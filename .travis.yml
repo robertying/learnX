@@ -1,0 +1,51 @@
+language: android
+sudo: required
+android:
+  components:
+    - tools
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+  licenses:
+    - android-sdk-license-.+
+cache:
+  yarn: true
+  directories:
+    - "$HOME/.gradle/caches/"
+    - "$HOME/.gradle/wrapper/"
+    - "$HOME/.android/build-cache"
+before_install:
+  - openssl aes-256-cbc -K $encrypted_9e59021b51e5_key -iv $encrypted_9e59021b51e5_iv
+    -in secrets.tar.gz.enc -out secrets.tar.gz -d
+  - tar xf secrets.tar.gz
+  - nvm install node
+  - node -v
+  - npm install -g yarn
+install:
+  - touch $HOME/.android/repositories.cfg
+  - echo y | sdkmanager "platforms;android-28"
+  - echo y | sdkmanager "build-tools;28.0.3"
+  - gem install bundler
+  - bundle install
+  - yarn install
+script:
+  - bundle exec fastlane android beta
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+before_deploy:
+  - mv android/app/build/outputs/apk/release/app-arm64-v8a-release.apk android/app/build/outputs/apk/release/learnX-arm64-v8a-$TRAVIS_TAG.apk
+  - mv android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk android/app/build/outputs/apk/release/learnX-armeabi-v7a-$TRAVIS_TAG.apk
+  - mv android/app/build/outputs/apk/release/app-x86-release.apk android/app/build/outputs/apk/release/learnX-x86-$TRAVIS_TAG.apk
+  - mv android/app/build/outputs/apk/release/app-universal-release.apk android/app/build/outputs/apk/release/learnX-universal-$TRAVIS_TAG.apk
+deploy:
+  provider: releases
+  api_key:
+    secure: NbKeQiIo2tB/Y5k1blUjvIEPo5xGFUAoP5Hldwftuxz2DgIKCqzUlj0nvVfEG3vvhR2I1LCAPr/UH46s/5yw/mQyuSRR6crf9bgNMybZUR1Hj04ns8ablX8XOj8qFniQExIM6uuMQ94LN3s3ThP550XKuNp0+BL8tSO0Gbqb0PuKiOXmQUi27ia/TlQxnDTxYuL+betyLfJ3rzusifqvWoa+rc9S2xJmKygqxhs6IZMP5+P0SgAPPqmCysJp3sd2ZUWp0lJsNW8AXNFKmQKLIZ8Gyg/TbNJI1vFRECV53Tj0Fze6uyz4GzGHceFuU93xgtn1aiOqCwPJyKmegq0cFwUnzD1NcKK1P1VMe0RGDz39bAG3OJ8N4E8jbE7+Ju4E5ZhCa0gOouEAYQb5e5Zeb7Vt56HG+BGt1ZdHZ4A5J3H0+341J7/H/A5i3vLN1aKvy6fUTaPW3lvo/CRlhKHhEfhfzFegytc9s7jlEzNvWs1YB9b9988qrRlpadJmSNaerz+uC2lyLMg7oDjhSHG9l1Y9N85I6Sht4NScGGNmaZVxo2zgBpH2y7y97QiQsrPcwN7r+Zm7gUsRPsSnGcBB1CaelUg4dn0wSyWtRTKDHwTZspj8ido9gLlJ21D5RG05hBLpqg1pOqwsB5fvfqtLEPtkF82EwNt1XW/YvLWUC6w=
+  file_glob: true
+  file: android/app/build/outputs/apk/release/*.apk
+  skip_cleanup: true
+  overwrite: true
+  prerelease: true
+  on:
+    tags: true
