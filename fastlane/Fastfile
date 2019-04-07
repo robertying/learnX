@@ -1,0 +1,27 @@
+update_fastlane
+
+platform :ios do
+  # iOS Lanes
+
+  desc 'Fetch certificates and provisioning profiles'
+  lane :certificates do
+    match(app_identifier: 'io.robertying.learnX', type: 'development', readonly: true)
+    match(app_identifier: 'io.robertying.learnX', type: 'appstore', readonly: true)
+  end
+end
+
+platform :android do
+  # Android Lanes
+
+  desc 'Build the Android application.'
+  private_lane :build do
+    gradle(task: 'clean', project_dir: 'android/')
+    gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
+  end
+
+  desc 'Ship to Beta.'
+  lane :beta do
+    gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
+    crashlytics
+  end
+end
