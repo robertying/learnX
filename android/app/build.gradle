@@ -4,6 +4,8 @@ apply from: './versionCode.gradle'
 
 import com.android.build.OutputFile
 
+def CI = System.getenv("CI") == "true"
+
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
  * and bundleReleaseJsAndAssets).
@@ -76,7 +78,7 @@ import com.android.build.OutputFile
 
 project.ext.react = [
         entryFile            : "index.js",
-        nodeExecutableAndArgs: ["/usr/local/bin/node"],
+        nodeExecutableAndArgs: [CI ? "node" : "/usr/local/bin/node"],
 ]
 
 apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
@@ -123,8 +125,6 @@ android {
         versionCode Integer.parseInt(VERSION_CODE)
         versionName "1.0"
     }
-
-    def CI = System.getenv("CI") == "true"
     signingConfigs {
         if (CI) {
             release {
@@ -142,7 +142,6 @@ android {
             }
         }
     }
-
     splits {
         abi {
             reset()
