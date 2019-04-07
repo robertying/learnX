@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "jsx": "react",
+    "lib": ["esnext"],
+    "moduleResolution": "node",
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "target": "esnext"
+  },
+  "exclude": ["node_modules"]
+}
