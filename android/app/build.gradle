@@ -123,7 +123,7 @@ android {
         renderscriptTargetApi 23
         renderscriptSupportModeEnabled true
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "1.0"
+        versionName "1.1"
     }
     signingConfigs {
         if (CI) {
