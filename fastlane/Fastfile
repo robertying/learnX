@@ -3,9 +3,12 @@ update_fastlane
 platform :ios do
   # iOS Lanes
 
+  before_all do
+    setup_travis
+  end
+
   desc 'Fetch certificates and provisioning profiles.'
   lane :certificates do
-    setup_travis
     match(app_identifier: 'io.robertying.learnX', type: 'development', readonly: is_ci)
     match(app_identifier: 'io.robertying.learnX', type: 'appstore', readonly: is_ci)
   end
