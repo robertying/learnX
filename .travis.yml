@@ -62,9 +62,9 @@ matrix:
         - node -v
         - npm install -g yarn
       install:
-        - cd ios && pod install && cd ..
         - gem install bundler
         - bundle install
         - yarn install
+        - cd ios && pod install && cd ..
       script:
         - yarn ios:beta
