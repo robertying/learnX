@@ -17,8 +17,10 @@ import RaisedButton from "../components/RaisedButton";
 import Text from "../components/Text";
 import TextField from "../components/TextField";
 import Colors from "../constants/Colors";
+import { dummyPassword, dummyUsername } from "../helpers/dummy";
 import { login } from "../redux/actions/auth";
 import { getCurrentSemester } from "../redux/actions/currentSemester";
+import { setMockStore } from "../redux/actions/root";
 import { getAllSemesters } from "../redux/actions/semesters";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
@@ -30,10 +32,18 @@ interface ILoginScreenProps {
   readonly loginError?: Error | null;
   readonly login: (username: string, password: string) => void;
   readonly showToast: (text: string, duration: number) => void;
+  readonly setMockStore: () => void;
 }
 
 const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
-  const { loggedIn, login, navigation, showToast, loginError } = props;
+  const {
+    loggedIn,
+    login,
+    navigation,
+    showToast,
+    loginError,
+    setMockStore
+  } = props;
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
   useEffect(() => {
@@ -82,7 +92,9 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
             type: LayoutAnimation.Types.easeOut
           }
         },
-        () => (usernameTextFieldRef.current as any).getNode().focus()
+        () =>
+          usernameTextFieldRef.current &&
+          (usernameTextFieldRef.current as any).getNode().focus()
       );
       setFormVisible(true);
     }, 800);
@@ -99,16 +111,25 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   };
 
   const handleKeyboardNext = () =>
+    passwordTextFieldRef.current &&
     (passwordTextFieldRef.current as any).getNode().focus();
 
   const handleUsernameChange = (text: string) => setUsername(text);
 
   const handlePasswordChange = (text: string) => setPassword(text);
 
+  const handleDummyUser = (username: string, password: string) => {
+    if (username === dummyUsername && password === dummyPassword) {
+      setMockStore();
+      return;
+    }
+  };
+
   const onLoginButtonPress = () => {
     setLoginButtonPressed(true);
 
     if (username && password) {
+      handleDummyUser(username, password);
       login(username, password);
     } else {
       if (Platform.OS === "android") {
@@ -206,7 +227,8 @@ const mapStateToProps = (state: IPersistAppState) => ({
 
 const mapDispatchToProps = {
   login: (username: string, password: string) => login(username, password),
-  showToast: (text: string, duration: number) => showToast(text, duration)
+  showToast: (text: string, duration: number) => showToast(text, duration),
+  setMockStore
 };
 
 export default connect(

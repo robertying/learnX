@@ -16,7 +16,7 @@ import {
   getAllNoticesForCoursesAction,
   getNoticesForCourseAction
 } from "../actions/notices";
-import { clearStoreAction } from "../actions/root";
+import { clearStoreAction, setMockStore } from "../actions/root";
 import { getAllSemestersAction } from "../actions/semesters";
 import { setTabsOrder } from "../actions/settings";
 import { hideToast, showToastAction } from "../actions/toast";
@@ -67,6 +67,8 @@ export type ISetTabsOrderAction = ActionType<typeof setTabsOrder>;
 export type ISettingsAction = ISetTabsOrderAction;
 
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
+export type ISetMockStoreAction = ActionType<typeof setMockStore>;
+export type IStoreAction = IClearStoreAction | ISetMockStoreAction;
 
 export type IAppActions =
   | IThunkResult
@@ -82,4 +84,4 @@ export type IAppActions =
   | IGetAllAssignmentsForCoursesAction
   | IToastAction
   | ISettingsAction
-  | IClearStoreAction;
+  | IStoreAction;

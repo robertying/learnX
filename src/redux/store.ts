@@ -4,7 +4,7 @@ import createSecureStore from "redux-persist-expo-securestore";
 import AsyncStorage from "redux-persist/lib/storage";
 import thunk, { ThunkMiddleware } from "redux-thunk";
 import authReducer from "./reducers/auth";
-import { mainReducers } from "./reducers/root";
+import { mainReducers, rootReducer } from "./reducers/root";
 import { IAppState, IPersistAppState } from "./types/state";
 
 declare const window: any;
@@ -21,7 +21,7 @@ const rootPersistConfig: PersistConfig = {
   blacklist: ["auth", "toast"]
 };
 
-const rootReducer = combineReducers<IAppState, any>({
+const appReducer = combineReducers<IAppState, any>({
   auth: persistReducer(authPersistConfig, authReducer),
   ...mainReducers
 });
@@ -32,4 +32,4 @@ const store = createStore<IPersistAppState, any, {}, {}>(
 );
 const persistor = persistStore(store);
 
-export { store, persistor };
+export { appReducer, store, persistor };
