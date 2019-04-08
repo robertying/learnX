@@ -38,6 +38,15 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
             fontSize: iOSUIKit.bodyObject.fontSize
           }}
         >
+          感谢 Yayu Xiao 制作的 Icon 👻
+        </Text>
+        <Text
+          style={{
+            alignSelf: "center",
+            marginBottom: 20,
+            fontSize: iOSUIKit.bodyObject.fontSize
+          }}
+        >
           致敬 JavaScript 开源社区 ❤️
         </Text>
         {deps.map((dep, index) => (
