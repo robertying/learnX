@@ -2,10 +2,7 @@ import { IAuthAction } from "../types/actions";
 import {
   LOGIN_FAILURE,
   LOGIN_REQUEST,
-  LOGIN_SUCCESS,
-  LOGOUT_FAILURE,
-  LOGOUT_REQUEST,
-  LOGOUT_SUCCESS
+  LOGIN_SUCCESS
 } from "../types/constants";
 import { IAuthState } from "../types/state";
 
@@ -41,15 +38,6 @@ export default function auth(
         loggingIn: false,
         loggedIn: false,
         error: action.payload
-      };
-    case LOGOUT_REQUEST:
-    case LOGOUT_SUCCESS:
-    case LOGOUT_FAILURE:
-      return {
-        ...state,
-        loggedIn: false,
-        username: null,
-        password: null
       };
   }
   return state;

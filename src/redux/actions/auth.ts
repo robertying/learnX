@@ -4,10 +4,7 @@ import { IThunkResult } from "../types/actions";
 import {
   LOGIN_FAILURE,
   LOGIN_REQUEST,
-  LOGIN_SUCCESS,
-  LOGOUT_FAILURE,
-  LOGOUT_REQUEST,
-  LOGOUT_SUCCESS
+  LOGIN_SUCCESS
 } from "../types/constants";
 import { IAuth } from "../types/state";
 
@@ -25,24 +22,6 @@ export function login(username: string, password: string): IThunkResult {
       dispatch(loginAction.success({ username, password }));
     } else {
       dispatch(loginAction.failure(new Error("login failed")));
-    }
-  };
-}
-
-export const logoutAction = createAsyncAction(
-  LOGOUT_REQUEST,
-  LOGOUT_SUCCESS,
-  LOGOUT_FAILURE
-)<undefined, undefined, Error>();
-
-export function logout(): IThunkResult {
-  return async dispatch => {
-    dispatch(logoutAction.request());
-    const success = await dataSource.logout();
-    if (success) {
-      dispatch(logoutAction.success());
-    } else {
-      dispatch(logoutAction.failure(new Error("logout failed")));
     }
   };
 }
