@@ -1,7 +1,8 @@
 {
   "scripts": {
     "android": "react-native run-android",
-    "android-beta": "bundle exec fastlane android beta",
+    "android:beta": "bundle exec fastlane android beta",
+    "ios:beta": "bundle exec fastlane ios beta",
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",

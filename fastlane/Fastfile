@@ -1,12 +1,26 @@
 update_fastlane
+setup_travis
 
 platform :ios do
   # iOS Lanes
 
-  desc 'Fetch certificates and provisioning profiles'
+  desc 'Fetch certificates and provisioning profiles.'
   lane :certificates do
-    match(app_identifier: 'io.robertying.learnX', type: 'development', readonly: true)
-    match(app_identifier: 'io.robertying.learnX', type: 'appstore', readonly: true)
+    match(app_identifier: 'io.robertying.learnX', type: 'development', readonly: is_ci)
+    match(app_identifier: 'io.robertying.learnX', type: 'appstore', readonly: is_ci)
+  end
+
+  desc 'Build the iOS application.'
+  private_lane :build do
+    certificates
+    increment_build_number(xcodeproj: 'ios/learnX.xcodeproj')
+    gym(scheme: 'learnX', workspace: 'ios/learnX.xcworkspace')
+  end
+
+  desc 'Ship to Testflight.'
+  lane :beta do
+    build
+    upload_to_testflight(username: "yingrui205@qq.com")
   end
 end
 
