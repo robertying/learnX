@@ -5,7 +5,7 @@ import {
   getAllAssignmentsForCoursesAction,
   getAssignmentsForCourseAction
 } from "../actions/assignments";
-import { loginAction, logoutAction } from "../actions/auth";
+import { loginAction } from "../actions/auth";
 import { getCoursesForSemesterAction } from "../actions/courses";
 import { getCurrentSemester } from "../actions/currentSemester";
 import {
@@ -30,8 +30,7 @@ export type IThunkResult = ThunkAction<
 >;
 
 export type ILoginAction = ActionType<typeof loginAction>;
-export type ILogoutAction = ActionType<typeof logoutAction>;
-export type IAuthAction = ILoginAction | ILogoutAction;
+export type IAuthAction = ILoginAction;
 
 export type IGetAllSemestersAction = ActionType<typeof getAllSemestersAction>;
 export type IGetCurrentSemesterAction = ActionType<typeof getCurrentSemester>;
