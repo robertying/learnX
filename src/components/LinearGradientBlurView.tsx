@@ -1,3 +1,4 @@
+import { BlurView } from "@react-native-community/blur";
 import React from "react";
 import { StyleSheet, View, ViewProps } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
@@ -14,6 +15,7 @@ const LinearGradientBlurView: React.FunctionComponent<
       props.style
     ]}
   >
+    <BlurView blurAmount={75} blurType="dark" style={styles.absolute} />
     <LinearGradient
       colors={Colors.headerGradient}
       style={styles.absolute}
