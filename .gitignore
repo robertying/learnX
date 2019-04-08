@@ -20,8 +20,9 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
-project.xcworkspace
+learnX.xcworkspace
 Pods/
+*.dSYM.zip
 
 # Android/IntelliJ
 #
@@ -53,6 +54,7 @@ buck-out/
 fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
+fastlane/README.md
 
 # Bundle artifact
 *.jsbundle
