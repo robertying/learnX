@@ -1,4 +1,6 @@
 PODS:
+  - Answers (1.4.0):
+    - Fabric (~> 1.8.0)
   - boost-for-react-native (1.63.0)
   - BVLinearGradient (2.5.4):
     - React
@@ -14,6 +16,7 @@ PODS:
     - UMPermissionsInterface
   - EXSecureStore (4.0.0):
     - UMCore
+  - Fabric (1.8.2)
   - Folly (2018.10.22.00):
     - boost-for-react-native
     - DoubleConversion
@@ -106,12 +109,14 @@ PODS:
   - yoga (0.59.3.React)
 
 DEPENDENCIES:
+  - Answers
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXPermissions (from `../node_modules/expo-permissions/ios`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - Fabric
   - Folly (from `../node_modules/react-native/third-party-podspecs/Folly.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
@@ -151,7 +156,9 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
+    - Answers
     - boost-for-react-native
+    - Fabric
 
 EXTERNAL SOURCES:
   BVLinearGradient:
@@ -214,6 +221,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
+  Answers: e7317ccd30e7bf55c3bacfe28adbe2304b082e49
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BVLinearGradient: 8cbc5155c978f2e43098818c91d206d07aae6d30
   DoubleConversion: bb338842f62ab1d708ceb63ec3d999f0f3d98ecd
@@ -221,6 +229,7 @@ SPEC CHECKSUMS:
   EXFileSystem: 18c9980f52e3bd6a28670c17e0d33a9c1584a336
   EXPermissions: ce3e170052df9d496aa51e1c372080cb2508fb16
   EXSecureStore: 86d05a7df8d08671381511b399382b5209e23c4a
+  Fabric: d2b22f443ba195d8a7cc204da230977c72733b40
   Folly: de497beb10f102453a1afa9edbf8cf8a251890de
   glog: aefd1eb5dda2ab95ba0938556f34b98e2da3a60d
   React: b52fdb80565505b7e4592b313a38868f5df51641
@@ -245,6 +254,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: f88793bd35248182e15591e0aa5b045132312be0
   yoga: 1a492113f66a35e9e583bb0434f4b8cc668dd839
 
-PODFILE CHECKSUM: 7d55df15c08c891a73a1f3c073e40952cff297fe
+PODFILE CHECKSUM: 0930d2bfe6e56ed7dd1354aa9cddf15afbe88ec1
 
 COCOAPODS: 1.6.1
