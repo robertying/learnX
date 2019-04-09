@@ -1,5 +1,6 @@
 ---
 title: learnX - Privacy Policy
+permalink: /en/privacy-policy
 layout: default
 ---
 
