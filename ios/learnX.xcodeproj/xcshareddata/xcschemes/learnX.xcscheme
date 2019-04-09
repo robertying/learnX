@@ -34,20 +34,6 @@
                ReferencedContainer = "container:learnX.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "learnXTests.xctest"
-               BlueprintName = "learnXTests"
-               ReferencedContainer = "container:learnX.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -60,9 +46,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "learnXTests.xctest"
-               BlueprintName = "learnXTests"
+               BlueprintIdentifier = "D49F64A3225CA6A900FA9B23"
+               BuildableName = "learnXUITests.xctest"
+               BlueprintName = "learnXUITests"
                ReferencedContainer = "container:learnX.xcodeproj">
             </BuildableReference>
          </TestableReference>
