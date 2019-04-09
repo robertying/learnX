@@ -61,7 +61,7 @@ matrix:
       before_install:
         - openssl aes-256-cbc -K $encrypted_9e59021b51e5_key -iv $encrypted_9e59021b51e5_iv -in secrets.tar.gz.enc -out secrets.tar.gz -d
         - tar xf secrets.tar.gz
-        - sed -i'.bak' -e "s/$PASSWORD/$GITHUB_PASSWORD/" fastlane/Matchfile
+        - sed -i'.bak' -e "s/PASSWORD/$GITHUB_PASSWORD/" fastlane/Matchfile
         - nvm install node
         - node -v
         - npm install -g yarn
