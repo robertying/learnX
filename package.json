@@ -56,7 +56,7 @@
     "tslint-immutable": "5.5.2",
     "tslint-react": "4.0.0",
     "tslint-react-hooks": "2.0.0",
-    "typescript": "3.4.2"
+    "typescript": "3.4.3"
   },
   "babel": {
     "presets": [
