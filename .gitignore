@@ -67,3 +67,7 @@ fastlane/README.md
 
 # travis
 secrets.tar.gz
+
+# GitHub Pages
+_site
+.sass-cache

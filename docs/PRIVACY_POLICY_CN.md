@@ -1,3 +1,8 @@
+---
+title: learnX - 隐私政策
+layout: default
+---
+
 # 隐私政策
 
 Rui Ying 将 learnX 应用程序构建为免费应用程序。本服务由 Rui Ying 免费提供，旨在按原样使用。
