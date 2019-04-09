@@ -15,7 +15,7 @@ const LinearGradientBlurView: React.FunctionComponent<
       props.style
     ]}
   >
-    <BlurView blurAmount={75} blurType="dark" style={styles.absolute} />
+    <BlurView blurAmount={50} blurType="dark" style={styles.absolute} />
     <LinearGradient
       colors={Colors.headerGradient}
       style={styles.absolute}
