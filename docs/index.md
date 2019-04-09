@@ -67,6 +67,12 @@ layout: default
     <img src="screenshots/netcampus.png" width="40%" align="center" />
 </div>
 
+## 隐私政策
+
+[中文隐私政策](/cn/privacy)
+
+[英文隐私政策](/en/privacy)
+
 ## 开源协议
 
 以 MIT 许可证开源，但**不包含**下列情况：
