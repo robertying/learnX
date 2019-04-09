@@ -1,3 +1,8 @@
+---
+title: learnX - Privacy Policy
+layout: default
+---
+
 # Privacy Policy
 
 Rui Ying built the learnX app as a Free app. This SERVICE is provided by Rui Ying at no cost and is intended for use as is.
