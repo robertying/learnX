@@ -29,6 +29,15 @@ layout: default_cn
     <img src="screenshots/4.jpg" width="40%" />
 </div>
 
+## 反馈与建议
+
+- 如果您已经拥有 GitHub 账户
+  - 欢迎来 [issues](https://github.com/robertying/learnX/issues) 讨论新功能，反馈问题
+- 如果您愿意获取最新的测试版本
+  - iOS 用户可以选择参与 [TestFlight](https://testflight.apple.com/join/5SPCH86w)
+  - Android 用户可以选择参与 [Beta](https://betas.to/eVu7BvkU)
+- 您也可以在 App Store 中分享评论和反馈
+
 ## 其他实用工具
 
 ### CampusNet for Android
