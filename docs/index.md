@@ -1,15 +1,8 @@
 ---
 title: learnX - 清华大学网络学堂
 permalink: /
-layout: default
+layout: default_cn
 ---
-
-清华大学网络学堂 App，以 React Native 构建。
-
-## 下载
-
-- Android 👉 [GitHub Releases](https://github.com/robertying/learnX/releases/latest)
-- iOS iPhone / iPad 👉 App Store
 
 ## 功能
 
