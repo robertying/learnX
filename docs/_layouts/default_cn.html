@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ site.lang | default: "en-US" }}">
+<html lang="{{ site.lang | default: "zh-CN" }}">
   <head>
     <meta charset="UTF-8">
 
@@ -12,13 +12,13 @@
   <body>
     <section class="page-header">
       <h1 class="project-name">{{ site.title | default: site.github.repository_name }}</h1>
-      <h2 class="project-tagline">{{ site.description | default: site.github.project_tagline }}</h2>
-      {% if site.github.is_project_page %}
-        <a href="{{ site.github.repository_url }}" class="btn">View on GitHub</a>
-      {% endif %}
+      <h2 class="project-tagline">{{ site.description_cn | default: site.github.project_tagline }}</h2>
       {% if site.show_downloads %}
-        <a href="{{ site.github.zip_url }}" class="btn">Download .zip</a>
-        <a href="{{ site.github.tar_url }}" class="btn">Download .tar.gz</a>
+        <a href="{{ site.ios_url }}" class="btn">iOS 下载</a>
+        <a href="{{ site.android_url }}" class="btn">Android 下载</a>
+      {% endif %}
+      {% if site.github.is_project_page %}
+      <a href="{{ site.github.repository_url }}" class="btn">在 GitHub 上查看</a>
       {% endif %}
     </section>
 
