@@ -1,1 +1,5 @@
 theme: jekyll-theme-cayman
+description_cn: 清华大学网络学堂 App，以 React Native 构建
+show_downloads: true
+ios_url: "#"
+android_url: "https://github.com/robertying/learnX/releases/latest"
