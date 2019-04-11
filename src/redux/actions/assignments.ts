@@ -18,7 +18,14 @@ export const getAssignmentsForCourseAction = createAsyncAction(
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
   GET_ASSIGNMENTS_FOR_COURSE_FAILURE
-)<undefined, ReadonlyArray<IAssignment>, Error>();
+)<
+  undefined,
+  {
+    readonly assignments: ReadonlyArray<IAssignment>;
+    readonly courseId: string;
+  },
+  Error
+>();
 
 export function getAssignmentsForCourse(courseId: string): IThunkResult {
   return async (dispatch, getState) => {
@@ -32,7 +39,9 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
 
     if (results) {
       const assignments = results.map(result => ({ ...result, courseId }));
-      dispatch(getAssignmentsForCourseAction.success(assignments));
+      dispatch(
+        getAssignmentsForCourseAction.success({ assignments, courseId })
+      );
     } else {
       dispatch(
         getAssignmentsForCourseAction.failure(
@@ -53,22 +62,27 @@ export function getAllAssignmentsForCourses(
   // tslint:disable-next-line: readonly-array
   courseIds: string[]
 ): IThunkResult {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch(getAllAssignmentsForCoursesAction.request());
-    const results = await dataSource.getAllContents(
-      courseIds,
-      ContentType.HOMEWORK
-    );
-    const assignments = Object.keys(results)
-      .map(courseId => {
-        const assignmentsForCourse = results[courseId] as any;
-        return assignmentsForCourse.map((assignment: IAssignment) => ({
-          ...assignment,
-          courseId
-        }));
-      })
-      .reduce((a, b) => a.concat(b));
-    if (assignments) {
+
+    const results = await dataSource
+      .getAllContents(courseIds, ContentType.HOMEWORK)
+      .catch(err => {
+        dispatch(showToast("刷新失败，您可能未登录", 1500));
+        const auth = getState().auth;
+        dispatch(login(auth.username || "", auth.password || ""));
+      });
+
+    if (results) {
+      const assignments = Object.keys(results)
+        .map(courseId => {
+          const assignmentsForCourse = results[courseId] as any;
+          return assignmentsForCourse.map((assignment: IAssignment) => ({
+            ...assignment,
+            courseId
+          }));
+        })
+        .reduce((a, b) => a.concat(b));
       dispatch(getAllAssignmentsForCoursesAction.success(assignments));
     } else {
       dispatch(
