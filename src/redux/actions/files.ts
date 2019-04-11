@@ -18,7 +18,11 @@ export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
   GET_FILES_FOR_COURSE_FAILURE
-)<undefined, ReadonlyArray<IFile>, Error>();
+)<
+  undefined,
+  { readonly files: ReadonlyArray<IFile>; readonly courseId: string },
+  Error
+>();
 
 export function getFilesForCourse(courseId: string): IThunkResult {
   return async (dispatch, getState) => {
@@ -32,7 +36,7 @@ export function getFilesForCourse(courseId: string): IThunkResult {
 
     if (results) {
       const files = results.map(result => ({ ...result, courseId }));
-      dispatch(getFilesForCourseAction.success(files));
+      dispatch(getFilesForCourseAction.success({ files, courseId }));
     } else {
       dispatch(
         getFilesForCourseAction.failure(new Error("getFilesForCourse failed"))
@@ -51,19 +55,24 @@ export function getAllFilesForCourses(
   // tslint:disable-next-line: readonly-array
   courseIds: string[]
 ): IThunkResult {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch(getAllFilesForCoursesAction.request());
-    const results = await dataSource.getAllContents(
-      courseIds,
-      ContentType.FILE
-    );
-    const files = Object.keys(results)
-      .map(courseId => {
-        const filesForCourse = results[courseId] as any;
-        return filesForCourse.map((file: IFile) => ({ ...file, courseId }));
-      })
-      .reduce((a, b) => a.concat(b));
-    if (files) {
+
+    const results = await dataSource
+      .getAllContents(courseIds, ContentType.FILE)
+      .catch(err => {
+        dispatch(showToast("刷新失败，您可能未登录", 1500));
+        const auth = getState().auth;
+        dispatch(login(auth.username || "", auth.password || ""));
+      });
+
+    if (results) {
+      const files = Object.keys(results)
+        .map(courseId => {
+          const filesForCourse = results[courseId] as any;
+          return filesForCourse.map((file: IFile) => ({ ...file, courseId }));
+        })
+        .reduce((a, b) => a.concat(b));
       dispatch(getAllFilesForCoursesAction.success(files));
     } else {
       dispatch(
