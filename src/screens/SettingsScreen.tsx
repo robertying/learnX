@@ -3,6 +3,7 @@ import { Alert, FlatList, ListRenderItem, SafeAreaView } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
+import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
 import { clearStore } from "../redux/actions/root";
 import { setAutoRefreshing } from "../redux/actions/settings";
@@ -90,7 +91,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="arrow"
-            containerStyle={{ marginTop: 10 }}
             icon={<MaterialIcons name="copyright" size={20} />}
             text="关于"
             onPress={onAboutPress}
@@ -111,6 +111,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           { key: "about" }
         ]}
         renderItem={renderListItem}
+        ItemSeparatorComponent={Divider}
       />
     </SafeAreaView>
   );
