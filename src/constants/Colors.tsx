@@ -2,7 +2,7 @@ const tint = "rgba(102,8,116,0.8)";
 
 export default {
   statusBar: "rgba(86, 53, 138, 1)",
-  headerGradient: ["rgba(101,16,173,0.6)", "#104fad"],
+  headerGradient: ["rgba(101,16,173,0.9)", "#104fad"],
   headerTint: "white",
   tabBar: "#fefefe",
   tabIconDefault: "gray",
