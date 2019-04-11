@@ -1,5 +1,5 @@
 import React from "react";
-import { FlatList, ListRenderItem, SafeAreaView } from "react-native";
+import { Alert, FlatList, ListRenderItem, SafeAreaView } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
@@ -29,8 +29,24 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onLogoutPress = () => {
-    clearStore();
-    navigation.navigate("Auth");
+    Alert.alert(
+      "注销",
+      "确定要注销吗？",
+      [
+        {
+          text: "取消",
+          style: "cancel"
+        },
+        {
+          text: "确定",
+          onPress: () => {
+            clearStore();
+            navigation.navigate("Auth");
+          }
+        }
+      ],
+      { cancelable: true }
+    );
   };
 
   const onAboutPress = () => {
