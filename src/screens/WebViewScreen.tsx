@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { View } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
 import NoticePlaceholder from "../components/NoticePlaceholder";
+import { shareFile } from "../helpers/share";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 export interface IWebViewScreenProps {
@@ -47,7 +49,19 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
 // tslint:disable-next-line: no-object-mutation
 WebViewScreen.navigationOptions = ({ navigation }) => {
   return {
-    headerTitle: navigation.getParam("title", "预览")
+    headerTitle: navigation.getParam("title", "预览"),
+    headerRight: (
+      <Icon.Button
+        name="share"
+        // tslint:disable-next-line: jsx-no-lambda
+        onPress={() => {
+          shareFile(navigation.getParam("url"), navigation.getParam("ext"));
+        }}
+        color="white"
+        backgroundColor="transparent"
+        underlayColor="transparent"
+      />
+    )
   };
 };
 

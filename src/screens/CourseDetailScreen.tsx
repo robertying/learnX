@@ -106,7 +106,8 @@ const CourseDetailScreen: INavigationScreen<
     if (Platform.OS === "ios") {
       navigation.navigate("WebView", {
         filename,
-        url
+        url,
+        ext
       });
     } else {
       showToast("文件下载中……", 3000);
