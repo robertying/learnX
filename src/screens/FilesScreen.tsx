@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Platform, ToastAndroid } from "react-native";
+import { Platform } from "react-native";
 import { connect } from "react-redux";
 import FilesView from "../components/FilesView";
 import dayjs from "../helpers/dayjs";
@@ -86,10 +86,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         url
       });
     } else {
-      ToastAndroid.show("文件下载中……", ToastAndroid.SHORT);
+      showToast("文件下载中……", 3000);
       const success = await shareFile(url, ext);
       if (!success) {
-        ToastAndroid.show("文件下载失败", ToastAndroid.SHORT);
+        showToast("文件下载失败", 3000);
       }
     }
   };
