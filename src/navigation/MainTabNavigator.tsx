@@ -41,12 +41,9 @@ const NoticesStack = createStackNavigator(
     headerTransitionPreset: "uikit",
     initialRouteName: "Notices",
     navigationOptions: {
-      tabBarIcon: ({ focused }) =>
-        focused ? (
-          <TabBarIcon focused={focused} name="notifications" />
-        ) : (
-          <TabBarIcon focused={focused} name="notifications-none" />
-        ),
+      tabBarIcon: ({ focused }) => (
+        <TabBarIcon focused={focused} name="notifications" />
+      ),
       tabBarLabel: "通知"
     }
   }
@@ -63,7 +60,7 @@ const FilesStack = createStackNavigator(
     initialRouteName: "Files",
     navigationOptions: {
       tabBarIcon: ({ focused }) => (
-        <TabBarIcon focused={focused} name="attach-file" />
+        <TabBarIcon focused={focused} name="cloud-download" />
       ),
       tabBarLabel: "文件"
     }
@@ -80,12 +77,9 @@ const AssignmentsStack = createStackNavigator(
     headerTransitionPreset: "uikit",
     initialRouteName: "Assignments",
     navigationOptions: {
-      tabBarIcon: ({ focused }) =>
-        focused ? (
-          <TabBarIcon focused={focused} name="hourglass-full" />
-        ) : (
-          <TabBarIcon focused={focused} name="hourglass-empty" />
-        ),
+      tabBarIcon: ({ focused }) => (
+        <TabBarIcon focused={focused} name="assignment" />
+      ),
       tabBarLabel: "作业"
     }
   }
@@ -102,12 +96,9 @@ const CoursesStack = createStackNavigator(
     headerTransitionPreset: "uikit",
     initialRouteName: "Courses",
     navigationOptions: {
-      tabBarIcon: ({ focused }) =>
-        focused ? (
-          <TabBarIcon focused={focused} name="bookmark" />
-        ) : (
-          <TabBarIcon focused={focused} name="bookmark-border" />
-        ),
+      tabBarIcon: ({ focused }) => (
+        <TabBarIcon focused={focused} name="class" />
+      ),
       tabBarLabel: "课程"
     }
   }
