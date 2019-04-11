@@ -2,6 +2,7 @@ import React from "react";
 import {
   Animated,
   LayoutAnimation,
+  Platform,
   StatusBar,
   StyleSheet,
   View
@@ -56,7 +57,10 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
         <Animated.View
           style={[
             styles.toastContainer,
-            { height: 80, paddingTop: Layout.statusBarHeight }
+            {
+              height: 80,
+              paddingTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
+            }
           ]}
         >
           <ToastBody />
@@ -68,7 +72,11 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
           <ToastBody />
         </Animated.View>
       )}
-      <StatusBar barStyle={visible ? "dark-content" : "light-content"} />
+      {Platform.OS === "android" ? (
+        <StatusBar barStyle="light-content" />
+      ) : (
+        <StatusBar barStyle={visible ? "dark-content" : "light-content"} />
+      )}
     </>
   );
 };

@@ -46,11 +46,18 @@ const renderLabel: TabBarProps<ITabRoute>["renderLabel"] = ({ route }) => (
   <Text style={{ color: "black" }}>{route.title}</Text>
 );
 
-interface ICourseDetailScreenProps {
+interface ICourseDetailScreenStateProps {
   readonly notices: ReadonlyArray<INotice>;
   readonly files: ReadonlyArray<IFile>;
   readonly assignments: ReadonlyArray<IAssignment>;
 }
+
+interface ICourseDetailScreenDispatchProps {
+  readonly showToast: (text: string, duration: number) => void;
+}
+
+type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
+  ICourseDetailScreenDispatchProps;
 
 const CourseDetailScreen: INavigationScreen<
   ICourseDetailScreenProps
@@ -59,14 +66,20 @@ const CourseDetailScreen: INavigationScreen<
     navigation,
     notices: rawNotices,
     files: rawFiles,
-    assignments: rawAssignments
+    assignments: rawAssignments,
+    showToast
   } = props;
 
   const courseId = navigation.getParam("courseId");
 
   const notices = rawNotices.filter(item => item.courseId === courseId);
   const files = rawFiles.filter(item => item.courseId === courseId);
-  const assignments = rawAssignments.filter(item => item.courseId === courseId);
+  const assignments = [...rawAssignments]
+    .filter(
+      item =>
+        item.courseId === courseId && dayjs(item.deadline).isAfter(dayjs())
+    )
+    .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix());
 
   const [index, setIndex] = useState(0);
   const routes: any = [
@@ -220,7 +233,11 @@ const mapStateToProps = (state: IPersistAppState) => ({
   assignments: state.assignments.items
 });
 
+const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
+  showToast: (text: string, duration: number) => showToast(text, duration)
+};
+
 export default connect(
   mapStateToProps,
-  null
+  mapDispatchToProps
 )(CourseDetailScreen);
