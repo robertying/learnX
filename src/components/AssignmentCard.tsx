@@ -71,7 +71,9 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
               {attachment ? "附件 " + attachment : "无附件"}
             </Text>
             <Text style={{ color: "grey", fontSize: 12 }}>
-              {"还剩 " + dayjs().to(dayjs(date), true)}
+              {dayjs().isAfter(dayjs(date))
+                ? dayjs().to(dayjs(date)) + "截止"
+                : "还剩 " + dayjs().to(dayjs(date), true)}
             </Text>
           </View>
         </View>
