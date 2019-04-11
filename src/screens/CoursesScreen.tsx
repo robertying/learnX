@@ -25,6 +25,7 @@ import {
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ICoursesScreenStateProps {
+  readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
   readonly semesterId: ISemester;
   readonly courses: ReadonlyArray<ICourse>;
@@ -63,7 +64,8 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     getAllNoticesForCourses,
     getAllFilesForCourses,
     getAllAssignmentsForCourses,
-    navigation
+    navigation,
+    autoRefreshing
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -84,7 +86,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   }, [courses.length]);
 
   useEffect(() => {
-    if (initialRouteName !== "Courses") {
+    if (initialRouteName !== "Courses" && autoRefreshing) {
       invalidateAll();
     }
   }, []);
@@ -167,6 +169,7 @@ CoursesScreen.navigationOptions = {
 
 function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {
+    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     semesterId: state.currentSemester,
     courses: state.courses.items,
