@@ -11,6 +11,8 @@ import {
   GET_NOTICES_FOR_COURSE_SUCCESS
 } from "../types/constants";
 import { INotice } from "../types/state";
+import { login } from "./auth";
+import { showToast } from "./toast";
 
 export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_REQUEST,
@@ -19,11 +21,19 @@ export const getNoticesForCourseAction = createAsyncAction(
 )<undefined, ReadonlyArray<INotice>, Error>();
 
 export function getNoticesForCourse(courseId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch(getNoticesForCourseAction.request());
-    const results = await dataSource.getNotificationList(courseId);
-    const notices = results.map(result => ({ ...result, courseId }));
-    if (notices) {
+
+    const results = await dataSource
+      .getNotificationList(courseId)
+      .catch(err => {
+        dispatch(showToast("刷新失败，您可能未登录", 1500));
+        const auth = getState().auth;
+        dispatch(login(auth.username || "", auth.password || ""));
+      });
+
+    if (results) {
+      const notices = results.map(result => ({ ...result, courseId }));
       dispatch(getNoticesForCourseAction.success(notices));
     } else {
       dispatch(
