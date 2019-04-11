@@ -9,7 +9,6 @@ import {
   TouchableWithoutFeedback,
   View
 } from "react-native";
-import { Snackbar } from "react-native-paper";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { connect } from "react-redux";
 import LinearGradientBlurView from "../components/LinearGradientBlurView";
@@ -48,11 +47,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
   useEffect(() => {
     if (loginButtonPressed && loginError) {
-      if (Platform.OS === "android") {
-        setSnackbar({ visible: true, text: "登录失败" });
-      } else {
-        showToast("登录失败", 1500);
-      }
+      showToast("登录失败", 1500);
       setLoginButtonPressed(false);
     }
   }, [loginError]);
@@ -72,7 +67,6 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   const [password, setPassword] = useState("");
   const [logoSize, setLogoSize] = useState(120);
   const [formVisible, setFormVisible] = useState(false);
-  const [snackbar, setSnackbar] = useState({ visible: false, text: "" });
 
   useEffect(() => {
     setTimeout(() => {
@@ -129,11 +123,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       handleDummyUser(username, password);
       login(username, password);
     } else {
-      if (Platform.OS === "android") {
-        setSnackbar({ visible: true, text: "请完整填写用户名与密码" });
-      } else {
-        showToast("请完整填写用户名与密码", 1500);
-      }
+      showToast("请完整填写用户名与密码", 1500);
     }
   };
 
@@ -202,15 +192,6 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
               </RaisedButton>
             </View>
           )}
-          <Snackbar
-            style={{ backgroundColor: "white", marginBottom: 20 }}
-            visible={snackbar.visible}
-            duration={Snackbar.DURATION_SHORT}
-            // tslint:disable-next-line: jsx-no-lambda
-            onDismiss={() => setSnackbar({ visible: false, text: "" })}
-          >
-            <Text>{snackbar.text}</Text>
-          </Snackbar>
         </KeyboardAvoidingView>
       </SafeAreaView>
     </LinearGradientBlurView>
