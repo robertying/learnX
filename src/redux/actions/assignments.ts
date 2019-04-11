@@ -11,6 +11,8 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS
 } from "../types/constants";
 import { IAssignment } from "../types/state";
+import { login } from "./auth";
+import { showToast } from "./toast";
 
 export const getAssignmentsForCourseAction = createAsyncAction(
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
@@ -19,11 +21,17 @@ export const getAssignmentsForCourseAction = createAsyncAction(
 )<undefined, ReadonlyArray<IAssignment>, Error>();
 
 export function getAssignmentsForCourse(courseId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch(getAssignmentsForCourseAction.request());
-    const results = await dataSource.getHomeworkList(courseId);
-    const assignments = results.map(result => ({ ...result, courseId }));
-    if (assignments) {
+
+    const results = await dataSource.getHomeworkList(courseId).catch(err => {
+      dispatch(showToast("刷新失败，您可能未登录", 1500));
+      const auth = getState().auth;
+      dispatch(login(auth.username || "", auth.password || ""));
+    });
+
+    if (results) {
+      const assignments = results.map(result => ({ ...result, courseId }));
       dispatch(getAssignmentsForCourseAction.success(assignments));
     } else {
       dispatch(

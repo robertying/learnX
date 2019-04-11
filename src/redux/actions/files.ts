@@ -11,6 +11,8 @@ import {
   GET_FILES_FOR_COURSE_SUCCESS
 } from "../types/constants";
 import { IFile } from "../types/state";
+import { login } from "./auth";
+import { showToast } from "./toast";
 
 export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_REQUEST,
@@ -19,11 +21,17 @@ export const getFilesForCourseAction = createAsyncAction(
 )<undefined, ReadonlyArray<IFile>, Error>();
 
 export function getFilesForCourse(courseId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch, getState) => {
     dispatch(getFilesForCourseAction.request());
-    const results = await dataSource.getFileList(courseId);
-    const files = results.map(result => ({ ...result, courseId }));
-    if (files) {
+
+    const results = await dataSource.getFileList(courseId).catch(err => {
+      dispatch(showToast("刷新失败，您可能未登录", 1500));
+      const auth = getState().auth;
+      dispatch(login(auth.username || "", auth.password || ""));
+    });
+
+    if (results) {
+      const files = results.map(result => ({ ...result, courseId }));
       dispatch(getFilesForCourseAction.success(files));
     } else {
       dispatch(
