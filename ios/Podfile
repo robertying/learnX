@@ -48,4 +48,6 @@ target 'learnX' do
 
   pod 'react-native-blur', :path => '../node_modules/@react-native-community/blur'
 
+  pod 'CodePush', :path => '../node_modules/react-native-code-push'
+
 end

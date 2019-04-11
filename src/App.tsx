@@ -1,5 +1,6 @@
 import React from "react";
 import { StatusBar } from "react-native";
+import codePush from "react-native-code-push";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import SplashScreen from "./components/SplashScreen";
@@ -21,4 +22,4 @@ const App: React.FunctionComponent = () => (
   </Provider>
 );
 
-export default App;
+export default codePush()(App);
