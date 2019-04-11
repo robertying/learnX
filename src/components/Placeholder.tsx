@@ -6,7 +6,7 @@ export interface IPlaceholderProps {
   readonly renderPlaceholder: React.FunctionComponent<{
     readonly opacity: Animated.Value;
   }>;
-  readonly children: React.ReactElement;
+  readonly children?: React.ReactElement;
 }
 
 const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
@@ -39,7 +39,7 @@ const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
     });
   };
 
-  return loading ? renderPlaceholder({ opacity }) : children;
+  return loading ? renderPlaceholder({ opacity }) : children || null;
 };
 
 export default Placeholder;
