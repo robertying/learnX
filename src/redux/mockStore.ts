@@ -19,7 +19,8 @@ const mockStore: IPersistAppState = {
       Tab.Assignments,
       Tab.Courses,
       Tab.Settings
-    ]
+    ],
+    autoRefreshing: true
   },
   toast: {
     text: "",

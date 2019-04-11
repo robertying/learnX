@@ -1,5 +1,5 @@
 import { ISettingsAction } from "../types/actions";
-import { SET_TABS_ORDER } from "../types/constants";
+import { SET_AUTO_REFRESHING, SET_TABS_ORDER } from "../types/constants";
 import { ISettingsState, Tab } from "../types/state";
 
 export default function settings(
@@ -10,7 +10,8 @@ export default function settings(
       Tab.Assignments,
       Tab.Courses,
       Tab.Settings
-    ]
+    ],
+    autoRefreshing: true
   },
   action: ISettingsAction
 ): ISettingsState {
@@ -19,6 +20,11 @@ export default function settings(
       return {
         ...state,
         tabsOrder: action.payload
+      };
+    case SET_AUTO_REFRESHING:
+      return {
+        ...state,
+        autoRefreshing: action.payload
       };
   }
   return state;

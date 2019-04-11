@@ -17,6 +17,7 @@ import {
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IFilesScreenStateProps {
+  readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
   readonly semesterId: ISemester;
   readonly courses: ReadonlyArray<ICourse>;
@@ -42,7 +43,8 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     isFetching,
     getCoursesForSemester,
     getAllFilesForCourses,
-    navigation
+    navigation,
+    autoRefreshing
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -64,7 +66,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   }, [courses.length]);
 
   useEffect(() => {
-    if (initialRouteName !== "Files") {
+    if (initialRouteName !== "Files" && autoRefreshing) {
       invalidateAll();
     }
   }, []);
@@ -112,6 +114,7 @@ FilesScreen.navigationOptions = {
 
 function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
   return {
+    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     semesterId: state.currentSemester,
     courses: state.courses.items,

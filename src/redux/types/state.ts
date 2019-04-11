@@ -19,6 +19,7 @@ export enum Tab {
 }
 export interface ISettingsState {
   readonly tabsOrder: ReadonlyArray<Tab>;
+  readonly autoRefreshing: boolean;
 }
 
 export type ISemester = string | null;
