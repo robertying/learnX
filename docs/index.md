@@ -49,7 +49,7 @@ layout: default_cn
 下载 👉 [GitHub Releases](https://github.com/robertying/CampusNet-Android/releases/latest)
 
 <div align="center">
-    <img src="screenshots/campusnet.png" width="40%" />
+    <img src="screenshots/campusnet.png" width="50%" />
 </div>
 
 ### .Net Campus for Windows
@@ -66,7 +66,7 @@ layout: default_cn
 下载 👉 [Microsoft 商店](https://www.microsoft.com/store/productId/9PDVWNT4K1MW)
 
 <div align="center">
-    <img src="screenshots/netcampus.png" width="40%" align="center" />
+    <img src="screenshots/netcampus.png" width="70%" align="center" />
 </div>
 
 ## 隐私政策
