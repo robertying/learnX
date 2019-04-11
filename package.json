@@ -15,7 +15,7 @@
     "expo-secure-store": "4.0.0",
     "react": "16.8.6",
     "react-native": "0.59.4",
-    "react-native-code-push": "^5.6.0",
+    "react-native-code-push": "5.6.0",
     "react-native-gesture-handler": "1.1.0",
     "react-native-linear-gradient": "2.5.4",
     "react-native-modal": "9.0.0",
