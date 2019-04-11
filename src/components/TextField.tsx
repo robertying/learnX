@@ -27,7 +27,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
     ...restProps
   } = props;
 
-  const [opacity] = useState(new Animated.Value(0));
+  const [opacity] = useState(new Animated.Value(0.01));
 
   const onFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     Animated.timing(opacity, {
@@ -42,7 +42,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
 
   const onBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     Animated.timing(opacity, {
-      toValue: 0,
+      toValue: 0.01,
       duration: 200
     }).start();
 
@@ -72,7 +72,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
             marginLeft: 5,
             borderBottomWidth: 1,
             borderBottomColor: opacity.interpolate({
-              inputRange: [0, 1],
+              inputRange: [0.01, 1],
               outputRange: ["transparent", tintColor]
             }),
             color: tintColor,
