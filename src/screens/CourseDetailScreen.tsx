@@ -89,12 +89,7 @@ const CourseDetailScreen: INavigationScreen<
 
   const notices = rawNotices.filter(item => item.courseId === courseId);
   const files = rawFiles.filter(item => item.courseId === courseId);
-  const assignments = [...rawAssignments]
-    .filter(
-      item =>
-        item.courseId === courseId && dayjs(item.deadline).isAfter(dayjs())
-    )
-    .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix());
+  const assignments = rawAssignments.filter(item => item.courseId === courseId);
 
   const [index, setIndex] = useState(0);
   const routes: any = [
