@@ -1,9 +1,15 @@
 PODS:
   - Answers (1.4.0):
     - Fabric (~> 1.8.0)
+  - Base64 (1.1.2)
   - boost-for-react-native (1.63.0)
   - BVLinearGradient (2.5.4):
     - React
+  - CodePush (5.6.0):
+    - Base64 (~> 1.1)
+    - JWT (~> 3.0.0-beta.7)
+    - React
+    - SSZipArchive (~> 2.1)
   - DoubleConversion (1.1.6)
   - EXConstants (4.0.0):
     - UMConstantsInterface
@@ -22,62 +28,64 @@ PODS:
     - DoubleConversion
     - glog
   - glog (0.3.5)
-  - React (0.59.3):
-    - React/Core (= 0.59.3)
+  - JWT (3.0.0-beta.11):
+    - Base64 (~> 1.1.2)
+  - React (0.59.4):
+    - React/Core (= 0.59.4)
   - react-native-blur (0.8.0):
     - React
   - react-native-webview (5.6.2):
     - React
-  - React/Core (0.59.3):
-    - yoga (= 0.59.3.React)
-  - React/CxxBridge (0.59.3):
+  - React/Core (0.59.4):
+    - yoga (= 0.59.4.React)
+  - React/CxxBridge (0.59.4):
     - Folly (= 2018.10.22.00)
     - React/Core
     - React/cxxreact
     - React/jsiexecutor
-  - React/cxxreact (0.59.3):
+  - React/cxxreact (0.59.4):
     - boost-for-react-native (= 1.63.0)
     - DoubleConversion
     - Folly (= 2018.10.22.00)
     - glog
     - React/jsinspector
-  - React/DevSupport (0.59.3):
+  - React/DevSupport (0.59.4):
     - React/Core
     - React/RCTWebSocket
-  - React/fishhook (0.59.3)
-  - React/jsi (0.59.3):
+  - React/fishhook (0.59.4)
+  - React/jsi (0.59.4):
     - DoubleConversion
     - Folly (= 2018.10.22.00)
     - glog
-  - React/jsiexecutor (0.59.3):
+  - React/jsiexecutor (0.59.4):
     - DoubleConversion
     - Folly (= 2018.10.22.00)
     - glog
     - React/cxxreact
     - React/jsi
-  - React/jsinspector (0.59.3)
-  - React/RCTActionSheet (0.59.3):
+  - React/jsinspector (0.59.4)
+  - React/RCTActionSheet (0.59.4):
     - React/Core
-  - React/RCTAnimation (0.59.3):
+  - React/RCTAnimation (0.59.4):
     - React/Core
-  - React/RCTBlob (0.59.3):
+  - React/RCTBlob (0.59.4):
     - React/Core
-  - React/RCTGeolocation (0.59.3):
+  - React/RCTGeolocation (0.59.4):
     - React/Core
-  - React/RCTImage (0.59.3):
+  - React/RCTImage (0.59.4):
     - React/Core
     - React/RCTNetwork
-  - React/RCTLinkingIOS (0.59.3):
+  - React/RCTLinkingIOS (0.59.4):
     - React/Core
-  - React/RCTNetwork (0.59.3):
+  - React/RCTNetwork (0.59.4):
     - React/Core
-  - React/RCTSettings (0.59.3):
+  - React/RCTSettings (0.59.4):
     - React/Core
-  - React/RCTText (0.59.3):
+  - React/RCTText (0.59.4):
     - React/Core
-  - React/RCTVibration (0.59.3):
+  - React/RCTVibration (0.59.4):
     - React/Core
-  - React/RCTWebSocket (0.59.3):
+  - React/RCTWebSocket (0.59.4):
     - React/Core
     - React/fishhook
     - React/RCTBlob
@@ -91,6 +99,7 @@ PODS:
     - React
   - RNVectorIcons (6.4.2):
     - React
+  - SSZipArchive (2.1.4)
   - UMBarCodeScannerInterface (1.0.0)
   - UMCameraInterface (1.0.0)
   - UMConstantsInterface (1.0.0)
@@ -106,11 +115,12 @@ PODS:
     - UMFontInterface
   - UMSensorsInterface (1.0.0)
   - UMTaskManagerInterface (1.0.0)
-  - yoga (0.59.3.React)
+  - yoga (0.59.4.React)
 
 DEPENDENCIES:
   - Answers
   - BVLinearGradient (from `../node_modules/react-native-linear-gradient`)
+  - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
@@ -157,12 +167,17 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/cocoapods/specs.git:
     - Answers
+    - Base64
     - boost-for-react-native
     - Fabric
+    - JWT
+    - SSZipArchive
 
 EXTERNAL SOURCES:
   BVLinearGradient:
     :path: "../node_modules/react-native-linear-gradient"
+  CodePush:
+    :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
   EXConstants:
@@ -222,8 +237,10 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Answers: e7317ccd30e7bf55c3bacfe28adbe2304b082e49
+  Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   BVLinearGradient: 8cbc5155c978f2e43098818c91d206d07aae6d30
+  CodePush: 300e90b3481fa82569090406165b83745de3613a
   DoubleConversion: bb338842f62ab1d708ceb63ec3d999f0f3d98ecd
   EXConstants: a338ed187829ab25b8817f84cd84eecc13e64fd4
   EXFileSystem: 18c9980f52e3bd6a28670c17e0d33a9c1584a336
@@ -232,7 +249,8 @@ SPEC CHECKSUMS:
   Fabric: d2b22f443ba195d8a7cc204da230977c72733b40
   Folly: de497beb10f102453a1afa9edbf8cf8a251890de
   glog: aefd1eb5dda2ab95ba0938556f34b98e2da3a60d
-  React: b52fdb80565505b7e4592b313a38868f5df51641
+  JWT: 05028b9624591bba9681bb57df2c5f95fa258bad
+  React: 5cb71fb1a15b5ce04794ab49e24b48ebe4c94e65
   react-native-blur: cad4d93b364f91e7b7931b3fa935455487e5c33c
   react-native-webview: c0ddb07676492d983068b0dbfe38ff82d49b1175
   rn-fetch-blob: 766f85cabd2992300dfa1be2bc9e4e258abc6f04
@@ -240,6 +258,7 @@ SPEC CHECKSUMS:
   RNReanimated: 9497464b378759f538c539df105cda235de496c5
   RNShare: 4f206fa36e384e95a0cbf79f2a92490647e93127
   RNVectorIcons: 6607bd3a30291d0edb56f9bbe7ae411ee2b928b0
+  SSZipArchive: 41455d4b8d2b6ab93990820b50dc697c2554a322
   UMBarCodeScannerInterface: 53fd3cbf24fe5c58f3ba82ac8c27f0373fbf52fa
   UMCameraInterface: d5a2727e76d6b47e3201f863102c055ddbcc6206
   UMConstantsInterface: 800fb8f95fca9bb2c18ae554e4cb4df4383f6cbf
@@ -252,8 +271,8 @@ SPEC CHECKSUMS:
   UMReactNativeAdapter: d1ca37ccecbfa95306adeebfa5e1d5514bf3d479
   UMSensorsInterface: 136a828e73e4d69694cdd8d6203a99d38471b90e
   UMTaskManagerInterface: f88793bd35248182e15591e0aa5b045132312be0
-  yoga: 1a492113f66a35e9e583bb0434f4b8cc668dd839
+  yoga: 596e61c9b57751d08a22b07aba310dbd3e65ab75
 
-PODFILE CHECKSUM: 0930d2bfe6e56ed7dd1354aa9cddf15afbe88ec1
+PODFILE CHECKSUM: 1b50a010152e5432c91feca2681877af02b4940c
 
 COCOAPODS: 1.6.1
