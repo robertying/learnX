@@ -19,6 +19,9 @@ import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
+import { getAssignmentsForCourse } from "../redux/actions/assignments";
+import { getFilesForCourse } from "../redux/actions/files";
+import { getNoticesForCourse } from "../redux/actions/notices";
 import { showToast } from "../redux/actions/toast";
 import {
   IAssignment,
@@ -50,9 +53,15 @@ interface ICourseDetailScreenStateProps {
   readonly notices: ReadonlyArray<INotice>;
   readonly files: ReadonlyArray<IFile>;
   readonly assignments: ReadonlyArray<IAssignment>;
+  readonly isFetchingNotices: boolean;
+  readonly isFetchingFiles: boolean;
+  readonly isFetchingAssignments: boolean;
 }
 
 interface ICourseDetailScreenDispatchProps {
+  readonly getNoticesForCourse: (courseId: string) => void;
+  readonly getFilesForCourse: (courseId: string) => void;
+  readonly getAssignmentsForCourse: (courseId: string) => void;
   readonly showToast: (text: string, duration: number) => void;
 }
 
@@ -67,7 +76,13 @@ const CourseDetailScreen: INavigationScreen<
     notices: rawNotices,
     files: rawFiles,
     assignments: rawAssignments,
-    showToast
+    showToast,
+    isFetchingAssignments,
+    isFetchingFiles,
+    isFetchingNotices,
+    getAssignmentsForCourse,
+    getFilesForCourse,
+    getNoticesForCourse
   } = props;
 
   const courseId = navigation.getParam("courseId");
@@ -125,32 +140,38 @@ const CourseDetailScreen: INavigationScreen<
   const NoticesRoute = useMemo(
     () => (
       <NoticesView
-        isFetching={false}
+        isFetching={isFetchingNotices}
         notices={notices}
         onNoticeCardPress={onNoticeCardPress}
+        // tslint:disable-next-line: jsx-no-lambda
+        onRefresh={() => getNoticesForCourse(courseId)}
       />
     ),
-    [notices.length, onNoticeCardPress]
+    [notices.length, isFetchingNotices]
   );
   const FilesRoute = useMemo(
     () => (
       <FilesView
-        isFetching={false}
+        isFetching={isFetchingFiles}
         files={files}
         onFileCardPress={onFileCardPress}
+        // tslint:disable-next-line: jsx-no-lambda
+        onRefresh={() => getFilesForCourse(courseId)}
       />
     ),
-    [files.length]
+    [files.length, isFetchingFiles]
   );
   const AssignmentsRoute = useMemo(
     () => (
       <AssignmentsView
-        isFetching={false}
+        isFetching={isFetchingAssignments}
         assignments={assignments}
         onAssignmentCardPress={onAssignmentCardPress}
+        // tslint:disable-next-line: jsx-no-lambda
+        onRefresh={() => getAssignmentsForCourse(courseId)}
       />
     ),
-    [assignments.length]
+    [assignments.length, isFetchingAssignments]
   );
 
   const renderScene = ({ route }: SceneRendererProps<any> & Scene<any>) => {
@@ -228,13 +249,24 @@ CourseDetailScreen.navigationOptions = ({ navigation }) => {
   };
 };
 
-const mapStateToProps = (state: IPersistAppState) => ({
-  notices: state.notices.items,
-  files: state.files.items,
-  assignments: state.assignments.items
-});
+function mapStateToProps(
+  state: IPersistAppState
+): ICourseDetailScreenStateProps {
+  return {
+    notices: state.notices.items,
+    files: state.files.items,
+    assignments: state.assignments.items,
+    isFetchingNotices: state.notices.isFetching,
+    isFetchingFiles: state.files.isFetching,
+    isFetchingAssignments: state.assignments.isFetching
+  };
+}
 
 const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
+  getNoticesForCourse: (courseId: string) => getNoticesForCourse(courseId),
+  getFilesForCourse: (courseId: string) => getFilesForCourse(courseId),
+  getAssignmentsForCourse: (courseId: string) =>
+    getAssignmentsForCourse(courseId),
   showToast: (text: string, duration: number) => showToast(text, duration)
 };
 
