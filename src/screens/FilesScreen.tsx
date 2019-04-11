@@ -44,7 +44,8 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     getCoursesForSemester,
     getAllFilesForCourses,
     navigation,
-    autoRefreshing
+    autoRefreshing,
+    showToast
   } = props;
 
   const courseIds = courses.map(course => course.id);
