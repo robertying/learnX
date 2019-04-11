@@ -55,6 +55,7 @@ export const SHOW_TOAST = "SHOW_TOAST";
 export const HIDE_TOAST = "HIDE_TOAST";
 
 export const SET_TABS_ORDER = "SET_TABS_ORDER";
+export const SET_AUTO_REFRESHING = "SET_AUTO_REFRESHING";
 
 export const CLEAR_STORE = "CLEAR_STORE";
 export const SET_MOCK_STORE = "SET_MOCK_STORE";

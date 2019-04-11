@@ -14,6 +14,7 @@ import {
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IAssignmentsScreenStateProps {
+  readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
   readonly semesterId: ISemester;
   readonly courses: ReadonlyArray<ICourse>;
@@ -39,7 +40,8 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     isFetching,
     getCoursesForSemester,
     getAllAssignmentsForCourses,
-    navigation
+    navigation,
+    autoRefreshing
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -61,7 +63,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   }, [courses.length]);
 
   useEffect(() => {
-    if (initialRouteName !== "Assignments") {
+    if (initialRouteName !== "Assignments" && autoRefreshing) {
       invalidateAll();
     }
   }, []);
@@ -104,6 +106,7 @@ function mapStateToProps(
   state: IPersistAppState
 ): IAssignmentsScreenStateProps {
   return {
+    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     semesterId: state.currentSemester,
     courses: state.courses.items,

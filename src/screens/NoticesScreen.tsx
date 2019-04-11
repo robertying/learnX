@@ -14,6 +14,7 @@ import {
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface INoticesScreenStateProps {
+  readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
   readonly semesterId: ISemester;
   readonly courses: ReadonlyArray<ICourse>;
@@ -39,7 +40,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     isFetching,
     getCoursesForSemester,
     getAllNoticesForCourses,
-    navigation
+    navigation,
+    autoRefreshing
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -55,10 +57,16 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, [loggedIn, semesterId]);
 
   useEffect(() => {
-    if (initialRouteName === "Notices" && courses && courses.length !== 0) {
+    if (initialRouteName === "Notices") {
       invalidateAll();
     }
   }, [courses.length]);
+
+  useEffect(() => {
+    if (initialRouteName !== "Notices" && autoRefreshing) {
+      invalidateAll();
+    }
+  }, []);
 
   const invalidateAll = () => {
     if (loggedIn && courseIds.length !== 0) {
@@ -96,6 +104,7 @@ NoticesScreen.navigationOptions = {
 
 function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
   return {
+    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     semesterId: state.currentSemester,
     courses: state.courses.items,

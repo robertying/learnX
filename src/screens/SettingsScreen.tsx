@@ -5,14 +5,24 @@ import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import SettingsListItem from "../components/SettingsListItem";
 import { clearStore } from "../redux/actions/root";
+import { setAutoRefreshing } from "../redux/actions/settings";
+import { IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
-interface ISettingsScreenProps {
-  readonly clearStore: () => void;
+interface ISettingsScreenStateProps {
+  readonly autoRefreshing: boolean;
 }
 
+interface ISettingsScreenDispatchProps {
+  readonly clearStore: () => void;
+  readonly setAutoRefreshing: (enabled: boolean) => void;
+}
+
+type ISettingsScreenProps = ISettingsScreenStateProps &
+  ISettingsScreenDispatchProps;
+
 const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
-  const { navigation, clearStore } = props;
+  const { navigation, clearStore, setAutoRefreshing, autoRefreshing } = props;
 
   const onAcknowledgementsPress = () => {
     navigation.navigate("Acknowledgements");
@@ -32,14 +42,25 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       case 0:
         return (
           <SettingsListItem
-            variant="none"
+            variant="switch"
             containerStyle={{ marginTop: 10 }}
-            icon={<MaterialCommunityIcons name="account-off" size={20} />}
-            text="退出登录"
-            onPress={onLogoutPress}
+            icon={<MaterialCommunityIcons name="refresh" size={20} />}
+            text="自动刷新"
+            switchValue={autoRefreshing}
+            onSwitchValueChange={setAutoRefreshing}
           />
         );
       case 1:
+        return (
+          <SettingsListItem
+            variant="none"
+            containerStyle={{ marginTop: 10 }}
+            icon={<MaterialCommunityIcons name="account-off" size={20} />}
+            text="注销"
+            onPress={onLogoutPress}
+          />
+        );
+      case 2:
         return (
           <SettingsListItem
             variant="arrow"
@@ -49,7 +70,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 2:
+      case 3:
         return (
           <SettingsListItem
             variant="arrow"
@@ -67,7 +88,12 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
-        data={[{ key: "logout" }, { key: "acknowledgement" }, { key: "about" }]}
+        data={[
+          { key: "autoRefreshing" },
+          { key: "logout" },
+          { key: "acknowledgement" },
+          { key: "about" }
+        ]}
         renderItem={renderListItem}
       />
     </SafeAreaView>
@@ -79,11 +105,18 @@ SettingsScreen.navigationOptions = {
   title: "设置"
 };
 
-const mapDispatchToProps = {
-  clearStore
+function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
+  return {
+    autoRefreshing: state.settings.autoRefreshing
+  };
+}
+
+const mapDispatchToProps: ISettingsScreenDispatchProps = {
+  clearStore,
+  setAutoRefreshing
 };
 
 export default connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps
 )(SettingsScreen);
