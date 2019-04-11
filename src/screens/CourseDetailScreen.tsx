@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Dimensions, Platform, ToastAndroid, View } from "react-native";
+import { Dimensions, Platform, View } from "react-native";
 import Modal from "react-native-modal";
 import {
   Scene,
@@ -19,6 +19,7 @@ import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
+import { showToast } from "../redux/actions/toast";
 import {
   IAssignment,
   IFile,
@@ -95,10 +96,10 @@ const CourseDetailScreen: INavigationScreen<
         url
       });
     } else {
-      ToastAndroid.show("文件下载中……", ToastAndroid.SHORT);
+      showToast("文件下载中……", 3000);
       const success = await shareFile(url, ext);
       if (!success) {
-        ToastAndroid.show("文件下载失败", ToastAndroid.SHORT);
+        showToast("文件下载失败", 3000);
       }
     }
   };

@@ -19,7 +19,8 @@ export default function toast(
     case HIDE_TOAST:
       return {
         ...state,
-        visible: false
+        visible: false,
+        text: ""
       };
   }
   return state;
