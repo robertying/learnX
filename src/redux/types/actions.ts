@@ -58,6 +58,16 @@ export type IGetAllAssignmentsForCoursesAction = ActionType<
   typeof getAllAssignmentsForCoursesAction
 >;
 
+export type IGetNoticesAction =
+  | IGetNoticesForCourseAction
+  | IGetAllNoticesForCoursesAction;
+export type IGetFilesAction =
+  | IGetFilesForCourseAction
+  | IGetAllFilesForCoursesAction;
+export type IGetAssignmentsAction =
+  | IGetAssignmentsForCourseAction
+  | IGetAllAssignmentsForCoursesAction;
+
 export type IShowToastAction = ActionType<typeof showToastAction>;
 export type IHideToastAction = ActionType<typeof hideToast>;
 export type IToastAction = IShowToastAction | IHideToastAction;
