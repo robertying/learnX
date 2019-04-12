@@ -1,7 +1,7 @@
 import {
-  NavigationScreenConfigProps,
-  NavigationScreenProp,
-  NavigationStackScreenOptions
+  NavigationScreenConfig,
+  NavigationScreenOptions,
+  NavigationScreenProp
 } from "react-navigation";
 
 export interface INavigationScreenProps {
@@ -13,6 +13,6 @@ export type INavigationScreen<P> = React.FunctionComponent<
 > & {
   // tslint:disable-next-line: readonly-keyword
   navigationOptions?:
-    | NavigationStackScreenOptions
-    | ((props: NavigationScreenConfigProps) => NavigationStackScreenOptions);
+    | NavigationScreenOptions
+    | NavigationScreenConfig<NavigationScreenOptions>;
 };
