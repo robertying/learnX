@@ -1,7 +1,15 @@
-import React, { useEffect } from "react";
-import { Platform } from "react-native";
+import Fuse from "fuse.js";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  LayoutAnimation,
+  Platform,
+  SafeAreaView,
+  TextInput
+} from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import FilesView from "../components/FilesView";
+import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
 import { initialRouteName } from "../navigation/MainTabNavigator";
@@ -98,21 +106,80 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
+  const isSearching = navigation.getParam("isSearching", false);
+  const searchBarRef = useRef<TextInput>();
+  const [searchResult, setSearchResult] = useState(files);
+
+  useEffect(() => {
+    if (isSearching) {
+      if (searchBarRef.current) {
+        searchBarRef.current.focus();
+      }
+    } else {
+      setSearchResult(files);
+    }
+  }, [isSearching]);
+
+  const onSearchChange = (text: string) => {
+    if (text) {
+      const fuse = new Fuse(files, fuseOptions);
+      setSearchResult(fuse.search(text));
+    }
+  };
+
   return (
-    <FilesView
-      isFetching={isFetching}
-      onRefresh={invalidateAll}
-      courses={courses}
-      files={files}
-      onFileCardPress={onFileCardPress}
-    />
+    <SafeAreaView style={{ flex: 1 }}>
+      {isSearching && (
+        <SearchBar
+          ref={searchBarRef as any}
+          // tslint:disable-next-line: jsx-no-lambda
+          onCancel={() => {
+            LayoutAnimation.easeInEaseOut();
+            navigation.setParams({ isSearching: false });
+          }}
+          onChangeText={onSearchChange}
+        />
+      )}
+      <FilesView
+        isFetching={isFetching}
+        onRefresh={invalidateAll}
+        courses={courses}
+        files={searchResult}
+        onFileCardPress={onFileCardPress}
+      />
+    </SafeAreaView>
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-FilesScreen.navigationOptions = {
-  title: "文件"
+const fuseOptions = {
+  shouldSort: true,
+  threshold: 0.6,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: ["description", "fileType", "title"]
 };
+
+// tslint:disable-next-line: no-object-mutation
+FilesScreen.navigationOptions = ({ navigation }) => ({
+  title: "文件",
+  headerRight: (
+    <Icon.Button
+      name="search"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        LayoutAnimation.easeInEaseOut();
+        navigation.setParams({
+          isSearching: !navigation.getParam("isSearching", false)
+        });
+      }}
+      color="white"
+      backgroundColor="transparent"
+      underlayColor="transparent"
+    />
+  )
+});
 
 function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
   return {

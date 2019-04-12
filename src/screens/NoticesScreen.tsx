@@ -1,6 +1,10 @@
-import React, { useEffect } from "react";
+import Fuse from "fuse.js";
+import React, { useEffect, useRef, useState } from "react";
+import { LayoutAnimation, SafeAreaView, TextInput } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import NoticesView from "../components/NoticesView";
+import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
 import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getCoursesForSemester } from "../redux/actions/courses";
@@ -86,20 +90,79 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   };
 
+  const isSearching = navigation.getParam("isSearching", false);
+  const searchBarRef = useRef<TextInput>();
+  const [searchResult, setSearchResult] = useState(notices);
+
+  useEffect(() => {
+    if (isSearching) {
+      if (searchBarRef.current) {
+        searchBarRef.current.focus();
+      }
+    } else {
+      setSearchResult(notices);
+    }
+  }, [isSearching]);
+
+  const onSearchChange = (text: string) => {
+    if (text) {
+      const fuse = new Fuse(notices, fuseOptions);
+      setSearchResult(fuse.search(text));
+    }
+  };
+
   return (
-    <NoticesView
-      isFetching={isFetching}
-      onRefresh={invalidateAll}
-      courses={courses}
-      notices={notices}
-      onNoticeCardPress={onNoticeCardPress}
-    />
+    <SafeAreaView style={{ flex: 1 }}>
+      {isSearching && (
+        <SearchBar
+          ref={searchBarRef as any}
+          // tslint:disable-next-line: jsx-no-lambda
+          onCancel={() => {
+            LayoutAnimation.easeInEaseOut();
+            navigation.setParams({ isSearching: false });
+          }}
+          onChangeText={onSearchChange}
+        />
+      )}
+      <NoticesView
+        isFetching={isFetching}
+        onRefresh={invalidateAll}
+        courses={courses}
+        notices={searchResult}
+        onNoticeCardPress={onNoticeCardPress}
+      />
+    </SafeAreaView>
   );
 };
 
 // tslint:disable-next-line: no-object-mutation
-NoticesScreen.navigationOptions = {
-  title: "通知"
+NoticesScreen.navigationOptions = ({ navigation }) => ({
+  title: "通知",
+  headerRight: (
+    <Icon.Button
+      name="search"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        LayoutAnimation.easeInEaseOut();
+        navigation.setParams({
+          isSearching: !navigation.getParam("isSearching", false)
+        });
+      }}
+      color="white"
+      backgroundColor="transparent"
+      underlayColor="transparent"
+    />
+  )
+});
+
+const fuseOptions = {
+  shouldSort: true,
+  threshold: 0.6,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: ["content", "title", "publisher"]
 };
 
 function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
