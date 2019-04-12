@@ -154,12 +154,22 @@ android {
     buildTypes {
         debug {
             manifestPlaceholders = [isDebug: true]
+            applicationIdSuffix ".debug"
+            buildConfigField "String", "CODEPUSH_KEY", '""'
+        }
+        releaseStaging {
+            manifestPlaceholders = [isDebug: false]
+            minifyEnabled enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            signingConfig signingConfigs.release
+            buildConfigField "String", "CODEPUSH_KEY", '"85HbNLH52a6R9ukGlaQ2IU9BhaujBy9a1NntV"'
         }
         release {
             manifestPlaceholders = [isDebug: false]
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
+            buildConfigField "String", "CODEPUSH_KEY", '"Ims62DStmtYSRrADmEal4lQKU4g8Hy5ak4nYV"'
         }
     }
     // applicationVariants are e.g. debug, release
