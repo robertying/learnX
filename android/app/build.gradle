@@ -163,6 +163,7 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
             buildConfigField "String", "CODEPUSH_KEY", '"85HbNLH52a6R9ukGlaQ2IU9BhaujBy9a1NntV"'
+            matchingFallbacks = ["release"]
         }
         release {
             manifestPlaceholders = [isDebug: false]
