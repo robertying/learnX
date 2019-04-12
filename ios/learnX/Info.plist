@@ -23,7 +23,7 @@
 	<key>CFBundleVersion</key>
 	<string>15</string>
 	<key>CodePushDeploymentKey</key>
-	<string>7NdRqz1VWpbZBJ8NZPrD8QWpPh_YSk-Jcy43tV</string>
+	<string>$(CODEPUSH_KEY)</string>
 	<key>Fabric</key>
 	<dict>
 		<key>APIKey</key>
@@ -68,7 +68,7 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow learnX to access your microphone</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Allow learnX to access your device's accelerometer</string>
+	<string>Allow learnX to access your device&apos;s accelerometer</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Give learnX periences permission to save photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>

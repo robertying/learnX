@@ -1,4 +1,3 @@
 <resources>
-	<string moduleConfig="true" name="reactNativeCodePush_androidDeploymentKey">85HbNLH52a6R9ukGlaQ2IU9BhaujBy9a1NntV</string>
     <string name="app_name">learnX</string>
 </resources>

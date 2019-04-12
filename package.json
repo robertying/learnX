@@ -1,4 +1,5 @@
 {
+  "name": "learnX",
   "scripts": {
     "android": "react-native run-android",
     "android:beta": "bundle exec fastlane android beta",
