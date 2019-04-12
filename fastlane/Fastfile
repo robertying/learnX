@@ -23,7 +23,7 @@ platform :ios do
   desc 'Ship to Testflight.'
   lane :beta do
     build
-    upload_to_testflight(username: "yingrui205@qq.com")
+    upload_to_testflight(username: "yingrui205@qq.com", skip_waiting_for_build_processing: true)
   end
 end
 
