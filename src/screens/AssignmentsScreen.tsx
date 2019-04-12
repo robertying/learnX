@@ -1,6 +1,10 @@
-import React, { useEffect } from "react";
+import Fuse from "fuse.js";
+import React, { useEffect, useRef, useState } from "react";
+import { LayoutAnimation, SafeAreaView, TextInput } from "react-native";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import AssignmentsView from "../components/AssignmentsView";
+import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
 import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
@@ -86,21 +90,80 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     }
   };
 
+  const isSearching = navigation.getParam("isSearching", false);
+  const searchBarRef = useRef<TextInput>();
+  const [searchResult, setSearchResult] = useState(assignments);
+
+  useEffect(() => {
+    if (isSearching) {
+      if (searchBarRef.current) {
+        searchBarRef.current.focus();
+      }
+    } else {
+      setSearchResult(assignments);
+    }
+  }, [isSearching]);
+
+  const onSearchChange = (text: string) => {
+    if (text) {
+      const fuse = new Fuse(assignments, fuseOptions);
+      setSearchResult(fuse.search(text));
+    }
+  };
+
   return (
-    <AssignmentsView
-      isFetching={isFetching}
-      onRefresh={invalidateAll}
-      courses={courses}
-      assignments={assignments}
-      onAssignmentCardPress={onAssignmentCardPress}
-    />
+    <SafeAreaView style={{ flex: 1 }}>
+      {isSearching && (
+        <SearchBar
+          ref={searchBarRef as any}
+          // tslint:disable-next-line: jsx-no-lambda
+          onCancel={() => {
+            LayoutAnimation.easeInEaseOut();
+            navigation.setParams({ isSearching: false });
+          }}
+          onChangeText={onSearchChange}
+        />
+      )}
+      <AssignmentsView
+        isFetching={isFetching}
+        onRefresh={invalidateAll}
+        courses={courses}
+        assignments={searchResult}
+        onAssignmentCardPress={onAssignmentCardPress}
+      />
+    </SafeAreaView>
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-AssignmentsScreen.navigationOptions = {
-  title: "作业"
+const fuseOptions = {
+  shouldSort: true,
+  threshold: 0.6,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: ["attachmentName", "description", "title"]
 };
+
+// tslint:disable-next-line: no-object-mutation
+AssignmentsScreen.navigationOptions = ({ navigation }) => ({
+  title: "作业",
+  headerRight: (
+    <Icon.Button
+      name="search"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        LayoutAnimation.easeInEaseOut();
+        navigation.setParams({
+          isSearching: !navigation.getParam("isSearching", false)
+        });
+      }}
+      color="white"
+      backgroundColor="transparent"
+      underlayColor="transparent"
+    />
+  )
+});
 
 function mapStateToProps(
   state: IPersistAppState

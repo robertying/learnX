@@ -13,23 +13,24 @@ export type ITextButtonProps = TouchableOpacityProps & {
   readonly children: string;
 };
 
-const TextButton: React.FunctionComponent<ITextButtonProps> = props => {
-  const { textStyle, children } = props;
-
-  return (
-    <TouchableOpacity activeOpacity={Colors.activeOpacity} {...props}>
-      <Text
-        style={[
-          { color: Colors.tint, fontSize: iOSUIKit.bodyObject.fontSize },
-          textStyle
-        ]}
-        numberOfLines={1}
-        ellipsizeMode="clip"
-      >
-        {children}
-      </Text>
-    </TouchableOpacity>
-  );
-};
+class TextButton extends React.Component<ITextButtonProps> {
+  public render(): React.ReactElement {
+    const { textStyle, children } = this.props;
+    return (
+      <TouchableOpacity activeOpacity={Colors.activeOpacity} {...this.props}>
+        <Text
+          style={[
+            { color: Colors.tint, fontSize: iOSUIKit.bodyObject.fontSize },
+            textStyle
+          ]}
+          numberOfLines={1}
+          ellipsizeMode="clip"
+        >
+          {children}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+}
 
 export default TextButton;
