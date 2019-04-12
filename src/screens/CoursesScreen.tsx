@@ -1,13 +1,18 @@
-import React, { useEffect } from "react";
+import Fuse from "fuse.js";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  FlatList,
+  LayoutAnimation,
   ListRenderItem,
   RefreshControl,
-  SafeAreaView
+  SafeAreaView,
+  TextInput
 } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import CoursePreviewView from "../components/CourseCard";
 import Divider from "../components/Divider";
+import SearchBar from "../components/SearchBar";
 import Colors from "../constants/Colors";
 import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
@@ -111,6 +116,27 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     });
   };
 
+  const isSearching = navigation.getParam("isSearching", false);
+  const searchBarRef = useRef<TextInput>();
+  const [searchResult, setSearchResult] = useState(courses);
+
+  useEffect(() => {
+    if (isSearching) {
+      if (searchBarRef.current) {
+        searchBarRef.current.focus();
+      }
+    } else {
+      setSearchResult(courses);
+    }
+  }, [isSearching]);
+
+  const onSearchChange = (text: string) => {
+    if (text) {
+      const fuse = new Fuse(courses, fuseOptions);
+      setSearchResult(fuse.search(text));
+    }
+  };
+
   const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
     return (
       <CoursePreviewView
@@ -145,9 +171,20 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
+      {isSearching && (
+        <SearchBar
+          ref={searchBarRef as any}
+          // tslint:disable-next-line: jsx-no-lambda
+          onCancel={() => {
+            LayoutAnimation.easeInEaseOut();
+            navigation.setParams({ isSearching: false });
+          }}
+          onChangeText={onSearchChange}
+        />
+      )}
       <FlatList
         ItemSeparatorComponent={Divider}
-        data={courses}
+        data={searchResult}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
         refreshControl={
@@ -162,10 +199,35 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-CoursesScreen.navigationOptions = {
-  title: "课程"
+const fuseOptions = {
+  shouldSort: true,
+  threshold: 0.6,
+  location: 0,
+  distance: 100,
+  maxPatternLength: 32,
+  minMatchCharLength: 1,
+  keys: ["name", "teacherName"]
 };
+
+// tslint:disable-next-line: no-object-mutation
+CoursesScreen.navigationOptions = ({ navigation }) => ({
+  title: "课程",
+  headerRight: (
+    <Icon.Button
+      name="search"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        LayoutAnimation.easeInEaseOut();
+        navigation.setParams({
+          isSearching: !navigation.getParam("isSearching", false)
+        });
+      }}
+      color="white"
+      backgroundColor="transparent"
+      underlayColor="transparent"
+    />
+  )
+});
 
 function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {

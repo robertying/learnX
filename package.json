@@ -13,6 +13,7 @@
     "@react-native-community/blur": "3.3.1",
     "dayjs": "1.8.12",
     "expo-secure-store": "4.0.0",
+    "fuse.js": "3.4.4",
     "react": "16.8.6",
     "react-native": "0.59.4",
     "react-native-code-push": "5.6.0",
