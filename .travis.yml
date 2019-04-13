@@ -30,7 +30,8 @@ matrix:
         - bundle install
         - yarn install
       script:
-        - yarn android:beta
+        - [ $TRAVIS_TAG ] && yarn android:beta
+        - [ ! $TRAVIS_TAG ] && yarn android:build
       before_cache:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
@@ -71,4 +72,5 @@ matrix:
         - yarn install
         - cd ios && pod install && cd ..
       script:
-        - yarn ios:beta
+        - [ $TRAVIS_TAG ] && yarn ios:beta
+        - [ ! $TRAVIS_TAG ] && yarn ios:build

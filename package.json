@@ -3,8 +3,10 @@
   "scripts": {
     "android": "react-native run-android",
     "android:beta": "bundle exec fastlane android beta",
-    "ios:beta": "bundle exec fastlane ios beta",
+    "android:build": "bundle exec fastlane android build",
     "ios": "react-native run-ios",
+    "ios:beta": "bundle exec fastlane ios beta",
+    "ios:build": "bundle exec fastlane ios build",
     "start": "react-native start",
     "test": "jest",
     "lint": "tsc --noUnusedLocals && prettier -c \"src/**/*\" --write",
