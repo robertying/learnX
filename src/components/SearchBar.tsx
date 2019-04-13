@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Animated,
+  Platform,
   TextInput,
   TextInputProps,
   View,
@@ -62,7 +63,9 @@ const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
           ref={innerRef}
           style={{
             flex: 1,
-            height: 34,
+            height: Platform.OS === "android" ? 40 : 34,
+            paddingLeft: Platform.OS === "android" ? 36 : undefined,
+            paddingRight: Platform.OS === "android" ? 36 : undefined,
             margin: 8,
             backgroundColor: "white",
             borderColor: "white",
@@ -74,7 +77,6 @@ const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
           allowFontScaling={true}
           clearButtonMode="while-editing"
           enablesReturnKeyAutomatically={true}
-          placeholder="搜索课程、老师……"
           placeholderTextColor="gray"
           returnKeyType="search"
           selectTextOnFocus={true}
