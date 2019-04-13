@@ -95,6 +95,12 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(notices);
 
   useEffect(() => {
+    if (notices.length) {
+      setSearchResult(notices);
+    }
+  }, [notices.length]);
+
+  useEffect(() => {
     if (isSearching) {
       if (searchBarRef.current) {
         searchBarRef.current.focus();

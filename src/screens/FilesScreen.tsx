@@ -111,6 +111,12 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(files);
 
   useEffect(() => {
+    if (files.length) {
+      setSearchResult(files);
+    }
+  }, [files.length]);
+
+  useEffect(() => {
     if (isSearching) {
       if (searchBarRef.current) {
         searchBarRef.current.focus();
