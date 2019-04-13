@@ -10,12 +10,19 @@ import { store } from "../redux/store";
 import { IAssignment } from "../redux/types/state";
 
 export const createCalendar = async () => {
+  const calendars = await RNCalendarEvents.findCalendars();
+
   const storedId = store.getState().settings.calendarId;
   if (storedId) {
-    const calendars = await RNCalendarEvents.findCalendars();
     if (calendars.some(value => value.id === storedId)) {
       return storedId;
     }
+  }
+
+  const existingCalendar = calendars.find(value => value.title === "learnX");
+  if (existingCalendar) {
+    store.dispatch(setCalendarId(existingCalendar.id));
+    return existingCalendar.id;
   }
 
   store.dispatch(clearEventIds());
@@ -100,7 +107,7 @@ export const saveAssignmentsToCalendar = async (
   }
 
   const courses = store.getState().courses.items;
-  console.log("here");
+
   for (const assignment of assignments) {
     const course = courses.find(value => value.id === assignment.courseId);
     if (course) {
