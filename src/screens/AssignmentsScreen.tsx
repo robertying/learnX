@@ -95,6 +95,12 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(assignments);
 
   useEffect(() => {
+    if (assignments.length) {
+      setSearchResult(assignments);
+    }
+  }, [assignments.length]);
+
+  useEffect(() => {
     if (isSearching) {
       if (searchBarRef.current) {
         searchBarRef.current.focus();
