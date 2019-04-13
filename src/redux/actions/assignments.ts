@@ -1,5 +1,7 @@
 import { ContentType } from "thu-learn-lib-no-native/lib/types";
 import { createAsyncAction } from "typesafe-actions";
+import { saveAssignmentsToCalendar } from "../../helpers/calendar";
+import dayjs from "../../helpers/dayjs";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -84,6 +86,13 @@ export function getAllAssignmentsForCourses(
         })
         .reduce((a, b) => a.concat(b));
       dispatch(getAllAssignmentsForCoursesAction.success(assignments));
+
+      if (getState().settings.calendarSync) {
+        const savingAssignments: readonly IAssignment[] = [
+          ...assignments
+        ].filter(item => dayjs(item.deadline).isAfter(dayjs()));
+        saveAssignmentsToCalendar(savingAssignments);
+      }
     } else {
       dispatch(
         getAllAssignmentsForCoursesAction.failure(

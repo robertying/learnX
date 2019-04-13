@@ -1,5 +1,12 @@
 import { ISettingsAction } from "../types/actions";
-import { SET_AUTO_REFRESHING, SET_TABS_ORDER } from "../types/constants";
+import {
+  CLEAR_EVENT_IDS,
+  SET_AUTO_REFRESHING,
+  SET_CALENDAR_ID,
+  SET_CALENDAR_SYNC,
+  SET_EVENT_ID_FOR_ASSIGNMENT,
+  SET_TABS_ORDER
+} from "../types/constants";
 import { ISettingsState, Tab } from "../types/state";
 
 export default function settings(
@@ -11,7 +18,9 @@ export default function settings(
       Tab.Courses,
       Tab.Settings
     ],
-    autoRefreshing: true
+    autoRefreshing: true,
+    calendarSync: false,
+    syncedAssignments: {}
   },
   action: ISettingsAction
 ): ISettingsState {
@@ -25,6 +34,29 @@ export default function settings(
       return {
         ...state,
         autoRefreshing: action.payload
+      };
+    case SET_CALENDAR_SYNC:
+      return {
+        ...state,
+        calendarSync: action.payload
+      };
+    case SET_CALENDAR_ID:
+      return {
+        ...state,
+        calendarId: action.payload
+      };
+    case SET_EVENT_ID_FOR_ASSIGNMENT:
+      return {
+        ...state,
+        syncedAssignments: {
+          ...state.syncedAssignments,
+          ...action.payload
+        }
+      };
+    case CLEAR_EVENT_IDS:
+      return {
+        ...state,
+        syncedAssignments: {}
       };
   }
   return state;
