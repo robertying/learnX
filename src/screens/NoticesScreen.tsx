@@ -149,8 +149,10 @@ NoticesScreen.navigationOptions = ({ navigation }) => ({
         });
       }}
       color="white"
+      size={24}
       backgroundColor="transparent"
       underlayColor="transparent"
+      activeOpacity={0.6}
     />
   )
 });
