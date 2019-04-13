@@ -9,18 +9,10 @@ App for Tsinghua University Web Learning, developed with React Native 🎉.
 ## Download
 
 - Android
-  - 使用 GitHub [Releases](https://github.com/robertying/learnX/releases) 下载
+  - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
 - iOS
-  - 暂不可用
-
-----
-
-- Android
-  - Use GitHub [Releases](https://github.com/robertying/learnX/releases)
-
-- iOS
-  - Currently unavailable
+  - [App Store](https://itunes.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1&mt=8)
 
 ## License
 
