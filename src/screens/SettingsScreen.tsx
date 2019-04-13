@@ -1,29 +1,47 @@
 import React from "react";
-import { Alert, FlatList, ListRenderItem, SafeAreaView } from "react-native";
+import {
+  Alert,
+  FlatList,
+  ListRenderItem,
+  Platform,
+  SafeAreaView
+} from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
+import { saveAssignmentsToCalendar } from "../helpers/calendar";
+import dayjs from "../helpers/dayjs";
 import { clearStore } from "../redux/actions/root";
-import { setAutoRefreshing } from "../redux/actions/settings";
+import { setAutoRefreshing, setCalendarSync } from "../redux/actions/settings";
+import { store } from "../redux/store";
 import { IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
+  readonly calendarSync: boolean;
 }
 
 interface ISettingsScreenDispatchProps {
   readonly clearStore: () => void;
   readonly setAutoRefreshing: (enabled: boolean) => void;
+  readonly setCalendarSync: (enabled: boolean) => void;
 }
 
 type ISettingsScreenProps = ISettingsScreenStateProps &
   ISettingsScreenDispatchProps;
 
 const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
-  const { navigation, clearStore, setAutoRefreshing, autoRefreshing } = props;
+  const {
+    navigation,
+    clearStore,
+    setAutoRefreshing,
+    autoRefreshing,
+    setCalendarSync,
+    calendarSync
+  } = props;
 
   const onAcknowledgementsPress = () => {
     navigation.navigate("Acknowledgements");
@@ -54,6 +72,19 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     navigation.navigate("About");
   };
 
+  const onCalendarSyncSwitchChange = (enabled: boolean) => {
+    if (enabled) {
+      const rawAssignments = store.getState().assignments.items;
+      if (rawAssignments) {
+        const assignments = [...rawAssignments].filter(item =>
+          dayjs(item.deadline).isAfter(dayjs())
+        );
+        saveAssignmentsToCalendar(assignments);
+      }
+    }
+    setCalendarSync(enabled);
+  };
+
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
     switch (index) {
       case 0:
@@ -68,6 +99,16 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         );
       case 1:
+        return Platform.OS === "ios" ? (
+          <SettingsListItem
+            variant="switch"
+            icon={<MaterialCommunityIcons name="calendar" size={20} />}
+            text="同步作业事件到系统日历"
+            switchValue={calendarSync}
+            onSwitchValueChange={onCalendarSyncSwitchChange}
+          />
+        ) : null;
+      case 2:
         return (
           <SettingsListItem
             variant="none"
@@ -77,7 +118,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onLogoutPress}
           />
         );
-      case 2:
+      case 3:
         return (
           <SettingsListItem
             variant="arrow"
@@ -87,7 +128,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 3:
+      case 4:
         return (
           <SettingsListItem
             variant="arrow"
@@ -106,6 +147,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       <FlatList
         data={[
           { key: "autoRefreshing" },
+          { key: "calendarSync" },
           { key: "logout" },
           { key: "acknowledgement" },
           { key: "about" }
@@ -124,13 +166,15 @@ SettingsScreen.navigationOptions = {
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
   return {
-    autoRefreshing: state.settings.autoRefreshing
+    autoRefreshing: state.settings.autoRefreshing,
+    calendarSync: state.settings.calendarSync
   };
 }
 
 const mapDispatchToProps: ISettingsScreenDispatchProps = {
   clearStore,
-  setAutoRefreshing
+  setAutoRefreshing,
+  setCalendarSync
 };
 
 export default connect(
