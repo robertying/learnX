@@ -14,7 +14,7 @@ platform :ios do
   end
 
   desc 'Build the iOS application.'
-  private_lane :build do
+  lane :build do
     certificates
     increment_build_number(xcodeproj: 'ios/learnX.xcodeproj')
     gym(scheme: 'learnX', workspace: 'ios/learnX.xcworkspace')
@@ -31,7 +31,7 @@ platform :android do
   # Android Lanes
 
   desc 'Build the Android application.'
-  private_lane :build do
+  lane :build do
     gradle(task: 'clean', project_dir: 'android/')
     gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
   end
