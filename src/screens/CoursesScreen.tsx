@@ -121,6 +121,12 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(courses);
 
   useEffect(() => {
+    if (courses.length) {
+      setSearchResult(courses);
+    }
+  }, [courses.length]);
+
+  useEffect(() => {
     if (isSearching) {
       if (searchBarRef.current) {
         searchBarRef.current.focus();
