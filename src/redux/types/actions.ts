@@ -18,7 +18,14 @@ import {
 } from "../actions/notices";
 import { clearStoreAction, setMockStore } from "../actions/root";
 import { getAllSemestersAction } from "../actions/semesters";
-import { setAutoRefreshing, setTabsOrder } from "../actions/settings";
+import {
+  clearEventIds,
+  setAutoRefreshing,
+  setCalendarId,
+  setCalendarSync,
+  setEventIdForAssignment,
+  setTabsOrder
+} from "../actions/settings";
 import { hideToast, showToastAction } from "../actions/toast";
 import { IPersistAppState } from "./state";
 
@@ -74,7 +81,19 @@ export type IToastAction = IShowToastAction | IHideToastAction;
 
 export type ISetTabsOrderAction = ActionType<typeof setTabsOrder>;
 export type ISetAutoRefreshingAction = ActionType<typeof setAutoRefreshing>;
-export type ISettingsAction = ISetTabsOrderAction | ISetAutoRefreshingAction;
+export type ISetCalendarSyncAction = ActionType<typeof setCalendarSync>;
+export type ISetCalendarIdAction = ActionType<typeof setCalendarId>;
+export type ISetEventIdForAssignment = ActionType<
+  typeof setEventIdForAssignment
+>;
+export type IClearEventIds = ActionType<typeof clearEventIds>;
+export type ISettingsAction =
+  | ISetTabsOrderAction
+  | ISetAutoRefreshingAction
+  | ISetCalendarSyncAction
+  | ISetCalendarIdAction
+  | ISetEventIdForAssignment
+  | IClearEventIds;
 
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
 export type ISetMockStoreAction = ActionType<typeof setMockStore>;

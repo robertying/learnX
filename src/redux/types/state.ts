@@ -20,6 +20,11 @@ export enum Tab {
 export interface ISettingsState {
   readonly tabsOrder: ReadonlyArray<Tab>;
   readonly autoRefreshing: boolean;
+  readonly calendarSync: boolean;
+  readonly calendarId?: string;
+  readonly syncedAssignments: {
+    readonly [assignmentId: string]: string;
+  };
 }
 
 export type ISemester = string | null;
