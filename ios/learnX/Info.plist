@@ -17,11 +17,11 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.4.0</string>
+	<string>1.5.0</string>
 	<key>CFBundleSignature</key>
-	<string></string>
+	<string/>
 	<key>CFBundleVersion</key>
-	<string>15</string>
+	<string>16</string>
 	<key>CodePushDeploymentKey</key>
 	<string>$(CODEPUSH_KEY)</string>
 	<key>Fabric</key>
@@ -68,7 +68,7 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow learnX to access your microphone</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Allow learnX to access your device&apos;s accelerometer</string>
+	<string>Allow learnX to access your device's accelerometer</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Give learnX periences permission to save photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>

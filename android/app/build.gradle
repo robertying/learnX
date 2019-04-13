@@ -124,7 +124,7 @@ android {
         renderscriptTargetApi 23
         renderscriptSupportModeEnabled true
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "1.4.0"
+        versionName "1.5.0"
     }
     signingConfigs {
         if (CI) {
@@ -193,6 +193,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-calendar-events')
     implementation project(':react-native-code-push')
     implementation project(':@react-native-community_blur')
     implementation project(':react-native-linear-gradient')

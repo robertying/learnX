@@ -50,4 +50,6 @@ target 'learnX' do
 
   pod 'CodePush', :path => '../node_modules/react-native-code-push'
 
+  pod 'react-native-calendar-events', :path => '../node_modules/react-native-calendar-events'
+
 end
