@@ -113,7 +113,7 @@ export const saveAssignmentsToCalendar = async (
     if (course) {
       await saveAssignmentEvent(
         assignment.id,
-        (assignment.submitted ? "【已完成】" : "") +
+        (assignment.submitted ? "✅ " : "") +
           assignment.title +
           " - " +
           course.name,
