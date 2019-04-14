@@ -1,6 +1,7 @@
 import React from "react";
 import { Linking, SafeAreaView, ScrollView } from "react-native";
 import { iOSUIKit } from "react-native-typography";
+import packageConfig from "../../package.json";
 import Text from "../components/Text";
 import TextButton from "../components/TextButton";
 import Colors from "../constants/Colors";
@@ -21,6 +22,15 @@ const AboutScreen: INavigationScreen<{}> = () => {
           paddingBottom: 30
         }}
       >
+        <Text
+          style={{
+            alignSelf: "center",
+            marginBottom: 20,
+            fontSize: iOSUIKit.bodyObject.fontSize
+          }}
+        >
+          {"v" + packageConfig.version}
+        </Text>
         <Text
           style={{
             alignSelf: "center",
