@@ -78,17 +78,17 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
             </View>
             <View style={[styles.flexRow, { flex: 3 }]}>
               <IconText
-                name="notifications-none"
+                name="notifications"
                 color={iOSColors.black}
                 text={`${noticesCount}`}
               />
               <IconText
-                name="attach-file"
+                name="cloud-download"
                 color={iOSColors.black}
                 text={`${filesCount}`}
               />
               <IconText
-                name="hourglass-empty"
+                name="assignment"
                 color={iOSColors.black}
                 text={`${assignmentsCount}`}
               />
