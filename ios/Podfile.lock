@@ -36,7 +36,7 @@ PODS:
     - React
   - react-native-calendar-events (1.7.1):
     - React
-  - react-native-webview (5.6.2):
+  - react-native-webview (5.7.0):
     - React
   - React/Core (0.59.4):
     - yoga (= 0.59.4.React)
@@ -258,7 +258,7 @@ SPEC CHECKSUMS:
   React: 5cb71fb1a15b5ce04794ab49e24b48ebe4c94e65
   react-native-blur: cad4d93b364f91e7b7931b3fa935455487e5c33c
   react-native-calendar-events: 667f4141959b3f90c44cd328396c1488f216922d
-  react-native-webview: c0ddb07676492d983068b0dbfe38ff82d49b1175
+  react-native-webview: 69ca34f590814ae44260d30e293ab4b7b3eea793
   rn-fetch-blob: 766f85cabd2992300dfa1be2bc9e4e258abc6f04
   RNGestureHandler: b65d391f4f570178d657b99a16ec99d09b8656b0
   RNReanimated: 9497464b378759f538c539df105cda235de496c5
