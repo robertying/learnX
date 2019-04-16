@@ -2,6 +2,7 @@ import React from "react";
 import {
   Alert,
   FlatList,
+  Linking,
   ListRenderItem,
   Platform,
   SafeAreaView
@@ -9,12 +10,15 @@ import {
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
+import packageConfig from "../../package.json";
 import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
 import { saveAssignmentsToCalendar } from "../helpers/calendar";
 import dayjs from "../helpers/dayjs";
+import { getLatestRelease } from "../helpers/update";
 import { clearStore } from "../redux/actions/root";
 import { setAutoRefreshing, setCalendarSync } from "../redux/actions/settings";
+import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
 import { IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
@@ -85,6 +89,34 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     setCalendarSync(enabled);
   };
 
+  const onCheckUpdatePress = async () => {
+    const { versionString, apkUrl } = await getLatestRelease();
+
+    if (
+      parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
+    ) {
+      Alert.alert(
+        "检查更新",
+        `发现新版本 ${versionString}`,
+        [
+          {
+            text: "取消",
+            style: "cancel"
+          },
+          {
+            text: "更新",
+            onPress: () => {
+              Linking.openURL(apkUrl);
+            }
+          }
+        ],
+        { cancelable: true }
+      );
+    } else {
+      store.dispatch(showToast("未发现更新", 1500));
+    }
+  };
+
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
     switch (index) {
       case 0:
@@ -119,6 +151,16 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         );
       case 3:
+        return Platform.OS === "android" ? (
+          <SettingsListItem
+            variant="none"
+            containerStyle={{ marginTop: 10 }}
+            icon={<MaterialCommunityIcons name="update" size={20} />}
+            text="检查更新"
+            onPress={onCheckUpdatePress}
+          />
+        ) : null;
+      case 4:
         return (
           <SettingsListItem
             variant="arrow"
@@ -128,7 +170,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 4:
+      case 5:
         return (
           <SettingsListItem
             variant="arrow"
@@ -149,6 +191,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           { key: "autoRefreshing" },
           { key: "calendarSync" },
           { key: "logout" },
+          { key: "checkUpdate" },
           { key: "acknowledgement" },
           { key: "about" }
         ]}
