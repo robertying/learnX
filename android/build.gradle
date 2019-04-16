@@ -30,8 +30,3 @@ allprojects {
         }
     }
 }
-
-wrapper {
-    gradleVersion = '5.4.0'
-    distributionUrl = distributionUrl.replace("bin", "all")
-}
