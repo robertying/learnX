@@ -3,7 +3,7 @@ import { GET_CURRENT_SEMESTER } from "../types/constants";
 import { ISemester } from "../types/state";
 
 export default function currentSemester(
-  state: ISemester = null,
+  state: ISemester = "2018-2019-2",
   action: IGetCurrentSemesterAction
 ): ISemester {
   switch (action.type) {
