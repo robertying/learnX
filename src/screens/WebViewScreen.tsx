@@ -21,7 +21,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         source={{
           uri: url
         }}
-        useWebKit={true}
+        useWebKit={false}
         // tslint:disable-next-line: jsx-no-lambda
         onLoadEnd={() => setLoading(false)}
       />
