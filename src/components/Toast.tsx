@@ -58,7 +58,8 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
           style={[
             styles.toastContainer,
             {
-              height: 88,
+              height:
+                Platform.OS === "android" ? 56 : Layout.statusBarHeight + 44,
               paddingTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
             }
           ]}
