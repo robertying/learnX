@@ -57,7 +57,7 @@
     "metro-react-native-babel-preset": "0.53.1",
     "prettier": "1.17.0",
     "react-test-renderer": "16.8.6",
-    "tslint": "5.15.0",
+    "tslint": "5.16.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-eslint-rules": "5.4.0",
     "tslint-immutable": "5.5.2",
