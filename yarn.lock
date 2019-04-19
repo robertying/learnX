@@ -7120,10 +7120,10 @@ tslint-immutable@5.5.2:
   dependencies:
     tsutils "^2.28.0 || ^3.0.0"
 
-tslint-react-hooks@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/tslint-react-hooks/-/tslint-react-hooks-2.0.0.tgz#452d7eed160420023dc1f26ad3b08ad861fb5d05"
-  integrity sha512-SC0BvRVX+SaSrT/kVcD/xzunBzleeX3TPHX010g9EfXPKLQzyg971VU/j1HnfutvPILDI1Qkhjqseb1+WIBiOw==
+tslint-react-hooks@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/tslint-react-hooks/-/tslint-react-hooks-2.1.0.tgz#cc9841da0cef20d3527c8d16412f029c33767898"
+  integrity sha512-ccjyguEHGEU5rXikLDaQ6kT1AVo3C0HV8gi2MIJc7SbYAXjbzJkpbs4IXulgfqdEY1T6RnNSuGhyXg+2jTm5Bg==
 
 tslint-react@4.0.0:
   version "4.0.0"
