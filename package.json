@@ -45,7 +45,7 @@
   "devDependencies": {
     "@types/jest": "24.0.11",
     "@types/react": "16.8.14",
-    "@types/react-native": "0.57.49",
+    "@types/react-native": "0.57.50",
     "@types/react-native-share": "1.1.1",
     "@types/react-native-tab-view": "1.0.6",
     "@types/react-native-vector-icons": "6.4.0",
