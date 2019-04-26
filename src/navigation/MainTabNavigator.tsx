@@ -139,7 +139,11 @@ const TabNavigator = createBottomTabNavigator(
     order,
     tabBarOptions: {
       activeTintColor: Colors.tabIconSelected,
-      inactiveTintColor: Colors.tabIconDefault
+      inactiveTintColor: Colors.tabIconDefault,
+      style: {
+        paddingTop: 3,
+        paddingBottom: 3
+      }
     },
     initialRouteName
   }
