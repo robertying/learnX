@@ -12,7 +12,6 @@ import FilesView from "../components/FilesView";
 import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
-import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { getAllFilesForCourses } from "../redux/actions/files";
 import { showToast } from "../redux/actions/toast";
@@ -63,19 +62,13 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   );
 
   useEffect(() => {
-    if (initialRouteName === "Files" && loggedIn && semesterId) {
+    if (courses.length === 0 && loggedIn && semesterId) {
       getCoursesForSemester(semesterId);
     }
-  }, [loggedIn, semesterId]);
+  }, [loggedIn, semesterId, courses.length]);
 
   useEffect(() => {
-    if (initialRouteName === "Files") {
-      invalidateAll();
-    }
-  }, [courses.length]);
-
-  useEffect(() => {
-    if (initialRouteName !== "Files" && autoRefreshing) {
+    if (autoRefreshing || files.length === 0) {
       invalidateAll();
     }
   }, []);
