@@ -1,18 +1,31 @@
 import React from "react";
-import { View } from "react-native";
-import Colors from "../constants/Colors";
-import Text from "./Text";
+import { Platform, View } from "react-native";
+import Layout from "../constants/Layout";
+import LinearGradientBlurView from "./LinearGradientBlurView";
 
 const SplashScreen = () => (
   <View
     style={{
-      backgroundColor: "white",
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center"
+      backgroundColor: "#f0f0f0",
+      flex: 1
     }}
   >
-    <Text style={{ fontSize: 150, color: Colors.tint }}>X</Text>
+    <LinearGradientBlurView
+      style={{
+        flex: undefined,
+        height: Layout.statusBarHeight + (Platform.OS === "android" ? 56 : 44)
+      }}
+    />
+    <View
+      style={{
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: Platform.OS === "android" ? 50 : 82,
+        backgroundColor: "white"
+      }}
+    />
   </View>
 );
 
