@@ -18,7 +18,7 @@ export default function settings(
       Tab.Courses,
       Tab.Settings
     ],
-    autoRefreshing: true,
+    autoRefreshing: false,
     calendarSync: false,
     syncedAssignments: {}
   },
