@@ -11,7 +11,6 @@ const TabBarIcon = (props: ITabBarIconProps) => (
   <Icon
     name={props.name}
     size={24}
-    style={{ marginBottom: -3 }}
     color={props.focused ? Colors.tabIconSelected : Colors.tabIconDefault}
   />
 );
