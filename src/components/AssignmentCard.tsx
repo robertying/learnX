@@ -6,7 +6,6 @@ import {
   View
 } from "react-native";
 import dayjs from "../helpers/dayjs";
-import NoticePlaceholder from "./NoticePlaceholder";
 import Text from "./Text";
 
 export type IAssignmentCardProps = TouchableHighlightProps & {
@@ -20,7 +19,6 @@ export type IAssignmentCardProps = TouchableHighlightProps & {
 
 const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
   const {
-    loading,
     onPress,
     title,
     attachment,
@@ -30,55 +28,53 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
   } = props;
 
   return (
-    <NoticePlaceholder loading={loading}>
-      <TouchableHighlight onPress={onPress}>
-        <View style={{ backgroundColor: "#fff" }}>
-          {courseName && courseTeacherName && (
-            <Text
-              style={{
-                flex: 1,
-                margin: 15,
-                marginBottom: 0,
-                color: "grey"
-              }}
-            >
-              {`${courseTeacherName} / ${courseName}`}
-            </Text>
-          )}
-          <View
+    <TouchableHighlight onPress={onPress}>
+      <View style={{ backgroundColor: "#fff" }}>
+        {courseName && courseTeacherName && (
+          <Text
             style={{
-              flex: 3,
-              margin: courseName && courseTeacherName ? 20 : 15
+              flex: 1,
+              margin: 15,
+              marginBottom: 0,
+              color: "grey"
             }}
           >
-            <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
-              {title}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.flexRow,
-              {
-                flex: 1,
-                justifyContent: "space-between",
-                margin: 15,
-                marginTop: 0,
-                marginBottom: 10
-              }
-            ]}
-          >
-            <Text style={{ color: "grey", fontSize: 12 }}>
-              {attachment ? "附件 " + attachment : "无附件"}
-            </Text>
-            <Text style={{ color: "grey", fontSize: 12 }}>
-              {dayjs().isAfter(dayjs(date))
-                ? dayjs().to(dayjs(date)) + "截止"
-                : "还剩 " + dayjs().to(dayjs(date), true)}
-            </Text>
-          </View>
+            {`${courseTeacherName} / ${courseName}`}
+          </Text>
+        )}
+        <View
+          style={{
+            flex: 3,
+            margin: courseName && courseTeacherName ? 20 : 15
+          }}
+        >
+          <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
+            {title}
+          </Text>
         </View>
-      </TouchableHighlight>
-    </NoticePlaceholder>
+        <View
+          style={[
+            styles.flexRow,
+            {
+              flex: 1,
+              justifyContent: "space-between",
+              margin: 15,
+              marginTop: 0,
+              marginBottom: 10
+            }
+          ]}
+        >
+          <Text style={{ color: "grey", fontSize: 12 }}>
+            {attachment ? "附件 " + attachment : "无附件"}
+          </Text>
+          <Text style={{ color: "grey", fontSize: 12 }}>
+            {dayjs().isAfter(dayjs(date))
+              ? dayjs().to(dayjs(date)) + "截止"
+              : "还剩 " + dayjs().to(dayjs(date), true)}
+          </Text>
+        </View>
+      </View>
+    </TouchableHighlight>
   );
 };
 
