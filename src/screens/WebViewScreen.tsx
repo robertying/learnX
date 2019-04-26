@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
-import NoticePlaceholder from "../components/NoticePlaceholder";
+import MediumPlaceholder from "../components/MediumPlaceholder";
 import { shareFile } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
@@ -38,10 +38,10 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
             right: 0
           }}
         >
-          <NoticePlaceholder style={{ margin: 15 }} loading={true} />
-          <NoticePlaceholder style={{ margin: 15 }} loading={true} />
-          <NoticePlaceholder style={{ margin: 15 }} loading={true} />
-          <NoticePlaceholder style={{ margin: 15 }} loading={true} />
+          <MediumPlaceholder style={{ margin: 15 }} loading={true} />
+          <MediumPlaceholder style={{ margin: 15 }} loading={true} />
+          <MediumPlaceholder style={{ margin: 15 }} loading={true} />
+          <MediumPlaceholder style={{ margin: 15 }} loading={true} />
         </View>
       )}
     </>

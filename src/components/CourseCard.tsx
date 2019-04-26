@@ -8,7 +8,6 @@ import {
 import { iOSColors } from "react-native-typography";
 import { ISemester } from "../redux/types/state";
 import IconText from "./IconText";
-import NoticePlaceholder from "./NoticePlaceholder";
 import Text from "./Text";
 
 export type ICourseCardProps = TouchableHighlightProps & {
@@ -23,7 +22,6 @@ export type ICourseCardProps = TouchableHighlightProps & {
 
 const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
   const {
-    loading,
     onPress,
     courseName,
     courseTeacherName,
@@ -34,69 +32,67 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
   } = props;
 
   return (
-    <NoticePlaceholder loading={loading}>
-      <TouchableHighlight onPress={onPress}>
-        <View style={{ backgroundColor: "#fff" }}>
-          {courseName && courseTeacherName && (
-            <Text
-              style={{
-                flex: 1,
-                margin: 15,
-                marginBottom: 0,
-                color: "grey"
-              }}
-            >
-              {courseTeacherName}
-            </Text>
-          )}
-          <View
+    <TouchableHighlight onPress={onPress}>
+      <View style={{ backgroundColor: "#fff" }}>
+        {courseName && courseTeacherName && (
+          <Text
             style={{
-              flex: 3,
-              margin: 20,
-              marginLeft: 30,
-              marginRight: 30
+              flex: 1,
+              margin: 15,
+              marginBottom: 0,
+              color: "grey"
             }}
           >
-            <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
-              {courseName}
-            </Text>
+            {courseTeacherName}
+          </Text>
+        )}
+        <View
+          style={{
+            flex: 3,
+            margin: 20,
+            marginLeft: 30,
+            marginRight: 30
+          }}
+        >
+          <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
+            {courseName}
+          </Text>
+        </View>
+        <View
+          style={[
+            styles.flexRow,
+            {
+              flex: 1,
+              justifyContent: "space-between",
+              margin: 15,
+              marginTop: 0,
+              marginBottom: 10
+            }
+          ]}
+        >
+          <View style={[styles.flexRow, { flex: 2 }]}>
+            <Text style={{ color: "grey", fontSize: 12 }}>{semester}</Text>
           </View>
-          <View
-            style={[
-              styles.flexRow,
-              {
-                flex: 1,
-                justifyContent: "space-between",
-                margin: 15,
-                marginTop: 0,
-                marginBottom: 10
-              }
-            ]}
-          >
-            <View style={[styles.flexRow, { flex: 2 }]}>
-              <Text style={{ color: "grey", fontSize: 12 }}>{semester}</Text>
-            </View>
-            <View style={[styles.flexRow, { flex: 3 }]}>
-              <IconText
-                name="notifications"
-                color={iOSColors.black}
-                text={`${noticesCount}`}
-              />
-              <IconText
-                name="cloud-download"
-                color={iOSColors.black}
-                text={`${filesCount}`}
-              />
-              <IconText
-                name="assignment"
-                color={iOSColors.black}
-                text={`${assignmentsCount}`}
-              />
-            </View>
+          <View style={[styles.flexRow, { flex: 3 }]}>
+            <IconText
+              name="notifications"
+              color={iOSColors.black}
+              text={`${noticesCount}`}
+            />
+            <IconText
+              name="cloud-download"
+              color={iOSColors.black}
+              text={`${filesCount}`}
+            />
+            <IconText
+              name="assignment"
+              color={iOSColors.black}
+              text={`${assignmentsCount}`}
+            />
           </View>
         </View>
-      </TouchableHighlight>
-    </NoticePlaceholder>
+      </View>
+    </TouchableHighlight>
   );
 };
 
