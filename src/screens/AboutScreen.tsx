@@ -31,15 +31,6 @@ const AboutScreen: INavigationScreen<{}> = () => {
         >
           {"v" + packageConfig.version}
         </Text>
-        <Text
-          style={{
-            alignSelf: "center",
-            marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize
-          }}
-        >
-          Copyright (c) 2019 Rui Ying
-        </Text>
         <TextButton
           style={{
             alignSelf: "center",
@@ -50,6 +41,15 @@ const AboutScreen: INavigationScreen<{}> = () => {
         >
           robertying / learnX @ GitHub
         </TextButton>
+        <Text
+          style={{
+            alignSelf: "center",
+            marginBottom: 20,
+            fontSize: iOSUIKit.bodyObject.fontSize
+          }}
+        >
+          Copyright (c) 2019 Rui Ying
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );
