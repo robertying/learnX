@@ -59,8 +59,8 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
             styles.toastContainer,
             {
               height:
-                Platform.OS === "android" ? 56 : Layout.statusBarHeight + 44,
-              paddingTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
+                Layout.statusBarHeight + (Platform.OS === "android" ? 56 : 44),
+              paddingTop: Layout.statusBarHeight
             }
           ]}
         >
@@ -73,11 +73,7 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
           <ToastBody />
         </Animated.View>
       )}
-      {Platform.OS === "android" ? (
-        <StatusBar barStyle="light-content" />
-      ) : (
-        <StatusBar barStyle={visible ? "dark-content" : "light-content"} />
-      )}
+      <StatusBar barStyle={visible ? "dark-content" : "light-content"} />
     </>
   );
 };
