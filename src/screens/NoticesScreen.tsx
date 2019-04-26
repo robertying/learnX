@@ -6,7 +6,6 @@ import { connect } from "react-redux";
 import NoticesView from "../components/NoticesView";
 import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
-import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { getAllNoticesForCourses } from "../redux/actions/notices";
 import {
@@ -55,22 +54,16 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   );
 
   useEffect(() => {
-    if (initialRouteName === "Notices" && loggedIn && semesterId) {
+    if (courses.length === 0 && loggedIn && semesterId) {
       getCoursesForSemester(semesterId);
     }
-  }, [loggedIn, semesterId]);
+  }, [loggedIn, semesterId, courses.length]);
 
   useEffect(() => {
-    if (initialRouteName === "Notices") {
+    if (autoRefreshing || notices.length === 0) {
       invalidateAll();
     }
   }, [courses.length]);
-
-  useEffect(() => {
-    if (initialRouteName !== "Notices" && autoRefreshing) {
-      invalidateAll();
-    }
-  }, []);
 
   const invalidateAll = () => {
     if (loggedIn && courseIds.length !== 0) {
