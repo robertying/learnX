@@ -6,7 +6,6 @@ import { connect } from "react-redux";
 import AssignmentsView from "../components/AssignmentsView";
 import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
-import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import {
@@ -55,19 +54,13 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix());
 
   useEffect(() => {
-    if (initialRouteName === "Assignments" && loggedIn && semesterId) {
+    if (courses.length === 0 && loggedIn && semesterId) {
       getCoursesForSemester(semesterId);
     }
-  }, [loggedIn, semesterId]);
+  }, [loggedIn, semesterId, courses.length]);
 
   useEffect(() => {
-    if (initialRouteName === "Assignments") {
-      invalidateAll();
-    }
-  }, [courses.length]);
-
-  useEffect(() => {
-    if (initialRouteName !== "Assignments" && autoRefreshing) {
+    if (autoRefreshing || assignments.length === 0) {
       invalidateAll();
     }
   }, []);

@@ -14,7 +14,6 @@ import CoursePreviewView from "../components/CourseCard";
 import Divider from "../components/Divider";
 import SearchBar from "../components/SearchBar";
 import Colors from "../constants/Colors";
-import { initialRouteName } from "../navigation/MainTabNavigator";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { getAllFilesForCourses } from "../redux/actions/files";
@@ -79,19 +78,18 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     isFetchingNotices || isFetchingFiles || isFetchingAssignments;
 
   useEffect(() => {
-    if (initialRouteName === "Courses" && loggedIn && semesterId) {
+    if (courses.length === 0 && loggedIn && semesterId) {
       getCoursesForSemester(semesterId);
     }
-  }, [loggedIn, semesterId]);
+  }, [loggedIn, semesterId, courses.length]);
 
   useEffect(() => {
-    if (initialRouteName === "Courses") {
-      invalidateAll();
-    }
-  }, [courses.length]);
-
-  useEffect(() => {
-    if (initialRouteName !== "Courses" && autoRefreshing) {
+    if (
+      autoRefreshing ||
+      notices.length === 0 ||
+      files.length === 0 ||
+      assignments.length === 0
+    ) {
       invalidateAll();
     }
   }, []);
