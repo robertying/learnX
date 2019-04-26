@@ -1,13 +1,15 @@
 import React from "react";
-import { StatusBar } from "react-native";
+import { Platform, StatusBar } from "react-native";
 import {
   createBottomTabNavigator,
   createStackNavigator,
+  Header,
   NavigationStackScreenOptions
 } from "react-navigation";
 import LinearGradientBlurView from "../components/LinearGradientBlurView";
 import TabBarIcon from "../components/TabBarIcon";
 import Colors from "../constants/Colors";
+import Layout from "../constants/Layout";
 import { store } from "../redux/store";
 import { Tab } from "../redux/types/state";
 import AboutScreen from "../screens/AboutScreen";
@@ -25,10 +27,17 @@ import WebViewScreen from "../screens/WebViewScreen";
 const defaultNavigationOptions: NavigationStackScreenOptions = {
   headerBackground: (
     <LinearGradientBlurView>
-      <StatusBar translucent={false} backgroundColor={Colors.statusBar} />
+      <StatusBar translucent={true} backgroundColor="transparent" />
     </LinearGradientBlurView>
   ),
-  headerTintColor: Colors.headerTint
+  headerTintColor: Colors.headerTint,
+  headerStyle:
+    Platform.OS === "android"
+      ? {
+          paddingTop: Layout.statusBarHeight,
+          height: Header.HEIGHT + Layout.statusBarHeight
+        }
+      : undefined
 };
 
 const NoticesStack = createStackNavigator(
@@ -60,7 +69,7 @@ const FilesStack = createStackNavigator(
     initialRouteName: "Files",
     navigationOptions: {
       tabBarIcon: ({ focused }) => (
-        <TabBarIcon focused={focused} name="cloud-download" />
+        <TabBarIcon focused={focused} name="file-download" />
       ),
       tabBarLabel: "文件"
     }
