@@ -9,6 +9,7 @@ import {
   GET_COURSES_FOR_SEMESTER_REQUEST,
   GET_COURSES_FOR_SEMESTER_SUCCESS,
   PIN_COURSE,
+  SET_COURSES_FILTER,
   UNPIN_COURSE
 } from "../types/constants";
 import { ICoursesState } from "../types/state";
@@ -16,6 +17,7 @@ import { ICoursesState } from "../types/state";
 export default function courses(
   state: ICoursesState = {
     isFetching: false,
+    hidden: [],
     pinned: [],
     items: []
   },
@@ -23,6 +25,7 @@ export default function courses(
     | IGetCoursesForSemesterAction
     | IPinCourseAction
     | IUnpinCourseAction
+    | ISetCoursesFilter
 ): ICoursesState {
   switch (action.type) {
     case GET_COURSES_FOR_SEMESTER_REQUEST:
@@ -50,6 +53,11 @@ export default function courses(
       return {
         ...state,
         pinned: state.pinned.filter(item => item !== action.payload)
+      };
+    case SET_COURSES_FILTER:
+      return {
+        ...state,
+        hidden: action.payload
       };
   }
   return state;

@@ -1,16 +1,33 @@
 import Fuse from "fuse.js";
 import React, { useEffect, useRef, useState } from "react";
-import { LayoutAnimation, SafeAreaView, TextInput } from "react-native";
+import {
+  FlatList,
+  LayoutAnimation,
+  ListRenderItem,
+  Platform,
+  SafeAreaView,
+  TextInput,
+  View
+} from "react-native";
+import Modal from "react-native-modal";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import AssignmentsView from "../components/AssignmentsView";
+import Divider from "../components/Divider";
 import SearchBar from "../components/SearchBar";
+import SettingsListItem from "../components/SettingsListItem";
+import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
 import {
   getAllAssignmentsForCourses,
   pinAssignment,
   unpinAssignment
 } from "../redux/actions/assignments";
+import {
+  getCoursesForSemester,
+  setCoursesFilter
+} from "../redux/actions/courses";
+import {
   IAssignment,
   ICourse,
   IPersistAppState,
@@ -26,6 +43,7 @@ interface IAssignmentsScreenStateProps {
   readonly assignments: ReadonlyArray<IAssignment>;
   readonly isFetching: boolean;
   readonly pinnedAssignments: readonly string[];
+  readonly hidden: readonly string[];
 }
 
 interface IAssignmentsScreenDispatchProps {
@@ -34,6 +52,7 @@ interface IAssignmentsScreenDispatchProps {
   readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
   readonly pinAssignment: (assignmentId: string) => void;
   readonly unpinAssignment: (assignmentId: string) => void;
+  readonly setCoursesFilter: (hidden: string[]) => void;
 }
 
 type IAssignmentsScreenProps = IAssignmentsScreenStateProps &
@@ -53,11 +72,14 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     pinnedAssignments,
     pinAssignment,
     unpinAssignment,
+    hidden,
+    setCoursesFilter
   } = props;
 
   const courseIds = courses.map(course => course.id);
 
   const assignments = [...rawAssignments]
+    .filter(item => !hidden.includes(item.courseId))
     .filter(item => dayjs(item.deadline).isAfter(dayjs()))
     .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix());
 
@@ -86,7 +108,14 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       navigation.navigate("AssignmentDetail", {
         title: assignment.title,
         deadline: dayjs(assignment.deadline).format("llll") + " 截止",
-        content: assignment.description
+        description: assignment.description,
+        attachmentName: assignment.attachmentName,
+        attachmentUrl: assignment.attachmentUrl,
+        submittedAttachmentName: assignment.submittedAttachmentName,
+        submittedAttachmentUrl: assignment.submittedAttachmentUrl,
+        submitTime: assignment.submitTime,
+        grade: assignment.grade,
+        gradeContent: assignment.gradeContent
       });
     }
   };
@@ -126,6 +155,26 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     }
   };
 
+  const modalVisible = navigation.getParam("filterModalVisible");
+
+  const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
+    return (
+      <SettingsListItem
+        variant="none"
+        text={item.name}
+        icon={hidden.includes(item.id) ? null : <Icon name="check" size={20} />}
+        // tslint:disable-next-line: jsx-no-lambda
+        onPress={() =>
+          hidden.includes(item.id)
+            ? setCoursesFilter(hidden.filter(hid => hid !== item.id))
+            : setCoursesFilter([...hidden, item.id])
+        }
+      />
+    );
+  };
+
+  const keyExtractor = (item: any) => item.id;
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isSearching && (
@@ -148,6 +197,42 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
         pinnedAssignments={pinnedAssignments || []}
         onPinned={onPinned}
       />
+      <Modal
+        style={{
+          margin: 0,
+          marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
+        }}
+        deviceHeight={Layout.window.height}
+        isVisible={modalVisible}
+        backdropColor="transparent"
+        swipeDirection="down"
+        // tslint:disable-next-line: jsx-no-lambda
+        onSwipeComplete={() =>
+          navigation.setParams({ filterModalVisible: false })
+        }
+      >
+        <View style={{ flex: 1, backgroundColor: "white" }}>
+          <Icon.Button
+            style={{ margin: 10 }}
+            name="close"
+            // tslint:disable-next-line: jsx-no-lambda
+            onPress={() => {
+              navigation.setParams({ filterModalVisible: false });
+            }}
+            color="black"
+            size={24}
+            backgroundColor="transparent"
+            underlayColor="transparent"
+            activeOpacity={0.6}
+          />
+          <FlatList
+            ItemSeparatorComponent={Divider}
+            data={courses}
+            renderItem={renderListItem}
+            keyExtractor={keyExtractor}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -165,6 +250,23 @@ const fuseOptions = {
 // tslint:disable-next-line: no-object-mutation
 AssignmentsScreen.navigationOptions = ({ navigation }) => ({
   title: "作业",
+  headerLeft: (
+    <Icon.Button
+      style={{ marginLeft: 10 }}
+      name="filter-list"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        navigation.setParams({
+          filterModalVisible: true
+        });
+      }}
+      color="white"
+      size={24}
+      backgroundColor="transparent"
+      underlayColor="transparent"
+      activeOpacity={0.6}
+    />
+  ),
   headerRight: (
     <Icon.Button
       name="search"
@@ -195,6 +297,7 @@ function mapStateToProps(
     isFetching: state.assignments.isFetching,
     assignments: state.assignments.items,
     pinnedAssignments: state.assignments.pinned,
+    hidden: state.courses.hidden || []
   };
 }
 
@@ -203,7 +306,10 @@ const mapDispatchToProps: IAssignmentsScreenDispatchProps = {
   getCoursesForSemester: (semesterId: string) =>
     getCoursesForSemester(semesterId),
   getAllAssignmentsForCourses: (courseIds: string[]) =>
-    getAllAssignmentsForCourses(courseIds)
+    getAllAssignmentsForCourses(courseIds),
+  pinAssignment: (assignmentId: string) => pinAssignment(assignmentId),
+  unpinAssignment: (assignmentId: string) => unpinAssignment(assignmentId),
+  setCoursesFilter: (hidden: string[]) => setCoursesFilter(hidden)
 };
 
 export default connect(

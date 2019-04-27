@@ -1,17 +1,28 @@
 import Fuse from "fuse.js";
 import React, { useEffect, useRef, useState } from "react";
 import {
+  FlatList,
   LayoutAnimation,
+  ListRenderItem,
   Platform,
   SafeAreaView,
-  TextInput
+  TextInput,
+  View
 } from "react-native";
+import Modal from "react-native-modal";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
+import Divider from "../components/Divider";
 import FilesView from "../components/FilesView";
 import SearchBar from "../components/SearchBar";
+import SettingsListItem from "../components/SettingsListItem";
+import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
+import {
+  getCoursesForSemester,
+  setCoursesFilter
+} from "../redux/actions/courses";
 import {
   getAllFilesForCourses,
   pinFile,
@@ -34,6 +45,7 @@ interface IFilesScreenStateProps {
   readonly files: ReadonlyArray<IFile>;
   readonly isFetching: boolean;
   readonly pinnedFiles: readonly string[];
+  readonly hidden: readonly string[];
 }
 
 interface IFilesScreenDispatchProps {
@@ -43,6 +55,7 @@ interface IFilesScreenDispatchProps {
   readonly showToast: (text: string, duration: number) => void;
   readonly pinFile: (fileId: string) => void;
   readonly unpinFile: (fileId: string) => void;
+  readonly setCoursesFilter: (hidden: string[]) => void;
 }
 
 type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
@@ -62,13 +75,15 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     pinFile,
     pinnedFiles,
     unpinFile,
+    hidden,
+    setCoursesFilter
   } = props;
 
   const courseIds = courses.map(course => course.id);
 
-  const files = [...rawFiles].sort(
-    (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix()
-  );
+  const files = [...rawFiles]
+    .filter(item => !hidden.includes(item.courseId))
+    .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
 
   useEffect(() => {
     if (courses.length === 0 && loggedIn && semesterId) {
@@ -143,6 +158,26 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
+  const modalVisible = navigation.getParam("filterModalVisible");
+
+  const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
+    return (
+      <SettingsListItem
+        variant="none"
+        text={item.name}
+        icon={hidden.includes(item.id) ? null : <Icon name="check" size={20} />}
+        // tslint:disable-next-line: jsx-no-lambda
+        onPress={() =>
+          hidden.includes(item.id)
+            ? setCoursesFilter(hidden.filter(hid => hid !== item.id))
+            : setCoursesFilter([...hidden, item.id])
+        }
+      />
+    );
+  };
+
+  const keyExtractor = (item: any) => item.id;
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isSearching && (
@@ -165,6 +200,42 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         pinnedFiles={pinnedFiles || []}
         onPinned={onPinned}
       />
+      <Modal
+        style={{
+          margin: 0,
+          marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
+        }}
+        deviceHeight={Layout.window.height}
+        isVisible={modalVisible}
+        backdropColor="transparent"
+        swipeDirection="down"
+        // tslint:disable-next-line: jsx-no-lambda
+        onSwipeComplete={() =>
+          navigation.setParams({ filterModalVisible: false })
+        }
+      >
+        <View style={{ flex: 1, backgroundColor: "white" }}>
+          <Icon.Button
+            style={{ margin: 10 }}
+            name="close"
+            // tslint:disable-next-line: jsx-no-lambda
+            onPress={() => {
+              navigation.setParams({ filterModalVisible: false });
+            }}
+            color="black"
+            size={24}
+            backgroundColor="transparent"
+            underlayColor="transparent"
+            activeOpacity={0.6}
+          />
+          <FlatList
+            ItemSeparatorComponent={Divider}
+            data={courses}
+            renderItem={renderListItem}
+            keyExtractor={keyExtractor}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -182,6 +253,23 @@ const fuseOptions = {
 // tslint:disable-next-line: no-object-mutation
 FilesScreen.navigationOptions = ({ navigation }) => ({
   title: "文件",
+  headerLeft: (
+    <Icon.Button
+      style={{ marginLeft: 10 }}
+      name="filter-list"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        navigation.setParams({
+          filterModalVisible: true
+        });
+      }}
+      color="white"
+      size={24}
+      backgroundColor="transparent"
+      underlayColor="transparent"
+      activeOpacity={0.6}
+    />
+  ),
   headerRight: (
     <Icon.Button
       name="search"
@@ -210,6 +298,7 @@ function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
     isFetching: state.files.isFetching,
     files: state.files.items,
     pinnedFiles: state.files.pinned,
+    hidden: state.courses.hidden || []
   };
 }
 
@@ -222,6 +311,7 @@ const mapDispatchToProps: IFilesScreenDispatchProps = {
   showToast: (text: string, duration: number) => showToast(text, duration),
   pinFile: (fileId: string) => pinFile(fileId),
   unpinFile: (fileId: string) => unpinFile(fileId),
+  setCoursesFilter: (hidden: string[]) => setCoursesFilter(hidden)
 };
 
 export default connect(
