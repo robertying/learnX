@@ -203,6 +203,8 @@ const CourseDetailScreen: INavigationScreen<
         }
         animationIn="bounceIn"
         animationOut="zoomOut"
+        useNativeDriver={true}
+        deviceHeight={Layout.window.height}
       >
         <View style={{ height: "80%", backgroundColor: "white" }}>
           {currentModal.data && currentModal.type === "Notice" && (
