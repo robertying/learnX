@@ -42,12 +42,14 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
       if (course) {
         return (
           <NoticeCard
-            loading={isFetching}
             title={item.title}
             author={item.publisher}
             date={item.publishTime}
             courseName={course.name}
             courseTeacherName={course.teacherName}
+            content={item.content}
+            markedImportant={item.markedImportant}
+            hasAttachment={item.attachmentName ? true : false}
             pinned={pinnedNotices.includes(item.id)}
             // tslint:disable-next-line: jsx-no-lambda
             onPinned={pin => onPinned!(pin, item.id)}
@@ -59,10 +61,12 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
     }
     return (
       <NoticeCard
-        loading={isFetching}
         title={item.title}
         author={item.publisher}
         date={item.publishTime}
+        content={item.content}
+        markedImportant={item.markedImportant}
+        hasAttachment={item.attachmentName ? true : false}
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() => onNoticeCardPress(item.id)}
       />
@@ -74,7 +78,6 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
-        ItemSeparatorComponent={Divider}
         data={notices}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}

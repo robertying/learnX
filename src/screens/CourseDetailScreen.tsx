@@ -210,16 +210,45 @@ const CourseDetailScreen: INavigationScreen<
               title={(currentModal.data as INotice).title || ""}
               content={(currentModal.data as INotice).content || ""}
               author={(currentModal.data as INotice).publisher || ""}
+              attachmentName={
+                (currentModal.data as INotice).attachmentName || ""
+              }
+              attachmentUrl={(currentModal.data as INotice).attachmentUrl || ""}
+              // tslint:disable-next-line: jsx-no-lambda
+              onTransition={() =>
+                setCurrentModal({ type: "Notice", visible: false })
+              }
             />
           )}
           {currentModal.data && currentModal.type === "Assignment" && (
-            <NoticeBoard
+            <AssignmentBoard
               title={(currentModal.data as IAssignment).title || ""}
-              content={(currentModal.data as IAssignment).description || ""}
-              author={
+              description={(currentModal.data as IAssignment).description || ""}
+              deadline={
                 dayjs((currentModal.data as IAssignment).deadline).format(
                   "llll"
                 ) + " 截止"
+              }
+              attachmentName={
+                (currentModal.data as IAssignment).attachmentName || ""
+              }
+              attachmentUrl={
+                (currentModal.data as IAssignment).attachmentUrl || ""
+              }
+              submittedAttachmentName={
+                (currentModal.data as IAssignment).submittedAttachmentName || ""
+              }
+              submittedAttachmentUrl={
+                (currentModal.data as IAssignment).submittedAttachmentUrl || ""
+              }
+              submitTime={(currentModal.data as IAssignment).submitTime || ""}
+              grade={(currentModal.data as IAssignment).grade || NaN}
+              gradeContent={
+                (currentModal.data as IAssignment).gradeContent || ""
+              }
+              // tslint:disable-next-line: jsx-no-lambda
+              onTransition={() =>
+                setCurrentModal({ type: "Notice", visible: false })
               }
             />
           )}

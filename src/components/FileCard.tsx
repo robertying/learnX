@@ -1,20 +1,25 @@
 import React, { FunctionComponent } from "react";
 import {
+  Platform,
   StyleSheet,
   TouchableHighlight,
   TouchableHighlightProps,
   View
 } from "react-native";
 import Interactable from "react-native-interactable";
+import { iOSColors, iOSUIKit } from "react-native-typography";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
 import Text from "./Text";
 
 export type IFileCardProps = TouchableHighlightProps & {
-  readonly loading: boolean;
   readonly title: string;
   readonly extension: string;
   readonly size: string;
   readonly date: string;
+  readonly description: string;
+  readonly markedImportant: boolean;
   readonly pinned?: boolean;
   readonly onPinned?: (pin: boolean) => void;
   readonly courseName?: string;
@@ -29,8 +34,11 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
     date,
     courseName,
     extension,
+    courseTeacherName,
+    markedImportant,
     pinned,
     onPinned,
+    description
   } = props;
 
   const onDrag = (event: Interactable.IDragEvent) => {
@@ -47,47 +55,83 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
       onDrag={onDrag}
       dragEnabled={courseName && courseTeacherName ? true : false}
     >
-            style={{
-              flex: 1,
-              margin: 15,
-              marginBottom: 0,
-              color: "grey"
-            }}
-          >
-            {`${courseTeacherName} / ${courseName}`}
-          </Text>
-        )}
+      <TouchableHighlight
+        onPress={onPress}
+        underlayColor={pinned ? "white" : undefined}
+      >
         <View
           style={{
-            flex: 3,
-            margin: courseName && courseTeacherName ? 20 : 15
+            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            padding: 15
           }}
         >
-          <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
-            {title}
-          </Text>
+          <View
+            style={[
+              styles.flexRow,
+              {
+                flex: 1,
+                justifyContent: "space-between"
+              }
+            ]}
+          >
+            <Text
+              style={[
+                { flex: 1 },
+                iOSUIKit.title3Emphasized,
+                Platform.OS === "android" && { fontWeight: "bold" }
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </Text>
+            <Text style={{ color: "black", fontSize: 13, marginLeft: 5 }}>
+              {extension.toUpperCase() + " " + size}
+            </Text>
+            {markedImportant && (
+              <Icon
+                style={{ marginLeft: 5 }}
+                name="flag"
+                size={18}
+                color={iOSColors.red}
+              />
+            )}
+          </View>
+          <View
+            style={{
+              flex: 2,
+              marginTop: 10
+            }}
+          >
+            <Text
+              style={[iOSUIKit.subhead, { lineHeight: 24 }]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {description || "无文件描述"}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.flexRow,
+              {
+                flex: 1,
+                justifyContent: "space-between",
+                marginTop: 10
+              }
+            ]}
+          >
+            <Text style={{ color: "grey", fontSize: 13 }}>
+              {courseName &&
+                courseTeacherName &&
+                `${courseTeacherName} / ${courseName} `}
+            </Text>
+            <Text style={{ color: "grey", fontSize: 13 }}>
+              {dayjs(date).fromNow()}
+            </Text>
+          </View>
         </View>
-        <View
-          style={[
-            styles.flexRow,
-            {
-              flex: 1,
-              justifyContent: "space-between",
-              margin: 15,
-              marginTop: 0,
-              marginBottom: 10
-            }
-          ]}
-        >
-          <Text style={{ color: "grey", fontSize: 12 }}>
-            {extension.toUpperCase() + " " + size}
-          </Text>
-          <Text style={{ color: "grey", fontSize: 12 }}>
-            {dayjs(date).fromNow()}
-          </Text>
-        </View>
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
     </Interactable.View>
   );
 };
