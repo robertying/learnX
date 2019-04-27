@@ -8,7 +8,6 @@ import {
 import Colors from "../constants/Colors";
 import { IAssignment, ICourse } from "../redux/types/state";
 import AssignmentCard from "./AssignmentCard";
-import Divider from "./Divider";
 
 export interface IAssignmentsViewProps {
   readonly courses?: ReadonlyArray<ICourse>;
@@ -47,10 +46,13 @@ const AssignmentsView: React.FunctionComponent<
           <AssignmentCard
             loading={isFetching}
             title={item.title}
-            attachment={item.attachmentName}
             date={item.deadline}
             courseName={course.name}
             courseTeacherName={course.teacherName}
+            description={item.description}
+            hasAttachment={item.attachmentName ? true : false}
+            submitted={item.submitTime ? true : false}
+            graded={item.gradeTime ? true : false}
             pinned={pinnedAssignments.includes(item.id)}
             // tslint:disable-next-line: jsx-no-lambda
             onPinned={pin => onPinned!(pin, item.id)}
@@ -64,8 +66,11 @@ const AssignmentsView: React.FunctionComponent<
       <AssignmentCard
         loading={isFetching}
         title={item.title}
-        attachment={item.attachmentName}
         date={item.deadline}
+        description={item.description}
+        hasAttachment={item.attachmentName ? true : false}
+        submitted={item.submitTime ? true : false}
+        graded={item.gradeTime ? true : false}
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() => onAssignmentCardPress(item.id)}
       />
@@ -77,7 +82,6 @@ const AssignmentsView: React.FunctionComponent<
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
-        ItemSeparatorComponent={Divider}
         data={assignments}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}

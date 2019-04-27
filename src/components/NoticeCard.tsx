@@ -1,18 +1,26 @@
 import React, { FunctionComponent } from "react";
 import {
+  Platform,
   StyleSheet,
   TouchableHighlight,
   TouchableHighlightProps,
   View
 } from "react-native";
+import Interactable from "react-native-interactable";
+import { iOSColors, iOSUIKit } from "react-native-typography";
+import Icon from "react-native-vector-icons/MaterialIcons";
+import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
+import { removeTags } from "../helpers/html";
 import Text from "./Text";
 
 export type INoticeCardProps = TouchableHighlightProps & {
-  readonly loading: boolean;
   readonly title: string;
   readonly author: string;
   readonly date: string;
+  readonly content: string;
+  readonly markedImportant: boolean;
+  readonly hasAttachment: boolean;
   readonly pinned?: boolean;
   readonly onPinned?: (pin: boolean) => void;
   readonly courseName?: string;
@@ -20,8 +28,19 @@ export type INoticeCardProps = TouchableHighlightProps & {
 };
 
 const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
+  const {
+    onPress,
+    title,
+    author,
+    date,
+    courseName,
+    courseTeacherName,
+    content,
+    markedImportant,
+    hasAttachment,
     pinned,
     onPinned
+  } = props;
 
   const onDrag = (event: Interactable.IDragEvent) => {
     if (Math.abs(event.nativeEvent.x) > 150) {
@@ -37,47 +56,88 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
       onDrag={onDrag}
       dragEnabled={courseName && courseTeacherName ? true : false}
     >
-            style={{
-              flex: 1,
-              margin: 15,
-              marginBottom: 0,
-              color: "grey"
-            }}
-          >
-            {`${courseTeacherName} / ${courseName}`}
-          </Text>
-        )}
+      <TouchableHighlight
+        onPress={onPress}
+        underlayColor={pinned ? "white" : undefined}
+      >
         <View
           style={{
-            flex: 3,
-            margin: courseName && courseTeacherName ? 20 : 15
+            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            padding: 15
           }}
         >
-          <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
-            {title}
-          </Text>
+          <View
+            style={[
+              styles.flexRow,
+              {
+                flex: 1,
+                justifyContent: "space-between"
+              }
+            ]}
+          >
+            <Text
+              style={[
+                { flex: 1 },
+                iOSUIKit.title3Emphasized,
+                Platform.OS === "android" && { fontWeight: "bold" }
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </Text>
+            {hasAttachment && (
+              <Icon
+                style={{ marginLeft: 5 }}
+                name="attachment"
+                size={18}
+                color={iOSColors.yellow}
+              />
+            )}
+            {markedImportant && (
+              <Icon
+                style={{ marginLeft: 5 }}
+                name="flag"
+                size={18}
+                color={iOSColors.red}
+              />
+            )}
+          </View>
+          <View
+            style={{
+              flex: 2,
+              marginTop: 10
+            }}
+          >
+            <Text
+              style={[iOSUIKit.subhead, { lineHeight: 24 }]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {removeTags(content)}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.flexRow,
+              {
+                flex: 1,
+                justifyContent: "space-between",
+                marginTop: 10
+              }
+            ]}
+          >
+            <Text style={{ color: "grey", fontSize: 13 }}>
+              {courseName && courseTeacherName
+                ? `${courseTeacherName} / ${courseName}`
+                : author + " 发布"}
+            </Text>
+            <Text style={{ color: "grey", fontSize: 13 }}>
+              {dayjs(date).fromNow()}
+            </Text>
+          </View>
         </View>
-        <View
-          style={[
-            styles.flexRow,
-            {
-              flex: 1,
-              justifyContent: "space-between",
-              margin: 15,
-              marginTop: 0,
-              marginBottom: 10
-            }
-          ]}
-        >
-          <Text style={{ color: "grey", fontSize: 12 }}>
-            {author + " 发布"}
-          </Text>
-          <Text style={{ color: "grey", fontSize: 12 }}>
-            {dayjs(date).fromNow()}
-          </Text>
-        </View>
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
     </Interactable.View>
   );
 };

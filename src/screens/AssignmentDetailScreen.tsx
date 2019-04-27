@@ -1,11 +1,11 @@
 import React from "react";
-import NoticeBoard from "../components/NoticeBoard";
+import AssignmentBoard from "../components/AssignmentBoard";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IAssignmentDetailScreenProps {
   readonly title: string;
-  readonly author: string;
-  readonly content: string;
+  readonly description: string;
+  readonly deadline: string;
 }
 
 const AssignmentDetailScreen: INavigationScreen<
@@ -13,10 +13,32 @@ const AssignmentDetailScreen: INavigationScreen<
 > = props => {
   const { navigation } = props;
   const title = navigation.getParam("title");
-  const content = navigation.getParam("content");
   const deadline = navigation.getParam("deadline");
+  const description = navigation.getParam("description");
+  const attachmentName = navigation.getParam("attachmentName");
+  const attachmentUrl = navigation.getParam("attachmentUrl");
+  const submittedAttachmentName = navigation.getParam(
+    "submittedAttachmentName"
+  );
+  const submittedAttachmentUrl = navigation.getParam("submittedAttachmentUrl");
+  const submitTime = navigation.getParam("submitTime");
+  const grade = navigation.getParam("grade");
+  const gradeContent = navigation.getParam("gradeContent");
 
-  return <NoticeBoard title={title} content={content} author={deadline} />;
+  return (
+    <AssignmentBoard
+      title={title}
+      description={description}
+      deadline={deadline}
+      attachmentName={attachmentName}
+      attachmentUrl={attachmentUrl}
+      submittedAttachmentName={submittedAttachmentName}
+      submittedAttachmentUrl={submittedAttachmentUrl}
+      submitTime={submitTime}
+      grade={grade}
+      gradeContent={gradeContent}
+    />
+  );
 };
 
 // tslint:disable-next-line: no-object-mutation

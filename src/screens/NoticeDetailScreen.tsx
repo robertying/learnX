@@ -6,6 +6,8 @@ interface INoticeDetailScreenProps {
   readonly title: string;
   readonly author: string;
   readonly content: string;
+  readonly attachmentName?: string;
+  readonly attachmentUrl?: string;
 }
 
 const NoticeDetailScreen: INavigationScreen<
@@ -15,8 +17,18 @@ const NoticeDetailScreen: INavigationScreen<
   const title = navigation.getParam("title");
   const content = navigation.getParam("content");
   const author = navigation.getParam("author");
+  const attachmentName = navigation.getParam("attachmentName");
+  const attachmentUrl = navigation.getParam("attachmentUrl");
 
-  return <NoticeBoard title={title} content={content} author={author} />;
+  return (
+    <NoticeBoard
+      title={title}
+      content={content}
+      author={author}
+      attachmentName={attachmentName}
+      attachmentUrl={attachmentUrl}
+    />
+  );
 };
 
 // tslint:disable-next-line: no-object-mutation

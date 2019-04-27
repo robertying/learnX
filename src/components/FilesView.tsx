@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import Colors from "../constants/Colors";
 import { ICourse, IFile } from "../redux/types/state";
-import Divider from "./Divider";
 import FileCard from "./FileCard";
 
 export interface IFilesViewProps {
@@ -47,11 +46,12 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
       if (course) {
         return (
           <FileCard
-            loading={isFetching}
             title={item.title}
             extension={item.fileType}
             size={item.size}
             date={item.uploadTime}
+            description={item.description}
+            markedImportant={item.markedImportant}
             pinned={pinnedFiles.includes(item.id)}
             // tslint:disable-next-line: jsx-no-lambda
             onPinned={pin => onPinned!(pin, item.id)}
@@ -67,11 +67,12 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
     }
     return (
       <FileCard
-        loading={isFetching}
         title={item.title}
         extension={item.fileType}
         size={item.size}
         date={item.uploadTime}
+        description={item.description}
+        markedImportant={item.markedImportant}
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() =>
           onFileCardPress(item.title, item.downloadUrl, item.fileType)
@@ -85,7 +86,6 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
-        ItemSeparatorComponent={Divider}
         data={files}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}

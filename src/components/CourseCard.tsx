@@ -1,17 +1,19 @@
 import React from "react";
 import {
+  Platform,
   StyleSheet,
   TouchableHighlight,
   TouchableHighlightProps,
   View
 } from "react-native";
 import Interactable from "react-native-interactable";
+import { iOSUIKit } from "react-native-typography";
+import Colors from "../constants/Colors";
 import { ISemester } from "../redux/types/state";
 import IconText from "./IconText";
 import Text from "./Text";
 
 export type ICourseCardProps = TouchableHighlightProps & {
-  readonly loading: boolean;
   readonly courseName: string;
   readonly courseTeacherName: string;
   readonly noticesCount: number;
@@ -35,68 +37,67 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
     onPinned
   } = props;
 
+  const onDrag = (event: Interactable.IDragEvent) => {
+    if (Math.abs(event.nativeEvent.x) > 150) {
+      onPinned(!pinned);
+    }
+  };
+
   return (
-    <TouchableHighlight onPress={onPress}>
-      <View style={{ backgroundColor: "#fff" }}>
-        {courseName && courseTeacherName && (
-          <Text
-            style={{
-              flex: 1,
-              margin: 15,
-              marginBottom: 0,
-              color: "grey"
-            }}
-          >
-            {courseTeacherName}
-          </Text>
-        )}
+    <Interactable.View
+      animatedNativeDriver={true}
+      horizontalOnly={true}
+      snapPoints={[{ x: 0 }]}
+      onDrag={onDrag}
+    >
+      <TouchableHighlight
+        onPress={onPress}
+        underlayColor={pinned ? "white" : undefined}
+      >
         <View
           style={{
-            flex: 3,
-            margin: 20,
-            marginLeft: 30,
-            marginRight: 30
+            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            padding: 15
           }}
         >
-          <Text style={{ fontSize: 16, lineHeight: 20 }} numberOfLines={3}>
+          <Text
+            style={[
+              { flex: 1 },
+              iOSUIKit.title3Emphasized,
+              Platform.OS === "android" && { fontWeight: "bold" }
+            ]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
             {courseName}
           </Text>
-        </View>
-        <View
-          style={[
-            styles.flexRow,
-            {
-              flex: 1,
-              justifyContent: "space-between",
-              margin: 15,
-              marginTop: 0,
-              marginBottom: 10
-            }
-          ]}
-        >
-          <View style={[styles.flexRow, { flex: 2 }]}>
-            <Text style={{ color: "grey", fontSize: 12 }}>{semester}</Text>
-          </View>
-          <View style={[styles.flexRow, { flex: 3 }]}>
-            <IconText
-              name="notifications"
-              color={iOSColors.black}
-              text={`${noticesCount}`}
-            />
-            <IconText
-              name="cloud-download"
-              color={iOSColors.black}
-              text={`${filesCount}`}
-            />
-            <IconText
-              name="assignment"
-              color={iOSColors.black}
-              text={`${assignmentsCount}`}
-            />
+          <View
+            style={{ flexDirection: "row", alignItems: "flex-end", flex: 1 }}
+          >
+            <View style={{ flex: 1 }}>
+              <Text style={[iOSUIKit.subhead, { marginTop: 10 }]}>
+                {courseTeacherName}
+              </Text>
+              <Text style={{ color: "grey", fontSize: 13, marginTop: 10 }}>
+                {semester}
+              </Text>
+            </View>
+            <View style={[styles.flexRow, { flex: 1 }]}>
+              <IconText
+                name="notifications"
+                color="grey"
+                text={`${noticesCount}`}
+              />
+              <IconText name="folder" color="grey" text={`${filesCount}`} />
+              <IconText
+                name="today"
+                color="grey"
+                text={`${assignmentsCount}`}
+              />
+            </View>
           </View>
         </View>
-      </View>
-    </TouchableHighlight>
+      </TouchableHighlight>
     </Interactable.View>
   );
 };
