@@ -10,6 +10,7 @@ import {
   TabViewProps
 } from "react-native-tab-view";
 import { connect } from "react-redux";
+import AssignmentBoard from "../components/AssignmentBoard";
 import AssignmentsView from "../components/AssignmentsView";
 import DoubleHeaderTitle from "../components/DoubleHeaderTitle";
 import FilesView from "../components/FilesView";
@@ -17,6 +18,7 @@ import NoticeBoard from "../components/NoticeBoard";
 import NoticesView from "../components/NoticesView";
 import Text from "../components/Text";
 import Colors from "../constants/Colors";
+import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
@@ -87,9 +89,15 @@ const CourseDetailScreen: INavigationScreen<
 
   const courseId = navigation.getParam("courseId");
 
-  const notices = rawNotices.filter(item => item.courseId === courseId);
-  const files = rawFiles.filter(item => item.courseId === courseId);
-  const assignments = rawAssignments.filter(item => item.courseId === courseId);
+  const notices = rawNotices
+    .filter(item => item.courseId === courseId)
+    .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix());
+  const files = rawFiles
+    .filter(item => item.courseId === courseId)
+    .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
+  const assignments = rawAssignments
+    .filter(item => item.courseId === courseId)
+    .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
 
   const [index, setIndex] = useState(0);
   const routes: any = [
