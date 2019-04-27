@@ -52,4 +52,6 @@ target 'learnX' do
 
   pod 'react-native-calendar-events', :path => '../node_modules/react-native-calendar-events'
 
+  pod 'Interactable', :path => '../node_modules/react-native-interactable'
+
 end
