@@ -35,15 +35,24 @@ const defaultNavigationOptions: NavigationStackScreenOptions = {
     Platform.OS === "android"
       ? {
           paddingTop: Layout.statusBarHeight,
-          height: Header.HEIGHT + Layout.statusBarHeight
+          height: Header.HEIGHT + Layout.statusBarHeight,
+          elevation: 10
         }
-      : undefined
+      : {
+          shadowColor: "grey",
+          shadowOffset: {
+            width: 0,
+            height: 2
+          },
+          shadowOpacity: 0.5
+        }
 };
 
 const NoticesStack = createStackNavigator(
   {
     Notices: NoticesScreen,
-    NoticeDetail: NoticeDetailScreen
+    NoticeDetail: NoticeDetailScreen,
+    WebView: WebViewScreen
   },
   {
     defaultNavigationOptions,
@@ -79,7 +88,8 @@ const FilesStack = createStackNavigator(
 const AssignmentsStack = createStackNavigator(
   {
     Assignments: AssignmentsScreen,
-    AssignmentDetail: AssignmentDetailScreen
+    AssignmentDetail: AssignmentDetailScreen,
+    WebView: WebViewScreen
   },
   {
     defaultNavigationOptions,
@@ -149,7 +159,15 @@ const TabNavigator = createBottomTabNavigator(
       inactiveTintColor: Colors.tabIconDefault,
       style: {
         paddingTop: 3,
-        paddingBottom: 3
+        paddingBottom: 3,
+        elevation: 10,
+        borderTopColor: "transparent",
+        shadowColor: "grey",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.5
       }
     },
     initialRouteName
