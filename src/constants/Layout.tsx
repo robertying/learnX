@@ -1,8 +1,12 @@
 import Constants from "expo-constants";
-import { Dimensions } from "react-native";
+import { Dimensions, Platform } from "react-native";
+import ExtraDimensions from "react-native-extra-dimensions-android";
 
 const width = Dimensions.get("window").width;
-const height = Dimensions.get("window").height;
+const height =
+  Platform.OS === "ios"
+    ? Dimensions.get("window").height
+    : ExtraDimensions.get("REAL_WINDOW_HEIGHT");
 
 export default {
   isSmallDevice: width < 375,
