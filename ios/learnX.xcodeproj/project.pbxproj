@@ -12,6 +12,7 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		C862D3BDF627CF48D5F03856 /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A6BDE4FBB80E444559DC5F08 /* libPods-learnX.a */; };
 		D4BC73FA22734DD30079635A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4BC73F922734DD30079635A /* LaunchScreen.storyboard */; };
+		D4E7C17E227433A200CFADA3 /* main.jsbundle in Resources */ = {isa = PBXBuildFile; fileRef = 008F07F21AC5B25A0029DE68 /* main.jsbundle */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -188,6 +189,7 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				en,
 				Base,
 				"zh-Hans",
 			);
@@ -206,6 +208,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D4E7C17E227433A200CFADA3 /* main.jsbundle in Resources */,
 				D4BC73FA22734DD30079635A /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */,
 			);
