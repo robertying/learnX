@@ -1,14 +1,27 @@
 import Fuse from "fuse.js";
 import React, { useEffect, useRef, useState } from "react";
-import { LayoutAnimation, SafeAreaView, TextInput } from "react-native";
+import {
+  LayoutAnimation,
+  ListRenderItem,
+  Platform,
+  SafeAreaView,
+  TextInput,
+  View
+} from "react-native";
+import { FlatList } from "react-native-gesture-handler";
+import Modal from "react-native-modal";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
+import Divider from "../components/Divider";
 import NoticesView from "../components/NoticesView";
 import SearchBar from "../components/SearchBar";
+import SettingsListItem from "../components/SettingsListItem";
+import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
-import { getCoursesForSemester } from "../redux/actions/courses";
-import { getAllNoticesForCourses } from "../redux/actions/notices";
 import {
+  getCoursesForSemester,
+  setCoursesFilter
+} from "../redux/actions/courses";
 import {
   getAllNoticesForCourses,
   pinNotice,
@@ -30,6 +43,7 @@ interface INoticesScreenStateProps {
   readonly notices: ReadonlyArray<INotice>;
   readonly isFetching: boolean;
   readonly pinnedNotices: readonly string[];
+  readonly hidden: readonly string[];
 }
 
 interface INoticesScreenDispatchProps {
@@ -38,6 +52,7 @@ interface INoticesScreenDispatchProps {
   readonly getAllNoticesForCourses: (courseIds: string[]) => void;
   readonly pinNotice: (noticeId: string) => void;
   readonly unpinNotice: (noticeId: string) => void;
+  readonly setCoursesFilter: (hidden: string[]) => void;
 }
 
 type INoticesScreenProps = INoticesScreenStateProps &
@@ -57,13 +72,15 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     pinnedNotices,
     pinNotice,
     unpinNotice,
+    setCoursesFilter,
+    hidden
   } = props;
 
   const courseIds = courses.map(course => course.id);
 
-  const notices = [...rawNotices].sort(
-    (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix()
-  );
+  const notices = [...rawNotices]
+    .filter(item => !hidden.includes(item.courseId))
+    .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix());
 
   useEffect(() => {
     if (courses.length === 0 && loggedIn && semesterId) {
@@ -90,7 +107,9 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       navigation.navigate("NoticeDetail", {
         title: notice.title,
         author: notice.publisher,
-        content: notice.content
+        content: notice.content,
+        attachmentName: notice.attachmentName,
+        attachmentUrl: notice.attachmentUrl
       });
     }
   };
@@ -129,6 +148,27 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       unpinNotice(noticeId);
     }
   };
+
+  const modalVisible = navigation.getParam("filterModalVisible");
+
+  const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
+    return (
+      <SettingsListItem
+        variant="none"
+        text={item.name}
+        icon={hidden.includes(item.id) ? null : <Icon name="check" size={20} />}
+        // tslint:disable-next-line: jsx-no-lambda
+        onPress={() =>
+          hidden.includes(item.id)
+            ? setCoursesFilter(hidden.filter(hid => hid !== item.id))
+            : setCoursesFilter([...hidden, item.id])
+        }
+      />
+    );
+  };
+
+  const keyExtractor = (item: any) => item.id;
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isSearching && (
@@ -151,6 +191,42 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         onPinned={onPinned}
         onNoticeCardPress={onNoticeCardPress}
       />
+      <Modal
+        style={{
+          margin: 0,
+          marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
+        }}
+        deviceHeight={Layout.window.height}
+        isVisible={modalVisible}
+        backdropColor="transparent"
+        swipeDirection="down"
+        // tslint:disable-next-line: jsx-no-lambda
+        onSwipeComplete={() =>
+          navigation.setParams({ filterModalVisible: false })
+        }
+      >
+        <View style={{ flex: 1, backgroundColor: "white" }}>
+          <Icon.Button
+            style={{ margin: 10 }}
+            name="close"
+            // tslint:disable-next-line: jsx-no-lambda
+            onPress={() => {
+              navigation.setParams({ filterModalVisible: false });
+            }}
+            color="black"
+            size={24}
+            backgroundColor="transparent"
+            underlayColor="transparent"
+            activeOpacity={0.6}
+          />
+          <FlatList
+            ItemSeparatorComponent={Divider}
+            data={courses}
+            renderItem={renderListItem}
+            keyExtractor={keyExtractor}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -158,6 +234,23 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 // tslint:disable-next-line: no-object-mutation
 NoticesScreen.navigationOptions = ({ navigation }) => ({
   title: "通知",
+  headerLeft: (
+    <Icon.Button
+      style={{ marginLeft: 10 }}
+      name="filter-list"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        navigation.setParams({
+          filterModalVisible: true
+        });
+      }}
+      color="white"
+      size={24}
+      backgroundColor="transparent"
+      underlayColor="transparent"
+      activeOpacity={0.6}
+    />
+  ),
   headerRight: (
     <Icon.Button
       name="search"
@@ -196,6 +289,7 @@ function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
     isFetching: state.notices.isFetching,
     notices: state.notices.items,
     pinnedNotices: state.notices.pinned,
+    hidden: state.courses.hidden || []
   };
 }
 
@@ -204,7 +298,10 @@ const mapDispatchToProps: INoticesScreenDispatchProps = {
   getCoursesForSemester: (semesterId: string) =>
     getCoursesForSemester(semesterId),
   getAllNoticesForCourses: (courseIds: string[]) =>
-    getAllNoticesForCourses(courseIds)
+    getAllNoticesForCourses(courseIds),
+  pinNotice: (noticeId: string) => pinNotice(noticeId),
+  unpinNotice: (noticeId: string) => unpinNotice(noticeId),
+  setCoursesFilter: (hidden: string[]) => setCoursesFilter(hidden)
 };
 
 export default connect(

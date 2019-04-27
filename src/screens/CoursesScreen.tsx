@@ -3,17 +3,22 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   LayoutAnimation,
   ListRenderItem,
+  Platform,
   RefreshControl,
   SafeAreaView,
-  TextInput
+  TextInput,
+  View
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
+import Modal from "react-native-modal";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
-import CoursePreviewView from "../components/CourseCard";
+import CourseCard from "../components/CourseCard";
 import Divider from "../components/Divider";
 import SearchBar from "../components/SearchBar";
+import SettingsListItem from "../components/SettingsListItem";
 import Colors from "../constants/Colors";
+import Layout from "../constants/Layout";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
 import {
   getCoursesForSemester,
@@ -45,6 +50,7 @@ interface ICoursesScreenStateProps {
   readonly assignments: ReadonlyArray<IAssignment>;
   readonly isFetchingAssignments: boolean;
   readonly pinnedCourses: readonly string[];
+  readonly hidden: readonly string[];
 }
 
 interface ICoursesScreenDispatchProps {
@@ -55,6 +61,7 @@ interface ICoursesScreenDispatchProps {
   readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
   readonly pinCourse: (courseId: string) => void;
   readonly unpinCourse: (courseId: string) => void;
+  readonly setCoursesFilter: (hidden: string[]) => void;
 }
 
 type ICoursesScreenProps = ICoursesScreenStateProps &
@@ -64,7 +71,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
-    courses,
+    courses: rawCourses,
     notices,
     isFetchingNotices,
     files,
@@ -76,7 +83,12 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     getAllFilesForCourses,
     getAllAssignmentsForCourses,
     navigation,
-    autoRefreshing
+    autoRefreshing,
+    pinCourse,
+    pinnedCourses,
+    unpinCourse,
+    hidden,
+    setCoursesFilter
   } = props;
 
   const courses: ReadonlyArray<ICourse> = [
@@ -161,10 +173,27 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     }
   };
 
+  const modalVisible = navigation.getParam("filterModalVisible");
+
+  const renderFilterListItem: ListRenderItem<ICourse> = ({ item }) => {
+    return (
+      <SettingsListItem
+        variant="none"
+        text={item.name}
+        icon={hidden.includes(item.id) ? null : <Icon name="check" size={20} />}
+        // tslint:disable-next-line: jsx-no-lambda
+        onPress={() =>
+          hidden.includes(item.id)
+            ? setCoursesFilter(hidden.filter(hid => hid !== item.id))
+            : setCoursesFilter([...hidden, item.id])
+        }
+      />
+    );
+  };
+
   const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
     return (
-      <CoursePreviewView
-        loading={isFetching}
+      <CourseCard
         courseName={item.name}
         courseTeacherName={item.teacherName}
         semester={semesterId}
@@ -210,7 +239,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         />
       )}
       <FlatList
-        ItemSeparatorComponent={Divider}
         data={searchResult}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
@@ -222,6 +250,42 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
           />
         }
       />
+      <Modal
+        style={{
+          margin: 0,
+          marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
+        }}
+        deviceHeight={Layout.window.height}
+        isVisible={modalVisible}
+        backdropColor="transparent"
+        swipeDirection="down"
+        // tslint:disable-next-line: jsx-no-lambda
+        onSwipeComplete={() =>
+          navigation.setParams({ filterModalVisible: false })
+        }
+      >
+        <View style={{ flex: 1, backgroundColor: "white" }}>
+          <Icon.Button
+            style={{ margin: 10 }}
+            name="close"
+            // tslint:disable-next-line: jsx-no-lambda
+            onPress={() => {
+              navigation.setParams({ filterModalVisible: false });
+            }}
+            color="black"
+            size={24}
+            backgroundColor="transparent"
+            underlayColor="transparent"
+            activeOpacity={0.6}
+          />
+          <FlatList
+            ItemSeparatorComponent={Divider}
+            data={rawCourses}
+            renderItem={renderFilterListItem}
+            keyExtractor={keyExtractor}
+          />
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -239,6 +303,23 @@ const fuseOptions = {
 // tslint:disable-next-line: no-object-mutation
 CoursesScreen.navigationOptions = ({ navigation }) => ({
   title: "课程",
+  headerLeft: (
+    <Icon.Button
+      style={{ marginLeft: 10 }}
+      name="filter-list"
+      // tslint:disable-next-line: jsx-no-lambda
+      onPress={() => {
+        navigation.setParams({
+          filterModalVisible: true
+        });
+      }}
+      color="white"
+      size={24}
+      backgroundColor="transparent"
+      underlayColor="transparent"
+      activeOpacity={0.6}
+    />
+  ),
   headerRight: (
     <Icon.Button
       name="search"
@@ -271,6 +352,7 @@ function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
     isFetchingAssignments: state.assignments.isFetching,
     assignments: state.assignments.items,
     pinnedCourses: state.courses.pinned || [],
+    hidden: state.courses.hidden || []
   };
 }
 
@@ -286,6 +368,7 @@ const mapDispatchToProps: ICoursesScreenDispatchProps = {
     getAllAssignmentsForCourses(courseIds),
   pinCourse: (courseId: string) => pinCourse(courseId),
   unpinCourse: (courseId: string) => unpinCourse(courseId),
+  setCoursesFilter: (hidden: string[]) => setCoursesFilter(hidden)
 };
 
 export default connect(

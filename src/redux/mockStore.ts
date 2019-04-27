@@ -36,6 +36,7 @@ const mockStore: IPersistAppState = {
   courses: {
     isFetching: false,
     pinned: [],
+    hidden: [],
     items: [
       {
         id: "2018-2019-226ef84e7689589e9016898eaca0970f7",
