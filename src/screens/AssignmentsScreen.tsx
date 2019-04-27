@@ -6,9 +6,11 @@ import { connect } from "react-redux";
 import AssignmentsView from "../components/AssignmentsView";
 import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
-import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
-import { getCoursesForSemester } from "../redux/actions/courses";
 import {
+  getAllAssignmentsForCourses,
+  pinAssignment,
+  unpinAssignment
+} from "../redux/actions/assignments";
   IAssignment,
   ICourse,
   IPersistAppState,
@@ -23,12 +25,15 @@ interface IAssignmentsScreenStateProps {
   readonly courses: ReadonlyArray<ICourse>;
   readonly assignments: ReadonlyArray<IAssignment>;
   readonly isFetching: boolean;
+  readonly pinnedAssignments: readonly string[];
 }
 
 interface IAssignmentsScreenDispatchProps {
   readonly getCoursesForSemester: (semesterId: string) => void;
   // tslint:disable: readonly-array
   readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
+  readonly pinAssignment: (assignmentId: string) => void;
+  readonly unpinAssignment: (assignmentId: string) => void;
 }
 
 type IAssignmentsScreenProps = IAssignmentsScreenStateProps &
@@ -44,7 +49,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     getCoursesForSemester,
     getAllAssignmentsForCourses,
     navigation,
-    autoRefreshing
+    autoRefreshing,
+    pinnedAssignments,
+    pinAssignment,
+    unpinAssignment,
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -110,6 +118,14 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     }
   };
 
+  const onPinned = (pin: boolean, assignmentId: string) => {
+    if (pin) {
+      pinAssignment(assignmentId);
+    } else {
+      unpinAssignment(assignmentId);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isSearching && (
@@ -129,6 +145,8 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
         courses={courses}
         assignments={searchResult}
         onAssignmentCardPress={onAssignmentCardPress}
+        pinnedAssignments={pinnedAssignments || []}
+        onPinned={onPinned}
       />
     </SafeAreaView>
   );
@@ -175,7 +193,8 @@ function mapStateToProps(
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.assignments.isFetching,
-    assignments: state.assignments.items
+    assignments: state.assignments.items,
+    pinnedAssignments: state.assignments.pinned,
   };
 }
 

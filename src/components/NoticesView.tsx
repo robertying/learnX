@@ -7,7 +7,6 @@ import {
 } from "react-native";
 import Colors from "../constants/Colors";
 import { ICourse, INotice } from "../redux/types/state";
-import Divider from "./Divider";
 import NoticeCard from "./NoticeCard";
 
 export interface INoticesViewProps {
@@ -16,10 +15,26 @@ export interface INoticesViewProps {
   readonly isFetching: boolean;
   readonly onNoticeCardPress: (noticeId: string) => void;
   readonly onRefresh?: () => void;
+  readonly pinnedNotices?: readonly string[];
+  readonly onPinned?: (pin: boolean, noticeId: string) => void;
 }
 
 const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
-  const { courses, notices, isFetching, onNoticeCardPress, onRefresh } = props;
+  const {
+    courses,
+    notices: rawNotices,
+    isFetching,
+    onNoticeCardPress,
+    onRefresh,
+    onPinned
+  } = props;
+
+  const pinnedNotices = props.pinnedNotices || [];
+
+  const notices: ReadonlyArray<INotice> = [
+    ...rawNotices.filter(item => pinnedNotices.includes(item.id)),
+    ...rawNotices.filter(item => !pinnedNotices.includes(item.id))
+  ];
 
   const renderListItem: ListRenderItem<INotice> = ({ item }) => {
     if (courses) {
@@ -33,6 +48,9 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
             date={item.publishTime}
             courseName={course.name}
             courseTeacherName={course.teacherName}
+            pinned={pinnedNotices.includes(item.id)}
+            // tslint:disable-next-line: jsx-no-lambda
+            onPinned={pin => onPinned!(pin, item.id)}
             // tslint:disable-next-line: jsx-no-lambda
             onPress={() => onNoticeCardPress(item.id)}
           />

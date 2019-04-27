@@ -5,7 +5,7 @@ import {
   TouchableHighlightProps,
   View
 } from "react-native";
-import { iOSColors } from "react-native-typography";
+import Interactable from "react-native-interactable";
 import { ISemester } from "../redux/types/state";
 import IconText from "./IconText";
 import Text from "./Text";
@@ -18,6 +18,8 @@ export type ICourseCardProps = TouchableHighlightProps & {
   readonly filesCount: number;
   readonly assignmentsCount: number;
   readonly semester: ISemester;
+  readonly pinned: boolean;
+  readonly onPinned: (pin: boolean) => void;
 };
 
 const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
@@ -28,7 +30,9 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
     noticesCount,
     filesCount,
     assignmentsCount,
-    semester
+    semester,
+    pinned,
+    onPinned
   } = props;
 
   return (
@@ -93,6 +97,7 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
         </View>
       </View>
     </TouchableHighlight>
+    </Interactable.View>
   );
 };
 

@@ -16,18 +16,28 @@ export interface IAssignmentsViewProps {
   readonly isFetching: boolean;
   readonly onAssignmentCardPress: (assignmentId: string) => void;
   readonly onRefresh?: () => void;
+  readonly pinnedAssignments?: readonly string[];
+  readonly onPinned?: (pin: boolean, assignmentId: string) => void;
 }
 
 const AssignmentsView: React.FunctionComponent<
   IAssignmentsViewProps
 > = props => {
   const {
-    assignments,
+    assignments: rawAssignments,
     onAssignmentCardPress,
     courses,
     isFetching,
-    onRefresh
+    onRefresh,
+    onPinned
   } = props;
+
+  const pinnedAssignments = props.pinnedAssignments || [];
+
+  const assignments: ReadonlyArray<IAssignment> = [
+    ...rawAssignments.filter(item => pinnedAssignments.includes(item.id)),
+    ...rawAssignments.filter(item => !pinnedAssignments.includes(item.id))
+  ];
 
   const renderListItem: ListRenderItem<IAssignment> = ({ item }) => {
     if (courses) {
@@ -41,6 +51,9 @@ const AssignmentsView: React.FunctionComponent<
             date={item.deadline}
             courseName={course.name}
             courseTeacherName={course.teacherName}
+            pinned={pinnedAssignments.includes(item.id)}
+            // tslint:disable-next-line: jsx-no-lambda
+            onPinned={pin => onPinned!(pin, item.id)}
             // tslint:disable-next-line: jsx-no-lambda
             onPress={() => onAssignmentCardPress(item.id)}
           />

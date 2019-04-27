@@ -1,5 +1,5 @@
 import { ContentType } from "thu-learn-lib-no-native/lib/types";
-import { createAsyncAction } from "typesafe-actions";
+import { createAction, createAsyncAction } from "typesafe-actions";
 import { saveAssignmentsToCalendar } from "../../helpers/calendar";
 import dayjs from "../../helpers/dayjs";
 import dataSource from "../dataSource";
@@ -10,7 +10,9 @@ import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS,
   GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
-  GET_ASSIGNMENTS_FOR_COURSE_SUCCESS
+  GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
+  PIN_ASSIGNMENT,
+  UNPIN_ASSIGNMENT
 } from "../types/constants";
 import { IAssignment } from "../types/state";
 import { login } from "./auth";
@@ -102,3 +104,11 @@ export function getAllAssignmentsForCourses(
     }
   };
 }
+
+export const pinAssignment = createAction(PIN_ASSIGNMENT, action => {
+  return (assignmentId: string) => action(assignmentId);
+});
+
+export const unpinAssignment = createAction(UNPIN_ASSIGNMENT, action => {
+  return (assignmentId: string) => action(assignmentId);
+});

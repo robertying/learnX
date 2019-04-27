@@ -35,6 +35,7 @@ const mockStore: IPersistAppState = {
   currentSemester: "2018-2019-2",
   courses: {
     isFetching: false,
+    pinned: [],
     items: [
       {
         id: "2018-2019-226ef84e7689589e9016898eaca0970f7",
@@ -45,6 +46,7 @@ const mockStore: IPersistAppState = {
   },
   notices: {
     isFetching: false,
+    pinned: ["26ef84e769b413d20169b9493d4d16e3"],
     items: [
       {
         courseId: "2018-2019-226ef84e7689589e9016898eaca0970f7",
@@ -60,6 +62,7 @@ const mockStore: IPersistAppState = {
   },
   files: {
     isFetching: false,
+    pinned: [],
     items: [
       {
         courseId: "2018-2019-226ef84e7689589e9016898eaca0970f7",
@@ -78,6 +81,7 @@ const mockStore: IPersistAppState = {
   },
   assignments: {
     isFetching: false,
+    pinned: [],
     items: [
       {
         courseId: "2018-2019-226ef84e7689589e9016898eaca0970f7",
