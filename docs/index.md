@@ -4,29 +4,38 @@ permalink: /
 layout: default_cn
 ---
 
-## 功能
+## 基础功能
 
-- 第一时间看到老师新发布的通知
-- 预览或下载课程文件
-- 了解作业信息，不错过任何 deadline
+- 第一时间看到老师最新发布的通知及其附件
+
+- 预览或下载课程文件，将文件分享到其他应用
+
+- 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况
+
+## 高级功能
+
+- Deadline 系统日历同步
+
+- 滑动卡片以置顶
+
+- 隐藏 / 屏蔽课程
+
+- 模糊搜索
 
 ## 即将加入的新功能
 
-- 文件、课程搜索
-- 课程相关信息屏蔽、筛选
-- 自定义卡片流
 - 文件收藏
 
 ## 应用截图
 
 <div align="center">
-    <img src="screenshots/1.jpg" width="40%" />
-    <img src="screenshots/2.jpg" width="40%" />
+    <img src="screenshots/1.png" width="40%" />
+    <img src="screenshots/2.png" width="40%" />
 </div>
 
 <div align="center">
-    <img src="screenshots/3.jpg" width="40%" />
-    <img src="screenshots/4.jpg" width="40%" />
+    <img src="screenshots/3.png" width="40%" />
+    <img src="screenshots/4.png" width="40%" />
 </div>
 
 ## 反馈与建议
@@ -35,7 +44,7 @@ layout: default_cn
   - 欢迎来 [issues](https://github.com/robertying/learnX/issues) 讨论新功能，反馈问题
 - 如果您愿意获取最新的测试版本
   - iOS 用户可以选择参与 [TestFlight](https://testflight.apple.com/join/5SPCH86w)
-  - Android 用户可以选择参与 [Beta](https://betas.to/eVu7BvkU)
+  - Android 用户可以选择参与 [Beta](https://betas.to/t8dzWLB7)
 - 您也可以在 App Store 中分享评论和反馈
 
 ## 其他实用工具
