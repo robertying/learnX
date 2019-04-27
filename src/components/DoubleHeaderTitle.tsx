@@ -18,6 +18,7 @@ const DoubleHeaderTitle: React.FunctionComponent<
       <Text
         style={[
           iOSUIKit.subheadEmphasizedWhite,
+          Platform.OS === "android" ? { fontWeight: "bold" } : undefined,
           { textAlign: Platform.OS === "ios" ? "center" : "left" }
         ]}
       >
