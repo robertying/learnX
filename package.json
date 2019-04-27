@@ -11,7 +11,7 @@
     "start": "react-native start",
     "test": "jest",
     "lint": "tsc --noUnusedLocals && prettier -c \"src/**/*\" --write",
-    "postinstall": "cp patch/redux-persist-expo-securestore.js node_modules/redux-persist-expo-securestore/src/index.js"
+    "postinstall": "chmod +x patch/patch.sh && patch/patch.sh"
   },
   "dependencies": {
     "@react-native-community/blur": "3.3.1",
