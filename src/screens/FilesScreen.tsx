@@ -12,8 +12,11 @@ import FilesView from "../components/FilesView";
 import SearchBar from "../components/SearchBar";
 import dayjs from "../helpers/dayjs";
 import { shareFile } from "../helpers/share";
-import { getCoursesForSemester } from "../redux/actions/courses";
-import { getAllFilesForCourses } from "../redux/actions/files";
+import {
+  getAllFilesForCourses,
+  pinFile,
+  unpinFile
+} from "../redux/actions/files";
 import { showToast } from "../redux/actions/toast";
 import {
   ICourse,
@@ -30,6 +33,7 @@ interface IFilesScreenStateProps {
   readonly courses: ReadonlyArray<ICourse>;
   readonly files: ReadonlyArray<IFile>;
   readonly isFetching: boolean;
+  readonly pinnedFiles: readonly string[];
 }
 
 interface IFilesScreenDispatchProps {
@@ -37,6 +41,8 @@ interface IFilesScreenDispatchProps {
   // tslint:disable: readonly-array
   readonly getAllFilesForCourses: (courseIds: string[]) => void;
   readonly showToast: (text: string, duration: number) => void;
+  readonly pinFile: (fileId: string) => void;
+  readonly unpinFile: (fileId: string) => void;
 }
 
 type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
@@ -52,7 +58,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     getAllFilesForCourses,
     navigation,
     autoRefreshing,
-    showToast
+    showToast,
+    pinFile,
+    pinnedFiles,
+    unpinFile,
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -126,6 +135,14 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
+  const onPinned = (pin: boolean, fileId: string) => {
+    if (pin) {
+      pinFile(fileId);
+    } else {
+      unpinFile(fileId);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isSearching && (
@@ -145,6 +162,8 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         courses={courses}
         files={searchResult}
         onFileCardPress={onFileCardPress}
+        pinnedFiles={pinnedFiles || []}
+        onPinned={onPinned}
       />
     </SafeAreaView>
   );
@@ -189,7 +208,8 @@ function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.files.isFetching,
-    files: state.files.items
+    files: state.files.items,
+    pinnedFiles: state.files.pinned,
   };
 }
 
@@ -199,7 +219,9 @@ const mapDispatchToProps: IFilesScreenDispatchProps = {
     getCoursesForSemester(semesterId),
   getAllFilesForCourses: (courseIds: string[]) =>
     getAllFilesForCourses(courseIds),
-  showToast: (text: string, duration: number) => showToast(text, duration)
+  showToast: (text: string, duration: number) => showToast(text, duration),
+  pinFile: (fileId: string) => pinFile(fileId),
+  unpinFile: (fileId: string) => unpinFile(fileId),
 };
 
 export default connect(

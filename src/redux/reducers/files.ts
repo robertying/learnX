@@ -1,20 +1,27 @@
-import { IGetFilesAction } from "../types/actions";
+import {
+  IGetFilesAction,
+  IPinFileAction,
+  IUnpinFileAction
+} from "../types/actions";
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
   GET_ALL_FILES_FOR_COURSES_REQUEST,
   GET_ALL_FILES_FOR_COURSES_SUCCESS,
   GET_FILES_FOR_COURSE_FAILURE,
   GET_FILES_FOR_COURSE_REQUEST,
-  GET_FILES_FOR_COURSE_SUCCESS
+  GET_FILES_FOR_COURSE_SUCCESS,
+  PIN_FILE,
+  UNPIN_FILE
 } from "../types/constants";
 import { IFilesState } from "../types/state";
 
 export default function files(
   state: IFilesState = {
     isFetching: false,
+    pinned: [],
     items: []
   },
-  action: IGetFilesAction
+  action: IGetFilesAction | IPinFileAction | IUnpinFileAction
 ): IFilesState {
   switch (action.type) {
     case GET_ALL_FILES_FOR_COURSES_REQUEST:
@@ -53,6 +60,16 @@ export default function files(
       return {
         ...state,
         isFetching: false
+      };
+    case PIN_FILE:
+      return {
+        ...state,
+        pinned: [...(state.pinned || []), action.payload]
+      };
+    case UNPIN_FILE:
+      return {
+        ...state,
+        pinned: state.pinned.filter(item => item !== action.payload)
       };
   }
   return state;
