@@ -41,3 +41,7 @@ export const shareFile = (url: string, ext: string) => {
     }
   });
 };
+
+export const getExtension = (filename: string) => {
+  return filename.split(".").pop();
+};
