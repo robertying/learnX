@@ -33,6 +33,7 @@ build/
 local.properties
 *.iml
 android/app/release/
+generated/
 
 # node.js
 #
