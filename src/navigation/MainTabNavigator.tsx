@@ -69,7 +69,7 @@ const FilesStack = createStackNavigator(
     initialRouteName: "Files",
     navigationOptions: {
       tabBarIcon: ({ focused }) => (
-        <TabBarIcon focused={focused} name="file-download" />
+        <TabBarIcon focused={focused} name="folder" />
       ),
       tabBarLabel: "文件"
     }
@@ -87,7 +87,7 @@ const AssignmentsStack = createStackNavigator(
     initialRouteName: "Assignments",
     navigationOptions: {
       tabBarIcon: ({ focused }) => (
-        <TabBarIcon focused={focused} name="assignment" />
+        <TabBarIcon focused={focused} name="today" />
       ),
       tabBarLabel: "作业"
     }
@@ -105,9 +105,7 @@ const CoursesStack = createStackNavigator(
     headerTransitionPreset: "uikit",
     initialRouteName: "Courses",
     navigationOptions: {
-      tabBarIcon: ({ focused }) => (
-        <TabBarIcon focused={focused} name="class" />
-      ),
+      tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="apps" />,
       tabBarLabel: "课程"
     }
   }
