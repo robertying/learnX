@@ -3,18 +3,25 @@ import { ThunkAction } from "redux-thunk";
 import { ActionType } from "typesafe-actions";
 import {
   getAllAssignmentsForCoursesAction,
-  getAssignmentsForCourseAction
+  getAssignmentsForCourseAction,
+  pinAssignment,
+  unpinAssignment
 } from "../actions/assignments";
 import { loginAction } from "../actions/auth";
-import { getCoursesForSemesterAction } from "../actions/courses";
+  pinCourse,
+  unpinCourse
 import { getCurrentSemester } from "../actions/currentSemester";
 import {
   getAllFilesForCoursesAction,
-  getFilesForCourseAction
+  getFilesForCourseAction,
+  pinFile,
+  unpinFile
 } from "../actions/files";
 import {
   getAllNoticesForCoursesAction,
-  getNoticesForCourseAction
+  getNoticesForCourseAction,
+  pinNotice,
+  unpinNotice
 } from "../actions/notices";
 import { clearStoreAction, setMockStore } from "../actions/root";
 import { getAllSemestersAction } from "../actions/semesters";
@@ -79,6 +86,15 @@ export type IShowToastAction = ActionType<typeof showToastAction>;
 export type IHideToastAction = ActionType<typeof hideToast>;
 export type IToastAction = IShowToastAction | IHideToastAction;
 
+export type IPinNoticeAction = ActionType<typeof pinNotice>;
+export type IUnpinNoticeAction = ActionType<typeof unpinNotice>;
+export type IPinFileAction = ActionType<typeof pinFile>;
+export type IUnpinFileAction = ActionType<typeof unpinFile>;
+export type IPinAssignmentAction = ActionType<typeof pinAssignment>;
+export type IUnpinAssignmentAction = ActionType<typeof unpinAssignment>;
+export type IPinCourseAction = ActionType<typeof pinCourse>;
+export type IUnpinCourseAction = ActionType<typeof unpinCourse>;
+
 export type ISetTabsOrderAction = ActionType<typeof setTabsOrder>;
 export type ISetAutoRefreshingAction = ActionType<typeof setAutoRefreshing>;
 export type ISetCalendarSyncAction = ActionType<typeof setCalendarSync>;
@@ -111,6 +127,14 @@ export type IAppActions =
   | IGetAllNoticesForCoursesAction
   | IGetAllFilesForCoursesAction
   | IGetAllAssignmentsForCoursesAction
+  | IPinNoticeAction
+  | IUnpinNoticeAction
+  | IPinFileAction
+  | IUnpinFileAction
+  | IPinAssignmentAction
+  | IUnpinAssignmentAction
+  | IPinCourseAction
+  | IUnpinCourseAction
   | IToastAction
   | ISettingsAction
   | IStoreAction;

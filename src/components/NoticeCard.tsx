@@ -13,18 +13,30 @@ export type INoticeCardProps = TouchableHighlightProps & {
   readonly title: string;
   readonly author: string;
   readonly date: string;
+  readonly pinned?: boolean;
+  readonly onPinned?: (pin: boolean) => void;
   readonly courseName?: string;
   readonly courseTeacherName?: string;
 };
 
 const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
-  const { onPress, title, author, date, courseName, courseTeacherName } = props;
+    pinned,
+    onPinned
+
+  const onDrag = (event: Interactable.IDragEvent) => {
+    if (Math.abs(event.nativeEvent.x) > 150) {
+      onPinned!(!pinned);
+    }
+  };
 
   return (
-    <TouchableHighlight onPress={onPress}>
-      <View style={{ backgroundColor: "#fff" }}>
-        {courseName && courseTeacherName && (
-          <Text
+    <Interactable.View
+      animatedNativeDriver={true}
+      horizontalOnly={true}
+      snapPoints={[{ x: 0 }]}
+      onDrag={onDrag}
+      dragEnabled={courseName && courseTeacherName ? true : false}
+    >
             style={{
               flex: 1,
               margin: 15,
@@ -66,6 +78,7 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
         </View>
       </View>
     </TouchableHighlight>
+    </Interactable.View>
   );
 };
 

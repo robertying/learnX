@@ -15,7 +15,12 @@ import Divider from "../components/Divider";
 import SearchBar from "../components/SearchBar";
 import Colors from "../constants/Colors";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
-import { getCoursesForSemester } from "../redux/actions/courses";
+import {
+  getCoursesForSemester,
+  pinCourse,
+  setCoursesFilter,
+  unpinCourse
+} from "../redux/actions/courses";
 import { getAllFilesForCourses } from "../redux/actions/files";
 import { getAllNoticesForCourses } from "../redux/actions/notices";
 import {
@@ -39,6 +44,7 @@ interface ICoursesScreenStateProps {
   readonly isFetchingFiles: boolean;
   readonly assignments: ReadonlyArray<IAssignment>;
   readonly isFetchingAssignments: boolean;
+  readonly pinnedCourses: readonly string[];
 }
 
 interface ICoursesScreenDispatchProps {
@@ -47,7 +53,8 @@ interface ICoursesScreenDispatchProps {
   readonly getAllNoticesForCourses: (courseIds: string[]) => void;
   readonly getAllFilesForCourses: (courseIds: string[]) => void;
   readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
-  // tslint:enable: readonly-array
+  readonly pinCourse: (courseId: string) => void;
+  readonly unpinCourse: (courseId: string) => void;
 }
 
 type ICoursesScreenProps = ICoursesScreenStateProps &
@@ -71,6 +78,11 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     navigation,
     autoRefreshing
   } = props;
+
+  const courses: ReadonlyArray<ICourse> = [
+    ...rawCourses.filter(item => pinnedCourses.includes(item.id)),
+    ...rawCourses.filter(item => !pinnedCourses.includes(item.id))
+  ].filter(item => !hidden.includes(item.id));
 
   const courseIds = courses.map(course => course.id);
 
@@ -122,7 +134,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     if (courses.length) {
       setSearchResult(courses);
     }
-  }, [courses.length]);
+  }, [courses.length, pinnedCourses.length]);
 
   useEffect(() => {
     if (isSearching) {
@@ -138,6 +150,14 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     if (text) {
       const fuse = new Fuse(courses, fuseOptions);
       setSearchResult(fuse.search(text));
+    }
+  };
+
+  const onPinned = (pin: boolean, courseId: string) => {
+    if (pin) {
+      pinCourse(courseId);
+    } else {
+      unpinCourse(courseId);
     }
   };
 
@@ -163,6 +183,9 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
               assignment.courseId === item.id && assignment.submitted === false
           ).length
         }
+        pinned={pinnedCourses.includes(item.id)}
+        // tslint:disable-next-line: jsx-no-lambda
+        onPinned={pin => onPinned(pin, item.id)}
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() =>
           onCoursePreviewPress(item.id, item.name, item.teacherName)
@@ -246,7 +269,8 @@ function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
     isFetchingFiles: state.files.isFetching,
     files: state.files.items,
     isFetchingAssignments: state.assignments.isFetching,
-    assignments: state.assignments.items
+    assignments: state.assignments.items,
+    pinnedCourses: state.courses.pinned || [],
   };
 }
 
@@ -259,7 +283,9 @@ const mapDispatchToProps: ICoursesScreenDispatchProps = {
   getAllFilesForCourses: (courseIds: string[]) =>
     getAllFilesForCourses(courseIds),
   getAllAssignmentsForCourses: (courseIds: string[]) =>
-    getAllAssignmentsForCourses(courseIds)
+    getAllAssignmentsForCourses(courseIds),
+  pinCourse: (courseId: string) => pinCourse(courseId),
+  unpinCourse: (courseId: string) => unpinCourse(courseId),
 };
 
 export default connect(

@@ -1,10 +1,12 @@
-import { createAsyncAction } from "typesafe-actions";
+import { createAction, createAsyncAction } from "typesafe-actions";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
-  GET_COURSES_FOR_SEMESTER_SUCCESS
+  GET_COURSES_FOR_SEMESTER_SUCCESS,
+  PIN_COURSE,
+  UNPIN_COURSE
 } from "../types/constants";
 import { ICourse } from "../types/state";
 import { login } from "./auth";
@@ -37,3 +39,12 @@ export function getCoursesForSemester(semesterId: string): IThunkResult {
     }
   };
 }
+
+export const pinCourse = createAction(PIN_COURSE, action => {
+  return (courseId: string) => action(courseId);
+});
+
+export const unpinCourse = createAction(UNPIN_COURSE, action => {
+  return (courseId: string) => action(courseId);
+});
+

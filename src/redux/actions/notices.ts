@@ -1,5 +1,5 @@
 import { ContentType } from "thu-learn-lib-no-native/lib/types";
-import { createAsyncAction } from "typesafe-actions";
+import { createAction, createAsyncAction } from "typesafe-actions";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -8,7 +8,9 @@ import {
   GET_ALL_NOTICES_FOR_COURSES_SUCCESS,
   GET_NOTICES_FOR_COURSE_FAILURE,
   GET_NOTICES_FOR_COURSE_REQUEST,
-  GET_NOTICES_FOR_COURSE_SUCCESS
+  GET_NOTICES_FOR_COURSE_SUCCESS,
+  PIN_NOTICE,
+  UNPIN_NOTICE
 } from "../types/constants";
 import { INotice } from "../types/state";
 import { login } from "./auth";
@@ -90,3 +92,11 @@ export function getAllNoticesForCourses(
     }
   };
 }
+
+export const pinNotice = createAction(PIN_NOTICE, action => {
+  return (noticeId: string) => action(noticeId);
+});
+
+export const unpinNotice = createAction(UNPIN_NOTICE, action => {
+  return (noticeId: string) => action(noticeId);
+});

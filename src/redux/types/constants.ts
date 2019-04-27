@@ -54,6 +54,18 @@ export const GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE =
 export const SHOW_TOAST = "SHOW_TOAST";
 export const HIDE_TOAST = "HIDE_TOAST";
 
+export const PIN_NOTICE = "PIN_NOTICE";
+export const UNPIN_NOTICE = "UNPIN_NOTICE";
+
+export const PIN_FILE = "PIN_FILE";
+export const UNPIN_FILE = "UNPIN_FILE";
+
+export const PIN_ASSIGNMENT = "PIN_ASSIGNMENT";
+export const UNPIN_ASSIGNMENT = "UNPIN_ASSIGNMENT";
+
+export const PIN_COURSE = "PIN_COURSE";
+export const UNPIN_COURSE = "UNPIN_COURSE";
+
 export const SET_TABS_ORDER = "SET_TABS_ORDER";
 export const SET_AUTO_REFRESHING = "SET_AUTO_REFRESHING";
 export const SET_CALENDAR_SYNC = "SET_CALENDAR_SYNC";

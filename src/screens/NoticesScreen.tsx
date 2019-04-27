@@ -9,6 +9,12 @@ import dayjs from "../helpers/dayjs";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { getAllNoticesForCourses } from "../redux/actions/notices";
 import {
+import {
+  getAllNoticesForCourses,
+  pinNotice,
+  unpinNotice
+} from "../redux/actions/notices";
+import {
   ICourse,
   INotice,
   IPersistAppState,
@@ -23,12 +29,15 @@ interface INoticesScreenStateProps {
   readonly courses: ReadonlyArray<ICourse>;
   readonly notices: ReadonlyArray<INotice>;
   readonly isFetching: boolean;
+  readonly pinnedNotices: readonly string[];
 }
 
 interface INoticesScreenDispatchProps {
   readonly getCoursesForSemester: (semesterId: string) => void;
   // tslint:disable: readonly-array
   readonly getAllNoticesForCourses: (courseIds: string[]) => void;
+  readonly pinNotice: (noticeId: string) => void;
+  readonly unpinNotice: (noticeId: string) => void;
 }
 
 type INoticesScreenProps = INoticesScreenStateProps &
@@ -44,7 +53,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     getCoursesForSemester,
     getAllNoticesForCourses,
     navigation,
-    autoRefreshing
+    autoRefreshing,
+    pinnedNotices,
+    pinNotice,
+    unpinNotice,
   } = props;
 
   const courseIds = courses.map(course => course.id);
@@ -110,6 +122,13 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   };
 
+  const onPinned = (pin: boolean, noticeId: string) => {
+    if (pin) {
+      pinNotice(noticeId);
+    } else {
+      unpinNotice(noticeId);
+    }
+  };
   return (
     <SafeAreaView style={{ flex: 1 }}>
       {isSearching && (
@@ -128,6 +147,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         onRefresh={invalidateAll}
         courses={courses}
         notices={searchResult}
+        pinnedNotices={pinnedNotices || []}
+        onPinned={onPinned}
         onNoticeCardPress={onNoticeCardPress}
       />
     </SafeAreaView>
@@ -173,7 +194,8 @@ function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.notices.isFetching,
-    notices: state.notices.items
+    notices: state.notices.items,
+    pinnedNotices: state.notices.pinned,
   };
 }
 

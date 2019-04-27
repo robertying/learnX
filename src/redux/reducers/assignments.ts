@@ -1,20 +1,27 @@
-import { IGetAssignmentsAction } from "../types/actions";
+import {
+  IGetAssignmentsAction,
+  IPinAssignmentAction,
+  IUnpinAssignmentAction
+} from "../types/actions";
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS,
   GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
-  GET_ASSIGNMENTS_FOR_COURSE_SUCCESS
+  GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
+  PIN_ASSIGNMENT,
+  UNPIN_ASSIGNMENT
 } from "../types/constants";
 import { IAssignmentsState } from "../types/state";
 
 export default function assignments(
   state: IAssignmentsState = {
     isFetching: false,
+    pinned: [],
     items: []
   },
-  action: IGetAssignmentsAction
+  action: IGetAssignmentsAction | IPinAssignmentAction | IUnpinAssignmentAction
 ): IAssignmentsState {
   switch (action.type) {
     case GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST:
@@ -53,6 +60,16 @@ export default function assignments(
       return {
         ...state,
         isFetching: false
+      };
+    case PIN_ASSIGNMENT:
+      return {
+        ...state,
+        pinned: [...(state.pinned || []), action.payload]
+      };
+    case UNPIN_ASSIGNMENT:
+      return {
+        ...state,
+        pinned: state.pinned.filter(item => item !== action.payload)
       };
   }
   return state;

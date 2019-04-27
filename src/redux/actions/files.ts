@@ -1,5 +1,5 @@
 import { ContentType } from "thu-learn-lib-no-native/lib/types";
-import { createAsyncAction } from "typesafe-actions";
+import { createAction, createAsyncAction } from "typesafe-actions";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -8,7 +8,9 @@ import {
   GET_ALL_FILES_FOR_COURSES_SUCCESS,
   GET_FILES_FOR_COURSE_FAILURE,
   GET_FILES_FOR_COURSE_REQUEST,
-  GET_FILES_FOR_COURSE_SUCCESS
+  GET_FILES_FOR_COURSE_SUCCESS,
+  PIN_FILE,
+  UNPIN_FILE
 } from "../types/constants";
 import { IFile } from "../types/state";
 import { login } from "./auth";
@@ -83,3 +85,11 @@ export function getAllFilesForCourses(
     }
   };
 }
+
+export const pinFile = createAction(PIN_FILE, action => {
+  return (fileId: string) => action(fileId);
+});
+
+export const unpinFile = createAction(UNPIN_FILE, action => {
+  return (fileId: string) => action(fileId);
+});
