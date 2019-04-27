@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "target": "esnext"
   },
-  "exclude": ["node_modules"]
+  "include": ["src/**/*", "@types", "index.js", "package.json"]
 }
