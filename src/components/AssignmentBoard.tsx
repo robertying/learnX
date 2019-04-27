@@ -13,30 +13,40 @@ import Divider from "./Divider";
 import Text from "./Text";
 import TextButton from "./TextButton";
 
-interface INoticeBoardDispatchProps {
+interface IAssignmentBoardDispatchProps {
   readonly showToast: (text: string, duration: number) => void;
 }
 
-export type INoticeBoardProps = TouchableHighlightProps & {
+export type IAssignmentBoardProps = TouchableHighlightProps & {
   readonly title: string;
-  readonly author: string;
-  readonly content: string;
+  readonly deadline: string;
+  readonly description: string;
   readonly attachmentName?: string;
   readonly attachmentUrl?: string;
+  readonly submittedAttachmentName: string;
+  readonly submittedAttachmentUrl: string;
+  readonly submitTime: string;
+  readonly grade: number;
+  readonly gradeContent: string;
   readonly onTransition?: () => void;
 };
 
-const NoticeBoard: FunctionComponent<
-  INoticeBoardProps & INoticeBoardDispatchProps & INavigationScreenProps
+const AssignmentBoard: FunctionComponent<
+  IAssignmentBoardProps & IAssignmentBoardDispatchProps & INavigationScreenProps
 > = props => {
   const {
     title,
-    author,
-    content,
+    deadline,
+    description,
     attachmentName,
     attachmentUrl,
     navigation,
     showToast,
+    submitTime,
+    submittedAttachmentName,
+    submittedAttachmentUrl,
+    grade,
+    gradeContent,
     onTransition
   } = props;
 
@@ -79,7 +89,7 @@ const NoticeBoard: FunctionComponent<
         >
           {title}
         </Text>
-        <Text style={[iOSUIKit.subhead, { marginTop: 5 }]}>{author}</Text>
+        <Text style={[iOSUIKit.subhead, { marginTop: 5 }]}>{deadline}</Text>
       </View>
       <Divider />
       {attachmentName ? (
@@ -109,24 +119,70 @@ const NoticeBoard: FunctionComponent<
           <Divider />
         </>
       ) : null}
+      {submitTime ? (
+        <>
+          <View
+            style={{ padding: 15, flexDirection: "row", alignItems: "center" }}
+          >
+            <Icon
+              style={{ marginRight: 5 }}
+              name="done"
+              size={18}
+              color={Colors.tint}
+            />
+            <TextButton
+              // tslint:disable-next-line: jsx-no-lambda
+              onPress={() =>
+                onAttachmentPress(
+                  submittedAttachmentName,
+                  submittedAttachmentUrl!,
+                  getExtension(submittedAttachmentName)!
+                )
+              }
+            >
+              {submittedAttachmentName}
+            </TextButton>
+          </View>
+          <Divider />
+        </>
+      ) : null}
+      {grade ? (
+        <>
+          <View style={{ padding: 15 }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Icon
+                style={{ marginRight: 5 }}
+                name="grade"
+                size={18}
+                color={Colors.tint}
+              />
+              <Text>{grade}</Text>
+            </View>
+            {gradeContent ? (
+              <Text style={{ marginTop: 5 }}>{gradeContent}</Text>
+            ) : null}
+          </View>
+          <Divider />
+        </>
+      ) : null}
       <WebView
         style={{ flex: 1 }}
         originWhitelist={["*"]}
         source={{
-          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${content}</body>`
+          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${description}</body>`
         }}
       />
     </View>
   );
 };
 
-const mapDispatchToProps: INoticeBoardDispatchProps = {
+const mapDispatchToProps: IAssignmentBoardDispatchProps = {
   showToast: (text: string, duration: number) => showToast(text, duration)
 };
 
-export default withNavigation<INoticeBoardProps>(
+export default withNavigation<IAssignmentBoardProps>(
   connect(
     null,
     mapDispatchToProps
-  )(NoticeBoard)
+  )(AssignmentBoard)
 );
