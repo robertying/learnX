@@ -41,6 +41,7 @@ export interface ICourse {
 export interface ICoursesState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
+  readonly hidden: readonly string[];
   readonly items: ReadonlyArray<ICourse>;
 }
 
@@ -53,6 +54,8 @@ export interface INotice {
   readonly markedImportant: boolean;
   readonly content: string;
   readonly hasRead: boolean;
+  readonly attachmentName?: string;
+  readonly attachmentUrl?: string;
 }
 export interface INoticesState {
   readonly isFetching: boolean;
@@ -89,7 +92,12 @@ export interface IAssignment {
   readonly submitted: boolean;
   readonly submitTime?: string;
   readonly submittedContent?: string;
+  readonly submittedAttachmentName?: string;
   readonly submittedAttachmentUrl?: string;
+  readonly grade?: number;
+  readonly gradeTime?: string;
+  readonly graderName?: string;
+  readonly gradeContent?: string;
 }
 export interface IAssignmentsState {
   readonly isFetching: boolean;

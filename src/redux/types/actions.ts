@@ -8,8 +8,12 @@ import {
   unpinAssignment
 } from "../actions/assignments";
 import { loginAction } from "../actions/auth";
+import {
+  getCoursesForSemesterAction,
   pinCourse,
+  setCoursesFilter,
   unpinCourse
+} from "../actions/courses";
 import { getCurrentSemester } from "../actions/currentSemester";
 import {
   getAllFilesForCoursesAction,
@@ -95,6 +99,8 @@ export type IUnpinAssignmentAction = ActionType<typeof unpinAssignment>;
 export type IPinCourseAction = ActionType<typeof pinCourse>;
 export type IUnpinCourseAction = ActionType<typeof unpinCourse>;
 
+export type ISetCoursesFilter = ActionType<typeof setCoursesFilter>;
+
 export type ISetTabsOrderAction = ActionType<typeof setTabsOrder>;
 export type ISetAutoRefreshingAction = ActionType<typeof setAutoRefreshing>;
 export type ISetCalendarSyncAction = ActionType<typeof setCalendarSync>;
@@ -135,6 +141,7 @@ export type IAppActions =
   | IUnpinAssignmentAction
   | IPinCourseAction
   | IUnpinCourseAction
+  | ISetCoursesFilter
   | IToastAction
   | ISettingsAction
   | IStoreAction;
