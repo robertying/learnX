@@ -38,14 +38,7 @@ const defaultNavigationOptions: NavigationStackScreenOptions = {
           height: Header.HEIGHT + Layout.statusBarHeight,
           elevation: 10
         }
-      : {
-          shadowColor: "grey",
-          shadowOffset: {
-            width: 0,
-            height: 2
-          },
-          shadowOpacity: 0.5
-        }
+      : undefined
 };
 
 const NoticesStack = createStackNavigator(
