@@ -1,3 +1,5 @@
+<img style="float: right; width: 20vw;" src="docs/screenshots/1.png" />
+
 # learnX
 
 [![Build Status](https://travis-ci.org/robertying/learnX.svg?branch=master)](https://travis-ci.org/robertying/learnX)
@@ -9,9 +11,11 @@ App for Tsinghua University Web Learning, developed with React Native 🎉.
 ## Download
 
 - Android
+
   - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
 - iOS
+
   - [App Store](https://itunes.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1&mt=8)
 
 ## License
@@ -25,7 +29,7 @@ App for Tsinghua University Web Learning, developed with React Native 🎉.
 
 本项目中使用的开源项目则应用其自带的许可证。
 
-----
+---
 
 MIT licensed, with the following restrictions:
 
