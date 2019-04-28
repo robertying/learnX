@@ -1,4 +1,4 @@
-<img style="float: right; width: 250px;" src="docs/screenshots/1.png" />
+<img align="right" width="250" src="docs/screenshots/1.png" />
 
 # learnX
 
