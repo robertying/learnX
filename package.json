@@ -35,7 +35,7 @@
     "react-native-vector-icons": "6.4.2",
     "react-native-webview": "5.7.1",
     "react-navigation": "3.9.1",
-    "react-redux": "7.0.2",
+    "react-redux": "7.0.3",
     "redux": "4.0.1",
     "redux-persist": "5.10.0",
     "redux-persist-expo-securestore": "0.1.1",
