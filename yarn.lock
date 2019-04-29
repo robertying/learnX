@@ -5777,10 +5777,10 @@ react-native-extra-dimensions-android@1.2.5:
   resolved "https://registry.yarnpkg.com/react-native-extra-dimensions-android/-/react-native-extra-dimensions-android-1.2.5.tgz#8ade91029aaac7519bf305116d39019e618a60f0"
   integrity sha512-eorFo9X1vEqAWUkgcZ300yKBG1wtgNeE7tdWAH2CE+P50FGTniJg5Sr6l1iPWG8ZskQOuF+KeiSTFlDa4vLfMw==
 
-react-native-gesture-handler@1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-1.1.0.tgz#2a7d545ad2e0ca23adce22b2af441ad360ecccee"
-  integrity sha512-E9IKHpmL+sz/iCYkUriTUjBaQBORWV+oheYPQleADkxjo2sYsQfnlyTz4EQYFONkUwJ6WmfTNkYt2/yc5U4Ziw==
+react-native-gesture-handler@1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-gesture-handler/-/react-native-gesture-handler-1.2.0.tgz#19009d9102bedd3bea0dd295ded110262b86227a"
+  integrity sha512-PBsqfyUlzAQQXVEy5nDB8HpehSalhN8Vlc00VJ4RT0FDxlkbpl1otT6DxUN/shMEEuOkyS9gz80ZzWTfAmeBOQ==
   dependencies:
     hoist-non-react-statics "^2.3.1"
     invariant "^2.2.2"
