@@ -8,7 +8,7 @@ task('incrementVersionCode') {
 }
 
 tasks.whenTaskAdded { task ->
-    if (task.name == 'assembleRelease') {
+    if (task.name == 'assembleRelease' || task.name == 'bundleRelease') {
         task.dependsOn 'incrementVersionCode'
     }
 }

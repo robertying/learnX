@@ -1,0 +1,12 @@
+Basics:
+- Get a glance of the newest notices published by teachers
+- Preview or download uploaded files of each course
+- See any assignment detail while keeping track of deadlines
+
+You can also enjoy:
+- Pin at the top
+- Deadline calendar sync
+- Hiding courses
+- Search
+
+More features are on their way...
