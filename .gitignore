@@ -57,6 +57,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/screenshots
 fastlane/README.md
+fastlane/key.json
 Gemfile.lock
 
 # Bundle artifact

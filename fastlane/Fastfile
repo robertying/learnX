@@ -36,9 +36,9 @@ platform :android do
     gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
   end
 
-  desc 'Ship to Beta.'
+  desc 'Ship to Google Play Beta.'
   lane :beta do
-    gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
-    crashlytics
+    gradle(task: 'bundle', build_type: 'Release', project_dir: 'android/')
+    upload_to_play_store(track: 'beta', skip_upload_apk: true)
   end
 end
