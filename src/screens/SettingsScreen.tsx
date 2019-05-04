@@ -12,6 +12,7 @@ import { iOSColors } from "react-native-typography";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
+import RNFetchBlob from "rn-fetch-blob";
 import packageConfig from "../../package.json";
 import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
@@ -135,6 +136,29 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     }
   };
 
+  const onClearFileCachePress = () => {
+    Alert.alert(
+      "清空文件缓存",
+      "确定要清空文件缓存吗？",
+      [
+        {
+          text: "取消",
+          style: "cancel"
+        },
+        {
+          text: "确定",
+          onPress: async () => {
+            await RNFetchBlob.fs.unlink(
+              `${RNFetchBlob.fs.dirs.DocumentDir}/files`
+            );
+            showToast("成功清空文件缓存", 1500);
+          }
+        }
+      ],
+      { cancelable: true }
+    );
+  };
+
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
     switch (index) {
       case 0:
@@ -169,6 +193,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         );
       case 3:
+        return (
+          <SettingsListItem
+            variant="none"
+            icon={<MaterialCommunityIcons name="file-hidden" size={20} />}
+            text="清空文件缓存"
+            onPress={onClearFileCachePress}
+          />
+        );
+      case 4:
         return Platform.OS === "android" ? (
           <SettingsListItem
             variant="none"
@@ -197,7 +230,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 4:
+      case 5:
         return (
           <SettingsListItem
             variant="arrow"
@@ -207,7 +240,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 5:
+      case 6:
         return (
           <SettingsListItem
             variant="arrow"
@@ -228,6 +261,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           { key: "autoRefreshing" },
           { key: "calendarSync" },
           { key: "logout" },
+          { key: "clearFileCache" },
           { key: "checkUpdate" },
           { key: "acknowledgement" },
           { key: "about" }

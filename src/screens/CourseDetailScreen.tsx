@@ -128,8 +128,8 @@ const CourseDetailScreen: INavigationScreen<
         ext
       });
     } else {
-      showToast("文件下载中……", 3000);
-      const success = await shareFile(url, ext);
+      showToast("文件下载中……", 1000);
+      const success = await shareFile(url, filename, ext);
       if (!success) {
         showToast("文件下载失败", 3000);
       }
