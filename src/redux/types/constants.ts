@@ -77,3 +77,5 @@ export const CLEAR_EVENT_IDS = "CLEAR_EVENT_IDS";
 
 export const CLEAR_STORE = "CLEAR_STORE";
 export const SET_MOCK_STORE = "SET_MOCK_STORE";
+
+export const SET_UPDATE = "SET_UPDATE";

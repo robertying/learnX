@@ -35,7 +35,8 @@ import {
   setCalendarId,
   setCalendarSync,
   setEventIdForAssignment,
-  setTabsOrder
+  setTabsOrder,
+  setUpdate
 } from "../actions/settings";
 import { hideToast, showToastAction } from "../actions/toast";
 import { IPersistAppState } from "./state";
@@ -109,13 +110,15 @@ export type ISetEventIdForAssignment = ActionType<
   typeof setEventIdForAssignment
 >;
 export type IClearEventIds = ActionType<typeof clearEventIds>;
+export type ISetUpdateAction = ActionType<typeof setUpdate>;
 export type ISettingsAction =
   | ISetTabsOrderAction
   | ISetAutoRefreshingAction
   | ISetCalendarSyncAction
   | ISetCalendarIdAction
   | ISetEventIdForAssignment
-  | IClearEventIds;
+  | IClearEventIds
+  | ISetUpdateAction;
 
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
 export type ISetMockStoreAction = ActionType<typeof setMockStore>;
