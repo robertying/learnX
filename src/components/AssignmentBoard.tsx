@@ -112,6 +112,7 @@ const AssignmentBoard: FunctionComponent<
                   getExtension(attachmentName)!
                 )
               }
+              ellipsizeMode="tail"
             >
               {attachmentName}
             </TextButton>
@@ -139,6 +140,7 @@ const AssignmentBoard: FunctionComponent<
                   getExtension(submittedAttachmentName)!
                 )
               }
+              ellipsizeMode="tail"
             >
               {submittedAttachmentName}
             </TextButton>
