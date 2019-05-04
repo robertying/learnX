@@ -6,7 +6,9 @@ export const supportedFileTypes: ReadonlyArray<string> = [
   "doc",
   "docx",
   "ppt",
-  "pptx"
+  "pptx",
+  "zip",
+  "rar"
 ];
 export const mimeTypes: any = {
   pdf: "application/pdf",
@@ -15,7 +17,9 @@ export const mimeTypes: any = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   ppt: "application/vnd.ms-powerpoint",
   pptx:
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  zip: "application/zip",
+  rar: "application/x-rar-compressed"
 };
 
 export const shareFile = (url: string, ext: string) => {
