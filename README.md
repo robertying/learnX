@@ -12,6 +12,8 @@ App for Tsinghua University Web Learning, developed with React Native 🎉.
 
 - Android
 
+  - [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx)
+
   - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
 - iOS

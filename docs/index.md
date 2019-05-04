@@ -24,7 +24,7 @@ layout: default_cn
 
 ## 即将加入的新功能
 
-- 文件收藏
+- 推送通知
 
 ## 应用截图
 
@@ -44,7 +44,6 @@ layout: default_cn
   - 欢迎来 [issues](https://github.com/robertying/learnX/issues) 讨论新功能，反馈问题
 - 如果您愿意获取最新的测试版本
   - iOS 用户可以选择参与 [TestFlight](https://testflight.apple.com/join/5SPCH86w)
-  - Android 用户可以选择参与 [Beta](https://betas.to/t8dzWLB7)
 - 您也可以在 App Store 中分享评论和反馈
 
 ## 其他实用工具
