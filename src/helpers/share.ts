@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import Share from "react-native-share";
 import RNFetchBlob from "rn-fetch-blob";
 
@@ -22,26 +23,48 @@ export const mimeTypes: any = {
   rar: "application/x-rar-compressed"
 };
 
-export const shareFile = (url: string, ext: string) => {
+export const shareFile = (url: string, name: string, ext: string) => {
   return new Promise<boolean>(async (resolve, reject) => {
     if (!supportedFileTypes.includes(ext.toLowerCase())) {
       reject("Unsupported file type");
     }
 
-    const res = await RNFetchBlob.fetch("GET", url);
-    const status = res.respInfo.status;
+    const filePath = await downloadFile(url, name, ext).catch(() =>
+      reject("Download failed")
+    );
 
-    if (status !== 200) {
-      reject();
-    } else {
-      const base64Str = res.base64();
+    if (filePath) {
       Share.open({
-        url: `data:${mimeTypes[ext]};base64,${base64Str}`,
+        url: Platform.OS === "android" ? "file://" + filePath : filePath,
         type: mimeTypes[ext],
         title: "打开文件",
         showAppsToView: true
       });
+
       resolve(true);
+    }
+  });
+};
+
+export const downloadFile = (url: string, name: string, ext: string) => {
+  return new Promise<string>(async (resolve, reject) => {
+    const dirs = RNFetchBlob.fs.dirs;
+    const filePath = `${dirs.DocumentDir}/files/${name}.${ext}`;
+    const exists = await RNFetchBlob.fs.exists(filePath);
+
+    if (!exists) {
+      const res = await RNFetchBlob.config({
+        fileCache: true,
+        path: filePath
+      }).fetch("GET", url);
+      const status = res.respInfo.status;
+      if (status !== 200) {
+        reject();
+      } else {
+        resolve(res.path());
+      }
+    } else {
+      resolve(filePath);
     }
   });
 };

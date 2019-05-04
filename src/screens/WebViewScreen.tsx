@@ -1,31 +1,41 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
 import MediumPlaceholder from "../components/MediumPlaceholder";
-import { shareFile } from "../helpers/share";
+import { downloadFile, shareFile } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
 import { INavigationScreen } from "../types/NavigationScreen";
 
-export interface IWebViewScreenProps {
-  readonly url: string;
-}
-
-const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
+const WebViewScreen: INavigationScreen<{}> = props => {
   const url = props.navigation.getParam("url");
+  const name = props.navigation.getParam("filename");
+  const ext = props.navigation.getParam("ext");
 
   const [loading, setLoading] = useState(true);
+  const [filePath, setFilePath] = useState("");
+
+  useEffect(() => {
+    if (loading) {
+      (async () => {
+        const filePath = await downloadFile(url, name, ext);
+        if (filePath) {
+          setFilePath(filePath);
+          setLoading(false);
+        }
+      })();
+    }
+  }, [loading]);
 
   return (
     <>
       <WebView
         source={{
-          uri: url
+          uri: filePath
         }}
         useWebKit={false}
-        // tslint:disable-next-line: jsx-no-lambda
-        onLoadEnd={() => setLoading(false)}
+        originWhitelist={["*"]}
       />
       {loading && (
         <View
@@ -58,7 +68,11 @@ WebViewScreen.navigationOptions = ({ navigation }) => {
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() => {
           store.dispatch(showToast("准备文件中……", 1500));
-          shareFile(navigation.getParam("url"), navigation.getParam("ext"));
+          shareFile(
+            navigation.getParam("url"),
+            navigation.getParam("filename"),
+            navigation.getParam("ext")
+          );
         }}
         color="white"
         size={24}
