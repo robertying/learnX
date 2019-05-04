@@ -102,6 +102,7 @@ const NoticeBoard: FunctionComponent<
                   getExtension(attachmentName)!
                 )
               }
+              ellipsizeMode="tail"
             >
               {attachmentName}
             </TextButton>

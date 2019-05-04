@@ -11,11 +11,12 @@ import Colors from "../constants/Colors";
 export type ITextButtonProps = TouchableOpacityProps & {
   readonly textStyle?: TextProps["style"];
   readonly children: string;
+  readonly ellipsizeMode?: TextProps["ellipsizeMode"];
 };
 
 class TextButton extends React.Component<ITextButtonProps> {
   public render(): React.ReactElement {
-    const { textStyle, children } = this.props;
+    const { textStyle, children, ellipsizeMode } = this.props;
     return (
       <TouchableOpacity activeOpacity={Colors.activeOpacity} {...this.props}>
         <Text
@@ -24,7 +25,7 @@ class TextButton extends React.Component<ITextButtonProps> {
             textStyle
           ]}
           numberOfLines={1}
-          ellipsizeMode="clip"
+          ellipsizeMode={ellipsizeMode || "clip"}
         >
           {children}
         </Text>
