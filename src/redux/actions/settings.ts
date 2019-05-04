@@ -5,7 +5,8 @@ import {
   SET_CALENDAR_ID,
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
-  SET_TABS_ORDER
+  SET_TABS_ORDER,
+  SET_UPDATE
 } from "../types/constants";
 import { Tab } from "../types/state";
 
@@ -34,3 +35,7 @@ export const setEventIdForAssignment = createAction(
 );
 
 export const clearEventIds = createAction(CLEAR_EVENT_IDS);
+
+export const setUpdate = createAction(SET_UPDATE, action => {
+  return (hasNewUpdate: boolean) => action(hasNewUpdate);
+});

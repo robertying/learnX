@@ -6,12 +6,13 @@ import {
   Header,
   NavigationStackScreenOptions
 } from "react-navigation";
+import { connect } from "react-redux";
 import LinearGradientBlurView from "../components/LinearGradientBlurView";
 import TabBarIcon from "../components/TabBarIcon";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import { store } from "../redux/store";
-import { Tab } from "../redux/types/state";
+import { IPersistAppState, Tab } from "../redux/types/state";
 import AboutScreen from "../screens/AboutScreen";
 import AcknowledgementsScreen from "../screens/AcknowledgementsScreen";
 import AssignmentDetailScreen from "../screens/AssignmentDetailScreen";
@@ -114,6 +115,13 @@ const CoursesStack = createStackNavigator(
   }
 );
 
+const TabBarIconWithBadge = connect(
+  (state: IPersistAppState) => ({
+    hasDot: state.settings.hasUpdate
+  }),
+  null
+)(TabBarIcon);
+
 const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
@@ -126,7 +134,7 @@ const SettingsStack = createStackNavigator(
     initialRouteName: "Settings",
     navigationOptions: {
       tabBarIcon: ({ focused }) => (
-        <TabBarIcon focused={focused} name="settings" />
+        <TabBarIconWithBadge focused={focused} name="settings" />
       ),
       tabBarLabel: "设置"
     }

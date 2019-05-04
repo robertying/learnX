@@ -1,9 +1,13 @@
 import React, { useEffect } from "react";
+import { Platform } from "react-native";
 import { connect, DispatchProp } from "react-redux";
+import packageConfig from "../../package.json";
 import SplashScreen from "../components/SplashScreen";
+import { getLatestRelease } from "../helpers/update";
 import { login } from "../redux/actions/auth";
 import { getCurrentSemester } from "../redux/actions/currentSemester";
 import { getAllSemesters } from "../redux/actions/semesters";
+import { setUpdate } from "../redux/actions/settings";
 import { IAuthState, IPersistAppState, ISemester } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
@@ -17,6 +21,22 @@ type IAuthLoadingScreenProps = DispatchProp<any> & IAuthLoadingScreenStateProps;
 
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
   const { navigation, dispatch, rehydrated, auth, semesters } = props;
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      (async () => {
+        const { versionString } = await getLatestRelease();
+
+        if (
+          parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
+        ) {
+          dispatch(setUpdate(true));
+        } else {
+          dispatch(setUpdate(false));
+        }
+      })();
+    }
+  }, []);
 
   useEffect(() => {
     if (auth.loggedIn) {

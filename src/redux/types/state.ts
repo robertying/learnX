@@ -25,6 +25,7 @@ export interface ISettingsState {
   readonly syncedAssignments: {
     readonly [assignmentId: string]: string;
   };
+  readonly hasUpdate: boolean;
 }
 
 export type ISemester = string | null;

@@ -5,8 +5,10 @@ import {
   Linking,
   ListRenderItem,
   Platform,
-  SafeAreaView
+  SafeAreaView,
+  View
 } from "react-native";
+import { iOSColors } from "react-native-typography";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
@@ -17,21 +19,28 @@ import { saveAssignmentsToCalendar } from "../helpers/calendar";
 import dayjs from "../helpers/dayjs";
 import { getLatestRelease } from "../helpers/update";
 import { clearStore } from "../redux/actions/root";
-import { setAutoRefreshing, setCalendarSync } from "../redux/actions/settings";
+import {
+  setAutoRefreshing,
+  setCalendarSync,
+  setUpdate
+} from "../redux/actions/settings";
 import { showToast } from "../redux/actions/toast";
-import { store } from "../redux/store";
-import { IPersistAppState } from "../redux/types/state";
+import { IAssignment, IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly calendarSync: boolean;
+  readonly rawAssignments: readonly IAssignment[];
+  readonly hasUpdate: boolean;
 }
 
 interface ISettingsScreenDispatchProps {
   readonly clearStore: () => void;
   readonly setAutoRefreshing: (enabled: boolean) => void;
   readonly setCalendarSync: (enabled: boolean) => void;
+  readonly setUpdate: (hasUpdate: boolean) => void;
+  readonly showToast: (text: string, duration: number) => void;
 }
 
 type ISettingsScreenProps = ISettingsScreenStateProps &
@@ -44,7 +53,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     setAutoRefreshing,
     autoRefreshing,
     setCalendarSync,
-    calendarSync
+    calendarSync,
+    rawAssignments,
+    setUpdate,
+    showToast,
+    hasUpdate
   } = props;
 
   const onAcknowledgementsPress = () => {
@@ -78,7 +91,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   const onCalendarSyncSwitchChange = (enabled: boolean) => {
     if (enabled) {
-      const rawAssignments = store.getState().assignments.items;
       if (rawAssignments) {
         const assignments = [...rawAssignments].filter(item =>
           dayjs(item.deadline).isAfter(dayjs())
@@ -112,8 +124,14 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         ],
         { cancelable: true }
       );
+      if (!hasUpdate) {
+        setUpdate(true);
+      }
     } else {
-      store.dispatch(showToast("未发现更新", 1500));
+      showToast("未发现更新", 1500);
+      if (hasUpdate) {
+        setUpdate(false);
+      }
     }
   };
 
@@ -155,8 +173,27 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="none"
             containerStyle={{ marginTop: 10 }}
-            icon={<MaterialCommunityIcons name="update" size={20} />}
-            text="检查更新"
+            icon={
+              hasUpdate ? (
+                <View>
+                  <MaterialCommunityIcons name="update" size={20} />
+                  <View
+                    style={{
+                      position: "absolute",
+                      right: 0,
+                      top: 0,
+                      backgroundColor: iOSColors.red,
+                      borderRadius: 3,
+                      width: 6,
+                      height: 6
+                    }}
+                  />
+                </View>
+              ) : (
+                <MaterialCommunityIcons name="update" size={20} />
+              )
+            }
+            text={hasUpdate ? "发现新版本" : "检查更新"}
             onPress={onCheckUpdatePress}
           />
         ) : null;
@@ -210,14 +247,18 @@ SettingsScreen.navigationOptions = {
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
-    calendarSync: state.settings.calendarSync
+    calendarSync: state.settings.calendarSync,
+    rawAssignments: state.assignments.items,
+    hasUpdate: state.settings.hasUpdate
   };
 }
 
 const mapDispatchToProps: ISettingsScreenDispatchProps = {
   clearStore,
   setAutoRefreshing,
-  setCalendarSync
+  setCalendarSync,
+  setUpdate,
+  showToast
 };
 
 export default connect(

@@ -22,7 +22,8 @@ const mockStore: IPersistAppState = {
     ],
     autoRefreshing: false,
     calendarSync: false,
-    syncedAssignments: {}
+    syncedAssignments: {},
+    hasUpdate: false
   },
   toast: {
     text: "",
