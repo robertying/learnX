@@ -16,8 +16,9 @@
       <h1 class="project-name">{{ site.title | default: site.github.repository_name }}</h1>
       <h2 class="project-tagline">{{ site.description_cn | default: site.github.project_tagline }}</h2>
       {% if site.show_downloads %}
-        <a href="{{ site.ios_url }}" class="btn">iOS 下载</a>
-        <a href="{{ site.android_url }}" class="btn">Android 下载</a>
+        <a href="{{ site.ios_url }}" class="btn">App Store for iOS</a>
+        <a href="{{ site.android_url }}" class="btn">GitHub Releases for Android</a>
+        <a href="{{ site.play_url }}" class="btn">Google Play for Android</a>
       {% endif %}
       {% if site.github.is_project_page %}
       <a href="{{ site.github.repository_url }}" class="btn">在 GitHub 上查看</a>
