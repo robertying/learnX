@@ -54,4 +54,6 @@ target 'learnX' do
 
   pod 'Interactable', :path => '../node_modules/react-native-interactable'
 
+  pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
+
 end
