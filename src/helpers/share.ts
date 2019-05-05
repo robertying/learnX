@@ -46,7 +46,12 @@ export const shareFile = (url: string, name: string, ext: string) => {
   });
 };
 
-export const downloadFile = (url: string, name: string, ext: string) => {
+export const downloadFile = (
+  url: string,
+  name: string,
+  ext: string,
+  onProgress?: (percent: number) => void
+) => {
   return new Promise<string>(async (resolve, reject) => {
     const dirs = RNFetchBlob.fs.dirs;
     const filePath = `${dirs.DocumentDir}/files/${name}.${ext}`;
@@ -56,7 +61,13 @@ export const downloadFile = (url: string, name: string, ext: string) => {
       const res = await RNFetchBlob.config({
         fileCache: true,
         path: filePath
-      }).fetch("GET", url);
+      })
+        .fetch("GET", url)
+        .progress((received, total) => {
+          if (onProgress) {
+            onProgress(received / total);
+          }
+        });
       const status = res.respInfo.status;
       if (status !== 200) {
         reject();
