@@ -13,6 +13,7 @@ import Modal from "react-native-modal";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
+import EmptyList from "../components/EmptyList";
 import NoticesView from "../components/NoticesView";
 import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
@@ -220,6 +221,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
             activeOpacity={0.6}
           />
           <FlatList
+            ListEmptyComponent={EmptyList}
             ItemSeparatorComponent={Divider}
             data={courses}
             renderItem={renderListItem}
