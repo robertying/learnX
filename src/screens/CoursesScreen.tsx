@@ -15,6 +15,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import CourseCard from "../components/CourseCard";
 import Divider from "../components/Divider";
+import EmptyList from "../components/EmptyList";
 import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Colors from "../constants/Colors";
@@ -279,6 +280,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
             activeOpacity={0.6}
           />
           <FlatList
+            ListEmptyComponent={EmptyList}
             ItemSeparatorComponent={Divider}
             data={rawCourses}
             renderItem={renderFilterListItem}

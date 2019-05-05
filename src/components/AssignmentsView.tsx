@@ -8,6 +8,7 @@ import {
 import Colors from "../constants/Colors";
 import { IAssignment, ICourse } from "../redux/types/state";
 import AssignmentCard from "./AssignmentCard";
+import EmptyList from "./EmptyList";
 
 export interface IAssignmentsViewProps {
   readonly courses?: ReadonlyArray<ICourse>;
@@ -82,6 +83,7 @@ const AssignmentsView: React.FunctionComponent<
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
+        ListEmptyComponent={EmptyList}
         data={assignments}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}

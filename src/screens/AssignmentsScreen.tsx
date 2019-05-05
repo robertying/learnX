@@ -14,6 +14,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import AssignmentsView from "../components/AssignmentsView";
 import Divider from "../components/Divider";
+import EmptyList from "../components/EmptyList";
 import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Layout from "../constants/Layout";
@@ -226,6 +227,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
             activeOpacity={0.6}
           />
           <FlatList
+            ListEmptyComponent={EmptyList}
             ItemSeparatorComponent={Divider}
             data={courses}
             renderItem={renderListItem}

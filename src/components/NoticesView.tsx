@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import Colors from "../constants/Colors";
 import { ICourse, INotice } from "../redux/types/state";
+import EmptyList from "./EmptyList";
 import NoticeCard from "./NoticeCard";
 
 export interface INoticesViewProps {
@@ -78,6 +79,7 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
+        ListEmptyComponent={EmptyList}
         data={notices}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}

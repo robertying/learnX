@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import Colors from "../constants/Colors";
 import { ICourse, IFile } from "../redux/types/state";
+import EmptyList from "./EmptyList";
 import FileCard from "./FileCard";
 
 export interface IFilesViewProps {
@@ -86,6 +87,7 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
       <FlatList
+        ListEmptyComponent={EmptyList}
         data={files}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
