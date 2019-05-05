@@ -69,7 +69,6 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
             style={[
               styles.flexRow,
               {
-                flex: 1,
                 justifyContent: "space-between"
               }
             ]}
@@ -77,7 +76,7 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
             <Text
               style={[
                 { flex: 1 },
-                iOSUIKit.title3Emphasized,
+                iOSUIKit.bodyEmphasized,
                 Platform.OS === "android" && { fontWeight: "bold" }
               ]}
               numberOfLines={1}
@@ -99,8 +98,7 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
           </View>
           <View
             style={{
-              flex: 2,
-              marginTop: 10
+              marginTop: 8
             }}
           >
             <Text
@@ -115,7 +113,6 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
             style={[
               styles.flexRow,
               {
-                flex: 1,
                 justifyContent: "space-between",
                 marginTop: 10
               }

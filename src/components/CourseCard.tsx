@@ -63,7 +63,7 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
           <Text
             style={[
               { flex: 1 },
-              iOSUIKit.title3Emphasized,
+              iOSUIKit.bodyEmphasized,
               Platform.OS === "android" && { fontWeight: "bold" }
             ]}
             numberOfLines={1}
@@ -75,7 +75,7 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
             style={{ flexDirection: "row", alignItems: "flex-end", flex: 1 }}
           >
             <View style={{ flex: 1 }}>
-              <Text style={[iOSUIKit.subhead, { marginTop: 10 }]}>
+              <Text style={[iOSUIKit.subhead, { marginTop: 8 }]}>
                 {courseTeacherName}
               </Text>
               <Text style={{ color: "grey", fontSize: 13, marginTop: 10 }}>

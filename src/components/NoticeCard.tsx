@@ -70,7 +70,6 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
             style={[
               styles.flexRow,
               {
-                flex: 1,
                 justifyContent: "space-between"
               }
             ]}
@@ -78,7 +77,7 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
             <Text
               style={[
                 { flex: 1 },
-                iOSUIKit.title3Emphasized,
+                iOSUIKit.bodyEmphasized,
                 Platform.OS === "android" && { fontWeight: "bold" }
               ]}
               numberOfLines={1}
@@ -105,8 +104,7 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
           </View>
           <View
             style={{
-              flex: 2,
-              marginTop: 10
+              marginTop: 8
             }}
           >
             <Text
@@ -121,7 +119,6 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
             style={[
               styles.flexRow,
               {
-                flex: 1,
                 justifyContent: "space-between",
                 marginTop: 10
               }
