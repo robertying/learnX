@@ -18,7 +18,7 @@ export type INoticeCardProps = TouchableHighlightProps & {
   readonly title: string;
   readonly author: string;
   readonly date: string;
-  readonly content: string;
+  readonly content?: string;
   readonly markedImportant: boolean;
   readonly hasAttachment: boolean;
   readonly pinned?: boolean;
@@ -114,7 +114,7 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
               numberOfLines={2}
               ellipsizeMode="tail"
             >
-              {removeTags(content)}
+              {removeTags(content || "") || "无通知内容"}
             </Text>
           </View>
           <View

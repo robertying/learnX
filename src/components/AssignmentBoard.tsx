@@ -20,14 +20,14 @@ interface IAssignmentBoardDispatchProps {
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   readonly title: string;
   readonly deadline: string;
-  readonly description: string;
+  readonly description?: string;
   readonly attachmentName?: string;
   readonly attachmentUrl?: string;
-  readonly submittedAttachmentName: string;
-  readonly submittedAttachmentUrl: string;
-  readonly submitTime: string;
-  readonly grade: number;
-  readonly gradeContent: string;
+  readonly submittedAttachmentName?: string;
+  readonly submittedAttachmentUrl?: string;
+  readonly submitTime?: string;
+  readonly grade?: number;
+  readonly gradeContent?: string;
   readonly onTransition?: () => void;
 };
 
@@ -135,14 +135,14 @@ const AssignmentBoard: FunctionComponent<
               // tslint:disable-next-line: jsx-no-lambda
               onPress={() =>
                 onAttachmentPress(
-                  submittedAttachmentName,
+                  submittedAttachmentName!,
                   submittedAttachmentUrl!,
-                  getExtension(submittedAttachmentName)!
+                  getExtension(submittedAttachmentName!)!
                 )
               }
               ellipsizeMode="tail"
             >
-              {submittedAttachmentName}
+              {submittedAttachmentName!}
             </TextButton>
           </View>
           <Divider />
@@ -171,7 +171,8 @@ const AssignmentBoard: FunctionComponent<
         style={{ flex: 1 }}
         originWhitelist={["*"]}
         source={{
-          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${description}</body>`
+          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${description ||
+            "无作业描述"}</body>`
         }}
       />
     </View>
