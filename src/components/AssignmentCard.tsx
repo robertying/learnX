@@ -71,7 +71,6 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
             style={[
               styles.flexRow,
               {
-                flex: 1,
                 justifyContent: "space-between"
               }
             ]}
@@ -79,7 +78,7 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
             <Text
               style={[
                 { flex: 1 },
-                iOSUIKit.title3Emphasized,
+                iOSUIKit.bodyEmphasized,
                 Platform.OS === "android" && { fontWeight: "bold" }
               ]}
               numberOfLines={1}
@@ -114,8 +113,7 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
           </View>
           <View
             style={{
-              flex: 2,
-              marginTop: 10
+              marginTop: 8
             }}
           >
             <Text
@@ -130,7 +128,6 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
             style={[
               styles.flexRow,
               {
-                flex: 1,
                 justifyContent: "space-between",
                 marginTop: 10
               }
