@@ -18,7 +18,7 @@ export type IFileCardProps = TouchableHighlightProps & {
   readonly extension: string;
   readonly size: string;
   readonly date: string;
-  readonly description: string;
+  readonly description?: string;
   readonly markedImportant: boolean;
   readonly pinned?: boolean;
   readonly onPinned?: (pin: boolean) => void;
