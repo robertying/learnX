@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import { ProgressViewIOS, View } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
 import MediumPlaceholder from "../components/MediumPlaceholder";
+import Colors from "../constants/Colors";
 import { downloadFile, shareFile } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
@@ -15,11 +16,12 @@ const WebViewScreen: INavigationScreen<{}> = props => {
 
   const [loading, setLoading] = useState(true);
   const [filePath, setFilePath] = useState("");
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     if (loading) {
       (async () => {
-        const filePath = await downloadFile(url, name, ext);
+        const filePath = await downloadFile(url, name, ext, setProgress);
         if (filePath) {
           setFilePath(filePath);
           setLoading(false);
@@ -53,6 +55,13 @@ const WebViewScreen: INavigationScreen<{}> = props => {
           <MediumPlaceholder style={{ margin: 15 }} loading={true} />
           <MediumPlaceholder style={{ margin: 15 }} loading={true} />
         </View>
+      )}
+      {loading && (
+        <ProgressViewIOS
+          style={{ position: "absolute", top: 0, left: 0, right: 0 }}
+          progressTintColor={Colors.tint}
+          progress={progress}
+        />
       )}
     </>
   );
