@@ -20,7 +20,7 @@ interface INoticeBoardDispatchProps {
 export type INoticeBoardProps = TouchableHighlightProps & {
   readonly title: string;
   readonly author: string;
-  readonly content: string;
+  readonly content?: string;
   readonly attachmentName?: string;
   readonly attachmentUrl?: string;
   readonly onTransition?: () => void;
@@ -114,7 +114,8 @@ const NoticeBoard: FunctionComponent<
         style={{ flex: 1 }}
         originWhitelist={["*"]}
         source={{
-          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${content}</body>`
+          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${content ||
+            "无通知内容"}</body>`
         }}
       />
     </View>
