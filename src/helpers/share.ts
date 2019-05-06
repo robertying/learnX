@@ -83,3 +83,7 @@ export const downloadFile = (
 export const getExtension = (filename: string) => {
   return filename.split(".").pop();
 };
+
+export const stripExtension = (filename: string) => {
+  return filename.replace(/\.[^/.]+$/, "");
+};

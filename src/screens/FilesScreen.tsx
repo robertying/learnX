@@ -19,7 +19,7 @@ import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
-import { shareFile } from "../helpers/share";
+import { shareFile, stripExtension } from "../helpers/share";
 import {
   getCoursesForSemester,
   setCoursesFilter
@@ -111,13 +111,14 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   ) => {
     if (Platform.OS === "ios") {
       navigation.navigate("WebView", {
-        filename,
+        title: stripExtension(filename),
+        filename: stripExtension(filename),
         url,
         ext
       });
     } else {
       showToast("文件下载中……", 1000);
-      const success = await shareFile(url, filename, ext);
+      const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
         showToast("文件下载失败", 3000);
       }
