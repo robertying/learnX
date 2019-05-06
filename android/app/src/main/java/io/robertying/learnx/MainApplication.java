@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.facebook.react.ReactApplication;
+import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import ca.jaysoo.extradimensions.ExtraDimensionsPackage;
 import com.wix.interactable.Interactable;
@@ -53,6 +54,7 @@ public class MainApplication extends Application implements ShareApplication, Re
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
+                    new RNDeviceInfo(),
                     new AsyncStoragePackage(),
                     new ExtraDimensionsPackage(),
                     new Interactable(),
