@@ -7,7 +7,9 @@ import {
   StyleSheet,
   View
 } from "react-native";
+import DeviceInfo from "react-native-device-info";
 import { iOSUIKit } from "react-native-typography";
+import { Header } from "react-navigation";
 import { connect } from "react-redux";
 import Layout from "../constants/Layout";
 import { IPersistAppState } from "../redux/types/state";
@@ -59,7 +61,11 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
             styles.toastContainer,
             {
               height:
-                Layout.statusBarHeight + (Platform.OS === "android" ? 56 : 44),
+                DeviceInfo.isTablet() && Platform.OS === "ios"
+                  ? Header.HEIGHT + 4
+                  : Platform.OS === "ios"
+                  ? 44 + Layout.statusBarHeight
+                  : Header.HEIGHT + Layout.statusBarHeight,
               paddingTop: Layout.statusBarHeight
             }
           ]}
