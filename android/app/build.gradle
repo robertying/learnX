@@ -124,7 +124,7 @@ android {
         renderscriptTargetApi 23
         renderscriptSupportModeEnabled true
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "2.1.0"
+        versionName "2.2.0"
     }
     signingConfigs {
         if (CI) {
@@ -193,6 +193,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-device-info')
     implementation project(':@react-native-community_async-storage')
     implementation project(':react-native-extra-dimensions-android')
     implementation project(':react-native-interactable')
