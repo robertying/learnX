@@ -56,4 +56,6 @@ target 'learnX' do
 
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
+  pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
+
 end
