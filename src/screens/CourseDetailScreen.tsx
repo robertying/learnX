@@ -20,7 +20,7 @@ import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
-import { shareFile } from "../helpers/share";
+import { shareFile, stripExtension } from "../helpers/share";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
 import { getFilesForCourse } from "../redux/actions/files";
 import { getNoticesForCourse } from "../redux/actions/notices";
@@ -123,13 +123,14 @@ const CourseDetailScreen: INavigationScreen<
   ) => {
     if (Platform.OS === "ios") {
       navigation.navigate("WebView", {
-        filename,
+        title: stripExtension(filename),
+        filename: stripExtension(filename),
         url,
         ext
       });
     } else {
       showToast("文件下载中……", 1000);
-      const success = await shareFile(url, filename, ext);
+      const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
         showToast("文件下载失败", 3000);
       }
@@ -279,7 +280,7 @@ CourseDetailScreen.navigationOptions = ({ navigation }) => {
     ),
     headerBackTitle: navigation.getParam("courseName", "课程"),
     headerTruncatedBackTitle:
-      navigation.getParam("courseName", "课程").substring(0, 5) + "..."
+      navigation.getParam("courseName", "课程").substring(0, 3) + "..."
   };
 };
 

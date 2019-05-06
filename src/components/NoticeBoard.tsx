@@ -6,7 +6,7 @@ import WebView from "react-native-webview";
 import { withNavigation } from "react-navigation";
 import { connect } from "react-redux";
 import Colors from "../constants/Colors";
-import { getExtension, shareFile } from "../helpers/share";
+import { getExtension, shareFile, stripExtension } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
 import { INavigationScreenProps } from "../types/NavigationScreen";
 import Divider from "./Divider";
@@ -51,13 +51,14 @@ const NoticeBoard: FunctionComponent<
 
     if (Platform.OS === "ios") {
       navigation.navigate("WebView", {
-        filename,
+        title: stripExtension(filename),
+        filename: stripExtension(filename),
         url,
         ext
       });
     } else {
       showToast("文件下载中……", 1000);
-      const success = await shareFile(url, filename, ext);
+      const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
         showToast("文件下载失败", 3000);
       }
