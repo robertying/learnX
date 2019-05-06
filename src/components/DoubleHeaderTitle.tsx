@@ -21,6 +21,8 @@ const DoubleHeaderTitle: React.FunctionComponent<
           Platform.OS === "android" ? { fontWeight: "bold" } : undefined,
           { textAlign: Platform.OS === "ios" ? "center" : "left" }
         ]}
+        numberOfLines={1}
+        ellipsizeMode="middle"
       >
         {title}
       </Text>
