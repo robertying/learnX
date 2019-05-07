@@ -6,7 +6,8 @@ import {
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
   SET_TABS_ORDER,
-  SET_UPDATE
+  SET_UPDATE,
+  SET_WINDOW
 } from "../types/constants";
 import { ISettingsState, Tab } from "../types/state";
 
@@ -64,6 +65,11 @@ export default function settings(
       return {
         ...state,
         hasUpdate: action.payload
+      };
+    case SET_WINDOW:
+      return {
+        ...state,
+        window: action.payload
       };
   }
   return state;

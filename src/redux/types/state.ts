@@ -17,6 +17,10 @@ export enum Tab {
   "Courses",
   "Settings"
 }
+export interface IWindow {
+  readonly height: number;
+  readonly width: number;
+}
 export interface ISettingsState {
   readonly tabsOrder: ReadonlyArray<Tab>;
   readonly autoRefreshing: boolean;
@@ -26,6 +30,7 @@ export interface ISettingsState {
     readonly [assignmentId: string]: string;
   };
   readonly hasUpdate: boolean;
+  readonly window?: IWindow;
 }
 
 export type ISemester = string | null;

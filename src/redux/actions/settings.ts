@@ -6,9 +6,10 @@ import {
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
   SET_TABS_ORDER,
-  SET_UPDATE
+  SET_UPDATE,
+  SET_WINDOW
 } from "../types/constants";
-import { Tab } from "../types/state";
+import { IWindow, Tab } from "../types/state";
 
 export const setTabsOrder = createAction(SET_TABS_ORDER, action => {
   return (tabs: ReadonlyArray<Tab>) => action(tabs);
@@ -38,4 +39,8 @@ export const clearEventIds = createAction(CLEAR_EVENT_IDS);
 
 export const setUpdate = createAction(SET_UPDATE, action => {
   return (hasNewUpdate: boolean) => action(hasNewUpdate);
+});
+
+export const setWindow = createAction(SET_WINDOW, action => {
+  return (window: IWindow) => action(window);
 });
