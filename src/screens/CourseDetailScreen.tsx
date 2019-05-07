@@ -286,7 +286,8 @@ CourseDetailScreen.navigationOptions = ({ navigation }) => {
         subtitle={navigation.getParam("courseTeacherName", "教师")}
       />
     ),
-    headerBackTitle: navigation.getParam("courseName", "课程"),
+    headerBackTitle:
+      navigation.getParam("courseName", "课程").substring(0, 3) + "...",
     headerTruncatedBackTitle:
       navigation.getParam("courseName", "课程").substring(0, 3) + "..."
   };
