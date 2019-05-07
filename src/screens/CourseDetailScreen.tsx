@@ -18,6 +18,7 @@ import NoticeBoard from "../components/NoticeBoard";
 import NoticesView from "../components/NoticesView";
 import Text from "../components/Text";
 import Colors from "../constants/Colors";
+import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
 import { shareFile, stripExtension } from "../helpers/share";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
@@ -215,8 +216,12 @@ const CourseDetailScreen: INavigationScreen<
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
-        deviceWidth={window.width}
-        deviceHeight={window.height}
+        deviceWidth={
+          Platform.OS === "android" ? Layout.window().width : window.width
+        }
+        deviceHeight={
+          Platform.OS === "android" ? Layout.window().height : window.height
+        }
       >
         <View style={{ height: "80%", backgroundColor: "white" }}>
           {currentModal.data && currentModal.type === "Notice" && (
