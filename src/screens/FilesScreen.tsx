@@ -207,7 +207,6 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           margin: 0,
           marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
         }}
-        deviceHeight={Layout.window.height}
         isVisible={modalVisible}
         backdropColor="transparent"
         swipeDirection="down"

@@ -18,7 +18,6 @@ import NoticeBoard from "../components/NoticeBoard";
 import NoticesView from "../components/NoticesView";
 import Text from "../components/Text";
 import Colors from "../constants/Colors";
-import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
 import { shareFile, stripExtension } from "../helpers/share";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
@@ -29,7 +28,8 @@ import {
   IAssignment,
   IFile,
   INotice,
-  IPersistAppState
+  IPersistAppState,
+  IWindow
 } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
@@ -58,6 +58,7 @@ interface ICourseDetailScreenStateProps {
   readonly isFetchingNotices: boolean;
   readonly isFetchingFiles: boolean;
   readonly isFetchingAssignments: boolean;
+  readonly window: IWindow;
 }
 
 interface ICourseDetailScreenDispatchProps {
@@ -84,7 +85,8 @@ const CourseDetailScreen: INavigationScreen<
     isFetchingNotices,
     getAssignmentsForCourse,
     getFilesForCourse,
-    getNoticesForCourse
+    getNoticesForCourse,
+    window
   } = props;
 
   const courseId = navigation.getParam("courseId");
@@ -213,7 +215,8 @@ const CourseDetailScreen: INavigationScreen<
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
-        deviceHeight={Layout.window.height}
+        deviceWidth={window.width}
+        deviceHeight={window.height}
       >
         <View style={{ height: "80%", backgroundColor: "white" }}>
           {currentModal.data && currentModal.type === "Notice" && (
@@ -293,7 +296,8 @@ function mapStateToProps(
     assignments: state.assignments.items,
     isFetchingNotices: state.notices.isFetching,
     isFetchingFiles: state.files.isFetching,
-    isFetchingAssignments: state.assignments.isFetching
+    isFetchingAssignments: state.assignments.isFetching,
+    window: state.settings.window || Dimensions.get("window")
   };
 }
 
