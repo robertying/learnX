@@ -17,11 +17,11 @@ import { setWindow as setStoreWindow } from "./redux/actions/settings";
 import { persistor, store } from "./redux/store";
 
 const App: React.FunctionComponent = () => {
-  const [appState, setAppState] = useState(AppState.currentState);
+  const [, setAppState] = useState(AppState.currentState);
   const [window, setWindow] = useState(Dimensions.get("window"));
 
   const handleAppStateChange = (nextAppState: AppStateStatus) => {
-    if (appState.match(/inactive|background/) && nextAppState === "active") {
+    if (nextAppState === "inactive") {
       const window = Dimensions.get("window");
       setWindow(window);
       store.dispatch(setStoreWindow(window));
