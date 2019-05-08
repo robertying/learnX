@@ -5863,10 +5863,10 @@ react-native-webview@5.8.1:
     escape-string-regexp "1.0.5"
     invariant "2.2.4"
 
-react-native@0.59.5:
-  version "0.59.5"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.59.5.tgz#79500d2885a3dc83216715e1fc6effa878ad6ea9"
-  integrity sha512-8Q/9cS6IMsGNiFhJgzmncbUeuacXQMe5EJl0c63fW30DvjEjeTVCvhM08eGzSpsNlOvL2XDRa4YOiCrwI7S1TA==
+react-native@0.59.7:
+  version "0.59.7"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.59.7.tgz#63571ed58b93e3cc05c1e9bcc4eedbc8a0a591fc"
+  integrity sha512-EFKuWSUv9noU44HugitxoO1QompGSKFe6+kjuhG5lKL+FiHrJjKIt8RsvyMS9MxRBIIip1vNBFaQLG8a9fl4aw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@react-native-community/cli" "^1.2.1"
