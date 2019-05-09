@@ -31,7 +31,7 @@ export function getFilesForCourse(courseId: string): IThunkResult {
     dispatch(getFilesForCourseAction.request());
 
     const results = await dataSource.getFileList(courseId).catch(err => {
-      dispatch(showToast("刷新失败，您可能未登录", 1500));
+      dispatch(showToast("刷新失败", 1500));
       const auth = getState().auth;
       dispatch(login(auth.username || "", auth.password || ""));
     });
@@ -63,7 +63,7 @@ export function getAllFilesForCourses(
     const results = await dataSource
       .getAllContents(courseIds, ContentType.FILE)
       .catch(err => {
-        dispatch(showToast("刷新失败，您可能未登录", 1500));
+        dispatch(showToast("刷新失败", 1500));
         const auth = getState().auth;
         dispatch(login(auth.username || "", auth.password || ""));
       });
