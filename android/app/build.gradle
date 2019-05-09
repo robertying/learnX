@@ -193,6 +193,8 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-push-notification')
+    implementation project(':react-native-background-fetch')
     implementation project(':react-native-device-info')
     implementation project(':@react-native-community_async-storage')
     implementation project(':react-native-extra-dimensions-android')

@@ -4,6 +4,8 @@ import android.app.Application;
 
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.facebook.react.ReactApplication;
+import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
+import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import ca.jaysoo.extradimensions.ExtraDimensionsPackage;
@@ -54,6 +56,8 @@ public class MainApplication extends Application implements ShareApplication, Re
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
+                    new ReactNativePushNotificationPackage(),
+                    new RNBackgroundFetchPackage(),
                     new RNDeviceInfo(),
                     new AsyncStoragePackage(),
                     new ExtraDimensionsPackage(),
