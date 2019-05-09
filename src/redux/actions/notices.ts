@@ -33,7 +33,7 @@ export function getNoticesForCourse(courseId: string): IThunkResult {
     const results = await dataSource
       .getNotificationList(courseId)
       .catch(err => {
-        dispatch(showToast("刷新失败，您可能未登录", 1500));
+        dispatch(showToast("刷新失败", 1500));
         const auth = getState().auth;
         dispatch(login(auth.username || "", auth.password || ""));
       });
@@ -67,7 +67,7 @@ export function getAllNoticesForCourses(
     const results = await dataSource
       .getAllContents(courseIds, ContentType.NOTIFICATION)
       .catch(err => {
-        dispatch(showToast("刷新失败，您可能未登录", 1500));
+        dispatch(showToast("刷新失败", 1500));
         const auth = getState().auth;
         dispatch(login(auth.username || "", auth.password || ""));
       });
