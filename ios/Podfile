@@ -22,6 +22,7 @@ target 'learnX' do
     'RCTText',
     'RCTVibration',
     'RCTWebSocket',
+    'RCTPushNotification'
   ]
 
   pod 'yoga', :path => '../node_modules/react-native/ReactCommon/yoga'
@@ -57,5 +58,7 @@ target 'learnX' do
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
 
   pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
+
+  pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
 
 end
