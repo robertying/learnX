@@ -22,7 +22,7 @@
     "fuse.js": "3.4.4",
     "react": "16.8.6",
     "react-native": "0.59.8",
-    "react-native-background-fetch": "2.5.4",
+    "react-native-background-fetch": "2.5.6",
     "react-native-calendar-events": "1.7.1",
     "react-native-code-push": "5.6.0",
     "react-native-device-info": "1.6.1",

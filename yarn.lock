@@ -1478,11 +1478,6 @@ base64-js@1.1.2:
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.1.2.tgz#d6400cac1c4c660976d90d07a04351d89395f5e8"
   integrity sha1-1kAMrBxMZgl22Q0HoENR2JOV9eg=
 
-base64-js@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.2.0.tgz#a39992d723584811982be5e290bb6a53d86700f1"
-  integrity sha1-o5mS1yNYSBGYK+XikLtqU9hnAPE=
-
 base64-js@^1.1.2, base64-js@^1.2.3:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/base64-js/-/base64-js-1.3.0.tgz#cab1e6118f051095e58b5281aea8c1cd22bfc0e3"
@@ -5513,15 +5508,6 @@ plist@3.0.1, plist@^3.0.0, plist@^3.0.1:
     xmlbuilder "^9.0.7"
     xmldom "0.1.x"
 
-plist@^2.0.1:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/plist/-/plist-2.1.0.tgz#57ccdb7a0821df21831217a3cad54e3e146a1025"
-  integrity sha1-V8zbeggh3yGDEhejytVOPhRqECU=
-  dependencies:
-    base64-js "1.2.0"
-    xmlbuilder "8.2.2"
-    xmldom "0.1.x"
-
 plugin-error@^0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/plugin-error/-/plugin-error-0.1.2.tgz#3b9bb3335ccf00f425e07437e19276967da47ace"
@@ -5770,14 +5756,14 @@ react-native-animatable@^1.3.1:
   dependencies:
     prop-types "^15.5.10"
 
-react-native-background-fetch@2.5.4:
-  version "2.5.4"
-  resolved "https://registry.yarnpkg.com/react-native-background-fetch/-/react-native-background-fetch-2.5.4.tgz#3da20be2ffa38887ed4df7ea00894f60273e453d"
-  integrity sha512-JAF9UrjVue6S3Khwqfv9NI9z606BLVnvkPLpGN7a3Ju8TVD6D+01pgnRtaY3+ge+rpy/rBPK7J1317kWOSvG9A==
+react-native-background-fetch@2.5.6:
+  version "2.5.6"
+  resolved "https://registry.yarnpkg.com/react-native-background-fetch/-/react-native-background-fetch-2.5.6.tgz#dde90cc411919b94678ad96febeda433cae27528"
+  integrity sha512-/k62G/Wbu0gWymJLIvp/pWIy1hbU7VTUKXqmnIpgXhdoZ9gOiVgDBZtBobtyLRZZo2tinE6V8ImePmW4owaKfA==
   dependencies:
     fast-plist "^0.1.2"
-    plist "^2.0.1"
-    xcode "^0.9.1"
+    plist "^3.0.1"
+    xcode "^2.0.0"
 
 react-native-calendar-events@1.7.1:
   version "1.7.1"
@@ -7674,15 +7660,6 @@ xcode@1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/xcode/-/xcode-1.0.0.tgz#e1f5b1443245ded38c180796df1a10fdeda084ec"
   integrity sha1-4fWxRDJF3tOMGAeW3xoQ/e2ghOw=
-  dependencies:
-    pegjs "^0.10.0"
-    simple-plist "^0.2.1"
-    uuid "3.0.1"
-
-xcode@^0.9.1:
-  version "0.9.3"
-  resolved "https://registry.yarnpkg.com/xcode/-/xcode-0.9.3.tgz#910a89c16aee6cc0b42ca805a6d0b4cf87211cf3"
-  integrity sha1-kQqJwWrubMC0LKgFptC0z4chHPM=
   dependencies:
     pegjs "^0.10.0"
     simple-plist "^0.2.1"
