@@ -22,6 +22,7 @@ import CoursesScreen from "../screens/CoursesScreen";
 import FilesScreen from "../screens/FilesScreen";
 import NoticeDetailScreen from "../screens/NoticeDetailScreen";
 import NoticesScreen from "../screens/NoticesScreen";
+import NotificationsSettingsScreen from "../screens/NotificationsSettingsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import WebViewScreen from "../screens/WebViewScreen";
 
@@ -126,7 +127,8 @@ const SettingsStack = createStackNavigator(
   {
     Settings: SettingsScreen,
     Acknowledgements: AcknowledgementsScreen,
-    About: AboutScreen
+    About: AboutScreen,
+    NotificationsSettings: NotificationsSettingsScreen
   },
   {
     defaultNavigationOptions,
