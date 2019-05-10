@@ -21,6 +21,13 @@ export interface IWindow {
   readonly height: number;
   readonly width: number;
 }
+export enum NotificationType {
+  "Notices",
+  "Files",
+  "Assignments",
+  "Deadlines",
+  "Grades"
+}
 export interface ISettingsState {
   readonly tabsOrder: ReadonlyArray<Tab>;
   readonly autoRefreshing: boolean;
@@ -31,6 +38,8 @@ export interface ISettingsState {
   };
   readonly hasUpdate: boolean;
   readonly window?: IWindow;
+  readonly notifications: boolean;
+  readonly notificationTypes: ReadonlyArray<NotificationType>;
 }
 
 export type ISemester = string | null;

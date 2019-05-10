@@ -67,19 +67,20 @@ const App: React.FunctionComponent = () => {
   }, []);
 
   useEffect(() => {
-    PushNotification.configure({
-      onNotification: notification => {
-        console.log("NOTIFICATION:", notification);
-        notification.finish(PushNotificationIOS.FetchResult.NoData);
-      },
-      permissions: {
-        alert: true,
-        badge: true,
-        sound: true
-      },
-      popInitialNotification: true,
-      requestPermissions: true
-    });
+    if (store.getState().settings.notifications) {
+      PushNotification.configure({
+        onNotification: notification => {
+          console.log("NOTIFICATION:", notification);
+          notification.finish(PushNotificationIOS.FetchResult.NoData);
+        },
+        permissions: {
+          alert: true,
+          badge: true,
+          sound: true
+        },
+        popInitialNotification: true
+      });
+    }
   }, []);
 
   return (

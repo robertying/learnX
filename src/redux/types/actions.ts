@@ -35,6 +35,8 @@ import {
   setCalendarId,
   setCalendarSync,
   setEventIdForAssignment,
+  setNotifications,
+  setNotificationTypes,
   setTabsOrder,
   setUpdate,
   setWindow
@@ -113,6 +115,8 @@ export type ISetEventIdForAssignment = ActionType<
 export type IClearEventIds = ActionType<typeof clearEventIds>;
 export type ISetUpdateAction = ActionType<typeof setUpdate>;
 export type ISetWindowAction = ActionType<typeof setWindow>;
+export type ISetNotifications = ActionType<typeof setNotifications>;
+export type ISetNotificationTypes = ActionType<typeof setNotificationTypes>;
 export type ISettingsAction =
   | ISetTabsOrderAction
   | ISetAutoRefreshingAction
@@ -121,7 +125,9 @@ export type ISettingsAction =
   | ISetEventIdForAssignment
   | IClearEventIds
   | ISetUpdateAction
-  | ISetWindowAction;
+  | ISetWindowAction
+  | ISetNotifications
+  | ISetNotificationTypes;
 
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
 export type ISetMockStoreAction = ActionType<typeof setMockStore>;

@@ -5,11 +5,13 @@ import {
   SET_CALENDAR_ID,
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
+  SET_NOTIFICATION_TYPES,
+  SET_NOTIFICATIONS,
   SET_TABS_ORDER,
   SET_UPDATE,
   SET_WINDOW
 } from "../types/constants";
-import { ISettingsState, Tab } from "../types/state";
+import { ISettingsState, NotificationType, Tab } from "../types/state";
 
 export default function settings(
   state: ISettingsState = {
@@ -23,7 +25,15 @@ export default function settings(
     autoRefreshing: false,
     calendarSync: false,
     syncedAssignments: {},
-    hasUpdate: false
+    hasUpdate: false,
+    notifications: true,
+    notificationTypes: [
+      NotificationType.Notices,
+      NotificationType.Files,
+      NotificationType.Assignments,
+      NotificationType.Deadlines,
+      NotificationType.Grades
+    ]
   },
   action: ISettingsAction
 ): ISettingsState {
@@ -70,6 +80,16 @@ export default function settings(
       return {
         ...state,
         window: action.payload
+      };
+    case SET_NOTIFICATIONS:
+      return {
+        ...state,
+        notifications: action.payload
+      };
+    case SET_NOTIFICATION_TYPES:
+      return {
+        ...state,
+        notificationTypes: action.payload
       };
   }
   return state;
