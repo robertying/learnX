@@ -1,7 +1,9 @@
+import * as Permissions from "expo-permissions";
 import React from "react";
 import {
   Alert,
   FlatList,
+  LayoutAnimation,
   Linking,
   ListRenderItem,
   Platform,
@@ -23,6 +25,7 @@ import { clearStore } from "../redux/actions/root";
 import {
   setAutoRefreshing,
   setCalendarSync,
+  setNotifications,
   setUpdate
 } from "../redux/actions/settings";
 import { showToast } from "../redux/actions/toast";
@@ -34,6 +37,7 @@ interface ISettingsScreenStateProps {
   readonly calendarSync: boolean;
   readonly rawAssignments: readonly IAssignment[];
   readonly hasUpdate: boolean;
+  readonly notifications: boolean;
 }
 
 interface ISettingsScreenDispatchProps {
@@ -42,6 +46,7 @@ interface ISettingsScreenDispatchProps {
   readonly setCalendarSync: (enabled: boolean) => void;
   readonly setUpdate: (hasUpdate: boolean) => void;
   readonly showToast: (text: string, duration: number) => void;
+  readonly setNotifications: (enabled: boolean) => void;
 }
 
 type ISettingsScreenProps = ISettingsScreenStateProps &
@@ -58,7 +63,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     rawAssignments,
     setUpdate,
     showToast,
-    hasUpdate
+    hasUpdate,
+    notifications,
+    setNotifications
   } = props;
 
   const onAcknowledgementsPress = () => {
@@ -159,6 +166,43 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     );
   };
 
+  const onNotificationsSwitchChange = (enabled: boolean) => {
+    if (enabled) {
+      Alert.alert(
+        "开启推送通知",
+        "App 仅能在处于后台状态且未被用户显式关闭（上滑）的情况下，进行数据更新及推送本地通知。只要未被显式关闭（上滑），即使 App 的内存已被系统释放，也可以在短时间内执行数据更新程序以推送本地通知。",
+        [
+          {
+            text: "取消",
+            style: "cancel"
+          },
+          {
+            text: "确定",
+            onPress: async () => {
+              const { status } = await Permissions.askAsync(
+                Permissions.USER_FACING_NOTIFICATIONS
+              );
+              if (status !== "granted") {
+                showToast("App 无法获取推送通知权限，请在设置中开启", 1500);
+              } else {
+                LayoutAnimation.easeInEaseOut();
+                setNotifications(enabled);
+              }
+            }
+          }
+        ],
+        { cancelable: true }
+      );
+    } else {
+      LayoutAnimation.easeInEaseOut();
+      setNotifications(enabled);
+    }
+  };
+
+  const onNotificationTypesPress = () => {
+    navigation.navigate("NotificationsSettings");
+  };
+
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
     switch (index) {
       case 0:
@@ -185,6 +229,25 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       case 2:
         return (
           <SettingsListItem
+            variant="switch"
+            icon={<MaterialIcons name="notifications" size={20} />}
+            text="推送通知"
+            switchValue={notifications}
+            onSwitchValueChange={onNotificationsSwitchChange}
+          />
+        );
+      case 3:
+        return notifications ? (
+          <SettingsListItem
+            variant="arrow"
+            icon={null}
+            text="设置推送通知类型"
+            onPress={onNotificationTypesPress}
+          />
+        ) : null;
+      case 4:
+        return (
+          <SettingsListItem
             variant="none"
             containerStyle={{ marginTop: 10 }}
             icon={<MaterialCommunityIcons name="account-off" size={20} />}
@@ -192,7 +255,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onLogoutPress}
           />
         );
-      case 3:
+      case 5:
         return (
           <SettingsListItem
             variant="none"
@@ -201,7 +264,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 4:
+      case 6:
         return Platform.OS === "android" ? (
           <SettingsListItem
             variant="none"
@@ -230,7 +293,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 5:
+      case 7:
         return (
           <SettingsListItem
             variant="arrow"
@@ -240,7 +303,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 6:
+      case 8:
         return (
           <SettingsListItem
             variant="arrow"
@@ -260,6 +323,8 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         data={[
           { key: "autoRefreshing" },
           { key: "calendarSync" },
+          { key: "notifications" },
+          { key: "notificationTypes" },
           { key: "logout" },
           { key: "clearFileCache" },
           { key: "checkUpdate" },
@@ -283,7 +348,8 @@ function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
     autoRefreshing: state.settings.autoRefreshing,
     calendarSync: state.settings.calendarSync,
     rawAssignments: state.assignments.items,
-    hasUpdate: state.settings.hasUpdate
+    hasUpdate: state.settings.hasUpdate,
+    notifications: state.settings.notifications
   };
 }
 
@@ -292,7 +358,8 @@ const mapDispatchToProps: ISettingsScreenDispatchProps = {
   setAutoRefreshing,
   setCalendarSync,
   setUpdate,
-  showToast
+  showToast,
+  setNotifications
 };
 
 export default connect(

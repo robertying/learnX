@@ -5,11 +5,13 @@ import {
   SET_CALENDAR_ID,
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
+  SET_NOTIFICATION_TYPES,
+  SET_NOTIFICATIONS,
   SET_TABS_ORDER,
   SET_UPDATE,
   SET_WINDOW
 } from "../types/constants";
-import { IWindow, Tab } from "../types/state";
+import { IWindow, NotificationType, Tab } from "../types/state";
 
 export const setTabsOrder = createAction(SET_TABS_ORDER, action => {
   return (tabs: ReadonlyArray<Tab>) => action(tabs);
@@ -44,3 +46,13 @@ export const setUpdate = createAction(SET_UPDATE, action => {
 export const setWindow = createAction(SET_WINDOW, action => {
   return (window: IWindow) => action(window);
 });
+
+export const setNotifications = createAction(SET_NOTIFICATIONS, action => {
+  return (enabled: boolean) => action(enabled);
+});
+export const setNotificationTypes = createAction(
+  SET_NOTIFICATION_TYPES,
+  action => {
+    return (types: ReadonlyArray<NotificationType>) => action(types);
+  }
+);
