@@ -37,6 +37,7 @@ matrix:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
       before_deploy:
+        - mv android/app/build/outputs/apk/release/app-x86_64-release.apk android/app/build/outputs/apk/release/learnX-x86_64-$TRAVIS_TAG.apk
         - mv android/app/build/outputs/apk/release/app-arm64-v8a-release.apk android/app/build/outputs/apk/release/learnX-arm64-v8a-$TRAVIS_TAG.apk
         - mv android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk android/app/build/outputs/apk/release/learnX-armeabi-v7a-$TRAVIS_TAG.apk
         - mv android/app/build/outputs/apk/release/app-x86-release.apk android/app/build/outputs/apk/release/learnX-x86-$TRAVIS_TAG.apk

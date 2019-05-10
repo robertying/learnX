@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "2.2.2",
+  "version": "2.3.0",
   "scripts": {
     "android": "react-native run-android",
     "android:beta": "bundle exec fastlane android beta",
@@ -47,7 +47,7 @@
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
     "thu-learn-lib-no-native": "2.0.0",
-    "typesafe-actions": "4.2.1"
+    "typesafe-actions": "4.2.0"
   },
   "devDependencies": {
     "@types/deep-diff": "1.0.0",

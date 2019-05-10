@@ -4,9 +4,6 @@ require_relative '../node_modules/react-native-unimodules/cocoapods'
 
 target 'learnX' do
 
-  pod 'Fabric'
-  pod 'Answers'
-
   pod 'React', :path => '../node_modules/react-native', :subspecs => [
     'Core',
     'CxxBridge',
@@ -30,6 +27,9 @@ target 'learnX' do
   pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+
+  pod 'Fabric'
+  pod 'Answers'
 
   use_unimodules!
 
