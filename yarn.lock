@@ -5790,10 +5790,10 @@ react-native-linear-gradient@2.5.4:
   resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.5.4.tgz#dce133526f5a5510a639af94544f1ed0c984bd1e"
   integrity sha512-FF1NhlerA4uBiS0gFIHa4FBp8/aftv4vPj14Y47lGNkYjSI94tnI6oYO3EfUxXjEyCUPiOVNKZOB9kScyjc5Ew==
 
-react-native-modal@11.0.0:
-  version "11.0.0"
-  resolved "https://registry.yarnpkg.com/react-native-modal/-/react-native-modal-11.0.0.tgz#5a45662a2893cfb805ef9d6537c6c3da5e903c60"
-  integrity sha512-xm/WHmAVJj8Kv1vtvFESGC7LHLpQeon+bKBDSxwDCNIr9O5AGPg1sceo5jjS2+U05Uml3rXgbXSbPz3qH25Lbw==
+react-native-modal@11.0.1:
+  version "11.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-modal/-/react-native-modal-11.0.1.tgz#0c7e546557938981f188c56b80474ddfe7c9835c"
+  integrity sha512-qXKRCFj28uJ1AopMPwf4HssscZ4LwTCY+PlDKnXERdxrbGK626rduj4fHyLXSZ1xJvrDy8doHqVAYoQ9YuObgQ==
   dependencies:
     prop-types "^15.6.2"
     react-native-animatable "^1.3.1"
