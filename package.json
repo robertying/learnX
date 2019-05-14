@@ -63,7 +63,7 @@
     "babel-jest": "24.8.0",
     "husky": "2.2.0",
     "jest": "24.8.0",
-    "metro-react-native-babel-preset": "0.54.0",
+    "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.17.1",
     "react-test-renderer": "16.8.6",
     "tslint": "5.16.0",
