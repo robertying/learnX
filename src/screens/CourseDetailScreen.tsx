@@ -2,13 +2,12 @@ import React, { useMemo, useState } from "react";
 import { Dimensions, Platform, View } from "react-native";
 import Modal from "react-native-modal";
 import {
-  Scene,
+  Route,
   SceneRendererProps,
   TabBar,
-  TabBarProps,
-  TabView,
-  TabViewProps
+  TabView
 } from "react-native-tab-view";
+import { Props } from "react-native-tab-view/lib/typescript/src/TabBar";
 import { connect } from "react-redux";
 import AssignmentBoard from "../components/AssignmentBoard";
 import AssignmentsView from "../components/AssignmentsView";
@@ -39,7 +38,7 @@ interface ITabRoute {
   readonly title: string;
 }
 
-const renderTabBar: TabViewProps<ITabRoute>["renderTabBar"] = props => (
+const renderTabBar = (props: Props<ITabRoute>) => (
   <TabBar
     {...props}
     indicatorStyle={{ backgroundColor: Colors.tint }}
@@ -48,7 +47,7 @@ const renderTabBar: TabViewProps<ITabRoute>["renderTabBar"] = props => (
   />
 );
 
-const renderLabel: TabBarProps<ITabRoute>["renderLabel"] = ({ route }) => (
+const renderLabel: Props<ITabRoute>["renderLabel"] = ({ route }) => (
   <Text style={{ color: "black" }}>{route.title}</Text>
 );
 
@@ -181,7 +180,11 @@ const CourseDetailScreen: INavigationScreen<
     [assignments.length, isFetchingAssignments]
   );
 
-  const renderScene = ({ route }: SceneRendererProps<any> & Scene<any>) => {
+  const renderScene = ({
+    route
+  }: SceneRendererProps & {
+    readonly route: Route;
+  }) => {
     switch (route.key) {
       case "notice":
         return NoticesRoute;
