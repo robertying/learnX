@@ -75,3 +75,11 @@ secrets.tar.gz
 # GitHub Pages
 _site
 .sass-cache
+
+# CodePush
+ios/CodePush.plist
+android/app/src/main/res/values/codepush.xml
+
+# Firebase
+ios/GoogleService-Info.plist
+android/app/google-services.json
