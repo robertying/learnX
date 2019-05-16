@@ -2,8 +2,13 @@ package io.robertying.learnx;
 
 import android.app.Application;
 
+import cl.json.RNSharePackage;
+import cl.json.ShareApplication;
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.facebook.react.ReactApplication;
+import io.invertase.firebase.RNFirebasePackage;
+import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;
+import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
 import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
@@ -31,13 +36,8 @@ import org.unimodules.core.interfaces.SingletonModule;
 import java.util.Arrays;
 import java.util.List;
 
-import cl.json.RNSharePackage;
-import cl.json.ShareApplication;
-
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
-
 public class MainApplication extends Application implements ShareApplication, ReactApplication {
+
     private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(new BasePackageList().getPackageList(), Arrays.<SingletonModule>asList());
 
     private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
@@ -56,14 +56,17 @@ public class MainApplication extends Application implements ShareApplication, Re
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
+                    new RNFirebasePackage(),
+                    new RNFirebaseMessagingPackage(),
+                    new RNFirebaseNotificationsPackage(),
                     new ReactNativePushNotificationPackage(),
                     new RNBackgroundFetchPackage(),
+                    new CodePush(getString(R.string.codepush_key), MainApplication.this, BuildConfig.DEBUG),
                     new RNDeviceInfo(),
                     new AsyncStoragePackage(),
                     new ExtraDimensionsPackage(),
                     new Interactable(),
                     new CalendarEventsPackage(),
-                    new CodePush(BuildConfig.CODEPUSH_KEY, getApplicationContext(), BuildConfig.DEBUG),
                     new BlurViewPackage(),
                     new LinearGradientPackage(),
                     new RNFetchBlobPackage(),
@@ -96,6 +99,6 @@ public class MainApplication extends Application implements ShareApplication, Re
     public void onCreate() {
         super.onCreate();
         SoLoader.init(this, /* native exopackage */ false);
-        Fabric.with(this, new Crashlytics());
     }
+
 }
