@@ -1,4 +1,6 @@
 import { diff } from "deep-diff";
+import hash from "object-hash";
+import BackgroundFetch from "react-native-background-fetch";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
 import { getAllFilesForCourses } from "../redux/actions/files";
 import { getAllNoticesForCourses } from "../redux/actions/notices";
@@ -7,6 +9,12 @@ import { NotificationType } from "../redux/types/state";
 import dayjs from "./dayjs";
 import { sendLocalNotification } from "./notification";
 
+export const headlessTask = async () => {
+  await updateAll();
+  BackgroundFetch.finish();
+};
+BackgroundFetch.registerHeadlessTask(headlessTask);
+
 export const updateAll = () => {
   return new Promise(resolve => {
     // tslint:disable-next-line: no-let
@@ -14,24 +22,37 @@ export const updateAll = () => {
     const courses = state.courses.items;
     const courseIds = courses.map(course => course.id);
 
+    if (!state.settings.notificationTypes) {
+      // tslint:disable-next-line: no-object-mutation
+      (state.settings.notificationTypes as any) = [
+        NotificationType.Notices,
+        NotificationType.Files,
+        NotificationType.Assignments,
+        NotificationType.Deadlines,
+        NotificationType.Grades
+      ];
+    }
+
     if (state.settings.notifications) {
       // tslint:disable: no-let
       let notices = [...state.notices.items].sort((a, b) =>
-        a.id.localeCompare(b.id)
+        hash(a).localeCompare(hash(b))
       );
       let files = [...state.files.items].sort((a, b) =>
-        a.id.localeCompare(b.id)
+        hash(a).localeCompare(hash(b))
       );
       let assignments = [...state.assignments.items].sort((a, b) =>
-        a.id.localeCompare(b.id)
+        hash(a).localeCompare(hash(b))
       );
       // tslint:enable: no-let
 
       if (
-        state.settings.notificationTypes.includes(NotificationType.Deadlines)
+        state.settings.notificationTypes.includes(NotificationType.Deadlines) &&
+        assignments.length > 0
       ) {
         const dueAssignments = assignments.filter(
           item =>
+            !item.submitted &&
             dayjs(item.deadline).unix() > dayjs().unix() &&
             dayjs(item.deadline).diff(dayjs(), "hour", true) <= 48 &&
             dayjs(item.deadline).diff(dayjs(), "hour", true) > 47
@@ -52,18 +73,19 @@ export const updateAll = () => {
       const removeSubscription = store.subscribe(() => {
         const newState = store.getState();
         const newNotices = [...newState.notices.items].sort((a, b) =>
-          a.id.localeCompare(b.id)
+          hash(a).localeCompare(hash(b))
         );
         const newFiles = [...newState.files.items].sort((a, b) =>
-          a.id.localeCompare(b.id)
+          hash(a).localeCompare(hash(b))
         );
         const newAssignments = [...newState.assignments.items].sort((a, b) =>
-          a.id.localeCompare(b.id)
+          hash(a).localeCompare(hash(b))
         );
 
         if (
           state.settings.notificationTypes.includes(NotificationType.Notices) &&
-          newNotices.length > notices.length
+          newNotices.length > notices.length &&
+          notices.length > 0
         ) {
           const diffs = diff(notices, newNotices)!;
           const newArrayElements = diffs.filter(
@@ -84,7 +106,8 @@ export const updateAll = () => {
 
         if (
           state.settings.notificationTypes.includes(NotificationType.Files) &&
-          newFiles.length > files.length
+          newFiles.length > files.length &&
+          files.length > 0
         ) {
           const diffs = diff(files, newFiles)!;
           const newArrayElements = diffs.filter(
@@ -109,7 +132,8 @@ export const updateAll = () => {
           if (
             state.settings.notificationTypes.includes(
               NotificationType.Assignments
-            )
+            ) &&
+            assignments.length > 0
           ) {
             const newArrayElements = diffs.filter(item => item.kind === "A");
             const newCount = newArrayElements.length;
@@ -126,7 +150,10 @@ export const updateAll = () => {
           }
 
           if (
-            state.settings.notificationTypes.includes(NotificationType.Grades)
+            state.settings.notificationTypes.includes(
+              NotificationType.Grades
+            ) &&
+            assignments.length > 0
           ) {
             const newGrades = diffs.filter(
               item => item.rhs && item.kind === "N" && item.path[1] === "grade"
@@ -153,7 +180,10 @@ export const updateAll = () => {
           }
         } else if (newAssignments.length === assignments.length) {
           if (
-            state.settings.notificationTypes.includes(NotificationType.Grades)
+            state.settings.notificationTypes.includes(
+              NotificationType.Grades
+            ) &&
+            assignments.length > 0
           ) {
             const diffs = diff(assignments, newAssignments)! as readonly any[];
             if (!diffs) {
