@@ -89,7 +89,6 @@ project.ext.vectoricons = [
         iconFontNames:
                 [
                         'AntDesign.ttf',
-                        'FontAwesome.ttf',
                         'Ionicons.ttf',
                         'MaterialCommunityIcons.ttf',
                         'MaterialIcons.ttf'
@@ -123,7 +122,7 @@ android {
         renderscriptTargetApi 23
         renderscriptSupportModeEnabled true
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "2.3.0"
+        versionName "3.0.0"
     }
     signingConfigs {
         if (CI) {
@@ -152,24 +151,12 @@ android {
     }
     buildTypes {
         debug {
-            manifestPlaceholders = [isDebug: true]
             applicationIdSuffix ".debug"
-            buildConfigField "String", "CODEPUSH_KEY", '""'
-        }
-        releaseStaging {
-            manifestPlaceholders = [isDebug: false]
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            signingConfig signingConfigs.release
-            buildConfigField "String", "CODEPUSH_KEY", '"85HbNLH52a6R9ukGlaQ2IU9BhaujBy9a1NntV"'
-            matchingFallbacks = ["release"]
         }
         release {
-            manifestPlaceholders = [isDebug: false]
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
             signingConfig signingConfigs.release
-            buildConfigField "String", "CODEPUSH_KEY", '"Ims62DStmtYSRrADmEal4lQKU4g8Hy5ak4nYV"'
         }
     }
     // applicationVariants are e.g. debug, release
@@ -192,6 +179,7 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-firebase')
     implementation project(':react-native-push-notification')
     implementation project(':react-native-background-fetch')
     implementation project(':react-native-device-info')
@@ -208,9 +196,14 @@ dependencies {
     implementation project(':react-native-vector-icons')
     implementation project(':react-native-reanimated')
     implementation project(':react-native-gesture-handler')
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.0'
+    implementation 'com.google.firebase:firebase-core:+'
+    implementation 'com.google.firebase:firebase-messaging:+'
+    implementation 'com.crashlytics.sdk.android:crashlytics:+'
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"
     implementation "com.facebook.react:react-native:+"  // From node_modules
     addUnimodulesDependencies()
 }
+
+apply plugin: 'com.google.gms.google-services'
+com.google.gms.googleservices.GoogleServicesPlugin.config.disableVersionCheck = true

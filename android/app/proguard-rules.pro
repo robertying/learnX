@@ -106,3 +106,6 @@
 -dontnote com.swmansion.gesturehandler.**
 -dontnote com.swmansion.reanimated.**
 -dontnote com.wix.interactable.**
+
+-keep class io.invertase.firebase.** { *; }
+-dontwarn io.invertase.firebase.**
