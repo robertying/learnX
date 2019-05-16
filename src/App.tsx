@@ -3,22 +3,58 @@ import {
   AppState,
   AppStateStatus,
   Dimensions,
-  PushNotificationIOS,
+  Platform,
   ScaledSize,
   StatusBar,
   View
 } from "react-native";
 import BackgroundFetch from "react-native-background-fetch";
 import codePush from "react-native-code-push";
-import PushNotification from "react-native-push-notification";
+import firebase from "react-native-firebase";
+import { Notification } from "react-native-firebase/notifications";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import SplashScreen from "./components/SplashScreen";
 import Toast from "./components/Toast";
-import { updateAll } from "./helpers/background";
+import { headlessTask, updateAll } from "./helpers/background";
+import { sendLocalNotification } from "./helpers/notification";
 import AppContainer from "./navigation/AppContainer";
 import { setWindow as setStoreWindow } from "./redux/actions/settings";
 import { persistor, store } from "./redux/store";
+
+if (Platform.OS === "ios") {
+  const messaging = firebase.messaging();
+  messaging.requestPermission().then(() => {
+    messaging.subscribeToTopic("all");
+
+    const notifications = firebase.notifications();
+    // tslint:disable-next-line: no-object-mutation
+    (notifications as any).ios.shouldAutoComplete = false;
+    notifications.onNotificationDisplayed(
+      async (notification: Notification) => {
+        if (!notification.body) {
+          sendLocalNotification("Got", "Got");
+          await updateAll();
+          const newDataResult = (notifications as any).ios.backgroundFetchResult
+            .newData;
+          notification.ios.complete!(newDataResult);
+        }
+      }
+    );
+  });
+}
+
+if (Platform.OS === "android") {
+  BackgroundFetch.configure(
+    {
+      minimumFetchInterval: 60,
+      stopOnTerminate: false,
+      startOnBoot: true,
+      enableHeadless: true
+    },
+    headlessTask
+  );
+}
 
 const App: React.FunctionComponent = () => {
   const [window, setWindow] = useState(Dimensions.get("window"));
@@ -49,38 +85,6 @@ const App: React.FunctionComponent = () => {
   useEffect(() => {
     Dimensions.addEventListener("change", handleWindowChange);
     return () => Dimensions.removeEventListener("change", handleWindowChange);
-  }, []);
-
-  useEffect(() => {
-    BackgroundFetch.configure(
-      {
-        minimumFetchInterval: 60,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        enableHeadless: true
-      },
-      async () => {
-        await updateAll();
-        BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA);
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    if (store.getState().settings.notifications) {
-      PushNotification.configure({
-        onNotification: notification => {
-          console.log("NOTIFICATION:", notification);
-          notification.finish(PushNotificationIOS.FetchResult.NoData);
-        },
-        permissions: {
-          alert: true,
-          badge: true,
-          sound: true
-        },
-        popInitialNotification: true
-      });
-    }
   }, []);
 
   return (
