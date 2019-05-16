@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "2.3.0",
+  "version": "3.0.0",
   "scripts": {
     "android": "react-native run-android",
     "android:beta": "bundle exec fastlane android beta",
