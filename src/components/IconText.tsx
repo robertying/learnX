@@ -2,7 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { iOSUIKit } from "react-native-typography";
 import { IconProps } from "react-native-vector-icons/Icon";
-import Ionicons from "react-native-vector-icons/MaterialIcons";
+import Icon from "react-native-vector-icons/MaterialIcons";
 import Text from "./Text";
 
 export type IIconTextProps = IconProps & {
@@ -19,7 +19,7 @@ const IconText: React.FunctionComponent<IIconTextProps> = props => {
         justifyContent: "center"
       }}
     >
-      <Ionicons size={iOSUIKit.bodyObject.fontSize} {...props} />
+      <Icon size={iOSUIKit.bodyObject.fontSize} {...props} />
       <Text style={[iOSUIKit.body, { marginLeft: 5, color: props.color }]}>
         {props.text}
       </Text>
