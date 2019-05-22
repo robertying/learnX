@@ -5793,10 +5793,10 @@ react-native-code-push@5.6.0:
     semver "^5.6.0"
     xcode "1.0.0"
 
-react-native-device-info@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-2.0.0.tgz#7b36f33187f2ca471f8978b102cf023ff3f47e8f"
-  integrity sha512-U7etnOYOU0UPFtH4/RraMjGz9o2FP8ak7IotoiSlWERt1TVcqYMiNVKYaFzaMHjyinxxsCS2fyznl2WTPoK77Q==
+react-native-device-info@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-2.0.1.tgz#88b4f87b199e4be6810b9dfbecb6fcfce1c33018"
+  integrity sha512-Np9AgcPDhAIC/0QTMccFUmXWWjHABjgjmbxv9nOqwvu4gC2YXynq6/gR0bJpiZXO02TGQnIL4SZoNaerQgYmGQ==
 
 react-native-extra-dimensions-android@1.2.5:
   version "1.2.5"
