@@ -4,59 +4,56 @@ import {
   AppStateStatus,
   Dimensions,
   Platform,
+  PushNotification,
+  PushNotificationIOS,
+  PushNotificationPermissions,
   ScaledSize,
   StatusBar,
   View
 } from "react-native";
 import BackgroundFetch from "react-native-background-fetch";
 import codePush from "react-native-code-push";
-import firebase from "react-native-firebase";
-import { Notification } from "react-native-firebase/notifications";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import SplashScreen from "./components/SplashScreen";
 import Toast from "./components/Toast";
 import { headlessTask, updateAll } from "./helpers/background";
-import { sendLocalNotification } from "./helpers/notification";
 import AppContainer from "./navigation/AppContainer";
 import { setWindow as setStoreWindow } from "./redux/actions/settings";
 import { persistor, store } from "./redux/store";
 
-if (Platform.OS === "ios") {
-  const messaging = firebase.messaging();
-  messaging.requestPermission().then(() => {
-    messaging.subscribeToTopic("all");
-
-    const notifications = firebase.notifications();
-    // tslint:disable-next-line: no-object-mutation
-    (notifications as any).ios.shouldAutoComplete = false;
-    notifications.onNotificationDisplayed(
-      async (notification: Notification) => {
-        if (!notification.body) {
-          sendLocalNotification("Got", "Got");
-          await updateAll();
-          const newDataResult = (notifications as any).ios.backgroundFetchResult
-            .newData;
-          notification.ios.complete!(newDataResult);
-        }
-      }
-    );
-  });
-}
-
-if (Platform.OS === "android") {
-  BackgroundFetch.configure(
-    {
-      minimumFetchInterval: 60,
-      stopOnTerminate: false,
-      startOnBoot: true,
-      enableHeadless: true
-    },
-    headlessTask
-  );
-}
-
 const App: React.FunctionComponent = () => {
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      const handler = async (notification: PushNotification) => {
+        await updateAll();
+        notification.finish(PushNotificationIOS.FetchResult.NewData);
+      };
+
+      (async () => {
+        const status = ((await PushNotificationIOS.requestPermissions()) as unknown) as PushNotificationPermissions;
+        if (status.alert) {
+          PushNotificationIOS.addEventListener("notification", handler);
+        }
+      })();
+
+      return () =>
+        PushNotificationIOS.removeEventListener("notification", handler);
+    }
+
+    if (Platform.OS === "android") {
+      BackgroundFetch.configure(
+        {
+          minimumFetchInterval: 60,
+          stopOnTerminate: false,
+          startOnBoot: true,
+          enableHeadless: true
+        },
+        headlessTask
+      );
+    }
+  }, []);
+
   const [window, setWindow] = useState(Dimensions.get("window"));
 
   const handleAppStateChange = (nextAppState: AppStateStatus) => {
