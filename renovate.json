@@ -1,12 +1,4 @@
 {
   "extends": ["config:base"],
-  "patch": {
-    "automerge": true
-  },
-  "packageRules": [
-    {
-      "depTypeList": ["devDependencies"],
-      "automerge": true
-    }
-  ]
+  "automerge": true
 }
