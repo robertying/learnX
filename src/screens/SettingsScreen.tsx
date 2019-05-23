@@ -1,9 +1,7 @@
-import * as Permissions from "expo-permissions";
 import React from "react";
 import {
   Alert,
   FlatList,
-  LayoutAnimation,
   Linking,
   ListRenderItem,
   Platform,
@@ -63,9 +61,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     rawAssignments,
     setUpdate,
     showToast,
-    hasUpdate,
-    notifications,
-    setNotifications
+    hasUpdate
   } = props;
 
   const onAcknowledgementsPress = () => {
@@ -166,43 +162,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     );
   };
 
-  const onNotificationsSwitchChange = (enabled: boolean) => {
-    if (enabled) {
-      Alert.alert(
-        "开启推送通知",
-        "App 仅能在处于后台状态且未被用户显式关闭（上滑）的情况下，进行数据更新及推送本地通知。只要未被显式关闭（上滑），即使 App 的内存已被系统释放，也可以在短时间内执行数据更新程序以推送本地通知。",
-        [
-          {
-            text: "取消",
-            style: "cancel"
-          },
-          {
-            text: "确定",
-            onPress: async () => {
-              const { status } = await Permissions.askAsync(
-                Permissions.USER_FACING_NOTIFICATIONS
-              );
-              if (status !== "granted") {
-                showToast("App 无法获取推送通知权限，请在设置中开启", 1500);
-              } else {
-                LayoutAnimation.easeInEaseOut();
-                setNotifications(enabled);
-              }
-            }
-          }
-        ],
-        { cancelable: true }
-      );
-    } else {
-      LayoutAnimation.easeInEaseOut();
-      setNotifications(enabled);
-    }
-  };
-
-  const onNotificationTypesPress = () => {
-    navigation.navigate("NotificationsSettings");
-  };
-
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
     switch (index) {
       case 0:
@@ -227,24 +186,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         ) : null;
       case 2:
-        return (
-          <SettingsListItem
-            variant="switch"
-            icon={<MaterialIcons name="notifications" size={20} />}
-            text="推送通知"
-            switchValue={notifications}
-            onSwitchValueChange={onNotificationsSwitchChange}
-          />
-        );
+        return null;
       case 3:
-        return notifications ? (
-          <SettingsListItem
-            variant="arrow"
-            icon={null}
-            text="设置推送通知类型"
-            onPress={onNotificationTypesPress}
-          />
-        ) : null;
+        return null;
       case 4:
         return (
           <SettingsListItem

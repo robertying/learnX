@@ -6,16 +6,11 @@ import cl.json.RNSharePackage;
 import cl.json.ShareApplication;
 import com.RNFetchBlob.RNFetchBlobPackage;
 import com.facebook.react.ReactApplication;
-import io.invertase.firebase.RNFirebasePackage;
-import io.invertase.firebase.messaging.RNFirebaseMessagingPackage;
-import io.invertase.firebase.notifications.RNFirebaseNotificationsPackage;
-import com.dieam.reactnativepushnotification.ReactNativePushNotificationPackage;
 import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.learnium.RNDeviceInfo.RNDeviceInfo;
 import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import ca.jaysoo.extradimensions.ExtraDimensionsPackage;
 import com.wix.interactable.Interactable;
-import com.calendarevents.CalendarEventsPackage;
 import com.microsoft.codepush.react.CodePush;
 import com.cmcewen.blurview.BlurViewPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
@@ -56,17 +51,12 @@ public class MainApplication extends Application implements ShareApplication, Re
         protected List<ReactPackage> getPackages() {
             return Arrays.<ReactPackage>asList(
                     new MainReactPackage(),
-                    new RNFirebasePackage(),
-                    new RNFirebaseMessagingPackage(),
-                    new RNFirebaseNotificationsPackage(),
-                    new ReactNativePushNotificationPackage(),
                     new RNBackgroundFetchPackage(),
                     new CodePush(getString(R.string.codepush_key), MainApplication.this, BuildConfig.DEBUG),
                     new RNDeviceInfo(),
                     new AsyncStoragePackage(),
                     new ExtraDimensionsPackage(),
                     new Interactable(),
-                    new CalendarEventsPackage(),
                     new BlurViewPackage(),
                     new LinearGradientPackage(),
                     new RNFetchBlobPackage(),

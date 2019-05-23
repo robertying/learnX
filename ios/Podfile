@@ -24,7 +24,6 @@ target 'learnX' do
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
   pod 'Firebase/Analytics'
-  pod 'Firebase/Messaging'
   pod 'Fabric'
   pod 'Crashlytics'
 
@@ -57,7 +56,5 @@ target 'learnX' do
   pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
 
   pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
-
-  pod 'RNFirebase', :path => '../node_modules/react-native-firebase/ios'
 
 end
