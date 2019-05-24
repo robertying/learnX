@@ -50,7 +50,7 @@
   "devDependencies": {
     "@types/jest": "24.0.13",
     "@types/react": "16.8.18",
-    "@types/react-native": "0.57.59",
+    "@types/react-native": "0.57.60",
     "@types/react-native-push-notification": "3.0.5",
     "@types/react-native-share": "1.1.1",
     "@types/react-native-tab-view": "1.0.6",
