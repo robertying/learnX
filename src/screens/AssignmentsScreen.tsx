@@ -129,9 +129,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(assignments);
 
   useEffect(() => {
-    if (assignments.length) {
-      setSearchResult(assignments);
-    }
+    setSearchResult(assignments);
   }, [assignments.length]);
 
   useEffect(() => {
