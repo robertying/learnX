@@ -12,6 +12,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
 import { removeTags } from "../helpers/html";
+import { getLocale, getTranslation } from "../helpers/i18n";
 import Text from "./Text";
 
 export type INoticeCardProps = TouchableHighlightProps & {
@@ -112,7 +113,7 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
               numberOfLines={2}
               ellipsizeMode="tail"
             >
-              {removeTags(content || "") || "无通知内容"}
+              {removeTags(content || "") || getTranslation("noNoticeContent")}
             </Text>
           </View>
           <View
@@ -127,7 +128,9 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
             <Text style={{ color: "grey", fontSize: 13 }}>
               {courseName && courseTeacherName
                 ? `${courseTeacherName} / ${courseName}`
-                : author + " 发布"}
+                : getLocale().startsWith("zh")
+                ? author + " 发布"
+                : "published by " + author}
             </Text>
             <Text style={{ color: "grey", fontSize: 13 }}>
               {dayjs(date).fromNow()}

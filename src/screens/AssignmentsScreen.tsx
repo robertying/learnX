@@ -19,6 +19,7 @@ import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
+import { getLocale, getTranslation } from "../helpers/i18n";
 import {
   getAllAssignmentsForCourses,
   pinAssignment,
@@ -108,7 +109,9 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     if (assignment) {
       navigation.navigate("AssignmentDetail", {
         title: assignment.title,
-        deadline: dayjs(assignment.deadline).format("llll") + " 截止",
+        deadline: getLocale().startsWith("zh")
+          ? dayjs(assignment.deadline).format("llll") + " 截止"
+          : "Submission close on " + dayjs(assignment.deadline).format("llll"),
         description: assignment.description,
         attachmentName: assignment.attachmentName,
         attachmentUrl: assignment.attachmentUrl,
@@ -250,7 +253,7 @@ const fuseOptions = {
 
 // tslint:disable-next-line: no-object-mutation
 AssignmentsScreen.navigationOptions = ({ navigation }) => ({
-  title: "作业",
+  title: getTranslation("assignments"),
   headerLeft: (
     <Icon.Button
       style={{ marginLeft: 10 }}

@@ -28,6 +28,10 @@ export enum NotificationType {
   "Deadlines",
   "Grades"
 }
+export enum Language {
+  "zh",
+  "en"
+}
 export interface ISettingsState {
   readonly tabsOrder: ReadonlyArray<Tab>;
   readonly autoRefreshing: boolean;
@@ -40,6 +44,7 @@ export interface ISettingsState {
   readonly window?: IWindow;
   readonly notifications: boolean;
   readonly notificationTypes: ReadonlyArray<NotificationType>;
+  readonly lang?: Language | null;
 }
 
 export type ISemester = string | null;

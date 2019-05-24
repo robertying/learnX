@@ -2,6 +2,7 @@ import { ContentType } from "thu-learn-lib-no-native/lib/types";
 import { createAction, createAsyncAction } from "typesafe-actions";
 import { saveAssignmentsToCalendar } from "../../helpers/calendar";
 import dayjs from "../../helpers/dayjs";
+import { getTranslation } from "../../helpers/i18n";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -36,7 +37,7 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
     dispatch(getAssignmentsForCourseAction.request());
 
     const results = await dataSource.getHomeworkList(courseId).catch(err => {
-      dispatch(showToast("刷新失败", 1500));
+      dispatch(showToast(getTranslation("refreshFailure"), 1500));
       const auth = getState().auth;
       dispatch(login(auth.username || "", auth.password || ""));
     });
@@ -72,7 +73,7 @@ export function getAllAssignmentsForCourses(
     const results = await dataSource
       .getAllContents(courseIds, ContentType.HOMEWORK)
       .catch(err => {
-        dispatch(showToast("刷新失败", 1500));
+        dispatch(showToast(getTranslation("refreshFailure"), 1500));
         const auth = getState().auth;
         dispatch(login(auth.username || "", auth.password || ""));
       });

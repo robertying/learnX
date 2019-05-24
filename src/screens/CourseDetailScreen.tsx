@@ -19,6 +19,7 @@ import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
+import { getLocale, getTranslation } from "../helpers/i18n";
 import { shareFile, stripExtension } from "../helpers/share";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
 import { getFilesForCourse } from "../redux/actions/files";
@@ -103,9 +104,9 @@ const CourseDetailScreen: INavigationScreen<
 
   const [index, setIndex] = useState(0);
   const routes: any = [
-    { key: "notice", title: "通知" },
-    { key: "file", title: "文件" },
-    { key: "assignment", title: "作业" }
+    { key: "notice", title: getTranslation("notices") },
+    { key: "file", title: getTranslation("files") },
+    { key: "assignment", title: getTranslation("assignments") }
   ];
 
   const [currentModal, setCurrentModal] = useState<{
@@ -131,10 +132,10 @@ const CourseDetailScreen: INavigationScreen<
         ext
       });
     } else {
-      showToast("文件下载中……", 1000);
+      showToast(getTranslation("downloadingFile"), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
-        showToast("文件下载失败", 3000);
+        showToast(getTranslation("downloadFileFailure"), 3000);
       }
     }
   };
@@ -247,9 +248,14 @@ const CourseDetailScreen: INavigationScreen<
               title={(currentModal.data as IAssignment).title || ""}
               description={(currentModal.data as IAssignment).description || ""}
               deadline={
-                dayjs((currentModal.data as IAssignment).deadline).format(
-                  "llll"
-                ) + " 截止"
+                getLocale().startsWith("zh")
+                  ? dayjs((currentModal.data as IAssignment).deadline).format(
+                      "llll"
+                    ) + " 截止"
+                  : "Submission close on " +
+                    dayjs((currentModal.data as IAssignment).deadline).format(
+                      "llll"
+                    )
               }
               attachmentName={
                 (currentModal.data as IAssignment).attachmentName || ""
