@@ -10,6 +10,7 @@ import {
 import { iOSUIKit } from "react-native-typography";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Colors from "../constants/Colors";
+import { getLocale, getTranslation } from "../helpers/i18n";
 import TextButton, { ITextButtonProps } from "./TextButton";
 
 export type ISearchBarProps = TextInputProps & {
@@ -19,6 +20,8 @@ export type ISearchBarProps = TextInputProps & {
   readonly innerRef?: React.Ref<TextInput> | undefined;
 };
 
+const cancelButtonOriginalWidth = getLocale().startsWith("zh") ? 34 : 54;
+
 const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
   const { onCancel, containerStyle, innerRef, onChangeText } = props;
 
@@ -26,7 +29,7 @@ const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
 
   const onFocus: TextInputProps["onFocus"] = e => {
     Animated.timing(cancelButtonWidth, {
-      toValue: 34,
+      toValue: cancelButtonOriginalWidth,
       duration: 300
     }).start();
 
@@ -89,12 +92,12 @@ const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
           style={{
             width: cancelButtonWidth,
             marginRight: cancelButtonWidth.interpolate({
-              inputRange: [0, 34],
+              inputRange: [0, cancelButtonOriginalWidth],
               outputRange: [0, 8]
             })
           }}
         >
-          取消
+          {getTranslation("cancel")}
         </AnimatedButton>
       </View>
       <Icon

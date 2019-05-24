@@ -5,6 +5,7 @@ import {
   SET_CALENDAR_ID,
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
+  SET_LANG,
   SET_NOTIFICATION_TYPES,
   SET_NOTIFICATIONS,
   SET_TABS_ORDER,
@@ -33,7 +34,8 @@ export default function settings(
       NotificationType.Assignments,
       NotificationType.Deadlines,
       NotificationType.Grades
-    ]
+    ],
+    lang: null
   },
   action: ISettingsAction
 ): ISettingsState {
@@ -90,6 +92,11 @@ export default function settings(
       return {
         ...state,
         notificationTypes: action.payload
+      };
+    case SET_LANG:
+      return {
+        ...state,
+        lang: action.payload
       };
   }
   return state;

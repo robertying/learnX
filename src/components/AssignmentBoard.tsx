@@ -6,6 +6,7 @@ import WebView from "react-native-webview";
 import { withNavigation } from "react-navigation";
 import { connect } from "react-redux";
 import Colors from "../constants/Colors";
+import { getTranslation } from "../helpers/i18n";
 import { getExtension, shareFile, stripExtension } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
 import { INavigationScreenProps } from "../types/NavigationScreen";
@@ -67,10 +68,10 @@ const AssignmentBoard: FunctionComponent<
         ext
       });
     } else {
-      showToast("文件下载中……", 1000);
+      showToast(getTranslation("downloadingFile"), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
-        showToast("文件下载失败", 3000);
+        showToast(getTranslation("downloadFileFailure"), 3000);
       }
     }
   };
@@ -173,7 +174,7 @@ const AssignmentBoard: FunctionComponent<
         originWhitelist={["*"]}
         source={{
           html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${description ||
-            "无作业描述"}</body>`
+            getTranslation("noAssignmentDescription")}</body>`
         }}
       />
     </View>

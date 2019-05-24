@@ -20,6 +20,7 @@ import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
+import { getTranslation } from "../helpers/i18n";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
 import {
   getCoursesForSemester,
@@ -303,7 +304,7 @@ const fuseOptions = {
 
 // tslint:disable-next-line: no-object-mutation
 CoursesScreen.navigationOptions = ({ navigation }) => ({
-  title: "课程",
+  title: getTranslation("courses"),
   headerLeft: (
     <Icon.Button
       style={{ marginLeft: 10 }}

@@ -35,6 +35,7 @@ import {
   setCalendarId,
   setCalendarSync,
   setEventIdForAssignment,
+  setLang,
   setNotifications,
   setNotificationTypes,
   setTabsOrder,
@@ -117,6 +118,7 @@ export type ISetUpdateAction = ActionType<typeof setUpdate>;
 export type ISetWindowAction = ActionType<typeof setWindow>;
 export type ISetNotifications = ActionType<typeof setNotifications>;
 export type ISetNotificationTypes = ActionType<typeof setNotificationTypes>;
+export type ISetLang = ActionType<typeof setLang>;
 export type ISettingsAction =
   | ISetTabsOrderAction
   | ISetAutoRefreshingAction
@@ -127,7 +129,8 @@ export type ISettingsAction =
   | ISetUpdateAction
   | ISetWindowAction
   | ISetNotifications
-  | ISetNotificationTypes;
+  | ISetNotificationTypes
+  | ISetLang;
 
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
 export type ISetMockStoreAction = ActionType<typeof setMockStore>;

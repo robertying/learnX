@@ -8,6 +8,7 @@ import {
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
 import { IAssignment } from "../redux/types/state";
+import { getTranslation } from "./i18n";
 
 export const createCalendar = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
@@ -57,7 +58,9 @@ export const saveAssignmentEvent = (
     if (status !== "authorized") {
       const result = await RNCalendarEvents.authorizeEventStore();
       if (result !== "authorized") {
-        store.dispatch(showToast("无法访问日历，创建作业事项失败", 1500));
+        store.dispatch(
+          showToast(getTranslation("accessCalendarFailure"), 1500)
+        );
         reject("Unauthorized");
       }
     }
@@ -101,7 +104,7 @@ export const saveAssignmentsToCalendar = async (
   if (status !== "authorized") {
     const result = await RNCalendarEvents.authorizeEventStore();
     if (result !== "authorized") {
-      store.dispatch(showToast("无法访问日历，创建作业事项失败", 1500));
+      store.dispatch(showToast(getTranslation("accessCalendarFailure"), 1500));
       return;
     }
   }

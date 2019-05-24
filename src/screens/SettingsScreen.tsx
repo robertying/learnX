@@ -18,6 +18,7 @@ import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
 import { saveAssignmentsToCalendar } from "../helpers/calendar";
 import dayjs from "../helpers/dayjs";
+import { getTranslation } from "../helpers/i18n";
 import { getLatestRelease } from "../helpers/update";
 import { clearStore } from "../redux/actions/root";
 import {
@@ -70,15 +71,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   const onLogoutPress = () => {
     Alert.alert(
-      "注销",
-      "确定要注销吗？",
+      getTranslation("logout"),
+      getTranslation("logoutConfirmation"),
       [
         {
-          text: "取消",
+          text: getTranslation("cancel"),
           style: "cancel"
         },
         {
-          text: "确定",
+          text: getTranslation("ok"),
           onPress: () => {
             clearStore();
             navigation.navigate("Auth");
@@ -112,15 +113,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
     ) {
       Alert.alert(
-        "检查更新",
-        `发现新版本 ${versionString}`,
+        getTranslation("checkUpdate"),
+        `${getTranslation("foundNewVersion")} ${versionString}`,
         [
           {
-            text: "取消",
+            text: getTranslation("cancel"),
             style: "cancel"
           },
           {
-            text: "更新",
+            text: getTranslation("update"),
             onPress: () => {
               Linking.openURL(apkUrl);
             }
@@ -132,7 +133,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         setUpdate(true);
       }
     } else {
-      showToast("未发现更新", 1500);
+      showToast(getTranslation("noUpdate"), 1500);
       if (hasUpdate) {
         setUpdate(false);
       }
@@ -141,20 +142,20 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   const onClearFileCachePress = () => {
     Alert.alert(
-      "清空文件缓存",
-      "确定要清空文件缓存吗？",
+      getTranslation("clearFileCache"),
+      getTranslation("clearFileCacheConfirmation"),
       [
         {
-          text: "取消",
+          text: getTranslation("cancel"),
           style: "cancel"
         },
         {
-          text: "确定",
+          text: getTranslation("ok"),
           onPress: async () => {
             await RNFetchBlob.fs.unlink(
               `${RNFetchBlob.fs.dirs.DocumentDir}/files`
             );
-            showToast("成功清空文件缓存", 1500);
+            showToast(getTranslation("clearFileCacheSuccess"), 1500);
           }
         }
       ],
@@ -170,7 +171,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             variant="switch"
             containerStyle={{ marginTop: 10 }}
             icon={<MaterialCommunityIcons name="refresh" size={20} />}
-            text="自动刷新"
+            text={getTranslation("autoRefreshing")}
             switchValue={autoRefreshing}
             onSwitchValueChange={setAutoRefreshing}
           />
@@ -180,7 +181,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="switch"
             icon={<MaterialCommunityIcons name="calendar" size={20} />}
-            text="同步作业事件到系统日历"
+            text={getTranslation("calendarSync")}
             switchValue={calendarSync}
             onSwitchValueChange={onCalendarSyncSwitchChange}
           />
@@ -195,7 +196,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             variant="none"
             containerStyle={{ marginTop: 10 }}
             icon={<MaterialCommunityIcons name="account-off" size={20} />}
-            text="注销"
+            text={getTranslation("logout")}
             onPress={onLogoutPress}
           />
         );
@@ -204,7 +205,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="none"
             icon={<MaterialCommunityIcons name="file-hidden" size={20} />}
-            text="清空文件缓存"
+            text={getTranslation("clearFileCache")}
             onPress={onClearFileCachePress}
           />
         );
@@ -233,26 +234,32 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
                 <MaterialCommunityIcons name="update" size={20} />
               )
             }
-            text={hasUpdate ? "发现新版本" : "检查更新"}
+            text={
+              hasUpdate
+                ? getTranslation("foundNewVersion")
+                : getTranslation("checkUpdate")
+            }
             onPress={onCheckUpdatePress}
           />
         ) : null;
       case 7:
+        return null;
+      case 8:
         return (
           <SettingsListItem
             variant="arrow"
             containerStyle={{ marginTop: 10 }}
             icon={<MaterialCommunityIcons name="tag-heart" size={20} />}
-            text="致谢"
+            text={getTranslation("acknowledges")}
             onPress={onAcknowledgementsPress}
           />
         );
-      case 8:
+      case 9:
         return (
           <SettingsListItem
             variant="arrow"
             icon={<MaterialIcons name="copyright" size={20} />}
-            text="关于"
+            text={getTranslation("about")}
             onPress={onAboutPress}
           />
         );
@@ -272,6 +279,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           { key: "logout" },
           { key: "clearFileCache" },
           { key: "checkUpdate" },
+          { key: "lang" },
           { key: "acknowledgement" },
           { key: "about" }
         ]}
@@ -284,7 +292,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
 // tslint:disable-next-line: no-object-mutation
 SettingsScreen.navigationOptions = {
-  title: "设置"
+  title: getTranslation("settings")
 };
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
