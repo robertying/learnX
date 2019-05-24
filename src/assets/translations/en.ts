@@ -39,5 +39,6 @@ export default {
   noFileDescription: "No file description",
   noNoticeContent: "No notice content",
   effectAfterReboot: "Settings will take effect next time App launches",
-  languages: "Languages"
+  languages: "Languages",
+  semesters: "Semesters"
 };
