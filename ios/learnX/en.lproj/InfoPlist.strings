@@ -1,1 +1,4 @@
 NSCalendarsUsageDescription = "Allow learnX to access your calendar for assignment deadline sync";
+NSContactsUsageDescription = "Allow learnX to access your contacts";
+NSPhotoLibraryUsageDescription = "Allow learnX to access your photos";
+NSMicrophoneUsageDescription = "Allow learnX to access your microphone";
