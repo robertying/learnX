@@ -11,6 +11,7 @@
 		13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Assets.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		4B53EC8FB16B5F626FA38F22 /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A2EEB9974DD60D43B2AD36 /* libPods-learnX.a */; };
+		D4061A0022975B3900FDA322 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D4061A0222975B3900FDA322 /* InfoPlist.strings */; };
 		D4B79E48228D91930000DEAC /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4B79E47228D91930000DEAC /* GoogleService-Info.plist */; };
 		D4B79E4A228D9A390000DEAC /* CodePush.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4B79E49228D9A390000DEAC /* CodePush.plist */; };
 		D4FB90232279D7A50048E41D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4FB90252279D7A50048E41D /* LaunchScreen.storyboard */; };
@@ -25,9 +26,12 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = learnX/main.m; sourceTree = "<group>"; };
 		1E4FE077357C4ADA3070C7C6 /* Pods-learnX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.debug.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.debug.xcconfig"; sourceTree = "<group>"; };
 		7F0EC96FF19AB037F4007B0E /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
+		D4061A0122975B3900FDA322 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D4061A0322975B4000FDA322 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		D465FB98228B62B3005369B3 /* learnX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 		D4B79E47228D91930000DEAC /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D4B79E49228D9A390000DEAC /* CodePush.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CodePush.plist; sourceTree = "<group>"; };
+		D4CFF93F22976642000D6BEB /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4FB90262279D7C60048E41D /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		D8A2EEB9974DD60D43B2AD36 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -55,6 +59,7 @@
 				D4B79E49228D9A390000DEAC /* CodePush.plist */,
 				13B07FB51A68108700A75B9A /* Assets.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
+				D4061A0222975B3900FDA322 /* InfoPlist.strings */,
 				13B07FB71A68108700A75B9A /* main.m */,
 			);
 			name = learnX;
@@ -175,6 +180,7 @@
 				13B07FBF1A68108700A75B9A /* Assets.xcassets in Resources */,
 				D4B79E48228D91930000DEAC /* GoogleService-Info.plist in Resources */,
 				D4B79E4A228D9A390000DEAC /* CodePush.plist in Resources */,
+				D4061A0022975B3900FDA322 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,10 +345,21 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
+		D4061A0222975B3900FDA322 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D4061A0122975B3900FDA322 /* en */,
+				D4061A0322975B4000FDA322 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			path = learnX;
+			sourceTree = "<group>";
+		};
 		D4FB90252279D7A50048E41D /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				D4FB90262279D7C60048E41D /* zh-Hans */,
+				D4CFF93F22976642000D6BEB /* en */,
 			);
 			name = LaunchScreen.storyboard;
 			path = learnX;

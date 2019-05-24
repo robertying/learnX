@@ -1,5 +1,6 @@
 import React from "react";
 import AssignmentBoard from "../components/AssignmentBoard";
+import { getTranslation } from "../helpers/i18n";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IAssignmentDetailScreenProps {
@@ -43,7 +44,7 @@ const AssignmentDetailScreen: INavigationScreen<
 
 // tslint:disable-next-line: no-object-mutation
 AssignmentDetailScreen.navigationOptions = {
-  title: "详情"
+  title: getTranslation("detail")
 };
 
 export default AssignmentDetailScreen;

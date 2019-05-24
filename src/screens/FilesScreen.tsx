@@ -19,6 +19,7 @@ import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
+import { getTranslation } from "../helpers/i18n";
 import { shareFile, stripExtension } from "../helpers/share";
 import {
   getCoursesForSemester,
@@ -117,10 +118,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         ext
       });
     } else {
-      showToast("文件下载中……", 1000);
+      showToast(getTranslation("downloadingFile"), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
-        showToast("文件下载失败", 3000);
+        showToast(getTranslation("downloadFileFailure"), 3000);
       }
     }
   };
@@ -254,7 +255,7 @@ const fuseOptions = {
 
 // tslint:disable-next-line: no-object-mutation
 FilesScreen.navigationOptions = ({ navigation }) => ({
-  title: "文件",
+  title: getTranslation("files"),
   headerLeft: (
     <Icon.Button
       style={{ marginLeft: 10 }}

@@ -11,6 +11,7 @@ import { iOSColors, iOSUIKit } from "react-native-typography";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
+import { getTranslation } from "../helpers/i18n";
 import Text from "./Text";
 
 export type IFileCardProps = TouchableHighlightProps & {
@@ -106,7 +107,7 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
               numberOfLines={2}
               ellipsizeMode="tail"
             >
-              {description || "无文件描述"}
+              {description || getTranslation("noFileDescription")}
             </Text>
           </View>
           <View
