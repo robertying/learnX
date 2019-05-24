@@ -163,6 +163,10 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     );
   };
 
+  const onSemestersPress = () => {
+    navigation.navigate("Semesters");
+  };
+
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
     switch (index) {
       case 0:
@@ -187,10 +191,19 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         ) : null;
       case 2:
-        return null;
+        return (
+          <SettingsListItem
+            variant="arrow"
+            icon={<MaterialCommunityIcons name="book" size={20} />}
+            text={getTranslation("semesters")}
+            onPress={onSemestersPress}
+          />
+        );
       case 3:
         return null;
       case 4:
+        return null;
+      case 5:
         return (
           <SettingsListItem
             variant="none"
@@ -200,7 +213,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onLogoutPress}
           />
         );
-      case 5:
+      case 6:
         return (
           <SettingsListItem
             variant="none"
@@ -209,7 +222,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 6:
+      case 7:
         return Platform.OS === "android" ? (
           <SettingsListItem
             variant="none"
@@ -242,9 +255,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 7:
-        return null;
       case 8:
+        return null;
+      case 9:
         return (
           <SettingsListItem
             variant="arrow"
@@ -254,7 +267,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 9:
+      case 10:
         return (
           <SettingsListItem
             variant="arrow"
@@ -274,6 +287,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         data={[
           { key: "autoRefreshing" },
           { key: "calendarSync" },
+          { key: "semesters" },
           { key: "notifications" },
           { key: "notificationTypes" },
           { key: "logout" },

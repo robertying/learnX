@@ -39,5 +39,6 @@ export default {
   noFileDescription: "无文件描述",
   noNoticeContent: "无通知内容",
   effectAfterReboot: "设置将在下一次 App 启动时生效",
-  languages: "语言"
+  languages: "语言",
+  semesters: "学期"
 };
