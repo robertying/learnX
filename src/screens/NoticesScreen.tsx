@@ -121,9 +121,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(notices);
 
   useEffect(() => {
-    if (notices.length) {
-      setSearchResult(notices);
-    }
+    setSearchResult(notices);
   }, [notices.length]);
 
   useEffect(() => {
