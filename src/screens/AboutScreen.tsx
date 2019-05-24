@@ -5,6 +5,7 @@ import packageConfig from "../../package.json";
 import Text from "../components/Text";
 import TextButton from "../components/TextButton";
 import Colors from "../constants/Colors";
+import { getTranslation } from "../helpers/i18n";
 import { INavigationScreen } from "../types/NavigationScreen.js";
 
 const AboutScreen: INavigationScreen<{}> = () => {
@@ -57,7 +58,7 @@ const AboutScreen: INavigationScreen<{}> = () => {
 
 // tslint:disable-next-line: no-object-mutation
 AboutScreen.navigationOptions = {
-  title: "关于"
+  title: getTranslation("about")
 };
 
 export default AboutScreen;

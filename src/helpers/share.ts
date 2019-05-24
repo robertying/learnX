@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import Share from "react-native-share";
 import RNFetchBlob from "rn-fetch-blob";
+import { getTranslation } from "./i18n";
 
 export const supportedFileTypes: ReadonlyArray<string> = [
   "pdf",
@@ -37,7 +38,7 @@ export const shareFile = (url: string, name: string, ext: string) => {
       Share.open({
         url: Platform.OS === "android" ? "file://" + filePath : filePath,
         type: mimeTypes[ext],
-        title: "打开文件",
+        title: getTranslation("openFile"),
         showAppsToView: true
       });
 

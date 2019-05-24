@@ -12,6 +12,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
 import { removeTags } from "../helpers/html";
+import { getLocale, getTranslation } from "../helpers/i18n";
 import Text from "./Text";
 
 export type IAssignmentCardProps = TouchableHighlightProps & {
@@ -121,7 +122,8 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
               numberOfLines={2}
               ellipsizeMode="tail"
             >
-              {removeTags(description || "") || "无作业描述"}
+              {removeTags(description || "") ||
+                getTranslation("noAssignmentDescription")}
             </Text>
           </View>
           <View
@@ -139,9 +141,13 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
                 `${courseTeacherName} / ${courseName}`}
             </Text>
             <Text style={{ color: "grey", fontSize: 13 }}>
-              {dayjs().isAfter(dayjs(date))
-                ? dayjs().to(dayjs(date)) + "截止"
-                : "还剩 " + dayjs().to(dayjs(date), true)}
+              {getLocale().startsWith("zh")
+                ? dayjs().isAfter(dayjs(date))
+                  ? dayjs().to(dayjs(date)) + "截止"
+                  : "还剩 " + dayjs().to(dayjs(date), true)
+                : dayjs().isAfter(dayjs(date))
+                ? "closed " + dayjs().to(dayjs(date))
+                : "due in " + dayjs().to(dayjs(date), true)}
             </Text>
           </View>
         </View>

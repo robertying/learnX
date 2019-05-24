@@ -4,6 +4,7 @@ import { iOSUIKit } from "react-native-typography";
 import packageConfig from "../../package.json";
 import Text from "../components/Text";
 import Colors from "../constants/Colors";
+import { getTranslation } from "../helpers/i18n";
 import { INavigationScreen } from "../types/NavigationScreen.js";
 
 const deps: ReadonlyArray<any> = [
@@ -29,7 +30,7 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
             fontSize: iOSUIKit.bodyObject.fontSize
           }}
         >
-          感谢 Harry Chen 提供的 thu-learn-lib 🎉
+          {getTranslation("acknowledgeHarryChen")}
         </Text>
         <Text
           style={{
@@ -38,7 +39,7 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
             fontSize: iOSUIKit.bodyObject.fontSize
           }}
         >
-          感谢 Yayu Xiao 制作的 Icon 👻
+          {getTranslation("acknowledgeYayuXiao")}
         </Text>
         <Text
           style={{
@@ -47,7 +48,7 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
             fontSize: iOSUIKit.bodyObject.fontSize
           }}
         >
-          致敬 JavaScript 开源社区 ❤️
+          {getTranslation("acknowledgeJSCommunity")}
         </Text>
         {deps.map((dep, index) => (
           <Text
@@ -69,7 +70,7 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
 
 // tslint:disable-next-line: no-object-mutation
 AcknowledgementsScreen.navigationOptions = {
-  title: "致谢"
+  title: getTranslation("acknowledges")
 };
 
 export default AcknowledgementsScreen;

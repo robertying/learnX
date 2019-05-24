@@ -1,4 +1,5 @@
 import { createAsyncAction } from "typesafe-actions";
+import { getTranslation } from "../../helpers/i18n";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -20,7 +21,7 @@ export function getAllSemesters(): IThunkResult {
     dispatch(getAllSemestersAction.request());
 
     const semesters = await dataSource.getSemesterIdList().catch(err => {
-      dispatch(showToast("刷新失败", 1500));
+      dispatch(showToast(getTranslation("refreshFailure"), 1500));
       const auth = getState().auth;
       dispatch(login(auth.username || "", auth.password || ""));
     });

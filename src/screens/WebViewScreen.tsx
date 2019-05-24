@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
 import MediumPlaceholder from "../components/MediumPlaceholder";
 import Colors from "../constants/Colors";
+import { getTranslation } from "../helpers/i18n";
 import { downloadFile, shareFile } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
@@ -76,7 +77,7 @@ WebViewScreen.navigationOptions = ({ navigation }) => {
         name="share"
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() => {
-          store.dispatch(showToast("准备文件中……", 1500));
+          store.dispatch(showToast(getTranslation("preparingFile"), 1500));
           shareFile(
             navigation.getParam("url"),
             navigation.getParam("filename"),

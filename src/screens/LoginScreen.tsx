@@ -17,6 +17,7 @@ import Text from "../components/Text";
 import TextField from "../components/TextField";
 import Colors from "../constants/Colors";
 import { dummyPassword, dummyUsername } from "../helpers/dummy";
+import { getTranslation } from "../helpers/i18n";
 import { login } from "../redux/actions/auth";
 import { getCurrentSemester } from "../redux/actions/currentSemester";
 import { setMockStore } from "../redux/actions/root";
@@ -47,7 +48,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
   useEffect(() => {
     if (loginButtonPressed && loginError) {
-      showToast("登录失败", 1500);
+      showToast(getTranslation("loginFailure"), 1500);
       setLoginButtonPressed(false);
     }
   }, [loginError]);
@@ -123,7 +124,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       handleDummyUser(username, password);
       login(username, password);
     } else {
-      showToast("请完整填写用户名与密码", 1500);
+      showToast(getTranslation("completeCredentials"), 1500);
     }
   };
 
@@ -159,7 +160,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
                 tintColor={tintColor}
                 textContentType="username"
                 returnKeyType="next"
-                placeholder="用户名"
+                placeholder={getTranslation("username")}
                 onSubmitEditing={handleKeyboardNext}
                 ref={usernameTextFieldRef}
                 value={username}
@@ -173,7 +174,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
                 textContentType="password"
                 secureTextEntry={true}
                 returnKeyType="done"
-                placeholder="密码"
+                placeholder={getTranslation("password")}
                 ref={passwordTextFieldRef}
                 value={password}
                 onChangeText={handlePasswordChange}
@@ -188,7 +189,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
                 textStyle={styles.textField}
                 onPress={onLoginButtonPress}
               >
-                登录
+                {getTranslation("login")}
               </RaisedButton>
             </View>
           )}
