@@ -21,10 +21,9 @@ import AssignmentsScreen from "../screens/AssignmentsScreen";
 import CourseDetailScreen from "../screens/CourseDetailScreen";
 import CoursesScreen from "../screens/CoursesScreen";
 import FilesScreen from "../screens/FilesScreen";
-import LanguagesSettingsScreen from "../screens/LanguagesSettingsScreen";
 import NoticeDetailScreen from "../screens/NoticeDetailScreen";
 import NoticesScreen from "../screens/NoticesScreen";
-import NotificationsSettingsScreen from "../screens/NotificationsSettingsScreen";
+import SemestersSettingsScreen from "../screens/SemestersSettingsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import WebViewScreen from "../screens/WebViewScreen";
 
@@ -130,8 +129,7 @@ const SettingsStack = createStackNavigator(
     Settings: SettingsScreen,
     Acknowledgements: AcknowledgementsScreen,
     About: AboutScreen,
-    NotificationsSettings: NotificationsSettingsScreen,
-    Languages: LanguagesSettingsScreen
+    Semesters: SemestersSettingsScreen
   },
   {
     defaultNavigationOptions,
