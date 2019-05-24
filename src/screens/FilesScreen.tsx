@@ -131,9 +131,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const [searchResult, setSearchResult] = useState(files);
 
   useEffect(() => {
-    if (files.length) {
-      setSearchResult(files);
-    }
+    setSearchResult(files);
   }, [files.length]);
 
   useEffect(() => {
