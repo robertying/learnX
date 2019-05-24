@@ -11,6 +11,7 @@ import LinearGradientBlurView from "../components/LinearGradientBlurView";
 import TabBarIcon from "../components/TabBarIcon";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
+import { getTranslation } from "../helpers/i18n";
 import { store } from "../redux/store";
 import { IPersistAppState, Tab } from "../redux/types/state";
 import AboutScreen from "../screens/AboutScreen";
@@ -20,6 +21,7 @@ import AssignmentsScreen from "../screens/AssignmentsScreen";
 import CourseDetailScreen from "../screens/CourseDetailScreen";
 import CoursesScreen from "../screens/CoursesScreen";
 import FilesScreen from "../screens/FilesScreen";
+import LanguagesSettingsScreen from "../screens/LanguagesSettingsScreen";
 import NoticeDetailScreen from "../screens/NoticeDetailScreen";
 import NoticesScreen from "../screens/NoticesScreen";
 import NotificationsSettingsScreen from "../screens/NotificationsSettingsScreen";
@@ -57,7 +59,7 @@ const NoticesStack = createStackNavigator(
       tabBarIcon: ({ focused }) => (
         <TabBarIcon focused={focused} name="notifications" />
       ),
-      tabBarLabel: "通知"
+      tabBarLabel: getTranslation("notices")
     }
   }
 );
@@ -75,7 +77,7 @@ const FilesStack = createStackNavigator(
       tabBarIcon: ({ focused }) => (
         <TabBarIcon focused={focused} name="folder" />
       ),
-      tabBarLabel: "文件"
+      tabBarLabel: getTranslation("files")
     }
   }
 );
@@ -94,7 +96,7 @@ const AssignmentsStack = createStackNavigator(
       tabBarIcon: ({ focused }) => (
         <TabBarIcon focused={focused} name="today" />
       ),
-      tabBarLabel: "作业"
+      tabBarLabel: getTranslation("assignments")
     }
   }
 );
@@ -111,7 +113,7 @@ const CoursesStack = createStackNavigator(
     initialRouteName: "Courses",
     navigationOptions: {
       tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name="apps" />,
-      tabBarLabel: "课程"
+      tabBarLabel: getTranslation("courses")
     }
   }
 );
@@ -128,7 +130,8 @@ const SettingsStack = createStackNavigator(
     Settings: SettingsScreen,
     Acknowledgements: AcknowledgementsScreen,
     About: AboutScreen,
-    NotificationsSettings: NotificationsSettingsScreen
+    NotificationsSettings: NotificationsSettingsScreen,
+    Languages: LanguagesSettingsScreen
   },
   {
     defaultNavigationOptions,
@@ -138,7 +141,7 @@ const SettingsStack = createStackNavigator(
       tabBarIcon: ({ focused }) => (
         <TabBarIconWithBadge focused={focused} name="settings" />
       ),
-      tabBarLabel: "设置"
+      tabBarLabel: getTranslation("settings")
     }
   }
 );

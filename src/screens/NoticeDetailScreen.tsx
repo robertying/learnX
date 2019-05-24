@@ -1,5 +1,6 @@
 import React from "react";
 import NoticeBoard from "../components/NoticeBoard";
+import { getTranslation } from "../helpers/i18n";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface INoticeDetailScreenProps {
@@ -33,7 +34,7 @@ const NoticeDetailScreen: INavigationScreen<
 
 // tslint:disable-next-line: no-object-mutation
 NoticeDetailScreen.navigationOptions = {
-  title: "详情"
+  title: getTranslation("detail")
 };
 
 export default NoticeDetailScreen;

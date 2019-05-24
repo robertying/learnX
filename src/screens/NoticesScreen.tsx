@@ -19,6 +19,7 @@ import SearchBar from "../components/SearchBar";
 import SettingsListItem from "../components/SettingsListItem";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
+import { getTranslation } from "../helpers/i18n";
 import {
   getCoursesForSemester,
   setCoursesFilter
@@ -234,7 +235,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
 // tslint:disable-next-line: no-object-mutation
 NoticesScreen.navigationOptions = ({ navigation }) => ({
-  title: "通知",
+  title: getTranslation("notices"),
   headerLeft: (
     <Icon.Button
       style={{ marginLeft: 10 }}
