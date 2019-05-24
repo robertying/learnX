@@ -32,7 +32,7 @@ const SemestersSettingsScreen: INavigationScreen<
     return () => {
       store.dispatch(getCoursesForSemester(currentSemester as string));
     };
-  }, []);
+  }, [currentSemester]);
 
   const renderListItem: ListRenderItem<ISemester> = ({ item }) => {
     return (
@@ -41,7 +41,9 @@ const SemestersSettingsScreen: INavigationScreen<
         text={item as string}
         icon={currentSemester === item ? <Icon name="check" size={20} /> : null}
         // tslint:disable-next-line: jsx-no-lambda
-        onPress={() => setCurrentSemester(item)}
+        onPress={() => {
+          setCurrentSemester(item);
+        }}
       />
     );
   };
