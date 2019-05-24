@@ -69,5 +69,11 @@
 	<false/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Allow learnX to access your calendar for assignment deadline sync</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Allow learnX to access your contacts</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow learnX to access your photos</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow learnX to access your microphone</string>
 </dict>
 </plist>
