@@ -5843,10 +5843,10 @@ react-native-share@1.2.1:
   resolved "https://registry.yarnpkg.com/react-native-share/-/react-native-share-1.2.1.tgz#3756a3cf383c1489a6a0edf2b529ec025ee8f8f7"
   integrity sha512-V9q1FM+LuYJ65qN3k6BLWs17mIbJCzGyMOhF3rb4MIQXdJfCUbtkDX9aaV86PzcsL1EudCA53HVTJBmWPDed0Q==
 
-react-native-tab-view@2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.4.0.tgz#0f6092761502da78a89b2600d3d5c1bd25c484f5"
-  integrity sha512-SRD+UvzAfKPCvTwMn28+3pw5FBRheveZnVdXhsejUABHAonnW5s402S66jp6nq0h5a3fmLVxqvw+doijUxXTHQ==
+react-native-tab-view@2.5.0:
+  version "2.5.0"
+  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.5.0.tgz#b13ac4d9e0666db58c1a55af62f12dee8a6e4bfa"
+  integrity sha512-nU/zTUA3WFV7wZN3lw0xCJmXvFzBjxHMCJXmTNPQeoQNsmwapNNgpbyZ6CgjfTVTXsv14vOYxx3HwQCy0i1gbA==
 
 react-native-tab-view@^1.2.0, react-native-tab-view@^1.4.1:
   version "1.4.1"
