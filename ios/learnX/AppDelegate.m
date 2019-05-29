@@ -5,7 +5,6 @@
 #import <React/RCTPushNotificationManager.h>
 
 #import <UMCore/UMModuleRegistry.h>
-#import <UMReactNativeAdapter/UMNativeModulesProxy.h>
 #import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
 
 #import <CodePush/CodePush.h>
