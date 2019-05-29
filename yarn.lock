@@ -2532,10 +2532,10 @@ expo-permissions@~4.0.0:
   resolved "https://registry.yarnpkg.com/expo-permissions/-/expo-permissions-4.0.0.tgz#288701e40ee10973deb40d3d965e84da6783cdc6"
   integrity sha512-OdO5qXnC1oU4bF3ItTatOEbeIGU1986OuT2bUO8dxu8/1ycc+s7w9ayOguFTFWGLINrKmjI7StDxl5KnaW6j3Q==
 
-expo-secure-store@4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-4.0.0.tgz#87b8a3c702457e0e600438830c07081406f9da1f"
-  integrity sha512-gAG9+aExhhCjSP/GGEEDgRc2eGXRW7+IlmouljVM/xEVxwfIhfCmVBOo16ig496gEO8I/RtN2csJ9H1enPaO3Q==
+expo-secure-store@5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-5.0.0.tgz#fc51180b87ab9306657a8b5ec4345f32dd167934"
+  integrity sha512-8k/u09woXoQqzR1QPw5K9cTpV/dSIKTbE51Db5z0ojAuEeVHUhdOqfi2vkml5m50qG/h/ZjymnoICfMQtK/H8g==
 
 extend-shallow@^1.1.2:
   version "1.1.4"
