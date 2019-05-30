@@ -54,7 +54,7 @@
     "@types/react-native-push-notification": "3.0.5",
     "@types/react-native-share": "1.1.1",
     "@types/react-native-tab-view": "1.0.6",
-    "@types/react-native-vector-icons": "6.4.0",
+    "@types/react-native-vector-icons": "6.4.1",
     "@types/react-redux": "7.0.9",
     "@types/react-test-renderer": "16.8.1",
     "babel-jest": "24.8.0",
