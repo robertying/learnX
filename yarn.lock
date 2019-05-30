@@ -5766,10 +5766,10 @@ react-native-background-fetch@2.6.0:
     plist "^3.0.1"
     xcode "^2.0.0"
 
-react-native-calendar-events@1.7.2:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/react-native-calendar-events/-/react-native-calendar-events-1.7.2.tgz#489ad289bb21130d325e120710bea298da71d836"
-  integrity sha512-uKkx4kMGt+fNP+P+RgT0/brU73LbLY4jGVjQKThjlgXByT3xIJ9kN2zUkdzEGVnR5zGj5lVr+GIDcmpNYRVfyw==
+react-native-calendar-events@1.7.3:
+  version "1.7.3"
+  resolved "https://registry.yarnpkg.com/react-native-calendar-events/-/react-native-calendar-events-1.7.3.tgz#1c9f9989bfec5ae7c3a3c72572f0d68d43de0d41"
+  integrity sha512-IbtfPDpD6PLx6XQQK0X5f9gIt12iyItoSlMbPgfalz646KUqppU2L0xo4v7kZFy1D2tVDX0gpuPlwJMT2dTeNg==
 
 react-native-code-push@5.6.0:
   version "5.6.0"
