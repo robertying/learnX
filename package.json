@@ -18,7 +18,7 @@
     "@react-native-community/blur": "3.3.1",
     "dayjs": "1.8.14",
     "expo-secure-store": "5.0.0",
-    "fuse.js": "3.4.4",
+    "fuse.js": "3.4.5",
     "react": "16.8.6",
     "react-native": "0.59.8",
     "react-native-background-fetch": "2.5.6",
