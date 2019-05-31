@@ -35,7 +35,9 @@ const AboutScreen: INavigationScreen<{}> = () => {
         <TextButton
           style={{
             alignSelf: "center",
-            marginBottom: 20,
+            marginBottom: 20
+          }}
+          textStyle={{
             fontSize: iOSUIKit.bodyObject.fontSize
           }}
           onPress={onGitHubLinkPress}
