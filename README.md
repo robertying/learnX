@@ -2,7 +2,7 @@
 
 # learnX
 
-[![Build Status](https://travis-ci.org/robertying/learnX.svg?branch=master)](https://travis-ci.org/robertying/learnX)
+[![Build Status](https://travis-ci.com/robertying/learnX.svg?branch=master)](https://travis-ci.com/robertying/learnX)
 
 清华大学网络学堂 App，以 React Native 构建。
 
