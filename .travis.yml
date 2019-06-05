@@ -25,8 +25,8 @@ matrix:
         - npm install -g yarn
       install:
         - touch $HOME/.android/repositories.cfg
-        - echo y | sdkmanager "platforms;android-28"
-        - echo y | sdkmanager "build-tools;28.0.3"
+        - echo y | sdkmanager "platforms;android-29"
+        - echo y | sdkmanager "build-tools;29.0.0"
         - gem install bundler
         - bundle install
         - yarn install
