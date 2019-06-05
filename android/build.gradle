@@ -2,11 +2,11 @@
 
 buildscript {
     ext {
-        buildToolsVersion = "28.0.3"
-        minSdkVersion = 21
+        minSdkVersion = 23
         compileSdkVersion = 28
         targetSdkVersion = 28
         supportLibVersion = "28.0.0"
+        buildToolsVersion = "29.0.0"
     }
     repositories {
         google()
@@ -16,7 +16,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'com.android.tools.build:gradle:3.3.+'
         classpath 'com.google.gms:google-services:+'
         classpath 'io.fabric.tools:gradle:+'
     }
@@ -25,24 +25,15 @@ buildscript {
 allprojects {
     repositories {
         mavenLocal()
-        google()
-        jcenter()
+
         maven {
-            url "$rootDir/../node_modules/react-native/android"
+            url("$rootDir/../node_modules/react-native/android")
         }
         maven {
             url "$rootDir/../node_modules/react-native-background-fetch/android/libs"
         }
-    }
-}
 
-subprojects {
-    afterEvaluate { project ->
-        if (project.hasProperty("android")) {
-            android {
-                compileSdkVersion 28
-                buildToolsVersion "28.0.3"
-            }
-        }
+        google()
+        jcenter()
     }
 }
