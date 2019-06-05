@@ -58,7 +58,7 @@
     "@types/react-redux": "7.0.9",
     "@types/react-test-renderer": "16.8.1",
     "babel-jest": "24.8.0",
-    "husky": "2.3.0",
+    "husky": "2.4.0",
     "jest": "24.8.0",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.17.1",
