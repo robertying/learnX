@@ -48,6 +48,8 @@
     "typesafe-actions": "4.4.0"
   },
   "devDependencies": {
+    "@babel/core": "7.4.5",
+    "@babel/runtime": "7.4.5",
     "@types/jest": "24.0.13",
     "@types/react": "16.8.19",
     "@types/react-native": "0.57.60",
@@ -84,5 +86,6 @@
       "pre-commit": "yarn lint"
     }
   },
+  "license": "MIT",
   "private": true
 }
