@@ -60,6 +60,7 @@
     "@types/react-redux": "7.0.9",
     "@types/react-test-renderer": "16.8.1",
     "babel-jest": "24.8.0",
+    "babel-plugin-transform-remove-console": "6.9.4",
     "husky": "2.4.0",
     "jest": "24.8.0",
     "metro-react-native-babel-preset": "0.54.1",
@@ -76,7 +77,14 @@
   "babel": {
     "presets": [
       "module:metro-react-native-babel-preset"
-    ]
+    ],
+    "env": {
+      "production": {
+        "plugins": [
+          "transform-remove-console"
+        ]
+      }
+    }
   },
   "jest": {
     "preset": "react-native"
