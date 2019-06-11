@@ -61,7 +61,7 @@
     "@types/react-test-renderer": "16.8.1",
     "babel-jest": "24.8.0",
     "babel-plugin-transform-remove-console": "6.9.4",
-    "husky": "2.4.0",
+    "husky": "2.4.1",
     "jest": "24.8.0",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.18.2",
