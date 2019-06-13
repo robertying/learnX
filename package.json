@@ -58,7 +58,7 @@
     "@types/react-native-tab-view": "1.0.6",
     "@types/react-native-vector-icons": "6.4.1",
     "@types/react-redux": "7.1.0",
-    "@types/react-test-renderer": "16.8.1",
+    "@types/react-test-renderer": "16.8.2",
     "babel-jest": "24.8.0",
     "babel-plugin-transform-remove-console": "6.9.4",
     "husky": "2.4.1",
