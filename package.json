@@ -14,7 +14,7 @@
     "postinstall": "chmod +x patch/patch.sh && patch/patch.sh"
   },
   "dependencies": {
-    "@react-native-community/async-storage": "1.4.2",
+    "@react-native-community/async-storage": "1.5.0",
     "@react-native-community/blur": "3.3.1",
     "dayjs": "1.8.14",
     "expo-secure-store": "5.0.1",
