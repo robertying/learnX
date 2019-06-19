@@ -6133,10 +6133,10 @@ recursive-fs@0.1.4:
   resolved "https://registry.yarnpkg.com/recursive-fs/-/recursive-fs-0.1.4.tgz#47e08b1ddab8d7d9a960aa0d0daea76f875b63fa"
   integrity sha1-R+CLHdq419mpYKoNDa6nb4dbY/o=
 
-redux-persist-expo-securestore@0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/redux-persist-expo-securestore/-/redux-persist-expo-securestore-0.1.1.tgz#49fe6aed4aa3d688969efd162f92c190307054cb"
-  integrity sha1-Sf5q7Uqj1oiWnv0WL5LBkDBwVMs=
+redux-persist-expo-securestore@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/redux-persist-expo-securestore/-/redux-persist-expo-securestore-2.0.0.tgz#990d8c007c39a9a624b6311d09952b6b221a548e"
+  integrity sha512-swD6sC6QCCHyKBV0hFQIBEiO8ph2Nc6Bs96hZ7Qq5iciO/Mk2T6ZDRR8e23jWDjGK5I8uCr4in7ZVb+RPbENQA==
 
 redux-persist@5.10.0:
   version "5.10.0"

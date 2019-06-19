@@ -41,7 +41,7 @@
     "react-redux": "7.1.0",
     "redux": "4.0.1",
     "redux-persist": "5.10.0",
-    "redux-persist-expo-securestore": "0.1.1",
+    "redux-persist-expo-securestore": "2.0.0",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
     "thu-learn-lib-no-native": "2.0.0",
