@@ -934,10 +934,18 @@
     hoist-non-react-statics "^3.3.0"
     redux "^4.0.0"
 
-"@types/react@*", "@types/react@16.8.20":
+"@types/react@*":
   version "16.8.20"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.20.tgz#4f633ecbd0a4d56d0ccc50fff6f9321bbcd7d583"
   integrity sha512-ZLmI+ubSJpfUIlQuULDDrdyuFQORBuGOvNnMue8HeA0GVrAJbWtZQhcBvnBPNRBI/GrfSfrKPFhthzC2SLEtLQ==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^2.2.0"
+
+"@types/react@16.8.21":
+  version "16.8.21"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.8.21.tgz#aefb32519a4111964993be5b2bd3f172f81c34ff"
+  integrity sha512-+jAtgtJ3htE+VEP/bMzBBOANGkaTbMOGYWVrmhCVtp2WE//lNG6Irw9kBEaLR7lQGjjkt/BlSSHPgArFNOKhkg==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
@@ -3266,10 +3274,10 @@ jest-worker@^24.6.0:
     merge-stream "^1.0.1"
     supports-color "^6.1.0"
 
-jetifier@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.0.1.tgz#bc6c4fe3beffba0bc53d0f3271ce07d6f55d875f"
-  integrity sha512-OwQQusC8zuUxAf1vBI4YopueF7seAXzy9pznpbLL279o6kZKcSWSxfACjSPtjk7QA+E4dEtXgRxnaGtvmejUQA==
+jetifier@1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.1.0.tgz#a527d5d24fdef4dad829450740742a2887d2ac51"
+  integrity sha512-+vilDQbJ6ALFRCNuqea0smMGdyBG92u1uOCeRtijGLvTPyf5SNrUErYT3osd28y0+attxCbWvI3NM4LXc6u4dg==
 
 js-base64@^2.5.1:
   version "2.5.1"
