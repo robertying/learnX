@@ -16,7 +16,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.4.+'
+        classpath 'com.android.tools.build:gradle:+'
         classpath 'com.google.gms:google-services:+'
         classpath 'io.fabric.tools:gradle:+'
     }
@@ -34,7 +34,7 @@ allprojects {
             // Android JSC is installed from npm
             url("$rootDir/../node_modules/jsc-android/dist")
         }
-                maven {
+        maven {
             url "$rootDir/../node_modules/react-native-background-fetch/android/libs"
         }
 
@@ -42,14 +42,3 @@ allprojects {
         jcenter()
     }
 }
-
-// subprojects {
-//     afterEvaluate { project ->
-//         if (project.hasProperty("android")) {
-//             android {
-//                 compileSdkVersion 28
-//                 buildToolsVersion "29.0.0"
-//             }
-//         }
-//     }
-// }
