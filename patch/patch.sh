@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp patch/redux-persist-expo-securestore.js node_modules/redux-persist-expo-securestore/src/index.js
+cp -r patch/node_modules .
 
 pushd node_modules/react-native-interactable
 rm -rf \{ios\,android\} && rm -rf android && rm -rf ios

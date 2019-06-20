@@ -1,12 +1,10 @@
+import PushNotificationIOS from "@react-native-community/push-notification-ios";
 import React, { useEffect, useState } from "react";
 import {
   AppState,
   AppStateStatus,
   Dimensions,
   Platform,
-  PushNotification,
-  PushNotificationIOS,
-  PushNotificationPermissions,
   ScaledSize,
   StatusBar,
   View
@@ -25,13 +23,13 @@ import { persistor, store } from "./redux/store";
 const App: React.FunctionComponent = () => {
   useEffect(() => {
     if (Platform.OS === "ios") {
-      const handler = async (notification: PushNotification) => {
+      const handler = async (notification: any) => {
         await updateAll();
         notification.finish(PushNotificationIOS.FetchResult.NewData);
       };
 
       (async () => {
-        const status = ((await PushNotificationIOS.requestPermissions()) as unknown) as PushNotificationPermissions;
+        const status = ((await PushNotificationIOS.requestPermissions()) as unknown) as any;
         if (status.alert) {
           PushNotificationIOS.addEventListener("notification", handler);
         }
