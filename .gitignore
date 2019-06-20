@@ -83,3 +83,6 @@ android/app/src/main/res/values/codepush.xml
 # Firebase
 ios/GoogleService-Info.plist
 android/app/google-services.json
+
+# patch
+!patch/node_modules
