@@ -21,7 +21,7 @@
     "fuse.js": "3.4.5",
     "jsc-android": "241213.1.0",
     "react": "16.8.6",
-    "react-native": "0.60.0-rc.1",
+    "react-native": "0.60.0-rc.2",
     "react-native-background-fetch": "2.6.0",
     "react-native-calendar-events": "1.7.3",
     "react-native-code-push": "5.6.0",
@@ -45,7 +45,6 @@
     "redux-persist-expo-securestore": "2.0.0",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
-    "scheduler": "0.14.0",
     "thu-learn-lib-no-native": "2.0.0",
     "typesafe-actions": "4.4.1"
   },
