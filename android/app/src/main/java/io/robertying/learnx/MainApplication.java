@@ -7,18 +7,20 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.soloader.SoLoader;
-import com.microsoft.codepush.react.CodePush;
 
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
 import org.unimodules.core.interfaces.SingletonModule;
+
+import com.microsoft.codepush.react.CodePush;
+import cl.json.ShareApplication;
 
 import java.util.Arrays;
 import java.util.List;
 
 import io.robertying.learnx.generated.BasePackageList;
 
-public class MainApplication extends Application implements ReactApplication {
+public class MainApplication extends Application implements ShareApplication, ReactApplication {
 
     private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(new BasePackageList().getPackageList(), Arrays.<SingletonModule>asList());
 
@@ -47,6 +49,11 @@ public class MainApplication extends Application implements ReactApplication {
             return "index";
         }
     };
+
+    @Override
+    public String getFileProviderAuthority() {
+        return BuildConfig.APPLICATION_ID + ".provider";
+    }
 
     @Override
     public ReactNativeHost getReactNativeHost() {
