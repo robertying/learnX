@@ -81,8 +81,8 @@ import com.android.build.OutputFile
 def CI = System.getenv("CI") == "true"
 
 project.ext.react = [
-    entryFile: "index.js",
-    nodeExecutableAndArgs: [CI ? "node" : "/usr/local/bin/node"],
+        entryFile            : "index.js",
+        nodeExecutableAndArgs: [CI ? "node" : "/usr/local/bin/node"],
 ]
 
 project.ext.vectoricons = [
