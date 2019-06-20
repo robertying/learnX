@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "scripts": {
     "android": "react-native run-android",
     "android:beta": "bundle exec fastlane android beta",
@@ -52,7 +52,7 @@
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/runtime": "7.4.5",
-    "@types/react": "16.8.20",
+    "@types/react": "16.8.21",
     "@types/react-native": "0.57.63",
     "@types/react-native-share": "1.1.1",
     "@types/react-native-tab-view": "1.0.6",
@@ -60,7 +60,7 @@
     "@types/react-redux": "7.1.0",
     "babel-plugin-transform-remove-console": "6.9.4",
     "husky": "2.4.1",
-    "jetifier": "1.0.1",
+    "jetifier": "1.1.0",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.18.2",
     "tslint": "5.17.0",
