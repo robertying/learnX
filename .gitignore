@@ -84,5 +84,5 @@ android/app/src/main/res/values/codepush.xml
 ios/GoogleService-Info.plist
 android/app/google-services.json
 
-# patch
-!patch/node_modules
+# patches
+!patches/node_modules
