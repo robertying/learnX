@@ -8,6 +8,16 @@
 
 App for Tsinghua University Web Learning, developed with React Native 🎉.
 
+## Features
+
+This project also serves as a demonstration of how to build a React Native app featuring:
+
+- Latest React Native (0.60)
+- AndroidX / CocoaPods
+- TypeScript
+- Continuous Integration (travis)
+- Automatic Deployment (fastlane)
+
 ## Download
 
 - Android
