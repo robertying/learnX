@@ -10,7 +10,7 @@
     "ios:build": "bundle exec fastlane ios build",
     "start": "react-native start",
     "lint": "tsc --noUnusedLocals && prettier -c \"src/**/*\" --write",
-    "postinstall": "chmod +x patch/patch.sh && patch/patch.sh && jetify"
+    "postinstall": "chmod +x patches/patch.sh && patches/patch.sh && jetify"
   },
   "dependencies": {
     "@react-native-community/async-storage": "1.5.0",
