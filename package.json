@@ -62,7 +62,7 @@
     "jetifier": "1.4.0",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.18.2",
-    "tslint": "5.17.0",
+    "tslint": "5.18.0",
     "tslint-config-prettier": "1.18.0",
     "tslint-eslint-rules": "5.4.0",
     "tslint-immutable": "6.0.0",
