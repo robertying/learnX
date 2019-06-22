@@ -3,7 +3,7 @@ export default {
   acknowledgeHarryChen: "Thank Harry Chen for `thu-learn-lib` 🎉",
   acknowledgeYayuXiao: "Thank Yayu Xiao for App Icon 👻",
   acknowledgeJSCommunity: "Best regards to JavaScript Community ❤️",
-  acknowledges: "Acknowledgements",
+  acknowledgements: "Acknowledgements",
   detail: "Detail",
   assignments: "Assignments",
   notices: "Notices",

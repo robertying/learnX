@@ -3,7 +3,7 @@ export default {
   acknowledgeHarryChen: "感谢 Harry Chen 提供的 thu-learn-lib 🎉",
   acknowledgeYayuXiao: "感谢 Yayu Xiao 制作的 Icon 👻",
   acknowledgeJSCommunity: "致敬 JavaScript 开源社区 ❤️",
-  acknowledges: "致谢",
+  acknowledgements: "致谢",
   detail: "详情",
   assignments: "作业",
   notices: "通知",
