@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
+import { iOSUIKit } from "react-native-typography";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
 
 const EmptyList: React.FunctionComponent = () => (
@@ -13,8 +13,8 @@ const EmptyList: React.FunctionComponent = () => (
       marginTop: 40
     }}
   >
-    <Icon name="check-circle" color={Colors.secondaryText} size={40} />
-    <Text style={{ marginTop: 10, color: Colors.secondaryText, fontSize: 16 }}>
+    <Icon name="check-circle" color={iOSUIKit.footnoteObject.color} size={40} />
+    <Text style={[iOSUIKit.footnote, { marginTop: 10 }]}>
       {getTranslation("emptyContent")}
     </Text>
   </View>

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Modal from "react-native-modal";
+import { Navigation } from "react-native-navigation";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
@@ -35,7 +36,7 @@ import {
   IPersistAppState,
   ISemester
 } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface INoticesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -60,7 +61,7 @@ interface INoticesScreenDispatchProps {
 type INoticesScreenProps = INoticesScreenStateProps &
   INoticesScreenDispatchProps;
 
-const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
+const NoticesScreen: NavigationScreen<INoticesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
@@ -69,7 +70,6 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     isFetching,
     getCoursesForSemester,
     getAllNoticesForCourses,
-    navigation,
     autoRefreshing,
     pinnedNotices,
     pinNotice,
@@ -106,17 +106,22 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     const notice = notices.find(item => item.id === noticeId);
 
     if (notice) {
-      navigation.navigate("NoticeDetail", {
-        title: notice.title,
-        author: notice.publisher,
-        content: notice.content,
-        attachmentName: notice.attachmentName,
-        attachmentUrl: notice.attachmentUrl
+      Navigation.push(props.componentId, {
+        component: {
+          name: "notices.detail",
+          passProps: {
+            title: notice.title,
+            author: notice.publisher,
+            content: notice.content,
+            attachmentName: notice.attachmentName,
+            attachmentUrl: notice.attachmentUrl
+          }
+        }
       });
     }
   };
 
-  const isSearching = navigation.getParam("isSearching", false);
+  const isSearching = false;
   const searchBarRef = useRef<TextInput>();
   const [searchResult, setSearchResult] = useState(notices);
 
@@ -149,7 +154,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   };
 
-  const modalVisible = navigation.getParam("filterModalVisible");
+  const modalVisible = false;
 
   const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
     return (
@@ -177,7 +182,6 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           // tslint:disable-next-line: jsx-no-lambda
           onCancel={() => {
             LayoutAnimation.easeInEaseOut();
-            navigation.setParams({ isSearching: false });
           }}
           onChangeText={onSearchChange}
         />
@@ -200,9 +204,9 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         backdropColor="transparent"
         swipeDirection="down"
         // tslint:disable-next-line: jsx-no-lambda
-        onSwipeComplete={() =>
-          navigation.setParams({ filterModalVisible: false })
-        }
+        onSwipeComplete={() => {
+          // navigation.setParams({ filterModalVisible: false })
+        }}
       >
         <View style={{ flex: 1, backgroundColor: "white" }}>
           <Icon.Button
@@ -210,7 +214,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
             name="close"
             // tslint:disable-next-line: jsx-no-lambda
             onPress={() => {
-              navigation.setParams({ filterModalVisible: false });
+              // navigation.setParams({ filterModalVisible: false });
             }}
             color="black"
             size={24}
@@ -232,44 +236,16 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 };
 
 // tslint:disable-next-line: no-object-mutation
-NoticesScreen.navigationOptions = ({ navigation }) => ({
-  title: getTranslation("notices"),
-  headerLeft: (
-    <Icon.Button
-      style={{ marginLeft: 10 }}
-      name="filter-list"
-      // tslint:disable-next-line: jsx-no-lambda
-      onPress={() => {
-        navigation.setParams({
-          filterModalVisible: true
-        });
-      }}
-      color="white"
-      size={24}
-      backgroundColor="transparent"
-      underlayColor="transparent"
-      activeOpacity={0.6}
-    />
-  ),
-  headerRight: (
-    <Icon.Button
-      name="search"
-      // tslint:disable-next-line: jsx-no-lambda
-      onPress={() => {
-        LayoutAnimation.easeInEaseOut();
-        navigation.setParams({
-          isSearching: !navigation.getParam("isSearching", false)
-        });
-      }}
-      color="white"
-      size={24}
-      backgroundColor="transparent"
-      underlayColor="transparent"
-      activeOpacity={0.6}
-    />
-  )
-});
-
+NoticesScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("notices")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
+};
 const fuseOptions = {
   shouldSort: true,
   threshold: 0.6,

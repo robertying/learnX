@@ -9,7 +9,7 @@ import { getCoursesForSemester } from "../redux/actions/courses";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
 import { store } from "../redux/store";
 import { IPersistAppState, ISemester } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface ISemestersSettingsScreenStateProps {
   readonly semesters: ReadonlyArray<ISemester>;
@@ -23,7 +23,7 @@ interface ISemestersSettingsScreenDispatchProps {
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
   ISemestersSettingsScreenDispatchProps;
 
-const SemestersSettingsScreen: INavigationScreen<
+const SemestersSettingsScreen: NavigationScreen<
   ISemestersSettingsScreenProps
 > = props => {
   const { semesters, currentSemester, setCurrentSemester } = props;
@@ -64,8 +64,15 @@ const SemestersSettingsScreen: INavigationScreen<
 };
 
 // tslint:disable-next-line: no-object-mutation
-SemestersSettingsScreen.navigationOptions = {
-  title: getTranslation("semesters")
+SemestersSettingsScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("semesters")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 function mapStateToProps(

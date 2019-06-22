@@ -10,6 +10,7 @@ import {
   View
 } from "react-native";
 import Modal from "react-native-modal";
+import { Navigation } from "react-native-navigation";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
@@ -37,7 +38,7 @@ import {
   IPersistAppState,
   ISemester
 } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface IFilesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -62,7 +63,7 @@ interface IFilesScreenDispatchProps {
 
 type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
 
-const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
+const FilesScreen: NavigationScreen<IFilesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
@@ -71,7 +72,6 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     isFetching,
     getCoursesForSemester,
     getAllFilesForCourses,
-    navigation,
     autoRefreshing,
     showToast,
     pinFile,
@@ -111,11 +111,16 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     ext: string
   ) => {
     if (Platform.OS === "ios") {
-      navigation.navigate("WebView", {
-        title: stripExtension(filename),
-        filename: stripExtension(filename),
-        url,
-        ext
+      Navigation.push(props.componentId, {
+        component: {
+          name: "webview",
+          passProps: {
+            title: stripExtension(filename),
+            filename: stripExtension(filename),
+            url,
+            ext
+          }
+        }
       });
     } else {
       showToast(getTranslation("downloadingFile"), 1000);
@@ -126,7 +131,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
-  const isSearching = navigation.getParam("isSearching", false);
+  const isSearching = false;
   const searchBarRef = useRef<TextInput>();
   const [searchResult, setSearchResult] = useState(files);
 
@@ -159,7 +164,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
-  const modalVisible = navigation.getParam("filterModalVisible");
+  const modalVisible = false;
 
   const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
     return (
@@ -187,7 +192,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           // tslint:disable-next-line: jsx-no-lambda
           onCancel={() => {
             LayoutAnimation.easeInEaseOut();
-            navigation.setParams({ isSearching: false });
+            //  navigation.setParams({ isSearching: false });
           }}
           onChangeText={onSearchChange}
         />
@@ -210,9 +215,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         backdropColor="transparent"
         swipeDirection="down"
         // tslint:disable-next-line: jsx-no-lambda
-        onSwipeComplete={() =>
-          navigation.setParams({ filterModalVisible: false })
-        }
+        onSwipeComplete={() => {}}
       >
         <View style={{ flex: 1, backgroundColor: "white" }}>
           <Icon.Button
@@ -220,7 +223,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             name="close"
             // tslint:disable-next-line: jsx-no-lambda
             onPress={() => {
-              navigation.setParams({ filterModalVisible: false });
+              //   navigation.setParams({ filterModalVisible: false });
             }}
             color="black"
             size={24}
@@ -252,43 +255,16 @@ const fuseOptions = {
 };
 
 // tslint:disable-next-line: no-object-mutation
-FilesScreen.navigationOptions = ({ navigation }) => ({
-  title: getTranslation("files"),
-  headerLeft: (
-    <Icon.Button
-      style={{ marginLeft: 10 }}
-      name="filter-list"
-      // tslint:disable-next-line: jsx-no-lambda
-      onPress={() => {
-        navigation.setParams({
-          filterModalVisible: true
-        });
-      }}
-      color="white"
-      size={24}
-      backgroundColor="transparent"
-      underlayColor="transparent"
-      activeOpacity={0.6}
-    />
-  ),
-  headerRight: (
-    <Icon.Button
-      name="search"
-      // tslint:disable-next-line: jsx-no-lambda
-      onPress={() => {
-        LayoutAnimation.easeInEaseOut();
-        navigation.setParams({
-          isSearching: !navigation.getParam("isSearching", false)
-        });
-      }}
-      color="white"
-      size={24}
-      backgroundColor="transparent"
-      underlayColor="transparent"
-      activeOpacity={0.6}
-    />
-  )
-});
+FilesScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("courses")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
+};
 
 function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
   return {

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Dimensions, Platform, View } from "react-native";
 import Modal from "react-native-modal";
+import { Navigation } from "react-native-navigation";
 import {
   Route,
   SceneRendererProps,
@@ -11,7 +12,6 @@ import { Props } from "react-native-tab-view/lib/typescript/src/TabBar";
 import { connect } from "react-redux";
 import AssignmentBoard from "../components/AssignmentBoard";
 import AssignmentsView from "../components/AssignmentsView";
-import DoubleHeaderTitle from "../components/DoubleHeaderTitle";
 import FilesView from "../components/FilesView";
 import NoticeBoard from "../components/NoticeBoard";
 import NoticesView from "../components/NoticesView";
@@ -32,7 +32,7 @@ import {
   IPersistAppState,
   IWindow
 } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface ITabRoute {
   readonly key: string;
@@ -42,7 +42,7 @@ interface ITabRoute {
 const renderTabBar = (props: Props<ITabRoute>) => (
   <TabBar
     {...props}
-    indicatorStyle={{ backgroundColor: Colors.tint }}
+    indicatorStyle={{ backgroundColor: Colors.theme }}
     style={{ backgroundColor: "white" }}
     renderLabel={renderLabel}
   />
@@ -72,11 +72,10 @@ interface ICourseDetailScreenDispatchProps {
 type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
   ICourseDetailScreenDispatchProps;
 
-const CourseDetailScreen: INavigationScreen<
-  ICourseDetailScreenProps
+const CourseDetailScreen: NavigationScreen<
+  ICourseDetailScreenProps & { readonly courseId: string }
 > = props => {
   const {
-    navigation,
     notices: rawNotices,
     files: rawFiles,
     assignments: rawAssignments,
@@ -87,10 +86,9 @@ const CourseDetailScreen: INavigationScreen<
     getAssignmentsForCourse,
     getFilesForCourse,
     getNoticesForCourse,
-    window
+    window,
+    courseId
   } = props;
-
-  const courseId = navigation.getParam("courseId");
 
   const notices = rawNotices
     .filter(item => item.courseId === courseId)
@@ -125,11 +123,16 @@ const CourseDetailScreen: INavigationScreen<
     ext: string
   ) => {
     if (Platform.OS === "ios") {
-      navigation.navigate("WebView", {
-        title: stripExtension(filename),
-        filename: stripExtension(filename),
-        url,
-        ext
+      Navigation.push(props.componentId, {
+        component: {
+          name: "webview",
+          passProps: {
+            title: stripExtension(filename),
+            filename: stripExtension(filename),
+            url,
+            ext
+          }
+        }
       });
     } else {
       showToast(getTranslation("downloadingFile"), 1000);
@@ -287,19 +290,15 @@ const CourseDetailScreen: INavigationScreen<
 };
 
 // tslint:disable-next-line: no-object-mutation
-CourseDetailScreen.navigationOptions = ({ navigation }) => {
-  return {
-    headerTitle: (
-      <DoubleHeaderTitle
-        title={navigation.getParam("courseName", "课程")}
-        subtitle={navigation.getParam("courseTeacherName", "教师")}
-      />
-    ),
-    headerBackTitle:
-      navigation.getParam("courseName", "课程").substring(0, 3) + "...",
-    headerTruncatedBackTitle:
-      navigation.getParam("courseName", "课程").substring(0, 3) + "..."
-  };
+CourseDetailScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("detail")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 function mapStateToProps(

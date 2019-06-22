@@ -9,7 +9,7 @@ import { getCurrentSemester } from "../redux/actions/currentSemester";
 import { getAllSemesters } from "../redux/actions/semesters";
 import { setUpdate } from "../redux/actions/settings";
 import { IAuthState, IPersistAppState, ISemester } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface IAuthLoadingScreenStateProps {
   readonly rehydrated: boolean;
@@ -19,8 +19,8 @@ interface IAuthLoadingScreenStateProps {
 
 type IAuthLoadingScreenProps = DispatchProp<any> & IAuthLoadingScreenStateProps;
 
-const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
-  const { navigation, dispatch, rehydrated, auth, semesters } = props;
+const AuthLoadingScreen: NavigationScreen<IAuthLoadingScreenProps> = props => {
+  const { dispatch, rehydrated, auth, semesters } = props;
 
   useEffect(() => {
     if (Platform.OS === "android") {
@@ -42,13 +42,13 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
     if (auth.loggedIn) {
       dispatch(getAllSemesters());
       dispatch(getCurrentSemester(semesters));
-      navigation.navigate("Main");
+      //   navigation.navigate("Main");
     }
   }, [auth.loggedIn]);
 
   useEffect(() => {
     if (auth.error) {
-      navigation.navigate("Auth");
+      //  navigation.navigate("Auth");
     }
   }, [auth.error]);
 
@@ -57,7 +57,7 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
       if (auth && auth.username && auth.password) {
         dispatch(login(auth.username, auth.password));
       } else {
-        navigation.navigate("Auth");
+        //   navigation.navigate("Auth");
       }
     }
   }, [rehydrated]);

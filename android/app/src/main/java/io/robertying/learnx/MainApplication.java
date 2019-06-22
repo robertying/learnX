@@ -1,69 +1,68 @@
 package io.robertying.learnx;
 
-import android.app.Application;
-
 import com.facebook.react.PackageList;
-import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
-import com.facebook.soloader.SoLoader;
+import com.microsoft.codepush.react.CodePush;
+import com.reactnativenavigation.NavigationApplication;
+import com.reactnativenavigation.react.NavigationPackage;
+import com.reactnativenavigation.react.NavigationReactNativeHost;
+import com.reactnativenavigation.react.ReactGateway;
 
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
 import org.unimodules.core.interfaces.SingletonModule;
 
-import com.microsoft.codepush.react.CodePush;
-import cl.json.ShareApplication;
-
 import java.util.Arrays;
 import java.util.List;
 
+import cl.json.ShareApplication;
 import io.robertying.learnx.generated.BasePackageList;
 
-public class MainApplication extends Application implements ShareApplication, ReactApplication {
+public class MainApplication extends NavigationApplication implements ShareApplication {
 
     private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(new BasePackageList().getPackageList(), Arrays.<SingletonModule>asList());
 
-    private final ReactNativeHost mReactNativeHost = new ReactNativeHost(this) {
+    @Override
+    protected ReactGateway createReactGateway() {
 
-        @Override
-        protected String getJSBundleFile() {
-            return CodePush.getJSBundleFile();
-        }
+        ReactNativeHost host = new NavigationReactNativeHost(this, isDebug(), createAdditionalReactPackages()) {
+            @Override
+            protected String getJSMainModuleName() {
+                return "index";
+            }
 
-        @Override
-        public boolean getUseDeveloperSupport() {
-            return BuildConfig.DEBUG;
-        }
+            @Override
+            protected String getJSBundleFile() {
+                return CodePush.getJSBundleFile();
+            }
 
-        @Override
-        protected List<ReactPackage> getPackages() {
-            @SuppressWarnings("UnnecessaryLocalVariable")
-            List<ReactPackage> packages = new PackageList(this).getPackages();
-            packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
-            return packages;
-        }
+            @Override
+            protected List<ReactPackage> getPackages() {
+                @SuppressWarnings("UnnecessaryLocalVariable")
+                List<ReactPackage> packages = new PackageList(this).getPackages();
+                packages.add(new ModuleRegistryAdapter(mModuleRegistryProvider));
+                packages.add(new NavigationPackage(this));
+                return packages;
+            }
+        };
 
-        @Override
-        protected String getJSMainModuleName() {
-            return "index";
-        }
-    };
+        return new ReactGateway(this, isDebug(), host);
+    }
+
+    @Override
+    public boolean isDebug() {
+        return BuildConfig.DEBUG;
+    }
+
+    @Override
+    public List<ReactPackage> createAdditionalReactPackages() {
+        return Arrays.<ReactPackage>asList();
+    }
 
     @Override
     public String getFileProviderAuthority() {
         return BuildConfig.APPLICATION_ID + ".provider";
-    }
-
-    @Override
-    public ReactNativeHost getReactNativeHost() {
-        return mReactNativeHost;
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        SoLoader.init(this, /* native exopackage */ false);
     }
 
 }

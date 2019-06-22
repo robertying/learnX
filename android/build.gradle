@@ -10,6 +10,8 @@ buildscript {
     }
     repositories {
         google()
+        mavenLocal()
+        mavenCentral()
         jcenter()
         maven {
             url 'https://maven.fabric.io/public'
@@ -24,8 +26,6 @@ buildscript {
 
 allprojects {
     repositories {
-        mavenLocal()
-
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url("$rootDir/../node_modules/react-native/android")
@@ -39,6 +39,37 @@ allprojects {
         }
 
         google()
+        mavenLocal()
+        mavenCentral()
         jcenter()
+        maven {
+            url 'https://jitpack.io'
+        }
+    }
+}
+
+subprojects { subproject ->
+    afterEvaluate {
+        if ((subproject.plugins.hasPlugin('android') || subproject.plugins.hasPlugin('android-library'))) {
+            android {
+                variantFilter { variant ->
+                    def names = variant.flavors*.name
+                    if (names.contains("reactNative51") ||
+                            names.contains("reactNative55") ||
+                            names.contains("reactNative56") ||
+                            names.contains("reactNative57") ||
+                            names.contains("reactNative57_5")) {
+                        setIgnore(true)
+                    }
+                }
+            }
+        }
+
+        if (project.hasProperty("android")) {
+            android {
+                compileSdkVersion 29
+                buildToolsVersion "29.0.0"
+            }
+        }
     }
 }

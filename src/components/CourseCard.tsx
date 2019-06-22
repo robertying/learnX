@@ -56,7 +56,7 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
       >
         <View
           style={{
-            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            backgroundColor: pinned ? Colors.theme : "#fff",
             padding: 15
           }}
         >
