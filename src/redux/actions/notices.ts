@@ -1,6 +1,5 @@
-import { ContentType } from "thu-learn-lib-no-native/lib/types";
+import { ContentType, Notification } from "thu-learn-lib-no-native/lib/types";
 import { createAction, createAsyncAction } from "typesafe-actions";
-import { getTranslation } from "../../helpers/i18n";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -14,8 +13,6 @@ import {
   UNPIN_NOTICE
 } from "../types/constants";
 import { INotice } from "../types/state";
-import { login } from "./auth";
-import { showToast } from "./toast";
 
 export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_REQUEST,
@@ -23,21 +20,15 @@ export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_FAILURE
 )<
   undefined,
-  { readonly notices: ReadonlyArray<INotice>; readonly courseId: string },
+  { readonly courseId: string; readonly notices: ReadonlyArray<INotice> },
   Error
 >();
 
 export function getNoticesForCourse(courseId: string): IThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getNoticesForCourseAction.request());
 
-    const results = await dataSource
-      .getNotificationList(courseId)
-      .catch(err => {
-        dispatch(showToast(getTranslation("refreshFailure"), 1500));
-        const auth = getState().auth;
-        dispatch(login(auth.username || "", auth.password || ""));
-      });
+    const results = await dataSource.getNotificationList(courseId);
 
     if (results) {
       const notices = results.map(result => ({ ...result, courseId }));
@@ -62,22 +53,21 @@ export function getAllNoticesForCourses(
   // tslint:disable-next-line: readonly-array
   courseIds: string[]
 ): IThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAllNoticesForCoursesAction.request());
 
-    const results = await dataSource
-      .getAllContents(courseIds, ContentType.NOTIFICATION)
-      .catch(err => {
-        dispatch(showToast(getTranslation("refreshFailure"), 1500));
-        const auth = getState().auth;
-        dispatch(login(auth.username || "", auth.password || ""));
-      });
+    const results = await dataSource.getAllContents(
+      courseIds,
+      ContentType.NOTIFICATION
+    );
 
     if (results) {
       const notices = Object.keys(results)
         .map(courseId => {
-          const noticesForCourse = results[courseId] as any;
-          return noticesForCourse.map((notice: INotice) => ({
+          const noticesForCourse = results[courseId] as ReadonlyArray<
+            Notification
+          >;
+          return noticesForCourse.map(notice => ({
             ...notice,
             courseId
           }));

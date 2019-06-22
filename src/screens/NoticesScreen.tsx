@@ -30,18 +30,13 @@ import {
   pinNotice,
   unpinNotice
 } from "../redux/actions/notices";
-import {
-  ICourse,
-  INotice,
-  IPersistAppState,
-  ISemester
-} from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { ICourse, INotice, IPersistAppState } from "../redux/types/state";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface INoticesScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
-  readonly semesterId: ISemester;
+  readonly semesterId: string;
   readonly courses: ReadonlyArray<ICourse>;
   readonly notices: ReadonlyArray<INotice>;
   readonly isFetching: boolean;
@@ -61,7 +56,7 @@ interface INoticesScreenDispatchProps {
 type INoticesScreenProps = INoticesScreenStateProps &
   INoticesScreenDispatchProps;
 
-const NoticesScreen: NavigationScreen<INoticesScreenProps> = props => {
+const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,

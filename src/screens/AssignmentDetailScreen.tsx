@@ -1,7 +1,7 @@
 import React from "react";
 import AssignmentBoard from "../components/AssignmentBoard";
 import { getTranslation } from "../helpers/i18n";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IAssignmentDetailScreenProps {
   readonly title: string;
@@ -9,7 +9,7 @@ interface IAssignmentDetailScreenProps {
   readonly deadline: string;
 }
 
-const AssignmentDetailScreen: NavigationScreen<
+const AssignmentDetailScreen: INavigationScreen<
   IAssignmentDetailScreenProps
 > = props => {
   return <AssignmentBoard {...props} />;

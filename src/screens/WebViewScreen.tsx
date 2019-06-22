@@ -5,9 +5,9 @@ import MediumPlaceholder from "../components/MediumPlaceholder";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
 import { downloadFile } from "../helpers/share";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
-const WebViewScreen: NavigationScreen<{
+const WebViewScreen: INavigationScreen<{
   readonly title: string;
   readonly filename: string;
   readonly url: string;

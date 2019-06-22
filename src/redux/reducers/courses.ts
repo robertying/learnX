@@ -31,18 +31,21 @@ export default function courses(
     case GET_COURSES_FOR_SEMESTER_REQUEST:
       return {
         ...state,
-        isFetching: true
+        isFetching: true,
+        error: null
       };
     case GET_COURSES_FOR_SEMESTER_SUCCESS:
       return {
         ...state,
         isFetching: false,
-        items: action.payload
+        items: action.payload,
+        error: null
       };
     case GET_COURSES_FOR_SEMESTER_FAILURE:
       return {
         ...state,
-        isFetching: false
+        isFetching: false,
+        error: action.payload
       };
     case PIN_COURSE:
       return {

@@ -8,22 +8,22 @@ import { getTranslation } from "../helpers/i18n";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
 import { store } from "../redux/store";
-import { IPersistAppState, ISemester } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { IPersistAppState } from "../redux/types/state";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ISemestersSettingsScreenStateProps {
-  readonly semesters: ReadonlyArray<ISemester>;
-  readonly currentSemester: ISemester;
+  readonly semesters: readonly string[];
+  readonly currentSemester: string;
 }
 
 interface ISemestersSettingsScreenDispatchProps {
-  readonly setCurrentSemester: (semester: ISemester) => void;
+  readonly setCurrentSemester: (semesterId: string) => void;
 }
 
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
   ISemestersSettingsScreenDispatchProps;
 
-const SemestersSettingsScreen: NavigationScreen<
+const SemestersSettingsScreen: INavigationScreen<
   ISemestersSettingsScreenProps
 > = props => {
   const { semesters, currentSemester, setCurrentSemester } = props;
@@ -34,7 +34,7 @@ const SemestersSettingsScreen: NavigationScreen<
     };
   }, [currentSemester]);
 
-  const renderListItem: ListRenderItem<ISemester> = ({ item }) => {
+  const renderListItem: ListRenderItem<string> = ({ item }) => {
     return (
       <SettingsListItem
         variant="none"

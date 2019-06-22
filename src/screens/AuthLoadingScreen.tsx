@@ -4,22 +4,22 @@ import { connect, DispatchProp } from "react-redux";
 import packageConfig from "../../package.json";
 import SplashScreen from "../components/SplashScreen";
 import { getLatestRelease } from "../helpers/update";
-import { login } from "../redux/actions/auth";
-import { getCurrentSemester } from "../redux/actions/currentSemester";
+import { login } from "../redux/actions/auth.js";
+import { setCurrentSemester } from "../redux/actions/currentSemester.js";
 import { getAllSemesters } from "../redux/actions/semesters";
 import { setUpdate } from "../redux/actions/settings";
-import { IAuthState, IPersistAppState, ISemester } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { IAuthState, IPersistAppState } from "../redux/types/state";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IAuthLoadingScreenStateProps {
   readonly rehydrated: boolean;
   readonly auth: IAuthState;
-  readonly semesters: ReadonlyArray<ISemester>;
+  readonly semesters: readonly string[];
 }
 
 type IAuthLoadingScreenProps = DispatchProp<any> & IAuthLoadingScreenStateProps;
 
-const AuthLoadingScreen: NavigationScreen<IAuthLoadingScreenProps> = props => {
+const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
   const { dispatch, rehydrated, auth, semesters } = props;
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const AuthLoadingScreen: NavigationScreen<IAuthLoadingScreenProps> = props => {
   useEffect(() => {
     if (auth.loggedIn) {
       dispatch(getAllSemesters());
-      dispatch(getCurrentSemester(semesters));
+      dispatch(setCurrentSemester(semesters[0]));
       //   navigation.navigate("Main");
     }
   }, [auth.loggedIn]);

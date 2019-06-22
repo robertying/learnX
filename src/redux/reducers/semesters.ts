@@ -17,18 +17,21 @@ export default function semesters(
     case GET_ALL_SEMESTERS_REQUEST:
       return {
         ...state,
-        isFetching: true
+        isFetching: true,
+        error: null
       };
     case GET_ALL_SEMESTERS_SUCCESS:
       return {
         ...state,
         isFetching: false,
-        items: action.payload
+        items: action.payload,
+        error: null
       };
     case GET_ALL_SEMESTERS_FAILURE:
       return {
         ...state,
-        isFetching: false
+        isFetching: false,
+        error: action.payload
       };
   }
   return state;

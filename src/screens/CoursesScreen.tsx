@@ -36,15 +36,14 @@ import {
   ICourse,
   IFile,
   INotice,
-  IPersistAppState,
-  ISemester
+  IPersistAppState
 } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ICoursesScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
-  readonly semesterId: ISemester;
+  readonly semesterId: string;
   readonly courses: ReadonlyArray<ICourse>;
   readonly notices: ReadonlyArray<INotice>;
   readonly isFetchingNotices: boolean;
@@ -70,7 +69,7 @@ interface ICoursesScreenDispatchProps {
 type ICoursesScreenProps = ICoursesScreenStateProps &
   ICoursesScreenDispatchProps;
 
-const CoursesScreen: NavigationScreen<ICoursesScreenProps> = props => {
+const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,

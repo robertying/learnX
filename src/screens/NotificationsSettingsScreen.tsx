@@ -5,7 +5,7 @@ import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
 import { setNotificationTypes } from "../redux/actions/settings";
 import { IPersistAppState, NotificationType } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface INotificationsSettingsScreenStateProps {
   readonly notificationTypes: ReadonlyArray<NotificationType>;
@@ -20,7 +20,7 @@ interface INotificationsSettingsScreenDispatchProps {
 type INotificationsSettingsScreenProps = INotificationsSettingsScreenStateProps &
   INotificationsSettingsScreenDispatchProps;
 
-const NotificationsSettingsScreen: NavigationScreen<
+const NotificationsSettingsScreen: INavigationScreen<
   INotificationsSettingsScreenProps
 > = props => {
   const { notificationTypes, setNotificationTypes } = props;

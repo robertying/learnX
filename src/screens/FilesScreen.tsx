@@ -32,18 +32,13 @@ import {
   unpinFile
 } from "../redux/actions/files";
 import { showToast } from "../redux/actions/toast";
-import {
-  ICourse,
-  IFile,
-  IPersistAppState,
-  ISemester
-} from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { ICourse, IFile, IPersistAppState } from "../redux/types/state";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IFilesScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
-  readonly semesterId: ISemester;
+  readonly semesterId: string;
   readonly courses: ReadonlyArray<ICourse>;
   readonly files: ReadonlyArray<IFile>;
   readonly isFetching: boolean;
@@ -63,7 +58,7 @@ interface IFilesScreenDispatchProps {
 
 type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
 
-const FilesScreen: NavigationScreen<IFilesScreenProps> = props => {
+const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
