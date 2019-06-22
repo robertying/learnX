@@ -1,5 +1,6 @@
 import RNCalendarEvents from "react-native-calendar-events";
 import Colors from "../constants/Colors";
+import dayjs from "../helpers/dayjs";
 import {
   clearEventIds,
   setCalendarId,
@@ -100,6 +101,10 @@ export const saveAssignmentEvent = (
 export const saveAssignmentsToCalendar = async (
   assignments: readonly IAssignment[]
 ) => {
+  const savingAssignments = [...assignments].filter(item =>
+    dayjs(item.deadline).isAfter(dayjs())
+  );
+
   const status = await RNCalendarEvents.authorizationStatus();
   if (status !== "authorized") {
     const result = await RNCalendarEvents.authorizeEventStore();
@@ -111,7 +116,7 @@ export const saveAssignmentsToCalendar = async (
 
   const courses = store.getState().courses.items;
 
-  for (const assignment of assignments) {
+  for (const assignment of savingAssignments) {
     const course = courses.find(value => value.id === assignment.courseId);
     if (course) {
       await saveAssignmentEvent(

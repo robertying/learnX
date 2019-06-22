@@ -17,7 +17,9 @@ export const loginAction = createAsyncAction(
 export function login(username: string, password: string): IThunkResult {
   return async dispatch => {
     dispatch(loginAction.request());
+
     const success = await dataSource.login(username, password);
+
     if (success) {
       dispatch(loginAction.success({ username, password }));
     } else {

@@ -30,18 +30,13 @@ import {
   getCoursesForSemester,
   setCoursesFilter
 } from "../redux/actions/courses";
-import {
-  IAssignment,
-  ICourse,
-  IPersistAppState,
-  ISemester
-} from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { IAssignment, ICourse, IPersistAppState } from "../redux/types/state";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IAssignmentsScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
-  readonly semesterId: ISemester;
+  readonly semesterId: string;
   readonly courses: ReadonlyArray<ICourse>;
   readonly assignments: ReadonlyArray<IAssignment>;
   readonly isFetching: boolean;
@@ -61,7 +56,7 @@ interface IAssignmentsScreenDispatchProps {
 type IAssignmentsScreenProps = IAssignmentsScreenStateProps &
   IAssignmentsScreenDispatchProps;
 
-const AssignmentsScreen: NavigationScreen<IAssignmentsScreenProps> = props => {
+const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const {
     loggedIn,
     semesterId,

@@ -6,9 +6,9 @@ import Text from "../components/Text";
 import TextButton from "../components/TextButton";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
-import { NavigationScreen } from "../types/NavigationScreen.js";
+import { INavigationScreen } from "../types/NavigationScreen.js";
 
-const AboutScreen: NavigationScreen<{}> = () => {
+const AboutScreen: INavigationScreen<{}> = () => {
   const onGitHubLinkPress = () => {
     Linking.openURL("https://github.com/robertying/learnX");
   };

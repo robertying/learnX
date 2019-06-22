@@ -18,13 +18,13 @@ import Colors from "../constants/Colors";
 import { dummyPassword, dummyUsername } from "../helpers/dummy";
 import { getTranslation } from "../helpers/i18n";
 import { login } from "../redux/actions/auth";
-import { getCurrentSemester } from "../redux/actions/currentSemester";
+import { setCurrentSemester } from "../redux/actions/currentSemester";
 import { setMockStore } from "../redux/actions/root";
 import { getAllSemesters } from "../redux/actions/semesters";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
 import { IPersistAppState } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ILoginScreenProps {
   readonly loggedIn: boolean;
@@ -32,9 +32,10 @@ interface ILoginScreenProps {
   readonly login: (username: string, password: string) => void;
   readonly showToast: (text: string, duration: number) => void;
   readonly setMockStore: () => void;
+  readonly setCurrentSemester: (semesterId: string) => void;
 }
 
-const LoginScreen: NavigationScreen<ILoginScreenProps> = props => {
+const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   const { loggedIn, login, showToast, loginError, setMockStore } = props;
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
@@ -48,7 +49,7 @@ const LoginScreen: NavigationScreen<ILoginScreenProps> = props => {
   if (loggedIn) {
     (async () => {
       await Promise.resolve(store.dispatch(getAllSemesters()));
-      store.dispatch(getCurrentSemester(store.getState().semesters.items));
+      store.dispatch(setCurrentSemester(store.getState().semesters.items[0]));
     })();
     //    navigation.navigate("Main");
   }
