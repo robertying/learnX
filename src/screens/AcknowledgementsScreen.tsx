@@ -5,14 +5,14 @@ import packageConfig from "../../package.json";
 import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 const deps: ReadonlyArray<any> = [
   ...Object.keys(packageConfig.dependencies),
   ...Object.keys(packageConfig.devDependencies)
 ];
 
-const AcknowledgementsScreen: NavigationScreen<{}> = () => {
+const AcknowledgementsScreen: INavigationScreen<{}> = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
       <ScrollView

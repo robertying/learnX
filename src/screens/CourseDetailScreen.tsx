@@ -32,7 +32,7 @@ import {
   IPersistAppState,
   IWindow
 } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ITabRoute {
   readonly key: string;
@@ -72,7 +72,7 @@ interface ICourseDetailScreenDispatchProps {
 type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
   ICourseDetailScreenDispatchProps;
 
-const CourseDetailScreen: NavigationScreen<
+const CourseDetailScreen: INavigationScreen<
   ICourseDetailScreenProps & { readonly courseId: string }
 > = props => {
   const {

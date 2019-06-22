@@ -1,6 +1,5 @@
-import { ContentType } from "thu-learn-lib-no-native/lib/types";
+import { ContentType, File } from "thu-learn-lib-no-native/lib/types";
 import { createAction, createAsyncAction } from "typesafe-actions";
-import { getTranslation } from "../../helpers/i18n";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -14,8 +13,6 @@ import {
   UNPIN_FILE
 } from "../types/constants";
 import { IFile } from "../types/state";
-import { login } from "./auth";
-import { showToast } from "./toast";
 
 export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_REQUEST,
@@ -23,19 +20,15 @@ export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_FAILURE
 )<
   undefined,
-  { readonly files: ReadonlyArray<IFile>; readonly courseId: string },
+  { readonly courseId: string; readonly files: ReadonlyArray<IFile> },
   Error
 >();
 
 export function getFilesForCourse(courseId: string): IThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getFilesForCourseAction.request());
 
-    const results = await dataSource.getFileList(courseId).catch(err => {
-      dispatch(showToast(getTranslation("refreshFailure"), 1500));
-      const auth = getState().auth;
-      dispatch(login(auth.username || "", auth.password || ""));
-    });
+    const results = await dataSource.getFileList(courseId);
 
     if (results) {
       const files = results.map(result => ({ ...result, courseId }));
@@ -58,22 +51,19 @@ export function getAllFilesForCourses(
   // tslint:disable-next-line: readonly-array
   courseIds: string[]
 ): IThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAllFilesForCoursesAction.request());
 
-    const results = await dataSource
-      .getAllContents(courseIds, ContentType.FILE)
-      .catch(err => {
-        dispatch(showToast(getTranslation("refreshFailure"), 1500));
-        const auth = getState().auth;
-        dispatch(login(auth.username || "", auth.password || ""));
-      });
+    const results = await dataSource.getAllContents(
+      courseIds,
+      ContentType.FILE
+    );
 
     if (results) {
       const files = Object.keys(results)
         .map(courseId => {
-          const filesForCourse = results[courseId] as any;
-          return filesForCourse.map((file: IFile) => ({ ...file, courseId }));
+          const filesForCourse = results[courseId] as ReadonlyArray<File>;
+          return filesForCourse.map(file => ({ ...file, courseId }));
         })
         .reduce((a, b) => a.concat(b));
       dispatch(getAllFilesForCoursesAction.success(files));

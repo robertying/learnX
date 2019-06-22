@@ -1,7 +1,7 @@
 import React from "react";
 import NoticeBoard from "../components/NoticeBoard";
 import { getTranslation } from "../helpers/i18n";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface INoticeDetailScreenProps {
   readonly title: string;
@@ -11,7 +11,7 @@ interface INoticeDetailScreenProps {
   readonly attachmentUrl?: string;
 }
 
-const NoticeDetailScreen: NavigationScreen<
+const NoticeDetailScreen: INavigationScreen<
   INoticeDetailScreenProps
 > = props => {
   return <NoticeBoard {...props} />;

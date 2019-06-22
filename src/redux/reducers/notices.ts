@@ -27,23 +27,27 @@ export default function notices(
     case GET_ALL_NOTICES_FOR_COURSES_REQUEST:
       return {
         ...state,
-        isFetching: true
+        isFetching: true,
+        error: null
       };
     case GET_ALL_NOTICES_FOR_COURSES_SUCCESS:
       return {
         ...state,
         isFetching: false,
-        items: action.payload
+        items: action.payload,
+        error: null
       };
     case GET_ALL_NOTICES_FOR_COURSES_FAILURE:
       return {
         ...state,
-        isFetching: false
+        isFetching: false,
+        error: action.payload
       };
     case GET_NOTICES_FOR_COURSE_REQUEST:
       return {
         ...state,
-        isFetching: true
+        isFetching: true,
+        error: null
       };
     case GET_NOTICES_FOR_COURSE_SUCCESS:
       return {
@@ -54,12 +58,14 @@ export default function notices(
             item => item.courseId !== action.payload.courseId
           ),
           ...action.payload.notices
-        ]
+        ],
+        error: null
       };
     case GET_NOTICES_FOR_COURSE_FAILURE:
       return {
         ...state,
-        isFetching: false
+        isFetching: false,
+        error: action.payload
       };
     case PIN_NOTICE:
       return {

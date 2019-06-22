@@ -33,7 +33,7 @@ export enum Language {
   "en"
 }
 export interface ISettingsState {
-  readonly tabsOrder: ReadonlyArray<Tab>;
+  readonly tabsOrder: readonly Tab[];
   readonly autoRefreshing: boolean;
   readonly calendarSync: boolean;
   readonly calendarId?: string;
@@ -43,14 +43,14 @@ export interface ISettingsState {
   readonly hasUpdate: boolean;
   readonly window?: IWindow;
   readonly notifications: boolean;
-  readonly notificationTypes: ReadonlyArray<NotificationType>;
+  readonly notificationTypes: readonly NotificationType[];
   readonly lang?: Language | null;
 }
 
-export type ISemester = string | null;
 export interface ISemestersState {
   readonly isFetching: boolean;
-  readonly items: ReadonlyArray<ISemester>;
+  readonly items: readonly string[];
+  readonly error?: Error | null;
 }
 
 export interface ICourse {
@@ -63,6 +63,7 @@ export interface ICoursesState {
   readonly pinned: readonly string[];
   readonly hidden: readonly string[];
   readonly items: ReadonlyArray<ICourse>;
+  readonly error?: Error | null;
 }
 
 export interface INotice {
@@ -81,6 +82,7 @@ export interface INoticesState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
   readonly items: ReadonlyArray<INotice>;
+  readonly error?: Error | null;
 }
 
 export interface IFile {
@@ -99,6 +101,7 @@ export interface IFilesState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
   readonly items: ReadonlyArray<IFile>;
+  readonly error?: Error | null;
 }
 
 export interface IAssignment {
@@ -123,6 +126,7 @@ export interface IAssignmentsState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
   readonly items: ReadonlyArray<IAssignment>;
+  readonly error?: Error | null;
 }
 
 export interface IToastState {
@@ -134,7 +138,7 @@ export interface IAppState {
   readonly auth: IAuthState & PersistPartial;
   readonly settings: ISettingsState;
   readonly semesters: ISemestersState;
-  readonly currentSemester: ISemester;
+  readonly currentSemester: string;
   readonly courses: ICoursesState;
   readonly notices: INoticesState;
   readonly files: IFilesState;

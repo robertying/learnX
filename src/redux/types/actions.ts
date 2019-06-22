@@ -14,10 +14,7 @@ import {
   setCoursesFilter,
   unpinCourse
 } from "../actions/courses";
-import {
-  getCurrentSemester,
-  setCurrentSemester
-} from "../actions/currentSemester";
+import { setCurrentSemester } from "../actions/currentSemester";
 import {
   getAllFilesForCoursesAction,
   getFilesForCourseAction,
@@ -59,7 +56,6 @@ export type ILoginAction = ActionType<typeof loginAction>;
 export type IAuthAction = ILoginAction;
 
 export type IGetAllSemestersAction = ActionType<typeof getAllSemestersAction>;
-export type IGetCurrentSemesterAction = ActionType<typeof getCurrentSemester>;
 export type ISetCurrentSemesterAction = ActionType<typeof setCurrentSemester>;
 
 export type IGetCoursesForSemesterAction = ActionType<
@@ -144,7 +140,6 @@ export type IAppActions =
   | IThunkResult
   | IAuthAction
   | IGetAllSemestersAction
-  | IGetCurrentSemesterAction
   | ISetCurrentSemesterAction
   | IGetCoursesForSemesterAction
   | IGetNoticesForCourseAction

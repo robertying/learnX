@@ -5,6 +5,13 @@ import registerScreens from "./navigation/registerScreens";
 
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(async () => {
+    const a = new Promise((resolve, reject) => {
+      throw new Error();
+      return "asd";
+    });
+    const b = await a.catch(err => console.log(err));
+    console.log(b);
+
     // tslint:disable-next-line
     console.disableYellowBox = true;
 

@@ -30,7 +30,7 @@ import {
 } from "../redux/actions/settings";
 import { showToast } from "../redux/actions/toast";
 import { IAssignment, IPersistAppState } from "../redux/types/state";
-import { NavigationScreen } from "../types/NavigationScreen";
+import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -52,7 +52,7 @@ interface ISettingsScreenDispatchProps {
 type ISettingsScreenProps = ISettingsScreenStateProps &
   ISettingsScreenDispatchProps;
 
-const SettingsScreen: NavigationScreen<ISettingsScreenProps> = props => {
+const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const {
     clearStore,
     setAutoRefreshing,

@@ -1,5 +1,4 @@
 import { createAction, createAsyncAction } from "typesafe-actions";
-import { getTranslation } from "../../helpers/i18n";
 import dataSource from "../dataSource";
 import { IThunkResult } from "../types/actions";
 import {
@@ -11,8 +10,6 @@ import {
   UNPIN_COURSE
 } from "../types/constants";
 import { ICourse } from "../types/state";
-import { login } from "./auth";
-import { showToast } from "./toast";
 
 export const getCoursesForSemesterAction = createAsyncAction(
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -21,14 +18,10 @@ export const getCoursesForSemesterAction = createAsyncAction(
 )<undefined, ReadonlyArray<ICourse>, Error>();
 
 export function getCoursesForSemester(semesterId: string): IThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
-    const courses = await dataSource.getCourseList(semesterId).catch(err => {
-      dispatch(showToast(getTranslation("refreshFailure"), 1500));
-      const auth = getState().auth;
-      dispatch(login(auth.username || "", auth.password || ""));
-    });
+    const courses = await dataSource.getCourseList(semesterId);
 
     if (courses) {
       dispatch(getCoursesForSemesterAction.success(courses));

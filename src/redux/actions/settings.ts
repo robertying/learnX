@@ -15,7 +15,7 @@ import {
 import { IWindow, Language, NotificationType, Tab } from "../types/state";
 
 export const setTabsOrder = createAction(SET_TABS_ORDER, action => {
-  return (tabs: ReadonlyArray<Tab>) => action(tabs);
+  return (tabs: readonly Tab[]) => action(tabs);
 });
 
 export const setAutoRefreshing = createAction(SET_AUTO_REFRESHING, action => {
@@ -54,7 +54,7 @@ export const setNotifications = createAction(SET_NOTIFICATIONS, action => {
 export const setNotificationTypes = createAction(
   SET_NOTIFICATION_TYPES,
   action => {
-    return (types: ReadonlyArray<NotificationType>) => action(types);
+    return (types: readonly NotificationType[]) => action(types);
   }
 );
 

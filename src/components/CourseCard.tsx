@@ -9,7 +9,6 @@ import {
 import Interactable from "react-native-interactable";
 import { iOSUIKit } from "react-native-typography";
 import Colors from "../constants/Colors";
-import { ISemester } from "../redux/types/state";
 import IconText from "./IconText";
 import Text from "./Text";
 
@@ -19,7 +18,7 @@ export type ICourseCardProps = TouchableHighlightProps & {
   readonly noticesCount: number;
   readonly filesCount: number;
   readonly assignmentsCount: number;
-  readonly semester: ISemester;
+  readonly semester: string;
   readonly pinned: boolean;
   readonly onPinned: (pin: boolean) => void;
 };
