@@ -21,7 +21,7 @@ class TextButton extends React.Component<ITextButtonProps> {
       <TouchableOpacity activeOpacity={Colors.activeOpacity} {...this.props}>
         <Text
           style={[
-            { color: Colors.tint, fontSize: iOSUIKit.bodyObject.fontSize },
+            { color: Colors.theme, fontSize: iOSUIKit.bodyObject.fontSize },
             textStyle
           ]}
           numberOfLines={1}

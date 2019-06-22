@@ -8,7 +8,7 @@ import { getTranslation } from "../helpers/i18n";
 import { setLang } from "../redux/actions/settings";
 import { showToast } from "../redux/actions/toast";
 import { IPersistAppState, Language } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface ILanguagesSettingsScreenStateProps {
   readonly lang?: Language | null;
@@ -22,7 +22,7 @@ interface ILanguagesSettingsScreenDispatchProps {
 type ILanguagesSettingsScreenProps = ILanguagesSettingsScreenStateProps &
   ILanguagesSettingsScreenDispatchProps;
 
-const LanguagesSettingsScreen: INavigationScreen<
+const LanguagesSettingsScreen: NavigationScreen<
   ILanguagesSettingsScreenProps
 > = props => {
   const { lang, setLang, showToast } = props;
@@ -73,8 +73,15 @@ const LanguagesSettingsScreen: INavigationScreen<
 };
 
 // tslint:disable-next-line: no-object-mutation
-LanguagesSettingsScreen.navigationOptions = {
-  title: getTranslation("languages")
+LanguagesSettingsScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("languages")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 function mapStateToProps(

@@ -91,7 +91,7 @@ const AssignmentsView: React.FunctionComponent<
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            colors={[Colors.tint]}
+            colors={[Colors.theme]}
           />
         }
       />

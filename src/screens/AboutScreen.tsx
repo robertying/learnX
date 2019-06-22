@@ -6,9 +6,9 @@ import Text from "../components/Text";
 import TextButton from "../components/TextButton";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
-import { INavigationScreen } from "../types/NavigationScreen.js";
+import { NavigationScreen } from "../types/NavigationScreen.js";
 
-const AboutScreen: INavigationScreen<{}> = () => {
+const AboutScreen: NavigationScreen<{}> = () => {
   const onGitHubLinkPress = () => {
     Linking.openURL("https://github.com/robertying/learnX");
   };
@@ -59,8 +59,15 @@ const AboutScreen: INavigationScreen<{}> = () => {
 };
 
 // tslint:disable-next-line: no-object-mutation
-AboutScreen.navigationOptions = {
-  title: getTranslation("about")
+AboutScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("about")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 export default AboutScreen;

@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { connect } from "react-redux";
-import LinearGradientBlurView from "../components/LinearGradientBlurView";
 import RaisedButton from "../components/RaisedButton";
 import Text from "../components/Text";
 import TextField from "../components/TextField";
@@ -25,7 +24,7 @@ import { getAllSemesters } from "../redux/actions/semesters";
 import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
 import { IPersistAppState } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface ILoginScreenProps {
   readonly loggedIn: boolean;
@@ -35,15 +34,8 @@ interface ILoginScreenProps {
   readonly setMockStore: () => void;
 }
 
-const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
-  const {
-    loggedIn,
-    login,
-    navigation,
-    showToast,
-    loginError,
-    setMockStore
-  } = props;
+const LoginScreen: NavigationScreen<ILoginScreenProps> = props => {
+  const { loggedIn, login, showToast, loginError, setMockStore } = props;
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
   useEffect(() => {
@@ -58,7 +50,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       await Promise.resolve(store.dispatch(getAllSemesters()));
       store.dispatch(getCurrentSemester(store.getState().semesters.items));
     })();
-    navigation.navigate("Main");
+    //    navigation.navigate("Main");
   }
 
   const usernameTextFieldRef = useRef<typeof TextInput>();
@@ -129,79 +121,70 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   };
 
   return (
-    <LinearGradientBlurView>
-      <SafeAreaView style={{ flex: 1 }}>
-        <KeyboardAvoidingView
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-        >
-          <TouchableWithoutFeedback onPress={onLogoPress}>
-            <View>
-              <Text style={[{ color: "white" }, { fontSize: logoSize }]}>
-                X
-              </Text>
-            </View>
-          </TouchableWithoutFeedback>
-          {formVisible && (
-            <View
+    <SafeAreaView style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center"
+        }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+      >
+        <TouchableWithoutFeedback onPress={onLogoPress}>
+          <View>
+            <Text style={[{ color: "white" }, { fontSize: logoSize }]}>X</Text>
+          </View>
+        </TouchableWithoutFeedback>
+        {formVisible && (
+          <View
+            style={{
+              marginTop: 30,
+              marginBottom: 30,
+              alignItems: "center"
+            }}
+          >
+            <TextField
+              style={styles.textField}
+              icon={<AntDesign name="user" size={25} color={tintColor} />}
+              tintColor={tintColor}
+              textContentType="username"
+              returnKeyType="next"
+              placeholder={getTranslation("username")}
+              onSubmitEditing={handleKeyboardNext}
+              ref={usernameTextFieldRef}
+              value={username}
+              onChangeText={handleUsernameChange}
+            />
+            <TextField
+              containerStyle={{ marginTop: 20 }}
+              style={styles.textField}
+              icon={<AntDesign name="key" size={25} color={tintColor} />}
+              tintColor={tintColor}
+              textContentType="password"
+              secureTextEntry={true}
+              returnKeyType="done"
+              placeholder={getTranslation("password")}
+              ref={passwordTextFieldRef}
+              value={password}
+              onChangeText={handlePasswordChange}
+            />
+            <RaisedButton
               style={{
-                marginTop: 30,
-                marginBottom: 30,
-                alignItems: "center"
+                backgroundColor: Colors.theme,
+                width: 100,
+                height: 40,
+                marginTop: 30
               }}
+              textStyle={styles.textField}
+              onPress={onLoginButtonPress}
             >
-              <TextField
-                style={styles.textField}
-                icon={<AntDesign name="user" size={25} color={tintColor} />}
-                tintColor={tintColor}
-                textContentType="username"
-                returnKeyType="next"
-                placeholder={getTranslation("username")}
-                onSubmitEditing={handleKeyboardNext}
-                ref={usernameTextFieldRef}
-                value={username}
-                onChangeText={handleUsernameChange}
-              />
-              <TextField
-                containerStyle={{ marginTop: 20 }}
-                style={styles.textField}
-                icon={<AntDesign name="key" size={25} color={tintColor} />}
-                tintColor={tintColor}
-                textContentType="password"
-                secureTextEntry={true}
-                returnKeyType="done"
-                placeholder={getTranslation("password")}
-                ref={passwordTextFieldRef}
-                value={password}
-                onChangeText={handlePasswordChange}
-              />
-              <RaisedButton
-                style={{
-                  backgroundColor: Colors.lightTint,
-                  width: 100,
-                  height: 40,
-                  marginTop: 30
-                }}
-                textStyle={styles.textField}
-                onPress={onLoginButtonPress}
-              >
-                {getTranslation("login")}
-              </RaisedButton>
-            </View>
-          )}
-        </KeyboardAvoidingView>
-      </SafeAreaView>
-    </LinearGradientBlurView>
+              {getTranslation("login")}
+            </RaisedButton>
+          </View>
+        )}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
-};
-
-// tslint:disable-next-line: no-object-mutation
-LoginScreen.navigationOptions = {
-  gesturesEnabled: false
 };
 
 const mapStateToProps = (state: IPersistAppState) => ({

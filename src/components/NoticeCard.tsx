@@ -63,7 +63,7 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
       >
         <View
           style={{
-            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            backgroundColor: pinned ? Colors.theme : "#fff",
             padding: 15
           }}
         >

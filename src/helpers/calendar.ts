@@ -29,7 +29,7 @@ export const createCalendar = async () => {
   store.dispatch(clearEventIds());
   const newId = await RNCalendarEvents.saveCalendar({
     title: "learnX",
-    color: Colors.tint,
+    color: Colors.theme,
     entityType: "event",
     name: "learnX",
     accessLevel: "read",

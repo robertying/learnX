@@ -95,7 +95,7 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            colors={[Colors.tint]}
+            colors={[Colors.theme]}
           />
         }
       />

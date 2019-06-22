@@ -2,14 +2,11 @@ import React from "react";
 import {
   Animated,
   LayoutAnimation,
-  Platform,
   StatusBar,
   StyleSheet,
   View
 } from "react-native";
-import DeviceInfo from "react-native-device-info";
 import { iOSUIKit } from "react-native-typography";
-import { Header } from "react-navigation";
 import { connect } from "react-redux";
 import Layout from "../constants/Layout";
 import { IPersistAppState } from "../redux/types/state";
@@ -60,12 +57,12 @@ const Toast: React.FunctionComponent<IToastProps> = props => {
           style={[
             styles.toastContainer,
             {
-              height:
-                DeviceInfo.isTablet() && Platform.OS === "ios"
-                  ? Header.HEIGHT + 4
-                  : Platform.OS === "ios"
-                  ? 44 + Layout.statusBarHeight
-                  : Header.HEIGHT + Layout.statusBarHeight,
+              // height:
+              //   DeviceInfo.isTablet() && Platform.OS === "ios"
+              //     ? Header.HEIGHT + 4
+              //     : Platform.OS === "ios"
+              //     ? 44 + Layout.statusBarHeight
+              //     : Header.HEIGHT + Layout.statusBarHeight,
               paddingTop: Layout.statusBarHeight
             }
           ]}

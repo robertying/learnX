@@ -5,14 +5,14 @@ import packageConfig from "../../package.json";
 import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
-import { INavigationScreen } from "../types/NavigationScreen.js";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 const deps: ReadonlyArray<any> = [
   ...Object.keys(packageConfig.dependencies),
   ...Object.keys(packageConfig.devDependencies)
 ];
 
-const AcknowledgementsScreen: INavigationScreen<{}> = () => {
+const AcknowledgementsScreen: NavigationScreen<{}> = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
       <ScrollView
@@ -53,12 +53,13 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
         {deps.map((dep, index) => (
           <Text
             key={index}
-            style={{
-              fontSize: iOSUIKit.footnoteObject.fontSize,
-              color: Colors.secondaryText,
-              marginTop: 2,
-              marginBottom: 2
-            }}
+            style={[
+              iOSUIKit.footnote,
+              {
+                marginTop: 2,
+                marginBottom: 2
+              }
+            ]}
           >
             {dep}
           </Text>
@@ -69,8 +70,15 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
 };
 
 // tslint:disable-next-line: no-object-mutation
-AcknowledgementsScreen.navigationOptions = {
-  title: getTranslation("acknowledges")
+AcknowledgementsScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("acknowledges")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 export default AcknowledgementsScreen;
