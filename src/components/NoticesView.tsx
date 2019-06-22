@@ -87,7 +87,7 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            colors={[Colors.tint]}
+            colors={[Colors.theme]}
           />
         }
       />

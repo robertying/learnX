@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import Modal from "react-native-modal";
+import { Navigation } from "react-native-navigation";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import CourseCard from "../components/CourseCard";
@@ -38,7 +39,7 @@ import {
   IPersistAppState,
   ISemester
 } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface ICoursesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -69,7 +70,7 @@ interface ICoursesScreenDispatchProps {
 type ICoursesScreenProps = ICoursesScreenStateProps &
   ICoursesScreenDispatchProps;
 
-const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
+const CoursesScreen: NavigationScreen<ICoursesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
@@ -84,7 +85,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     getAllNoticesForCourses,
     getAllFilesForCourses,
     getAllAssignmentsForCourses,
-    navigation,
     autoRefreshing,
     pinCourse,
     pinnedCourses,
@@ -133,14 +133,19 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     courseName: string,
     courseTeacherName: string
   ) => {
-    navigation.navigate("CourseDetail", {
-      courseId,
-      courseName,
-      courseTeacherName
+    Navigation.push(props.componentId, {
+      component: {
+        name: "courses.detail",
+        passProps: {
+          courseId,
+          courseName,
+          courseTeacherName
+        }
+      }
     });
   };
 
-  const isSearching = navigation.getParam("isSearching", false);
+  const isSearching = false;
   const searchBarRef = useRef<TextInput>();
   const [searchResult, setSearchResult] = useState(courses);
 
@@ -175,7 +180,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     }
   };
 
-  const modalVisible = navigation.getParam("filterModalVisible");
+  const modalVisible = false;
 
   const renderFilterListItem: ListRenderItem<ICourse> = ({ item }) => {
     return (
@@ -235,7 +240,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
           // tslint:disable-next-line: jsx-no-lambda
           onCancel={() => {
             LayoutAnimation.easeInEaseOut();
-            navigation.setParams({ isSearching: false });
           }}
           onChangeText={onSearchChange}
         />
@@ -248,7 +252,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={invalidateAll}
-            colors={[Colors.tint]}
+            colors={[Colors.theme]}
           />
         }
       />
@@ -261,18 +265,14 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         backdropColor="transparent"
         swipeDirection="down"
         // tslint:disable-next-line: jsx-no-lambda
-        onSwipeComplete={() =>
-          navigation.setParams({ filterModalVisible: false })
-        }
+        onSwipeComplete={() => {}}
       >
         <View style={{ flex: 1, backgroundColor: "white" }}>
           <Icon.Button
             style={{ margin: 10 }}
             name="close"
             // tslint:disable-next-line: jsx-no-lambda
-            onPress={() => {
-              navigation.setParams({ filterModalVisible: false });
-            }}
+            onPress={() => {}}
             color="black"
             size={24}
             backgroundColor="transparent"
@@ -303,43 +303,16 @@ const fuseOptions = {
 };
 
 // tslint:disable-next-line: no-object-mutation
-CoursesScreen.navigationOptions = ({ navigation }) => ({
-  title: getTranslation("courses"),
-  headerLeft: (
-    <Icon.Button
-      style={{ marginLeft: 10 }}
-      name="filter-list"
-      // tslint:disable-next-line: jsx-no-lambda
-      onPress={() => {
-        navigation.setParams({
-          filterModalVisible: true
-        });
-      }}
-      color="white"
-      size={24}
-      backgroundColor="transparent"
-      underlayColor="transparent"
-      activeOpacity={0.6}
-    />
-  ),
-  headerRight: (
-    <Icon.Button
-      name="search"
-      // tslint:disable-next-line: jsx-no-lambda
-      onPress={() => {
-        LayoutAnimation.easeInEaseOut();
-        navigation.setParams({
-          isSearching: !navigation.getParam("isSearching", false)
-        });
-      }}
-      color="white"
-      size={24}
-      backgroundColor="transparent"
-      underlayColor="transparent"
-      activeOpacity={0.6}
-    />
-  )
-});
+CoursesScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("courses")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
+};
 
 function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {

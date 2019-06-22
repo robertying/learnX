@@ -64,7 +64,7 @@ const AssignmentCard: FunctionComponent<IAssignmentCardProps> = props => {
       >
         <View
           style={{
-            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            backgroundColor: pinned ? Colors.theme : "#fff",
             padding: 15
           }}
         >

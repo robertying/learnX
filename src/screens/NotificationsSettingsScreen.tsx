@@ -5,7 +5,7 @@ import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
 import { setNotificationTypes } from "../redux/actions/settings";
 import { IPersistAppState, NotificationType } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface INotificationsSettingsScreenStateProps {
   readonly notificationTypes: ReadonlyArray<NotificationType>;
@@ -20,7 +20,7 @@ interface INotificationsSettingsScreenDispatchProps {
 type INotificationsSettingsScreenProps = INotificationsSettingsScreenStateProps &
   INotificationsSettingsScreenDispatchProps;
 
-const NotificationsSettingsScreen: INavigationScreen<
+const NotificationsSettingsScreen: NavigationScreen<
   INotificationsSettingsScreenProps
 > = props => {
   const { notificationTypes, setNotificationTypes } = props;
@@ -123,11 +123,6 @@ const NotificationsSettingsScreen: INavigationScreen<
       />
     </SafeAreaView>
   );
-};
-
-// tslint:disable-next-line: no-object-mutation
-NotificationsSettingsScreen.navigationOptions = {
-  title: "推送通知类型设置"
 };
 
 function mapStateToProps(

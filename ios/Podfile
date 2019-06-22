@@ -49,5 +49,6 @@ target 'learnX' do
   pod 'RNDeviceInfo', :path => '../node_modules/react-native-device-info'
   pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
   pod 'RNCPushNotificationIOS', :path => '../node_modules/@react-native-community/push-notification-ios'
+  pod 'ReactNativeNavigation', :path => '../node_modules/react-native-navigation'
 
 end

@@ -140,6 +140,7 @@ android {
         renderscriptSupportModeEnabled false
         versionCode Integer.parseInt(VERSION_CODE)
         versionName "3.1.0"
+        missingDimensionStrategy "RNN.reactNativeVersion", "reactNative60"
     }
     splits {
         abi {
@@ -207,6 +208,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:+'
     implementation 'com.crashlytics.sdk.android:crashlytics:+'
 
+    implementation project(':react-native-navigation')
     implementation project(':react-native-background-fetch')
     implementation project(':react-native-device-info')
     implementation project(':@react-native-community_async-storage')

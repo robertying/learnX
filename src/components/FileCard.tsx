@@ -62,7 +62,7 @@ const FileCard: FunctionComponent<IFileCardProps> = props => {
       >
         <View
           style={{
-            backgroundColor: pinned ? Colors.lightTint : "#fff",
+            backgroundColor: pinned ? Colors.theme : "#fff",
             padding: 15
           }}
         >

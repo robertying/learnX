@@ -3,13 +3,11 @@ import { Platform, TouchableHighlightProps, View } from "react-native";
 import { iOSUIKit } from "react-native-typography";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import WebView from "react-native-webview";
-import { withNavigation } from "react-navigation";
 import { connect } from "react-redux";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
 import { getExtension, shareFile, stripExtension } from "../helpers/share";
 import { showToast } from "../redux/actions/toast";
-import { INavigationScreenProps } from "../types/NavigationScreen";
 import Divider from "./Divider";
 import Text from "./Text";
 import TextButton from "./TextButton";
@@ -33,7 +31,7 @@ export type IAssignmentBoardProps = TouchableHighlightProps & {
 };
 
 const AssignmentBoard: FunctionComponent<
-  IAssignmentBoardProps & IAssignmentBoardDispatchProps & INavigationScreenProps
+  IAssignmentBoardProps & IAssignmentBoardDispatchProps
 > = props => {
   const {
     title,
@@ -41,7 +39,6 @@ const AssignmentBoard: FunctionComponent<
     description,
     attachmentName,
     attachmentUrl,
-    navigation,
     showToast,
     submitTime,
     submittedAttachmentName,
@@ -61,12 +58,14 @@ const AssignmentBoard: FunctionComponent<
     }
 
     if (Platform.OS === "ios") {
-      navigation.navigate("WebView", {
-        title: stripExtension(filename),
-        filename: stripExtension(filename),
-        url,
-        ext
-      });
+      // Navigation.push(props.componentId, {
+      //   passProps: {
+      //     title: stripExtension(filename),
+      //     filename: stripExtension(filename),
+      //     url,
+      //     ext
+      //   }
+      // });
     } else {
       showToast(getTranslation("downloadingFile"), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
@@ -103,7 +102,7 @@ const AssignmentBoard: FunctionComponent<
               style={{ marginRight: 5 }}
               name="attachment"
               size={18}
-              color={Colors.tint}
+              color={Colors.theme}
             />
             <TextButton
               // tslint:disable-next-line: jsx-no-lambda
@@ -131,7 +130,7 @@ const AssignmentBoard: FunctionComponent<
               style={{ marginRight: 5 }}
               name="done"
               size={18}
-              color={Colors.tint}
+              color={Colors.theme}
             />
             <TextButton
               // tslint:disable-next-line: jsx-no-lambda
@@ -158,7 +157,7 @@ const AssignmentBoard: FunctionComponent<
                 style={{ marginRight: 5 }}
                 name="grade"
                 size={18}
-                color={Colors.tint}
+                color={Colors.theme}
               />
               <Text>{grade}</Text>
             </View>
@@ -185,9 +184,7 @@ const mapDispatchToProps: IAssignmentBoardDispatchProps = {
   showToast: (text: string, duration: number) => showToast(text, duration)
 };
 
-export default withNavigation<IAssignmentBoardProps>(
-  connect(
-    null,
-    mapDispatchToProps
-  )(AssignmentBoard)
-);
+export default connect(
+  null,
+  mapDispatchToProps
+)(AssignmentBoard);

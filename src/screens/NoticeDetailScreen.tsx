@@ -1,7 +1,7 @@
 import React from "react";
 import NoticeBoard from "../components/NoticeBoard";
 import { getTranslation } from "../helpers/i18n";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface INoticeDetailScreenProps {
   readonly title: string;
@@ -11,30 +11,22 @@ interface INoticeDetailScreenProps {
   readonly attachmentUrl?: string;
 }
 
-const NoticeDetailScreen: INavigationScreen<
+const NoticeDetailScreen: NavigationScreen<
   INoticeDetailScreenProps
 > = props => {
-  const { navigation } = props;
-  const title = navigation.getParam("title");
-  const content = navigation.getParam("content");
-  const author = navigation.getParam("author");
-  const attachmentName = navigation.getParam("attachmentName");
-  const attachmentUrl = navigation.getParam("attachmentUrl");
-
-  return (
-    <NoticeBoard
-      title={title}
-      content={content}
-      author={author}
-      attachmentName={attachmentName}
-      attachmentUrl={attachmentUrl}
-    />
-  );
+  return <NoticeBoard {...props} />;
 };
 
 // tslint:disable-next-line: no-object-mutation
-NoticeDetailScreen.navigationOptions = {
-  title: getTranslation("detail")
+NoticeDetailScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("languages")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 export default NoticeDetailScreen;

@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   View
 } from "react-native";
+import { Navigation } from "react-native-navigation";
 import { iOSColors } from "react-native-typography";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
@@ -29,7 +30,7 @@ import {
 } from "../redux/actions/settings";
 import { showToast } from "../redux/actions/toast";
 import { IAssignment, IPersistAppState } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { NavigationScreen } from "../types/NavigationScreen";
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -51,9 +52,8 @@ interface ISettingsScreenDispatchProps {
 type ISettingsScreenProps = ISettingsScreenStateProps &
   ISettingsScreenDispatchProps;
 
-const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
+const SettingsScreen: NavigationScreen<ISettingsScreenProps> = props => {
   const {
-    navigation,
     clearStore,
     setAutoRefreshing,
     autoRefreshing,
@@ -66,7 +66,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   } = props;
 
   const onAcknowledgementsPress = () => {
-    navigation.navigate("Acknowledgements");
+    Navigation.push(props.componentId, {
+      component: {
+        name: "settings.acknowledgements"
+      }
+    });
   };
 
   const onLogoutPress = () => {
@@ -82,7 +86,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           text: getTranslation("ok"),
           onPress: () => {
             clearStore();
-            navigation.navigate("Auth");
+            //  navigation.navigate("Auth");
           }
         }
       ],
@@ -91,7 +95,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onAboutPress = () => {
-    navigation.navigate("About");
+    Navigation.push(props.componentId, {
+      component: {
+        name: "settings.about"
+      }
+    });
   };
 
   const onCalendarSyncSwitchChange = (enabled: boolean) => {
@@ -164,7 +172,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onSemestersPress = () => {
-    navigation.navigate("Semesters");
+    Navigation.push(props.componentId, {
+      component: {
+        name: "settings.semesters"
+      }
+    });
   };
 
   const renderListItem: ListRenderItem<{}> = ({ index }) => {
@@ -305,8 +317,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 };
 
 // tslint:disable-next-line: no-object-mutation
-SettingsScreen.navigationOptions = {
-  title: getTranslation("settings")
+SettingsScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("settings")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {

@@ -55,7 +55,7 @@ const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
     <Animated.View
       style={[
         {
-          backgroundColor: Colors.lightTint,
+          backgroundColor: Colors.theme,
           justifyContent: "center"
         },
         containerStyle
@@ -76,7 +76,7 @@ const SearchBar: React.FunctionComponent<ISearchBarProps> = props => {
             borderRadius: 8,
             fontSize: iOSUIKit.bodyObject.fontSize
           }}
-          selectionColor={Colors.tint}
+          selectionColor={Colors.theme}
           allowFontScaling={true}
           clearButtonMode="while-editing"
           enablesReturnKeyAutomatically={true}

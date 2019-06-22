@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { ProgressViewIOS, View } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { WebView } from "react-native-webview";
 import MediumPlaceholder from "../components/MediumPlaceholder";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
-import { downloadFile, shareFile } from "../helpers/share";
-import { showToast } from "../redux/actions/toast";
-import { store } from "../redux/store";
-import { INavigationScreen } from "../types/NavigationScreen";
+import { downloadFile } from "../helpers/share";
+import { NavigationScreen } from "../types/NavigationScreen";
 
-const WebViewScreen: INavigationScreen<{}> = props => {
-  const url = props.navigation.getParam("url");
-  const name = props.navigation.getParam("filename");
-  const ext = props.navigation.getParam("ext");
+const WebViewScreen: NavigationScreen<{
+  readonly title: string;
+  readonly filename: string;
+  readonly url: string;
+  readonly ext: string;
+}> = props => {
+  const { url, ext, filename } = props;
 
   const [loading, setLoading] = useState(true);
   const [filePath, setFilePath] = useState("");
@@ -22,7 +22,7 @@ const WebViewScreen: INavigationScreen<{}> = props => {
   useEffect(() => {
     if (loading) {
       (async () => {
-        const filePath = await downloadFile(url, name, ext, setProgress);
+        const filePath = await downloadFile(url, filename, ext, setProgress);
         if (filePath) {
           setFilePath(filePath);
           setLoading(false);
@@ -60,7 +60,7 @@ const WebViewScreen: INavigationScreen<{}> = props => {
       {loading && (
         <ProgressViewIOS
           style={{ position: "absolute", top: 0, left: 0, right: 0 }}
-          progressTintColor={Colors.tint}
+          progressTintColor={Colors.theme}
           progress={progress}
         />
       )}
@@ -69,29 +69,15 @@ const WebViewScreen: INavigationScreen<{}> = props => {
 };
 
 // tslint:disable-next-line: no-object-mutation
-WebViewScreen.navigationOptions = ({ navigation }) => {
-  return {
-    headerTitle: navigation.getParam("title", "预览"),
-    headerRight: (
-      <Icon.Button
-        name="share"
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() => {
-          store.dispatch(showToast(getTranslation("preparingFile"), 1500));
-          shareFile(
-            navigation.getParam("url"),
-            navigation.getParam("filename"),
-            navigation.getParam("ext")
-          );
-        }}
-        color="white"
-        size={24}
-        backgroundColor="transparent"
-        underlayColor="transparent"
-        activeOpacity={0.6}
-      />
-    )
-  };
+WebViewScreen.options = {
+  topBar: {
+    title: {
+      text: getTranslation("courses")
+    },
+    largeTitle: {
+      visible: true
+    }
+  }
 };
 
 export default WebViewScreen;
