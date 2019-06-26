@@ -3233,10 +3233,10 @@ jest-worker@^24.6.0:
     merge-stream "^1.0.1"
     supports-color "^6.1.0"
 
-jetifier@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.5.0.tgz#712a7be7fdfe50c23e6fa924ce873ebe97c27995"
-  integrity sha512-Um/sdPYd6Xs5ntLAd1pqzQIlSjiBBsHcjB3oc7EEri3neJQzuBCKHUnO9ayUljll/BbwCTtxoxCkESsZMYA0uQ==
+jetifier@1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.5.1.tgz#fae0bb6fdc51d60fe2bbaba26aeb89b07ec29ee4"
+  integrity sha512-zGFRsf7j84gbwJ0ykLNkChx7RPEE4q2OdELN1sqWY/z2DwdRq+b/db1pc+5T+Ie3nPDInyNFSvnmACjWBZNidA==
 
 js-base64@^2.5.1:
   version "2.5.1"
