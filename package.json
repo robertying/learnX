@@ -59,7 +59,7 @@
     "@types/react-native-vector-icons": "6.4.1",
     "@types/react-redux": "7.1.0",
     "babel-plugin-transform-remove-console": "6.9.4",
-    "husky": "2.5.0",
+    "husky": "2.6.0",
     "jetifier": "1.5.0",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.18.2",
