@@ -5403,10 +5403,10 @@ through@^2.3.6:
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
 
-thu-learn-lib-no-native@2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/thu-learn-lib-no-native/-/thu-learn-lib-no-native-2.1.1.tgz#839396b5d17541e58fd0d91e612861b557719fc3"
-  integrity sha512-/8KIMZCf0kv+4O2DCBGU6koUXa96j394A4kCXYpVDeAMAurbLItvwmb9TLJV1S/hxz+99lwPlumcpqf77x+qVg==
+thu-learn-lib-no-native@2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/thu-learn-lib-no-native/-/thu-learn-lib-no-native-2.1.2.tgz#2f035c878f999d49bb3847ae4ee30401b231f711"
+  integrity sha512-Xife4m2XV9eCNzlhjEsibbUCFm/MfvTKIaaSqNgHJzpmiX706DXXzcYFMC265z3S2td7OU6twk/xpnrhoyZo2Q==
   dependencies:
     cheerio-without-node-native "^0.20.2"
     cross-fetch "^3.0.2"
