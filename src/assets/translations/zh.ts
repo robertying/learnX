@@ -40,5 +40,10 @@ export default {
   noNoticeContent: "无通知内容",
   effectAfterReboot: "设置将在下一次 App 启动时生效",
   languages: "语言",
-  semesters: "学期"
+  semesters: "学期",
+  searchNotices: "搜索通知……",
+  searchFiles: "搜索文件……",
+  searchAssignments: "搜索作业……",
+  networkError: "网络错误",
+  fetchingSemesters: "登录成功，获取学期信息……"
 };
