@@ -40,5 +40,10 @@ export default {
   noNoticeContent: "No notice content",
   effectAfterReboot: "Settings will take effect next time App launches",
   languages: "Languages",
-  semesters: "Semesters"
+  semesters: "Semesters",
+  searchNotices: "Search notices...",
+  searchFiles: "Search files...",
+  searchAssignments: "Search assignments",
+  networkError: "Network error",
+  fetchingSemesters: "Logged in. Fetching semesters..."
 };
