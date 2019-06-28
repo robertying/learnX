@@ -45,7 +45,7 @@
     "redux-persist-expo-securestore": "2.0.0",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
-    "thu-learn-lib-no-native": "2.0.0",
+    "thu-learn-lib-no-native": "2.1.1",
     "typesafe-actions": "4.4.2"
   },
   "devDependencies": {
