@@ -40,9 +40,6 @@ target 'learnX' do
   pod 'react-native-webview', :path => '../node_modules/react-native-webview'
   pod 'RNShare', :path => '../node_modules/react-native-share'
   pod 'rn-fetch-blob', :path => '../node_modules/rn-fetch-blob'
-  pod 'BVLinearGradient', :path => '../node_modules/react-native-linear-gradient'
-  pod 'react-native-blur', :path => '../node_modules/@react-native-community/blur'
-  pod 'CodePush', :path => '../node_modules/react-native-code-push'
   pod 'react-native-calendar-events', :path => '../node_modules/react-native-calendar-events'
   pod 'Interactable', :path => '../node_modules/react-native-interactable'
   pod 'RNCAsyncStorage', :path => '../node_modules/@react-native-community/async-storage'
@@ -50,5 +47,6 @@ target 'learnX' do
   pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
   pod 'RNCPushNotificationIOS', :path => '../node_modules/@react-native-community/push-notification-ios'
   pod 'ReactNativeNavigation', :path => '../node_modules/react-native-navigation'
+  pod 'RNSnackbar', :path => '../node_modules/react-native-snackbar'
 
 end

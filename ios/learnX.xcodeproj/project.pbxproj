@@ -11,7 +11,6 @@
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		4CACF6A2814C6AFFA0701A8D /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F637BF5EECC01BD5184480D8 /* libPods-learnX.a */; };
 		D415DD5422B9335400DC4D5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D415DD5322B9335400DC4D5C /* Assets.xcassets */; };
-		D415DD5722B9373B00DC4D5C /* CodePush.plist in Resources */ = {isa = PBXBuildFile; fileRef = D415DD5522B9373B00DC4D5C /* CodePush.plist */; };
 		D415DD5822B9373B00DC4D5C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */; };
 		D415DD6922B9385600DC4D5C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D415DD6B22B9385600DC4D5C /* LaunchScreen.storyboard */; };
 		D415DD6F22B9389500DC4D5C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D415DD7122B9389500DC4D5C /* InfoPlist.strings */; };
@@ -27,7 +26,6 @@
 		71EFBAB9EFBC22898F87480F /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
 		D415DD5022B92F5700DC4D5C /* learnX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 		D415DD5322B9335400DC4D5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
-		D415DD5522B9373B00DC4D5C /* CodePush.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = CodePush.plist; sourceTree = "<group>"; };
 		D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D415DD6A22B9385600DC4D5C /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = learnX/en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D415DD6C22B9386200DC4D5C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/LaunchScreen.storyboard"; sourceTree = "<group>"; };
@@ -53,7 +51,6 @@
 			children = (
 				D415DD7122B9389500DC4D5C /* InfoPlist.strings */,
 				D415DD6B22B9385600DC4D5C /* LaunchScreen.storyboard */,
-				D415DD5522B9373B00DC4D5C /* CodePush.plist */,
 				D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */,
 				D415DD5322B9335400DC4D5C /* Assets.xcassets */,
 				D415DD5022B92F5700DC4D5C /* learnX.entitlements */,
@@ -115,7 +112,6 @@
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
-				D415DD5122B9328C00DC4D5C /* Add CodePush Key to Info.plist */,
 				9FE3574D9518F832E544CBA6 /* [CP] Copy Pods Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				D415DD5222B932CF00DC4D5C /* Setup Fabric */,
@@ -157,6 +153,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				"zh-Hans",
 			);
@@ -177,7 +174,6 @@
 			files = (
 				D415DD5422B9335400DC4D5C /* Assets.xcassets in Resources */,
 				D415DD6922B9385600DC4D5C /* LaunchScreen.storyboard in Resources */,
-				D415DD5722B9373B00DC4D5C /* CodePush.plist in Resources */,
 				D415DD5822B9373B00DC4D5C /* GoogleService-Info.plist in Resources */,
 				D415DD6F22B9389500DC4D5C /* InfoPlist.strings in Resources */,
 			);
@@ -215,6 +211,7 @@
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Regular.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Solid.ttf",
+				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Fontisto.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Foundation.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf",
 				"${PODS_ROOT}/../../node_modules/react-native-vector-icons/Fonts/MaterialCommunityIcons.ttf",
@@ -233,6 +230,7 @@
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome5_Brands.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome5_Regular.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FontAwesome5_Solid.ttf",
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Fontisto.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Foundation.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Ionicons.ttf",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MaterialCommunityIcons.ttf",
@@ -245,24 +243,6 @@
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-resources.sh\"\n";
 			showEnvVarsInLog = 0;
-		};
-		D415DD5122B9328C00DC4D5C /* Add CodePush Key to Info.plist */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Add CodePush Key to Info.plist";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"${CONFIGURATION}\" = \"Release\" ]; then\n/usr/libexec/PlistBuddy -c \"Merge ${SRCROOT}/CodePush.plist\" \"$BUILT_PRODUCTS_DIR/$INFOPLIST_PATH\"\nfi\n";
 		};
 		D415DD5222B932CF00DC4D5C /* Setup Fabric */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -367,8 +347,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 60;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;
@@ -392,9 +373,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 60;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -405,7 +386,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX;
 				PRODUCT_NAME = learnX;
-				PROVISIONING_PROFILE_SPECIFIER = "match AppStore io.robertying.learnX";
+				PROVISIONING_PROFILE_SPECIFIER = "match Development io.robertying.learnX";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 			};

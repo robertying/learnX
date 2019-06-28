@@ -209,20 +209,6 @@ dependencies {
     implementation 'com.crashlytics.sdk.android:crashlytics:+'
 
     implementation project(':react-native-navigation')
-    implementation project(':react-native-background-fetch')
-    implementation project(':react-native-device-info')
-    implementation project(':@react-native-community_async-storage')
-    implementation project(':react-native-extra-dimensions-android')
-    implementation project(':react-native-interactable')
-    implementation project(':react-native-code-push')
-    implementation project(':@react-native-community_blur')
-    implementation project(':react-native-linear-gradient')
-    implementation project(':rn-fetch-blob')
-    implementation project(':react-native-share')
-    implementation project(':react-native-webview')
-    implementation project(':react-native-vector-icons')
-    implementation project(':react-native-reanimated')
-    implementation project(':react-native-gesture-handler')
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
