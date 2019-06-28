@@ -1,12 +1,12 @@
 import RNCalendarEvents from "react-native-calendar-events";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
+import { showToast } from "../helpers/toast";
 import {
   clearEventIds,
   setCalendarId,
   setEventIdForAssignment
 } from "../redux/actions/settings";
-import { showToast } from "../redux/actions/toast";
 import { store } from "../redux/store";
 import { IAssignment } from "../redux/types/state";
 import { getTranslation } from "./i18n";
@@ -59,9 +59,7 @@ export const saveAssignmentEvent = (
     if (status !== "authorized") {
       const result = await RNCalendarEvents.authorizeEventStore();
       if (result !== "authorized") {
-        store.dispatch(
-          showToast(getTranslation("accessCalendarFailure"), 1500)
-        );
+        showToast(getTranslation("accessCalendarFailure"), 1500);
         reject("Unauthorized");
       }
     }
@@ -109,7 +107,7 @@ export const saveAssignmentsToCalendar = async (
   if (status !== "authorized") {
     const result = await RNCalendarEvents.authorizeEventStore();
     if (result !== "authorized") {
-      store.dispatch(showToast(getTranslation("accessCalendarFailure"), 1500));
+      showToast(getTranslation("accessCalendarFailure"), 1500);
       return;
     }
   }

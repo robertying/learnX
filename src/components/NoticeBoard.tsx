@@ -1,40 +1,43 @@
 import React, { FunctionComponent } from "react";
-import { Platform, TouchableHighlightProps, View } from "react-native";
-import { iOSUIKit } from "react-native-typography";
+import {
+  Platform,
+  ScrollView,
+  TouchableHighlightProps,
+  View
+} from "react-native";
+import { Navigation } from "react-native-navigation";
+import { iOSColors, iOSUIKit } from "react-native-typography";
 import Icon from "react-native-vector-icons/MaterialIcons";
-import WebView from "react-native-webview";
-import { connect } from "react-redux";
+import AutoHeightWebView from "../components/AutoHeightWebView";
 import Colors from "../constants/Colors";
+import dayjs from "../helpers/dayjs";
 import { getTranslation } from "../helpers/i18n";
 import { getExtension, shareFile, stripExtension } from "../helpers/share";
-import { showToast } from "../redux/actions/toast";
+import { showToast } from "../helpers/toast";
 import Divider from "./Divider";
 import Text from "./Text";
 import TextButton from "./TextButton";
-
-interface INoticeBoardDispatchProps {
-  readonly showToast: (text: string, duration: number) => void;
-}
 
 export type INoticeBoardProps = TouchableHighlightProps & {
   readonly title: string;
   readonly author: string;
   readonly content?: string;
+  readonly publishTime: string;
   readonly attachmentName?: string;
   readonly attachmentUrl?: string;
+  readonly componentId: string;
   readonly onTransition?: () => void;
 };
 
-const NoticeBoard: FunctionComponent<
-  INoticeBoardProps & INoticeBoardDispatchProps
-> = props => {
+const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
   const {
     title,
     author,
     content,
     attachmentName,
     attachmentUrl,
-    showToast,
+    publishTime,
+    componentId,
     onTransition
   } = props;
 
@@ -48,17 +51,23 @@ const NoticeBoard: FunctionComponent<
     }
 
     if (Platform.OS === "ios") {
-      // Navigation.push(props.componentId, {
-      //   component: {
-      //     name: "webview",
-      //     passProps: {
-      //       title: stripExtension(filename),
-      //       filename: stripExtension(filename),
-      //       url,
-      //       ext
-      //     }
-      //   }
-      // });
+      Navigation.push(componentId, {
+        component: {
+          name: "webview",
+          passProps: {
+            filename: stripExtension(filename),
+            url,
+            ext
+          },
+          options: {
+            topBar: {
+              title: {
+                text: stripExtension(filename)
+              }
+            }
+          }
+        }
+      });
     } else {
       showToast(getTranslation("downloadingFile"), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
@@ -69,13 +78,13 @@ const NoticeBoard: FunctionComponent<
   };
 
   return (
-    <View
+    <ScrollView
       style={{
         flex: 1,
         backgroundColor: "#fff"
       }}
     >
-      <View style={{ padding: 15 }}>
+      <View style={{ padding: 15, paddingLeft: 20, paddingRight: 20 }}>
         <Text
           style={[iOSUIKit.title3Emphasized, { lineHeight: 24 }]}
           numberOfLines={2}
@@ -83,13 +92,33 @@ const NoticeBoard: FunctionComponent<
         >
           {title}
         </Text>
-        <Text style={[iOSUIKit.subhead, { marginTop: 5 }]}>{author}</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginTop: 5
+          }}
+        >
+          <Text style={[iOSUIKit.body, { color: iOSColors.gray }]}>
+            {author}
+          </Text>
+          <Text style={[iOSUIKit.body, { color: iOSColors.gray }]}>
+            {dayjs(publishTime).format("LL")}
+          </Text>
+        </View>
       </View>
       <Divider />
       {attachmentName ? (
         <>
           <View
-            style={{ padding: 15, flexDirection: "row", alignItems: "center" }}
+            style={{
+              padding: 15,
+              paddingLeft: 20,
+              paddingRight: 20,
+              flexDirection: "row",
+              alignItems: "center"
+            }}
           >
             <Icon
               style={{ marginRight: 5 }}
@@ -114,23 +143,17 @@ const NoticeBoard: FunctionComponent<
           <Divider />
         </>
       ) : null}
-      <WebView
-        style={{ flex: 1 }}
+      <AutoHeightWebView
+        style={{ margin: 15 }}
+        useWebKit={true}
         originWhitelist={["*"]}
         source={{
-          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body style="padding: 10px;">${content ||
+          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body>${content ||
             getTranslation("noNoticeContent")}</body>`
         }}
       />
-    </View>
+    </ScrollView>
   );
 };
 
-const mapDispatchToProps: INoticeBoardDispatchProps = {
-  showToast: (text: string, duration: number) => showToast(text, duration)
-};
-
-export default connect(
-  null,
-  mapDispatchToProps
-)(NoticeBoard);
+export default NoticeBoard;
