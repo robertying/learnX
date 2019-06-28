@@ -17,9 +17,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>3.1.0</string>
+	<string>4.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>51</string>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -35,6 +35,21 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Allow learnX to access your calendar for assignment deadline sync</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Allow learnX to access your contacts</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow learnX to access your microphone</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow learnX to access your photos</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>AntDesign.ttf</string>
+		<string>Ionicons.ttf</string>
+		<string>MaterialCommunityIcons.ttf</string>
+		<string>MaterialIcons.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
@@ -58,22 +73,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>UIAppFonts</key>
-	<array>
-		<string>AntDesign.ttf</string>
-		<string>Ionicons.ttf</string>
-		<string>MaterialCommunityIcons.ttf</string>
-		<string>MaterialIcons.ttf</string>
-	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Allow learnX to access your calendar for assignment deadline sync</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Allow learnX to access your contacts</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow learnX to access your microphone</string>
 </dict>
 </plist>
