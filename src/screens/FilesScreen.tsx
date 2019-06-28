@@ -1,43 +1,41 @@
-import Fuse from "fuse.js";
-import React, { useEffect, useRef, useState } from "react";
+import * as Haptics from "expo-haptics";
+import { FuseOptions } from "fuse.js";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
-  LayoutAnimation,
-  ListRenderItem,
-  Platform,
-  SafeAreaView,
-  TextInput,
-  View
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  SafeAreaView
 } from "react-native";
-import Modal from "react-native-modal";
 import { Navigation } from "react-native-navigation";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
-import Divider from "../components/Divider";
 import EmptyList from "../components/EmptyList";
-import FilesView from "../components/FilesView";
-import SearchBar from "../components/SearchBar";
-import SettingsListItem from "../components/SettingsListItem";
-import Layout from "../constants/Layout";
+import FileCard from "../components/FileCard";
+import DeviceInfo from "../constants/DeviceInfo";
 import dayjs from "../helpers/dayjs";
 import { getTranslation } from "../helpers/i18n";
-import { shareFile, stripExtension } from "../helpers/share";
-import {
-  getCoursesForSemester,
-  setCoursesFilter
-} from "../redux/actions/courses";
+import { showToast } from "../helpers/toast";
+import useSearchBar from "../hooks/useSearchBar";
+import { login } from "../redux/actions/auth";
+import { getCoursesForSemester } from "../redux/actions/courses";
 import {
   getAllFilesForCourses,
   pinFile,
   unpinFile
 } from "../redux/actions/files";
-import { showToast } from "../redux/actions/toast";
-import { ICourse, IFile, IPersistAppState } from "../redux/types/state";
+import {
+  ICourse,
+  IFile,
+  IPersistAppState,
+  withCourseInfo
+} from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface IFilesScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
+  readonly username: string;
+  readonly password: string;
   readonly semesterId: string;
   readonly courses: ReadonlyArray<ICourse>;
   readonly files: ReadonlyArray<IFile>;
@@ -48,12 +46,11 @@ interface IFilesScreenStateProps {
 
 interface IFilesScreenDispatchProps {
   readonly getCoursesForSemester: (semesterId: string) => void;
-  // tslint:disable: readonly-array
+  // tslint:disable-next-line: readonly-array
   readonly getAllFilesForCourses: (courseIds: string[]) => void;
-  readonly showToast: (text: string, duration: number) => void;
   readonly pinFile: (fileId: string) => void;
   readonly unpinFile: (fileId: string) => void;
-  readonly setCoursesFilter: (hidden: string[]) => void;
+  readonly login: (username: string, password: string) => void;
 }
 
 type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
@@ -61,6 +58,8 @@ type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
 const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const {
     loggedIn,
+    username,
+    password,
     semesterId,
     courses,
     files: rawFiles,
@@ -68,19 +67,43 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     getCoursesForSemester,
     getAllFilesForCourses,
     autoRefreshing,
-    showToast,
     pinFile,
     pinnedFiles,
     unpinFile,
     hidden,
-    setCoursesFilter
+    login
   } = props;
 
+  /**
+   * Prepare data
+   */
+
   const courseIds = courses.map(course => course.id);
+  const courseNames = courses.reduce(
+    (a, b) => ({
+      ...a,
+      ...{
+        [b.id]: { courseName: b.name, courseTeacherName: b.teacherName }
+      }
+    }),
+    {}
+  ) as {
+    readonly [id: string]: {
+      readonly courseName: string;
+      readonly courseTeacherName: string;
+    };
+  };
 
   const files = [...rawFiles]
-    .filter(item => !hidden.includes(item.courseId))
-    .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
+    .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix())
+    .map(file => ({
+      ...file,
+      ...courseNames[file.courseId]
+    }));
+
+  /**
+   * Fetch and handle error
+   */
 
   useEffect(() => {
     if (courses.length === 0 && loggedIn && semesterId) {
@@ -92,62 +115,75 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     if (autoRefreshing || files.length === 0) {
       invalidateAll();
     }
-  }, []);
+  }, [courses.length, loggedIn]);
 
   const invalidateAll = () => {
-    if (loggedIn && courseIds.length !== 0) {
-      getAllFilesForCourses(courseIds);
+    if (courseIds.length !== 0) {
+      if (loggedIn) {
+        getAllFilesForCourses(courseIds);
+      } else {
+        showToast(getTranslation("refreshFailure"), 1500);
+        login(username, password);
+      }
     }
   };
 
-  const onFileCardPress = async (
-    filename: string,
-    url: string,
-    ext: string
-  ) => {
-    if (Platform.OS === "ios") {
-      Navigation.push(props.componentId, {
-        component: {
-          name: "webview",
-          passProps: {
-            title: stripExtension(filename),
-            filename: stripExtension(filename),
-            url,
-            ext
+  /**
+   * Render cards
+   */
+
+  const onFileCardPress = (fileId: string, reactTag?: number) => {
+    const file = files.find(item => item.id === fileId);
+
+    if (file) {
+      if (DeviceInfo.isPad) {
+        Navigation.setStackRoot("detail.root", [
+          {
+            component: {
+              name: "webview",
+              passProps: {
+                filename: file.title,
+                url: file.downloadUrl,
+                ext: file.fileType
+              },
+              options: {
+                topBar: {
+                  title: {
+                    text: file.title
+                  }
+                },
+                animations: {
+                  setStackRoot: {
+                    enabled: false
+                  }
+                } as any
+              }
+            }
           }
-        }
-      });
-    } else {
-      showToast(getTranslation("downloadingFile"), 1000);
-      const success = await shareFile(url, stripExtension(filename), ext);
-      if (!success) {
-        showToast(getTranslation("downloadFileFailure"), 3000);
+        ]);
+      } else {
+        Navigation.push(props.componentId, {
+          component: {
+            name: "webview",
+            passProps: {
+              filename: file.title,
+              url: file.downloadUrl,
+              ext: file.fileType
+            },
+            options: {
+              topBar: {
+                title: {
+                  text: file.title
+                }
+              },
+              preview: {
+                reactTag,
+                commit: true
+              }
+            }
+          }
+        });
       }
-    }
-  };
-
-  const isSearching = false;
-  const searchBarRef = useRef<TextInput>();
-  const [searchResult, setSearchResult] = useState(files);
-
-  useEffect(() => {
-    setSearchResult(files);
-  }, [files.length]);
-
-  useEffect(() => {
-    if (isSearching) {
-      if (searchBarRef.current) {
-        searchBarRef.current.focus();
-      }
-    } else {
-      setSearchResult(files);
-    }
-  }, [isSearching]);
-
-  const onSearchChange = (text: string) => {
-    if (text) {
-      const fuse = new Fuse(files, fuseOptions);
-      setSearchResult(fuse.search(text));
     }
   };
 
@@ -159,87 +195,95 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
-  const modalVisible = false;
+  const renderListItem = ({
+    item
+  }: {
+    readonly item: withCourseInfo<IFile>;
+  }) => (
+    <FileCard
+      title={item.title}
+      extension={item.fileType}
+      size={item.size}
+      date={item.uploadTime}
+      description={item.description}
+      markedImportant={item.markedImportant}
+      courseName={item.courseName}
+      courseTeacherName={item.courseTeacherName}
+      dragEnabled={item.courseName && item.courseTeacherName ? true : false}
+      pinned={pinnedFiles.includes(item.id)}
+      // tslint:disable: jsx-no-lambda
+      onPinned={pin => onPinned!(pin, item.id)}
+      onPress={() => {
+        onFileCardPress(item.id, undefined);
+      }}
+      onPressIn={
+        DeviceInfo.isPad
+          ? undefined
+          : (e: { readonly reactTag: number | null }) => {
+              onFileCardPress(item.id, e.reactTag!);
+            }
+      }
+      // tslint:enable: jsx-no-lambda
+    />
+  );
 
-  const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
-    return (
-      <SettingsListItem
-        variant="none"
-        text={item.name}
-        icon={hidden.includes(item.id) ? null : <Icon name="check" size={20} />}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() =>
-          hidden.includes(item.id)
-            ? setCoursesFilter(hidden.filter(hid => hid !== item.id))
-            : setCoursesFilter([...hidden, item.id])
+  /**
+   * Refresh
+   */
+
+  const [indicatorShown, setIndicatorShown] = useState(false);
+
+  const onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+
+    if (offsetY < -60 && !isFetching) {
+      Navigation.showOverlay({
+        component: {
+          id: "AnimatingActivityIndicator",
+          name: "AnimatingActivityIndicator"
         }
-      />
-    );
+      });
+      setIndicatorShown(true);
+
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      invalidateAll();
+    }
   };
 
-  const keyExtractor = (item: any) => item.id;
+  useEffect(() => {
+    if (!isFetching && indicatorShown) {
+      Navigation.dismissOverlay("AnimatingActivityIndicator");
+      setIndicatorShown(false);
+    }
+  }, [isFetching]);
+
+  /**
+   * Search
+   */
+
+  const searchResults = useSearchBar(
+    files,
+    pinnedFiles,
+    hidden,
+    fuseOptions
+  ) as ReadonlyArray<withCourseInfo<IFile>>;
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {isSearching && (
-        <SearchBar
-          ref={searchBarRef as any}
-          // tslint:disable-next-line: jsx-no-lambda
-          onCancel={() => {
-            LayoutAnimation.easeInEaseOut();
-            //  navigation.setParams({ isSearching: false });
-          }}
-          onChangeText={onSearchChange}
-        />
-      )}
-      <FilesView
-        isFetching={isFetching}
-        onRefresh={invalidateAll}
-        courses={courses}
-        files={searchResult}
-        onFileCardPress={onFileCardPress}
-        pinnedFiles={pinnedFiles || []}
-        onPinned={onPinned}
-      />
-      <Modal
-        style={{
-          margin: 0,
-          marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
-        }}
-        isVisible={modalVisible}
-        backdropColor="transparent"
-        swipeDirection="down"
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <FlatList
+        ListEmptyComponent={EmptyList}
+        data={searchResults}
+        renderItem={renderListItem}
         // tslint:disable-next-line: jsx-no-lambda
-        onSwipeComplete={() => {}}
-      >
-        <View style={{ flex: 1, backgroundColor: "white" }}>
-          <Icon.Button
-            style={{ margin: 10 }}
-            name="close"
-            // tslint:disable-next-line: jsx-no-lambda
-            onPress={() => {
-              //   navigation.setParams({ filterModalVisible: false });
-            }}
-            color="black"
-            size={24}
-            backgroundColor="transparent"
-            underlayColor="transparent"
-            activeOpacity={0.6}
-          />
-          <FlatList
-            ListEmptyComponent={EmptyList}
-            ItemSeparatorComponent={Divider}
-            data={courses}
-            renderItem={renderListItem}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-      </Modal>
+        keyExtractor={item => item.id}
+        onScrollEndDrag={onScrollEndDrag}
+      />
     </SafeAreaView>
   );
 };
 
-const fuseOptions = {
+const fuseOptions: FuseOptions<withCourseInfo<IFile>> = {
   shouldSort: true,
   threshold: 0.6,
   location: 0,
@@ -253,11 +297,14 @@ const fuseOptions = {
 FilesScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("courses")
+      text: getTranslation("files")
     },
     largeTitle: {
       visible: true
-    }
+    },
+    searchBar: true,
+    searchBarPlaceholder: getTranslation("searchFiles"),
+    hideNavBarOnFocusSearchBar: true
   }
 };
 
@@ -265,6 +312,8 @@ function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
+    username: state.auth.username || "",
+    password: state.auth.password || "",
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.files.isFetching,
@@ -280,10 +329,9 @@ const mapDispatchToProps: IFilesScreenDispatchProps = {
     getCoursesForSemester(semesterId),
   getAllFilesForCourses: (courseIds: string[]) =>
     getAllFilesForCourses(courseIds),
-  showToast: (text: string, duration: number) => showToast(text, duration),
   pinFile: (fileId: string) => pinFile(fileId),
   unpinFile: (fileId: string) => unpinFile(fileId),
-  setCoursesFilter: (hidden: string[]) => setCoursesFilter(hidden)
+  login: (username: string, password: string) => login(username, password)
 };
 
 export default connect(

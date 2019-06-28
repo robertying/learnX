@@ -4,10 +4,10 @@ import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
+import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
-import { store } from "../redux/store";
 import { IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
@@ -18,6 +18,7 @@ interface ISemestersSettingsScreenStateProps {
 
 interface ISemestersSettingsScreenDispatchProps {
   readonly setCurrentSemester: (semesterId: string) => void;
+  readonly getCoursesForSemester: (semesterId: string) => void;
 }
 
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
@@ -26,11 +27,16 @@ type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
 const SemestersSettingsScreen: INavigationScreen<
   ISemestersSettingsScreenProps
 > = props => {
-  const { semesters, currentSemester, setCurrentSemester } = props;
+  const {
+    semesters,
+    currentSemester,
+    setCurrentSemester,
+    getCoursesForSemester
+  } = props;
 
   useEffect(() => {
     return () => {
-      store.dispatch(getCoursesForSemester(currentSemester as string));
+      getCoursesForSemester(currentSemester);
     };
   }, [currentSemester]);
 
@@ -51,7 +57,7 @@ const SemestersSettingsScreen: INavigationScreen<
   const keyExtractor = (item: any) => item as string;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
       <FlatList
         style={{ marginTop: 10 }}
         data={semesters}
@@ -85,7 +91,8 @@ function mapStateToProps(
 }
 
 const mapDispatchToProps: ISemestersSettingsScreenDispatchProps = {
-  setCurrentSemester
+  setCurrentSemester,
+  getCoursesForSemester
 };
 
 export default connect(

@@ -18,7 +18,7 @@ const authPersistConfig: PersistConfig = {
 const rootPersistConfig: PersistConfig = {
   key: "root",
   storage: AsyncStorage,
-  blacklist: ["auth", "toast"]
+  blacklist: ["auth"]
 };
 
 const appReducer = combineReducers<IAppState, any>({

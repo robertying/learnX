@@ -9,6 +9,7 @@ const SplashScreen = () => (
         flex: 1
       }}
     >
+      <View style={{ backgroundColor: "white", height: 52 + 44 }} />
       <View style={{ backgroundColor: "#f0f0f0", flex: 1 }} />
       <View
         style={{

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Alert,
   FlatList,
@@ -17,9 +17,10 @@ import RNFetchBlob from "rn-fetch-blob";
 import packageConfig from "../../package.json";
 import Divider from "../components/Divider";
 import SettingsListItem from "../components/SettingsListItem";
+import Colors from "../constants/Colors";
 import { saveAssignmentsToCalendar } from "../helpers/calendar";
-import dayjs from "../helpers/dayjs";
 import { getTranslation } from "../helpers/i18n";
+import { showToast } from "../helpers/toast";
 import { getLatestRelease } from "../helpers/update";
 import { clearStore } from "../redux/actions/root";
 import {
@@ -28,14 +29,13 @@ import {
   setNotifications,
   setUpdate
 } from "../redux/actions/settings";
-import { showToast } from "../redux/actions/toast";
 import { IAssignment, IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly calendarSync: boolean;
-  readonly rawAssignments: readonly IAssignment[];
+  readonly assignments: readonly IAssignment[];
   readonly hasUpdate: boolean;
   readonly notifications: boolean;
 }
@@ -45,7 +45,6 @@ interface ISettingsScreenDispatchProps {
   readonly setAutoRefreshing: (enabled: boolean) => void;
   readonly setCalendarSync: (enabled: boolean) => void;
   readonly setUpdate: (hasUpdate: boolean) => void;
-  readonly showToast: (text: string, duration: number) => void;
   readonly setNotifications: (enabled: boolean) => void;
 }
 
@@ -59,11 +58,21 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     autoRefreshing,
     setCalendarSync,
     calendarSync,
-    rawAssignments,
+    assignments,
     setUpdate,
-    showToast,
     hasUpdate
   } = props;
+
+  useEffect(() => {
+    const listener = Navigation.events().registerNavigationButtonPressedListener(
+      ({ buttonId }) => {
+        if (buttonId === "close") {
+          Navigation.dismissModal("settings");
+        }
+      }
+    );
+    return () => listener.remove();
+  }, []);
 
   const onAcknowledgementsPress = () => {
     Navigation.push(props.componentId, {
@@ -86,7 +95,12 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           text: getTranslation("ok"),
           onPress: () => {
             clearStore();
-            //  navigation.navigate("Auth");
+            Navigation.showModal({
+              component: {
+                id: "login",
+                name: "login"
+              }
+            });
           }
         }
       ],
@@ -104,10 +118,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   const onCalendarSyncSwitchChange = (enabled: boolean) => {
     if (enabled) {
-      if (rawAssignments) {
-        const assignments = [...rawAssignments].filter(item =>
-          dayjs(item.deadline).isAfter(dayjs())
-        );
+      if (assignments) {
         saveAssignmentsToCalendar(assignments);
       }
     }
@@ -212,10 +223,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         );
       case 3:
-        return null;
-      case 4:
-        return null;
-      case 5:
         return (
           <SettingsListItem
             variant="none"
@@ -225,7 +232,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onLogoutPress}
           />
         );
-      case 6:
+      case 4:
         return (
           <SettingsListItem
             variant="none"
@@ -234,7 +241,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 7:
+      case 5:
         return Platform.OS === "android" ? (
           <SettingsListItem
             variant="none"
@@ -267,19 +274,17 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 8:
-        return null;
-      case 9:
+      case 6:
         return (
           <SettingsListItem
             variant="arrow"
             containerStyle={{ marginTop: 10 }}
             icon={<MaterialCommunityIcons name="tag-heart" size={20} />}
-            text={getTranslation("acknowledges")}
+            text={getTranslation("acknowledgements")}
             onPress={onAcknowledgementsPress}
           />
         );
-      case 10:
+      case 7:
         return (
           <SettingsListItem
             variant="arrow"
@@ -294,18 +299,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
       <FlatList
         data={[
           { key: "autoRefreshing" },
           { key: "calendarSync" },
           { key: "semesters" },
-          { key: "notifications" },
-          { key: "notificationTypes" },
           { key: "logout" },
           { key: "clearFileCache" },
           { key: "checkUpdate" },
-          { key: "lang" },
           { key: "acknowledgement" },
           { key: "about" }
         ]}
@@ -332,7 +334,7 @@ function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     calendarSync: state.settings.calendarSync,
-    rawAssignments: state.assignments.items,
+    assignments: state.assignments.items,
     hasUpdate: state.settings.hasUpdate,
     notifications: state.settings.notifications
   };
@@ -343,7 +345,6 @@ const mapDispatchToProps: ISettingsScreenDispatchProps = {
   setAutoRefreshing,
   setCalendarSync,
   setUpdate,
-  showToast,
   setNotifications
 };
 

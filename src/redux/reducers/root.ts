@@ -11,7 +11,6 @@ import files from "./files";
 import notices from "./notices";
 import semesters from "./semesters";
 import settings from "./settings";
-import toast from "./toast";
 
 export const mainReducers = {
   settings,
@@ -20,8 +19,7 @@ export const mainReducers = {
   currentSemester,
   files,
   notices,
-  semesters,
-  toast
+  semesters
 };
 
 export function rootReducer(

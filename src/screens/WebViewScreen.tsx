@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { ProgressViewIOS, View } from "react-native";
+import { Navigation } from "react-native-navigation";
 import { WebView } from "react-native-webview";
 import MediumPlaceholder from "../components/MediumPlaceholder";
 import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
-import { downloadFile } from "../helpers/share";
+import { downloadFile, shareFile } from "../helpers/share";
+import { showToast } from "../helpers/toast";
 import { INavigationScreen } from "../types/NavigationScreen";
 
-const WebViewScreen: INavigationScreen<{
-  readonly title: string;
+export interface IWebViewScreenStateProps {
   readonly filename: string;
   readonly url: string;
   readonly ext: string;
-}> = props => {
+}
+
+type IWebViewScreenProps = IWebViewScreenStateProps;
+
+const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   const { url, ext, filename } = props;
 
   const [loading, setLoading] = useState(true);
@@ -30,6 +35,18 @@ const WebViewScreen: INavigationScreen<{
       })();
     }
   }, [loading]);
+
+  useEffect(() => {
+    const listener = Navigation.events().registerNavigationButtonPressedListener(
+      ({ buttonId }) => {
+        if (buttonId === "share") {
+          showToast(getTranslation("preparingFile"), 1500);
+          shareFile(url, filename, ext);
+        }
+      }
+    );
+    return () => listener.remove();
+  }, []);
 
   return (
     <>
@@ -59,7 +76,13 @@ const WebViewScreen: INavigationScreen<{
       )}
       {loading && (
         <ProgressViewIOS
-          style={{ position: "absolute", top: 0, left: 0, right: 0 }}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            transform: [{ scaleX: 1.0 }, { scaleY: 3 }]
+          }}
           progressTintColor={Colors.theme}
           progress={progress}
         />
@@ -71,12 +94,16 @@ const WebViewScreen: INavigationScreen<{
 // tslint:disable-next-line: no-object-mutation
 WebViewScreen.options = {
   topBar: {
-    title: {
-      text: getTranslation("courses")
-    },
+    hideOnScroll: true,
     largeTitle: {
-      visible: true
-    }
+      visible: false
+    },
+    rightButtons: [
+      {
+        id: "share",
+        systemItem: "action"
+      }
+    ]
   }
 };
 

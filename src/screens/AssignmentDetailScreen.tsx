@@ -1,12 +1,20 @@
 import React from "react";
+import { connect } from "react-redux";
 import AssignmentBoard from "../components/AssignmentBoard";
-import { getTranslation } from "../helpers/i18n";
 import { INavigationScreen } from "../types/NavigationScreen";
 
-interface IAssignmentDetailScreenProps {
+export interface IAssignmentDetailScreenProps {
   readonly title: string;
-  readonly description: string;
   readonly deadline: string;
+  readonly description?: string;
+  readonly attachmentName?: string;
+  readonly attachmentUrl?: string;
+  readonly submittedAttachmentName?: string;
+  readonly submittedAttachmentUrl?: string;
+  readonly submitTime?: string;
+  readonly grade?: number;
+  readonly gradeLevel?: string;
+  readonly gradeContent?: string;
 }
 
 const AssignmentDetailScreen: INavigationScreen<
@@ -15,16 +23,4 @@ const AssignmentDetailScreen: INavigationScreen<
   return <AssignmentBoard {...props} />;
 };
 
-// tslint:disable-next-line: no-object-mutation
-AssignmentDetailScreen.options = {
-  topBar: {
-    title: {
-      text: getTranslation("Detail")
-    },
-    largeTitle: {
-      visible: true
-    }
-  }
-};
-
-export default AssignmentDetailScreen;
+export default connect()(AssignmentDetailScreen);

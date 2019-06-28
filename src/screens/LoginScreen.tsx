@@ -1,42 +1,53 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  Image,
+  Keyboard,
   KeyboardAvoidingView,
   LayoutAnimation,
   Platform,
   SafeAreaView,
-  StyleSheet,
   TextInput,
   TouchableWithoutFeedback,
   View
 } from "react-native";
+import { Navigation } from "react-native-navigation";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { connect } from "react-redux";
 import RaisedButton from "../components/RaisedButton";
-import Text from "../components/Text";
 import TextField from "../components/TextField";
 import Colors from "../constants/Colors";
 import { dummyPassword, dummyUsername } from "../helpers/dummy";
 import { getTranslation } from "../helpers/i18n";
+import { showToast } from "../helpers/toast";
 import { login } from "../redux/actions/auth";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
 import { setMockStore } from "../redux/actions/root";
 import { getAllSemesters } from "../redux/actions/semesters";
-import { showToast } from "../redux/actions/toast";
-import { store } from "../redux/store";
 import { IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface ILoginScreenProps {
   readonly loggedIn: boolean;
   readonly loginError?: Error | null;
+  readonly semesters: readonly string[];
+  readonly getAllSemestersError?: Error | null;
   readonly login: (username: string, password: string) => void;
-  readonly showToast: (text: string, duration: number) => void;
   readonly setMockStore: () => void;
   readonly setCurrentSemester: (semesterId: string) => void;
+  readonly getAllSemesters: () => void;
 }
 
 const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
-  const { loggedIn, login, showToast, loginError, setMockStore } = props;
+  const {
+    loggedIn,
+    semesters,
+    login,
+    loginError,
+    setMockStore,
+    setCurrentSemester,
+    getAllSemesters,
+    getAllSemestersError
+  } = props;
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
   useEffect(() => {
@@ -46,20 +57,33 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     }
   }, [loginError]);
 
-  if (loggedIn) {
-    (async () => {
-      await Promise.resolve(store.dispatch(getAllSemesters()));
-      store.dispatch(setCurrentSemester(store.getState().semesters.items[0]));
-    })();
-    //    navigation.navigate("Main");
-  }
+  useEffect(() => {
+    if (loggedIn) {
+      showToast(getTranslation("fetchingSemesters"), 1500);
+      getAllSemesters();
+    }
+  }, [loggedIn]);
+
+  useEffect(() => {
+    if (loggedIn && semesters.length !== 0) {
+      setCurrentSemester(semesters[0]);
+      Keyboard.dismiss();
+      Navigation.dismissModal("login");
+    }
+  }, [semesters.length]);
+
+  useEffect(() => {
+    if (getAllSemestersError) {
+      showToast(getTranslation("networkError"), 1500);
+      setLoginButtonPressed(false);
+    }
+  }, [getAllSemestersError]);
 
   const usernameTextFieldRef = useRef<typeof TextInput>();
   const passwordTextFieldRef = useRef<typeof TextInput>();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [logoSize, setLogoSize] = useState(120);
   const [formVisible, setFormVisible] = useState(false);
 
   useEffect(() => {
@@ -85,10 +109,11 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     }, 800);
   }, []);
 
+  const [logoSize, setLogoSize] = useState(160);
   const onLogoPress = () => {
     if (logoSize >= 200) {
       LayoutAnimation.spring();
-      setLogoSize(120);
+      setLogoSize(160);
     } else {
       LayoutAnimation.spring();
       setLogoSize(oldSize => oldSize + 10);
@@ -132,9 +157,10 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <TouchableWithoutFeedback onPress={onLogoPress}>
-          <View>
-            <Text style={[{ color: "white" }, { fontSize: logoSize }]}>X</Text>
-          </View>
+          <Image
+            style={{ height: logoSize, width: logoSize }}
+            source={require("../assets/images/MaskedAppIcon.png")}
+          />
         </TouchableWithoutFeedback>
         {formVisible && (
           <View
@@ -145,12 +171,12 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
             }}
           >
             <TextField
-              style={styles.textField}
-              icon={<AntDesign name="user" size={25} color={tintColor} />}
-              tintColor={tintColor}
+              icon={<AntDesign name="user" size={25} color={Colors.theme} />}
+              tintColor={Colors.theme}
               textContentType="username"
               returnKeyType="next"
               placeholder={getTranslation("username")}
+              placeholderTextColor={Colors.lightTheme}
               onSubmitEditing={handleKeyboardNext}
               ref={usernameTextFieldRef}
               value={username}
@@ -158,13 +184,13 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
             />
             <TextField
               containerStyle={{ marginTop: 20 }}
-              style={styles.textField}
-              icon={<AntDesign name="key" size={25} color={tintColor} />}
-              tintColor={tintColor}
+              icon={<AntDesign name="key" size={25} color={Colors.theme} />}
+              tintColor={Colors.theme}
               textContentType="password"
               secureTextEntry={true}
               returnKeyType="done"
               placeholder={getTranslation("password")}
+              placeholderTextColor={Colors.lightTheme}
               ref={passwordTextFieldRef}
               value={password}
               onChangeText={handlePasswordChange}
@@ -176,7 +202,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
                 height: 40,
                 marginTop: 30
               }}
-              textStyle={styles.textField}
+              textStyle={{ color: "white" }}
               onPress={onLoginButtonPress}
             >
               {getTranslation("login")}
@@ -190,22 +216,19 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
 
 const mapStateToProps = (state: IPersistAppState) => ({
   loggedIn: state.auth.loggedIn,
-  loginError: state.auth.error
+  loginError: state.auth.error,
+  semesters: state.semesters.items,
+  getAllSemestersError: state.semesters.error
 });
 
 const mapDispatchToProps = {
   login: (username: string, password: string) => login(username, password),
-  showToast: (text: string, duration: number) => showToast(text, duration),
-  setMockStore
+  setMockStore,
+  setCurrentSemester: (semesterId: string) => setCurrentSemester(semesterId),
+  getAllSemesters
 };
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(LoginScreen);
-
-const tintColor = "rgba(255, 255, 255, 0.8)";
-
-const styles = StyleSheet.create({
-  textField: { color: "white" }
-});

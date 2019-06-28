@@ -1,12 +1,13 @@
 import React from "react";
+import { connect } from "react-redux";
 import NoticeBoard from "../components/NoticeBoard";
-import { getTranslation } from "../helpers/i18n";
 import { INavigationScreen } from "../types/NavigationScreen";
 
 interface INoticeDetailScreenProps {
   readonly title: string;
   readonly author: string;
   readonly content: string;
+  readonly publishTime: string;
   readonly attachmentName?: string;
   readonly attachmentUrl?: string;
 }
@@ -17,16 +18,4 @@ const NoticeDetailScreen: INavigationScreen<
   return <NoticeBoard {...props} />;
 };
 
-// tslint:disable-next-line: no-object-mutation
-NoticeDetailScreen.options = {
-  topBar: {
-    title: {
-      text: getTranslation("languages")
-    },
-    largeTitle: {
-      visible: true
-    }
-  }
-};
-
-export default NoticeDetailScreen;
+export default connect()(NoticeDetailScreen);

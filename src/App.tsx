@@ -1,17 +1,10 @@
 import { Platform, UIManager } from "react-native";
 import { Navigation } from "react-native-navigation";
-import { getNavigationRoot } from "./navigation/navigationRoot";
+import { getAuthLoadingRoot } from "./navigation/navigationRoot";
 import registerScreens from "./navigation/registerScreens";
 
 const startApp = () => {
-  Navigation.events().registerAppLaunchedListener(async () => {
-    const a = new Promise((resolve, reject) => {
-      throw new Error();
-      return "asd";
-    });
-    const b = await a.catch(err => console.log(err));
-    console.log(b);
-
+  Navigation.events().registerAppLaunchedListener(() => {
     // tslint:disable-next-line
     console.disableYellowBox = true;
 
@@ -23,9 +16,9 @@ const startApp = () => {
     }
 
     registerScreens();
-    const navigationRoot = await getNavigationRoot();
 
-    Navigation.setRoot(navigationRoot);
+    const authLoadingRoot = getAuthLoadingRoot();
+    Navigation.setRoot(authLoadingRoot);
   });
 };
 

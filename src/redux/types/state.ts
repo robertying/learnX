@@ -65,6 +65,10 @@ export interface ICoursesState {
   readonly items: ReadonlyArray<ICourse>;
   readonly error?: Error | null;
 }
+export type withCourseInfo<T> = T & {
+  readonly courseName: string;
+  readonly courseTeacherName: string;
+};
 
 export interface INotice {
   readonly courseId: string;
@@ -118,6 +122,7 @@ export interface IAssignment {
   readonly submittedAttachmentName?: string;
   readonly submittedAttachmentUrl?: string;
   readonly grade?: number;
+  readonly gradeLevel?: string;
   readonly gradeTime?: string;
   readonly graderName?: string;
   readonly gradeContent?: string;
@@ -129,11 +134,6 @@ export interface IAssignmentsState {
   readonly error?: Error | null;
 }
 
-export interface IToastState {
-  readonly visible: boolean;
-  readonly text: string;
-}
-
 export interface IAppState {
   readonly auth: IAuthState & PersistPartial;
   readonly settings: ISettingsState;
@@ -143,6 +143,5 @@ export interface IAppState {
   readonly notices: INoticesState;
   readonly files: IFilesState;
   readonly assignments: IAssignmentsState;
-  readonly toast: IToastState;
 }
 export type IPersistAppState = IAppState & PersistPartial;
