@@ -1,32 +1,24 @@
-import Fuse from "fuse.js";
-import React, { useEffect, useRef, useState } from "react";
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useState } from "react";
 import {
-  LayoutAnimation,
-  ListRenderItem,
-  Platform,
-  RefreshControl,
-  SafeAreaView,
-  TextInput,
-  View
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  SafeAreaView
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-import Modal from "react-native-modal";
 import { Navigation } from "react-native-navigation";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import CourseCard from "../components/CourseCard";
-import Divider from "../components/Divider";
 import EmptyList from "../components/EmptyList";
-import SearchBar from "../components/SearchBar";
-import SettingsListItem from "../components/SettingsListItem";
-import Colors from "../constants/Colors";
-import Layout from "../constants/Layout";
+import DeviceInfo from "../constants/DeviceInfo";
 import { getTranslation } from "../helpers/i18n";
+import { loadTabIcons } from "../helpers/icons";
+import { showToast } from "../helpers/toast";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
+import { login } from "../redux/actions/auth";
 import {
   getCoursesForSemester,
   pinCourse,
-  setCoursesFilter,
   unpinCourse
 } from "../redux/actions/courses";
 import { getAllFilesForCourses } from "../redux/actions/files";
@@ -43,6 +35,8 @@ import { INavigationScreen } from "../types/NavigationScreen";
 interface ICoursesScreenStateProps {
   readonly autoRefreshing: boolean;
   readonly loggedIn: boolean;
+  readonly username: string;
+  readonly password: string;
   readonly semesterId: string;
   readonly courses: ReadonlyArray<ICourse>;
   readonly notices: ReadonlyArray<INotice>;
@@ -63,7 +57,8 @@ interface ICoursesScreenDispatchProps {
   readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
   readonly pinCourse: (courseId: string) => void;
   readonly unpinCourse: (courseId: string) => void;
-  readonly setCoursesFilter: (hidden: string[]) => void;
+  readonly login: (username: string, password: string) => void;
+  // tslint:enable: readonly-array
 }
 
 type ICoursesScreenProps = ICoursesScreenStateProps &
@@ -73,7 +68,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
-    courses: rawCourses,
+    courses,
     notices,
     isFetchingNotices,
     files,
@@ -88,16 +83,52 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     pinCourse,
     pinnedCourses,
     unpinCourse,
-    hidden,
-    setCoursesFilter
+    username,
+    password,
+    login
   } = props;
 
-  const courses: ReadonlyArray<ICourse> = [
-    ...rawCourses.filter(item => pinnedCourses.includes(item.id)),
-    ...rawCourses.filter(item => !pinnedCourses.includes(item.id))
-  ].filter(item => !hidden.includes(item.id));
+  useEffect(() => {
+    const listener = Navigation.events().registerNavigationButtonPressedListener(
+      async ({ buttonId }) => {
+        if (buttonId === "settings") {
+          Navigation.showModal({
+            stack: {
+              children: [
+                {
+                  component: {
+                    id: "settings",
+                    name: "settings.index",
+                    options: {
+                      topBar: {
+                        rightButtons: [
+                          {
+                            id: "close",
+                            icon: (await loadTabIcons()).close
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          });
+        }
+      }
+    );
+    return () => listener.remove();
+  }, []);
+
+  /**
+   * Prepare data
+   */
 
   const courseIds = courses.map(course => course.id);
+
+  /**
+   * Fetch and handle error
+   */
 
   const isFetching =
     isFetchingNotices || isFetchingFiles || isFetchingAssignments;
@@ -117,193 +148,169 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     ) {
       invalidateAll();
     }
-  }, []);
+  }, [courses.length, loggedIn]);
 
   const invalidateAll = () => {
-    if (loggedIn && courseIds.length !== 0) {
-      getAllNoticesForCourses(courseIds);
-      getAllFilesForCourses(courseIds);
-      getAllAssignmentsForCourses(courseIds);
+    if (courseIds.length !== 0) {
+      if (loggedIn) {
+        getAllNoticesForCourses(courseIds);
+        getAllFilesForCourses(courseIds);
+        getAllAssignmentsForCourses(courseIds);
+      } else {
+        showToast(getTranslation("refreshFailure"), 1500);
+        login(username, password);
+      }
     }
   };
 
-  const onCoursePreviewPress = (
+  /**
+   * Render cards
+   */
+
+  const onCourseCardPress = (
     courseId: string,
     courseName: string,
-    courseTeacherName: string
+    reactTag?: number
   ) => {
-    Navigation.push(props.componentId, {
-      component: {
-        name: "courses.detail",
-        passProps: {
-          courseId,
-          courseName,
-          courseTeacherName
+    if (DeviceInfo.isPad) {
+      Navigation.setStackRoot("detail.root", [
+        {
+          component: {
+            name: "courses.detail",
+            passProps: {
+              courseId
+            },
+            options: {
+              topBar: {
+                title: {
+                  text: courseName
+                }
+              },
+              animations: {
+                setStackRoot: {
+                  enabled: false
+                }
+              } as any
+            }
+          }
         }
-      }
-    });
-  };
-
-  const isSearching = false;
-  const searchBarRef = useRef<TextInput>();
-  const [searchResult, setSearchResult] = useState(courses);
-
-  useEffect(() => {
-    if (courses.length) {
-      setSearchResult(courses);
-    }
-  }, [courses.length, pinnedCourses.length]);
-
-  useEffect(() => {
-    if (isSearching) {
-      if (searchBarRef.current) {
-        searchBarRef.current.focus();
-      }
+      ]);
     } else {
-      setSearchResult(courses);
-    }
-  }, [isSearching]);
-
-  const onSearchChange = (text: string) => {
-    if (text) {
-      const fuse = new Fuse(courses, fuseOptions);
-      setSearchResult(fuse.search(text));
+      Navigation.push(props.componentId, {
+        component: {
+          name: "courses.detail",
+          passProps: {
+            courseId
+          },
+          options: {
+            topBar: {
+              title: {
+                text: courseName
+              }
+            },
+            preview: {
+              reactTag,
+              commit: true
+            }
+          }
+        }
+      });
     }
   };
 
-  const onPinned = (pin: boolean, courseId: string) => {
+  const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {
-      pinCourse(courseId);
+      pinCourse(noticeId);
     } else {
-      unpinCourse(courseId);
+      unpinCourse(noticeId);
     }
   };
 
-  const modalVisible = false;
+  const renderListItem = ({ item }: { readonly item: ICourse }) => (
+    <CourseCard
+      dragEnabled={false}
+      courseName={item.name}
+      courseTeacherName={item.teacherName}
+      semester={semesterId}
+      noticesCount={
+        notices.filter(
+          notice => notice.courseId === item.id && notice.hasRead === false
+        ).length
+      }
+      filesCount={
+        files.filter(file => file.courseId === item.id && file.isNew === true)
+          .length
+      }
+      assignmentsCount={
+        assignments.filter(
+          assignment =>
+            assignment.courseId === item.id && assignment.submitted === false
+        ).length
+      }
+      pinned={pinnedCourses.includes(item.id)}
+      // tslint:disable: jsx-no-lambda
+      onPinned={pin => onPinned!(pin, item.id)}
+      onPress={() => {
+        onCourseCardPress(item.id, item.name, undefined);
+      }}
+      onPressIn={(e: { readonly reactTag: number | null }) => {
+        onCourseCardPress(item.id, item.name, e.reactTag!);
+      }}
+      // tslint:enable: jsx-no-lambda
+    />
+  );
 
-  const renderFilterListItem: ListRenderItem<ICourse> = ({ item }) => {
-    return (
-      <SettingsListItem
-        variant="none"
-        text={item.name}
-        icon={hidden.includes(item.id) ? null : <Icon name="check" size={20} />}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() =>
-          hidden.includes(item.id)
-            ? setCoursesFilter(hidden.filter(hid => hid !== item.id))
-            : setCoursesFilter([...hidden, item.id])
+  /**
+   * Refresh
+   */
+
+  const [indicatorShown, setIndicatorShown] = useState(false);
+
+  const onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+
+    if (offsetY < -60 && !isFetching) {
+      Navigation.showOverlay({
+        component: {
+          id: "AnimatingActivityIndicator",
+          name: "AnimatingActivityIndicator"
         }
-      />
-    );
+      });
+      setIndicatorShown(true);
+
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+      invalidateAll();
+    }
   };
 
-  const renderListItem: ListRenderItem<ICourse> = ({ item }) => {
-    return (
-      <CourseCard
-        courseName={item.name}
-        courseTeacherName={item.teacherName}
-        semester={semesterId}
-        noticesCount={
-          notices.filter(
-            notice => notice.courseId === item.id && notice.hasRead === false
-          ).length
-        }
-        filesCount={
-          files.filter(file => file.courseId === item.id && file.isNew === true)
-            .length
-        }
-        assignmentsCount={
-          assignments.filter(
-            assignment =>
-              assignment.courseId === item.id && assignment.submitted === false
-          ).length
-        }
-        pinned={pinnedCourses.includes(item.id)}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPinned={pin => onPinned(pin, item.id)}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() =>
-          onCoursePreviewPress(item.id, item.name, item.teacherName)
-        }
-      />
-    );
-  };
-
-  const keyExtractor = (item: any) => item.id;
+  useEffect(() => {
+    if (!isFetching && indicatorShown) {
+      Navigation.dismissOverlay("AnimatingActivityIndicator");
+      setIndicatorShown(false);
+    }
+  }, [isFetching]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
-      {isSearching && (
-        <SearchBar
-          ref={searchBarRef as any}
-          // tslint:disable-next-line: jsx-no-lambda
-          onCancel={() => {
-            LayoutAnimation.easeInEaseOut();
-          }}
-          onChangeText={onSearchChange}
-        />
-      )}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
       <FlatList
-        data={searchResult}
+        ListEmptyComponent={EmptyList}
+        data={courses}
         renderItem={renderListItem}
-        keyExtractor={keyExtractor}
-        refreshControl={
-          <RefreshControl
-            refreshing={isFetching}
-            onRefresh={invalidateAll}
-            colors={[Colors.theme]}
-          />
-        }
-      />
-      <Modal
-        style={{
-          margin: 0,
-          marginTop: Platform.OS === "android" ? 0 : Layout.statusBarHeight
-        }}
-        isVisible={modalVisible}
-        backdropColor="transparent"
-        swipeDirection="down"
         // tslint:disable-next-line: jsx-no-lambda
-        onSwipeComplete={() => {}}
-      >
-        <View style={{ flex: 1, backgroundColor: "white" }}>
-          <Icon.Button
-            style={{ margin: 10 }}
-            name="close"
-            // tslint:disable-next-line: jsx-no-lambda
-            onPress={() => {}}
-            color="black"
-            size={24}
-            backgroundColor="transparent"
-            underlayColor="transparent"
-            activeOpacity={0.6}
-          />
-          <FlatList
-            ListEmptyComponent={EmptyList}
-            ItemSeparatorComponent={Divider}
-            data={rawCourses}
-            renderItem={renderFilterListItem}
-            keyExtractor={keyExtractor}
-          />
-        </View>
-      </Modal>
+        keyExtractor={item => item.id}
+        onScrollEndDrag={onScrollEndDrag}
+      />
     </SafeAreaView>
   );
-};
-
-const fuseOptions = {
-  shouldSort: true,
-  threshold: 0.6,
-  location: 0,
-  distance: 100,
-  maxPatternLength: 32,
-  minMatchCharLength: 1,
-  keys: ["name", "teacherName"]
 };
 
 // tslint:disable-next-line: no-object-mutation
 CoursesScreen.options = {
   topBar: {
+    background: {
+      color: "white"
+    },
     title: {
       text: getTranslation("courses")
     },
@@ -317,6 +324,8 @@ function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
+    username: state.auth.username || "",
+    password: state.auth.password || "",
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetchingNotices: state.notices.isFetching,
@@ -342,7 +351,7 @@ const mapDispatchToProps: ICoursesScreenDispatchProps = {
     getAllAssignmentsForCourses(courseIds),
   pinCourse: (courseId: string) => pinCourse(courseId),
   unpinCourse: (courseId: string) => unpinCourse(courseId),
-  setCoursesFilter: (hidden: string[]) => setCoursesFilter(hidden)
+  login: (username: string, password: string) => login(username, password)
 };
 
 export default connect(

@@ -42,7 +42,6 @@ import {
   setUpdate,
   setWindow
 } from "../actions/settings";
-import { hideToast, showToastAction } from "../actions/toast";
 import { IPersistAppState } from "./state";
 
 export type IThunkResult = ThunkAction<
@@ -90,10 +89,6 @@ export type IGetFilesAction =
 export type IGetAssignmentsAction =
   | IGetAssignmentsForCourseAction
   | IGetAllAssignmentsForCoursesAction;
-
-export type IShowToastAction = ActionType<typeof showToastAction>;
-export type IHideToastAction = ActionType<typeof hideToast>;
-export type IToastAction = IShowToastAction | IHideToastAction;
 
 export type IPinNoticeAction = ActionType<typeof pinNotice>;
 export type IUnpinNoticeAction = ActionType<typeof unpinNotice>;
@@ -157,6 +152,5 @@ export type IAppActions =
   | IPinCourseAction
   | IUnpinCourseAction
   | ISetCoursesFilter
-  | IToastAction
   | ISettingsAction
   | IStoreAction;

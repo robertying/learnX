@@ -21,10 +21,10 @@ import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
 import { getLocale, getTranslation } from "../helpers/i18n";
 import { shareFile, stripExtension } from "../helpers/share";
+import { showToast } from "../helpers/toast";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
 import { getFilesForCourse } from "../redux/actions/files";
 import { getNoticesForCourse } from "../redux/actions/notices";
-import { showToast } from "../redux/actions/toast";
 import {
   IAssignment,
   IFile,
@@ -66,20 +66,22 @@ interface ICourseDetailScreenDispatchProps {
   readonly getNoticesForCourse: (courseId: string) => void;
   readonly getFilesForCourse: (courseId: string) => void;
   readonly getAssignmentsForCourse: (courseId: string) => void;
-  readonly showToast: (text: string, duration: number) => void;
 }
 
 type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
   ICourseDetailScreenDispatchProps;
 
 const CourseDetailScreen: INavigationScreen<
-  ICourseDetailScreenProps & { readonly courseId: string }
+  ICourseDetailScreenProps & {
+    readonly courseId: string;
+    readonly courseName: string;
+    readonly courseTeacherName: string;
+  }
 > = props => {
   const {
     notices: rawNotices,
     files: rawFiles,
     assignments: rawAssignments,
-    showToast,
     isFetchingAssignments,
     isFetchingFiles,
     isFetchingNotices,
@@ -127,10 +129,16 @@ const CourseDetailScreen: INavigationScreen<
         component: {
           name: "webview",
           passProps: {
-            title: stripExtension(filename),
             filename: stripExtension(filename),
             url,
             ext
+          },
+          options: {
+            topBar: {
+              title: {
+                text: stripExtension(filename)
+              }
+            }
           }
         }
       });
@@ -224,18 +232,20 @@ const CourseDetailScreen: INavigationScreen<
         animationOut="zoomOut"
         useNativeDriver={true}
         deviceWidth={
-          Platform.OS === "android" ? Layout.window().width : window.width
+          Platform.OS === "android" ? Layout.window.width : window.width
         }
         deviceHeight={
-          Platform.OS === "android" ? Layout.window().height : window.height
+          Platform.OS === "android" ? Layout.window.height : window.height
         }
       >
         <View style={{ height: "80%", backgroundColor: "white" }}>
           {currentModal.data && currentModal.type === "Notice" && (
             <NoticeBoard
+              componentId={props.componentId}
               title={(currentModal.data as INotice).title || ""}
               content={(currentModal.data as INotice).content || ""}
               author={(currentModal.data as INotice).publisher || ""}
+              publishTime={(currentModal.data as INotice).publishTime || ""}
               attachmentName={
                 (currentModal.data as INotice).attachmentName || ""
               }
@@ -248,6 +258,7 @@ const CourseDetailScreen: INavigationScreen<
           )}
           {currentModal.data && currentModal.type === "Assignment" && (
             <AssignmentBoard
+              componentId={props.componentId}
               title={(currentModal.data as IAssignment).title || ""}
               description={(currentModal.data as IAssignment).description || ""}
               deadline={
@@ -292,11 +303,8 @@ const CourseDetailScreen: INavigationScreen<
 // tslint:disable-next-line: no-object-mutation
 CourseDetailScreen.options = {
   topBar: {
-    title: {
-      text: getTranslation("detail")
-    },
     largeTitle: {
-      visible: true
+      visible: false
     }
   }
 };
@@ -319,8 +327,7 @@ const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
   getNoticesForCourse: (courseId: string) => getNoticesForCourse(courseId),
   getFilesForCourse: (courseId: string) => getFilesForCourse(courseId),
   getAssignmentsForCourse: (courseId: string) =>
-    getAssignmentsForCourse(courseId),
-  showToast: (text: string, duration: number) => showToast(text, duration)
+    getAssignmentsForCourse(courseId)
 };
 
 export default connect(

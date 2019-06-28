@@ -1,13 +1,19 @@
 import React from "react";
 import { Navigation } from "react-native-navigation";
 import { ConnectedComponentClass, Provider } from "react-redux";
+import AnimatingActivityIndicator from "../components/AnimatingActivityIndicator";
+import EmptyScreen from "../components/EmptyScreen";
 import { store } from "../redux/store";
 import AboutScreen from "../screens/AboutScreen";
 import AcknowledgementsScreen from "../screens/AcknowledgementsScreen";
+import AssignmentDetailScreen from "../screens/AssignmentDetailScreen";
 import AssignmentsScreen from "../screens/AssignmentsScreen";
+import AuthLoadingScreen from "../screens/AuthLoadingScreen";
 import CourseDetailScreen from "../screens/CourseDetailScreen";
 import CoursesScreen from "../screens/CoursesScreen";
 import FilesScreen from "../screens/FilesScreen";
+import LoginScreen from "../screens/LoginScreen";
+import NoticeDetailScreen from "../screens/NoticeDetailScreen";
 import NoticesScreen from "../screens/NoticesScreen";
 import SemestersSettingsScreen from "../screens/SemestersSettingsScreen";
 import SettingsScreen from "../screens/SettingsScreen";
@@ -23,19 +29,50 @@ const storeWrapped = (
 
 const registerScreens = () => {
   Navigation.registerComponent(
+    "AnimatingActivityIndicator",
+    () => AnimatingActivityIndicator
+  );
+
+  Navigation.registerComponent("empty", () => EmptyScreen);
+
+  Navigation.registerComponent(
+    "auth.loading",
+    () => storeWrapped(AuthLoadingScreen),
+    () => AuthLoadingScreen
+  );
+
+  Navigation.registerComponent(
+    "login",
+    () => storeWrapped(LoginScreen),
+    () => LoginScreen
+  );
+
+  Navigation.registerComponent(
     "notices.index",
     () => storeWrapped(NoticesScreen),
     () => NoticesScreen
   );
   Navigation.registerComponent(
+    "notices.detail",
+    () => storeWrapped(NoticeDetailScreen),
+    () => NoticeDetailScreen
+  );
+
+  Navigation.registerComponent(
     "files.index",
     () => storeWrapped(FilesScreen),
     () => FilesScreen
   );
+
   Navigation.registerComponent(
     "assignments.index",
     () => storeWrapped(AssignmentsScreen),
     () => AssignmentsScreen
+  );
+  Navigation.registerComponent(
+    "assignments.detail",
+    () => storeWrapped(AssignmentDetailScreen),
+    () => AssignmentDetailScreen
   );
 
   Navigation.registerComponent(

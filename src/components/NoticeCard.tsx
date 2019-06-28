@@ -1,36 +1,31 @@
-import React, { FunctionComponent } from "react";
-import {
-  Platform,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableHighlightProps,
-  View
-} from "react-native";
-import Interactable from "react-native-interactable";
+import React from "react";
+import { Platform, StyleSheet, View } from "react-native";
 import { iOSColors, iOSUIKit } from "react-native-typography";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import Colors from "../constants/Colors";
 import dayjs from "../helpers/dayjs";
 import { removeTags } from "../helpers/html";
 import { getLocale, getTranslation } from "../helpers/i18n";
+import InteractablePreviewWrapper, {
+  IInteractablePreviewWrapperProps
+} from "./InteractablePreviewWrapper";
 import Text from "./Text";
 
-export type INoticeCardProps = TouchableHighlightProps & {
+export interface INoticeCardProps extends IInteractablePreviewWrapperProps {
   readonly title: string;
   readonly author: string;
   readonly date: string;
   readonly content?: string;
   readonly markedImportant: boolean;
   readonly hasAttachment: boolean;
-  readonly pinned?: boolean;
-  readonly onPinned?: (pin: boolean) => void;
   readonly courseName?: string;
   readonly courseTeacherName?: string;
-};
+}
 
-const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
+const NoticeCard: React.FC<INoticeCardProps> = props => {
   const {
     onPress,
+    onPressIn,
     title,
     author,
     date,
@@ -40,105 +35,95 @@ const NoticeCard: FunctionComponent<INoticeCardProps> = props => {
     markedImportant,
     hasAttachment,
     pinned,
-    onPinned
+    onPinned,
+    dragEnabled
   } = props;
 
-  const onDrag = (event: Interactable.IDragEvent) => {
-    if (Math.abs(event.nativeEvent.x) > 150) {
-      onPinned!(!pinned);
-    }
-  };
-
   return (
-    <Interactable.View
-      animatedNativeDriver={true}
-      horizontalOnly={true}
-      snapPoints={[{ x: 0 }]}
-      onDrag={onDrag}
-      dragEnabled={courseName && courseTeacherName ? true : false}
+    <InteractablePreviewWrapper
+      pinned={pinned}
+      onPinned={onPinned}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      dragEnabled={dragEnabled}
     >
-      <TouchableHighlight
-        onPress={onPress}
-        underlayColor={pinned ? "white" : undefined}
+      <View
+        style={{
+          backgroundColor: "#fff",
+          padding: 15,
+          paddingLeft: 20,
+          paddingRight: 20,
+          borderLeftColor: Colors.theme,
+          borderLeftWidth: pinned ? 10 : 0
+        }}
       >
         <View
+          style={[
+            styles.flexRow,
+            {
+              justifyContent: "space-between"
+            }
+          ]}
+        >
+          <Text
+            style={[
+              { flex: 1 },
+              iOSUIKit.bodyEmphasized,
+              Platform.OS === "android" && { fontWeight: "bold" }
+            ]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {title}
+          </Text>
+          {hasAttachment && (
+            <Icon
+              style={{ marginLeft: 5 }}
+              name="attachment"
+              size={18}
+              color={iOSColors.yellow}
+            />
+          )}
+          {markedImportant && (
+            <Icon
+              style={{ marginLeft: 5 }}
+              name="flag"
+              size={18}
+              color={iOSColors.red}
+            />
+          )}
+        </View>
+        <View
           style={{
-            backgroundColor: pinned ? Colors.theme : "#fff",
-            padding: 15
+            marginTop: 8
           }}
         >
-          <View
-            style={[
-              styles.flexRow,
-              {
-                justifyContent: "space-between"
-              }
-            ]}
-          >
-            <Text
-              style={[
-                { flex: 1 },
-                iOSUIKit.bodyEmphasized,
-                Platform.OS === "android" && { fontWeight: "bold" }
-              ]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {title}
-            </Text>
-            {hasAttachment && (
-              <Icon
-                style={{ marginLeft: 5 }}
-                name="attachment"
-                size={18}
-                color={iOSColors.yellow}
-              />
-            )}
-            {markedImportant && (
-              <Icon
-                style={{ marginLeft: 5 }}
-                name="flag"
-                size={18}
-                color={iOSColors.red}
-              />
-            )}
-          </View>
-          <View
-            style={{
-              marginTop: 8
-            }}
-          >
-            <Text
-              style={[iOSUIKit.subhead, { lineHeight: 24 }]}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {removeTags(content || "") || getTranslation("noNoticeContent")}
-            </Text>
-          </View>
-          <View
-            style={[
-              styles.flexRow,
-              {
-                justifyContent: "space-between",
-                marginTop: 10
-              }
-            ]}
-          >
-            <Text style={{ color: "grey", fontSize: 13 }}>
-              {courseName && courseTeacherName
-                ? `${courseTeacherName} / ${courseName}`
-                : getLocale().startsWith("zh")
-                ? author + " 发布"
-                : "published by " + author}
-            </Text>
-            <Text style={{ color: "grey", fontSize: 13 }}>
-              {dayjs(date).fromNow()}
-            </Text>
-          </View>
+          <Text style={iOSUIKit.subhead} numberOfLines={3}>
+            {removeTags(content || "") || getTranslation("noNoticeContent")}
+          </Text>
         </View>
-      </TouchableHighlight>
-    </Interactable.View>
+        <View
+          style={[
+            styles.flexRow,
+            {
+              justifyContent: "space-between",
+              marginTop: 10
+            }
+          ]}
+        >
+          <Text style={{ color: iOSColors.gray, fontSize: 13 }}>
+            {courseName && courseTeacherName
+              ? `${courseTeacherName} / ${courseName}`
+              : getLocale().startsWith("zh")
+              ? author + " 发布"
+              : "published by " + author}
+          </Text>
+          <Text style={{ color: iOSColors.gray, fontSize: 13 }}>
+            {dayjs(date).fromNow()}
+          </Text>
+        </View>
+      </View>
+    </InteractablePreviewWrapper>
   );
 };
 

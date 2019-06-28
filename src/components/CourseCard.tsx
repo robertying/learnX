@@ -1,31 +1,26 @@
 import React from "react";
-import {
-  Platform,
-  StyleSheet,
-  TouchableHighlight,
-  TouchableHighlightProps,
-  View
-} from "react-native";
-import Interactable from "react-native-interactable";
-import { iOSUIKit } from "react-native-typography";
+import { Platform, StyleSheet, View } from "react-native";
+import { iOSColors, iOSUIKit } from "react-native-typography";
 import Colors from "../constants/Colors";
 import IconText from "./IconText";
+import InteractablePreviewWrapper, {
+  IInteractablePreviewWrapperProps
+} from "./InteractablePreviewWrapper";
 import Text from "./Text";
 
-export type ICourseCardProps = TouchableHighlightProps & {
+export interface ICourseCardProps extends IInteractablePreviewWrapperProps {
   readonly courseName: string;
   readonly courseTeacherName: string;
   readonly noticesCount: number;
   readonly filesCount: number;
   readonly assignmentsCount: number;
   readonly semester: string;
-  readonly pinned: boolean;
-  readonly onPinned: (pin: boolean) => void;
-};
+}
 
-const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
+const CourseCard: React.FC<ICourseCardProps> = props => {
   const {
     onPress,
+    onPressIn,
     courseName,
     courseTeacherName,
     noticesCount,
@@ -36,68 +31,58 @@ const CourseCard: React.FunctionComponent<ICourseCardProps> = props => {
     onPinned
   } = props;
 
-  const onDrag = (event: Interactable.IDragEvent) => {
-    if (Math.abs(event.nativeEvent.x) > 150) {
-      onPinned(!pinned);
-    }
-  };
-
   return (
-    <Interactable.View
-      animatedNativeDriver={true}
-      horizontalOnly={true}
-      snapPoints={[{ x: 0 }]}
-      onDrag={onDrag}
+    <InteractablePreviewWrapper
+      pinned={pinned}
+      onPinned={onPinned}
+      onPress={onPress}
+      onPressIn={onPressIn}
+      dragEnabled={true}
     >
-      <TouchableHighlight
-        onPress={onPress}
-        underlayColor={pinned ? "white" : undefined}
+      <View
+        style={{
+          backgroundColor: "#fff",
+          padding: 15,
+          paddingLeft: 20,
+          paddingRight: 20,
+          borderLeftColor: Colors.theme,
+          borderLeftWidth: pinned ? 10 : 0
+        }}
       >
-        <View
-          style={{
-            backgroundColor: pinned ? Colors.theme : "#fff",
-            padding: 15
-          }}
+        <Text
+          style={[
+            { flex: 1 },
+            iOSUIKit.bodyEmphasized,
+            Platform.OS === "android" && { fontWeight: "bold" }
+          ]}
+          numberOfLines={1}
+          ellipsizeMode="tail"
         >
-          <Text
-            style={[
-              { flex: 1 },
-              iOSUIKit.bodyEmphasized,
-              Platform.OS === "android" && { fontWeight: "bold" }
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {courseName}
-          </Text>
-          <View
-            style={{ flexDirection: "row", alignItems: "flex-end", flex: 1 }}
-          >
-            <View style={{ flex: 1 }}>
-              <Text style={[iOSUIKit.subhead, { marginTop: 8 }]}>
-                {courseTeacherName}
-              </Text>
-              <Text style={{ color: "grey", fontSize: 13, marginTop: 10 }}>
-                {semester}
-              </Text>
-            </View>
-            <View style={[styles.flexRow, { flex: 1 }]}>
-              <IconText
-                name="notifications"
-                color="grey"
-                text={`${noticesCount}`}
-              />
-              <IconText name="folder" color="grey" text={`${filesCount}`} />
-              <IconText
-                name="today"
-                color="grey"
-                text={`${assignmentsCount}`}
-              />
-            </View>
+          {courseName}
+        </Text>
+        <View style={{ flexDirection: "row", alignItems: "flex-end", flex: 1 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={[iOSUIKit.subhead, { marginTop: 10 }]}>
+              {courseTeacherName}
+            </Text>
+            <Text
+              style={{ color: iOSColors.gray, fontSize: 13, marginTop: 10 }}
+            >
+              {semester}
+            </Text>
+          </View>
+          <View style={[styles.flexRow, { flex: 1 }]}>
+            <IconText
+              name="notifications"
+              color="grey"
+              text={`${noticesCount}`}
+            />
+            <IconText name="folder" color="grey" text={`${filesCount}`} />
+            <IconText name="today" color="grey" text={`${assignmentsCount}`} />
           </View>
         </View>
-      </TouchableHighlight>
-    </Interactable.View>
+      </View>
+    </InteractablePreviewWrapper>
   );
 };
 

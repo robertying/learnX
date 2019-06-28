@@ -73,7 +73,7 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
 AcknowledgementsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("acknowledges")
+      text: getTranslation("acknowledgements")
     },
     largeTitle: {
       visible: true

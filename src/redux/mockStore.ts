@@ -27,10 +27,6 @@ const mockStore: IPersistAppState = {
     notifications: true,
     notificationTypes: []
   },
-  toast: {
-    text: "",
-    visible: false
-  },
   semesters: {
     isFetching: false,
     items: ["2018-2019-2", "2017-2018-3"]

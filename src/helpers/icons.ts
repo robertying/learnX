@@ -5,21 +5,36 @@ interface ITabIcons {
   readonly folder: number;
   readonly today: number;
   readonly apps: number;
+  readonly settings: number;
+  readonly close: number;
 }
 
+const size = 25;
+
+// tslint:disable-next-line: no-let
+let icons: ITabIcons;
+
 export const loadTabIcons = async () => {
+  if (icons) {
+    return icons;
+  }
+
   const imageSources = await Promise.all([
-    Icon.getImageSource("notifications", 24),
-    Icon.getImageSource("folder", 24),
-    Icon.getImageSource("today", 24),
-    Icon.getImageSource("apps", 24)
+    Icon.getImageSource("notifications", size),
+    Icon.getImageSource("folder", size),
+    Icon.getImageSource("today", size),
+    Icon.getImageSource("apps", size),
+    Icon.getImageSource("settings", size),
+    Icon.getImageSource("close", size)
   ]);
 
-  const icons: ITabIcons = {
+  icons = {
     notifications: imageSources[0],
     folder: imageSources[1],
     today: imageSources[2],
-    apps: imageSources[3]
+    apps: imageSources[3],
+    settings: imageSources[4],
+    close: imageSources[5]
   };
 
   return icons;
