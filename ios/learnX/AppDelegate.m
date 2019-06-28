@@ -7,7 +7,6 @@
 #import <ReactNativeNavigation.h>
 #import <RNCPushNotificationIOS.h>
 #import <Firebase.h>
-#import <CodePush.h>
 
 @implementation AppDelegate
 
@@ -29,11 +28,12 @@
   return extraModules;
 }
 
-- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge {
-#ifdef DEBUG
+- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+{
+#if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
 #else
-  return [CodePush bundleURL];
+  return [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
 #endif
 }
 
