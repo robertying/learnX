@@ -934,6 +934,11 @@
     lodash "^4.5.0"
     prop-types "^15.6.1"
 
+Base64@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/Base64/-/Base64-1.0.2.tgz#82a36d43f4b98659d72488afe008a905d2cbccdb"
+  integrity sha512-WufIun24IbKXKBCGmxau2cYAaGLJ1GJjXcqTUyUzYiQImCreWwvTagnZd9k3nHGPAdPxpvC+4FNN1OhQH2Vz7g==
+
 abab@^1.0.0:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/abab/-/abab-1.0.4.tgz#5faad9c2c07f60dd76770f71cf025b62a63cfd4e"
@@ -3125,11 +3130,6 @@ jetifier@1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.5.1.tgz#fae0bb6fdc51d60fe2bbaba26aeb89b07ec29ee4"
   integrity sha512-zGFRsf7j84gbwJ0ykLNkChx7RPEE4q2OdELN1sqWY/z2DwdRq+b/db1pc+5T+Ie3nPDInyNFSvnmACjWBZNidA==
-
-js-base64@^2.5.1:
-  version "2.5.1"
-  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.5.1.tgz#1efa39ef2c5f7980bb1784ade4a8af2de3291121"
-  integrity sha512-M7kLczedRMYX4L8Mdh4MzyAMM9O5osx+4FcOQuTvr3A9F2D9S5JXheN0ewNbrvK2UatkTRhL5ejGmGSjNMiZuw==
 
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
@@ -5403,17 +5403,17 @@ through@^2.3.6:
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
   integrity sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
 
-thu-learn-lib-no-native@2.1.4:
-  version "2.1.4"
-  resolved "https://registry.yarnpkg.com/thu-learn-lib-no-native/-/thu-learn-lib-no-native-2.1.4.tgz#0a1ca160fdd080e30068592c2900c9ebfdc1219f"
-  integrity sha512-JL6YBeRBvHeORKz7UNqszP2Mz1GnFzqWfIebgNFDbya9M9sq892UhgjS4Q0mpfgemmJVt30K8MocLokoYwin1A==
+thu-learn-lib-no-native@2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/thu-learn-lib-no-native/-/thu-learn-lib-no-native-2.1.5.tgz#335606dace6052b08964d2dc65af27b4274ac446"
+  integrity sha512-tBlGL3IJ/3LP+N7y6c/kj1nO1/0lsFVk2UyigtZ8hBZxezg4GEiIt56n86R+VXxv2Ps+Lek8OdFH37Ytwk6emw==
   dependencies:
+    Base64 "^1.0.2"
     cheerio-without-node-native "^0.20.2"
     cross-fetch "^3.0.2"
     entities "^1.1.2"
     es6-denodeify "^0.1.5"
     form-data "^2.3.3"
-    js-base64 "^2.5.1"
     real-isomorphic-fetch "^2.0.5"
     util "^0.12.0"
 
