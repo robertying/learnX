@@ -7,5 +7,5 @@
     <application
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
-        tools:targetApi="28" />
+        tools:targetApi="29" />
 </manifest>
