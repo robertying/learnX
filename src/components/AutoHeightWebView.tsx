@@ -26,7 +26,7 @@ const injectedScript = `
 `;
 
 const AutoHeightWebView: React.FC<WebViewProps> = props => {
-  const [height, setHeight] = useState(500);
+  const [height, setHeight] = useState(400);
 
   const onMessage = (e: WebViewMessageEvent) => {
     setHeight(parseInt(e.nativeEvent.data, 10));
