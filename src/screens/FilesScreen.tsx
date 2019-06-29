@@ -5,15 +5,20 @@ import {
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
+  RefreshControl,
   SafeAreaView
 } from "react-native";
 import { Navigation } from "react-native-navigation";
+import { Provider as PaperProvider, Searchbar } from "react-native-paper";
 import { connect } from "react-redux";
 import EmptyList from "../components/EmptyList";
 import FileCard from "../components/FileCard";
+import Colors from "../constants/Colors";
 import DeviceInfo from "../constants/DeviceInfo";
 import dayjs from "../helpers/dayjs";
 import { getTranslation } from "../helpers/i18n";
+import { shareFile } from "../helpers/share";
 import { showToast } from "../helpers/toast";
 import useSearchBar from "../hooks/useSearchBar";
 import { login } from "../redux/actions/auth";
@@ -132,7 +137,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
    * Render cards
    */
 
-  const onFileCardPress = (fileId: string, reactTag?: number) => {
+  const onFileCardPress = async (fileId: string, reactTag?: number) => {
     const file = files.find(item => item.id === fileId);
 
     if (file) {
@@ -161,7 +166,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             }
           }
         ]);
-      } else {
+      } else if (Platform.OS === "ios") {
         Navigation.push(props.componentId, {
           component: {
             name: "webview",
@@ -183,6 +188,16 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             }
           }
         });
+      } else {
+        showToast(getTranslation("downloadingFile"), 1000);
+        const success = await shareFile(
+          file.downloadUrl,
+          file.title,
+          file.fileType
+        );
+        if (!success) {
+          showToast(getTranslation("downloadFileFailure"), 3000);
+        }
       }
     }
   };
@@ -228,7 +243,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   );
 
   /**
-   * Refresh
+   * iOS Refresh
    */
 
   const [indicatorShown, setIndicatorShown] = useState(false);
@@ -264,27 +279,55 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   }, [isFetching]);
 
   /**
+   * Android Refresh
+   */
+
+  const onRefresh = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    invalidateAll();
+  };
+
+  /**
    * Search
    */
 
-  const searchResults = useSearchBar(
-    files,
-    pinnedFiles,
-    hidden,
-    fuseOptions
-  ) as ReadonlyArray<withCourseInfo<IFile>>;
+  const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
+    withCourseInfo<IFile>
+  >(files, pinnedFiles, hidden, fuseOptions);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <FlatList
-        ListEmptyComponent={EmptyList}
-        data={searchResults}
-        renderItem={renderListItem}
-        // tslint:disable-next-line: jsx-no-lambda
-        keyExtractor={item => item.id}
-        onScrollEndDrag={onScrollEndDrag}
-      />
-    </SafeAreaView>
+    <PaperProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+        {Platform.OS === "android" && (
+          <Searchbar
+            style={{ elevation: 4 }}
+            clearButtonMode="always"
+            placeholder={getTranslation("searchFiles")}
+            onChangeText={setSearchBarText}
+            value={searchBarText}
+          />
+        )}
+        <FlatList
+          ListEmptyComponent={EmptyList}
+          data={searchResults}
+          renderItem={renderListItem}
+          // tslint:disable-next-line: jsx-no-lambda
+          keyExtractor={item => item.id}
+          onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+          refreshControl={
+            Platform.OS === "android" ? (
+              <RefreshControl
+                colors={[Colors.theme]}
+                onRefresh={onRefresh}
+                refreshing={isFetching}
+              />
+            ) : (
+              undefined
+            )
+          }
+        />
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 
@@ -309,7 +352,8 @@ FilesScreen.options = {
     },
     searchBar: true,
     searchBarPlaceholder: getTranslation("searchFiles"),
-    hideNavBarOnFocusSearchBar: true
+    hideNavBarOnFocusSearchBar: true,
+    elevation: 0
   }
 };
 

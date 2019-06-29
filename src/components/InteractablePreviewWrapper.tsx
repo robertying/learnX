@@ -1,9 +1,11 @@
 import * as Haptics from "expo-haptics";
 import React, { PropsWithChildren } from "react";
+import { Platform, TouchableNativeFeedback } from "react-native";
 import { TouchableHighlight } from "react-native-gesture-handler";
 import Interactable from "react-native-interactable";
 import { Navigation } from "react-native-navigation";
 import { TouchablePreview } from "react-native-navigation/lib/dist/adapters/TouchablePreview";
+import Colors from "../constants/Colors";
 
 export interface IInteractablePreviewWrapperProps {
   readonly pinned?: boolean;
@@ -33,13 +35,22 @@ function InteractablePreviewWrapper(
       onDrag={onDrag}
       dragEnabled={dragEnabled}
     >
-      <Navigation.TouchablePreview
-        touchableComponent={TouchableHighlight}
-        onPress={onPress}
-        onPressIn={onPressIn}
-      >
-        {props.children}
-      </Navigation.TouchablePreview>
+      {Platform.OS === "ios" ? (
+        <Navigation.TouchablePreview
+          touchableComponent={TouchableHighlight}
+          onPress={onPress}
+          onPressIn={onPressIn}
+        >
+          {props.children}
+        </Navigation.TouchablePreview>
+      ) : (
+        <TouchableNativeFeedback
+          onPress={onPress}
+          background={TouchableNativeFeedback.Ripple(Colors.background, false)}
+        >
+          {props.children}
+        </TouchableNativeFeedback>
+      )}
     </Interactable.View>
   );
 }

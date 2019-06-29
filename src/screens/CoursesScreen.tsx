@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
+  RefreshControl,
   SafeAreaView
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
@@ -10,6 +12,7 @@ import { Navigation } from "react-native-navigation";
 import { connect } from "react-redux";
 import CourseCard from "../components/CourseCard";
 import EmptyList from "../components/EmptyList";
+import Colors from "../constants/Colors";
 import DeviceInfo from "../constants/DeviceInfo";
 import { getTranslation } from "../helpers/i18n";
 import { loadTabIcons } from "../helpers/icons";
@@ -151,15 +154,14 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   }, [courses.length, loggedIn]);
 
   const invalidateAll = () => {
-    if (courseIds.length !== 0) {
-      if (loggedIn) {
-        getAllNoticesForCourses(courseIds);
-        getAllFilesForCourses(courseIds);
-        getAllAssignmentsForCourses(courseIds);
-      } else {
-        showToast(getTranslation("refreshFailure"), 1500);
-        login(username, password);
-      }
+    if (loggedIn) {
+      getCoursesForSemester(semesterId);
+      getAllNoticesForCourses(courseIds);
+      getAllFilesForCourses(courseIds);
+      getAllAssignmentsForCourses(courseIds);
+    } else {
+      showToast(getTranslation("refreshFailure"), 1500);
+      login(username, password);
     }
   };
 
@@ -261,7 +263,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   );
 
   /**
-   * Refresh
+   * iOS Refresh
    */
 
   const [indicatorShown, setIndicatorShown] = useState(false);
@@ -289,6 +291,15 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     }
   };
 
+  /**
+   * Android Refresh
+   */
+
+  const onRefresh = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    invalidateAll();
+  };
+
   useEffect(() => {
     if (!isFetching && indicatorShown) {
       Navigation.dismissOverlay("AnimatingActivityIndicator");
@@ -304,7 +315,18 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         renderItem={renderListItem}
         // tslint:disable-next-line: jsx-no-lambda
         keyExtractor={item => item.id}
-        onScrollEndDrag={onScrollEndDrag}
+        onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+        refreshControl={
+          Platform.OS === "android" ? (
+            <RefreshControl
+              colors={[Colors.theme]}
+              onRefresh={onRefresh}
+              refreshing={isFetching}
+            />
+          ) : (
+            undefined
+          )
+        }
       />
     </SafeAreaView>
   );

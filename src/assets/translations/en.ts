@@ -22,6 +22,7 @@ export default {
   ok: "Ok",
   checkUpdate: "Check for update",
   foundNewVersion: "Found new version",
+  pleaseUpdate: "New version found. Please go to Settings to download update",
   update: "Update",
   noUpdate: "No update available",
   clearFileCache: "Clear file cache",

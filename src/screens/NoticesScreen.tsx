@@ -4,13 +4,17 @@ import React, { useEffect, useState } from "react";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
+  Platform,
+  RefreshControl,
   SafeAreaView
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { Navigation } from "react-native-navigation";
+import { Provider as PaperProvider, Searchbar } from "react-native-paper";
 import { connect } from "react-redux";
 import EmptyList from "../components/EmptyList";
 import NoticeCard from "../components/NoticeCard";
+import Colors from "../constants/Colors";
 import DeviceInfo from "../constants/DeviceInfo";
 import dayjs from "../helpers/dayjs";
 import { getTranslation } from "../helpers/i18n";
@@ -235,7 +239,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   );
 
   /**
-   * Refresh
+   * iOS Refresh
    */
 
   const [indicatorShown, setIndicatorShown] = useState(false);
@@ -271,27 +275,55 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, [isFetching]);
 
   /**
+   * Android Refresh
+   */
+
+  const onRefresh = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    invalidateAll();
+  };
+
+  /**
    * Search
    */
 
-  const searchResults = useSearchBar(
-    notices,
-    pinnedNotices,
-    hidden,
-    fuseOptions
-  ) as ReadonlyArray<withCourseInfo<INotice>>;
+  const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
+    withCourseInfo<INotice>
+  >(notices, pinnedNotices, hidden, fuseOptions);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-      <FlatList
-        ListEmptyComponent={EmptyList}
-        data={searchResults}
-        renderItem={renderListItem}
-        // tslint:disable-next-line: jsx-no-lambda
-        keyExtractor={item => item.id}
-        onScrollEndDrag={onScrollEndDrag}
-      />
-    </SafeAreaView>
+    <PaperProvider>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+        {Platform.OS === "android" && (
+          <Searchbar
+            style={{ elevation: 4 }}
+            clearButtonMode="always"
+            placeholder={getTranslation("searchNotices")}
+            onChangeText={setSearchBarText}
+            value={searchBarText}
+          />
+        )}
+        <FlatList
+          ListEmptyComponent={EmptyList}
+          data={searchResults}
+          renderItem={renderListItem}
+          // tslint:disable-next-line: jsx-no-lambda
+          keyExtractor={item => item.id}
+          onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+          refreshControl={
+            Platform.OS === "android" ? (
+              <RefreshControl
+                colors={[Colors.theme]}
+                onRefresh={onRefresh}
+                refreshing={isFetching}
+              />
+            ) : (
+              undefined
+            )
+          }
+        />
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 
@@ -316,7 +348,8 @@ NoticesScreen.options = {
     },
     searchBar: true,
     searchBarPlaceholder: getTranslation("searchNotices"),
-    hideNavBarOnFocusSearchBar: true
+    hideNavBarOnFocusSearchBar: true,
+    elevation: 0
   }
 };
 
