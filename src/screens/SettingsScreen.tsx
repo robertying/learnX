@@ -101,6 +101,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
                 name: "login"
               }
             });
+            Navigation.dismissModal("settings");
           }
         }
       ],
