@@ -26,6 +26,7 @@ export default {
   update: "Update",
   noUpdate: "No update available",
   clearFileCache: "Clear file cache",
+  clearFileCacheFail: "Failed to clear file cache",
   clearFileCacheConfirmation: "Are you sure to clear file cache?",
   clearFileCacheSuccess: "Successfully cleared file cache",
   autoRefreshing: "Auto refreshing",
