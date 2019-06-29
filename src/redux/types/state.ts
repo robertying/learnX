@@ -56,7 +56,7 @@ export interface ISemestersState {
 export interface ICourse {
   readonly id: string;
   readonly name: string;
-  readonly teacherName: string;
+  readonly teacherName?: string;
 }
 export interface ICoursesState {
   readonly isFetching: boolean;
