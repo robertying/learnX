@@ -136,6 +136,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   };
 
   const onLoginButtonPress = () => {
+    Keyboard.dismiss();
     setLoginButtonPressed(true);
 
     if (username && password) {
