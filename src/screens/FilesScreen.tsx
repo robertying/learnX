@@ -252,18 +252,22 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     if (offsetY < -60 && !isFetching) {
-      Navigation.showOverlay({
-        component: {
-          id: "AnimatingActivityIndicator",
-          name: "AnimatingActivityIndicator",
-          options: {
-            overlay: {
-              interceptTouchOutside: false
+      if (DeviceInfo.isPad) {
+        showToast(getTranslation("refreshing"), 3000);
+      } else {
+        Navigation.showOverlay({
+          component: {
+            id: "AnimatingActivityIndicator",
+            name: "AnimatingActivityIndicator",
+            options: {
+              overlay: {
+                interceptTouchOutside: false
+              }
             }
           }
-        }
-      });
-      setIndicatorShown(true);
+        });
+        setIndicatorShown(true);
+      }
 
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
