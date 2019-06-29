@@ -3,7 +3,6 @@ package io.robertying.learnx;
 import com.facebook.react.PackageList;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
-import com.microsoft.codepush.react.CodePush;
 import com.reactnativenavigation.NavigationApplication;
 import com.reactnativenavigation.react.NavigationPackage;
 import com.reactnativenavigation.react.NavigationReactNativeHost;
@@ -30,11 +29,6 @@ public class MainApplication extends NavigationApplication implements ShareAppli
             @Override
             protected String getJSMainModuleName() {
                 return "index";
-            }
-
-            @Override
-            protected String getJSBundleFile() {
-                return CodePush.getJSBundleFile();
             }
 
             @Override
