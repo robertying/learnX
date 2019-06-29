@@ -7,6 +7,7 @@ interface ITabIcons {
   readonly apps: number;
   readonly settings: number;
   readonly close: number;
+  readonly search: number;
 }
 
 const size = 25;
@@ -25,7 +26,8 @@ export const loadTabIcons = async () => {
     Icon.getImageSource("today", size),
     Icon.getImageSource("apps", size),
     Icon.getImageSource("settings", size),
-    Icon.getImageSource("close", size)
+    Icon.getImageSource("close", size),
+    Icon.getImageSource("search", size)
   ]);
 
   icons = {
@@ -34,7 +36,8 @@ export const loadTabIcons = async () => {
     today: imageSources[2],
     apps: imageSources[3],
     settings: imageSources[4],
-    close: imageSources[5]
+    close: imageSources[5],
+    search: imageSources[6]
   };
 
   return icons;

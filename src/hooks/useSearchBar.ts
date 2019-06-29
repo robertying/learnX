@@ -1,66 +1,47 @@
-import Fuse, { FuseOptions } from "fuse.js";
-import { useEffect, useState } from "react";
-import { Navigation } from "react-native-navigation";
+import { FuseOptions } from "fuse.js";
+import { Platform } from "react-native";
 import {
   IAssignment,
   IFile,
   INotice,
   withCourseInfo
 } from "../redux/types/state";
+import useAndroidSearchBar from "./useAndroidSearchBar";
+import useIosSearchBar from "./useIosSearchBar";
 
-type IEntity = withCourseInfo<INotice | IFile | IAssignment>;
+type IEntity =
+  | withCourseInfo<INotice>
+  | withCourseInfo<IFile>
+  | withCourseInfo<IAssignment>;
 
-const filter = (
-  entities: ReadonlyArray<IEntity>,
-  pinned: readonly string[],
-  hidden: readonly string[]
-) => {
-  return [
-    ...entities.filter(item => pinned.includes(item.id)),
-    ...entities
-      .filter(item => !hidden.includes(item.courseId))
-      .filter(item => !pinned.includes(item.id))
-  ];
-};
-
-function useSearchBar<T>(
-  entities: ReadonlyArray<IEntity>,
+function useSearchBar<T extends IEntity>(
+  entities: ReadonlyArray<T>,
   pinned: readonly string[],
   hidden: readonly string[],
   fuseOptions: FuseOptions<T>
-): ReadonlyArray<IEntity> {
-  const [searchResults, setSearchResults] = useState(
-    filter(entities, pinned, hidden)
+): readonly [
+  readonly T[],
+  string | undefined,
+  React.Dispatch<React.SetStateAction<string>> | undefined,
+  boolean | undefined
+] {
+  const iosSearchResults = useIosSearchBar<T>(
+    entities,
+    pinned,
+    hidden,
+    fuseOptions
   );
 
-  useEffect(() => {
-    setSearchResults(filter(entities, pinned, hidden));
-  }, [entities.length, pinned.length, hidden.length]);
+  const [
+    searchBarText,
+    setSearchBarText,
+    androidSearchResults,
+    searchBarVisible
+  ] = useAndroidSearchBar<T>(entities, pinned, hidden, fuseOptions);
 
-  useEffect(() => {
-    const listener = Navigation.events().registerSearchBarUpdatedListener(
-      ({ text }) => {
-        if (text) {
-          const fuse = new Fuse(entities, fuseOptions);
-          setSearchResults(fuse.search(text));
-        } else {
-          setSearchResults(filter(entities, pinned, hidden));
-        }
-      }
-    );
-    return () => listener.remove();
-  }, []);
-
-  useEffect(() => {
-    const listener = Navigation.events().registerSearchBarCancelPressedListener(
-      () => {
-        setSearchResults(filter(entities, pinned, hidden));
-      }
-    );
-    return () => listener.remove();
-  }, []);
-
-  return searchResults;
+  return Platform.OS === "ios"
+    ? [iosSearchResults, undefined, undefined, undefined]
+    : [androidSearchResults, searchBarText, setSearchBarText, searchBarVisible];
 }
 
 export default useSearchBar;

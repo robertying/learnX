@@ -22,6 +22,7 @@ export default {
   ok: "确定",
   checkUpdate: "检查更新",
   foundNewVersion: "发现新版本",
+  pleaseUpdate: "发现新版本，请前往设置下载更新",
   update: "更新",
   noUpdate: "未发现更新",
   clearFileCache: "清空文件缓存",

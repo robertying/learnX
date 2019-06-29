@@ -17,6 +17,13 @@ const startApp = () => {
 
     registerScreens();
 
+    Navigation.setDefaultOptions({
+      statusBar: {
+        backgroundColor: "white",
+        style: "dark"
+      }
+    });
+
     const authLoadingRoot = getAuthLoadingRoot();
     Navigation.setRoot(authLoadingRoot);
   });

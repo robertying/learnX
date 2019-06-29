@@ -4,6 +4,8 @@ import { Navigation } from "react-native-navigation";
 import { connect } from "react-redux";
 import packageConfig from "../../package.json";
 import SplashScreen from "../components/SplashScreen";
+import { getTranslation } from "../helpers/i18n";
+import { showToast } from "../helpers/toast";
 import { getLatestRelease } from "../helpers/update";
 import { getNavigationRoot } from "../navigation/navigationRoot";
 import { login } from "../redux/actions/auth";
@@ -19,13 +21,14 @@ interface IAuthLoadingScreenStateProps {
 interface IAuthLoadingScreenDispatchProps {
   readonly setUpdate: (hasUpdate: boolean) => void;
   readonly login: (username: string, password: string) => void;
+  readonly showToast: (text: string, duration: number) => void;
 }
 
 type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
   IAuthLoadingScreenDispatchProps;
 
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
-  const { rehydrated, auth, setUpdate, login } = props;
+  const { rehydrated, auth, setUpdate, login, showToast } = props;
 
   useEffect(() => {
     if (Platform.OS === "android") {
@@ -36,6 +39,7 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
           parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
         ) {
           setUpdate(true);
+          showToast(getTranslation("pleaseUpdate"), 5000);
         } else {
           setUpdate(false);
         }
@@ -92,7 +96,8 @@ function mapStateToProps(
 
 const mapDispatchToProps: IAuthLoadingScreenDispatchProps = {
   login: (username: string, password: string) => login(username, password),
-  setUpdate: (hasUpdate: boolean) => setUpdate(hasUpdate)
+  setUpdate: (hasUpdate: boolean) => setUpdate(hasUpdate),
+  showToast: (text: string, duration: number) => showToast(text, duration)
 };
 
 export default connect(

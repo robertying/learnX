@@ -19,7 +19,7 @@ import Text from "../components/Text";
 import Colors from "../constants/Colors";
 import Layout from "../constants/Layout";
 import dayjs from "../helpers/dayjs";
-import { getLocale, getTranslation } from "../helpers/i18n";
+import { getTranslation } from "../helpers/i18n";
 import { shareFile, stripExtension } from "../helpers/share";
 import { showToast } from "../helpers/toast";
 import { getAssignmentsForCourse } from "../redux/actions/assignments";
@@ -29,8 +29,7 @@ import {
   IAssignment,
   IFile,
   INotice,
-  IPersistAppState,
-  IWindow
+  IPersistAppState
 } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
@@ -59,7 +58,6 @@ interface ICourseDetailScreenStateProps {
   readonly isFetchingNotices: boolean;
   readonly isFetchingFiles: boolean;
   readonly isFetchingAssignments: boolean;
-  readonly window: IWindow;
 }
 
 interface ICourseDetailScreenDispatchProps {
@@ -88,7 +86,6 @@ const CourseDetailScreen: INavigationScreen<
     getAssignmentsForCourse,
     getFilesForCourse,
     getNoticesForCourse,
-    window,
     courseId
   } = props;
 
@@ -231,11 +228,11 @@ const CourseDetailScreen: INavigationScreen<
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
-        deviceWidth={
-          Platform.OS === "android" ? Layout.window.width : window.width
-        }
+        deviceWidth={Layout.window.width}
         deviceHeight={
-          Platform.OS === "android" ? Layout.window.height : window.height
+          Platform.OS === "android"
+            ? Layout.window.height + 100
+            : Layout.window.height
         }
       >
         <View style={{ height: "80%", backgroundColor: "white" }}>
@@ -252,6 +249,7 @@ const CourseDetailScreen: INavigationScreen<
               attachmentUrl={(currentModal.data as INotice).attachmentUrl || ""}
               // tslint:disable-next-line: jsx-no-lambda
               onTransition={() =>
+                Platform.OS === "ios" &&
                 setCurrentModal({ type: "Notice", visible: false })
               }
             />
@@ -281,6 +279,7 @@ const CourseDetailScreen: INavigationScreen<
               }
               // tslint:disable-next-line: jsx-no-lambda
               onTransition={() =>
+                Platform.OS === "ios" &&
                 setCurrentModal({ type: "Notice", visible: false })
               }
             />
@@ -309,8 +308,7 @@ function mapStateToProps(
     assignments: state.assignments.items,
     isFetchingNotices: state.notices.isFetching,
     isFetchingFiles: state.files.isFetching,
-    isFetchingAssignments: state.assignments.isFetching,
-    window: state.settings.window || Dimensions.get("window")
+    isFetchingAssignments: state.assignments.isFetching
   };
 }
 
