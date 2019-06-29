@@ -261,16 +261,7 @@ const CourseDetailScreen: INavigationScreen<
               componentId={props.componentId}
               title={(currentModal.data as IAssignment).title || ""}
               description={(currentModal.data as IAssignment).description || ""}
-              deadline={
-                getLocale().startsWith("zh")
-                  ? dayjs((currentModal.data as IAssignment).deadline).format(
-                      "llll"
-                    ) + " 截止"
-                  : "Submission close on " +
-                    dayjs((currentModal.data as IAssignment).deadline).format(
-                      "llll"
-                    )
-              }
+              deadline={(currentModal.data as IAssignment).deadline}
               attachmentName={
                 (currentModal.data as IAssignment).attachmentName || ""
               }
