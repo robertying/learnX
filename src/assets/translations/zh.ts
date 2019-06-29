@@ -26,6 +26,7 @@ export default {
   update: "更新",
   noUpdate: "未发现更新",
   clearFileCache: "清空文件缓存",
+  clearFileCacheFail: "清空文件缓存失败",
   clearFileCacheConfirmation: "确定要清空文件缓存吗？",
   clearFileCacheSuccess: "成功清空文件缓存",
   autoRefreshing: "自动刷新",

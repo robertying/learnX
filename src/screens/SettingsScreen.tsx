@@ -172,10 +172,14 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         {
           text: getTranslation("ok"),
           onPress: async () => {
-            await RNFetchBlob.fs.unlink(
-              `${RNFetchBlob.fs.dirs.DocumentDir}/files`
-            );
-            showToast(getTranslation("clearFileCacheSuccess"), 1500);
+            RNFetchBlob.fs
+              .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
+              .then(() =>
+                showToast(getTranslation("clearFileCacheSuccess"), 1500)
+              )
+              .catch(() =>
+                showToast(getTranslation("clearFileCacheFail"), 1500)
+              );
           }
         }
       ],
