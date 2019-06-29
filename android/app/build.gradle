@@ -97,7 +97,6 @@ project.ext.vectoricons = [
 
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
-apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 
 /**
