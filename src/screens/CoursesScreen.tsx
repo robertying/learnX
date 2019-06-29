@@ -232,7 +232,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     <CourseCard
       dragEnabled={false}
       courseName={item.name}
-      courseTeacherName={item.teacherName}
+      courseTeacherName={item.teacherName || ""}
       semester={semesterId}
       noticesCount={
         notices.filter(
