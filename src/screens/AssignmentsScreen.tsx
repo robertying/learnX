@@ -263,7 +263,12 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       Navigation.showOverlay({
         component: {
           id: "AnimatingActivityIndicator",
-          name: "AnimatingActivityIndicator"
+          name: "AnimatingActivityIndicator",
+          options: {
+            overlay: {
+              interceptTouchOutside: false
+            }
+          }
         }
       });
       setIndicatorShown(true);
