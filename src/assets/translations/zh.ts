@@ -47,5 +47,6 @@ export default {
   searchFiles: "搜索文件……",
   searchAssignments: "搜索作业……",
   networkError: "网络错误",
-  fetchingSemesters: "登录成功，获取学期信息……"
+  fetchingSemesters: "登录成功，获取学期信息……",
+  refreshing: "刷新中……"
 };

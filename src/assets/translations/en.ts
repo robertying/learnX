@@ -47,5 +47,6 @@ export default {
   searchFiles: "Search files...",
   searchAssignments: "Search assignments",
   networkError: "Network error",
-  fetchingSemesters: "Logged in. Fetching semesters..."
+  fetchingSemesters: "Logged in. Fetching semesters...",
+  refreshing: "Refreshing..."
 };
