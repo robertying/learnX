@@ -5,9 +5,9 @@ const AnimatingActivityIndicator: React.FC = () => (
   <ActivityIndicator
     style={{
       flex: 1,
-      alignSelf: "center",
       position: "absolute",
-      top: 44 + 52 - 10
+      top: 35,
+      right: 60
     }}
     color="gray"
     animating={true}
