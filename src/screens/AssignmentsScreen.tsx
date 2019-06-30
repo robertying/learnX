@@ -1,6 +1,6 @@
 import * as Haptics from "expo-haptics";
 import { FuseOptions } from "fuse.js";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   FlatList,
   NativeScrollEvent,
@@ -258,41 +258,15 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
    * iOS Refresh
    */
 
-  const [indicatorShown, setIndicatorShown] = useState(false);
-
   const onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     if (offsetY < -60 && !isFetching) {
-      if (DeviceInfo.isPad) {
-        showToast(getTranslation("refreshing"), 3000);
-      } else {
-        Navigation.showOverlay({
-          component: {
-            id: "AnimatingActivityIndicator",
-            name: "AnimatingActivityIndicator",
-            options: {
-              overlay: {
-                interceptTouchOutside: false
-              }
-            }
-          }
-        });
-        setIndicatorShown(true);
-      }
-
+      showToast(getTranslation("refreshing"), 3000);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-
       invalidateAll();
     }
   };
-
-  useEffect(() => {
-    if (!isFetching && indicatorShown) {
-      Navigation.dismissOverlay("AnimatingActivityIndicator");
-      setIndicatorShown(false);
-    }
-  }, [isFetching]);
 
   /**
    * Android Refresh
