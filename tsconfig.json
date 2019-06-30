@@ -10,5 +10,5 @@
     "strict": true,
     "target": "esnext"
   },
-  "include": ["src/**/*", "@types", "index.js", "package.json"]
+  "include": ["src/**/*", "e2e/**/*", "@types/**/*"]
 }

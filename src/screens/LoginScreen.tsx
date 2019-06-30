@@ -18,6 +18,7 @@ import TextField from "../components/TextField";
 import Colors from "../constants/Colors";
 import { dummyPassword, dummyUsername } from "../helpers/dummy";
 import { getTranslation } from "../helpers/i18n";
+import { isTesting } from "../helpers/test";
 import { showToast } from "../helpers/toast";
 import { login } from "../redux/actions/auth";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
@@ -88,23 +89,25 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
 
   useEffect(() => {
     setTimeout(() => {
-      LayoutAnimation.configureNext(
-        {
-          duration: 800,
-          create: {
-            delay: 200,
-            property: LayoutAnimation.Properties.opacity,
-            type: LayoutAnimation.Types.easeInEaseOut
+      if (!isTesting()) {
+        LayoutAnimation.configureNext(
+          {
+            duration: 800,
+            create: {
+              delay: 200,
+              property: LayoutAnimation.Properties.opacity,
+              type: LayoutAnimation.Types.easeInEaseOut
+            },
+            update: {
+              property: LayoutAnimation.Properties.scaleXY,
+              type: LayoutAnimation.Types.easeOut
+            }
           },
-          update: {
-            property: LayoutAnimation.Properties.scaleXY,
-            type: LayoutAnimation.Types.easeOut
-          }
-        },
-        () =>
-          usernameTextFieldRef.current &&
-          (usernameTextFieldRef.current as any).getNode().focus()
-      );
+          () =>
+            usernameTextFieldRef.current &&
+            (usernameTextFieldRef.current as any).getNode().focus()
+        );
+      }
       setFormVisible(true);
     }, 800);
   }, []);
@@ -148,7 +151,10 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView
+      testID="LoginScreen"
+      style={{ flex: 1, backgroundColor: "white" }}
+    >
       <KeyboardAvoidingView
         style={{
           flex: 1,
@@ -172,6 +178,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
             }}
           >
             <TextField
+              testID="UsernameTextField"
               icon={<AntDesign name="user" size={25} color={Colors.theme} />}
               tintColor={Colors.theme}
               textContentType="username"
@@ -184,6 +191,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
               onChangeText={handleUsernameChange}
             />
             <TextField
+              testID="PasswordTextField"
               containerStyle={{ marginTop: 20 }}
               icon={<AntDesign name="key" size={25} color={Colors.theme} />}
               tintColor={Colors.theme}
@@ -197,6 +205,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
               onChangeText={handlePasswordChange}
             />
             <RaisedButton
+              testID="LoginButton"
               style={{
                 backgroundColor: Colors.theme,
                 width: 100,

@@ -16,10 +16,11 @@ export type IRaisedButtonProps = TouchableOpacityProps & {
 };
 
 const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {
-  const { style, textStyle, onPress, children } = props;
+  const { style, textStyle, onPress, children, testID } = props;
 
   return (
     <TouchableOpacity
+      testID={testID}
       style={[
         {
           alignItems: "center",
