@@ -1,4 +1,4 @@
-<img align="right" width="250" src="docs/screenshots/1.png" />
+<img align="right" width="250" src="docs/screenshots/1.jpg" />
 
 # learnX
 
@@ -15,6 +15,7 @@ This project also serves as a demonstration of how to build a React Native app f
 - Latest React Native (0.60)
 - AndroidX / CocoaPods
 - TypeScript
+- Detox e2e tests
 - Continuous Integration (travis)
 - Automatic Deployment (fastlane)
 

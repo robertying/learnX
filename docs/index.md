@@ -29,13 +29,13 @@ layout: default_cn
 ## 应用截图
 
 <div align="center">
-    <img src="screenshots/1.png" width="40%" />
-    <img src="screenshots/2.png" width="40%" />
+    <img src="screenshots/1.jpg" width="40%" />
+    <img src="screenshots/2.jpg" width="40%" />
 </div>
 
 <div align="center">
-    <img src="screenshots/3.png" width="40%" />
-    <img src="screenshots/4.png" width="40%" />
+    <img src="screenshots/3.jpg" width="40%" />
+    <img src="screenshots/4.jpg" width="40%" />
 </div>
 
 ## 反馈与建议
