@@ -5642,10 +5642,10 @@ react-native-snackbar@1.0.0:
   resolved "https://registry.yarnpkg.com/react-native-snackbar/-/react-native-snackbar-1.0.0.tgz#d4afd037f5ea488115e160f20eb65e4ed30ddc9d"
   integrity sha512-4xW41LVzuaVy4E9n1/IWnJkXRWrKbJ/qsAhyYnHoIu738TBLqNAk44aAE7eSCYkSFfHSchAVDiuIdQDUDYWcSA==
 
-react-native-tab-view@2.7.0:
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.7.0.tgz#dd4b559841b894aa12ea07acf37303c0611c4dad"
-  integrity sha512-PJ16AzT9jQDufNnkrg6bA18o8MOE7ay3OCC/u9QeP2NYvqDaF8rzLegstbk1nDOz7MKsaWsXB35gMu6VAG2drg==
+react-native-tab-view@2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-2.7.1.tgz#6247ea6027be5656cb83d86ed9ee3e2c3f6e1a3b"
+  integrity sha512-GdKrosksYeDd1VRjb8PSSloY2l5MrNpRHAVxald4p1eiKkvonl7TJ1TN6FeA1wtsy/9x8CJ0dSIWlV/Xyq9R9g==
 
 react-native-typography@1.4.1:
   version "1.4.1"
