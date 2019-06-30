@@ -1,5 +1,10 @@
 import React, { useEffect } from "react";
-import { FlatList, ListRenderItem, SafeAreaView } from "react-native";
+import {
+  FlatList,
+  ListRenderItem,
+  SafeAreaView,
+  StatusBar
+} from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
@@ -8,6 +13,7 @@ import Colors from "../constants/Colors";
 import { getTranslation } from "../helpers/i18n";
 import { getCoursesForSemester } from "../redux/actions/courses";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
+import { getAllSemesters } from "../redux/actions/semesters";
 import { IPersistAppState } from "../redux/types/state";
 import { INavigationScreen } from "../types/NavigationScreen";
 
@@ -19,6 +25,7 @@ interface ISemestersSettingsScreenStateProps {
 interface ISemestersSettingsScreenDispatchProps {
   readonly setCurrentSemester: (semesterId: string) => void;
   readonly getCoursesForSemester: (semesterId: string) => void;
+  readonly getAllSemesters: () => void;
 }
 
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
@@ -31,8 +38,13 @@ const SemestersSettingsScreen: INavigationScreen<
     semesters,
     currentSemester,
     setCurrentSemester,
-    getCoursesForSemester
+    getCoursesForSemester,
+    getAllSemesters
   } = props;
+
+  useEffect(() => {
+    getAllSemesters();
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -92,7 +104,8 @@ function mapStateToProps(
 
 const mapDispatchToProps: ISemestersSettingsScreenDispatchProps = {
   setCurrentSemester,
-  getCoursesForSemester
+  getCoursesForSemester,
+  getAllSemesters
 };
 
 export default connect(
