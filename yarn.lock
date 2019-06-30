@@ -6908,10 +6908,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typesafe-actions@5.0.0-2:
-  version "5.0.0-2"
-  resolved "https://registry.yarnpkg.com/typesafe-actions/-/typesafe-actions-5.0.0-2.tgz#720d3c0ec6e83367fac6e90ff40c23684ae024c1"
-  integrity sha512-bCDZPAe/b3/MqtMbL158ZCnQ8tQRBfHRaIytt7/nOay+fXZm2fo1lnhHt0eRwsrXRMTFS7bojS7kerFWu5eH1w==
+typesafe-actions@5.0.0-3:
+  version "5.0.0-3"
+  resolved "https://registry.yarnpkg.com/typesafe-actions/-/typesafe-actions-5.0.0-3.tgz#b54354700a3a2827859e9f86dd51576c8945fcd4"
+  integrity sha512-sX5Sh2FLctpj+u6HDlqiH7o/MLQCPHFb8vI2X7vp22F7G4V+IqSZdgq/31+3i0G1q8vm39W6uk5EMIeE/x5gCg==
 
 typescript@3.5.2:
   version "3.5.2"
