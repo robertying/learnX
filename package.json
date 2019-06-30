@@ -47,7 +47,7 @@
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.15",
     "thu-learn-lib-no-native": "2.1.6",
-    "typesafe-actions": "5.0.0-2"
+    "typesafe-actions": "5.0.0-1"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
