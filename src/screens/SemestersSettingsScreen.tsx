@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  FlatList,
-  ListRenderItem,
-  SafeAreaView,
-  StatusBar
-} from "react-native";
+import { FlatList, ListRenderItem, SafeAreaView } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { connect } from "react-redux";
 import Divider from "../components/Divider";
