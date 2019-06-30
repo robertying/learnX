@@ -49,7 +49,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     >
       <View
         style={{
-          backgroundColor: pinned ? Colors.theme : "#fff",
+          backgroundColor: "#fff",
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
