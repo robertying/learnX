@@ -18,7 +18,6 @@ import TextField from "../components/TextField";
 import Colors from "../constants/Colors";
 import { dummyPassword, dummyUsername } from "../helpers/dummy";
 import { getTranslation } from "../helpers/i18n";
-import { isTesting } from "../helpers/test";
 import { showToast } from "../helpers/toast";
 import { login } from "../redux/actions/auth";
 import { setCurrentSemester } from "../redux/actions/currentSemester";
@@ -85,32 +84,6 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [formVisible, setFormVisible] = useState(false);
-
-  useEffect(() => {
-    setTimeout(() => {
-      if (!isTesting()) {
-        LayoutAnimation.configureNext(
-          {
-            duration: 800,
-            create: {
-              delay: 200,
-              property: LayoutAnimation.Properties.opacity,
-              type: LayoutAnimation.Types.easeInEaseOut
-            },
-            update: {
-              property: LayoutAnimation.Properties.scaleXY,
-              type: LayoutAnimation.Types.easeOut
-            }
-          },
-          () =>
-            usernameTextFieldRef.current &&
-            (usernameTextFieldRef.current as any).getNode().focus()
-        );
-      }
-      setFormVisible(true);
-    }, 800);
-  }, []);
 
   const [logoSize, setLogoSize] = useState(160);
   const onLogoPress = () => {
@@ -169,56 +142,54 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
             source={require("../assets/images/MaskedAppIcon.png")}
           />
         </TouchableWithoutFeedback>
-        {formVisible && (
-          <View
+        <View
+          style={{
+            marginTop: 30,
+            marginBottom: 30,
+            alignItems: "center"
+          }}
+        >
+          <TextField
+            testID="UsernameTextField"
+            icon={<AntDesign name="user" size={25} color={Colors.theme} />}
+            tintColor={Colors.theme}
+            textContentType="username"
+            returnKeyType="next"
+            placeholder={getTranslation("username")}
+            placeholderTextColor={Colors.lightTheme}
+            onSubmitEditing={handleKeyboardNext}
+            ref={usernameTextFieldRef}
+            value={username}
+            onChangeText={handleUsernameChange}
+          />
+          <TextField
+            testID="PasswordTextField"
+            containerStyle={{ marginTop: 20 }}
+            icon={<AntDesign name="key" size={25} color={Colors.theme} />}
+            tintColor={Colors.theme}
+            textContentType="password"
+            secureTextEntry={true}
+            returnKeyType="done"
+            placeholder={getTranslation("password")}
+            placeholderTextColor={Colors.lightTheme}
+            ref={passwordTextFieldRef}
+            value={password}
+            onChangeText={handlePasswordChange}
+          />
+          <RaisedButton
+            testID="LoginButton"
             style={{
-              marginTop: 30,
-              marginBottom: 30,
-              alignItems: "center"
+              backgroundColor: Colors.theme,
+              width: 100,
+              height: 40,
+              marginTop: 30
             }}
+            textStyle={{ color: "white" }}
+            onPress={onLoginButtonPress}
           >
-            <TextField
-              testID="UsernameTextField"
-              icon={<AntDesign name="user" size={25} color={Colors.theme} />}
-              tintColor={Colors.theme}
-              textContentType="username"
-              returnKeyType="next"
-              placeholder={getTranslation("username")}
-              placeholderTextColor={Colors.lightTheme}
-              onSubmitEditing={handleKeyboardNext}
-              ref={usernameTextFieldRef}
-              value={username}
-              onChangeText={handleUsernameChange}
-            />
-            <TextField
-              testID="PasswordTextField"
-              containerStyle={{ marginTop: 20 }}
-              icon={<AntDesign name="key" size={25} color={Colors.theme} />}
-              tintColor={Colors.theme}
-              textContentType="password"
-              secureTextEntry={true}
-              returnKeyType="done"
-              placeholder={getTranslation("password")}
-              placeholderTextColor={Colors.lightTheme}
-              ref={passwordTextFieldRef}
-              value={password}
-              onChangeText={handlePasswordChange}
-            />
-            <RaisedButton
-              testID="LoginButton"
-              style={{
-                backgroundColor: Colors.theme,
-                width: 100,
-                height: 40,
-                marginTop: 30
-              }}
-              textStyle={{ color: "white" }}
-              onPress={onLoginButtonPress}
-            >
-              {getTranslation("login")}
-            </RaisedButton>
-          </View>
-        )}
+            {getTranslation("login")}
+          </RaisedButton>
+        </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
