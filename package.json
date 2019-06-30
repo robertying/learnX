@@ -10,6 +10,8 @@
     "ios:build": "bundle exec fastlane ios build",
     "start": "react-native start",
     "lint": "tsc --noUnusedLocals && prettier -c \"src/**/*\" --write",
+    "ios:test:debug": "detox build --configuration \"ios.sim.debug\" && detox test --configuration \"ios.sim.debug\"",
+    "ios:test:release": "detox build --configuration \"ios.sim.release\" && detox test --configuration \"ios.sim.release\"",
     "postinstall": "chmod +x patches/patch.sh && patches/patch.sh && jetify"
   },
   "dependencies": {
@@ -51,6 +53,9 @@
     "@babel/core": "7.4.5",
     "@babel/runtime": "7.4.5",
     "@react-native-community/cli": "2.0.0-rc.3",
+    "@types/detox": "12.8.2",
+    "@types/jasmine": "3.3.13",
+    "@types/jest": "24.0.15",
     "@types/node": "12.0.10",
     "@types/react": "16.8.22",
     "@types/react-native": "0.57.64",
@@ -58,9 +63,12 @@
     "@types/react-native-tab-view": "1.0.6",
     "@types/react-native-vector-icons": "6.4.1",
     "@types/react-redux": "7.1.1",
+    "babel-jest": "24.8.0",
     "babel-plugin-transform-remove-console": "6.9.4",
+    "detox": "13.0.0",
     "husky": "2.7.0",
-    "jetifier": "1.5.1",
+    "jest": "24.8.0",
+    "jetifier": "1.6.0",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.18.2",
     "tslint": "5.18.0",
@@ -83,6 +91,24 @@
         ]
       }
     }
+  },
+  "detox": {
+    "configurations": {
+      "ios.sim.debug": {
+        "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/learnX.app",
+        "build": "xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build",
+        "type": "ios.simulator",
+        "name": "iPhone Xs"
+      },
+      "ios.sim.release": {
+        "binaryPath": "ios/build/Build/Products/Release-iphonesimulator/learnX.app",
+        "build": "xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Release -sdk iphonesimulator -derivedDataPath ios/build",
+        "type": "ios.simulator",
+        "name": "iPhone Xs"
+      }
+    },
+    "test-runner": "jest",
+    "runner-config": "e2e/jest.config.js"
   },
   "husky": {
     "hooks": {

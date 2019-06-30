@@ -74,5 +74,5 @@ matrix:
         - yarn install
         - cd ios && pod install && cd ..
       script:
+        - yarn ios:test:release
         - if [ -n "$TRAVIS_TAG" ]; then yarn ios:beta; fi
-        - if [ -z "$TRAVIS_TAG" ]; then yarn ios:build; fi
