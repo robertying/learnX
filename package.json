@@ -68,7 +68,7 @@
     "detox": "13.0.1",
     "husky": "3.0.0",
     "jest": "24.8.0",
-    "jetifier": "1.6.0",
+    "jetifier": "1.6.1",
     "metro-react-native-babel-preset": "0.54.1",
     "prettier": "1.18.2",
     "tslint": "5.18.0",
