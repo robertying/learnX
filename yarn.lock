@@ -1028,10 +1028,10 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.1.tgz#f1a11e7babb0c3cad68100be381d1e064c68f1f6"
   integrity sha512-CFzn9idOEpHrgdw8JsoTkaDDyRWk1jrzIV8djzcgpq0y9tG4B4lFT+Nxh52DVpDXV+n4+NPNv7M1Dj5uMp6XFg==
 
-"@types/react-native-share@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@types/react-native-share/-/react-native-share-1.1.1.tgz#cdbc8976a132f54d4d4394f6e7695139937be6fc"
-  integrity sha512-5kbHw7cIKcrtsd4+Md3axlngaNQ55Oux6h+Q5iR4GwRaYEDZSLhzlfckDO19K7hfwNTEqovgpzLpSalf6+IcHQ==
+"@types/react-native-share@1.1.2":
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@types/react-native-share/-/react-native-share-1.1.2.tgz#8ba7b9a17da2c4ecba0cd38d7c752ca503726908"
+  integrity sha512-yBOGzKlMNlmb/o4TLzNzG61MynTKlTAQyE0LNxC7QpQh/E8imgl0mntoFCsz8vmn0ehb69TcRfGnM/9qBR7D1w==
 
 "@types/react-native-tab-view@1.0.6":
   version "1.0.6"
