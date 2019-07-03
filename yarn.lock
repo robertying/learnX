@@ -864,6 +864,16 @@
     slash "^2.0.0"
     xmldoc "^0.4.0"
 
+"@react-native-community/cli-platform-android@^2.0.0-rc.5":
+  version "2.0.0-rc.5"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.0.0-rc.5.tgz#c488ba470cefdcbbb51cd5f4db012dd5b984dd37"
+  integrity sha512-jyfKpicz+RAusr/aZ8o4PfCr2cwVoj+RB7TG/KEJRkzFEt9FwmL4E4uHsHAMMtFO0nWslXohE8KeTuFE8x3xTQ==
+  dependencies:
+    "@react-native-community/cli-tools" "^2.0.0-rc.5"
+    logkitty "^0.4.0"
+    slash "^2.0.0"
+    xmldoc "^0.4.0"
+
 "@react-native-community/cli-platform-ios@2.0.0-rc.3", "@react-native-community/cli-platform-ios@^2.0.0-rc.3":
   version "2.0.0-rc.3"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-2.0.0-rc.3.tgz#076d3e7b4d4952421877f7e3477fa07ced049b49"
@@ -873,10 +883,29 @@
     chalk "^1.1.1"
     xcode "^2.0.0"
 
+"@react-native-community/cli-platform-ios@^2.0.0-rc.5":
+  version "2.0.0-rc.5"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-2.0.0-rc.5.tgz#6accc2f4dd0dedd540fab6e84b4f0afdf72fa8cf"
+  integrity sha512-3Q2kuJS+qBYVm1MvW4gxKZKcIyUkhQ6xU8R/vtkvTRNLTtZUad54lUsmGb+eUKUAbbs5lWYLKklJYCopAe6Yvw==
+  dependencies:
+    "@react-native-community/cli-tools" "^2.0.0-rc.5"
+    chalk "^1.1.1"
+    xcode "^2.0.0"
+
 "@react-native-community/cli-tools@^2.0.0-rc.3":
   version "2.0.0-rc.3"
   resolved "https://registry.yarnpkg.com/@react-native-community/cli-tools/-/cli-tools-2.0.0-rc.3.tgz#4b37779081bf2e247a8865f6bd71c29adb88ed47"
   integrity sha512-KG6GhmvIiLrwLGNBs3zmslnhTutm9EPwQDB3TztDU8uGn/50wPwflybS0mzT9lPzTqMcyEP7KcGtpnKqant1vA==
+  dependencies:
+    chalk "^1.1.1"
+    lodash "^4.17.5"
+    mime "^2.4.1"
+    node-fetch "^2.5.0"
+
+"@react-native-community/cli-tools@^2.0.0-rc.5":
+  version "2.0.0-rc.5"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-tools/-/cli-tools-2.0.0-rc.5.tgz#caa2cf6d1bf4700a22b3c0058554714870ede00c"
+  integrity sha512-3y0vJarRO1U80AG22khDEbcsatlItSHcvaHIUWk5mitQagOCzDy2kRFvu5u2VbK/MCm64NJ1oAienfF3JB8JYg==
   dependencies:
     chalk "^1.1.1"
     lodash "^4.17.5"
@@ -892,6 +921,46 @@
     "@react-native-community/cli-platform-android" "^2.0.0-rc.3"
     "@react-native-community/cli-platform-ios" "^2.0.0-rc.3"
     "@react-native-community/cli-tools" "^2.0.0-rc.3"
+    chalk "^1.1.1"
+    command-exists "^1.2.8"
+    commander "^2.19.0"
+    compression "^1.7.1"
+    connect "^3.6.5"
+    cosmiconfig "^5.1.0"
+    deepmerge "^3.2.0"
+    envinfo "^7.1.0"
+    errorhandler "^1.5.0"
+    execa "^1.0.0"
+    fs-extra "^7.0.1"
+    glob "^7.1.1"
+    graceful-fs "^4.1.3"
+    inquirer "^3.0.6"
+    lodash "^4.17.5"
+    metro "^0.54.1"
+    metro-config "^0.54.1"
+    metro-core "^0.54.1"
+    metro-react-native-babel-transformer "^0.54.1"
+    minimist "^1.2.0"
+    mkdirp "^0.5.1"
+    morgan "^1.9.0"
+    node-notifier "^5.2.1"
+    open "^6.2.0"
+    ora "^3.4.0"
+    plist "^3.0.0"
+    semver "^5.0.3"
+    serve-static "^1.13.1"
+    shell-quote "1.6.1"
+    ws "^1.1.0"
+
+"@react-native-community/cli@2.0.0-rc.5":
+  version "2.0.0-rc.5"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.0.0-rc.5.tgz#6cfdaa86271d8f6d3ae4e9afa2dc466764b3fcf1"
+  integrity sha512-6bYwDIsoC4ikROZWg19FIbRMLMe5/WKOKrZ+uy6OA9VLvUm0ms9sZKXuaPX21el4AkGv1w0VXB+RYdtu/9R9ZA==
+  dependencies:
+    "@hapi/joi" "^15.0.3"
+    "@react-native-community/cli-platform-android" "^2.0.0-rc.5"
+    "@react-native-community/cli-platform-ios" "^2.0.0-rc.5"
+    "@react-native-community/cli-tools" "^2.0.0-rc.5"
     chalk "^1.1.1"
     command-exists "^1.2.8"
     commander "^2.19.0"
