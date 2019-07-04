@@ -5763,10 +5763,10 @@ react-native-animatable@^1.3.1:
   dependencies:
     prop-types "^15.5.10"
 
-react-native-background-fetch@2.6.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/react-native-background-fetch/-/react-native-background-fetch-2.6.0.tgz#410741a9454c59f4463b12fd41fdb51eb181545c"
-  integrity sha512-6a0ITgePMnFa1sVoCYeVuXvvjQzZavN7ynvchJixoQZEi8TreTuePUDxmzQVf7eZPCBciSaogfCoBwAzDRsK0Q==
+react-native-background-fetch@2.6.1:
+  version "2.6.1"
+  resolved "https://registry.yarnpkg.com/react-native-background-fetch/-/react-native-background-fetch-2.6.1.tgz#a38c298cf748ba332e51c724ad4d7af8677929af"
+  integrity sha512-/P6GceM1/OvTeHmnwEYJl89FAY2ExpAJfMC4Z1eYUIMwR93Vv2ZLEYa5FHyhItMMeg2ZzlEXmiZTVZ6IbYeb+A==
   dependencies:
     fast-plist "^0.1.2"
     plist "^3.0.1"
