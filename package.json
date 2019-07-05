@@ -26,7 +26,7 @@
     "react-native": "0.60.0",
     "react-native-background-fetch": "2.6.1",
     "react-native-calendar-events": "1.7.3",
-    "react-native-device-info": "2.2.1",
+    "react-native-device-info": "2.2.2",
     "react-native-gesture-handler": "1.3.0",
     "react-native-interactable": "1.0.0",
     "react-native-modal": "11.1.0",
