@@ -52,7 +52,7 @@
   "devDependencies": {
     "@babel/core": "7.5.0",
     "@babel/runtime": "7.5.1",
-    "@react-native-community/cli": "2.1.0",
+    "@react-native-community/cli": "2.1.1",
     "@types/detox": "12.8.2",
     "@types/jasmine": "3.3.13",
     "@types/jest": "24.0.15",
