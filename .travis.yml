@@ -4,18 +4,19 @@ matrix:
       android:
         components:
           - tools
+          - platform-tools
+          - build-tools-29.0.0
+          - android-29
           - extra-google-google_play_services
           - extra-google-m2repository
           - extra-android-m2repository
-        licenses:
-          - android-sdk-license-.+
       cache:
         yarn: true
         bundler: true
         directories:
-          - "$HOME/.gradle/caches/"
-          - "$HOME/.gradle/wrapper/"
-          - "$HOME/.android/build-cache"
+          - $HOME/.gradle/caches/
+          - $HOME/.gradle/wrapper/
+          - $HOME/.android/build-cache
       before_install:
         - openssl aes-256-cbc -K $encrypted_c670c9b85964_key -iv $encrypted_c670c9b85964_iv
           -in secrets.tar.gz.enc -out secrets.tar.gz -d
@@ -24,9 +25,6 @@ matrix:
         - node -v
         - npm install -g yarn
       install:
-        - touch $HOME/.android/repositories.cfg
-        - echo y | sdkmanager "platforms;android-29"
-        - echo y | sdkmanager "build-tools;29.0.0"
         - gem install bundler
         - bundle install
         - yarn install
@@ -74,5 +72,5 @@ matrix:
         - yarn install
         - cd ios && pod install && cd ..
       script:
-        - yarn ios:test:release
         - if [ -n "$TRAVIS_TAG" ]; then yarn ios:beta; fi
+        - if [ -z "$TRAVIS_TAG" ]; then yarn ios:build; fi
