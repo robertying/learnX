@@ -3,8 +3,9 @@
   "version": "4.0.0",
   "scripts": {
     "android": "react-native run-android",
+    "android:pack": "react-native bundle --platform android --dev false --reset-cache --entry-file index.js --bundle-output android/app/build/generated/assets/react/release/index.android.bundle --assets-dest android/app/build/generated/res/react/release",
     "android:beta": "bundle exec fastlane android beta",
-    "android:build": "bundle exec fastlane android build",
+    "android:build": "yarn android:pack && cd android && ./gradlew assembleRelease -x bundleReleaseJsAndAssets && cd ..",
     "ios": "react-native run-ios",
     "ios:beta": "bundle exec fastlane ios beta",
     "ios:build": "bundle exec fastlane ios build",
