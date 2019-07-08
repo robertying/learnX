@@ -345,7 +345,7 @@ function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
     courses: state.courses.items,
     isFetching: state.files.isFetching,
     files: state.files.items,
-    pinnedFiles: state.files.pinned,
+    pinnedFiles: state.files.pinned || [],
     hidden: state.courses.hidden || []
   };
 }

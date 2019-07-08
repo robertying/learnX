@@ -359,7 +359,7 @@ function mapStateToProps(
     courses: state.courses.items,
     isFetching: state.assignments.isFetching,
     assignments: state.assignments.items,
-    pinnedAssignments: state.assignments.pinned,
+    pinnedAssignments: state.assignments.pinned || [],
     hidden: state.courses.hidden || []
   };
 }
