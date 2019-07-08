@@ -911,10 +911,10 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.1.1.tgz#8e09e333f9825c190100b64a4cc60aa635c04f82"
-  integrity sha512-ztkta218TmsecXCbO1ddUMcFEm0oqQ4G4KvYyoD8eeZJTS+iQbT3QTEWAwZRGsxDPsXTuUVy4mCRNIOQwOtI/Q==
+"@react-native-community/cli@2.1.2":
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.1.2.tgz#17aa604c7d7bac5cbd5ddf2db7a6ef5f8f29242a"
+  integrity sha512-EidKuBpI3zrgUFpuyOcsjcOLyM7nMjidRg8QHqNtVzOGuDH3GIZ0VOhulbROxFjI1cUY68qqaOxcE5gLdxa9Hw==
   dependencies:
     "@hapi/joi" "^15.0.3"
     "@react-native-community/cli-platform-android" "^2.1.1"
