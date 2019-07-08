@@ -341,7 +341,7 @@ function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
     courses: state.courses.items,
     isFetching: state.notices.isFetching,
     notices: state.notices.items,
-    pinnedNotices: state.notices.pinned,
+    pinnedNotices: state.notices.pinned || [],
     hidden: state.courses.hidden || []
   };
 }
