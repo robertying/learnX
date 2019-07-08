@@ -138,7 +138,7 @@ android {
         renderscriptTargetApi 23
         renderscriptSupportModeEnabled false
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "4.0.1"
+        versionName "4.0.2"
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative60"
     }
     splits {
