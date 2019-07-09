@@ -892,10 +892,10 @@
     chalk "^1.1.1"
     xcode "^2.0.0"
 
-"@react-native-community/cli-platform-ios@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-2.1.1.tgz#7887e522a5244e7662b37e0e610be70196ea3090"
-  integrity sha512-P8veNo582/dsWExlSw9EnvPjWKhtAdStD2YcFzsZ6KqRoc81kdS1tUPv3bW2tKzkgrA65hILEOhWmAskJu8GPA==
+"@react-native-community/cli-platform-ios@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-2.2.0.tgz#8008eee0bee871b52182217f49d86068bdb80efe"
+  integrity sha512-rgqksYcolGZNkG4EnWEX2nECWyTxYRUZXRb+pXc4niBsCvNMU88sXoMTxFIHb3wOAaVT2Eix3nS78yG6TA7dnA==
   dependencies:
     "@react-native-community/cli-tools" "^2.0.2"
     chalk "^1.1.1"
@@ -911,14 +911,14 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.1.2":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.1.2.tgz#17aa604c7d7bac5cbd5ddf2db7a6ef5f8f29242a"
-  integrity sha512-EidKuBpI3zrgUFpuyOcsjcOLyM7nMjidRg8QHqNtVzOGuDH3GIZ0VOhulbROxFjI1cUY68qqaOxcE5gLdxa9Hw==
+"@react-native-community/cli@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.3.0.tgz#40c1359e68cc7ba5a980cd3e427bdd4ae91bc89f"
+  integrity sha512-Vf11SAW1ZwSfZ3JsYiEhU1/Oq9ozKyh7Uawbg8D4IrBM8dCHSpPGhONNfzSQ6x4k9YQjFHH+bOY274/fcYtNXQ==
   dependencies:
     "@hapi/joi" "^15.0.3"
     "@react-native-community/cli-platform-android" "^2.1.1"
-    "@react-native-community/cli-platform-ios" "^2.1.1"
+    "@react-native-community/cli-platform-ios" "^2.2.0"
     "@react-native-community/cli-tools" "^2.0.2"
     chalk "^1.1.1"
     command-exists "^1.2.8"
