@@ -940,17 +940,16 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.3.0.tgz#40c1359e68cc7ba5a980cd3e427bdd4ae91bc89f"
-  integrity sha512-Vf11SAW1ZwSfZ3JsYiEhU1/Oq9ozKyh7Uawbg8D4IrBM8dCHSpPGhONNfzSQ6x4k9YQjFHH+bOY274/fcYtNXQ==
+"@react-native-community/cli@2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.4.0.tgz#8642e77a17907b007989d1aaf6a5f42ac7bde3ae"
+  integrity sha512-Bzekn+4qpF1fwYCfbgJwphrSkSpJT4FaSDUSNghxmWt8ND05MRDt2Brt4n7Rn+g8ufJ3BHQLQEu4yPK6JxCDaw==
   dependencies:
     "@hapi/joi" "^15.0.3"
     "@react-native-community/cli-platform-android" "^2.1.1"
     "@react-native-community/cli-platform-ios" "^2.2.0"
     "@react-native-community/cli-tools" "^2.0.2"
     chalk "^1.1.1"
-    command-exists "^1.2.8"
     commander "^2.19.0"
     compression "^1.7.1"
     connect "^3.6.5"
