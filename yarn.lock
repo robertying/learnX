@@ -5817,10 +5817,10 @@ react-native-typography@1.4.1:
   resolved "https://registry.yarnpkg.com/react-native-typography/-/react-native-typography-1.4.1.tgz#2d05cb5935a2f7fdb6b43bbde93d60f1324578e3"
   integrity sha512-dc9Zfs4jUdq4ygx4/KwO6jKTERBu6cRrfPJGntw/pA+D6BMjlWfMNuhZ/69vf4Zpsnt9s4AGe+Z/V1QFYaCXAA==
 
-react-native-unimodules@0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-unimodules/-/react-native-unimodules-0.4.1.tgz#c01491fd3cb7f4786521fbb7477c35882969a20d"
-  integrity sha512-KU/38iFWdy5LIydmoF21d/dgG6ndOvIyqPZIBr5tFzcZuVArYSp+eyjQ6AXLw9uueyZAq2F2ONqgTJsyfoxwfA==
+react-native-unimodules@0.4.2:
+  version "0.4.2"
+  resolved "https://registry.yarnpkg.com/react-native-unimodules/-/react-native-unimodules-0.4.2.tgz#17ebc5a67e12fe9203afbfb2f3cb53f938cc0661"
+  integrity sha512-qK/JmrsPdNpBldr3vqvCi5vsLQM3LN33VAF4fxD66ovV4ZKWw8yJTPQekfrU8Ktny9cFSVQ/KgISzpvUbjUiIA==
   dependencies:
     "@unimodules/core" "~2.0.0"
     "@unimodules/react-native-adapter" "~2.0.0"
