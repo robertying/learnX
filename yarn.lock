@@ -902,13 +902,14 @@
     slash "^2.0.0"
     xmldoc "^0.4.0"
 
-"@react-native-community/cli-platform-android@^2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.4.1.tgz#27d4c5c7be2a6a28b07cd37f10e661a5eef70b0f"
-  integrity sha512-M482L65Kst1LYQWDkXNTFgBDcBmUAmiF8f6SLkhsps8zmimluMUrJ/yTcBnHSK8QGuxfpW/B+QT2sT1louShmw==
+"@react-native-community/cli-platform-android@^2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.6.0.tgz#44fc0a781f9b78b374a32b2d90a0cc2260a9976c"
+  integrity sha512-3sEeErfrWWjBwuGDZvp2RTkPwzrzvn69wqUbasGHdu5H+IWhJr3V8Zj7J2j+7YSnP+pFde/HoaBJOzaHT5hJsQ==
   dependencies:
     "@react-native-community/cli-tools" "^2.4.1"
     chalk "^2.4.2"
+    jetifier "^1.6.2"
     logkitty "^0.5.0"
     slash "^2.0.0"
     xmldoc "^0.4.0"
@@ -951,13 +952,13 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.4.1":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.4.1.tgz#00dd7ebb6a26331f94d0defb4f8ef66e9001ef22"
-  integrity sha512-Kk7VX4M56IV9dM4EtczJgNNhn32KTsrcFzXGEseMGMH8HQqY6BTZr++XLmyCVSgFQXt0nsc9zNa+ORkWVhqO+g==
+"@react-native-community/cli@2.6.0":
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.6.0.tgz#71eb04021bed28fd699e39f27bf72d5e686de725"
+  integrity sha512-W2W9ta9xROeQFo++OyClfAxx98uMlL3MVTCP7E1Cq4BZdbo8W43TO8KN5Boe8F3laxtELgzD/mCd+bto7m4yiw==
   dependencies:
     "@hapi/joi" "^15.0.3"
-    "@react-native-community/cli-platform-android" "^2.4.1"
+    "@react-native-community/cli-platform-android" "^2.6.0"
     "@react-native-community/cli-platform-ios" "^2.4.1"
     "@react-native-community/cli-tools" "^2.4.1"
     chalk "^2.4.2"
@@ -4122,6 +4123,11 @@ jetifier@1.6.2:
   version "1.6.2"
   resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.6.2.tgz#c1d8b7cc2af1d3a255963dbdaed3d56157e94712"
   integrity sha512-KQKWmj7CNGcOztXwkWoZHoGHJqHBM2hI7YXRHv0tdSz5Gw063CU6z6o8sXaD1+ctTfYQOk+I87NPvPnX/3B3Kw==
+
+jetifier@^1.6.2:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.6.3.tgz#61a95b29aefddfe3b6d81ee956f5e99f8b9cba19"
+  integrity sha512-i0rb2nHVPZDPzFhgs9+yYxEDMh2z0iSHRD3vBQmvn98wlgWKwhmU2F3MUEEXfK+MLnKwLKqsCTvlcS1+CpDTUg==
 
 js-base64@^2.5.1:
   version "2.5.1"
