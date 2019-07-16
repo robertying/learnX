@@ -38,6 +38,7 @@
 
 # okhttp
 
+-keepattributes InnerClasses
 -keepattributes Signature
 -keepattributes *Annotation*
 -keep class okhttp3.** { *; }
