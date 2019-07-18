@@ -65,7 +65,7 @@
     "babel-jest": "24.8.0",
     "babel-plugin-transform-remove-console": "6.9.4",
     "detox": "13.1.1",
-    "husky": "3.0.0",
+    "husky": "3.0.1",
     "jest": "24.8.0",
     "jetifier": "1.6.3",
     "metro-react-native-babel-preset": "0.55.0",
