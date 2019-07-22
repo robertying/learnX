@@ -1002,10 +1002,10 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.7.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.7.0.tgz#d392b6f6092c7fc8da05982f38bd626db4799a10"
-  integrity sha512-53S+z7YyMA1WMigQP7oEgSUIJkDp8SxE7MCXQXosnVRkPuPKkPoL/W6KY/wQZa7dES4SdlkrFbc4AgRz/R+B3Q==
+"@react-native-community/cli@2.7.1":
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.7.1.tgz#ae83ddc2f2af146654555a2627ce0d629ad6ab64"
+  integrity sha512-k/MQUqNt5FJFQ5J+syRWAmnR0Sdh+LnSsMqIq77GGj/B0sc7abNrZbycvlHzpaoOMXUbVg6Q/ePhpT2J031kUw==
   dependencies:
     "@hapi/joi" "^15.0.3"
     "@react-native-community/cli-platform-android" "^2.7.0"
