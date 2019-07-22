@@ -54,7 +54,7 @@
     "@babel/runtime": "7.5.5",
     "@react-native-community/cli": "2.7.1",
     "@types/detox": "12.8.2",
-    "@types/jasmine": "3.3.14",
+    "@types/jasmine": "3.3.15",
     "@types/jest": "24.0.15",
     "@types/react": "16.8.23",
     "@types/react-native": "0.60.2",
