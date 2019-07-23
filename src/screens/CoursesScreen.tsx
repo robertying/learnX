@@ -174,7 +174,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     courseName: string,
     reactTag?: number
   ) => {
-    if (DeviceInfo.isPad) {
+    if (DeviceInfo.isIPad) {
       Navigation.setStackRoot("detail.root", [
         {
           component: {
