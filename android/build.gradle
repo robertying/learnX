@@ -34,9 +34,6 @@ allprojects {
             // Android JSC is installed from npm
             url("$rootDir/../node_modules/jsc-android/dist")
         }
-        maven {
-            url "$rootDir/../node_modules/react-native-background-fetch/android/libs"
-        }
 
         google()
         mavenLocal()
@@ -65,7 +62,7 @@ subprojects { subproject ->
             }
         }
 
-        if (project.hasProperty("android")) {
+        if (subproject.hasProperty("android")) {
             android {
                 compileSdkVersion 29
                 buildToolsVersion "29.0.1"
