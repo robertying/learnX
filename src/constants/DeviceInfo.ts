@@ -1,7 +1,8 @@
+import { Platform } from "react-native";
 import Info from "react-native-device-info";
 
 const DeviceInfo = {
-  isPad: Info.isTablet()
+  isIPad: Info.isTablet() && Platform.OS === "ios"
 };
 
 export default DeviceInfo;

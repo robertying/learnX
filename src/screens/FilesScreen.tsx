@@ -141,7 +141,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     const file = files.find(item => item.id === fileId);
 
     if (file) {
-      if (DeviceInfo.isPad) {
+      if (DeviceInfo.isIPad) {
         Navigation.setStackRoot("detail.root", [
           {
             component: {
@@ -232,7 +232,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         onFileCardPress(item.id, undefined);
       }}
       onPressIn={
-        DeviceInfo.isPad
+        DeviceInfo.isIPad
           ? undefined
           : (e: { readonly reactTag: number | null }) => {
               onFileCardPress(item.id, e.reactTag!);
