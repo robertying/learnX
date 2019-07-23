@@ -1,14 +1,7 @@
-import BackgroundFetch from "react-native-background-fetch";
 import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
 import { getAllFilesForCourses } from "../redux/actions/files";
 import { getAllNoticesForCourses } from "../redux/actions/notices";
 import { store } from "../redux/store";
-
-export const headlessTask = async () => {
-  await updateAll();
-  BackgroundFetch.finish();
-};
-BackgroundFetch.registerHeadlessTask(headlessTask);
 
 export const updateAll = () => {
   return new Promise(async resolve => {
