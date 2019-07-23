@@ -1,4 +1,3 @@
-import { Platform } from "react-native";
 import { LayoutBottomTabs, LayoutRoot } from "react-native-navigation";
 import Colors from "../constants/Colors";
 import DeviceInfo from "../constants/DeviceInfo";
