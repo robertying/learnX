@@ -15,7 +15,7 @@
     "postinstall": "chmod +x patches/patch.sh && patches/patch.sh && jetify"
   },
   "dependencies": {
-    "@react-native-community/async-storage": "1.5.1",
+    "@react-native-community/async-storage": "1.6.0",
     "@react-native-community/push-notification-ios": "1.0.1",
     "dayjs": "1.8.15",
     "expo-haptics": "5.0.1",
