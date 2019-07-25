@@ -14,6 +14,7 @@ This project also serves as a demonstration of how to build a React Native app f
 
 - Latest React Native (0.60)
 - AndroidX / CocoaPods
+- Redux
 - TypeScript
 - Detox e2e tests
 - Continuous Integration (travis)
