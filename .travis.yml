@@ -70,7 +70,7 @@ matrix:
         - gem install bundler
         - bundle install
         - yarn install
-        - cd ios && pod install && cd ..
+        - cd ios && bundle exec pod install && cd ..
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn ios:beta; fi
         - if [ -z "$TRAVIS_TAG" ]; then yarn ios:build; fi
