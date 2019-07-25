@@ -66,11 +66,12 @@ matrix:
         - nvm install node
         - node -v
         - npm install -g yarn
+        - sudo gem install cocoapods
       install:
         - gem install bundler
         - bundle install
         - yarn install
-        - cd ios && bundle exec pod install && cd ..
+        - cd ios && pod install && cd ..
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn ios:beta; fi
         - if [ -z "$TRAVIS_TAG" ]; then yarn ios:build; fi
