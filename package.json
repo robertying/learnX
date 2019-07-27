@@ -17,8 +17,8 @@
   "dependencies": {
     "@react-native-community/async-storage": "1.6.1",
     "dayjs": "1.8.15",
-    "expo-haptics": "5.0.1",
-    "expo-secure-store": "5.0.1",
+    "expo-haptics": "6.0.0",
+    "expo-secure-store": "6.0.0",
     "fuse.js": "3.4.5",
     "react": "16.8.6",
     "react-native": "0.60.4",
