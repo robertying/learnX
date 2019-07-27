@@ -960,10 +960,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/detox@12.8.2":
-  version "12.8.2"
-  resolved "https://registry.yarnpkg.com/@types/detox/-/detox-12.8.2.tgz#b206fee84d6d225bb8913308170d58e40edb7e6a"
-  integrity sha512-OXiix5255GRVchHUeLSh9EBy57bAjM4MFLhSSEj5I0JztYEiTctnmazgK099gdKJjNmEmQMMMf51Waxzh1fY3w==
+"@types/detox@12.8.3":
+  version "12.8.3"
+  resolved "https://registry.yarnpkg.com/@types/detox/-/detox-12.8.3.tgz#6734e83efad500cc4033af131ea65616284985be"
+  integrity sha512-Bx9DBmVousynqSre3X/zJFKNPhFwBgZYI3eKhPZMLrE3pVcEnyULu6Ld3s5w4ZvJz9zsDrSRiWMDj9259FD1+Q==
 
 "@types/hoist-non-react-statics@^3.3.0":
   version "3.3.1"
