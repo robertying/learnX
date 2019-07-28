@@ -29,8 +29,7 @@ matrix:
         - bundle install
         - yarn install
       script:
-        - if [ -n "$TRAVIS_TAG" ]; then travis_wait yarn android:beta; fi
-        - if [ -z "$TRAVIS_TAG" ]; then travis_wait yarn android:build; fi
+        - cd android && ./gradlew assembleDebug && cd ..
       before_cache:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
