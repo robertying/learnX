@@ -1077,10 +1077,10 @@
   resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-12.0.12.tgz#45dd1d0638e8c8f153e87d296907659296873916"
   integrity sha512-SOhuU4wNBxhhTHxYaiG5NY4HBhDIDnJF60GU+2LqHAdKKer86//e4yg69aENCtQ04n0ovz+tq2YPME5t5yp4pw==
 
-"@unimodules/core@3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@unimodules/core/-/core-3.0.0.tgz#bd00ce2a7d2c8bafdb086673bc437f4de5a0920c"
-  integrity sha512-57k14gPJYZKGxrQk5ZJV8VKSARHeaLpxI7eXE1ajhkQ+Eh9UF0VBr3WUQo/KmYWaGllTG2YVVe/SGcmkvsvugA==
+"@unimodules/core@3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@unimodules/core/-/core-3.0.2.tgz#a2b143fb1e743809ba17c60ae1848f82b8637901"
+  integrity sha512-EMZjVp+yrtoPKpDBPvj4+hyDWALl7gvpWeUsDz2Nb9MMBPLnhag1uNk3KC98StJdnjbSXKSdKrCMMidOXnyKcg==
   dependencies:
     compare-versions "^3.4.0"
 
@@ -5705,12 +5705,12 @@ react-native-typography@1.4.1:
   resolved "https://registry.yarnpkg.com/react-native-typography/-/react-native-typography-1.4.1.tgz#2d05cb5935a2f7fdb6b43bbde93d60f1324578e3"
   integrity sha512-dc9Zfs4jUdq4ygx4/KwO6jKTERBu6cRrfPJGntw/pA+D6BMjlWfMNuhZ/69vf4Zpsnt9s4AGe+Z/V1QFYaCXAA==
 
-react-native-unimodules@0.5.0:
-  version "0.5.0"
-  resolved "https://registry.yarnpkg.com/react-native-unimodules/-/react-native-unimodules-0.5.0.tgz#ab6be58e2c2ebcc812a1df4debda0780ffe1898f"
-  integrity sha512-dGCjR7MUStKSN2SXRAptClmBKXOUwKqvXbeH+2Mco+mjd/bXlyTegnBAlWiUolh6DZrN1DnBOxi55l0vWlFpBQ==
+react-native-unimodules@0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/react-native-unimodules/-/react-native-unimodules-0.5.2.tgz#02ace4a3633906ebe43ff42164482795965d38a0"
+  integrity sha512-/wRMjdLsSgIOrnr7FRtXiv2Km0KH0IRXDky2uGp0K4i7NLEme7Fn4e3mEbqALfa7t3lIa2KLU15mVsp41TKlEg==
   dependencies:
-    "@unimodules/core" "3.0.0"
+    "@unimodules/core" "3.0.2"
     "@unimodules/react-native-adapter" "3.0.0"
     chalk "^2.4.2"
     expo-app-loader-provider "6.0.0"
