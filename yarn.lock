@@ -869,10 +869,10 @@
     slash "^2.0.0"
     xmldoc "^0.4.0"
 
-"@react-native-community/cli-platform-android@^2.8.1":
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.8.1.tgz#bdad92a1aaab7eff20f4ce5825fd2a24fc26bd5e"
-  integrity sha512-KXPzQ4GQebdZJY7dPecAxtiOGnt1Fe0MBz3QnG8ehpmLPla7/J27u4rYL7LZ0Gm+U/ocSuYUCHpnlRXN3llO/g==
+"@react-native-community/cli-platform-android@^2.8.2":
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.8.2.tgz#9b9862551c214e6c031fca5a887b73c92b5a2527"
+  integrity sha512-JlDmBe/XH8b9g4gViZEkYJs/tMAtppxLkpgeUhNBYIjVktI2vwxcq3Ydx1VQAjwuH9RMlXtBufBkJQ/NVz+9/A==
   dependencies:
     "@react-native-community/cli-tools" "^2.7.0"
     chalk "^2.4.2"
@@ -901,13 +901,13 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.8.1":
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.8.1.tgz#f3f72ddbe6133703d9b7232518a236eb20090621"
-  integrity sha512-b/tPHoVT1/YFCQQYmar2ioW4I8utE8wvYe5TV4hxhx/IGaTw0odMTvZzfP1rxyk0kyVNGMWyd5DaJ9v6uueauw==
+"@react-native-community/cli@2.8.2":
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.8.2.tgz#2032f8fb4bafd79d9cb6f14fc8ad858fff7e0699"
+  integrity sha512-MKXRDQLm0vhf2BPw0d9krSRG1m7qJHGyYR0fL4NxQS2oEy6JyCc5qP/v/HtZlhJOUV92KAACG8XrAwd4JGC5iA==
   dependencies:
     "@hapi/joi" "^15.0.3"
-    "@react-native-community/cli-platform-android" "^2.8.1"
+    "@react-native-community/cli-platform-android" "^2.8.2"
     "@react-native-community/cli-platform-ios" "^2.8.0"
     "@react-native-community/cli-tools" "^2.7.0"
     chalk "^2.4.2"
