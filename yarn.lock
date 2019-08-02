@@ -869,18 +869,18 @@
     slash "^2.0.0"
     xmldoc "^0.4.0"
 
-"@react-native-community/cli-platform-android@^2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.8.2.tgz#9b9862551c214e6c031fca5a887b73c92b5a2527"
-  integrity sha512-JlDmBe/XH8b9g4gViZEkYJs/tMAtppxLkpgeUhNBYIjVktI2vwxcq3Ydx1VQAjwuH9RMlXtBufBkJQ/NVz+9/A==
+"@react-native-community/cli-platform-android@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-android/-/cli-platform-android-2.8.3.tgz#097237769d69400ceaf254a780d645bb8284acd6"
+  integrity sha512-I0/knJYmyMgp1IkrgvgirifArnarFvm+EvrRKVQjEO0aEXhOjVU2DA7TshdjocZhjq1leKm/bSxz8D3WHpRJ9g==
   dependencies:
-    "@react-native-community/cli-tools" "^2.7.0"
+    "@react-native-community/cli-tools" "^2.8.3"
     chalk "^2.4.2"
     execa "^1.0.0"
     jetifier "^1.6.2"
     logkitty "^0.5.0"
-    slash "^2.0.0"
-    xmldoc "^0.4.0"
+    slash "^3.0.0"
+    xmldoc "^1.1.2"
 
 "@react-native-community/cli-platform-ios@^2.0.1", "@react-native-community/cli-platform-ios@^2.8.0":
   version "2.8.0"
@@ -888,6 +888,15 @@
   integrity sha512-a6DD4fnfJij8FicQ/5+4zgsqxRO92o6unt2XKZexIM8bqH3i8U5pvUsccOhRnsaIjXUFMbLU5knozRrFSaJBoQ==
   dependencies:
     "@react-native-community/cli-tools" "^2.7.0"
+    chalk "^2.4.2"
+    xcode "^2.0.0"
+
+"@react-native-community/cli-platform-ios@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-platform-ios/-/cli-platform-ios-2.8.3.tgz#2d77bf5c6fde753d7c675fd94f656f78c0d5f741"
+  integrity sha512-r2+xa4trWubLRqXvotYtDIFzQpepSwo9Zsjt0JT96BUJLdXNzsUSwTFZW2EmLPmnJiZJRNdWvoXaBYVqDthdTQ==
+  dependencies:
+    "@react-native-community/cli-tools" "^2.8.3"
     chalk "^2.4.2"
     xcode "^2.0.0"
 
@@ -901,15 +910,25 @@
     mime "^2.4.1"
     node-fetch "^2.5.0"
 
-"@react-native-community/cli@2.8.2":
-  version "2.8.2"
-  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.8.2.tgz#2032f8fb4bafd79d9cb6f14fc8ad858fff7e0699"
-  integrity sha512-MKXRDQLm0vhf2BPw0d9krSRG1m7qJHGyYR0fL4NxQS2oEy6JyCc5qP/v/HtZlhJOUV92KAACG8XrAwd4JGC5iA==
+"@react-native-community/cli-tools@^2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli-tools/-/cli-tools-2.8.3.tgz#0e2249f48cf4603fb8d740a9f0715c31ac131ceb"
+  integrity sha512-N5Pz+pR+GFq3JApjd0SW4jp9KC7kbKsMH65QLRh30JNsxdPvNkYox6/ZZdkvdXaI5ev3EckR7eqlcwi5gpVTYQ==
+  dependencies:
+    chalk "^2.4.2"
+    lodash "^4.17.5"
+    mime "^2.4.1"
+    node-fetch "^2.5.0"
+
+"@react-native-community/cli@2.8.3":
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/@react-native-community/cli/-/cli-2.8.3.tgz#b59c4e44946a1ce6c464ae246328cf3a2ab47bd2"
+  integrity sha512-khlS6slD6fsIv8R6L0bbQvK2PQ/UJytmh8/XEZ835bDwgbn6U90Yqrf299r6JxKk2/tyckRu6QimQNAkEQxEHg==
   dependencies:
     "@hapi/joi" "^15.0.3"
-    "@react-native-community/cli-platform-android" "^2.8.2"
-    "@react-native-community/cli-platform-ios" "^2.8.0"
-    "@react-native-community/cli-tools" "^2.7.0"
+    "@react-native-community/cli-platform-android" "^2.8.3"
+    "@react-native-community/cli-platform-ios" "^2.8.3"
+    "@react-native-community/cli-tools" "^2.8.3"
     chalk "^2.4.2"
     commander "^2.19.0"
     compression "^1.7.1"
@@ -6286,7 +6305,7 @@ sanitize-filename@^1.6.1:
   dependencies:
     truncate-utf8-bytes "^1.0.0"
 
-sax@^1.1.4, sax@^1.2.4:
+sax@^1.1.4, sax@^1.2.1, sax@^1.2.4:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==
@@ -7482,6 +7501,13 @@ xmldoc@^0.4.0:
   integrity sha1-0lciS+g5PqrL+DfvIn/Y7CWzaIg=
   dependencies:
     sax "~1.1.1"
+
+xmldoc@^1.1.2:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/xmldoc/-/xmldoc-1.1.2.tgz#6666e029fe25470d599cd30e23ff0d1ed50466d7"
+  integrity sha512-ruPC/fyPNck2BD1dpz0AZZyrEwMOrWTO5lDdIXS91rs3wtm4j+T8Rp2o+zoOYkkAxJTZRPOSnOGei1egoRmKMQ==
+  dependencies:
+    sax "^1.2.1"
 
 xmldom@0.1.x:
   version "0.1.27"
