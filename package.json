@@ -20,7 +20,7 @@
     "expo-haptics": "6.0.0",
     "expo-secure-store": "6.0.0",
     "fuse.js": "3.4.5",
-    "react": "16.8.6",
+    "react": "16.9.0",
     "react-native": "0.60.4",
     "react-native-calendar-events": "1.7.3",
     "react-native-device-info": "2.3.2",
