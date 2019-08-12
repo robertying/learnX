@@ -6,7 +6,7 @@ matrix:
         components:
           - tools
           - platform-tools
-          - build-tools-29.0.1
+          - build-tools-29.0.2
           - android-29
           - extra-google-google_play_services
           - extra-google-m2repository
@@ -25,7 +25,7 @@ matrix:
         - nvm install node
         - node -v
         - npm install -g yarn
-        - yes | sdkmanager --licenses
+        - yes | sdkmanager "build-tools;29.0.2"
       install:
         - gem install bundler
         - bundle install
