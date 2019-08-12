@@ -25,6 +25,7 @@ matrix:
         - nvm install node
         - node -v
         - npm install -g yarn
+        - yes | sdkmanager --licenses
       install:
         - gem install bundler
         - bundle install
