@@ -1,22 +1,22 @@
-import React, { FunctionComponent } from "react";
+import React, {FunctionComponent} from 'react';
 import {
   Platform,
   ScrollView,
   TouchableHighlightProps,
-  View
-} from "react-native";
-import { Navigation } from "react-native-navigation";
-import { iOSColors, iOSUIKit } from "react-native-typography";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import AutoHeightWebView from "../components/AutoHeightWebView";
-import Colors from "../constants/Colors";
-import dayjs from "../helpers/dayjs";
-import { getTranslation } from "../helpers/i18n";
-import { getExtension, shareFile, stripExtension } from "../helpers/share";
-import { showToast } from "../helpers/toast";
-import Divider from "./Divider";
-import Text from "./Text";
-import TextButton from "./TextButton";
+  View,
+} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {iOSColors, iOSUIKit} from 'react-native-typography';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import AutoHeightWebView from '../components/AutoHeightWebView';
+import Colors from '../constants/Colors';
+import dayjs from '../helpers/dayjs';
+import {getTranslation} from '../helpers/i18n';
+import {getExtension, shareFile, stripExtension} from '../helpers/share';
+import {showToast} from '../helpers/toast';
+import Divider from './Divider';
+import Text from './Text';
+import TextButton from './TextButton';
 
 export type INoticeBoardProps = TouchableHighlightProps & {
   readonly title: string;
@@ -38,41 +38,41 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     attachmentUrl,
     publishTime,
     componentId,
-    onTransition
+    onTransition,
   } = props;
 
   const onAttachmentPress = async (
     filename: string,
     url: string,
-    ext: string
+    ext: string,
   ) => {
     if (onTransition) {
       onTransition();
     }
 
-    if (Platform.OS === "ios") {
+    if (Platform.OS === 'ios') {
       Navigation.push(componentId, {
         component: {
-          name: "webview",
+          name: 'webview',
           passProps: {
             filename: stripExtension(filename),
             url,
-            ext
+            ext,
           },
           options: {
             topBar: {
               title: {
-                text: stripExtension(filename)
-              }
-            }
-          }
-        }
+                text: stripExtension(filename),
+              },
+            },
+          },
+        },
       });
     } else {
-      showToast(getTranslation("downloadingFile"), 1000);
+      showToast(getTranslation('downloadingFile'), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
-        showToast(getTranslation("downloadFileFailure"), 3000);
+        showToast(getTranslation('downloadFileFailure'), 3000);
       }
     }
   };
@@ -81,30 +81,25 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor: "#fff"
-      }}
-    >
-      <View style={{ padding: 15, paddingLeft: 20, paddingRight: 20 }}>
+        backgroundColor: '#fff',
+      }}>
+      <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
         <Text
-          style={[iOSUIKit.title3Emphasized, { lineHeight: 24 }]}
+          style={[iOSUIKit.title3Emphasized, {lineHeight: 24}]}
           numberOfLines={2}
-          ellipsizeMode="tail"
-        >
+          ellipsizeMode="tail">
           {title}
         </Text>
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginTop: 5
-          }}
-        >
-          <Text style={[iOSUIKit.body, { color: iOSColors.gray }]}>
-            {author}
-          </Text>
-          <Text style={[iOSUIKit.body, { color: iOSColors.gray }]}>
-            {dayjs(publishTime).format("LL")}
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 5,
+          }}>
+          <Text style={[iOSUIKit.body, {color: iOSColors.gray}]}>{author}</Text>
+          <Text style={[iOSUIKit.body, {color: iOSColors.gray}]}>
+            {dayjs(publishTime).format('LL')}
           </Text>
         </View>
       </View>
@@ -116,12 +111,11 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
               padding: 15,
               paddingLeft: 20,
               paddingRight: 20,
-              flexDirection: "row",
-              alignItems: "center"
-            }}
-          >
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
             <Icon
-              style={{ marginRight: 5 }}
+              style={{marginRight: 5}}
               name="attachment"
               size={18}
               color={Colors.theme}
@@ -132,11 +126,10 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
                 onAttachmentPress(
                   attachmentName,
                   attachmentUrl!,
-                  getExtension(attachmentName)!
+                  getExtension(attachmentName)!,
                 )
               }
-              ellipsizeMode="tail"
-            >
+              ellipsizeMode="tail">
               {attachmentName}
             </TextButton>
           </View>
@@ -144,12 +137,12 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
         </>
       ) : null}
       <AutoHeightWebView
-        style={{ margin: 15 }}
+        style={{margin: 15}}
         useWebKit={true}
-        originWhitelist={["*"]}
+        originWhitelist={['*']}
         source={{
           html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body>${content ||
-            getTranslation("noNoticeContent")}</body>`
+            getTranslation('noNoticeContent')}</body>`,
         }}
       />
     </ScrollView>

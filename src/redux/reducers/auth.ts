@@ -1,26 +1,22 @@
-import { IAuthAction } from "../types/actions";
-import {
-  LOGIN_FAILURE,
-  LOGIN_REQUEST,
-  LOGIN_SUCCESS
-} from "../types/constants";
-import { IAuthState } from "../types/state";
+import {IAuthAction} from '../types/actions';
+import {LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS} from '../types/constants';
+import {IAuthState} from '../types/state';
 
 export default function auth(
   state: IAuthState = {
     loggingIn: false,
     loggedIn: false,
     username: null,
-    password: null
+    password: null,
   },
-  action: IAuthAction
+  action: IAuthAction,
 ): IAuthState {
   switch (action.type) {
     case LOGIN_REQUEST:
       return {
         ...state,
         loggingIn: true,
-        error: null
+        error: null,
       };
     case LOGIN_SUCCESS:
       const payload = action.payload;
@@ -30,14 +26,14 @@ export default function auth(
         loggedIn: true,
         username: payload.username,
         password: payload.password,
-        error: null
+        error: null,
       };
     case LOGIN_FAILURE:
       return {
         ...state,
         loggingIn: false,
         loggedIn: false,
-        error: action.payload
+        error: action.payload,
       };
   }
   return state;

@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 import {
   FlatList,
   ListRenderItem,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import Colors from "../constants/Colors";
-import { IFile } from "../redux/types/state";
-import EmptyList from "./EmptyList";
-import FileCard from "./FileCard";
+  SafeAreaView,
+} from 'react-native';
+import Colors from '../constants/Colors';
+import {IFile} from '../redux/types/state';
+import EmptyList from './EmptyList';
+import FileCard from './FileCard';
 
 export interface IFilesViewProps {
   readonly files: ReadonlyArray<IFile>;
@@ -16,15 +16,15 @@ export interface IFilesViewProps {
   readonly onFileCardPress: (
     filename: string,
     url: string,
-    ext: string
+    ext: string,
   ) => void;
   readonly onRefresh?: () => void;
 }
 
 const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
-  const { files, onFileCardPress, isFetching, onRefresh } = props;
+  const {files, onFileCardPress, isFetching, onRefresh} = props;
 
-  const renderListItem: ListRenderItem<IFile> = ({ item }) => {
+  const renderListItem: ListRenderItem<IFile> = ({item}) => {
     return (
       <FileCard
         dragEnabled={false}
@@ -45,7 +45,7 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
   const keyExtractor = (item: any) => item.id;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={files}

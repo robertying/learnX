@@ -1,2 +1,2 @@
-export const dummyUsername = "appreview";
-export const dummyPassword = "appreview";
+export const dummyUsername = 'appreview';
+export const dummyPassword = 'appreview';

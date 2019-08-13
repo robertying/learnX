@@ -1,22 +1,22 @@
-import React, { FunctionComponent } from "react";
+import React, {FunctionComponent} from 'react';
 import {
   Platform,
   ScrollView,
   TouchableHighlightProps,
-  View
-} from "react-native";
-import { Navigation } from "react-native-navigation";
-import { iOSColors, iOSUIKit } from "react-native-typography";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import Colors from "../constants/Colors";
-import dayjs from "../helpers/dayjs";
-import { getLocale, getTranslation } from "../helpers/i18n";
-import { getExtension, shareFile, stripExtension } from "../helpers/share";
-import { showToast } from "../helpers/toast";
-import AutoHeightWebView from "./AutoHeightWebView";
-import Divider from "./Divider";
-import Text from "./Text";
-import TextButton from "./TextButton";
+  View,
+} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {iOSColors, iOSUIKit} from 'react-native-typography';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Colors from '../constants/Colors';
+import dayjs from '../helpers/dayjs';
+import {getLocale, getTranslation} from '../helpers/i18n';
+import {getExtension, shareFile, stripExtension} from '../helpers/share';
+import {showToast} from '../helpers/toast';
+import AutoHeightWebView from './AutoHeightWebView';
+import Divider from './Divider';
+import Text from './Text';
+import TextButton from './TextButton';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   readonly title: string;
@@ -48,41 +48,41 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     gradeContent,
     gradeLevel,
     componentId,
-    onTransition
+    onTransition,
   } = props;
 
   const onAttachmentPress = async (
     filename: string,
     url: string,
-    ext: string
+    ext: string,
   ) => {
     if (onTransition) {
       onTransition();
     }
 
-    if (Platform.OS === "ios") {
+    if (Platform.OS === 'ios') {
       Navigation.push(componentId, {
         component: {
-          name: "webview",
+          name: 'webview',
           passProps: {
             filename: stripExtension(filename),
             url,
-            ext
+            ext,
           },
           options: {
             topBar: {
               title: {
-                text: stripExtension(filename)
-              }
-            }
-          }
-        }
+                text: stripExtension(filename),
+              },
+            },
+          },
+        },
       });
     } else {
-      showToast(getTranslation("downloadingFile"), 1000);
+      showToast(getTranslation('downloadingFile'), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
-        showToast(getTranslation("downloadFileFailure"), 3000);
+        showToast(getTranslation('downloadFileFailure'), 3000);
       }
     }
   };
@@ -91,21 +91,19 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor: "#fff"
-      }}
-    >
-      <View style={{ padding: 15, paddingLeft: 20, paddingRight: 20 }}>
+        backgroundColor: '#fff',
+      }}>
+      <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
         <Text
-          style={[iOSUIKit.title3Emphasized, { lineHeight: 24 }]}
+          style={[iOSUIKit.title3Emphasized, {lineHeight: 24}]}
           numberOfLines={2}
-          ellipsizeMode="tail"
-        >
+          ellipsizeMode="tail">
           {title}
         </Text>
-        <Text style={[iOSUIKit.body, { color: iOSColors.gray, marginTop: 5 }]}>
-          {getLocale().startsWith("zh")
-            ? dayjs(deadline).format("llll") + " 截止"
-            : "Submission close on " + dayjs(deadline).format("llll")}
+        <Text style={[iOSUIKit.body, {color: iOSColors.gray, marginTop: 5}]}>
+          {getLocale().startsWith('zh')
+            ? dayjs(deadline).format('llll') + ' 截止'
+            : 'Submission close on ' + dayjs(deadline).format('llll')}
         </Text>
       </View>
       <Divider />
@@ -116,12 +114,11 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               padding: 15,
               paddingLeft: 20,
               paddingRight: 20,
-              flexDirection: "row",
-              alignItems: "center"
-            }}
-          >
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
             <Icon
-              style={{ marginRight: 5 }}
+              style={{marginRight: 5}}
               name="attachment"
               size={18}
               color={Colors.theme}
@@ -132,11 +129,10 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                 onAttachmentPress(
                   attachmentName,
                   attachmentUrl!,
-                  getExtension(attachmentName)!
+                  getExtension(attachmentName)!,
                 )
               }
-              ellipsizeMode="tail"
-            >
+              ellipsizeMode="tail">
               {attachmentName}
             </TextButton>
           </View>
@@ -150,12 +146,11 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               padding: 15,
               paddingLeft: 20,
               paddingRight: 20,
-              flexDirection: "row",
-              alignItems: "center"
-            }}
-          >
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
             <Icon
-              style={{ marginRight: 5 }}
+              style={{marginRight: 5}}
               name="done"
               size={18}
               color={Colors.theme}
@@ -166,11 +161,10 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                 onAttachmentPress(
                   submittedAttachmentName!,
                   submittedAttachmentUrl!,
-                  getExtension(submittedAttachmentName!)!
+                  getExtension(submittedAttachmentName!)!,
                 )
               }
-              ellipsizeMode="tail"
-            >
+              ellipsizeMode="tail">
               {submittedAttachmentName!}
             </TextButton>
           </View>
@@ -179,10 +173,10 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
       ) : null}
       {grade || gradeLevel ? (
         <>
-          <View style={{ padding: 15, paddingLeft: 20, paddingRight: 20 }}>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Icon
-                style={{ marginRight: 5 }}
+                style={{marginRight: 5}}
                 name="grade"
                 size={18}
                 color={Colors.theme}
@@ -196,19 +190,19 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               </Text>
             </View>
             {gradeContent ? (
-              <Text style={{ marginTop: 5 }}>{gradeContent}</Text>
+              <Text style={{marginTop: 5}}>{gradeContent}</Text>
             ) : null}
           </View>
           <Divider />
         </>
       ) : null}
       <AutoHeightWebView
-        style={{ margin: 15 }}
+        style={{margin: 15}}
         useWebKit={true}
-        originWhitelist={["*"]}
+        originWhitelist={['*']}
         source={{
           html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body>${description ||
-            getTranslation("noAssignmentDescription")}</body>`
+            getTranslation('noAssignmentDescription')}</body>`,
         }}
       />
     </ScrollView>

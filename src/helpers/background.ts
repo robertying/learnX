@@ -1,7 +1,7 @@
-import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
-import { getAllFilesForCourses } from "../redux/actions/files";
-import { getAllNoticesForCourses } from "../redux/actions/notices";
-import { store } from "../redux/store";
+import {getAllAssignmentsForCourses} from '../redux/actions/assignments';
+import {getAllFilesForCourses} from '../redux/actions/files';
+import {getAllNoticesForCourses} from '../redux/actions/notices';
+import {store} from '../redux/store';
 
 export const updateAll = () => {
   return new Promise(async resolve => {

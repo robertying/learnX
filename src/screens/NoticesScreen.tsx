@@ -1,39 +1,39 @@
-import * as Haptics from "expo-haptics";
-import { FuseOptions } from "fuse.js";
-import React, { useEffect } from "react";
+import * as Haptics from 'expo-haptics';
+import {FuseOptions} from 'fuse.js';
+import React, {useEffect} from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import { FlatList } from "react-native-gesture-handler";
-import { Navigation } from "react-native-navigation";
-import { Provider as PaperProvider, Searchbar } from "react-native-paper";
-import { connect } from "react-redux";
-import EmptyList from "../components/EmptyList";
-import NoticeCard from "../components/NoticeCard";
-import Colors from "../constants/Colors";
-import DeviceInfo from "../constants/DeviceInfo";
-import dayjs from "../helpers/dayjs";
-import { getTranslation } from "../helpers/i18n";
-import { showToast } from "../helpers/toast";
-import useSearchBar from "../hooks/useSearchBar";
-import { login } from "../redux/actions/auth";
-import { getCoursesForSemester } from "../redux/actions/courses";
+  SafeAreaView,
+} from 'react-native';
+import {FlatList} from 'react-native-gesture-handler';
+import {Navigation} from 'react-native-navigation';
+import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
+import {connect} from 'react-redux';
+import EmptyList from '../components/EmptyList';
+import NoticeCard from '../components/NoticeCard';
+import Colors from '../constants/Colors';
+import DeviceInfo from '../constants/DeviceInfo';
+import dayjs from '../helpers/dayjs';
+import {getTranslation} from '../helpers/i18n';
+import {showToast} from '../helpers/toast';
+import useSearchBar from '../hooks/useSearchBar';
+import {login} from '../redux/actions/auth';
+import {getCoursesForSemester} from '../redux/actions/courses';
 import {
   getAllNoticesForCourses,
   pinNotice,
-  unpinNotice
-} from "../redux/actions/notices";
+  unpinNotice,
+} from '../redux/actions/notices';
 import {
   ICourse,
   INotice,
   IPersistAppState,
-  withCourseInfo
-} from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+  withCourseInfo,
+} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface INoticesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -76,7 +76,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     username,
     password,
     isFetching,
-    login
+    login,
   } = props;
 
   /**
@@ -88,10 +88,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     (a, b) => ({
       ...a,
       ...{
-        [b.id]: { courseName: b.name, courseTeacherName: b.teacherName }
-      }
+        [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+      },
     }),
-    {}
+    {},
   ) as {
     readonly [id: string]: {
       readonly courseName: string;
@@ -103,7 +103,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix())
     .map(notice => ({
       ...notice,
-      ...courseNames[notice.courseId]
+      ...courseNames[notice.courseId],
     }));
 
   /**
@@ -127,7 +127,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       if (loggedIn) {
         getAllNoticesForCourses(courseIds);
       } else {
-        showToast(getTranslation("refreshFailure"), 1500);
+        showToast(getTranslation('refreshFailure'), 1500);
         login(username, password);
       }
     }
@@ -142,57 +142,57 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
     if (notice) {
       if (DeviceInfo.isIPad) {
-        Navigation.setStackRoot("detail.root", [
+        Navigation.setStackRoot('detail.root', [
           {
             component: {
-              name: "notices.detail",
+              name: 'notices.detail',
               passProps: {
                 title: notice.title,
                 author: notice.publisher,
                 content: notice.content,
                 publishTime: notice.publishTime,
                 attachmentName: notice.attachmentName,
-                attachmentUrl: notice.attachmentUrl
+                attachmentUrl: notice.attachmentUrl,
               },
               options: {
                 topBar: {
                   title: {
-                    text: notice.courseName
-                  }
+                    text: notice.courseName,
+                  },
                 },
                 animations: {
                   setStackRoot: {
-                    enabled: false
-                  }
-                } as any
-              }
-            }
-          }
+                    enabled: false,
+                  },
+                } as any,
+              },
+            },
+          },
         ]);
       } else {
         Navigation.push(props.componentId, {
           component: {
-            name: "notices.detail",
+            name: 'notices.detail',
             passProps: {
               title: notice.title,
               author: notice.publisher,
               content: notice.content,
               publishTime: notice.publishTime,
               attachmentName: notice.attachmentName,
-              attachmentUrl: notice.attachmentUrl
+              attachmentUrl: notice.attachmentUrl,
             },
             options: {
               topBar: {
                 title: {
-                  text: notice.courseName
-                }
+                  text: notice.courseName,
+                },
               },
               preview: {
                 reactTag,
-                commit: true
-              }
-            }
-          }
+                commit: true,
+              },
+            },
+          },
         });
       }
     }
@@ -206,11 +206,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   };
 
-  const renderListItem = ({
-    item
-  }: {
-    readonly item: withCourseInfo<INotice>;
-  }) => (
+  const renderListItem = ({item}: {readonly item: withCourseInfo<INotice>}) => (
     <NoticeCard
       title={item.title}
       author={item.publisher}
@@ -230,7 +226,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       onPressIn={
         DeviceInfo.isIPad
           ? undefined
-          : (e: { readonly reactTag: number | null }) => {
+          : (e: {readonly reactTag: number | null}) => {
               onNoticeCardPress(item.id, e.reactTag!);
             }
       }
@@ -246,7 +242,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     if (offsetY < -60 && !isFetching) {
-      showToast(getTranslation("refreshing"), 3000);
+      showToast(getTranslation('refreshing'), 3000);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       invalidateAll();
     }
@@ -271,12 +267,12 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
   return (
     <PaperProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-        {Platform.OS === "android" && (
+      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+        {Platform.OS === 'android' && (
           <Searchbar
-            style={{ elevation: 4 }}
+            style={{elevation: 4}}
             clearButtonMode="always"
-            placeholder={getTranslation("searchNotices")}
+            placeholder={getTranslation('searchNotices')}
             onChangeText={setSearchBarText}
             value={searchBarText}
           />
@@ -287,9 +283,9 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           renderItem={renderListItem}
           // tslint:disable-next-line: jsx-no-lambda
           keyExtractor={item => item.id}
-          onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+          onScrollEndDrag={Platform.OS === 'ios' ? onScrollEndDrag : undefined}
           refreshControl={
-            Platform.OS === "android" ? (
+            Platform.OS === 'android' ? (
               <RefreshControl
                 colors={[Colors.theme]}
                 onRefresh={onRefresh}
@@ -312,37 +308,37 @@ const fuseOptions: FuseOptions<withCourseInfo<INotice>> = {
   distance: 100,
   maxPatternLength: 32,
   minMatchCharLength: 1,
-  keys: ["courseName", "courseTeacherName"]
+  keys: ['courseName', 'courseTeacherName'],
 };
 
 // tslint:disable-next-line: no-object-mutation
 NoticesScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("notices")
+      text: getTranslation('notices'),
     },
     largeTitle: {
-      visible: true
+      visible: true,
     },
     searchBar: true,
-    searchBarPlaceholder: getTranslation("searchNotices"),
+    searchBarPlaceholder: getTranslation('searchNotices'),
     hideNavBarOnFocusSearchBar: true,
-    elevation: 0
-  }
+    elevation: 0,
+  },
 };
 
 function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || "",
-    password: state.auth.password || "",
+    username: state.auth.username || '',
+    password: state.auth.password || '',
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.notices.isFetching,
     notices: state.notices.items,
     pinnedNotices: state.notices.pinned || [],
-    hidden: state.courses.hidden || []
+    hidden: state.courses.hidden || [],
   };
 }
 
@@ -354,10 +350,10 @@ const mapDispatchToProps: INoticesScreenDispatchProps = {
     getAllNoticesForCourses(courseIds),
   pinNotice: (noticeId: string) => pinNotice(noticeId),
   unpinNotice: (noticeId: string) => unpinNotice(noticeId),
-  login: (username: string, password: string) => login(username, password)
+  login: (username: string, password: string) => login(username, password),
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(NoticesScreen);

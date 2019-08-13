@@ -1,16 +1,16 @@
-import React, { useEffect } from "react";
-import { FlatList, ListRenderItem, SafeAreaView } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import { connect } from "react-redux";
-import Divider from "../components/Divider";
-import SettingsListItem from "../components/SettingsListItem";
-import Colors from "../constants/Colors";
-import { getTranslation } from "../helpers/i18n";
-import { getCoursesForSemester } from "../redux/actions/courses";
-import { setCurrentSemester } from "../redux/actions/currentSemester";
-import { getAllSemesters } from "../redux/actions/semesters";
-import { IPersistAppState } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import React, {useEffect} from 'react';
+import {FlatList, ListRenderItem, SafeAreaView} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import {connect} from 'react-redux';
+import Divider from '../components/Divider';
+import SettingsListItem from '../components/SettingsListItem';
+import Colors from '../constants/Colors';
+import {getTranslation} from '../helpers/i18n';
+import {getCoursesForSemester} from '../redux/actions/courses';
+import {setCurrentSemester} from '../redux/actions/currentSemester';
+import {getAllSemesters} from '../redux/actions/semesters';
+import {IPersistAppState} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface ISemestersSettingsScreenStateProps {
   readonly semesters: readonly string[];
@@ -34,7 +34,7 @@ const SemestersSettingsScreen: INavigationScreen<
     currentSemester,
     setCurrentSemester,
     getCoursesForSemester,
-    getAllSemesters
+    getAllSemesters,
   } = props;
 
   useEffect(() => {
@@ -47,7 +47,7 @@ const SemestersSettingsScreen: INavigationScreen<
     };
   }, [currentSemester]);
 
-  const renderListItem: ListRenderItem<string> = ({ item }) => {
+  const renderListItem: ListRenderItem<string> = ({item}) => {
     return (
       <SettingsListItem
         variant="none"
@@ -64,9 +64,9 @@ const SemestersSettingsScreen: INavigationScreen<
   const keyExtractor = (item: any) => item as string;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
       <FlatList
-        style={{ marginTop: 10 }}
+        style={{marginTop: 10}}
         data={semesters}
         renderItem={renderListItem}
         ItemSeparatorComponent={Divider}
@@ -80,30 +80,30 @@ const SemestersSettingsScreen: INavigationScreen<
 SemestersSettingsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("semesters")
+      text: getTranslation('semesters'),
     },
     largeTitle: {
-      visible: true
-    }
-  }
+      visible: true,
+    },
+  },
 };
 
 function mapStateToProps(
-  state: IPersistAppState
+  state: IPersistAppState,
 ): ISemestersSettingsScreenStateProps {
   return {
     semesters: state.semesters.items,
-    currentSemester: state.currentSemester
+    currentSemester: state.currentSemester,
   };
 }
 
 const mapDispatchToProps: ISemestersSettingsScreenDispatchProps = {
   setCurrentSemester,
   getCoursesForSemester,
-  getAllSemesters
+  getAllSemesters,
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(SemestersSettingsScreen);

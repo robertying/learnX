@@ -1,34 +1,34 @@
-import { AnyAction } from "redux";
-import { ThunkAction } from "redux-thunk";
-import { ActionType } from "typesafe-actions";
+import {AnyAction} from 'redux';
+import {ThunkAction} from 'redux-thunk';
+import {ActionType} from 'typesafe-actions';
 import {
   getAllAssignmentsForCoursesAction,
   getAssignmentsForCourseAction,
   pinAssignment,
-  unpinAssignment
-} from "../actions/assignments";
-import { loginAction } from "../actions/auth";
+  unpinAssignment,
+} from '../actions/assignments';
+import {loginAction} from '../actions/auth';
 import {
   getCoursesForSemesterAction,
   pinCourse,
   setCoursesFilter,
-  unpinCourse
-} from "../actions/courses";
-import { setCurrentSemester } from "../actions/currentSemester";
+  unpinCourse,
+} from '../actions/courses';
+import {setCurrentSemester} from '../actions/currentSemester';
 import {
   getAllFilesForCoursesAction,
   getFilesForCourseAction,
   pinFile,
-  unpinFile
-} from "../actions/files";
+  unpinFile,
+} from '../actions/files';
 import {
   getAllNoticesForCoursesAction,
   getNoticesForCourseAction,
   pinNotice,
-  unpinNotice
-} from "../actions/notices";
-import { clearStoreAction, setMockStore } from "../actions/root";
-import { getAllSemestersAction } from "../actions/semesters";
+  unpinNotice,
+} from '../actions/notices';
+import {clearStoreAction, setMockStore} from '../actions/root';
+import {getAllSemestersAction} from '../actions/semesters';
 import {
   clearEventIds,
   setAutoRefreshing,
@@ -40,9 +40,9 @@ import {
   setNotificationTypes,
   setTabsOrder,
   setUpdate,
-  setWindow
-} from "../actions/settings";
-import { IPersistAppState } from "./state";
+  setWindow,
+} from '../actions/settings';
+import {IPersistAppState} from './state';
 
 export type IThunkResult = ThunkAction<
   void,

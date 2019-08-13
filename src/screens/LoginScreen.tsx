@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Image,
   Keyboard,
@@ -8,23 +8,23 @@ import {
   SafeAreaView,
   TextInput,
   TouchableWithoutFeedback,
-  View
-} from "react-native";
-import { Navigation } from "react-native-navigation";
-import AntDesign from "react-native-vector-icons/AntDesign";
-import { connect } from "react-redux";
-import RaisedButton from "../components/RaisedButton";
-import TextField from "../components/TextField";
-import Colors from "../constants/Colors";
-import { dummyPassword, dummyUsername } from "../helpers/dummy";
-import { getTranslation } from "../helpers/i18n";
-import { showToast } from "../helpers/toast";
-import { login } from "../redux/actions/auth";
-import { setCurrentSemester } from "../redux/actions/currentSemester";
-import { setMockStore } from "../redux/actions/root";
-import { getAllSemesters } from "../redux/actions/semesters";
-import { IPersistAppState } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+  View,
+} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import {connect} from 'react-redux';
+import RaisedButton from '../components/RaisedButton';
+import TextField from '../components/TextField';
+import Colors from '../constants/Colors';
+import {dummyPassword, dummyUsername} from '../helpers/dummy';
+import {getTranslation} from '../helpers/i18n';
+import {showToast} from '../helpers/toast';
+import {login} from '../redux/actions/auth';
+import {setCurrentSemester} from '../redux/actions/currentSemester';
+import {setMockStore} from '../redux/actions/root';
+import {getAllSemesters} from '../redux/actions/semesters';
+import {IPersistAppState} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface ILoginScreenProps {
   readonly loggedIn: boolean;
@@ -46,20 +46,20 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     setMockStore,
     setCurrentSemester,
     getAllSemesters,
-    getAllSemestersError
+    getAllSemestersError,
   } = props;
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
   useEffect(() => {
     if (loginButtonPressed && loginError) {
-      showToast(getTranslation("loginFailure"), 1500);
+      showToast(getTranslation('loginFailure'), 1500);
       setLoginButtonPressed(false);
     }
   }, [loginError]);
 
   useEffect(() => {
     if (loggedIn) {
-      showToast(getTranslation("fetchingSemesters"), 1500);
+      showToast(getTranslation('fetchingSemesters'), 1500);
       getAllSemesters();
     }
   }, [loggedIn]);
@@ -68,13 +68,13 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     if (loggedIn && semesters.length !== 0) {
       setCurrentSemester(semesters[0]);
       Keyboard.dismiss();
-      Navigation.dismissModal("login");
+      Navigation.dismissModal('login');
     }
   }, [semesters.length]);
 
   useEffect(() => {
     if (getAllSemestersError) {
-      showToast(getTranslation("networkError"), 1500);
+      showToast(getTranslation('networkError'), 1500);
       setLoginButtonPressed(false);
     }
   }, [getAllSemestersError]);
@@ -82,8 +82,8 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   const usernameTextFieldRef = useRef<typeof TextInput>();
   const passwordTextFieldRef = useRef<typeof TextInput>();
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const [logoSize, setLogoSize] = useState(160);
   const onLogoPress = () => {
@@ -119,43 +119,40 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       handleDummyUser(username, password);
       login(username, password);
     } else {
-      showToast(getTranslation("completeCredentials"), 1500);
+      showToast(getTranslation('completeCredentials'), 1500);
     }
   };
 
   return (
     <SafeAreaView
       testID="LoginScreen"
-      style={{ flex: 1, backgroundColor: "white" }}
-    >
+      style={{flex: 1, backgroundColor: 'white'}}>
       <KeyboardAvoidingView
         style={{
           flex: 1,
-          justifyContent: "center",
-          alignItems: "center"
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableWithoutFeedback onPress={onLogoPress}>
           <Image
-            style={{ height: logoSize, width: logoSize }}
-            source={require("../assets/images/MaskedAppIcon.png")}
+            style={{height: logoSize, width: logoSize}}
+            source={require('../assets/images/MaskedAppIcon.png')}
           />
         </TouchableWithoutFeedback>
         <View
           style={{
             marginTop: 30,
             marginBottom: 30,
-            alignItems: "center"
-          }}
-        >
+            alignItems: 'center',
+          }}>
           <TextField
             testID="UsernameTextField"
             icon={<AntDesign name="user" size={25} color={Colors.theme} />}
             tintColor={Colors.theme}
             textContentType="username"
             returnKeyType="next"
-            placeholder={getTranslation("username")}
+            placeholder={getTranslation('username')}
             placeholderTextColor={Colors.lightTheme}
             onSubmitEditing={handleKeyboardNext}
             ref={usernameTextFieldRef}
@@ -164,13 +161,13 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
           />
           <TextField
             testID="PasswordTextField"
-            containerStyle={{ marginTop: 20 }}
+            containerStyle={{marginTop: 20}}
             icon={<AntDesign name="key" size={25} color={Colors.theme} />}
             tintColor={Colors.theme}
             textContentType="password"
             secureTextEntry={true}
             returnKeyType="done"
-            placeholder={getTranslation("password")}
+            placeholder={getTranslation('password')}
             placeholderTextColor={Colors.lightTheme}
             ref={passwordTextFieldRef}
             value={password}
@@ -182,12 +179,11 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
               backgroundColor: Colors.theme,
               width: 100,
               height: 40,
-              marginTop: 30
+              marginTop: 30,
             }}
-            textStyle={{ color: "white" }}
-            onPress={onLoginButtonPress}
-          >
-            {getTranslation("login")}
+            textStyle={{color: 'white'}}
+            onPress={onLoginButtonPress}>
+            {getTranslation('login')}
           </RaisedButton>
         </View>
       </KeyboardAvoidingView>
@@ -199,17 +195,17 @@ const mapStateToProps = (state: IPersistAppState) => ({
   loggedIn: state.auth.loggedIn,
   loginError: state.auth.error,
   semesters: state.semesters.items,
-  getAllSemestersError: state.semesters.error
+  getAllSemestersError: state.semesters.error,
 });
 
 const mapDispatchToProps = {
   login: (username: string, password: string) => login(username, password),
   setMockStore,
   setCurrentSemester: (semesterId: string) => setCurrentSemester(semesterId),
-  getAllSemesters
+  getAllSemesters,
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(LoginScreen);

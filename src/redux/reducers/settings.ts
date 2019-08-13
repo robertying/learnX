@@ -1,4 +1,4 @@
-import { ISettingsAction } from "../types/actions";
+import {ISettingsAction} from '../types/actions';
 import {
   CLEAR_EVENT_IDS,
   SET_AUTO_REFRESHING,
@@ -10,9 +10,9 @@ import {
   SET_NOTIFICATIONS,
   SET_TABS_ORDER,
   SET_UPDATE,
-  SET_WINDOW
-} from "../types/constants";
-import { ISettingsState, NotificationType, Tab } from "../types/state";
+  SET_WINDOW,
+} from '../types/constants';
+import {ISettingsState, NotificationType, Tab} from '../types/state';
 
 export default function settings(
   state: ISettingsState = {
@@ -21,7 +21,7 @@ export default function settings(
       Tab.Files,
       Tab.Assignments,
       Tab.Courses,
-      Tab.Settings
+      Tab.Settings,
     ],
     autoRefreshing: false,
     calendarSync: false,
@@ -33,70 +33,70 @@ export default function settings(
       NotificationType.Files,
       NotificationType.Assignments,
       NotificationType.Deadlines,
-      NotificationType.Grades
+      NotificationType.Grades,
     ],
-    lang: null
+    lang: null,
   },
-  action: ISettingsAction
+  action: ISettingsAction,
 ): ISettingsState {
   switch (action.type) {
     case SET_TABS_ORDER:
       return {
         ...state,
-        tabsOrder: action.payload
+        tabsOrder: action.payload,
       };
     case SET_AUTO_REFRESHING:
       return {
         ...state,
-        autoRefreshing: action.payload
+        autoRefreshing: action.payload,
       };
     case SET_CALENDAR_SYNC:
       return {
         ...state,
-        calendarSync: action.payload
+        calendarSync: action.payload,
       };
     case SET_CALENDAR_ID:
       return {
         ...state,
-        calendarId: action.payload
+        calendarId: action.payload,
       };
     case SET_EVENT_ID_FOR_ASSIGNMENT:
       return {
         ...state,
         syncedAssignments: {
           ...state.syncedAssignments,
-          ...action.payload
-        }
+          ...action.payload,
+        },
       };
     case CLEAR_EVENT_IDS:
       return {
         ...state,
-        syncedAssignments: {}
+        syncedAssignments: {},
       };
     case SET_UPDATE:
       return {
         ...state,
-        hasUpdate: action.payload
+        hasUpdate: action.payload,
       };
     case SET_WINDOW:
       return {
         ...state,
-        window: action.payload
+        window: action.payload,
       };
     case SET_NOTIFICATIONS:
       return {
         ...state,
-        notifications: action.payload
+        notifications: action.payload,
       };
     case SET_NOTIFICATION_TYPES:
       return {
         ...state,
-        notificationTypes: action.payload
+        notificationTypes: action.payload,
       };
     case SET_LANG:
       return {
         ...state,
-        lang: action.payload
+        lang: action.payload,
       };
   }
   return state;

@@ -1,7 +1,7 @@
-import React from "react";
-import { connect } from "react-redux";
-import NoticeBoard from "../components/NoticeBoard";
-import { INavigationScreen } from "../types/NavigationScreen";
+import React from 'react';
+import {connect} from 'react-redux';
+import NoticeBoard from '../components/NoticeBoard';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface INoticeDetailScreenProps {
   readonly title: string;

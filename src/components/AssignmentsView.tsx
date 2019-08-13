@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 import {
   FlatList,
   ListRenderItem,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import Colors from "../constants/Colors";
-import { IAssignment } from "../redux/types/state";
-import AssignmentCard from "./AssignmentCard";
-import EmptyList from "./EmptyList";
+  SafeAreaView,
+} from 'react-native';
+import Colors from '../constants/Colors';
+import {IAssignment} from '../redux/types/state';
+import AssignmentCard from './AssignmentCard';
+import EmptyList from './EmptyList';
 
 export interface IAssignmentsViewProps {
   readonly assignments: ReadonlyArray<IAssignment>;
@@ -20,9 +20,9 @@ export interface IAssignmentsViewProps {
 const AssignmentsView: React.FunctionComponent<
   IAssignmentsViewProps
 > = props => {
-  const { assignments, onAssignmentCardPress, isFetching, onRefresh } = props;
+  const {assignments, onAssignmentCardPress, isFetching, onRefresh} = props;
 
-  const renderListItem: ListRenderItem<IAssignment> = ({ item }) => {
+  const renderListItem: ListRenderItem<IAssignment> = ({item}) => {
     return (
       <AssignmentCard
         dragEnabled={false}
@@ -41,7 +41,7 @@ const AssignmentsView: React.FunctionComponent<
   const keyExtractor = (item: any) => item.id;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f0f0f0" }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#f0f0f0'}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={assignments}

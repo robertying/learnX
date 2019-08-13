@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {
   Animated,
   NativeSyntheticEvent,
@@ -6,13 +6,13 @@ import {
   TextInputFocusEventData,
   TextInputProps,
   View,
-  ViewProps
-} from "react-native";
-import { iOSUIKit } from "react-native-typography";
+  ViewProps,
+} from 'react-native';
+import {iOSUIKit} from 'react-native-typography';
 
 export type ITextFieldProps = TextInputProps & {
   readonly innerRef?: React.Ref<any>;
-  readonly containerStyle?: ViewProps["style"];
+  readonly containerStyle?: ViewProps['style'];
   readonly icon?: React.ReactNode;
   readonly tintColor: string;
 };
@@ -32,7 +32,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
   const onFocus = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     Animated.timing(opacity, {
       toValue: 1,
-      duration: 200
+      duration: 200,
     }).start();
 
     if (props.onFocus) {
@@ -43,7 +43,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
   const onBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     Animated.timing(opacity, {
       toValue: 0.01,
-      duration: 200
+      duration: 200,
     }).start();
 
     if (props.onBlur) {
@@ -55,14 +55,13 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
     <View
       style={[
         {
-          flexDirection: "row",
-          alignItems: "center",
-          width: "60%",
-          backgroundColor: "transparent"
+          flexDirection: 'row',
+          alignItems: 'center',
+          width: '60%',
+          backgroundColor: 'transparent',
         },
-        containerStyle
-      ]}
-    >
+        containerStyle,
+      ]}>
       {icon}
       <AnimatedTextInput
         style={[
@@ -73,12 +72,12 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
             borderBottomWidth: 1,
             borderBottomColor: opacity.interpolate({
               inputRange: [0.01, 1],
-              outputRange: ["transparent", tintColor]
+              outputRange: ['transparent', tintColor],
             }),
             color: tintColor,
-            fontSize: iOSUIKit.bodyObject.fontSize
+            fontSize: iOSUIKit.bodyObject.fontSize,
           },
-          style
+          style,
         ]}
         selectionColor={tintColor}
         autoCapitalize="none"
@@ -99,5 +98,5 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 export default React.forwardRef(
   (props: ITextFieldProps, ref: React.Ref<any>) => (
     <TextField innerRef={ref} {...props} />
-  )
+  ),
 );

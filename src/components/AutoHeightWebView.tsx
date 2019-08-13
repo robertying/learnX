@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
-import { Linking } from "react-native";
-import WebView, { WebViewProps } from "react-native-webview";
+import React, {useRef, useState} from 'react';
+import {Linking} from 'react-native';
+import WebView, {WebViewProps} from 'react-native-webview';
 import {
   WebViewMessageEvent,
-  WebViewNavigation
-} from "react-native-webview/lib/WebViewTypes";
+  WebViewNavigation,
+} from 'react-native-webview/lib/WebViewTypes';
 
 const injectedScript = `
   function waitForBridge() {
@@ -35,7 +35,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
   const webViewRef = useRef<WebView>(null);
 
   const onNavigationStateChange = (e: WebViewNavigation) => {
-    if (e.navigationType === "click") {
+    if (e.navigationType === 'click') {
       if (webViewRef.current) {
         webViewRef.current.stopLoading();
       }
@@ -53,7 +53,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       showsVerticalScrollIndicator={false}
       onNavigationStateChange={onNavigationStateChange}
       {...props}
-      style={[{ height }, props.style]}
+      style={[{height}, props.style]}
     />
   );
 };

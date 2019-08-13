@@ -1,16 +1,16 @@
-import { createAsyncAction } from "typesafe-actions";
-import dataSource from "../dataSource";
-import { IThunkResult } from "../types/actions";
+import {createAsyncAction} from 'typesafe-actions';
+import dataSource from '../dataSource';
+import {IThunkResult} from '../types/actions';
 import {
   GET_ALL_SEMESTERS_FAILURE,
   GET_ALL_SEMESTERS_REQUEST,
-  GET_ALL_SEMESTERS_SUCCESS
-} from "../types/constants";
+  GET_ALL_SEMESTERS_SUCCESS,
+} from '../types/constants';
 
 export const getAllSemestersAction = createAsyncAction(
   GET_ALL_SEMESTERS_REQUEST,
   GET_ALL_SEMESTERS_SUCCESS,
-  GET_ALL_SEMESTERS_FAILURE
+  GET_ALL_SEMESTERS_FAILURE,
 )<undefined, readonly string[], Error>();
 
 export function getAllSemesters(): IThunkResult {
@@ -23,7 +23,7 @@ export function getAllSemesters(): IThunkResult {
       dispatch(getAllSemestersAction.success(semesters));
     } else {
       dispatch(
-        getAllSemestersAction.failure(new Error("getAllSemesters failed"))
+        getAllSemestersAction.failure(new Error('getAllSemesters failed')),
       );
     }
   };
