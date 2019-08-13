@@ -1,41 +1,40 @@
-import React from "react";
+import React from 'react';
 import {
   TextProps,
   TouchableOpacity,
   TouchableOpacityProps,
-  ViewProps
-} from "react-native";
-import { iOSUIKit } from "react-native-typography";
-import Colors from "../constants/Colors";
-import Text from "./Text";
+  ViewProps,
+} from 'react-native';
+import {iOSUIKit} from 'react-native-typography';
+import Colors from '../constants/Colors';
+import Text from './Text';
 
 export type IRaisedButtonProps = TouchableOpacityProps & {
-  readonly style?: ViewProps["style"];
-  readonly textStyle?: TextProps["style"];
+  readonly style?: ViewProps['style'];
+  readonly textStyle?: TextProps['style'];
   readonly children: string;
 };
 
 const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {
-  const { style, textStyle, onPress, children, testID } = props;
+  const {style, textStyle, onPress, children, testID} = props;
 
   return (
     <TouchableOpacity
       testID={testID}
       style={[
         {
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: 'center',
+          justifyContent: 'center',
           width: 60,
           height: 30,
-          backgroundColor: "lightblue",
-          borderRadius: 8
+          backgroundColor: 'lightblue',
+          borderRadius: 8,
         },
-        style
+        style,
       ]}
       activeOpacity={Colors.activeOpacity}
-      onPress={onPress}
-    >
-      <Text style={[{ fontSize: iOSUIKit.bodyObject.fontSize }, textStyle]}>
+      onPress={onPress}>
+      <Text style={[{fontSize: iOSUIKit.bodyObject.fontSize}, textStyle]}>
         {children}
       </Text>
     </TouchableOpacity>

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Animated } from "react-native";
+import React, {useEffect, useState} from 'react';
+import {Animated} from 'react-native';
 
 export interface IPlaceholderProps {
   readonly loading: boolean;
@@ -10,7 +10,7 @@ export interface IPlaceholderProps {
 }
 
 const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
-  const { loading, renderPlaceholder, children } = props;
+  const {loading, renderPlaceholder, children} = props;
 
   const [opacity] = useState(new Animated.Value(1));
 
@@ -27,19 +27,19 @@ const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
       Animated.timing(opacity, {
         toValue: newValue,
         duration,
-        useNativeDriver: true
+        useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: oldValue,
         duration,
-        useNativeDriver: true
-      })
+        useNativeDriver: true,
+      }),
     ]).start(() => {
       fadeAnimation();
     });
   };
 
-  return loading ? renderPlaceholder({ opacity }) : children || null;
+  return loading ? renderPlaceholder({opacity}) : children || null;
 };
 
 export default Placeholder;

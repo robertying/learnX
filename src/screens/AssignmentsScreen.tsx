@@ -1,40 +1,40 @@
-import * as Haptics from "expo-haptics";
-import { FuseOptions } from "fuse.js";
-import React, { useEffect } from "react";
+import * as Haptics from 'expo-haptics';
+import {FuseOptions} from 'fuse.js';
+import React, {useEffect} from 'react';
 import {
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import { Navigation } from "react-native-navigation";
-import { Provider as PaperProvider, Searchbar } from "react-native-paper";
-import { connect } from "react-redux";
-import AssignmentCard from "../components/AssignmentCard";
-import EmptyList from "../components/EmptyList";
-import Colors from "../constants/Colors";
-import DeviceInfo from "../constants/DeviceInfo";
-import dayjs from "../helpers/dayjs";
-import { getTranslation } from "../helpers/i18n";
-import { showToast } from "../helpers/toast";
-import useSearchBar from "../hooks/useSearchBar";
+  SafeAreaView,
+} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
+import {connect} from 'react-redux';
+import AssignmentCard from '../components/AssignmentCard';
+import EmptyList from '../components/EmptyList';
+import Colors from '../constants/Colors';
+import DeviceInfo from '../constants/DeviceInfo';
+import dayjs from '../helpers/dayjs';
+import {getTranslation} from '../helpers/i18n';
+import {showToast} from '../helpers/toast';
+import useSearchBar from '../hooks/useSearchBar';
 import {
   getAllAssignmentsForCourses,
   pinAssignment,
-  unpinAssignment
-} from "../redux/actions/assignments";
-import { login } from "../redux/actions/auth";
-import { getCoursesForSemester } from "../redux/actions/courses";
+  unpinAssignment,
+} from '../redux/actions/assignments';
+import {login} from '../redux/actions/auth';
+import {getCoursesForSemester} from '../redux/actions/courses';
 import {
   IAssignment,
   ICourse,
   IPersistAppState,
-  withCourseInfo
-} from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
-import { IAssignmentDetailScreenProps } from "./AssignmentDetailScreen";
+  withCourseInfo,
+} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
+import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
 
 interface IAssignmentsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -77,7 +77,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     hidden,
     username,
     password,
-    login
+    login,
   } = props;
 
   /**
@@ -89,10 +89,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     (a, b) => ({
       ...a,
       ...{
-        [b.id]: { courseName: b.name, courseTeacherName: b.teacherName }
-      }
+        [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+      },
     }),
-    {}
+    {},
   ) as {
     readonly [id: string]: {
       readonly courseName: string;
@@ -106,10 +106,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix()),
     ...rawAssignments
       .filter(item => dayjs(item.deadline).unix() < dayjs().unix())
-      .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix())
+      .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
   ].map(assignment => ({
     ...assignment,
-    ...courseNames[assignment.courseId]
+    ...courseNames[assignment.courseId],
   }));
 
   /**
@@ -133,7 +133,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       if (loggedIn) {
         getAllAssignmentsForCourses(courseIds);
       } else {
-        showToast(getTranslation("refreshFailure"), 1500);
+        showToast(getTranslation('refreshFailure'), 1500);
         login(username, password);
       }
     }
@@ -148,10 +148,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
 
     if (assignment) {
       if (DeviceInfo.isIPad) {
-        Navigation.setStackRoot("detail.root", [
+        Navigation.setStackRoot('detail.root', [
           {
             component: {
-              name: "assignments.detail",
+              name: 'assignments.detail',
               passProps: {
                 title: assignment.title,
                 deadline: assignment.deadline,
@@ -163,27 +163,27 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
                 submitTime: assignment.submitTime,
                 grade: assignment.grade,
                 gradeLevel: assignment.gradeLevel,
-                gradeContent: assignment.gradeContent
+                gradeContent: assignment.gradeContent,
               },
               options: {
                 topBar: {
                   title: {
-                    text: assignment.courseName
-                  }
+                    text: assignment.courseName,
+                  },
                 },
                 animations: {
                   setStackRoot: {
-                    enabled: false
-                  }
-                } as any
-              }
-            }
-          }
+                    enabled: false,
+                  },
+                } as any,
+              },
+            },
+          },
         ]);
       } else {
         Navigation.push<IAssignmentDetailScreenProps>(props.componentId, {
           component: {
-            name: "assignments.detail",
+            name: 'assignments.detail',
             passProps: {
               title: assignment.title,
               deadline: assignment.deadline,
@@ -195,20 +195,20 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
               submitTime: assignment.submitTime,
               grade: assignment.grade,
               gradeLevel: assignment.gradeLevel,
-              gradeContent: assignment.gradeContent
+              gradeContent: assignment.gradeContent,
             },
             options: {
               topBar: {
                 title: {
-                  text: assignment.courseName
-                }
+                  text: assignment.courseName,
+                },
               },
               preview: {
                 reactTag,
-                commit: true
-              }
-            }
-          }
+                commit: true,
+              },
+            },
+          },
         });
       }
     }
@@ -223,7 +223,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   };
 
   const renderListItem = ({
-    item
+    item,
   }: {
     readonly item: withCourseInfo<IAssignment>;
   }) => (
@@ -246,7 +246,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       onPressIn={
         DeviceInfo.isIPad
           ? undefined
-          : (e: { readonly reactTag: number | null }) => {
+          : (e: {readonly reactTag: number | null}) => {
               onAssignmentCardPress(item.id, e.reactTag!);
             }
       }
@@ -262,7 +262,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     if (offsetY < -60 && !isFetching) {
-      showToast(getTranslation("refreshing"), 3000);
+      showToast(getTranslation('refreshing'), 3000);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       invalidateAll();
     }
@@ -287,25 +287,25 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
 
   return (
     <PaperProvider>
-      {Platform.OS === "android" && (
+      {Platform.OS === 'android' && (
         <Searchbar
-          style={{ elevation: 4 }}
+          style={{elevation: 4}}
           clearButtonMode="always"
-          placeholder={getTranslation("searchAssignments")}
+          placeholder={getTranslation('searchAssignments')}
           onChangeText={setSearchBarText}
           value={searchBarText}
         />
       )}
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
         <FlatList
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
           // tslint:disable-next-line: jsx-no-lambda
           keyExtractor={item => item.id}
-          onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+          onScrollEndDrag={Platform.OS === 'ios' ? onScrollEndDrag : undefined}
           refreshControl={
-            Platform.OS === "android" ? (
+            Platform.OS === 'android' ? (
               <RefreshControl
                 colors={[Colors.theme]}
                 onRefresh={onRefresh}
@@ -328,39 +328,39 @@ const fuseOptions: FuseOptions<withCourseInfo<IAssignment>> = {
   distance: 100,
   maxPatternLength: 32,
   minMatchCharLength: 1,
-  keys: ["attachmentName", "description", "title"]
+  keys: ['attachmentName', 'description', 'title'],
 };
 
 // tslint:disable-next-line: no-object-mutation
 AssignmentsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("assignments")
+      text: getTranslation('assignments'),
     },
     largeTitle: {
-      visible: true
+      visible: true,
     },
     searchBar: true,
-    searchBarPlaceholder: getTranslation("searchAssignments"),
+    searchBarPlaceholder: getTranslation('searchAssignments'),
     hideNavBarOnFocusSearchBar: true,
-    elevation: 0
-  }
+    elevation: 0,
+  },
 };
 
 function mapStateToProps(
-  state: IPersistAppState
+  state: IPersistAppState,
 ): IAssignmentsScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || "",
-    password: state.auth.password || "",
+    username: state.auth.username || '',
+    password: state.auth.password || '',
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.assignments.isFetching,
     assignments: state.assignments.items,
     pinnedAssignments: state.assignments.pinned || [],
-    hidden: state.courses.hidden || []
+    hidden: state.courses.hidden || [],
   };
 }
 
@@ -372,10 +372,10 @@ const mapDispatchToProps: IAssignmentsScreenDispatchProps = {
     getAllAssignmentsForCourses(courseIds),
   pinAssignment: (assignmentId: string) => pinAssignment(assignmentId),
   unpinAssignment: (assignmentId: string) => unpinAssignment(assignmentId),
-  login: (username: string, password: string) => login(username, password)
+  login: (username: string, password: string) => login(username, password),
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(AssignmentsScreen);

@@ -1,15 +1,15 @@
-import RNCalendarEvents from "react-native-calendar-events";
-import Colors from "../constants/Colors";
-import dayjs from "../helpers/dayjs";
-import { showToast } from "../helpers/toast";
+import RNCalendarEvents from 'react-native-calendar-events';
+import Colors from '../constants/Colors';
+import dayjs from '../helpers/dayjs';
+import {showToast} from '../helpers/toast';
 import {
   clearEventIds,
   setCalendarId,
-  setEventIdForAssignment
-} from "../redux/actions/settings";
-import { store } from "../redux/store";
-import { IAssignment } from "../redux/types/state";
-import { getTranslation } from "./i18n";
+  setEventIdForAssignment,
+} from '../redux/actions/settings';
+import {store} from '../redux/store';
+import {IAssignment} from '../redux/types/state';
+import {getTranslation} from './i18n';
 
 export const createCalendar = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
@@ -21,7 +21,7 @@ export const createCalendar = async () => {
     }
   }
 
-  const existingCalendar = calendars.find(value => value.title === "learnX");
+  const existingCalendar = calendars.find(value => value.title === 'learnX');
   if (existingCalendar) {
     store.dispatch(setCalendarId(existingCalendar.id));
     return existingCalendar.id;
@@ -29,17 +29,17 @@ export const createCalendar = async () => {
 
   store.dispatch(clearEventIds());
   const newId = await RNCalendarEvents.saveCalendar({
-    title: "learnX",
+    title: 'learnX',
     color: Colors.theme,
-    entityType: "event",
-    name: "learnX",
-    accessLevel: "read",
-    ownerAccount: "learnX",
+    entityType: 'event',
+    name: 'learnX',
+    accessLevel: 'read',
+    ownerAccount: 'learnX',
     source: {
-      name: "learnX",
-      type: "learnX",
-      isLocalAccount: true
-    }
+      name: 'learnX',
+      type: 'learnX',
+      isLocalAccount: true,
+    },
   });
   if (newId) {
     store.dispatch(setCalendarId(newId));
@@ -52,15 +52,15 @@ export const saveAssignmentEvent = (
   title: string,
   note: string,
   startTime: string,
-  endTime: string
+  endTime: string,
 ) => {
   return new Promise(async (resolve, reject) => {
     const status = await RNCalendarEvents.authorizationStatus();
-    if (status !== "authorized") {
+    if (status !== 'authorized') {
       const result = await RNCalendarEvents.authorizeEventStore();
-      if (result !== "authorized") {
-        showToast(getTranslation("accessCalendarFailure"), 1500);
-        reject("Unauthorized");
+      if (result !== 'authorized') {
+        showToast(getTranslation('accessCalendarFailure'), 1500);
+        reject('Unauthorized');
       }
     }
 
@@ -77,7 +77,7 @@ export const saveAssignmentEvent = (
           startDate: startTime,
           endDate: endTime,
           notes: note,
-          description: note
+          description: note,
         });
         resolve();
       } else {
@@ -86,28 +86,28 @@ export const saveAssignmentEvent = (
           startDate: startTime,
           endDate: endTime,
           notes: note,
-          description: note
+          description: note,
         });
         store.dispatch(setEventIdForAssignment(assignmentId, eventId));
         resolve();
       }
     }
-    reject("Failed to create new calendar");
+    reject('Failed to create new calendar');
   });
 };
 
 export const saveAssignmentsToCalendar = async (
-  assignments: readonly IAssignment[]
+  assignments: readonly IAssignment[],
 ) => {
   const savingAssignments = [...assignments].filter(item =>
-    dayjs(item.deadline).isAfter(dayjs())
+    dayjs(item.deadline).isAfter(dayjs()),
   );
 
   const status = await RNCalendarEvents.authorizationStatus();
-  if (status !== "authorized") {
+  if (status !== 'authorized') {
     const result = await RNCalendarEvents.authorizeEventStore();
-    if (result !== "authorized") {
-      showToast(getTranslation("accessCalendarFailure"), 1500);
+    if (result !== 'authorized') {
+      showToast(getTranslation('accessCalendarFailure'), 1500);
       return;
     }
   }
@@ -119,13 +119,13 @@ export const saveAssignmentsToCalendar = async (
     if (course) {
       await saveAssignmentEvent(
         assignment.id,
-        (assignment.submitted ? "✅ " : "") +
+        (assignment.submitted ? '✅ ' : '') +
           assignment.title +
-          " - " +
+          ' - ' +
           course.name,
-        assignment.description || "",
+        assignment.description || '',
         assignment.deadline,
-        assignment.deadline
+        assignment.deadline,
       );
     }
   }

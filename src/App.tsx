@@ -1,7 +1,7 @@
-import { Platform, UIManager } from "react-native";
-import { Navigation } from "react-native-navigation";
-import { getAuthLoadingRoot } from "./navigation/navigationRoot";
-import registerScreens from "./navigation/registerScreens";
+import {Platform, UIManager} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {getAuthLoadingRoot} from './navigation/navigationRoot';
+import registerScreens from './navigation/registerScreens';
 
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(() => {
@@ -9,7 +9,7 @@ const startApp = () => {
     console.disableYellowBox = true;
 
     if (
-      Platform.OS === "android" &&
+      Platform.OS === 'android' &&
       UIManager.setLayoutAnimationEnabledExperimental
     ) {
       UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -19,9 +19,9 @@ const startApp = () => {
 
     Navigation.setDefaultOptions({
       statusBar: {
-        backgroundColor: "white",
-        style: "dark"
-      }
+        backgroundColor: 'white',
+        style: 'dark',
+      },
     });
 
     const authLoadingRoot = getAuthLoadingRoot();

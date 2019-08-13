@@ -1,7 +1,7 @@
-import React from "react";
-import { connect } from "react-redux";
-import AssignmentBoard from "../components/AssignmentBoard";
-import { INavigationScreen } from "../types/NavigationScreen";
+import React from 'react';
+import {connect} from 'react-redux';
+import AssignmentBoard from '../components/AssignmentBoard';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 export interface IAssignmentDetailScreenProps {
   readonly title: string;

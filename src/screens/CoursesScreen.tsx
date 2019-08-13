@@ -1,39 +1,39 @@
-import * as Haptics from "expo-haptics";
-import React, { useEffect } from "react";
+import * as Haptics from 'expo-haptics';
+import React, {useEffect} from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import { FlatList } from "react-native-gesture-handler";
-import { Navigation } from "react-native-navigation";
-import { connect } from "react-redux";
-import CourseCard from "../components/CourseCard";
-import EmptyList from "../components/EmptyList";
-import Colors from "../constants/Colors";
-import DeviceInfo from "../constants/DeviceInfo";
-import { getTranslation } from "../helpers/i18n";
-import { loadTabIcons } from "../helpers/icons";
-import { showToast } from "../helpers/toast";
-import { getAllAssignmentsForCourses } from "../redux/actions/assignments";
-import { login } from "../redux/actions/auth";
+  SafeAreaView,
+} from 'react-native';
+import {FlatList} from 'react-native-gesture-handler';
+import {Navigation} from 'react-native-navigation';
+import {connect} from 'react-redux';
+import CourseCard from '../components/CourseCard';
+import EmptyList from '../components/EmptyList';
+import Colors from '../constants/Colors';
+import DeviceInfo from '../constants/DeviceInfo';
+import {getTranslation} from '../helpers/i18n';
+import {loadTabIcons} from '../helpers/icons';
+import {showToast} from '../helpers/toast';
+import {getAllAssignmentsForCourses} from '../redux/actions/assignments';
+import {login} from '../redux/actions/auth';
 import {
   getCoursesForSemester,
   pinCourse,
-  unpinCourse
-} from "../redux/actions/courses";
-import { getAllFilesForCourses } from "../redux/actions/files";
-import { getAllNoticesForCourses } from "../redux/actions/notices";
+  unpinCourse,
+} from '../redux/actions/courses';
+import {getAllFilesForCourses} from '../redux/actions/files';
+import {getAllNoticesForCourses} from '../redux/actions/notices';
 import {
   IAssignment,
   ICourse,
   IFile,
   INotice,
-  IPersistAppState
-} from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+  IPersistAppState,
+} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface ICoursesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -88,37 +88,37 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     unpinCourse,
     username,
     password,
-    login
+    login,
   } = props;
 
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
-      async ({ buttonId }) => {
-        if (buttonId === "settings") {
+      async ({buttonId}) => {
+        if (buttonId === 'settings') {
           Navigation.showModal({
             stack: {
               children: [
                 {
                   component: {
-                    id: "settings",
-                    name: "settings.index",
+                    id: 'settings',
+                    name: 'settings.index',
                     options: {
                       topBar: {
                         rightButtons: [
                           {
-                            id: "close",
-                            icon: (await loadTabIcons()).close
-                          }
-                        ]
-                      }
-                    }
-                  }
-                }
-              ]
-            }
+                            id: 'close',
+                            icon: (await loadTabIcons()).close,
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
           });
         }
-      }
+      },
     );
     return () => listener.remove();
   }, []);
@@ -160,7 +160,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       getAllFilesForCourses(courseIds);
       getAllAssignmentsForCourses(courseIds);
     } else {
-      showToast(getTranslation("refreshFailure"), 1500);
+      showToast(getTranslation('refreshFailure'), 1500);
       login(username, password);
     }
   };
@@ -172,50 +172,50 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const onCourseCardPress = (
     courseId: string,
     courseName: string,
-    reactTag?: number
+    reactTag?: number,
   ) => {
     if (DeviceInfo.isIPad) {
-      Navigation.setStackRoot("detail.root", [
+      Navigation.setStackRoot('detail.root', [
         {
           component: {
-            name: "courses.detail",
+            name: 'courses.detail',
             passProps: {
-              courseId
+              courseId,
             },
             options: {
               topBar: {
                 title: {
-                  text: courseName
-                }
+                  text: courseName,
+                },
               },
               animations: {
                 setStackRoot: {
-                  enabled: false
-                }
-              } as any
-            }
-          }
-        }
+                  enabled: false,
+                },
+              } as any,
+            },
+          },
+        },
       ]);
     } else {
       Navigation.push(props.componentId, {
         component: {
-          name: "courses.detail",
+          name: 'courses.detail',
           passProps: {
-            courseId
+            courseId,
           },
           options: {
             topBar: {
               title: {
-                text: courseName
-              }
+                text: courseName,
+              },
             },
             preview: {
               reactTag,
-              commit: true
-            }
-          }
-        }
+              commit: true,
+            },
+          },
+        },
       });
     }
   };
@@ -228,15 +228,15 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     }
   };
 
-  const renderListItem = ({ item }: { readonly item: ICourse }) => (
+  const renderListItem = ({item}: {readonly item: ICourse}) => (
     <CourseCard
       dragEnabled={false}
       courseName={item.name}
-      courseTeacherName={item.teacherName || ""}
+      courseTeacherName={item.teacherName || ''}
       semester={semesterId}
       noticesCount={
         notices.filter(
-          notice => notice.courseId === item.id && notice.hasRead === false
+          notice => notice.courseId === item.id && notice.hasRead === false,
         ).length
       }
       filesCount={
@@ -246,7 +246,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       assignmentsCount={
         assignments.filter(
           assignment =>
-            assignment.courseId === item.id && assignment.submitted === false
+            assignment.courseId === item.id && assignment.submitted === false,
         ).length
       }
       pinned={pinnedCourses.includes(item.id)}
@@ -255,7 +255,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       onPress={() => {
         onCourseCardPress(item.id, item.name, undefined);
       }}
-      onPressIn={(e: { readonly reactTag: number | null }) => {
+      onPressIn={(e: {readonly reactTag: number | null}) => {
         onCourseCardPress(item.id, item.name, e.reactTag!);
       }}
       // tslint:enable: jsx-no-lambda
@@ -270,7 +270,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     if (offsetY < -60 && !isFetching) {
-      showToast(getTranslation("refreshing"), 3000);
+      showToast(getTranslation('refreshing'), 3000);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       invalidateAll();
     }
@@ -286,16 +286,16 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={courses}
         renderItem={renderListItem}
         // tslint:disable-next-line: jsx-no-lambda
         keyExtractor={item => item.id}
-        onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+        onScrollEndDrag={Platform.OS === 'ios' ? onScrollEndDrag : undefined}
         refreshControl={
-          Platform.OS === "android" ? (
+          Platform.OS === 'android' ? (
             <RefreshControl
               colors={[Colors.theme]}
               onRefresh={onRefresh}
@@ -314,23 +314,23 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
 CoursesScreen.options = {
   topBar: {
     background: {
-      color: "white"
+      color: 'white',
     },
     title: {
-      text: getTranslation("courses")
+      text: getTranslation('courses'),
     },
     largeTitle: {
-      visible: true
-    }
-  }
+      visible: true,
+    },
+  },
 };
 
 function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || "",
-    password: state.auth.password || "",
+    username: state.auth.username || '',
+    password: state.auth.password || '',
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetchingNotices: state.notices.isFetching,
@@ -340,7 +340,7 @@ function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
     isFetchingAssignments: state.assignments.isFetching,
     assignments: state.assignments.items,
     pinnedCourses: state.courses.pinned || [],
-    hidden: state.courses.hidden || []
+    hidden: state.courses.hidden || [],
   };
 }
 
@@ -356,10 +356,10 @@ const mapDispatchToProps: ICoursesScreenDispatchProps = {
     getAllAssignmentsForCourses(courseIds),
   pinCourse: (courseId: string) => pinCourse(courseId),
   unpinCourse: (courseId: string) => unpinCourse(courseId),
-  login: (username: string, password: string) => login(username, password)
+  login: (username: string, password: string) => login(username, password),
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(CoursesScreen);

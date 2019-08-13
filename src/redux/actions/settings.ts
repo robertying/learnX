@@ -1,4 +1,4 @@
-import { createAction } from "typesafe-actions";
+import {createAction} from 'typesafe-actions';
 import {
   CLEAR_EVENT_IDS,
   SET_AUTO_REFRESHING,
@@ -10,9 +10,9 @@ import {
   SET_NOTIFICATIONS,
   SET_TABS_ORDER,
   SET_UPDATE,
-  SET_WINDOW
-} from "../types/constants";
-import { IWindow, Language, NotificationType, Tab } from "../types/state";
+  SET_WINDOW,
+} from '../types/constants';
+import {IWindow, Language, NotificationType, Tab} from '../types/state';
 
 export const setTabsOrder = createAction(SET_TABS_ORDER, action => {
   return (tabs: readonly Tab[]) => action(tabs);
@@ -34,8 +34,8 @@ export const setEventIdForAssignment = createAction(
   SET_EVENT_ID_FOR_ASSIGNMENT,
   action => {
     return (assignmentId: string, eventId: string) =>
-      action({ [assignmentId]: eventId });
-  }
+      action({[assignmentId]: eventId});
+  },
 );
 
 export const clearEventIds = createAction(CLEAR_EVENT_IDS);
@@ -55,7 +55,7 @@ export const setNotificationTypes = createAction(
   SET_NOTIFICATION_TYPES,
   action => {
     return (types: readonly NotificationType[]) => action(types);
-  }
+  },
 );
 
 export const setLang = createAction(SET_LANG, action => {

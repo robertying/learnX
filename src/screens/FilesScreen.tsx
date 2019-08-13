@@ -1,40 +1,40 @@
-import * as Haptics from "expo-haptics";
-import { FuseOptions } from "fuse.js";
-import React, { useEffect } from "react";
+import * as Haptics from 'expo-haptics';
+import {FuseOptions} from 'fuse.js';
+import React, {useEffect} from 'react';
 import {
   FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   Platform,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import { Navigation } from "react-native-navigation";
-import { Provider as PaperProvider, Searchbar } from "react-native-paper";
-import { connect } from "react-redux";
-import EmptyList from "../components/EmptyList";
-import FileCard from "../components/FileCard";
-import Colors from "../constants/Colors";
-import DeviceInfo from "../constants/DeviceInfo";
-import dayjs from "../helpers/dayjs";
-import { getTranslation } from "../helpers/i18n";
-import { shareFile } from "../helpers/share";
-import { showToast } from "../helpers/toast";
-import useSearchBar from "../hooks/useSearchBar";
-import { login } from "../redux/actions/auth";
-import { getCoursesForSemester } from "../redux/actions/courses";
+  SafeAreaView,
+} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
+import {connect} from 'react-redux';
+import EmptyList from '../components/EmptyList';
+import FileCard from '../components/FileCard';
+import Colors from '../constants/Colors';
+import DeviceInfo from '../constants/DeviceInfo';
+import dayjs from '../helpers/dayjs';
+import {getTranslation} from '../helpers/i18n';
+import {shareFile} from '../helpers/share';
+import {showToast} from '../helpers/toast';
+import useSearchBar from '../hooks/useSearchBar';
+import {login} from '../redux/actions/auth';
+import {getCoursesForSemester} from '../redux/actions/courses';
 import {
   getAllFilesForCourses,
   pinFile,
-  unpinFile
-} from "../redux/actions/files";
+  unpinFile,
+} from '../redux/actions/files';
 import {
   ICourse,
   IFile,
   IPersistAppState,
-  withCourseInfo
-} from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+  withCourseInfo,
+} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface IFilesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -76,7 +76,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     pinnedFiles,
     unpinFile,
     hidden,
-    login
+    login,
   } = props;
 
   /**
@@ -88,10 +88,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     (a, b) => ({
       ...a,
       ...{
-        [b.id]: { courseName: b.name, courseTeacherName: b.teacherName }
-      }
+        [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+      },
     }),
-    {}
+    {},
   ) as {
     readonly [id: string]: {
       readonly courseName: string;
@@ -103,7 +103,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix())
     .map(file => ({
       ...file,
-      ...courseNames[file.courseId]
+      ...courseNames[file.courseId],
     }));
 
   /**
@@ -127,7 +127,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       if (loggedIn) {
         getAllFilesForCourses(courseIds);
       } else {
-        showToast(getTranslation("refreshFailure"), 1500);
+        showToast(getTranslation('refreshFailure'), 1500);
         login(username, password);
       }
     }
@@ -142,61 +142,61 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
 
     if (file) {
       if (DeviceInfo.isIPad) {
-        Navigation.setStackRoot("detail.root", [
+        Navigation.setStackRoot('detail.root', [
           {
             component: {
-              name: "webview",
+              name: 'webview',
               passProps: {
                 filename: file.title,
                 url: file.downloadUrl,
-                ext: file.fileType
+                ext: file.fileType,
               },
               options: {
                 topBar: {
                   title: {
-                    text: file.title
-                  }
+                    text: file.title,
+                  },
                 },
                 animations: {
                   setStackRoot: {
-                    enabled: false
-                  }
-                } as any
-              }
-            }
-          }
+                    enabled: false,
+                  },
+                } as any,
+              },
+            },
+          },
         ]);
-      } else if (Platform.OS === "ios") {
+      } else if (Platform.OS === 'ios') {
         Navigation.push(props.componentId, {
           component: {
-            name: "webview",
+            name: 'webview',
             passProps: {
               filename: file.title,
               url: file.downloadUrl,
-              ext: file.fileType
+              ext: file.fileType,
             },
             options: {
               topBar: {
                 title: {
-                  text: file.title
-                }
+                  text: file.title,
+                },
               },
               preview: {
                 reactTag,
-                commit: true
-              }
-            }
-          }
+                commit: true,
+              },
+            },
+          },
         });
       } else {
-        showToast(getTranslation("downloadingFile"), 1000);
+        showToast(getTranslation('downloadingFile'), 1000);
         const success = await shareFile(
           file.downloadUrl,
           file.title,
-          file.fileType
+          file.fileType,
         );
         if (!success) {
-          showToast(getTranslation("downloadFileFailure"), 3000);
+          showToast(getTranslation('downloadFileFailure'), 3000);
         }
       }
     }
@@ -210,11 +210,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   };
 
-  const renderListItem = ({
-    item
-  }: {
-    readonly item: withCourseInfo<IFile>;
-  }) => (
+  const renderListItem = ({item}: {readonly item: withCourseInfo<IFile>}) => (
     <FileCard
       title={item.title}
       extension={item.fileType}
@@ -234,7 +230,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       onPressIn={
         DeviceInfo.isIPad
           ? undefined
-          : (e: { readonly reactTag: number | null }) => {
+          : (e: {readonly reactTag: number | null}) => {
               onFileCardPress(item.id, e.reactTag!);
             }
       }
@@ -250,7 +246,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     const offsetY = event.nativeEvent.contentOffset.y;
 
     if (offsetY < -60 && !isFetching) {
-      showToast(getTranslation("refreshing"), 3000);
+      showToast(getTranslation('refreshing'), 3000);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       invalidateAll();
     }
@@ -275,12 +271,12 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
 
   return (
     <PaperProvider>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "white" }}>
-        {Platform.OS === "android" && (
+      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+        {Platform.OS === 'android' && (
           <Searchbar
-            style={{ elevation: 4 }}
+            style={{elevation: 4}}
             clearButtonMode="always"
-            placeholder={getTranslation("searchFiles")}
+            placeholder={getTranslation('searchFiles')}
             onChangeText={setSearchBarText}
             value={searchBarText}
           />
@@ -291,9 +287,9 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           renderItem={renderListItem}
           // tslint:disable-next-line: jsx-no-lambda
           keyExtractor={item => item.id}
-          onScrollEndDrag={Platform.OS === "ios" ? onScrollEndDrag : undefined}
+          onScrollEndDrag={Platform.OS === 'ios' ? onScrollEndDrag : undefined}
           refreshControl={
-            Platform.OS === "android" ? (
+            Platform.OS === 'android' ? (
               <RefreshControl
                 colors={[Colors.theme]}
                 onRefresh={onRefresh}
@@ -316,37 +312,37 @@ const fuseOptions: FuseOptions<withCourseInfo<IFile>> = {
   distance: 100,
   maxPatternLength: 32,
   minMatchCharLength: 1,
-  keys: ["description", "fileType", "title"]
+  keys: ['description', 'fileType', 'title'],
 };
 
 // tslint:disable-next-line: no-object-mutation
 FilesScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("files")
+      text: getTranslation('files'),
     },
     largeTitle: {
-      visible: true
+      visible: true,
     },
     searchBar: true,
-    searchBarPlaceholder: getTranslation("searchFiles"),
+    searchBarPlaceholder: getTranslation('searchFiles'),
     hideNavBarOnFocusSearchBar: true,
-    elevation: 0
-  }
+    elevation: 0,
+  },
 };
 
 function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || "",
-    password: state.auth.password || "",
+    username: state.auth.username || '',
+    password: state.auth.password || '',
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetching: state.files.isFetching,
     files: state.files.items,
     pinnedFiles: state.files.pinned || [],
-    hidden: state.courses.hidden || []
+    hidden: state.courses.hidden || [],
   };
 }
 
@@ -358,10 +354,10 @@ const mapDispatchToProps: IFilesScreenDispatchProps = {
     getAllFilesForCourses(courseIds),
   pinFile: (fileId: string) => pinFile(fileId),
   unpinFile: (fileId: string) => unpinFile(fileId),
-  login: (username: string, password: string) => login(username, password)
+  login: (username: string, password: string) => login(username, password),
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(FilesScreen);

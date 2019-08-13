@@ -1,15 +1,15 @@
-import React from "react";
-import { Platform, StyleSheet, View } from "react-native";
-import { iOSColors, iOSUIKit } from "react-native-typography";
-import Icon from "react-native-vector-icons/MaterialIcons";
-import Colors from "../constants/Colors";
-import dayjs from "../helpers/dayjs";
-import { removeTags } from "../helpers/html";
-import { getLocale, getTranslation } from "../helpers/i18n";
+import React from 'react';
+import {Platform, StyleSheet, View} from 'react-native';
+import {iOSColors, iOSUIKit} from 'react-native-typography';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import Colors from '../constants/Colors';
+import dayjs from '../helpers/dayjs';
+import {removeTags} from '../helpers/html';
+import {getLocale, getTranslation} from '../helpers/i18n';
 import InteractablePreviewWrapper, {
-  IInteractablePreviewWrapperProps
-} from "./InteractablePreviewWrapper";
-import Text from "./Text";
+  IInteractablePreviewWrapperProps,
+} from './InteractablePreviewWrapper';
+import Text from './Text';
 
 export interface IAssignmentCardProps extends IInteractablePreviewWrapperProps {
   readonly title: string;
@@ -36,7 +36,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     onPinned,
     submitted,
     graded,
-    dragEnabled
+    dragEnabled,
   } = props;
 
   return (
@@ -45,40 +45,36 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
       onPinned={onPinned}
       onPress={onPress}
       onPressIn={onPressIn}
-      dragEnabled={dragEnabled}
-    >
+      dragEnabled={dragEnabled}>
       <View
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: '#fff',
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
           borderLeftColor: Colors.theme,
-          borderLeftWidth: pinned ? 10 : 0
-        }}
-      >
+          borderLeftWidth: pinned ? 10 : 0,
+        }}>
         <View
           style={[
             styles.flexRow,
             {
-              justifyContent: "space-between"
-            }
-          ]}
-        >
+              justifyContent: 'space-between',
+            },
+          ]}>
           <Text
             style={[
-              { flex: 1 },
+              {flex: 1},
               iOSUIKit.bodyEmphasized,
-              Platform.OS === "android" && { fontWeight: "bold" }
+              Platform.OS === 'android' && {fontWeight: 'bold'},
             ]}
             numberOfLines={1}
-            ellipsizeMode="tail"
-          >
+            ellipsizeMode="tail">
             {title}
           </Text>
           {hasAttachment && (
             <Icon
-              style={{ marginLeft: 5 }}
+              style={{marginLeft: 5}}
               name="attachment"
               size={18}
               color={iOSColors.yellow}
@@ -86,7 +82,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           )}
           {submitted && (
             <Icon
-              style={{ marginLeft: 5 }}
+              style={{marginLeft: 5}}
               name="done"
               size={18}
               color={iOSColors.green}
@@ -94,7 +90,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           )}
           {graded && (
             <Icon
-              style={{ marginLeft: 5 }}
+              style={{marginLeft: 5}}
               name="grade"
               size={18}
               color={iOSColors.red}
@@ -103,36 +99,34 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
         </View>
         <View
           style={{
-            marginTop: 8
-          }}
-        >
+            marginTop: 8,
+          }}>
           <Text style={iOSUIKit.subhead} numberOfLines={3}>
-            {removeTags(description || "") ||
-              getTranslation("noAssignmentDescription")}
+            {removeTags(description || '') ||
+              getTranslation('noAssignmentDescription')}
           </Text>
         </View>
         <View
           style={[
             styles.flexRow,
             {
-              justifyContent: "space-between",
-              marginTop: 10
-            }
-          ]}
-        >
-          <Text style={{ color: iOSColors.gray, fontSize: 13 }}>
+              justifyContent: 'space-between',
+              marginTop: 10,
+            },
+          ]}>
+          <Text style={{color: iOSColors.gray, fontSize: 13}}>
             {courseName &&
               courseTeacherName &&
               `${courseTeacherName} / ${courseName}`}
           </Text>
-          <Text style={{ color: iOSColors.gray, fontSize: 13 }}>
-            {getLocale().startsWith("zh")
+          <Text style={{color: iOSColors.gray, fontSize: 13}}>
+            {getLocale().startsWith('zh')
               ? dayjs().isAfter(dayjs(date))
-                ? dayjs().to(dayjs(date)) + "截止"
-                : "还剩 " + dayjs().to(dayjs(date), true)
+                ? dayjs().to(dayjs(date)) + '截止'
+                : '还剩 ' + dayjs().to(dayjs(date), true)
               : dayjs().isAfter(dayjs(date))
-              ? "closed " + dayjs().to(dayjs(date))
-              : "due in " + dayjs().to(dayjs(date), true)}
+              ? 'closed ' + dayjs().to(dayjs(date))
+              : 'due in ' + dayjs().to(dayjs(date), true)}
           </Text>
         </View>
       </View>
@@ -144,7 +138,7 @@ export default AssignmentCard;
 
 const styles = StyleSheet.create({
   flexRow: {
-    flexDirection: "row",
-    alignItems: "center"
-  }
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
 });

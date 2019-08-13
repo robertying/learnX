@@ -1,14 +1,14 @@
-import React from "react";
+import React from 'react';
 import {
   FlatList,
   ListRenderItem,
   RefreshControl,
-  SafeAreaView
-} from "react-native";
-import Colors from "../constants/Colors";
-import { INotice } from "../redux/types/state";
-import EmptyList from "./EmptyList";
-import NoticeCard from "./NoticeCard";
+  SafeAreaView,
+} from 'react-native';
+import Colors from '../constants/Colors';
+import {INotice} from '../redux/types/state';
+import EmptyList from './EmptyList';
+import NoticeCard from './NoticeCard';
 
 export interface INoticesViewProps {
   readonly notices: ReadonlyArray<INotice>;
@@ -18,9 +18,9 @@ export interface INoticesViewProps {
 }
 
 const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
-  const { notices, isFetching, onNoticeCardPress, onRefresh } = props;
+  const {notices, isFetching, onNoticeCardPress, onRefresh} = props;
 
-  const renderListItem: ListRenderItem<INotice> = ({ item }) => {
+  const renderListItem: ListRenderItem<INotice> = ({item}) => {
     return (
       <NoticeCard
         dragEnabled={false}
@@ -39,7 +39,7 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
   const keyExtractor = (item: any) => item.id;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={notices}

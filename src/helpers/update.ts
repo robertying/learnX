@@ -1,6 +1,6 @@
 export const getLatestRelease = async () => {
   const response = await fetch(
-    "https://api.github.com/repos/robertying/learnX/releases/latest"
+    'https://api.github.com/repos/robertying/learnX/releases/latest',
   );
   const json = await response.json();
 
@@ -9,6 +9,6 @@ export const getLatestRelease = async () => {
 
   return {
     versionString,
-    apkUrl
+    apkUrl,
   };
 };

@@ -1,17 +1,17 @@
-import React, { useEffect } from "react";
-import { Platform } from "react-native";
-import { Navigation } from "react-native-navigation";
-import { connect } from "react-redux";
-import packageConfig from "../../package.json";
-import SplashScreen from "../components/SplashScreen";
-import { getTranslation } from "../helpers/i18n";
-import { showToast } from "../helpers/toast";
-import { getLatestRelease } from "../helpers/update";
-import { getNavigationRoot } from "../navigation/navigationRoot";
-import { login } from "../redux/actions/auth";
-import { setUpdate } from "../redux/actions/settings";
-import { IAuthState, IPersistAppState } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+import React, {useEffect} from 'react';
+import {Platform} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {connect} from 'react-redux';
+import packageConfig from '../../package.json';
+import SplashScreen from '../components/SplashScreen';
+import {getTranslation} from '../helpers/i18n';
+import {showToast} from '../helpers/toast';
+import {getLatestRelease} from '../helpers/update';
+import {getNavigationRoot} from '../navigation/navigationRoot';
+import {login} from '../redux/actions/auth';
+import {setUpdate} from '../redux/actions/settings';
+import {IAuthState, IPersistAppState} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface IAuthLoadingScreenStateProps {
   readonly rehydrated: boolean;
@@ -28,18 +28,18 @@ type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
   IAuthLoadingScreenDispatchProps;
 
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
-  const { rehydrated, auth, setUpdate, login, showToast } = props;
+  const {rehydrated, auth, setUpdate, login, showToast} = props;
 
   useEffect(() => {
-    if (Platform.OS === "android") {
+    if (Platform.OS === 'android') {
       (async () => {
-        const { versionString } = await getLatestRelease();
+        const {versionString} = await getLatestRelease();
 
         if (
           parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
         ) {
           setUpdate(true);
-          showToast(getTranslation("pleaseUpdate"), 5000);
+          showToast(getTranslation('pleaseUpdate'), 5000);
         } else {
           setUpdate(false);
         }
@@ -54,9 +54,9 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
       } else {
         Navigation.showModal({
           component: {
-            id: "login",
-            name: "login"
-          }
+            id: 'login',
+            name: 'login',
+          },
         });
       }
     }
@@ -75,9 +75,9 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
     if (auth.error) {
       Navigation.showModal({
         component: {
-          id: "login",
-          name: "login"
-        }
+          id: 'login',
+          name: 'login',
+        },
       });
     }
   }, [auth.error]);
@@ -86,21 +86,21 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
 };
 
 function mapStateToProps(
-  state: IPersistAppState
+  state: IPersistAppState,
 ): IAuthLoadingScreenStateProps {
   return {
     rehydrated: state.auth._persist.rehydrated,
-    auth: state.auth
+    auth: state.auth,
   };
 }
 
 const mapDispatchToProps: IAuthLoadingScreenDispatchProps = {
   login: (username: string, password: string) => login(username, password),
   setUpdate: (hasUpdate: boolean) => setUpdate(hasUpdate),
-  showToast: (text: string, duration: number) => showToast(text, duration)
+  showToast: (text: string, duration: number) => showToast(text, duration),
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(AuthLoadingScreen);

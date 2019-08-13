@@ -1,12 +1,12 @@
-import Fuse, { FuseOptions } from "fuse.js";
-import { useEffect, useState } from "react";
-import { Navigation } from "react-native-navigation";
+import Fuse, {FuseOptions} from 'fuse.js';
+import {useEffect, useState} from 'react';
+import {Navigation} from 'react-native-navigation';
 import {
   IAssignment,
   IFile,
   INotice,
-  withCourseInfo
-} from "../redux/types/state";
+  withCourseInfo,
+} from '../redux/types/state';
 
 type IEntity =
   | withCourseInfo<INotice>
@@ -16,13 +16,13 @@ type IEntity =
 function filter<T extends IEntity>(
   entities: ReadonlyArray<T>,
   pinned: readonly string[],
-  hidden: readonly string[]
+  hidden: readonly string[],
 ): ReadonlyArray<T> {
   return [
     ...entities.filter(item => pinned.includes(item.id)),
     ...entities
       .filter(item => !hidden.includes(item.courseId))
-      .filter(item => !pinned.includes(item.id))
+      .filter(item => !pinned.includes(item.id)),
   ];
 }
 
@@ -30,22 +30,22 @@ function useAndroidSearchBar<T extends IEntity>(
   entities: ReadonlyArray<T>,
   pinned: readonly string[],
   hidden: readonly string[],
-  fuseOptions: FuseOptions<T>
+  fuseOptions: FuseOptions<T>,
 ): readonly [
   string,
   React.Dispatch<React.SetStateAction<string>>,
   ReadonlyArray<T>,
-  boolean
+  boolean,
 ] {
   const [searchResults, setSearchResults] = useState(
-    filter<T>(entities, pinned, hidden)
+    filter<T>(entities, pinned, hidden),
   );
 
   useEffect(() => {
     setSearchResults(filter<T>(entities, pinned, hidden));
   }, [entities.length, pinned.length, hidden.length]);
 
-  const [searchBarText, setSearchBarText] = useState("");
+  const [searchBarText, setSearchBarText] = useState('');
 
   useEffect(() => {
     if (searchBarText) {
@@ -60,14 +60,14 @@ function useAndroidSearchBar<T extends IEntity>(
 
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
-      ({ buttonId }) => {
-        if (buttonId === "search") {
+      ({buttonId}) => {
+        if (buttonId === 'search') {
           if (searchBarVisible) {
-            setSearchBarText("");
+            setSearchBarText('');
           }
           setSearchBarVisible(!searchBarVisible);
         }
-      }
+      },
     );
     return () => listener.remove();
   }, []);

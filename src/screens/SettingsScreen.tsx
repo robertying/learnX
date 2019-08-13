@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, {useEffect} from 'react';
 import {
   Alert,
   FlatList,
@@ -6,31 +6,31 @@ import {
   ListRenderItem,
   Platform,
   SafeAreaView,
-  View
-} from "react-native";
-import { Navigation } from "react-native-navigation";
-import { iOSColors } from "react-native-typography";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { connect } from "react-redux";
-import RNFetchBlob from "rn-fetch-blob";
-import packageConfig from "../../package.json";
-import Divider from "../components/Divider";
-import SettingsListItem from "../components/SettingsListItem";
-import Colors from "../constants/Colors";
-import { saveAssignmentsToCalendar } from "../helpers/calendar";
-import { getTranslation } from "../helpers/i18n";
-import { showToast } from "../helpers/toast";
-import { getLatestRelease } from "../helpers/update";
-import { clearStore } from "../redux/actions/root";
+  View,
+} from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import {iOSColors} from 'react-native-typography';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {connect} from 'react-redux';
+import RNFetchBlob from 'rn-fetch-blob';
+import packageConfig from '../../package.json';
+import Divider from '../components/Divider';
+import SettingsListItem from '../components/SettingsListItem';
+import Colors from '../constants/Colors';
+import {saveAssignmentsToCalendar} from '../helpers/calendar';
+import {getTranslation} from '../helpers/i18n';
+import {showToast} from '../helpers/toast';
+import {getLatestRelease} from '../helpers/update';
+import {clearStore} from '../redux/actions/root';
 import {
   setAutoRefreshing,
   setCalendarSync,
   setNotifications,
-  setUpdate
-} from "../redux/actions/settings";
-import { IAssignment, IPersistAppState } from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+  setUpdate,
+} from '../redux/actions/settings';
+import {IAssignment, IPersistAppState} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -60,16 +60,16 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     calendarSync,
     assignments,
     setUpdate,
-    hasUpdate
+    hasUpdate,
   } = props;
 
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
-      ({ buttonId }) => {
-        if (buttonId === "close") {
-          Navigation.dismissModal("settings");
+      ({buttonId}) => {
+        if (buttonId === 'close') {
+          Navigation.dismissModal('settings');
         }
-      }
+      },
     );
     return () => listener.remove();
   }, []);
@@ -77,43 +77,43 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const onAcknowledgementsPress = () => {
     Navigation.push(props.componentId, {
       component: {
-        name: "settings.acknowledgements"
-      }
+        name: 'settings.acknowledgements',
+      },
     });
   };
 
   const onLogoutPress = () => {
     Alert.alert(
-      getTranslation("logout"),
-      getTranslation("logoutConfirmation"),
+      getTranslation('logout'),
+      getTranslation('logoutConfirmation'),
       [
         {
-          text: getTranslation("cancel"),
-          style: "cancel"
+          text: getTranslation('cancel'),
+          style: 'cancel',
         },
         {
-          text: getTranslation("ok"),
+          text: getTranslation('ok'),
           onPress: () => {
             clearStore();
             Navigation.showModal({
               component: {
-                id: "login",
-                name: "login"
-              }
+                id: 'login',
+                name: 'login',
+              },
             });
-            Navigation.dismissModal("settings");
-          }
-        }
+            Navigation.dismissModal('settings');
+          },
+        },
       ],
-      { cancelable: true }
+      {cancelable: true},
     );
   };
 
   const onAboutPress = () => {
     Navigation.push(props.componentId, {
       component: {
-        name: "settings.about"
-      }
+        name: 'settings.about',
+      },
     });
   };
 
@@ -127,33 +127,33 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onCheckUpdatePress = async () => {
-    const { versionString, apkUrl } = await getLatestRelease();
+    const {versionString, apkUrl} = await getLatestRelease();
 
     if (
       parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
     ) {
       Alert.alert(
-        getTranslation("checkUpdate"),
-        `${getTranslation("foundNewVersion")} ${versionString}`,
+        getTranslation('checkUpdate'),
+        `${getTranslation('foundNewVersion')} ${versionString}`,
         [
           {
-            text: getTranslation("cancel"),
-            style: "cancel"
+            text: getTranslation('cancel'),
+            style: 'cancel',
           },
           {
-            text: getTranslation("update"),
+            text: getTranslation('update'),
             onPress: () => {
               Linking.openURL(apkUrl);
-            }
-          }
+            },
+          },
         ],
-        { cancelable: true }
+        {cancelable: true},
       );
       if (!hasUpdate) {
         setUpdate(true);
       }
     } else {
-      showToast(getTranslation("noUpdate"), 1500);
+      showToast(getTranslation('noUpdate'), 1500);
       if (hasUpdate) {
         setUpdate(false);
       }
@@ -162,58 +162,58 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   const onClearFileCachePress = () => {
     Alert.alert(
-      getTranslation("clearFileCache"),
-      getTranslation("clearFileCacheConfirmation"),
+      getTranslation('clearFileCache'),
+      getTranslation('clearFileCacheConfirmation'),
       [
         {
-          text: getTranslation("cancel"),
-          style: "cancel"
+          text: getTranslation('cancel'),
+          style: 'cancel',
         },
         {
-          text: getTranslation("ok"),
+          text: getTranslation('ok'),
           onPress: async () => {
             RNFetchBlob.fs
               .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
               .then(() =>
-                showToast(getTranslation("clearFileCacheSuccess"), 1500)
+                showToast(getTranslation('clearFileCacheSuccess'), 1500),
               )
               .catch(() =>
-                showToast(getTranslation("clearFileCacheFail"), 1500)
+                showToast(getTranslation('clearFileCacheFail'), 1500),
               );
-          }
-        }
+          },
+        },
       ],
-      { cancelable: true }
+      {cancelable: true},
     );
   };
 
   const onSemestersPress = () => {
     Navigation.push(props.componentId, {
       component: {
-        name: "settings.semesters"
-      }
+        name: 'settings.semesters',
+      },
     });
   };
 
-  const renderListItem: ListRenderItem<{}> = ({ index }) => {
+  const renderListItem: ListRenderItem<{}> = ({index}) => {
     switch (index) {
       case 0:
         return (
           <SettingsListItem
             variant="switch"
-            containerStyle={{ marginTop: 10 }}
+            containerStyle={{marginTop: 10}}
             icon={<MaterialCommunityIcons name="refresh" size={20} />}
-            text={getTranslation("autoRefreshing")}
+            text={getTranslation('autoRefreshing')}
             switchValue={autoRefreshing}
             onSwitchValueChange={setAutoRefreshing}
           />
         );
       case 1:
-        return Platform.OS === "ios" ? (
+        return Platform.OS === 'ios' ? (
           <SettingsListItem
             variant="switch"
             icon={<MaterialCommunityIcons name="calendar" size={20} />}
-            text={getTranslation("calendarSync")}
+            text={getTranslation('calendarSync')}
             switchValue={calendarSync}
             onSwitchValueChange={onCalendarSyncSwitchChange}
           />
@@ -223,7 +223,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="arrow"
             icon={<MaterialCommunityIcons name="book" size={20} />}
-            text={getTranslation("semesters")}
+            text={getTranslation('semesters')}
             onPress={onSemestersPress}
           />
         );
@@ -231,9 +231,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="none"
-            containerStyle={{ marginTop: 10 }}
+            containerStyle={{marginTop: 10}}
             icon={<MaterialCommunityIcons name="account-off" size={20} />}
-            text={getTranslation("logout")}
+            text={getTranslation('logout')}
             onPress={onLogoutPress}
           />
         );
@@ -242,28 +242,28 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="none"
             icon={<MaterialCommunityIcons name="file-hidden" size={20} />}
-            text={getTranslation("clearFileCache")}
+            text={getTranslation('clearFileCache')}
             onPress={onClearFileCachePress}
           />
         );
       case 5:
-        return Platform.OS === "android" ? (
+        return Platform.OS === 'android' ? (
           <SettingsListItem
             variant="none"
-            containerStyle={{ marginTop: 10 }}
+            containerStyle={{marginTop: 10}}
             icon={
               hasUpdate ? (
                 <View>
                   <MaterialCommunityIcons name="update" size={20} />
                   <View
                     style={{
-                      position: "absolute",
+                      position: 'absolute',
                       right: 0,
                       top: 0,
                       backgroundColor: iOSColors.red,
                       borderRadius: 3,
                       width: 6,
-                      height: 6
+                      height: 6,
                     }}
                   />
                 </View>
@@ -273,8 +273,8 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             }
             text={
               hasUpdate
-                ? getTranslation("foundNewVersion")
-                : getTranslation("checkUpdate")
+                ? getTranslation('foundNewVersion')
+                : getTranslation('checkUpdate')
             }
             onPress={onCheckUpdatePress}
           />
@@ -283,9 +283,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="arrow"
-            containerStyle={{ marginTop: 10 }}
+            containerStyle={{marginTop: 10}}
             icon={<MaterialCommunityIcons name="tag-heart" size={20} />}
-            text={getTranslation("acknowledgements")}
+            text={getTranslation('acknowledgements')}
             onPress={onAcknowledgementsPress}
           />
         );
@@ -294,7 +294,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="arrow"
             icon={<MaterialIcons name="copyright" size={20} />}
-            text={getTranslation("about")}
+            text={getTranslation('about')}
             onPress={onAboutPress}
           />
         );
@@ -304,17 +304,17 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
       <FlatList
         data={[
-          { key: "autoRefreshing" },
-          { key: "calendarSync" },
-          { key: "semesters" },
-          { key: "logout" },
-          { key: "clearFileCache" },
-          { key: "checkUpdate" },
-          { key: "acknowledgement" },
-          { key: "about" }
+          {key: 'autoRefreshing'},
+          {key: 'calendarSync'},
+          {key: 'semesters'},
+          {key: 'logout'},
+          {key: 'clearFileCache'},
+          {key: 'checkUpdate'},
+          {key: 'acknowledgement'},
+          {key: 'about'},
         ]}
         renderItem={renderListItem}
         ItemSeparatorComponent={Divider}
@@ -327,12 +327,12 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 SettingsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("settings")
+      text: getTranslation('settings'),
     },
     largeTitle: {
-      visible: true
-    }
-  }
+      visible: true,
+    },
+  },
 };
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
@@ -341,7 +341,7 @@ function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
     calendarSync: state.settings.calendarSync,
     assignments: state.assignments.items,
     hasUpdate: state.settings.hasUpdate,
-    notifications: state.settings.notifications
+    notifications: state.settings.notifications,
   };
 }
 
@@ -350,10 +350,10 @@ const mapDispatchToProps: ISettingsScreenDispatchProps = {
   setAutoRefreshing,
   setCalendarSync,
   setUpdate,
-  setNotifications
+  setNotifications,
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(SettingsScreen);

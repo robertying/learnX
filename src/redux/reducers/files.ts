@@ -1,8 +1,8 @@
 import {
   IGetFilesAction,
   IPinFileAction,
-  IUnpinFileAction
-} from "../types/actions";
+  IUnpinFileAction,
+} from '../types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
   GET_ALL_FILES_FOR_COURSES_REQUEST,
@@ -11,43 +11,43 @@ import {
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
   PIN_FILE,
-  UNPIN_FILE
-} from "../types/constants";
-import { IFilesState } from "../types/state";
+  UNPIN_FILE,
+} from '../types/constants';
+import {IFilesState} from '../types/state';
 
 export default function files(
   state: IFilesState = {
     isFetching: false,
     pinned: [],
-    items: []
+    items: [],
   },
-  action: IGetFilesAction | IPinFileAction | IUnpinFileAction
+  action: IGetFilesAction | IPinFileAction | IUnpinFileAction,
 ): IFilesState {
   switch (action.type) {
     case GET_ALL_FILES_FOR_COURSES_REQUEST:
       return {
         ...state,
         isFetching: true,
-        error: null
+        error: null,
       };
     case GET_ALL_FILES_FOR_COURSES_SUCCESS:
       return {
         ...state,
         isFetching: false,
         items: action.payload,
-        error: null
+        error: null,
       };
     case GET_ALL_FILES_FOR_COURSES_FAILURE:
       return {
         ...state,
         isFetching: false,
-        error: action.payload
+        error: action.payload,
       };
     case GET_FILES_FOR_COURSE_REQUEST:
       return {
         ...state,
         isFetching: true,
-        error: null
+        error: null,
       };
     case GET_FILES_FOR_COURSE_SUCCESS:
       return {
@@ -55,27 +55,27 @@ export default function files(
         isFetching: false,
         items: [
           ...state.items.filter(
-            item => item.courseId !== action.payload.courseId
+            item => item.courseId !== action.payload.courseId,
           ),
-          ...action.payload.files
+          ...action.payload.files,
         ],
-        error: null
+        error: null,
       };
     case GET_FILES_FOR_COURSE_FAILURE:
       return {
         ...state,
         isFetching: false,
-        error: action.payload
+        error: action.payload,
       };
     case PIN_FILE:
       return {
         ...state,
-        pinned: [...(state.pinned || []), action.payload]
+        pinned: [...(state.pinned || []), action.payload],
       };
     case UNPIN_FILE:
       return {
         ...state,
-        pinned: state.pinned.filter(item => item !== action.payload)
+        pinned: state.pinned.filter(item => item !== action.payload),
       };
   }
   return state;

@@ -1,54 +1,50 @@
-import React from "react";
-import { SafeAreaView, ScrollView } from "react-native";
-import { iOSUIKit } from "react-native-typography";
-import packageConfig from "../../package.json";
-import Text from "../components/Text";
-import Colors from "../constants/Colors";
-import { getTranslation } from "../helpers/i18n";
-import { INavigationScreen } from "../types/NavigationScreen";
+import React from 'react';
+import {SafeAreaView, ScrollView} from 'react-native';
+import {iOSUIKit} from 'react-native-typography';
+import packageConfig from '../../package.json';
+import Text from '../components/Text';
+import Colors from '../constants/Colors';
+import {getTranslation} from '../helpers/i18n';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 const deps: ReadonlyArray<any> = [
   ...Object.keys(packageConfig.dependencies),
-  ...Object.keys(packageConfig.devDependencies)
+  ...Object.keys(packageConfig.devDependencies),
 ];
 
 const AcknowledgementsScreen: INavigationScreen<{}> = () => {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.background }}>
+    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
       <ScrollView
-        style={{ flex: 1 }}
+        style={{flex: 1}}
         contentContainerStyle={{
-          alignItems: "center",
+          alignItems: 'center',
           paddingTop: 30,
-          paddingBottom: 30
-        }}
-      >
+          paddingBottom: 30,
+        }}>
         <Text
           style={{
-            alignSelf: "center",
+            alignSelf: 'center',
             marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize
-          }}
-        >
-          {getTranslation("acknowledgeHarryChen")}
+            fontSize: iOSUIKit.bodyObject.fontSize,
+          }}>
+          {getTranslation('acknowledgeHarryChen')}
         </Text>
         <Text
           style={{
-            alignSelf: "center",
+            alignSelf: 'center',
             marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize
-          }}
-        >
-          {getTranslation("acknowledgeYayuXiao")}
+            fontSize: iOSUIKit.bodyObject.fontSize,
+          }}>
+          {getTranslation('acknowledgeYayuXiao')}
         </Text>
         <Text
           style={{
-            alignSelf: "center",
+            alignSelf: 'center',
             marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize
-          }}
-        >
-          {getTranslation("acknowledgeJSCommunity")}
+            fontSize: iOSUIKit.bodyObject.fontSize,
+          }}>
+          {getTranslation('acknowledgeJSCommunity')}
         </Text>
         {deps.map((dep, index) => (
           <Text
@@ -57,10 +53,9 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
               iOSUIKit.footnote,
               {
                 marginTop: 2,
-                marginBottom: 2
-              }
-            ]}
-          >
+                marginBottom: 2,
+              },
+            ]}>
             {dep}
           </Text>
         ))}
@@ -73,12 +68,12 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
 AcknowledgementsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation("acknowledgements")
+      text: getTranslation('acknowledgements'),
     },
     largeTitle: {
-      visible: true
-    }
-  }
+      visible: true,
+    },
+  },
 };
 
 export default AcknowledgementsScreen;

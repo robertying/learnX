@@ -1,26 +1,26 @@
-import React from "react";
-import { Navigation } from "react-native-navigation";
-import { ConnectedComponentClass, Provider } from "react-redux";
-import AnimatingActivityIndicator from "../components/AnimatingActivityIndicator";
-import EmptyScreen from "../components/EmptyScreen";
-import { store } from "../redux/store";
-import AboutScreen from "../screens/AboutScreen";
-import AcknowledgementsScreen from "../screens/AcknowledgementsScreen";
-import AssignmentDetailScreen from "../screens/AssignmentDetailScreen";
-import AssignmentsScreen from "../screens/AssignmentsScreen";
-import AuthLoadingScreen from "../screens/AuthLoadingScreen";
-import CourseDetailScreen from "../screens/CourseDetailScreen";
-import CoursesScreen from "../screens/CoursesScreen";
-import FilesScreen from "../screens/FilesScreen";
-import LoginScreen from "../screens/LoginScreen";
-import NoticeDetailScreen from "../screens/NoticeDetailScreen";
-import NoticesScreen from "../screens/NoticesScreen";
-import SemestersSettingsScreen from "../screens/SemestersSettingsScreen";
-import SettingsScreen from "../screens/SettingsScreen";
-import WebViewScreen from "../screens/WebViewScreen";
+import React from 'react';
+import {Navigation} from 'react-native-navigation';
+import {ConnectedComponentClass, Provider} from 'react-redux';
+import AnimatingActivityIndicator from '../components/AnimatingActivityIndicator';
+import EmptyScreen from '../components/EmptyScreen';
+import {store} from '../redux/store';
+import AboutScreen from '../screens/AboutScreen';
+import AcknowledgementsScreen from '../screens/AcknowledgementsScreen';
+import AssignmentDetailScreen from '../screens/AssignmentDetailScreen';
+import AssignmentsScreen from '../screens/AssignmentsScreen';
+import AuthLoadingScreen from '../screens/AuthLoadingScreen';
+import CourseDetailScreen from '../screens/CourseDetailScreen';
+import CoursesScreen from '../screens/CoursesScreen';
+import FilesScreen from '../screens/FilesScreen';
+import LoginScreen from '../screens/LoginScreen';
+import NoticeDetailScreen from '../screens/NoticeDetailScreen';
+import NoticesScreen from '../screens/NoticesScreen';
+import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
+import SettingsScreen from '../screens/SettingsScreen';
+import WebViewScreen from '../screens/WebViewScreen';
 
 const storeWrapped = (
-  Component: ConnectedComponentClass<React.FC<any>, any>
+  Component: ConnectedComponentClass<React.FC<any>, any>,
 ) => (props: any) => (
   <Provider store={store}>
     <Component {...props} />
@@ -29,80 +29,80 @@ const storeWrapped = (
 
 const registerScreens = () => {
   Navigation.registerComponent(
-    "AnimatingActivityIndicator",
-    () => AnimatingActivityIndicator
+    'AnimatingActivityIndicator',
+    () => AnimatingActivityIndicator,
   );
 
-  Navigation.registerComponent("empty", () => EmptyScreen);
+  Navigation.registerComponent('empty', () => EmptyScreen);
 
   Navigation.registerComponent(
-    "auth.loading",
+    'auth.loading',
     () => storeWrapped(AuthLoadingScreen),
-    () => AuthLoadingScreen
+    () => AuthLoadingScreen,
   );
 
   Navigation.registerComponent(
-    "login",
+    'login',
     () => storeWrapped(LoginScreen),
-    () => LoginScreen
+    () => LoginScreen,
   );
 
   Navigation.registerComponent(
-    "notices.index",
+    'notices.index',
     () => storeWrapped(NoticesScreen),
-    () => NoticesScreen
+    () => NoticesScreen,
   );
   Navigation.registerComponent(
-    "notices.detail",
+    'notices.detail',
     () => storeWrapped(NoticeDetailScreen),
-    () => NoticeDetailScreen
+    () => NoticeDetailScreen,
   );
 
   Navigation.registerComponent(
-    "files.index",
+    'files.index',
     () => storeWrapped(FilesScreen),
-    () => FilesScreen
+    () => FilesScreen,
   );
 
   Navigation.registerComponent(
-    "assignments.index",
+    'assignments.index',
     () => storeWrapped(AssignmentsScreen),
-    () => AssignmentsScreen
+    () => AssignmentsScreen,
   );
   Navigation.registerComponent(
-    "assignments.detail",
+    'assignments.detail',
     () => storeWrapped(AssignmentDetailScreen),
-    () => AssignmentDetailScreen
+    () => AssignmentDetailScreen,
   );
 
   Navigation.registerComponent(
-    "courses.index",
+    'courses.index',
     () => storeWrapped(CoursesScreen),
-    () => CoursesScreen
+    () => CoursesScreen,
   );
   Navigation.registerComponent(
-    "courses.detail",
+    'courses.detail',
     () => storeWrapped(CourseDetailScreen),
-    () => CourseDetailScreen
+    () => CourseDetailScreen,
   );
 
   Navigation.registerComponent(
-    "settings.index",
+    'settings.index',
     () => storeWrapped(SettingsScreen),
-    () => SettingsScreen
+    () => SettingsScreen,
   );
   Navigation.registerComponent(
-    "settings.semesters",
+    'settings.semesters',
     () => storeWrapped(SemestersSettingsScreen),
-    () => SemestersSettingsScreen
+    () => SemestersSettingsScreen,
   );
   Navigation.registerComponent(
-    "settings.acknowledgements",
-    () => AcknowledgementsScreen
+    'settings.acknowledgements',
+    () => AcknowledgementsScreen,
   );
-  Navigation.registerComponent("settings.about", () => AboutScreen);
+  Navigation.registerComponent('settings.about', () => AboutScreen);
 
-  Navigation.registerComponent("webview", () => WebViewScreen);
+  Navigation.registerComponent('webview', () => WebViewScreen);
 };
 
 export default registerScreens;

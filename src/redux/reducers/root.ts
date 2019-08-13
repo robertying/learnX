@@ -1,16 +1,16 @@
-import { dummyUsername } from "../../helpers/dummy";
-import mockStore from "../mockStore";
-import { appReducer } from "../store";
-import { IStoreAction } from "../types/actions";
-import { CLEAR_STORE, SET_MOCK_STORE } from "../types/constants";
-import { IAppState } from "../types/state";
-import assignments from "./assignments";
-import courses from "./courses";
-import currentSemester from "./currentSemester";
-import files from "./files";
-import notices from "./notices";
-import semesters from "./semesters";
-import settings from "./settings";
+import {dummyUsername} from '../../helpers/dummy';
+import mockStore from '../mockStore';
+import {appReducer} from '../store';
+import {IStoreAction} from '../types/actions';
+import {CLEAR_STORE, SET_MOCK_STORE} from '../types/constants';
+import {IAppState} from '../types/state';
+import assignments from './assignments';
+import courses from './courses';
+import currentSemester from './currentSemester';
+import files from './files';
+import notices from './notices';
+import semesters from './semesters';
+import settings from './settings';
 
 export const mainReducers = {
   settings,
@@ -19,12 +19,12 @@ export const mainReducers = {
   currentSemester,
   files,
   notices,
-  semesters
+  semesters,
 };
 
 export function rootReducer(
   state: IAppState | undefined,
-  action: IStoreAction
+  action: IStoreAction,
 ): IAppState {
   if (action.type === SET_MOCK_STORE) {
     return mockStore;

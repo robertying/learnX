@@ -1,4 +1,4 @@
-import { PersistPartial } from "redux-persist";
+import {PersistPartial} from 'redux-persist';
 
 export interface IAuth {
   readonly username: string | null;
@@ -11,26 +11,26 @@ export interface IAuthState extends IAuth {
 }
 
 export enum Tab {
-  "Notices",
-  "Files",
-  "Assignments",
-  "Courses",
-  "Settings"
+  'Notices',
+  'Files',
+  'Assignments',
+  'Courses',
+  'Settings',
 }
 export interface IWindow {
   readonly height: number;
   readonly width: number;
 }
 export enum NotificationType {
-  "Notices",
-  "Files",
-  "Assignments",
-  "Deadlines",
-  "Grades"
+  'Notices',
+  'Files',
+  'Assignments',
+  'Deadlines',
+  'Grades',
 }
 export enum Language {
-  "zh",
-  "en"
+  'zh',
+  'en',
 }
 export interface ISettingsState {
   readonly tabsOrder: readonly Tab[];

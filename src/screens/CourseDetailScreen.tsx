@@ -1,37 +1,37 @@
-import React, { useMemo, useState } from "react";
-import { Dimensions, Platform, View } from "react-native";
-import Modal from "react-native-modal";
-import { Navigation } from "react-native-navigation";
+import React, {useMemo, useState} from 'react';
+import {Dimensions, Platform, View} from 'react-native';
+import Modal from 'react-native-modal';
+import {Navigation} from 'react-native-navigation';
 import {
   Route,
   SceneRendererProps,
   TabBar,
-  TabView
-} from "react-native-tab-view";
-import { Props } from "react-native-tab-view/lib/typescript/src/TabBar";
-import { connect } from "react-redux";
-import AssignmentBoard from "../components/AssignmentBoard";
-import AssignmentsView from "../components/AssignmentsView";
-import FilesView from "../components/FilesView";
-import NoticeBoard from "../components/NoticeBoard";
-import NoticesView from "../components/NoticesView";
-import Text from "../components/Text";
-import Colors from "../constants/Colors";
-import Layout from "../constants/Layout";
-import dayjs from "../helpers/dayjs";
-import { getTranslation } from "../helpers/i18n";
-import { shareFile, stripExtension } from "../helpers/share";
-import { showToast } from "../helpers/toast";
-import { getAssignmentsForCourse } from "../redux/actions/assignments";
-import { getFilesForCourse } from "../redux/actions/files";
-import { getNoticesForCourse } from "../redux/actions/notices";
+  TabView,
+} from 'react-native-tab-view';
+import {Props} from 'react-native-tab-view/lib/typescript/src/TabBar';
+import {connect} from 'react-redux';
+import AssignmentBoard from '../components/AssignmentBoard';
+import AssignmentsView from '../components/AssignmentsView';
+import FilesView from '../components/FilesView';
+import NoticeBoard from '../components/NoticeBoard';
+import NoticesView from '../components/NoticesView';
+import Text from '../components/Text';
+import Colors from '../constants/Colors';
+import Layout from '../constants/Layout';
+import dayjs from '../helpers/dayjs';
+import {getTranslation} from '../helpers/i18n';
+import {shareFile, stripExtension} from '../helpers/share';
+import {showToast} from '../helpers/toast';
+import {getAssignmentsForCourse} from '../redux/actions/assignments';
+import {getFilesForCourse} from '../redux/actions/files';
+import {getNoticesForCourse} from '../redux/actions/notices';
 import {
   IAssignment,
   IFile,
   INotice,
-  IPersistAppState
-} from "../redux/types/state";
-import { INavigationScreen } from "../types/NavigationScreen";
+  IPersistAppState,
+} from '../redux/types/state';
+import {INavigationScreen} from '../types/NavigationScreen';
 
 interface ITabRoute {
   readonly key: string;
@@ -41,14 +41,14 @@ interface ITabRoute {
 const renderTabBar = (props: Props<ITabRoute>) => (
   <TabBar
     {...props}
-    indicatorStyle={{ backgroundColor: Colors.theme }}
-    style={{ backgroundColor: "white" }}
+    indicatorStyle={{backgroundColor: Colors.theme}}
+    style={{backgroundColor: 'white'}}
     renderLabel={renderLabel}
   />
 );
 
-const renderLabel: Props<ITabRoute>["renderLabel"] = ({ route }) => (
-  <Text style={{ color: "black" }}>{route.title}</Text>
+const renderLabel: Props<ITabRoute>['renderLabel'] = ({route}) => (
+  <Text style={{color: 'black'}}>{route.title}</Text>
 );
 
 interface ICourseDetailScreenStateProps {
@@ -86,7 +86,7 @@ const CourseDetailScreen: INavigationScreen<
     getAssignmentsForCourse,
     getFilesForCourse,
     getNoticesForCourse,
-    courseId
+    courseId,
   } = props;
 
   const notices = rawNotices
@@ -101,55 +101,55 @@ const CourseDetailScreen: INavigationScreen<
 
   const [index, setIndex] = useState(0);
   const routes: any = [
-    { key: "notice", title: getTranslation("notices") },
-    { key: "file", title: getTranslation("files") },
-    { key: "assignment", title: getTranslation("assignments") }
+    {key: 'notice', title: getTranslation('notices')},
+    {key: 'file', title: getTranslation('files')},
+    {key: 'assignment', title: getTranslation('assignments')},
   ];
 
   const [currentModal, setCurrentModal] = useState<{
-    readonly type: "Notice" | "Assignment";
+    readonly type: 'Notice' | 'Assignment';
     readonly data?: INotice | IAssignment | null;
     readonly visible: boolean;
-  }>({ type: "Notice", data: null, visible: false });
+  }>({type: 'Notice', data: null, visible: false});
 
   const onNoticeCardPress = (noticeId: string) => {
     const notice = notices.find(item => item.id === noticeId);
-    setCurrentModal({ type: "Notice", data: notice, visible: true });
+    setCurrentModal({type: 'Notice', data: notice, visible: true});
   };
   const onFileCardPress = async (
     filename: string,
     url: string,
-    ext: string
+    ext: string,
   ) => {
-    if (Platform.OS === "ios") {
+    if (Platform.OS === 'ios') {
       Navigation.push(props.componentId, {
         component: {
-          name: "webview",
+          name: 'webview',
           passProps: {
             filename: stripExtension(filename),
             url,
-            ext
+            ext,
           },
           options: {
             topBar: {
               title: {
-                text: stripExtension(filename)
-              }
-            }
-          }
-        }
+                text: stripExtension(filename),
+              },
+            },
+          },
+        },
       });
     } else {
-      showToast(getTranslation("downloadingFile"), 1000);
+      showToast(getTranslation('downloadingFile'), 1000);
       const success = await shareFile(url, stripExtension(filename), ext);
       if (!success) {
-        showToast(getTranslation("downloadFileFailure"), 3000);
+        showToast(getTranslation('downloadFileFailure'), 3000);
       }
     }
   };
   const onAssignmentCardPress = (assignmentId: string) => {
     const assignment = assignments.find(item => item.id === assignmentId);
-    setCurrentModal({ type: "Assignment", data: assignment, visible: true });
+    setCurrentModal({type: 'Assignment', data: assignment, visible: true});
   };
 
   const NoticesRoute = useMemo(
@@ -162,7 +162,7 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getNoticesForCourse(courseId)}
       />
     ),
-    [notices.length, isFetchingNotices]
+    [notices.length, isFetchingNotices],
   );
   const FilesRoute = useMemo(
     () => (
@@ -174,7 +174,7 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getFilesForCourse(courseId)}
       />
     ),
-    [files.length, isFetchingFiles]
+    [files.length, isFetchingFiles],
   );
   const AssignmentsRoute = useMemo(
     () => (
@@ -186,20 +186,20 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getAssignmentsForCourse(courseId)}
       />
     ),
-    [assignments.length, isFetchingAssignments]
+    [assignments.length, isFetchingAssignments],
   );
 
   const renderScene = ({
-    route
+    route,
   }: SceneRendererProps & {
     readonly route: Route;
   }) => {
     switch (route.key) {
-      case "notice":
+      case 'notice':
         return NoticesRoute;
-      case "file":
+      case 'file':
         return FilesRoute;
-      case "assignment":
+      case 'assignment':
         return AssignmentsRoute;
       default:
         return null;
@@ -209,13 +209,13 @@ const CourseDetailScreen: INavigationScreen<
   return (
     <>
       <TabView
-        navigationState={{ index, routes }}
+        navigationState={{index, routes}}
         renderTabBar={renderTabBar as any}
         renderScene={renderScene}
         onIndexChange={setIndex}
         initialLayout={
           {
-            width: Dimensions.get("window").width
+            width: Dimensions.get('window').width,
           } as any
         }
       />
@@ -223,64 +223,63 @@ const CourseDetailScreen: INavigationScreen<
         isVisible={currentModal.visible}
         // tslint:disable-next-line: jsx-no-lambda
         onBackdropPress={() =>
-          setCurrentModal({ type: "Notice", visible: false })
+          setCurrentModal({type: 'Notice', visible: false})
         }
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
         deviceWidth={Layout.window.width}
         deviceHeight={
-          Platform.OS === "android"
+          Platform.OS === 'android'
             ? Layout.window.height + 100
             : Layout.window.height
-        }
-      >
-        <View style={{ height: "80%", backgroundColor: "white" }}>
-          {currentModal.data && currentModal.type === "Notice" && (
+        }>
+        <View style={{height: '80%', backgroundColor: 'white'}}>
+          {currentModal.data && currentModal.type === 'Notice' && (
             <NoticeBoard
               componentId={props.componentId}
-              title={(currentModal.data as INotice).title || ""}
-              content={(currentModal.data as INotice).content || ""}
-              author={(currentModal.data as INotice).publisher || ""}
-              publishTime={(currentModal.data as INotice).publishTime || ""}
+              title={(currentModal.data as INotice).title || ''}
+              content={(currentModal.data as INotice).content || ''}
+              author={(currentModal.data as INotice).publisher || ''}
+              publishTime={(currentModal.data as INotice).publishTime || ''}
               attachmentName={
-                (currentModal.data as INotice).attachmentName || ""
+                (currentModal.data as INotice).attachmentName || ''
               }
-              attachmentUrl={(currentModal.data as INotice).attachmentUrl || ""}
+              attachmentUrl={(currentModal.data as INotice).attachmentUrl || ''}
               // tslint:disable-next-line: jsx-no-lambda
               onTransition={() =>
-                Platform.OS === "ios" &&
-                setCurrentModal({ type: "Notice", visible: false })
+                Platform.OS === 'ios' &&
+                setCurrentModal({type: 'Notice', visible: false})
               }
             />
           )}
-          {currentModal.data && currentModal.type === "Assignment" && (
+          {currentModal.data && currentModal.type === 'Assignment' && (
             <AssignmentBoard
               componentId={props.componentId}
-              title={(currentModal.data as IAssignment).title || ""}
-              description={(currentModal.data as IAssignment).description || ""}
+              title={(currentModal.data as IAssignment).title || ''}
+              description={(currentModal.data as IAssignment).description || ''}
               deadline={(currentModal.data as IAssignment).deadline}
               attachmentName={
-                (currentModal.data as IAssignment).attachmentName || ""
+                (currentModal.data as IAssignment).attachmentName || ''
               }
               attachmentUrl={
-                (currentModal.data as IAssignment).attachmentUrl || ""
+                (currentModal.data as IAssignment).attachmentUrl || ''
               }
               submittedAttachmentName={
-                (currentModal.data as IAssignment).submittedAttachmentName || ""
+                (currentModal.data as IAssignment).submittedAttachmentName || ''
               }
               submittedAttachmentUrl={
-                (currentModal.data as IAssignment).submittedAttachmentUrl || ""
+                (currentModal.data as IAssignment).submittedAttachmentUrl || ''
               }
-              submitTime={(currentModal.data as IAssignment).submitTime || ""}
+              submitTime={(currentModal.data as IAssignment).submitTime || ''}
               grade={(currentModal.data as IAssignment).grade || NaN}
               gradeContent={
-                (currentModal.data as IAssignment).gradeContent || ""
+                (currentModal.data as IAssignment).gradeContent || ''
               }
               // tslint:disable-next-line: jsx-no-lambda
               onTransition={() =>
-                Platform.OS === "ios" &&
-                setCurrentModal({ type: "Notice", visible: false })
+                Platform.OS === 'ios' &&
+                setCurrentModal({type: 'Notice', visible: false})
               }
             />
           )}
@@ -294,13 +293,13 @@ const CourseDetailScreen: INavigationScreen<
 CourseDetailScreen.options = {
   topBar: {
     largeTitle: {
-      visible: false
-    }
-  }
+      visible: false,
+    },
+  },
 };
 
 function mapStateToProps(
-  state: IPersistAppState
+  state: IPersistAppState,
 ): ICourseDetailScreenStateProps {
   return {
     notices: state.notices.items,
@@ -308,7 +307,7 @@ function mapStateToProps(
     assignments: state.assignments.items,
     isFetchingNotices: state.notices.isFetching,
     isFetchingFiles: state.files.isFetching,
-    isFetchingAssignments: state.assignments.isFetching
+    isFetchingAssignments: state.assignments.isFetching,
   };
 }
 
@@ -316,10 +315,10 @@ const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
   getNoticesForCourse: (courseId: string) => getNoticesForCourse(courseId),
   getFilesForCourse: (courseId: string) => getFilesForCourse(courseId),
   getAssignmentsForCourse: (courseId: string) =>
-    getAssignmentsForCourse(courseId)
+    getAssignmentsForCourse(courseId),
 };
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
 )(CourseDetailScreen);

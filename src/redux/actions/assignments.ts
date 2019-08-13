@@ -1,8 +1,8 @@
-import { ContentType, Homework } from "thu-learn-lib-no-native/lib/types";
-import { createAction, createAsyncAction } from "typesafe-actions";
-import { saveAssignmentsToCalendar } from "../../helpers/calendar";
-import dataSource from "../dataSource";
-import { IThunkResult } from "../types/actions";
+import {ContentType, Homework} from 'thu-learn-lib-no-native/lib/types';
+import {createAction, createAsyncAction} from 'typesafe-actions';
+import {saveAssignmentsToCalendar} from '../../helpers/calendar';
+import dataSource from '../dataSource';
+import {IThunkResult} from '../types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
@@ -11,14 +11,14 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
   PIN_ASSIGNMENT,
-  UNPIN_ASSIGNMENT
-} from "../types/constants";
-import { IAssignment } from "../types/state";
+  UNPIN_ASSIGNMENT,
+} from '../types/constants';
+import {IAssignment} from '../types/state';
 
 export const getAssignmentsForCourseAction = createAsyncAction(
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
-  GET_ASSIGNMENTS_FOR_COURSE_FAILURE
+  GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
 )<
   undefined,
   {
@@ -35,15 +35,13 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
     const results = await dataSource.getHomeworkList(courseId);
 
     if (results) {
-      const assignments = results.map(result => ({ ...result, courseId }));
-      dispatch(
-        getAssignmentsForCourseAction.success({ courseId, assignments })
-      );
+      const assignments = results.map(result => ({...result, courseId}));
+      dispatch(getAssignmentsForCourseAction.success({courseId, assignments}));
     } else {
       dispatch(
         getAssignmentsForCourseAction.failure(
-          new Error("getAssignmentsForCourse failed")
-        )
+          new Error('getAssignmentsForCourse failed'),
+        ),
       );
     }
   };
@@ -52,19 +50,19 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
 export const getAllAssignmentsForCoursesAction = createAsyncAction(
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS,
-  GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE
+  GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
 )<undefined, ReadonlyArray<IAssignment>, Error>();
 
 export function getAllAssignmentsForCourses(
   // tslint:disable-next-line: readonly-array
-  courseIds: string[]
+  courseIds: string[],
 ): IThunkResult {
   return async (dispatch, getState) => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
     const results = await dataSource.getAllContents(
       courseIds,
-      ContentType.HOMEWORK
+      ContentType.HOMEWORK,
     );
 
     if (results) {
@@ -75,7 +73,7 @@ export function getAllAssignmentsForCourses(
           >;
           return assignmentsForCourse.map(assignment => ({
             ...assignment,
-            courseId
+            courseId,
           }));
         })
         .reduce((a, b) => a.concat(b));
@@ -87,8 +85,8 @@ export function getAllAssignmentsForCourses(
     } else {
       dispatch(
         getAllAssignmentsForCoursesAction.failure(
-          new Error("getAllAssignmentsForCourses failed")
-        )
+          new Error('getAllAssignmentsForCourses failed'),
+        ),
       );
     }
   };
