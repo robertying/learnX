@@ -12,7 +12,7 @@
     "lint": "tsc --noUnusedLocals && prettier -c \"src/**/*\" --write",
     "ios:test:debug": "detox build --configuration \"ios.sim.debug\" && detox test --configuration \"ios.sim.debug\"",
     "ios:test:release": "detox build --configuration \"ios.sim.release\" && detox test --configuration \"ios.sim.release\"",
-    "postinstall": "chmod +x patches/patch.sh && patches/patch.sh && jetify"
+    "postinstall": "patch-package && jetify && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
     "@react-native-community/async-storage": "1.6.1",
@@ -66,6 +66,8 @@
     "jest": "24.8.0",
     "jetifier": "1.6.4",
     "metro-react-native-babel-preset": "0.56.0",
+    "patch-package": "6.1.2",
+    "postinstall-postinstall": "2.0.0",
     "prettier": "1.18.2",
     "tslint": "5.18.0",
     "tslint-config-prettier": "1.18.0",
