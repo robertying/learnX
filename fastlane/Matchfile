@@ -1,4 +1,4 @@
-git_url("https://GITHUB_TOKEN@github.com/robertying/certificates")
+git_url("https://github.com/robertying/certificates")
 storage_mode("git")
 app_identifier("io.robertying.learnX")
 username("yingrui205@qq.com")
