@@ -35,7 +35,15 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
     const results = await dataSource.getHomeworkList(courseId);
 
     if (results) {
-      const assignments = results.map(result => ({...result, courseId}));
+      const assignments = results.map(result => ({
+        ...result,
+        courseId,
+        description: result.description
+          ? result.description.startsWith('\xC2\x9E\xC3\xA9\x65')
+            ? result.description.substr(5)
+            : result.description
+          : '',
+      }));
       dispatch(getAssignmentsForCourseAction.success({courseId, assignments}));
     } else {
       dispatch(
@@ -74,6 +82,11 @@ export function getAllAssignmentsForCourses(
           return assignmentsForCourse.map(assignment => ({
             ...assignment,
             courseId,
+            description: assignment.description
+              ? assignment.description.startsWith('\xC2\x9E\xC3\xA9\x65')
+                ? assignment.description.substr(5)
+                : assignment.description
+              : '',
           }));
         })
         .reduce((a, b) => a.concat(b));
