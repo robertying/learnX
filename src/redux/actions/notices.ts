@@ -31,7 +31,15 @@ export function getNoticesForCourse(courseId: string): IThunkResult {
     const results = await dataSource.getNotificationList(courseId);
 
     if (results) {
-      const notices = results.map(result => ({...result, courseId}));
+      const notices = results.map(result => ({
+        ...result,
+        courseId,
+        content: result.content
+          ? result.content.startsWith('\xC2\x9E\xC3\xA9\x65')
+            ? result.content.substr(5)
+            : result.content
+          : '',
+      }));
       dispatch(getNoticesForCourseAction.success({notices, courseId}));
     } else {
       dispatch(
@@ -70,6 +78,11 @@ export function getAllNoticesForCourses(
           return noticesForCourse.map(notice => ({
             ...notice,
             courseId,
+            content: notice.content
+              ? notice.content.startsWith('\xC2\x9E\xC3\xA9\x65')
+                ? notice.content.substr(5)
+                : notice.content
+              : '',
           }));
         })
         .reduce((a, b) => a.concat(b));
