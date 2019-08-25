@@ -61,7 +61,7 @@
     "@types/react-redux": "7.1.2",
     "babel-jest": "24.9.0",
     "babel-plugin-transform-remove-console": "6.9.4",
-    "detox": "14.0.2",
+    "detox": "14.0.3",
     "husky": "3.0.4",
     "jest": "24.9.0",
     "jetifier": "1.6.4",
