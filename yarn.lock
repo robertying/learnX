@@ -1038,15 +1038,7 @@
     "@types/react" "*"
     "@types/react-native" "*"
 
-"@types/react-native@*":
-  version "0.60.7"
-  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.60.7.tgz#900311fd57f9cf4f3aea469b1b5af283860ddebb"
-  integrity sha512-D9mrA7PGecUQ7wr0hbyr0m59DXqkZAKxNHQFoiviii0so+MKs9FG8OKZvGt934dxLWiEUFxCJCdeJGpZmH7EDw==
-  dependencies:
-    "@types/prop-types" "*"
-    "@types/react" "*"
-
-"@types/react-native@0.60.8":
+"@types/react-native@*", "@types/react-native@0.60.8":
   version "0.60.8"
   resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.60.8.tgz#71f340b4b97ed0b1161f942354e0eebc9fbe5b00"
   integrity sha512-bk13deCDm/DiNFdrF8Y5je++G9NPaCT/VxkSBY1Rcxu3rWZQIQal9uIH0Qc0Vi9sRX9us32EPevYylbscH3wEg==
@@ -3297,9 +3289,9 @@ has@^1.0.1, has@^1.0.3:
     function-bind "^1.1.1"
 
 hermesvm@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/hermesvm/-/hermesvm-0.1.0.tgz#4bfaf4ac682a2fd407b862ab641eb8deb232de83"
-  integrity sha512-GbP6dKaVW/V2QpB+DZPxcmhBhJVFa9cHS/xRX7FD1MGfa6Z1aHHD83VDCwo3SgcqNj5yHlVbe9UgrK1PFGCXpw==
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/hermesvm/-/hermesvm-0.1.1.tgz#bd1df92b4dc504e261c23df34864daf24b844d03"
+  integrity sha512-EosSDeUqTTGvlc9vQiy5Y/9GBlucEyo6lYuxg/FnukHCD/CP3NYeDAGV54TyZ19FgSqMEoPgOH9cyxvv8epQ1g==
 
 hoist-non-react-statics@3.x.x, hoist-non-react-statics@^3.1.0, hoist-non-react-statics@^3.3.0:
   version "3.3.0"
@@ -4956,9 +4948,9 @@ minimist@~0.0.1:
   integrity sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
 
 minipass@^2.2.1, minipass@^2.3.5:
-  version "2.3.5"
-  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.3.5.tgz#cacebe492022497f656b0f0f51e2682a9ed2d848"
-  integrity sha512-Gi1W4k059gyRbyVUZQ4mEqLm0YIUiGYfvxhF6SIlk3ui1WVxMTGfGdQ2SInh3PDrRTVvPKgULkpJtT4RH10+VA==
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.4.0.tgz#38f0af94f42fb6f34d3d7d82a90e2c99cd3ff485"
+  integrity sha512-6PmOuSP4NnZXzs2z6rbwzLJu/c5gdzYg1mRI/WIYdx45iiX7T+a4esOzavD6V/KmBzAaopFSTZPZcUx73bqKWA==
   dependencies:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
@@ -6495,9 +6487,9 @@ sane@^4.0.3:
     walker "~1.0.5"
 
 sanitize-filename@^1.6.1:
-  version "1.6.2"
-  resolved "https://registry.yarnpkg.com/sanitize-filename/-/sanitize-filename-1.6.2.tgz#01b4fc8809f14e9d22761fe70380fe7f3f902185"
-  integrity sha512-cmTzND7RMxUB+f7gI+4+KAVHWEg0lfXvQJdko+FXDP5bNbGIdx4KMP5pX6lv5jfT9jSf6OBbjyxjFtZQwYA/ig==
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/sanitize-filename/-/sanitize-filename-1.6.3.tgz#755ebd752045931977e30b2025d340d7c9090378"
+  integrity sha512-y/52Mcy7aw3gRm7IrcGDFx/bCk4AhRh2eI9luHOQM86nZsqwiRkkq2GekHXBBD+SmPidc8i2PqtYZl+pWJ8Oeg==
   dependencies:
     truncate-utf8-bytes "^1.0.0"
 
