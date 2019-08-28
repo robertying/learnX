@@ -7264,10 +7264,10 @@ typesafe-actions@5.0.0-3:
   resolved "https://registry.yarnpkg.com/typesafe-actions/-/typesafe-actions-5.0.0-3.tgz#b54354700a3a2827859e9f86dd51576c8945fcd4"
   integrity sha512-sX5Sh2FLctpj+u6HDlqiH7o/MLQCPHFb8vI2X7vp22F7G4V+IqSZdgq/31+3i0G1q8vm39W6uk5EMIeE/x5gCg==
 
-typescript@3.5.3:
-  version "3.5.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.5.3.tgz#c830f657f93f1ea846819e929092f5fe5983e977"
-  integrity sha512-ACzBtm/PhXBDId6a6sDJfroT2pOWt/oOnk4/dElG5G33ZL776N3Y6/6bKZJBFpd+b05F3Ct9qDjMeJmRWtE2/g==
+typescript@3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.6.2.tgz#105b0f1934119dde543ac8eb71af3a91009efe54"
+  integrity sha512-lmQ4L+J6mnu3xweP8+rOrUwzmN+MRAj7TgtJtDaXE5PMyX2kCrklhg3rvOsOIfNeAWMQWO2F1GPc1kMD2vLAfw==
 
 ua-parser-js@^0.7.18, ua-parser-js@^0.7.19:
   version "0.7.20"
