@@ -21,7 +21,7 @@
     "expo-secure-store": "6.0.0",
     "fuse.js": "3.4.5",
     "react": "16.9.0",
-    "react-native": "0.60.5",
+    "react-native": "0.61.0-rc.0",
     "react-native-calendar-events": "1.7.3",
     "react-native-device-info": "2.3.2",
     "react-native-gesture-handler": "1.4.1",
@@ -43,7 +43,7 @@
     "redux-persist-expo-securestore": "2.0.0",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.16",
-    "thu-learn-lib-no-native": "3.0.0",
+    "thu-learn-lib-no-native": "3.0.1",
     "typesafe-actions": "5.0.0-3"
   },
   "devDependencies": {
