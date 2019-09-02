@@ -53,7 +53,7 @@ matrix:
         on:
           tags: true
     - language: objective-c
-      osx_image: xcode10.2
+      osx_image: xcode11
       podfile: ios/Podfile
       cache:
         - yarn
