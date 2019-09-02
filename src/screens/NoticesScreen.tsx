@@ -46,6 +46,7 @@ interface INoticesScreenStateProps {
   readonly isFetching: boolean;
   readonly pinnedNotices: readonly string[];
   readonly hidden: readonly string[];
+  readonly hasUpdate: boolean;
 }
 
 interface INoticesScreenDispatchProps {
@@ -77,7 +78,20 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     password,
     isFetching,
     login,
+    hasUpdate,
   } = props;
+
+  useEffect(() => {
+    if (hasUpdate) {
+      Navigation.mergeOptions('SettingsScreen', {
+        bottomTab: {
+          dotIndicator: {
+            visible: true,
+          },
+        },
+      });
+    }
+  }, []);
 
   /**
    * Prepare data
@@ -339,6 +353,7 @@ function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
     notices: state.notices.items,
     pinnedNotices: state.notices.pinned || [],
     hidden: state.courses.hidden || [],
+    hasUpdate: state.settings.hasUpdate,
   };
 }
 

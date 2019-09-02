@@ -31,6 +31,7 @@ import {
 } from '../redux/actions/settings';
 import {IAssignment, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
+import semver from 'semver';
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -129,9 +130,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const onCheckUpdatePress = async () => {
     const {versionString, apkUrl} = await getLatestRelease();
 
-    if (
-      parseFloat(versionString.slice(1)) > parseFloat(packageConfig.version)
-    ) {
+    if (semver.gt(versionString.slice(1), packageConfig.version)) {
       Alert.alert(
         getTranslation('checkUpdate'),
         `${getTranslation('foundNewVersion')} ${versionString}`,
