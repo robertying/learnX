@@ -5,17 +5,17 @@ import createSecureStore from 'redux-persist-expo-securestore';
 import thunk, {ThunkMiddleware} from 'redux-thunk';
 import authReducer from './reducers/auth';
 import {mainReducers, rootReducer} from './reducers/root';
-import {IAppState, IPersistAppState} from './types/state';
+import {IAppState, IPersistAppState, IAuthState} from './types/state';
 
 declare const window: any;
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-const authPersistConfig: PersistConfig = {
+const authPersistConfig: PersistConfig<IAuthState> = {
   key: 'auth',
   storage: createSecureStore(),
   whitelist: ['username', 'password'],
 };
-const rootPersistConfig: PersistConfig = {
+const rootPersistConfig: PersistConfig<IAppState> = {
   key: 'root',
   storage: AsyncStorage,
   blacklist: ['auth'],

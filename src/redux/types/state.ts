@@ -1,4 +1,4 @@
-import {PersistPartial} from 'redux-persist';
+import {PersistState} from 'redux-persist';
 
 export interface IAuth {
   readonly username: string | null;
@@ -132,6 +132,10 @@ export interface IAssignmentsState {
   readonly pinned: readonly string[];
   readonly items: ReadonlyArray<IAssignment>;
   readonly error?: Error | null;
+}
+
+export interface PersistPartial {
+  _persist: PersistState;
 }
 
 export interface IAppState {
