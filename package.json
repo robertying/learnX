@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "4.2.2",
+  "version": "4.3.0",
   "scripts": {
     "android": "react-native run-android --no-jetifier",
     "android:beta": "bundle exec fastlane android beta",
@@ -43,6 +43,7 @@
     "redux-persist-expo-securestore": "2.0.0",
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.10.16",
+    "semver": "6.3.0",
     "thu-learn-lib-no-native": "3.0.1",
     "typesafe-actions": "5.0.0-3"
   },
@@ -59,6 +60,7 @@
     "@types/react-native-tab-view": "1.0.6",
     "@types/react-native-vector-icons": "6.4.1",
     "@types/react-redux": "7.1.2",
+    "@types/semver": "6.0.1",
     "babel-jest": "24.9.0",
     "babel-plugin-transform-remove-console": "6.9.4",
     "detox": "14.0.3",
