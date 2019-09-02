@@ -138,7 +138,6 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
       ) : null}
       <AutoHeightWebView
         style={{margin: 15}}
-        useWebKit={true}
         originWhitelist={['*']}
         source={{
           html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body>${content ||

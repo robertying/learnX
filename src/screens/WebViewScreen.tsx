@@ -54,7 +54,6 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         source={{
           uri: filePath,
         }}
-        useWebKit={true}
         originWhitelist={['*']}
       />
       {loading && (
