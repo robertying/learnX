@@ -335,6 +335,7 @@ NoticesScreen.options = {
       visible: true,
     },
     searchBar: true,
+    searchBarHiddenWhenScrolling: true,
     searchBarPlaceholder: getTranslation('searchNotices'),
     hideNavBarOnFocusSearchBar: true,
     elevation: 0,

@@ -89,16 +89,6 @@ export const getNavigationRoot = async () => {
             {
               component: {
                 name: 'courses.index',
-                options: {
-                  topBar: {
-                    rightButtons: [
-                      {
-                        id: 'settings',
-                        icon: icons.settings,
-                      },
-                    ],
-                  },
-                },
               },
             },
           ],
@@ -108,6 +98,28 @@ export const getNavigationRoot = async () => {
               textColor: Colors.tabIconDefault,
               selectedTextColor: Colors.tabIconSelected,
               icon: icons.apps,
+              iconColor: Colors.tabIconDefault,
+              selectedIconColor: Colors.tabIconSelected,
+            },
+          },
+        },
+      },
+      {
+        stack: {
+          children: [
+            {
+              component: {
+                id: 'SettingsScreen',
+                name: 'settings.index',
+              },
+            },
+          ],
+          options: {
+            bottomTab: {
+              text: getTranslation('settings'),
+              textColor: Colors.tabIconDefault,
+              selectedTextColor: Colors.tabIconSelected,
+              icon: icons.settings,
               iconColor: Colors.tabIconDefault,
               selectedIconColor: Colors.tabIconSelected,
             },

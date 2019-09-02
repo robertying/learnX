@@ -60,9 +60,6 @@ AboutScreen.options = {
     title: {
       text: getTranslation('about'),
     },
-    largeTitle: {
-      visible: true,
-    },
   },
 };
 

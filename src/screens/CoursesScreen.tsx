@@ -15,7 +15,6 @@ import EmptyList from '../components/EmptyList';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
-import {loadTabIcons} from '../helpers/icons';
 import {showToast} from '../helpers/toast';
 import {getAllAssignmentsForCourses} from '../redux/actions/assignments';
 import {login} from '../redux/actions/auth';
@@ -90,38 +89,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     password,
     login,
   } = props;
-
-  useEffect(() => {
-    const listener = Navigation.events().registerNavigationButtonPressedListener(
-      async ({buttonId}) => {
-        if (buttonId === 'settings') {
-          Navigation.showModal({
-            stack: {
-              children: [
-                {
-                  component: {
-                    id: 'settings',
-                    name: 'settings.index',
-                    options: {
-                      topBar: {
-                        rightButtons: [
-                          {
-                            id: 'close',
-                            icon: (await loadTabIcons()).close,
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          });
-        }
-      },
-    );
-    return () => listener.remove();
-  }, []);
 
   /**
    * Prepare data

@@ -341,6 +341,7 @@ AssignmentsScreen.options = {
       visible: true,
     },
     searchBar: true,
+    searchBarHiddenWhenScrolling: true,
     searchBarPlaceholder: getTranslation('searchAssignments'),
     hideNavBarOnFocusSearchBar: true,
     elevation: 0,

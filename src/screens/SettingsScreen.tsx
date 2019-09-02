@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   Alert,
   FlatList,
@@ -32,6 +32,7 @@ import {
 import {IAssignment, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
 import semver from 'semver';
+import DeviceInfo from '../constants/DeviceInfo';
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -64,23 +65,29 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     hasUpdate,
   } = props;
 
-  useEffect(() => {
-    const listener = Navigation.events().registerNavigationButtonPressedListener(
-      ({buttonId}) => {
-        if (buttonId === 'close') {
-          Navigation.dismissModal('settings');
-        }
-      },
-    );
-    return () => listener.remove();
-  }, []);
-
   const onAcknowledgementsPress = () => {
-    Navigation.push(props.componentId, {
-      component: {
-        name: 'settings.acknowledgements',
-      },
-    });
+    if (DeviceInfo.isIPad) {
+      Navigation.setStackRoot('detail.root', [
+        {
+          component: {
+            name: 'settings.acknowledgements',
+            options: {
+              animations: {
+                setStackRoot: {
+                  enabled: false,
+                },
+              } as any,
+            },
+          },
+        },
+      ]);
+    } else {
+      Navigation.push(props.componentId, {
+        component: {
+          name: 'settings.acknowledgements',
+        },
+      });
+    }
   };
 
   const onLogoutPress = () => {
@@ -102,7 +109,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
                 name: 'login',
               },
             });
-            Navigation.dismissModal('settings');
           },
         },
       ],
@@ -111,11 +117,28 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onAboutPress = () => {
-    Navigation.push(props.componentId, {
-      component: {
-        name: 'settings.about',
-      },
-    });
+    if (DeviceInfo.isIPad) {
+      Navigation.setStackRoot('detail.root', [
+        {
+          component: {
+            name: 'settings.about',
+            options: {
+              animations: {
+                setStackRoot: {
+                  enabled: false,
+                },
+              } as any,
+            },
+          },
+        },
+      ]);
+    } else {
+      Navigation.push(props.componentId, {
+        component: {
+          name: 'settings.about',
+        },
+      });
+    }
   };
 
   const onCalendarSyncSwitchChange = (enabled: boolean) => {
@@ -187,11 +210,28 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onSemestersPress = () => {
-    Navigation.push(props.componentId, {
-      component: {
-        name: 'settings.semesters',
-      },
-    });
+    if (DeviceInfo.isIPad) {
+      Navigation.setStackRoot('detail.root', [
+        {
+          component: {
+            name: 'settings.semesters',
+            options: {
+              animations: {
+                setStackRoot: {
+                  enabled: false,
+                },
+              } as any,
+            },
+          },
+        },
+      ]);
+    } else {
+      Navigation.push(props.componentId, {
+        component: {
+          name: 'settings.semesters',
+        },
+      });
+    }
   };
 
   const renderListItem: ListRenderItem<{}> = ({index}) => {

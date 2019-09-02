@@ -70,9 +70,6 @@ AcknowledgementsScreen.options = {
     title: {
       text: getTranslation('acknowledgements'),
     },
-    largeTitle: {
-      visible: true,
-    },
   },
 };
 

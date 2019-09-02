@@ -82,9 +82,6 @@ SemestersSettingsScreen.options = {
     title: {
       text: getTranslation('semesters'),
     },
-    largeTitle: {
-      visible: true,
-    },
   },
 };
 
