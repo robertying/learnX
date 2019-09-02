@@ -325,6 +325,7 @@ FilesScreen.options = {
       visible: true,
     },
     searchBar: true,
+    searchBarHiddenWhenScrolling: true,
     searchBarPlaceholder: getTranslation('searchFiles'),
     hideNavBarOnFocusSearchBar: true,
     elevation: 0,
