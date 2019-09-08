@@ -82,7 +82,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   } = props;
 
   useEffect(() => {
-    if (hasUpdate) {
+    if (hasUpdate && Platform.OS === 'android') {
       Navigation.mergeOptions('SettingsScreen', {
         bottomTab: {
           dotIndicator: {
