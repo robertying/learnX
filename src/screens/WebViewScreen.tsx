@@ -55,6 +55,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
           uri: filePath,
         }}
         originWhitelist={['*']}
+        decelerationRate="normal"
       />
       {loading && (
         <View
