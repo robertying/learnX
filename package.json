@@ -36,7 +36,7 @@
     "react-native-typography": "1.4.1",
     "react-native-unimodules": "0.5.4",
     "react-native-vector-icons": "6.6.0",
-    "react-native-webview": "7.0.4",
+    "react-native-webview": "7.0.5",
     "react-redux": "7.1.1",
     "redux": "4.0.4",
     "redux-persist": "6.0.0",
