@@ -120,13 +120,15 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     if (courses.length === 0 && loggedIn && semesterId) {
       getCoursesForSemester(semesterId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loggedIn, semesterId, courses.length]);
 
   useEffect(() => {
     if (autoRefreshing || assignments.length === 0) {
       invalidateAll();
     }
-  }, [courses.length, loggedIn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignments.length, autoRefreshing, courses.length, loggedIn]);
 
   const invalidateAll = () => {
     if (courseIds.length !== 0) {
