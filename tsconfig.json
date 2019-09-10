@@ -10,5 +10,5 @@
     "strict": true,
     "target": "esnext"
   },
-  "include": ["src/**/*", "e2e/**/*", "@types/**/*"]
+  "include": ["src/**/*", "tests/**/*", "e2e/**/*", "@types/**/*"]
 }
