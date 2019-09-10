@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import React, {useEffect} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -107,7 +107,30 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     if (courses.length === 0 && loggedIn && semesterId) {
       getCoursesForSemester(semesterId);
     }
-  }, [loggedIn, semesterId, courses.length]);
+  }, [loggedIn, semesterId, courses.length, getCoursesForSemester]);
+
+  const invalidateAll = useCallback(() => {
+    if (loggedIn) {
+      getCoursesForSemester(semesterId);
+      getAllNoticesForCourses(courseIds);
+      getAllFilesForCourses(courseIds);
+      getAllAssignmentsForCourses(courseIds);
+    } else {
+      showToast(getTranslation('refreshFailure'), 1500);
+      login(username, password);
+    }
+  }, [
+    courseIds,
+    getAllAssignmentsForCourses,
+    getAllFilesForCourses,
+    getAllNoticesForCourses,
+    getCoursesForSemester,
+    loggedIn,
+    login,
+    password,
+    semesterId,
+    username,
+  ]);
 
   useEffect(() => {
     if (
@@ -118,19 +141,15 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     ) {
       invalidateAll();
     }
-  }, [courses.length, loggedIn]);
-
-  const invalidateAll = () => {
-    if (loggedIn) {
-      getCoursesForSemester(semesterId);
-      getAllNoticesForCourses(courseIds);
-      getAllFilesForCourses(courseIds);
-      getAllAssignmentsForCourses(courseIds);
-    } else {
-      showToast(getTranslation('refreshFailure'), 1500);
-      login(username, password);
-    }
-  };
+  }, [
+    assignments.length,
+    autoRefreshing,
+    courses.length,
+    files.length,
+    invalidateAll,
+    loggedIn,
+    notices.length,
+  ]);
 
   /**
    * Render cards

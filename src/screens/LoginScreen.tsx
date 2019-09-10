@@ -55,14 +55,14 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       showToast(getTranslation('loginFailure'), 1500);
       setLoginButtonPressed(false);
     }
-  }, [loginError]);
+  }, [loginButtonPressed, loginError]);
 
   useEffect(() => {
     if (loggedIn) {
       showToast(getTranslation('fetchingSemesters'), 1500);
       getAllSemesters();
     }
-  }, [loggedIn]);
+  }, [getAllSemesters, loggedIn]);
 
   useEffect(() => {
     if (loggedIn && semesters.length !== 0) {
@@ -70,7 +70,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       Keyboard.dismiss();
       Navigation.dismissModal('login');
     }
-  }, [semesters.length]);
+  }, [loggedIn, semesters, semesters.length, setCurrentSemester]);
 
   useEffect(() => {
     if (getAllSemestersError) {

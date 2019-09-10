@@ -44,6 +44,7 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
         });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rehydrated]);
 
   useEffect(() => {
@@ -79,6 +80,7 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
         }
       })();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <SplashScreen />;

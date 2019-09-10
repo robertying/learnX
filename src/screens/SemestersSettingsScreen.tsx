@@ -39,13 +39,13 @@ const SemestersSettingsScreen: INavigationScreen<
 
   useEffect(() => {
     getAllSemesters();
-  }, []);
+  }, [getAllSemesters]);
 
   useEffect(() => {
     return () => {
       getCoursesForSemester(currentSemester);
     };
-  }, [currentSemester]);
+  }, [currentSemester, getCoursesForSemester]);
 
   const renderListItem: ListRenderItem<string> = ({item}) => {
     return (

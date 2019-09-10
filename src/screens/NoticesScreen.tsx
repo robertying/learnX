@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
-import React, {useEffect} from 'react';
+import React, {useEffect, useCallback} from 'react';
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
@@ -91,7 +91,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         },
       });
     }
-  }, []);
+  }, [hasUpdate]);
 
   /**
    * Prepare data
@@ -124,19 +124,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    * Fetch and handle error
    */
 
-  useEffect(() => {
-    if (courses.length === 0 && loggedIn && semesterId) {
-      getCoursesForSemester(semesterId);
-    }
-  }, [loggedIn, semesterId, courses.length]);
-
-  useEffect(() => {
-    if (autoRefreshing || notices.length === 0) {
-      invalidateAll();
-    }
-  }, [courses.length, loggedIn]);
-
-  const invalidateAll = () => {
+  const invalidateAll = useCallback(() => {
     if (courseIds.length !== 0) {
       if (loggedIn) {
         getAllNoticesForCourses(courseIds);
@@ -145,7 +133,19 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         login(username, password);
       }
     }
-  };
+  }, [courseIds, getAllNoticesForCourses, loggedIn, login, password, username]);
+
+  useEffect(() => {
+    if (courses.length === 0 && loggedIn && semesterId) {
+      getCoursesForSemester(semesterId);
+    }
+  }, [loggedIn, semesterId, courses.length, getCoursesForSemester]);
+
+  useEffect(() => {
+    if (autoRefreshing || notices.length === 0) {
+      invalidateAll();
+    }
+  }, [autoRefreshing, courses.length, invalidateAll, loggedIn, notices.length]);
 
   /**
    * Render cards

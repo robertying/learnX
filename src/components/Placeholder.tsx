@@ -16,6 +16,7 @@ const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
 
   useEffect(() => {
     fadeAnimation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fadeAnimation = () => {

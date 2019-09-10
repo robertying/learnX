@@ -38,7 +38,7 @@ function useIosSearchBar<T extends IEntity>(
 
   useEffect(() => {
     setSearchResults(filter<T>(entities, pinned, hidden));
-  }, [entities.length, pinned.length, hidden.length]);
+  }, [entities, hidden, pinned]);
 
   useEffect(() => {
     const listener = Navigation.events().registerSearchBarUpdatedListener(
@@ -52,7 +52,7 @@ function useIosSearchBar<T extends IEntity>(
       },
     );
     return () => listener.remove();
-  }, []);
+  }, [entities, fuseOptions, hidden, pinned]);
 
   useEffect(() => {
     const listener = Navigation.events().registerSearchBarCancelPressedListener(
@@ -61,7 +61,7 @@ function useIosSearchBar<T extends IEntity>(
       },
     );
     return () => listener.remove();
-  }, []);
+  }, [entities, hidden, pinned]);
 
   return searchResults;
 }

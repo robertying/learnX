@@ -1,3 +1,3 @@
-import loginScreenDescription from "./LoginScreen";
+import loginScreenDescription from './LoginScreen';
 
-describe("LoginScreen", loginScreenDescription);
+describe('LoginScreen', loginScreenDescription);

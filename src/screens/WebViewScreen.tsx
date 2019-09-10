@@ -34,7 +34,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         }
       })();
     }
-  }, [loading]);
+  }, [ext, filename, loading, url]);
 
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
@@ -46,7 +46,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
       },
     );
     return () => listener.remove();
-  }, []);
+  }, [ext, filename, url]);
 
   return (
     <>

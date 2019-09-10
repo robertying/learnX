@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {Dimensions, Platform, View} from 'react-native';
 import Modal from 'react-native-modal';
 import {Navigation} from 'react-native-navigation';
@@ -112,45 +112,50 @@ const CourseDetailScreen: INavigationScreen<
     readonly visible: boolean;
   }>({type: 'Notice', data: null, visible: false});
 
-  const onNoticeCardPress = (noticeId: string) => {
-    const notice = notices.find(item => item.id === noticeId);
-    setCurrentModal({type: 'Notice', data: notice, visible: true});
-  };
-  const onFileCardPress = async (
-    filename: string,
-    url: string,
-    ext: string,
-  ) => {
-    if (Platform.OS === 'ios') {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'webview',
-          passProps: {
-            filename: stripExtension(filename),
-            url,
-            ext,
-          },
-          options: {
-            topBar: {
-              title: {
-                text: stripExtension(filename),
+  const onNoticeCardPress = useCallback(
+    (noticeId: string) => {
+      const notice = notices.find(item => item.id === noticeId);
+      setCurrentModal({type: 'Notice', data: notice, visible: true});
+    },
+    [notices],
+  );
+  const onFileCardPress = useCallback(
+    async (filename: string, url: string, ext: string) => {
+      if (Platform.OS === 'ios') {
+        Navigation.push(props.componentId, {
+          component: {
+            name: 'webview',
+            passProps: {
+              filename: stripExtension(filename),
+              url,
+              ext,
+            },
+            options: {
+              topBar: {
+                title: {
+                  text: stripExtension(filename),
+                },
               },
             },
           },
-        },
-      });
-    } else {
-      showToast(getTranslation('downloadingFile'), 1000);
-      const success = await shareFile(url, stripExtension(filename), ext);
-      if (!success) {
-        showToast(getTranslation('downloadFileFailure'), 3000);
+        });
+      } else {
+        showToast(getTranslation('downloadingFile'), 1000);
+        const success = await shareFile(url, stripExtension(filename), ext);
+        if (!success) {
+          showToast(getTranslation('downloadFileFailure'), 3000);
+        }
       }
-    }
-  };
-  const onAssignmentCardPress = (assignmentId: string) => {
-    const assignment = assignments.find(item => item.id === assignmentId);
-    setCurrentModal({type: 'Assignment', data: assignment, visible: true});
-  };
+    },
+    [props.componentId],
+  );
+  const onAssignmentCardPress = useCallback(
+    (assignmentId: string) => {
+      const assignment = assignments.find(item => item.id === assignmentId);
+      setCurrentModal({type: 'Assignment', data: assignment, visible: true});
+    },
+    [assignments],
+  );
 
   const NoticesRoute = useMemo(
     () => (
@@ -162,7 +167,13 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getNoticesForCourse(courseId)}
       />
     ),
-    [notices.length, isFetchingNotices],
+    [
+      isFetchingNotices,
+      notices,
+      onNoticeCardPress,
+      getNoticesForCourse,
+      courseId,
+    ],
   );
   const FilesRoute = useMemo(
     () => (
@@ -174,7 +185,7 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getFilesForCourse(courseId)}
       />
     ),
-    [files.length, isFetchingFiles],
+    [courseId, files, getFilesForCourse, isFetchingFiles, onFileCardPress],
   );
   const AssignmentsRoute = useMemo(
     () => (
@@ -186,7 +197,13 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getAssignmentsForCourse(courseId)}
       />
     ),
-    [assignments.length, isFetchingAssignments],
+    [
+      assignments,
+      courseId,
+      getAssignmentsForCourse,
+      isFetchingAssignments,
+      onAssignmentCardPress,
+    ],
   );
 
   const renderScene = ({

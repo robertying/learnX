@@ -43,7 +43,7 @@ function useAndroidSearchBar<T extends IEntity>(
 
   useEffect(() => {
     setSearchResults(filter<T>(entities, pinned, hidden));
-  }, [entities.length, pinned.length, hidden.length]);
+  }, [entities, pinned, hidden]);
 
   const [searchBarText, setSearchBarText] = useState('');
 
@@ -54,7 +54,7 @@ function useAndroidSearchBar<T extends IEntity>(
     } else {
       setSearchResults(filter<T>(entities, pinned, hidden));
     }
-  }, [searchBarText]);
+  }, [entities, fuseOptions, hidden, pinned, searchBarText]);
 
   const [searchBarVisible, setSearchBarVisible] = useState(false);
 
@@ -70,7 +70,7 @@ function useAndroidSearchBar<T extends IEntity>(
       },
     );
     return () => listener.remove();
-  }, []);
+  }, [searchBarVisible]);
 
   return [searchBarText, setSearchBarText, searchResults, searchBarVisible];
 }
