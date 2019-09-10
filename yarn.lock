@@ -6335,10 +6335,10 @@ react-native-webview@7.0.5:
     escape-string-regexp "1.0.5"
     invariant "2.2.4"
 
-react-native@0.61.0-rc.2:
-  version "0.61.0-rc.2"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.0-rc.2.tgz#2d60369c2b0cb01e877c10e61f1799513ade5972"
-  integrity sha512-W3IVFkFLjBHfEPqKzrCk755GwGyxpJGxmIXxvB8BdpW9Hx9w51z75+LXHX+6+Dn75TdekjU8spHW8dcJDZxTHg==
+react-native@0.61.0-rc.3:
+  version "0.61.0-rc.3"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.0-rc.3.tgz#880b1ca4805fe5095a506306461c38cf4e74452d"
+  integrity sha512-1jG098scd2vBXx2vZYpsrdX7dfmO8bSMJq+eB52x6RWmr70c8Zy7VUNpgndB6EEjthDUEfkcZmBHbkmuSEfzvg==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@react-native-community/cli" "^3.0.0-alpha.1"
