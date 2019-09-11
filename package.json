@@ -29,6 +29,7 @@
     "react-native-device-info": "3.0.0",
     "react-native-gesture-handler": "1.4.1",
     "react-native-interactable": "1.0.0",
+    "react-native-localize": "1.2.0",
     "react-native-modal": "11.3.1",
     "react-native-navigation": "3.2.0",
     "react-native-paper": "2.16.0",
