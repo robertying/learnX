@@ -1,4 +1,6 @@
-import React, {useMemo, useState, useCallback} from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+
+import React, {useMemo, useState} from 'react';
 import {Dimensions, Platform, View} from 'react-native';
 import Modal from 'react-native-modal';
 import {Navigation} from 'react-native-navigation';
@@ -112,50 +114,45 @@ const CourseDetailScreen: INavigationScreen<
     readonly visible: boolean;
   }>({type: 'Notice', data: null, visible: false});
 
-  const onNoticeCardPress = useCallback(
-    (noticeId: string) => {
-      const notice = notices.find(item => item.id === noticeId);
-      setCurrentModal({type: 'Notice', data: notice, visible: true});
-    },
-    [notices],
-  );
-  const onFileCardPress = useCallback(
-    async (filename: string, url: string, ext: string) => {
-      if (Platform.OS === 'ios') {
-        Navigation.push(props.componentId, {
-          component: {
-            name: 'webview',
-            passProps: {
-              filename: stripExtension(filename),
-              url,
-              ext,
-            },
-            options: {
-              topBar: {
-                title: {
-                  text: stripExtension(filename),
-                },
+  const onNoticeCardPress = (noticeId: string) => {
+    const notice = notices.find(item => item.id === noticeId);
+    setCurrentModal({type: 'Notice', data: notice, visible: true});
+  };
+  const onFileCardPress = async (
+    filename: string,
+    url: string,
+    ext: string,
+  ) => {
+    if (Platform.OS === 'ios') {
+      Navigation.push(props.componentId, {
+        component: {
+          name: 'webview',
+          passProps: {
+            filename: stripExtension(filename),
+            url,
+            ext,
+          },
+          options: {
+            topBar: {
+              title: {
+                text: stripExtension(filename),
               },
             },
           },
-        });
-      } else {
-        showToast(getTranslation('downloadingFile'), 1000);
-        const success = await shareFile(url, stripExtension(filename), ext);
-        if (!success) {
-          showToast(getTranslation('downloadFileFailure'), 3000);
-        }
+        },
+      });
+    } else {
+      showToast(getTranslation('downloadingFile'), 1000);
+      const success = await shareFile(url, stripExtension(filename), ext);
+      if (!success) {
+        showToast(getTranslation('downloadFileFailure'), 3000);
       }
-    },
-    [props.componentId],
-  );
-  const onAssignmentCardPress = useCallback(
-    (assignmentId: string) => {
-      const assignment = assignments.find(item => item.id === assignmentId);
-      setCurrentModal({type: 'Assignment', data: assignment, visible: true});
-    },
-    [assignments],
-  );
+    }
+  };
+  const onAssignmentCardPress = (assignmentId: string) => {
+    const assignment = assignments.find(item => item.id === assignmentId);
+    setCurrentModal({type: 'Assignment', data: assignment, visible: true});
+  };
 
   const NoticesRoute = useMemo(
     () => (
@@ -167,13 +164,7 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getNoticesForCourse(courseId)}
       />
     ),
-    [
-      isFetchingNotices,
-      notices,
-      onNoticeCardPress,
-      getNoticesForCourse,
-      courseId,
-    ],
+    [notices.length, isFetchingNotices],
   );
   const FilesRoute = useMemo(
     () => (
@@ -185,7 +176,7 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getFilesForCourse(courseId)}
       />
     ),
-    [courseId, files, getFilesForCourse, isFetchingFiles, onFileCardPress],
+    [files.length, isFetchingFiles],
   );
   const AssignmentsRoute = useMemo(
     () => (
@@ -197,13 +188,7 @@ const CourseDetailScreen: INavigationScreen<
         onRefresh={() => getAssignmentsForCourse(courseId)}
       />
     ),
-    [
-      assignments,
-      courseId,
-      getAssignmentsForCourse,
-      isFetchingAssignments,
-      onAssignmentCardPress,
-    ],
+    [assignments.length, isFetchingAssignments],
   );
 
   const renderScene = ({

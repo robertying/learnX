@@ -34,7 +34,8 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         }
       })();
     }
-  }, [ext, filename, loading, url]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
@@ -46,7 +47,8 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
       },
     );
     return () => listener.remove();
-  }, [ext, filename, url]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

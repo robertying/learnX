@@ -55,14 +55,16 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       showToast(getTranslation('loginFailure'), 1500);
       setLoginButtonPressed(false);
     }
-  }, [loginButtonPressed, loginError]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loginError]);
 
   useEffect(() => {
     if (loggedIn) {
       showToast(getTranslation('fetchingSemesters'), 1500);
       getAllSemesters();
     }
-  }, [getAllSemesters, loggedIn]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedIn]);
 
   useEffect(() => {
     if (loggedIn && semesters.length !== 0) {
@@ -70,7 +72,8 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       Keyboard.dismiss();
       Navigation.dismissModal('login');
     }
-  }, [loggedIn, semesters, semesters.length, setCurrentSemester]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [semesters.length]);
 
   useEffect(() => {
     if (getAllSemestersError) {

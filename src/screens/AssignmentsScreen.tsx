@@ -128,7 +128,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       invalidateAll();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assignments.length, autoRefreshing, courses.length, loggedIn]);
+  }, [courses.length, loggedIn]);
 
   const invalidateAll = () => {
     if (courseIds.length !== 0) {
