@@ -38,7 +38,8 @@ function useIosSearchBar<T extends IEntity>(
 
   useEffect(() => {
     setSearchResults(filter<T>(entities, pinned, hidden));
-  }, [entities, hidden, pinned]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entities.length, pinned.length, hidden.length]);
 
   useEffect(() => {
     const listener = Navigation.events().registerSearchBarUpdatedListener(
@@ -52,7 +53,8 @@ function useIosSearchBar<T extends IEntity>(
       },
     );
     return () => listener.remove();
-  }, [entities, fuseOptions, hidden, pinned]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const listener = Navigation.events().registerSearchBarCancelPressedListener(
@@ -61,7 +63,8 @@ function useIosSearchBar<T extends IEntity>(
       },
     );
     return () => listener.remove();
-  }, [entities, hidden, pinned]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return searchResults;
 }

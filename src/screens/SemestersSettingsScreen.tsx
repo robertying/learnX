@@ -39,13 +39,15 @@ const SemestersSettingsScreen: INavigationScreen<
 
   useEffect(() => {
     getAllSemesters();
-  }, [getAllSemesters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     return () => {
       getCoursesForSemester(currentSemester);
     };
-  }, [currentSemester, getCoursesForSemester]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSemester]);
 
   const renderListItem: ListRenderItem<string> = ({item}) => {
     return (

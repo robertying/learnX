@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
-import React, {useEffect, useCallback} from 'react';
+import React, {useEffect} from 'react';
 import {
   FlatList,
   NativeScrollEvent,
@@ -110,7 +110,21 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
    * Fetch and handle error
    */
 
-  const invalidateAll = useCallback(() => {
+  useEffect(() => {
+    if (courses.length === 0 && loggedIn && semesterId) {
+      getCoursesForSemester(semesterId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loggedIn, semesterId, courses.length]);
+
+  useEffect(() => {
+    if (autoRefreshing || files.length === 0) {
+      invalidateAll();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courses.length, loggedIn]);
+
+  const invalidateAll = () => {
     if (courseIds.length !== 0) {
       if (loggedIn) {
         getAllFilesForCourses(courseIds);
@@ -119,19 +133,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         login(username, password);
       }
     }
-  }, [courseIds, getAllFilesForCourses, loggedIn, login, password, username]);
-
-  useEffect(() => {
-    if (courses.length === 0 && loggedIn && semesterId) {
-      getCoursesForSemester(semesterId);
-    }
-  }, [loggedIn, semesterId, courses.length, getCoursesForSemester]);
-
-  useEffect(() => {
-    if (autoRefreshing || files.length === 0) {
-      invalidateAll();
-    }
-  }, [autoRefreshing, courses.length, files.length, invalidateAll, loggedIn]);
+  };
 
   /**
    * Render cards
