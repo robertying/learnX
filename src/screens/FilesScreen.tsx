@@ -139,7 +139,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
    * Render cards
    */
 
-  const onFileCardPress = async (fileId: string, reactTag?: number) => {
+  const onFileCardPress = async (fileId: string) => {
     const file = files.find(item => item.id === fileId);
 
     if (file) {
@@ -183,10 +183,6 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
                   text: file.title,
                 },
               },
-              preview: {
-                reactTag,
-                commit: true,
-              },
             },
           },
         });
@@ -227,15 +223,8 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       // tslint:disable: jsx-no-lambda
       onPinned={pin => onPinned!(pin, item.id)}
       onPress={() => {
-        onFileCardPress(item.id, undefined);
+        onFileCardPress(item.id);
       }}
-      onPressIn={
-        DeviceInfo.isIPad()
-          ? undefined
-          : (e: {readonly reactTag: number | null}) => {
-              onFileCardPress(item.id, e.reactTag!);
-            }
-      }
       // tslint:enable: jsx-no-lambda
     />
   );

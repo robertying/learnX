@@ -145,7 +145,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
    * Render cards
    */
 
-  const onAssignmentCardPress = (assignmentId: string, reactTag?: number) => {
+  const onAssignmentCardPress = (assignmentId: string) => {
     const assignment = assignments.find(item => item.id === assignmentId);
 
     if (assignment) {
@@ -205,10 +205,6 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
                   text: assignment.courseName,
                 },
               },
-              preview: {
-                reactTag,
-                commit: true,
-              },
             },
           },
         });
@@ -243,15 +239,8 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       // tslint:disable: jsx-no-lambda
       onPinned={pin => onPinned!(pin, item.id)}
       onPress={() => {
-        onAssignmentCardPress(item.id, undefined);
+        onAssignmentCardPress(item.id);
       }}
-      onPressIn={
-        DeviceInfo.isIPad()
-          ? undefined
-          : (e: {readonly reactTag: number | null}) => {
-              onAssignmentCardPress(item.id, e.reactTag!);
-            }
-      }
       // tslint:enable: jsx-no-lambda
     />
   );
