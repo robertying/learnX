@@ -149,7 +149,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     const assignment = assignments.find(item => item.id === assignmentId);
 
     if (assignment) {
-      if (DeviceInfo.isIPad) {
+      if (DeviceInfo.isIPad()) {
         Navigation.setStackRoot('detail.root', [
           {
             component: {
@@ -246,7 +246,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
         onAssignmentCardPress(item.id, undefined);
       }}
       onPressIn={
-        DeviceInfo.isIPad
+        DeviceInfo.isIPad()
           ? undefined
           : (e: {readonly reactTag: number | null}) => {
               onAssignmentCardPress(item.id, e.reactTag!);

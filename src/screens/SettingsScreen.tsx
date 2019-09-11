@@ -66,7 +66,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   } = props;
 
   const onAcknowledgementsPress = () => {
-    if (DeviceInfo.isIPad) {
+    if (DeviceInfo.isIPad()) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -117,7 +117,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onAboutPress = () => {
-    if (DeviceInfo.isIPad) {
+    if (DeviceInfo.isIPad()) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -210,7 +210,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onSemestersPress = () => {
-    if (DeviceInfo.isIPad) {
+    if (DeviceInfo.isIPad()) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
