@@ -158,7 +158,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     const notice = notices.find(item => item.id === noticeId);
 
     if (notice) {
-      if (DeviceInfo.isIPad) {
+      if (DeviceInfo.isIPad()) {
         Navigation.setStackRoot('detail.root', [
           {
             component: {
@@ -187,6 +187,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           },
         ]);
       } else {
+        console.log(reactTag);
         Navigation.push(props.componentId, {
           component: {
             name: 'notices.detail',
@@ -241,7 +242,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         onNoticeCardPress(item.id, undefined);
       }}
       onPressIn={
-        DeviceInfo.isIPad
+        DeviceInfo.isIPad()
           ? undefined
           : (e: {readonly reactTag: number | null}) => {
               onNoticeCardPress(item.id, e.reactTag!);

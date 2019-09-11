@@ -1,8 +1,15 @@
 import {Platform} from 'react-native';
 import Info from 'react-native-device-info';
 
-const DeviceInfo = {
-  isIPad: Info.isTablet() && Platform.OS === 'ios',
+let _isIPad: boolean;
+
+const init = async () => {
+  _isIPad = (await Info.isTablet()) && Platform.OS === 'ios';
 };
 
-export default DeviceInfo;
+const isIPad = () => _isIPad;
+
+export default {
+  init,
+  isIPad,
+};

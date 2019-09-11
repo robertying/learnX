@@ -17,6 +17,7 @@ export const getAuthLoadingRoot = () => {
 
 export const getNavigationRoot = async () => {
   const icons = await loadTabIcons();
+  await DeviceInfo.init();
 
   const bottomTabs: LayoutBottomTabs = {
     children: [
@@ -129,7 +130,7 @@ export const getNavigationRoot = async () => {
     ],
   };
 
-  const navigationRoot: LayoutRoot = DeviceInfo.isIPad
+  const navigationRoot: LayoutRoot = DeviceInfo.isIPad()
     ? {
         root: {
           splitView: {
