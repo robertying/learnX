@@ -140,8 +140,25 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
         style={{margin: 15}}
         originWhitelist={['*']}
         source={{
-          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body>${content ||
-            getTranslation('noNoticeContent')}</body>`,
+          html: `
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/>
+            <script
+              id="darkreader"
+              src="https://unpkg.com/darkreader"
+              async
+              defer
+            ></script>
+            <script>
+              var script = document.querySelector("#darkreader");
+              script.addEventListener("load", function() {
+                DarkReader.enable();
+              });
+            </script>
+          </head>
+          <body>
+            ${content || getTranslation('noNoticeContent')}
+          </body>`,
         }}
       />
     </ScrollView>

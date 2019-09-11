@@ -154,7 +154,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    * Render cards
    */
 
-  const onNoticeCardPress = (noticeId: string, reactTag?: number) => {
+  const onNoticeCardPress = (noticeId: string) => {
     const notice = notices.find(item => item.id === noticeId);
 
     if (notice) {
@@ -187,7 +187,6 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           },
         ]);
       } else {
-        console.log(reactTag);
         Navigation.push(props.componentId, {
           component: {
             name: 'notices.detail',
@@ -204,10 +203,6 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
                 title: {
                   text: notice.courseName,
                 },
-              },
-              preview: {
-                reactTag,
-                commit: true,
               },
             },
           },
@@ -239,15 +234,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       // tslint:disable: jsx-no-lambda
       onPinned={pin => onPinned!(pin, item.id)}
       onPress={() => {
-        onNoticeCardPress(item.id, undefined);
+        onNoticeCardPress(item.id);
       }}
-      onPressIn={
-        DeviceInfo.isIPad()
-          ? undefined
-          : (e: {readonly reactTag: number | null}) => {
-              onNoticeCardPress(item.id, e.reactTag!);
-            }
-      }
       // tslint:enable: jsx-no-lambda
     />
   );

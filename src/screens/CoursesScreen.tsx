@@ -138,11 +138,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
    * Render cards
    */
 
-  const onCourseCardPress = (
-    courseId: string,
-    courseName: string,
-    reactTag?: number,
-  ) => {
+  const onCourseCardPress = (courseId: string, courseName: string) => {
     if (DeviceInfo.isIPad()) {
       Navigation.setStackRoot('detail.root', [
         {
@@ -178,10 +174,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
               title: {
                 text: courseName,
               },
-            },
-            preview: {
-              reactTag,
-              commit: true,
             },
           },
         },
@@ -222,10 +214,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       // tslint:disable: jsx-no-lambda
       onPinned={pin => onPinned!(pin, item.id)}
       onPress={() => {
-        onCourseCardPress(item.id, item.name, undefined);
-      }}
-      onPressIn={(e: {readonly reactTag: number | null}) => {
-        onCourseCardPress(item.id, item.name, e.reactTag!);
+        onCourseCardPress(item.id, item.name);
       }}
       // tslint:enable: jsx-no-lambda
     />
