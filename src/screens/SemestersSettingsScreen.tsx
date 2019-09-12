@@ -82,7 +82,7 @@ const SemestersSettingsScreen: INavigationScreen<
 SemestersSettingsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation('semesters'),
+      text: getTranslation('changeSemester'),
     },
   },
 };

@@ -43,6 +43,7 @@ export default {
   effectAfterReboot: 'Settings will take effect next time App launches',
   languages: 'Languages',
   semesters: 'Semesters',
+  changeSemester: 'Change current semester',
   searchNotices: 'Search notices...',
   searchFiles: 'Search files...',
   searchAssignments: 'Search assignments',
