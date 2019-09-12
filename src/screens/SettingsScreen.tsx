@@ -261,8 +261,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="arrow"
-            icon={<MaterialCommunityIcons name="book" size={20} />}
-            text={getTranslation('semesters')}
+            text={getTranslation('changeSemester')}
             onPress={onSemestersPress}
           />
         );

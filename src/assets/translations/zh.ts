@@ -43,6 +43,7 @@ export default {
   effectAfterReboot: '设置将在下一次 App 启动时生效',
   languages: '语言',
   semesters: '学期',
+  changeSemester: '更改当前学期',
   searchNotices: '搜索通知……',
   searchFiles: '搜索文件……',
   searchAssignments: '搜索作业……',
