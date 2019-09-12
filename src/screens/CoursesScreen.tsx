@@ -33,6 +33,7 @@ import {
   IPersistAppState,
 } from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {useDarkMode, initialMode} from 'react-native-dark-mode';
 
 interface ICoursesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -243,9 +244,30 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     invalidateAll();
   };
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
+    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
+
+    Navigation.mergeOptions(props.componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+      bottomTab: {
+        textColor: tabIconDefaultColor,
+        selectedTextColor: tabIconSelectedColor,
+        iconColor: tabIconDefaultColor,
+        selectedIconColor: tabIconSelectedColor,
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
+        style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
         ListEmptyComponent={EmptyList}
         data={courses}
         renderItem={renderListItem}
@@ -270,15 +292,15 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
 
 // tslint:disable-next-line: no-object-mutation
 CoursesScreen.options = {
+  layout: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
-    background: {
-      color: 'white',
-    },
     title: {
       text: getTranslation('courses'),
     },
     largeTitle: {
-      visible: true,
+      visible: false,
     },
   },
 };

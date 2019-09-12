@@ -12,6 +12,7 @@ import {iOSUIKit} from 'react-native-typography';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Layout from '../constants/Layout';
 import Text from './Text';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface ISettingsListItemProps {
   readonly icon?: React.ReactNode;
@@ -46,9 +47,11 @@ const SettingsListItem: React.FunctionComponent<
     secondaryTextStyle,
   } = props;
 
+  const isDarkMode = useDarkMode();
+
   return (
     <TouchableHighlight
-      activeOpacity={0.8}
+      underlayColor={isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.4)'}
       onPress={onPress}
       style={containerStyle}>
       <View
@@ -57,7 +60,7 @@ const SettingsListItem: React.FunctionComponent<
             height: size === 'large' ? 100 : Layout.normalBlockHeight,
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: 'white',
+            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'white',
             paddingLeft: 10,
             paddingRight: 20,
           },
@@ -96,7 +99,6 @@ const SettingsListItem: React.FunctionComponent<
                 style={[
                   {
                     marginRight: 10,
-                    color: 'grey',
                     fontSize: iOSUIKit.bodyObject.fontSize,
                   },
                   secondaryTextStyle,

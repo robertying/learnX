@@ -15,6 +15,8 @@
 
   NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index" fallbackResource:nil];
   [ReactNativeNavigation bootstrap:jsCodeLocation launchOptions:launchOptions bridgeManagerDelegate:self];
+  
+  [[UIView appearance] setTintColor:[UIColor systemPurpleColor]];
 
   return YES;
 }

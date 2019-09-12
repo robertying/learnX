@@ -9,6 +9,7 @@ import Colors from '../constants/Colors';
 import {IAssignment} from '../redux/types/state';
 import AssignmentCard from './AssignmentCard';
 import EmptyList from './EmptyList';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IAssignmentsViewProps {
   readonly assignments: ReadonlyArray<IAssignment>;
@@ -40,8 +41,11 @@ const AssignmentsView: React.FunctionComponent<
 
   const keyExtractor = (item: any) => item.id;
 
+  const isDarkMode = useDarkMode();
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#f0f0f0'}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={assignments}

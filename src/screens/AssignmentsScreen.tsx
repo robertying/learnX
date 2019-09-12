@@ -35,6 +35,7 @@ import {
 } from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
 import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
+import {useDarkMode, initialMode} from 'react-native-dark-mode';
 
 interface IAssignmentsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -276,6 +277,25 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     withCourseInfo<IAssignment>
   >(assignments, pinnedAssignments, hidden, fuseOptions);
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
+    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
+
+    Navigation.mergeOptions(props.componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+      bottomTab: {
+        textColor: tabIconDefaultColor,
+        selectedTextColor: tabIconSelectedColor,
+        iconColor: tabIconDefaultColor,
+        selectedIconColor: tabIconSelectedColor,
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
   return (
     <PaperProvider>
       {Platform.OS === 'android' && (
@@ -287,8 +307,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           value={searchBarText}
         />
       )}
-      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+      <SafeAreaView
+        style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         <FlatList
+          style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
@@ -324,12 +346,15 @@ const fuseOptions: FuseOptions<withCourseInfo<IAssignment>> = {
 
 // tslint:disable-next-line: no-object-mutation
 AssignmentsScreen.options = {
+  layout: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
     title: {
       text: getTranslation('assignments'),
     },
     largeTitle: {
-      visible: true,
+      visible: false,
     },
     searchBar: true,
     searchBarHiddenWhenScrolling: true,

@@ -8,6 +8,7 @@ import {getTranslation} from '../helpers/i18n';
 import {downloadFile, shareFile} from '../helpers/share';
 import {showToast} from '../helpers/toast';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {useDarkMode, initialMode} from 'react-native-dark-mode';
 
 export interface IWebViewScreenStateProps {
   readonly filename: string;
@@ -49,6 +50,25 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
     return () => listener.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
+    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
+
+    Navigation.mergeOptions(props.componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+      bottomTab: {
+        textColor: tabIconDefaultColor,
+        selectedTextColor: tabIconSelectedColor,
+        iconColor: tabIconDefaultColor,
+        selectedIconColor: tabIconSelectedColor,
+      },
+    });
+  }, [isDarkMode, props.componentId]);
 
   return (
     <>
@@ -94,11 +114,11 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
 
 // tslint:disable-next-line: no-object-mutation
 WebViewScreen.options = {
+  layout: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
     hideOnScroll: true,
-    largeTitle: {
-      visible: false,
-    },
     rightButtons: [
       {
         id: 'share',

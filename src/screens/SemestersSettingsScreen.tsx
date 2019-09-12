@@ -2,7 +2,6 @@ import React, {useEffect} from 'react';
 import {FlatList, ListRenderItem, SafeAreaView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
-import Divider from '../components/Divider';
 import SettingsListItem from '../components/SettingsListItem';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
@@ -11,6 +10,8 @@ import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {useDarkMode} from 'react-native-dark-mode';
+import {Navigation} from 'react-native-navigation';
 
 interface ISemestersSettingsScreenStateProps {
   readonly semesters: readonly string[];
@@ -54,7 +55,15 @@ const SemestersSettingsScreen: INavigationScreen<
       <SettingsListItem
         variant="none"
         text={item as string}
-        icon={currentSemester === item ? <Icon name="check" size={20} /> : null}
+        icon={
+          currentSemester === item ? (
+            <Icon
+              name="check"
+              size={20}
+              color={isDarkMode ? Colors.grayDark : undefined}
+            />
+          ) : null
+        }
         // tslint:disable-next-line: jsx-no-lambda
         onPress={() => {
           setCurrentSemester(item);
@@ -65,13 +74,31 @@ const SemestersSettingsScreen: INavigationScreen<
 
   const keyExtractor = (item: any) => item as string;
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    Navigation.mergeOptions(props.componentId, {
+      topBar: {
+        title: {
+          color: isDarkMode ? 'white' : 'black',
+        },
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      }}>
       <FlatList
-        style={{marginTop: 10}}
+        style={{
+          marginTop: 10,
+          backgroundColor: isDarkMode ? 'black' : 'white',
+        }}
         data={semesters}
         renderItem={renderListItem}
-        ItemSeparatorComponent={Divider}
         keyExtractor={keyExtractor}
       />
     </SafeAreaView>

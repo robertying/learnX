@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   Alert,
   FlatList,
@@ -15,7 +15,6 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
 import RNFetchBlob from 'rn-fetch-blob';
 import packageConfig from '../../package.json';
-import Divider from '../components/Divider';
 import SettingsListItem from '../components/SettingsListItem';
 import Colors from '../constants/Colors';
 import {saveAssignmentsToCalendar} from '../helpers/calendar';
@@ -33,6 +32,7 @@ import {IAssignment, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
 import semver from 'semver';
 import DeviceInfo from '../constants/DeviceInfo';
+import {useDarkMode, initialMode} from 'react-native-dark-mode';
 
 interface ISettingsScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -241,7 +241,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="switch"
             containerStyle={{marginTop: 10}}
-            icon={<MaterialCommunityIcons name="refresh" size={20} />}
+            icon={
+              <MaterialCommunityIcons
+                name="refresh"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('autoRefreshing')}
             switchValue={autoRefreshing}
             onSwitchValueChange={setAutoRefreshing}
@@ -251,7 +257,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return Platform.OS === 'ios' ? (
           <SettingsListItem
             variant="switch"
-            icon={<MaterialCommunityIcons name="calendar" size={20} />}
+            icon={
+              <MaterialCommunityIcons
+                name="calendar"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('calendarSync')}
             switchValue={calendarSync}
             onSwitchValueChange={onCalendarSyncSwitchChange}
@@ -261,6 +273,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="arrow"
+            icon={
+              <MaterialCommunityIcons
+                name="book"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('changeSemester')}
             onPress={onSemestersPress}
           />
@@ -270,7 +289,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="none"
             containerStyle={{marginTop: 10}}
-            icon={<MaterialCommunityIcons name="account-off" size={20} />}
+            icon={
+              <MaterialCommunityIcons
+                name="account-off"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('logout')}
             onPress={onLogoutPress}
           />
@@ -279,7 +304,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="none"
-            icon={<MaterialCommunityIcons name="file-hidden" size={20} />}
+            icon={
+              <MaterialCommunityIcons
+                name="file-hidden"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('clearFileCache')}
             onPress={onClearFileCachePress}
           />
@@ -292,7 +323,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             icon={
               hasUpdate ? (
                 <View>
-                  <MaterialCommunityIcons name="update" size={20} />
+                  <MaterialCommunityIcons
+                    name="update"
+                    size={20}
+                    color={isDarkMode ? Colors.grayDark : undefined}
+                  />
                   <View
                     style={{
                       position: 'absolute',
@@ -306,7 +341,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
                   />
                 </View>
               ) : (
-                <MaterialCommunityIcons name="update" size={20} />
+                <MaterialCommunityIcons
+                  name="update"
+                  size={20}
+                  color={isDarkMode ? Colors.grayDark : undefined}
+                />
               )
             }
             text={
@@ -322,7 +361,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           <SettingsListItem
             variant="arrow"
             containerStyle={{marginTop: 10}}
-            icon={<MaterialCommunityIcons name="tag-heart" size={20} />}
+            icon={
+              <MaterialCommunityIcons
+                name="tag-heart"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('acknowledgements')}
             onPress={onAcknowledgementsPress}
           />
@@ -331,7 +376,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         return (
           <SettingsListItem
             variant="arrow"
-            icon={<MaterialIcons name="copyright" size={20} />}
+            icon={
+              <MaterialIcons
+                name="copyright"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
             text={getTranslation('about')}
             onPress={onAboutPress}
           />
@@ -341,9 +392,30 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     }
   };
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
+    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
+
+    Navigation.mergeOptions(props.componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+      bottomTab: {
+        textColor: tabIconDefaultColor,
+        selectedTextColor: tabIconSelectedColor,
+        iconColor: tabIconDefaultColor,
+        selectedIconColor: tabIconSelectedColor,
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
+        style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
         data={[
           {key: 'autoRefreshing'},
           {key: 'calendarSync'},
@@ -355,7 +427,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           {key: 'about'},
         ]}
         renderItem={renderListItem}
-        ItemSeparatorComponent={Divider}
       />
     </SafeAreaView>
   );
@@ -363,12 +434,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
 // tslint:disable-next-line: no-object-mutation
 SettingsScreen.options = {
+  layout: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
     title: {
       text: getTranslation('settings'),
     },
     largeTitle: {
-      visible: true,
+      visible: false,
     },
   },
 };

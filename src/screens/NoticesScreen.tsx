@@ -34,6 +34,7 @@ import {
   withCourseInfo,
 } from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {initialMode, useDarkMode} from 'react-native-dark-mode';
 
 interface INoticesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -271,9 +272,29 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     withCourseInfo<INotice>
   >(notices, pinnedNotices, hidden, fuseOptions);
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
+    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
+
+    Navigation.mergeOptions(props.componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+      bottomTab: {
+        textColor: tabIconDefaultColor,
+        selectedTextColor: tabIconSelectedColor,
+        iconColor: tabIconDefaultColor,
+        selectedIconColor: tabIconSelectedColor,
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
   return (
     <PaperProvider>
-      <SafeAreaView style={{flex: 1, backgroundColor: 'white'}}>
+      <SafeAreaView
+        style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         {Platform.OS === 'android' && (
           <Searchbar
             style={{elevation: 4}}
@@ -284,6 +305,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           />
         )}
         <FlatList
+          style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
@@ -319,12 +341,15 @@ const fuseOptions: FuseOptions<withCourseInfo<INotice>> = {
 
 // tslint:disable-next-line: no-object-mutation
 NoticesScreen.options = {
+  layout: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
     title: {
       text: getTranslation('notices'),
     },
     largeTitle: {
-      visible: true,
+      visible: false,
     },
     searchBar: true,
     searchBarHiddenWhenScrolling: true,

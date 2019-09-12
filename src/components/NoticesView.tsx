@@ -9,6 +9,7 @@ import Colors from '../constants/Colors';
 import {INotice} from '../redux/types/state';
 import EmptyList from './EmptyList';
 import NoticeCard from './NoticeCard';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface INoticesViewProps {
   readonly notices: ReadonlyArray<INotice>;
@@ -38,8 +39,11 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
 
   const keyExtractor = (item: any) => item.id;
 
+  const isDarkMode = useDarkMode();
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={notices}
