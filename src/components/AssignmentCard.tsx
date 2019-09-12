@@ -1,6 +1,6 @@
 import React from 'react';
 import {Platform, StyleSheet, View} from 'react-native';
-import {iOSColors, iOSUIKit} from 'react-native-typography';
+import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
@@ -10,6 +10,7 @@ import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
 import Text from './Text';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IAssignmentCardProps extends IInteractablePreviewWrapperProps {
   readonly title: string;
@@ -39,6 +40,8 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     dragEnabled,
   } = props;
 
+  const isDarkMode = useDarkMode();
+
   return (
     <InteractablePreviewWrapper
       pinned={pinned}
@@ -48,7 +51,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
       dragEnabled={dragEnabled}>
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: isDarkMode ? 'black' : 'white',
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
@@ -65,7 +68,9 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           <Text
             style={[
               {flex: 1},
-              iOSUIKit.bodyEmphasized,
+              isDarkMode
+                ? iOSUIKit.bodyEmphasizedWhite
+                : iOSUIKit.bodyEmphasized,
               Platform.OS === 'android' && {fontWeight: 'bold'},
             ]}
             numberOfLines={1}
@@ -77,7 +82,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
               style={{marginLeft: 5}}
               name="attachment"
               size={18}
-              color={iOSColors.yellow}
+              color={isDarkMode ? Colors.yellowDark : Colors.yellowLight}
             />
           )}
           {submitted && (
@@ -85,7 +90,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
               style={{marginLeft: 5}}
               name="done"
               size={18}
-              color={iOSColors.green}
+              color={isDarkMode ? Colors.greenDark : Colors.greenLight}
             />
           )}
           {graded && (
@@ -93,7 +98,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
               style={{marginLeft: 5}}
               name="grade"
               size={18}
-              color={iOSColors.red}
+              color={isDarkMode ? Colors.redDark : Colors.redLight}
             />
           )}
         </View>
@@ -101,7 +106,9 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           style={{
             marginTop: 8,
           }}>
-          <Text style={iOSUIKit.subhead} numberOfLines={3}>
+          <Text
+            style={isDarkMode ? iOSUIKit.subheadWhite : iOSUIKit.subhead}
+            numberOfLines={3}>
             {removeTags(description || '') ||
               getTranslation('noAssignmentDescription')}
           </Text>
@@ -114,12 +121,20 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
               marginTop: 10,
             },
           ]}>
-          <Text style={{color: iOSColors.gray, fontSize: 13}}>
+          <Text
+            style={{
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              fontSize: 13,
+            }}>
             {courseName &&
               courseTeacherName &&
               `${courseTeacherName} / ${courseName}`}
           </Text>
-          <Text style={{color: iOSColors.gray, fontSize: 13}}>
+          <Text
+            style={{
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              fontSize: 13,
+            }}>
             {getLocale().startsWith('zh')
               ? dayjs().isAfter(dayjs(date))
                 ? dayjs().to(dayjs(date)) + '截止'

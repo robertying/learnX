@@ -1,6 +1,6 @@
 import React from 'react';
 import {Platform, StyleSheet, View} from 'react-native';
-import {iOSColors, iOSUIKit} from 'react-native-typography';
+import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
@@ -9,6 +9,7 @@ import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
 import Text from './Text';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IFileCardProps extends IInteractablePreviewWrapperProps {
   readonly title: string;
@@ -38,6 +39,8 @@ const FileCard: React.FC<IFileCardProps> = props => {
     dragEnabled,
   } = props;
 
+  const isDarkMode = useDarkMode();
+
   return (
     <InteractablePreviewWrapper
       pinned={pinned}
@@ -47,7 +50,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
       dragEnabled={dragEnabled}>
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: isDarkMode ? 'black' : 'white',
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
@@ -64,7 +67,9 @@ const FileCard: React.FC<IFileCardProps> = props => {
           <Text
             style={[
               {flex: 1},
-              iOSUIKit.bodyEmphasized,
+              isDarkMode
+                ? iOSUIKit.bodyEmphasizedWhite
+                : iOSUIKit.bodyEmphasized,
               Platform.OS === 'android' && {fontWeight: 'bold'},
             ]}
             numberOfLines={1}
@@ -79,7 +84,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
               style={{marginLeft: 5}}
               name="flag"
               size={18}
-              color={iOSColors.red}
+              color={isDarkMode ? Colors.redDark : Colors.redLight}
             />
           )}
         </View>
@@ -87,7 +92,9 @@ const FileCard: React.FC<IFileCardProps> = props => {
           style={{
             marginTop: 8,
           }}>
-          <Text style={iOSUIKit.subhead} numberOfLines={3}>
+          <Text
+            style={isDarkMode ? iOSUIKit.subheadWhite : iOSUIKit.subhead}
+            numberOfLines={3}>
             {description || getTranslation('noFileDescription')}
           </Text>
         </View>
@@ -99,12 +106,20 @@ const FileCard: React.FC<IFileCardProps> = props => {
               marginTop: 10,
             },
           ]}>
-          <Text style={{color: iOSColors.gray, fontSize: 13}}>
+          <Text
+            style={{
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              fontSize: 13,
+            }}>
             {courseName &&
               courseTeacherName &&
               `${courseTeacherName} / ${courseName} `}
           </Text>
-          <Text style={{color: iOSColors.gray, fontSize: 13}}>
+          <Text
+            style={{
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              fontSize: 13,
+            }}>
             {dayjs(date).fromNow()}
           </Text>
         </View>

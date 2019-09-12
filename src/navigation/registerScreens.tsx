@@ -1,7 +1,6 @@
 import React from 'react';
 import {Navigation} from 'react-native-navigation';
 import {ConnectedComponentClass, Provider} from 'react-redux';
-import AnimatingActivityIndicator from '../components/AnimatingActivityIndicator';
 import EmptyScreen from '../components/EmptyScreen';
 import {store} from '../redux/store';
 import AboutScreen from '../screens/AboutScreen';
@@ -28,11 +27,6 @@ const storeWrapped = (
 );
 
 const registerScreens = () => {
-  Navigation.registerComponent(
-    'AnimatingActivityIndicator',
-    () => AnimatingActivityIndicator,
-  );
-
   Navigation.registerComponent('empty', () => EmptyScreen);
 
   Navigation.registerComponent(

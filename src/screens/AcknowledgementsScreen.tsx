@@ -3,9 +3,9 @@ import {SafeAreaView, ScrollView} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
 import Text from '../components/Text';
-import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {useDarkMode} from 'react-native-dark-mode';
 
 const deps: ReadonlyArray<any> = [
   ...Object.keys(packageConfig.dependencies),
@@ -13,8 +13,11 @@ const deps: ReadonlyArray<any> = [
 ];
 
 const AcknowledgementsScreen: INavigationScreen<{}> = () => {
+  const isDarkMode = useDarkMode();
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <ScrollView
         style={{flex: 1}}
         contentContainerStyle={{
@@ -50,7 +53,7 @@ const AcknowledgementsScreen: INavigationScreen<{}> = () => {
           <Text
             key={index}
             style={[
-              iOSUIKit.footnote,
+              isDarkMode ? iOSUIKit.footnoteWhite : iOSUIKit.footnote,
               {
                 marginTop: 2,
                 marginBottom: 2,

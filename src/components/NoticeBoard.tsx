@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import {iOSColors, iOSUIKit} from 'react-native-typography';
+import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AutoHeightWebView from '../components/AutoHeightWebView';
 import Colors from '../constants/Colors';
@@ -17,6 +17,7 @@ import {showToast} from '../helpers/toast';
 import Divider from './Divider';
 import Text from './Text';
 import TextButton from './TextButton';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export type INoticeBoardProps = TouchableHighlightProps & {
   readonly title: string;
@@ -28,6 +29,13 @@ export type INoticeBoardProps = TouchableHighlightProps & {
   readonly componentId: string;
   readonly onTransition?: () => void;
 };
+
+declare const preval: any;
+
+const darkreader = preval`
+  const fs = require('fs')
+  module.exports = fs.readFileSync(require.resolve('../../node_modules/darkreader/darkreader.js'), 'utf8')
+`;
 
 const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
   const {
@@ -77,15 +85,27 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     }
   };
 
+  const isDarkMode = useDarkMode();
+
   return (
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: isDarkMode ? 'black' : 'white',
       }}>
-      <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
+      <View
+        style={{
+          padding: 15,
+          paddingLeft: 20,
+          paddingRight: 20,
+        }}>
         <Text
-          style={[iOSUIKit.title3Emphasized, {lineHeight: 24}]}
+          style={[
+            isDarkMode
+              ? iOSUIKit.title3EmphasizedWhite
+              : iOSUIKit.title3Emphasized,
+            {lineHeight: 24},
+          ]}
           numberOfLines={2}
           ellipsizeMode="tail">
           {title}
@@ -97,8 +117,18 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
             justifyContent: 'space-between',
             marginTop: 5,
           }}>
-          <Text style={[iOSUIKit.body, {color: iOSColors.gray}]}>{author}</Text>
-          <Text style={[iOSUIKit.body, {color: iOSColors.gray}]}>
+          <Text
+            style={[
+              iOSUIKit.body,
+              {color: isDarkMode ? Colors.grayDark : Colors.grayLight},
+            ]}>
+            {author}
+          </Text>
+          <Text
+            style={[
+              iOSUIKit.body,
+              {color: isDarkMode ? Colors.grayDark : Colors.grayLight},
+            ]}>
             {dayjs(publishTime).format('LL')}
           </Text>
         </View>
@@ -118,9 +148,10 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
               style={{marginRight: 5}}
               name="attachment"
               size={18}
-              color={Colors.theme}
+              color={isDarkMode ? Colors.purpleDark : Colors.theme}
             />
             <TextButton
+              textStyle={{color: isDarkMode ? Colors.purpleDark : Colors.theme}}
               // tslint:disable-next-line: jsx-no-lambda
               onPress={() =>
                 onAttachmentPress(
@@ -142,19 +173,30 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
         source={{
           html: `
           <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/>
-            <script
-              id="darkreader"
-              src="https://unpkg.com/darkreader"
-              async
-              defer
-            ></script>
-            <script>
-              var script = document.querySelector("#darkreader");
-              script.addEventListener("load", function() {
-                DarkReader.enable();
-              });
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0" />
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                ${
+                  isDarkMode
+                    ? 'background-color: black;'
+                    : 'background-color: white;'
+                }
+              }
+            </style>
+            ${
+              isDarkMode
+                ? `
+                <script>
+              ${darkreader}
             </script>
+            <script>
+              DarkReader.enable();
+            </script>
+            `
+                : ''
+            }
           </head>
           <body>
             ${content || getTranslation('noNoticeContent')}

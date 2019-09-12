@@ -9,6 +9,7 @@ import Colors from '../constants/Colors';
 import {IFile} from '../redux/types/state';
 import EmptyList from './EmptyList';
 import FileCard from './FileCard';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IFilesViewProps {
   readonly files: ReadonlyArray<IFile>;
@@ -44,8 +45,11 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
 
   const keyExtractor = (item: any) => item.id;
 
+  const isDarkMode = useDarkMode();
+
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: Colors.background}}>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={files}

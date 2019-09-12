@@ -3,6 +3,7 @@ import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
 import {loadTabIcons} from '../helpers/icons';
+import {initialMode} from 'react-native-dark-mode';
 
 export const getAuthLoadingRoot = () => {
   const authLoadingRoot: LayoutRoot = {
@@ -14,6 +15,11 @@ export const getAuthLoadingRoot = () => {
   };
   return authLoadingRoot;
 };
+
+const tabIconDefaultColor =
+  initialMode === 'dark' ? Colors.grayDark : Colors.grayLight;
+const tabIconSelectedColor =
+  initialMode === 'dark' ? Colors.purpleDark : Colors.theme;
 
 export const getNavigationRoot = async () => {
   const icons = await loadTabIcons();
@@ -33,11 +39,11 @@ export const getNavigationRoot = async () => {
           options: {
             bottomTab: {
               text: getTranslation('notices'),
-              textColor: Colors.tabIconDefault,
-              selectedTextColor: Colors.tabIconSelected,
+              textColor: tabIconDefaultColor,
+              selectedTextColor: tabIconSelectedColor,
               icon: icons.notifications,
-              iconColor: Colors.tabIconDefault,
-              selectedIconColor: Colors.tabIconSelected,
+              iconColor: tabIconDefaultColor,
+              selectedIconColor: tabIconSelectedColor,
             },
           },
         },
@@ -54,11 +60,11 @@ export const getNavigationRoot = async () => {
           options: {
             bottomTab: {
               text: getTranslation('files'),
-              textColor: Colors.tabIconDefault,
-              selectedTextColor: Colors.tabIconSelected,
+              textColor: tabIconDefaultColor,
+              selectedTextColor: tabIconSelectedColor,
               icon: icons.folder,
-              iconColor: Colors.tabIconDefault,
-              selectedIconColor: Colors.tabIconSelected,
+              iconColor: tabIconDefaultColor,
+              selectedIconColor: tabIconSelectedColor,
             },
           },
         },
@@ -75,11 +81,11 @@ export const getNavigationRoot = async () => {
           options: {
             bottomTab: {
               text: getTranslation('assignments'),
-              textColor: Colors.tabIconDefault,
-              selectedTextColor: Colors.tabIconSelected,
+              textColor: tabIconDefaultColor,
+              selectedTextColor: tabIconSelectedColor,
               icon: icons.today,
-              iconColor: Colors.tabIconDefault,
-              selectedIconColor: Colors.tabIconSelected,
+              iconColor: tabIconDefaultColor,
+              selectedIconColor: tabIconSelectedColor,
             },
           },
         },
@@ -96,11 +102,11 @@ export const getNavigationRoot = async () => {
           options: {
             bottomTab: {
               text: getTranslation('courses'),
-              textColor: Colors.tabIconDefault,
-              selectedTextColor: Colors.tabIconSelected,
+              textColor: tabIconDefaultColor,
+              selectedTextColor: tabIconSelectedColor,
               icon: icons.apps,
-              iconColor: Colors.tabIconDefault,
-              selectedIconColor: Colors.tabIconSelected,
+              iconColor: tabIconDefaultColor,
+              selectedIconColor: tabIconSelectedColor,
             },
           },
         },
@@ -118,11 +124,11 @@ export const getNavigationRoot = async () => {
           options: {
             bottomTab: {
               text: getTranslation('settings'),
-              textColor: Colors.tabIconDefault,
-              selectedTextColor: Colors.tabIconSelected,
+              textColor: tabIconDefaultColor,
+              selectedTextColor: tabIconSelectedColor,
               icon: icons.settings,
-              iconColor: Colors.tabIconDefault,
-              selectedIconColor: Colors.tabIconSelected,
+              iconColor: tabIconDefaultColor,
+              selectedIconColor: tabIconSelectedColor,
             },
           },
         },

@@ -1,12 +1,13 @@
 import React from 'react';
 import {Platform, StyleSheet, View} from 'react-native';
-import {iOSColors, iOSUIKit} from 'react-native-typography';
+import {iOSUIKit} from 'react-native-typography';
 import Colors from '../constants/Colors';
 import IconText from './IconText';
 import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
 import Text from './Text';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export interface ICourseCardProps extends IInteractablePreviewWrapperProps {
   readonly courseName: string;
@@ -31,6 +32,8 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
     onPinned,
   } = props;
 
+  const isDarkMode = useDarkMode();
+
   return (
     <InteractablePreviewWrapper
       pinned={pinned}
@@ -40,7 +43,7 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
       dragEnabled={true}>
       <View
         style={{
-          backgroundColor: '#fff',
+          backgroundColor: isDarkMode ? 'black' : 'white',
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
@@ -50,7 +53,7 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
         <Text
           style={[
             {flex: 1},
-            iOSUIKit.bodyEmphasized,
+            isDarkMode ? iOSUIKit.bodyEmphasizedWhite : iOSUIKit.bodyEmphasized,
             Platform.OS === 'android' && {fontWeight: 'bold'},
           ]}
           numberOfLines={1}
@@ -59,21 +62,38 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
         </Text>
         <View style={{flexDirection: 'row', alignItems: 'flex-end', flex: 1}}>
           <View style={{flex: 1}}>
-            <Text style={[iOSUIKit.subhead, {marginTop: 10}]}>
+            <Text
+              style={[
+                isDarkMode ? iOSUIKit.subheadWhite : iOSUIKit.subhead,
+                {marginTop: 10},
+              ]}>
               {courseTeacherName}
             </Text>
-            <Text style={{color: iOSColors.gray, fontSize: 13, marginTop: 10}}>
+            <Text
+              style={{
+                color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+                fontSize: 13,
+                marginTop: 10,
+              }}>
               {semester}
             </Text>
           </View>
           <View style={[styles.flexRow, {flex: 1}]}>
             <IconText
               name="notifications"
-              color="grey"
+              color={isDarkMode ? Colors.grayDark : Colors.grayLight}
               text={`${noticesCount}`}
             />
-            <IconText name="folder" color="grey" text={`${filesCount}`} />
-            <IconText name="today" color="grey" text={`${assignmentsCount}`} />
+            <IconText
+              name="folder"
+              color={isDarkMode ? Colors.grayDark : Colors.grayLight}
+              text={`${filesCount}`}
+            />
+            <IconText
+              name="today"
+              color={isDarkMode ? Colors.grayDark : Colors.grayLight}
+              text={`${assignmentsCount}`}
+            />
           </View>
         </View>
       </View>

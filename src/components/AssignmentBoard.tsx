@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import {iOSColors, iOSUIKit} from 'react-native-typography';
+import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
@@ -17,6 +17,7 @@ import AutoHeightWebView from './AutoHeightWebView';
 import Divider from './Divider';
 import Text from './Text';
 import TextButton from './TextButton';
+import {useDarkMode} from 'react-native-dark-mode';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   readonly title: string;
@@ -33,6 +34,13 @@ export type IAssignmentBoardProps = TouchableHighlightProps & {
   readonly gradeContent?: string;
   readonly onTransition?: () => void;
 };
+
+declare const preval: any;
+
+const darkreader = preval`
+  const fs = require('fs')
+  module.exports = fs.readFileSync(require.resolve('../../node_modules/darkreader/darkreader.js'), 'utf8')
+`;
 
 const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
   const {
@@ -87,20 +95,39 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     }
   };
 
+  const isDarkMode = useDarkMode();
+
   return (
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: isDarkMode ? 'black' : 'white',
       }}>
-      <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
+      <View
+        style={{
+          padding: 15,
+          paddingLeft: 20,
+          paddingRight: 20,
+        }}>
         <Text
-          style={[iOSUIKit.title3Emphasized, {lineHeight: 24}]}
+          style={[
+            isDarkMode
+              ? iOSUIKit.title3EmphasizedWhite
+              : iOSUIKit.title3Emphasized,
+            {lineHeight: 24},
+          ]}
           numberOfLines={2}
           ellipsizeMode="tail">
           {title}
         </Text>
-        <Text style={[iOSUIKit.body, {color: iOSColors.gray, marginTop: 5}]}>
+        <Text
+          style={[
+            iOSUIKit.body,
+            {
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              marginTop: 5,
+            },
+          ]}>
           {getLocale().startsWith('zh')
             ? dayjs(deadline).format('llll') + ' 截止'
             : 'Submission close on ' + dayjs(deadline).format('llll')}
@@ -121,9 +148,10 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               style={{marginRight: 5}}
               name="attachment"
               size={18}
-              color={Colors.theme}
+              color={isDarkMode ? Colors.purpleDark : Colors.theme}
             />
             <TextButton
+              textStyle={{color: isDarkMode ? Colors.purpleDark : Colors.theme}}
               // tslint:disable-next-line: jsx-no-lambda
               onPress={() =>
                 onAttachmentPress(
@@ -153,9 +181,10 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               style={{marginRight: 5}}
               name="done"
               size={18}
-              color={Colors.theme}
+              color={isDarkMode ? Colors.purpleDark : Colors.theme}
             />
             <TextButton
+              textStyle={{color: isDarkMode ? Colors.purpleDark : Colors.theme}}
               // tslint:disable-next-line: jsx-no-lambda
               onPress={() =>
                 onAttachmentPress(
@@ -179,7 +208,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                 style={{marginRight: 5}}
                 name="grade"
                 size={18}
-                color={Colors.theme}
+                color={isDarkMode ? Colors.purpleDark : Colors.theme}
               />
               <Text>
                 {grade && gradeLevel
@@ -197,11 +226,38 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
         </>
       ) : null}
       <AutoHeightWebView
-        style={{margin: 15}}
         originWhitelist={['*']}
         source={{
-          html: `<head><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0"/></head><body>${description ||
-            getTranslation('noAssignmentDescription')}</body>`,
+          html: `
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0" />
+            <style>
+              body {
+                margin: 0;
+                padding: 20px;
+                ${
+                  isDarkMode
+                    ? 'background-color: black;'
+                    : 'background-color: white;'
+                }
+              }
+            </style>
+            ${
+              isDarkMode
+                ? `
+                <script>
+              ${darkreader}
+            </script>
+            <script>
+              DarkReader.enable();
+            </script>
+            `
+                : ''
+            }
+          </head>
+          <body>
+            ${description || getTranslation('noAssignmentDescription')}
+          </body>`,
         }}
       />
     </ScrollView>

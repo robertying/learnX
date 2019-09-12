@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import React, {useMemo, useState} from 'react';
-import {Dimensions, Platform, View} from 'react-native';
+import React, {useMemo, useState, useCallback, useEffect} from 'react';
+import {Dimensions, Platform, View, SafeAreaView} from 'react-native';
 import Modal from 'react-native-modal';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -34,24 +34,12 @@ import {
   IPersistAppState,
 } from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {useDarkMode} from 'react-native-dark-mode';
 
 interface ITabRoute {
   readonly key: string;
   readonly title: string;
 }
-
-const renderTabBar = (props: Props<ITabRoute>) => (
-  <TabBar
-    {...props}
-    indicatorStyle={{backgroundColor: Colors.theme}}
-    style={{backgroundColor: 'white'}}
-    renderLabel={renderLabel}
-  />
-);
-
-const renderLabel: Props<ITabRoute>['renderLabel'] = ({route}) => (
-  <Text style={{color: 'black'}}>{route.title}</Text>
-);
 
 interface ICourseDetailScreenStateProps {
   readonly notices: ReadonlyArray<INotice>;
@@ -191,6 +179,37 @@ const CourseDetailScreen: INavigationScreen<
     [assignments.length, isFetchingAssignments],
   );
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    Navigation.mergeOptions(props.componentId, {
+      topBar: {
+        title: {
+          color: isDarkMode ? 'white' : 'black',
+        },
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
+  const renderTabBar = useCallback(
+    (props: Props<ITabRoute>) => (
+      <TabBar
+        style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+        indicatorStyle={{
+          backgroundColor: isDarkMode ? Colors.purpleDark : Colors.theme,
+        }}
+        {...props}
+        renderLabel={renderLabel}
+      />
+    ),
+    [isDarkMode],
+  );
+
+  const renderLabel: Props<ITabRoute>['renderLabel'] = useCallback(
+    ({route}) => <Text>{route.title}</Text>,
+    [isDarkMode],
+  );
+
   const renderScene = ({
     route,
   }: SceneRendererProps & {
@@ -209,7 +228,8 @@ const CourseDetailScreen: INavigationScreen<
   };
 
   return (
-    <>
+    <SafeAreaView
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <TabView
         navigationState={{index, routes}}
         renderTabBar={renderTabBar as any}
@@ -227,6 +247,7 @@ const CourseDetailScreen: INavigationScreen<
         onBackdropPress={() =>
           setCurrentModal({type: 'Notice', visible: false})
         }
+        backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
@@ -236,7 +257,11 @@ const CourseDetailScreen: INavigationScreen<
             ? Layout.window.height + 100
             : Layout.window.height
         }>
-        <View style={{height: '80%', backgroundColor: 'white'}}>
+        <View
+          style={{
+            height: '80%',
+            backgroundColor: isDarkMode ? 'black' : 'white',
+          }}>
           {currentModal.data && currentModal.type === 'Notice' && (
             <NoticeBoard
               componentId={props.componentId}
@@ -287,17 +312,8 @@ const CourseDetailScreen: INavigationScreen<
           )}
         </View>
       </Modal>
-    </>
+    </SafeAreaView>
   );
-};
-
-// tslint:disable-next-line: no-object-mutation
-CourseDetailScreen.options = {
-  topBar: {
-    largeTitle: {
-      visible: false,
-    },
-  },
 };
 
 function mapStateToProps(
