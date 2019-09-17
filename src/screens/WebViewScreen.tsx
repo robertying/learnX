@@ -3,6 +3,7 @@ import {ProgressViewIOS, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import MediumPlaceholder from '../components/MediumPlaceholder';
+import MediumPlaceholderDark from '../components/MediumPlaceholderDark';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {downloadFile, shareFile} from '../helpers/share';
@@ -94,22 +95,38 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         originWhitelist={['*']}
         decelerationRate="normal"
       />
-      {loading && (
-        <View
-          style={{
-            backgroundColor: 'white',
-            position: 'absolute',
-            top: 0,
-            bottom: 0,
-            left: 0,
-            right: 0,
-          }}>
-          <MediumPlaceholder style={{margin: 15}} loading={true} />
-          <MediumPlaceholder style={{margin: 15}} loading={true} />
-          <MediumPlaceholder style={{margin: 15}} loading={true} />
-          <MediumPlaceholder style={{margin: 15}} loading={true} />
-        </View>
-      )}
+      {loading &&
+        (isDarkMode ? (
+          <View
+            style={{
+              backgroundColor: 'black',
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}>
+            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+          </View>
+        ) : (
+          <View
+            style={{
+              backgroundColor: 'white',
+              position: 'absolute',
+              top: 0,
+              bottom: 0,
+              left: 0,
+              right: 0,
+            }}>
+            <MediumPlaceholder style={{margin: 15}} loading={true} />
+            <MediumPlaceholder style={{margin: 15}} loading={true} />
+            <MediumPlaceholder style={{margin: 15}} loading={true} />
+            <MediumPlaceholder style={{margin: 15}} loading={true} />
+          </View>
+        ))}
       {loading && (
         <ProgressViewIOS
           style={{
