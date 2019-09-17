@@ -50,4 +50,5 @@ export default {
   networkError: '网络错误',
   fetchingSemesters: '登录成功，获取学期信息……',
   refreshing: '刷新中……',
+  help: '帮助',
 };

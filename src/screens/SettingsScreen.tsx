@@ -141,6 +141,31 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     }
   };
 
+  const onHelpPress = () => {
+    if (DeviceInfo.isIPad()) {
+      Navigation.setStackRoot('detail.root', [
+        {
+          component: {
+            name: 'settings.help',
+            options: {
+              animations: {
+                setStackRoot: {
+                  enabled: false,
+                },
+              } as any,
+            },
+          },
+        },
+      ]);
+    } else {
+      Navigation.push(props.componentId, {
+        component: {
+          name: 'settings.help',
+        },
+      });
+    }
+  };
+
   const onCalendarSyncSwitchChange = (enabled: boolean) => {
     if (enabled) {
       if (assignments) {
@@ -363,6 +388,21 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             containerStyle={{marginTop: 10}}
             icon={
               <MaterialCommunityIcons
+                name="help"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
+            text={getTranslation('help')}
+            onPress={onHelpPress}
+          />
+        );
+      case 7:
+        return (
+          <SettingsListItem
+            variant="arrow"
+            icon={
+              <MaterialCommunityIcons
                 name="tag-heart"
                 size={20}
                 color={isDarkMode ? Colors.grayDark : undefined}
@@ -372,7 +412,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 7:
+      case 8:
         return (
           <SettingsListItem
             variant="arrow"
@@ -438,6 +478,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           {key: 'logout'},
           {key: 'clearFileCache'},
           {key: 'checkUpdate'},
+          {key: 'help'},
           {key: 'acknowledgement'},
           {key: 'about'},
         ]}

@@ -18,6 +18,7 @@ import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import WebViewScreen from '../screens/WebViewScreen';
 import Text from '../components/Text';
+import HelpScreen from '../screens/HelpScreen';
 
 const storeWrapped = (
   Component: ConnectedComponentClass<React.FC<any>, any>,
@@ -98,6 +99,7 @@ const registerScreens = () => {
     () => AcknowledgementsScreen,
   );
   Navigation.registerComponent('settings.about', () => AboutScreen);
+  Navigation.registerComponent('settings.help', () => HelpScreen);
 
   Navigation.registerComponent('webview', () => WebViewScreen);
 };

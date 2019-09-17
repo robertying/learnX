@@ -50,4 +50,5 @@ export default {
   networkError: 'Network error',
   fetchingSemesters: 'Logged in. Fetching semesters...',
   refreshing: 'Refreshing...',
+  help: 'Help',
 };
