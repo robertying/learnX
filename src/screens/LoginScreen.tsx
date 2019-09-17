@@ -25,6 +25,8 @@ import {setMockStore} from '../redux/actions/root';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
+import {useDarkMode} from 'react-native-dark-mode';
+import Text from '../components/Text';
 
 interface ILoginScreenProps {
   readonly loggedIn: boolean;
@@ -126,10 +128,20 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     }
   };
 
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    Navigation.mergeOptions(props.componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+    });
+  }, [isDarkMode, props.componentId]);
+
   return (
     <SafeAreaView
       testID="LoginScreen"
-      style={{flex: 1, backgroundColor: 'white'}}>
+      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <KeyboardAvoidingView
         style={{
           flex: 1,
@@ -138,10 +150,14 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableWithoutFeedback onPress={onLogoPress}>
-          <Image
-            style={{height: logoSize, width: logoSize}}
-            source={require('../assets/images/MaskedAppIcon.png')}
-          />
+          {isDarkMode ? (
+            <Text style={{fontSize: logoSize}}>X</Text>
+          ) : (
+            <Image
+              style={{height: logoSize, width: logoSize}}
+              source={require('../assets/images/MaskedAppIcon.png')}
+            />
+          )}
         </TouchableWithoutFeedback>
         <View
           style={{
@@ -151,12 +167,20 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
           }}>
           <TextField
             testID="UsernameTextField"
-            icon={<AntDesign name="user" size={25} color={Colors.theme} />}
-            tintColor={Colors.theme}
+            icon={
+              <AntDesign
+                name="user"
+                size={25}
+                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              />
+            }
+            tintColor={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
             textContentType="username"
             returnKeyType="next"
             placeholder={getTranslation('username')}
-            placeholderTextColor={Colors.lightTheme}
+            placeholderTextColor={
+              isDarkMode ? Colors.purpleDark : Colors.lightTheme
+            }
             onSubmitEditing={handleKeyboardNext}
             ref={usernameTextFieldRef}
             value={username}
@@ -165,13 +189,21 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
           <TextField
             testID="PasswordTextField"
             containerStyle={{marginTop: 20}}
-            icon={<AntDesign name="key" size={25} color={Colors.theme} />}
-            tintColor={Colors.theme}
+            icon={
+              <AntDesign
+                name="key"
+                size={25}
+                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              />
+            }
+            tintColor={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
             textContentType="password"
             secureTextEntry={true}
             returnKeyType="done"
             placeholder={getTranslation('password')}
-            placeholderTextColor={Colors.lightTheme}
+            placeholderTextColor={
+              isDarkMode ? Colors.purpleDark : Colors.lightTheme
+            }
             ref={passwordTextFieldRef}
             value={password}
             onChangeText={handlePasswordChange}
@@ -179,7 +211,9 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
           <RaisedButton
             testID="LoginButton"
             style={{
-              backgroundColor: Colors.theme,
+              backgroundColor: isDarkMode
+                ? Colors.purpleDark
+                : Colors.purpleLight,
               width: 100,
               height: 40,
               marginTop: 30,
