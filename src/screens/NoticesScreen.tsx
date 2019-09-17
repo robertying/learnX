@@ -373,7 +373,7 @@ const fuseOptions: FuseOptions<withCourseInfo<INotice>> = {
   distance: 100,
   maxPatternLength: 32,
   minMatchCharLength: 1,
-  keys: ['courseName', 'courseTeacherName'],
+  keys: ['title', 'content', 'attachmentName'],
 };
 
 // tslint:disable-next-line: no-object-mutation
