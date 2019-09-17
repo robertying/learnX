@@ -17,7 +17,7 @@ const NoticePlaceholder: React.FunctionComponent<
         style={[
           {
             height: 125,
-            backgroundColor: 'white',
+            backgroundColor: 'black',
             justifyContent: 'space-between',
           },
           props.style,
@@ -57,14 +57,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   line: {
-    backgroundColor: Colors.placeholder,
+    backgroundColor: Colors.grayDark,
     height: 16,
     marginBottom: 6,
     width: '100%',
     borderRadius: 5,
   },
   shortLine: {
-    backgroundColor: Colors.placeholder,
+    backgroundColor: Colors.grayDark,
     height: 16,
     marginLeft: 20,
     width: '20%',
