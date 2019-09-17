@@ -1,13 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
 import React, {useEffect} from 'react';
-import {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  Platform,
-  RefreshControl,
-  SafeAreaView,
-} from 'react-native';
+import {Platform, RefreshControl, SafeAreaView} from 'react-native';
 import {FlatList} from 'react-native-gesture-handler';
 import {Navigation} from 'react-native-navigation';
 import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
@@ -264,21 +258,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   );
 
   /**
-   * iOS Refresh
-   */
-
-  const onScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-
-    if (offsetY < -60 && !isFetching) {
-      showToast(getTranslation('refreshing'), 3000);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      invalidateAll();
-    }
-  };
-
-  /**
-   * Android Refresh
+   * Refresh
    */
 
   const onRefresh = () => {
@@ -348,17 +328,12 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           renderItem={renderListItem}
           // tslint:disable-next-line: jsx-no-lambda
           keyExtractor={item => item.id}
-          onScrollEndDrag={Platform.OS === 'ios' ? onScrollEndDrag : undefined}
           refreshControl={
-            Platform.OS === 'android' ? (
-              <RefreshControl
-                colors={[Colors.theme]}
-                onRefresh={onRefresh}
-                refreshing={isFetching}
-              />
-            ) : (
-              undefined
-            )
+            <RefreshControl
+              colors={[Colors.theme]}
+              onRefresh={onRefresh}
+              refreshing={isFetching}
+            />
           }
         />
       </SafeAreaView>
