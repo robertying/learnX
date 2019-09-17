@@ -10,7 +10,7 @@ import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode} from 'react-native-dark-mode';
+import {useDarkMode, initialMode} from 'react-native-dark-mode';
 import {Navigation} from 'react-native-navigation';
 
 interface ISemestersSettingsScreenStateProps {
@@ -80,7 +80,17 @@ const SemestersSettingsScreen: INavigationScreen<
     Navigation.mergeOptions(props.componentId, {
       topBar: {
         title: {
-          color: isDarkMode ? 'white' : 'black',
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('changeSemester'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
         },
       },
     });
@@ -109,7 +119,17 @@ const SemestersSettingsScreen: INavigationScreen<
 SemestersSettingsScreen.options = {
   topBar: {
     title: {
-      text: getTranslation('changeSemester'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('changeSemester'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
   },
 };

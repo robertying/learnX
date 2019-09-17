@@ -7,7 +7,7 @@ import TextButton from '../components/TextButton';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode} from 'react-native-dark-mode';
+import {useDarkMode, initialMode} from 'react-native-dark-mode';
 import {Navigation} from 'react-native-navigation';
 
 const AboutScreen: INavigationScreen<{}> = props => {
@@ -21,7 +21,17 @@ const AboutScreen: INavigationScreen<{}> = props => {
     Navigation.mergeOptions(props.componentId, {
       topBar: {
         title: {
-          color: isDarkMode ? 'white' : 'black',
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('about'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
         },
       },
     });
@@ -78,7 +88,17 @@ const AboutScreen: INavigationScreen<{}> = props => {
 AboutScreen.options = {
   topBar: {
     title: {
-      text: getTranslation('about'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('about'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
   },
 };

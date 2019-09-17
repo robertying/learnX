@@ -12,6 +12,7 @@ interface INoticeDetailScreenProps {
   readonly publishTime: string;
   readonly attachmentName?: string;
   readonly attachmentUrl?: string;
+  readonly courseName?: string;
 }
 
 const NoticeDetailScreen: INavigationScreen<
@@ -23,11 +24,21 @@ const NoticeDetailScreen: INavigationScreen<
     Navigation.mergeOptions(props.componentId, {
       topBar: {
         title: {
-          color: isDarkMode ? 'white' : 'black',
+          component: {
+            name: 'text',
+            passProps: {
+              children: props.courseName,
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
         },
       },
     });
-  }, [isDarkMode, props.componentId]);
+  }, [isDarkMode, props.componentId, props.courseName]);
 
   return <NoticeBoard {...props} />;
 };
