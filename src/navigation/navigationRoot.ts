@@ -37,6 +37,9 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
+            layout: {
+              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+            },
             bottomTab: {
               text: getTranslation('notices'),
               textColor: tabIconDefaultColor,
@@ -58,6 +61,9 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
+            layout: {
+              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+            },
             bottomTab: {
               text: getTranslation('files'),
               textColor: tabIconDefaultColor,
@@ -79,6 +85,9 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
+            layout: {
+              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+            },
             bottomTab: {
               text: getTranslation('assignments'),
               textColor: tabIconDefaultColor,
@@ -100,6 +109,9 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
+            layout: {
+              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+            },
             bottomTab: {
               text: getTranslation('courses'),
               textColor: tabIconDefaultColor,
@@ -122,6 +134,9 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
+            layout: {
+              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+            },
             bottomTab: {
               text: getTranslation('settings'),
               textColor: tabIconDefaultColor,
@@ -150,6 +165,12 @@ export const getNavigationRoot = async () => {
                   {
                     component: {
                       name: 'empty',
+                      options: {
+                        layout: {
+                          backgroundColor:
+                            initialMode === 'dark' ? 'black' : 'white',
+                        },
+                      },
                     },
                   },
                 ],
