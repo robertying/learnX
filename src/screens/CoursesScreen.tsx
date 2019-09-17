@@ -147,11 +147,22 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
             name: 'courses.detail',
             passProps: {
               courseId,
+              courseName,
             },
             options: {
               topBar: {
                 title: {
-                  text: courseName,
+                  component: {
+                    name: 'text',
+                    passProps: {
+                      children: courseName,
+                      style: {
+                        fontSize: 17,
+                        fontWeight: '500',
+                        color: isDarkMode ? 'white' : 'black',
+                      },
+                    },
+                  },
                 },
               },
               animations: {
@@ -169,11 +180,22 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
           name: 'courses.detail',
           passProps: {
             courseId,
+            courseName,
           },
           options: {
             topBar: {
               title: {
-                text: courseName,
+                component: {
+                  name: 'text',
+                  passProps: {
+                    children: courseName,
+                    style: {
+                      fontSize: 17,
+                      fontWeight: '500',
+                      color: isDarkMode ? 'white' : 'black',
+                    },
+                  },
+                },
               },
             },
           },
@@ -254,6 +276,21 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      topBar: {
+        title: {
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('courses'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
+        },
+      },
       bottomTab: {
         textColor: tabIconDefaultColor,
         selectedTextColor: tabIconSelectedColor,
@@ -297,7 +334,17 @@ CoursesScreen.options = {
   },
   topBar: {
     title: {
-      text: getTranslation('courses'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('courses'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
     largeTitle: {
       visible: false,

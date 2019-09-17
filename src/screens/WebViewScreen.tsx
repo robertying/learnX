@@ -61,6 +61,21 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      topBar: {
+        title: {
+          component: {
+            name: 'text',
+            passProps: {
+              children: props.filename,
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
+        },
+      },
       bottomTab: {
         textColor: tabIconDefaultColor,
         selectedTextColor: tabIconSelectedColor,
@@ -68,7 +83,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         selectedIconColor: tabIconSelectedColor,
       },
     });
-  }, [isDarkMode, props.componentId]);
+  }, [isDarkMode, props.componentId, props.filename]);
 
   return (
     <>

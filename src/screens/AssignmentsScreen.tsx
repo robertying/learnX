@@ -167,11 +167,22 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
                 grade: assignment.grade,
                 gradeLevel: assignment.gradeLevel,
                 gradeContent: assignment.gradeContent,
+                courseName: assignment.courseName,
               },
               options: {
                 topBar: {
                   title: {
-                    text: assignment.courseName,
+                    component: {
+                      name: 'text',
+                      passProps: {
+                        children: assignment.courseName,
+                        style: {
+                          fontSize: 17,
+                          fontWeight: '500',
+                          color: isDarkMode ? 'white' : 'black',
+                        },
+                      },
+                    },
                   },
                 },
                 animations: {
@@ -199,11 +210,22 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
               grade: assignment.grade,
               gradeLevel: assignment.gradeLevel,
               gradeContent: assignment.gradeContent,
+              courseName: assignment.courseName,
             },
             options: {
               topBar: {
                 title: {
-                  text: assignment.courseName,
+                  component: {
+                    name: 'text',
+                    passProps: {
+                      children: assignment.courseName,
+                      style: {
+                        fontSize: 17,
+                        fontWeight: '500',
+                        color: isDarkMode ? 'white' : 'black',
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -287,6 +309,21 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      topBar: {
+        title: {
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('assignments'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
+        },
+      },
       bottomTab: {
         textColor: tabIconDefaultColor,
         selectedTextColor: tabIconSelectedColor,
@@ -351,7 +388,17 @@ AssignmentsScreen.options = {
   },
   topBar: {
     title: {
-      text: getTranslation('assignments'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('assignments'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
     largeTitle: {
       visible: false,

@@ -17,6 +17,7 @@ export interface IAssignmentDetailScreenProps {
   readonly grade?: number;
   readonly gradeLevel?: string;
   readonly gradeContent?: string;
+  readonly courseName?: string;
 }
 
 const AssignmentDetailScreen: INavigationScreen<
@@ -28,11 +29,21 @@ const AssignmentDetailScreen: INavigationScreen<
     Navigation.mergeOptions(props.componentId, {
       topBar: {
         title: {
-          color: isDarkMode ? 'white' : 'black',
+          component: {
+            name: 'text',
+            passProps: {
+              children: props.courseName,
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
         },
       },
     });
-  }, [isDarkMode, props.componentId]);
+  }, [isDarkMode, props.componentId, props.courseName]);
 
   return <AssignmentBoard {...props} />;
 };

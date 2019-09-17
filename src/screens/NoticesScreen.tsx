@@ -171,11 +171,22 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
                 publishTime: notice.publishTime,
                 attachmentName: notice.attachmentName,
                 attachmentUrl: notice.attachmentUrl,
+                courseName: notice.courseName,
               },
               options: {
                 topBar: {
                   title: {
-                    text: notice.courseName,
+                    component: {
+                      name: 'text',
+                      passProps: {
+                        children: notice.courseName,
+                        style: {
+                          fontSize: 17,
+                          fontWeight: '500',
+                          color: isDarkMode ? 'white' : 'black',
+                        },
+                      },
+                    },
                   },
                 },
                 animations: {
@@ -198,11 +209,22 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
               publishTime: notice.publishTime,
               attachmentName: notice.attachmentName,
               attachmentUrl: notice.attachmentUrl,
+              courseName: notice.courseName,
             },
             options: {
               topBar: {
                 title: {
-                  text: notice.courseName,
+                  component: {
+                    name: 'text',
+                    passProps: {
+                      children: notice.courseName,
+                      style: {
+                        fontSize: 17,
+                        fontWeight: '500',
+                        color: isDarkMode ? 'white' : 'black',
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -282,6 +304,21 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      topBar: {
+        title: {
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('notices'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
+        },
+      },
       bottomTab: {
         textColor: tabIconDefaultColor,
         selectedTextColor: tabIconSelectedColor,
@@ -346,7 +383,17 @@ NoticesScreen.options = {
   },
   topBar: {
     title: {
-      text: getTranslation('notices'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('notices'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
     largeTitle: {
       visible: false,

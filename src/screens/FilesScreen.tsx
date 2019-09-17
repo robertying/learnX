@@ -181,7 +181,17 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             options: {
               topBar: {
                 title: {
-                  text: file.title,
+                  component: {
+                    name: 'text',
+                    passProps: {
+                      children: file.title,
+                      style: {
+                        fontSize: 17,
+                        fontWeight: '500',
+                        color: isDarkMode ? 'white' : 'black',
+                      },
+                    },
+                  },
                 },
               },
             },
@@ -271,6 +281,21 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      topBar: {
+        title: {
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('files'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
+        },
+      },
       bottomTab: {
         textColor: tabIconDefaultColor,
         selectedTextColor: tabIconSelectedColor,
@@ -335,7 +360,17 @@ FilesScreen.options = {
   },
   topBar: {
     title: {
-      text: getTranslation('files'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('files'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
     largeTitle: {
       visible: false,

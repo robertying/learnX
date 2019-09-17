@@ -185,7 +185,17 @@ const CourseDetailScreen: INavigationScreen<
     Navigation.mergeOptions(props.componentId, {
       topBar: {
         title: {
-          color: isDarkMode ? 'white' : 'black',
+          component: {
+            name: 'text',
+            passProps: {
+              children: props.courseName,
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
         },
       },
     });

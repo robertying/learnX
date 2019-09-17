@@ -17,6 +17,7 @@ import NoticesScreen from '../screens/NoticesScreen';
 import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import WebViewScreen from '../screens/WebViewScreen';
+import Text from '../components/Text';
 
 const storeWrapped = (
   Component: ConnectedComponentClass<React.FC<any>, any>,
@@ -28,6 +29,8 @@ const storeWrapped = (
 
 const registerScreens = () => {
   Navigation.registerComponent('empty', () => EmptyScreen);
+
+  Navigation.registerComponent('text', () => Text);
 
   Navigation.registerComponent(
     'auth.loading',

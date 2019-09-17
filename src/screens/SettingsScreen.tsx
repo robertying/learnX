@@ -402,6 +402,21 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      topBar: {
+        title: {
+          component: {
+            name: 'text',
+            passProps: {
+              children: getTranslation('settings'),
+              style: {
+                fontSize: 17,
+                fontWeight: '500',
+                color: isDarkMode ? 'white' : 'black',
+              },
+            },
+          },
+        },
+      },
       bottomTab: {
         textColor: tabIconDefaultColor,
         selectedTextColor: tabIconSelectedColor,
@@ -439,7 +454,17 @@ SettingsScreen.options = {
   },
   topBar: {
     title: {
-      text: getTranslation('settings'),
+      component: {
+        name: 'text',
+        passProps: {
+          children: getTranslation('settings'),
+          style: {
+            fontSize: 17,
+            fontWeight: '500',
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+        },
+      },
     },
     largeTitle: {
       visible: false,
