@@ -13,6 +13,7 @@ import {setUpdate} from '../redux/actions/settings';
 import {IAuthState, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
 import semver from 'semver';
+import {store} from '../redux/store';
 
 interface IAuthLoadingScreenStateProps {
   readonly rehydrated: boolean;
@@ -33,6 +34,14 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
 
   useEffect(() => {
     if (rehydrated) {
+      const state = store.getState() as any;
+      state.auth.loggingIn = false;
+      state.semesters.isFetching = false;
+      state.courses.isFetching = false;
+      state.notices.isFetching = false;
+      state.files.isFetching = false;
+      state.assignments.isFetching = false;
+
       if (auth && auth.username && auth.password) {
         login(auth.username, auth.password);
       } else {
