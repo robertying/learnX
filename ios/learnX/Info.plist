@@ -37,12 +37,30 @@
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Allow learnX to access your calendar for assignment deadline sync</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>Allow learnX to access your reminders for assignment deadline sync</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Allow learnX to access your contacts</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allow learnX to access your camera</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow learnX to access your microphone</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow learnX to access your photos</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow learnX to access your photos</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Allow learnX to access your files for sharing</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>Allow learnX to access your files for sharing</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>Allow learnX to access your files for sharing</string>
+	<key>NSRemovableVolumesUsageDescription</key>
+	<string>Allow learnX to access your files for sharing</string>
+	<key>NSNetworkVolumesUsageDescription</key>
+	<string>Allow learnX to access your files for sharing</string>
+	<key>NSFileProviderDomainUsageDescription</key>
+	<string>Allow learnX to access your files for sharing</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
