@@ -1,17 +1,19 @@
 import * as Haptics from 'expo-haptics';
 import React, {PropsWithChildren} from 'react';
-import {Platform, TouchableNativeFeedback} from 'react-native';
-import {TouchableHighlight} from 'react-native-gesture-handler';
+import {
+  Platform,
+  TouchableNativeFeedback,
+  TouchableHighlight,
+} from 'react-native';
 import Interactable from 'react-native-interactable';
-import {TouchablePreview} from 'react-native-navigation/lib/dist/adapters/TouchablePreview';
 import Colors from '../constants/Colors';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IInteractablePreviewWrapperProps {
   readonly pinned?: boolean;
   readonly onPinned?: (pin: boolean) => void;
-  readonly onPress?: TouchablePreview['props']['onPress'];
-  readonly onPressIn?: TouchablePreview['props']['onPressIn'];
+  readonly onPress?: TouchableHighlight['props']['onPress'];
+  readonly onPressIn?: TouchableHighlight['props']['onPressIn'];
   readonly dragEnabled: boolean;
 }
 
