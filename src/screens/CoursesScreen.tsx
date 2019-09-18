@@ -1,7 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import React, {useEffect} from 'react';
-import {RefreshControl, SafeAreaView} from 'react-native';
-import {FlatList} from 'react-native-gesture-handler';
+import {RefreshControl, SafeAreaView, FlatList} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {connect} from 'react-redux';
 import CourseCard from '../components/CourseCard';

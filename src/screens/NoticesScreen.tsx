@@ -1,8 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
 import React, {useEffect} from 'react';
-import {Platform, RefreshControl, SafeAreaView} from 'react-native';
-import {FlatList} from 'react-native-gesture-handler';
+import {Platform, RefreshControl, SafeAreaView, FlatList} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
 import {connect} from 'react-redux';
