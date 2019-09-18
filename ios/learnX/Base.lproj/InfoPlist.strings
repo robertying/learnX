@@ -1,4 +1,13 @@
 NSCalendarsUsageDescription = "Allow learnX to access your calendar for assignment deadline sync";
+NSRemindersUsageDescription = "Allow learnX to access your reminders for assignment deadline sync";
 NSContactsUsageDescription = "Allow learnX to access your contacts";
-NSPhotoLibraryUsageDescription = "Allow learnX to access your photos";
+NSCameraUsageDescription = "Allow learnX to access your camera";
 NSMicrophoneUsageDescription = "Allow learnX to access your microphone";
+NSPhotoLibraryUsageDescription = "Allow learnX to access your photos";
+NSPhotoLibraryAddUsageDescription = "Allow learnX to access your photos";
+NSDesktopFolderUsageDescription = "Allow learnX to access your files for sharing";
+NSDocumentsFolderUsageDescription = "Allow learnX to access your files for sharing";
+NSDownloadsFolderUsageDescription = "Allow learnX to access your files for sharing";
+NSRemovableVolumesUsageDescription = "Allow learnX to access your files for sharing";
+NSNetworkVolumesUsageDescription = "Allow learnX to access your files for sharing";
+NSFileProviderDomainUsageDescription = "Allow learnX to access your files for sharing";
