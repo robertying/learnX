@@ -7113,6 +7113,14 @@ react-native-webview@7.0.5:
     escape-string-regexp "1.0.5"
     invariant "2.2.4"
 
+react-native-webview@7.0.6:
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-7.0.6.tgz#b34685ce76c59d90b183a45f1321e1f1148bdab9"
+  integrity sha512-AaDyHlGfzY5LYoe7Z1C1Z9r2wbWit1vV1lKShJqRGEY+MVafXk49VXDll6wxQCT6pMX3bxOsRmrv3GV5daHYWA==
+  dependencies:
+    escape-string-regexp "1.0.5"
+    invariant "2.2.4"
+
 react-native@0.61.0-rc.3:
   version "0.61.0-rc.3"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.0-rc.3.tgz#880b1ca4805fe5095a506306461c38cf4e74452d"
