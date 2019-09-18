@@ -30,7 +30,8 @@ matrix:
         - gem install fastlane
         - yarn install
       script:
-        - cd android && ./gradlew assembleDebug && cd ..
+        - if [ -n "$TRAVIS_TAG" ]; then yarn android:beta; fi
+        - if [ -z "$TRAVIS_TAG" ]; then yarn android:build; fi
       before_cache:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
