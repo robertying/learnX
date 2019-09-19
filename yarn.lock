@@ -2884,6 +2884,11 @@ escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2, escape-string-regexp@^1
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
+escape-string-regexp@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-2.0.0.tgz#a30304e99daa32e23b2fd20f51babd07cffca344"
+  integrity sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==
+
 escodegen@^1.6.1, escodegen@^1.9.1:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/escodegen/-/escodegen-1.12.0.tgz#f763daf840af172bb3a2b6dd7219c0e17f7ff541"
@@ -7113,12 +7118,12 @@ react-native-webview@7.0.5:
     escape-string-regexp "1.0.5"
     invariant "2.2.4"
 
-react-native-webview@7.0.6:
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-7.0.6.tgz#b34685ce76c59d90b183a45f1321e1f1148bdab9"
-  integrity sha512-AaDyHlGfzY5LYoe7Z1C1Z9r2wbWit1vV1lKShJqRGEY+MVafXk49VXDll6wxQCT6pMX3bxOsRmrv3GV5daHYWA==
+react-native-webview@7.0.7:
+  version "7.0.7"
+  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-7.0.7.tgz#38915091b012de63e625d455bbf074f7dd89efad"
+  integrity sha512-vfL4n5Od4bE0AdDAc8wHVkaxjPzI92y2URYs6cnvib9jU+lhc6AGSoLPsT1J9E4+8oojEvpsetUOrJGXmY/F6g==
   dependencies:
-    escape-string-regexp "1.0.5"
+    escape-string-regexp "2.0.0"
     invariant "2.2.4"
 
 react-native@0.61.0-rc.3:
