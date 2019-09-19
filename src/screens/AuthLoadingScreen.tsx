@@ -52,6 +52,13 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
           },
         });
       }
+    } else {
+      Navigation.showModal({
+        component: {
+          id: 'login',
+          name: 'login',
+        },
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rehydrated]);
@@ -99,7 +106,7 @@ function mapStateToProps(
   state: IPersistAppState,
 ): IAuthLoadingScreenStateProps {
   return {
-    rehydrated: state.auth._persist.rehydrated,
+    rehydrated: state.auth._persist ? state.auth._persist.rehydrated : false,
     auth: state.auth,
   };
 }
