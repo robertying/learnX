@@ -3224,20 +3224,20 @@ expo-file-system@~7.0.0:
   dependencies:
     uuid-js "^0.7.5"
 
-expo-haptics@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-6.0.0.tgz#dd0b8390564b3ba398a3f6d726ce5ad99a892ddc"
-  integrity sha512-Xn+u5Gqp0/aLipKUMhPgZrccTO9uSV5FSM9u6bkMhV/zfjZqQMWpm0NqL24OBBXy5wPmF3g6Hev5YyDUd0Jj9Q==
+expo-haptics@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/expo-haptics/-/expo-haptics-7.0.0.tgz#aebcce0cb2cd0f0a9c21b2e1591a2ee26a8e9a41"
+  integrity sha512-E95fqb32U2qbWyW45LdFKL0da+oxlpkjN+fP4NOykH1i6SW0a886X0aAIFJXvbLbfC3l32TcmFUIynrKU/jwOg==
 
 expo-permissions@~7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/expo-permissions/-/expo-permissions-7.0.0.tgz#f4135c3cf8e49c673a9a714459a1eb2b40fe2092"
   integrity sha512-C+qyVz+pdZO4YpVR2HSC3gsBZg0Qb8brCFgzmDmWcAtgrOiHClaLPdhI2XtQuGh8ubXcKPUGZp++UCEGiG0Jxg==
 
-expo-secure-store@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-6.0.0.tgz#0879320b1b12196dec67f02c3386a8a8918ff1ee"
-  integrity sha512-UCtxUio+c9iE+fgRpxStGbC+Ci83mlv0kh3cVEq/KbFejGPmMZ0u7oCykGqVDoPzvgTGrP1ZyJb0mwYfamXwmA==
+expo-secure-store@7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/expo-secure-store/-/expo-secure-store-7.0.0.tgz#83aee977ef2fe0bb9fa9f2baecdf6d50b26a893a"
+  integrity sha512-7O80jH+JynoO8OlAHSj+F9Rbk1Vaf8309shuyZVW3C0tB1dXN+UiJUrCKAJ38dI8k/eV8+f5orw7x67VTJNUSQ==
 
 extend-shallow@^1.1.2:
   version "1.1.4"
