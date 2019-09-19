@@ -77,7 +77,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
             {title}
           </Text>
           <Text style={{fontSize: 13, marginLeft: 5}}>
-            {extension.toUpperCase() + ' ' + size}
+            {(extension ? extension.toUpperCase() + ' ' : '') + size}
           </Text>
           {markedImportant && (
             <Icon
