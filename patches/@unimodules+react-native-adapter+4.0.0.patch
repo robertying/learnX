@@ -1,11 +1,11 @@
 diff --git a/node_modules/@unimodules/react-native-adapter/android/build.gradle b/node_modules/@unimodules/react-native-adapter/android/build.gradle
-index 70d03a5..b00408c 100644
+index 7b3b00a..fd0e797 100644
 --- a/node_modules/@unimodules/react-native-adapter/android/build.gradle
 +++ b/node_modules/@unimodules/react-native-adapter/android/build.gradle
 @@ -66,8 +66,6 @@ dependencies {
    unimodule 'unimodules-permissions-interface'
    unimodule 'unimodules-image-loader-interface'
- 
+
 -  compileOnly('com.facebook.react:react-native:+') {
 -    exclude group: 'com.android.support'
 -  }
