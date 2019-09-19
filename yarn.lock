@@ -2732,10 +2732,10 @@ domhandler@^2.3.0:
   dependencies:
     domelementtype "1"
 
-dompurify@2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.0.0.tgz#2afb46460fc3f72096f4e77537edd9811dcdf512"
-  integrity sha512-i8LWSIMDpGmv7AbOcQOyy54L4TrRhjs6yrSessoNeYspsAtgaKiiGeBAG5959qLfhGvyndkHeyZWxx0dd4iDxw==
+dompurify@2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/dompurify/-/dompurify-2.0.1.tgz#02e927c164393213f11a288eea154f105ee33349"
+  integrity sha512-57cdUdCG300XfdO+BTYfgBtcP0G6LuwnQ8BZQ2t9wFDIa+DoQT9iaxKox5aJJYovAA3B4wNIeNlqBfnS/OWvRQ==
 
 domutils@1.5.1:
   version "1.5.1"
@@ -2879,15 +2879,15 @@ escape-html@~1.0.3:
   resolved "https://registry.yarnpkg.com/escape-html/-/escape-html-1.0.3.tgz#0258eae4d3d0c0974de1c169188ef0051d1d1988"
   integrity sha1-Aljq5NPQwJdN4cFpGI7wBR0dGYg=
 
-escape-string-regexp@1.0.5, escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
-  integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
-
 escape-string-regexp@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-2.0.0.tgz#a30304e99daa32e23b2fd20f51babd07cffca344"
   integrity sha512-UpzcLCXolUWcNu5HtVMHYdXJjArjsF9C0aNnquZYY4uW/Vu0miy5YoWvbV345HauVvcAUnpRuhMMcqTcGOY2+w==
+
+escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
+  integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
 escodegen@^1.6.1, escodegen@^1.9.1:
   version "1.12.0"
@@ -6993,16 +6993,16 @@ react-native-gesture-handler@1.4.1:
     invariant "^2.2.4"
     prop-types "^15.7.2"
 
-react-native-github-markdown@2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/react-native-github-markdown/-/react-native-github-markdown-2.1.2.tgz#a18b68a71bfa4abdefb7c60541c1eb42fb9bb4f5"
-  integrity sha512-r+uP5GKa312md2nzP/DqHC1T3u//EAVo79j0nnHLvDB0pgr24MjmCJQA+PVwdKXIPJNW+Mc3RyB5DPAfg0LzdA==
+react-native-github-markdown@2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-github-markdown/-/react-native-github-markdown-2.2.0.tgz#32be03ffecb6ab9c5858ce93ca157a1529f12682"
+  integrity sha512-bxJchEB69mkkYsvIS8vTXoCs/kGuW96B2CGLSOX2G3lCl9SuRBuitoGRusW+OMqJssqHQDKLDp0yOliowl0hjg==
   dependencies:
     darkreader "4.7.15"
-    dompurify "2.0.0"
+    dompurify "2.0.1"
     highlight.js "9.15.10"
     marked "0.7.0"
-    react-native-webview "7.0.5"
+    react-native-webview "^7.0.7"
 
 react-native-interactable@1.0.0:
   version "1.0.0"
@@ -7110,15 +7110,7 @@ react-native-vector-icons@6.6.0:
     prop-types "^15.6.2"
     yargs "^13.2.2"
 
-react-native-webview@7.0.5:
-  version "7.0.5"
-  resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-7.0.5.tgz#1dd9d4f2856bda86a40222eca3612bf2152bacd3"
-  integrity sha512-FWY3tjbyV3Uhuw1JxJ0zs2HspJ5HAsIfkJaquURsVWQnTdZPnkSQjHWQp0PzGIwJ1PPVOA/gnhRmd7SZU/Br5Q==
-  dependencies:
-    escape-string-regexp "1.0.5"
-    invariant "2.2.4"
-
-react-native-webview@7.0.7:
+react-native-webview@7.0.7, react-native-webview@^7.0.7:
   version "7.0.7"
   resolved "https://registry.yarnpkg.com/react-native-webview/-/react-native-webview-7.0.7.tgz#38915091b012de63e625d455bbf074f7dd89efad"
   integrity sha512-vfL4n5Od4bE0AdDAc8wHVkaxjPzI92y2URYs6cnvib9jU+lhc6AGSoLPsT1J9E4+8oojEvpsetUOrJGXmY/F6g==
