@@ -25,6 +25,10 @@ layout: default_cn
 ## 应用截图
 
 <div align="center">
+    <img src="screenshots/5.png" width="40%" />
+</div>
+
+<div align="center">
     <img src="screenshots/1.jpg" width="40%" />
     <img src="screenshots/2.jpg" width="40%" />
 </div>
