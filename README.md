@@ -1,4 +1,5 @@
-<img align="right" width="250" src="docs/screenshots/1.jpg" />
+<img align="right" width="200" src="docs/screenshots/5.png" />
+<img align="right" width="200" src="docs/screenshots/1.jpg" />
 
 # learnX
 
