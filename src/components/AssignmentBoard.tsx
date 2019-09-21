@@ -226,6 +226,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
         </>
       ) : null}
       <AutoHeightWebView
+        style={{backgroundColor: 'transparent'}}
         originWhitelist={['*']}
         source={{
           html: `

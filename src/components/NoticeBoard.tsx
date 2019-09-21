@@ -168,7 +168,7 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
         </>
       ) : null}
       <AutoHeightWebView
-        style={{margin: 15}}
+        style={{backgroundColor: 'transparent'}}
         originWhitelist={['*']}
         source={{
           html: `
