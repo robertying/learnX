@@ -60,6 +60,7 @@ const HelpScreen: INavigationScreen<{}> = props => {
         backgroundColor: isDarkMode ? 'black' : 'white',
       }}>
       <MarkdownWebView
+        style={{backgroundColor: 'transparent'}}
         ref={webViewRef}
         content={markdown}
         highlight

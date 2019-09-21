@@ -89,6 +89,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   return (
     <>
       <WebView
+        style={{backgroundColor: 'transparent'}}
         source={{
           uri: filePath,
         }}
