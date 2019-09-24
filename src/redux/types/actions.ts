@@ -41,6 +41,7 @@ import {
   setTabsOrder,
   setUpdate,
   setWindow,
+  setCompactWidth,
 } from '../actions/settings';
 import {IPersistAppState} from './state';
 
@@ -114,6 +115,7 @@ export type ISetWindowAction = ActionType<typeof setWindow>;
 export type ISetNotifications = ActionType<typeof setNotifications>;
 export type ISetNotificationTypes = ActionType<typeof setNotificationTypes>;
 export type ISetLang = ActionType<typeof setLang>;
+export type ISetCompactWidth = ActionType<typeof setCompactWidth>;
 export type ISettingsAction =
   | ISetTabsOrderAction
   | ISetAutoRefreshingAction
@@ -125,7 +127,8 @@ export type ISettingsAction =
   | ISetWindowAction
   | ISetNotifications
   | ISetNotificationTypes
-  | ISetLang;
+  | ISetLang
+  | ISetCompactWidth;
 
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
 export type ISetMockStoreAction = ActionType<typeof setMockStore>;

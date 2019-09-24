@@ -40,6 +40,7 @@ interface ISettingsScreenStateProps {
   readonly assignments: readonly IAssignment[];
   readonly hasUpdate: boolean;
   readonly notifications: boolean;
+  compactWith: boolean;
 }
 
 interface ISettingsScreenDispatchProps {
@@ -63,10 +64,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     assignments,
     setUpdate,
     hasUpdate,
+    compactWith,
   } = props;
 
   const onAcknowledgementsPress = () => {
-    if (DeviceInfo.isIPad()) {
+    if (DeviceInfo.isIPad() && !compactWith) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -117,7 +119,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onAboutPress = () => {
-    if (DeviceInfo.isIPad()) {
+    if (DeviceInfo.isIPad() && !compactWith) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -142,7 +144,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onHelpPress = () => {
-    if (DeviceInfo.isIPad()) {
+    if (DeviceInfo.isIPad() && !compactWith) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -235,7 +237,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onSemestersPress = () => {
-    if (DeviceInfo.isIPad()) {
+    if (DeviceInfo.isIPad() && !compactWith) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -520,6 +522,7 @@ function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
     assignments: state.assignments.items,
     hasUpdate: state.settings.hasUpdate,
     notifications: state.settings.notifications,
+    compactWith: state.settings.compactWidth,
   };
 }
 

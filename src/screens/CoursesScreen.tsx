@@ -43,6 +43,7 @@ interface ICoursesScreenStateProps {
   readonly isFetchingAssignments: boolean;
   readonly pinnedCourses: readonly string[];
   readonly hidden: readonly string[];
+  compactWith: boolean;
 }
 
 interface ICoursesScreenDispatchProps {
@@ -82,6 +83,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     username,
     password,
     login,
+    compactWith,
   } = props;
 
   /**
@@ -133,7 +135,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
    */
 
   const onCourseCardPress = (courseId: string, courseName: string) => {
-    if (DeviceInfo.isIPad()) {
+    if (DeviceInfo.isIPad() && !compactWith) {
       Navigation.setStackRoot('detail.root', [
         {
           component: {
@@ -342,6 +344,7 @@ function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
     assignments: state.assignments.items,
     pinnedCourses: state.courses.pinned || [],
     hidden: state.courses.hidden || [],
+    compactWith: state.settings.compactWidth,
   };
 }
 

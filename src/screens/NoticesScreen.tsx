@@ -1,7 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
 import React, {useEffect} from 'react';
-import {Platform, RefreshControl, SafeAreaView, FlatList} from 'react-native';
+import {
+  Platform,
+  RefreshControl,
+  SafeAreaView,
+  FlatList,
+  Dimensions,
+} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
 import {connect} from 'react-redux';
@@ -28,6 +34,7 @@ import {
 } from '../redux/types/state';
 import {INavigationScreen} from '../types/NavigationScreen';
 import {initialMode, useDarkMode} from 'react-native-dark-mode';
+import {setCompactWidth} from '../redux/actions/settings';
 
 interface INoticesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -41,6 +48,7 @@ interface INoticesScreenStateProps {
   readonly pinnedNotices: readonly string[];
   readonly hidden: readonly string[];
   readonly hasUpdate: boolean;
+  compactWidth: boolean;
 }
 
 interface INoticesScreenDispatchProps {
@@ -50,6 +58,7 @@ interface INoticesScreenDispatchProps {
   readonly pinNotice: (noticeId: string) => void;
   readonly unpinNotice: (noticeId: string) => void;
   readonly login: (username: string, password: string) => void;
+  setCompactWidth: (compactWidth: boolean) => void;
 }
 
 type INoticesScreenProps = INoticesScreenStateProps &
@@ -73,6 +82,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     isFetching,
     login,
     hasUpdate,
+    setCompactWidth,
+    compactWidth,
   } = props;
 
   useEffect(() => {
@@ -152,7 +163,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     const notice = notices.find(item => item.id === noticeId);
 
     if (notice) {
-      if (DeviceInfo.isIPad()) {
+      if (DeviceInfo.isIPad() && !compactWidth) {
         Navigation.setStackRoot('detail.root', [
           {
             component: {
@@ -307,6 +318,38 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     });
   }, [isDarkMode, props.componentId]);
 
+  useEffect(() => {
+    const window = Dimensions.get('window');
+    const screen = Dimensions.get('screen');
+    if (
+      window.width < screen.width &&
+      !(screen.height < screen.width && window.width > screen.width * 0.4)
+    ) {
+      setCompactWidth(true);
+    }
+  }, [setCompactWidth]);
+
+  useEffect(() => {
+    const listener = ({window, screen}: any) => {
+      if (
+        window.width < screen.width &&
+        !(
+          screen.height < screen.width &&
+          (DeviceInfo.isIPad12_9()
+            ? window.width > screen.width * 0.4
+            : window.width > screen.width / 2)
+        )
+      ) {
+        setCompactWidth(true);
+      } else {
+        setCompactWidth(false);
+      }
+    };
+    Dimensions.addEventListener('change', listener);
+
+    return () => Dimensions.removeEventListener('change', listener);
+  }, [compactWidth, setCompactWidth]);
+
   return (
     <PaperProvider>
       <SafeAreaView
@@ -393,6 +436,7 @@ function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
     pinnedNotices: state.notices.pinned || [],
     hidden: state.courses.hidden || [],
     hasUpdate: state.settings.hasUpdate,
+    compactWidth: state.settings.compactWidth,
   };
 }
 
@@ -405,6 +449,7 @@ const mapDispatchToProps: INoticesScreenDispatchProps = {
   pinNotice: (noticeId: string) => pinNotice(noticeId),
   unpinNotice: (noticeId: string) => unpinNotice(noticeId),
   login: (username: string, password: string) => login(username, password),
+  setCompactWidth,
 };
 
 export default connect(

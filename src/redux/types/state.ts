@@ -45,6 +45,7 @@ export interface ISettingsState {
   readonly notifications: boolean;
   readonly notificationTypes: readonly NotificationType[];
   readonly lang?: Language | null;
+  readonly compactWidth: boolean;
 }
 
 export interface ISemestersState {
