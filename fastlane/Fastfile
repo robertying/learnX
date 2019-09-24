@@ -40,7 +40,6 @@ platform :android do
   lane :beta do
     gradle(task: 'clean', project_dir: 'android/')
     gradle(task: 'assemble', build_type: 'Release', project_dir: 'android/')
-    gradle(task: 'bundle', build_type: 'Release', project_dir: 'android/')
-    upload_to_play_store(track: 'beta', skip_upload_apk: true)
+    upload_to_play_store(track: 'beta')
   end
 end
