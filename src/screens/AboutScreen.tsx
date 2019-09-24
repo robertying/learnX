@@ -9,6 +9,7 @@ import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types/NavigationScreen';
 import {useDarkMode, initialMode} from 'react-native-dark-mode';
 import {Navigation} from 'react-native-navigation';
+import DeviceInfo from '../constants/DeviceInfo';
 
 const AboutScreen: INavigationScreen<{}> = props => {
   const onGitHubLinkPress = () => {
@@ -57,7 +58,7 @@ const AboutScreen: INavigationScreen<{}> = props => {
             fontSize: iOSUIKit.bodyObject.fontSize,
             color: isDarkMode ? 'white' : 'black',
           }}>
-          {'v' + packageConfig.version}
+          {`v${packageConfig.version} (${DeviceInfo.buildNo()})`}
         </Text>
         <TextButton
           style={{
