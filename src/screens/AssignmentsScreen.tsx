@@ -41,6 +41,7 @@ interface IAssignmentsScreenStateProps {
   readonly isFetching: boolean;
   readonly pinnedAssignments: readonly string[];
   readonly hidden: readonly string[];
+  compactWith: boolean;
 }
 
 interface IAssignmentsScreenDispatchProps {
@@ -72,6 +73,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     username,
     password,
     login,
+    compactWith,
   } = props;
 
   /**
@@ -143,7 +145,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     const assignment = assignments.find(item => item.id === assignmentId);
 
     if (assignment) {
-      if (DeviceInfo.isIPad()) {
+      if (DeviceInfo.isIPad() && !compactWith) {
         Navigation.setStackRoot('detail.root', [
           {
             component: {
@@ -399,6 +401,7 @@ function mapStateToProps(
     assignments: state.assignments.items,
     pinnedAssignments: state.assignments.pinned || [],
     hidden: state.courses.hidden || [],
+    compactWith: state.settings.compactWidth,
   };
 }
 

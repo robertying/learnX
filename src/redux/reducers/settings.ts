@@ -11,6 +11,7 @@ import {
   SET_TABS_ORDER,
   SET_UPDATE,
   SET_WINDOW,
+  SET_COMPACT_WIDTH,
 } from '../types/constants';
 import {ISettingsState, NotificationType, Tab} from '../types/state';
 
@@ -36,6 +37,7 @@ export default function settings(
       NotificationType.Grades,
     ],
     lang: null,
+    compactWidth: false,
   },
   action: ISettingsAction,
 ): ISettingsState {
@@ -97,6 +99,11 @@ export default function settings(
       return {
         ...state,
         lang: action.payload,
+      };
+    case SET_COMPACT_WIDTH:
+      return {
+        ...state,
+        compactWidth: action.payload,
       };
   }
   return state;

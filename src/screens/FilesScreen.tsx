@@ -41,6 +41,7 @@ interface IFilesScreenStateProps {
   readonly isFetching: boolean;
   readonly pinnedFiles: readonly string[];
   readonly hidden: readonly string[];
+  compactWith: boolean;
 }
 
 interface IFilesScreenDispatchProps {
@@ -71,6 +72,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     unpinFile,
     hidden,
     login,
+    compactWith,
   } = props;
 
   /**
@@ -137,7 +139,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     const file = files.find(item => item.id === fileId);
 
     if (file) {
-      if (DeviceInfo.isIPad()) {
+      if (DeviceInfo.isIPad() && !compactWith) {
         Navigation.setStackRoot('detail.root', [
           {
             component: {
@@ -369,6 +371,7 @@ function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
     files: state.files.items,
     pinnedFiles: state.files.pinned || [],
     hidden: state.courses.hidden || [],
+    compactWith: state.settings.compactWidth,
   };
 }
 

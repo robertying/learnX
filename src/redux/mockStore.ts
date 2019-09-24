@@ -26,6 +26,7 @@ const mockStore: IPersistAppState = {
     hasUpdate: false,
     notifications: true,
     notificationTypes: [],
+    compactWidth: false,
   },
   semesters: {
     isFetching: false,

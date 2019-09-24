@@ -11,6 +11,7 @@ import {
   SET_TABS_ORDER,
   SET_UPDATE,
   SET_WINDOW,
+  SET_COMPACT_WIDTH,
 } from '../types/constants';
 import {IWindow, Language, NotificationType, Tab} from '../types/state';
 
@@ -60,4 +61,8 @@ export const setNotificationTypes = createAction(
 
 export const setLang = createAction(SET_LANG, action => {
   return (lang: Language) => action(lang);
+});
+
+export const setCompactWidth = createAction(SET_COMPACT_WIDTH, action => {
+  return (compactWidth: boolean) => action(compactWidth);
 });
