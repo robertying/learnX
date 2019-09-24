@@ -44,9 +44,7 @@ const SemestersSettingsScreen: INavigationScreen<
   }, []);
 
   useEffect(() => {
-    return () => {
-      getCoursesForSemester(currentSemester);
-    };
+    getCoursesForSemester(currentSemester);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentSemester]);
 
