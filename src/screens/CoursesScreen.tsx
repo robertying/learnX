@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import React, {useEffect} from 'react';
-import {RefreshControl, SafeAreaView, FlatList} from 'react-native';
+import {RefreshControl, SafeAreaView, FlatList, Platform} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {connect} from 'react-redux';
 import CourseCard from '../components/CourseCard';
@@ -178,7 +178,19 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
             courseName,
           },
           options: {
+            bottomTabs: {
+              backgroundColor: isDarkMode ? 'black' : 'white',
+            },
             topBar: {
+              background: {
+                color: isDarkMode ? 'black' : 'white',
+              },
+              backButton:
+                Platform.OS === 'android'
+                  ? {
+                      color: isDarkMode ? 'white' : 'black',
+                    }
+                  : undefined,
               title: {
                 component: {
                   name: 'text',
@@ -257,7 +269,13 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      bottomTabs: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
       topBar: {
+        background: {
+          color: isDarkMode ? 'black' : 'white',
+        },
         title: {
           component: {
             name: 'text',
@@ -308,7 +326,13 @@ CoursesScreen.options = {
   layout: {
     backgroundColor: initialMode === 'dark' ? 'black' : 'white',
   },
+  bottomTabs: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
+    background: {
+      color: initialMode === 'dark' ? 'black' : 'white',
+    },
     title: {
       component: {
         name: 'text',

@@ -1,3 +1,5 @@
 <resources>
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar" />
+    <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorAccent">#bf5af2</item>
+    </style>
 </resources>

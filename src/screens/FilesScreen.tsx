@@ -3,7 +3,11 @@ import {FuseOptions} from 'fuse.js';
 import React, {useEffect} from 'react';
 import {FlatList, Platform, RefreshControl, SafeAreaView} from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import {Provider as PaperProvider, Searchbar} from 'react-native-paper';
+import {
+  Provider as PaperProvider,
+  Searchbar,
+  DefaultTheme,
+} from 'react-native-paper';
 import {connect} from 'react-redux';
 import EmptyList from '../components/EmptyList';
 import FileCard from '../components/FileCard';
@@ -262,7 +266,13 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      bottomTabs: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
       topBar: {
+        background: {
+          color: isDarkMode ? 'black' : 'white',
+        },
         title: {
           component: {
             name: 'text',
@@ -287,12 +297,23 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   }, [isDarkMode, props.componentId]);
 
   return (
-    <PaperProvider>
+    <PaperProvider
+      theme={{
+        ...DefaultTheme,
+        colors: {
+          ...DefaultTheme.colors,
+          text: isDarkMode ? 'white' : 'black',
+          placeholder: isDarkMode ? Colors.grayDark : Colors.grayLight,
+        },
+      }}>
       <SafeAreaView
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         {Platform.OS === 'android' && (
           <Searchbar
-            style={{elevation: 4}}
+            style={{
+              elevation: 4,
+              backgroundColor: isDarkMode ? 'black' : 'white',
+            }}
             clearButtonMode="always"
             placeholder={getTranslation('searchFiles')}
             onChangeText={setSearchBarText}
@@ -334,7 +355,13 @@ FilesScreen.options = {
   layout: {
     backgroundColor: initialMode === 'dark' ? 'black' : 'white',
   },
+  bottomTabs: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
+    background: {
+      color: initialMode === 'dark' ? 'black' : 'white',
+    },
     title: {
       component: {
         name: 'text',
