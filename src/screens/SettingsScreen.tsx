@@ -87,6 +87,22 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       Navigation.push(props.componentId, {
         component: {
           name: 'settings.acknowledgements',
+          options: {
+            bottomTabs: {
+              backgroundColor: isDarkMode ? 'black' : 'white',
+            },
+            topBar: {
+              background: {
+                color: isDarkMode ? 'black' : 'white',
+              },
+              backButton:
+                Platform.OS === 'android'
+                  ? {
+                      color: isDarkMode ? 'white' : 'black',
+                    }
+                  : undefined,
+            },
+          },
         },
       });
     }
@@ -138,6 +154,22 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       Navigation.push(props.componentId, {
         component: {
           name: 'settings.about',
+          options: {
+            bottomTabs: {
+              backgroundColor: isDarkMode ? 'black' : 'white',
+            },
+            topBar: {
+              background: {
+                color: isDarkMode ? 'black' : 'white',
+              },
+              backButton:
+                Platform.OS === 'android'
+                  ? {
+                      color: isDarkMode ? 'white' : 'black',
+                    }
+                  : undefined,
+            },
+          },
         },
       });
     }
@@ -163,6 +195,22 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       Navigation.push(props.componentId, {
         component: {
           name: 'settings.help',
+          options: {
+            bottomTabs: {
+              backgroundColor: isDarkMode ? 'black' : 'white',
+            },
+            topBar: {
+              background: {
+                color: isDarkMode ? 'black' : 'white',
+              },
+              backButton:
+                Platform.OS === 'android'
+                  ? {
+                      color: isDarkMode ? 'white' : 'black',
+                    }
+                  : undefined,
+            },
+          },
         },
       });
     }
@@ -256,6 +304,22 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       Navigation.push(props.componentId, {
         component: {
           name: 'settings.semesters',
+          options: {
+            bottomTabs: {
+              backgroundColor: isDarkMode ? 'black' : 'white',
+            },
+            topBar: {
+              background: {
+                color: isDarkMode ? 'black' : 'white',
+              },
+              backButton:
+                Platform.OS === 'android'
+                  ? {
+                      color: isDarkMode ? 'white' : 'black',
+                    }
+                  : undefined,
+            },
+          },
         },
       });
     }
@@ -444,7 +508,13 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       layout: {
         backgroundColor: isDarkMode ? 'black' : 'white',
       },
+      bottomTabs: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
       topBar: {
+        background: {
+          color: isDarkMode ? 'black' : 'white',
+        },
         title: {
           component: {
             name: 'text',
@@ -495,7 +565,13 @@ SettingsScreen.options = {
   layout: {
     backgroundColor: initialMode === 'dark' ? 'black' : 'white',
   },
+  bottomTabs: {
+    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+  },
   topBar: {
+    background: {
+      color: initialMode === 'dark' ? 'black' : 'white',
+    },
     title: {
       component: {
         name: 'text',
