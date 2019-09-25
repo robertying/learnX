@@ -1040,9 +1040,9 @@
     "@types/babel__traverse" "*"
 
 "@types/babel__generator@*":
-  version "7.0.2"
-  resolved "https://registry.yarnpkg.com/@types/babel__generator/-/babel__generator-7.0.2.tgz#d2112a6b21fad600d7674274293c85dce0cb47fc"
-  integrity sha512-NHcOfab3Zw4q5sEE2COkpfXjoE7o+PmqD9DQW4koUT3roNxwziUdXGnRndMat/LJNUtePwn1TlP4do3uoe3KZQ==
+  version "7.6.0"
+  resolved "https://registry.yarnpkg.com/@types/babel__generator/-/babel__generator-7.6.0.tgz#f1ec1c104d1bb463556ecb724018ab788d0c172a"
+  integrity sha512-c1mZUu4up5cp9KROs/QAw0gTeHrw/x7m52LcnvMxxOZ03DmLwPV0MlGmlgzV3cnSdjhJOZsj7E7FHeioai+egw==
   dependencies:
     "@babel/types" "^7.0.0"
 
@@ -1141,9 +1141,9 @@
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
 
 "@types/node@*":
-  version "12.7.5"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.5.tgz#e19436e7f8e9b4601005d73673b6dc4784ffcc2f"
-  integrity sha512-9fq4jZVhPNW8r+UYKnxF1e2HkDWOWKM5bC2/7c9wPV835I0aOrVbS/Hw/pWPk2uKrNXQqg9Z959Kz+IYDd5p3w==
+  version "12.7.7"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.7.tgz#f9bd8c00fa9e1a8129af910fc829f6139c397d6c"
+  integrity sha512-4jUncNe2tj1nmrO/34PsRpZqYVnRV1svbU78cKhuQKkMntKB/AmdLyGgswcZKjFHEHGpiY8pVD8CuVI55nP54w==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -1151,9 +1151,9 @@
   integrity sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==
 
 "@types/prop-types@*":
-  version "15.7.2"
-  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.2.tgz#0e58ae66773d7fd7c372a493aff740878ec9ceaa"
-  integrity sha512-f8JzJNWVhKtc9dg/dyDNfliTKNOJSLa7Oht/ElZdF/UbMUmAH3rLmAk3ODNjw0mZajDEgatA03tRjB4+Dp/tzA==
+  version "15.7.3"
+  resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.3.tgz#2ab0d5da2e5815f94b0b9d4b95d1e5f243ab2ca7"
+  integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
 
 "@types/react-native-share@1.1.3":
   version "1.1.3"
@@ -1194,15 +1194,7 @@
     hoist-non-react-statics "^3.3.0"
     redux "^4.0.0"
 
-"@types/react@*":
-  version "16.9.2"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.2.tgz#6d1765431a1ad1877979013906731aae373de268"
-  integrity sha512-jYP2LWwlh+FTqGd9v7ynUKZzjj98T8x7Yclz479QdRhHfuW9yQ+0jjnD31eXSXutmBpppj5PYNLYLRfnZJvcfg==
-  dependencies:
-    "@types/prop-types" "*"
-    csstype "^2.2.0"
-
-"@types/react@16.9.3":
+"@types/react@*", "@types/react@16.9.3":
   version "16.9.3"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.3.tgz#6d13251e441a3e67fb60d719d1fc8785b984a2ec"
   integrity sha512-Ogb2nSn+2qQv5opoCv7Ls5yFxtyrdUYxp5G+SWTrlGk7dmFKw331GiezCgEZj9U7QeXJi1CDtws9pdXU1zUL4g==
@@ -1297,9 +1289,9 @@ abab@^1.0.0:
   integrity sha1-X6rZwsB/YN12dw9xzwJbYqY8/U4=
 
 abab@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.1.tgz#3fa17797032b71410ec372e11668f4b4ffc86a82"
-  integrity sha512-1zSbbCuoIjafKZ3mblY5ikvAb0ODUbqBnFuUb7f6uLeQhhGJ0vEV4ntmtxKLT2WgXCO94E07BjunsIw1jOMPZw==
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/abab/-/abab-2.0.2.tgz#a2fba1b122c69a85caa02d10f9270c7219709a9d"
+  integrity sha512-2scffjvioEmNz0OyDSLGWDfKCVwaKc6l9Pm9kOIREU13ClXZvHpg/nRL5xyjSSSLhOnXqft2HpsAzNEEA8cFFg==
 
 abbrev@1:
   version "1.1.1"
@@ -1367,9 +1359,9 @@ acorn@^6.0.1:
   integrity sha512-/czfa8BwS88b9gWQVhc8eknunSA2DoJpJyTQkhheIf5E48u1N0R4q/YxxsAeqRrmK9TQ/uYfgLDfZo91UlANIA==
 
 acorn@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.0.0.tgz#26b8d1cd9a9b700350b71c0905546f64d1284e7a"
-  integrity sha512-PaF/MduxijYYt7unVGRuds1vBC9bFxbNf+VWqhOClfdgy7RlVkQqt610ig1/yxTgsDIfW1cWDel5EBbOy3jdtQ==
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.1.0.tgz#949d36f2c292535da602283586c2477c57eb2d6c"
+  integrity sha512-kL5CuoXA/dgxlBbVrflsflzQ3PAas7RYZB52NOm/6839iVYJgKMJ3cQJD+t2i5+qFa8h3MDpEOJiS64E8JLnSQ==
 
 aggregate-error@^3.0.0:
   version "3.0.0"
@@ -2075,9 +2067,9 @@ chokidar@^2.0.0:
     fsevents "^1.2.7"
 
 chownr@^1.1.1:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.2.tgz#a18f1e0b269c8a6a5d3c86eb298beb14c3dd7bf6"
-  integrity sha512-GkfeAQh+QNy3wquu9oIZr6SS5x7wGdSgNQvD10X3r+AZr1Oys22HW8kAmDMvNg2+Dm0TeGaEuO8gFwdBXxwO8A==
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/chownr/-/chownr-1.1.3.tgz#42d837d5239688d55f303003a508230fa6727142"
+  integrity sha512-i70fVHhmV3DtTl6nqvZOnIjbY0Pe4kAUjwHj8z0zAdgBtYrJyYwLKCCuRBQ5ppkyL0AkN7HKRnETdmdp1zqNXw==
 
 ci-info@^1.5.0:
   version "1.6.0"
@@ -2815,9 +2807,9 @@ encoding@^0.1.11:
     iconv-lite "~0.4.13"
 
 end-of-stream@^1.1.0:
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.2.tgz#080bf028edce8312b665ff18ea03cae0c3ac0ecb"
-  integrity sha512-gUSUszrsxlDnUbUwEI9Oygyrk4ZEWtVaHQc+uZHphVeNxl+qeqMV/jDWoTkjN1RmGlZ5QWAP7o458p/JMlikQg==
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/end-of-stream/-/end-of-stream-1.4.3.tgz#9db9861620e47283cd49513be9c344f339ec5153"
+  integrity sha512-cbNhPFS6MlYlWTGncSiDYbdqKhwWFy7kNeb1YSOG6K65i/wPTkLVCJQj0hXA4j0m5Da+hBWnqopEnu1FFelisQ==
   dependencies:
     once "^1.4.0"
 
@@ -3845,9 +3837,9 @@ hammerjs@^2.0.8:
   integrity sha1-BO93hiz/K7edMPdpIJWTAiK/YPE=
 
 handlebars@^4.1.2:
-  version "4.2.1"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.2.1.tgz#dc69c0e61604224f0c23b38b5b6741db210b57da"
-  integrity sha512-bqPIlDk06UWbVEIFoYj+LVo42WhK96J+b25l7hbFDpxrOXMphFM3fNIm+cluwg4Pk2jiLjWU5nHQY7igGE75NQ==
+  version "4.3.1"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.3.1.tgz#6febc1890851f62a8932d495cc88d29390fa850d"
+  integrity sha512-c0HoNHzDiHpBt4Kqe99N8tdLPKAnGCQ73gYMPWtAYM4PwGnf7xl8PBUHJqh9ijlzt2uQKaSRxbXRt+rZ7M2/kA==
   dependencies:
     neo-async "^2.6.0"
     optimist "^0.6.1"
@@ -5953,10 +5945,10 @@ minimist@~0.0.1:
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
   integrity sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
 
-minipass@^2.2.1, minipass@^2.6.0, minipass@^2.6.4:
-  version "2.8.4"
-  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.8.4.tgz#490fe62adeb620c4a3373f62ee1c31cf2ef36385"
-  integrity sha512-i97pKD0f0eZLlhcTTSa6b6QlxCD7cvh8t/5MyR/pqchD5GPAeDaUrXQCoYA+W/VmmCgWvS/ADbfW3FUc+iT51Q==
+minipass@^2.2.1, minipass@^2.6.0, minipass@^2.8.6:
+  version "2.8.6"
+  resolved "https://registry.yarnpkg.com/minipass/-/minipass-2.8.6.tgz#620d889ace26356391d010ecb9458749df9b6db5"
+  integrity sha512-lFG7d6g3+/UaFDCOtqPiKAC9zngWWsQZl1g5q6gaONqrjq61SX2xFqXMleQiFVyDpYwa018E9hmlAFY22PCb+A==
   dependencies:
     safe-buffer "^5.1.2"
     yallist "^3.0.0"
@@ -7125,10 +7117,10 @@ react-native-webview@7.2.5, react-native-webview@^7.0.7:
     escape-string-regexp "2.0.0"
     invariant "2.2.4"
 
-react-native@0.61.0:
-  version "0.61.0"
-  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.0.tgz#e9fc06cd9976295b11f7f1f72e4b840f0edd5d8e"
-  integrity sha512-JCpGS5bADDM4jCp3lylVPEY3ovvmV64VHxesofvpoKuMf8KWiItfQ48+EUP48mciTbSOsC75KCXy9bTPttiOMw==
+react-native@0.61.1:
+  version "0.61.1"
+  resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.61.1.tgz#ac2559f78f9e689356fedfa93159026a25313d7d"
+  integrity sha512-FjOhAgzjrPr2BjBITmCY+SHzWxfP/bv5ve3oN6ItoIPsVPjJG2QZE8yeByVdI4TzaZrGHU4Ag7/7hX4j39cj2Q==
   dependencies:
     "@babel/runtime" "^7.0.0"
     "@react-native-community/cli" "^3.0.0-alpha.1"
@@ -8175,13 +8167,13 @@ tail@^2.0.0:
   integrity sha512-s9NOGkLqqiDEtBttQZI7acLS8ycYK5sTlDwNjGnpXG9c8AWj0cfAtwEIzo/hVRMMiC5EYz+bXaJWC1u1u0GPpQ==
 
 tar@^4:
-  version "4.4.11"
-  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.11.tgz#7ac09801445a3cf74445ed27499136b5240ffb73"
-  integrity sha512-iI4zh3ktLJKaDNZKZc+fUONiQrSn9HkCFzamtb7k8FFmVilHVob7QsLX/VySAW8lAviMzMbFw4QtFb4errwgYA==
+  version "4.4.13"
+  resolved "https://registry.yarnpkg.com/tar/-/tar-4.4.13.tgz#43b364bc52888d555298637b10d60790254ab525"
+  integrity sha512-w2VwSrBoHa5BsSyH+KxEqeQBAllHhccyMFVHtGtdMpF4W7IRWfZjFiQceJPChOeTsSDVUpER2T8FA93pr0L+QA==
   dependencies:
     chownr "^1.1.1"
     fs-minipass "^1.2.5"
-    minipass "^2.6.4"
+    minipass "^2.8.6"
     minizlib "^1.2.1"
     mkdirp "^0.5.0"
     safe-buffer "^5.1.2"
