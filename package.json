@@ -18,7 +18,7 @@
     "postinstall": "patch-package && jetify && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
-    "@react-native-community/async-storage": "1.6.1",
+    "@react-native-community/async-storage": "1.6.2",
     "darkreader": "4.7.15",
     "dayjs": "1.8.16",
     "expo-haptics": "7.0.0",
