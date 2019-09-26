@@ -60,7 +60,7 @@
     "@react-native-community/cli": "2.9.0",
     "@react-native-community/eslint-config": "0.0.5",
     "@types/detox": "12.8.4",
-    "@types/jasmine": "3.4.0",
+    "@types/jasmine": "3.4.1",
     "@types/jest": "24.0.18",
     "@types/react": "16.9.3",
     "@types/react-native": "0.60.16",
