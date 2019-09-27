@@ -2,7 +2,7 @@
   "name": "learnX",
   "private": true,
   "license": "MIT",
-  "version": "5.1.0",
+  "version": "5.1.1",
   "scripts": {
     "android": "react-native run-android --no-jetifier",
     "android:beta": "fastlane android beta",
