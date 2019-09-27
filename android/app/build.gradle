@@ -149,7 +149,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "5.1.0"
+        versionName "5.1.1"
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative60"
     }
 
