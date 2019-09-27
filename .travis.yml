@@ -73,6 +73,7 @@ matrix:
       install:
         - gem install fastlane
         - gem install cocoapods
+        - pod repo update
         - yarn install
         - cd ios && pod install && cd ..
       script:
