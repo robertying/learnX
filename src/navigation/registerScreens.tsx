@@ -1,6 +1,6 @@
 import React from 'react';
 import {Navigation} from 'react-native-navigation';
-import {ConnectedComponentClass, Provider} from 'react-redux';
+import {ConnectedComponent, Provider} from 'react-redux';
 import EmptyScreen from '../components/EmptyScreen';
 import {store} from '../redux/store';
 import AboutScreen from '../screens/AboutScreen';
@@ -20,9 +20,9 @@ import WebViewScreen from '../screens/WebViewScreen';
 import Text from '../components/Text';
 import HelpScreen from '../screens/HelpScreen';
 
-const storeWrapped = (
-  Component: ConnectedComponentClass<React.FC<any>, any>,
-) => (props: any) => (
+const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
+  props: any,
+) => (
   <Provider store={store}>
     <Component {...props} />
   </Provider>
