@@ -75,7 +75,7 @@
     "detox": "14.3.4",
     "eslint": "6.4.0",
     "eslint-plugin-prettier": "3.1.1",
-    "husky": "3.0.5",
+    "husky": "3.0.7",
     "jest": "24.9.0",
     "jetifier": "1.6.4",
     "lint-staged": "9.4.0",
