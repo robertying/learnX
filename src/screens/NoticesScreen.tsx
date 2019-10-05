@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   FlatList,
   Dimensions,
+  StatusBar,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -380,6 +381,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           placeholder: isDarkMode ? Colors.grayDark : Colors.grayLight,
         },
       }}>
+      <StatusBar barStyle="default" />
       <SafeAreaView
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         {Platform.OS === 'android' && (
