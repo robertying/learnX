@@ -6971,10 +6971,10 @@ react-native-calendar-events@1.7.3:
   resolved "https://registry.yarnpkg.com/react-native-calendar-events/-/react-native-calendar-events-1.7.3.tgz#1c9f9989bfec5ae7c3a3c72572f0d68d43de0d41"
   integrity sha512-IbtfPDpD6PLx6XQQK0X5f9gIt12iyItoSlMbPgfalz646KUqppU2L0xo4v7kZFy1D2tVDX0gpuPlwJMT2dTeNg==
 
-react-native-dark-mode@0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-dark-mode/-/react-native-dark-mode-0.1.0.tgz#3805ebfa769190814876a879609b8dc51c2d7941"
-  integrity sha512-JoSWYvo/OGABuJCgakL8sR9yuhdwkrFQ/C6vPqM01VL7EeFCxUT5eAUAqPc0nOjWdo23B9o7wEtLfda0li/GCg==
+react-native-dark-mode@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-dark-mode/-/react-native-dark-mode-0.1.1.tgz#f47ac21e2c56ca8aa6d6fa2453bd2b890246fdd8"
+  integrity sha512-RG1vMM91mJq6qFpkm2LJR2TDumll0olvAov/A9eslvb6OQMd7+svDTHS6lSb5yBd+j8aOBvpSxzkM69ZisXk4g==
   dependencies:
     "@types/events" "*"
     "@types/react" "*"
