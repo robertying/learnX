@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import React, {useEffect} from 'react';
 import {RefreshControl, SafeAreaView, FlatList, Platform} from 'react-native';
 import {Navigation} from 'react-native-navigation';
@@ -255,7 +254,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
    */
 
   const onRefresh = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     invalidateAll();
   };
 
