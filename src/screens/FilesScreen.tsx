@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
 import React, {useEffect} from 'react';
 import {FlatList, Platform, RefreshControl, SafeAreaView} from 'react-native';
@@ -244,7 +243,6 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
    */
 
   const onRefresh = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     invalidateAll();
   };
 

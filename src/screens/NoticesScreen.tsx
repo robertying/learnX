@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import {FuseOptions} from 'fuse.js';
 import React, {useEffect} from 'react';
 import {
@@ -288,7 +287,6 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    */
 
   const onRefresh = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     invalidateAll();
   };
 
