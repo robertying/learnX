@@ -18,7 +18,7 @@ This project also serves as a demonstration of how to build a React Native app f
 - AndroidX / CocoaPods
 - Redux
 - TypeScript
-- Detox e2e tests (in progress)
+- Detox e2e tests (iOS)
 - Continuous integration (Travis)
 - Automatic deployment (Fastlane)
 
