@@ -299,6 +299,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
 
   return (
     <SafeAreaView
+      testID="CoursesScreen"
       style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
         style={{backgroundColor: isDarkMode ? 'black' : 'white'}}

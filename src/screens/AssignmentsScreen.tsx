@@ -345,6 +345,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
         },
       }}>
       <SafeAreaView
+        testID="AssignmentsScreen"
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         {Platform.OS === 'android' && (
           <Searchbar

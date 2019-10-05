@@ -305,6 +305,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
         },
       }}>
       <SafeAreaView
+        testID="FilesScreen"
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         {Platform.OS === 'android' && (
           <Searchbar

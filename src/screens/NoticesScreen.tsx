@@ -383,6 +383,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       }}>
       <StatusBar barStyle="default" />
       <SafeAreaView
+        testID="NoticesScreen"
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
         {Platform.OS === 'android' && (
           <Searchbar
@@ -397,6 +398,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           />
         )}
         <FlatList
+          testID="FlatList"
           style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
           ListEmptyComponent={EmptyList}
           data={searchResults}

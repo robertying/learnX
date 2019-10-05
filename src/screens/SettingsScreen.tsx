@@ -540,6 +540,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   return (
     <SafeAreaView
+      testID="SettingsScreen"
       style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <FlatList
         style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
