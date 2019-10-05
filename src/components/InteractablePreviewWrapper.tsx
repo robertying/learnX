@@ -33,6 +33,7 @@ function InteractablePreviewWrapper(
 
   return (
     <Interactable.View
+      testID="InteractableCard"
       animatedNativeDriver={true}
       horizontalOnly={true}
       snapPoints={[{x: 0}]}

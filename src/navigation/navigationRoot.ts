@@ -41,6 +41,7 @@ export const getNavigationRoot = async () => {
               backgroundColor: initialMode === 'dark' ? 'black' : 'white',
             },
             bottomTab: {
+              testID: 'NoticeTab',
               text: getTranslation('notices'),
               textColor: tabIconDefaultColor,
               selectedTextColor: tabIconSelectedColor,
@@ -65,6 +66,7 @@ export const getNavigationRoot = async () => {
               backgroundColor: initialMode === 'dark' ? 'black' : 'white',
             },
             bottomTab: {
+              testID: 'FileTab',
               text: getTranslation('files'),
               textColor: tabIconDefaultColor,
               selectedTextColor: tabIconSelectedColor,
@@ -89,6 +91,7 @@ export const getNavigationRoot = async () => {
               backgroundColor: initialMode === 'dark' ? 'black' : 'white',
             },
             bottomTab: {
+              testID: 'AssignmentTab',
               text: getTranslation('assignments'),
               textColor: tabIconDefaultColor,
               selectedTextColor: tabIconSelectedColor,
@@ -113,6 +116,7 @@ export const getNavigationRoot = async () => {
               backgroundColor: initialMode === 'dark' ? 'black' : 'white',
             },
             bottomTab: {
+              testID: 'CourseTab',
               text: getTranslation('courses'),
               textColor: tabIconDefaultColor,
               selectedTextColor: tabIconSelectedColor,
@@ -138,6 +142,7 @@ export const getNavigationRoot = async () => {
               backgroundColor: initialMode === 'dark' ? 'black' : 'white',
             },
             bottomTab: {
+              testID: 'SettingTab',
               text: getTranslation('settings'),
               textColor: tabIconDefaultColor,
               selectedTextColor: tabIconSelectedColor,
