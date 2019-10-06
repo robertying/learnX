@@ -3,7 +3,7 @@ import adapter from 'detox/runners/jest/adapter';
 import specReporter from 'detox/runners/jest/specReporter';
 import config from '../package.json';
 
-jest.setTimeout(60000);
+jest.setTimeout(120000);
 jasmine.getEnv().addReporter(adapter);
 jasmine.getEnv().addReporter(specReporter);
 
