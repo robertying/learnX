@@ -27,7 +27,7 @@
     "react": "16.10.2",
     "react-native": "0.61.2",
     "react-native-calendar-events": "1.7.3",
-    "react-native-dark-mode": "0.1.1",
+    "react-native-dark-mode": "0.1.2",
     "react-native-device-info": "3.1.4",
     "react-native-gesture-handler": "1.4.1",
     "react-native-github-markdown": "2.2.0",
