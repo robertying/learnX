@@ -71,6 +71,7 @@ matrix:
         - node -v
         - npm install -g yarn
       install:
+        - brew install applesimutils
         - gem install fastlane
         - gem install cocoapods
         - pod repo update
