@@ -4,6 +4,14 @@ permalink: /
 layout: default_cn
 ---
 
+## 下载
+
+&nbsp;&nbsp;&nbsp;[![Download on the App Store](assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg)](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1)
+
+[![Get it on Google Play](assets/google-play-badge.svg)](https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+
+**Android 用户还可以从 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载最新版本**
+
 ## 基础功能
 
 - 第一时间看到老师最新发布的通知及其附件
@@ -20,7 +28,7 @@ layout: default_cn
 
 - 模糊搜索
 
-- 暗黑模式（iOS）
+- 暗黑模式
 
 ## 应用截图
 
@@ -45,37 +53,6 @@ layout: default_cn
 - 如果您愿意获取最新的测试版本
   - iOS 用户可以选择参与 [TestFlight](https://testflight.apple.com/join/5SPCH86w)
 - 您也可以在 App Store 中分享评论和反馈
-
-## 其他实用工具
-
-### CampusNet for Android
-
-- 网络切换时自动登录校园网
-- 流量使用趋势图
-- <del>比 Tunet 好看</del> 真的！
-
-下载 👉 [GitHub Releases](https://github.com/robertying/CampusNet-Android/releases/latest)
-
-<div align="center">
-    <img src="screenshots/campusnet.png" width="50%" />
-</div>
-
-### .Net Campus for Windows
-
-- 网络切换 / 开机启动时自动登录校园网
-- 流畅设计 UWP
-- 实时 Windows 通知
-- 流量使用趋势图
-- 自定义 Wi-Fi
-- 多账户切换
-- 低余额预警
-- <del>比 Tunet 好看</del> 真的！
-
-下载 👉 [Microsoft 商店](https://www.microsoft.com/store/productId/9PDVWNT4K1MW)
-
-<div align="center">
-    <img src="screenshots/netcampus.png" width="70%" align="center" />
-</div>
 
 ## 隐私政策
 
