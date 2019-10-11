@@ -122,7 +122,10 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
             },
           ]}>
           <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
             style={{
+              flex: 1,
               color: isDarkMode ? Colors.grayDark : Colors.grayLight,
               fontSize: 13,
             }}>

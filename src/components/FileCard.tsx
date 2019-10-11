@@ -107,7 +107,10 @@ const FileCard: React.FC<IFileCardProps> = props => {
             },
           ]}>
           <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
             style={{
+              flex: 1,
               color: isDarkMode ? Colors.grayDark : Colors.grayLight,
               fontSize: 13,
             }}>
