@@ -22,29 +22,56 @@ type IWebViewScreenProps = IWebViewScreenStateProps;
 const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   const {url, ext, filename} = props;
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [filePath, setFilePath] = useState('');
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (loading) {
-      (async () => {
-        const filePath = await downloadFile(url, filename, ext, setProgress);
-        if (filePath) {
-          setFilePath(filePath);
-          setLoading(false);
-        }
-      })();
-    }
+    (async () => {
+      setLoading(true);
+      try {
+        const filePath = await downloadFile(
+          url,
+          filename,
+          ext,
+          false,
+          setProgress,
+        );
+        setFilePath(filePath);
+      } catch {
+        showToast(getTranslation('downloadFileFailure'), 1500);
+      } finally {
+        setLoading(false);
+        setProgress(0);
+      }
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loading]);
+  }, []);
 
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
-      ({buttonId}) => {
+      async ({buttonId}) => {
         if (buttonId === 'share') {
           showToast(getTranslation('preparingFile'), 1500);
           shareFile(url, filename, ext);
+        }
+        if (buttonId === 'refresh') {
+          setLoading(true);
+          try {
+            const filePath = await downloadFile(
+              url,
+              filename,
+              ext,
+              true,
+              setProgress,
+            );
+            setFilePath(filePath);
+          } catch {
+            showToast(getTranslation('downloadFileFailure'), 1500);
+          } finally {
+            setLoading(false);
+            setProgress(0);
+          }
         }
       },
     );
@@ -156,6 +183,10 @@ WebViewScreen.options = {
       {
         id: 'share',
         systemItem: 'action',
+      },
+      {
+        id: 'refresh',
+        systemItem: 'refresh',
       },
     ],
   },

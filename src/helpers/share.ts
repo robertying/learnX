@@ -51,6 +51,7 @@ export const downloadFile = (
   url: string,
   name: string,
   ext: string,
+  retry?: boolean,
   onProgress?: (percent: number) => void,
 ) => {
   return new Promise<string>(async (resolve, reject) => {
@@ -58,9 +59,8 @@ export const downloadFile = (
     const filePath = `${dirs.DocumentDir}/files/${name}.${ext}`;
     const exists = await RNFetchBlob.fs.exists(filePath);
 
-    if (!exists) {
-      const res = await RNFetchBlob.config({
-        fileCache: true,
+    if (retry || !exists) {
+      RNFetchBlob.config({
         path: filePath,
       })
         .fetch('GET', url)
@@ -68,13 +68,16 @@ export const downloadFile = (
           if (onProgress) {
             onProgress(received / total);
           }
-        });
-      const status = res.respInfo.status;
-      if (status !== 200) {
-        reject();
-      } else {
-        resolve(res.path());
-      }
+        })
+        .then(res => {
+          const status = res.respInfo.status;
+          if (status !== 200) {
+            reject();
+          } else {
+            resolve(res.path());
+          }
+        })
+        .catch(() => reject());
     } else {
       resolve(filePath);
     }
