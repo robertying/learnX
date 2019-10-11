@@ -1,5 +1,3 @@
-# Help
-
 Here are some information that may help you to use the App.
 
 ### The App is empty. Refreshing doesn't work.
