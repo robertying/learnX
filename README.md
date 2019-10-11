@@ -24,15 +24,17 @@ This project also serves as a demonstration of how to build a React Native app f
 
 ## Download
 
-- Android
+<div style="display: flex; align-items: center; justify-content: flex-start;">
+<a href='https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1'>
+    <img width=160 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
+</a>
 
-  - [Google Play](https://play.google.com/store/apps/details?id=io.robertying.learnx)
+<a href='https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
+    <img width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.png' />
+</a>
+</div>
 
-  - [GitHub Releases](https://github.com/robertying/learnX/releases)
-
-- iOS
-
-  - [App Store](https://itunes.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1&mt=8)
+**Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).**
 
 ## License
 
