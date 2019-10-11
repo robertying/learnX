@@ -135,8 +135,9 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
       topBar: {
         title: {
           component: {
-            name: 'text',
+            name: 'navigation.title',
             passProps: {
+              pushed,
               children: props.filename,
               style: {
                 fontSize: 17,
@@ -154,7 +155,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         selectedIconColor: tabIconSelectedColor,
       },
     });
-  }, [isDarkMode, props.componentId, props.filename]);
+  }, [isDarkMode, props.componentId, props.filename, pushed]);
 
   return (
     <>
