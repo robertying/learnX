@@ -119,6 +119,7 @@ const CourseDetailScreen: INavigationScreen<
             filename: stripExtension(filename),
             url,
             ext,
+            pushed: true,
           },
           options: {
             topBar: {

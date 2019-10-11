@@ -175,6 +175,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
               filename: file.title,
               url: file.downloadUrl,
               ext: file.fileType,
+              pushed: true,
             },
             options: {
               topBar: {

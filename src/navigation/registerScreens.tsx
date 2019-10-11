@@ -101,7 +101,11 @@ const registerScreens = () => {
   Navigation.registerComponent('settings.about', () => AboutScreen);
   Navigation.registerComponent('settings.help', () => HelpScreen);
 
-  Navigation.registerComponent('webview', () => WebViewScreen);
+  Navigation.registerComponent(
+    'webview',
+    () => storeWrapped(WebViewScreen),
+    () => WebViewScreen,
+  );
 };
 
 export default registerScreens;
