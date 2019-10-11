@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef} from 'react';
-import {ProgressViewIOS, View} from 'react-native';
+import {ProgressViewIOS, View, StatusBar} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import MediumPlaceholder from '../components/MediumPlaceholder';
@@ -30,6 +30,10 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   const [loading, setLoading] = useState(false);
   const [filePath, setFilePath] = useState('');
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    StatusBar.setBarStyle('default');
+  }, []);
 
   useEffect(() => {
     (async () => {
