@@ -28,7 +28,7 @@ This project also serves as a demonstration of how to build a React Native app f
     <img align="center" width=160 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
 </a>
 <a href='https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
-    <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.png' />
+    <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
 </a>
 
 **Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).**

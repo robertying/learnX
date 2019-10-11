@@ -6,6 +6,6 @@ description_cn: 清华大学网络学堂 App，以 React Native 构建
 logo: /favicon.ico
 lang: zh_CN
 show_downloads: true
-ios_url: "https://itunes.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1&mt=8"
-android_url: "https://github.com/robertying/learnX/releases/latest"
-play_url: "https://play.google.com/store/apps/details?id=io.robertying.learnx"
+ios_url: 'https://itunes.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1'
+android_url: 'https://github.com/robertying/learnX/releases/latest'
+play_url: 'https://play.google.com/store/apps/details?id=io.robertying.learnx'
