@@ -17,8 +17,9 @@ import NoticesScreen from '../screens/NoticesScreen';
 import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import WebViewScreen from '../screens/WebViewScreen';
-import Text from '../components/Text';
 import HelpScreen from '../screens/HelpScreen';
+import NavigationTitle from '../components/NavigationTitle';
+import Text from '../components/Text';
 
 const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
   props: any,
@@ -32,6 +33,8 @@ const registerScreens = () => {
   Navigation.registerComponent('empty', () => EmptyScreen);
 
   Navigation.registerComponent('text', () => Text);
+
+  Navigation.registerComponent('navigation.title', () => NavigationTitle);
 
   Navigation.registerComponent(
     'auth.loading',

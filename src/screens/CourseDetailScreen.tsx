@@ -124,7 +124,18 @@ const CourseDetailScreen: INavigationScreen<
           options: {
             topBar: {
               title: {
-                text: stripExtension(filename),
+                component: {
+                  name: 'navigation.title',
+                  passProps: {
+                    pushed: true,
+                    children: stripExtension(filename),
+                    style: {
+                      fontSize: 17,
+                      fontWeight: '500',
+                      color: isDarkMode ? 'white' : 'black',
+                    },
+                  },
+                },
               },
             },
           },

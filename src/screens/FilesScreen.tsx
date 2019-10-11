@@ -155,7 +155,17 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
               options: {
                 topBar: {
                   title: {
-                    text: file.title,
+                    component: {
+                      name: 'navigation.title',
+                      passProps: {
+                        children: file.title,
+                        style: {
+                          fontSize: 17,
+                          fontWeight: '500',
+                          color: isDarkMode ? 'white' : 'black',
+                        },
+                      },
+                    },
                   },
                 },
                 animations: {
@@ -181,8 +191,9 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
               topBar: {
                 title: {
                   component: {
-                    name: 'text',
+                    name: 'navigation.title',
                     passProps: {
+                      pushed: true,
                       children: file.title,
                       style: {
                         fontSize: 17,
