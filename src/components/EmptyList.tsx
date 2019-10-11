@@ -11,6 +11,7 @@ const EmptyList: React.FunctionComponent = () => {
   return (
     <View
       style={{
+        backgroundColor: isDarkMode ? 'black' : 'white',
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
