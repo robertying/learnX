@@ -66,6 +66,7 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
             filename: stripExtension(filename),
             url,
             ext,
+            pushed: true,
           },
           options: {
             topBar: {

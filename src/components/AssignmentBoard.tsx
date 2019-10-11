@@ -76,6 +76,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
             filename: stripExtension(filename),
             url,
             ext,
+            pushed: true,
           },
           options: {
             topBar: {

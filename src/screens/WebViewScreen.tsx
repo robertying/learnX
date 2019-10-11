@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {ProgressViewIOS, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
@@ -10,17 +10,22 @@ import {downloadFile, shareFile} from '../helpers/share';
 import {showToast} from '../helpers/toast';
 import {INavigationScreen} from '../types/NavigationScreen';
 import {useDarkMode, initialMode} from 'react-native-dark-mode';
+import DeviceInfo from '../constants/DeviceInfo';
+import {IPersistAppState} from '../redux/types/state';
+import {connect} from 'react-redux';
 
 export interface IWebViewScreenStateProps {
   readonly filename: string;
   readonly url: string;
   readonly ext: string;
+  compactWidth?: boolean;
+  pushed?: boolean;
 }
 
 type IWebViewScreenProps = IWebViewScreenStateProps;
 
 const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
-  const {url, ext, filename} = props;
+  const {url, ext, filename, compactWidth, pushed} = props;
 
   const [loading, setLoading] = useState(false);
   const [filePath, setFilePath] = useState('');
@@ -48,9 +53,30 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const fullScreenRef = useRef<boolean>(false);
+
   useEffect(() => {
     const listener = Navigation.events().registerNavigationButtonPressedListener(
       async ({buttonId}) => {
+        if (buttonId === 'toggle') {
+          const fullScreen = fullScreenRef.current!;
+          Navigation.mergeOptions(props.componentId, {
+            splitView: {
+              displayMode: fullScreen ? 'visible' : 'hidden',
+            },
+            topBar: {
+              leftButtons: pushed
+                ? []
+                : [
+                    {
+                      id: 'toggle',
+                      systemItem: fullScreen ? 'rewind' : 'fastForward',
+                    },
+                  ],
+            },
+          });
+          fullScreenRef.current = !fullScreen;
+        }
         if (buttonId === 'share') {
           showToast(getTranslation('preparingFile'), 1500);
           shareFile(url, filename, ext);
@@ -78,6 +104,23 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
     return () => listener.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!pushed) {
+      Navigation.mergeOptions(props.componentId, {
+        topBar: {
+          leftButtons: compactWidth
+            ? []
+            : [
+                {
+                  id: 'toggle',
+                  systemItem: 'rewind',
+                },
+              ],
+        },
+      });
+    }
+  }, [compactWidth, props.componentId, pushed]);
 
   const isDarkMode = useDarkMode();
 
@@ -179,6 +222,14 @@ WebViewScreen.options = {
   },
   topBar: {
     hideOnScroll: true,
+    leftButtons: DeviceInfo.isIPad()
+      ? [
+          {
+            id: 'toggle',
+            systemItem: 'rewind',
+          },
+        ]
+      : undefined,
     rightButtons: [
       {
         id: 'share',
@@ -192,4 +243,13 @@ WebViewScreen.options = {
   },
 };
 
-export default WebViewScreen;
+function mapStateToProps(state: IPersistAppState) {
+  return {
+    compactWidth: state.settings.compactWidth,
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  undefined,
+)(WebViewScreen);
