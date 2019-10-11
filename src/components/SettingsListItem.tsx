@@ -72,6 +72,7 @@ const SettingsListItem: React.FunctionComponent<
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'flex-start',
+            display: 'flex',
           }}>
           <View
             style={{
@@ -81,7 +82,11 @@ const SettingsListItem: React.FunctionComponent<
             }}>
             {icon}
           </View>
-          <Text style={[{fontSize: iOSUIKit.bodyObject.fontSize}, textStyle]}>
+          <Text
+            style={[
+              {flex: 1, fontSize: iOSUIKit.bodyObject.fontSize},
+              textStyle,
+            ]}>
             {text}
           </Text>
         </View>
