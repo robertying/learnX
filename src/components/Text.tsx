@@ -9,8 +9,6 @@ const CustomText: React.FunctionComponent<TextProps> = props => {
 
   return (
     <Text
-      numberOfLines={1}
-      ellipsizeMode="middle"
       style={[{color: isDarkMode ? 'white' : 'black'}, style]}
       {...restProps}>
       {props.children}
