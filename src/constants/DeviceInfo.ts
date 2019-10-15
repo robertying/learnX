@@ -6,9 +6,9 @@ let _isIPad12_9: boolean;
 let _buildNo: string;
 
 const init = async () => {
-  _isIPad = (await Info.isTablet()) && Platform.OS === 'ios';
+  _isIPad = Info.isTablet() && Platform.OS === 'ios';
   _isIPad12_9 = (await Info.getDeviceName()).includes('iPad Pro (12.9-inch)');
-  _buildNo = await Info.getBuildNumber();
+  _buildNo = Info.getBuildNumber();
 };
 
 export default {
