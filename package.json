@@ -106,7 +106,7 @@
         "build": "xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build | xcpretty && exit ${PIPESTATUS[0]}",
         "type": "ios.simulator",
         "device": {
-          "type": "iPhone 11 Pro Max",
+          "type": "iPhone 11 Pro Max"
         }
       },
       "ios.sim.release": {
@@ -114,7 +114,7 @@
         "build": "xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Release -sdk iphonesimulator -derivedDataPath ios/build | xcpretty && exit ${PIPESTATUS[0]}",
         "type": "ios.simulator",
         "device": {
-          "type": "iPhone 11 Pro Max",
+          "type": "iPhone 11 Pro Max"
         }
       }
     },
