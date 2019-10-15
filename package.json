@@ -105,13 +105,17 @@
         "binaryPath": "ios/build/Build/Products/Debug-iphonesimulator/learnX.app",
         "build": "xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build | xcpretty && exit ${PIPESTATUS[0]}",
         "type": "ios.simulator",
-        "name": "iPhone 11 Pro Max"
+        "device": {
+          "type": "iPhone 11 Pro Max",
+        }
       },
       "ios.sim.release": {
         "binaryPath": "ios/build/Build/Products/Release-iphonesimulator/learnX.app",
         "build": "xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Release -sdk iphonesimulator -derivedDataPath ios/build | xcpretty && exit ${PIPESTATUS[0]}",
         "type": "ios.simulator",
-        "name": "iPhone 11 Pro Max"
+        "device": {
+          "type": "iPhone 11 Pro Max",
+        }
       }
     },
     "test-runner": "jest",
