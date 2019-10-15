@@ -62,7 +62,7 @@
     "@types/detox": "12.8.4",
     "@types/jasmine": "3.4.4",
     "@types/jest": "24.0.19",
-    "@types/react": "16.9.6",
+    "@types/react": "16.9.7",
     "@types/react-native": "0.60.21",
     "@types/react-native-share": "1.1.4",
     "@types/react-native-tab-view": "1.0.6",
