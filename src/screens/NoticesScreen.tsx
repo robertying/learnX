@@ -1,5 +1,5 @@
 import {FuseOptions} from 'fuse.js';
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Platform,
   RefreshControl,
@@ -7,6 +7,8 @@ import {
   FlatList,
   Dimensions,
   StatusBar,
+  AppState,
+  AppStateStatus,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -39,6 +41,7 @@ import {
 import {INavigationScreen} from '../types/NavigationScreen';
 import {initialMode, useDarkMode} from 'react-native-dark-mode';
 import {setCompactWidth} from '../redux/actions/settings';
+import {resetLoading} from '../redux/actions/root';
 
 interface INoticesScreenStateProps {
   readonly autoRefreshing: boolean;
@@ -63,6 +66,7 @@ interface INoticesScreenDispatchProps {
   readonly unpinNotice: (noticeId: string) => void;
   readonly login: (username: string, password: string) => void;
   setCompactWidth: (compactWidth: boolean) => void;
+  resetLoading: () => void;
 }
 
 type INoticesScreenProps = INoticesScreenStateProps &
@@ -88,6 +92,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     hasUpdate,
     setCompactWidth,
     compactWidth,
+    resetLoading,
   } = props;
 
   useEffect(() => {
@@ -371,6 +376,18 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     return () => Dimensions.removeEventListener('change', listener);
   }, [compactWidth, setCompactWidth]);
 
+  const [appState, setAppState] = useState(AppState.currentState);
+  useEffect(() => {
+    const listener = (nextAppState: AppStateStatus) => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        resetLoading();
+      }
+      setAppState(nextAppState);
+    };
+    AppState.addEventListener('change', listener);
+    return () => AppState.removeEventListener('change', listener);
+  });
+
   return (
     <PaperProvider
       theme={{
@@ -491,6 +508,7 @@ const mapDispatchToProps: INoticesScreenDispatchProps = {
   unpinNotice: (noticeId: string) => unpinNotice(noticeId),
   login: (username: string, password: string) => login(username, password),
   setCompactWidth,
+  resetLoading,
 };
 
 export default connect(

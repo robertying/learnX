@@ -27,7 +27,7 @@ import {
   pinNotice,
   unpinNotice,
 } from '../actions/notices';
-import {clearStoreAction, setMockStore} from '../actions/root';
+import {clearStoreAction, setMockStore, resetLoading} from '../actions/root';
 import {getAllSemestersAction} from '../actions/semesters';
 import {
   clearEventIds,
@@ -130,9 +130,13 @@ export type ISettingsAction =
   | ISetLang
   | ISetCompactWidth;
 
+export type IResetLoadingAction = ActionType<typeof resetLoading>;
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
 export type ISetMockStoreAction = ActionType<typeof setMockStore>;
-export type IStoreAction = IClearStoreAction | ISetMockStoreAction;
+export type IStoreAction =
+  | IClearStoreAction
+  | ISetMockStoreAction
+  | IResetLoadingAction;
 
 export type IAppActions =
   | IThunkResult
