@@ -5,9 +5,8 @@ import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
   GET_COURSES_FOR_SEMESTER_SUCCESS,
-  PIN_COURSE,
-  SET_COURSES_FILTER,
-  UNPIN_COURSE,
+  HIDE_COURSE,
+  UNHIDE_COURSE,
 } from '../types/constants';
 import {ICourse} from '../types/state';
 
@@ -35,14 +34,10 @@ export function getCoursesForSemester(semesterId: string): IThunkResult {
   };
 }
 
-export const pinCourse = createAction(PIN_COURSE, action => {
+export const hideCourse = createAction(HIDE_COURSE, action => {
   return (courseId: string) => action(courseId);
 });
 
-export const unpinCourse = createAction(UNPIN_COURSE, action => {
+export const unhideCourse = createAction(UNHIDE_COURSE, action => {
   return (courseId: string) => action(courseId);
-});
-
-export const setCoursesFilter = createAction(SET_COURSES_FILTER, action => {
-  return (hiddenCourses: readonly string[]) => action(hiddenCourses);
 });

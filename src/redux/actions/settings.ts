@@ -8,16 +8,11 @@ import {
   SET_LANG,
   SET_NOTIFICATION_TYPES,
   SET_NOTIFICATIONS,
-  SET_TABS_ORDER,
   SET_UPDATE,
   SET_WINDOW,
   SET_COMPACT_WIDTH,
 } from '../types/constants';
-import {IWindow, Language, NotificationType, Tab} from '../types/state';
-
-export const setTabsOrder = createAction(SET_TABS_ORDER, action => {
-  return (tabs: readonly Tab[]) => action(tabs);
-});
+import {IWindow, Language, NotificationType} from '../types/state';
 
 export const setAutoRefreshing = createAction(SET_AUTO_REFRESHING, action => {
   return (enabled: boolean) => action(enabled);

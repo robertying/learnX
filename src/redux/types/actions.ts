@@ -6,13 +6,14 @@ import {
   getAssignmentsForCourseAction,
   pinAssignment,
   unpinAssignment,
+  favAssignment,
+  unfavAssignment,
 } from '../actions/assignments';
 import {loginAction} from '../actions/auth';
 import {
   getCoursesForSemesterAction,
-  pinCourse,
-  setCoursesFilter,
-  unpinCourse,
+  hideCourse,
+  unhideCourse,
 } from '../actions/courses';
 import {setCurrentSemester} from '../actions/currentSemester';
 import {
@@ -20,12 +21,16 @@ import {
   getFilesForCourseAction,
   pinFile,
   unpinFile,
+  unfavFile,
+  favFile,
 } from '../actions/files';
 import {
   getAllNoticesForCoursesAction,
   getNoticesForCourseAction,
   pinNotice,
   unpinNotice,
+  unfavNotice,
+  favNotice,
 } from '../actions/notices';
 import {clearStoreAction, setMockStore, resetLoading} from '../actions/root';
 import {getAllSemestersAction} from '../actions/semesters';
@@ -38,7 +43,6 @@ import {
   setLang,
   setNotifications,
   setNotificationTypes,
-  setTabsOrder,
   setUpdate,
   setWindow,
   setCompactWidth,
@@ -97,12 +101,17 @@ export type IPinFileAction = ActionType<typeof pinFile>;
 export type IUnpinFileAction = ActionType<typeof unpinFile>;
 export type IPinAssignmentAction = ActionType<typeof pinAssignment>;
 export type IUnpinAssignmentAction = ActionType<typeof unpinAssignment>;
-export type IPinCourseAction = ActionType<typeof pinCourse>;
-export type IUnpinCourseAction = ActionType<typeof unpinCourse>;
 
-export type ISetCoursesFilter = ActionType<typeof setCoursesFilter>;
+export type IFavNoticeAction = ActionType<typeof favNotice>;
+export type IUnfavNoticeAction = ActionType<typeof unfavNotice>;
+export type IFavFileAction = ActionType<typeof favFile>;
+export type IUnfavFileAction = ActionType<typeof unfavFile>;
+export type IFavAssignmentAction = ActionType<typeof favAssignment>;
+export type IUnfavAssignmentAction = ActionType<typeof unfavAssignment>;
 
-export type ISetTabsOrderAction = ActionType<typeof setTabsOrder>;
+export type IHideCourseAction = ActionType<typeof hideCourse>;
+export type IUnhideCourseAction = ActionType<typeof unhideCourse>;
+
 export type ISetAutoRefreshingAction = ActionType<typeof setAutoRefreshing>;
 export type ISetCalendarSyncAction = ActionType<typeof setCalendarSync>;
 export type ISetCalendarIdAction = ActionType<typeof setCalendarId>;
@@ -117,7 +126,6 @@ export type ISetNotificationTypes = ActionType<typeof setNotificationTypes>;
 export type ISetLang = ActionType<typeof setLang>;
 export type ISetCompactWidth = ActionType<typeof setCompactWidth>;
 export type ISettingsAction =
-  | ISetTabsOrderAction
   | ISetAutoRefreshingAction
   | ISetCalendarSyncAction
   | ISetCalendarIdAction
@@ -156,8 +164,13 @@ export type IAppActions =
   | IUnpinFileAction
   | IPinAssignmentAction
   | IUnpinAssignmentAction
-  | IPinCourseAction
-  | IUnpinCourseAction
-  | ISetCoursesFilter
+  | IFavNoticeAction
+  | IUnfavNoticeAction
+  | IFavFileAction
+  | IUnfavFileAction
+  | IFavAssignmentAction
+  | IUnfavAssignmentAction
+  | IHideCourseAction
+  | IUnhideCourseAction
   | ISettingsAction
   | IStoreAction;

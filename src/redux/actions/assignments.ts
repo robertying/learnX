@@ -12,6 +12,8 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
   PIN_ASSIGNMENT,
   UNPIN_ASSIGNMENT,
+  FAV_ASSIGNMENT,
+  UNFAV_ASSIGNMENT,
 } from '../types/constants';
 import {IAssignment} from '../types/state';
 
@@ -110,5 +112,13 @@ export const pinAssignment = createAction(PIN_ASSIGNMENT, action => {
 });
 
 export const unpinAssignment = createAction(UNPIN_ASSIGNMENT, action => {
+  return (assignmentId: string) => action(assignmentId);
+});
+
+export const favAssignment = createAction(FAV_ASSIGNMENT, action => {
+  return (assignmentId: string) => action(assignmentId);
+});
+
+export const unfavAssignment = createAction(UNFAV_ASSIGNMENT, action => {
   return (assignmentId: string) => action(assignmentId);
 });

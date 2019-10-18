@@ -2,6 +2,8 @@ import {
   IGetNoticesAction,
   IPinNoticeAction,
   IUnpinNoticeAction,
+  IFavNoticeAction,
+  IUnfavNoticeAction,
 } from '../types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
@@ -12,6 +14,8 @@ import {
   GET_NOTICES_FOR_COURSE_SUCCESS,
   PIN_NOTICE,
   UNPIN_NOTICE,
+  FAV_NOTICE,
+  UNFAV_NOTICE,
 } from '../types/constants';
 import {INoticesState} from '../types/state';
 
@@ -19,9 +23,15 @@ export default function notices(
   state: INoticesState = {
     isFetching: false,
     pinned: [],
+    favorites: [],
     items: [],
   },
-  action: IGetNoticesAction | IPinNoticeAction | IUnpinNoticeAction,
+  action:
+    | IGetNoticesAction
+    | IPinNoticeAction
+    | IUnpinNoticeAction
+    | IFavNoticeAction
+    | IUnfavNoticeAction,
 ): INoticesState {
   switch (action.type) {
     case GET_ALL_NOTICES_FOR_COURSES_REQUEST:
@@ -76,6 +86,16 @@ export default function notices(
       return {
         ...state,
         pinned: state.pinned.filter(item => item !== action.payload),
+      };
+    case FAV_NOTICE:
+      return {
+        ...state,
+        favorites: [...(state.favorites || []), action.payload],
+      };
+    case UNFAV_NOTICE:
+      return {
+        ...state,
+        favorites: state.favorites.filter(item => item !== action.payload),
       };
   }
   return state;

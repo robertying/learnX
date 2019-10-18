@@ -11,6 +11,8 @@ import {
   GET_NOTICES_FOR_COURSE_SUCCESS,
   PIN_NOTICE,
   UNPIN_NOTICE,
+  FAV_NOTICE,
+  UNFAV_NOTICE,
 } from '../types/constants';
 import {INotice} from '../types/state';
 
@@ -102,5 +104,13 @@ export const pinNotice = createAction(PIN_NOTICE, action => {
 });
 
 export const unpinNotice = createAction(UNPIN_NOTICE, action => {
+  return (noticeId: string) => action(noticeId);
+});
+
+export const favNotice = createAction(FAV_NOTICE, action => {
+  return (noticeId: string) => action(noticeId);
+});
+
+export const unfavNotice = createAction(UNFAV_NOTICE, action => {
   return (noticeId: string) => action(noticeId);
 });
