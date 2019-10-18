@@ -2,6 +2,8 @@ import {
   IGetAssignmentsAction,
   IPinAssignmentAction,
   IUnpinAssignmentAction,
+  IFavAssignmentAction,
+  IUnfavAssignmentAction,
 } from '../types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
@@ -12,6 +14,8 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
   PIN_ASSIGNMENT,
   UNPIN_ASSIGNMENT,
+  FAV_ASSIGNMENT,
+  UNFAV_ASSIGNMENT,
 } from '../types/constants';
 import {IAssignmentsState} from '../types/state';
 
@@ -19,9 +23,15 @@ export default function assignments(
   state: IAssignmentsState = {
     isFetching: false,
     pinned: [],
+    favorites: [],
     items: [],
   },
-  action: IGetAssignmentsAction | IPinAssignmentAction | IUnpinAssignmentAction,
+  action:
+    | IGetAssignmentsAction
+    | IPinAssignmentAction
+    | IUnpinAssignmentAction
+    | IFavAssignmentAction
+    | IUnfavAssignmentAction,
 ): IAssignmentsState {
   switch (action.type) {
     case GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST:
@@ -76,6 +86,16 @@ export default function assignments(
       return {
         ...state,
         pinned: state.pinned.filter(item => item !== action.payload),
+      };
+    case FAV_ASSIGNMENT:
+      return {
+        ...state,
+        favorites: [...(state.favorites || []), action.payload],
+      };
+    case UNFAV_ASSIGNMENT:
+      return {
+        ...state,
+        favorites: state.favorites.filter(item => item !== action.payload),
       };
   }
   return state;

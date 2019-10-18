@@ -11,6 +11,8 @@ import {
   GET_FILES_FOR_COURSE_SUCCESS,
   PIN_FILE,
   UNPIN_FILE,
+  FAV_FILE,
+  UNFAV_FILE,
 } from '../types/constants';
 import {IFile} from '../types/state';
 
@@ -82,5 +84,13 @@ export const pinFile = createAction(PIN_FILE, action => {
 });
 
 export const unpinFile = createAction(UNPIN_FILE, action => {
+  return (fileId: string) => action(fileId);
+});
+
+export const favFile = createAction(FAV_FILE, action => {
+  return (fileId: string) => action(fileId);
+});
+
+export const unfavFile = createAction(UNFAV_FILE, action => {
   return (fileId: string) => action(fileId);
 });

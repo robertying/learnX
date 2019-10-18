@@ -1,16 +1,14 @@
 import {
   IGetCoursesForSemesterAction,
-  IPinCourseAction,
-  ISetCoursesFilter,
-  IUnpinCourseAction,
+  IHideCourseAction,
+  IUnhideCourseAction,
 } from '../types/actions';
 import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
   GET_COURSES_FOR_SEMESTER_SUCCESS,
-  PIN_COURSE,
-  SET_COURSES_FILTER,
-  UNPIN_COURSE,
+  HIDE_COURSE,
+  UNHIDE_COURSE,
 } from '../types/constants';
 import {ICoursesState} from '../types/state';
 
@@ -18,14 +16,12 @@ export default function courses(
   state: ICoursesState = {
     isFetching: false,
     hidden: [],
-    pinned: [],
     items: [],
   },
   action:
     | IGetCoursesForSemesterAction
-    | IPinCourseAction
-    | IUnpinCourseAction
-    | ISetCoursesFilter,
+    | IHideCourseAction
+    | IUnhideCourseAction,
 ): ICoursesState {
   switch (action.type) {
     case GET_COURSES_FOR_SEMESTER_REQUEST:
@@ -47,20 +43,15 @@ export default function courses(
         isFetching: false,
         error: action.payload,
       };
-    case PIN_COURSE:
+    case HIDE_COURSE:
       return {
         ...state,
-        pinned: [...(state.pinned || []), action.payload],
+        hidden: [...(state.hidden || []), action.payload],
       };
-    case UNPIN_COURSE:
+    case UNHIDE_COURSE:
       return {
         ...state,
-        pinned: state.pinned.filter(item => item !== action.payload),
-      };
-    case SET_COURSES_FILTER:
-      return {
-        ...state,
-        hidden: action.payload,
+        hidden: state.hidden.filter(item => item !== action.payload),
       };
   }
   return state;

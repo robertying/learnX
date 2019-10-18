@@ -56,17 +56,24 @@ export const HIDE_TOAST = 'HIDE_TOAST';
 
 export const PIN_NOTICE = 'PIN_NOTICE';
 export const UNPIN_NOTICE = 'UNPIN_NOTICE';
-
 export const PIN_FILE = 'PIN_FILE';
 export const UNPIN_FILE = 'UNPIN_FILE';
-
 export const PIN_ASSIGNMENT = 'PIN_ASSIGNMENT';
 export const UNPIN_ASSIGNMENT = 'UNPIN_ASSIGNMENT';
-
 export const PIN_COURSE = 'PIN_COURSE';
 export const UNPIN_COURSE = 'UNPIN_COURSE';
 
-export const SET_COURSES_FILTER = 'SET_COURSES_FILTER';
+export const FAV_NOTICE = 'FAV_NOTICE';
+export const UNFAV_NOTICE = 'UNFAV_NOTICE';
+export const FAV_FILE = 'FAV_FILE';
+export const UNFAV_FILE = 'UNFAV_FILE';
+export const FAV_ASSIGNMENT = 'FAV_ASSIGNMENT';
+export const UNFAV_ASSIGNMENT = 'UNFAV_ASSIGNMENT';
+export const FAV_COURSE = 'FAV_COURSE';
+export const UNFAV_COURSE = 'UNFAV_COURSE';
+
+export const HIDE_COURSE = 'HIDE_COURSE';
+export const UNHIDE_COURSE = 'UNHIDE_COURSE';
 
 export const SET_TABS_ORDER = 'SET_TABS_ORDER';
 export const SET_AUTO_REFRESHING = 'SET_AUTO_REFRESHING';

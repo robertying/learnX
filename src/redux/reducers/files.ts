@@ -2,6 +2,8 @@ import {
   IGetFilesAction,
   IPinFileAction,
   IUnpinFileAction,
+  IFavFileAction,
+  IUnfavFileAction,
 } from '../types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
@@ -12,6 +14,8 @@ import {
   GET_FILES_FOR_COURSE_SUCCESS,
   PIN_FILE,
   UNPIN_FILE,
+  FAV_FILE,
+  UNFAV_FILE,
 } from '../types/constants';
 import {IFilesState} from '../types/state';
 
@@ -19,9 +23,15 @@ export default function files(
   state: IFilesState = {
     isFetching: false,
     pinned: [],
+    favorites: [],
     items: [],
   },
-  action: IGetFilesAction | IPinFileAction | IUnpinFileAction,
+  action:
+    | IGetFilesAction
+    | IPinFileAction
+    | IUnpinFileAction
+    | IFavFileAction
+    | IUnfavFileAction,
 ): IFilesState {
   switch (action.type) {
     case GET_ALL_FILES_FOR_COURSES_REQUEST:
@@ -76,6 +86,16 @@ export default function files(
       return {
         ...state,
         pinned: state.pinned.filter(item => item !== action.payload),
+      };
+    case FAV_FILE:
+      return {
+        ...state,
+        favorites: [...(state.favorites || []), action.payload],
+      };
+    case UNFAV_FILE:
+      return {
+        ...state,
+        favorites: state.favorites.filter(item => item !== action.payload),
       };
   }
   return state;

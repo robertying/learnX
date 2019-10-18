@@ -33,7 +33,6 @@ export enum Language {
   'en',
 }
 export interface ISettingsState {
-  readonly tabsOrder: readonly Tab[];
   readonly autoRefreshing: boolean;
   readonly calendarSync: boolean;
   readonly calendarId?: string;
@@ -61,7 +60,6 @@ export interface ICourse {
 }
 export interface ICoursesState {
   readonly isFetching: boolean;
-  readonly pinned: readonly string[];
   readonly hidden: readonly string[];
   readonly items: ReadonlyArray<ICourse>;
   readonly error?: Error | null;
@@ -86,6 +84,7 @@ export interface INotice {
 export interface INoticesState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
+  readonly favorites: readonly string[];
   readonly items: ReadonlyArray<INotice>;
   readonly error?: Error | null;
 }
@@ -105,6 +104,7 @@ export interface IFile {
 export interface IFilesState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
+  readonly favorites: readonly string[];
   readonly items: ReadonlyArray<IFile>;
   readonly error?: Error | null;
 }
@@ -131,6 +131,7 @@ export interface IAssignment {
 export interface IAssignmentsState {
   readonly isFetching: boolean;
   readonly pinned: readonly string[];
+  readonly favorites: readonly string[];
   readonly items: ReadonlyArray<IAssignment>;
   readonly error?: Error | null;
 }

@@ -8,22 +8,14 @@ import {
   SET_LANG,
   SET_NOTIFICATION_TYPES,
   SET_NOTIFICATIONS,
-  SET_TABS_ORDER,
   SET_UPDATE,
   SET_WINDOW,
   SET_COMPACT_WIDTH,
 } from '../types/constants';
-import {ISettingsState, NotificationType, Tab} from '../types/state';
+import {ISettingsState, NotificationType} from '../types/state';
 
 export default function settings(
   state: ISettingsState = {
-    tabsOrder: [
-      Tab.Notices,
-      Tab.Files,
-      Tab.Assignments,
-      Tab.Courses,
-      Tab.Settings,
-    ],
     autoRefreshing: false,
     calendarSync: false,
     syncedAssignments: {},
@@ -42,11 +34,6 @@ export default function settings(
   action: ISettingsAction,
 ): ISettingsState {
   switch (action.type) {
-    case SET_TABS_ORDER:
-      return {
-        ...state,
-        tabsOrder: action.payload,
-      };
     case SET_AUTO_REFRESHING:
       return {
         ...state,
