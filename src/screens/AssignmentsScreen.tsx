@@ -354,6 +354,7 @@ const fuseOptions = getFuseOptions<IAssignment>([
   'attachmentName',
   'description',
   'title',
+  'courseName',
 ]);
 
 AssignmentsScreen.options = getScreenOptions(
