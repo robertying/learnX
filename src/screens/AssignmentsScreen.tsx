@@ -35,7 +35,6 @@ import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {getFuseOptions} from '../helpers/search';
 
 interface IAssignmentsScreenStateProps {
-  autoRefreshing: boolean;
   loggedIn: boolean;
   courses: ICourse[];
   hiddenCourseIds: string[];
@@ -63,7 +62,6 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     assignments,
     isFetching,
     getAllAssignmentsForCourses,
-    autoRefreshing,
     pinAssignment,
     pinnedAssignmentIds,
     unpinAssignment,
@@ -173,10 +171,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   }, [courses, getAllAssignmentsForCourses, loggedIn]);
 
   useEffect(() => {
-    if (autoRefreshing || assignments.length === 0) {
+    if (assignments.length === 0) {
       invalidateAll();
     }
-  }, [autoRefreshing, invalidateAll, assignments.length]);
+  }, [invalidateAll, assignments.length]);
 
   /**
    * Render cards
@@ -366,7 +364,6 @@ function mapStateToProps(
   state: IPersistAppState,
 ): IAssignmentsScreenStateProps {
   return {
-    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     courses: state.courses.items || [],
     isFetching: state.assignments.isFetching,

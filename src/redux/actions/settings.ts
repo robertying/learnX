@@ -1,7 +1,6 @@
 import {createAction} from 'typesafe-actions';
 import {
   CLEAR_EVENT_IDS,
-  SET_AUTO_REFRESHING,
   SET_CALENDAR_ID,
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
@@ -13,10 +12,6 @@ import {
   SET_COMPACT_WIDTH,
 } from '../types/constants';
 import {IWindow, Language, NotificationType} from '../types/state';
-
-export const setAutoRefreshing = createAction(SET_AUTO_REFRESHING, action => {
-  return (enabled: boolean) => action(enabled);
-});
 
 export const setCalendarSync = createAction(SET_CALENDAR_SYNC, action => {
   return (enabled: boolean) => action(enabled);

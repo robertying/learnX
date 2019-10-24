@@ -23,7 +23,6 @@ import SnackBar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {clearStore} from '../redux/actions/root';
 import {
-  setAutoRefreshing,
   setCalendarSync,
   setNotifications,
   setUpdate,
@@ -36,7 +35,6 @@ import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 
 interface ISettingsScreenStateProps {
-  autoRefreshing: boolean;
   calendarSync: boolean;
   assignments: IAssignment[];
   hasUpdate: boolean;
@@ -46,7 +44,6 @@ interface ISettingsScreenStateProps {
 
 interface ISettingsScreenDispatchProps {
   clearStore: () => void;
-  setAutoRefreshing: (enabled: boolean) => void;
   setCalendarSync: (enabled: boolean) => void;
   setUpdate: (hasUpdate: boolean) => void;
   setNotifications: (enabled: boolean) => void;
@@ -58,8 +55,6 @@ type ISettingsScreenProps = ISettingsScreenStateProps &
 const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const {
     clearStore,
-    setAutoRefreshing,
-    autoRefreshing,
     setCalendarSync,
     calendarSync,
     assignments,
@@ -198,25 +193,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const renderListItem: ListRenderItem<{}> = ({index}) => {
     switch (index) {
       case 0:
-        return (
-          <SettingsListItem
-            variant="switch"
-            containerStyle={{marginTop: 10}}
-            icon={
-              <MaterialCommunityIcons
-                name="refresh"
-                size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
-              />
-            }
-            text={getTranslation('autoRefreshing')}
-            switchValue={autoRefreshing}
-            onSwitchValueChange={setAutoRefreshing}
-          />
-        );
-      case 1:
         return Platform.OS === 'ios' ? (
           <SettingsListItem
+            containerStyle={{marginTop: 10}}
             variant="switch"
             icon={
               <MaterialCommunityIcons
@@ -230,7 +209,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onSwitchValueChange={onCalendarSyncSwitchChange}
           />
         ) : null;
-      case 2:
+      case 1:
         return (
           <SettingsListItem
             variant="arrow"
@@ -245,7 +224,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onSemestersPress}
           />
         );
-      case 3:
+      case 2:
         return (
           <SettingsListItem
             variant="none"
@@ -261,7 +240,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onLogoutPress}
           />
         );
-      case 4:
+      case 3:
         return (
           <SettingsListItem
             variant="none"
@@ -276,7 +255,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 5:
+      case 4:
         return Platform.OS === 'android' ? (
           <SettingsListItem
             variant="none"
@@ -317,7 +296,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 6:
+      case 5:
         return (
           <SettingsListItem
             variant="arrow"
@@ -333,7 +312,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onHelpPress}
           />
         );
-      case 7:
+      case 6:
         return (
           <SettingsListItem
             variant="arrow"
@@ -348,7 +327,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 8:
+      case 7:
         return (
           <SettingsListItem
             variant="arrow"
@@ -377,7 +356,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       <FlatList
         style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
         data={[
-          {key: 'autoRefreshing'},
           {key: 'calendarSync'},
           {key: 'semesters'},
           {key: 'logout'},
@@ -397,7 +375,6 @@ SettingsScreen.options = getScreenOptions(getTranslation('settings'));
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
   return {
-    autoRefreshing: state.settings.autoRefreshing,
     calendarSync: state.settings.calendarSync,
     assignments: state.assignments.items,
     hasUpdate: state.settings.hasUpdate,
@@ -408,7 +385,6 @@ function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
 
 const mapDispatchToProps: ISettingsScreenDispatchProps = {
   clearStore,
-  setAutoRefreshing,
   setCalendarSync,
   setUpdate,
   setNotifications,

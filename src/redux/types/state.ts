@@ -33,7 +33,6 @@ export enum Language {
   'en',
 }
 export interface ISettingsState {
-  autoRefreshing: boolean;
   calendarSync: boolean;
   calendarId?: string;
   syncedAssignments: {

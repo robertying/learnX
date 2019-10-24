@@ -33,7 +33,6 @@ import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
 
 interface ICoursesScreenStateProps {
-  autoRefreshing: boolean;
   loggedIn: boolean;
   semesterId: string;
   courses: ICourse[];
@@ -74,7 +73,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     getAllNoticesForCourses,
     getAllFilesForCourses,
     getAllAssignmentsForCourses,
-    autoRefreshing,
     hideCourse,
     unhideCourse,
     hiddenCourseIds,
@@ -130,20 +128,13 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
 
   useEffect(() => {
     if (
-      autoRefreshing ||
       notices.length === 0 ||
       files.length === 0 ||
       assignments.length === 0
     ) {
       invalidateAll();
     }
-  }, [
-    assignments.length,
-    autoRefreshing,
-    files.length,
-    invalidateAll,
-    notices.length,
-  ]);
+  }, [assignments.length, files.length, invalidateAll, notices.length]);
 
   /**
    * Render cards
@@ -275,7 +266,6 @@ CoursesScreen.options = getScreenOptions(getTranslation('courses'));
 
 function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {
-    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     semesterId: state.currentSemester,
     courses: state.courses.items,

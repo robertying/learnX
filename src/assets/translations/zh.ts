@@ -29,7 +29,6 @@ export default {
   clearFileCacheFail: '清空文件缓存失败',
   clearFileCacheConfirmation: '确定要清空文件缓存吗？',
   clearFileCacheSuccess: '成功清空文件缓存',
-  autoRefreshing: '自动刷新',
   calendarSync: '作业同步',
   settings: '设置',
   preparingFile: '准备文件中……',
