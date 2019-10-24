@@ -134,7 +134,13 @@ const CourseDetailScreen: INavigationScreen<
       };
       const title = stripedFilename;
 
-      pushTo<IWebViewScreenProps>(name, props.componentId, passProps, title);
+      pushTo<IWebViewScreenProps>(
+        name,
+        props.componentId,
+        passProps,
+        title,
+        true,
+      );
     },
     [props.componentId],
   );

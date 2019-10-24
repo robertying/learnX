@@ -46,11 +46,18 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
       beforeNavigation();
     }
 
-    pushTo('webview', componentId, {
-      filename: stripExtension(filename),
-      url,
-      ext,
-    });
+    const stripedFilename = stripExtension(filename);
+    pushTo(
+      'webview',
+      componentId,
+      {
+        filename: stripedFilename,
+        url,
+        ext,
+      },
+      stripedFilename,
+      true,
+    );
   };
 
   const isDarkMode = useDarkMode();

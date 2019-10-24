@@ -53,11 +53,18 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
       beforeNavigation();
     }
 
-    pushTo<IWebViewScreenProps>('webview', componentId, {
-      filename: stripExtension(filename),
-      url,
-      ext,
-    });
+    const stripedFilename = stripExtension(filename);
+    pushTo<IWebViewScreenProps>(
+      'webview',
+      componentId,
+      {
+        filename: stripedFilename,
+        url,
+        ext,
+      },
+      stripedFilename,
+      true,
+    );
   };
 
   const isDarkMode = useDarkMode();
