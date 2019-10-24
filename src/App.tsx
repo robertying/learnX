@@ -15,9 +15,9 @@ const startApp = () => {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
 
-    registerComponents();
-
     eventEmitter.setMaxListeners(0);
+
+    registerComponents();
 
     Navigation.setDefaultOptions({
       layout: {
