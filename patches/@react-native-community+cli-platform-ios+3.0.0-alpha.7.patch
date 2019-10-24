@@ -1,0 +1,16 @@
+diff --git a/node_modules/@react-native-community/cli-platform-ios/build/link-pods/getDependenciesFromPodfileLock.js b/node_modules/@react-native-community/cli-platform-ios/build/link-pods/getDependenciesFromPodfileLock.js
+index 3bb647c..3b12cdd 100644
+--- a/node_modules/@react-native-community/cli-platform-ios/build/link-pods/getDependenciesFromPodfileLock.js
++++ b/node_modules/@react-native-community/cli-platform-ios/build/link-pods/getDependenciesFromPodfileLock.js
+@@ -60,5 +60,9 @@ function getDependenciesFromPodfileLock(podfileLockPath) {
+     return [];
+   }
+ 
+-  return Object.keys((0, _jsYaml().safeLoad)(fileContent)['SPEC CHECKSUMS'] || {});
++  const CHECKSUM_KEY = 'SPEC CHECKSUMS';
++  const tail = fileContent.split(CHECKSUM_KEY).slice(1);
++  const checksumTail = CHECKSUM_KEY + tail;
++
++  return Object.keys((0, _jsYaml().safeLoad)(checksumTail)[CHECKSUM_KEY] || {});
+ }
+\ No newline at end of file
