@@ -9,9 +9,9 @@ import {iOSUIKit} from 'react-native-typography';
 import Colors from '../constants/Colors';
 
 export type ITextButtonProps = TouchableOpacityProps & {
-  readonly textStyle?: TextProps['style'];
-  readonly children: string;
-  readonly ellipsizeMode?: TextProps['ellipsizeMode'];
+  textStyle?: TextProps['style'];
+  children: string;
+  ellipsizeMode?: TextProps['ellipsizeMode'];
 };
 
 class TextButton extends React.Component<ITextButtonProps> {

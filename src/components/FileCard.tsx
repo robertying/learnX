@@ -12,20 +12,19 @@ import Text from './Text';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IFileCardProps extends IInteractablePreviewWrapperProps {
-  readonly title: string;
-  readonly extension: string;
-  readonly size: string;
-  readonly date: string;
-  readonly description?: string;
-  readonly markedImportant: boolean;
-  readonly courseName?: string;
-  readonly courseTeacherName?: string;
+  title: string;
+  extension: string;
+  size: string;
+  date: string;
+  description?: string;
+  markedImportant: boolean;
+  courseName?: string;
+  courseTeacherName?: string;
 }
 
 const FileCard: React.FC<IFileCardProps> = props => {
   const {
     onPress,
-    onPressIn,
     title,
     size,
     date,
@@ -37,6 +36,8 @@ const FileCard: React.FC<IFileCardProps> = props => {
     onPinned,
     description,
     dragEnabled,
+    fav,
+    onFav,
   } = props;
 
   const isDarkMode = useDarkMode();
@@ -46,7 +47,8 @@ const FileCard: React.FC<IFileCardProps> = props => {
       pinned={pinned}
       onPinned={onPinned}
       onPress={onPress}
-      onPressIn={onPressIn}
+      fav={fav}
+      onFav={onFav}
       dragEnabled={dragEnabled}>
       <View
         style={{
@@ -54,7 +56,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
-          borderLeftColor: Colors.theme,
+          borderLeftColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
           borderLeftWidth: pinned ? 10 : 0,
         }}>
         <View

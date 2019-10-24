@@ -4,8 +4,8 @@ import Colors from '../constants/Colors';
 import Placeholder, {IPlaceholderProps} from './Placeholder';
 
 export type INoticePlaceholderProps = ViewProps & {
-  readonly loading: boolean;
-  readonly children?: React.ReactElement;
+  loading: boolean;
+  children?: React.ReactElement;
 };
 
 const NoticePlaceholder: React.FunctionComponent<

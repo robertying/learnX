@@ -50,7 +50,7 @@ export const setNotifications = createAction(SET_NOTIFICATIONS, action => {
 export const setNotificationTypes = createAction(
   SET_NOTIFICATION_TYPES,
   action => {
-    return (types: readonly NotificationType[]) => action(types);
+    return (types: NotificationType[]) => action(types);
   },
 );
 

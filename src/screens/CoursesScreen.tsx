@@ -1,19 +1,22 @@
-import React, {useEffect} from 'react';
-import {RefreshControl, SafeAreaView, FlatList, Platform} from 'react-native';
-import {Navigation} from 'react-native-navigation';
+import React, {useEffect, useMemo, useCallback, useState} from 'react';
+import {
+  RefreshControl,
+  SafeAreaView,
+  FlatList,
+  Platform,
+  SegmentedControlIOS,
+} from 'react-native';
 import {connect} from 'react-redux';
 import CourseCard from '../components/CourseCard';
 import EmptyList from '../components/EmptyList';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
-import {showToast} from '../helpers/toast';
 import {getAllAssignmentsForCourses} from '../redux/actions/assignments';
-import {login} from '../redux/actions/auth';
 import {
   getCoursesForSemester,
-  pinCourse,
-  unpinCourse,
+  hideCourse,
+  unhideCourse,
 } from '../redux/actions/courses';
 import {getAllFilesForCourses} from '../redux/actions/files';
 import {getAllNoticesForCourses} from '../redux/actions/notices';
@@ -24,37 +27,33 @@ import {
   INotice,
   IPersistAppState,
 } from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
+import {INavigationScreen} from '../types';
+import {useDarkMode} from 'react-native-dark-mode';
+import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
+import {ICourseDetailScreenProps} from './CourseDetailScreen';
 
 interface ICoursesScreenStateProps {
-  readonly autoRefreshing: boolean;
-  readonly loggedIn: boolean;
-  readonly username: string;
-  readonly password: string;
-  readonly semesterId: string;
-  readonly courses: ReadonlyArray<ICourse>;
-  readonly notices: ReadonlyArray<INotice>;
-  readonly isFetchingNotices: boolean;
-  readonly files: ReadonlyArray<IFile>;
-  readonly isFetchingFiles: boolean;
-  readonly assignments: ReadonlyArray<IAssignment>;
-  readonly isFetchingAssignments: boolean;
-  readonly pinnedCourses: readonly string[];
-  readonly hidden: readonly string[];
-  compactWith: boolean;
+  autoRefreshing: boolean;
+  loggedIn: boolean;
+  semesterId: string;
+  courses: ICourse[];
+  notices: INotice[];
+  isFetchingNotices: boolean;
+  files: IFile[];
+  isFetchingFiles: boolean;
+  assignments: IAssignment[];
+  isFetchingAssignments: boolean;
+  hiddenCourseIds: string[];
+  compactWidth: boolean;
 }
 
 interface ICoursesScreenDispatchProps {
-  readonly getCoursesForSemester: (semesterId: string) => void;
-  // tslint:disable: readonly-array
-  readonly getAllNoticesForCourses: (courseIds: string[]) => void;
-  readonly getAllFilesForCourses: (courseIds: string[]) => void;
-  readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
-  readonly pinCourse: (courseId: string) => void;
-  readonly unpinCourse: (courseId: string) => void;
-  readonly login: (username: string, password: string) => void;
-  // tslint:enable: readonly-array
+  getCoursesForSemester: (semesterId: string) => void;
+  getAllNoticesForCourses: (courseIds: string[]) => void;
+  getAllFilesForCourses: (courseIds: string[]) => void;
+  getAllAssignmentsForCourses: (courseIds: string[]) => void;
+  hideCourse: (courseId: string) => void;
+  unhideCourse: (courseId: string) => void;
 }
 
 type ICoursesScreenProps = ICoursesScreenStateProps &
@@ -64,6 +63,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const {
     loggedIn,
     semesterId,
+    getCoursesForSemester,
     courses,
     notices,
     isFetchingNotices,
@@ -71,39 +71,62 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     isFetchingFiles,
     assignments,
     isFetchingAssignments,
-    getCoursesForSemester,
     getAllNoticesForCourses,
     getAllFilesForCourses,
     getAllAssignmentsForCourses,
     autoRefreshing,
-    pinCourse,
-    pinnedCourses,
-    unpinCourse,
-    username,
-    password,
-    login,
-    compactWith,
+    hideCourse,
+    unhideCourse,
+    hiddenCourseIds,
+    compactWidth,
   } = props;
 
   /**
    * Prepare data
    */
 
-  const courseIds = courses.map(course => course.id);
+  const courseIds = useMemo(() => courses.map(i => i.id), [courses]);
+
+  const visibleCourses = useMemo(
+    () => courses.filter(i => !hiddenCourseIds.includes(i.id)),
+    [courses, hiddenCourseIds],
+  );
+
+  const hiddenCourses = useMemo(
+    () => courses.filter(i => hiddenCourseIds.includes(i.id)),
+    [courses, hiddenCourseIds],
+  );
+
+  const [currentDisplayCourses, setCurrentDisplayCourses] = useState(
+    visibleCourses,
+  );
 
   /**
    * Fetch and handle error
    */
 
+  useEffect(() => {
+    if (loggedIn && semesterId && courses.length === 0) {
+      getCoursesForSemester(semesterId);
+    }
+  }, [courses.length, getCoursesForSemester, loggedIn, semesterId]);
+
   const isFetching =
     isFetchingNotices || isFetchingFiles || isFetchingAssignments;
 
-  useEffect(() => {
-    if (courses.length === 0 && loggedIn && semesterId) {
-      getCoursesForSemester(semesterId);
+  const invalidateAll = useCallback(() => {
+    if (loggedIn && courseIds.length !== 0) {
+      getAllNoticesForCourses(courseIds);
+      getAllFilesForCourses(courseIds);
+      getAllAssignmentsForCourses(courseIds);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedIn, semesterId, courses.length]);
+  }, [
+    courseIds,
+    getAllAssignmentsForCourses,
+    getAllFilesForCourses,
+    getAllNoticesForCourses,
+    loggedIn,
+  ]);
 
   useEffect(() => {
     if (
@@ -114,111 +137,46 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     ) {
       invalidateAll();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses.length, loggedIn]);
-
-  const invalidateAll = () => {
-    if (loggedIn) {
-      getCoursesForSemester(semesterId);
-      getAllNoticesForCourses(courseIds);
-      getAllFilesForCourses(courseIds);
-      getAllAssignmentsForCourses(courseIds);
-    } else {
-      showToast(getTranslation('refreshFailure'), 1500);
-      login(username, password);
-    }
-  };
+  }, [
+    assignments.length,
+    autoRefreshing,
+    files.length,
+    invalidateAll,
+    notices.length,
+  ]);
 
   /**
    * Render cards
    */
 
-  const onCourseCardPress = (courseId: string, courseName: string) => {
-    if (DeviceInfo.isIPad() && !compactWith) {
-      Navigation.setStackRoot('detail.root', [
-        {
-          component: {
-            name: 'courses.detail',
-            passProps: {
-              courseId,
-              courseName,
-            },
-            options: {
-              topBar: {
-                title: {
-                  component: {
-                    name: 'text',
-                    passProps: {
-                      children: courseName,
-                      style: {
-                        fontSize: 17,
-                        fontWeight: '500',
-                        color: isDarkMode ? 'white' : 'black',
-                      },
-                    },
-                  },
-                },
-              },
-              animations: {
-                setStackRoot: {
-                  enabled: false,
-                },
-              } as any,
-            },
-          },
-        },
-      ]);
+  const onCourseCardPress = (course: ICourse) => {
+    const name = 'courses.detail';
+    const passProps = {
+      course,
+    };
+    const title = course.name;
+
+    if (DeviceInfo.isIPad() && !compactWidth) {
+      setDetailView<Partial<ICourseDetailScreenProps>>(name, passProps, title);
     } else {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'courses.detail',
-          passProps: {
-            courseId,
-            courseName,
-          },
-          options: {
-            bottomTabs: {
-              backgroundColor: isDarkMode ? 'black' : 'white',
-            },
-            topBar: {
-              background: {
-                color: isDarkMode ? 'black' : 'white',
-              },
-              backButton:
-                Platform.OS === 'android'
-                  ? {
-                      color: isDarkMode ? 'white' : 'black',
-                    }
-                  : undefined,
-              title: {
-                component: {
-                  name: 'text',
-                  passProps: {
-                    children: courseName,
-                    style: {
-                      fontSize: 17,
-                      fontWeight: '500',
-                      color: isDarkMode ? 'white' : 'black',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
+      pushTo<Partial<ICourseDetailScreenProps>>(
+        name,
+        props.componentId,
+        passProps,
+        title,
+      );
     }
   };
 
-  const onPinned = (pin: boolean, noticeId: string) => {
-    if (pin) {
-      pinCourse(noticeId);
+  const onHide = (hide: boolean, courseId: string) => {
+    if (hide) {
+      hideCourse(courseId);
     } else {
-      unpinCourse(noticeId);
+      unhideCourse(courseId);
     }
   };
 
-  const renderListItem = ({item}: {readonly item: ICourse}) => (
+  const renderListItem = ({item}: {item: ICourse}) => (
     <CourseCard
       dragEnabled={false}
       courseName={item.name}
@@ -239,13 +197,11 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
             assignment.courseId === item.id && assignment.submitted === false,
         ).length
       }
-      pinned={pinnedCourses.includes(item.id)}
-      // tslint:disable: jsx-no-lambda
-      onPinned={pin => onPinned!(pin, item.id)}
+      hidden={hiddenCourseIds.includes(item.id)}
+      onHide={hide => onHide!(hide, item.id)}
       onPress={() => {
-        onCourseCardPress(item.id, item.name);
+        onCourseCardPress(item);
       }}
-      // tslint:enable: jsx-no-lambda
     />
   );
 
@@ -257,45 +213,31 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     invalidateAll();
   };
 
-  const isDarkMode = useDarkMode();
+  const [segment, setSegment] = useState('visible');
+
+  const handleSegmentChange = (value: string) => {
+    if (value === getTranslation('visible')) {
+      setSegment('visible');
+      setCurrentDisplayCourses(visibleCourses);
+    } else {
+      setSegment('hidden');
+      setCurrentDisplayCourses(hiddenCourses);
+    }
+  };
 
   useEffect(() => {
-    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
-    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
+    if (segment === 'visible') {
+      setCurrentDisplayCourses(visibleCourses);
+    }
+  }, [visibleCourses, segment]);
 
-    Navigation.mergeOptions(props.componentId, {
-      layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      bottomTabs: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      topBar: {
-        background: {
-          color: isDarkMode ? 'black' : 'white',
-        },
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('courses'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-      bottomTab: {
-        textColor: tabIconDefaultColor,
-        selectedTextColor: tabIconSelectedColor,
-        iconColor: tabIconDefaultColor,
-        selectedIconColor: tabIconSelectedColor,
-      },
-    });
-  }, [isDarkMode, props.componentId]);
+  useEffect(() => {
+    if (segment === 'hidden') {
+      setCurrentDisplayCourses(hiddenCourses);
+    }
+  }, [hiddenCourses, segment]);
+
+  const isDarkMode = useDarkMode();
 
   return (
     <SafeAreaView
@@ -304,13 +246,22 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       <FlatList
         style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
         ListEmptyComponent={EmptyList}
-        data={courses}
+        data={currentDisplayCourses}
         renderItem={renderListItem}
-        // tslint:disable-next-line: jsx-no-lambda
         keyExtractor={item => item.id}
+        ListHeaderComponent={
+          Platform.OS === 'ios' ? (
+            <SegmentedControlIOS
+              style={{margin: 20, marginTop: 10, marginBottom: 10}}
+              values={[getTranslation('visible'), getTranslation('hidden')]}
+              selectedIndex={0}
+              onValueChange={handleSegmentChange}
+            />
+          ) : null
+        }
         refreshControl={
           <RefreshControl
-            colors={[Colors.theme]}
+            colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
             onRefresh={onRefresh}
             refreshing={isFetching}
           />
@@ -320,43 +271,12 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-CoursesScreen.options = {
-  layout: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  bottomTabs: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  topBar: {
-    background: {
-      color: initialMode === 'dark' ? 'black' : 'white',
-    },
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('courses'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-    largeTitle: {
-      visible: false,
-    },
-  },
-};
+CoursesScreen.options = getScreenOptions(getTranslation('courses'));
 
 function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || '',
-    password: state.auth.password || '',
     semesterId: state.currentSemester,
     courses: state.courses.items,
     isFetchingNotices: state.notices.isFetching,
@@ -365,25 +285,18 @@ function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
     files: state.files.items,
     isFetchingAssignments: state.assignments.isFetching,
     assignments: state.assignments.items,
-    pinnedCourses: state.courses.pinned || [],
-    hidden: state.courses.hidden || [],
-    compactWith: state.settings.compactWidth,
+    hiddenCourseIds: state.courses.hidden || [],
+    compactWidth: state.settings.compactWidth,
   };
 }
 
-// tslint:disable: readonly-array
 const mapDispatchToProps: ICoursesScreenDispatchProps = {
-  getCoursesForSemester: (semesterId: string) =>
-    getCoursesForSemester(semesterId),
-  getAllNoticesForCourses: (courseIds: string[]) =>
-    getAllNoticesForCourses(courseIds),
-  getAllFilesForCourses: (courseIds: string[]) =>
-    getAllFilesForCourses(courseIds),
-  getAllAssignmentsForCourses: (courseIds: string[]) =>
-    getAllAssignmentsForCourses(courseIds),
-  pinCourse: (courseId: string) => pinCourse(courseId),
-  unpinCourse: (courseId: string) => unpinCourse(courseId),
-  login: (username: string, password: string) => login(username, password),
+  getCoursesForSemester,
+  getAllNoticesForCourses,
+  getAllFilesForCourses,
+  getAllAssignmentsForCourses,
+  hideCourse,
+  unhideCourse,
 };
 
 export default connect(

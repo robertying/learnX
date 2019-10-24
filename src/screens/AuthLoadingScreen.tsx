@@ -5,42 +5,36 @@ import {connect} from 'react-redux';
 import packageConfig from '../../package.json';
 import SplashScreen from '../components/SplashScreen';
 import {getTranslation} from '../helpers/i18n';
-import {showToast} from '../helpers/toast';
+import SnackBar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {getNavigationRoot} from '../navigation/navigationRoot';
 import {login} from '../redux/actions/auth';
 import {setUpdate} from '../redux/actions/settings';
 import {IAuthState, IPersistAppState} from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
+import {INavigationScreen} from '../types';
 import semver from 'semver';
-import {store} from '../redux/store';
+import {resetLoading} from '../redux/actions/root';
 
 interface IAuthLoadingScreenStateProps {
-  readonly rehydrated: boolean;
-  readonly auth: IAuthState;
+  rehydrated: boolean;
+  auth: IAuthState;
 }
 
 interface IAuthLoadingScreenDispatchProps {
-  readonly setUpdate: (hasUpdate: boolean) => void;
-  readonly login: (username: string, password: string) => void;
-  readonly showToast: (text: string, duration: number) => void;
+  setUpdate: (hasUpdate: boolean) => void;
+  login: (username: string, password: string) => void;
+  resetLoading: () => void;
 }
 
 type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
   IAuthLoadingScreenDispatchProps;
 
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
-  const {rehydrated, auth, setUpdate, login, showToast} = props;
+  const {rehydrated, auth, setUpdate, login, resetLoading} = props;
 
   useEffect(() => {
     if (rehydrated) {
-      const state = store.getState() as any;
-      state.auth.loggingIn = false;
-      state.semesters.isFetching = false;
-      state.courses.isFetching = false;
-      state.notices.isFetching = false;
-      state.files.isFetching = false;
-      state.assignments.isFetching = false;
+      resetLoading();
 
       if (auth && auth.username && auth.password) {
         login(auth.username, auth.password);
@@ -90,14 +84,16 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
 
         if (semver.gt(versionString.slice(1), packageConfig.version)) {
           setUpdate(true);
-          showToast(getTranslation('pleaseUpdate'), 5000);
+          SnackBar.show({
+            title: getTranslation('pleaseUpdate'),
+            duration: SnackBar.LENGTH_SHORT,
+          });
         } else {
           setUpdate(false);
         }
       })();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setUpdate]);
 
   return <SplashScreen />;
 };
@@ -112,9 +108,9 @@ function mapStateToProps(
 }
 
 const mapDispatchToProps: IAuthLoadingScreenDispatchProps = {
-  login: (username: string, password: string) => login(username, password),
-  setUpdate: (hasUpdate: boolean) => setUpdate(hasUpdate),
-  showToast: (text: string, duration: number) => showToast(text, duration),
+  login,
+  setUpdate,
+  resetLoading,
 };
 
 export default connect(

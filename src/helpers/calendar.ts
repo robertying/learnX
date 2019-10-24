@@ -1,7 +1,6 @@
 import RNCalendarEvents from 'react-native-calendar-events';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
-import {showToast} from '../helpers/toast';
 import {
   clearEventIds,
   setCalendarId,
@@ -10,8 +9,9 @@ import {
 import {store} from '../redux/store';
 import {IAssignment} from '../redux/types/state';
 import {getTranslation} from './i18n';
+import SnackBar from 'react-native-snackbar';
 
-export const createCalendar = async () => {
+export const getCalendar = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
 
   const storedId = store.getState().settings.calendarId;
@@ -59,12 +59,15 @@ export const saveAssignmentEvent = (
     if (status !== 'authorized') {
       const result = await RNCalendarEvents.authorizeEventStore();
       if (result !== 'authorized') {
-        showToast(getTranslation('accessCalendarFailure'), 1500);
+        SnackBar.show({
+          title: getTranslation('accessCalendarFailure'),
+          duration: SnackBar.LENGTH_SHORT,
+        });
         reject('Unauthorized');
       }
     }
 
-    const id = await createCalendar();
+    const id = await getCalendar();
     if (id) {
       const syncedAssignments = store.getState().settings.syncedAssignments;
       if (
@@ -96,9 +99,7 @@ export const saveAssignmentEvent = (
   });
 };
 
-export const saveAssignmentsToCalendar = async (
-  assignments: readonly IAssignment[],
-) => {
+export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
   const savingAssignments = [...assignments].filter(item =>
     dayjs(item.deadline).isAfter(dayjs()),
   );
@@ -107,14 +108,17 @@ export const saveAssignmentsToCalendar = async (
   if (status !== 'authorized') {
     const result = await RNCalendarEvents.authorizeEventStore();
     if (result !== 'authorized') {
-      showToast(getTranslation('accessCalendarFailure'), 1500);
+      SnackBar.show({
+        title: getTranslation('accessCalendarFailure'),
+        duration: SnackBar.LENGTH_SHORT,
+      });
       return;
     }
   }
 
   const courses = store.getState().courses.items;
 
-  for (const assignment of savingAssignments) {
+  savingAssignments.forEach(async assignment => {
     const course = courses.find(value => value.id === assignment.courseId);
     if (course) {
       await saveAssignmentEvent(
@@ -128,5 +132,5 @@ export const saveAssignmentsToCalendar = async (
         assignment.deadline,
       );
     }
-  }
+  });
 };

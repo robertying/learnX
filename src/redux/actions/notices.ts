@@ -20,11 +20,7 @@ export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_REQUEST,
   GET_NOTICES_FOR_COURSE_SUCCESS,
   GET_NOTICES_FOR_COURSE_FAILURE,
-)<
-  undefined,
-  {readonly courseId: string; readonly notices: ReadonlyArray<INotice>},
-  Error
->();
+)<undefined, {courseId: string; notices: INotice[]}, Error>();
 
 export function getNoticesForCourse(courseId: string): IThunkResult {
   return async dispatch => {
@@ -57,12 +53,9 @@ export const getAllNoticesForCoursesAction = createAsyncAction(
   GET_ALL_NOTICES_FOR_COURSES_REQUEST,
   GET_ALL_NOTICES_FOR_COURSES_SUCCESS,
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
-)<undefined, ReadonlyArray<INotice>, Error>();
+)<undefined, INotice[], Error>();
 
-export function getAllNoticesForCourses(
-  // tslint:disable-next-line: readonly-array
-  courseIds: string[],
-): IThunkResult {
+export function getAllNoticesForCourses(courseIds: string[]): IThunkResult {
   return async dispatch => {
     dispatch(getAllNoticesForCoursesAction.request());
 
@@ -74,9 +67,7 @@ export function getAllNoticesForCourses(
     if (results) {
       const notices = Object.keys(results)
         .map(courseId => {
-          const noticesForCourse = results[courseId] as ReadonlyArray<
-            Notification
-          >;
+          const noticesForCourse = results[courseId] as Notification[];
           return noticesForCourse.map(notice => ({
             ...notice,
             courseId,

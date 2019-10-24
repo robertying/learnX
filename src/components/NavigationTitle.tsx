@@ -1,24 +1,22 @@
 import React from 'react';
-import {Text, TextProps, View, Dimensions} from 'react-native';
-import DeviceInfo from '../constants/DeviceInfo';
+import {TextProps, View} from 'react-native';
+import Text from './Text';
 
-const NavigationTitle: React.FunctionComponent<
-  TextProps & {pushed?: boolean}
-> = props => {
+const NavigationTitle: React.FunctionComponent<TextProps> = props => {
   const {style, ...restProps} = props;
-
+  console.log(style);
   return (
     <View
       style={{
         flex: 1,
-        width: Dimensions.get('window').width,
       }}>
       <Text
         numberOfLines={1}
         ellipsizeMode="tail"
         style={[
           {
-            width: DeviceInfo.isIPad() ? (props.pushed ? '55%' : '35%') : '60%',
+            fontSize: 17,
+            fontWeight: '500',
           },
           style,
         ]}

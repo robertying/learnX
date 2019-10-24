@@ -45,6 +45,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
 
   return (
     <WebView
+      originWhitelist={['*']}
       ref={webViewRef}
       injectedJavaScript={injectedScript}
       onMessage={onMessage}
@@ -54,7 +55,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
       {...props}
-      style={[{height}, props.style]}
+      style={[{height, backgroundColor: 'transparent'}, props.style]}
     />
   );
 };

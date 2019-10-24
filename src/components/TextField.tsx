@@ -11,10 +11,10 @@ import {
 import {iOSUIKit} from 'react-native-typography';
 
 export type ITextFieldProps = TextInputProps & {
-  readonly innerRef?: React.Ref<any>;
-  readonly containerStyle?: ViewProps['style'];
-  readonly icon?: React.ReactNode;
-  readonly tintColor: string;
+  innerRef?: React.Ref<any>;
+  containerStyle?: ViewProps['style'];
+  icon?: React.ReactNode;
+  tintColor: string;
 };
 
 const TextField: React.FunctionComponent<ITextFieldProps> = props => {

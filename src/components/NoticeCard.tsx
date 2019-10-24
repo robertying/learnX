@@ -13,20 +13,19 @@ import Text from './Text';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface INoticeCardProps extends IInteractablePreviewWrapperProps {
-  readonly title: string;
-  readonly author: string;
-  readonly date: string;
-  readonly content?: string;
-  readonly markedImportant: boolean;
-  readonly hasAttachment: boolean;
-  readonly courseName?: string;
-  readonly courseTeacherName?: string;
+  title: string;
+  author: string;
+  date: string;
+  content?: string;
+  markedImportant: boolean;
+  hasAttachment: boolean;
+  courseName?: string;
+  courseTeacherName?: string;
 }
 
 const NoticeCard: React.FC<INoticeCardProps> = props => {
   const {
     onPress,
-    onPressIn,
     title,
     author,
     date,
@@ -37,6 +36,8 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
     hasAttachment,
     pinned,
     onPinned,
+    fav,
+    onFav,
     dragEnabled,
   } = props;
 
@@ -46,8 +47,9 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
     <InteractablePreviewWrapper
       pinned={pinned}
       onPinned={onPinned}
+      fav={fav}
+      onFav={onFav}
       onPress={onPress}
-      onPressIn={onPressIn}
       dragEnabled={dragEnabled}>
       <View
         style={{
@@ -55,7 +57,7 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
-          borderLeftColor: Colors.theme,
+          borderLeftColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
           borderLeftWidth: pinned ? 10 : 0,
         }}>
         <View

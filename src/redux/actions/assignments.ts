@@ -24,8 +24,8 @@ export const getAssignmentsForCourseAction = createAsyncAction(
 )<
   undefined,
   {
-    readonly courseId: string;
-    readonly assignments: ReadonlyArray<IAssignment>;
+    courseId: string;
+    assignments: IAssignment[];
   },
   Error
 >();
@@ -61,12 +61,9 @@ export const getAllAssignmentsForCoursesAction = createAsyncAction(
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
-)<undefined, ReadonlyArray<IAssignment>, Error>();
+)<undefined, IAssignment[], Error>();
 
-export function getAllAssignmentsForCourses(
-  // tslint:disable-next-line: readonly-array
-  courseIds: string[],
-): IThunkResult {
+export function getAllAssignmentsForCourses(courseIds: string[]): IThunkResult {
   return async (dispatch, getState) => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
@@ -78,9 +75,7 @@ export function getAllAssignmentsForCourses(
     if (results) {
       const assignments = Object.keys(results)
         .map(courseId => {
-          const assignmentsForCourse = results[courseId] as ReadonlyArray<
-            Homework
-          >;
+          const assignmentsForCourse = results[courseId] as Homework[];
           return assignmentsForCourse.map(assignment => ({
             ...assignment,
             courseId,

@@ -16,27 +16,27 @@ import {connect} from 'react-redux';
 import RaisedButton from '../components/RaisedButton';
 import TextField from '../components/TextField';
 import Colors from '../constants/Colors';
-import {dummyPassword, dummyUsername} from '../helpers/dummy';
+import {dummyPassword, dummyUsername} from '../constants/Dummy';
 import {getTranslation} from '../helpers/i18n';
-import {showToast} from '../helpers/toast';
+import SnackBar from 'react-native-snackbar';
 import {login} from '../redux/actions/auth';
 import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {setMockStore} from '../redux/actions/root';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
+import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import Text from '../components/Text';
 
 interface ILoginScreenProps {
-  readonly loggedIn: boolean;
-  readonly loginError?: Error | null;
-  readonly semesters: readonly string[];
-  readonly getAllSemestersError?: Error | null;
-  readonly login: (username: string, password: string) => void;
-  readonly setMockStore: () => void;
-  readonly setCurrentSemester: (semesterId: string) => void;
-  readonly getAllSemesters: () => void;
+  loggedIn: boolean;
+  loginError?: Error | null;
+  semesters: string[];
+  getAllSemestersError?: Error | null;
+  login: (username: string, password: string) => void;
+  setMockStore: () => void;
+  setCurrentSemester: (semesterId: string) => void;
+  getAllSemesters: () => void;
 }
 
 const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
@@ -52,21 +52,26 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   } = props;
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
+
   useEffect(() => {
     if (loginButtonPressed && loginError) {
-      showToast(getTranslation('loginFailure'), 1500);
+      SnackBar.show({
+        title: getTranslation('loginFailure'),
+        duration: SnackBar.LENGTH_SHORT,
+      });
       setLoginButtonPressed(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loginError]);
+  }, [loginButtonPressed, loginError]);
 
   useEffect(() => {
     if (loggedIn) {
-      showToast(getTranslation('fetchingSemesters'), 1500);
+      SnackBar.show({
+        title: getTranslation('fetchingSemesters'),
+        duration: SnackBar.LENGTH_SHORT,
+      });
       getAllSemesters();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedIn]);
+  }, [getAllSemesters, loggedIn]);
 
   useEffect(() => {
     if (loggedIn && semesters.length !== 0) {
@@ -74,18 +79,20 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       Keyboard.dismiss();
       Navigation.dismissModal('login');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [semesters.length]);
+  }, [loggedIn, semesters, semesters.length, setCurrentSemester]);
 
   useEffect(() => {
     if (getAllSemestersError) {
-      showToast(getTranslation('networkError'), 1500);
+      SnackBar.show({
+        title: getTranslation('networkError'),
+        duration: SnackBar.LENGTH_SHORT,
+      });
       setLoginButtonPressed(false);
     }
   }, [getAllSemestersError]);
 
-  const usernameTextFieldRef = useRef<typeof TextInput>();
-  const passwordTextFieldRef = useRef<typeof TextInput>();
+  const usernameTextFieldRef = useRef<TextInput>(null);
+  const passwordTextFieldRef = useRef<TextInput>(null);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -124,19 +131,14 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       handleDummyUser(username, password);
       login(username, password);
     } else {
-      showToast(getTranslation('completeCredentials'), 1500);
+      SnackBar.show({
+        title: getTranslation('completeCredentials'),
+        duration: SnackBar.LENGTH_SHORT,
+      });
     }
   };
 
   const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-    });
-  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView
@@ -236,9 +238,9 @@ const mapStateToProps = (state: IPersistAppState) => ({
 });
 
 const mapDispatchToProps = {
-  login: (username: string, password: string) => login(username, password),
+  login,
   setMockStore,
-  setCurrentSemester: (semesterId: string) => setCurrentSemester(semesterId),
+  setCurrentSemester,
   getAllSemesters,
 };
 

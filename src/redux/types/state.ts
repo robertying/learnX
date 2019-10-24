@@ -1,13 +1,13 @@
 import {PersistState} from 'redux-persist';
 
 export interface IAuth {
-  readonly username: string | null;
-  readonly password: string | null;
+  username: string | null;
+  password: string | null;
 }
 export interface IAuthState extends IAuth {
-  readonly loggingIn: boolean;
-  readonly loggedIn: boolean;
-  readonly error?: Error | null;
+  loggingIn: boolean;
+  loggedIn: boolean;
+  error?: Error | null;
 }
 
 export enum Tab {
@@ -18,8 +18,8 @@ export enum Tab {
   'Settings',
 }
 export interface IWindow {
-  readonly height: number;
-  readonly width: number;
+  height: number;
+  width: number;
 }
 export enum NotificationType {
   'Notices',
@@ -33,107 +33,103 @@ export enum Language {
   'en',
 }
 export interface ISettingsState {
-  readonly autoRefreshing: boolean;
-  readonly calendarSync: boolean;
-  readonly calendarId?: string;
-  readonly syncedAssignments: {
-    readonly [assignmentId: string]: string;
+  autoRefreshing: boolean;
+  calendarSync: boolean;
+  calendarId?: string;
+  syncedAssignments: {
+    [assignmentId: string]: string;
   };
-  readonly hasUpdate: boolean;
-  readonly window?: IWindow;
-  readonly notifications: boolean;
-  readonly notificationTypes: readonly NotificationType[];
-  readonly lang?: Language | null;
-  readonly compactWidth: boolean;
+  hasUpdate: boolean;
+  window?: IWindow;
+  notifications: boolean;
+  notificationTypes: NotificationType[];
+  lang?: Language | null;
+  compactWidth: boolean;
 }
 
 export interface ISemestersState {
-  readonly isFetching: boolean;
-  readonly items: readonly string[];
-  readonly error?: Error | null;
+  isFetching: boolean;
+  items: string[];
+  error?: Error | null;
 }
 
 export interface ICourse {
-  readonly id: string;
-  readonly name: string;
-  readonly teacherName?: string;
+  id: string;
+  name: string;
+  teacherName?: string;
 }
 export interface ICoursesState {
-  readonly isFetching: boolean;
-  readonly hidden: readonly string[];
-  readonly items: ReadonlyArray<ICourse>;
-  readonly error?: Error | null;
+  isFetching: boolean;
+  hidden: string[];
+  items: ICourse[];
+  error?: Error | null;
 }
-export type withCourseInfo<T> = T & {
-  readonly courseName: string;
-  readonly courseTeacherName: string;
-};
 
 export interface INotice {
-  readonly courseId: string;
-  readonly id: string;
-  readonly title: string;
-  readonly publisher: string;
-  readonly publishTime: string;
-  readonly markedImportant: boolean;
-  readonly content: string;
-  readonly hasRead: boolean;
-  readonly attachmentName?: string;
-  readonly attachmentUrl?: string;
+  courseId: string;
+  id: string;
+  title: string;
+  publisher: string;
+  publishTime: string;
+  markedImportant: boolean;
+  content: string;
+  hasRead: boolean;
+  attachmentName?: string;
+  attachmentUrl?: string;
 }
 export interface INoticesState {
-  readonly isFetching: boolean;
-  readonly pinned: readonly string[];
-  readonly favorites: readonly string[];
-  readonly items: ReadonlyArray<INotice>;
-  readonly error?: Error | null;
+  isFetching: boolean;
+  pinned: string[];
+  favorites: string[];
+  items: INotice[];
+  error?: Error | null;
 }
 
 export interface IFile {
-  readonly courseId: string;
-  readonly id: string;
-  readonly title: string;
-  readonly description: string;
-  readonly size: string;
-  readonly fileType: string;
-  readonly markedImportant: boolean;
-  readonly isNew: boolean;
-  readonly uploadTime: string;
-  readonly downloadUrl: string;
+  courseId: string;
+  id: string;
+  title: string;
+  description: string;
+  size: string;
+  fileType: string;
+  markedImportant: boolean;
+  isNew: boolean;
+  uploadTime: string;
+  downloadUrl: string;
 }
 export interface IFilesState {
-  readonly isFetching: boolean;
-  readonly pinned: readonly string[];
-  readonly favorites: readonly string[];
-  readonly items: ReadonlyArray<IFile>;
-  readonly error?: Error | null;
+  isFetching: boolean;
+  pinned: string[];
+  favorites: string[];
+  items: IFile[];
+  error?: Error | null;
 }
 
 export interface IAssignment {
-  readonly courseId: string;
-  readonly id: string;
-  readonly title: string;
-  readonly description?: string;
-  readonly deadline: string;
-  readonly attachmentName?: string;
-  readonly attachmentUrl?: string;
-  readonly submitted: boolean;
-  readonly submitTime?: string;
-  readonly submittedContent?: string;
-  readonly submittedAttachmentName?: string;
-  readonly submittedAttachmentUrl?: string;
-  readonly grade?: number;
-  readonly gradeLevel?: string;
-  readonly gradeTime?: string;
-  readonly graderName?: string;
-  readonly gradeContent?: string;
+  courseId: string;
+  id: string;
+  title: string;
+  description?: string;
+  deadline: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  submitted: boolean;
+  submitTime?: string;
+  submittedContent?: string;
+  submittedAttachmentName?: string;
+  submittedAttachmentUrl?: string;
+  grade?: number;
+  gradeLevel?: string;
+  gradeTime?: string;
+  graderName?: string;
+  gradeContent?: string;
 }
 export interface IAssignmentsState {
-  readonly isFetching: boolean;
-  readonly pinned: readonly string[];
-  readonly favorites: readonly string[];
-  readonly items: ReadonlyArray<IAssignment>;
-  readonly error?: Error | null;
+  isFetching: boolean;
+  pinned: string[];
+  favorites: string[];
+  items: IAssignment[];
+  error?: Error | null;
 }
 
 export interface PersistPartial {
@@ -141,13 +137,13 @@ export interface PersistPartial {
 }
 
 export interface IAppState {
-  readonly auth: IAuthState & PersistPartial;
-  readonly settings: ISettingsState;
-  readonly semesters: ISemestersState;
-  readonly currentSemester: string;
-  readonly courses: ICoursesState;
-  readonly notices: INoticesState;
-  readonly files: IFilesState;
-  readonly assignments: IAssignmentsState;
+  auth: IAuthState & PersistPartial;
+  settings: ISettingsState;
+  semesters: ISemestersState;
+  currentSemester: string;
+  courses: ICoursesState;
+  notices: INoticesState;
+  files: IFilesState;
+  assignments: IAssignmentsState;
 }
 export type IPersistAppState = IAppState & PersistPartial;

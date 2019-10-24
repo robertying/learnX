@@ -1,46 +1,35 @@
-import React, {FunctionComponent} from 'react';
-import {
-  Platform,
-  ScrollView,
-  TouchableHighlightProps,
-  View,
-} from 'react-native';
-import {Navigation} from 'react-native-navigation';
+import React, {FunctionComponent, useMemo} from 'react';
+import {ScrollView, TouchableHighlightProps, View} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {getLocale, getTranslation} from '../helpers/i18n';
-import {getExtension, shareFile, stripExtension} from '../helpers/share';
-import {showToast} from '../helpers/toast';
+import {getExtension, stripExtension} from '../helpers/share';
 import AutoHeightWebView from './AutoHeightWebView';
 import Divider from './Divider';
 import Text from './Text';
 import TextButton from './TextButton';
 import {useDarkMode} from 'react-native-dark-mode';
+import {pushTo} from '../helpers/navigation';
+import {IWebViewScreenProps} from '../screens/WebViewScreen';
+import {getWebViewTemplate} from '../helpers/html';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
-  readonly title: string;
-  readonly deadline: string;
-  readonly description?: string;
-  readonly attachmentName?: string;
-  readonly attachmentUrl?: string;
-  readonly submittedAttachmentName?: string;
-  readonly submittedAttachmentUrl?: string;
-  readonly submitTime?: string;
-  readonly grade?: number;
-  readonly gradeLevel?: string;
-  readonly componentId: string;
-  readonly gradeContent?: string;
-  readonly onTransition?: () => void;
+  title: string;
+  deadline: string;
+  description?: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  submittedAttachmentName?: string;
+  submittedAttachmentUrl?: string;
+  submitTime?: string;
+  grade?: number;
+  gradeLevel?: string;
+  componentId: string;
+  gradeContent?: string;
+  beforeNavigation?: () => void;
 };
-
-declare const preval: any;
-
-const darkreader = preval`
-  const fs = require('fs')
-  module.exports = fs.readFileSync(require.resolve('../../node_modules/darkreader/darkreader.js'), 'utf8')
-`;
 
 const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
   const {
@@ -56,58 +45,31 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     gradeContent,
     gradeLevel,
     componentId,
-    onTransition,
+    beforeNavigation,
   } = props;
 
-  const onAttachmentPress = async (
-    filename: string,
-    url: string,
-    ext: string,
-  ) => {
-    if (onTransition) {
-      onTransition();
+  const onAttachmentPress = (filename: string, url: string, ext: string) => {
+    if (beforeNavigation) {
+      beforeNavigation();
     }
 
-    if (Platform.OS === 'ios') {
-      Navigation.push(componentId, {
-        component: {
-          name: 'webview',
-          passProps: {
-            filename: stripExtension(filename),
-            url,
-            ext,
-            pushed: true,
-          },
-          options: {
-            topBar: {
-              title: {
-                component: {
-                  name: 'navigation.title',
-                  passProps: {
-                    pushed: true,
-                    children: stripExtension(filename),
-                    style: {
-                      fontSize: 17,
-                      fontWeight: '500',
-                      color: isDarkMode ? 'white' : 'black',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      showToast(getTranslation('downloadingFile'), 1000);
-      const success = await shareFile(url, stripExtension(filename), ext);
-      if (!success) {
-        showToast(getTranslation('downloadFileFailure'), 3000);
-      }
-    }
+    pushTo<IWebViewScreenProps>('webview', componentId, {
+      filename: stripExtension(filename),
+      url,
+      ext,
+    });
   };
 
   const isDarkMode = useDarkMode();
+
+  const html = useMemo(
+    () =>
+      getWebViewTemplate(
+        description || getTranslation('noAssignmentDescription'),
+        isDarkMode,
+      ),
+    [description, isDarkMode],
+  );
 
   return (
     <ScrollView
@@ -160,11 +122,12 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               style={{marginRight: 5}}
               name="attachment"
               size={18}
-              color={isDarkMode ? Colors.purpleDark : Colors.theme}
+              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
             />
             <TextButton
-              textStyle={{color: isDarkMode ? Colors.purpleDark : Colors.theme}}
-              // tslint:disable-next-line: jsx-no-lambda
+              textStyle={{
+                color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+              }}
               onPress={() =>
                 onAttachmentPress(
                   attachmentName,
@@ -193,11 +156,12 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               style={{marginRight: 5}}
               name="done"
               size={18}
-              color={isDarkMode ? Colors.purpleDark : Colors.theme}
+              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
             />
             <TextButton
-              textStyle={{color: isDarkMode ? Colors.purpleDark : Colors.theme}}
-              // tslint:disable-next-line: jsx-no-lambda
+              textStyle={{
+                color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+              }}
               onPress={() =>
                 onAttachmentPress(
                   submittedAttachmentName!,
@@ -220,7 +184,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                 style={{marginRight: 5}}
                 name="grade"
                 size={18}
-                color={isDarkMode ? Colors.purpleDark : Colors.theme}
+                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
               />
               <Text>
                 {grade && gradeLevel
@@ -238,39 +202,8 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
         </>
       ) : null}
       <AutoHeightWebView
-        style={{backgroundColor: 'transparent'}}
-        originWhitelist={['*']}
         source={{
-          html: `
-          <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0" />
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                ${
-                  isDarkMode
-                    ? 'background-color: black;'
-                    : 'background-color: white;'
-                }
-              }
-            </style>
-            ${
-              isDarkMode
-                ? `
-                <script>
-              ${darkreader}
-            </script>
-            <script>
-              DarkReader.enable();
-            </script>
-            `
-                : ''
-            }
-          </head>
-          <body>
-            ${description || getTranslation('noAssignmentDescription')}
-          </body>`,
+          html,
         }}
       />
     </ScrollView>

@@ -1,5 +1,5 @@
 import {by, element, expect} from 'detox';
-import {dummyPassword, dummyUsername} from '../src/helpers/dummy';
+import {dummyPassword, dummyUsername} from '../src/constants/Dummy';
 
 const loginScreenDescription = () => {
   it('should have a screen', async () => {

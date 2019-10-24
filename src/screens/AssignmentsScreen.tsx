@@ -1,11 +1,16 @@
-import {FuseOptions} from 'fuse.js';
-import React, {useEffect} from 'react';
-import {FlatList, Platform, RefreshControl, SafeAreaView} from 'react-native';
-import {Navigation} from 'react-native-navigation';
+import React, {useEffect, useMemo, useCallback, useState} from 'react';
+import {
+  FlatList,
+  Platform,
+  RefreshControl,
+  SafeAreaView,
+  SegmentedControlIOS,
+} from 'react-native';
 import {
   Provider as PaperProvider,
   Searchbar,
   DefaultTheme,
+  DarkTheme,
 } from 'react-native-paper';
 import {connect} from 'react-redux';
 import AssignmentCard from '../components/AssignmentCard';
@@ -14,46 +19,39 @@ import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
-import {showToast} from '../helpers/toast';
 import useSearchBar from '../hooks/useSearchBar';
 import {
   getAllAssignmentsForCourses,
   pinAssignment,
   unpinAssignment,
+  favAssignment,
+  unfavAssignment,
 } from '../redux/actions/assignments';
-import {login} from '../redux/actions/auth';
-import {getCoursesForSemester} from '../redux/actions/courses';
-import {
-  IAssignment,
-  ICourse,
-  IPersistAppState,
-  withCourseInfo,
-} from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
+import {IAssignment, ICourse, IPersistAppState} from '../redux/types/state';
+import {INavigationScreen, WithCourseInfo} from '../types';
 import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
+import {useDarkMode} from 'react-native-dark-mode';
+import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
+import {getFuseOptions} from '../helpers/search';
 
 interface IAssignmentsScreenStateProps {
-  readonly autoRefreshing: boolean;
-  readonly loggedIn: boolean;
-  readonly username: string;
-  readonly password: string;
-  readonly semesterId: string;
-  readonly courses: ReadonlyArray<ICourse>;
-  readonly assignments: ReadonlyArray<IAssignment>;
-  readonly isFetching: boolean;
-  readonly pinnedAssignments: readonly string[];
-  readonly hidden: readonly string[];
-  compactWith: boolean;
+  autoRefreshing: boolean;
+  loggedIn: boolean;
+  courses: ICourse[];
+  hiddenCourseIds: string[];
+  isFetching: boolean;
+  assignments: IAssignment[];
+  pinnedAssignmentIds: string[];
+  favAssignmentIds: string[];
+  compactWidth: boolean;
 }
 
 interface IAssignmentsScreenDispatchProps {
-  readonly getCoursesForSemester: (semesterId: string) => void;
-  // tslint:disable-next-line: readonly-array
-  readonly getAllAssignmentsForCourses: (courseIds: string[]) => void;
-  readonly pinAssignment: (assignmentId: string) => void;
-  readonly unpinAssignment: (assignmentId: string) => void;
-  readonly login: (username: string, password: string) => void;
+  getAllAssignmentsForCourses: (courseIds: string[]) => void;
+  pinAssignment: (assignmentId: string) => void;
+  unpinAssignment: (assignmentId: string) => void;
+  favAssignment: (assignmentId: string) => void;
+  unfavAssignment: (assignmentId: string) => void;
 }
 
 type IAssignmentsScreenProps = IAssignmentsScreenStateProps &
@@ -61,203 +59,176 @@ type IAssignmentsScreenProps = IAssignmentsScreenStateProps &
 
 const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const {
-    loggedIn,
-    semesterId,
     courses,
-    assignments: rawAssignments,
+    assignments,
     isFetching,
-    getCoursesForSemester,
     getAllAssignmentsForCourses,
     autoRefreshing,
-    pinnedAssignments,
     pinAssignment,
+    pinnedAssignmentIds,
     unpinAssignment,
-    hidden,
-    username,
-    password,
-    login,
-    compactWith,
+    hiddenCourseIds,
+    favAssignmentIds,
+    favAssignment,
+    unfavAssignment,
+    compactWidth,
+    loggedIn,
   } = props;
 
   /**
    * Prepare data
    */
 
-  const courseIds = courses.map(course => course.id);
-  const courseNames = courses.reduce(
-    (a, b) => ({
-      ...a,
-      ...{
-        [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+  const courseNames = useMemo(
+    () =>
+      courses.reduce(
+        (a, b) => ({
+          ...a,
+          ...{
+            [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+          },
+        }),
+        {},
+      ) as {
+        [id: string]: {
+          courseName: string;
+          courseTeacherName: string;
+        };
       },
-    }),
-    {},
-  ) as {
-    readonly [id: string]: {
-      readonly courseName: string;
-      readonly courseTeacherName: string;
-    };
-  };
+    [courses],
+  );
 
-  const assignments = [
-    ...rawAssignments
-      .filter(item => dayjs(item.deadline).unix() > dayjs().unix())
-      .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix()),
-    ...rawAssignments
-      .filter(item => dayjs(item.deadline).unix() < dayjs().unix())
-      .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
-  ].map(assignment => ({
-    ...assignment,
-    ...courseNames[assignment.courseId],
-  }));
+  const sortedAssignments = useMemo(
+    () =>
+      [
+        ...assignments
+          .filter(item => dayjs(item.deadline).unix() > dayjs().unix())
+          .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix()),
+        ...assignments
+          .filter(item => dayjs(item.deadline).unix() < dayjs().unix())
+          .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
+      ].map(assignment => ({
+        ...assignment,
+        ...courseNames[assignment.courseId],
+      })),
+    [assignments, courseNames],
+  );
+
+  const newAssignments = useMemo(() => {
+    const newAssignmentsOnly = sortedAssignments.filter(
+      i =>
+        !favAssignmentIds.includes(i.id) &&
+        !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...newAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...newAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+    ];
+  }, [
+    favAssignmentIds,
+    hiddenCourseIds,
+    pinnedAssignmentIds,
+    sortedAssignments,
+  ]);
+
+  const favAssignments = useMemo(() => {
+    const favAssignmentsOnly = sortedAssignments.filter(
+      i =>
+        favAssignmentIds.includes(i.id) &&
+        !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...favAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...favAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+    ];
+  }, [
+    favAssignmentIds,
+    hiddenCourseIds,
+    pinnedAssignmentIds,
+    sortedAssignments,
+  ]);
+
+  const hiddenAssignments = useMemo(() => {
+    const hiddenAssignmentsOnly = sortedAssignments.filter(i =>
+      hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...hiddenAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...hiddenAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+    ];
+  }, [hiddenCourseIds, pinnedAssignmentIds, sortedAssignments]);
+
+  const [currentDisplayAssignments, setCurrentDisplayAssignments] = useState(
+    newAssignments,
+  );
 
   /**
    * Fetch and handle error
    */
 
-  useEffect(() => {
-    if (courses.length === 0 && loggedIn && semesterId) {
-      getCoursesForSemester(semesterId);
+  const invalidateAll = useCallback(() => {
+    if (loggedIn && courses.length !== 0) {
+      getAllAssignmentsForCourses(courses.map(i => i.id));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedIn, semesterId, courses.length]);
+  }, [courses, getAllAssignmentsForCourses, loggedIn]);
 
   useEffect(() => {
     if (autoRefreshing || assignments.length === 0) {
       invalidateAll();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses.length, loggedIn]);
-
-  const invalidateAll = () => {
-    if (courseIds.length !== 0) {
-      if (loggedIn) {
-        getAllAssignmentsForCourses(courseIds);
-      } else {
-        showToast(getTranslation('refreshFailure'), 1500);
-        login(username, password);
-      }
-    }
-  };
+  }, [autoRefreshing, invalidateAll, assignments.length]);
 
   /**
    * Render cards
    */
 
-  const onAssignmentCardPress = (assignmentId: string) => {
-    const assignment = assignments.find(item => item.id === assignmentId);
+  const onAssignmentCardPress = (assignment: WithCourseInfo<IAssignment>) => {
+    const name = 'assignments.detail';
+    const passProps = {
+      title: assignment.title,
+      deadline: assignment.deadline,
+      description: assignment.description,
+      attachmentName: assignment.attachmentName,
+      attachmentUrl: assignment.attachmentUrl,
+      submittedAttachmentName: assignment.submittedAttachmentName,
+      submittedAttachmentUrl: assignment.submittedAttachmentUrl,
+      submitTime: assignment.submitTime,
+      grade: assignment.grade,
+      gradeLevel: assignment.gradeLevel,
+      gradeContent: assignment.gradeContent,
+      courseName: assignment.courseName,
+    };
+    const title = assignment.courseName;
 
-    if (assignment) {
-      if (DeviceInfo.isIPad() && !compactWith) {
-        Navigation.setStackRoot('detail.root', [
-          {
-            component: {
-              name: 'assignments.detail',
-              passProps: {
-                title: assignment.title,
-                deadline: assignment.deadline,
-                description: assignment.description,
-                attachmentName: assignment.attachmentName,
-                attachmentUrl: assignment.attachmentUrl,
-                submittedAttachmentName: assignment.submittedAttachmentName,
-                submittedAttachmentUrl: assignment.submittedAttachmentUrl,
-                submitTime: assignment.submitTime,
-                grade: assignment.grade,
-                gradeLevel: assignment.gradeLevel,
-                gradeContent: assignment.gradeContent,
-                courseName: assignment.courseName,
-              },
-              options: {
-                topBar: {
-                  title: {
-                    component: {
-                      name: 'text',
-                      passProps: {
-                        children: assignment.courseName,
-                        style: {
-                          fontSize: 17,
-                          fontWeight: '500',
-                          color: isDarkMode ? 'white' : 'black',
-                        },
-                      },
-                    },
-                  },
-                },
-                animations: {
-                  setStackRoot: {
-                    enabled: false,
-                  },
-                } as any,
-              },
-            },
-          },
-        ]);
-      } else {
-        Navigation.push<IAssignmentDetailScreenProps>(props.componentId, {
-          component: {
-            name: 'assignments.detail',
-            passProps: {
-              title: assignment.title,
-              deadline: assignment.deadline,
-              description: assignment.description,
-              attachmentName: assignment.attachmentName,
-              attachmentUrl: assignment.attachmentUrl,
-              submittedAttachmentName: assignment.submittedAttachmentName,
-              submittedAttachmentUrl: assignment.submittedAttachmentUrl,
-              submitTime: assignment.submitTime,
-              grade: assignment.grade,
-              gradeLevel: assignment.gradeLevel,
-              gradeContent: assignment.gradeContent,
-              courseName: assignment.courseName,
-            },
-            options: {
-              bottomTabs: {
-                backgroundColor: isDarkMode ? 'black' : 'white',
-              },
-              topBar: {
-                background: {
-                  color: isDarkMode ? 'black' : 'white',
-                },
-                backButton:
-                  Platform.OS === 'android'
-                    ? {
-                        color: isDarkMode ? 'white' : 'black',
-                      }
-                    : undefined,
-                title: {
-                  component: {
-                    name: 'text',
-                    passProps: {
-                      children: assignment.courseName,
-                      style: {
-                        fontSize: 17,
-                        fontWeight: '500',
-                        color: isDarkMode ? 'white' : 'black',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-      }
-    }
-  };
-
-  const onPinned = (pin: boolean, noticeId: string) => {
-    if (pin) {
-      pinAssignment(noticeId);
+    if (DeviceInfo.isIPad() && !compactWidth) {
+      setDetailView<IAssignmentDetailScreenProps>(name, passProps, title);
     } else {
-      unpinAssignment(noticeId);
+      pushTo<IAssignmentDetailScreenProps>(
+        name,
+        props.componentId,
+        passProps,
+        title,
+      );
     }
   };
 
-  const renderListItem = ({
-    item,
-  }: {
-    readonly item: withCourseInfo<IAssignment>;
-  }) => (
+  const onPinned = (pin: boolean, assignmentId: string) => {
+    if (pin) {
+      pinAssignment(assignmentId);
+    } else {
+      unpinAssignment(assignmentId);
+    }
+  };
+
+  const onFav = (fav: boolean, assignmentId: string) => {
+    if (fav) {
+      favAssignment(assignmentId);
+    } else {
+      unfavAssignment(assignmentId);
+    }
+  };
+
+  const renderListItem = ({item}: {item: WithCourseInfo<IAssignment>}) => (
     <AssignmentCard
       title={item.title}
       hasAttachment={item.attachmentName ? true : false}
@@ -268,13 +239,13 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       courseName={item.courseName}
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
-      pinned={pinnedAssignments.includes(item.id)}
-      // tslint:disable: jsx-no-lambda
-      onPinned={pin => onPinned!(pin, item.id)}
+      pinned={pinnedAssignmentIds.includes(item.id)}
+      onPinned={pin => onPinned(pin, item.id)}
+      fav={favAssignmentIds.includes(item.id)}
+      onFav={fav => onFav(fav, item.id)}
       onPress={() => {
-        onAssignmentCardPress(item.id);
+        onAssignmentCardPress(item);
       }}
-      // tslint:enable: jsx-no-lambda
     />
   );
 
@@ -291,59 +262,46 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
    */
 
   const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
-    withCourseInfo<IAssignment>
-  >(assignments, pinnedAssignments, hidden, fuseOptions);
+    WithCourseInfo<IAssignment>
+  >(currentDisplayAssignments, fuseOptions);
+
+  const [segment, setSegment] = useState('new');
+
+  const handleSegmentChange = (value: string) => {
+    if (value === getTranslation('new')) {
+      setSegment('new');
+      setCurrentDisplayAssignments(newAssignments);
+    } else if (value === getTranslation('favorite')) {
+      setSegment('favorite');
+      setCurrentDisplayAssignments(favAssignments);
+    } else {
+      setSegment('hidden');
+      setCurrentDisplayAssignments(hiddenAssignments);
+    }
+  };
+
+  useEffect(() => {
+    if (segment === 'new') {
+      setCurrentDisplayAssignments(newAssignments);
+    }
+  }, [newAssignments, segment]);
+
+  useEffect(() => {
+    if (segment === 'favorite') {
+      setCurrentDisplayAssignments(favAssignments);
+    }
+  }, [favAssignments, segment]);
+
+  useEffect(() => {
+    if (segment === 'hidden') {
+      setCurrentDisplayAssignments(hiddenAssignments);
+    }
+  }, [hiddenAssignments, segment]);
 
   const isDarkMode = useDarkMode();
 
-  useEffect(() => {
-    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
-    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
-
-    Navigation.mergeOptions(props.componentId, {
-      layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      bottomTabs: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      topBar: {
-        background: {
-          color: isDarkMode ? 'black' : 'white',
-        },
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('assignments'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-      bottomTab: {
-        textColor: tabIconDefaultColor,
-        selectedTextColor: tabIconSelectedColor,
-        iconColor: tabIconDefaultColor,
-        selectedIconColor: tabIconSelectedColor,
-      },
-    });
-  }, [isDarkMode, props.componentId]);
-
   return (
-    <PaperProvider
-      theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          text: isDarkMode ? 'white' : 'black',
-          placeholder: isDarkMode ? Colors.grayDark : Colors.grayLight,
-        },
-      }}>
+    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
       <SafeAreaView
         testID="AssignmentsScreen"
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
@@ -356,7 +314,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
             clearButtonMode="always"
             placeholder={getTranslation('searchAssignments')}
             onChangeText={setSearchBarText}
-            value={searchBarText}
+            value={searchBarText || ''}
           />
         )}
         <FlatList
@@ -364,11 +322,24 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
-          // tslint:disable-next-line: jsx-no-lambda
           keyExtractor={item => item.id}
+          ListHeaderComponent={
+            Platform.OS === 'ios' ? (
+              <SegmentedControlIOS
+                style={{margin: 20, marginTop: 10, marginBottom: 10}}
+                values={[
+                  getTranslation('new'),
+                  getTranslation('favorite'),
+                  getTranslation('hidden'),
+                ]}
+                selectedIndex={0}
+                onValueChange={handleSegmentChange}
+              />
+            ) : null
+          }
           refreshControl={
             <RefreshControl
-              colors={[Colors.theme]}
+              colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
               onRefresh={onRefresh}
               refreshing={isFetching}
             />
@@ -379,51 +350,16 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   );
 };
 
-const fuseOptions: FuseOptions<withCourseInfo<IAssignment>> = {
-  shouldSort: true,
-  threshold: 0.6,
-  location: 0,
-  distance: 100,
-  maxPatternLength: 32,
-  minMatchCharLength: 1,
-  keys: ['attachmentName', 'description', 'title'],
-};
+const fuseOptions = getFuseOptions<IAssignment>([
+  'attachmentName',
+  'description',
+  'title',
+]);
 
-// tslint:disable-next-line: no-object-mutation
-AssignmentsScreen.options = {
-  layout: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  bottomTabs: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  topBar: {
-    background: {
-      color: initialMode === 'dark' ? 'black' : 'white',
-    },
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('assignments'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-    largeTitle: {
-      visible: false,
-    },
-    searchBar: true,
-    searchBarHiddenWhenScrolling: true,
-    searchBarPlaceholder: getTranslation('searchAssignments'),
-    hideNavBarOnFocusSearchBar: true,
-    elevation: 0,
-  },
-};
+AssignmentsScreen.options = getScreenOptions(
+  getTranslation('assignments'),
+  getTranslation('searchAssignments'),
+);
 
 function mapStateToProps(
   state: IPersistAppState,
@@ -431,27 +367,22 @@ function mapStateToProps(
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || '',
-    password: state.auth.password || '',
-    semesterId: state.currentSemester,
-    courses: state.courses.items,
+    courses: state.courses.items || [],
     isFetching: state.assignments.isFetching,
-    assignments: state.assignments.items,
-    pinnedAssignments: state.assignments.pinned || [],
-    hidden: state.courses.hidden || [],
-    compactWith: state.settings.compactWidth,
+    assignments: state.assignments.items || [],
+    favAssignmentIds: state.assignments.favorites || [],
+    pinnedAssignmentIds: state.assignments.pinned || [],
+    hiddenCourseIds: state.courses.hidden || [],
+    compactWidth: state.settings.compactWidth,
   };
 }
 
-// tslint:disable: readonly-array
 const mapDispatchToProps: IAssignmentsScreenDispatchProps = {
-  getCoursesForSemester: (semesterId: string) =>
-    getCoursesForSemester(semesterId),
-  getAllAssignmentsForCourses: (courseIds: string[]) =>
-    getAllAssignmentsForCourses(courseIds),
-  pinAssignment: (assignmentId: string) => pinAssignment(assignmentId),
-  unpinAssignment: (assignmentId: string) => unpinAssignment(assignmentId),
-  login: (username: string, password: string) => login(username, password),
+  getAllAssignmentsForCourses,
+  pinAssignment,
+  unpinAssignment,
+  favAssignment,
+  unfavAssignment,
 };
 
 export default connect(

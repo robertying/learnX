@@ -6,7 +6,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Text from './Text';
 
 export type IIconTextProps = IconProps & {
-  readonly text: string;
+  text: string;
 };
 
 const IconText: React.FunctionComponent<IIconTextProps> = props => {

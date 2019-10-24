@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {Animated} from 'react-native';
 
 export interface IPlaceholderProps {
-  readonly loading: boolean;
-  readonly renderPlaceholder: React.FunctionComponent<{
-    readonly opacity: Animated.Value;
+  loading: boolean;
+  renderPlaceholder: React.FunctionComponent<{
+    opacity: Animated.Value;
   }>;
-  readonly children?: React.ReactElement;
+  children?: React.ReactElement;
 }
 
 const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
@@ -14,12 +14,7 @@ const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
 
   const [opacity] = useState(new Animated.Value(1));
 
-  useEffect(() => {
-    fadeAnimation();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fadeAnimation = () => {
+  const fadeAnimation = useCallback(() => {
     const newValue = 0.5;
     const oldValue = 1;
     const duration = 500;
@@ -38,7 +33,11 @@ const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
     ]).start(() => {
       fadeAnimation();
     });
-  };
+  }, [opacity]);
+
+  useEffect(() => {
+    fadeAnimation();
+  }, [fadeAnimation]);
 
   return loading ? renderPlaceholder({opacity}) : children || null;
 };

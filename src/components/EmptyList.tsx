@@ -1,22 +1,27 @@
 import React from 'react';
-import {Text, View} from 'react-native';
+import {Text, View, ViewProps} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {getTranslation} from '../helpers/i18n';
 import {useDarkMode} from 'react-native-dark-mode';
 
-const EmptyList: React.FunctionComponent = () => {
+const EmptyList: React.FC<ViewProps> = props => {
+  const {style} = props;
+
   const isDarkMode = useDarkMode();
 
   return (
     <View
-      style={{
-        backgroundColor: isDarkMode ? 'black' : 'white',
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 40,
-      }}>
+      style={[
+        {
+          backgroundColor: isDarkMode ? 'black' : 'white',
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginTop: 40,
+        },
+        style,
+      ]}>
       <Icon
         name="check-circle"
         color={

@@ -1,12 +1,11 @@
 import {Platform, UIManager} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {getAuthLoadingRoot} from './navigation/navigationRoot';
-import registerScreens from './navigation/registerScreens';
-import {eventEmitter} from 'react-native-dark-mode';
+import registerComponents from './navigation/registerComponents';
+import {eventEmitter, initialMode} from 'react-native-dark-mode';
 
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(() => {
-    // tslint:disable-next-line
     console.disableYellowBox = true;
 
     if (
@@ -16,9 +15,15 @@ const startApp = () => {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
 
-    registerScreens();
+    registerComponents();
 
     eventEmitter.setMaxListeners(0);
+
+    Navigation.setDefaultOptions({
+      layout: {
+        backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+      },
+    });
 
     const authLoadingRoot = getAuthLoadingRoot();
     Navigation.setRoot(authLoadingRoot);

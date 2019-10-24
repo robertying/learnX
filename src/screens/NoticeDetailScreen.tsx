@@ -1,46 +1,21 @@
-import React, {useEffect} from 'react';
-import {connect} from 'react-redux';
+import React from 'react';
 import NoticeBoard from '../components/NoticeBoard';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode} from 'react-native-dark-mode';
-import {Navigation} from 'react-native-navigation';
+import {INavigationScreen} from '../types';
 
-interface INoticeDetailScreenProps {
-  readonly title: string;
-  readonly author: string;
-  readonly content: string;
-  readonly publishTime: string;
-  readonly attachmentName?: string;
-  readonly attachmentUrl?: string;
-  readonly courseName?: string;
+export interface INoticeDetailScreenProps {
+  title: string;
+  author: string;
+  content: string;
+  publishTime: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  courseName?: string;
 }
 
 const NoticeDetailScreen: INavigationScreen<
   INoticeDetailScreenProps
 > = props => {
-  const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      topBar: {
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: props.courseName,
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-    });
-  }, [isDarkMode, props.componentId, props.courseName]);
-
   return <NoticeBoard {...props} />;
 };
 
-export default connect()(NoticeDetailScreen);
+export default NoticeDetailScreen;
