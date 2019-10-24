@@ -35,7 +35,6 @@ import {IWebViewScreenProps} from './WebViewScreen';
 import {getFuseOptions} from '../helpers/search';
 
 interface IFilesScreenStateProps {
-  autoRefreshing: boolean;
   loggedIn: boolean;
   courses: ICourse[];
   hiddenCourseIds: string[];
@@ -63,7 +62,6 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     files,
     isFetching,
     getAllFilesForCourses,
-    autoRefreshing,
     pinFile,
     pinnedFileIds,
     unpinFile,
@@ -151,10 +149,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   }, [courses, getAllFilesForCourses, loggedIn]);
 
   useEffect(() => {
-    if (autoRefreshing || files.length === 0) {
+    if (files.length === 0) {
       invalidateAll();
     }
-  }, [autoRefreshing, invalidateAll, files.length]);
+  }, [invalidateAll, files.length]);
 
   /**
    * Render cards
@@ -328,7 +326,6 @@ FilesScreen.options = getScreenOptions(
 
 function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
   return {
-    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     courses: state.courses.items || [],
     isFetching: state.files.isFetching,

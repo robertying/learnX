@@ -1,7 +1,6 @@
 import {ISettingsAction} from '../types/actions';
 import {
   CLEAR_EVENT_IDS,
-  SET_AUTO_REFRESHING,
   SET_CALENDAR_ID,
   SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
@@ -16,7 +15,6 @@ import {ISettingsState, NotificationType} from '../types/state';
 
 export default function settings(
   state: ISettingsState = {
-    autoRefreshing: false,
     calendarSync: false,
     syncedAssignments: {},
     hasUpdate: false,
@@ -34,11 +32,6 @@ export default function settings(
   action: ISettingsAction,
 ): ISettingsState {
   switch (action.type) {
-    case SET_AUTO_REFRESHING:
-      return {
-        ...state,
-        autoRefreshing: action.payload,
-      };
     case SET_CALENDAR_SYNC:
       return {
         ...state,

@@ -36,7 +36,6 @@ import {clearStoreAction, setMockStore, resetLoading} from '../actions/root';
 import {getAllSemestersAction} from '../actions/semesters';
 import {
   clearEventIds,
-  setAutoRefreshing,
   setCalendarId,
   setCalendarSync,
   setEventIdForAssignment,
@@ -112,7 +111,6 @@ export type IUnfavAssignmentAction = ActionType<typeof unfavAssignment>;
 export type IHideCourseAction = ActionType<typeof hideCourse>;
 export type IUnhideCourseAction = ActionType<typeof unhideCourse>;
 
-export type ISetAutoRefreshingAction = ActionType<typeof setAutoRefreshing>;
 export type ISetCalendarSyncAction = ActionType<typeof setCalendarSync>;
 export type ISetCalendarIdAction = ActionType<typeof setCalendarId>;
 export type ISetEventIdForAssignment = ActionType<
@@ -126,7 +124,6 @@ export type ISetNotificationTypes = ActionType<typeof setNotificationTypes>;
 export type ISetLang = ActionType<typeof setLang>;
 export type ISetCompactWidth = ActionType<typeof setCompactWidth>;
 export type ISettingsAction =
-  | ISetAutoRefreshingAction
   | ISetCalendarSyncAction
   | ISetCalendarIdAction
   | ISetEventIdForAssignment

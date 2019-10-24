@@ -13,7 +13,6 @@ const mockStore: IPersistAppState = {
     },
   },
   settings: {
-    autoRefreshing: false,
     calendarSync: false,
     syncedAssignments: {},
     hasUpdate: false,

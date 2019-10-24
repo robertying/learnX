@@ -41,7 +41,6 @@ import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {INoticeDetailScreenProps} from './NoticeDetailScreen';
 
 interface INoticesScreenStateProps {
-  autoRefreshing: boolean;
   loggedIn: boolean;
   hasUpdate: boolean;
   compactWidth: boolean;
@@ -73,7 +72,6 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     courses,
     notices,
     getAllNoticesForCourses,
-    autoRefreshing,
     pinnedNoticeIds,
     pinNotice,
     unpinNotice,
@@ -232,10 +230,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, [courses, getAllNoticesForCourses, loggedIn]);
 
   useEffect(() => {
-    if (autoRefreshing || notices.length === 0) {
+    if (notices.length === 0) {
       invalidateAll();
     }
-  }, [autoRefreshing, invalidateAll, notices.length]);
+  }, [invalidateAll, notices.length]);
 
   /**
    * Render cards
@@ -417,7 +415,6 @@ NoticesScreen.options = getScreenOptions(
 
 function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
   return {
-    autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
     courses: state.courses.items || [],
     isFetching: state.notices.isFetching,
