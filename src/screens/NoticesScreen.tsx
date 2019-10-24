@@ -406,6 +406,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 const fuseOptions = getFuseOptions<INotice>([
   'title',
   'content',
+  'courseName',
   'attachmentName',
 ]);
 

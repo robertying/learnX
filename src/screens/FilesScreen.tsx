@@ -314,7 +314,12 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   );
 };
 
-const fuseOptions = getFuseOptions<IFile>(['description', 'fileType', 'title']);
+const fuseOptions = getFuseOptions<IFile>([
+  'description',
+  'fileType',
+  'title',
+  'courseName',
+]);
 
 FilesScreen.options = getScreenOptions(
   getTranslation('files'),
