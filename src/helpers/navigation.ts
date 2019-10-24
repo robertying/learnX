@@ -5,6 +5,7 @@ export function pushTo<T>(
   componentId: string,
   passProps?: T,
   title?: string,
+  hideBackTitle?: boolean,
 ) {
   Navigation.push(componentId, {
     component: {
@@ -15,6 +16,9 @@ export function pushTo<T>(
           title: {
             text: title,
             fontWeight: 'medium',
+          },
+          backButton: {
+            showTitle: !hideBackTitle,
           },
         },
       },
