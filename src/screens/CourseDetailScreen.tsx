@@ -1,16 +1,13 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-
-import React, {useMemo, useState, useCallback, useEffect} from 'react';
+import React, {useMemo, useState, useCallback} from 'react';
 import {Dimensions, Platform, View, SafeAreaView} from 'react-native';
 import Modal from 'react-native-modal';
-import {Navigation} from 'react-native-navigation';
 import {
   Route,
   SceneRendererProps,
   TabBar,
   TabView,
+  NavigationState,
 } from 'react-native-tab-view';
-import {Props} from 'react-native-tab-view/lib/typescript/src/TabBar';
 import {connect} from 'react-redux';
 import AssignmentBoard from '../components/AssignmentBoard';
 import AssignmentsView from '../components/AssignmentsView';
@@ -22,8 +19,7 @@ import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
-import {shareFile, stripExtension} from '../helpers/share';
-import {showToast} from '../helpers/toast';
+import {stripExtension} from '../helpers/share';
 import {getAssignmentsForCourse} from '../redux/actions/assignments';
 import {getFilesForCourse} from '../redux/actions/files';
 import {getNoticesForCourse} from '../redux/actions/notices';
@@ -32,39 +28,35 @@ import {
   IFile,
   INotice,
   IPersistAppState,
+  ICourse,
 } from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
+import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
-
-interface ITabRoute {
-  readonly key: string;
-  readonly title: string;
-}
+import {pushTo} from '../helpers/navigation';
+import {IWebViewScreenProps} from './WebViewScreen';
+import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 
 interface ICourseDetailScreenStateProps {
-  readonly notices: ReadonlyArray<INotice>;
-  readonly files: ReadonlyArray<IFile>;
-  readonly assignments: ReadonlyArray<IAssignment>;
-  readonly isFetchingNotices: boolean;
-  readonly isFetchingFiles: boolean;
-  readonly isFetchingAssignments: boolean;
+  course?: ICourse;
+  notices: INotice[];
+  files: IFile[];
+  assignments: IAssignment[];
+  isFetchingNotices: boolean;
+  isFetchingFiles: boolean;
+  isFetchingAssignments: boolean;
 }
 
 interface ICourseDetailScreenDispatchProps {
-  readonly getNoticesForCourse: (courseId: string) => void;
-  readonly getFilesForCourse: (courseId: string) => void;
-  readonly getAssignmentsForCourse: (courseId: string) => void;
+  getNoticesForCourse: (courseId: string) => void;
+  getFilesForCourse: (courseId: string) => void;
+  getAssignmentsForCourse: (courseId: string) => void;
 }
 
-type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
+export type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
   ICourseDetailScreenDispatchProps;
 
 const CourseDetailScreen: INavigationScreen<
-  ICourseDetailScreenProps & {
-    readonly courseId: string;
-    readonly courseName: string;
-    readonly courseTeacherName: string;
-  }
+  ICourseDetailScreenProps
 > = props => {
   const {
     notices: rawNotices,
@@ -76,83 +68,80 @@ const CourseDetailScreen: INavigationScreen<
     getAssignmentsForCourse,
     getFilesForCourse,
     getNoticesForCourse,
-    courseId,
+    course,
   } = props;
 
-  const notices = rawNotices
-    .filter(item => item.courseId === courseId)
-    .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix());
-  const files = rawFiles
-    .filter(item => item.courseId === courseId)
-    .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
-  const assignments = rawAssignments
-    .filter(item => item.courseId === courseId)
-    .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+  const notices = useMemo(
+    () =>
+      rawNotices
+        .filter(item => item.courseId === course!.id)
+        .sort(
+          (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
+        ),
+    [course, rawNotices],
+  );
+
+  const files = useMemo(
+    () =>
+      rawFiles
+        .filter(item => item.courseId === course!.id)
+        .sort(
+          (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix(),
+        ),
+    [course, rawFiles],
+  );
+
+  const assignments = useMemo(
+    () =>
+      rawAssignments
+        .filter(item => item.courseId === course!.id)
+        .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
+    [course, rawAssignments],
+  );
 
   const [index, setIndex] = useState(0);
-  const routes: any = [
+  const routes: Route[] = [
     {key: 'notice', title: getTranslation('notices')},
     {key: 'file', title: getTranslation('files')},
     {key: 'assignment', title: getTranslation('assignments')},
   ];
 
-  const [currentModal, setCurrentModal] = useState<{
-    readonly type: 'Notice' | 'Assignment';
-    readonly data?: INotice | IAssignment | null;
-    readonly visible: boolean;
-  }>({type: 'Notice', data: null, visible: false});
-
-  const onNoticeCardPress = (noticeId: string) => {
-    const notice = notices.find(item => item.id === noticeId);
-    setCurrentModal({type: 'Notice', data: notice, visible: true});
-  };
-  const onFileCardPress = async (
-    filename: string,
-    url: string,
-    ext: string,
-  ) => {
-    if (Platform.OS === 'ios') {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'webview',
-          passProps: {
-            filename: stripExtension(filename),
-            url,
-            ext,
-            pushed: true,
-          },
-          options: {
-            topBar: {
-              title: {
-                component: {
-                  name: 'navigation.title',
-                  passProps: {
-                    pushed: true,
-                    children: stripExtension(filename),
-                    style: {
-                      fontSize: 17,
-                      fontWeight: '500',
-                      color: isDarkMode ? 'white' : 'black',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      showToast(getTranslation('downloadingFile'), 1000);
-      const success = await shareFile(url, stripExtension(filename), ext);
-      if (!success) {
-        showToast(getTranslation('downloadFileFailure'), 3000);
+  const [currentModal, setCurrentModal] = useState<
+    | {
+        type: 'Notice';
+        data?: INotice;
+        visible: boolean;
       }
-    }
-  };
-  const onAssignmentCardPress = (assignmentId: string) => {
-    const assignment = assignments.find(item => item.id === assignmentId);
+    | {
+        type: 'Assignment';
+        data?: IAssignment;
+        visible: boolean;
+      }
+  >({type: 'Notice', data: undefined, visible: false});
+
+  const onNoticeCardPress = useCallback((notice: INotice) => {
+    setCurrentModal({type: 'Notice', data: notice, visible: true});
+  }, []);
+
+  const onFileCardPress = useCallback(
+    async (file: IFile) => {
+      const stripedFilename = stripExtension(file.title);
+      const name = 'webview';
+      const passProps = {
+        filename: stripedFilename,
+        url: file.downloadUrl,
+        ext: file.fileType,
+      };
+      const title = stripedFilename;
+
+      pushTo<IWebViewScreenProps>(name, props.componentId, passProps, title);
+    },
+    [props.componentId],
+  );
+
+  const onAssignmentCardPress = useCallback((assignment: IAssignment) => {
     setCurrentModal({type: 'Assignment', data: assignment, visible: true});
-  };
+  }, []);
 
   const NoticesRoute = useMemo(
     () => (
@@ -160,82 +149,82 @@ const CourseDetailScreen: INavigationScreen<
         isFetching={isFetchingNotices}
         notices={notices}
         onNoticeCardPress={onNoticeCardPress}
-        // tslint:disable-next-line: jsx-no-lambda
-        onRefresh={() => getNoticesForCourse(courseId)}
+        onRefresh={() => getNoticesForCourse(course!.id)}
       />
     ),
-    [notices.length, isFetchingNotices],
+    [
+      course,
+      getNoticesForCourse,
+      isFetchingNotices,
+      notices,
+      onNoticeCardPress,
+    ],
   );
+
   const FilesRoute = useMemo(
     () => (
       <FilesView
         isFetching={isFetchingFiles}
         files={files}
         onFileCardPress={onFileCardPress}
-        // tslint:disable-next-line: jsx-no-lambda
-        onRefresh={() => getFilesForCourse(courseId)}
+        onRefresh={() => getFilesForCourse(course!.id)}
       />
     ),
-    [files.length, isFetchingFiles],
+    [course, files, getFilesForCourse, isFetchingFiles, onFileCardPress],
   );
+
   const AssignmentsRoute = useMemo(
     () => (
       <AssignmentsView
         isFetching={isFetchingAssignments}
         assignments={assignments}
         onAssignmentCardPress={onAssignmentCardPress}
-        // tslint:disable-next-line: jsx-no-lambda
-        onRefresh={() => getAssignmentsForCourse(courseId)}
+        onRefresh={() => getAssignmentsForCourse(course!.id)}
       />
     ),
-    [assignments.length, isFetchingAssignments],
+    [
+      assignments,
+      course,
+      getAssignmentsForCourse,
+      isFetchingAssignments,
+      onAssignmentCardPress,
+    ],
   );
 
   const isDarkMode = useDarkMode();
 
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      topBar: {
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: props.courseName,
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-    });
-  }, [isDarkMode, props.componentId]);
+  const renderLabel = useCallback(
+    ({
+      route,
+    }: Scene<Route> & {
+      focused: boolean;
+      color: string;
+    }) => <Text>{route.title}</Text>,
+    [],
+  );
 
   const renderTabBar = useCallback(
-    (props: Props<ITabRoute>) => (
+    (
+      props: SceneRendererProps & {
+        navigationState: NavigationState<Route>;
+      },
+    ) => (
       <TabBar
         style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
         indicatorStyle={{
-          backgroundColor: isDarkMode ? Colors.purpleDark : Colors.theme,
+          backgroundColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
         }}
         {...props}
         renderLabel={renderLabel}
       />
     ),
-    [isDarkMode],
-  );
-
-  const renderLabel: Props<ITabRoute>['renderLabel'] = useCallback(
-    ({route}) => <Text>{route.title}</Text>,
-    [isDarkMode],
+    [isDarkMode, renderLabel],
   );
 
   const renderScene = ({
     route,
   }: SceneRendererProps & {
-    readonly route: Route;
+    route: Route;
   }) => {
     switch (route.key) {
       case 'notice':
@@ -254,18 +243,15 @@ const CourseDetailScreen: INavigationScreen<
       style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <TabView
         navigationState={{index, routes}}
-        renderTabBar={renderTabBar as any}
+        renderTabBar={renderTabBar}
         renderScene={renderScene}
         onIndexChange={setIndex}
-        initialLayout={
-          {
-            width: Dimensions.get('window').width,
-          } as any
-        }
+        initialLayout={{
+          width: Dimensions.get('window').width,
+        }}
       />
       <Modal
         isVisible={currentModal.visible}
-        // tslint:disable-next-line: jsx-no-lambda
         onBackdropPress={() =>
           setCurrentModal({type: 'Notice', visible: false})
         }
@@ -273,11 +259,11 @@ const CourseDetailScreen: INavigationScreen<
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
-        deviceWidth={Layout.window.width}
+        deviceWidth={Layout.initialWindow.width}
         deviceHeight={
           Platform.OS === 'android'
-            ? Layout.window.height + 100
-            : Layout.window.height
+            ? Layout.initialWindow.height + 100
+            : Layout.initialWindow.height
         }>
         <View
           style={{
@@ -287,16 +273,13 @@ const CourseDetailScreen: INavigationScreen<
           {currentModal.data && currentModal.type === 'Notice' && (
             <NoticeBoard
               componentId={props.componentId}
-              title={(currentModal.data as INotice).title || ''}
-              content={(currentModal.data as INotice).content || ''}
-              author={(currentModal.data as INotice).publisher || ''}
-              publishTime={(currentModal.data as INotice).publishTime || ''}
-              attachmentName={
-                (currentModal.data as INotice).attachmentName || ''
-              }
-              attachmentUrl={(currentModal.data as INotice).attachmentUrl || ''}
-              // tslint:disable-next-line: jsx-no-lambda
-              onTransition={() =>
+              title={currentModal.data!.title}
+              content={currentModal.data!.content}
+              author={currentModal.data!.publisher}
+              publishTime={currentModal.data!.publishTime}
+              attachmentName={currentModal.data!.attachmentName}
+              attachmentUrl={currentModal.data!.attachmentUrl}
+              beforeNavigation={() =>
                 Platform.OS === 'ios' &&
                 setCurrentModal({type: 'Notice', visible: false})
               }
@@ -305,28 +288,19 @@ const CourseDetailScreen: INavigationScreen<
           {currentModal.data && currentModal.type === 'Assignment' && (
             <AssignmentBoard
               componentId={props.componentId}
-              title={(currentModal.data as IAssignment).title || ''}
-              description={(currentModal.data as IAssignment).description || ''}
-              deadline={(currentModal.data as IAssignment).deadline}
-              attachmentName={
-                (currentModal.data as IAssignment).attachmentName || ''
-              }
-              attachmentUrl={
-                (currentModal.data as IAssignment).attachmentUrl || ''
-              }
+              title={currentModal.data!.title}
+              description={currentModal.data!.description}
+              deadline={currentModal.data!.deadline}
+              attachmentName={currentModal.data!.attachmentName}
+              attachmentUrl={currentModal.data!.attachmentUrl}
               submittedAttachmentName={
-                (currentModal.data as IAssignment).submittedAttachmentName || ''
+                currentModal.data!.submittedAttachmentName
               }
-              submittedAttachmentUrl={
-                (currentModal.data as IAssignment).submittedAttachmentUrl || ''
-              }
-              submitTime={(currentModal.data as IAssignment).submitTime || ''}
-              grade={(currentModal.data as IAssignment).grade || NaN}
-              gradeContent={
-                (currentModal.data as IAssignment).gradeContent || ''
-              }
-              // tslint:disable-next-line: jsx-no-lambda
-              onTransition={() =>
+              submittedAttachmentUrl={currentModal.data!.submittedAttachmentUrl}
+              submitTime={currentModal.data!.submitTime}
+              grade={currentModal.data!.grade}
+              gradeContent={currentModal.data!.gradeContent}
+              beforeNavigation={() =>
                 Platform.OS === 'ios' &&
                 setCurrentModal({type: 'Notice', visible: false})
               }
@@ -352,10 +326,9 @@ function mapStateToProps(
 }
 
 const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
-  getNoticesForCourse: (courseId: string) => getNoticesForCourse(courseId),
-  getFilesForCourse: (courseId: string) => getFilesForCourse(courseId),
-  getAssignmentsForCourse: (courseId: string) =>
-    getAssignmentsForCourse(courseId),
+  getNoticesForCourse,
+  getFilesForCourse,
+  getAssignmentsForCourse,
 };
 
 export default connect(

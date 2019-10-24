@@ -1,5 +1,5 @@
-import React, {useEffect, useState, useRef} from 'react';
-import {ProgressViewIOS, View, StatusBar} from 'react-native';
+import React, {useEffect, useState, useRef, useCallback} from 'react';
+import {ProgressViewIOS, View} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import MediumPlaceholder from '../components/MediumPlaceholder';
@@ -7,33 +7,25 @@ import MediumPlaceholderDark from '../components/MediumPlaceholderDark';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {downloadFile, shareFile} from '../helpers/share';
-import {showToast} from '../helpers/toast';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
+import SnackBar from 'react-native-snackbar';
+import {INavigationScreen} from '../types';
+import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
-import {IPersistAppState} from '../redux/types/state';
-import {connect} from 'react-redux';
 
 export interface IWebViewScreenStateProps {
-  readonly filename: string;
-  readonly url: string;
-  readonly ext: string;
-  compactWidth?: boolean;
-  pushed?: boolean;
+  filename: string;
+  url: string;
+  ext: string;
 }
 
-type IWebViewScreenProps = IWebViewScreenStateProps;
+export type IWebViewScreenProps = IWebViewScreenStateProps;
 
 const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
-  const {url, ext, filename, compactWidth, pushed} = props;
+  const {url, ext, filename} = props;
 
   const [loading, setLoading] = useState(false);
   const [filePath, setFilePath] = useState('');
   const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    StatusBar.setBarStyle('default');
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -48,118 +40,97 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
         );
         setFilePath(filePath);
       } catch {
-        showToast(getTranslation('downloadFileFailure'), 1500);
+        SnackBar.show({
+          title: getTranslation('downloadFileFailure'),
+          duration: SnackBar.LENGTH_SHORT,
+        });
       } finally {
         setLoading(false);
         setProgress(0);
       }
     })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [ext, filename, url]);
 
   const fullScreenRef = useRef<boolean>(false);
 
-  useEffect(() => {
-    const listener = Navigation.events().registerNavigationButtonPressedListener(
-      async ({buttonId}) => {
-        if (buttonId === 'toggle') {
-          const fullScreen = fullScreenRef.current!;
-          Navigation.mergeOptions(props.componentId, {
-            splitView: {
-              displayMode: fullScreen ? 'visible' : 'hidden',
-            },
-            topBar: {
-              leftButtons: pushed
-                ? []
-                : [
-                    {
-                      id: 'toggle',
-                      systemItem: fullScreen ? 'rewind' : 'fastForward',
-                    },
-                  ],
-            },
+  const listener = useCallback(
+    async ({buttonId}: {buttonId: string}) => {
+      if (buttonId === 'toggle') {
+        const fullScreen = fullScreenRef.current!;
+        Navigation.mergeOptions(props.componentId, {
+          splitView: {
+            displayMode: fullScreen ? 'visible' : 'hidden',
+          },
+          topBar: {
+            rightButtons: DeviceInfo.isIPad()
+              ? [
+                  {
+                    id: 'share',
+                    systemItem: 'action',
+                  },
+                  {
+                    id: 'refresh',
+                    systemItem: 'refresh',
+                  },
+                  {
+                    id: 'toggle',
+                    systemItem: fullScreen ? 'fastForward' : 'rewind',
+                  },
+                ]
+              : [
+                  {
+                    id: 'share',
+                    systemItem: 'action',
+                  },
+                  {
+                    id: 'refresh',
+                    systemItem: 'refresh',
+                  },
+                ],
+          },
+        });
+        fullScreenRef.current = !fullScreen;
+      }
+      if (buttonId === 'share') {
+        SnackBar.show({
+          title: getTranslation('preparingFile'),
+          duration: SnackBar.LENGTH_SHORT,
+        });
+        shareFile(url, filename, ext);
+      }
+      if (buttonId === 'refresh') {
+        setLoading(true);
+        try {
+          const filePath = await downloadFile(
+            url,
+            filename,
+            ext,
+            true,
+            setProgress,
+          );
+          setFilePath(filePath);
+        } catch {
+          SnackBar.show({
+            title: getTranslation('downloadFileFailure'),
+            duration: SnackBar.LENGTH_SHORT,
           });
-          fullScreenRef.current = !fullScreen;
+        } finally {
+          setLoading(false);
+          setProgress(0);
         }
-        if (buttonId === 'share') {
-          showToast(getTranslation('preparingFile'), 1500);
-          shareFile(url, filename, ext);
-        }
-        if (buttonId === 'refresh') {
-          setLoading(true);
-          try {
-            const filePath = await downloadFile(
-              url,
-              filename,
-              ext,
-              true,
-              setProgress,
-            );
-            setFilePath(filePath);
-          } catch {
-            showToast(getTranslation('downloadFileFailure'), 1500);
-          } finally {
-            setLoading(false);
-            setProgress(0);
-          }
-        }
-      },
-    );
-    return () => listener.remove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      }
+    },
+    [ext, filename, props.componentId, url],
+  );
 
   useEffect(() => {
-    if (!pushed) {
-      Navigation.mergeOptions(props.componentId, {
-        topBar: {
-          leftButtons: compactWidth
-            ? []
-            : [
-                {
-                  id: 'toggle',
-                  systemItem: 'rewind',
-                },
-              ],
-        },
-      });
-    }
-  }, [compactWidth, props.componentId, pushed]);
+    const handle = Navigation.events().registerNavigationButtonPressedListener(
+      listener,
+    );
+    return () => handle.remove();
+  }, [listener]);
 
   const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
-    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
-
-    Navigation.mergeOptions(props.componentId, {
-      layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      topBar: {
-        title: {
-          component: {
-            name: 'navigation.title',
-            passProps: {
-              pushed,
-              children: props.filename,
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-      bottomTab: {
-        textColor: tabIconDefaultColor,
-        selectedTextColor: tabIconSelectedColor,
-        iconColor: tabIconDefaultColor,
-        selectedIconColor: tabIconSelectedColor,
-      },
-    });
-  }, [isDarkMode, props.componentId, props.filename, pushed]);
 
   return (
     <>
@@ -220,41 +191,35 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
 WebViewScreen.options = {
-  layout: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
   topBar: {
     hideOnScroll: true,
-    leftButtons: DeviceInfo.isIPad()
+    rightButtons: DeviceInfo.isIPad()
       ? [
+          {
+            id: 'share',
+            systemItem: 'action',
+          },
+          {
+            id: 'refresh',
+            systemItem: 'refresh',
+          },
           {
             id: 'toggle',
             systemItem: 'rewind',
           },
         ]
-      : undefined,
-    rightButtons: [
-      {
-        id: 'share',
-        systemItem: 'action',
-      },
-      {
-        id: 'refresh',
-        systemItem: 'refresh',
-      },
-    ],
+      : [
+          {
+            id: 'share',
+            systemItem: 'action',
+          },
+          {
+            id: 'refresh',
+            systemItem: 'refresh',
+          },
+        ],
   },
 };
 
-function mapStateToProps(state: IPersistAppState) {
-  return {
-    compactWidth: state.settings.compactWidth,
-  };
-}
-
-export default connect(
-  mapStateToProps,
-  undefined,
-)(WebViewScreen);
+export default WebViewScreen;

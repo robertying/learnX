@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   Alert,
   FlatList,
@@ -19,7 +19,7 @@ import SettingsListItem from '../components/SettingsListItem';
 import Colors from '../constants/Colors';
 import {saveAssignmentsToCalendar} from '../helpers/calendar';
 import {getTranslation} from '../helpers/i18n';
-import {showToast} from '../helpers/toast';
+import SnackBar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {clearStore} from '../redux/actions/root';
 import {
@@ -29,26 +29,27 @@ import {
   setUpdate,
 } from '../redux/actions/settings';
 import {IAssignment, IPersistAppState} from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
+import {INavigationScreen} from '../types';
 import semver from 'semver';
 import DeviceInfo from '../constants/DeviceInfo';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
+import {useDarkMode} from 'react-native-dark-mode';
+import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 
 interface ISettingsScreenStateProps {
-  readonly autoRefreshing: boolean;
-  readonly calendarSync: boolean;
-  readonly assignments: readonly IAssignment[];
-  readonly hasUpdate: boolean;
-  readonly notifications: boolean;
+  autoRefreshing: boolean;
+  calendarSync: boolean;
+  assignments: IAssignment[];
+  hasUpdate: boolean;
+  notifications: boolean;
   compactWith: boolean;
 }
 
 interface ISettingsScreenDispatchProps {
-  readonly clearStore: () => void;
-  readonly setAutoRefreshing: (enabled: boolean) => void;
-  readonly setCalendarSync: (enabled: boolean) => void;
-  readonly setUpdate: (hasUpdate: boolean) => void;
-  readonly setNotifications: (enabled: boolean) => void;
+  clearStore: () => void;
+  setAutoRefreshing: (enabled: boolean) => void;
+  setCalendarSync: (enabled: boolean) => void;
+  setUpdate: (hasUpdate: boolean) => void;
+  setNotifications: (enabled: boolean) => void;
 }
 
 type ISettingsScreenProps = ISettingsScreenStateProps &
@@ -67,45 +68,16 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     compactWith,
   } = props;
 
-  const onAcknowledgementsPress = () => {
+  const navigate = (name: string) => {
     if (DeviceInfo.isIPad() && !compactWith) {
-      Navigation.setStackRoot('detail.root', [
-        {
-          component: {
-            name: 'settings.acknowledgements',
-            options: {
-              animations: {
-                setStackRoot: {
-                  enabled: false,
-                },
-              } as any,
-            },
-          },
-        },
-      ]);
+      setDetailView(name, props.componentId);
     } else {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'settings.acknowledgements',
-          options: {
-            bottomTabs: {
-              backgroundColor: isDarkMode ? 'black' : 'white',
-            },
-            topBar: {
-              background: {
-                color: isDarkMode ? 'black' : 'white',
-              },
-              backButton:
-                Platform.OS === 'android'
-                  ? {
-                      color: isDarkMode ? 'white' : 'black',
-                    }
-                  : undefined,
-            },
-          },
-        },
-      });
+      pushTo(name, props.componentId);
     }
+  };
+
+  const onAcknowledgementsPress = () => {
+    navigate('settings.acknowledgements');
   };
 
   const onLogoutPress = () => {
@@ -135,85 +107,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onAboutPress = () => {
-    if (DeviceInfo.isIPad() && !compactWith) {
-      Navigation.setStackRoot('detail.root', [
-        {
-          component: {
-            name: 'settings.about',
-            options: {
-              animations: {
-                setStackRoot: {
-                  enabled: false,
-                },
-              } as any,
-            },
-          },
-        },
-      ]);
-    } else {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'settings.about',
-          options: {
-            bottomTabs: {
-              backgroundColor: isDarkMode ? 'black' : 'white',
-            },
-            topBar: {
-              background: {
-                color: isDarkMode ? 'black' : 'white',
-              },
-              backButton:
-                Platform.OS === 'android'
-                  ? {
-                      color: isDarkMode ? 'white' : 'black',
-                    }
-                  : undefined,
-            },
-          },
-        },
-      });
-    }
+    navigate('settings.about');
   };
 
   const onHelpPress = () => {
-    if (DeviceInfo.isIPad() && !compactWith) {
-      Navigation.setStackRoot('detail.root', [
-        {
-          component: {
-            name: 'settings.help',
-            options: {
-              animations: {
-                setStackRoot: {
-                  enabled: false,
-                },
-              } as any,
-            },
-          },
-        },
-      ]);
-    } else {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'settings.help',
-          options: {
-            bottomTabs: {
-              backgroundColor: isDarkMode ? 'black' : 'white',
-            },
-            topBar: {
-              background: {
-                color: isDarkMode ? 'black' : 'white',
-              },
-              backButton:
-                Platform.OS === 'android'
-                  ? {
-                      color: isDarkMode ? 'white' : 'black',
-                    }
-                  : undefined,
-            },
-          },
-        },
-      });
-    }
+    navigate('settings.help');
   };
 
   const onCalendarSyncSwitchChange = (enabled: boolean) => {
@@ -250,7 +148,10 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         setUpdate(true);
       }
     } else {
-      showToast(getTranslation('noUpdate'), 1500);
+      SnackBar.show({
+        title: getTranslation('noUpdate'),
+        duration: SnackBar.LENGTH_SHORT,
+      });
       if (hasUpdate) {
         setUpdate(false);
       }
@@ -272,10 +173,16 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             RNFetchBlob.fs
               .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
               .then(() =>
-                showToast(getTranslation('clearFileCacheSuccess'), 1500),
+                SnackBar.show({
+                  title: getTranslation('clearFileCacheSuccess'),
+                  duration: SnackBar.LENGTH_SHORT,
+                }),
               )
               .catch(() =>
-                showToast(getTranslation('clearFileCacheFail'), 1500),
+                SnackBar.show({
+                  title: getTranslation('clearFileCacheFail'),
+                  duration: SnackBar.LENGTH_SHORT,
+                }),
               );
           },
         },
@@ -285,44 +192,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const onSemestersPress = () => {
-    if (DeviceInfo.isIPad() && !compactWith) {
-      Navigation.setStackRoot('detail.root', [
-        {
-          component: {
-            name: 'settings.semesters',
-            options: {
-              animations: {
-                setStackRoot: {
-                  enabled: false,
-                },
-              } as any,
-            },
-          },
-        },
-      ]);
-    } else {
-      Navigation.push(props.componentId, {
-        component: {
-          name: 'settings.semesters',
-          options: {
-            bottomTabs: {
-              backgroundColor: isDarkMode ? 'black' : 'white',
-            },
-            topBar: {
-              background: {
-                color: isDarkMode ? 'black' : 'white',
-              },
-              backButton:
-                Platform.OS === 'android'
-                  ? {
-                      color: isDarkMode ? 'white' : 'black',
-                    }
-                  : undefined,
-            },
-          },
-        },
-      });
-    }
+    navigate('settings.semesters');
   };
 
   const renderListItem: ListRenderItem<{}> = ({index}) => {
@@ -500,44 +370,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
   const isDarkMode = useDarkMode();
 
-  useEffect(() => {
-    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
-    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
-
-    Navigation.mergeOptions(props.componentId, {
-      layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      bottomTabs: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      topBar: {
-        background: {
-          color: isDarkMode ? 'black' : 'white',
-        },
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('settings'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-      bottomTab: {
-        textColor: tabIconDefaultColor,
-        selectedTextColor: tabIconSelectedColor,
-        iconColor: tabIconDefaultColor,
-        selectedIconColor: tabIconSelectedColor,
-      },
-    });
-  }, [isDarkMode, props.componentId]);
-
   return (
     <SafeAreaView
       testID="SettingsScreen"
@@ -561,36 +393,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-SettingsScreen.options = {
-  layout: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  bottomTabs: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  topBar: {
-    background: {
-      color: initialMode === 'dark' ? 'black' : 'white',
-    },
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('settings'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-    largeTitle: {
-      visible: false,
-    },
-  },
-};
+SettingsScreen.options = getScreenOptions(getTranslation('settings'));
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
   return {

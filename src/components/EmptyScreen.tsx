@@ -3,7 +3,7 @@ import {SafeAreaView} from 'react-native';
 import EmptyList from './EmptyList';
 import {useDarkMode} from 'react-native-dark-mode';
 
-const EmptyScreen: React.FC<{}> = () => {
+const EmptyScreen: React.FC = () => {
   const isDarkMode = useDarkMode();
 
   return (

@@ -8,7 +8,7 @@ Here are some information that may help you to use the App.
 
 ### iOS: The file won't open. / The file is always blank.
 
-- This is possibly due to any download failure. Please use `Clear file cache` in `Settings` to clear file cache. The App will try to download the file again.
+- This is possibly due to any download failure. Please tap the Refresh button on the upper right or use `Clear file cache` in `Settings` to clear file cache. The App will try to download the file again.
 - Please also check the file format. Some formats are not supported on iOS WebView, such as `.zip`, `.rar` and so on. Please tap the `share` button on the upper right the screen to share the file to other apps that support these formats.
 
 ### Android: Tapping on the file doesn't do anything.

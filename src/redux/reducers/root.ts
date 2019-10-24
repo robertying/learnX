@@ -1,4 +1,4 @@
-import {dummyUsername} from '../../helpers/dummy';
+import {dummyUsername} from '../../constants/Dummy';
 import mockStore from '../mockStore';
 import {appReducer} from '../store';
 import {IStoreAction} from '../types/actions';
@@ -59,7 +59,6 @@ export function rootReducer(
   if (action.type === SET_MOCK_STORE) {
     return mockStore;
   } else if (action.type === CLEAR_STORE) {
-    // tslint:disable-next-line: no-parameter-reassignment
     state = undefined;
   } else if (state && state.auth.username === dummyUsername) {
     return state;

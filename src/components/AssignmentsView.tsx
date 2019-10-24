@@ -12,10 +12,10 @@ import EmptyList from './EmptyList';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IAssignmentsViewProps {
-  readonly assignments: ReadonlyArray<IAssignment>;
-  readonly isFetching: boolean;
-  readonly onAssignmentCardPress: (assignmentId: string) => void;
-  readonly onRefresh?: () => void;
+  assignments: IAssignment[];
+  isFetching: boolean;
+  onAssignmentCardPress: (assignment: IAssignment) => void;
+  onRefresh?: () => void;
 }
 
 const AssignmentsView: React.FunctionComponent<
@@ -33,8 +33,7 @@ const AssignmentsView: React.FunctionComponent<
         hasAttachment={item.attachmentName ? true : false}
         submitted={item.submitted}
         graded={item.gradeTime ? true : false}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() => onAssignmentCardPress(item.id)}
+        onPress={() => onAssignmentCardPress(item)}
       />
     );
   };
@@ -55,7 +54,7 @@ const AssignmentsView: React.FunctionComponent<
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            colors={[Colors.theme]}
+            colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
           />
         }
       />

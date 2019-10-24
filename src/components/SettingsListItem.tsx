@@ -15,18 +15,18 @@ import Text from './Text';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface ISettingsListItemProps {
-  readonly icon?: React.ReactNode;
-  readonly size?: 'small' | 'large';
-  readonly text?: string;
-  readonly textStyle?: TextProps['style'];
-  readonly secondaryText?: string;
-  readonly secondaryTextStyle?: TextProps['style'];
-  readonly variant: 'switch' | 'arrow' | 'none';
-  readonly switchValue?: boolean;
-  readonly onSwitchValueChange?: SwitchProps['onValueChange'];
-  readonly onPress?: TouchableHighlightProps['onPress'];
-  readonly style?: ViewProps['style'];
-  readonly containerStyle?: TouchableHighlightProps['style'];
+  icon?: React.ReactNode;
+  size?: 'small' | 'large';
+  text?: string;
+  textStyle?: TextProps['style'];
+  secondaryText?: string;
+  secondaryTextStyle?: TextProps['style'];
+  variant: 'switch' | 'arrow' | 'none';
+  switchValue?: boolean;
+  onSwitchValueChange?: SwitchProps['onValueChange'];
+  onPress?: TouchableHighlightProps['onPress'];
+  style?: ViewProps['style'];
+  containerStyle?: TouchableHighlightProps['style'];
 }
 
 const SettingsListItem: React.FunctionComponent<
@@ -51,7 +51,7 @@ const SettingsListItem: React.FunctionComponent<
 
   return (
     <TouchableHighlight
-      underlayColor={isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.4)'}
+      underlayColor={isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'}
       onPress={onPress}
       style={containerStyle}>
       <View
@@ -60,7 +60,7 @@ const SettingsListItem: React.FunctionComponent<
             height: size === 'large' ? 100 : Layout.normalBlockHeight,
             flexDirection: 'row',
             alignItems: 'center',
-            backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'white',
+            backgroundColor: isDarkMode ? 'black' : 'white',
             paddingLeft: 10,
             paddingRight: 20,
           },

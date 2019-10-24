@@ -18,8 +18,6 @@ import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import WebViewScreen from '../screens/WebViewScreen';
 import HelpScreen from '../screens/HelpScreen';
-import NavigationTitle from '../components/NavigationTitle';
-import Text from '../components/Text';
 
 const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
   props: any,
@@ -31,10 +29,6 @@ const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
 
 const registerScreens = () => {
   Navigation.registerComponent('empty', () => EmptyScreen);
-
-  Navigation.registerComponent('text', () => Text);
-
-  Navigation.registerComponent('navigation.title', () => NavigationTitle);
 
   Navigation.registerComponent(
     'auth.loading',
@@ -53,11 +47,7 @@ const registerScreens = () => {
     () => storeWrapped(NoticesScreen),
     () => NoticesScreen,
   );
-  Navigation.registerComponent(
-    'notices.detail',
-    () => storeWrapped(NoticeDetailScreen),
-    () => NoticeDetailScreen,
-  );
+  Navigation.registerComponent('notices.detail', () => NoticeDetailScreen);
 
   Navigation.registerComponent(
     'files.index',
@@ -72,7 +62,6 @@ const registerScreens = () => {
   );
   Navigation.registerComponent(
     'assignments.detail',
-    () => storeWrapped(AssignmentDetailScreen),
     () => AssignmentDetailScreen,
   );
 
@@ -104,11 +93,7 @@ const registerScreens = () => {
   Navigation.registerComponent('settings.about', () => AboutScreen);
   Navigation.registerComponent('settings.help', () => HelpScreen);
 
-  Navigation.registerComponent(
-    'webview',
-    () => storeWrapped(WebViewScreen),
-    () => WebViewScreen,
-  );
+  Navigation.registerComponent('webview', () => WebViewScreen);
 };
 
 export default registerScreens;

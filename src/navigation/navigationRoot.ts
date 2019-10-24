@@ -2,7 +2,7 @@ import {LayoutBottomTabs, LayoutRoot} from 'react-native-navigation';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
-import {loadTabIcons} from '../helpers/icons';
+import {loadIcons} from '../helpers/icons';
 import {initialMode} from 'react-native-dark-mode';
 
 export const getAuthLoadingRoot = () => {
@@ -21,8 +21,15 @@ const tabIconDefaultColor =
 const tabIconSelectedColor =
   initialMode === 'dark' ? Colors.purpleDark : Colors.theme;
 
+const tabColorSettings = {
+  textColor: tabIconDefaultColor,
+  selectedTextColor: tabIconSelectedColor,
+  iconColor: tabIconDefaultColor,
+  selectedIconColor: tabIconSelectedColor,
+};
+
 export const getNavigationRoot = async () => {
-  const icons = await loadTabIcons();
+  const icons = await loadIcons();
   await DeviceInfo.init();
 
   const bottomTabs: LayoutBottomTabs = {
@@ -37,17 +44,11 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
-            layout: {
-              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-            },
             bottomTab: {
               testID: 'NoticeTab',
               text: getTranslation('notices'),
-              textColor: tabIconDefaultColor,
-              selectedTextColor: tabIconSelectedColor,
               icon: icons.notifications,
-              iconColor: tabIconDefaultColor,
-              selectedIconColor: tabIconSelectedColor,
+              ...tabColorSettings,
             },
           },
         },
@@ -62,17 +63,11 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
-            layout: {
-              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-            },
             bottomTab: {
               testID: 'FileTab',
               text: getTranslation('files'),
-              textColor: tabIconDefaultColor,
-              selectedTextColor: tabIconSelectedColor,
               icon: icons.folder,
-              iconColor: tabIconDefaultColor,
-              selectedIconColor: tabIconSelectedColor,
+              ...tabColorSettings,
             },
           },
         },
@@ -87,17 +82,11 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
-            layout: {
-              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-            },
             bottomTab: {
               testID: 'AssignmentTab',
               text: getTranslation('assignments'),
-              textColor: tabIconDefaultColor,
-              selectedTextColor: tabIconSelectedColor,
               icon: icons.today,
-              iconColor: tabIconDefaultColor,
-              selectedIconColor: tabIconSelectedColor,
+              ...tabColorSettings,
             },
           },
         },
@@ -112,17 +101,11 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
-            layout: {
-              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-            },
             bottomTab: {
               testID: 'CourseTab',
               text: getTranslation('courses'),
-              textColor: tabIconDefaultColor,
-              selectedTextColor: tabIconSelectedColor,
               icon: icons.apps,
-              iconColor: tabIconDefaultColor,
-              selectedIconColor: tabIconSelectedColor,
+              ...tabColorSettings,
             },
           },
         },
@@ -138,17 +121,11 @@ export const getNavigationRoot = async () => {
             },
           ],
           options: {
-            layout: {
-              backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-            },
             bottomTab: {
               testID: 'SettingTab',
               text: getTranslation('settings'),
-              textColor: tabIconDefaultColor,
-              selectedTextColor: tabIconSelectedColor,
               icon: icons.settings,
-              iconColor: tabIconDefaultColor,
-              selectedIconColor: tabIconSelectedColor,
+              ...tabColorSettings,
             },
           },
         },
@@ -170,21 +147,9 @@ export const getNavigationRoot = async () => {
                   {
                     component: {
                       name: 'empty',
-                      options: {
-                        layout: {
-                          backgroundColor:
-                            initialMode === 'dark' ? 'black' : 'white',
-                        },
-                      },
                     },
                   },
                 ],
-              },
-            },
-            options: {
-              splitView: {
-                displayMode: 'visible',
-                primaryEdge: 'leading',
               },
             },
           },

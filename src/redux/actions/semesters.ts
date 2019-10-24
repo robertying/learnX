@@ -11,7 +11,7 @@ export const getAllSemestersAction = createAsyncAction(
   GET_ALL_SEMESTERS_REQUEST,
   GET_ALL_SEMESTERS_SUCCESS,
   GET_ALL_SEMESTERS_FAILURE,
-)<undefined, readonly string[], Error>();
+)<undefined, string[], Error>();
 
 export function getAllSemesters(): IThunkResult {
   return async dispatch => {

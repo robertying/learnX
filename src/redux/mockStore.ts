@@ -1,4 +1,4 @@
-import {dummyPassword, dummyUsername} from '../helpers/dummy';
+import {dummyPassword, dummyUsername} from '../constants/Dummy';
 import {IPersistAppState} from './types/state';
 
 const mockStore: IPersistAppState = {

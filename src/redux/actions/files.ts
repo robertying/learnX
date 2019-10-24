@@ -20,11 +20,7 @@ export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
   GET_FILES_FOR_COURSE_FAILURE,
-)<
-  undefined,
-  {readonly courseId: string; readonly files: ReadonlyArray<IFile>},
-  Error
->();
+)<undefined, {courseId: string; files: IFile[]}, Error>();
 
 export function getFilesForCourse(courseId: string): IThunkResult {
   return async dispatch => {
@@ -47,12 +43,9 @@ export const getAllFilesForCoursesAction = createAsyncAction(
   GET_ALL_FILES_FOR_COURSES_REQUEST,
   GET_ALL_FILES_FOR_COURSES_SUCCESS,
   GET_ALL_FILES_FOR_COURSES_FAILURE,
-)<undefined, ReadonlyArray<IFile>, Error>();
+)<undefined, IFile[], Error>();
 
-export function getAllFilesForCourses(
-  // tslint:disable-next-line: readonly-array
-  courseIds: string[],
-): IThunkResult {
+export function getAllFilesForCourses(courseIds: string[]): IThunkResult {
   return async dispatch => {
     dispatch(getAllFilesForCoursesAction.request());
 
@@ -64,7 +57,7 @@ export function getAllFilesForCourses(
     if (results) {
       const files = Object.keys(results)
         .map(courseId => {
-          const filesForCourse = results[courseId] as ReadonlyArray<File>;
+          const filesForCourse = results[courseId] as File[];
           return filesForCourse.map(file => ({...file, courseId}));
         })
         .reduce((a, b) => a.concat(b));

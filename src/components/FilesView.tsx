@@ -12,17 +12,13 @@ import FileCard from './FileCard';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IFilesViewProps {
-  readonly files: ReadonlyArray<IFile>;
-  readonly isFetching: boolean;
-  readonly onFileCardPress: (
-    filename: string,
-    url: string,
-    ext: string,
-  ) => void;
-  readonly onRefresh?: () => void;
+  files: IFile[];
+  isFetching: boolean;
+  onFileCardPress: (file: IFile) => void;
+  onRefresh?: () => void;
 }
 
-const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
+const FilesView: React.FC<IFilesViewProps> = props => {
   const {files, onFileCardPress, isFetching, onRefresh} = props;
 
   const renderListItem: ListRenderItem<IFile> = ({item}) => {
@@ -35,10 +31,7 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
         date={item.uploadTime}
         description={item.description}
         markedImportant={item.markedImportant}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() =>
-          onFileCardPress(item.title, item.downloadUrl, item.fileType)
-        }
+        onPress={() => onFileCardPress(item)}
       />
     );
   };
@@ -59,7 +52,7 @@ const FilesView: React.FunctionComponent<IFilesViewProps> = props => {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            colors={[Colors.theme]}
+            colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
           />
         }
       />

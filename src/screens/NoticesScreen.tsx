@@ -1,12 +1,10 @@
-import {FuseOptions} from 'fuse.js';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {
   Platform,
   RefreshControl,
   SafeAreaView,
   FlatList,
-  Dimensions,
-  StatusBar,
+  SegmentedControlIOS,
   AppState,
   AppStateStatus,
 } from 'react-native';
@@ -15,6 +13,7 @@ import {
   Provider as PaperProvider,
   Searchbar,
   DefaultTheme,
+  DarkTheme,
 } from 'react-native-paper';
 import {connect} from 'react-redux';
 import EmptyList from '../components/EmptyList';
@@ -23,48 +22,44 @@ import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
-import {showToast} from '../helpers/toast';
 import useSearchBar from '../hooks/useSearchBar';
 import {login} from '../redux/actions/auth';
-import {getCoursesForSemester} from '../redux/actions/courses';
 import {
   getAllNoticesForCourses,
   pinNotice,
   unpinNotice,
+  favNotice,
+  unfavNotice,
 } from '../redux/actions/notices';
-import {
-  ICourse,
-  INotice,
-  IPersistAppState,
-  withCourseInfo,
-} from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {initialMode, useDarkMode} from 'react-native-dark-mode';
+import {ICourse, INotice, IPersistAppState} from '../redux/types/state';
+import {INavigationScreen, WithCourseInfo} from '../types';
+import {useDarkMode} from 'react-native-dark-mode';
 import {setCompactWidth} from '../redux/actions/settings';
 import {resetLoading} from '../redux/actions/root';
+import {getFuseOptions} from '../helpers/search';
+import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
+import {INoticeDetailScreenProps} from './NoticeDetailScreen';
 
 interface INoticesScreenStateProps {
-  readonly autoRefreshing: boolean;
-  readonly loggedIn: boolean;
-  readonly username: string;
-  readonly password: string;
-  readonly semesterId: string;
-  readonly courses: ReadonlyArray<ICourse>;
-  readonly notices: ReadonlyArray<INotice>;
-  readonly isFetching: boolean;
-  readonly pinnedNotices: readonly string[];
-  readonly hidden: readonly string[];
-  readonly hasUpdate: boolean;
+  autoRefreshing: boolean;
+  loggedIn: boolean;
+  hasUpdate: boolean;
   compactWidth: boolean;
+  courses: ICourse[];
+  hiddenCourseIds: string[];
+  isFetching: boolean;
+  notices: INotice[];
+  pinnedNoticeIds: string[];
+  favNoticeIds: string[];
 }
 
 interface INoticesScreenDispatchProps {
-  readonly getCoursesForSemester: (semesterId: string) => void;
-  // tslint:disable-next-line: readonly-array
-  readonly getAllNoticesForCourses: (courseIds: string[]) => void;
-  readonly pinNotice: (noticeId: string) => void;
-  readonly unpinNotice: (noticeId: string) => void;
-  readonly login: (username: string, password: string) => void;
+  getAllNoticesForCourses: (courseIds: string[]) => void;
+  pinNotice: (noticeId: string) => void;
+  unpinNotice: (noticeId: string) => void;
+  favNotice: (noticeId: string) => void;
+  unfavNotice: (noticeId: string) => void;
+  login: (username?: string | undefined, password?: string | undefined) => void;
   setCompactWidth: (compactWidth: boolean) => void;
   resetLoading: () => void;
 }
@@ -75,25 +70,28 @@ type INoticesScreenProps = INoticesScreenStateProps &
 const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const {
     loggedIn,
-    semesterId,
     courses,
-    notices: rawNotices,
-    getCoursesForSemester,
+    notices,
     getAllNoticesForCourses,
     autoRefreshing,
-    pinnedNotices,
+    pinnedNoticeIds,
     pinNotice,
     unpinNotice,
-    hidden,
-    username,
-    password,
+    favNotice,
+    unfavNotice,
+    favNoticeIds,
+    hiddenCourseIds,
     isFetching,
-    login,
     hasUpdate,
-    setCompactWidth,
     compactWidth,
     resetLoading,
   } = props;
+
+  /**
+   * App scope stuff
+   */
+
+  const isDarkMode = useDarkMode();
 
   useEffect(() => {
     if (hasUpdate && Platform.OS === 'android') {
@@ -105,157 +103,166 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         },
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hasUpdate]);
+
+  // useEffect(() => {
+  //   const window = Dimensions.get('window');
+  //   const screen = Dimensions.get('screen');
+  //   if (
+  //     window.width < screen.width &&
+  //     !(screen.height < screen.width && window.width > screen.width * 0.4)
+  //   ) {
+  //     setCompactWidth(true);
+  //   }
+  // }, [setCompactWidth]);
+
+  // useEffect(() => {
+  //   const listener = ({window, screen}: any) => {
+  //     if (
+  //       window.width < screen.width &&
+  //       !(
+  //         screen.height < screen.width &&
+  //         (DeviceInfo.isIPad12_9()
+  //           ? window.width > screen.width * 0.4
+  //           : window.width > screen.width / 2)
+  //       )
+  //     ) {
+  //       setCompactWidth(true);
+  //     } else {
+  //       setCompactWidth(false);
+  //     }
+  //   };
+  //   Dimensions.addEventListener('change', listener);
+
+  //   return () => Dimensions.removeEventListener('change', listener);
+  // }, [setCompactWidth]);
+
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  useEffect(() => {
+    const listener = (nextAppState: AppStateStatus) => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        resetLoading();
+      }
+      setAppState(nextAppState);
+    };
+    AppState.addEventListener('change', listener);
+    return () => AppState.removeEventListener('change', listener);
+  });
 
   /**
    * Prepare data
    */
 
-  const courseIds = courses.map(course => course.id);
-  const courseNames = courses.reduce(
-    (a, b) => ({
-      ...a,
-      ...{
-        [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+  const courseNames = useMemo(
+    () =>
+      courses.reduce(
+        (a, b) => ({
+          ...a,
+          ...{
+            [b.id]: {courseName: b.name, courseTeacherName: b.teacherName},
+          },
+        }),
+        {},
+      ) as {
+        [id: string]: {
+          courseName: string;
+          courseTeacherName: string;
+        };
       },
-    }),
-    {},
-  ) as {
-    readonly [id: string]: {
-      readonly courseName: string;
-      readonly courseTeacherName: string;
-    };
-  };
+    [courses],
+  );
 
-  const notices = [...rawNotices]
-    .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix())
-    .map(notice => ({
-      ...notice,
-      ...courseNames[notice.courseId],
-    }));
+  const sortedNotices = useMemo(
+    () =>
+      notices
+        .sort(
+          (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
+        )
+        .map(notice => ({
+          ...notice,
+          ...courseNames[notice.courseId],
+        })),
+    [notices, courseNames],
+  );
+
+  const newNotices = useMemo(() => {
+    const newNoticesOnly = sortedNotices.filter(
+      i =>
+        !favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...newNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...newNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+    ];
+  }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+
+  const favNotices = useMemo(() => {
+    const favNoticesOnly = sortedNotices.filter(
+      i => favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...favNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...favNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+    ];
+  }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+
+  const hiddenNotices = useMemo(() => {
+    const hiddenNoticesOnly = sortedNotices.filter(i =>
+      hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...hiddenNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...hiddenNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+    ];
+  }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+
+  const [currentDisplayNotices, setCurrentDisplayNotices] = useState(
+    newNotices,
+  );
 
   /**
    * Fetch and handle error
    */
 
-  useEffect(() => {
-    if (courses.length === 0 && loggedIn && semesterId) {
-      getCoursesForSemester(semesterId);
+  const invalidateAll = useCallback(() => {
+    if (loggedIn && courses.length !== 0) {
+      getAllNoticesForCourses(courses.map(i => i.id));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loggedIn, semesterId, courses.length]);
+  }, [courses, getAllNoticesForCourses, loggedIn]);
 
   useEffect(() => {
     if (autoRefreshing || notices.length === 0) {
       invalidateAll();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courses.length, loggedIn]);
-
-  const invalidateAll = () => {
-    if (courseIds.length !== 0) {
-      if (loggedIn) {
-        getAllNoticesForCourses(courseIds);
-      } else {
-        showToast(getTranslation('refreshFailure'), 1500);
-        login(username, password);
-      }
-    }
-  };
+  }, [autoRefreshing, invalidateAll, notices.length]);
 
   /**
    * Render cards
    */
 
-  const onNoticeCardPress = (noticeId: string) => {
-    const notice = notices.find(item => item.id === noticeId);
+  const onNoticeCardPress = (notice: WithCourseInfo<INotice>) => {
+    const name = 'notices.detail';
+    const passProps = {
+      title: notice.title,
+      author: notice.publisher,
+      content: notice.content,
+      publishTime: notice.publishTime,
+      attachmentName: notice.attachmentName,
+      attachmentUrl: notice.attachmentUrl,
+      courseName: notice.courseName,
+    };
+    const title = notice.courseName;
 
-    if (notice) {
-      if (DeviceInfo.isIPad() && !compactWidth) {
-        Navigation.setStackRoot('detail.root', [
-          {
-            component: {
-              name: 'notices.detail',
-              passProps: {
-                title: notice.title,
-                author: notice.publisher,
-                content: notice.content,
-                publishTime: notice.publishTime,
-                attachmentName: notice.attachmentName,
-                attachmentUrl: notice.attachmentUrl,
-                courseName: notice.courseName,
-              },
-              options: {
-                topBar: {
-                  title: {
-                    component: {
-                      name: 'text',
-                      passProps: {
-                        children: notice.courseName,
-                        style: {
-                          fontSize: 17,
-                          fontWeight: '500',
-                          color: isDarkMode ? 'white' : 'black',
-                        },
-                      },
-                    },
-                  },
-                },
-                animations: {
-                  setStackRoot: {
-                    enabled: false,
-                  },
-                } as any,
-              },
-            },
-          },
-        ]);
-      } else {
-        Navigation.push(props.componentId, {
-          component: {
-            name: 'notices.detail',
-            passProps: {
-              title: notice.title,
-              author: notice.publisher,
-              content: notice.content,
-              publishTime: notice.publishTime,
-              attachmentName: notice.attachmentName,
-              attachmentUrl: notice.attachmentUrl,
-              courseName: notice.courseName,
-            },
-            options: {
-              bottomTabs: {
-                backgroundColor: isDarkMode ? 'black' : 'white',
-              },
-              topBar: {
-                background: {
-                  color: isDarkMode ? 'black' : 'white',
-                },
-                backButton:
-                  Platform.OS === 'android'
-                    ? {
-                        color: isDarkMode ? 'white' : 'black',
-                      }
-                    : undefined,
-                title: {
-                  component: {
-                    name: 'text',
-                    passProps: {
-                      children: notice.courseName,
-                      style: {
-                        fontSize: 17,
-                        fontWeight: '500',
-                        color: isDarkMode ? 'white' : 'black',
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-      }
+    if (DeviceInfo.isIPad() && !compactWidth) {
+      setDetailView<INoticeDetailScreenProps>(name, passProps, title);
+    } else {
+      pushTo<INoticeDetailScreenProps>(
+        name,
+        props.componentId,
+        passProps,
+        title,
+      );
     }
   };
 
@@ -267,7 +274,15 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   };
 
-  const renderListItem = ({item}: {readonly item: withCourseInfo<INotice>}) => (
+  const onFav = (fav: boolean, noticeId: string) => {
+    if (fav) {
+      favNotice(noticeId);
+    } else {
+      unfavNotice(noticeId);
+    }
+  };
+
+  const renderListItem = ({item}: {item: WithCourseInfo<INotice>}) => (
     <NoticeCard
       title={item.title}
       author={item.publisher}
@@ -278,13 +293,13 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       courseName={item.courseName}
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
-      pinned={pinnedNotices.includes(item.id)}
-      // tslint:disable: jsx-no-lambda
-      onPinned={pin => onPinned!(pin, item.id)}
+      pinned={pinnedNoticeIds.includes(item.id)}
+      onPinned={pin => onPinned(pin, item.id)}
+      fav={favNoticeIds.includes(item.id)}
+      onFav={fav => onFav(fav, item.id)}
       onPress={() => {
-        onNoticeCardPress(item.id);
+        onNoticeCardPress(item);
       }}
-      // tslint:enable: jsx-no-lambda
     />
   );
 
@@ -301,104 +316,44 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    */
 
   const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
-    withCourseInfo<INotice>
-  >(notices, pinnedNotices, hidden, fuseOptions);
+    WithCourseInfo<INotice>
+  >(currentDisplayNotices, fuseOptions);
 
-  const isDarkMode = useDarkMode();
+  const [segment, setSegment] = useState('new');
 
-  useEffect(() => {
-    const tabIconDefaultColor = isDarkMode ? Colors.grayDark : Colors.grayLight;
-    const tabIconSelectedColor = isDarkMode ? Colors.purpleDark : Colors.theme;
-
-    Navigation.mergeOptions(props.componentId, {
-      layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      bottomTabs: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-      },
-      topBar: {
-        background: {
-          color: isDarkMode ? 'black' : 'white',
-        },
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('notices'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-      bottomTab: {
-        textColor: tabIconDefaultColor,
-        selectedTextColor: tabIconSelectedColor,
-        iconColor: tabIconDefaultColor,
-        selectedIconColor: tabIconSelectedColor,
-      },
-    });
-  }, [isDarkMode, props.componentId]);
-
-  useEffect(() => {
-    const window = Dimensions.get('window');
-    const screen = Dimensions.get('screen');
-    if (
-      window.width < screen.width &&
-      !(screen.height < screen.width && window.width > screen.width * 0.4)
-    ) {
-      setCompactWidth(true);
+  const handleSegmentChange = (value: string) => {
+    if (value === getTranslation('new')) {
+      setSegment('new');
+      setCurrentDisplayNotices(newNotices);
+    } else if (value === getTranslation('favorite')) {
+      setSegment('favorite');
+      setCurrentDisplayNotices(favNotices);
+    } else {
+      setSegment('hidden');
+      setCurrentDisplayNotices(hiddenNotices);
     }
-  }, [setCompactWidth]);
+  };
 
   useEffect(() => {
-    const listener = ({window, screen}: any) => {
-      if (
-        window.width < screen.width &&
-        !(
-          screen.height < screen.width &&
-          (DeviceInfo.isIPad12_9()
-            ? window.width > screen.width * 0.4
-            : window.width > screen.width / 2)
-        )
-      ) {
-        setCompactWidth(true);
-      } else {
-        setCompactWidth(false);
-      }
-    };
-    Dimensions.addEventListener('change', listener);
+    if (segment === 'new') {
+      setCurrentDisplayNotices(newNotices);
+    }
+  }, [newNotices, segment]);
 
-    return () => Dimensions.removeEventListener('change', listener);
-  }, [compactWidth, setCompactWidth]);
-
-  const [appState, setAppState] = useState(AppState.currentState);
   useEffect(() => {
-    const listener = (nextAppState: AppStateStatus) => {
-      if (appState.match(/inactive|background/) && nextAppState === 'active') {
-        resetLoading();
-      }
-      setAppState(nextAppState);
-    };
-    AppState.addEventListener('change', listener);
-    return () => AppState.removeEventListener('change', listener);
-  });
+    if (segment === 'favorite') {
+      setCurrentDisplayNotices(favNotices);
+    }
+  }, [favNotices, segment]);
+
+  useEffect(() => {
+    if (segment === 'hidden') {
+      setCurrentDisplayNotices(hiddenNotices);
+    }
+  }, [hiddenNotices, segment]);
 
   return (
-    <PaperProvider
-      theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          text: isDarkMode ? 'white' : 'black',
-          placeholder: isDarkMode ? Colors.grayDark : Colors.grayLight,
-        },
-      }}>
-      <StatusBar barStyle="default" />
+    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
       <SafeAreaView
         testID="NoticesScreen"
         style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
@@ -411,7 +366,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
             clearButtonMode="always"
             placeholder={getTranslation('searchNotices')}
             onChangeText={setSearchBarText}
-            value={searchBarText}
+            value={searchBarText || ''}
           />
         )}
         <FlatList
@@ -420,11 +375,24 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
-          // tslint:disable-next-line: jsx-no-lambda
           keyExtractor={item => item.id}
+          ListHeaderComponent={
+            Platform.OS === 'ios' ? (
+              <SegmentedControlIOS
+                style={{margin: 20, marginTop: 10, marginBottom: 10}}
+                values={[
+                  getTranslation('new'),
+                  getTranslation('favorite'),
+                  getTranslation('hidden'),
+                ]}
+                selectedIndex={0}
+                onValueChange={handleSegmentChange}
+              />
+            ) : null
+          }
           refreshControl={
             <RefreshControl
-              colors={[Colors.theme]}
+              colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
               onRefresh={onRefresh}
               refreshing={isFetching}
             />
@@ -435,80 +403,41 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   );
 };
 
-const fuseOptions: FuseOptions<withCourseInfo<INotice>> = {
-  shouldSort: true,
-  threshold: 0.6,
-  location: 0,
-  distance: 100,
-  maxPatternLength: 32,
-  minMatchCharLength: 1,
-  keys: ['title', 'content', 'attachmentName'],
-};
+const fuseOptions = getFuseOptions<INotice>([
+  'title',
+  'content',
+  'attachmentName',
+]);
 
-// tslint:disable-next-line: no-object-mutation
-NoticesScreen.options = {
-  layout: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  bottomTabs: {
-    backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-  },
-  topBar: {
-    background: {
-      color: initialMode === 'dark' ? 'black' : 'white',
-    },
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('notices'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-    largeTitle: {
-      visible: false,
-    },
-    searchBar: true,
-    searchBarHiddenWhenScrolling: true,
-    searchBarPlaceholder: getTranslation('searchNotices'),
-    hideNavBarOnFocusSearchBar: true,
-    elevation: 0,
-  },
-};
+NoticesScreen.options = getScreenOptions(
+  getTranslation('notices'),
+  getTranslation('searchNotices'),
+);
 
 function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
   return {
     autoRefreshing: state.settings.autoRefreshing,
     loggedIn: state.auth.loggedIn,
-    username: state.auth.username || '',
-    password: state.auth.password || '',
-    semesterId: state.currentSemester,
-    courses: state.courses.items,
+    courses: state.courses.items || [],
     isFetching: state.notices.isFetching,
-    notices: state.notices.items,
-    pinnedNotices: state.notices.pinned || [],
-    hidden: state.courses.hidden || [],
+    notices: state.notices.items || [],
+    favNoticeIds: state.notices.favorites || [],
+    pinnedNoticeIds: state.notices.pinned || [],
+    hiddenCourseIds: state.courses.hidden || [],
     hasUpdate: state.settings.hasUpdate,
     compactWidth: state.settings.compactWidth,
   };
 }
 
-// tslint:disable: readonly-array
 const mapDispatchToProps: INoticesScreenDispatchProps = {
-  getCoursesForSemester: (semesterId: string) =>
-    getCoursesForSemester(semesterId),
-  getAllNoticesForCourses: (courseIds: string[]) =>
-    getAllNoticesForCourses(courseIds),
-  pinNotice: (noticeId: string) => pinNotice(noticeId),
-  unpinNotice: (noticeId: string) => unpinNotice(noticeId),
-  login: (username: string, password: string) => login(username, password),
+  getAllNoticesForCourses,
+  pinNotice,
+  unpinNotice,
+  login,
   setCompactWidth,
   resetLoading,
+  favNotice,
+  unfavNotice,
 };
 
 export default connect(

@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {Linking, SafeAreaView, ScrollView} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
@@ -6,37 +6,17 @@ import Text from '../components/Text';
 import TextButton from '../components/TextButton';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
-import {Navigation} from 'react-native-navigation';
+import {INavigationScreen} from '../types';
+import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
+import {getScreenOptions} from '../helpers/navigation';
 
-const AboutScreen: INavigationScreen<{}> = props => {
+const AboutScreen: INavigationScreen<{}> = () => {
   const onGitHubLinkPress = () => {
     Linking.openURL('https://github.com/robertying/learnX');
   };
 
   const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      topBar: {
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('about'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-    });
-  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView
@@ -85,23 +65,6 @@ const AboutScreen: INavigationScreen<{}> = props => {
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-AboutScreen.options = {
-  topBar: {
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('about'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-  },
-};
+AboutScreen.options = getScreenOptions(getTranslation('about'));
 
 export default AboutScreen;

@@ -10,36 +10,34 @@ import Text from './Text';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface ICourseCardProps extends IInteractablePreviewWrapperProps {
-  readonly courseName: string;
-  readonly courseTeacherName: string;
-  readonly noticesCount: number;
-  readonly filesCount: number;
-  readonly assignmentsCount: number;
-  readonly semester: string;
+  courseName: string;
+  courseTeacherName: string;
+  noticesCount: number;
+  filesCount: number;
+  assignmentsCount: number;
+  semester: string;
 }
 
 const CourseCard: React.FC<ICourseCardProps> = props => {
   const {
     onPress,
-    onPressIn,
     courseName,
     courseTeacherName,
     noticesCount,
     filesCount,
     assignmentsCount,
     semester,
-    pinned,
-    onPinned,
+    hidden,
+    onHide,
   } = props;
 
   const isDarkMode = useDarkMode();
 
   return (
     <InteractablePreviewWrapper
-      pinned={pinned}
-      onPinned={onPinned}
+      hidden={hidden}
+      onHide={onHide}
       onPress={onPress}
-      onPressIn={onPressIn}
       dragEnabled={true}>
       <View
         style={{
@@ -47,8 +45,6 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
-          borderLeftColor: Colors.theme,
-          borderLeftWidth: pinned ? 10 : 0,
         }}>
         <Text
           style={[

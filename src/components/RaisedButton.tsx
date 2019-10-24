@@ -10,9 +10,9 @@ import Colors from '../constants/Colors';
 import Text from './Text';
 
 export type IRaisedButtonProps = TouchableOpacityProps & {
-  readonly style?: ViewProps['style'];
-  readonly textStyle?: TextProps['style'];
-  readonly children: string;
+  style?: ViewProps['style'];
+  textStyle?: TextProps['style'];
+  children: string;
 };
 
 const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {

@@ -1,79 +1,45 @@
 import Fuse, {FuseOptions} from 'fuse.js';
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback} from 'react';
 import {Navigation} from 'react-native-navigation';
-import {
-  IAssignment,
-  IFile,
-  INotice,
-  withCourseInfo,
-} from '../redux/types/state';
-
-type IEntity =
-  | withCourseInfo<INotice>
-  | withCourseInfo<IFile>
-  | withCourseInfo<IAssignment>;
-
-function filter<T extends IEntity>(
-  entities: ReadonlyArray<T>,
-  pinned: readonly string[],
-  hidden: readonly string[],
-): ReadonlyArray<T> {
-  return [
-    ...entities.filter(item => pinned.includes(item.id)),
-    ...entities
-      .filter(item => !hidden.includes(item.courseId))
-      .filter(item => !pinned.includes(item.id)),
-  ];
-}
+import {IEntity} from '../types';
 
 function useAndroidSearchBar<T extends IEntity>(
-  entities: ReadonlyArray<T>,
-  pinned: readonly string[],
-  hidden: readonly string[],
+  entities: Array<T>,
   fuseOptions: FuseOptions<T>,
-): readonly [
-  string,
-  React.Dispatch<React.SetStateAction<string>>,
-  ReadonlyArray<T>,
-  boolean,
-] {
-  const [searchResults, setSearchResults] = useState(
-    filter<T>(entities, pinned, hidden),
-  );
-
-  useEffect(() => {
-    setSearchResults(filter<T>(entities, pinned, hidden));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entities.length, pinned.length, hidden.length]);
-
+): [string, React.Dispatch<React.SetStateAction<string>>, Array<T>, boolean] {
   const [searchBarText, setSearchBarText] = useState('');
+
+  const [searchResults, setSearchResults] = useState(entities);
 
   useEffect(() => {
     if (searchBarText) {
       const fuse = new Fuse(entities, fuseOptions);
       setSearchResults(fuse.search(searchBarText));
     } else {
-      setSearchResults(filter<T>(entities, pinned, hidden));
+      setSearchResults(entities);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchBarText]);
+  }, [entities, fuseOptions, searchBarText]);
 
   const [searchBarVisible, setSearchBarVisible] = useState(false);
 
-  useEffect(() => {
-    const listener = Navigation.events().registerNavigationButtonPressedListener(
-      ({buttonId}) => {
-        if (buttonId === 'search') {
-          if (searchBarVisible) {
-            setSearchBarText('');
-          }
-          setSearchBarVisible(!searchBarVisible);
+  const listener = useCallback(
+    ({buttonId}) => {
+      if (buttonId === 'search') {
+        if (searchBarVisible) {
+          setSearchBarText('');
         }
-      },
+        setSearchBarVisible(!searchBarVisible);
+      }
+    },
+    [searchBarVisible],
+  );
+
+  useEffect(() => {
+    const handle = Navigation.events().registerNavigationButtonPressedListener(
+      listener,
     );
-    return () => listener.remove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => handle.remove();
+  }, [listener]);
 
   return [searchBarText, setSearchBarText, searchResults, searchBarVisible];
 }

@@ -9,19 +9,19 @@ import {getCoursesForSemester} from '../redux/actions/courses';
 import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
-import {Navigation} from 'react-native-navigation';
+import {INavigationScreen} from '../types';
+import {useDarkMode} from 'react-native-dark-mode';
+import {getScreenOptions} from '../helpers/navigation';
 
 interface ISemestersSettingsScreenStateProps {
-  readonly semesters: readonly string[];
-  readonly currentSemester: string;
+  semesters: string[];
+  currentSemester: string;
 }
 
 interface ISemestersSettingsScreenDispatchProps {
-  readonly setCurrentSemester: (semesterId: string) => void;
-  readonly getCoursesForSemester: (semesterId: string) => void;
-  readonly getAllSemesters: () => void;
+  setCurrentSemester: (semesterId: string) => void;
+  getCoursesForSemester: (semesterId: string) => void;
+  getAllSemesters: () => void;
 }
 
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
@@ -40,19 +40,17 @@ const SemestersSettingsScreen: INavigationScreen<
 
   useEffect(() => {
     getAllSemesters();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getAllSemesters]);
 
   useEffect(() => {
     getCoursesForSemester(currentSemester);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSemester]);
+  }, [currentSemester, getCoursesForSemester]);
 
   const renderListItem: ListRenderItem<string> = ({item}) => {
     return (
       <SettingsListItem
         variant="none"
-        text={item as string}
+        text={item}
         icon={
           currentSemester === item ? (
             <Icon
@@ -62,10 +60,7 @@ const SemestersSettingsScreen: INavigationScreen<
             />
           ) : null
         }
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() => {
-          setCurrentSemester(item);
-        }}
+        onPress={() => setCurrentSemester(item)}
       />
     );
   };
@@ -73,26 +68,6 @@ const SemestersSettingsScreen: INavigationScreen<
   const keyExtractor = (item: any) => item as string;
 
   const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      topBar: {
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('changeSemester'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-    });
-  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView
@@ -102,9 +77,9 @@ const SemestersSettingsScreen: INavigationScreen<
       }}>
       <FlatList
         style={{
-          marginTop: 10,
           backgroundColor: isDarkMode ? 'black' : 'white',
         }}
+        contentContainerStyle={{marginTop: 10}}
         data={semesters}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
@@ -113,24 +88,9 @@ const SemestersSettingsScreen: INavigationScreen<
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-SemestersSettingsScreen.options = {
-  topBar: {
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('changeSemester'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-  },
-};
+SemestersSettingsScreen.options = getScreenOptions(
+  getTranslation('changeSemester'),
+);
 
 function mapStateToProps(
   state: IPersistAppState,

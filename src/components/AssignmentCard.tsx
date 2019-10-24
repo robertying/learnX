@@ -13,20 +13,19 @@ import Text from './Text';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface IAssignmentCardProps extends IInteractablePreviewWrapperProps {
-  readonly title: string;
-  readonly hasAttachment: boolean;
-  readonly submitted: boolean;
-  readonly graded: boolean;
-  readonly date: string;
-  readonly description?: string;
-  readonly courseName?: string;
-  readonly courseTeacherName?: string;
+  title: string;
+  hasAttachment: boolean;
+  submitted: boolean;
+  graded: boolean;
+  date: string;
+  description?: string;
+  courseName?: string;
+  courseTeacherName?: string;
 }
 
 const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
   const {
     onPress,
-    onPressIn,
     title,
     hasAttachment,
     date,
@@ -38,6 +37,8 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     submitted,
     graded,
     dragEnabled,
+    fav,
+    onFav,
   } = props;
 
   const isDarkMode = useDarkMode();
@@ -47,7 +48,8 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
       pinned={pinned}
       onPinned={onPinned}
       onPress={onPress}
-      onPressIn={onPressIn}
+      fav={fav}
+      onFav={onFav}
       dragEnabled={dragEnabled}>
       <View
         style={{
@@ -55,7 +57,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           padding: 15,
           paddingLeft: 20,
           paddingRight: 20,
-          borderLeftColor: Colors.theme,
+          borderLeftColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
           borderLeftWidth: pinned ? 10 : 0,
         }}>
         <View

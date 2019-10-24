@@ -3,7 +3,7 @@ import Share from 'react-native-share';
 import RNFetchBlob from 'rn-fetch-blob';
 import {getTranslation} from './i18n';
 
-export const supportedFileTypes: ReadonlyArray<string> = [
+export const supportedFileTypes = [
   'pdf',
   'doc',
   'docx',

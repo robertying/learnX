@@ -10,14 +10,17 @@ export const loginAction = createAsyncAction(
   LOGIN_FAILURE,
 )<undefined, IAuth, Error>();
 
-export function login(username: string, password: string): IThunkResult {
-  return async dispatch => {
+export function login(username?: string, password?: string): IThunkResult {
+  return async (dispatch, getState) => {
     dispatch(loginAction.request());
 
-    const success = await dataSource.login(username, password);
+    const auth = getState().auth;
+    const _username = username || auth.username || '';
+    const _password = password || auth.password || '';
+    const success = await dataSource.login(_username, _password);
 
     if (success) {
-      dispatch(loginAction.success({username, password}));
+      dispatch(loginAction.success({username: _username, password: _password}));
     } else {
       dispatch(loginAction.failure(new Error('login failed')));
     }

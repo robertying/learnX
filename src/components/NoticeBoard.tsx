@@ -1,41 +1,29 @@
-import React, {FunctionComponent} from 'react';
-import {
-  Platform,
-  ScrollView,
-  TouchableHighlightProps,
-  View,
-} from 'react-native';
-import {Navigation} from 'react-native-navigation';
+import React, {FunctionComponent, useMemo} from 'react';
+import {ScrollView, TouchableHighlightProps, View} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AutoHeightWebView from '../components/AutoHeightWebView';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
-import {getExtension, shareFile, stripExtension} from '../helpers/share';
-import {showToast} from '../helpers/toast';
+import {getExtension, stripExtension} from '../helpers/share';
 import Divider from './Divider';
 import Text from './Text';
 import TextButton from './TextButton';
 import {useDarkMode} from 'react-native-dark-mode';
+import {pushTo} from '../helpers/navigation';
+import {getWebViewTemplate} from '../helpers/html';
 
 export type INoticeBoardProps = TouchableHighlightProps & {
-  readonly title: string;
-  readonly author: string;
-  readonly content?: string;
-  readonly publishTime: string;
-  readonly attachmentName?: string;
-  readonly attachmentUrl?: string;
-  readonly componentId: string;
-  readonly onTransition?: () => void;
+  title: string;
+  author: string;
+  content?: string;
+  publishTime: string;
+  attachmentName?: string;
+  attachmentUrl?: string;
+  componentId: string;
+  beforeNavigation?: () => void;
 };
-
-declare const preval: any;
-
-const darkreader = preval`
-  const fs = require('fs')
-  module.exports = fs.readFileSync(require.resolve('../../node_modules/darkreader/darkreader.js'), 'utf8')
-`;
 
 const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
   const {
@@ -46,7 +34,7 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     attachmentUrl,
     publishTime,
     componentId,
-    onTransition,
+    beforeNavigation,
   } = props;
 
   const onAttachmentPress = async (
@@ -54,50 +42,27 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     url: string,
     ext: string,
   ) => {
-    if (onTransition) {
-      onTransition();
+    if (beforeNavigation) {
+      beforeNavigation();
     }
 
-    if (Platform.OS === 'ios') {
-      Navigation.push(componentId, {
-        component: {
-          name: 'webview',
-          passProps: {
-            filename: stripExtension(filename),
-            url,
-            ext,
-            pushed: true,
-          },
-          options: {
-            topBar: {
-              title: {
-                component: {
-                  name: 'navigation.title',
-                  passProps: {
-                    pushed: true,
-                    children: stripExtension(filename),
-                    style: {
-                      fontSize: 17,
-                      fontWeight: '500',
-                      color: isDarkMode ? 'white' : 'black',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-    } else {
-      showToast(getTranslation('downloadingFile'), 1000);
-      const success = await shareFile(url, stripExtension(filename), ext);
-      if (!success) {
-        showToast(getTranslation('downloadFileFailure'), 3000);
-      }
-    }
+    pushTo('webview', componentId, {
+      filename: stripExtension(filename),
+      url,
+      ext,
+    });
   };
 
   const isDarkMode = useDarkMode();
+
+  const html = useMemo(
+    () =>
+      getWebViewTemplate(
+        content || getTranslation('noNoticeContent'),
+        isDarkMode,
+      ),
+    [content, isDarkMode],
+  );
 
   return (
     <ScrollView
@@ -160,11 +125,12 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
               style={{marginRight: 5}}
               name="attachment"
               size={18}
-              color={isDarkMode ? Colors.purpleDark : Colors.theme}
+              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
             />
             <TextButton
-              textStyle={{color: isDarkMode ? Colors.purpleDark : Colors.theme}}
-              // tslint:disable-next-line: jsx-no-lambda
+              textStyle={{
+                color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+              }}
               onPress={() =>
                 onAttachmentPress(
                   attachmentName,
@@ -180,39 +146,8 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
         </>
       ) : null}
       <AutoHeightWebView
-        style={{backgroundColor: 'transparent'}}
-        originWhitelist={['*']}
         source={{
-          html: `
-          <head>
-            <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1.0" />
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                ${
-                  isDarkMode
-                    ? 'background-color: black;'
-                    : 'background-color: white;'
-                }
-              }
-            </style>
-            ${
-              isDarkMode
-                ? `
-                <script>
-              ${darkreader}
-            </script>
-            <script>
-              DarkReader.enable();
-            </script>
-            `
-                : ''
-            }
-          </head>
-          <body>
-            ${content || getTranslation('noNoticeContent')}
-          </body>`,
+          html,
         }}
       />
     </ScrollView>

@@ -12,10 +12,10 @@ import NoticeCard from './NoticeCard';
 import {useDarkMode} from 'react-native-dark-mode';
 
 export interface INoticesViewProps {
-  readonly notices: ReadonlyArray<INotice>;
-  readonly isFetching: boolean;
-  readonly onNoticeCardPress: (noticeId: string) => void;
-  readonly onRefresh?: () => void;
+  notices: INotice[];
+  isFetching: boolean;
+  onNoticeCardPress: (notice: INotice) => void;
+  onRefresh?: () => void;
 }
 
 const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
@@ -31,8 +31,7 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
         content={item.content}
         markedImportant={item.markedImportant}
         hasAttachment={item.attachmentName ? true : false}
-        // tslint:disable-next-line: jsx-no-lambda
-        onPress={() => onNoticeCardPress(item.id)}
+        onPress={() => onNoticeCardPress(item)}
       />
     );
   };
@@ -53,7 +52,7 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            colors={[Colors.theme]}
+            colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
           />
         }
       />

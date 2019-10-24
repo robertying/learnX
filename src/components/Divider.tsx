@@ -4,7 +4,7 @@ import {useDarkMode} from 'react-native-dark-mode';
 
 export type IDividerProps = ViewProps;
 
-const Divider: React.FunctionComponent<IDividerProps> = props => {
+const Divider: React.FC<IDividerProps> = props => {
   const isDarkMode = useDarkMode();
 
   return (

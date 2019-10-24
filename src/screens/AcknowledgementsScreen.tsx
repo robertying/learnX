@@ -4,11 +4,12 @@ import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
 import Text from '../components/Text';
 import {getTranslation} from '../helpers/i18n';
-import {INavigationScreen} from '../types/NavigationScreen';
-import {useDarkMode, initialMode} from 'react-native-dark-mode';
+import {INavigationScreen} from '../types';
+import {useDarkMode} from 'react-native-dark-mode';
 import {Navigation} from 'react-native-navigation';
+import {getScreenOptions} from '../helpers/navigation';
 
-const deps: ReadonlyArray<any> = [
+const deps = [
   ...Object.keys(packageConfig.dependencies),
   ...Object.keys(packageConfig.devDependencies),
 ];
@@ -88,23 +89,8 @@ const AcknowledgementsScreen: INavigationScreen<{}> = props => {
   );
 };
 
-// tslint:disable-next-line: no-object-mutation
-AcknowledgementsScreen.options = {
-  topBar: {
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('acknowledgements'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-  },
-};
+AcknowledgementsScreen.options = getScreenOptions(
+  getTranslation('acknowledgements'),
+);
 
 export default AcknowledgementsScreen;

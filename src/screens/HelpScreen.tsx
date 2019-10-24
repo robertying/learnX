@@ -1,11 +1,11 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useRef} from 'react';
 import {SafeAreaView, Linking} from 'react-native';
-import {initialMode, useDarkMode} from 'react-native-dark-mode';
+import {useDarkMode} from 'react-native-dark-mode';
 import {getTranslation, getLocale} from '../helpers/i18n';
-import {INavigationScreen} from '../types/NavigationScreen';
+import {INavigationScreen} from '../types';
 import MarkdownWebView from 'react-native-github-markdown';
-import {Navigation} from 'react-native-navigation';
 import WebView, {WebViewProps} from 'react-native-webview';
+import {getScreenOptions} from '../helpers/navigation';
 
 declare const preval: any;
 
@@ -19,7 +19,7 @@ const markdown = getLocale().startsWith('zh')
         module.exports = fs.readFileSync(require.resolve('../assets/HELP_EN.md'), 'utf8')
 `;
 
-const HelpScreen: INavigationScreen<{}> = props => {
+const HelpScreen: INavigationScreen<{}> = () => {
   const isDarkMode = useDarkMode();
 
   const webViewRef = useRef<WebView>(null);
@@ -32,26 +32,6 @@ const HelpScreen: INavigationScreen<{}> = props => {
       Linking.openURL(e.url);
     }
   };
-
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      topBar: {
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('help'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-    });
-  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView
@@ -71,22 +51,6 @@ const HelpScreen: INavigationScreen<{}> = props => {
   );
 };
 
-HelpScreen.options = {
-  topBar: {
-    title: {
-      component: {
-        name: 'text',
-        passProps: {
-          children: getTranslation('help'),
-          style: {
-            fontSize: 17,
-            fontWeight: '500',
-            color: initialMode === 'dark' ? 'white' : 'black',
-          },
-        },
-      },
-    },
-  },
-};
+HelpScreen.options = getScreenOptions(getTranslation('help'));
 
 export default HelpScreen;
