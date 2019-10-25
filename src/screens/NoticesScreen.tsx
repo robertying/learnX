@@ -428,7 +428,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
 
     scheduleNotification(
-      reminderInfo.courseName,
+      `${getTranslation('reminder')}：${reminderInfo.courseName}`,
       `${reminderInfo.title}\n${removeTags(
         reminderInfo.content || getTranslation('noNoticeContent'),
       )}`,

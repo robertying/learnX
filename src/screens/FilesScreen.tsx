@@ -331,7 +331,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
 
     scheduleNotification(
-      reminderInfo.courseName,
+      `${getTranslation('reminder')}：${reminderInfo.courseName}`,
       `${reminderInfo.title}\n${removeTags(
         reminderInfo.description || getTranslation('noFileDescription'),
       )}`,
