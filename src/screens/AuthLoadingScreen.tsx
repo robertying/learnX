@@ -8,7 +8,6 @@ import {getTranslation} from '../helpers/i18n';
 import SnackBar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {getNavigationRoot} from '../navigation/navigationRoot';
-import {login} from '../redux/actions/auth';
 import {setUpdate} from '../redux/actions/settings';
 import {IAuthState, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
@@ -22,7 +21,6 @@ interface IAuthLoadingScreenStateProps {
 
 interface IAuthLoadingScreenDispatchProps {
   setUpdate: (hasUpdate: boolean) => void;
-  login: (username: string, password: string) => void;
   resetLoading: () => void;
 }
 
@@ -30,14 +28,17 @@ type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
   IAuthLoadingScreenDispatchProps;
 
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
-  const {rehydrated, auth, setUpdate, login, resetLoading} = props;
+  const {rehydrated, auth, setUpdate, resetLoading} = props;
 
   useEffect(() => {
     if (rehydrated) {
       resetLoading();
 
       if (auth && auth.username && auth.password) {
-        login(auth.username, auth.password);
+        (async () => {
+          const navigationRoot = await getNavigationRoot();
+          Navigation.setRoot(navigationRoot);
+        })();
       } else {
         Navigation.showModal({
           component: {
@@ -56,26 +57,6 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rehydrated]);
-
-  useEffect(() => {
-    (async () => {
-      if (auth.loggedIn) {
-        const navigationRoot = await getNavigationRoot();
-        Navigation.setRoot(navigationRoot);
-      }
-    })();
-  }, [auth.loggedIn]);
-
-  useEffect(() => {
-    if (auth.error) {
-      Navigation.showModal({
-        component: {
-          id: 'login',
-          name: 'login',
-        },
-      });
-    }
-  }, [auth.error]);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -108,7 +89,6 @@ function mapStateToProps(
 }
 
 const mapDispatchToProps: IAuthLoadingScreenDispatchProps = {
-  login,
   setUpdate,
   resetLoading,
 };

@@ -23,7 +23,7 @@ export default {
   checkUpdate: 'Check for update',
   foundNewVersion: 'New version found',
   pleaseUpdate:
-    'New version found. Please go to Settings to download the update',
+    'New version found. Please go to Settings to download the update.',
   update: 'Update',
   noUpdate: 'No update available',
   clearFileCache: 'Clear File Cache',
@@ -61,4 +61,7 @@ export default {
   goToSettings: 'Go to Settings',
   reminder: 'Reminder',
   reminderSet: 'Reminder set successfully',
+  loggingIn: 'Logging you in...',
+  offline: 'You are now offline. Tap here to re-login.',
+  offlineLoginError: 'Login failed. Tap here to try again.',
 };
