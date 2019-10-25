@@ -119,6 +119,8 @@ const CourseDetailScreen: INavigationScreen<
       }
   >({type: 'Notice', data: undefined, visible: false});
 
+  const isDarkMode = useDarkMode();
+
   const onNoticeCardPress = useCallback((notice: INotice) => {
     setCurrentModal({type: 'Notice', data: notice, visible: true});
   }, []);
@@ -140,9 +142,10 @@ const CourseDetailScreen: INavigationScreen<
         passProps,
         title,
         true,
+        isDarkMode,
       );
     },
-    [props.componentId],
+    [isDarkMode, props.componentId],
   );
 
   const onAssignmentCardPress = useCallback((assignment: IAssignment) => {
@@ -196,8 +199,6 @@ const CourseDetailScreen: INavigationScreen<
       onAssignmentCardPress,
     ],
   );
-
-  const isDarkMode = useDarkMode();
 
   const renderLabel = useCallback(
     ({

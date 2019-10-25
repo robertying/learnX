@@ -260,6 +260,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         props.componentId,
         passProps,
         title,
+        false,
+        isDarkMode,
       );
     }
   };

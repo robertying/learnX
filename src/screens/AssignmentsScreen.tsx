@@ -206,6 +206,8 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
         props.componentId,
         passProps,
         title,
+        false,
+        isDarkMode,
       );
     }
   };

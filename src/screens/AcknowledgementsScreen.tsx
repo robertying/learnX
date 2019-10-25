@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import {SafeAreaView, ScrollView} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
@@ -6,7 +6,6 @@ import Text from '../components/Text';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
-import {Navigation} from 'react-native-navigation';
 import {getScreenOptions} from '../helpers/navigation';
 
 const deps = [
@@ -14,34 +13,13 @@ const deps = [
   ...Object.keys(packageConfig.devDependencies),
 ];
 
-const AcknowledgementsScreen: INavigationScreen<{}> = props => {
+const AcknowledgementsScreen: INavigationScreen<{}> = () => {
   const isDarkMode = useDarkMode();
-
-  useEffect(() => {
-    Navigation.mergeOptions(props.componentId, {
-      topBar: {
-        title: {
-          component: {
-            name: 'text',
-            passProps: {
-              children: getTranslation('acknowledgements'),
-              style: {
-                fontSize: 17,
-                fontWeight: '500',
-                color: isDarkMode ? 'white' : 'black',
-              },
-            },
-          },
-        },
-      },
-    });
-  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView
       style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
       <ScrollView
-        style={{flex: 1}}
         contentContainerStyle={{
           alignItems: 'center',
           paddingTop: 30,

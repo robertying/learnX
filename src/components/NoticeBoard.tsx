@@ -57,6 +57,7 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
       },
       stripedFilename,
       true,
+      isDarkMode,
     );
   };
 

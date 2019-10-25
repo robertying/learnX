@@ -155,6 +155,8 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         props.componentId,
         passProps,
         title,
+        false,
+        isDarkMode,
       );
     }
   };
