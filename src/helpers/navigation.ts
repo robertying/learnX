@@ -6,12 +6,16 @@ export function pushTo<T>(
   passProps?: T,
   title?: string,
   hideBackTitle?: boolean,
+  isDarkMode?: boolean,
 ) {
   Navigation.push(componentId, {
     component: {
       name,
       passProps,
       options: {
+        layout: {
+          backgroundColor: isDarkMode ? 'black' : 'white',
+        },
         topBar: {
           title: {
             text: title,

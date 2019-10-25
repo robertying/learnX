@@ -25,7 +25,6 @@ const AboutScreen: INavigationScreen<{}> = () => {
         backgroundColor: isDarkMode ? 'black' : 'white',
       }}>
       <ScrollView
-        style={{flex: 1}}
         contentContainerStyle={{
           alignItems: 'center',
           paddingTop: 30,
@@ -36,7 +35,6 @@ const AboutScreen: INavigationScreen<{}> = () => {
             alignSelf: 'center',
             marginBottom: 20,
             fontSize: iOSUIKit.bodyObject.fontSize,
-            color: isDarkMode ? 'white' : 'black',
           }}>
           {`v${packageConfig.version} (${DeviceInfo.buildNo()})`}
         </Text>

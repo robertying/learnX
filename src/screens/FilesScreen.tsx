@@ -170,7 +170,14 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     if (DeviceInfo.isIPad() && !compactWidth) {
       setDetailView<IWebViewScreenProps>(name, passProps, title);
     } else {
-      pushTo<IWebViewScreenProps>(name, props.componentId, passProps, title);
+      pushTo<IWebViewScreenProps>(
+        name,
+        props.componentId,
+        passProps,
+        title,
+        false,
+        isDarkMode,
+      );
     }
   };
 

@@ -64,6 +64,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
       },
       stripedFilename,
       true,
+      isDarkMode,
     );
   };
 

@@ -67,7 +67,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     if (DeviceInfo.isIPad() && !compactWith) {
       setDetailView(name, props.componentId);
     } else {
-      pushTo(name, props.componentId);
+      pushTo(name, props.componentId, undefined, undefined, false, isDarkMode);
     }
   };
 
