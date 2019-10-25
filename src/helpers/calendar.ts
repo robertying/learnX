@@ -28,6 +28,7 @@ export const getCalendar = async () => {
   }
 
   store.dispatch(clearEventIds());
+
   const newId = await RNCalendarEvents.saveCalendar({
     title: 'learnX',
     color: Colors.theme,
@@ -47,63 +48,40 @@ export const getCalendar = async () => {
   return newId;
 };
 
-export const saveAssignmentEvent = (
+export const saveAssignmentEvent = async (
+  calendarId: string,
   assignmentId: string,
   title: string,
   note: string,
   startTime: string,
   endTime: string,
 ) => {
-  return new Promise(async (resolve, reject) => {
-    const status = await RNCalendarEvents.authorizationStatus();
-    if (status !== 'authorized') {
-      const result = await RNCalendarEvents.authorizeEventStore();
-      if (result !== 'authorized') {
-        SnackBar.show({
-          title: getTranslation('accessCalendarFailure'),
-          duration: SnackBar.LENGTH_SHORT,
-        });
-        reject('Unauthorized');
-      }
-    }
-
-    const id = await getCalendar();
-    if (id) {
-      const syncedAssignments = store.getState().settings.syncedAssignments;
-      if (
-        syncedAssignments &&
-        Object.keys(syncedAssignments).includes(assignmentId)
-      ) {
-        await RNCalendarEvents.saveEvent(title, {
-          id: syncedAssignments[assignmentId],
-          calendarId: id,
-          startDate: startTime,
-          endDate: endTime,
-          notes: note,
-          description: note,
-        });
-        resolve();
-      } else {
-        const eventId = await RNCalendarEvents.saveEvent(title, {
-          calendarId: id,
-          startDate: startTime,
-          endDate: endTime,
-          notes: note,
-          description: note,
-        });
-        store.dispatch(setEventIdForAssignment(assignmentId, eventId));
-        resolve();
-      }
-    }
-    reject('Failed to create new calendar');
-  });
+  const syncedAssignments = store.getState().settings.syncedAssignments;
+  if (
+    syncedAssignments &&
+    Object.keys(syncedAssignments).includes(assignmentId)
+  ) {
+    await RNCalendarEvents.saveEvent(title, {
+      id: syncedAssignments[assignmentId],
+      calendarId,
+      startDate: startTime,
+      endDate: endTime,
+      notes: note,
+      description: note,
+    });
+  } else {
+    const eventId = await RNCalendarEvents.saveEvent(title, {
+      calendarId,
+      startDate: startTime,
+      endDate: endTime,
+      notes: note,
+      description: note,
+    });
+    store.dispatch(setEventIdForAssignment(assignmentId, eventId));
+  }
 };
 
 export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
-  const savingAssignments = [...assignments].filter(item =>
-    dayjs(item.deadline).isAfter(dayjs()),
-  );
-
   const status = await RNCalendarEvents.authorizationStatus();
   if (status !== 'authorized') {
     const result = await RNCalendarEvents.authorizeEventStore();
@@ -116,12 +94,23 @@ export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
     }
   }
 
+  const calendarId = await getCalendar();
+
+  if (!calendarId) {
+    throw 'Failed to create new calendar';
+  }
+
+  const savingAssignments = [...assignments].filter(item =>
+    dayjs(item.deadline).isAfter(dayjs()),
+  );
+
   const courses = store.getState().courses.items;
 
   savingAssignments.forEach(async assignment => {
     const course = courses.find(value => value.id === assignment.courseId);
     if (course) {
       await saveAssignmentEvent(
+        calendarId,
         assignment.id,
         (assignment.submitted ? '✅ ' : '') +
           assignment.title +
