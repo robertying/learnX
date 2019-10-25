@@ -76,7 +76,7 @@ function InteractablePreviewWrapper(
 
   const isDarkMode = useDarkMode();
 
-  const buttonWidth = 100;
+  const buttonWidth = 90;
 
   return (
     <View>
