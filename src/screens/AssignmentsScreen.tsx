@@ -5,6 +5,9 @@ import {
   RefreshControl,
   SafeAreaView,
   SegmentedControlIOS,
+  PushNotificationIOS,
+  PushNotification,
+  View,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -33,6 +36,18 @@ import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
 import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {getFuseOptions} from '../helpers/search';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import Modal from 'react-native-modal';
+import Layout from '../constants/Layout';
+import Button from '../components/Button';
+import {removeTags} from '../helpers/html';
+import Text from '../components/Text';
+import Snackbar from 'react-native-snackbar';
+import {
+  requestNotificationPermission,
+  showNotificationPermissionAlert,
+  scheduleNotification,
+} from '../helpers/notification';
 
 interface IAssignmentsScreenStateProps {
   loggedIn: boolean;
@@ -180,37 +195,66 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
    * Render cards
    */
 
-  const onAssignmentCardPress = (assignment: WithCourseInfo<IAssignment>) => {
-    const name = 'assignments.detail';
-    const passProps = {
-      title: assignment.title,
-      deadline: assignment.deadline,
-      description: assignment.description,
-      attachmentName: assignment.attachmentName,
-      attachmentUrl: assignment.attachmentUrl,
-      submittedAttachmentName: assignment.submittedAttachmentName,
-      submittedAttachmentUrl: assignment.submittedAttachmentUrl,
-      submitTime: assignment.submitTime,
-      grade: assignment.grade,
-      gradeLevel: assignment.gradeLevel,
-      gradeContent: assignment.gradeContent,
-      courseName: assignment.courseName,
-    };
-    const title = assignment.courseName;
+  const isDarkMode = useDarkMode();
 
-    if (DeviceInfo.isIPad() && !compactWidth) {
-      setDetailView<IAssignmentDetailScreenProps>(name, passProps, title);
-    } else {
-      pushTo<IAssignmentDetailScreenProps>(
-        name,
-        props.componentId,
-        passProps,
-        title,
-        false,
-        isDarkMode,
-      );
-    }
-  };
+  const onAssignmentCardPress = useCallback(
+    (assignment: WithCourseInfo<IAssignment>) => {
+      const name = 'assignments.detail';
+      const passProps = {
+        title: assignment.title,
+        deadline: assignment.deadline,
+        description: assignment.description,
+        attachmentName: assignment.attachmentName,
+        attachmentUrl: assignment.attachmentUrl,
+        submittedAttachmentName: assignment.submittedAttachmentName,
+        submittedAttachmentUrl: assignment.submittedAttachmentUrl,
+        submitTime: assignment.submitTime,
+        grade: assignment.grade,
+        gradeLevel: assignment.gradeLevel,
+        gradeContent: assignment.gradeContent,
+        courseName: assignment.courseName,
+      };
+      const title = assignment.courseName;
+
+      if (DeviceInfo.isIPad() && !compactWidth) {
+        setDetailView<IAssignmentDetailScreenProps>(name, passProps, title);
+      } else {
+        pushTo<IAssignmentDetailScreenProps>(
+          name,
+          props.componentId,
+          passProps,
+          title,
+          false,
+          isDarkMode,
+        );
+      }
+    },
+    [compactWidth, isDarkMode, props.componentId],
+  );
+
+  useEffect(() => {
+    (async () => {
+      const notification = await PushNotificationIOS.getInitialNotification();
+      if (notification) {
+        const data = notification.getData();
+        if ((data as IAssignment).deadline) {
+          onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
+        }
+      }
+    })();
+  }, [onAssignmentCardPress]);
+
+  useEffect(() => {
+    const listener = (notification: PushNotification) => {
+      const data = notification.getData();
+      if ((data as IAssignment).deadline) {
+        onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
+      }
+    };
+    PushNotificationIOS.addEventListener('localNotification', listener);
+    return () =>
+      PushNotificationIOS.removeEventListener('localNotification', listener);
+  }, [onAssignmentCardPress]);
 
   const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {
@@ -246,6 +290,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       onPress={() => {
         onAssignmentCardPress(item);
       }}
+      onRemind={() => handleRemind(item)}
     />
   );
 
@@ -298,7 +343,41 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     }
   }, [hiddenAssignments, segment]);
 
-  const isDarkMode = useDarkMode();
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [reminderDate, setReminderDate] = useState(new Date());
+  const [reminderInfo, setReminderInfo] = useState<
+    WithCourseInfo<IAssignment>
+  >();
+
+  const handleRemind = async (notice: WithCourseInfo<IAssignment>) => {
+    if (!(await requestNotificationPermission())) {
+      showNotificationPermissionAlert();
+      return;
+    }
+    setPickerVisible(true);
+    setReminderInfo(notice);
+  };
+
+  const handleReminderSet = () => {
+    if (!reminderInfo) {
+      return;
+    }
+
+    scheduleNotification(
+      reminderInfo.courseName,
+      `${reminderInfo.title}\n${removeTags(
+        reminderInfo.description || getTranslation('noAssignmentDescription'),
+      )}`,
+      reminderDate.toISOString(),
+      reminderInfo,
+    );
+    setPickerVisible(false);
+    setReminderInfo(undefined);
+    Snackbar.show({
+      title: getTranslation('reminderSet'),
+      duration: Snackbar.LENGTH_SHORT,
+    });
+  };
 
   return (
     <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
@@ -345,6 +424,54 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
             />
           }
         />
+        <Modal
+          isVisible={pickerVisible}
+          onBackdropPress={() => setPickerVisible(false)}
+          backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+          animationIn="bounceIn"
+          animationOut="zoomOut"
+          useNativeDriver={true}
+          deviceWidth={Layout.initialWindow.width}
+          deviceHeight={Layout.initialWindow.height}>
+          <DateTimePicker
+            style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+            mode="datetime"
+            minimumDate={new Date()}
+            value={reminderDate}
+            onChange={(_, date) => date && setReminderDate(date)}
+          />
+          <View
+            style={{
+              backgroundColor: isDarkMode ? 'black' : 'white',
+              width: '100%',
+              height: 50,
+              paddingHorizontal: 15,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}>
+            <Button
+              style={{marginHorizontal: 20}}
+              onPress={() => setPickerVisible(false)}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                }}>
+                {getTranslation('cancel')}
+              </Text>
+            </Button>
+            <Button style={{marginHorizontal: 20}} onPress={handleReminderSet}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                }}>
+                {getTranslation('ok')}
+              </Text>
+            </Button>
+          </View>
+        </Modal>
       </SafeAreaView>
     </PaperProvider>
   );

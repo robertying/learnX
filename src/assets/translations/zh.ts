@@ -42,7 +42,7 @@ export default {
   effectAfterReboot: '设置将在下一次 App 启动时生效',
   languages: '语言',
   semesters: '学期',
-  changeSemester: '当前学期',
+  changeSemester: '更改当前学期',
   searchNotices: '搜索通知……',
   searchFiles: '搜索文件……',
   searchAssignments: '搜索作业……',
@@ -54,4 +54,9 @@ export default {
   favorite: '收藏',
   hidden: '屏蔽',
   visible: '可见',
+  pushNotification: '推送通知',
+  pushNotificationReminder: '设置定时提醒要求 App 具有推送通知权限',
+  goToSettings: '前往“设置”',
+  reminder: '定时提醒',
+  reminderSet: '定时提醒已设置',
 };

@@ -38,6 +38,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
     dragEnabled,
     fav,
     onFav,
+    onRemind,
   } = props;
 
   const isDarkMode = useDarkMode();
@@ -49,6 +50,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
       onPress={onPress}
       fav={fav}
       onFav={onFav}
+      onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
         style={{

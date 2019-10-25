@@ -39,6 +39,7 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
     fav,
     onFav,
     dragEnabled,
+    onRemind,
   } = props;
 
   const isDarkMode = useDarkMode();
@@ -50,6 +51,7 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
       fav={fav}
       onFav={onFav}
       onPress={onPress}
+      onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
         style={{

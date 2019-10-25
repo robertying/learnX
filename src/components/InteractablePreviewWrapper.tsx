@@ -20,6 +20,7 @@ export interface IInteractablePreviewWrapperProps {
   fav?: boolean;
   onPinned?: (pin: boolean) => void;
   onFav?: (fav: boolean) => void;
+  onRemind?: () => void;
   onPress: TouchableHighlight['props']['onPress'];
   dragEnabled: boolean;
 }
@@ -36,6 +37,7 @@ function InteractablePreviewWrapper(
     dragEnabled,
     onHide,
     hidden,
+    onRemind,
   } = props;
 
   const snapRef = useRef<any>(null);
@@ -64,9 +66,17 @@ function InteractablePreviewWrapper(
     }
   };
 
+  const handleRemind = () => {
+    onRemind && onRemind();
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (snapRef.current) {
+      snapRef.current.snapTo({index: 0});
+    }
+  };
+
   const isDarkMode = useDarkMode();
 
-  const buttonWidth = 120;
+  const buttonWidth = 100;
 
   return (
     <View>
@@ -130,6 +140,21 @@ function InteractablePreviewWrapper(
                   color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
                 />
               </Button>
+              <Button
+                style={{
+                  height: '100%',
+                  width: buttonWidth,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  backgroundColor: 'rgba(52,199,89,0.2)',
+                }}
+                onPress={handleRemind}>
+                <MaterialCommunityIcons
+                  name="timer"
+                  size={40}
+                  color={isDarkMode ? Colors.greenDark : Colors.greenLight}
+                />
+              </Button>
             </>
           )}
         </View>
@@ -140,11 +165,11 @@ function InteractablePreviewWrapper(
         animatedNativeDriver={true}
         horizontalOnly={true}
         boundaries={{
-          left: onHide ? -buttonWidth : -buttonWidth * 2,
+          left: onHide ? -buttonWidth : -buttonWidth * 3,
           right: buttonWidth,
           bounce: 0.8,
         }}
-        snapPoints={[{x: 0}, {x: onHide ? -buttonWidth : -buttonWidth * 2}]}
+        snapPoints={[{x: 0}, {x: onHide ? -buttonWidth : -buttonWidth * 3}]}
         dragEnabled={dragEnabled}>
         {Platform.OS === 'ios' ? (
           <TouchableHighlight

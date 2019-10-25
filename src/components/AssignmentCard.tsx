@@ -39,6 +39,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     dragEnabled,
     fav,
     onFav,
+    onRemind,
   } = props;
 
   const isDarkMode = useDarkMode();
@@ -50,6 +51,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
       onPress={onPress}
       fav={fav}
       onFav={onFav}
+      onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
         style={{
