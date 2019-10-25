@@ -7,7 +7,7 @@
 
 清华大学网络学堂 App，以 React Native 构建。
 
-App for Tsinghua University Web Learning, developed with React Native 🎉.
+App for Tsinghua University Web Learning, developed with React Native ⚛️.
 
 ## Features
 
