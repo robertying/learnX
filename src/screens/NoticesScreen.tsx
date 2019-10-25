@@ -39,6 +39,8 @@ import {resetLoading} from '../redux/actions/root';
 import {getFuseOptions} from '../helpers/search';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {INoticeDetailScreenProps} from './NoticeDetailScreen';
+import BackgroundFetch from 'react-native-background-fetch';
+import {runBackgroundTask} from '../helpers/background';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
@@ -90,6 +92,18 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    */
 
   const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    BackgroundFetch.configure(
+      {
+        minimumFetchInterval: 60 * 2,
+        stopOnTerminate: false,
+        startOnBoot: true,
+        requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+      },
+      runBackgroundTask,
+    );
+  }, []);
 
   useEffect(() => {
     if (hasUpdate && Platform.OS === 'android') {
