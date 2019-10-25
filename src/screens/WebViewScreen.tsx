@@ -28,10 +28,6 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    StatusBar.setBarStyle('default');
-  }, []);
-
-  useEffect(() => {
     (async () => {
       setLoading(true);
       try {
@@ -134,18 +130,26 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
     return () => handle.remove();
   }, [listener]);
 
+  useEffect(() => {
+    if (filePath) {
+      StatusBar.setBarStyle('default');
+    }
+  }, [filePath]);
+
   const isDarkMode = useDarkMode();
 
   return (
     <>
-      <WebView
-        style={{backgroundColor: 'transparent'}}
-        source={{
-          uri: filePath,
-        }}
-        originWhitelist={['*']}
-        decelerationRate="normal"
-      />
+      {!loading && (filePath ? true : false) && (
+        <WebView
+          style={{backgroundColor: 'transparent'}}
+          source={{
+            uri: filePath,
+          }}
+          originWhitelist={['*']}
+          decelerationRate="normal"
+        />
+      )}
       {loading &&
         (isDarkMode ? (
           <View
