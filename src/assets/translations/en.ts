@@ -43,7 +43,7 @@ export default {
   effectAfterReboot: 'Settings will take effect next time the App launches',
   languages: 'Languages',
   semesters: 'Semesters',
-  changeSemester: 'Current Semester',
+  changeSemester: 'Change Current Semester',
   searchNotices: 'Search notices...',
   searchFiles: 'Search files...',
   searchAssignments: 'Search assignments...',
@@ -55,4 +55,10 @@ export default {
   favorite: 'Favorite',
   hidden: 'Hidden',
   visible: 'Visible',
+  pushNotification: 'Push Notification',
+  pushNotificationReminder:
+    'You need to enable Notifications for the App to set reminders',
+  goToSettings: 'Go to Settings',
+  reminder: 'Reminder',
+  reminderSet: 'Reminder set successfully',
 };

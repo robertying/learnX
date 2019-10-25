@@ -5,6 +5,9 @@ import {
   RefreshControl,
   SafeAreaView,
   SegmentedControlIOS,
+  PushNotificationIOS,
+  PushNotification,
+  View,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -33,6 +36,18 @@ import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {IWebViewScreenProps} from './WebViewScreen';
 import {getFuseOptions} from '../helpers/search';
+import {
+  requestNotificationPermission,
+  showNotificationPermissionAlert,
+  scheduleNotification,
+} from '../helpers/notification';
+import {removeTags} from '../helpers/html';
+import Snackbar from 'react-native-snackbar';
+import Modal from 'react-native-modal';
+import Layout from '../constants/Layout';
+import Button from '../components/Button';
+import Text from '../components/Text';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface IFilesScreenStateProps {
   loggedIn: boolean;
@@ -158,28 +173,57 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
    * Render cards
    */
 
-  const onFileCardPress = (file: WithCourseInfo<IFile>) => {
-    const name = 'webview';
-    const passProps = {
-      filename: file.title,
-      url: file.downloadUrl,
-      ext: file.fileType,
-    };
-    const title = file.title;
+  const isDarkMode = useDarkMode();
 
-    if (DeviceInfo.isIPad() && !compactWidth) {
-      setDetailView<IWebViewScreenProps>(name, passProps, title);
-    } else {
-      pushTo<IWebViewScreenProps>(
-        name,
-        props.componentId,
-        passProps,
-        title,
-        false,
-        isDarkMode,
-      );
-    }
-  };
+  const onFileCardPress = useCallback(
+    (file: WithCourseInfo<IFile>) => {
+      const name = 'webview';
+      const passProps = {
+        filename: file.title,
+        url: file.downloadUrl,
+        ext: file.fileType,
+      };
+      const title = file.title;
+
+      if (DeviceInfo.isIPad() && !compactWidth) {
+        setDetailView<IWebViewScreenProps>(name, passProps, title);
+      } else {
+        pushTo<IWebViewScreenProps>(
+          name,
+          props.componentId,
+          passProps,
+          title,
+          false,
+          isDarkMode,
+        );
+      }
+    },
+    [compactWidth, isDarkMode, props.componentId],
+  );
+
+  useEffect(() => {
+    (async () => {
+      const notification = await PushNotificationIOS.getInitialNotification();
+      if (notification) {
+        const data = notification.getData();
+        if ((data as IFile).downloadUrl) {
+          onFileCardPress(data as WithCourseInfo<IFile>);
+        }
+      }
+    })();
+  }, [onFileCardPress]);
+
+  useEffect(() => {
+    const listener = (notification: PushNotification) => {
+      const data = notification.getData();
+      if ((data as IFile).downloadUrl) {
+        onFileCardPress(data as WithCourseInfo<IFile>);
+      }
+    };
+    PushNotificationIOS.addEventListener('localNotification', listener);
+    return () =>
+      PushNotificationIOS.removeEventListener('localNotification', listener);
+  }, [onFileCardPress]);
 
   const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {
@@ -215,6 +259,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       onPress={() => {
         onFileCardPress(item);
       }}
+      onRemind={() => handleRemind(item)}
     />
   );
 
@@ -267,7 +312,39 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   }, [hiddenFiles, segment]);
 
-  const isDarkMode = useDarkMode();
+  const [pickerVisible, setPickerVisible] = useState(false);
+  const [reminderDate, setReminderDate] = useState(new Date());
+  const [reminderInfo, setReminderInfo] = useState<WithCourseInfo<IFile>>();
+
+  const handleRemind = async (notice: WithCourseInfo<IFile>) => {
+    if (!(await requestNotificationPermission())) {
+      showNotificationPermissionAlert();
+      return;
+    }
+    setPickerVisible(true);
+    setReminderInfo(notice);
+  };
+
+  const handleReminderSet = () => {
+    if (!reminderInfo) {
+      return;
+    }
+
+    scheduleNotification(
+      reminderInfo.courseName,
+      `${reminderInfo.title}\n${removeTags(
+        reminderInfo.description || getTranslation('noFileDescription'),
+      )}`,
+      reminderDate.toISOString(),
+      reminderInfo,
+    );
+    setPickerVisible(false);
+    setReminderInfo(undefined);
+    Snackbar.show({
+      title: getTranslation('reminderSet'),
+      duration: Snackbar.LENGTH_SHORT,
+    });
+  };
 
   return (
     <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
@@ -314,6 +391,54 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             />
           }
         />
+        <Modal
+          isVisible={pickerVisible}
+          onBackdropPress={() => setPickerVisible(false)}
+          backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+          animationIn="bounceIn"
+          animationOut="zoomOut"
+          useNativeDriver={true}
+          deviceWidth={Layout.initialWindow.width}
+          deviceHeight={Layout.initialWindow.height}>
+          <DateTimePicker
+            style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+            mode="datetime"
+            minimumDate={new Date()}
+            value={reminderDate}
+            onChange={(_, date) => date && setReminderDate(date)}
+          />
+          <View
+            style={{
+              backgroundColor: isDarkMode ? 'black' : 'white',
+              width: '100%',
+              height: 50,
+              paddingHorizontal: 15,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}>
+            <Button
+              style={{marginHorizontal: 20}}
+              onPress={() => setPickerVisible(false)}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                }}>
+                {getTranslation('cancel')}
+              </Text>
+            </Button>
+            <Button style={{marginHorizontal: 20}} onPress={handleReminderSet}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                }}>
+                {getTranslation('ok')}
+              </Text>
+            </Button>
+          </View>
+        </Modal>
       </SafeAreaView>
     </PaperProvider>
   );
