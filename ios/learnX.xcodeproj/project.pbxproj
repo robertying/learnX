@@ -12,6 +12,7 @@
 		4CACF6A2814C6AFFA0701A8D /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F637BF5EECC01BD5184480D8 /* libPods-learnX.a */; };
 		D415DD5422B9335400DC4D5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D415DD5322B9335400DC4D5C /* Assets.xcassets */; };
 		D415DD5822B9373B00DC4D5C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */; };
+		D493E9542362B6AD00E60F16 /* RNBackgroundFetch+AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D493E9532362B6AD00E60F16 /* RNBackgroundFetch+AppDelegate.m */; };
 		D4A5362822E8F05C00CFC941 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D4A5362422E8F05C00CFC941 /* InfoPlist.strings */; };
 		D4A5362922E8F05C00CFC941 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4A5362622E8F05C00CFC941 /* LaunchScreen.storyboard */; };
 /* End PBXBuildFile section */
@@ -26,6 +27,7 @@
 		71EFBAB9EFBC22898F87480F /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
 		D415DD5322B9335400DC4D5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
 		D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D493E9532362B6AD00E60F16 /* RNBackgroundFetch+AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "RNBackgroundFetch+AppDelegate.m"; path = "../node_modules/react-native-background-fetch/ios/RNBackgroundFetch/RNBackgroundFetch+AppDelegate.m"; sourceTree = "<group>"; };
 		D4A5362522E8F05C00CFC941 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = learnX/Base.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D4A5362722E8F05C00CFC941 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = learnX/Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D4A5362A22E8F0A500CFC941 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
@@ -50,6 +52,7 @@
 		13B07FAE1A68108700A75B9A /* learnX */ = {
 			isa = PBXGroup;
 			children = (
+				D493E9532362B6AD00E60F16 /* RNBackgroundFetch+AppDelegate.m */,
 				D4A5362422E8F05C00CFC941 /* InfoPlist.strings */,
 				D4A5362622E8F05C00CFC941 /* LaunchScreen.storyboard */,
 				D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */,
@@ -272,6 +275,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D493E9542362B6AD00E60F16 /* RNBackgroundFetch+AppDelegate.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);

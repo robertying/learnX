@@ -26,6 +26,7 @@
     "fuse.js": "3.4.5",
     "react": "16.11.0",
     "react-native": "0.61.2",
+    "react-native-background-fetch": "2.7.1",
     "react-native-calendar-events": "1.7.3",
     "react-native-dark-mode": "0.2.0",
     "react-native-device-info": "5.0.1",
