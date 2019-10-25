@@ -28,6 +28,29 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    if (DeviceInfo.isIPad()) {
+      Navigation.mergeOptions(props.componentId, {
+        topBar: {
+          rightButtons: [
+            {
+              id: 'share',
+              systemItem: 'action',
+            },
+            {
+              id: 'refresh',
+              systemItem: 'refresh',
+            },
+            {
+              id: 'toggle',
+              systemItem: 'rewind',
+            },
+          ],
+        },
+      });
+    }
+  }, [props.componentId]);
+
+  useEffect(() => {
     (async () => {
       setLoading(true);
       try {
@@ -74,7 +97,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
                   },
                   {
                     id: 'toggle',
-                    systemItem: fullScreen ? 'fastForward' : 'rewind',
+                    systemItem: fullScreen ? 'rewind' : 'fastForward',
                   },
                 ]
               : [
@@ -202,31 +225,16 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
 WebViewScreen.options = {
   topBar: {
     hideOnScroll: true,
-    rightButtons: DeviceInfo.isIPad()
-      ? [
-          {
-            id: 'share',
-            systemItem: 'action',
-          },
-          {
-            id: 'refresh',
-            systemItem: 'refresh',
-          },
-          {
-            id: 'toggle',
-            systemItem: 'rewind',
-          },
-        ]
-      : [
-          {
-            id: 'share',
-            systemItem: 'action',
-          },
-          {
-            id: 'refresh',
-            systemItem: 'refresh',
-          },
-        ],
+    rightButtons: [
+      {
+        id: 'share',
+        systemItem: 'action',
+      },
+      {
+        id: 'refresh',
+        systemItem: 'refresh',
+      },
+    ],
   },
 };
 
