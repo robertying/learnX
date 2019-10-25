@@ -149,7 +149,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "5.1.2"
+        versionName "6.0.0"
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative60"
     }
 
@@ -223,7 +223,7 @@ dependencies {
 
     addUnimodulesDependencies()
 
-    implementation 'com.google.firebase:firebase-core:17.2.0'
+    implementation 'com.google.firebase:firebase-core:17.2.1'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     implementation project(':react-native-navigation')
