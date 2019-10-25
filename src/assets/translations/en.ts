@@ -30,7 +30,7 @@ export default {
   clearFileCacheFail: 'Failed to clear file cache',
   clearFileCacheConfirmation: 'Are you sure to clear file cache?',
   clearFileCacheSuccess: 'Successfully cleared file cache',
-  calendarSync: 'Assignment Sync',
+  calendarSync: 'Sync Assignments to Calendar',
   settings: 'Settings',
   preparingFile: 'Preparing file...',
   refreshFailure: 'Failed to refresh',

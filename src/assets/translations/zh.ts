@@ -29,7 +29,7 @@ export default {
   clearFileCacheFail: '清空文件缓存失败',
   clearFileCacheConfirmation: '确定要清空文件缓存吗？',
   clearFileCacheSuccess: '成功清空文件缓存',
-  calendarSync: '作业同步',
+  calendarSync: '将作业同步到日历',
   settings: '设置',
   preparingFile: '准备文件中……',
   refreshFailure: '刷新失败',
