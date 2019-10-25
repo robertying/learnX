@@ -10,6 +10,7 @@ import {
   View,
   PushNotificationIOS,
   PushNotification,
+  Dimensions,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -103,6 +104,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     hasUpdate,
     compactWidth,
     resetLoading,
+    setCompactWidth,
   } = props;
 
   /**
@@ -158,37 +160,37 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   }, [loginError]);
 
-  // useEffect(() => {
-  //   const window = Dimensions.get('window');
-  //   const screen = Dimensions.get('screen');
-  //   if (
-  //     window.width < screen.width &&
-  //     !(screen.height < screen.width && window.width > screen.width * 0.4)
-  //   ) {
-  //     setCompactWidth(true);
-  //   }
-  // }, [setCompactWidth]);
+  useEffect(() => {
+    const window = Dimensions.get('window');
+    const screen = Dimensions.get('screen');
+    if (
+      window.width < screen.width &&
+      !(screen.height < screen.width && window.width > screen.width * 0.4)
+    ) {
+      setCompactWidth(true);
+    }
+  }, [setCompactWidth]);
 
-  // useEffect(() => {
-  //   const listener = ({window, screen}: any) => {
-  //     if (
-  //       window.width < screen.width &&
-  //       !(
-  //         screen.height < screen.width &&
-  //         (DeviceInfo.isIPad12_9()
-  //           ? window.width > screen.width * 0.4
-  //           : window.width > screen.width / 2)
-  //       )
-  //     ) {
-  //       setCompactWidth(true);
-  //     } else {
-  //       setCompactWidth(false);
-  //     }
-  //   };
-  //   Dimensions.addEventListener('change', listener);
+  useEffect(() => {
+    const listener = ({window, screen}: any) => {
+      if (
+        window.width < screen.width &&
+        !(
+          screen.height < screen.width &&
+          (DeviceInfo.isIPad12_9()
+            ? window.width > screen.width * 0.4
+            : window.width > screen.width / 2)
+        )
+      ) {
+        setCompactWidth(true);
+      } else {
+        setCompactWidth(false);
+      }
+    };
+    Dimensions.addEventListener('change', listener);
 
-  //   return () => Dimensions.removeEventListener('change', listener);
-  // }, [setCompactWidth]);
+    return () => Dimensions.removeEventListener('change', listener);
+  }, [setCompactWidth]);
 
   const [appState, setAppState] = useState(AppState.currentState);
 
