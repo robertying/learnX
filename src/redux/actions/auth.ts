@@ -17,11 +17,16 @@ export function login(username?: string, password?: string): IThunkResult {
     const auth = getState().auth;
     const _username = username || auth.username || '';
     const _password = password || auth.password || '';
-    const success = await dataSource.login(_username, _password);
-
-    if (success) {
-      dispatch(loginAction.success({username: _username, password: _password}));
-    } else {
+    try {
+      const success = await dataSource.login(_username, _password);
+      if (success) {
+        dispatch(
+          loginAction.success({username: _username, password: _password}),
+        );
+      } else {
+        dispatch(loginAction.failure(new Error('login failed')));
+      }
+    } catch {
       dispatch(loginAction.failure(new Error('login failed')));
     }
   };

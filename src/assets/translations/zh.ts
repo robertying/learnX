@@ -59,4 +59,7 @@ export default {
   goToSettings: '前往“设置”',
   reminder: '定时提醒',
   reminderSet: '定时提醒已设置',
+  loggingIn: '正在登录……',
+  offline: '离线模式：点击此处重新登录',
+  offlineLoginError: '登录失败，点击此处重新尝试',
 };

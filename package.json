@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@react-native-community/async-storage": "1.6.2",
+    "@react-native-community/blur": "3.3.1",
     "@react-native-community/datetimepicker": "2.1.0",
     "darkreader": "4.7.15",
     "dayjs": "1.8.16",

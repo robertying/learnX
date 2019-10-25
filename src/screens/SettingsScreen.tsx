@@ -88,6 +88,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           text: getTranslation('ok'),
           onPress: () => {
             clearStore();
+            Navigation.dismissOverlay('offline');
             Navigation.showModal({
               component: {
                 id: 'login',

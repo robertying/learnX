@@ -59,6 +59,7 @@ import Snackbar from 'react-native-snackbar';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
+  loginError?: Error | null;
   hasUpdate: boolean;
   compactWidth: boolean;
   courses: ICourse[];
@@ -86,6 +87,8 @@ type INoticesScreenProps = INoticesScreenStateProps &
 const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const {
     loggedIn,
+    login,
+    loginError,
     courses,
     notices,
     getAllNoticesForCourses,
@@ -131,6 +134,29 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       });
     }
   }, [hasUpdate]);
+
+  useEffect(() => {
+    login();
+  }, [login]);
+
+  useEffect(() => {
+    if (loginError) {
+      Navigation.showOverlay({
+        component: {
+          id: 'offline',
+          name: 'offline',
+          options: {
+            layout: {
+              backgroundColor: 'transparent',
+            },
+            overlay: {
+              interceptTouchOutside: false,
+            },
+          },
+        },
+      });
+    }
+  }, [loginError]);
 
   // useEffect(() => {
   //   const window = Dimensions.get('window');
@@ -557,6 +583,7 @@ NoticesScreen.options = getScreenOptions(
 function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
   return {
     loggedIn: state.auth.loggedIn,
+    loginError: state.auth.error,
     courses: state.courses.items || [],
     isFetching: state.notices.isFetching,
     notices: state.notices.items || [],

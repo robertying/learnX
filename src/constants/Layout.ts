@@ -5,4 +5,5 @@ export default {
   initialWindow: Dimensions.get('window'),
   normalBlockHeight: 44,
   statusBarHeight: Constants.statusBarHeight,
+  bottomTabHeight: 49,
 };

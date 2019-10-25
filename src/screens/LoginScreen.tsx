@@ -27,6 +27,7 @@ import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import Text from '../components/Text';
+import {getNavigationRoot} from '../navigation/navigationRoot';
 
 interface ILoginScreenProps {
   loggedIn: boolean;
@@ -78,6 +79,10 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       setCurrentSemester(semesters[0]);
       Keyboard.dismiss();
       Navigation.dismissModal('login');
+      (async () => {
+        const navigationRoot = await getNavigationRoot();
+        Navigation.setRoot(navigationRoot);
+      })();
     }
   }, [loggedIn, semesters, semesters.length, setCurrentSemester]);
 

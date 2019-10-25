@@ -18,6 +18,7 @@ import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import WebViewScreen from '../screens/WebViewScreen';
 import HelpScreen from '../screens/HelpScreen';
+import OfflineIndicator from '../components/OfflineIndicator';
 
 const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
   props: any,
@@ -29,6 +30,12 @@ const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
 
 const registerScreens = () => {
   Navigation.registerComponent('empty', () => EmptyScreen);
+
+  Navigation.registerComponent(
+    'offline',
+    () => storeWrapped(OfflineIndicator),
+    () => OfflineIndicator,
+  );
 
   Navigation.registerComponent(
     'auth.loading',
