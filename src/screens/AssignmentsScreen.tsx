@@ -364,7 +364,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     }
 
     scheduleNotification(
-      reminderInfo.courseName,
+      `${getTranslation('reminder')}：${reminderInfo.courseName}`,
       `${reminderInfo.title}\n${removeTags(
         reminderInfo.description || getTranslation('noAssignmentDescription'),
       )}`,
