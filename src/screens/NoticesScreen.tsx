@@ -161,35 +161,39 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, [loginError]);
 
   useEffect(() => {
-    const window = Dimensions.get('window');
-    const screen = Dimensions.get('screen');
-    if (
-      window.width < screen.width &&
-      !(screen.height < screen.width && window.width > screen.width * 0.4)
-    ) {
-      setCompactWidth(true);
+    if (DeviceInfo.isIPad()) {
+      const window = Dimensions.get('window');
+      const screen = Dimensions.get('screen');
+      if (
+        window.width < screen.width &&
+        !(screen.height < screen.width && window.width > screen.width * 0.4)
+      ) {
+        setCompactWidth(true);
+      }
     }
   }, [setCompactWidth]);
 
   useEffect(() => {
-    const listener = ({window, screen}: any) => {
-      if (
-        window.width < screen.width &&
-        !(
-          screen.height < screen.width &&
-          (DeviceInfo.isIPad12_9()
-            ? window.width > screen.width * 0.4
-            : window.width > screen.width / 2)
-        )
-      ) {
-        setCompactWidth(true);
-      } else {
-        setCompactWidth(false);
-      }
-    };
-    Dimensions.addEventListener('change', listener);
+    if (DeviceInfo.isIPad()) {
+      const listener = ({window, screen}: any) => {
+        if (
+          window.width < screen.width &&
+          !(
+            screen.height < screen.width &&
+            (DeviceInfo.isIPad12_9()
+              ? window.width > screen.width * 0.4
+              : window.width > screen.width / 2)
+          )
+        ) {
+          setCompactWidth(true);
+        } else {
+          setCompactWidth(false);
+        }
+      };
+      Dimensions.addEventListener('change', listener);
 
-    return () => Dimensions.removeEventListener('change', listener);
+      return () => Dimensions.removeEventListener('change', listener);
+    }
   }, [setCompactWidth]);
 
   const [appState, setAppState] = useState(AppState.currentState);
@@ -327,27 +331,31 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   );
 
   useEffect(() => {
-    (async () => {
-      const notification = await PushNotificationIOS.getInitialNotification();
-      if (notification) {
+    if (Platform.OS === 'ios') {
+      (async () => {
+        const notification = await PushNotificationIOS.getInitialNotification();
+        if (notification) {
+          const data = notification.getData();
+          if ((data as INotice).publisher) {
+            onNoticeCardPress(data as WithCourseInfo<INotice>);
+          }
+        }
+      })();
+    }
+  }, [onNoticeCardPress]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const listener = (notification: PushNotification) => {
         const data = notification.getData();
         if ((data as INotice).publisher) {
           onNoticeCardPress(data as WithCourseInfo<INotice>);
         }
-      }
-    })();
-  }, [onNoticeCardPress]);
-
-  useEffect(() => {
-    const listener = (notification: PushNotification) => {
-      const data = notification.getData();
-      if ((data as INotice).publisher) {
-        onNoticeCardPress(data as WithCourseInfo<INotice>);
-      }
-    };
-    PushNotificationIOS.addEventListener('localNotification', listener);
-    return () =>
-      PushNotificationIOS.removeEventListener('localNotification', listener);
+      };
+      PushNotificationIOS.addEventListener('localNotification', listener);
+      return () =>
+        PushNotificationIOS.removeEventListener('localNotification', listener);
+    }
   }, [onNoticeCardPress]);
 
   const onPinned = (pin: boolean, noticeId: string) => {
