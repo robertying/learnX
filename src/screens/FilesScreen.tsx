@@ -202,27 +202,31 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   );
 
   useEffect(() => {
-    (async () => {
-      const notification = await PushNotificationIOS.getInitialNotification();
-      if (notification) {
+    if (Platform.OS === 'ios') {
+      (async () => {
+        const notification = await PushNotificationIOS.getInitialNotification();
+        if (notification) {
+          const data = notification.getData();
+          if ((data as IFile).downloadUrl) {
+            onFileCardPress(data as WithCourseInfo<IFile>);
+          }
+        }
+      })();
+    }
+  }, [onFileCardPress]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const listener = (notification: PushNotification) => {
         const data = notification.getData();
         if ((data as IFile).downloadUrl) {
           onFileCardPress(data as WithCourseInfo<IFile>);
         }
-      }
-    })();
-  }, [onFileCardPress]);
-
-  useEffect(() => {
-    const listener = (notification: PushNotification) => {
-      const data = notification.getData();
-      if ((data as IFile).downloadUrl) {
-        onFileCardPress(data as WithCourseInfo<IFile>);
-      }
-    };
-    PushNotificationIOS.addEventListener('localNotification', listener);
-    return () =>
-      PushNotificationIOS.removeEventListener('localNotification', listener);
+      };
+      PushNotificationIOS.addEventListener('localNotification', listener);
+      return () =>
+        PushNotificationIOS.removeEventListener('localNotification', listener);
+    }
   }, [onFileCardPress]);
 
   const onPinned = (pin: boolean, fileId: string) => {

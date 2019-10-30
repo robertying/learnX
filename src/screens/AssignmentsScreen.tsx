@@ -233,27 +233,31 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   );
 
   useEffect(() => {
-    (async () => {
-      const notification = await PushNotificationIOS.getInitialNotification();
-      if (notification) {
+    if (Platform.OS === 'ios') {
+      (async () => {
+        const notification = await PushNotificationIOS.getInitialNotification();
+        if (notification) {
+          const data = notification.getData();
+          if ((data as IAssignment).deadline) {
+            onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
+          }
+        }
+      })();
+    }
+  }, [onAssignmentCardPress]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const listener = (notification: PushNotification) => {
         const data = notification.getData();
         if ((data as IAssignment).deadline) {
           onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
         }
-      }
-    })();
-  }, [onAssignmentCardPress]);
-
-  useEffect(() => {
-    const listener = (notification: PushNotification) => {
-      const data = notification.getData();
-      if ((data as IAssignment).deadline) {
-        onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
-      }
-    };
-    PushNotificationIOS.addEventListener('localNotification', listener);
-    return () =>
-      PushNotificationIOS.removeEventListener('localNotification', listener);
+      };
+      PushNotificationIOS.addEventListener('localNotification', listener);
+      return () =>
+        PushNotificationIOS.removeEventListener('localNotification', listener);
+    }
   }, [onAssignmentCardPress]);
 
   const onPinned = (pin: boolean, assignmentId: string) => {
