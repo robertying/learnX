@@ -4,7 +4,7 @@
   "license": "MIT",
   "version": "6.0.0",
   "scripts": {
-    "android": "react-native run-android --no-jetifier",
+    "android": "react-native run-android",
     "android:beta": "fastlane android beta",
     "android:build": "fastlane android build",
     "ios": "react-native run-ios",
@@ -15,7 +15,7 @@
     "typecheck": "tsc --noUnusedLocals",
     "ios:test:debug": "detox build --configuration \"ios.sim.debug\" && detox test --configuration \"ios.sim.debug\"",
     "ios:test:release": "detox build --configuration \"ios.sim.release\" && detox test --configuration \"ios.sim.release\"",
-    "postinstall": "patch-package && jetify && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
+    "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
     "@react-native-community/async-storage": "1.6.2",
@@ -60,7 +60,6 @@
   "devDependencies": {
     "@babel/core": "7.7.0",
     "@babel/runtime": "7.7.0",
-    "@react-native-community/cli": "2.9.0",
     "@react-native-community/eslint-config": "0.0.5",
     "@types/detox": "14.5.1",
     "@types/jasmine": "3.4.5",
