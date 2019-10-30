@@ -152,6 +152,11 @@ export const getNavigationRoot = async () => {
                 ],
               },
             },
+            options: {
+              splitView: {
+                displayMode: 'visible',
+              },
+            },
           },
         },
       }
