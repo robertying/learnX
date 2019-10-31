@@ -1098,10 +1098,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/detox@14.5.0":
-  version "14.5.0"
-  resolved "https://registry.yarnpkg.com/@types/detox/-/detox-14.5.0.tgz#d543e69f28c45c38f42b0a3f06b784736ca3fc5e"
-  integrity sha512-yiCUYZTfsV9/DnxRgevSgmEFQjeekiEmgjieMDbv64bRfpie1ewosZNlwMMaCcWbsEssGHwWksyzyWIuIBO+Uw==
+"@types/detox@14.5.1":
+  version "14.5.1"
+  resolved "https://registry.yarnpkg.com/@types/detox/-/detox-14.5.1.tgz#54ad43d28da9b1e4d02dedbf7629a7879923e8e7"
+  integrity sha512-JZIejOec6KElGU145ErK3s1lbyPCRilCCmpsLvu0cLZQGJOPDypv0OXozGTDGOUnClrz/zphqnmiV4081q58JQ==
 
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
