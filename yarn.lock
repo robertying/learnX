@@ -8520,10 +8520,10 @@ typedarray@^0.0.6:
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
   integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
 
-typesafe-actions@5.0.0-3:
-  version "5.0.0-3"
-  resolved "https://registry.yarnpkg.com/typesafe-actions/-/typesafe-actions-5.0.0-3.tgz#b54354700a3a2827859e9f86dd51576c8945fcd4"
-  integrity sha512-sX5Sh2FLctpj+u6HDlqiH7o/MLQCPHFb8vI2X7vp22F7G4V+IqSZdgq/31+3i0G1q8vm39W6uk5EMIeE/x5gCg==
+typesafe-actions@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/typesafe-actions/-/typesafe-actions-5.1.0.tgz#9afe8b1e6a323af1fd59e6a57b11b7dd6623d2f1"
+  integrity sha512-bna6Yi1pRznoo6Bz1cE6btB/Yy8Xywytyfrzu/wc+NFW3ZF0I+2iCGImhBsoYYCOWuICtRO4yHcnDlzgo1AdNg==
 
 typescript@3.6.4:
   version "3.6.4"

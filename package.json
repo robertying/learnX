@@ -55,7 +55,7 @@
     "rn-fetch-blob": "0.11.2",
     "semver": "6.3.0",
     "thu-learn-lib-no-native": "3.0.1",
-    "typesafe-actions": "5.0.0-3"
+    "typesafe-actions": "5.1.0"
   },
   "devDependencies": {
     "@babel/core": "7.6.4",
