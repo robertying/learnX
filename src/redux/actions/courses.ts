@@ -34,10 +34,12 @@ export function getCoursesForSemester(semesterId: string): IThunkResult {
   };
 }
 
-export const hideCourse = createAction(HIDE_COURSE, action => {
-  return (courseId: string) => action(courseId);
-});
+export const hideCourse = createAction(
+  HIDE_COURSE,
+  (courseId: string) => courseId,
+)();
 
-export const unhideCourse = createAction(UNHIDE_COURSE, action => {
-  return (courseId: string) => action(courseId);
-});
+export const unhideCourse = createAction(
+  UNHIDE_COURSE,
+  (courseId: string) => courseId,
+)();

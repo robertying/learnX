@@ -13,46 +13,46 @@ import {
 } from '../types/constants';
 import {IWindow, Language, NotificationType} from '../types/state';
 
-export const setCalendarSync = createAction(SET_CALENDAR_SYNC, action => {
-  return (enabled: boolean) => action(enabled);
-});
+export const setCalendarSync = createAction(
+  SET_CALENDAR_SYNC,
+  (enabled: boolean) => enabled,
+)();
 
-export const setCalendarId = createAction(SET_CALENDAR_ID, action => {
-  return (calendarId: string) => action(calendarId);
-});
+export const setCalendarId = createAction(
+  SET_CALENDAR_ID,
+  (calendarId: string) => calendarId,
+)();
 
 export const setEventIdForAssignment = createAction(
   SET_EVENT_ID_FOR_ASSIGNMENT,
-  action => {
-    return (assignmentId: string, eventId: string) =>
-      action({[assignmentId]: eventId});
-  },
-);
+  (assignmentId: string, eventId: string) => ({[assignmentId]: eventId}),
+)();
 
-export const clearEventIds = createAction(CLEAR_EVENT_IDS);
+export const clearEventIds = createAction(CLEAR_EVENT_IDS)();
 
-export const setUpdate = createAction(SET_UPDATE, action => {
-  return (hasNewUpdate: boolean) => action(hasNewUpdate);
-});
+export const setUpdate = createAction(
+  SET_UPDATE,
+  (hasNewUpdate: boolean) => hasNewUpdate,
+)();
 
-export const setWindow = createAction(SET_WINDOW, action => {
-  return (window: IWindow) => action(window);
-});
+export const setWindow = createAction(
+  SET_WINDOW,
+  (window: IWindow) => window,
+)();
 
-export const setNotifications = createAction(SET_NOTIFICATIONS, action => {
-  return (enabled: boolean) => action(enabled);
-});
+export const setNotifications = createAction(
+  SET_NOTIFICATIONS,
+  (enabled: boolean) => enabled,
+)();
+
 export const setNotificationTypes = createAction(
   SET_NOTIFICATION_TYPES,
-  action => {
-    return (types: NotificationType[]) => action(types);
-  },
-);
+  (types: NotificationType[]) => types,
+)();
 
-export const setLang = createAction(SET_LANG, action => {
-  return (lang: Language) => action(lang);
-});
+export const setLang = createAction(SET_LANG, (lang: Language) => lang)();
 
-export const setCompactWidth = createAction(SET_COMPACT_WIDTH, action => {
-  return (compactWidth: boolean) => action(compactWidth);
-});
+export const setCompactWidth = createAction(
+  SET_COMPACT_WIDTH,
+  (compactWidth: boolean) => compactWidth,
+)();

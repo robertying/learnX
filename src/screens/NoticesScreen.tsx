@@ -57,6 +57,7 @@ import Button from '../components/Button';
 import {removeTags} from '../helpers/html';
 import Text from '../components/Text';
 import Snackbar from 'react-native-snackbar';
+import {loadIcons} from '../helpers/icons';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
@@ -126,15 +127,18 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, []);
 
   useEffect(() => {
-    if (hasUpdate && Platform.OS === 'android') {
-      Navigation.mergeOptions('SettingsScreen', {
-        bottomTab: {
-          dotIndicator: {
-            visible: true,
+    (async () => {
+      if (hasUpdate && Platform.OS === 'android') {
+        Navigation.mergeOptions('SettingsScreen', {
+          bottomTab: {
+            dotIndicator: {
+              visible: true,
+            },
+            icon: (await loadIcons()).settings,
           },
-        },
-      });
-    }
+        });
+      }
+    })();
   }, [hasUpdate]);
 
   useEffect(() => {
