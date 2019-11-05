@@ -6790,10 +6790,10 @@ react-native-navigation@3.4.0:
     react-lifecycles-compat "2.0.0"
     tslib "1.9.3"
 
-react-native-paper@3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/react-native-paper/-/react-native-paper-3.1.1.tgz#971f3097eecb4c061bf10768182b8985442a45ab"
-  integrity sha512-GHJ/2z/1Nzm4Y1g22Znu09BV7SV4tsR7h/9HrXuj3kFrsJo7zt5e+t/ELLLvycGEo4z1vhV6MtjtIk/PSaKoDA==
+react-native-paper@3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/react-native-paper/-/react-native-paper-3.2.0.tgz#b823360b6b9b06be8a341c236b054aa403c81b59"
+  integrity sha512-ZIevdT364IFZyjrE1fIJwvKI1ZsVJLxRjJj3c2OMatQ3kpO+105EwyM3eGjhFX3DAJVueQ54zEo7Mk48hicYMw==
   dependencies:
     "@callstack/react-theme-provider" "^3.0.5"
     color "^3.1.2"
