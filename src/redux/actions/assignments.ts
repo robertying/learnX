@@ -102,18 +102,22 @@ export function getAllAssignmentsForCourses(courseIds: string[]): IThunkResult {
   };
 }
 
-export const pinAssignment = createAction(PIN_ASSIGNMENT, action => {
-  return (assignmentId: string) => action(assignmentId);
-});
+export const pinAssignment = createAction(
+  PIN_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
+)();
 
-export const unpinAssignment = createAction(UNPIN_ASSIGNMENT, action => {
-  return (assignmentId: string) => action(assignmentId);
-});
+export const unpinAssignment = createAction(
+  UNPIN_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
+)();
 
-export const favAssignment = createAction(FAV_ASSIGNMENT, action => {
-  return (assignmentId: string) => action(assignmentId);
-});
+export const favAssignment = createAction(
+  FAV_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
+)();
 
-export const unfavAssignment = createAction(UNFAV_ASSIGNMENT, action => {
-  return (assignmentId: string) => action(assignmentId);
-});
+export const unfavAssignment = createAction(
+  UNFAV_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
+)();

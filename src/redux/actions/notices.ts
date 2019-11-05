@@ -90,18 +90,22 @@ export function getAllNoticesForCourses(courseIds: string[]): IThunkResult {
   };
 }
 
-export const pinNotice = createAction(PIN_NOTICE, action => {
-  return (noticeId: string) => action(noticeId);
-});
+export const pinNotice = createAction(
+  PIN_NOTICE,
+  (noticeId: string) => noticeId,
+)();
 
-export const unpinNotice = createAction(UNPIN_NOTICE, action => {
-  return (noticeId: string) => action(noticeId);
-});
+export const unpinNotice = createAction(
+  UNPIN_NOTICE,
+  (noticeId: string) => noticeId,
+)();
 
-export const favNotice = createAction(FAV_NOTICE, action => {
-  return (noticeId: string) => action(noticeId);
-});
+export const favNotice = createAction(
+  FAV_NOTICE,
+  (noticeId: string) => noticeId,
+)();
 
-export const unfavNotice = createAction(UNFAV_NOTICE, action => {
-  return (noticeId: string) => action(noticeId);
-});
+export const unfavNotice = createAction(
+  UNFAV_NOTICE,
+  (noticeId: string) => noticeId,
+)();

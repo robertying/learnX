@@ -72,18 +72,10 @@ export function getAllFilesForCourses(courseIds: string[]): IThunkResult {
   };
 }
 
-export const pinFile = createAction(PIN_FILE, action => {
-  return (fileId: string) => action(fileId);
-});
+export const pinFile = createAction(PIN_FILE, (fileId: string) => fileId)();
 
-export const unpinFile = createAction(UNPIN_FILE, action => {
-  return (fileId: string) => action(fileId);
-});
+export const unpinFile = createAction(UNPIN_FILE, (fileId: string) => fileId)();
 
-export const favFile = createAction(FAV_FILE, action => {
-  return (fileId: string) => action(fileId);
-});
+export const favFile = createAction(FAV_FILE, (fileId: string) => fileId)();
 
-export const unfavFile = createAction(UNFAV_FILE, action => {
-  return (fileId: string) => action(fileId);
-});
+export const unfavFile = createAction(UNFAV_FILE, (fileId: string) => fileId)();
