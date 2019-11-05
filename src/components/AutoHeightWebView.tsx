@@ -54,6 +54,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       showsVerticalScrollIndicator={false}
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
+      scrollEnabled={false}
       {...props}
       style={[{height, backgroundColor: 'transparent'}, props.style]}
     />
