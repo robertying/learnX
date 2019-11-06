@@ -9,6 +9,8 @@ export const supportedFileTypes = [
   'docx',
   'ppt',
   'pptx',
+  'xls',
+  'xlsx',
   'zip',
   'rar',
 ];
@@ -20,6 +22,8 @@ export const mimeTypes: any = {
   ppt: 'application/vnd.ms-powerpoint',
   pptx:
     'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   zip: 'application/zip',
   rar: 'application/x-rar-compressed',
 };
