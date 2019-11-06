@@ -317,10 +317,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const [segment, setSegment] = useState('new');
 
   const handleSegmentChange = (value: string) => {
-    if (value === getTranslation('new')) {
+    if (value.startsWith(getTranslation('new'))) {
       setSegment('new');
       setCurrentDisplayAssignments(newAssignments);
-    } else if (value === getTranslation('favorite')) {
+    } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
       setCurrentDisplayAssignments(favAssignments);
     } else {
@@ -411,9 +411,9 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
               <SegmentedControlIOS
                 style={{margin: 20, marginTop: 10, marginBottom: 10}}
                 values={[
-                  getTranslation('new'),
-                  getTranslation('favorite'),
-                  getTranslation('hidden'),
+                  getTranslation('new') + ` (${newAssignments.length})`,
+                  getTranslation('favorite') + ` (${favAssignments.length})`,
+                  getTranslation('hidden') + ` (${hiddenAssignments.length})`,
                 ]}
                 selectedIndex={0}
                 onValueChange={handleSegmentChange}

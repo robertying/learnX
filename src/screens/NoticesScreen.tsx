@@ -419,10 +419,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const [segment, setSegment] = useState('new');
 
   const handleSegmentChange = (value: string) => {
-    if (value === getTranslation('new')) {
+    if (value.startsWith(getTranslation('new'))) {
       setSegment('new');
       setCurrentDisplayNotices(newNotices);
-    } else if (value === getTranslation('favorite')) {
+    } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
       setCurrentDisplayNotices(favNotices);
     } else {
@@ -512,9 +512,9 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
               <SegmentedControlIOS
                 style={{margin: 20, marginTop: 10, marginBottom: 10}}
                 values={[
-                  getTranslation('new'),
-                  getTranslation('favorite'),
-                  getTranslation('hidden'),
+                  getTranslation('new') + ` (${newNotices.length})`,
+                  getTranslation('favorite') + ` (${favNotices.length})`,
+                  getTranslation('hidden') + ` (${hiddenNotices.length})`,
                 ]}
                 selectedIndex={0}
                 onValueChange={handleSegmentChange}

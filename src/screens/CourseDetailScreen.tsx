@@ -100,11 +100,20 @@ const CourseDetailScreen: INavigationScreen<
   );
 
   const [index, setIndex] = useState(0);
-  const routes: Route[] = [
-    {key: 'notice', title: getTranslation('notices')},
-    {key: 'file', title: getTranslation('files')},
-    {key: 'assignment', title: getTranslation('assignments')},
-  ];
+  const routes: Route[] = useMemo(
+    () => [
+      {
+        key: 'notice',
+        title: getTranslation('notices') + ` (${notices.length})`,
+      },
+      {key: 'file', title: getTranslation('files') + ` (${files.length})`},
+      {
+        key: 'assignment',
+        title: getTranslation('assignments') + ` (${assignments.length})`,
+      },
+    ],
+    [assignments.length, files.length, notices.length],
+  );
 
   const [currentModal, setCurrentModal] = useState<
     | {

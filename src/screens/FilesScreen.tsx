@@ -286,10 +286,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const [segment, setSegment] = useState('new');
 
   const handleSegmentChange = (value: string) => {
-    if (value === getTranslation('new')) {
+    if (value.startsWith(getTranslation('new'))) {
       setSegment('new');
       setCurrentDisplayFiles(newFiles);
-    } else if (value === getTranslation('favorite')) {
+    } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
       setCurrentDisplayFiles(favFiles);
     } else {
@@ -378,9 +378,9 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
               <SegmentedControlIOS
                 style={{margin: 20, marginTop: 10, marginBottom: 10}}
                 values={[
-                  getTranslation('new'),
-                  getTranslation('favorite'),
-                  getTranslation('hidden'),
+                  getTranslation('new') + ` (${newFiles.length})`,
+                  getTranslation('favorite') + ` (${favFiles.length})`,
+                  getTranslation('hidden') + ` (${hiddenFiles.length})`,
                 ]}
                 selectedIndex={0}
                 onValueChange={handleSegmentChange}

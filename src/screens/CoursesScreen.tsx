@@ -246,7 +246,10 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
           Platform.OS === 'ios' ? (
             <SegmentedControlIOS
               style={{margin: 20, marginTop: 10, marginBottom: 10}}
-              values={[getTranslation('visible'), getTranslation('hidden')]}
+              values={[
+                getTranslation('visible') + ` (${visibleCourses.length})`,
+                getTranslation('hidden') + ` (${hiddenCourses.length})`,
+              ]}
               selectedIndex={0}
               onValueChange={handleSegmentChange}
             />
