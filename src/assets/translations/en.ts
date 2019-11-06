@@ -64,4 +64,5 @@ export default {
   loggingIn: 'Logging you in...',
   offline: 'You are now offline. Tap here to re-login.',
   offlineLoginError: 'Login failed. Tap here to try again.',
+  noGrade: 'No grade specified',
 };

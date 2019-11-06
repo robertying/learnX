@@ -184,7 +184,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
           <Divider />
         </>
       ) : null}
-      {grade || gradeLevel ? (
+      {grade || gradeLevel || gradeContent ? (
         <>
           <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -199,12 +199,12 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                   ? `${gradeLevel} / ${grade}`
                   : grade
                   ? grade
-                  : gradeLevel}
+                  : gradeLevel
+                  ? gradeLevel
+                  : getTranslation('noGrade')}
               </Text>
             </View>
-            {gradeContent ? (
-              <Text style={{marginTop: 5}}>{gradeContent}</Text>
-            ) : null}
+            {gradeContent && <Text style={{marginTop: 5}}>{gradeContent}</Text>}
           </View>
           <Divider />
         </>

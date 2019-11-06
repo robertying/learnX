@@ -62,4 +62,5 @@ export default {
   loggingIn: '正在登录……',
   offline: '离线模式：点击此处重新登录',
   offlineLoginError: '登录失败，点击此处重新尝试',
+  noGrade: '无具体成绩',
 };
