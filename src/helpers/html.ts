@@ -35,3 +35,7 @@ export const getWebViewTemplate = (content: string, isDarkMode?: boolean) =>
     ${content}
   </body>
   `;
+
+export const needWhiteBackground = (ext: string) => {
+  return ['doc', 'docx', 'xls', 'xlsx'].includes(ext);
+};

@@ -11,6 +11,7 @@ import SnackBar from 'react-native-snackbar';
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
+import {needWhiteBackground} from '../helpers/html';
 
 export interface IWebViewScreenStateProps {
   filename: string;
@@ -165,7 +166,9 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
     <>
       {!loading && (filePath ? true : false) && (
         <WebView
-          style={{backgroundColor: 'transparent'}}
+          style={{
+            backgroundColor: needWhiteBackground(ext) ? 'white' : 'transparent',
+          }}
           source={{
             uri: filePath,
           }}
