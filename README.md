@@ -9,7 +9,26 @@
 
 App for Tsinghua University Web Learning, developed with React Native ⚛️.
 
-## Features
+## App Features
+
+### Basic Usage
+
+- Get a glance of the newest notices published by teachers.
+- Preview or download uploaded files of each course.
+- See any assignment detail while keeping track of deadlines.
+
+### Advanced Usage
+
+- Add to Favorites
+- Set a reminder
+- Hide courses
+- Pin at the top
+- Dark mode
+- Deadline calendar sync
+- Search
+- Switch among semesters
+
+## Project Features
 
 This project also serves as a demonstration of how to build a React Native app featuring:
 
