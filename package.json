@@ -4,7 +4,7 @@
   "license": "MIT",
   "version": "6.2.0",
   "scripts": {
-    "android": "react-native run-android",
+    "android": "react-native run-android --no-jetifier",
     "android:beta": "fastlane android beta",
     "android:build": "fastlane android build",
     "ios": "react-native run-ios",
@@ -15,7 +15,7 @@
     "typecheck": "tsc --noUnusedLocals",
     "ios:test:debug": "detox build --configuration \"ios.sim.debug\" && detox test --configuration \"ios.sim.debug\"",
     "ios:test:release": "detox build --configuration \"ios.sim.release\" && detox test --configuration \"ios.sim.release\"",
-    "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
+    "postinstall": "jetifier && patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
     "@react-native-community/async-storage": "1.6.2",
