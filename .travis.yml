@@ -75,7 +75,6 @@ matrix:
         - brew install applesimutils
         - gem install fastlane
         - gem install cocoapods
-        - pod repo update
         - yarn install
         - cd ios && pod install && cd ..
       script:
