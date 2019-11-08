@@ -16,7 +16,7 @@ import NoticeDetailScreen from '../screens/NoticeDetailScreen';
 import NoticesScreen from '../screens/NoticesScreen';
 import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import WebViewScreen from '../screens/WebViewScreen';
+import FilePreviewScreen from '../screens/FilePreviewScreen';
 import HelpScreen from '../screens/HelpScreen';
 import OfflineIndicator from '../components/OfflineIndicator';
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
@@ -101,7 +101,7 @@ const registerScreens = () => {
   Navigation.registerComponent('settings.about', () => AboutScreen);
   Navigation.registerComponent('settings.help', () => HelpScreen);
 
-  Navigation.registerComponent('webview', () => WebViewScreen);
+  Navigation.registerComponent('webview', () => FilePreviewScreen);
 };
 
 export default registerScreens;

@@ -34,7 +34,7 @@ import {ICourse, IFile, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
-import {IWebViewScreenProps} from './WebViewScreen';
+import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {getFuseOptions} from '../helpers/search';
 import {
   requestNotificationPermission,
@@ -191,9 +191,9 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       const title = file.title;
 
       if (DeviceInfo.isIPad() && !compactWidth) {
-        setDetailView<IWebViewScreenProps>(name, passProps, title);
+        setDetailView<IFilePreviewScreenProps>(name, passProps, title);
       } else {
-        pushTo<IWebViewScreenProps>(
+        pushTo<IFilePreviewScreenProps>(
           name,
           props.componentId,
           passProps,
