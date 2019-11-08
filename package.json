@@ -74,7 +74,7 @@
     "babel-jest": "24.9.0",
     "babel-plugin-preval": "3.0.1",
     "babel-plugin-transform-remove-console": "6.9.4",
-    "detox": "14.6.1",
+    "detox": "14.7.0",
     "eslint": "6.6.0",
     "eslint-plugin-prettier": "3.1.1",
     "husky": "3.0.9",
