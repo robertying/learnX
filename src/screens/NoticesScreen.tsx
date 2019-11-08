@@ -8,7 +8,7 @@ import {
   AppStateStatus,
   View,
   PushNotificationIOS,
-  PushNotification,
+  PushNotification as Notification,
   Dimensions,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
@@ -59,6 +59,7 @@ import Snackbar from 'react-native-snackbar';
 import {loadIcons} from '../helpers/icons';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import PushNotification from 'react-native-push-notification';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
@@ -126,6 +127,14 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       },
       runBackgroundTask,
     );
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      PushNotification.configure({
+        requestPermissions: false,
+      });
+    }
   }, []);
 
   useEffect(() => {
@@ -356,7 +365,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
-      const listener = (notification: PushNotification) => {
+      const listener = (notification: Notification) => {
         const data = notification.getData();
         if ((data as INotice).publisher) {
           onNoticeCardPress(data as WithCourseInfo<INotice>);
@@ -458,19 +467,34 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const [pickerVisible, setPickerVisible] = useState(false);
   const [reminderDate, setReminderDate] = useState(new Date());
   const [reminderInfo, setReminderInfo] = useState<WithCourseInfo<INotice>>();
+  const [dateAndroid, setDateAndroid] = useState<Date | null>(null);
+  const [timeAndroid, setTimeAndroid] = useState<Date | null>(null);
 
   const handleRemind = async (notice: WithCourseInfo<INotice>) => {
     if (!(await requestNotificationPermission())) {
       showNotificationPermissionAlert();
       return;
     }
+    setDateAndroid(null);
+    setTimeAndroid(null);
     setPickerVisible(true);
     setReminderInfo(notice);
   };
 
-  const handleReminderSet = () => {
+  const handleReminderSet = useCallback(() => {
     if (!reminderInfo) {
       return;
+    }
+
+    let date = reminderDate;
+    if (Platform.OS === 'android') {
+      dateAndroid!.setHours(
+        timeAndroid!.getHours(),
+        timeAndroid!.getMinutes(),
+        0,
+        0,
+      );
+      date = dateAndroid!;
     }
 
     scheduleNotification(
@@ -478,7 +502,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       `${reminderInfo.title}\n${removeTags(
         reminderInfo.content || getTranslation('noNoticeContent'),
       )}`,
-      reminderDate.toISOString(),
+      date,
       reminderInfo,
     );
     setPickerVisible(false);
@@ -487,7 +511,30 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       title: getTranslation('reminderSet'),
       duration: Snackbar.LENGTH_SHORT,
     });
+  }, [dateAndroid, reminderDate, reminderInfo, timeAndroid]);
+
+  const handleDateChange = (_: any, date?: Date) => {
+    if (date) {
+      if (Platform.OS === 'ios') {
+        setReminderDate(date);
+      } else {
+        if (!dateAndroid) {
+          setDateAndroid(date);
+        } else {
+          setTimeAndroid(date);
+          setPickerVisible(false);
+        }
+      }
+    }
   };
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && dateAndroid && timeAndroid) {
+      handleReminderSet();
+      setDateAndroid(null);
+      setTimeAndroid(null);
+    }
+  }, [dateAndroid, handleReminderSet, timeAndroid]);
 
   return (
     <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
@@ -534,54 +581,74 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
             />
           }
         />
-        <Modal
-          isVisible={pickerVisible}
-          onBackdropPress={() => setPickerVisible(false)}
-          backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
-          animationIn="bounceIn"
-          animationOut="zoomOut"
-          useNativeDriver={true}
-          deviceWidth={Layout.initialWindow.width}
-          deviceHeight={Layout.initialWindow.height}>
-          <DateTimePicker
-            style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
-            mode="datetime"
-            minimumDate={new Date()}
-            value={reminderDate}
-            onChange={(_, date) => date && setReminderDate(date)}
-          />
-          <View
-            style={{
-              backgroundColor: isDarkMode ? 'black' : 'white',
-              width: '100%',
-              height: 50,
-              paddingHorizontal: 15,
-              flexDirection: 'row',
-              justifyContent: 'flex-end',
-              alignItems: 'center',
-            }}>
-            <Button
-              style={{marginHorizontal: 20}}
-              onPress={() => setPickerVisible(false)}>
-              <Text
+        {Platform.OS === 'android' ? (
+          pickerVisible &&
+          (!dateAndroid || !timeAndroid) && (
+            <DateTimePicker
+              mode={dateAndroid ? 'time' : 'date'}
+              minimumDate={new Date()}
+              value={reminderDate}
+              onChange={handleDateChange}
+            />
+          )
+        ) : (
+          <Modal
+            isVisible={pickerVisible}
+            onBackdropPress={() => setPickerVisible(false)}
+            backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+            animationIn="bounceIn"
+            animationOut="zoomOut"
+            useNativeDriver={true}
+            deviceWidth={Layout.initialWindow.width}
+            deviceHeight={Layout.initialWindow.height}>
+            <DateTimePicker
+              style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+              mode="datetime"
+              minimumDate={new Date()}
+              value={reminderDate}
+              onChange={handleDateChange}
+            />
+            {Platform.OS === 'ios' && (
+              <View
                 style={{
-                  fontSize: 18,
-                  color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                  backgroundColor: isDarkMode ? 'black' : 'white',
+                  width: '100%',
+                  height: 50,
+                  paddingHorizontal: 15,
+                  flexDirection: 'row',
+                  justifyContent: 'flex-end',
+                  alignItems: 'center',
                 }}>
-                {getTranslation('cancel')}
-              </Text>
-            </Button>
-            <Button style={{marginHorizontal: 20}} onPress={handleReminderSet}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
-                }}>
-                {getTranslation('ok')}
-              </Text>
-            </Button>
-          </View>
-        </Modal>
+                <Button
+                  style={{marginHorizontal: 20}}
+                  onPress={() => setPickerVisible(false)}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: isDarkMode
+                        ? Colors.purpleDark
+                        : Colors.purpleLight,
+                    }}>
+                    {getTranslation('cancel')}
+                  </Text>
+                </Button>
+                <Button
+                  style={{marginHorizontal: 20}}
+                  onPress={handleReminderSet}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      color: isDarkMode
+                        ? Colors.purpleDark
+                        : Colors.purpleLight,
+                    }}>
+                    {getTranslation('ok')}
+                  </Text>
+                </Button>
+              </View>
+            )}
+          </Modal>
+        )}
       </SafeAreaView>
     </PaperProvider>
   );

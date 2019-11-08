@@ -1,13 +1,30 @@
-import {PushNotificationIOS, Alert, Linking} from 'react-native';
+import {
+  Alert,
+  Linking,
+  PushNotificationPermissions,
+  Platform,
+  PushNotificationIOS,
+} from 'react-native';
 import {getTranslation} from './i18n';
+import PushNotification from 'react-native-push-notification';
 
 export const requestNotificationPermission = async () => {
-  const result = await PushNotificationIOS.requestPermissions({
-    alert: true,
-    badge: true,
-    sound: true,
-  });
-  return result.alert;
+  if (Platform.OS === 'ios') {
+    const result = await PushNotificationIOS.requestPermissions({
+      alert: true,
+      badge: true,
+      sound: true,
+    });
+    return result.alert;
+  } else {
+    await PushNotification.requestPermissions(['alert', 'badge', 'sound']);
+
+    const result = await new Promise<PushNotificationPermissions>(resolve =>
+      PushNotification.checkPermissions(value => resolve(value)),
+    );
+
+    return result.alert;
+  }
 };
 
 export const showNotificationPermissionAlert = () => {
@@ -31,13 +48,22 @@ export const showNotificationPermissionAlert = () => {
 export const scheduleNotification = (
   title: string,
   body: string,
-  date: string,
+  date: Date,
   userInfo?: Object,
 ) => {
-  PushNotificationIOS.scheduleLocalNotification({
-    fireDate: date,
-    alertTitle: title,
-    alertBody: body,
-    userInfo,
-  });
+  if (Platform.OS === 'ios') {
+    PushNotificationIOS.scheduleLocalNotification({
+      fireDate: date.toISOString(),
+      alertTitle: title,
+      alertBody: body,
+      userInfo,
+    });
+  } else {
+    PushNotification.localNotificationSchedule({
+      date,
+      title,
+      message: body,
+      userInfo,
+    });
+  }
 };
