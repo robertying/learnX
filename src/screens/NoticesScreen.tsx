@@ -118,6 +118,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     BackgroundFetch.configure(
       {
         minimumFetchInterval: 60 * 2,
+        enableHeadless: true,
         stopOnTerminate: false,
         startOnBoot: true,
         requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
