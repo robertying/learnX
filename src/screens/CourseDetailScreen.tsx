@@ -301,7 +301,6 @@ const CourseDetailScreen: INavigationScreen<
               attachmentName={currentModal.data!.attachmentName}
               attachmentUrl={currentModal.data!.attachmentUrl}
               beforeNavigation={() =>
-                Platform.OS === 'ios' &&
                 setCurrentModal({type: 'Notice', visible: false})
               }
             />
@@ -322,7 +321,6 @@ const CourseDetailScreen: INavigationScreen<
               grade={currentModal.data!.grade}
               gradeContent={currentModal.data!.gradeContent}
               beforeNavigation={() =>
-                Platform.OS === 'ios' &&
                 setCurrentModal({type: 'Notice', visible: false})
               }
             />
