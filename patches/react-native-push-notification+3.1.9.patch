@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-push-notification/component/index.ios.js b/node_modules/react-native-push-notification/component/index.ios.js
+index 400214b..6d20453 100644
+--- a/node_modules/react-native-push-notification/component/index.ios.js
++++ b/node_modules/react-native-push-notification/component/index.ios.js
+@@ -1,7 +1,6 @@
+ "use strict";
+ 
+-import { AppState } from "react-native";
+-import PushNotificationIOS from "@react-native-community/push-notification-ios";
++import { AppState, PushNotificationIOS } from "react-native";
+ 
+ module.exports = {
+   state: AppState,
