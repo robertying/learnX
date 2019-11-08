@@ -80,85 +80,83 @@ function InteractablePreviewWrapper(
 
   return (
     <View>
-      {Platform.OS === 'ios' && (
-        <View
-          style={{
-            position: 'absolute',
-            right: 0,
-            left: 0,
-            top: 0,
-            bottom: 0,
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}>
-          {onHide ? (
+      <View
+        style={{
+          position: 'absolute',
+          right: 0,
+          left: 0,
+          top: 0,
+          bottom: 0,
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          alignItems: 'center',
+        }}>
+        {onHide ? (
+          <Button
+            style={{
+              height: '100%',
+              width: buttonWidth,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: 'rgba(255,204,0,0.2)',
+            }}
+            onPress={handleHide}>
+            <MaterialIcons
+              name={hidden ? 'visibility' : 'visibility-off'}
+              size={40}
+              color={isDarkMode ? Colors.yellowDark : Colors.yellowLight}
+            />
+          </Button>
+        ) : (
+          <>
             <Button
               style={{
                 height: '100%',
                 width: buttonWidth,
                 justifyContent: 'center',
                 alignItems: 'center',
-                backgroundColor: 'rgba(255,204,0,0.2)',
+                backgroundColor: 'rgba(255,59,48,0.2)',
               }}
-              onPress={handleHide}>
-              <MaterialIcons
-                name={hidden ? 'visibility' : 'visibility-off'}
+              onPress={handleFav}>
+              <MaterialCommunityIcons
+                name={fav ? 'heart-off' : 'heart'}
                 size={40}
-                color={isDarkMode ? Colors.yellowDark : Colors.yellowLight}
+                color={isDarkMode ? Colors.redDark : Colors.redLight}
               />
             </Button>
-          ) : (
-            <>
-              <Button
-                style={{
-                  height: '100%',
-                  width: buttonWidth,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(255,59,48,0.2)',
-                }}
-                onPress={handleFav}>
-                <MaterialCommunityIcons
-                  name={fav ? 'heart-off' : 'heart'}
-                  size={40}
-                  color={isDarkMode ? Colors.redDark : Colors.redLight}
-                />
-              </Button>
-              <Button
-                style={{
-                  height: '100%',
-                  width: buttonWidth,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(175,82,222,0.2)',
-                }}
-                onPress={handlePin}>
-                <MaterialCommunityIcons
-                  name={pinned ? 'pin-off' : 'pin'}
-                  size={40}
-                  color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
-                />
-              </Button>
-              <Button
-                style={{
-                  height: '100%',
-                  width: buttonWidth,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  backgroundColor: 'rgba(52,199,89,0.2)',
-                }}
-                onPress={handleRemind}>
-                <MaterialCommunityIcons
-                  name="timer"
-                  size={40}
-                  color={isDarkMode ? Colors.greenDark : Colors.greenLight}
-                />
-              </Button>
-            </>
-          )}
-        </View>
-      )}
+            <Button
+              style={{
+                height: '100%',
+                width: buttonWidth,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'rgba(175,82,222,0.2)',
+              }}
+              onPress={handlePin}>
+              <MaterialCommunityIcons
+                name={pinned ? 'pin-off' : 'pin'}
+                size={40}
+                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              />
+            </Button>
+            <Button
+              style={{
+                height: '100%',
+                width: buttonWidth,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: 'rgba(52,199,89,0.2)',
+              }}
+              onPress={handleRemind}>
+              <MaterialCommunityIcons
+                name="timer"
+                size={40}
+                color={isDarkMode ? Colors.greenDark : Colors.greenLight}
+              />
+            </Button>
+          </>
+        )}
+      </View>
       <Interactable.View
         testID="InteractableCard"
         ref={snapRef}

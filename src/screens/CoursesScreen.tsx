@@ -1,11 +1,5 @@
 import React, {useEffect, useMemo, useCallback, useState} from 'react';
-import {
-  RefreshControl,
-  SafeAreaView,
-  FlatList,
-  Platform,
-  SegmentedControlIOS,
-} from 'react-native';
+import {RefreshControl, SafeAreaView, FlatList} from 'react-native';
 import {connect} from 'react-redux';
 import CourseCard from '../components/CourseCard';
 import EmptyList from '../components/EmptyList';
@@ -32,6 +26,7 @@ import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import SegmentedControl from '../components/SegmentedControl';
 
 interface ICoursesScreenStateProps {
   loggedIn: boolean;
@@ -248,17 +243,14 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         renderItem={renderListItem}
         keyExtractor={item => item.id}
         ListHeaderComponent={
-          Platform.OS === 'ios' ? (
-            <SegmentedControlIOS
-              style={{margin: 20, marginTop: 10, marginBottom: 10}}
-              values={[
-                getTranslation('visible') + ` (${visibleCourses.length})`,
-                getTranslation('hidden') + ` (${hiddenCourses.length})`,
-              ]}
-              selectedIndex={0}
-              onValueChange={handleSegmentChange}
-            />
-          ) : null
+          <SegmentedControl
+            values={[
+              getTranslation('visible') + ` (${visibleCourses.length})`,
+              getTranslation('hidden') + ` (${hiddenCourses.length})`,
+            ]}
+            selectedIndex={segment === 'visible' ? 0 : 1}
+            onValueChange={handleSegmentChange}
+          />
         }
         refreshControl={
           <RefreshControl

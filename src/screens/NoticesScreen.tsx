@@ -4,7 +4,6 @@ import {
   RefreshControl,
   SafeAreaView,
   FlatList,
-  SegmentedControlIOS,
   AppState,
   AppStateStatus,
   View,
@@ -59,6 +58,7 @@ import Text from '../components/Text';
 import Snackbar from 'react-native-snackbar';
 import {loadIcons} from '../helpers/icons';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import SegmentedControl from '../components/SegmentedControl';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
@@ -514,18 +514,17 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           renderItem={renderListItem}
           keyExtractor={item => item.id}
           ListHeaderComponent={
-            Platform.OS === 'ios' ? (
-              <SegmentedControlIOS
-                style={{margin: 20, marginTop: 10, marginBottom: 10}}
-                values={[
-                  getTranslation('new') + ` (${newNotices.length})`,
-                  getTranslation('favorite') + ` (${favNotices.length})`,
-                  getTranslation('hidden') + ` (${hiddenNotices.length})`,
-                ]}
-                selectedIndex={0}
-                onValueChange={handleSegmentChange}
-              />
-            ) : null
+            <SegmentedControl
+              values={[
+                getTranslation('new') + ` (${newNotices.length})`,
+                getTranslation('favorite') + ` (${favNotices.length})`,
+                getTranslation('hidden') + ` (${hiddenNotices.length})`,
+              ]}
+              selectedIndex={
+                segment === 'new' ? 0 : segment === 'favorite' ? 1 : 2
+              }
+              onValueChange={handleSegmentChange}
+            />
           }
           refreshControl={
             <RefreshControl

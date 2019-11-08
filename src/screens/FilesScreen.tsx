@@ -4,7 +4,6 @@ import {
   Platform,
   RefreshControl,
   SafeAreaView,
-  SegmentedControlIOS,
   PushNotificationIOS,
   PushNotification,
   View,
@@ -49,6 +48,7 @@ import Button from '../components/Button';
 import Text from '../components/Text';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import SegmentedControl from '../components/SegmentedControl';
 
 interface IFilesScreenStateProps {
   loggedIn: boolean;
@@ -379,18 +379,17 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           renderItem={renderListItem}
           keyExtractor={item => item.id}
           ListHeaderComponent={
-            Platform.OS === 'ios' ? (
-              <SegmentedControlIOS
-                style={{margin: 20, marginTop: 10, marginBottom: 10}}
-                values={[
-                  getTranslation('new') + ` (${newFiles.length})`,
-                  getTranslation('favorite') + ` (${favFiles.length})`,
-                  getTranslation('hidden') + ` (${hiddenFiles.length})`,
-                ]}
-                selectedIndex={0}
-                onValueChange={handleSegmentChange}
-              />
-            ) : null
+            <SegmentedControl
+              values={[
+                getTranslation('new') + ` (${newFiles.length})`,
+                getTranslation('favorite') + ` (${favFiles.length})`,
+                getTranslation('hidden') + ` (${hiddenFiles.length})`,
+              ]}
+              selectedIndex={
+                segment === 'new' ? 0 : segment === 'favorite' ? 1 : 2
+              }
+              onValueChange={handleSegmentChange}
+            />
           }
           refreshControl={
             <RefreshControl
