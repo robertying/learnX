@@ -33,7 +33,7 @@ import {
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
-import {IWebViewScreenProps} from './WebViewScreen';
+import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
@@ -150,7 +150,7 @@ const CourseDetailScreen: INavigationScreen<
       };
       const title = stripedFilename;
 
-      pushTo<IWebViewScreenProps>(
+      pushTo<IFilePreviewScreenProps>(
         name,
         props.componentId,
         passProps,

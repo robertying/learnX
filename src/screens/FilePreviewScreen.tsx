@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {ProgressViewIOS, View, StatusBar} from 'react-native';
+import {View, StatusBar, Platform, SafeAreaView} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import MediumPlaceholder from '../components/MediumPlaceholder';
@@ -13,16 +13,19 @@ import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {needWhiteBackground} from '../helpers/html';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {ProgressBar, IconButton} from 'react-native-paper';
+import Text from '../components/Text';
+import {iOSUIKit} from 'react-native-typography';
 
-export interface IWebViewScreenStateProps {
+export interface IFilePreviewScreenStateProps {
   filename: string;
   url: string;
   ext: string;
 }
 
-export type IWebViewScreenProps = IWebViewScreenStateProps;
+export type IFilePreviewScreenProps = IFilePreviewScreenStateProps;
 
-const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
+const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   const {url, ext, filename} = props;
 
   const [loading, setLoading] = useState(false);
@@ -54,6 +57,7 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
 
   useEffect(() => {
     (async () => {
+      console.log('hi');
       setLoading(true);
       try {
         const filePath = await downloadFile(
@@ -168,8 +172,9 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   }, [isDarkMode, props.componentId]);
 
   return (
-    <>
-      {!loading && (filePath ? true : false) && (
+    <SafeAreaView style={{flex: 1}}>
+      {loading && <ProgressBar progress={progress} color={Colors.theme} />}
+      {Platform.OS === 'ios' && !loading && (filePath ? true : false) && (
         <WebView
           style={{
             backgroundColor: needWhiteBackground(ext) ? 'white' : 'transparent',
@@ -181,7 +186,48 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
           decelerationRate="normal"
         />
       )}
-      {loading &&
+      {Platform.OS === 'android' && (
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: isDarkMode ? 'black' : 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text
+            style={[
+              isDarkMode
+                ? iOSUIKit.largeTitleEmphasizedWhite
+                : iOSUIKit.largeTitleEmphasized,
+              {marginHorizontal: 20, textAlign: 'center'},
+            ]}>{`${filename}.${ext}`}</Text>
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+            }}>
+            <IconButton
+              icon="refresh"
+              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              size={50}
+              onPress={() => listener({buttonId: 'refresh'}) as any}
+            />
+            <IconButton
+              disabled={loading || !filePath}
+              icon="share"
+              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              size={50}
+              onPress={() => listener({buttonId: 'share'}) as any}
+            />
+          </View>
+        </View>
+      )}
+      {Platform.OS === 'ios' &&
+        loading &&
         (isDarkMode ? (
           <View
             style={{
@@ -213,24 +259,11 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
             <MediumPlaceholder style={{margin: 15}} loading={true} />
           </View>
         ))}
-      {loading && (
-        <ProgressViewIOS
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            transform: [{scaleX: 1.0}, {scaleY: 3}],
-          }}
-          progressTintColor={Colors.theme}
-          progress={progress}
-        />
-      )}
-    </>
+    </SafeAreaView>
   );
 };
 
-WebViewScreen.options = {
+FilePreviewScreen.options = {
   topBar: {
     hideOnScroll: true,
     rightButtons: [
@@ -246,4 +279,4 @@ WebViewScreen.options = {
   },
 };
 
-export default WebViewScreen;
+export default FilePreviewScreen;

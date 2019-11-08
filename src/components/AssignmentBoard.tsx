@@ -12,7 +12,7 @@ import Text from './Text';
 import TextButton from './TextButton';
 import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
-import {IWebViewScreenProps} from '../screens/WebViewScreen';
+import {IFilePreviewScreenProps} from '../screens/FilePreviewScreen';
 import {getWebViewTemplate} from '../helpers/html';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
@@ -54,7 +54,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     }
 
     const stripedFilename = stripExtension(filename);
-    pushTo<IWebViewScreenProps>(
+    pushTo<IFilePreviewScreenProps>(
       'webview',
       componentId,
       {
