@@ -194,7 +194,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const renderListItem: ListRenderItem<{}> = ({index}) => {
     switch (index) {
       case 0:
-        return Platform.OS === 'ios' ? (
+        return (
           <SettingsListItem
             containerStyle={{marginTop: 10}}
             variant="switch"
@@ -209,7 +209,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             switchValue={calendarSync}
             onSwitchValueChange={onCalendarSyncSwitchChange}
           />
-        ) : null;
+        );
       case 1:
         return (
           <SettingsListItem
