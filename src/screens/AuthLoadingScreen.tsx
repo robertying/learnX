@@ -13,6 +13,8 @@ import {IAuthState, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import semver from 'semver';
 import {resetLoading} from '../redux/actions/root';
+import {useDarkMode} from 'react-native-dark-mode';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface IAuthLoadingScreenStateProps {
   rehydrated: boolean;
@@ -29,6 +31,12 @@ type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
 
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
   const {rehydrated, auth, setUpdate, resetLoading} = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   useEffect(() => {
     if (rehydrated) {

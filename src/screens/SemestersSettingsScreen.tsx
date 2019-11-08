@@ -12,6 +12,7 @@ import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import {getScreenOptions} from '../helpers/navigation';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface ISemestersSettingsScreenStateProps {
   semesters: string[];
@@ -37,6 +38,12 @@ const SemestersSettingsScreen: INavigationScreen<
     getCoursesForSemester,
     getAllSemesters,
   } = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+  }, [isDarkMode, props.componentId]);
 
   useEffect(() => {
     getAllSemesters();
@@ -66,8 +73,6 @@ const SemestersSettingsScreen: INavigationScreen<
   };
 
   const keyExtractor = (item: any) => item as string;
-
-  const isDarkMode = useDarkMode();
 
   return (
     <SafeAreaView

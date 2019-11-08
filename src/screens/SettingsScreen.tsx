@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   Alert,
   FlatList,
@@ -33,6 +33,7 @@ import semver from 'semver';
 import DeviceInfo from '../constants/DeviceInfo';
 import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface ISettingsScreenStateProps {
   calendarSync: boolean;
@@ -349,6 +350,10 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   };
 
   const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView

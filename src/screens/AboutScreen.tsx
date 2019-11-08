@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {Linking, SafeAreaView, ScrollView} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
@@ -10,13 +10,18 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getScreenOptions} from '../helpers/navigation';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
-const AboutScreen: INavigationScreen<{}> = () => {
+const AboutScreen: INavigationScreen<{}> = props => {
   const onGitHubLinkPress = () => {
     Linking.openURL('https://github.com/robertying/learnX');
   };
 
   const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+  }, [isDarkMode, props.componentId]);
 
   return (
     <SafeAreaView

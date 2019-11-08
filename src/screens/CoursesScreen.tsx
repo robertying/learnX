@@ -31,6 +31,7 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface ICoursesScreenStateProps {
   loggedIn: boolean;
@@ -78,6 +79,12 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     hiddenCourseIds,
     compactWidth,
   } = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   /**
    * Prepare data
@@ -229,8 +236,6 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       setCurrentDisplayCourses(hiddenCourses);
     }
   }, [hiddenCourses, segment]);
-
-  const isDarkMode = useDarkMode();
 
   return (
     <SafeAreaView

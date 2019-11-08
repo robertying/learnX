@@ -19,11 +19,34 @@ const startApp = () => {
 
     registerComponents();
 
-    Navigation.setDefaultOptions({
-      layout: {
-        backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-      },
-    });
+    if (Platform.OS === 'ios') {
+      Navigation.setDefaultOptions({
+        layout: {
+          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+        },
+      });
+    } else {
+      Navigation.setDefaultOptions({
+        layout: {
+          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+        },
+        statusBar: {
+          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+          style: initialMode === 'dark' ? 'light' : 'dark',
+        },
+        topBar: {
+          title: {
+            color: initialMode === 'dark' ? 'white' : 'black',
+          },
+          background: {
+            color: initialMode === 'dark' ? 'black' : 'white',
+          },
+        },
+        bottomTabs: {
+          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+        },
+      });
+    }
 
     const authLoadingRoot = getAuthLoadingRoot();
     Navigation.setRoot(authLoadingRoot);

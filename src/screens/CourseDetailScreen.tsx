@@ -1,4 +1,4 @@
-import React, {useMemo, useState, useCallback} from 'react';
+import React, {useMemo, useState, useCallback, useEffect} from 'react';
 import {Dimensions, Platform, View, SafeAreaView} from 'react-native';
 import Modal from 'react-native-modal';
 import {
@@ -35,6 +35,7 @@ import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
 import {IWebViewScreenProps} from './WebViewScreen';
 import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface ICourseDetailScreenStateProps {
   course?: ICourse;
@@ -70,6 +71,12 @@ const CourseDetailScreen: INavigationScreen<
     getNoticesForCourse,
     course,
   } = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+  }, [isDarkMode, props.componentId]);
 
   const notices = useMemo(
     () =>
@@ -127,8 +134,6 @@ const CourseDetailScreen: INavigationScreen<
         visible: boolean;
       }
   >({type: 'Notice', data: undefined, visible: false});
-
-  const isDarkMode = useDarkMode();
 
   const onNoticeCardPress = useCallback((notice: INotice) => {
     setCurrentModal({type: 'Notice', data: notice, visible: true});

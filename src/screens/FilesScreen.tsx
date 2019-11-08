@@ -48,6 +48,7 @@ import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import Text from '../components/Text';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface IFilesScreenStateProps {
   loggedIn: boolean;
@@ -86,6 +87,12 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     unfavFile,
     compactWidth,
   } = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   /**
    * Prepare data
@@ -172,8 +179,6 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   /**
    * Render cards
    */
-
-  const isDarkMode = useDarkMode();
 
   const onFileCardPress = useCallback(
     (file: WithCourseInfo<IFile>) => {

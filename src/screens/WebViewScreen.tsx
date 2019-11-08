@@ -12,6 +12,7 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {needWhiteBackground} from '../helpers/html';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 export interface IWebViewScreenStateProps {
   filename: string;
@@ -161,6 +162,10 @@ const WebViewScreen: INavigationScreen<IWebViewScreenProps> = props => {
   }, [filePath]);
 
   const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+  }, [isDarkMode, props.componentId]);
 
   return (
     <>
