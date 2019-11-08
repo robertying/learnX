@@ -19,6 +19,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import WebViewScreen from '../screens/WebViewScreen';
 import HelpScreen from '../screens/HelpScreen';
 import OfflineIndicator from '../components/OfflineIndicator';
+import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
 
 const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
   props: any,
@@ -79,7 +80,7 @@ const registerScreens = () => {
   );
   Navigation.registerComponent(
     'courses.detail',
-    () => storeWrapped(CourseDetailScreen),
+    () => gestureHandlerRootHOC(storeWrapped(CourseDetailScreen)),
     () => CourseDetailScreen,
   );
 
