@@ -8,6 +8,9 @@ export const androidAdaptToSystemTheme = (
 ) => {
   if (Platform.OS === 'android') {
     Navigation.mergeOptions(componentId, {
+      layout: {
+        backgroundColor: isDarkMode ? 'black' : 'white',
+      },
       statusBar: {
         backgroundColor: isDarkMode ? 'black' : 'white',
         style: isDarkMode ? 'light' : 'dark',
