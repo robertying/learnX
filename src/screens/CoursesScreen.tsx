@@ -216,7 +216,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const [segment, setSegment] = useState('visible');
 
   const handleSegmentChange = (value: string) => {
-    if (value === getTranslation('visible')) {
+    if (value.startsWith(getTranslation('visible'))) {
       setSegment('visible');
       setCurrentDisplayCourses(visibleCourses);
     } else {
