@@ -28,6 +28,7 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import Text from '../components/Text';
 import {getNavigationRoot} from '../navigation/navigationRoot';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface ILoginScreenProps {
   loggedIn: boolean;
@@ -51,6 +52,12 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     getAllSemesters,
     getAllSemestersError,
   } = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
 
@@ -142,8 +149,6 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       });
     }
   };
-
-  const isDarkMode = useDarkMode();
 
   return (
     <SafeAreaView

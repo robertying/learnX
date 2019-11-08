@@ -58,6 +58,7 @@ import {removeTags} from '../helpers/html';
 import Text from '../components/Text';
 import Snackbar from 'react-native-snackbar';
 import {loadIcons} from '../helpers/icons';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
@@ -126,6 +127,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       runBackgroundTask,
     );
   }, []);
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   useEffect(() => {
     (async () => {

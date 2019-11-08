@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {SafeAreaView, Linking} from 'react-native';
 import {useDarkMode} from 'react-native-dark-mode';
 import {getTranslation, getLocale} from '../helpers/i18n';
@@ -6,6 +6,7 @@ import {INavigationScreen} from '../types';
 import MarkdownWebView from 'react-native-github-markdown';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {getScreenOptions} from '../helpers/navigation';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 declare const preval: any;
 
@@ -19,8 +20,12 @@ const markdown = getLocale().startsWith('zh')
         module.exports = fs.readFileSync(require.resolve('../assets/HELP_EN.md'), 'utf8')
 `;
 
-const HelpScreen: INavigationScreen<{}> = () => {
+const HelpScreen: INavigationScreen<{}> = props => {
   const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+  }, [isDarkMode, props.componentId]);
 
   const webViewRef = useRef<WebView>(null);
 

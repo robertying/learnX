@@ -48,6 +48,7 @@ import {
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
+import {androidAdaptToSystemTheme} from '../helpers/darkmode';
 
 interface IAssignmentsScreenStateProps {
   loggedIn: boolean;
@@ -87,6 +88,12 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     compactWidth,
     loggedIn,
   } = props;
+
+  const isDarkMode = useDarkMode();
+
+  useEffect(() => {
+    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+  }, [isDarkMode, props.componentId]);
 
   /**
    * Prepare data
@@ -194,8 +201,6 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   /**
    * Render cards
    */
-
-  const isDarkMode = useDarkMode();
 
   const onAssignmentCardPress = useCallback(
     (assignment: WithCourseInfo<IAssignment>) => {
