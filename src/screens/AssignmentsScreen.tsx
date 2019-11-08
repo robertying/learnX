@@ -4,7 +4,6 @@ import {
   Platform,
   RefreshControl,
   SafeAreaView,
-  SegmentedControlIOS,
   PushNotificationIOS,
   PushNotification,
   View,
@@ -49,6 +48,7 @@ import {
   scheduleNotification,
 } from '../helpers/notification';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import SegmentedControl from '../components/SegmentedControl';
 
 interface IAssignmentsScreenStateProps {
   loggedIn: boolean;
@@ -412,18 +412,17 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           renderItem={renderListItem}
           keyExtractor={item => item.id}
           ListHeaderComponent={
-            Platform.OS === 'ios' ? (
-              <SegmentedControlIOS
-                style={{margin: 20, marginTop: 10, marginBottom: 10}}
-                values={[
-                  getTranslation('new') + ` (${newAssignments.length})`,
-                  getTranslation('favorite') + ` (${favAssignments.length})`,
-                  getTranslation('hidden') + ` (${hiddenAssignments.length})`,
-                ]}
-                selectedIndex={0}
-                onValueChange={handleSegmentChange}
-              />
-            ) : null
+            <SegmentedControl
+              values={[
+                getTranslation('new') + ` (${newAssignments.length})`,
+                getTranslation('favorite') + ` (${favAssignments.length})`,
+                getTranslation('hidden') + ` (${hiddenAssignments.length})`,
+              ]}
+              selectedIndex={
+                segment === 'new' ? 0 : segment === 'favorite' ? 1 : 2
+              }
+              onValueChange={handleSegmentChange}
+            />
           }
           refreshControl={
             <RefreshControl

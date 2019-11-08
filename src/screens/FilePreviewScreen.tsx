@@ -13,7 +13,13 @@ import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {needWhiteBackground} from '../helpers/html';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
-import {ProgressBar, IconButton} from 'react-native-paper';
+import {
+  ProgressBar,
+  IconButton,
+  DarkTheme,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from 'react-native-paper';
 import Text from '../components/Text';
 import {iOSUIKit} from 'react-native-typography';
 
@@ -175,94 +181,98 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   }, [loading, isDarkMode]);
 
   return (
-    <SafeAreaView style={{flex: 1}}>
-      {loading && <ProgressBar progress={progress} color={Colors.theme} />}
-      {Platform.OS === 'ios' && !loading && (filePath ? true : false) && (
-        <WebView
-          style={{
-            backgroundColor: needWhiteBackground(ext) ? 'white' : 'transparent',
-          }}
-          source={{
-            uri: filePath,
-          }}
-          originWhitelist={['*']}
-          decelerationRate="normal"
-        />
-      )}
-      {Platform.OS === 'android' && (
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: isDarkMode ? 'black' : 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Text
-            style={[
-              isDarkMode
-                ? iOSUIKit.largeTitleEmphasizedWhite
-                : iOSUIKit.largeTitleEmphasized,
-              {marginHorizontal: 20, textAlign: 'center'},
-            ]}>{`${filename}.${ext}`}</Text>
+    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
+      <SafeAreaView style={{flex: 1}}>
+        {loading && <ProgressBar progress={progress} color={Colors.theme} />}
+        {Platform.OS === 'ios' && !loading && (filePath ? true : false) && (
+          <WebView
+            style={{
+              backgroundColor: needWhiteBackground(ext)
+                ? 'white'
+                : 'transparent',
+            }}
+            source={{
+              uri: filePath,
+            }}
+            originWhitelist={['*']}
+            decelerationRate="normal"
+          />
+        )}
+        {Platform.OS === 'android' && (
           <View
             style={{
+              flex: 1,
+              backgroundColor: isDarkMode ? 'black' : 'white',
               display: 'flex',
-              flexDirection: 'row',
-              justifyContent: 'space-around',
+              flexDirection: 'column',
+              justifyContent: 'center',
               alignItems: 'center',
             }}>
-            <IconButton
-              icon="refresh"
-              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
-              size={50}
-              onPress={() => listener({buttonId: 'refresh'}) as any}
-            />
-            <IconButton
-              disabled={loading || !filePath}
-              icon="share"
-              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
-              size={50}
-              onPress={() => listener({buttonId: 'share'}) as any}
-            />
+            <Text
+              style={[
+                isDarkMode
+                  ? iOSUIKit.largeTitleEmphasizedWhite
+                  : iOSUIKit.largeTitleEmphasized,
+                {marginHorizontal: 20, textAlign: 'center'},
+              ]}>{`${filename}.${ext}`}</Text>
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+              }}>
+              <IconButton
+                icon="refresh"
+                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                size={50}
+                onPress={() => listener({buttonId: 'refresh'}) as any}
+              />
+              <IconButton
+                disabled={loading || !filePath}
+                icon="share"
+                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                size={50}
+                onPress={() => listener({buttonId: 'share'}) as any}
+              />
+            </View>
           </View>
-        </View>
-      )}
-      {Platform.OS === 'ios' &&
-        loading &&
-        (isDarkMode ? (
-          <View
-            style={{
-              backgroundColor: 'black',
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            }}>
-            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-            <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-          </View>
-        ) : (
-          <View
-            style={{
-              backgroundColor: 'white',
-              position: 'absolute',
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
-            }}>
-            <MediumPlaceholder style={{margin: 15}} loading={true} />
-            <MediumPlaceholder style={{margin: 15}} loading={true} />
-            <MediumPlaceholder style={{margin: 15}} loading={true} />
-            <MediumPlaceholder style={{margin: 15}} loading={true} />
-          </View>
-        ))}
-    </SafeAreaView>
+        )}
+        {Platform.OS === 'ios' &&
+          loading &&
+          (isDarkMode ? (
+            <View
+              style={{
+                backgroundColor: 'black',
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+              }}>
+              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+            </View>
+          ) : (
+            <View
+              style={{
+                backgroundColor: 'white',
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+              }}>
+              <MediumPlaceholder style={{margin: 15}} loading={true} />
+              <MediumPlaceholder style={{margin: 15}} loading={true} />
+              <MediumPlaceholder style={{margin: 15}} loading={true} />
+              <MediumPlaceholder style={{margin: 15}} loading={true} />
+            </View>
+          ))}
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 
