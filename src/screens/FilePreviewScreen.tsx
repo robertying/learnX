@@ -57,7 +57,6 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
 
   useEffect(() => {
     (async () => {
-      console.log('hi');
       setLoading(true);
       try {
         const filePath = await downloadFile(
@@ -170,6 +169,10 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   useEffect(() => {
     androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
+
+  useEffect(() => {
+    StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');
+  }, [loading, isDarkMode]);
 
   return (
     <SafeAreaView style={{flex: 1}}>
