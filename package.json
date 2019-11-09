@@ -30,7 +30,7 @@
     "react-native": "0.61.4",
     "react-native-background-fetch": "2.7.1",
     "react-native-calendar-events": "1.7.3",
-    "react-native-dark-mode": "0.2.0",
+    "react-native-dark-mode": "0.2.1",
     "react-native-device-info": "5.2.1",
     "react-native-gesture-handler": "1.5.0",
     "react-native-github-markdown": "2.2.0",
