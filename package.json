@@ -55,7 +55,7 @@
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.11.2",
     "semver": "6.3.0",
-    "thu-learn-lib-no-native": "3.0.1",
+    "thu-learn-lib-no-native": "4.0.0",
     "typesafe-actions": "5.1.0"
   },
   "devDependencies": {
