@@ -2,9 +2,11 @@ import {darkreader} from './preval';
 
 export const removeTags = (html: string) => {
   return html
-    .replace(/<(?:.|\n)*?>/gm, '')
-    .replace(/\s\s+/g, ' ')
-    .trim();
+    ? html
+        .replace(/<(?:.|\n)*?>/gm, '')
+        .replace(/\s\s+/g, ' ')
+        .trim()
+    : '';
 };
 
 export const getWebViewTemplate = (content: string, isDarkMode?: boolean) =>
