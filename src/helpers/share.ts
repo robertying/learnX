@@ -93,5 +93,5 @@ export const getExtension = (filename: string) => {
 };
 
 export const stripExtension = (filename: string) => {
-  return filename.replace(/\.[^/.]+$/, '');
+  return filename ? filename.replace(/\.[^/.]+$/, '') : '';
 };
