@@ -18,7 +18,7 @@
     "postinstall": "jetifier && patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
-    "@react-native-community/async-storage": "1.6.2",
+    "@react-native-community/async-storage": "1.6.3",
     "@react-native-community/blur": "3.3.1",
     "@react-native-community/datetimepicker": "2.1.0",
     "darkreader": "4.7.15",
