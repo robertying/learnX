@@ -26,7 +26,7 @@
     "expo-haptics": "7.0.0",
     "expo-secure-store": "7.0.0",
     "fuse.js": "3.4.5",
-    "react": "16.11.0",
+    "react": "16.12.0",
     "react-native": "0.61.4",
     "react-native-background-fetch": "2.7.1",
     "react-native-calendar-events": "1.7.3",
