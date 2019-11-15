@@ -74,7 +74,7 @@
     "@types/react-redux": "7.1.5",
     "@types/semver": "6.2.0",
     "babel-jest": "24.9.0",
-    "babel-plugin-preval": "3.0.1",
+    "babel-plugin-preval": "4.0.0",
     "babel-plugin-transform-remove-console": "6.9.4",
     "detox": "14.7.1",
     "eslint": "6.6.0",
