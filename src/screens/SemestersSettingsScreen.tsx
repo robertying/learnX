@@ -28,9 +28,7 @@ interface ISemestersSettingsScreenDispatchProps {
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
   ISemestersSettingsScreenDispatchProps;
 
-const SemestersSettingsScreen: INavigationScreen<
-  ISemestersSettingsScreenProps
-> = props => {
+const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> = props => {
   const {
     semesters,
     currentSemester,

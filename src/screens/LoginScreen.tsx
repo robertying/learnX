@@ -254,7 +254,4 @@ const mapDispatchToProps = {
   getAllSemesters,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(LoginScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);

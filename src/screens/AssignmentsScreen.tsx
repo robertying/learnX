@@ -578,7 +578,4 @@ const mapDispatchToProps: IAssignmentsScreenDispatchProps = {
   unfavAssignment,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(AssignmentsScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(AssignmentsScreen);

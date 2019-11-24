@@ -19,9 +19,7 @@ export interface IAssignmentDetailScreenProps {
   courseName?: string;
 }
 
-const AssignmentDetailScreen: INavigationScreen<
-  IAssignmentDetailScreenProps
-> = props => {
+const AssignmentDetailScreen: INavigationScreen<IAssignmentDetailScreenProps> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {

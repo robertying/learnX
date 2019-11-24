@@ -291,7 +291,4 @@ const mapDispatchToProps: ICoursesScreenDispatchProps = {
   unhideCourse,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(CoursesScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(CoursesScreen);

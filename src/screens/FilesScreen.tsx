@@ -543,7 +543,4 @@ const mapDispatchToProps: IFilesScreenDispatchProps = {
   unfavFile,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(FilesScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(FilesScreen);

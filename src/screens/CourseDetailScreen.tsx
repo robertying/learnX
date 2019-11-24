@@ -56,9 +56,7 @@ interface ICourseDetailScreenDispatchProps {
 export type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
   ICourseDetailScreenDispatchProps;
 
-const CourseDetailScreen: INavigationScreen<
-  ICourseDetailScreenProps
-> = props => {
+const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props => {
   const {
     notices: rawNotices,
     files: rawFiles,
@@ -350,7 +348,4 @@ const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
   getAssignmentsForCourse,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(CourseDetailScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(CourseDetailScreen);
