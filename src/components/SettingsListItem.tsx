@@ -29,9 +29,7 @@ export interface ISettingsListItemProps {
   containerStyle?: TouchableHighlightProps['style'];
 }
 
-const SettingsListItem: React.FunctionComponent<
-  ISettingsListItemProps
-> = props => {
+const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props => {
   const {
     variant,
     icon,

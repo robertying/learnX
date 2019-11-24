@@ -396,7 +396,4 @@ const mapDispatchToProps: ISettingsScreenDispatchProps = {
   setNotifications,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(SettingsScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(SettingsScreen);

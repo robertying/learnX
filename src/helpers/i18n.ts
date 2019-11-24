@@ -16,6 +16,6 @@ export const getLocale = () => {
 
 const translations = (getLocale().startsWith('zh') ? zh : en) as typeof en;
 
-export function getTranslation<K extends keyof (typeof en)>(key: K): string {
+export function getTranslation<K extends keyof typeof en>(key: K): string {
   return translations[key];
 }

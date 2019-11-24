@@ -8,9 +8,7 @@ export type INoticePlaceholderProps = ViewProps & {
   children?: React.ReactElement;
 };
 
-const NoticePlaceholder: React.FunctionComponent<
-  INoticePlaceholderProps
-> = props => {
+const NoticePlaceholder: React.FunctionComponent<INoticePlaceholderProps> = props => {
   const renderPlaceholder: IPlaceholderProps['renderPlaceholder'] = animatedStyle => {
     return (
       <View

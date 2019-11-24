@@ -9,9 +9,7 @@ import {Chip} from 'react-native-paper';
 
 export type ISegmentedControlProps = SegmentedControlIOSProps;
 
-const SegmentedControl: React.FunctionComponent<
-  ISegmentedControlProps
-> = props => {
+const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = props => {
   const {style, ...restProps} = props;
 
   return Platform.OS === 'ios' ? (

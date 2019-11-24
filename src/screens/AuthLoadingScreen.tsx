@@ -101,7 +101,4 @@ const mapDispatchToProps: IAuthLoadingScreenDispatchProps = {
   resetLoading,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(AuthLoadingScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(AuthLoadingScreen);

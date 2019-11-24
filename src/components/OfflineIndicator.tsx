@@ -101,10 +101,7 @@ const mapDispatchToProps = {
   clearStore,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(OfflineIndicator);
+export default connect(mapStateToProps, mapDispatchToProps)(OfflineIndicator);
 
 const styles = StyleSheet.create({
   absolute: {

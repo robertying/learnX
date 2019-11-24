@@ -692,7 +692,4 @@ const mapDispatchToProps: INoticesScreenDispatchProps = {
   unfavNotice,
 };
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(NoticesScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(NoticesScreen);
