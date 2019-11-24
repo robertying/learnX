@@ -14,7 +14,7 @@ function useAndroidSearchBar<T extends IEntity>(
   useEffect(() => {
     if (searchBarText) {
       const fuse = new Fuse(entities, fuseOptions);
-      setSearchResults(fuse.search(searchBarText));
+      setSearchResults(fuse.search(searchBarText) as T[]);
     } else {
       setSearchResults(entities);
     }

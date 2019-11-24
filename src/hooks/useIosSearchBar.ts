@@ -17,7 +17,7 @@ function useIosSearchBar<T extends IEntity>(
     ({text}) => {
       if (text) {
         const fuse = new Fuse(entities, fuseOptions);
-        setSearchResults(fuse.search(text));
+        setSearchResults(fuse.search(text) as T[]);
       }
     },
     [entities, fuseOptions],
