@@ -55,7 +55,7 @@
     "redux-thunk": "2.3.0",
     "rn-fetch-blob": "0.11.2",
     "semver": "6.3.0",
-    "thu-learn-lib-no-native": "4.0.0",
+    "thu-learn-lib-no-native": "4.0.1",
     "typesafe-actions": "5.1.0"
   },
   "devDependencies": {
@@ -65,7 +65,7 @@
     "@types/detox": "14.5.1",
     "@types/jasmine": "3.5.0",
     "@types/jest": "24.0.23",
-    "@types/react": "16.9.12",
+    "@types/react": "16.9.13",
     "@types/react-native": "0.60.23",
     "@types/react-native-push-notification": "3.0.6",
     "@types/react-native-share": "1.1.4",
@@ -76,8 +76,8 @@
     "babel-jest": "24.9.0",
     "babel-plugin-preval": "4.0.0",
     "babel-plugin-transform-remove-console": "6.9.4",
-    "detox": "14.8.1",
-    "eslint": "6.7.0",
+    "detox": "14.8.2",
+    "eslint": "6.7.1",
     "eslint-plugin-prettier": "3.1.1",
     "husky": "3.1.0",
     "jest": "24.9.0",
