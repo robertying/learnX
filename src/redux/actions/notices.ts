@@ -35,6 +35,8 @@ export function getNoticesForCourse(courseId: string): IThunkResult {
         content: result.content
           ? result.content.startsWith('\xC2\x9E\xC3\xA9\x65')
             ? result.content.substr(5)
+            : result.content.startsWith('\x9E\xE9\x65')
+            ? result.content.substr(3)
             : result.content
           : '',
       }));
@@ -74,6 +76,8 @@ export function getAllNoticesForCourses(courseIds: string[]): IThunkResult {
             content: notice.content
               ? notice.content.startsWith('\xC2\x9E\xC3\xA9\x65')
                 ? notice.content.substr(5)
+                : notice.content.startsWith('\x9E\xE9\x65')
+                ? notice.content.substr(3)
                 : notice.content
               : '',
           }));

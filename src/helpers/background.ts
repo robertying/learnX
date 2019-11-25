@@ -34,6 +34,8 @@ const updateAssignments = async () => {
           description: assignment.description
             ? assignment.description.startsWith('\xC2\x9E\xC3\xA9\x65')
               ? assignment.description.substr(5)
+              : assignment.description.startsWith('\x9E\xE9\x65')
+              ? assignment.description.substr(3)
               : assignment.description
             : '',
         }));
