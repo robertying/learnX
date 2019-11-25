@@ -35,7 +35,8 @@ export default {
   preparingFile: 'Preparing file...',
   refreshFailure: 'Failed to refresh',
   openFile: 'Open the file with...',
-  accessCalendarFailure: 'Cannot access Calendar',
+  accessCalendarFailure:
+    'Cannot access Calendar. Make sure you have given the App permissions.',
   noAssignmentDescription: 'No assignment description',
   emptyContent: 'No content',
   noFileDescription: 'No file description',
@@ -65,4 +66,8 @@ export default {
   offline: 'You are now offline. Tap here to re-login.',
   offlineLoginError: 'Login failed. Tap here to try again.',
   noGrade: 'No grade specified',
+  courseSync: 'Sync Courses to Calendar',
+  fetchingCourseSchedule: 'Fetching course schedule...',
+  courseSyncSuccess: 'Course schedule synced successfully',
+  courseSyncFailure: 'Failed to sync course schedule... Try again later.',
 };
