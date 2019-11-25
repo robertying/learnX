@@ -13,7 +13,7 @@ Here are some information that may help you to use the App.
 
 ### Android: Tapping on the file doesn't do anything.
 
-- This is possibly due to any download failure. Please use `Clear File Cache` in `Settings` to clear file cache. The App will try to download the file again.
+- This is possibly due to any download failure. Please tap the Refresh button in the center or use `Clear File Cache` in `Settings` to clear file cache. The App will try to download the file again.
 - Please also check the file size. It takes longer to download large files and there is possibility that the download will fail.
 
 ### iOS: There are multiple calendar events in my Calendar.
