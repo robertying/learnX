@@ -1,0 +1,13 @@
+diff --git a/node_modules/@react-native-community/cli-platform-android/native_modules.gradle b/node_modules/@react-native-community/cli-platform-android/native_modules.gradle
+index b82f325..85d65d7 100644
+--- a/node_modules/@react-native-community/cli-platform-android/native_modules.gradle
++++ b/node_modules/@react-native-community/cli-platform-android/native_modules.gradle
+@@ -191,7 +191,7 @@ class ReactNativeModules {
+      * (e.g. when running with -p flag), in which case npx wouldn't resolve correct `react-native` binary.
+      */
+     def dir = new File(this.jsAppDir)
+-    def reactNativeConfigOutput = this.getCommandOutput(command, /* dir */) // Temporary disable changing dir, as it introduces regressions
++    def reactNativeConfigOutput = this.getCommandOutput(command, dir)
+     def json
+     try {
+       json = new JsonSlurper().parseText(reactNativeConfigOutput)
