@@ -22,6 +22,8 @@ layout: default_cn
 
 ## 高级功能
 
+- 课表系统日历同步
+
 - Deadline 系统日历同步
 
 - 滑动卡片以置顶
