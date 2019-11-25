@@ -43,6 +43,8 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
         description: result.description
           ? result.description.startsWith('\xC2\x9E\xC3\xA9\x65')
             ? result.description.substr(5)
+            : result.description.startsWith('\x9E\xE9\x65')
+            ? result.description.substr(3)
             : result.description
           : '',
       }));
@@ -82,6 +84,8 @@ export function getAllAssignmentsForCourses(courseIds: string[]): IThunkResult {
             description: assignment.description
               ? assignment.description.startsWith('\xC2\x9E\xC3\xA9\x65')
                 ? assignment.description.substr(5)
+                : assignment.description.startsWith('\x9E\xE9\x65')
+                ? assignment.description.substr(3)
                 : assignment.description
               : '',
           }));
