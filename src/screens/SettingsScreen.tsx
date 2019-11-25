@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   FlatList,
@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import {iOSColors} from 'react-native-typography';
+import {iOSColors, iOSUIKit} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
@@ -17,7 +17,11 @@ import RNFetchBlob from 'rn-fetch-blob';
 import packageConfig from '../../package.json';
 import SettingsListItem from '../components/SettingsListItem';
 import Colors from '../constants/Colors';
-import {saveAssignmentsToCalendar} from '../helpers/calendar';
+import {
+  saveAssignmentsToCalendar,
+  getSemesterDuration,
+  saveCoursesToCalendar,
+} from '../helpers/calendar';
 import {getTranslation} from '../helpers/i18n';
 import SnackBar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
@@ -34,6 +38,14 @@ import DeviceInfo from '../constants/DeviceInfo';
 import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import Modal from 'react-native-modal';
+import Layout from '../constants/Layout';
+import {ActivityIndicator} from 'react-native-paper';
+import TextButton from '../components/TextButton';
+import Text from '../components/Text';
+import dataSource from '../redux/dataSource';
+import RNCalendarEvents from 'react-native-calendar-events';
+import Snackbar from 'react-native-snackbar';
 
 interface ISettingsScreenStateProps {
   calendarSync: boolean;
@@ -111,8 +123,20 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     navigate('settings.help');
   };
 
-  const onCalendarSyncSwitchChange = (enabled: boolean) => {
+  const onCalendarSyncSwitchChange = async (enabled: boolean) => {
     if (enabled) {
+      const status = await RNCalendarEvents.authorizationStatus();
+      if (status !== 'authorized') {
+        const result = await RNCalendarEvents.authorizeEventStore();
+        if (result !== 'authorized') {
+          Snackbar.show({
+            title: getTranslation('accessCalendarFailure'),
+            duration: SnackBar.LENGTH_SHORT,
+          });
+          return;
+        }
+      }
+
       if (assignments) {
         saveAssignmentsToCalendar(assignments);
       }
@@ -192,6 +216,64 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     navigate('settings.semesters');
   };
 
+  const [courseSyncModalVisible, setCourseSyncModalVisible] = useState(false);
+
+  const handleCourseSync = async () => {
+    const status = await RNCalendarEvents.authorizationStatus();
+    if (status !== 'authorized') {
+      const result = await RNCalendarEvents.authorizeEventStore();
+      if (result !== 'authorized') {
+        Snackbar.show({
+          title: getTranslation('accessCalendarFailure'),
+          duration: SnackBar.LENGTH_SHORT,
+        });
+        return;
+      }
+    }
+
+    setCourseSyncModalVisible(true);
+  };
+
+  useEffect(() => {
+    if (courseSyncModalVisible) {
+      (async () => {
+        const {
+          startDate,
+          midEndDate,
+          midStartDate,
+          endDate,
+        } = getSemesterDuration();
+
+        try {
+          const firstHalfEvents = await dataSource.getCalendar(
+            startDate,
+            midEndDate,
+          );
+          const secondHalfEvents = await dataSource.getCalendar(
+            midStartDate,
+            endDate,
+          );
+          await saveCoursesToCalendar(
+            [...firstHalfEvents, ...secondHalfEvents],
+            startDate,
+            endDate,
+          );
+          SnackBar.show({
+            title: getTranslation('courseSyncSuccess'),
+            duration: SnackBar.LENGTH_SHORT,
+          });
+        } catch {
+          SnackBar.show({
+            title: getTranslation('courseSyncFailure'),
+            duration: SnackBar.LENGTH_SHORT,
+          });
+        } finally {
+          setCourseSyncModalVisible(false);
+        }
+      })();
+    }
+  }, [courseSyncModalVisible]);
+
   const renderListItem: ListRenderItem<{}> = ({index}) => {
     switch (index) {
       case 0:
@@ -201,7 +283,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             variant="switch"
             icon={
               <MaterialCommunityIcons
-                name="calendar"
+                name="calendar-alert"
                 size={20}
                 color={isDarkMode ? Colors.grayDark : undefined}
               />
@@ -212,6 +294,21 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           />
         );
       case 1:
+        return (
+          <SettingsListItem
+            variant="none"
+            icon={
+              <MaterialCommunityIcons
+                name="calendar-month"
+                size={20}
+                color={isDarkMode ? Colors.grayDark : undefined}
+              />
+            }
+            text={getTranslation('courseSync')}
+            onPress={handleCourseSync}
+          />
+        );
+      case 2:
         return (
           <SettingsListItem
             variant="arrow"
@@ -226,7 +323,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onSemestersPress}
           />
         );
-      case 2:
+      case 3:
         return (
           <SettingsListItem
             variant="none"
@@ -242,7 +339,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onLogoutPress}
           />
         );
-      case 3:
+      case 4:
         return (
           <SettingsListItem
             variant="none"
@@ -257,7 +354,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 4:
+      case 5:
         return Platform.OS === 'android' ? (
           <SettingsListItem
             variant="none"
@@ -298,7 +395,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 5:
+      case 6:
         return (
           <SettingsListItem
             variant="arrow"
@@ -314,7 +411,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onHelpPress}
           />
         );
-      case 6:
+      case 7:
         return (
           <SettingsListItem
             variant="arrow"
@@ -329,7 +426,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 7:
+      case 8:
         return (
           <SettingsListItem
             variant="arrow"
@@ -363,6 +460,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
         data={[
           {key: 'calendarSync'},
+          {key: 'courseSync'},
           {key: 'semesters'},
           {key: 'logout'},
           {key: 'clearFileCache'},
@@ -373,6 +471,33 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         ]}
         renderItem={renderListItem}
       />
+      <Modal
+        isVisible={courseSyncModalVisible}
+        backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+        animationIn="bounceIn"
+        animationOut="zoomOut"
+        useNativeDriver={true}
+        deviceWidth={Layout.initialWindow.width}
+        deviceHeight={Layout.initialWindow.height}>
+        <View
+          style={{
+            backgroundColor: isDarkMode ? 'black' : 'white',
+            width: '100%',
+            height: 150,
+            padding: 20,
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}>
+          <Text style={isDarkMode ? iOSUIKit.bodyWhite : iOSUIKit.body}>
+            {getTranslation('fetchingCourseSchedule')}
+          </Text>
+          <ActivityIndicator style={{margin: 20}} animating={true} />
+          <TextButton onPress={() => setCourseSyncModalVisible(false)}>
+            {getTranslation('cancel')}
+          </TextButton>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };

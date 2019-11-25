@@ -34,7 +34,8 @@ export default {
   preparingFile: '准备文件中……',
   refreshFailure: '刷新失败',
   openFile: '打开文件……',
-  accessCalendarFailure: '无法访问日历，创建作业事项失败',
+  accessCalendarFailure:
+    '无法访问日历，创建作业事项失败。请确保 App 具有访问日历的权限。',
   noAssignmentDescription: '无作业描述',
   emptyContent: '无内容',
   noFileDescription: '无文件描述',
@@ -63,4 +64,8 @@ export default {
   offline: '离线模式：点击此处重新登录',
   offlineLoginError: '登录失败，点击此处重新尝试',
   noGrade: '无具体成绩',
+  courseSync: '将课表同步到日历',
+  fetchingCourseSchedule: '获取课表信息……',
+  courseSyncSuccess: '课表同步成功',
+  courseSyncFailure: '课表同步失败，请稍后重试',
 };
