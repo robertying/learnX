@@ -1,6 +1,6 @@
 import {darkreader} from './preval';
 
-export const removeTags = (html: string) => {
+export const removeTags = (html?: string) => {
   return html
     ? html
         .replace(/<(?:.|\n)*?>/gm, '')

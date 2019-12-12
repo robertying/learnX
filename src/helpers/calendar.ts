@@ -11,6 +11,7 @@ import {IAssignment} from '../redux/types/state';
 import {getTranslation} from './i18n';
 import SnackBar from 'react-native-snackbar';
 import {CalendarEvent} from 'thu-learn-lib-no-native/lib/types';
+import {removeTags} from './html';
 
 export const getCalendar = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
@@ -114,7 +115,7 @@ export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
           assignment.title +
           ' - ' +
           course.name,
-        assignment.description || '',
+        removeTags(assignment.description),
         assignment.deadline,
         assignment.deadline,
       );
