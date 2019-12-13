@@ -183,7 +183,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   return (
     <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
       <SafeAreaView style={{flex: 1}}>
-        {loading && <ProgressBar progress={progress} color={Colors.theme} />}
+        {Platform.OS === 'android' && loading && (
+          <ProgressBar progress={progress} color={Colors.theme} />
+        )}
         {Platform.OS === 'ios' && !loading && (filePath ? true : false) && (
           <WebView
             style={{
@@ -271,6 +273,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
               <MediumPlaceholder style={{margin: 15}} loading={true} />
             </View>
           ))}
+        {Platform.OS === 'ios' && loading && (
+          <ProgressBar progress={progress} color={Colors.theme} />
+        )}
       </SafeAreaView>
     </PaperProvider>
   );
