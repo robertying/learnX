@@ -576,6 +576,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           refreshControl={
             <RefreshControl
               colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
+              progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
               onRefresh={onRefresh}
               refreshing={isFetching}
             />

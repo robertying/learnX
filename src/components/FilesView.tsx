@@ -52,6 +52,7 @@ const FilesView: React.FC<IFilesViewProps> = props => {
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
+            progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
             colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
           />
         }
