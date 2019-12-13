@@ -188,6 +188,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         !(screen.height < screen.width && window.width > screen.width * 0.4)
       ) {
         setCompactWidth(true);
+      } else {
+        setCompactWidth(false);
       }
     }
   }, [setCompactWidth]);
