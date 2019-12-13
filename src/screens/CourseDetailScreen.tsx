@@ -35,7 +35,7 @@ import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 
 interface ICourseDetailScreenStateProps {
   course?: ICourse;
@@ -73,7 +73,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+    adaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
 
   const notices = useMemo(

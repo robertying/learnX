@@ -12,7 +12,7 @@ import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import {getScreenOptions} from '../helpers/navigation';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 
 interface ISemestersSettingsScreenStateProps {
   semesters: string[];
@@ -40,7 +40,7 @@ const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> 
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+    adaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
 
   useEffect(() => {

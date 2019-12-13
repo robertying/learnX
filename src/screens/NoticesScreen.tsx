@@ -57,7 +57,7 @@ import {removeTags} from '../helpers/html';
 import Text from '../components/Text';
 import Snackbar from 'react-native-snackbar';
 import {loadIcons} from '../helpers/icons';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import PushNotification from 'react-native-push-notification';
 
@@ -138,7 +138,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, []);
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+    adaptToSystemTheme(props.componentId, isDarkMode);
   }, [isDarkMode, props.componentId]);
 
   useEffect(() => {
