@@ -432,6 +432,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           refreshControl={
             <RefreshControl
               colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
+              progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
               onRefresh={onRefresh}
               refreshing={isFetching}
             />
