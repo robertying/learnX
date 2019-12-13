@@ -1,4 +1,5 @@
 import {Navigation, Options} from 'react-native-navigation';
+import {Platform} from 'react-native';
 
 export function pushTo<T>(
   name: string,
@@ -49,7 +50,7 @@ export function setDetailView<T>(name: string, passProps?: T, title?: string) {
             setStackRoot: {
               enabled: false,
             },
-          } as any,
+          },
         },
       },
     },
