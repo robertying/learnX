@@ -10,7 +10,7 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getScreenOptions} from '../helpers/navigation';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 
 const AboutScreen: INavigationScreen<{}> = props => {
   const onGitHubLinkPress = () => {
@@ -20,7 +20,7 @@ const AboutScreen: INavigationScreen<{}> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+    adaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
 
   return (

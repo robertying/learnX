@@ -20,6 +20,7 @@ export function pushTo<T>(
           title: {
             text: title,
             fontWeight: 'medium',
+            fontSize: 17,
           },
           backButton: {
             showTitle: !hideBackTitle,
@@ -41,6 +42,7 @@ export function setDetailView<T>(name: string, passProps?: T, title?: string) {
             title: {
               text: title,
               fontWeight: 'medium',
+              fontSize: 17,
             },
           },
           animations: {
@@ -63,9 +65,7 @@ export const getScreenOptions = (
       title: {
         text: title,
         fontWeight: 'medium',
-      },
-      largeTitle: {
-        visible: false,
+        fontSize: 17,
       },
       ...(searchBarPlaceholder && {
         searchBar: true,
@@ -74,6 +74,9 @@ export const getScreenOptions = (
         hideNavBarOnFocusSearchBar: true,
       }),
       elevation: 0,
+    },
+    bottomTabs: {
+      translucent: true,
     },
   };
   return options;

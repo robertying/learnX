@@ -12,7 +12,7 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {needWhiteBackground} from '../helpers/html';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 import {
   ProgressBar,
   IconButton,
@@ -173,12 +173,12 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+    adaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
 
   useEffect(() => {
     StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');
-  }, [loading, isDarkMode]);
+  });
 
   return (
     <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
@@ -278,7 +278,6 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
 
 FilePreviewScreen.options = {
   topBar: {
-    hideOnScroll: true,
     rightButtons: [
       {
         id: 'share',

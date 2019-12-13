@@ -25,7 +25,7 @@ import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 
 interface ICoursesScreenStateProps {
@@ -78,7 +78,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+    adaptToSystemTheme(props.componentId, isDarkMode);
   }, [isDarkMode, props.componentId]);
 
   /**

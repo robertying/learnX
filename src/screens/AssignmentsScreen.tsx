@@ -47,7 +47,7 @@ import {
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 
 interface IAssignmentsScreenStateProps {
@@ -92,7 +92,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+    adaptToSystemTheme(props.componentId, isDarkMode);
   }, [isDarkMode, props.componentId]);
 
   /**

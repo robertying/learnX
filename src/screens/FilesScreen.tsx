@@ -47,7 +47,7 @@ import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import Text from '../components/Text';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 
 interface IFilesScreenStateProps {
@@ -91,7 +91,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+    adaptToSystemTheme(props.componentId, isDarkMode);
   }, [isDarkMode, props.componentId]);
 
   /**

@@ -1,7 +1,7 @@
 import {Navigation} from 'react-native-navigation';
 import {Platform} from 'react-native';
 
-export const androidAdaptToSystemTheme = (
+export const adaptToSystemTheme = (
   componentId: string,
   isDarkMode: boolean,
   hasBackButton?: boolean,
@@ -30,6 +30,12 @@ export const androidAdaptToSystemTheme = (
       },
       bottomTabs: {
         backgroundColor: isDarkMode ? 'black' : 'white',
+      },
+    });
+  } else {
+    Navigation.mergeOptions(componentId, {
+      statusBar: {
+        style: isDarkMode ? 'light' : 'dark',
       },
     });
   }

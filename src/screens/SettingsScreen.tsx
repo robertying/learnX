@@ -37,7 +37,7 @@ import semver from 'semver';
 import DeviceInfo from '../constants/DeviceInfo';
 import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import {ActivityIndicator} from 'react-native-paper';
@@ -449,7 +449,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode);
+    adaptToSystemTheme(props.componentId, isDarkMode);
   }, [isDarkMode, props.componentId]);
 
   return (

@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import AssignmentBoard from '../components/AssignmentBoard';
 import {INavigationScreen} from '../types';
 import {useDarkMode} from 'react-native-dark-mode';
-import {androidAdaptToSystemTheme} from '../helpers/darkmode';
+import {adaptToSystemTheme} from '../helpers/darkmode';
 
 export interface IAssignmentDetailScreenProps {
   title: string;
@@ -23,7 +23,7 @@ const AssignmentDetailScreen: INavigationScreen<IAssignmentDetailScreenProps> = 
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
-    androidAdaptToSystemTheme(props.componentId, isDarkMode, true);
+    adaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
 
   return <AssignmentBoard {...props} />;
