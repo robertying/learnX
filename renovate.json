@@ -1,6 +1,6 @@
 {
   "extends": ["config:base"],
   "automerge": true,
-  "schedule": "before 6am",
+  "schedule": "after 4am and before 8am every saturday",
   "timezone": "Asia/Shanghai"
 }
