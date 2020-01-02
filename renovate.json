@@ -1,6 +1,10 @@
 {
   "extends": ["config:base"],
   "automerge": true,
+  "timezone": "Asia/Shanghai",
   "schedule": "after 4am and before 8am every saturday",
-  "timezone": "Asia/Shanghai"
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": "after 10pm on saturday"
+  }
 }
