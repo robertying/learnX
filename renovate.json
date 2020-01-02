@@ -6,5 +6,8 @@
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": "after 10pm on saturday"
+  },
+  "gradle": {
+    "enabled": false
   }
 }
