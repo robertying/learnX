@@ -6837,10 +6837,10 @@ react-native-interactable@2.0.1:
   resolved "https://registry.yarnpkg.com/react-native-interactable/-/react-native-interactable-2.0.1.tgz#80a4608c4b6f19489b629926306afd980c73a309"
   integrity sha512-b5Mej8JnW9+q/hf+6bxWsKIX4E1rjILBgPnyYFIaEhJZGrZeu5jxENvw3+Q7t43ARp1wJIZZGfilVoFmwtgOdw==
 
-react-native-localize@1.3.1:
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/react-native-localize/-/react-native-localize-1.3.1.tgz#d0b7046acd4214ac2bcb61102317374351400c76"
-  integrity sha512-Y3LzTHyrgsIsDYvjWSRguARBKjiLaahcbJg663ZqP1Tcpan4LYn/f3iusM+Oh6qYvClnlo9AlBkLdCZbWwe7Tw==
+react-native-localize@1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/react-native-localize/-/react-native-localize-1.3.2.tgz#ba2aa99f590b392329f5beed0f68b8e008145831"
+  integrity sha512-SjWHiA0r90zV8KUd6j9VDWm9nfXuBQP1fgTW+cdKVkiX2D+YuojVDNml5D+Ngv+hIOBZ3eqtpO6oZaHoZ83tcw==
 
 react-native-modal@11.5.3:
   version "11.5.3"
