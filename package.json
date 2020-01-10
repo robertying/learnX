@@ -22,7 +22,7 @@
     "@react-native-community/blur": "3.4.1",
     "@react-native-community/datetimepicker": "2.1.0",
     "darkreader": "4.7.15",
-    "dayjs": "1.8.18",
+    "dayjs": "1.8.19",
     "expo-haptics": "8.0.0",
     "expo-secure-store": "8.0.0",
     "fuse.js": "3.4.6",
