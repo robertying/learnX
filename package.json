@@ -66,7 +66,7 @@
     "@types/jasmine": "3.5.0",
     "@types/jest": "24.0.25",
     "@types/react": "16.9.17",
-    "@types/react-native": "0.60.27",
+    "@types/react-native": "0.60.30",
     "@types/react-native-push-notification": "3.0.7",
     "@types/react-native-share": "1.1.4",
     "@types/react-native-tab-view": "2.3.0",
