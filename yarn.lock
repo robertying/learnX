@@ -1142,10 +1142,13 @@
   resolved "https://registry.yarnpkg.com/@types/react-native-push-notification/-/react-native-push-notification-3.0.7.tgz#eeced67f709918c237698ce261f296f469236a4d"
   integrity sha512-7UNlO635Lew05Os/Ex+wzMTDI7XpDYbuGNGwFDfIXvZOGUVoUcyKC6GNy28hfViM9iAT3rQ3K9fDTcW2fqVRnQ==
 
-"@types/react-native-share@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@types/react-native-share/-/react-native-share-1.1.4.tgz#720c52cbdcd8bb639c36d5097c9752fe0d61392e"
-  integrity sha512-6fDO/TtkIu3DmI9B+OgRMG4hl1Y7XBakzzNjjtJxanODuXMF5ARhc9lwPSgccdM73N3AxSyz73YbJOrCxcVTxQ==
+"@types/react-native-share@1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@types/react-native-share/-/react-native-share-1.1.5.tgz#654f8f070fb14b6e8fed0fb666d88df39786855b"
+  integrity sha512-QIUS5L3awnWFRJmIcLA2bJlrKuxhjRr5q5VEV/pvleKBTmR9GgH8NYibHzvRryZlMVwcsFxb3WSA+0mLQLdycg==
+  dependencies:
+    "@types/react" "*"
+    "@types/react-native" "*"
 
 "@types/react-native-tab-view@2.3.0":
   version "2.3.0"
