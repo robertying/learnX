@@ -4,6 +4,7 @@ import {
   SegmentedControlIOSProps,
   Platform,
   SegmentedControlIOS,
+  StyleSheet,
 } from 'react-native';
 import {Chip} from 'react-native-paper';
 
@@ -14,12 +15,15 @@ const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = props 
 
   return Platform.OS === 'ios' ? (
     <SegmentedControlIOS
-      style={[{margin: 20, marginTop: 10, marginBottom: 10}, style]}
+      style={StyleSheet.compose(
+        {margin: 20, marginTop: 10, marginBottom: 10},
+        style,
+      )}
       {...restProps}
     />
   ) : (
     <View
-      style={[
+      style={StyleSheet.compose(
         {
           flex: 1,
           display: 'flex',
@@ -29,7 +33,7 @@ const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = props 
           padding: 10,
         },
         style,
-      ]}>
+      )}>
       {props.values &&
         props.values.map((value, index) => (
           <Chip

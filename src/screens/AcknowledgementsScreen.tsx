@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {SafeAreaView, ScrollView} from 'react-native';
+import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
 import Text from '../components/Text';
@@ -57,13 +57,13 @@ const AcknowledgementsScreen: INavigationScreen<{}> = props => {
         {deps.map((dep, index) => (
           <Text
             key={index}
-            style={[
+            style={StyleSheet.compose(
               isDarkMode ? iOSUIKit.footnoteWhite : iOSUIKit.footnote,
               {
                 marginTop: 2,
                 marginBottom: 2,
               },
-            ]}>
+            )}>
             {dep}
           </Text>
         ))}

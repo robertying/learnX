@@ -1,5 +1,10 @@
 import React, {FunctionComponent, useMemo} from 'react';
-import {ScrollView, TouchableHighlightProps, View} from 'react-native';
+import {
+  ScrollView,
+  TouchableHighlightProps,
+  View,
+  StyleSheet,
+} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import AutoHeightWebView from '../components/AutoHeightWebView';
@@ -85,12 +90,12 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
           paddingRight: 20,
         }}>
         <Text
-          style={[
+          style={StyleSheet.compose(
             isDarkMode
               ? iOSUIKit.title3EmphasizedWhite
               : iOSUIKit.title3Emphasized,
             {lineHeight: 24},
-          ]}
+          )}
           numberOfLines={2}
           ellipsizeMode="tail">
           {title}
@@ -103,17 +108,15 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
             marginTop: 5,
           }}>
           <Text
-            style={[
-              iOSUIKit.body,
-              {color: isDarkMode ? Colors.grayDark : Colors.grayLight},
-            ]}>
+            style={StyleSheet.compose(iOSUIKit.body, {
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+            })}>
             {author}
           </Text>
           <Text
-            style={[
-              iOSUIKit.body,
-              {color: isDarkMode ? Colors.grayDark : Colors.grayLight},
-            ]}>
+            style={StyleSheet.compose(iOSUIKit.body, {
+              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+            })}>
             {dayjs(publishTime).format('LL')}
           </Text>
         </View>

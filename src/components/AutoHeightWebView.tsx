@@ -1,5 +1,5 @@
 import React, {useRef, useState} from 'react';
-import {Linking} from 'react-native';
+import {Linking, StyleSheet} from 'react-native';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {
   WebViewMessageEvent,
@@ -56,7 +56,10 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       decelerationRate="normal"
       scrollEnabled={false}
       {...props}
-      style={[{height, backgroundColor: 'transparent'}, props.style]}
+      style={StyleSheet.compose(
+        {height, backgroundColor: 'transparent'},
+        props.style,
+      )}
     />
   );
 };

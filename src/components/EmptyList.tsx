@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, View, ViewProps} from 'react-native';
+import {Text, View, ViewProps, StyleSheet} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {getTranslation} from '../helpers/i18n';
@@ -12,7 +12,7 @@ const EmptyList: React.FC<ViewProps> = props => {
 
   return (
     <View
-      style={[
+      style={StyleSheet.compose(
         {
           backgroundColor: isDarkMode ? 'black' : 'white',
           flex: 1,
@@ -21,7 +21,7 @@ const EmptyList: React.FC<ViewProps> = props => {
           marginTop: 40,
         },
         style,
-      ]}>
+      )}>
       <Icon
         name="check-circle"
         color={
@@ -32,10 +32,10 @@ const EmptyList: React.FC<ViewProps> = props => {
         size={40}
       />
       <Text
-        style={[
+        style={StyleSheet.compose(
           isDarkMode ? iOSUIKit.footnoteWhite : iOSUIKit.footnote,
           {marginTop: 10},
-        ]}>
+        )}>
         {getTranslation('emptyContent')}
       </Text>
     </View>

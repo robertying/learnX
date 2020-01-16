@@ -7,6 +7,7 @@ import {
   TouchableHighlightProps,
   View,
   ViewProps,
+  StyleSheet,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -53,7 +54,7 @@ const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props 
       onPress={onPress}
       style={containerStyle}>
       <View
-        style={[
+        style={StyleSheet.compose(
           {
             height: size === 'large' ? 100 : Layout.normalBlockHeight,
             flexDirection: 'row',
@@ -63,7 +64,7 @@ const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props 
             paddingRight: 20,
           },
           style,
-        ]}>
+        )}>
         <View
           style={{
             flex: 1,
@@ -81,10 +82,10 @@ const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props 
             {icon}
           </View>
           <Text
-            style={[
+            style={StyleSheet.compose(
               {flex: 1, fontSize: iOSUIKit.bodyObject.fontSize},
               textStyle,
-            ]}>
+            )}>
             {text}
           </Text>
         </View>
@@ -99,13 +100,13 @@ const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props 
           ) : (
             <>
               <Text
-                style={[
+                style={StyleSheet.compose(
                   {
                     marginRight: 10,
                     fontSize: iOSUIKit.bodyObject.fontSize,
                   },
                   secondaryTextStyle,
-                ]}>
+                )}>
                 {secondaryText}
               </Text>
               {variant === 'arrow' ? (

@@ -1,5 +1,10 @@
 import React, {FunctionComponent, useMemo} from 'react';
-import {ScrollView, TouchableHighlightProps, View} from 'react-native';
+import {
+  ScrollView,
+  TouchableHighlightProps,
+  View,
+  StyleSheet,
+} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
@@ -92,24 +97,21 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
           paddingRight: 20,
         }}>
         <Text
-          style={[
+          style={StyleSheet.compose(
             isDarkMode
               ? iOSUIKit.title3EmphasizedWhite
               : iOSUIKit.title3Emphasized,
             {lineHeight: 24},
-          ]}
+          )}
           numberOfLines={2}
           ellipsizeMode="tail">
           {title}
         </Text>
         <Text
-          style={[
-            iOSUIKit.body,
-            {
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
-              marginTop: 5,
-            },
-          ]}>
+          style={StyleSheet.compose(iOSUIKit.body, {
+            color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+            marginTop: 5,
+          })}>
           {getLocale().startsWith('zh')
             ? dayjs(deadline).format('llll') + ' 截止'
             : 'Submission close on ' + dayjs(deadline).format('llll')}

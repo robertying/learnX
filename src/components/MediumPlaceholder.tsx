@@ -12,14 +12,14 @@ const NoticePlaceholder: React.FunctionComponent<INoticePlaceholderProps> = prop
   const renderPlaceholder: IPlaceholderProps['renderPlaceholder'] = animatedStyle => {
     return (
       <View
-        style={[
+        style={StyleSheet.compose(
           {
             height: 125,
             backgroundColor: 'white',
             justifyContent: 'space-between',
           },
           props.style,
-        ]}>
+        )}>
         <Animated.View
           style={[styles.shortLine, {marginTop: 15}, animatedStyle]}
         />
