@@ -22,9 +22,9 @@ const mockStore: IPersistAppState = {
   },
   semesters: {
     isFetching: false,
-    items: ['2019-2020-1', '2018-2019-3'],
+    items: ['2019-2020-2', '2019-2020-1'],
   },
-  currentSemester: '2019-2020-1',
+  currentSemester: '2019-2020-2',
   courses: {
     isFetching: false,
     hidden: ['2019-2020-1139286494'],
