@@ -1,5 +1,11 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {View, StatusBar, Platform, SafeAreaView} from 'react-native';
+import {
+  View,
+  StatusBar,
+  Platform,
+  SafeAreaView,
+  StyleSheet,
+} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import MediumPlaceholder from '../components/MediumPlaceholder';
@@ -211,12 +217,12 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
               alignItems: 'center',
             }}>
             <Text
-              style={[
+              style={StyleSheet.compose(
                 isDarkMode
                   ? iOSUIKit.largeTitleEmphasizedWhite
                   : iOSUIKit.largeTitleEmphasized,
                 {marginHorizontal: 20, textAlign: 'center'},
-              ]}>{`${filename}.${ext}`}</Text>
+              )}>{`${filename}.${ext}`}</Text>
             <View
               style={{
                 display: 'flex',

@@ -47,11 +47,13 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
           paddingRight: 20,
         }}>
         <Text
-          style={[
-            {flex: 1},
+          style={StyleSheet.compose(
             isDarkMode ? iOSUIKit.bodyEmphasizedWhite : iOSUIKit.bodyEmphasized,
-            Platform.OS === 'android' && {fontWeight: 'bold'},
-          ]}
+            {
+              flex: 1,
+              fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
+            },
+          )}
           numberOfLines={1}
           ellipsizeMode="tail">
           {courseName}
@@ -59,10 +61,10 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
         <View style={{flexDirection: 'row', alignItems: 'flex-end', flex: 1}}>
           <View style={{flex: 1}}>
             <Text
-              style={[
+              style={StyleSheet.compose(
                 isDarkMode ? iOSUIKit.subheadWhite : iOSUIKit.subhead,
                 {marginTop: 10},
-              ]}>
+              )}>
               {courseTeacherName}
             </Text>
             <Text

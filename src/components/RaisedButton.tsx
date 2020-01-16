@@ -4,6 +4,7 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
   ViewProps,
+  StyleSheet,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Colors from '../constants/Colors';
@@ -21,7 +22,7 @@ const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {
   return (
     <TouchableOpacity
       testID={testID}
-      style={[
+      style={StyleSheet.compose(
         {
           alignItems: 'center',
           justifyContent: 'center',
@@ -31,10 +32,14 @@ const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {
           borderRadius: 8,
         },
         style,
-      ]}
+      )}
       activeOpacity={Colors.activeOpacity}
       onPress={onPress}>
-      <Text style={[{fontSize: iOSUIKit.bodyObject.fontSize}, textStyle]}>
+      <Text
+        style={StyleSheet.compose(
+          {fontSize: iOSUIKit.bodyObject.fontSize},
+          textStyle,
+        )}>
         {children}
       </Text>
     </TouchableOpacity>

@@ -4,6 +4,7 @@ import {
   TextProps,
   TouchableOpacity,
   TouchableOpacityProps,
+  StyleSheet,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Colors from '../constants/Colors';
@@ -21,12 +22,12 @@ class TextButton extends React.Component<ITextButtonProps> {
       <TouchableOpacity
         activeOpacity={Colors.activeOpacity}
         {...this.props}
-        style={[{flex: 1}, this.props.style]}>
+        style={StyleSheet.compose({flex: 1}, this.props.style)}>
         <Text
-          style={[
+          style={StyleSheet.compose(
             {color: Colors.theme, fontSize: iOSUIKit.bodyObject.fontSize},
             textStyle,
-          ]}
+          )}
           numberOfLines={1}
           ellipsizeMode={ellipsizeMode || 'clip'}>
           {children}

@@ -70,13 +70,15 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
             },
           ]}>
           <Text
-            style={[
-              {flex: 1},
+            style={StyleSheet.compose(
               isDarkMode
                 ? iOSUIKit.bodyEmphasizedWhite
                 : iOSUIKit.bodyEmphasized,
-              Platform.OS === 'android' && {fontWeight: 'bold'},
-            ]}
+              {
+                flex: 1,
+                fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
+              },
+            )}
             numberOfLines={1}
             ellipsizeMode="tail">
             {title}

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Text, TextProps} from 'react-native';
+import {Text, TextProps, StyleSheet} from 'react-native';
 import {useDarkMode} from 'react-native-dark-mode';
 
 const CustomText: React.FunctionComponent<TextProps> = props => {
@@ -9,7 +9,7 @@ const CustomText: React.FunctionComponent<TextProps> = props => {
 
   return (
     <Text
-      style={[{color: isDarkMode ? 'white' : 'black'}, style]}
+      style={StyleSheet.compose(style, {color: isDarkMode ? 'white' : 'black'})}
       {...restProps}>
       {props.children}
     </Text>

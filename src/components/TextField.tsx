@@ -7,6 +7,7 @@ import {
   TextInputProps,
   View,
   ViewProps,
+  StyleSheet,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 
@@ -53,7 +54,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
 
   return (
     <View
-      style={[
+      style={StyleSheet.compose(
         {
           flexDirection: 'row',
           alignItems: 'center',
@@ -61,7 +62,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
           backgroundColor: 'transparent',
         },
         containerStyle,
-      ]}>
+      )}>
       {icon}
       <AnimatedTextInput
         style={[
