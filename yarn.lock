@@ -6726,10 +6726,10 @@ react-native-share@2.0.0:
   resolved "https://registry.yarnpkg.com/react-native-share/-/react-native-share-2.0.0.tgz#4543a746013e0d8fa9f765fb8937007cfbcffcf7"
   integrity sha512-J8Xl3mq0L9KDFtSYtKsQDAnZWw/niZIpAD1PRiNfZFHo44Rc+oS2bEIhskNnoQXKEgBNdPzCl/DenMXYAHXRYg==
 
-react-native-snackbar@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/react-native-snackbar/-/react-native-snackbar-2.0.5.tgz#a545df35bdbe6a1e73c230f742d36935228b53ea"
-  integrity sha512-XR6u4EVnlp6BN9+K9fS/DhE1BwN7vLAgUrYohbWDaRguH0x5DIA9n/Vl4Gsfl6QkA/B3R6pW6a0jHpozipo2CA==
+react-native-snackbar@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/react-native-snackbar/-/react-native-snackbar-2.1.1.tgz#74641d967c8345f7f515ae02a0297271bceb6231"
+  integrity sha512-YMlyZzB3cvezNTAoQ5bwMZJAOF/Vrkv2F0AW/KNhLnOSqOW6zH2HrlPDi8aR2yHz83cV/wrgpfks1XM9Xx+3Fw==
 
 react-native-tab-view@*, react-native-tab-view@2.11.0:
   version "2.11.0"
