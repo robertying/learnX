@@ -9,7 +9,7 @@ const CustomText: React.FunctionComponent<TextProps> = props => {
 
   return (
     <Text
-      style={StyleSheet.compose(style, {color: isDarkMode ? 'white' : 'black'})}
+      style={StyleSheet.compose({color: isDarkMode ? 'white' : 'black'}, style)}
       {...restProps}>
       {props.children}
     </Text>
