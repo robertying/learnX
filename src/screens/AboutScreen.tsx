@@ -61,7 +61,7 @@ const AboutScreen: INavigationScreen<{}> = props => {
             marginBottom: 20,
             fontSize: iOSUIKit.bodyObject.fontSize,
           }}>
-          Copyright (c) 2019 Rui Ying
+          Copyright (c) 2020 Rui Ying
         </Text>
       </ScrollView>
     </SafeAreaView>
