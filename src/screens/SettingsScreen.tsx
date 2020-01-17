@@ -8,7 +8,10 @@ import {
   SafeAreaView,
   View,
 } from 'react-native';
-import {Navigation} from 'react-native-navigation';
+import {
+  Navigation,
+  OptionsModalPresentationStyle,
+} from 'react-native-navigation';
 import {iOSColors, iOSUIKit} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -106,6 +109,10 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               component: {
                 id: 'login',
                 name: 'login',
+                options: {
+                  modalPresentationStyle:
+                    OptionsModalPresentationStyle.fullScreen,
+                },
               },
             });
           },
