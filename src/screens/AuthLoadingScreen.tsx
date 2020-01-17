@@ -1,6 +1,10 @@
 import React, {useEffect} from 'react';
 import {Platform} from 'react-native';
-import {Navigation} from 'react-native-navigation';
+import {
+  Navigation,
+  OptionsModalPresentationStyle,
+  OptionsModalTransitionStyle,
+} from 'react-native-navigation';
 import {connect} from 'react-redux';
 import packageConfig from '../../package.json';
 import SplashScreen from '../components/SplashScreen';
@@ -52,6 +56,10 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
           component: {
             id: 'login',
             name: 'login',
+            options: {
+              modalTransitionStyle: OptionsModalTransitionStyle.crossDissolve,
+              modalPresentationStyle: OptionsModalPresentationStyle.fullScreen,
+            },
           },
         });
       }
@@ -60,6 +68,10 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
         component: {
           id: 'login',
           name: 'login',
+          options: {
+            modalTransitionStyle: OptionsModalTransitionStyle.crossDissolve,
+            modalPresentationStyle: OptionsModalPresentationStyle.fullScreen,
+          },
         },
       });
     }
