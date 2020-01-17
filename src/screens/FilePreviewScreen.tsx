@@ -1,11 +1,5 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {
-  View,
-  StatusBar,
-  Platform,
-  SafeAreaView,
-  StyleSheet,
-} from 'react-native';
+import {View, Platform, SafeAreaView, StyleSheet} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import MediumPlaceholder from '../components/MediumPlaceholder';
@@ -170,21 +164,11 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
     return () => handle.remove();
   }, [listener]);
 
-  useEffect(() => {
-    if (filePath) {
-      StatusBar.setBarStyle('default');
-    }
-  }, [filePath]);
-
   const isDarkMode = useDarkMode();
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, isDarkMode, true);
   }, [isDarkMode, props.componentId]);
-
-  useEffect(() => {
-    StatusBar.setBarStyle(isDarkMode ? 'light-content' : 'dark-content');
-  });
 
   return (
     <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
