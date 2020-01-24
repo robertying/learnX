@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
 import NoticeBoard from '../components/NoticeBoard';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface INoticeDetailScreenProps {
   title: string;
@@ -15,11 +15,11 @@ export interface INoticeDetailScreenProps {
 }
 
 const NoticeDetailScreen: INavigationScreen<INoticeDetailScreenProps> = props => {
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode, true);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
   return <NoticeBoard {...props} />;
 };

@@ -7,6 +7,7 @@ import {
   PushNotificationIOS,
   PushNotification,
   View,
+  Text,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -32,7 +33,6 @@ import {
 import {IAssignment, ICourse, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
 import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
-import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {getFuseOptions} from '../helpers/search';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -40,7 +40,6 @@ import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import {removeTags} from '../helpers/html';
-import Text from '../components/Text';
 import Snackbar from 'react-native-snackbar';
 import {
   requestNotificationPermission,
@@ -49,6 +48,7 @@ import {
 } from '../helpers/notification';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import {useColorScheme} from 'react-native-appearance';
 
 interface IAssignmentsScreenStateProps {
   loggedIn: boolean;
@@ -89,11 +89,11 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     loggedIn,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   /**
    * Prepare data
@@ -230,11 +230,11 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           passProps,
           title,
           false,
-          isDarkMode,
+          colorScheme === 'dark',
         );
       }
     },
-    [compactWidth, isDarkMode, props.componentId],
+    [colorScheme, compactWidth, props.componentId],
   );
 
   useEffect(() => {
@@ -398,7 +398,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     setPickerVisible(false);
     setReminderInfo(undefined);
     Snackbar.show({
-      title: getTranslation('reminderSet'),
+      text: getTranslation('reminderSet'),
       duration: Snackbar.LENGTH_SHORT,
     });
   }, [dateAndroid, reminderDate, reminderInfo, timeAndroid]);
@@ -427,15 +427,18 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
   return (
-    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
         testID="AssignmentsScreen"
-        style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+        style={{
+          flex: 1,
+          backgroundColor: Colors.system('background', colorScheme),
+        }}>
         {Platform.OS === 'android' && (
           <Searchbar
             style={{
               elevation: 4,
-              backgroundColor: isDarkMode ? 'black' : 'white',
+              backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"
             placeholder={getTranslation('searchAssignments')}
@@ -444,7 +447,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           />
         )}
         <FlatList
-          style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+          style={{backgroundColor: Colors.system('background', colorScheme)}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
@@ -464,8 +467,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           }
           refreshControl={
             <RefreshControl
-              colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
-              progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
+              colors={[Colors.system('purple', colorScheme)]}
+              progressBackgroundColor={
+                colorScheme === 'dark' ? '#424242' : 'white'
+              }
               onRefresh={onRefresh}
               refreshing={isFetching}
             />
@@ -485,14 +490,18 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           <Modal
             isVisible={pickerVisible}
             onBackdropPress={() => setPickerVisible(false)}
-            backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+            backdropColor={
+              colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
+            }
             animationIn="bounceIn"
             animationOut="zoomOut"
             useNativeDriver={true}
             deviceWidth={Layout.initialWindow.width}
             deviceHeight={Layout.initialWindow.height}>
             <DateTimePicker
-              style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+              style={{
+                backgroundColor: Colors.system('background', colorScheme),
+              }}
               mode="datetime"
               minimumDate={new Date()}
               value={reminderDate}
@@ -501,7 +510,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
             {Platform.OS === 'ios' && (
               <View
                 style={{
-                  backgroundColor: isDarkMode ? 'black' : 'white',
+                  backgroundColor: Colors.system('background', colorScheme),
                   width: '100%',
                   height: 50,
                   paddingHorizontal: 15,
@@ -515,9 +524,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: isDarkMode
-                        ? Colors.purpleDark
-                        : Colors.purpleLight,
+                      color: Colors.system('purple', colorScheme),
                     }}>
                     {getTranslation('cancel')}
                   </Text>
@@ -528,9 +535,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: isDarkMode
-                        ? Colors.purpleDark
-                        : Colors.purpleLight,
+                      color: Colors.system('purple', colorScheme),
                     }}>
                     {getTranslation('ok')}
                   </Text>

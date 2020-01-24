@@ -22,11 +22,11 @@ import {
   IPersistAppState,
 } from '../redux/types/state';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import {useColorScheme} from 'react-native-appearance';
 
 interface ICoursesScreenStateProps {
   loggedIn: boolean;
@@ -75,11 +75,11 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     compactWidth,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   /**
    * Prepare data
@@ -158,7 +158,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         passProps,
         title,
         false,
-        isDarkMode,
+        colorScheme === 'dark',
       );
     }
   };
@@ -235,9 +235,12 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
   return (
     <SafeAreaView
       testID="CoursesScreen"
-      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <FlatList
-        style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+        style={{backgroundColor: Colors.system('background', colorScheme)}}
         ListEmptyComponent={EmptyList}
         data={currentDisplayCourses}
         renderItem={renderListItem}
@@ -254,8 +257,10 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
         }
         refreshControl={
           <RefreshControl
-            colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
-            progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
+            colors={[Colors.system('purple', colorScheme)]}
+            progressBackgroundColor={
+              colorScheme === 'dark' ? '#424242' : 'white'
+            }
             onRefresh={onRefresh}
             refreshing={isFetching}
           />

@@ -18,6 +18,22 @@ export type ITextFieldProps = TextInputProps & {
   tintColor: string;
 };
 
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '60%',
+    backgroundColor: 'transparent',
+  },
+  textInput: {
+    flex: 1,
+    padding: 5,
+    marginLeft: 5,
+    borderBottomWidth: 1,
+    fontSize: iOSUIKit.bodyObject.fontSize,
+  },
+});
+
 const TextField: React.FunctionComponent<ITextFieldProps> = props => {
   const {
     containerStyle,
@@ -53,30 +69,17 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
   };
 
   return (
-    <View
-      style={StyleSheet.compose(
-        {
-          flexDirection: 'row',
-          alignItems: 'center',
-          width: '60%',
-          backgroundColor: 'transparent',
-        },
-        containerStyle,
-      )}>
+    <View style={[styles.root, containerStyle]}>
       {icon}
       <AnimatedTextInput
         style={[
+          styles.textInput,
           {
-            flex: 1,
-            padding: 5,
-            marginLeft: 5,
-            borderBottomWidth: 1,
             borderBottomColor: opacity.interpolate({
               inputRange: [0.01, 1],
               outputRange: ['transparent', tintColor],
             }),
             color: tintColor,
-            fontSize: iOSUIKit.bodyObject.fontSize,
           },
           style,
         ]}

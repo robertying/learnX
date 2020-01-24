@@ -1,10 +1,5 @@
 import React, {FunctionComponent, useMemo} from 'react';
-import {
-  ScrollView,
-  TouchableHighlightProps,
-  View,
-  StyleSheet,
-} from 'react-native';
+import {ScrollView, TouchableHighlightProps, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
@@ -13,12 +8,11 @@ import {getLocale, getTranslation} from '../helpers/i18n';
 import {getExtension, stripExtension} from '../helpers/share';
 import AutoHeightWebView from './AutoHeightWebView';
 import Divider from './Divider';
-import Text from './Text';
 import TextButton from './TextButton';
-import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from '../screens/FilePreviewScreen';
 import {getWebViewTemplate} from '../helpers/html';
+import {useColorScheme} from 'react-native-appearance';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   title: string;
@@ -53,6 +47,8 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     beforeNavigation,
   } = props;
 
+  const colorScheme = useColorScheme();
+
   const onAttachmentPress = (filename: string, url: string, ext: string) => {
     if (beforeNavigation) {
       beforeNavigation();
@@ -69,26 +65,24 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
       },
       stripedFilename,
       true,
-      isDarkMode,
+      colorScheme === 'dark',
     );
   };
-
-  const isDarkMode = useDarkMode();
 
   const html = useMemo(
     () =>
       getWebViewTemplate(
         description || getTranslation('noAssignmentDescription'),
-        isDarkMode,
+        colorScheme === 'dark',
       ),
-    [description, isDarkMode],
+    [description, colorScheme],
   );
 
   return (
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        backgroundColor: Colors.system('background', colorScheme),
       }}>
       <View
         style={{
@@ -97,21 +91,24 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
           paddingRight: 20,
         }}>
         <Text
-          style={StyleSheet.compose(
-            isDarkMode
+          style={[
+            colorScheme === 'dark'
               ? iOSUIKit.title3EmphasizedWhite
               : iOSUIKit.title3Emphasized,
             {lineHeight: 24},
-          )}
+          ]}
           numberOfLines={2}
           ellipsizeMode="tail">
           {title}
         </Text>
         <Text
-          style={StyleSheet.compose(iOSUIKit.body, {
-            color: isDarkMode ? Colors.grayDark : Colors.grayLight,
-            marginTop: 5,
-          })}>
+          style={[
+            iOSUIKit.body,
+            {
+              color: Colors.system('gray', colorScheme),
+              marginTop: 5,
+            },
+          ]}>
           {getLocale().startsWith('zh')
             ? dayjs(deadline).format('llll') + ' 截止'
             : 'Submission close on ' + dayjs(deadline).format('llll')}
@@ -132,11 +129,11 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               style={{marginRight: 5}}
               name="attachment"
               size={18}
-              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              color={Colors.system('purple', colorScheme)}
             />
             <TextButton
               textStyle={{
-                color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                color: Colors.system('purple', colorScheme),
               }}
               onPress={() =>
                 onAttachmentPress(
@@ -166,11 +163,11 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               style={{marginRight: 5}}
               name="done"
               size={18}
-              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              color={Colors.system('purple', colorScheme)}
             />
             <TextButton
               textStyle={{
-                color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                color: Colors.system('purple', colorScheme),
               }}
               onPress={() =>
                 onAttachmentPress(
@@ -194,9 +191,9 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                 style={{marginRight: 5}}
                 name="grade"
                 size={18}
-                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                color={Colors.system('purple', colorScheme)}
               />
-              <Text>
+              <Text style={{color: Colors.system('foreground', colorScheme)}}>
                 {grade && gradeLevel
                   ? `${gradeLevel} / ${grade}`
                   : grade
@@ -206,7 +203,15 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
                   : getTranslation('noGrade')}
               </Text>
             </View>
-            {gradeContent && <Text style={{marginTop: 5}}>{gradeContent}</Text>}
+            {gradeContent && (
+              <Text
+                style={{
+                  marginTop: 5,
+                  color: Colors.system('foreground', colorScheme),
+                }}>
+                {gradeContent}
+              </Text>
+            )}
           </View>
           <Divider />
         </>

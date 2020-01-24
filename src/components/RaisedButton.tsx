@@ -5,10 +5,9 @@ import {
   TouchableOpacityProps,
   ViewProps,
   StyleSheet,
+  Text,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
-import Colors from '../constants/Colors';
-import Text from './Text';
 
 export type IRaisedButtonProps = TouchableOpacityProps & {
   style?: ViewProps['style'];
@@ -16,32 +15,30 @@ export type IRaisedButtonProps = TouchableOpacityProps & {
   children: string;
 };
 
+const styles = StyleSheet.create({
+  root: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 60,
+    height: 30,
+    backgroundColor: 'lightblue',
+    borderRadius: 8,
+  },
+  text: {
+    fontSize: iOSUIKit.bodyObject.fontSize,
+  },
+});
+
 const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {
   const {style, textStyle, onPress, children, testID} = props;
 
   return (
     <TouchableOpacity
       testID={testID}
-      style={StyleSheet.compose(
-        {
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 60,
-          height: 30,
-          backgroundColor: 'lightblue',
-          borderRadius: 8,
-        },
-        style,
-      )}
-      activeOpacity={Colors.activeOpacity}
+      style={[styles.root, style]}
+      activeOpacity={0.6}
       onPress={onPress}>
-      <Text
-        style={StyleSheet.compose(
-          {fontSize: iOSUIKit.bodyObject.fontSize},
-          textStyle,
-        )}>
-        {children}
-      </Text>
+      <Text style={[styles.text, textStyle]}>{children}</Text>
     </TouchableOpacity>
   );
 };

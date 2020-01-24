@@ -9,7 +9,7 @@ import {
 import {store} from '../redux/store';
 import {IAssignment} from '../redux/types/state';
 import {getTranslation} from './i18n';
-import SnackBar from 'react-native-snackbar';
+import Snackbar from 'react-native-snackbar';
 import {CalendarEvent} from 'thu-learn-lib-no-native/lib/types';
 import {removeTags} from './html';
 
@@ -86,9 +86,9 @@ export const saveAssignmentEvent = async (
 export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
   const status = await RNCalendarEvents.authorizationStatus();
   if (status !== 'authorized') {
-    SnackBar.show({
-      title: getTranslation('accessCalendarFailure'),
-      duration: SnackBar.LENGTH_SHORT,
+    Snackbar.show({
+      text: getTranslation('accessCalendarFailure'),
+      duration: Snackbar.LENGTH_SHORT,
     });
     return;
   }
@@ -185,9 +185,9 @@ export const saveCoursesToCalendar = async (
 ) => {
   const status = await RNCalendarEvents.authorizationStatus();
   if (status !== 'authorized') {
-    SnackBar.show({
-      title: getTranslation('accessCalendarFailure'),
-      duration: SnackBar.LENGTH_SHORT,
+    Snackbar.show({
+      text: getTranslation('accessCalendarFailure'),
+      duration: Snackbar.LENGTH_SHORT,
     });
     return;
   }

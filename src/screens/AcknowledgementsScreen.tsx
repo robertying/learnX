@@ -1,69 +1,90 @@
 import React, {useEffect} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet} from 'react-native';
+import {SafeAreaView, ScrollView, StyleSheet, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
-import Text from '../components/Text';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
+import Colors from '../constants/Colors';
 
 const deps = [
   ...Object.keys(packageConfig.dependencies),
   ...Object.keys(packageConfig.devDependencies),
 ];
 
+const styles = StyleSheet.create({
+  center: {
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+});
+
 const AcknowledgementsScreen: INavigationScreen<{}> = props => {
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode, true);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
   return (
     <SafeAreaView
-      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <ScrollView
-        contentContainerStyle={{
-          alignItems: 'center',
-          paddingTop: 30,
-          paddingBottom: 30,
-        }}>
+        contentContainerStyle={[
+          styles.center,
+          {
+            paddingTop: 30,
+            paddingBottom: 30,
+          },
+        ]}>
         <Text
-          style={{
-            alignSelf: 'center',
-            marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize,
-          }}>
+          style={[
+            styles.center,
+            {
+              fontSize: iOSUIKit.bodyObject.fontSize,
+              color: Colors.system('foreground', colorScheme),
+            },
+          ]}>
           {getTranslation('acknowledgeHarryChen')}
         </Text>
         <Text
-          style={{
-            alignSelf: 'center',
-            marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize,
-          }}>
+          style={[
+            styles.center,
+            {
+              fontSize: iOSUIKit.bodyObject.fontSize,
+              color: Colors.system('foreground', colorScheme),
+            },
+          ]}>
           {getTranslation('acknowledgeYayuXiao')}
         </Text>
         <Text
-          style={{
-            alignSelf: 'center',
-            marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize,
-          }}>
+          style={[
+            styles.center,
+            {
+              fontSize: iOSUIKit.bodyObject.fontSize,
+              color: Colors.system('foreground', colorScheme),
+            },
+          ]}>
           {getTranslation('acknowledgeJSCommunity')}
         </Text>
         {deps.map((dep, index) => (
           <Text
             key={index}
-            style={StyleSheet.compose(
-              isDarkMode ? iOSUIKit.footnoteWhite : iOSUIKit.footnote,
+            style={[
+              colorScheme === 'dark'
+                ? iOSUIKit.footnoteWhite
+                : iOSUIKit.footnote,
               {
+                alignSelf: 'center',
                 marginTop: 2,
                 marginBottom: 2,
               },
-            )}>
+            ]}>
             {dep}
           </Text>
         ))}

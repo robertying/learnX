@@ -9,7 +9,7 @@ import {connect} from 'react-redux';
 import packageConfig from '../../package.json';
 import SplashScreen from '../components/SplashScreen';
 import {getTranslation} from '../helpers/i18n';
-import SnackBar from 'react-native-snackbar';
+import Snackbar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {getNavigationRoot} from '../navigation/navigationRoot';
 import {setUpdate} from '../redux/actions/settings';
@@ -17,8 +17,8 @@ import {IAuthState, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import semver from 'semver';
 import {resetLoading} from '../redux/actions/root';
-import {useDarkMode} from 'react-native-dark-mode';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 interface IAuthLoadingScreenStateProps {
   rehydrated: boolean;
@@ -36,11 +36,11 @@ type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
 const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
   const {rehydrated, auth, setUpdate, resetLoading} = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   useEffect(() => {
     if (rehydrated) {
@@ -85,9 +85,9 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
 
         if (semver.gt(versionString.slice(1), packageConfig.version)) {
           setUpdate(true);
-          SnackBar.show({
-            title: getTranslation('pleaseUpdate'),
-            duration: SnackBar.LENGTH_SHORT,
+          Snackbar.show({
+            text: getTranslation('pleaseUpdate'),
+            duration: Snackbar.LENGTH_SHORT,
           });
         } else {
           setUpdate(false);

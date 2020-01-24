@@ -4,6 +4,7 @@ import {
   TouchableHighlightProps,
   View,
   StyleSheet,
+  Text,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -13,11 +14,10 @@ import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
 import {getExtension, stripExtension} from '../helpers/share';
 import Divider from './Divider';
-import Text from './Text';
 import TextButton from './TextButton';
-import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
 import {getWebViewTemplate} from '../helpers/html';
+import {useColorScheme} from 'react-native-appearance';
 
 export type INoticeBoardProps = TouchableHighlightProps & {
   title: string;
@@ -30,6 +30,27 @@ export type INoticeBoardProps = TouchableHighlightProps & {
   beforeNavigation?: () => void;
 };
 
+const styles = StyleSheet.create({
+  root: {
+    padding: 15,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  status: {
+    padding: 15,
+    paddingLeft: 20,
+    paddingRight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  info: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 5,
+  },
+});
+
 const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
   const {
     title,
@@ -41,6 +62,8 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     componentId,
     beforeNavigation,
   } = props;
+
+  const colorScheme = useColorScheme();
 
   const onAttachmentPress = async (
     filename: string,
@@ -62,61 +85,54 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
       },
       stripedFilename,
       true,
-      isDarkMode,
+      colorScheme === 'dark',
     );
   };
-
-  const isDarkMode = useDarkMode();
 
   const html = useMemo(
     () =>
       getWebViewTemplate(
         content || getTranslation('noNoticeContent'),
-        isDarkMode,
+        colorScheme === 'dark',
       ),
-    [content, isDarkMode],
+    [content, colorScheme],
   );
 
   return (
     <ScrollView
       style={{
         flex: 1,
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        backgroundColor: Colors.system('background', colorScheme),
       }}>
-      <View
-        style={{
-          padding: 15,
-          paddingLeft: 20,
-          paddingRight: 20,
-        }}>
+      <View style={styles.root}>
         <Text
-          style={StyleSheet.compose(
-            isDarkMode
+          style={[
+            colorScheme === 'dark'
               ? iOSUIKit.title3EmphasizedWhite
               : iOSUIKit.title3Emphasized,
             {lineHeight: 24},
-          )}
+          ]}
           numberOfLines={2}
           ellipsizeMode="tail">
           {title}
         </Text>
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 5,
-          }}>
+        <View style={styles.info}>
           <Text
-            style={StyleSheet.compose(iOSUIKit.body, {
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
-            })}>
+            style={[
+              iOSUIKit.body,
+              {
+                color: Colors.system('gray', colorScheme),
+              },
+            ]}>
             {author}
           </Text>
           <Text
-            style={StyleSheet.compose(iOSUIKit.body, {
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
-            })}>
+            style={[
+              iOSUIKit.body,
+              {
+                color: Colors.system('gray', colorScheme),
+              },
+            ]}>
             {dayjs(publishTime).format('LL')}
           </Text>
         </View>
@@ -124,23 +140,16 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
       <Divider />
       {attachmentName ? (
         <>
-          <View
-            style={{
-              padding: 15,
-              paddingLeft: 20,
-              paddingRight: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
+          <View style={styles.status}>
             <Icon
               style={{marginRight: 5}}
               name="attachment"
               size={18}
-              color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+              color={Colors.system('purple', colorScheme)}
             />
             <TextButton
               textStyle={{
-                color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+                color: Colors.system('purple', colorScheme),
               }}
               onPress={() =>
                 onAttachmentPress(

@@ -1,34 +1,56 @@
 import React from 'react';
-import {Platform, SafeAreaView, View} from 'react-native';
-import {useDarkMode} from 'react-native-dark-mode';
+import {Platform, SafeAreaView, View, StyleSheet} from 'react-native';
+import {useColorScheme} from 'react-native-appearance';
+import Colors from '../constants/Colors';
 
-const SplashScreen = () => {
-  const isDarkMode = useDarkMode();
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  block1: {
+    height: Platform.OS === 'ios' ? 52 + 44 : 56,
+  },
+  block2: {
+    height: Platform.OS === 'android' ? 50 : 49,
+  },
+});
+
+const SplashScreen: React.FC = () => {
+  const colorScheme = useColorScheme();
 
   return (
     <>
       <SafeAreaView
-        style={{
-          backgroundColor: isDarkMode ? 'black' : 'white',
-          flex: 1,
-        }}>
+        style={[
+          styles.root,
+          {
+            backgroundColor: Colors.system('background', colorScheme),
+          },
+        ]}>
         <View
-          style={{
-            backgroundColor: isDarkMode ? 'black' : 'white',
-            height: Platform.OS === 'ios' ? 52 + 44 : 56,
-          }}
+          style={[
+            styles.block1,
+            {
+              backgroundColor: Colors.system('background', colorScheme),
+            },
+          ]}
         />
         <View
-          style={{
-            backgroundColor: isDarkMode ? 'rgb(28,28,30)' : '#f0f0f0',
-            flex: 1,
-          }}
+          style={[
+            styles.root,
+            {
+              backgroundColor:
+                colorScheme === 'dark' ? 'rgb(28,28,30)' : '#f0f0f0',
+            },
+          ]}
         />
         <View
-          style={{
-            height: Platform.OS === 'android' ? 50 : 49,
-            backgroundColor: isDarkMode ? 'black' : 'white',
-          }}
+          style={[
+            styles.block2,
+            {
+              backgroundColor: Colors.system('background', colorScheme),
+            },
+          ]}
         />
       </SafeAreaView>
     </>

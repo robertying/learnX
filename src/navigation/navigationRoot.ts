@@ -3,7 +3,7 @@ import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
 import {loadIcons} from '../helpers/icons';
-import {initialMode} from 'react-native-dark-mode';
+import {Appearance} from 'react-native-appearance';
 
 export const getAuthLoadingRoot = () => {
   const authLoadingRoot: LayoutRoot = {
@@ -16,10 +16,9 @@ export const getAuthLoadingRoot = () => {
   return authLoadingRoot;
 };
 
-const tabIconDefaultColor =
-  initialMode === 'dark' ? Colors.grayDark : Colors.grayLight;
-const tabIconSelectedColor =
-  initialMode === 'dark' ? Colors.purpleDark : Colors.theme;
+const colorScheme = Appearance.getColorScheme();
+const tabIconDefaultColor = Colors.system('gray', colorScheme);
+const tabIconSelectedColor = Colors.system('purple', colorScheme);
 
 const tabColorSettings = {
   textColor: tabIconDefaultColor,

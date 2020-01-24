@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform, StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
@@ -8,8 +8,7 @@ import {getTranslation} from '../helpers/i18n';
 import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
-import Text from './Text';
-import {useDarkMode} from 'react-native-dark-mode';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IFileCardProps extends IInteractablePreviewWrapperProps {
   title: string;
@@ -21,6 +20,23 @@ export interface IFileCardProps extends IInteractablePreviewWrapperProps {
   courseName?: string;
   courseTeacherName?: string;
 }
+
+const styles = StyleSheet.create({
+  root: {
+    padding: 15,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  flexRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  title: {
+    flex: 1,
+    fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
+  },
+});
 
 const FileCard: React.FC<IFileCardProps> = props => {
   const {
@@ -41,7 +57,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
     onRemind,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   return (
     <InteractablePreviewWrapper
@@ -53,31 +69,22 @@ const FileCard: React.FC<IFileCardProps> = props => {
       onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
-        style={{
-          backgroundColor: isDarkMode ? 'black' : 'white',
-          padding: 15,
-          paddingLeft: 20,
-          paddingRight: 20,
-          borderLeftColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
-          borderLeftWidth: pinned ? 10 : 0,
-        }}>
-        <View
-          style={[
-            styles.flexRow,
-            {
-              justifyContent: 'space-between',
-            },
-          ]}>
+        style={[
+          styles.root,
+          {
+            backgroundColor: Colors.system('background', colorScheme),
+            borderLeftColor: Colors.system('purple', colorScheme),
+            borderLeftWidth: pinned ? 10 : 0,
+          },
+        ]}>
+        <View style={styles.flexRow}>
           <Text
-            style={StyleSheet.compose(
-              isDarkMode
+            style={[
+              colorScheme === 'dark'
                 ? iOSUIKit.bodyEmphasizedWhite
                 : iOSUIKit.bodyEmphasized,
-              {
-                flex: 1,
-                fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
-              },
-            )}
+              styles.title,
+            ]}
             numberOfLines={1}
             ellipsizeMode="tail">
             {title}
@@ -90,7 +97,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
               style={{marginLeft: 5}}
               name="flag"
               size={18}
-              color={isDarkMode ? Colors.redDark : Colors.redLight}
+              color={Colors.system('red', colorScheme)}
             />
           )}
         </View>
@@ -99,7 +106,9 @@ const FileCard: React.FC<IFileCardProps> = props => {
             marginTop: 8,
           }}>
           <Text
-            style={isDarkMode ? iOSUIKit.subheadWhite : iOSUIKit.subhead}
+            style={
+              colorScheme === 'dark' ? iOSUIKit.subheadWhite : iOSUIKit.subhead
+            }
             numberOfLines={3}>
             {description || getTranslation('noFileDescription')}
           </Text>
@@ -108,7 +117,6 @@ const FileCard: React.FC<IFileCardProps> = props => {
           style={[
             styles.flexRow,
             {
-              justifyContent: 'space-between',
               marginTop: 10,
             },
           ]}>
@@ -117,7 +125,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
             ellipsizeMode="tail"
             style={{
               flex: 1,
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              color: Colors.system('gray', colorScheme),
               fontSize: 13,
             }}>
             {courseName &&
@@ -126,7 +134,7 @@ const FileCard: React.FC<IFileCardProps> = props => {
           </Text>
           <Text
             style={{
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              color: Colors.system('gray', colorScheme),
               fontSize: 13,
             }}>
             {dayjs(date).fromNow()}
@@ -138,10 +146,3 @@ const FileCard: React.FC<IFileCardProps> = props => {
 };
 
 export default FileCard;
-
-const styles = StyleSheet.create({
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-});

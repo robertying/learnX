@@ -7,6 +7,7 @@ import {
   PushNotificationIOS,
   PushNotification,
   View,
+  Text,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -31,7 +32,6 @@ import {
 } from '../redux/actions/files';
 import {ICourse, IFile, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {getFuseOptions} from '../helpers/search';
@@ -45,10 +45,10 @@ import Snackbar from 'react-native-snackbar';
 import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import Button from '../components/Button';
-import Text from '../components/Text';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import {useColorScheme} from 'react-native-appearance';
 
 interface IFilesScreenStateProps {
   loggedIn: boolean;
@@ -88,11 +88,11 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     compactWidth,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   /**
    * Prepare data
@@ -199,11 +199,11 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           passProps,
           title,
           false,
-          isDarkMode,
+          colorScheme === 'dark',
         );
       }
     },
-    [compactWidth, isDarkMode, props.componentId],
+    [colorScheme, compactWidth, props.componentId],
   );
 
   useEffect(() => {
@@ -365,7 +365,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     setPickerVisible(false);
     setReminderInfo(undefined);
     Snackbar.show({
-      title: getTranslation('reminderSet'),
+      text: getTranslation('reminderSet'),
       duration: Snackbar.LENGTH_SHORT,
     });
   }, [dateAndroid, reminderDate, reminderInfo, timeAndroid]);
@@ -394,15 +394,18 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
   return (
-    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
         testID="FilesScreen"
-        style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+        style={{
+          flex: 1,
+          backgroundColor: Colors.system('background', colorScheme),
+        }}>
         {Platform.OS === 'android' && (
           <Searchbar
             style={{
               elevation: 4,
-              backgroundColor: isDarkMode ? 'black' : 'white',
+              backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"
             placeholder={getTranslation('searchFiles')}
@@ -411,7 +414,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           />
         )}
         <FlatList
-          style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+          style={{backgroundColor: Colors.system('background', colorScheme)}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
@@ -431,8 +434,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           }
           refreshControl={
             <RefreshControl
-              colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
-              progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
+              colors={[Colors.system('purple', colorScheme)]}
+              progressBackgroundColor={
+                colorScheme === 'dark' ? '#424242' : 'white'
+              }
               onRefresh={onRefresh}
               refreshing={isFetching}
             />
@@ -452,14 +457,18 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           <Modal
             isVisible={pickerVisible}
             onBackdropPress={() => setPickerVisible(false)}
-            backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+            backdropColor={
+              colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
+            }
             animationIn="bounceIn"
             animationOut="zoomOut"
             useNativeDriver={true}
             deviceWidth={Layout.initialWindow.width}
             deviceHeight={Layout.initialWindow.height}>
             <DateTimePicker
-              style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+              style={{
+                backgroundColor: Colors.system('background', colorScheme),
+              }}
               mode="datetime"
               minimumDate={new Date()}
               value={reminderDate}
@@ -468,7 +477,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             {Platform.OS === 'ios' && (
               <View
                 style={{
-                  backgroundColor: isDarkMode ? 'black' : 'white',
+                  backgroundColor: Colors.system('background', colorScheme),
                   width: '100%',
                   height: 50,
                   paddingHorizontal: 15,
@@ -482,9 +491,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: isDarkMode
-                        ? Colors.purpleDark
-                        : Colors.purpleLight,
+                      color: Colors.system('purple', colorScheme),
                     }}>
                     {getTranslation('cancel')}
                   </Text>
@@ -495,9 +502,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: isDarkMode
-                        ? Colors.purpleDark
-                        : Colors.purpleLight,
+                      color: Colors.system('purple', colorScheme),
                     }}>
                     {getTranslation('ok')}
                   </Text>

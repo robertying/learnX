@@ -9,7 +9,7 @@ import Colors from '../constants/Colors';
 import {IAssignment} from '../redux/types/state';
 import AssignmentCard from './AssignmentCard';
 import EmptyList from './EmptyList';
-import {useDarkMode} from 'react-native-dark-mode';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IAssignmentsViewProps {
   assignments: IAssignment[];
@@ -36,13 +36,16 @@ const AssignmentsView: React.FunctionComponent<IAssignmentsViewProps> = props =>
     );
   };
 
-  const keyExtractor = (item: any) => item.id;
+  const keyExtractor = (item: IAssignment) => item.id;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   return (
     <SafeAreaView
-      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <FlatList
         ListEmptyComponent={EmptyList}
         data={assignments}
@@ -52,8 +55,10 @@ const AssignmentsView: React.FunctionComponent<IAssignmentsViewProps> = props =>
           <RefreshControl
             refreshing={isFetching}
             onRefresh={onRefresh}
-            progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
-            colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
+            progressBackgroundColor={
+              colorScheme === 'dark' ? '#424242' : 'white'
+            }
+            colors={[Colors.system('purple', colorScheme)]}
           />
         }
       />

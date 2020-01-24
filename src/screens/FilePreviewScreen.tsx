@@ -1,15 +1,14 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {View, Platform, SafeAreaView, StyleSheet} from 'react-native';
+import {View, Platform, SafeAreaView, Text} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
-import MediumPlaceholder from '../components/MediumPlaceholder';
-import MediumPlaceholderDark from '../components/MediumPlaceholderDark';
+import PlaceholderLight from '../components/PlaceholderLight';
+import PlaceholderDark from '../components/PlaceholderDark';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {downloadFile, shareFile} from '../helpers/share';
-import SnackBar from 'react-native-snackbar';
+import Snackbar from 'react-native-snackbar';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {needWhiteBackground} from '../helpers/html';
 import {adaptToSystemTheme} from '../helpers/darkmode';
@@ -20,8 +19,8 @@ import {
   DefaultTheme,
   Provider as PaperProvider,
 } from 'react-native-paper';
-import Text from '../components/Text';
 import {iOSUIKit} from 'react-native-typography';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IFilePreviewScreenStateProps {
   filename: string;
@@ -74,9 +73,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
         );
         setFilePath(filePath);
       } catch {
-        SnackBar.show({
-          title: getTranslation('downloadFileFailure'),
-          duration: SnackBar.LENGTH_SHORT,
+        Snackbar.show({
+          text: getTranslation('downloadFileFailure'),
+          duration: Snackbar.LENGTH_SHORT,
         });
       } finally {
         setLoading(false);
@@ -126,9 +125,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
         fullScreenRef.current = !fullScreen;
       }
       if (buttonId === 'share') {
-        SnackBar.show({
-          title: getTranslation('preparingFile'),
-          duration: SnackBar.LENGTH_SHORT,
+        Snackbar.show({
+          text: getTranslation('preparingFile'),
+          duration: Snackbar.LENGTH_SHORT,
         });
         shareFile(url, filename, ext);
       }
@@ -144,9 +143,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
           );
           setFilePath(filePath);
         } catch {
-          SnackBar.show({
-            title: getTranslation('downloadFileFailure'),
-            duration: SnackBar.LENGTH_SHORT,
+          Snackbar.show({
+            text: getTranslation('downloadFileFailure'),
+            duration: Snackbar.LENGTH_SHORT,
           });
         } finally {
           setLoading(false);
@@ -164,20 +163,34 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
     return () => handle.remove();
   }, [listener]);
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode, true);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
+
+  const webViewRef = useRef<WebView>(null);
+  const reloadCount = useRef(0);
+
+  const handleProcessTerminate = () => {
+    if (reloadCount.current <= 2) {
+      webViewRef.current?.reload();
+      reloadCount.current++;
+    }
+  };
 
   return (
-    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView style={{flex: 1}}>
         {Platform.OS === 'android' && loading && (
-          <ProgressBar progress={progress} color={Colors.theme} />
+          <ProgressBar
+            progress={progress}
+            color={Colors.system('purple', colorScheme)}
+          />
         )}
         {Platform.OS === 'ios' && !loading && (filePath ? true : false) && (
           <WebView
+            ref={webViewRef}
             style={{
               backgroundColor: needWhiteBackground(ext)
                 ? 'white'
@@ -188,25 +201,26 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
             }}
             originWhitelist={['*']}
             decelerationRate="normal"
+            onContentProcessDidTerminate={handleProcessTerminate}
           />
         )}
         {Platform.OS === 'android' && (
           <View
             style={{
               flex: 1,
-              backgroundColor: isDarkMode ? 'black' : 'white',
+              backgroundColor: Colors.system('background', colorScheme),
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
             <Text
-              style={StyleSheet.compose(
-                isDarkMode
+              style={[
+                colorScheme === 'dark'
                   ? iOSUIKit.largeTitleEmphasizedWhite
                   : iOSUIKit.largeTitleEmphasized,
                 {marginHorizontal: 20, textAlign: 'center'},
-              )}>{`${filename}.${ext}`}</Text>
+              ]}>{`${filename}.${ext}`}</Text>
             <View
               style={{
                 display: 'flex',
@@ -216,14 +230,14 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
               }}>
               <IconButton
                 icon="refresh"
-                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                color={Colors.system('purple', colorScheme)}
                 size={50}
                 onPress={() => listener({buttonId: 'refresh'}) as any}
               />
               <IconButton
                 disabled={loading || !filePath}
                 icon="share"
-                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                color={Colors.system('purple', colorScheme)}
                 size={50}
                 onPress={() => listener({buttonId: 'share'}) as any}
               />
@@ -232,7 +246,7 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
         )}
         {Platform.OS === 'ios' &&
           loading &&
-          (isDarkMode ? (
+          (colorScheme === 'dark' ? (
             <View
               style={{
                 backgroundColor: 'black',
@@ -242,10 +256,10 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
                 left: 0,
                 right: 0,
               }}>
-              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
-              <MediumPlaceholderDark style={{margin: 15}} loading={true} />
+              <PlaceholderDark style={{margin: 15}} loading={true} />
+              <PlaceholderDark style={{margin: 15}} loading={true} />
+              <PlaceholderDark style={{margin: 15}} loading={true} />
+              <PlaceholderDark style={{margin: 15}} loading={true} />
             </View>
           ) : (
             <View
@@ -257,10 +271,10 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
                 left: 0,
                 right: 0,
               }}>
-              <MediumPlaceholder style={{margin: 15}} loading={true} />
-              <MediumPlaceholder style={{margin: 15}} loading={true} />
-              <MediumPlaceholder style={{margin: 15}} loading={true} />
-              <MediumPlaceholder style={{margin: 15}} loading={true} />
+              <PlaceholderLight style={{margin: 15}} loading={true} />
+              <PlaceholderLight style={{margin: 15}} loading={true} />
+              <PlaceholderLight style={{margin: 15}} loading={true} />
+              <PlaceholderLight style={{margin: 15}} loading={true} />
             </View>
           ))}
         {Platform.OS === 'ios' && loading && (

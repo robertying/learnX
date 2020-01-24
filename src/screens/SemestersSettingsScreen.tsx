@@ -10,9 +10,9 @@ import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 interface ISemestersSettingsScreenStateProps {
   semesters: string[];
@@ -37,11 +37,11 @@ const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> 
     getAllSemesters,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode, true);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
   useEffect(() => {
     getAllSemesters();
@@ -61,7 +61,11 @@ const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> 
             <Icon
               name="check"
               size={20}
-              color={isDarkMode ? Colors.grayDark : undefined}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
             />
           ) : null
         }
@@ -76,11 +80,11 @@ const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> 
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        backgroundColor: Colors.system('background', colorScheme),
       }}>
       <FlatList
         style={{
-          backgroundColor: isDarkMode ? 'black' : 'white',
+          backgroundColor: Colors.system('background', colorScheme),
         }}
         contentContainerStyle={{marginTop: 10}}
         data={semesters}

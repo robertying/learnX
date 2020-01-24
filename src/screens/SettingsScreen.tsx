@@ -7,6 +7,7 @@ import {
   Platform,
   SafeAreaView,
   View,
+  Text,
 } from 'react-native';
 import {
   Navigation,
@@ -26,7 +27,7 @@ import {
   saveCoursesToCalendar,
 } from '../helpers/calendar';
 import {getTranslation} from '../helpers/i18n';
-import SnackBar from 'react-native-snackbar';
+import Snackbar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {clearStore} from '../redux/actions/root';
 import {
@@ -38,17 +39,15 @@ import {IAssignment, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import semver from 'semver';
 import DeviceInfo from '../constants/DeviceInfo';
-import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import {ActivityIndicator} from 'react-native-paper';
 import TextButton from '../components/TextButton';
-import Text from '../components/Text';
 import dataSource from '../redux/dataSource';
 import RNCalendarEvents from 'react-native-calendar-events';
-import Snackbar from 'react-native-snackbar';
+import {useColorScheme} from 'react-native-appearance';
 
 interface ISettingsScreenStateProps {
   calendarSync: boolean;
@@ -79,11 +78,20 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     compactWith,
   } = props;
 
+  const colorScheme = useColorScheme();
+
   const navigate = (name: string) => {
     if (DeviceInfo.isIPad() && !compactWith) {
       setDetailView(name, props.componentId);
     } else {
-      pushTo(name, props.componentId, undefined, undefined, false, isDarkMode);
+      pushTo(
+        name,
+        props.componentId,
+        undefined,
+        undefined,
+        false,
+        colorScheme === 'dark',
+      );
     }
   };
 
@@ -137,8 +145,8 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         const result = await RNCalendarEvents.authorizeEventStore();
         if (result !== 'authorized') {
           Snackbar.show({
-            title: getTranslation('accessCalendarFailure'),
-            duration: SnackBar.LENGTH_SHORT,
+            text: getTranslation('accessCalendarFailure'),
+            duration: Snackbar.LENGTH_SHORT,
           });
           return;
         }
@@ -176,9 +184,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         setUpdate(true);
       }
     } else {
-      SnackBar.show({
-        title: getTranslation('noUpdate'),
-        duration: SnackBar.LENGTH_SHORT,
+      Snackbar.show({
+        text: getTranslation('noUpdate'),
+        duration: Snackbar.LENGTH_SHORT,
       });
       if (hasUpdate) {
         setUpdate(false);
@@ -201,15 +209,15 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             RNFetchBlob.fs
               .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
               .then(() =>
-                SnackBar.show({
-                  title: getTranslation('clearFileCacheSuccess'),
-                  duration: SnackBar.LENGTH_SHORT,
+                Snackbar.show({
+                  text: getTranslation('clearFileCacheSuccess'),
+                  duration: Snackbar.LENGTH_SHORT,
                 }),
               )
               .catch(() =>
-                SnackBar.show({
-                  title: getTranslation('clearFileCacheFail'),
-                  duration: SnackBar.LENGTH_SHORT,
+                Snackbar.show({
+                  text: getTranslation('clearFileCacheFail'),
+                  duration: Snackbar.LENGTH_SHORT,
                 }),
               );
           },
@@ -231,8 +239,8 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       const result = await RNCalendarEvents.authorizeEventStore();
       if (result !== 'authorized') {
         Snackbar.show({
-          title: getTranslation('accessCalendarFailure'),
-          duration: SnackBar.LENGTH_SHORT,
+          text: getTranslation('accessCalendarFailure'),
+          duration: Snackbar.LENGTH_SHORT,
         });
         return;
       }
@@ -265,14 +273,14 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             startDate,
             endDate,
           );
-          SnackBar.show({
-            title: getTranslation('courseSyncSuccess'),
-            duration: SnackBar.LENGTH_SHORT,
+          Snackbar.show({
+            text: getTranslation('courseSyncSuccess'),
+            duration: Snackbar.LENGTH_SHORT,
           });
         } catch {
-          SnackBar.show({
-            title: getTranslation('courseSyncFailure'),
-            duration: SnackBar.LENGTH_SHORT,
+          Snackbar.show({
+            text: getTranslation('courseSyncFailure'),
+            duration: Snackbar.LENGTH_SHORT,
           });
         } finally {
           setCourseSyncModalVisible(false);
@@ -292,7 +300,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="calendar-alert"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('calendarSync')}
@@ -308,7 +320,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="calendar-month"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('courseSync')}
@@ -323,7 +339,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="book"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('changeSemester')}
@@ -339,7 +359,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="account-off"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('logout')}
@@ -354,7 +378,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="file-hidden"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('clearFileCache')}
@@ -372,7 +400,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
                   <MaterialCommunityIcons
                     name="update"
                     size={20}
-                    color={isDarkMode ? Colors.grayDark : undefined}
+                    color={
+                      colorScheme === 'dark'
+                        ? Colors.system('gray', 'dark')
+                        : undefined
+                    }
                   />
                   <View
                     style={{
@@ -390,7 +422,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
                 <MaterialCommunityIcons
                   name="update"
                   size={20}
-                  color={isDarkMode ? Colors.grayDark : undefined}
+                  color={
+                    colorScheme === 'dark'
+                      ? Colors.system('gray', 'dark')
+                      : undefined
+                  }
                 />
               )
             }
@@ -411,7 +447,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="help"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('help')}
@@ -426,7 +466,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialCommunityIcons
                 name="tag-heart"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('acknowledgements')}
@@ -441,7 +485,11 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
               <MaterialIcons
                 name="copyright"
                 size={20}
-                color={isDarkMode ? Colors.grayDark : undefined}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
               />
             }
             text={getTranslation('about')}
@@ -453,18 +501,19 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     }
   };
 
-  const isDarkMode = useDarkMode();
-
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   return (
     <SafeAreaView
       testID="SettingsScreen"
-      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <FlatList
-        style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+        style={{backgroundColor: Colors.system('background', colorScheme)}}
         data={[
           {key: 'calendarSync'},
           {key: 'courseSync'},
@@ -480,7 +529,9 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       />
       <Modal
         isVisible={courseSyncModalVisible}
-        backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+        backdropColor={
+          colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
+        }
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
@@ -488,7 +539,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         deviceHeight={Layout.initialWindow.height}>
         <View
           style={{
-            backgroundColor: isDarkMode ? 'black' : 'white',
+            backgroundColor: Colors.system('background', colorScheme),
             width: '100%',
             height: 150,
             padding: 20,
@@ -496,11 +547,18 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             justifyContent: 'space-between',
             alignItems: 'center',
           }}>
-          <Text style={isDarkMode ? iOSUIKit.bodyWhite : iOSUIKit.body}>
+          <Text
+            style={colorScheme === 'dark' ? iOSUIKit.bodyWhite : iOSUIKit.body}>
             {getTranslation('fetchingCourseSchedule')}
           </Text>
-          <ActivityIndicator style={{margin: 20}} animating={true} />
-          <TextButton onPress={() => setCourseSyncModalVisible(false)}>
+          <ActivityIndicator
+            style={{margin: 20}}
+            color={Colors.system('purple', colorScheme)}
+            animating={true}
+          />
+          <TextButton
+            textStyle={{color: Colors.system('purple', colorScheme)}}
+            onPress={() => setCourseSyncModalVisible(false)}>
             {getTranslation('cancel')}
           </TextButton>
         </View>

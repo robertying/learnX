@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useCallback, useEffect} from 'react';
-import {Dimensions, Platform, View, SafeAreaView} from 'react-native';
+import {Dimensions, Platform, View, SafeAreaView, Text} from 'react-native';
 import Modal from 'react-native-modal';
 import {
   Route,
@@ -14,7 +14,6 @@ import AssignmentsView from '../components/AssignmentsView';
 import FilesView from '../components/FilesView';
 import NoticeBoard from '../components/NoticeBoard';
 import NoticesView from '../components/NoticesView';
-import Text from '../components/Text';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 import dayjs from '../helpers/dayjs';
@@ -31,11 +30,11 @@ import {
   ICourse,
 } from '../redux/types/state';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 interface ICourseDetailScreenStateProps {
   course?: ICourse;
@@ -70,11 +69,11 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
     course,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode, true);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
   const notices = useMemo(
     () =>
@@ -154,10 +153,10 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         passProps,
         title,
         true,
-        isDarkMode,
+        colorScheme === 'dark',
       );
     },
-    [isDarkMode, props.componentId],
+    [colorScheme, props.componentId],
   );
 
   const onAssignmentCardPress = useCallback((assignment: IAssignment) => {
@@ -218,8 +217,12 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
     }: Scene<Route> & {
       focused: boolean;
       color: string;
-    }) => <Text>{route.title}</Text>,
-    [],
+    }) => (
+      <Text style={{color: Colors.system('foreground', colorScheme)}}>
+        {route.title}
+      </Text>
+    ),
+    [colorScheme],
   );
 
   const renderTabBar = useCallback(
@@ -229,15 +232,15 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
       },
     ) => (
       <TabBar
-        style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+        style={{backgroundColor: Colors.system('background', colorScheme)}}
         indicatorStyle={{
-          backgroundColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+          backgroundColor: Colors.system('purple', colorScheme),
         }}
         {...props}
         renderLabel={renderLabel}
       />
     ),
-    [isDarkMode, renderLabel],
+    [colorScheme, renderLabel],
   );
 
   const renderScene = ({
@@ -259,7 +262,10 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
 
   return (
     <SafeAreaView
-      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <TabView
         navigationState={{index, routes}}
         renderTabBar={renderTabBar}
@@ -274,7 +280,9 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         onBackdropPress={() =>
           setCurrentModal({type: 'Notice', visible: false})
         }
-        backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+        backdropColor={
+          colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
+        }
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
@@ -287,7 +295,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         <View
           style={{
             height: '80%',
-            backgroundColor: isDarkMode ? 'black' : 'white',
+            backgroundColor: Colors.system('background', colorScheme),
           }}>
           {currentModal.data && currentModal.type === 'Notice' && (
             <NoticeBoard

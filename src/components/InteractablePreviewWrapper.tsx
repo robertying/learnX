@@ -5,13 +5,14 @@ import {
   TouchableNativeFeedback,
   TouchableHighlight,
   View,
+  StyleSheet,
 } from 'react-native';
 import Interactable from 'react-native-interactable';
 import Colors from '../constants/Colors';
-import {useDarkMode} from 'react-native-dark-mode';
 import Button from './Button';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IInteractablePreviewWrapperProps {
   hidden?: boolean;
@@ -24,6 +25,27 @@ export interface IInteractablePreviewWrapperProps {
   onPress: TouchableHighlight['props']['onPress'];
   dragEnabled: boolean;
 }
+
+const buttonWidth = 90;
+
+const styles = StyleSheet.create({
+  drawer: {
+    position: 'absolute',
+    right: 0,
+    left: 0,
+    top: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  button: {
+    height: '100%',
+    width: buttonWidth,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
 
 function InteractablePreviewWrapper(
   props: PropsWithChildren<IInteractablePreviewWrapperProps>,
@@ -43,115 +65,91 @@ function InteractablePreviewWrapper(
   const snapRef = useRef<any>(null);
 
   const handlePin = () => {
-    onPinned && onPinned(!pinned);
+    onPinned?.(!pinned);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (snapRef.current) {
-      snapRef.current.snapTo({index: 0});
-    }
+    snapRef.current?.snapTo({index: 0});
   };
 
   const handleFav = () => {
-    onFav && onFav(!fav);
+    onFav?.(!fav);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (snapRef.current) {
-      snapRef.current.snapTo({index: 0});
-    }
+    snapRef.current?.snapTo({index: 0});
   };
 
   const handleHide = () => {
-    onHide && onHide(!hidden);
+    onHide?.(!hidden);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (snapRef.current) {
-      snapRef.current.snapTo({index: 0});
-    }
+    snapRef.current?.snapTo({index: 0});
   };
 
   const handleRemind = () => {
-    onRemind && onRemind();
+    onRemind?.();
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (snapRef.current) {
-      snapRef.current.snapTo({index: 0});
-    }
+    snapRef.current?.snapTo({index: 0});
   };
 
-  const isDarkMode = useDarkMode();
-
-  const buttonWidth = 90;
+  const colorScheme = useColorScheme();
 
   return (
     <View>
-      <View
-        style={{
-          position: 'absolute',
-          right: 0,
-          left: 0,
-          top: 0,
-          bottom: 0,
-          flexDirection: 'row',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-        }}>
+      <View style={styles.drawer}>
         {onHide ? (
           <Button
-            style={{
-              height: '100%',
-              width: buttonWidth,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: 'rgba(255,204,0,0.2)',
-            }}
+            style={[
+              styles.button,
+              {
+                backgroundColor: 'rgba(255,204,0,0.2)',
+              },
+            ]}
             onPress={handleHide}>
             <MaterialIcons
               name={hidden ? 'visibility' : 'visibility-off'}
               size={40}
-              color={isDarkMode ? Colors.yellowDark : Colors.yellowLight}
+              color={Colors.system('yellow', colorScheme)}
             />
           </Button>
         ) : (
           <>
             <Button
-              style={{
-                height: '100%',
-                width: buttonWidth,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(255,59,48,0.2)',
-              }}
+              style={[
+                styles.button,
+                {
+                  backgroundColor: 'rgba(255,59,48,0.2)',
+                },
+              ]}
               onPress={handleFav}>
               <MaterialCommunityIcons
                 name={fav ? 'heart-off' : 'heart'}
                 size={40}
-                color={isDarkMode ? Colors.redDark : Colors.redLight}
+                color={Colors.system('red', colorScheme)}
               />
             </Button>
             <Button
-              style={{
-                height: '100%',
-                width: buttonWidth,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(175,82,222,0.2)',
-              }}
+              style={[
+                styles.button,
+                {
+                  backgroundColor: 'rgba(175,82,222,0.2)',
+                },
+              ]}
               onPress={handlePin}>
               <MaterialCommunityIcons
                 name={pinned ? 'pin-off' : 'pin'}
                 size={40}
-                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                color={Colors.system('purple', colorScheme)}
               />
             </Button>
             <Button
-              style={{
-                height: '100%',
-                width: buttonWidth,
-                justifyContent: 'center',
-                alignItems: 'center',
-                backgroundColor: 'rgba(52,199,89,0.2)',
-              }}
+              style={[
+                styles.button,
+                {
+                  backgroundColor: 'rgba(52,199,89,0.2)',
+                },
+              ]}
               onPress={handleRemind}>
               <MaterialCommunityIcons
                 name="timer"
                 size={40}
-                color={isDarkMode ? Colors.greenDark : Colors.greenLight}
+                color={Colors.system('green', colorScheme)}
               />
             </Button>
           </>
@@ -171,7 +169,7 @@ function InteractablePreviewWrapper(
         dragEnabled={dragEnabled}>
         {Platform.OS === 'ios' ? (
           <TouchableHighlight
-            underlayColor={isDarkMode ? 'white' : 'black'}
+            underlayColor={Colors.system('foreground', colorScheme)}
             onPress={onPress}>
             {props.children}
           </TouchableHighlight>
@@ -179,7 +177,9 @@ function InteractablePreviewWrapper(
           <TouchableNativeFeedback
             onPress={onPress}
             background={TouchableNativeFeedback.Ripple(
-              isDarkMode ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+              colorScheme === 'dark'
+                ? 'rgba(255,255,255,0.2)'
+                : 'rgba(0,0,0,0.2)',
               false,
             )}>
             {props.children}

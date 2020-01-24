@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableWithoutFeedback,
   View,
+  Text,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -18,17 +19,16 @@ import TextField from '../components/TextField';
 import Colors from '../constants/Colors';
 import {dummyPassword, dummyUsername} from '../constants/Dummy';
 import {getTranslation} from '../helpers/i18n';
-import SnackBar from 'react-native-snackbar';
+import Snackbar from 'react-native-snackbar';
 import {login} from '../redux/actions/auth';
 import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {setMockStore} from '../redux/actions/root';
 import {getAllSemesters} from '../redux/actions/semesters';
 import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
-import Text from '../components/Text';
 import {getNavigationRoot} from '../navigation/navigationRoot';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 interface ILoginScreenProps {
   loggedIn: boolean;
@@ -53,19 +53,19 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
     getAllSemestersError,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   const [loginButtonPressed, setLoginButtonPressed] = useState(false);
 
   useEffect(() => {
     if (loginButtonPressed && loginError) {
-      SnackBar.show({
-        title: getTranslation('loginFailure'),
-        duration: SnackBar.LENGTH_SHORT,
+      Snackbar.show({
+        text: getTranslation('loginFailure'),
+        duration: Snackbar.LENGTH_SHORT,
       });
       setLoginButtonPressed(false);
     }
@@ -73,9 +73,9 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
 
   useEffect(() => {
     if (loggedIn) {
-      SnackBar.show({
-        title: getTranslation('fetchingSemesters'),
-        duration: SnackBar.LENGTH_SHORT,
+      Snackbar.show({
+        text: getTranslation('fetchingSemesters'),
+        duration: Snackbar.LENGTH_SHORT,
       });
       getAllSemesters();
     }
@@ -95,9 +95,9 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
 
   useEffect(() => {
     if (getAllSemestersError) {
-      SnackBar.show({
-        title: getTranslation('networkError'),
-        duration: SnackBar.LENGTH_SHORT,
+      Snackbar.show({
+        text: getTranslation('networkError'),
+        duration: Snackbar.LENGTH_SHORT,
       });
       setLoginButtonPressed(false);
     }
@@ -143,9 +143,9 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
       handleDummyUser(username, password);
       login(username, password);
     } else {
-      SnackBar.show({
-        title: getTranslation('completeCredentials'),
-        duration: SnackBar.LENGTH_SHORT,
+      Snackbar.show({
+        text: getTranslation('completeCredentials'),
+        duration: Snackbar.LENGTH_SHORT,
       });
     }
   };
@@ -153,7 +153,10 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   return (
     <SafeAreaView
       testID="LoginScreen"
-      style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <KeyboardAvoidingView
         style={{
           flex: 1,
@@ -162,7 +165,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
         }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableWithoutFeedback onPress={onLogoPress}>
-          {isDarkMode ? (
+          {colorScheme === 'dark' ? (
             <Text style={{fontSize: logoSize}}>X</Text>
           ) : (
             <Image
@@ -183,16 +186,14 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
               <AntDesign
                 name="user"
                 size={25}
-                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                color={Colors.system('purple', colorScheme)}
               />
             }
-            tintColor={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+            tintColor={Colors.system('purple', colorScheme)}
             textContentType="username"
             returnKeyType="next"
             placeholder={getTranslation('username')}
-            placeholderTextColor={
-              isDarkMode ? Colors.purpleDark : Colors.lightTheme
-            }
+            placeholderTextColor={Colors.system('purple', colorScheme)}
             onSubmitEditing={handleKeyboardNext}
             ref={usernameTextFieldRef}
             value={username}
@@ -205,17 +206,15 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
               <AntDesign
                 name="key"
                 size={25}
-                color={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+                color={Colors.system('purple', colorScheme)}
               />
             }
-            tintColor={isDarkMode ? Colors.purpleDark : Colors.purpleLight}
+            tintColor={Colors.system('purple', colorScheme)}
             textContentType="password"
             secureTextEntry={true}
             returnKeyType="done"
             placeholder={getTranslation('password')}
-            placeholderTextColor={
-              isDarkMode ? Colors.purpleDark : Colors.lightTheme
-            }
+            placeholderTextColor={Colors.system('purple', colorScheme)}
             ref={passwordTextFieldRef}
             value={password}
             onChangeText={handlePasswordChange}
@@ -223,9 +222,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
           <RaisedButton
             testID="LoginButton"
             style={{
-              backgroundColor: isDarkMode
-                ? Colors.purpleDark
-                : Colors.purpleLight,
+              backgroundColor: Colors.system('purple', colorScheme),
               width: 100,
               height: 40,
               marginTop: 30,

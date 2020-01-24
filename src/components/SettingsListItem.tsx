@@ -8,12 +8,13 @@ import {
   View,
   ViewProps,
   StyleSheet,
+  Text,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Layout from '../constants/Layout';
-import Text from './Text';
-import {useDarkMode} from 'react-native-dark-mode';
+import {useColorScheme} from 'react-native-appearance';
+import Colors from '../constants/Colors';
 
 export interface ISettingsListItemProps {
   icon?: React.ReactNode;
@@ -29,6 +30,39 @@ export interface ISettingsListItemProps {
   style?: ViewProps['style'];
   containerStyle?: TouchableHighlightProps['style'];
 }
+
+const styles = StyleSheet.create({
+  root: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingLeft: 10,
+    paddingRight: 20,
+  },
+  left: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    display: 'flex',
+  },
+  right: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+  },
+  leftView: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  leftText: {
+    flex: 1,
+    fontSize: iOSUIKit.bodyObject.fontSize,
+  },
+  rightText: {
+    marginRight: 10,
+    fontSize: iOSUIKit.bodyObject.fontSize,
+  },
+});
 
 const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props => {
   const {
@@ -46,67 +80,52 @@ const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props 
     secondaryTextStyle,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   return (
     <TouchableHighlight
-      underlayColor={isDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'}
+      underlayColor={
+        colorScheme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
+      }
       onPress={onPress}
       style={containerStyle}>
       <View
-        style={StyleSheet.compose(
+        style={[
+          styles.root,
           {
             height: size === 'large' ? 100 : Layout.normalBlockHeight,
-            flexDirection: 'row',
-            alignItems: 'center',
-            backgroundColor: isDarkMode ? 'black' : 'white',
-            paddingLeft: 10,
-            paddingRight: 20,
+            backgroundColor: Colors.system('background', colorScheme),
           },
           style,
-        )}>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            display: 'flex',
-          }}>
+        ]}>
+        <View style={styles.left}>
           <View
-            style={{
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: size === 'large' ? 100 : Layout.normalBlockHeight,
-            }}>
+            style={[
+              styles.leftView,
+              {width: size === 'large' ? 100 : Layout.normalBlockHeight},
+            ]}>
             {icon}
           </View>
           <Text
-            style={StyleSheet.compose(
-              {flex: 1, fontSize: iOSUIKit.bodyObject.fontSize},
+            style={[
+              {color: Colors.system('foreground', colorScheme)},
+              styles.leftText,
               textStyle,
-            )}>
+            ]}>
             {text}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'flex-end',
-            alignItems: 'center',
-          }}>
+        <View style={styles.right}>
           {variant === 'switch' ? (
             <Switch value={switchValue} onValueChange={onSwitchValueChange} />
           ) : (
             <>
               <Text
-                style={StyleSheet.compose(
-                  {
-                    marginRight: 10,
-                    fontSize: iOSUIKit.bodyObject.fontSize,
-                  },
+                style={[
+                  {color: Colors.system('foreground', colorScheme)},
+                  styles.rightText,
                   secondaryTextStyle,
-                )}>
+                ]}>
                 {secondaryText}
               </Text>
               {variant === 'arrow' ? (

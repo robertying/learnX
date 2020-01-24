@@ -15,19 +15,23 @@ export type ITextButtonProps = TouchableOpacityProps & {
   ellipsizeMode?: TextProps['ellipsizeMode'];
 };
 
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  text: {color: Colors.theme, fontSize: iOSUIKit.bodyObject.fontSize},
+});
+
 class TextButton extends React.Component<ITextButtonProps> {
-  public render(): React.ReactElement {
+  render() {
     const {textStyle, children, ellipsizeMode} = this.props;
     return (
       <TouchableOpacity
-        activeOpacity={Colors.activeOpacity}
+        activeOpacity={0.6}
         {...this.props}
-        style={StyleSheet.compose({flex: 1}, this.props.style)}>
+        style={[styles.root, this.props.style]}>
         <Text
-          style={StyleSheet.compose(
-            {color: Colors.theme, fontSize: iOSUIKit.bodyObject.fontSize},
-            textStyle,
-          )}
+          style={[styles.text, textStyle]}
           numberOfLines={1}
           ellipsizeMode={ellipsizeMode || 'clip'}>
           {children}

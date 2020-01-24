@@ -10,6 +10,7 @@ import {
   PushNotificationIOS,
   PushNotification as Notification,
   Dimensions,
+  Text,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -36,7 +37,6 @@ import {
 } from '../redux/actions/notices';
 import {ICourse, INotice, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import {setCompactWidth} from '../redux/actions/settings';
 import {resetLoading} from '../redux/actions/root';
 import {getFuseOptions} from '../helpers/search';
@@ -54,12 +54,12 @@ import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import {removeTags} from '../helpers/html';
-import Text from '../components/Text';
 import Snackbar from 'react-native-snackbar';
 import {loadIcons} from '../helpers/icons';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import PushNotification from 'react-native-push-notification';
+import {useColorScheme} from 'react-native-appearance';
 
 interface INoticesScreenStateProps {
   loggedIn: boolean;
@@ -114,7 +114,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    * App scope stuff
    */
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     BackgroundFetch.configure(
@@ -138,8 +138,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, []);
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme);
+  }, [colorScheme, props.componentId]);
 
   useEffect(() => {
     (async () => {
@@ -344,11 +344,11 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           passProps,
           title,
           false,
-          isDarkMode,
+          colorScheme === 'dark',
         );
       }
     },
-    [compactWidth, isDarkMode, props.componentId],
+    [compactWidth, colorScheme, props.componentId],
   );
 
   useEffect(() => {
@@ -510,7 +510,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     setPickerVisible(false);
     setReminderInfo(undefined);
     Snackbar.show({
-      title: getTranslation('reminderSet'),
+      text: getTranslation('reminderSet'),
       duration: Snackbar.LENGTH_SHORT,
     });
   }, [dateAndroid, reminderDate, reminderInfo, timeAndroid]);
@@ -539,15 +539,18 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
   return (
-    <PaperProvider theme={isDarkMode ? DarkTheme : DefaultTheme}>
+    <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
         testID="NoticesScreen"
-        style={{flex: 1, backgroundColor: isDarkMode ? 'black' : 'white'}}>
+        style={{
+          flex: 1,
+          backgroundColor: Colors.system('background', colorScheme),
+        }}>
         {Platform.OS === 'android' && (
           <Searchbar
             style={{
               elevation: 4,
-              backgroundColor: isDarkMode ? 'black' : 'white',
+              backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"
             placeholder={getTranslation('searchNotices')}
@@ -557,7 +560,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         )}
         <FlatList
           testID="FlatList"
-          style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+          style={{backgroundColor: Colors.system('background', colorScheme)}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
@@ -577,8 +580,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           }
           refreshControl={
             <RefreshControl
-              colors={[isDarkMode ? Colors.purpleDark : Colors.purpleLight]}
-              progressBackgroundColor={isDarkMode ? '#424242' : 'white'}
+              colors={[Colors.system('purple', colorScheme)]}
+              progressBackgroundColor={
+                colorScheme === 'dark' ? '#424242' : 'white'
+              }
               onRefresh={onRefresh}
               refreshing={isFetching}
             />
@@ -598,14 +603,18 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           <Modal
             isVisible={pickerVisible}
             onBackdropPress={() => setPickerVisible(false)}
-            backdropColor={isDarkMode ? 'rgba(255,255,255,0.25)' : undefined}
+            backdropColor={
+              colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
+            }
             animationIn="bounceIn"
             animationOut="zoomOut"
             useNativeDriver={true}
             deviceWidth={Layout.initialWindow.width}
             deviceHeight={Layout.initialWindow.height}>
             <DateTimePicker
-              style={{backgroundColor: isDarkMode ? 'black' : 'white'}}
+              style={{
+                backgroundColor: Colors.system('background', colorScheme),
+              }}
               mode="datetime"
               minimumDate={new Date()}
               value={reminderDate}
@@ -614,7 +623,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
             {Platform.OS === 'ios' && (
               <View
                 style={{
-                  backgroundColor: isDarkMode ? 'black' : 'white',
+                  backgroundColor: Colors.system('background', colorScheme),
                   width: '100%',
                   height: 50,
                   paddingHorizontal: 15,
@@ -628,9 +637,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: isDarkMode
-                        ? Colors.purpleDark
-                        : Colors.purpleLight,
+                      color: Colors.system('purple', colorScheme),
                     }}>
                     {getTranslation('cancel')}
                   </Text>
@@ -641,9 +648,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
                   <Text
                     style={{
                       fontSize: 18,
-                      color: isDarkMode
-                        ? Colors.purpleDark
-                        : Colors.purpleLight,
+                      color: Colors.system('purple', colorScheme),
                     }}>
                     {getTranslation('ok')}
                   </Text>

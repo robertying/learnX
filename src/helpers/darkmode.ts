@@ -1,41 +1,42 @@
 import {Navigation} from 'react-native-navigation';
 import {Platform} from 'react-native';
+import Colors from '../constants/Colors';
 
 export const adaptToSystemTheme = (
   componentId: string,
-  isDarkMode: boolean,
+  colorScheme: string,
   hasBackButton?: boolean,
 ) => {
   if (Platform.OS === 'android') {
     Navigation.mergeOptions(componentId, {
       layout: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        backgroundColor: Colors.system('background', colorScheme),
       },
       statusBar: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
-        style: isDarkMode ? 'light' : 'dark',
+        backgroundColor: Colors.system('background', colorScheme),
+        style: colorScheme === 'dark' ? 'light' : 'dark',
       },
       topBar: {
         backButton: hasBackButton
           ? {
-              color: isDarkMode ? 'white' : 'black',
+              color: Colors.system('foreground', colorScheme),
             }
           : undefined,
         title: {
-          color: isDarkMode ? 'white' : 'black',
+          color: Colors.system('foreground', colorScheme),
         },
         background: {
-          color: isDarkMode ? 'black' : 'white',
+          color: Colors.system('background', colorScheme),
         },
       },
       bottomTabs: {
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        backgroundColor: Colors.system('background', colorScheme),
       },
     });
   } else {
     Navigation.mergeOptions(componentId, {
       statusBar: {
-        style: isDarkMode ? 'light' : 'dark',
+        style: colorScheme === 'dark' ? 'light' : 'dark',
       },
     });
   }

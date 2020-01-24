@@ -1,6 +1,6 @@
 import React from 'react';
 import {Navigation} from 'react-native-navigation';
-import {ConnectedComponent, Provider} from 'react-redux';
+import {Provider} from 'react-redux';
 import EmptyScreen from '../components/EmptyScreen';
 import {store} from '../redux/store';
 import AboutScreen from '../screens/AboutScreen';
@@ -18,24 +18,22 @@ import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import FilePreviewScreen from '../screens/FilePreviewScreen';
 import HelpScreen from '../screens/HelpScreen';
-import OfflineIndicator from '../components/OfflineIndicator';
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
+import {AppearanceProvider} from 'react-native-appearance';
 
-const storeWrapped = (Component: ConnectedComponent<React.FC<any>, any>) => (
-  props: any,
-) => (
+const storeWrapped = (Component: React.FC<any>) => (props: any) => (
   <Provider store={store}>
-    <Component {...props} />
+    <AppearanceProvider>
+      <Component {...props} />
+    </AppearanceProvider>
   </Provider>
 );
 
 const registerScreens = () => {
-  Navigation.registerComponent('empty', () => EmptyScreen);
-
   Navigation.registerComponent(
-    'offline',
-    () => storeWrapped(OfflineIndicator),
-    () => OfflineIndicator,
+    'empty',
+    () => storeWrapped(EmptyScreen),
+    () => EmptyScreen,
   );
 
   Navigation.registerComponent(
@@ -55,7 +53,11 @@ const registerScreens = () => {
     () => storeWrapped(NoticesScreen),
     () => NoticesScreen,
   );
-  Navigation.registerComponent('notices.detail', () => NoticeDetailScreen);
+  Navigation.registerComponent(
+    'notices.detail',
+    () => storeWrapped(NoticeDetailScreen),
+    () => NoticeDetailScreen,
+  );
 
   Navigation.registerComponent(
     'files.index',
@@ -70,6 +72,7 @@ const registerScreens = () => {
   );
   Navigation.registerComponent(
     'assignments.detail',
+    () => storeWrapped(AssignmentDetailScreen),
     () => AssignmentDetailScreen,
   );
 
@@ -96,12 +99,25 @@ const registerScreens = () => {
   );
   Navigation.registerComponent(
     'settings.acknowledgements',
+    () => storeWrapped(AcknowledgementsScreen),
     () => AcknowledgementsScreen,
   );
-  Navigation.registerComponent('settings.about', () => AboutScreen);
-  Navigation.registerComponent('settings.help', () => HelpScreen);
+  Navigation.registerComponent(
+    'settings.about',
+    () => storeWrapped(AboutScreen),
+    () => AboutScreen,
+  );
+  Navigation.registerComponent(
+    'settings.help',
+    () => storeWrapped(HelpScreen),
+    () => HelpScreen,
+  );
 
-  Navigation.registerComponent('webview', () => FilePreviewScreen);
+  Navigation.registerComponent(
+    'webview',
+    () => storeWrapped(FilePreviewScreen),
+    () => FilePreviewScreen,
+  );
 };
 
 export default registerScreens;

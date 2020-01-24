@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform, StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
@@ -9,8 +9,7 @@ import {getLocale, getTranslation} from '../helpers/i18n';
 import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
-import Text from './Text';
-import {useDarkMode} from 'react-native-dark-mode';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IAssignmentCardProps extends IInteractablePreviewWrapperProps {
   title: string;
@@ -22,6 +21,22 @@ export interface IAssignmentCardProps extends IInteractablePreviewWrapperProps {
   courseName?: string;
   courseTeacherName?: string;
 }
+
+const styles = StyleSheet.create({
+  root: {
+    padding: 15,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  flexRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  status: {
+    marginLeft: 5,
+  },
+});
 
 const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
   const {
@@ -42,7 +57,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     onRemind,
   } = props;
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   return (
     <InteractablePreviewWrapper
@@ -54,57 +69,51 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
       onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
-        style={{
-          backgroundColor: isDarkMode ? 'black' : 'white',
-          padding: 15,
-          paddingLeft: 20,
-          paddingRight: 20,
-          borderLeftColor: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
-          borderLeftWidth: pinned ? 10 : 0,
-        }}>
-        <View
-          style={[
-            styles.flexRow,
-            {
-              justifyContent: 'space-between',
-            },
-          ]}>
+        style={[
+          styles.root,
+          {
+            backgroundColor: Colors.system('background', colorScheme),
+            borderLeftColor: Colors.system('purple', colorScheme),
+            borderLeftWidth: pinned ? 10 : 0,
+          },
+        ]}>
+        <View style={styles.flexRow}>
           <Text
-            style={StyleSheet.compose(
-              isDarkMode
+            style={[
+              colorScheme === 'dark'
                 ? iOSUIKit.bodyEmphasizedWhite
                 : iOSUIKit.bodyEmphasized,
               {
                 flex: 1,
                 fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
               },
-            )}
+            ]}
             numberOfLines={1}
             ellipsizeMode="tail">
             {title}
           </Text>
           {hasAttachment && (
             <Icon
-              style={{marginLeft: 5}}
+              style={styles.status}
               name="attachment"
               size={18}
-              color={isDarkMode ? Colors.yellowDark : Colors.yellowLight}
+              color={Colors.system('yellow', colorScheme)}
             />
           )}
           {submitted && (
             <Icon
-              style={{marginLeft: 5}}
+              style={styles.status}
               name="done"
               size={18}
-              color={isDarkMode ? Colors.greenDark : Colors.greenLight}
+              color={Colors.system('green', colorScheme)}
             />
           )}
           {graded && (
             <Icon
-              style={{marginLeft: 5}}
+              style={styles.status}
               name="grade"
               size={18}
-              color={isDarkMode ? Colors.redDark : Colors.redLight}
+              color={Colors.system('red', colorScheme)}
             />
           )}
         </View>
@@ -113,7 +122,9 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
             marginTop: 8,
           }}>
           <Text
-            style={isDarkMode ? iOSUIKit.subheadWhite : iOSUIKit.subhead}
+            style={
+              colorScheme === 'dark' ? iOSUIKit.subheadWhite : iOSUIKit.subhead
+            }
             numberOfLines={3}>
             {removeTags(description || '') ||
               getTranslation('noAssignmentDescription')}
@@ -123,7 +134,6 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           style={[
             styles.flexRow,
             {
-              justifyContent: 'space-between',
               marginTop: 10,
             },
           ]}>
@@ -132,7 +142,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
             ellipsizeMode="tail"
             style={{
               flex: 1,
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              color: Colors.system('gray', colorScheme),
               fontSize: 13,
             }}>
             {courseName &&
@@ -141,7 +151,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           </Text>
           <Text
             style={{
-              color: isDarkMode ? Colors.grayDark : Colors.grayLight,
+              color: Colors.system('gray', colorScheme),
               fontSize: 13,
             }}>
             {getLocale().startsWith('zh')
@@ -159,10 +169,3 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
 };
 
 export default AssignmentCard;
-
-const styles = StyleSheet.create({
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-});

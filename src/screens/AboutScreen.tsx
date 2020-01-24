@@ -1,66 +1,81 @@
 import React, {useEffect} from 'react';
-import {Linking, SafeAreaView, ScrollView} from 'react-native';
+import {
+  Linking,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
-import Text from '../components/Text';
 import TextButton from '../components/TextButton';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
-import {useDarkMode} from 'react-native-dark-mode';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
+
+const styles = StyleSheet.create({
+  center: {
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+});
 
 const AboutScreen: INavigationScreen<{}> = props => {
   const onGitHubLinkPress = () => {
     Linking.openURL('https://github.com/robertying/learnX');
   };
 
-  const isDarkMode = useDarkMode();
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, isDarkMode, true);
-  }, [isDarkMode, props.componentId]);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
   return (
     <SafeAreaView
       style={{
         flex: 1,
-        backgroundColor: isDarkMode ? 'black' : 'white',
+        backgroundColor: Colors.system('background', colorScheme),
       }}>
       <ScrollView
-        contentContainerStyle={{
-          alignItems: 'center',
-          paddingTop: 30,
-          paddingBottom: 30,
-        }}>
+        contentContainerStyle={[
+          styles.center,
+          {
+            paddingTop: 30,
+            paddingBottom: 30,
+          },
+        ]}>
         <Text
-          style={{
-            alignSelf: 'center',
-            marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize,
-          }}>
-          {`v${packageConfig.version} (${DeviceInfo.buildNo()})`}
+          style={[
+            styles.center,
+            {
+              fontSize: iOSUIKit.bodyObject.fontSize,
+              color: Colors.system('foreground', colorScheme),
+            },
+          ]}>
+          {`v${packageConfig.version} (build ${DeviceInfo.buildNo()})`}
         </Text>
         <TextButton
-          style={{
-            alignSelf: 'center',
-            marginBottom: 20,
-          }}
+          style={styles.center}
           textStyle={{
             fontSize: iOSUIKit.bodyObject.fontSize,
-            color: isDarkMode ? Colors.purpleDark : Colors.purpleLight,
+            color: Colors.system('purple', colorScheme),
           }}
           onPress={onGitHubLinkPress}>
           robertying / learnX @ GitHub
         </TextButton>
         <Text
-          style={{
-            alignSelf: 'center',
-            marginBottom: 20,
-            fontSize: iOSUIKit.bodyObject.fontSize,
-          }}>
+          style={[
+            styles.center,
+            {
+              fontSize: iOSUIKit.bodyObject.fontSize,
+              color: Colors.system('foreground', colorScheme),
+            },
+          ]}>
           Copyright (c) 2020 Rui Ying
         </Text>
       </ScrollView>

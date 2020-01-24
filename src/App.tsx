@@ -2,12 +2,10 @@ import {Platform, UIManager} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {getAuthLoadingRoot} from './navigation/navigationRoot';
 import registerComponents from './navigation/registerComponents';
-import {eventEmitter, initialMode} from 'react-native-dark-mode';
+import {Appearance} from 'react-native-appearance';
 
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(() => {
-    console.disableYellowBox = true;
-
     if (
       Platform.OS === 'android' &&
       UIManager.setLayoutAnimationEnabledExperimental
@@ -15,35 +13,35 @@ const startApp = () => {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
 
-    eventEmitter.setMaxListeners(0);
-
     registerComponents();
+
+    const colorScheme = Appearance.getColorScheme();
 
     if (Platform.OS === 'ios') {
       Navigation.setDefaultOptions({
         layout: {
-          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
         },
       });
     } else {
       Navigation.setDefaultOptions({
         layout: {
-          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
         },
         statusBar: {
-          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
-          style: initialMode === 'dark' ? 'light' : 'dark',
+          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
+          style: colorScheme === 'dark' ? 'light' : 'dark',
         },
         topBar: {
           title: {
-            color: initialMode === 'dark' ? 'white' : 'black',
+            color: colorScheme === 'dark' ? 'white' : 'black',
           },
           background: {
-            color: initialMode === 'dark' ? 'black' : 'white',
+            color: colorScheme === 'dark' ? 'black' : 'white',
           },
         },
         bottomTabs: {
-          backgroundColor: initialMode === 'dark' ? 'black' : 'white',
+          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
         },
       });
     }
