@@ -37,7 +37,7 @@ import {
 } from '../redux/actions/settings';
 import {IAssignment, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
-import semver from 'semver';
+import semverGt from 'semver/functions/gt';
 import DeviceInfo from '../constants/DeviceInfo';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
@@ -161,7 +161,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const onCheckUpdatePress = async () => {
     const {versionString, apkUrl} = await getLatestRelease();
 
-    if (semver.gt(versionString.slice(1), packageConfig.version)) {
+    if (semverGt(versionString.slice(1), packageConfig.version)) {
       Alert.alert(
         getTranslation('checkUpdate'),
         `${getTranslation('foundNewVersion')} ${versionString}`,
@@ -239,7 +239,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
       if (result !== 'authorized') {
         Snackbar.show({
           text: getTranslation('accessCalendarFailure'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
         return;
       }

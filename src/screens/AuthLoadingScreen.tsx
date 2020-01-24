@@ -15,7 +15,7 @@ import {getNavigationRoot} from '../navigation/navigationRoot';
 import {setUpdate} from '../redux/actions/settings';
 import {IAuthState, IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
-import semver from 'semver';
+import semverGt from 'semver/functions/gt';
 import {resetLoading} from '../redux/actions/root';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
@@ -86,7 +86,7 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
       (async () => {
         const {versionString} = await getLatestRelease();
 
-        if (semver.gt(versionString.slice(1), packageConfig.version)) {
+        if (semverGt(versionString.slice(1), packageConfig.version)) {
           setUpdate(true);
           Snackbar.show({
             text: getTranslation('pleaseUpdate'),
