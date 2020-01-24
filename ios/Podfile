@@ -42,7 +42,7 @@ target 'learnX' do
   pod 'Fabric'
   pod 'Crashlytics'
 
-  use_unimodules!
   use_native_modules!
+  use_unimodules!
 
 end

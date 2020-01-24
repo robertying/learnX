@@ -22,7 +22,9 @@
   [ReactNativeNavigation bootstrap:jsCodeLocation launchOptions:launchOptions bridgeManagerDelegate:self];
 
   [[UIView appearance] setTintColor:[UIColor systemPurpleColor]];
-  self.window.backgroundColor = [UIColor systemBackgroundColor];
+  if (@available(iOS 13.0, *)) {
+    self.window.backgroundColor = [UIColor systemBackgroundColor];
+  }
 
   return YES;
 }
