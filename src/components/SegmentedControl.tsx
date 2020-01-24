@@ -35,6 +35,7 @@ const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = props 
     <View style={[styles.root, style]}>
       {props.values?.map((value, index) => (
         <Chip
+          key={value}
           selected={index === props.selectedIndex}
           onPress={() => props.onValueChange?.(value)}>
           {value}
