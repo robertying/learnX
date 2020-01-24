@@ -166,7 +166,13 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <TouchableWithoutFeedback onPress={onLogoPress}>
           {colorScheme === 'dark' ? (
-            <Text style={{fontSize: logoSize}}>X</Text>
+            <Text
+              style={{
+                fontSize: logoSize,
+                color: Colors.system('foreground', colorScheme),
+              }}>
+              X
+            </Text>
           ) : (
             <Image
               style={{height: logoSize, width: logoSize}}
