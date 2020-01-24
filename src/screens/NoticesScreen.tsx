@@ -162,22 +162,17 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
   useEffect(() => {
     if (loginError) {
-      Navigation.showOverlay({
-        component: {
-          id: 'offline',
-          name: 'offline',
-          options: {
-            layout: {
-              backgroundColor: 'transparent',
-            },
-            overlay: {
-              interceptTouchOutside: false,
-            },
-          },
+      Snackbar.show({
+        text: getTranslation('loginFailure'),
+        duration: Snackbar.LENGTH_INDEFINITE,
+        action: {
+          text: getTranslation('ok'),
+          textColor: Colors.system('purple', colorScheme),
+          onPress: () => Snackbar.dismiss(),
         },
       });
     }
-  }, [loginError]);
+  }, [colorScheme, loginError]);
 
   useEffect(() => {
     if (DeviceInfo.isIPad()) {

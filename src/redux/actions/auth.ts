@@ -1,5 +1,5 @@
 import {createAsyncAction} from 'typesafe-actions';
-import dataSource from '../dataSource';
+import {dataSource} from '../dataSource';
 import {IThunkResult} from '../types/actions';
 import {LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS} from '../types/constants';
 import {IAuth} from '../types/state';

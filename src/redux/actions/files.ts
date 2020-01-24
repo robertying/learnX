@@ -1,6 +1,6 @@
-import {ContentType, File} from 'thu-learn-lib-no-native/lib/types';
+import {ContentType, File, CourseType} from 'thu-learn-lib-no-native/lib/types';
 import {createAction, createAsyncAction} from 'typesafe-actions';
-import dataSource from '../dataSource';
+import {dataSource} from '../dataSource';
 import {IThunkResult} from '../types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
@@ -26,7 +26,7 @@ export function getFilesForCourse(courseId: string): IThunkResult {
   return async dispatch => {
     dispatch(getFilesForCourseAction.request());
 
-    const results = await dataSource.getFileList(courseId);
+    const results = await dataSource.getFileList(courseId, CourseType.STUDENT);
 
     if (results) {
       const files = results.map(result => ({...result, courseId}));

@@ -1,4 +1,4 @@
-import dataSource from '../redux/dataSource';
+import {dataSource} from '../redux/dataSource';
 import {store} from '../redux/store';
 import {ContentType, Homework} from 'thu-learn-lib-no-native/lib/types';
 import {getAllAssignmentsForCoursesAction} from '../redux/actions/assignments';

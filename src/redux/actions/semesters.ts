@@ -1,5 +1,5 @@
 import {createAsyncAction} from 'typesafe-actions';
-import dataSource from '../dataSource';
+import {dataSource} from '../dataSource';
 import {IThunkResult} from '../types/actions';
 import {
   GET_ALL_SEMESTERS_FAILURE,

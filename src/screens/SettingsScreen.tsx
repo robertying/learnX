@@ -45,7 +45,7 @@ import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import {ActivityIndicator} from 'react-native-paper';
 import TextButton from '../components/TextButton';
-import dataSource from '../redux/dataSource';
+import {dataSource} from '../redux/dataSource';
 import RNCalendarEvents from 'react-native-calendar-events';
 import {useColorScheme} from 'react-native-appearance';
 
@@ -112,7 +112,6 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           text: getTranslation('ok'),
           onPress: () => {
             clearStore();
-            Navigation.dismissOverlay('offline');
             Navigation.showModal({
               component: {
                 id: 'login',

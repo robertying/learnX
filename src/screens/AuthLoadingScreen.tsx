@@ -19,6 +19,7 @@ import semver from 'semver';
 import {resetLoading} from '../redux/actions/root';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
+import {setCredentials} from '../redux/dataSource';
 
 interface IAuthLoadingScreenStateProps {
   rehydrated: boolean;
@@ -48,6 +49,8 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
 
       if (auth && auth.username && auth.password) {
         (async () => {
+          setCredentials(auth.username!, auth.password!);
+
           const navigationRoot = await getNavigationRoot();
           Navigation.setRoot(navigationRoot);
         })();

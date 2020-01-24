@@ -1,6 +1,6 @@
 import {ContentType, Notification} from 'thu-learn-lib-no-native/lib/types';
 import {createAction, createAsyncAction} from 'typesafe-actions';
-import dataSource from '../dataSource';
+import {dataSource} from '../dataSource';
 import {IThunkResult} from '../types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
