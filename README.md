@@ -34,12 +34,12 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️.
 This project also serves as a demonstration of how to build a React Native app featuring:
 
 - Latest React Native (0.61)
-- Dark Mode on iOS / Dark Theme on Android
-- AndroidX / CocoaPods
+- Dark Mode for iOS / Dark Theme for Android
+- CocoaPods / AndroidX
 - Redux
 - TypeScript
-- Detox e2e tests (iOS)
-- Continuous integration (Travis)
+- Detox e2e tests (iOS & Android)
+- Continuous integration (Travis CI)
 - Automatic deployment (Fastlane)
 
 ## Download

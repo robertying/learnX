@@ -11,6 +11,7 @@ matrix:
           - extra-google-google_play_services
           - extra-google-m2repository
           - extra-android-m2repository
+          - sys-img-x86-android-29
       cache:
         yarn: true
         bundler: true
@@ -33,6 +34,7 @@ matrix:
         - echo fs.inotify.max_user_instances=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
         - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
         - echo fs.inotify.max_queued_events=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
+        - echo no | android create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86" -c 500M
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn android:beta; fi
         - if [ -z "$TRAVIS_TAG" ]; then yarn android:build; fi

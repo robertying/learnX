@@ -78,6 +78,9 @@ android {
         versionCode Integer.parseInt(VERSION_CODE)
         versionName "7.0.0"
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative60"
+        testBuildType System.getProperty('testBuildType', 'debug')
+        // This will later be used to control the test apk build type
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
 
     splits {
@@ -123,6 +126,8 @@ android {
         release {
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            // Detox-specific additions to pro-guard
+            proguardFile "${rootProject.projectDir}/../node_modules/detox/android/detox/proguard-rules-app.pro"
             signingConfig signingConfigs.release
         }
     }
@@ -162,6 +167,9 @@ dependencies {
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
 
     implementation project(':react-native-navigation')
+
+    androidTestImplementation('com.wix:detox:+') { transitive = true }
+    androidTestImplementation 'junit:junit:4.13'
 }
 
 configurations.all {
