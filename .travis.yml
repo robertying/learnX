@@ -1,6 +1,7 @@
-matrix:
+jobs:
   include:
     - language: android
+      os: linux
       dist: trusty
       android:
         components:
@@ -14,7 +15,6 @@ matrix:
           - sys-img-x86-android-29
       cache:
         yarn: true
-        bundler: true
         directories:
           - $HOME/.gradle/caches/
           - $HOME/.gradle/wrapper/
@@ -24,7 +24,6 @@ matrix:
           -in secrets.tar.gz.enc -out secrets.tar.gz -d
         - tar xf secrets.tar.gz
         - nvm install node
-        - node -v
         - npm install -g yarn
         - yes | sdkmanager "build-tools;29.0.2"
       install:
@@ -37,29 +36,31 @@ matrix:
         - echo no | android create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86" -c 500M
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn android:beta; fi
-        - if [ -z "$TRAVIS_TAG" ]; then yarn android:build; fi
+        - if [ -z "$TRAVIS_TAG" ]; then yarn android:test:release; fi
       before_cache:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
       before_deploy:
-        - mv android/app/build/outputs/apk/release/app-x86_64-release.apk android/app/build/outputs/apk/release/learnX-x86_64-$TRAVIS_TAG.apk
-        - mv android/app/build/outputs/apk/release/app-arm64-v8a-release.apk android/app/build/outputs/apk/release/learnX-arm64-v8a-$TRAVIS_TAG.apk
-        - mv android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk android/app/build/outputs/apk/release/learnX-armeabi-v7a-$TRAVIS_TAG.apk
-        - mv android/app/build/outputs/apk/release/app-x86-release.apk android/app/build/outputs/apk/release/learnX-x86-$TRAVIS_TAG.apk
-        - mv android/app/build/outputs/apk/release/app-universal-release.apk android/app/build/outputs/apk/release/learnX-universal-$TRAVIS_TAG.apk
+        - export APK_DIR="android/app/build/outputs/apk/release"
+        - mv $APK_DIR/app-x86_64-release.apk $APK_DIR/learnX-x86_64-$TRAVIS_TAG.apk
+        - mv $APK_DIR/app-arm64-v8a-release.apk $APK_DIR/learnX-arm64-v8a-$TRAVIS_TAG.apk
+        - mv $APK_DIR/app-armeabi-v7a-release.apk $APK_DIR/learnX-armeabi-v7a-$TRAVIS_TAG.apk
+        - mv $APK_DIR/app-x86-release.apk $APK_DIR/learnX-x86-$TRAVIS_TAG.apk
+        - mv $APK_DIR/app-universal-release.apk $APK_DIR/learnX-universal-$TRAVIS_TAG.apk
       deploy:
         provider: releases
-        api_key:
-          secure: NbKeQiIo2tB/Y5k1blUjvIEPo5xGFUAoP5Hldwftuxz2DgIKCqzUlj0nvVfEG3vvhR2I1LCAPr/UH46s/5yw/mQyuSRR6crf9bgNMybZUR1Hj04ns8ablX8XOj8qFniQExIM6uuMQ94LN3s3ThP550XKuNp0+BL8tSO0Gbqb0PuKiOXmQUi27ia/TlQxnDTxYuL+betyLfJ3rzusifqvWoa+rc9S2xJmKygqxhs6IZMP5+P0SgAPPqmCysJp3sd2ZUWp0lJsNW8AXNFKmQKLIZ8Gyg/TbNJI1vFRECV53Tj0Fze6uyz4GzGHceFuU93xgtn1aiOqCwPJyKmegq0cFwUnzD1NcKK1P1VMe0RGDz39bAG3OJ8N4E8jbE7+Ju4E5ZhCa0gOouEAYQb5e5Zeb7Vt56HG+BGt1ZdHZ4A5J3H0+341J7/H/A5i3vLN1aKvy6fUTaPW3lvo/CRlhKHhEfhfzFegytc9s7jlEzNvWs1YB9b9988qrRlpadJmSNaerz+uC2lyLMg7oDjhSHG9l1Y9N85I6Sht4NScGGNmaZVxo2zgBpH2y7y97QiQsrPcwN7r+Zm7gUsRPsSnGcBB1CaelUg4dn0wSyWtRTKDHwTZspj8ido9gLlJ21D5RG05hBLpqg1pOqwsB5fvfqtLEPtkF82EwNt1XW/YvLWUC6w=
+        edge: true
+        token: $GITHUB_TOKEN
         file_glob: true
         file: android/app/build/outputs/apk/release/*.apk
-        skip_cleanup: true
+        cleanup: false
         overwrite: true
         prerelease: true
         on:
           tags: true
     - language: objective-c
-      osx_image: xcode11
+      os: osx
+      osx_image: xcode11.3
       podfile: ios/Podfile
       cache:
         - yarn
@@ -70,7 +71,6 @@ matrix:
         - tar xf secrets.tar.gz
         - sed -i'.bak' -e "s/GITHUB_TOKEN/$GITHUB_TOKEN/" fastlane/Matchfile
         - nvm install node
-        - node -v
         - npm install -g yarn
       install:
         - brew tap wix/brew
