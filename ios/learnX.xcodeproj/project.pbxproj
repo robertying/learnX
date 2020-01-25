@@ -314,7 +314,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 330;
+				CURRENT_PROJECT_VERSION = 350;
 				DEAD_CODE_STRIPPING = NO;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;
@@ -322,7 +322,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.4.0;
+				MARKETING_VERSION = 7.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -343,14 +343,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 330;
+				CURRENT_PROJECT_VERSION = 350;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 6.4.0;
+				MARKETING_VERSION = 7.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
