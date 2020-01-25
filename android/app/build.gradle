@@ -154,7 +154,9 @@ dependencies {
         implementation jscFlavor
     }
 
-    addUnimodulesDependencies()
+    addUnimodulesDependencies([exclude: ['expo-app-loader-provider',
+                                         'expo-constants',
+                                         'expo-permissions']])
 
     implementation 'com.google.firebase:firebase-core:17.2.2'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'

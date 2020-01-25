@@ -43,6 +43,6 @@ target 'learnX' do
   pod 'Crashlytics'
 
   use_native_modules!
-  use_unimodules!
+  use_unimodules!(exclude: ['expo-app-loader-provider', 'expo-constants', 'expo-permissions'])
 
 end
