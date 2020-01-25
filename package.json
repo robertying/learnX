@@ -12,9 +12,10 @@
     "ios:build": "fastlane ios build",
     "start": "react-native start",
     "lint": "eslint --ext .tsx,.ts .",
-    "ios:test:debug": "detox build --configuration \"ios.sim.debug\" && detox test --configuration \"ios.sim.debug\"",
-    "ios:test:release": "detox build --configuration \"ios.sim.release\" && detox test --configuration \"ios.sim.release\"",
-    "postinstall": "jetifier && patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
+    "android:test:debug": "detox build -c android.emu.debug && detox test -c android.emu.debug",
+    "android:test:release": "detox build -c android.emu.release && detox test -c android.emu.release",
+    "ios:test:debug": "detox build -c ios.sim.debug && detox test -c ios.sim.debug",
+    "ios:test:release": "detox build -c ios.sim.release && detox test -c ios.sim.release",
   },
   "dependencies": {
     "@react-native-community/async-storage": "1.7.1",
@@ -119,6 +120,24 @@
         "type": "ios.simulator",
         "device": {
           "type": "iPhone 11 Pro Max"
+        }
+      },
+      "android.emu.debug": {
+        "binaryPath": "android/app/build/outputs/apk/debug/app-x86-debug.apk",
+        "testBinaryPath": "android/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk",
+        "build": "cd android && ./gradlew assembleDebug app:assembleAndroidTest -DtestBuildType=debug && cd ..",
+        "type": "android.emulator",
+        "device": {
+          "avdName": "Pixel_3a_XL_API_29"
+        }
+      },
+      "android.emu.release": {
+        "binaryPath": "android/app/build/outputs/apk/release/app-x86-release.apk",
+        "testBinaryPath": "android/app/build/outputs/apk/androidTest/release/app-release-androidTest.apk",
+        "build": "cd android && ./gradlew assembleRelease app:assembleAndroidTest -DtestBuildType=release && cd ..",
+        "type": "android.emulator",
+        "device": {
+          "avdName": "Pixel_3a_XL_API_29"
         }
       }
     },
