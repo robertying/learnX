@@ -91,14 +91,11 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
           paddingRight: 20,
         }}>
         <Text
-          style={[
+          style={
             colorScheme === 'dark'
               ? iOSUIKit.title3EmphasizedWhite
-              : iOSUIKit.title3Emphasized,
-            {lineHeight: 24},
-          ]}
-          numberOfLines={2}
-          ellipsizeMode="tail">
+              : iOSUIKit.title3Emphasized
+          }>
           {title}
         </Text>
         <Text
