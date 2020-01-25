@@ -26,6 +26,8 @@ jobs:
         - nvm install node
         - npm install -g yarn
         - yes | sdkmanager "build-tools;29.0.2"
+        - yes | sdkmanager "system-images;android-29;google_apis;x86"
+        - echo no | android create avd --force -n Pixel_3a_XL_API_29 -t android-29 --abi x86
       install:
         - gem install fastlane
         - yarn install
@@ -33,7 +35,6 @@ jobs:
         - echo fs.inotify.max_user_instances=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
         - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
         - echo fs.inotify.max_queued_events=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-        - echo no | android create avd --force -n Pixel_3a_XL_API_29 -t android-29 --abi x86
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn android:beta; fi
         - if [ -z "$TRAVIS_TAG" ]; then yarn android:test:release; fi
