@@ -33,7 +33,7 @@ jobs:
         - echo fs.inotify.max_user_instances=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
         - echo fs.inotify.max_user_watches=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
         - echo fs.inotify.max_queued_events=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
-        - echo no | avdmanager create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86" -c 500M
+        - echo no | $ANDROID_HOME/tools/bin/avdmanager create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86" -c 500M
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn android:beta; fi
         - if [ -z "$TRAVIS_TAG" ]; then yarn android:test:release; fi
