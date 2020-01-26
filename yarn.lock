@@ -3671,6 +3671,7 @@ fsevents@^1.2.7:
   dependencies:
     bindings "^1.5.0"
     nan "^2.12.1"
+    node-pre-gyp "*"
 
 fsevents@^2.1.2:
   version "2.1.2"
@@ -8199,6 +8200,7 @@ through@^2.3.6:
 
 "thu-learn-lib-no-native@https://github.com/robertying/thu-learn-lib-no-native.git":
   version "1.2.0"
+  uid "1cafd66b601f226dc44cd42d39dd7d33a74c9b26"
   resolved "https://github.com/robertying/thu-learn-lib-no-native.git#1cafd66b601f226dc44cd42d39dd7d33a74c9b26"
   dependencies:
     cheerio-without-node-native "0.20.2"
