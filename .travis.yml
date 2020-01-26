@@ -27,7 +27,7 @@ jobs:
         - npm install -g yarn
         - yes | sdkmanager "build-tools;29.0.2"
         - yes | sdkmanager "system-images;android-29;google_apis;x86"
-        - echo no | android create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86" -c 500m
+        - echo no | /usr/local/android-sdk/tools/bin/avdmanager create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86"
       install:
         - gem install fastlane
         - yarn install
