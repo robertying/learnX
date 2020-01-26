@@ -12,7 +12,6 @@ jobs:
           - extra-google-google_play_services
           - extra-google-m2repository
           - extra-android-m2repository
-          - sys-img-x86-android-29
       cache:
         yarn: true
         directories:
@@ -26,9 +25,6 @@ jobs:
         - nvm install node
         - npm install -g yarn
         - yes | sdkmanager "build-tools;29.0.2"
-        - yes | sdkmanager "system-images;android-29;google_apis;x86"
-        - echo no | /usr/local/android-sdk/tools/bin/avdmanager create avd --force -n Pixel_3a_XL_API_29 -k "system-images;android-29;google_apis;x86"
-        - cp e2e/config.ini /home/travis/.android/avd/Pixel_3a_XL_API_29.avd/config.ini
       install:
         - gem install fastlane
         - yarn install
@@ -38,7 +34,7 @@ jobs:
         - echo fs.inotify.max_queued_events=524288 | sudo tee -a /etc/sysctl.conf && sudo sysctl -p
       script:
         - if [ -n "$TRAVIS_TAG" ]; then yarn android:beta; fi
-        - if [ -z "$TRAVIS_TAG" ]; then yarn android:test:release; fi
+        - if [ -z "$TRAVIS_TAG" ]; then yarn android:build; fi
       before_cache:
         - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
         - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
