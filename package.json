@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.8.3",
-    "@react-native-community/eslint-config": "0.0.6",
+    "@react-native-community/eslint-config": "0.0.7",
     "@react-native-community/eslint-plugin": "1.0.0",
     "@types/detox": "14.5.2",
     "@types/jasmine": "3.5.1",
