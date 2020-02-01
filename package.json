@@ -19,7 +19,7 @@
     "postinstall": "patch-package && jetifier && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
-    "@babel/runtime": "7.8.3",
+    "@babel/runtime": "7.8.4",
     "@react-native-community/async-storage": "1.7.1",
     "@react-native-community/datetimepicker": "2.1.2",
     "darkreader": "4.7.15",
@@ -60,7 +60,7 @@
     "typesafe-actions": "5.1.0"
   },
   "devDependencies": {
-    "@babel/core": "7.8.3",
+    "@babel/core": "7.8.4",
     "@react-native-community/eslint-config": "0.0.7",
     "@react-native-community/eslint-plugin": "1.0.0",
     "@types/detox": "14.5.2",
