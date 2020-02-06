@@ -12,6 +12,7 @@
     "ios:build": "fastlane ios build",
     "start": "react-native start",
     "lint": "eslint --ext .tsx,.ts .",
+    "typecheck": "tsc --noUnusedLocals",
     "android:test:debug": "detox build -c android.emu.debug && detox test -c android.emu.debug",
     "android:test:release": "detox build -c android.emu.release && detox test -c android.emu.release",
     "ios:test:debug": "detox build -c ios.sim.debug && detox test -c ios.sim.debug",
@@ -91,7 +92,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && yarn lint"
+      "pre-commit": "lint-staged && yarn lint && yarn typecheck"
     }
   },
   "lint-staged": {
