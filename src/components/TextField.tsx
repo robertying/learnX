@@ -72,17 +72,19 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
     <View style={[styles.root, containerStyle]}>
       {icon}
       <AnimatedTextInput
-        style={[
-          styles.textInput,
-          {
-            borderBottomColor: opacity.interpolate({
-              inputRange: [0.01, 1],
-              outputRange: ['transparent', tintColor],
-            }),
-            color: tintColor,
-          },
-          style,
-        ]}
+        style={
+          [
+            styles.textInput,
+            {
+              borderBottomColor: opacity.interpolate({
+                inputRange: [0.01, 1],
+                outputRange: ['transparent', tintColor],
+              }),
+              color: tintColor,
+            },
+            style,
+          ] as any
+        }
         selectionColor={tintColor}
         autoCapitalize="none"
         autoCorrect={false}
@@ -97,7 +99,9 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
   );
 };
 
-const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
+const AnimatedTextInput = (Animated.createAnimatedComponent(
+  TextInput,
+) as unknown) as typeof TextInput;
 
 export default React.forwardRef(
   (props: ITextFieldProps, ref: React.Ref<any>) => (
