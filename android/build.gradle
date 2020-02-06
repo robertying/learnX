@@ -60,7 +60,8 @@ subprojects { subproject ->
                             names.contains("reactNative55") ||
                             names.contains("reactNative56") ||
                             names.contains("reactNative57") ||
-                            names.contains("reactNative57_5")) {
+                            names.contains("reactNative57_5") ||
+                            names.contains("reactNative62")) {
                         setIgnore(true)
                     }
                 }
