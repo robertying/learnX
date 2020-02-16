@@ -153,7 +153,8 @@ export const getCourseCalendar = async () => {
 export const getSemesterDuration = () => {
   const date = new Date();
   const year = date.getFullYear();
-  const month = date.getMonth();
+  const month = date.getMonth() /* 0-11 */ + 1;
+
   if (month >= 7) {
     return {
       startDate: `${year}0901`,
