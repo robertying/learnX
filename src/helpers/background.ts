@@ -6,9 +6,7 @@ import {saveAssignmentsToCalendar} from './calendar';
 import BackgroundFetch from 'react-native-background-fetch';
 
 export const runBackgroundTask = () => {
-  updateAssignments().then(() =>
-    BackgroundFetch.finish(BackgroundFetch.FETCH_RESULT_NEW_DATA),
-  );
+  updateAssignments().then(() => BackgroundFetch.finish());
 };
 
 const updateAssignments = async () => {
