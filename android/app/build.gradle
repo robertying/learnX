@@ -76,7 +76,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "7.0.0"
+        versionName "7.1.0"
         missingDimensionStrategy "RNN.reactNativeVersion", "reactNative60"
         testBuildType System.getProperty('testBuildType', 'debug')
         // This will later be used to control the test apk build type
@@ -174,7 +174,7 @@ dependencies {
 
 configurations.all {
     resolutionStrategy {
-        force "com.facebook.soloader:soloader:0.8.1"
+        force "com.facebook.soloader:soloader:0.8.2"
     }
 }
 
