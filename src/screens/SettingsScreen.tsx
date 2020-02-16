@@ -547,7 +547,10 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
             alignItems: 'center',
           }}>
           <Text
-            style={colorScheme === 'dark' ? iOSUIKit.bodyWhite : iOSUIKit.body}>
+            style={[
+              colorScheme === 'dark' ? iOSUIKit.bodyWhite : iOSUIKit.body,
+              {textAlign: 'center'},
+            ]}>
             {getTranslation('fetchingCourseSchedule')}
           </Text>
           <ActivityIndicator

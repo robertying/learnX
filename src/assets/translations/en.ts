@@ -67,7 +67,8 @@ export default {
   offlineLoginError: 'Login failed. Tap here to try again.',
   noGrade: 'No grade specified',
   courseSync: 'Sync Courses to Calendar',
-  fetchingCourseSchedule: 'Fetching course schedule...',
+  fetchingCourseSchedule:
+    'Fetching course schedule...\nThis may fail sometimes\nJust try it again',
   courseSyncSuccess: 'Course schedule synced successfully',
   courseSyncFailure: 'Failed to sync course schedule... Try again later.',
 };

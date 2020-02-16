@@ -65,7 +65,7 @@ export default {
   offlineLoginError: '登录失败，点击此处重新尝试',
   noGrade: '无具体成绩',
   courseSync: '将课表同步到日历',
-  fetchingCourseSchedule: '获取课表信息……',
+  fetchingCourseSchedule: '获取课表信息……\n如果获取失败，请多尝试几次',
   courseSyncSuccess: '课表同步成功',
   courseSyncFailure: '课表同步失败，请稍后重试',
 };
