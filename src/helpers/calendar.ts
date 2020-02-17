@@ -139,10 +139,10 @@ export const getCourseCalendar = async () => {
     entityType: 'event',
     name: 'learnX - Course',
     accessLevel: 'read',
-    ownerAccount: 'learnX - Course',
+    ownerAccount: 'learnX',
     source: {
       name: 'learnX - Course',
-      type: 'learnX - Course',
+      type: 'learnX',
       isLocalAccount: true,
     },
   });
@@ -201,11 +201,11 @@ export const saveCoursesToCalendar = async (
     [calendarId],
   );
 
-  await Promise.all(
-    oldEvents.map(async e => await RNCalendarEvents.removeEvent(e.id)),
-  );
+  for (const e of oldEvents) {
+    await RNCalendarEvents.removeEvent(e.id);
+  }
 
-  events.forEach(async event => {
+  for (const event of events) {
     await RNCalendarEvents.saveEvent(event.courseName, {
       calendarId,
       startDate: dayjs(`${event.date} ${event.startTime}`).toISOString(),
@@ -213,5 +213,5 @@ export const saveCoursesToCalendar = async (
       notes: event.location,
       description: event.location,
     });
-  });
+  }
 };
