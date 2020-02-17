@@ -20,7 +20,7 @@ export default {
   logoutConfirmation: 'Are you sure to logout?',
   cancel: 'Cancel',
   ok: 'Ok',
-  checkUpdate: 'Check for update',
+  checkUpdate: 'Check for Update',
   foundNewVersion: 'New version found',
   pleaseUpdate:
     'New version found. Please go to Settings to download the update.',

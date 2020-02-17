@@ -540,7 +540,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
           style={{
             backgroundColor: Colors.system('background', colorScheme),
             width: '100%',
-            height: 150,
+            height: 190,
             padding: 20,
             flexDirection: 'column',
             justifyContent: 'space-between',
