@@ -7,7 +7,6 @@ import {
   AppState,
   AppStateStatus,
   View,
-  PushNotificationIOS,
   PushNotification as Notification,
   Dimensions,
   Text,
@@ -19,6 +18,7 @@ import {
   DefaultTheme,
   DarkTheme,
 } from 'react-native-paper';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {connect} from 'react-redux';
 import EmptyList from '../components/EmptyList';
 import NoticeCard from '../components/NoticeCard';

@@ -1,5 +1,5 @@
-NSCalendarsUsageDescription = "允许 learnX 访问您的日历，以添加作业信息";
-NSRemindersUsageDescription = "允许 learnX 访问您的提醒事项，以添加作业信息";
+NSCalendarsUsageDescription = "允许 learnX 访问您的日历";
+NSRemindersUsageDescription = "允许 learnX 访问您的提醒事项";
 NSContactsUsageDescription = "允许 learnX 访问您的联系人";
 NSCameraUsageDescription = "允许 learnX 访问您的相机";
 NSMicrophoneUsageDescription = "允许 learnX 访问您的麦克风";

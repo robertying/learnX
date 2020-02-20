@@ -3,9 +3,9 @@ import {
   Linking,
   PushNotificationPermissions,
   Platform,
-  PushNotificationIOS,
 } from 'react-native';
 import {getTranslation} from './i18n';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 
 export const requestNotificationPermission = async () => {

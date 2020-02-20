@@ -4,7 +4,6 @@ import {
   Platform,
   RefreshControl,
   SafeAreaView,
-  PushNotificationIOS,
   PushNotification,
   View,
   Text,
@@ -15,6 +14,7 @@ import {
   DefaultTheme,
   DarkTheme,
 } from 'react-native-paper';
+import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {connect} from 'react-redux';
 import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
