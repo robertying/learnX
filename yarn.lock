@@ -6629,10 +6629,10 @@ react-native-appearance@0.3.2:
     invariant "^2.2.4"
     use-subscription "^1.0.0"
 
-react-native-background-fetch@3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/react-native-background-fetch/-/react-native-background-fetch-3.0.0.tgz#2589bf0644d4224295ed0287eea228c1e7e1e0a6"
-  integrity sha512-zpap85NIfk3c3qnBiI0UT81NEeqIjDjnDm/iwwawZZvmXMlQ3kCN1t2rOoCNlry06WjNTTWCgwF4W8VQsKW74Q==
+react-native-background-fetch@3.0.3:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/react-native-background-fetch/-/react-native-background-fetch-3.0.3.tgz#ec5fa38aaebdbaa7d3f670de8cdaaa277def4db7"
+  integrity sha512-lO0rUvdFjOXAkV9hEIQcbPa0t3I8lwHvKD5kWS9fTIYAtkLSHC8DIVQI353fPaMgyY05toRS3bcT/T2ZM5jBGw==
   dependencies:
     fast-plist "^0.1.2"
     plist "^3.0.1"
