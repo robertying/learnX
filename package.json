@@ -32,7 +32,7 @@
     "react": "16.12.0",
     "react-native": "0.62.0-rc.2",
     "react-native-appearance": "0.3.2",
-    "react-native-background-fetch": "3.0.0",
+    "react-native-background-fetch": "3.0.3",
     "react-native-calendar-events": "1.7.3",
     "react-native-device-info": "5.5.3",
     "react-native-gesture-handler": "1.6.0",
