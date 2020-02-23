@@ -10,23 +10,10 @@ export interface IAuthState extends IAuth {
   error?: Error | null;
 }
 
-export enum Tab {
-  'Notices',
-  'Files',
-  'Assignments',
-  'Courses',
-  'Settings',
-}
-export interface IWindow {
-  height: number;
-  width: number;
-}
-export enum NotificationType {
-  'Notices',
-  'Files',
-  'Assignments',
-  'Deadlines',
-  'Grades',
+export enum Entity {
+  'Notice',
+  'File',
+  'Assignment',
 }
 export enum Language {
   'zh',
@@ -39,11 +26,9 @@ export interface ISettingsState {
     [assignmentId: string]: string;
   };
   hasUpdate: boolean;
-  window?: IWindow;
-  notifications: boolean;
-  notificationTypes: NotificationType[];
   lang?: Language | null;
-  compactWidth: boolean;
+  isCompact: boolean;
+  hasUnread: Entity[];
 }
 
 export interface ISemestersState {
@@ -78,6 +63,7 @@ export interface INotice {
 }
 export interface INoticesState {
   isFetching: boolean;
+  unread: string[];
   pinned: string[];
   favorites: string[];
   items: INotice[];
@@ -98,6 +84,7 @@ export interface IFile {
 }
 export interface IFilesState {
   isFetching: boolean;
+  unread: string[];
   pinned: string[];
   favorites: string[];
   items: IFile[];
@@ -125,6 +112,7 @@ export interface IAssignment {
 }
 export interface IAssignmentsState {
   isFetching: boolean;
+  unread: string[];
   pinned: string[];
   favorites: string[];
   items: IAssignment[];

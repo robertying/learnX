@@ -1,46 +1,27 @@
 import {ISettingsAction} from '../types/actions';
 import {
   CLEAR_EVENT_IDS,
-  SET_CALENDAR_ID,
-  SET_CALENDAR_SYNC,
   SET_EVENT_ID_FOR_ASSIGNMENT,
-  SET_LANG,
-  SET_NOTIFICATION_TYPES,
-  SET_NOTIFICATIONS,
-  SET_UPDATE,
-  SET_WINDOW,
-  SET_COMPACT_WIDTH,
+  SET_SETTING,
 } from '../types/constants';
-import {ISettingsState, NotificationType} from '../types/state';
+import {ISettingsState, Entity, Language} from '../types/state';
 
 export default function settings(
   state: ISettingsState = {
     calendarSync: false,
     syncedAssignments: {},
     hasUpdate: false,
-    notifications: true,
-    notificationTypes: [
-      NotificationType.Notices,
-      NotificationType.Files,
-      NotificationType.Assignments,
-      NotificationType.Deadlines,
-      NotificationType.Grades,
-    ],
-    lang: null,
-    compactWidth: false,
+    lang: Language.en,
+    isCompact: false,
+    hasUnread: [Entity.File, Entity.Assignment, Entity.Notice],
   },
   action: ISettingsAction,
 ): ISettingsState {
   switch (action.type) {
-    case SET_CALENDAR_SYNC:
+    case SET_SETTING:
       return {
         ...state,
-        calendarSync: action.payload,
-      };
-    case SET_CALENDAR_ID:
-      return {
-        ...state,
-        calendarId: action.payload,
+        [action.payload.key]: action.payload.value,
       };
     case SET_EVENT_ID_FOR_ASSIGNMENT:
       return {
@@ -54,36 +35,6 @@ export default function settings(
       return {
         ...state,
         syncedAssignments: {},
-      };
-    case SET_UPDATE:
-      return {
-        ...state,
-        hasUpdate: action.payload,
-      };
-    case SET_WINDOW:
-      return {
-        ...state,
-        window: action.payload,
-      };
-    case SET_NOTIFICATIONS:
-      return {
-        ...state,
-        notifications: action.payload,
-      };
-    case SET_NOTIFICATION_TYPES:
-      return {
-        ...state,
-        notificationTypes: action.payload,
-      };
-    case SET_LANG:
-      return {
-        ...state,
-        lang: action.payload,
-      };
-    case SET_COMPACT_WIDTH:
-      return {
-        ...state,
-        compactWidth: action.payload,
       };
   }
   return state;

@@ -1,9 +1,12 @@
+import differenceBy from 'lodash.differenceby';
 import {
   IGetFilesAction,
   IPinFileAction,
   IUnpinFileAction,
   IFavFileAction,
   IUnfavFileAction,
+  IUnreadFileAction,
+  IReadFileAction,
 } from '../types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
@@ -16,18 +19,23 @@ import {
   UNPIN_FILE,
   FAV_FILE,
   UNFAV_FILE,
+  UNREAD_FILE,
+  READ_FILE,
 } from '../types/constants';
 import {IFilesState} from '../types/state';
 
 export default function files(
   state: IFilesState = {
     isFetching: false,
+    unread: [],
     pinned: [],
     favorites: [],
     items: [],
   },
   action:
     | IGetFilesAction
+    | IReadFileAction
+    | IUnreadFileAction
     | IPinFileAction
     | IUnpinFileAction
     | IFavFileAction
@@ -44,6 +52,10 @@ export default function files(
       return {
         ...state,
         isFetching: false,
+        unread: [
+          ...state.unread,
+          ...differenceBy(action.payload, state.items, 'id').map(i => i.id),
+        ],
         items: action.payload,
         error: null,
       };
@@ -63,6 +75,16 @@ export default function files(
       return {
         ...state,
         isFetching: false,
+        unread: [
+          ...state.unread,
+          ...differenceBy(
+            action.payload.files,
+            state.items.filter(
+              item => item.courseId === action.payload.courseId,
+            ),
+            'id',
+          ).map(i => i.id),
+        ],
         items: [
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
@@ -76,6 +98,16 @@ export default function files(
         ...state,
         isFetching: false,
         error: action.payload,
+      };
+    case UNREAD_FILE:
+      return {
+        ...state,
+        unread: [...(state.unread || []), action.payload],
+      };
+    case READ_FILE:
+      return {
+        ...state,
+        unread: state.unread.filter(item => item !== action.payload),
       };
     case PIN_FILE:
       return {

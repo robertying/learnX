@@ -1,6 +1,5 @@
 import {ContentType, Homework} from 'thu-learn-lib-no-native/lib/types';
 import {createAction, createAsyncAction} from 'typesafe-actions';
-import {saveAssignmentsToCalendar} from '../../helpers/calendar';
 import {dataSource} from '../dataSource';
 import {IThunkResult} from '../types/actions';
 import {
@@ -14,6 +13,8 @@ import {
   UNPIN_ASSIGNMENT,
   FAV_ASSIGNMENT,
   UNFAV_ASSIGNMENT,
+  UNREAD_ASSIGNMENT,
+  READ_ASSIGNMENT,
 } from '../types/constants';
 import {IAssignment} from '../types/state';
 
@@ -34,27 +35,15 @@ export function getAssignmentsForCourse(courseId: string): IThunkResult {
   return async dispatch => {
     dispatch(getAssignmentsForCourseAction.request());
 
-    const results = await dataSource.getHomeworkList(courseId);
-
-    if (results) {
+    try {
+      const results = await dataSource.getHomeworkList(courseId);
       const assignments = results.map(result => ({
         ...result,
         courseId,
-        description: result.description
-          ? result.description.startsWith('\xC2\x9E\xC3\xA9\x65')
-            ? result.description.substr(5)
-            : result.description.startsWith('\x9E\xE9\x65')
-            ? result.description.substr(3)
-            : result.description
-          : '',
       }));
       dispatch(getAssignmentsForCourseAction.success({courseId, assignments}));
-    } else {
-      dispatch(
-        getAssignmentsForCourseAction.failure(
-          new Error('getAssignmentsForCourse failed'),
-        ),
-      );
+    } catch (err) {
+      dispatch(getAssignmentsForCourseAction.failure(new Error(err)));
     }
   };
 }
@@ -66,42 +55,26 @@ export const getAllAssignmentsForCoursesAction = createAsyncAction(
 )<undefined, IAssignment[], Error>();
 
 export function getAllAssignmentsForCourses(courseIds: string[]): IThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
-    const results = await dataSource.getAllContents(
-      courseIds,
-      ContentType.HOMEWORK,
-    );
-
-    if (results) {
+    try {
+      const results = await dataSource.getAllContents(
+        courseIds,
+        ContentType.HOMEWORK,
+      );
       const assignments = Object.keys(results)
         .map(courseId => {
           const assignmentsForCourse = results[courseId] as Homework[];
           return assignmentsForCourse.map(assignment => ({
             ...assignment,
             courseId,
-            description: assignment.description
-              ? assignment.description.startsWith('\xC2\x9E\xC3\xA9\x65')
-                ? assignment.description.substr(5)
-                : assignment.description.startsWith('\x9E\xE9\x65')
-                ? assignment.description.substr(3)
-                : assignment.description
-              : '',
           }));
         })
         .reduce((a, b) => a.concat(b));
       dispatch(getAllAssignmentsForCoursesAction.success(assignments));
-
-      if (getState().settings.calendarSync) {
-        saveAssignmentsToCalendar(assignments);
-      }
-    } else {
-      dispatch(
-        getAllAssignmentsForCoursesAction.failure(
-          new Error('getAllAssignmentsForCourses failed'),
-        ),
-      );
+    } catch (err) {
+      dispatch(getAllAssignmentsForCoursesAction.failure(new Error(err)));
     }
   };
 }
@@ -123,5 +96,15 @@ export const favAssignment = createAction(
 
 export const unfavAssignment = createAction(
   UNFAV_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
+)();
+
+export const readAssignment = createAction(
+  READ_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
+)();
+
+export const unreadAssignment = createAction(
+  UNREAD_ASSIGNMENT,
   (assignmentId: string) => assignmentId,
 )();

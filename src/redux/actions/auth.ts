@@ -21,7 +21,7 @@ export function login(username?: string, password?: string): IThunkResult {
       await dataSource.login(_username, _password);
       dispatch(loginAction.success({username: _username, password: _password}));
     } catch (err) {
-      dispatch(loginAction.failure(err));
+      dispatch(loginAction.failure(new Error(err)));
     }
   };
 }

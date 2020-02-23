@@ -1,5 +1,5 @@
 import {dummyPassword, dummyUsername} from '../constants/Dummy';
-import {IPersistAppState} from './types/state';
+import {IPersistAppState, Entity} from './types/state';
 
 const mockStore: IPersistAppState = {
   auth: {
@@ -16,9 +16,8 @@ const mockStore: IPersistAppState = {
     calendarSync: false,
     syncedAssignments: {},
     hasUpdate: false,
-    notifications: true,
-    notificationTypes: [],
-    compactWidth: false,
+    isCompact: false,
+    hasUnread: [Entity.Notice],
   },
   semesters: {
     isFetching: false,
@@ -83,6 +82,7 @@ const mockStore: IPersistAppState = {
   },
   notices: {
     isFetching: false,
+    unread: ['26ef84e76d60efc1016d71b8f4c63bc1'],
     pinned: ['26ef84e86d60f069016dadb09dd673b2'],
     favorites: [
       '26ef84e76d60efc1016d71b8f4c63bc1',
@@ -170,6 +170,7 @@ const mockStore: IPersistAppState = {
   },
   files: {
     isFetching: false,
+    unread: [],
     pinned: [],
     favorites: [
       '2016310500_KJ_157080064094130b5f1dcc2-f77a-4cca-be0f-95808af85d82',
@@ -259,6 +260,7 @@ const mockStore: IPersistAppState = {
   },
   assignments: {
     isFetching: false,
+    unread: [],
     pinned: [],
     favorites: [],
     items: [

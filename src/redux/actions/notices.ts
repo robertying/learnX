@@ -13,6 +13,8 @@ import {
   UNPIN_NOTICE,
   FAV_NOTICE,
   UNFAV_NOTICE,
+  UNREAD_NOTICE,
+  READ_NOTICE,
 } from '../types/constants';
 import {INotice} from '../types/state';
 
@@ -26,27 +28,15 @@ export function getNoticesForCourse(courseId: string): IThunkResult {
   return async dispatch => {
     dispatch(getNoticesForCourseAction.request());
 
-    const results = await dataSource.getNotificationList(courseId);
-
-    if (results) {
+    try {
+      const results = await dataSource.getNotificationList(courseId);
       const notices = results.map(result => ({
         ...result,
         courseId,
-        content: result.content
-          ? result.content.startsWith('\xC2\x9E\xC3\xA9\x65')
-            ? result.content.substr(5)
-            : result.content.startsWith('\x9E\xE9\x65')
-            ? result.content.substr(3)
-            : result.content
-          : '',
       }));
       dispatch(getNoticesForCourseAction.success({notices, courseId}));
-    } else {
-      dispatch(
-        getNoticesForCourseAction.failure(
-          new Error('getNoticesForCourse failed'),
-        ),
-      );
+    } catch (err) {
+      dispatch(getNoticesForCourseAction.failure(new Error(err)));
     }
   };
 }
@@ -61,35 +51,23 @@ export function getAllNoticesForCourses(courseIds: string[]): IThunkResult {
   return async dispatch => {
     dispatch(getAllNoticesForCoursesAction.request());
 
-    const results = await dataSource.getAllContents(
-      courseIds,
-      ContentType.NOTIFICATION,
-    );
-
-    if (results) {
+    try {
+      const results = await dataSource.getAllContents(
+        courseIds,
+        ContentType.NOTIFICATION,
+      );
       const notices = Object.keys(results)
         .map(courseId => {
           const noticesForCourse = results[courseId] as Notification[];
           return noticesForCourse.map(notice => ({
             ...notice,
             courseId,
-            content: notice.content
-              ? notice.content.startsWith('\xC2\x9E\xC3\xA9\x65')
-                ? notice.content.substr(5)
-                : notice.content.startsWith('\x9E\xE9\x65')
-                ? notice.content.substr(3)
-                : notice.content
-              : '',
           }));
         })
         .reduce((a, b) => a.concat(b));
       dispatch(getAllNoticesForCoursesAction.success(notices));
-    } else {
-      dispatch(
-        getAllNoticesForCoursesAction.failure(
-          new Error('getAllNoticesForCourses failed'),
-        ),
-      );
+    } catch (err) {
+      dispatch(getAllNoticesForCoursesAction.failure(new Error(err)));
     }
   };
 }
@@ -111,5 +89,15 @@ export const favNotice = createAction(
 
 export const unfavNotice = createAction(
   UNFAV_NOTICE,
+  (noticeId: string) => noticeId,
+)();
+
+export const readNotice = createAction(
+  READ_NOTICE,
+  (noticeId: string) => noticeId,
+)();
+
+export const unreadNotice = createAction(
+  UNREAD_NOTICE,
   (noticeId: string) => noticeId,
 )();

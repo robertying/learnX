@@ -20,16 +20,11 @@ export function getCoursesForSemester(semesterId: string): IThunkResult {
   return async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
-    const courses = await dataSource.getCourseList(semesterId);
-
-    if (courses) {
+    try {
+      const courses = await dataSource.getCourseList(semesterId);
       dispatch(getCoursesForSemesterAction.success(courses));
-    } else {
-      dispatch(
-        getCoursesForSemesterAction.failure(
-          new Error('getCoursesForSemester failed'),
-        ),
-      );
+    } catch (err) {
+      dispatch(getCoursesForSemesterAction.failure(new Error(err)));
     }
   };
 }

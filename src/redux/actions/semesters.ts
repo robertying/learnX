@@ -17,14 +17,11 @@ export function getAllSemesters(): IThunkResult {
   return async dispatch => {
     dispatch(getAllSemestersAction.request());
 
-    const semesters = await dataSource.getSemesterIdList();
-
-    if (semesters) {
+    try {
+      const semesters = await dataSource.getSemesterIdList();
       dispatch(getAllSemestersAction.success(semesters));
-    } else {
-      dispatch(
-        getAllSemestersAction.failure(new Error('getAllSemesters failed')),
-      );
+    } catch (err) {
+      dispatch(getAllSemestersAction.failure(new Error(err)));
     }
   };
 }

@@ -1,9 +1,12 @@
+import differenceBy from 'lodash.differenceby';
 import {
   IGetNoticesAction,
   IPinNoticeAction,
   IUnpinNoticeAction,
   IFavNoticeAction,
   IUnfavNoticeAction,
+  IReadNoticeAction,
+  IUnreadNoticeAction,
 } from '../types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
@@ -16,18 +19,23 @@ import {
   UNPIN_NOTICE,
   FAV_NOTICE,
   UNFAV_NOTICE,
+  UNREAD_NOTICE,
+  READ_NOTICE,
 } from '../types/constants';
 import {INoticesState} from '../types/state';
 
 export default function notices(
   state: INoticesState = {
     isFetching: false,
+    unread: [],
     pinned: [],
     favorites: [],
     items: [],
   },
   action:
     | IGetNoticesAction
+    | IReadNoticeAction
+    | IUnreadNoticeAction
     | IPinNoticeAction
     | IUnpinNoticeAction
     | IFavNoticeAction
@@ -44,6 +52,10 @@ export default function notices(
       return {
         ...state,
         isFetching: false,
+        unread: [
+          ...state.unread,
+          ...differenceBy(action.payload, state.items, 'id').map(i => i.id),
+        ],
         items: action.payload,
         error: null,
       };
@@ -63,6 +75,16 @@ export default function notices(
       return {
         ...state,
         isFetching: false,
+        unread: [
+          ...state.unread,
+          ...differenceBy(
+            action.payload.notices,
+            state.items.filter(
+              item => item.courseId === action.payload.courseId,
+            ),
+            'id',
+          ).map(i => i.id),
+        ],
         items: [
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
@@ -76,6 +98,16 @@ export default function notices(
         ...state,
         isFetching: false,
         error: action.payload,
+      };
+    case UNREAD_NOTICE:
+      return {
+        ...state,
+        unread: [...(state.unread || []), action.payload],
+      };
+    case READ_NOTICE:
+      return {
+        ...state,
+        unread: state.unread.filter(item => item !== action.payload),
       };
     case PIN_NOTICE:
       return {

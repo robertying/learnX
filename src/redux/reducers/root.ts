@@ -1,7 +1,7 @@
 import {dummyUsername} from '../../constants/Dummy';
 import mockStore from '../mockStore';
 import {appReducer} from '../store';
-import {IStoreAction} from '../types/actions';
+import {IAppActions} from '../types/actions';
 import {CLEAR_STORE, SET_MOCK_STORE, RESET_LOADING} from '../types/constants';
 import {IAppState} from '../types/state';
 import assignments from './assignments';
@@ -24,7 +24,7 @@ export const mainReducers = {
 
 export function rootReducer(
   state: IAppState | undefined,
-  action: IStoreAction,
+  action: IAppActions,
 ): IAppState {
   if (state && action.type === RESET_LOADING) {
     return {

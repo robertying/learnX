@@ -1,9 +1,12 @@
+import differenceBy from 'lodash.differenceby';
 import {
   IGetAssignmentsAction,
   IPinAssignmentAction,
   IUnpinAssignmentAction,
   IFavAssignmentAction,
   IUnfavAssignmentAction,
+  IReadAssignmentAction,
+  IUnreadAssignmentAction,
 } from '../types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
@@ -16,18 +19,23 @@ import {
   UNPIN_ASSIGNMENT,
   FAV_ASSIGNMENT,
   UNFAV_ASSIGNMENT,
+  UNREAD_ASSIGNMENT,
+  READ_ASSIGNMENT,
 } from '../types/constants';
 import {IAssignmentsState} from '../types/state';
 
 export default function assignments(
   state: IAssignmentsState = {
     isFetching: false,
+    unread: [],
     pinned: [],
     favorites: [],
     items: [],
   },
   action:
     | IGetAssignmentsAction
+    | IReadAssignmentAction
+    | IUnreadAssignmentAction
     | IPinAssignmentAction
     | IUnpinAssignmentAction
     | IFavAssignmentAction
@@ -44,6 +52,10 @@ export default function assignments(
       return {
         ...state,
         isFetching: false,
+        unread: [
+          ...state.unread,
+          ...differenceBy(action.payload, state.items, 'id').map(i => i.id),
+        ],
         items: action.payload,
         error: null,
       };
@@ -63,6 +75,16 @@ export default function assignments(
       return {
         ...state,
         isFetching: false,
+        unread: [
+          ...state.unread,
+          ...differenceBy(
+            action.payload.assignments,
+            state.items.filter(
+              item => item.courseId === action.payload.courseId,
+            ),
+            'id',
+          ).map(i => i.id),
+        ],
         items: [
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
@@ -76,6 +98,16 @@ export default function assignments(
         ...state,
         isFetching: false,
         error: action.payload,
+      };
+    case UNREAD_ASSIGNMENT:
+      return {
+        ...state,
+        unread: [...(state.unread || []), action.payload],
+      };
+    case READ_ASSIGNMENT:
+      return {
+        ...state,
+        unread: state.unread.filter(item => item !== action.payload),
       };
     case PIN_ASSIGNMENT:
       return {

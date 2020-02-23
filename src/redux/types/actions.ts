@@ -1,4 +1,3 @@
-import {AnyAction} from 'redux';
 import {ThunkAction} from 'redux-thunk';
 import {ActionType} from 'typesafe-actions';
 import {
@@ -8,6 +7,8 @@ import {
   unpinAssignment,
   favAssignment,
   unfavAssignment,
+  readAssignment,
+  unreadAssignment,
 } from '../actions/assignments';
 import {loginAction} from '../actions/auth';
 import {
@@ -23,6 +24,8 @@ import {
   unpinFile,
   unfavFile,
   favFile,
+  readFile,
+  unreadFile,
 } from '../actions/files';
 import {
   getAllNoticesForCoursesAction,
@@ -31,29 +34,17 @@ import {
   unpinNotice,
   unfavNotice,
   favNotice,
+  readNotice,
+  unreadNotice,
 } from '../actions/notices';
 import {clearStoreAction, setMockStore, resetLoading} from '../actions/root';
 import {getAllSemestersAction} from '../actions/semesters';
 import {
   clearEventIds,
-  setCalendarId,
-  setCalendarSync,
   setEventIdForAssignment,
-  setLang,
-  setNotifications,
-  setNotificationTypes,
-  setUpdate,
-  setWindow,
-  setCompactWidth,
+  setSetting,
 } from '../actions/settings';
 import {IPersistAppState} from './state';
-
-export type IThunkResult = ThunkAction<
-  void,
-  IPersistAppState,
-  undefined,
-  AnyAction
->;
 
 export type ILoginAction = ActionType<typeof loginAction>;
 export type IAuthAction = ILoginAction;
@@ -108,32 +99,26 @@ export type IUnfavFileAction = ActionType<typeof unfavFile>;
 export type IFavAssignmentAction = ActionType<typeof favAssignment>;
 export type IUnfavAssignmentAction = ActionType<typeof unfavAssignment>;
 
+export type IReadNoticeAction = ActionType<typeof readNotice>;
+export type IUnreadNoticeAction = ActionType<typeof unreadNotice>;
+export type IReadFileAction = ActionType<typeof readFile>;
+export type IUnreadFileAction = ActionType<typeof unreadFile>;
+export type IReadAssignmentAction = ActionType<typeof readAssignment>;
+export type IUnreadAssignmentAction = ActionType<typeof unreadAssignment>;
+
 export type IHideCourseAction = ActionType<typeof hideCourse>;
 export type IUnhideCourseAction = ActionType<typeof unhideCourse>;
 
-export type ISetCalendarSyncAction = ActionType<typeof setCalendarSync>;
-export type ISetCalendarIdAction = ActionType<typeof setCalendarId>;
+export type ISetSettingAction = ActionType<typeof setSetting>;
 export type ISetEventIdForAssignment = ActionType<
   typeof setEventIdForAssignment
 >;
 export type IClearEventIds = ActionType<typeof clearEventIds>;
-export type ISetUpdateAction = ActionType<typeof setUpdate>;
-export type ISetWindowAction = ActionType<typeof setWindow>;
-export type ISetNotifications = ActionType<typeof setNotifications>;
-export type ISetNotificationTypes = ActionType<typeof setNotificationTypes>;
-export type ISetLang = ActionType<typeof setLang>;
-export type ISetCompactWidth = ActionType<typeof setCompactWidth>;
+
 export type ISettingsAction =
-  | ISetCalendarSyncAction
-  | ISetCalendarIdAction
+  | ISetSettingAction
   | ISetEventIdForAssignment
-  | IClearEventIds
-  | ISetUpdateAction
-  | ISetWindowAction
-  | ISetNotifications
-  | ISetNotificationTypes
-  | ISetLang
-  | ISetCompactWidth;
+  | IClearEventIds;
 
 export type IResetLoadingAction = ActionType<typeof resetLoading>;
 export type IClearStoreAction = ActionType<typeof clearStoreAction>;
@@ -144,7 +129,6 @@ export type IStoreAction =
   | IResetLoadingAction;
 
 export type IAppActions =
-  | IThunkResult
   | IAuthAction
   | IGetAllSemestersAction
   | ISetCurrentSemesterAction
@@ -167,7 +151,20 @@ export type IAppActions =
   | IUnfavFileAction
   | IFavAssignmentAction
   | IUnfavAssignmentAction
+  | IReadNoticeAction
+  | IUnreadNoticeAction
+  | IReadFileAction
+  | IUnreadFileAction
+  | IReadAssignmentAction
+  | IUnreadAssignmentAction
   | IHideCourseAction
   | IUnhideCourseAction
   | ISettingsAction
   | IStoreAction;
+
+export type IThunkResult = ThunkAction<
+  void,
+  IPersistAppState,
+  undefined,
+  IAppActions
+>;
