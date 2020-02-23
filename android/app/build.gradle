@@ -130,7 +130,8 @@ dependencies {
 
     addUnimodulesDependencies([exclude: ['expo-app-loader-provider',
                                          'expo-constants',
-                                         'expo-permissions']])
+                                         'expo-permissions',
+                                         'expo-file-system']])
 
     implementation 'com.google.firebase:firebase-analytics:17.2.2'
     implementation 'com.google.firebase:firebase-crashlytics:17.0.0-beta01'

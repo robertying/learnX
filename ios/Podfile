@@ -59,10 +59,6 @@ target 'learnX' do
   pod 'Firebase/Crashlytics'
 
   use_native_modules!
-  use_unimodules!(exclude: ['expo-app-loader-provider', 'expo-constants', 'expo-permissions'])
+  use_unimodules!(exclude: ['expo-file-system', 'expo-app-loader-provider', 'expo-constants', 'expo-permissions'])
 
-  add_flipper_pods!
-  post_install do |installer|
-    flipper_post_install(installer)
-  end
 end
