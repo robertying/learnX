@@ -10,10 +10,11 @@ import {
   TouchableWithoutFeedback,
   View,
   Text,
+  StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {connect} from 'react-redux';
 import RaisedButton from '../components/RaisedButton';
 import TextField from '../components/TextField';
 import Colors from '../constants/Colors';
@@ -24,66 +25,62 @@ import {login} from '../redux/actions/auth';
 import {setCurrentSemester} from '../redux/actions/currentSemester';
 import {setMockStore} from '../redux/actions/root';
 import {getAllSemesters} from '../redux/actions/semesters';
-import {IPersistAppState} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import {getNavigationRoot} from '../navigation/navigationRoot';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
+import {iOSUIKit} from 'react-native-typography';
+import {useDispatch} from 'react-redux';
 
-interface ILoginScreenProps {
-  loggedIn: boolean;
-  loginError?: Error | null;
-  semesters: string[];
-  getAllSemestersError?: Error | null;
-  login: (username: string, password: string) => void;
-  setMockStore: () => void;
-  setCurrentSemester: (semesterId: string) => void;
-  getAllSemesters: () => void;
-}
+const styles = StyleSheet.create({
+  note: {
+    alignSelf: 'center',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    position: 'absolute',
+    bottom: 30,
+    width: '60%',
+  },
+});
 
-const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
-  const {
-    loggedIn,
-    semesters,
-    login,
-    loginError,
-    setMockStore,
-    setCurrentSemester,
-    getAllSemesters,
-    getAllSemestersError,
-  } = props;
-
+const LoginScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
+
+  const dispatch = useDispatch();
+  const auth = useTypedSelector(state => state.auth);
+  const semesters = useTypedSelector(state => state.semesters);
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
 
-  const [loginButtonPressed, setLoginButtonPressed] = useState(false);
-
   useEffect(() => {
-    if (loginButtonPressed && loginError) {
+    if (auth.error) {
       Snackbar.show({
         text: getTranslation('loginFailure'),
         duration: Snackbar.LENGTH_SHORT,
       });
-      setLoginButtonPressed(false);
+      setLoading(false);
     }
-  }, [loginButtonPressed, loginError]);
+  }, [auth.error]);
 
   useEffect(() => {
-    if (loggedIn) {
+    if (auth.loggedIn) {
       Snackbar.show({
         text: getTranslation('fetchingSemesters'),
         duration: Snackbar.LENGTH_SHORT,
       });
-      getAllSemesters();
+      dispatch(getAllSemesters());
     }
-  }, [getAllSemesters, loggedIn]);
+  }, [auth.loggedIn, dispatch]);
 
   useEffect(() => {
-    if (loggedIn && semesters.length !== 0) {
-      setCurrentSemester(semesters[0]);
+    if (auth.loggedIn && semesters.items.length !== 0) {
+      setLoading(false);
+      dispatch(setCurrentSemester(semesters.items[0]));
       Keyboard.dismiss();
       Navigation.dismissModal('login');
       (async () => {
@@ -91,17 +88,17 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
         Navigation.setRoot(navigationRoot);
       })();
     }
-  }, [loggedIn, semesters, semesters.length, setCurrentSemester]);
+  }, [auth.loggedIn, semesters.items, dispatch]);
 
   useEffect(() => {
-    if (getAllSemestersError) {
+    if (semesters.error) {
       Snackbar.show({
         text: getTranslation('networkError'),
         duration: Snackbar.LENGTH_SHORT,
       });
-      setLoginButtonPressed(false);
+      setLoading(false);
     }
-  }, [getAllSemestersError]);
+  }, [semesters.error]);
 
   const usernameTextFieldRef = useRef<TextInput>(null);
   const passwordTextFieldRef = useRef<TextInput>(null);
@@ -110,6 +107,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
   const [password, setPassword] = useState('');
 
   const [logoSize, setLogoSize] = useState(160);
+
   const onLogoPress = () => {
     if (logoSize >= 200) {
       LayoutAnimation.spring();
@@ -128,20 +126,16 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
 
   const handlePasswordChange = (text: string) => setPassword(text);
 
-  const handleDummyUser = (username: string, password: string) => {
-    if (username === dummyUsername && password === dummyPassword) {
-      setMockStore();
-      return;
-    }
-  };
-
   const onLoginButtonPress = () => {
     Keyboard.dismiss();
-    setLoginButtonPressed(true);
 
     if (username && password) {
-      handleDummyUser(username, password);
-      login(username, password);
+      setLoading(true);
+      if (username === dummyUsername && password === dummyPassword) {
+        dispatch(setMockStore());
+        return;
+      }
+      dispatch(login(username, password));
     } else {
       Snackbar.show({
         text: getTranslation('completeCredentials'),
@@ -227,6 +221,7 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
           />
           <RaisedButton
             testID="LoginButton"
+            disabled={loading}
             style={{
               backgroundColor: Colors.system('purple', colorScheme),
               width: 100,
@@ -237,24 +232,21 @@ const LoginScreen: INavigationScreen<ILoginScreenProps> = props => {
             onPress={onLoginButtonPress}>
             {getTranslation('login')}
           </RaisedButton>
+          <ActivityIndicator style={{margin: 10}} animating={loading} />
         </View>
       </KeyboardAvoidingView>
+      <Text
+        style={[
+          iOSUIKit.footnote,
+          styles.note,
+          {
+            color: Colors.system('gray', colorScheme),
+          },
+        ]}>
+        {getTranslation('credentialNote')}
+      </Text>
     </SafeAreaView>
   );
 };
 
-const mapStateToProps = (state: IPersistAppState) => ({
-  loggedIn: state.auth.loggedIn,
-  loginError: state.auth.error,
-  semesters: state.semesters.items,
-  getAllSemestersError: state.semesters.error,
-});
-
-const mapDispatchToProps = {
-  login,
-  setMockStore,
-  setCurrentSemester,
-  getAllSemesters,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(LoginScreen);
+export default LoginScreen;
