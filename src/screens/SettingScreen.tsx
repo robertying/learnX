@@ -16,7 +16,7 @@ import {
 import {iOSColors, iOSUIKit} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import packageConfig from '../../package.json';
 import SettingListItem from '../components/SettingListItem';
 import Colors from '../constants/Colors';
@@ -29,12 +29,7 @@ import {getTranslation} from '../helpers/i18n';
 import Snackbar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {clearStore} from '../redux/actions/root';
-import {
-  setCalendarSync,
-  setNotifications,
-  setUpdate,
-} from '../redux/actions/settings';
-import {IAssignment, IPersistAppState} from '../redux/types/state';
+import {setSetting} from '../redux/actions/settings';
 import {INavigationScreen} from '../types';
 import semverGt from 'semver/functions/gt';
 import DeviceInfo from '../constants/DeviceInfo';
@@ -47,40 +42,17 @@ import TextButton from '../components/TextButton';
 import {dataSource} from '../redux/dataSource';
 import RNCalendarEvents from 'react-native-calendar-events';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
 
-interface ISettingsScreenStateProps {
-  calendarSync: boolean;
-  assignments: IAssignment[];
-  hasUpdate: boolean;
-  notifications: boolean;
-  compactWith: boolean;
-}
-
-interface ISettingsScreenDispatchProps {
-  clearStore: () => void;
-  setCalendarSync: (enabled: boolean) => void;
-  setUpdate: (hasUpdate: boolean) => void;
-  setNotifications: (enabled: boolean) => void;
-}
-
-type ISettingsScreenProps = ISettingsScreenStateProps &
-  ISettingsScreenDispatchProps;
-
-const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
-  const {
-    clearStore,
-    setCalendarSync,
-    calendarSync,
-    assignments,
-    setUpdate,
-    hasUpdate,
-    compactWith,
-  } = props;
-
+const SettingScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
+  const dispatch = useDispatch();
+  const settings = useTypedSelector(state => state.settings);
+  const assignments = useTypedSelector(state => state.assignments.items);
+
   const navigate = (name: string) => {
-    if (DeviceInfo.isIPad() && !compactWith) {
+    if (DeviceInfo.isIPad() && !settings.isCompact) {
       setDetailView(name, props.componentId);
     } else {
       pushTo(
@@ -110,7 +82,7 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
         {
           text: getTranslation('ok'),
           onPress: () => {
-            clearStore();
+            dispatch(clearStore());
             Navigation.showModal({
               component: {
                 id: 'login',
@@ -154,7 +126,7 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
         saveAssignmentsToCalendar(assignments);
       }
     }
-    setCalendarSync(enabled);
+    dispatch(setSetting('calendarSync', enabled));
   };
 
   const onCheckUpdatePress = async () => {
@@ -178,17 +150,13 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
         ],
         {cancelable: true},
       );
-      if (!hasUpdate) {
-        setUpdate(true);
-      }
+      dispatch(setSetting('hasUpdate', true));
     } else {
       Snackbar.show({
         text: getTranslation('noUpdate'),
         duration: Snackbar.LENGTH_SHORT,
       });
-      if (hasUpdate) {
-        setUpdate(false);
-      }
+      dispatch(setSetting('hasUpdate', false));
     }
   };
 
@@ -306,7 +274,7 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
               />
             }
             text={getTranslation('calendarSync')}
-            switchValue={calendarSync}
+            switchValue={settings.calendarSync}
             onSwitchValueChange={onCalendarSyncSwitchChange}
           />
         );
@@ -393,7 +361,7 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
             variant="none"
             containerStyle={{marginTop: 10}}
             icon={
-              hasUpdate ? (
+              settings.hasUpdate ? (
                 <View>
                   <MaterialCommunityIcons
                     name="update"
@@ -429,7 +397,7 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
               )
             }
             text={
-              hasUpdate
+              settings.hasUpdate
                 ? getTranslation('foundNewVersion')
                 : getTranslation('checkUpdate')
             }
@@ -570,21 +538,4 @@ const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
 
 SettingScreen.options = getScreenOptions(getTranslation('settings'));
 
-function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
-  return {
-    calendarSync: state.settings.calendarSync,
-    assignments: state.assignments.items,
-    hasUpdate: state.settings.hasUpdate,
-    notifications: state.settings.notifications,
-    compactWith: state.settings.compactWidth,
-  };
-}
-
-const mapDispatchToProps: ISettingsScreenDispatchProps = {
-  clearStore,
-  setCalendarSync,
-  setUpdate,
-  setNotifications,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(SettingScreen);
+export default SettingScreen;

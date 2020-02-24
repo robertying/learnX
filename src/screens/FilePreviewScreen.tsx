@@ -22,13 +22,11 @@ import {
 import {iOSUIKit} from 'react-native-typography';
 import {useColorScheme} from 'react-native-appearance';
 
-export interface IFilePreviewScreenStateProps {
+export interface IFilePreviewScreenProps {
   filename: string;
   url: string;
   ext: string;
 }
-
-export type IFilePreviewScreenProps = IFilePreviewScreenStateProps;
 
 const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   const {url, ext, filename} = props;

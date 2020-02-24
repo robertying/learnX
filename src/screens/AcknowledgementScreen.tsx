@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const AcknowledgementScreen: INavigationScreen<{}> = props => {
+const AcknowledgementScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {

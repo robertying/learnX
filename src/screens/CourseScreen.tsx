@@ -95,9 +95,9 @@ const CourseScreen: INavigationScreen = props => {
     const title = course.name;
 
     if (DeviceInfo.isIPad() && !isCompact) {
-      setDetailView<Partial<ICourseDetailScreenProps>>(name, passProps, title);
+      setDetailView<ICourseDetailScreenProps>(name, passProps, title);
     } else {
-      pushTo<Partial<ICourseDetailScreenProps>>(
+      pushTo<ICourseDetailScreenProps>(
         name,
         props.componentId,
         passProps,

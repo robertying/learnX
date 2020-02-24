@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const AboutScreen: INavigationScreen<{}> = props => {
+const AboutScreen: INavigationScreen = props => {
   const onGitHubLinkPress = () => {
     Linking.openURL('https://github.com/robertying/learnX');
   };

@@ -8,7 +8,7 @@ import {
   TabView,
   NavigationState,
 } from 'react-native-tab-view';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import AssignmentBoard from '../components/AssignmentBoard';
 import AssignmentView from '../components/AssignmentView';
 import FileView from '../components/FileView';
@@ -19,57 +19,44 @@ import Layout from '../constants/Layout';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
 import {stripExtension} from '../helpers/share';
-import {getAssignmentsForCourse} from '../redux/actions/assignments';
-import {getFilesForCourse} from '../redux/actions/files';
-import {getNoticesForCourse} from '../redux/actions/notices';
 import {
-  IAssignment,
-  IFile,
-  INotice,
-  IPersistAppState,
-  ICourse,
-} from '../redux/types/state';
+  getAssignmentsForCourse,
+  readAssignment,
+} from '../redux/actions/assignments';
+import {getFilesForCourse, readFile} from '../redux/actions/files';
+import {getNoticesForCourse, readNotice} from '../redux/actions/notices';
+import {IAssignment, IFile, INotice, ICourse} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
+import Snackbar from 'react-native-snackbar';
 
-interface ICourseDetailScreenStateProps {
-  course?: ICourse;
-  notices: INotice[];
-  files: IFile[];
-  assignments: IAssignment[];
-  isFetchingNotices: boolean;
-  isFetchingFiles: boolean;
-  isFetchingAssignments: boolean;
+export interface ICourseDetailScreenProps {
+  course: ICourse;
 }
-
-interface ICourseDetailScreenDispatchProps {
-  getNoticesForCourse: (courseId: string) => void;
-  getFilesForCourse: (courseId: string) => void;
-  getAssignmentsForCourse: (courseId: string) => void;
-}
-
-export type ICourseDetailScreenProps = ICourseDetailScreenStateProps &
-  ICourseDetailScreenDispatchProps;
 
 const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props => {
-  const {
-    notices: rawNotices,
-    files: rawFiles,
-    assignments: rawAssignments,
-    isFetchingAssignments,
-    isFetchingFiles,
-    isFetchingNotices,
-    getAssignmentsForCourse,
-    getFilesForCourse,
-    getNoticesForCourse,
-    course,
-  } = props;
+  const {course} = props;
 
   const colorScheme = useColorScheme();
+
+  const dispatch = useDispatch();
+  const rawNotices = useTypedSelector(state => state.notices.items);
+  const rawFiles = useTypedSelector(state => state.files.items);
+  const rawAssignments = useTypedSelector(state => state.assignments.items);
+  const error = useTypedSelector(
+    state =>
+      state.notices.error || state.assignments.error || state.files.error,
+  );
+  const isFetchingNotices = useTypedSelector(state => state.notices.isFetching);
+  const isFetchingAssignments = useTypedSelector(
+    state => state.assignments.isFetching,
+  );
+  const isFetchingFiles = useTypedSelector(state => state.files.isFetching);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme, true);
@@ -78,7 +65,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const notices = useMemo(
     () =>
       rawNotices
-        .filter(item => item.courseId === course!.id)
+        .filter(item => item.courseId === course.id)
         .sort(
           (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
         ),
@@ -88,7 +75,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const files = useMemo(
     () =>
       rawFiles
-        .filter(item => item.courseId === course!.id)
+        .filter(item => item.courseId === course.id)
         .sort(
           (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix(),
         ),
@@ -98,7 +85,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const assignments = useMemo(
     () =>
       rawAssignments
-        .filter(item => item.courseId === course!.id)
+        .filter(item => item.courseId === course.id)
         .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
     [course, rawAssignments],
   );
@@ -132,9 +119,13 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
       }
   >({type: 'Notice', data: undefined, visible: false});
 
-  const onNoticeCardPress = useCallback((notice: INotice) => {
-    setCurrentModal({type: 'Notice', data: notice, visible: true});
-  }, []);
+  const onNoticeCardPress = useCallback(
+    (notice: INotice) => {
+      setCurrentModal({type: 'Notice', data: notice, visible: true});
+      dispatch(readNotice(notice.id));
+    },
+    [dispatch],
+  );
 
   const onFileCardPress = useCallback(
     async (file: IFile) => {
@@ -155,13 +146,19 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         true,
         colorScheme === 'dark',
       );
+
+      dispatch(readFile(file.id));
     },
-    [colorScheme, props.componentId],
+    [colorScheme, props.componentId, dispatch],
   );
 
-  const onAssignmentCardPress = useCallback((assignment: IAssignment) => {
-    setCurrentModal({type: 'Assignment', data: assignment, visible: true});
-  }, []);
+  const onAssignmentCardPress = useCallback(
+    (assignment: IAssignment) => {
+      setCurrentModal({type: 'Assignment', data: assignment, visible: true});
+      dispatch(readAssignment(assignment.id));
+    },
+    [dispatch],
+  );
 
   const NoticesRoute = useMemo(
     () => (
@@ -169,16 +166,10 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         isFetching={isFetchingNotices}
         notices={notices}
         onNoticeCardPress={onNoticeCardPress}
-        onRefresh={() => getNoticesForCourse(course!.id)}
+        onRefresh={() => dispatch(getNoticesForCourse(course.id))}
       />
     ),
-    [
-      course,
-      getNoticesForCourse,
-      isFetchingNotices,
-      notices,
-      onNoticeCardPress,
-    ],
+    [course, isFetchingNotices, notices, onNoticeCardPress, dispatch],
   );
 
   const FilesRoute = useMemo(
@@ -187,10 +178,10 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         isFetching={isFetchingFiles}
         files={files}
         onFileCardPress={onFileCardPress}
-        onRefresh={() => getFilesForCourse(course!.id)}
+        onRefresh={() => dispatch(getFilesForCourse(course.id))}
       />
     ),
-    [course, files, getFilesForCourse, isFetchingFiles, onFileCardPress],
+    [course, files, dispatch, isFetchingFiles, onFileCardPress],
   );
 
   const AssignmentsRoute = useMemo(
@@ -199,17 +190,26 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         isFetching={isFetchingAssignments}
         assignments={assignments}
         onAssignmentCardPress={onAssignmentCardPress}
-        onRefresh={() => getAssignmentsForCourse(course!.id)}
+        onRefresh={() => dispatch(getAssignmentsForCourse(course.id))}
       />
     ),
     [
       assignments,
       course,
-      getAssignmentsForCourse,
+      dispatch,
       isFetchingAssignments,
       onAssignmentCardPress,
     ],
   );
+
+  useEffect(() => {
+    if (error) {
+      Snackbar.show({
+        text: getTranslation('refreshFailure'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
+  }, [error]);
 
   const renderLabel = useCallback(
     ({
@@ -337,23 +337,4 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   );
 };
 
-function mapStateToProps(
-  state: IPersistAppState,
-): ICourseDetailScreenStateProps {
-  return {
-    notices: state.notices.items,
-    files: state.files.items,
-    assignments: state.assignments.items,
-    isFetchingNotices: state.notices.isFetching,
-    isFetchingFiles: state.files.isFetching,
-    isFetchingAssignments: state.assignments.isFetching,
-  };
-}
-
-const mapDispatchToProps: ICourseDetailScreenDispatchProps = {
-  getNoticesForCourse,
-  getFilesForCourse,
-  getAssignmentsForCourse,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(CourseDetailScreen);
+export default CourseDetailScreen;

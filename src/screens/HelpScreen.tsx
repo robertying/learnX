@@ -21,7 +21,7 @@ const markdown = getLocale().startsWith('zh')
         module.exports = fs.readFileSync(require.resolve('../assets/HELP_EN.md'), 'utf8')
 `;
 
-const HelpScreen: INavigationScreen<{}> = props => {
+const HelpScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {

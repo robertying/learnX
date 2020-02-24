@@ -5,47 +5,49 @@ import {
   OptionsModalPresentationStyle,
   OptionsModalTransitionStyle,
 } from 'react-native-navigation';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import packageConfig from '../../package.json';
 import SplashScreen from '../components/SplashScreen';
 import {getTranslation} from '../helpers/i18n';
 import Snackbar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
 import {getNavigationRoot} from '../navigation/navigationRoot';
-import {setUpdate} from '../redux/actions/settings';
-import {IAuthState, IPersistAppState} from '../redux/types/state';
+import {setSetting} from '../redux/actions/settings';
 import {INavigationScreen} from '../types';
 import semverGt from 'semver/functions/gt';
 import {resetLoading} from '../redux/actions/root';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {setCredentials} from '../redux/dataSource';
+import {useTypedSelector} from '../redux/store';
 
-interface IAuthLoadingScreenStateProps {
-  rehydrated: boolean;
-  auth: IAuthState;
-}
-
-interface IAuthLoadingScreenDispatchProps {
-  setUpdate: (hasUpdate: boolean) => void;
-  resetLoading: () => void;
-}
-
-type IAuthLoadingScreenProps = IAuthLoadingScreenStateProps &
-  IAuthLoadingScreenDispatchProps;
-
-const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
-  const {rehydrated, auth, setUpdate, resetLoading} = props;
-
+const AuthLoadingScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
+
+  const dispatch = useDispatch();
+  const rehydrated = useTypedSelector(state => state.auth._persist?.rehydrated);
+  const auth = useTypedSelector(state => state.auth);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
 
+  const showLoginScreen = () => {
+    Navigation.showModal({
+      component: {
+        id: 'login',
+        name: 'login',
+        options: {
+          modalTransitionStyle: OptionsModalTransitionStyle.crossDissolve,
+          modalPresentationStyle: OptionsModalPresentationStyle.fullScreen,
+        },
+      },
+    });
+  };
+
   useEffect(() => {
     if (rehydrated) {
-      resetLoading();
+      dispatch(resetLoading());
 
       if (auth && auth.username && auth.password) {
         (async () => {
@@ -55,28 +57,10 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
           Navigation.setRoot(navigationRoot);
         })();
       } else {
-        Navigation.showModal({
-          component: {
-            id: 'login',
-            name: 'login',
-            options: {
-              modalTransitionStyle: OptionsModalTransitionStyle.crossDissolve,
-              modalPresentationStyle: OptionsModalPresentationStyle.fullScreen,
-            },
-          },
-        });
+        showLoginScreen();
       }
     } else {
-      Navigation.showModal({
-        component: {
-          id: 'login',
-          name: 'login',
-          options: {
-            modalTransitionStyle: OptionsModalTransitionStyle.crossDissolve,
-            modalPresentationStyle: OptionsModalPresentationStyle.fullScreen,
-          },
-        },
-      });
+      showLoginScreen();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rehydrated]);
@@ -87,33 +71,19 @@ const AuthLoadingScreen: INavigationScreen<IAuthLoadingScreenProps> = props => {
         const {versionString} = await getLatestRelease();
 
         if (semverGt(versionString.slice(1), packageConfig.version)) {
-          setUpdate(true);
+          dispatch(setSetting('hasUpdate', true));
           Snackbar.show({
             text: getTranslation('pleaseUpdate'),
             duration: Snackbar.LENGTH_SHORT,
           });
         } else {
-          setUpdate(false);
+          dispatch(setSetting('hasUpdate', false));
         }
       })();
     }
-  }, [setUpdate]);
+  }, [dispatch]);
 
   return <SplashScreen />;
 };
 
-function mapStateToProps(
-  state: IPersistAppState,
-): IAuthLoadingScreenStateProps {
-  return {
-    rehydrated: state.auth._persist ? state.auth._persist.rehydrated : false,
-    auth: state.auth,
-  };
-}
-
-const mapDispatchToProps: IAuthLoadingScreenDispatchProps = {
-  setUpdate,
-  resetLoading,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(AuthLoadingScreen);
+export default AuthLoadingScreen;
