@@ -18,6 +18,7 @@ import TextButton from './TextButton';
 import {pushTo} from '../helpers/navigation';
 import {getWebViewTemplate} from '../helpers/html';
 import {useColorScheme} from 'react-native-appearance';
+import {IFilePreviewScreenProps} from '../screens/FilePreviewScreen';
 
 export type INoticeBoardProps = TouchableHighlightProps & {
   title: string;
@@ -75,13 +76,14 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     }
 
     const stripedFilename = stripExtension(filename);
-    pushTo(
+    pushTo<IFilePreviewScreenProps>(
       'webview',
       componentId,
       {
         filename: stripedFilename,
         url,
         ext,
+        courseName: 'notices',
       },
       stripedFilename,
       true,

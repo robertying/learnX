@@ -62,6 +62,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
         filename: stripedFilename,
         url,
         ext,
+        courseName: 'assignments',
       },
       stripedFilename,
       true,

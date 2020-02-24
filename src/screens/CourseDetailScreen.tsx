@@ -131,10 +131,11 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
     async (file: IFile) => {
       const stripedFilename = stripExtension(file.title);
       const name = 'webview';
-      const passProps = {
+      const passProps: IFilePreviewScreenProps = {
         filename: stripedFilename,
         url: file.downloadUrl,
         ext: file.fileType,
+        courseName: course.name,
       };
       const title = stripedFilename;
 
@@ -149,7 +150,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
 
       dispatch(readFile(file.id));
     },
-    [colorScheme, props.componentId, dispatch],
+    [colorScheme, props.componentId, dispatch, course],
   );
 
   const onAssignmentCardPress = useCallback(

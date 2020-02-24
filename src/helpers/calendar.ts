@@ -3,8 +3,8 @@ import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {
   clearEventIds,
-  setCalendarId,
   setEventIdForAssignment,
+  setSetting,
 } from '../redux/actions/settings';
 import {store} from '../redux/store';
 import {IAssignment} from '../redux/types/state';
@@ -25,7 +25,7 @@ export const getCalendar = async () => {
 
   const existingCalendar = calendars.find(value => value.title === 'learnX');
   if (existingCalendar) {
-    store.dispatch(setCalendarId(existingCalendar.id));
+    store.dispatch(setSetting('calendarId', existingCalendar.id));
     return existingCalendar.id;
   }
 
@@ -45,7 +45,7 @@ export const getCalendar = async () => {
     },
   });
   if (newId) {
-    store.dispatch(setCalendarId(newId));
+    store.dispatch(setSetting('calendarId', newId));
   }
   return newId;
 };
