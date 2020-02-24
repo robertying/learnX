@@ -187,6 +187,7 @@ const AssignmentScreen: INavigationScreen = props => {
   const loggedIn = useTypedSelector(state => state.auth.loggedIn);
   const assignmentError = useTypedSelector(state => state.assignments.error);
   const isFetching = useTypedSelector(state => state.assignments.isFetching);
+  const calendarSync = useTypedSelector(state => state.settings.calendarSync);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
@@ -201,10 +202,10 @@ const AssignmentScreen: INavigationScreen = props => {
   }, [invalidateAll, assignments.length]);
 
   useEffect(() => {
-    if (assignments) {
+    if (calendarSync && assignments) {
       saveAssignmentsToCalendar(assignments);
     }
-  }, [assignments]);
+  }, [assignments, calendarSync]);
 
   useEffect(() => {
     if (assignmentError) {
