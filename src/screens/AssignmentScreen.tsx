@@ -1,17 +1,13 @@
-import React, {useEffect, useState, useMemo, useCallback} from 'react';
+import React, {useEffect, useMemo, useCallback, useState} from 'react';
 import {
+  FlatList,
   Platform,
   RefreshControl,
   SafeAreaView,
-  FlatList,
-  AppState,
-  AppStateStatus,
+  PushNotification,
   View,
-  PushNotification as Notification,
-  Dimensions,
   Text,
 } from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import {
   Provider as PaperProvider,
   Searchbar,
@@ -20,178 +16,68 @@ import {
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {useDispatch} from 'react-redux';
+import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
-import NoticeCard from '../components/NoticeCard';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
 import useSearchBar from '../hooks/useSearchBar';
-import {login} from '../redux/actions/auth';
 import {
-  getAllNoticesForCourses,
-  pinNotice,
-  unpinNotice,
-  favNotice,
-  unfavNotice,
-  readNotice,
-  unreadNotice,
-} from '../redux/actions/notices';
-import {INotice} from '../redux/types/state';
+  getAllAssignmentsForCourses,
+  pinAssignment,
+  unpinAssignment,
+  favAssignment,
+  unfavAssignment,
+  readAssignment,
+  unreadAssignment,
+} from '../redux/actions/assignments';
+import {IAssignment} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
-import {resetLoading} from '../redux/actions/root';
-import {getFuseOptions} from '../helpers/search';
+import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
-import {INoticeDetailScreenProps} from './NoticeDetailScreen';
-// import BackgroundFetch from 'react-native-background-fetch';
-//import {runBackgroundTask} from '../helpers/background';
-import {
-  requestNotificationPermission,
-  showNotificationPermissionAlert,
-  scheduleNotification,
-} from '../helpers/notification';
+import {getFuseOptions} from '../helpers/search';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
+import {
+  requestNotificationPermission,
+  showNotificationPermissionAlert,
+  scheduleNotification,
+} from '../helpers/notification';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
-import PushNotification from 'react-native-push-notification';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
-import {setSetting} from '../redux/actions/settings';
 
-const NoticesScreen: INavigationScreen = props => {
+const AssignmentScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const settings = useTypedSelector(state => state.settings);
-  const loginError = useTypedSelector(state => state.auth.error);
-
-  /**
-   * App scope stuff
-   */
-
-  // useEffect(() => {
-  //   BackgroundFetch.configure(
-  //     {
-  //       minimumFetchInterval: 60 * 2,
-  //       enableHeadless: true,
-  //       stopOnTerminate: false,
-  //       startOnBoot: true,
-  //       requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
-  //     },
-  //     runBackgroundTask,
-  //   );
-  // }, []);
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      PushNotification.configure({
-        requestPermissions: false,
-      });
-    }
-  }, []);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
-
-  useEffect(() => {
-    (async () => {
-      if (settings.hasUpdate && Platform.OS === 'android') {
-        Navigation.mergeOptions('SettingsScreen', {
-          bottomTab: {
-            dotIndicator: {
-              visible: true,
-            },
-          },
-        });
-      }
-    })();
-  }, [settings.hasUpdate]);
-
-  useEffect(() => {
-    dispatch(login());
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (loginError) {
-      Snackbar.show({
-        text: getTranslation('loginFailure'),
-        duration: Snackbar.LENGTH_INDEFINITE,
-        action: {
-          text: getTranslation('ok'),
-          textColor: Colors.system('purple', colorScheme),
-          onPress: () => Snackbar.dismiss(),
-        },
-      });
-    }
-  }, [colorScheme, loginError]);
-
-  useEffect(() => {
-    if (DeviceInfo.isIPad()) {
-      const window = Dimensions.get('window');
-      const screen = Dimensions.get('screen');
-      if (
-        window.width < screen.width &&
-        !(screen.height < screen.width && window.width > screen.width * 0.4)
-      ) {
-        dispatch(setSetting('isCompact', true));
-      } else {
-        dispatch(setSetting('isCompact', false));
-      }
-    }
-  }, [dispatch]);
-
-  useEffect(() => {
-    if (DeviceInfo.isIPad()) {
-      const listener = ({window, screen}: any) => {
-        if (
-          window.width < screen.width &&
-          !(
-            screen.height < screen.width &&
-            (DeviceInfo.isIPad12_9()
-              ? window.width > screen.width * 0.4
-              : window.width > screen.width / 2)
-          )
-        ) {
-          dispatch(setSetting('isCompact', true));
-        } else {
-          dispatch(setSetting('isCompact', false));
-        }
-      };
-      Dimensions.addEventListener('change', listener);
-
-      return () => Dimensions.removeEventListener('change', listener);
-    }
-  }, [dispatch]);
-
-  const [appState, setAppState] = useState(AppState.currentState);
-
-  useEffect(() => {
-    const listener = (nextAppState: AppStateStatus) => {
-      if (appState.match(/inactive|background/) && nextAppState === 'active') {
-        resetLoading();
-      }
-      setAppState(nextAppState);
-    };
-    AppState.addEventListener('change', listener);
-    return () => AppState.removeEventListener('change', listener);
-  });
 
   /**
    * Prepare data
    */
 
   const courses = useTypedSelector(state => state.courses.items);
-  const notices = useTypedSelector(state => state.notices.items);
+  const assignments = useTypedSelector(state => state.assignments.items);
   const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const favNoticeIds = useTypedSelector(state => state.notices.favorites);
-  const pinnedNoticeIds = useTypedSelector(state => state.notices.pinned);
-  const unreadNoticeIds = useTypedSelector(state => state.notices.unread);
+  const favAssignmentIds = useTypedSelector(
+    state => state.assignments.favorites,
+  );
+  const pinnedAssignmentIds = useTypedSelector(
+    state => state.assignments.pinned,
+  );
+  const unreadAssignmentIds = useTypedSelector(
+    state => state.assignments.unread,
+  );
 
   const courseNames = useMemo(
     () =>
@@ -212,63 +98,85 @@ const NoticesScreen: INavigationScreen = props => {
     [courses],
   );
 
-  const sortedNotices = useMemo(
+  const sortedAssignments = useMemo(
     () =>
-      notices
-        .sort(
-          (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
-        )
-        .map(notice => ({
-          ...notice,
-          ...courseNames[notice.courseId],
-        })),
-    [notices, courseNames],
+      [
+        ...assignments
+          .filter(item => dayjs(item.deadline).unix() > dayjs().unix())
+          .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix()),
+        ...assignments
+          .filter(item => dayjs(item.deadline).unix() < dayjs().unix())
+          .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
+      ].map(assignment => ({
+        ...assignment,
+        ...courseNames[assignment.courseId],
+      })),
+    [assignments, courseNames],
   );
 
-  const newNotices = useMemo(() => {
-    const newNoticesOnly = sortedNotices.filter(
+  const newAssignments = useMemo(() => {
+    const newAssignmentsOnly = sortedAssignments.filter(
       i =>
-        !favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+        !favAssignmentIds.includes(i.id) &&
+        !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...newNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...newNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...newAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...newAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
     ];
-  }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+  }, [
+    favAssignmentIds,
+    hiddenCourseIds,
+    pinnedAssignmentIds,
+    sortedAssignments,
+  ]);
 
-  const unreadNotices = useMemo(() => {
-    const unreadNoticesOnly = sortedNotices.filter(
+  const unreadAssignments = useMemo(() => {
+    const unreadAssignmentsOnly = sortedAssignments.filter(
       i =>
-        unreadNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+        unreadAssignmentIds.includes(i.id) &&
+        !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...unreadNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...unreadAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...unreadAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
     ];
-  }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices, unreadNoticeIds]);
+  }, [
+    hiddenCourseIds,
+    pinnedAssignmentIds,
+    sortedAssignments,
+    unreadAssignmentIds,
+  ]);
 
-  const favNotices = useMemo(() => {
-    const favNoticesOnly = sortedNotices.filter(
-      i => favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+  const favAssignments = useMemo(() => {
+    const favAssignmentsOnly = sortedAssignments.filter(
+      i =>
+        favAssignmentIds.includes(i.id) &&
+        !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...favNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...favNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...favAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...favAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
     ];
-  }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+  }, [
+    favAssignmentIds,
+    hiddenCourseIds,
+    pinnedAssignmentIds,
+    sortedAssignments,
+  ]);
 
-  const hiddenNotices = useMemo(() => {
-    const hiddenNoticesOnly = sortedNotices.filter(i =>
+  const hiddenAssignments = useMemo(() => {
+    const hiddenAssignmentsOnly = sortedAssignments.filter(i =>
       hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...hiddenNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...hiddenNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...hiddenAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...hiddenAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
     ];
-  }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+  }, [hiddenCourseIds, pinnedAssignmentIds, sortedAssignments]);
 
-  const [currentDisplayNotices, setCurrentDisplayNotices] = useState(
-    newNotices,
+  const [currentDisplayAssignments, setCurrentDisplayAssignments] = useState(
+    newAssignments,
   );
 
   /**
@@ -276,29 +184,33 @@ const NoticesScreen: INavigationScreen = props => {
    */
 
   const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const noticeError = useTypedSelector(state => state.notices.error);
-  const isFetching = useTypedSelector(state => state.notices.isFetching);
+  const assignmentError = useTypedSelector(state => state.assignments.error);
+  const isFetching = useTypedSelector(state => state.assignments.isFetching);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      dispatch(getAllNoticesForCourses(courses.map(i => i.id)));
+      dispatch(getAllAssignmentsForCourses(courses.map(i => i.id)));
     }
   }, [courses, loggedIn, dispatch]);
 
   useEffect(() => {
-    if (notices.length === 0) {
+    if (assignments.length === 0) {
       invalidateAll();
     }
-  }, [invalidateAll, notices.length]);
+  }, [invalidateAll, assignments.length]);
 
   useEffect(() => {
-    if (noticeError) {
+    // to calendar
+  }, [assignments]);
+
+  useEffect(() => {
+    if (assignmentError) {
       Snackbar.show({
         text: getTranslation('refreshFailure'),
         duration: Snackbar.LENGTH_SHORT,
       });
     }
-  }, [noticeError]);
+  }, [assignmentError]);
 
   /**
    * Render cards
@@ -306,24 +218,29 @@ const NoticesScreen: INavigationScreen = props => {
 
   const isCompact = useTypedSelector(state => state.settings.isCompact);
 
-  const onNoticeCardPress = useCallback(
-    (notice: WithCourseInfo<INotice>) => {
-      const name = 'notices.detail';
+  const onAssignmentCardPress = useCallback(
+    (assignment: WithCourseInfo<IAssignment>) => {
+      const name = 'assignments.detail';
       const passProps = {
-        title: notice.title,
-        author: notice.publisher,
-        content: notice.content,
-        publishTime: notice.publishTime,
-        attachmentName: notice.attachmentName,
-        attachmentUrl: notice.attachmentUrl,
-        courseName: notice.courseName,
+        title: assignment.title,
+        deadline: assignment.deadline,
+        description: assignment.description,
+        attachmentName: assignment.attachmentName,
+        attachmentUrl: assignment.attachmentUrl,
+        submittedAttachmentName: assignment.submittedAttachmentName,
+        submittedAttachmentUrl: assignment.submittedAttachmentUrl,
+        submitTime: assignment.submitTime,
+        grade: assignment.grade,
+        gradeLevel: assignment.gradeLevel,
+        gradeContent: assignment.gradeContent,
+        courseName: assignment.courseName,
       };
-      const title = notice.courseName;
+      const title = assignment.courseName;
 
       if (DeviceInfo.isIPad() && !isCompact) {
-        setDetailView<INoticeDetailScreenProps>(name, passProps, title);
+        setDetailView<IAssignmentDetailScreenProps>(name, passProps, title);
       } else {
-        pushTo<INoticeDetailScreenProps>(
+        pushTo<IAssignmentDetailScreenProps>(
           name,
           props.componentId,
           passProps,
@@ -333,7 +250,7 @@ const NoticesScreen: INavigationScreen = props => {
         );
       }
 
-      dispatch(readNotice(notice.id));
+      dispatch(readAssignment(assignment.id));
     },
     [isCompact, colorScheme, props.componentId, dispatch],
   );
@@ -344,71 +261,71 @@ const NoticesScreen: INavigationScreen = props => {
         const notification = await PushNotificationIOS.getInitialNotification();
         if (notification) {
           const data = notification.getData();
-          if ((data as INotice).publisher) {
-            onNoticeCardPress(data as WithCourseInfo<INotice>);
+          if ((data as IAssignment).deadline) {
+            onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
           }
         }
       })();
     }
-  }, [onNoticeCardPress]);
+  }, [onAssignmentCardPress]);
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
-      const listener = (notification: Notification) => {
+      const listener = (notification: PushNotification) => {
         const data = notification.getData();
-        if ((data as INotice).publisher) {
-          onNoticeCardPress(data as WithCourseInfo<INotice>);
+        if ((data as IAssignment).deadline) {
+          onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
         }
       };
       PushNotificationIOS.addEventListener('localNotification', listener);
       return () =>
         PushNotificationIOS.removeEventListener('localNotification', listener);
     }
-  }, [onNoticeCardPress]);
+  }, [onAssignmentCardPress]);
 
-  const onPinned = (pin: boolean, noticeId: string) => {
+  const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {
-      dispatch(pinNotice(noticeId));
+      dispatch(pinAssignment(assignmentId));
     } else {
-      dispatch(unpinNotice(noticeId));
+      dispatch(unpinAssignment(assignmentId));
     }
   };
 
-  const onFav = (fav: boolean, noticeId: string) => {
+  const onFav = (fav: boolean, assignmentId: string) => {
     if (fav) {
-      dispatch(favNotice(noticeId));
+      dispatch(favAssignment(assignmentId));
     } else {
-      dispatch(unfavNotice(noticeId));
+      dispatch(unfavAssignment(assignmentId));
     }
   };
 
-  const onRead = (read: boolean, noticeId: string) => {
+  const onRead = (read: boolean, assignmentId: string) => {
     if (read) {
-      dispatch(readNotice(noticeId));
+      dispatch(readAssignment(assignmentId));
     } else {
-      dispatch(unreadNotice(noticeId));
+      dispatch(unreadAssignment(assignmentId));
     }
   };
 
-  const renderListItem = ({item}: {item: WithCourseInfo<INotice>}) => (
-    <NoticeCard
+  const renderListItem = ({item}: {item: WithCourseInfo<IAssignment>}) => (
+    <AssignmentCard
       title={item.title}
-      author={item.publisher}
-      date={item.publishTime}
-      content={item.content}
-      markedImportant={item.markedImportant}
       hasAttachment={item.attachmentName ? true : false}
+      submitted={item.submitted}
+      graded={item.gradeTime ? true : false}
+      date={item.deadline}
+      description={item.description}
       courseName={item.courseName}
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
-      pinned={pinnedNoticeIds.includes(item.id)}
+      pinned={pinnedAssignmentIds.includes(item.id)}
       onPinned={pin => onPinned(pin, item.id)}
-      fav={favNoticeIds.includes(item.id)}
+      fav={favAssignmentIds.includes(item.id)}
       onFav={fav => onFav(fav, item.id)}
-      unread={unreadNoticeIds.includes(item.id)}
+      unread={unreadAssignmentIds.includes(item.id)}
       onRead={read => onRead(read, item.id)}
       onPress={() => {
-        onNoticeCardPress(item);
+        onAssignmentCardPress(item);
       }}
       onRemind={() => handleRemind(item)}
     />
@@ -427,8 +344,8 @@ const NoticesScreen: INavigationScreen = props => {
    */
 
   const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
-    WithCourseInfo<INotice>
-  >(currentDisplayNotices, fuseOptions);
+    WithCourseInfo<IAssignment>
+  >(currentDisplayAssignments, fuseOptions);
 
   const [segment, setSegment] = useState('new');
 
@@ -446,35 +363,37 @@ const NoticesScreen: INavigationScreen = props => {
 
   useEffect(() => {
     if (segment === 'new') {
-      setCurrentDisplayNotices(newNotices);
+      setCurrentDisplayAssignments(newAssignments);
     }
-  }, [newNotices, segment]);
+  }, [newAssignments, segment]);
 
   useEffect(() => {
     if (segment === 'unread') {
-      setCurrentDisplayNotices(unreadNotices);
+      setCurrentDisplayAssignments(unreadAssignments);
     }
-  }, [unreadNotices, segment]);
+  }, [unreadAssignments, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
-      setCurrentDisplayNotices(favNotices);
+      setCurrentDisplayAssignments(favAssignments);
     }
-  }, [favNotices, segment]);
+  }, [favAssignments, segment]);
 
   useEffect(() => {
     if (segment === 'hidden') {
-      setCurrentDisplayNotices(hiddenNotices);
+      setCurrentDisplayAssignments(hiddenAssignments);
     }
-  }, [hiddenNotices, segment]);
+  }, [hiddenAssignments, segment]);
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [reminderDate, setReminderDate] = useState(new Date());
-  const [reminderInfo, setReminderInfo] = useState<WithCourseInfo<INotice>>();
+  const [reminderInfo, setReminderInfo] = useState<
+    WithCourseInfo<IAssignment>
+  >();
   const [dateAndroid, setDateAndroid] = useState<Date | null>(null);
   const [timeAndroid, setTimeAndroid] = useState<Date | null>(null);
 
-  const handleRemind = async (notice: WithCourseInfo<INotice>) => {
+  const handleRemind = async (notice: WithCourseInfo<IAssignment>) => {
     if (!(await requestNotificationPermission())) {
       showNotificationPermissionAlert();
       return;
@@ -504,7 +423,7 @@ const NoticesScreen: INavigationScreen = props => {
     scheduleNotification(
       `${getTranslation('reminder')}：${reminderInfo.courseName}`,
       `${reminderInfo.title}\n${removeTags(
-        reminderInfo.content || getTranslation('noNoticeContent'),
+        reminderInfo.description || getTranslation('noAssignmentDescription'),
       )}`,
       date,
       reminderInfo,
@@ -543,7 +462,7 @@ const NoticesScreen: INavigationScreen = props => {
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
-        testID="NoticesScreen"
+        testID="AssignmentsScreen"
         style={{
           flex: 1,
           backgroundColor: Colors.system('background', colorScheme),
@@ -555,13 +474,12 @@ const NoticesScreen: INavigationScreen = props => {
               backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"
-            placeholder={getTranslation('searchNotices')}
+            placeholder={getTranslation('searchAssignments')}
             onChangeText={setSearchBarText}
             value={searchBarText || ''}
           />
         )}
         <FlatList
-          testID="FlatList"
           style={{backgroundColor: Colors.system('background', colorScheme)}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
@@ -570,10 +488,10 @@ const NoticesScreen: INavigationScreen = props => {
           ListHeaderComponent={
             <SegmentedControl
               values={[
-                getTranslation('new') + ` (${newNotices.length})`,
-                getTranslation('unread') + ` (${unreadNotices.length})`,
-                getTranslation('favorite') + ` (${favNotices.length})`,
-                getTranslation('hidden') + ` (${hiddenNotices.length})`,
+                getTranslation('new') + ` (${newAssignments.length})`,
+                getTranslation('unread') + ` (${unreadAssignments.length})`,
+                getTranslation('favorite') + ` (${favAssignments.length})`,
+                getTranslation('hidden') + ` (${hiddenAssignments.length})`,
               ]}
               selectedIndex={
                 segment === 'new'
@@ -671,16 +589,16 @@ const NoticesScreen: INavigationScreen = props => {
   );
 };
 
-const fuseOptions = getFuseOptions<INotice>([
-  'title',
-  'content',
-  'courseName',
+const fuseOptions = getFuseOptions<IAssignment>([
   'attachmentName',
+  'description',
+  'title',
+  'courseName',
 ]);
 
-NoticesScreen.options = getScreenOptions(
-  getTranslation('notices'),
-  getTranslation('searchNotices'),
+AssignmentScreen.options = getScreenOptions(
+  getTranslation('assignments'),
+  getTranslation('searchAssignments'),
 );
 
-export default NoticesScreen;
+export default AssignmentScreen;

@@ -21,7 +21,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const AcknowledgementsScreen: INavigationScreen<{}> = props => {
+const AcknowledgementScreen: INavigationScreen<{}> = props => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
@@ -93,8 +93,8 @@ const AcknowledgementsScreen: INavigationScreen<{}> = props => {
   );
 };
 
-AcknowledgementsScreen.options = getScreenOptions(
+AcknowledgementScreen.options = getScreenOptions(
   getTranslation('acknowledgements'),
 );
 
-export default AcknowledgementsScreen;
+export default AcknowledgementScreen;

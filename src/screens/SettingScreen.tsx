@@ -17,9 +17,8 @@ import {iOSColors, iOSUIKit} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
-import RNFetchBlob from 'rn-fetch-blob';
 import packageConfig from '../../package.json';
-import SettingsListItem from '../components/SettingsListItem';
+import SettingListItem from '../components/SettingListItem';
 import Colors from '../constants/Colors';
 import {
   saveAssignmentsToCalendar,
@@ -67,7 +66,7 @@ interface ISettingsScreenDispatchProps {
 type ISettingsScreenProps = ISettingsScreenStateProps &
   ISettingsScreenDispatchProps;
 
-const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
+const SettingScreen: INavigationScreen<ISettingsScreenProps> = props => {
   const {
     clearStore,
     setCalendarSync,
@@ -205,20 +204,20 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         {
           text: getTranslation('ok'),
           onPress: async () => {
-            RNFetchBlob.fs
-              .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
-              .then(() =>
-                Snackbar.show({
-                  text: getTranslation('clearFileCacheSuccess'),
-                  duration: Snackbar.LENGTH_SHORT,
-                }),
-              )
-              .catch(() =>
-                Snackbar.show({
-                  text: getTranslation('clearFileCacheFail'),
-                  duration: Snackbar.LENGTH_SHORT,
-                }),
-              );
+            // RNFetchBlob.fs
+            //   .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
+            //   .then(() =>
+            //     Snackbar.show({
+            //       text: getTranslation('clearFileCacheSuccess'),
+            //       duration: Snackbar.LENGTH_SHORT,
+            //     }),
+            //   )
+            //   .catch(() =>
+            //     Snackbar.show({
+            //       text: getTranslation('clearFileCacheFail'),
+            //       duration: Snackbar.LENGTH_SHORT,
+            //     }),
+            //   );
           },
         },
       ],
@@ -292,7 +291,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
     switch (index) {
       case 0:
         return (
-          <SettingsListItem
+          <SettingListItem
             containerStyle={{marginTop: 10}}
             variant="switch"
             icon={
@@ -313,7 +312,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 1:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="none"
             icon={
               <MaterialCommunityIcons
@@ -332,7 +331,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 2:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="arrow"
             icon={
               <MaterialCommunityIcons
@@ -351,7 +350,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 3:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="none"
             containerStyle={{marginTop: 10}}
             icon={
@@ -371,7 +370,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 4:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="none"
             icon={
               <MaterialCommunityIcons
@@ -390,7 +389,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 5:
         return Platform.OS === 'android' ? (
-          <SettingsListItem
+          <SettingListItem
             variant="none"
             containerStyle={{marginTop: 10}}
             icon={
@@ -439,7 +438,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         ) : null;
       case 6:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="arrow"
             containerStyle={{marginTop: 10}}
             icon={
@@ -459,7 +458,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 7:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="arrow"
             icon={
               <MaterialCommunityIcons
@@ -478,7 +477,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
         );
       case 8:
         return (
-          <SettingsListItem
+          <SettingListItem
             variant="arrow"
             icon={
               <MaterialIcons
@@ -569,7 +568,7 @@ const SettingsScreen: INavigationScreen<ISettingsScreenProps> = props => {
   );
 };
 
-SettingsScreen.options = getScreenOptions(getTranslation('settings'));
+SettingScreen.options = getScreenOptions(getTranslation('settings'));
 
 function mapStateToProps(state: IPersistAppState): ISettingsScreenStateProps {
   return {
@@ -588,4 +587,4 @@ const mapDispatchToProps: ISettingsScreenDispatchProps = {
   setNotifications,
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(SettingsScreen);
+export default connect(mapStateToProps, mapDispatchToProps)(SettingScreen);

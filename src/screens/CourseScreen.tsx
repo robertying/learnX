@@ -21,7 +21,7 @@ import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
 import {useDispatch} from 'react-redux';
 
-const CoursesScreen: INavigationScreen = props => {
+const CourseScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
@@ -228,6 +228,6 @@ const CoursesScreen: INavigationScreen = props => {
   );
 };
 
-CoursesScreen.options = getScreenOptions(getTranslation('courses'));
+CourseScreen.options = getScreenOptions(getTranslation('courses'));
 
-export default CoursesScreen;
+export default CourseScreen;

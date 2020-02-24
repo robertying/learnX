@@ -4,18 +4,18 @@ import {Provider} from 'react-redux';
 import EmptyScreen from '../components/EmptyScreen';
 import {store} from '../redux/store';
 import AboutScreen from '../screens/AboutScreen';
-import AcknowledgementsScreen from '../screens/AcknowledgementsScreen';
+import AcknowledgementScreen from '../screens/AcknowledgementScreen';
 import AssignmentDetailScreen from '../screens/AssignmentDetailScreen';
-import AssignmentsScreen from '../screens/AssignmentsScreen';
+import AssignmentScreen from '../screens/AssignmentScreen';
 import AuthLoadingScreen from '../screens/AuthLoadingScreen';
 import CourseDetailScreen from '../screens/CourseDetailScreen';
-import CoursesScreen from '../screens/CoursesScreen';
-import FilesScreen from '../screens/FilesScreen';
+import CourseScreen from '../screens/CourseScreen';
+import FileScreen from '../screens/FileScreen';
 import LoginScreen from '../screens/LoginScreen';
 import NoticeDetailScreen from '../screens/NoticeDetailScreen';
-import NoticesScreen from '../screens/NoticesScreen';
-import SemestersSettingsScreen from '../screens/SemestersSettingsScreen';
-import SettingsScreen from '../screens/SettingsScreen';
+import NoticeScreen from '../screens/NoticeScreen';
+import SemesterSettingScreen from '../screens/SemesterSettingScreen';
+import SettingScreen from '../screens/SettingScreen';
 import FilePreviewScreen from '../screens/FilePreviewScreen';
 import HelpScreen from '../screens/HelpScreen';
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
@@ -50,8 +50,8 @@ const registerScreens = () => {
 
   Navigation.registerComponent(
     'notices.index',
-    () => storeWrapped(NoticesScreen),
-    () => NoticesScreen,
+    () => storeWrapped(NoticeScreen),
+    () => NoticeScreen,
   );
   Navigation.registerComponent(
     'notices.detail',
@@ -61,14 +61,14 @@ const registerScreens = () => {
 
   Navigation.registerComponent(
     'files.index',
-    () => storeWrapped(FilesScreen),
-    () => FilesScreen,
+    () => storeWrapped(FileScreen),
+    () => FileScreen,
   );
 
   Navigation.registerComponent(
     'assignments.index',
-    () => storeWrapped(AssignmentsScreen),
-    () => AssignmentsScreen,
+    () => storeWrapped(AssignmentScreen),
+    () => AssignmentScreen,
   );
   Navigation.registerComponent(
     'assignments.detail',
@@ -78,8 +78,8 @@ const registerScreens = () => {
 
   Navigation.registerComponent(
     'courses.index',
-    () => storeWrapped(CoursesScreen),
-    () => CoursesScreen,
+    () => storeWrapped(CourseScreen),
+    () => CourseScreen,
   );
   Navigation.registerComponent(
     'courses.detail',
@@ -89,18 +89,18 @@ const registerScreens = () => {
 
   Navigation.registerComponent(
     'settings.index',
-    () => storeWrapped(SettingsScreen),
-    () => SettingsScreen,
+    () => storeWrapped(SettingScreen),
+    () => SettingScreen,
   );
   Navigation.registerComponent(
     'settings.semesters',
-    () => storeWrapped(SemestersSettingsScreen),
-    () => SemestersSettingsScreen,
+    () => storeWrapped(SemesterSettingScreen),
+    () => SemesterSettingScreen,
   );
   Navigation.registerComponent(
     'settings.acknowledgements',
-    () => storeWrapped(AcknowledgementsScreen),
-    () => AcknowledgementsScreen,
+    () => storeWrapped(AcknowledgementScreen),
+    () => AcknowledgementScreen,
   );
   Navigation.registerComponent(
     'settings.about',

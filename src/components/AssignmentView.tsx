@@ -4,58 +4,51 @@ import {
   ListRenderItem,
   RefreshControl,
   SafeAreaView,
-  StyleSheet,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import {INotice} from '../redux/types/state';
+import {IAssignment} from '../redux/types/state';
+import AssignmentCard from './AssignmentCard';
 import EmptyList from './EmptyList';
-import NoticeCard from './NoticeCard';
 import {useColorScheme} from 'react-native-appearance';
 
-export interface INoticesViewProps {
-  notices: INotice[];
+export interface IAssignmentViewProps {
+  assignments: IAssignment[];
   isFetching: boolean;
-  onNoticeCardPress: (notice: INotice) => void;
+  onAssignmentCardPress: (assignment: IAssignment) => void;
   onRefresh?: () => void;
 }
 
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-});
+const AssignmentView: React.FunctionComponent<IAssignmentViewProps> = props => {
+  const {assignments, onAssignmentCardPress, isFetching, onRefresh} = props;
 
-const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
-  const {notices, isFetching, onNoticeCardPress, onRefresh} = props;
-
-  const renderListItem: ListRenderItem<INotice> = ({item}) => {
+  const renderListItem: ListRenderItem<IAssignment> = ({item}) => {
     return (
-      <NoticeCard
+      <AssignmentCard
         dragEnabled={false}
         title={item.title}
-        author={item.publisher}
-        date={item.publishTime}
-        content={item.content}
-        markedImportant={item.markedImportant}
+        date={item.deadline}
+        description={item.description}
         hasAttachment={item.attachmentName ? true : false}
-        onPress={() => onNoticeCardPress(item)}
+        submitted={item.submitted}
+        graded={item.gradeTime ? true : false}
+        onPress={() => onAssignmentCardPress(item)}
       />
     );
   };
 
-  const keyExtractor = (item: INotice) => item.id;
+  const keyExtractor = (item: IAssignment) => item.id;
 
   const colorScheme = useColorScheme();
 
   return (
     <SafeAreaView
-      style={[
-        styles.root,
-        {backgroundColor: Colors.system('background', colorScheme)},
-      ]}>
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
       <FlatList
         ListEmptyComponent={EmptyList}
-        data={notices}
+        data={assignments}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
         refreshControl={
@@ -73,4 +66,4 @@ const NoticesView: React.FunctionComponent<INoticesViewProps> = props => {
   );
 };
 
-export default NoticesView;
+export default AssignmentView;

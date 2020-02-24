@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useCallback, useState} from 'react';
+import React, {useEffect, useMemo, useState, useCallback} from 'react';
 import {
   FlatList,
   Platform,
@@ -16,44 +16,44 @@ import {
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {useDispatch} from 'react-redux';
-import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
+import FileCard from '../components/FileCard';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
 import useSearchBar from '../hooks/useSearchBar';
 import {
-  getAllAssignmentsForCourses,
-  pinAssignment,
-  unpinAssignment,
-  favAssignment,
-  unfavAssignment,
-  readAssignment,
-  unreadAssignment,
-} from '../redux/actions/assignments';
-import {IAssignment} from '../redux/types/state';
+  getAllFilesForCourses,
+  pinFile,
+  unpinFile,
+  favFile,
+  unfavFile,
+  readFile,
+  unreadFile,
+} from '../redux/actions/files';
+import {IFile} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
-import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
+import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {getFuseOptions} from '../helpers/search';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import Modal from 'react-native-modal';
-import Layout from '../constants/Layout';
-import Button from '../components/Button';
-import {removeTags} from '../helpers/html';
-import Snackbar from 'react-native-snackbar';
 import {
   requestNotificationPermission,
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
+import {removeTags} from '../helpers/html';
+import Snackbar from 'react-native-snackbar';
+import Modal from 'react-native-modal';
+import Layout from '../constants/Layout';
+import Button from '../components/Button';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 
-const AssignmentsScreen: INavigationScreen = props => {
+const FileScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
@@ -67,17 +67,11 @@ const AssignmentsScreen: INavigationScreen = props => {
    */
 
   const courses = useTypedSelector(state => state.courses.items);
-  const assignments = useTypedSelector(state => state.assignments.items);
+  const files = useTypedSelector(state => state.files.items);
   const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const favAssignmentIds = useTypedSelector(
-    state => state.assignments.favorites,
-  );
-  const pinnedAssignmentIds = useTypedSelector(
-    state => state.assignments.pinned,
-  );
-  const unreadAssignmentIds = useTypedSelector(
-    state => state.assignments.unread,
-  );
+  const favFileIds = useTypedSelector(state => state.files.favorites);
+  const pinnedFileIds = useTypedSelector(state => state.files.pinned);
+  const unreadFileIds = useTypedSelector(state => state.files.unread);
 
   const courseNames = useMemo(
     () =>
@@ -98,119 +92,88 @@ const AssignmentsScreen: INavigationScreen = props => {
     [courses],
   );
 
-  const sortedAssignments = useMemo(
+  const sortedFiles = useMemo(
     () =>
-      [
-        ...assignments
-          .filter(item => dayjs(item.deadline).unix() > dayjs().unix())
-          .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix()),
-        ...assignments
-          .filter(item => dayjs(item.deadline).unix() < dayjs().unix())
-          .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
-      ].map(assignment => ({
-        ...assignment,
-        ...courseNames[assignment.courseId],
-      })),
-    [assignments, courseNames],
+      files
+        .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix())
+        .map(file => ({
+          ...file,
+          ...courseNames[file.courseId],
+        })),
+    [files, courseNames],
   );
 
-  const newAssignments = useMemo(() => {
-    const newAssignmentsOnly = sortedAssignments.filter(
-      i =>
-        !favAssignmentIds.includes(i.id) &&
-        !hiddenCourseIds.includes(i.courseId),
+  const newFiles = useMemo(() => {
+    const newFilesOnly = sortedFiles.filter(
+      i => !favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...newAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...newAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...newFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
+      ...newFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
     ];
-  }, [
-    favAssignmentIds,
-    hiddenCourseIds,
-    pinnedAssignmentIds,
-    sortedAssignments,
-  ]);
+  }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
-  const unreadAssignments = useMemo(() => {
-    const unreadAssignmentsOnly = sortedAssignments.filter(
+  const unreadFiles = useMemo(() => {
+    const unreadFilesOnly = sortedFiles.filter(
       i =>
-        unreadAssignmentIds.includes(i.id) &&
-        !hiddenCourseIds.includes(i.courseId),
+        unreadFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...unreadAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...unreadFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
+      ...unreadFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
     ];
-  }, [
-    hiddenCourseIds,
-    pinnedAssignmentIds,
-    sortedAssignments,
-    unreadAssignmentIds,
-  ]);
+  }, [hiddenCourseIds, pinnedFileIds, sortedFiles, unreadFileIds]);
 
-  const favAssignments = useMemo(() => {
-    const favAssignmentsOnly = sortedAssignments.filter(
-      i =>
-        favAssignmentIds.includes(i.id) &&
-        !hiddenCourseIds.includes(i.courseId),
+  const favFiles = useMemo(() => {
+    const favFilesOnly = sortedFiles.filter(
+      i => favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...favAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...favAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...favFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
+      ...favFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
     ];
-  }, [
-    favAssignmentIds,
-    hiddenCourseIds,
-    pinnedAssignmentIds,
-    sortedAssignments,
-  ]);
+  }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
-  const hiddenAssignments = useMemo(() => {
-    const hiddenAssignmentsOnly = sortedAssignments.filter(i =>
+  const hiddenFiles = useMemo(() => {
+    const hiddenFilesOnly = sortedFiles.filter(i =>
       hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...hiddenAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...hiddenAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...hiddenFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
+      ...hiddenFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
     ];
-  }, [hiddenCourseIds, pinnedAssignmentIds, sortedAssignments]);
+  }, [hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
-  const [currentDisplayAssignments, setCurrentDisplayAssignments] = useState(
-    newAssignments,
-  );
+  const [currentDisplayFiles, setCurrentDisplayFiles] = useState(newFiles);
 
   /**
    * Fetch and handle error
    */
 
   const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const assignmentError = useTypedSelector(state => state.assignments.error);
-  const isFetching = useTypedSelector(state => state.assignments.isFetching);
+  const fileError = useTypedSelector(state => state.files.error);
+  const isFetching = useTypedSelector(state => state.files.isFetching);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      dispatch(getAllAssignmentsForCourses(courses.map(i => i.id)));
+      dispatch(getAllFilesForCourses(courses.map(i => i.id)));
     }
   }, [courses, loggedIn, dispatch]);
 
   useEffect(() => {
-    if (assignments.length === 0) {
+    if (files.length === 0) {
       invalidateAll();
     }
-  }, [invalidateAll, assignments.length]);
+  }, [invalidateAll, files.length]);
 
   useEffect(() => {
-    // to calendar
-  }, [assignments]);
-
-  useEffect(() => {
-    if (assignmentError) {
+    if (fileError) {
       Snackbar.show({
         text: getTranslation('refreshFailure'),
         duration: Snackbar.LENGTH_SHORT,
       });
     }
-  }, [assignmentError]);
+  }, [fileError]);
 
   /**
    * Render cards
@@ -218,29 +181,20 @@ const AssignmentsScreen: INavigationScreen = props => {
 
   const isCompact = useTypedSelector(state => state.settings.isCompact);
 
-  const onAssignmentCardPress = useCallback(
-    (assignment: WithCourseInfo<IAssignment>) => {
-      const name = 'assignments.detail';
+  const onFileCardPress = useCallback(
+    (file: WithCourseInfo<IFile>) => {
+      const name = 'webview';
       const passProps = {
-        title: assignment.title,
-        deadline: assignment.deadline,
-        description: assignment.description,
-        attachmentName: assignment.attachmentName,
-        attachmentUrl: assignment.attachmentUrl,
-        submittedAttachmentName: assignment.submittedAttachmentName,
-        submittedAttachmentUrl: assignment.submittedAttachmentUrl,
-        submitTime: assignment.submitTime,
-        grade: assignment.grade,
-        gradeLevel: assignment.gradeLevel,
-        gradeContent: assignment.gradeContent,
-        courseName: assignment.courseName,
+        filename: file.title,
+        url: file.downloadUrl,
+        ext: file.fileType,
       };
-      const title = assignment.courseName;
+      const title = file.title;
 
       if (DeviceInfo.isIPad() && !isCompact) {
-        setDetailView<IAssignmentDetailScreenProps>(name, passProps, title);
+        setDetailView<IFilePreviewScreenProps>(name, passProps, title);
       } else {
-        pushTo<IAssignmentDetailScreenProps>(
+        pushTo<IFilePreviewScreenProps>(
           name,
           props.componentId,
           passProps,
@@ -250,7 +204,7 @@ const AssignmentsScreen: INavigationScreen = props => {
         );
       }
 
-      dispatch(readAssignment(assignment.id));
+      dispatch(readFile(file.id));
     },
     [isCompact, colorScheme, props.componentId, dispatch],
   );
@@ -261,71 +215,71 @@ const AssignmentsScreen: INavigationScreen = props => {
         const notification = await PushNotificationIOS.getInitialNotification();
         if (notification) {
           const data = notification.getData();
-          if ((data as IAssignment).deadline) {
-            onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
+          if ((data as IFile).downloadUrl) {
+            onFileCardPress(data as WithCourseInfo<IFile>);
           }
         }
       })();
     }
-  }, [onAssignmentCardPress]);
+  }, [onFileCardPress]);
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
       const listener = (notification: PushNotification) => {
         const data = notification.getData();
-        if ((data as IAssignment).deadline) {
-          onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
+        if ((data as IFile).downloadUrl) {
+          onFileCardPress(data as WithCourseInfo<IFile>);
         }
       };
       PushNotificationIOS.addEventListener('localNotification', listener);
       return () =>
         PushNotificationIOS.removeEventListener('localNotification', listener);
     }
-  }, [onAssignmentCardPress]);
+  }, [onFileCardPress]);
 
-  const onPinned = (pin: boolean, assignmentId: string) => {
+  const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {
-      dispatch(pinAssignment(assignmentId));
+      dispatch(pinFile(fileId));
     } else {
-      dispatch(unpinAssignment(assignmentId));
+      dispatch(unpinFile(fileId));
     }
   };
 
-  const onFav = (fav: boolean, assignmentId: string) => {
+  const onFav = (fav: boolean, fileId: string) => {
     if (fav) {
-      dispatch(favAssignment(assignmentId));
+      dispatch(favFile(fileId));
     } else {
-      dispatch(unfavAssignment(assignmentId));
+      dispatch(unfavFile(fileId));
     }
   };
 
-  const onRead = (read: boolean, assignmentId: string) => {
+  const onRead = (read: boolean, fileId: string) => {
     if (read) {
-      dispatch(readAssignment(assignmentId));
+      dispatch(readFile(fileId));
     } else {
-      dispatch(unreadAssignment(assignmentId));
+      dispatch(unreadFile(fileId));
     }
   };
 
-  const renderListItem = ({item}: {item: WithCourseInfo<IAssignment>}) => (
-    <AssignmentCard
+  const renderListItem = ({item}: {item: WithCourseInfo<IFile>}) => (
+    <FileCard
       title={item.title}
-      hasAttachment={item.attachmentName ? true : false}
-      submitted={item.submitted}
-      graded={item.gradeTime ? true : false}
-      date={item.deadline}
+      extension={item.fileType}
+      size={item.size}
+      date={item.uploadTime}
       description={item.description}
+      markedImportant={item.markedImportant}
       courseName={item.courseName}
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
-      pinned={pinnedAssignmentIds.includes(item.id)}
+      pinned={pinnedFileIds.includes(item.id)}
       onPinned={pin => onPinned(pin, item.id)}
-      fav={favAssignmentIds.includes(item.id)}
+      fav={favFileIds.includes(item.id)}
       onFav={fav => onFav(fav, item.id)}
-      unread={unreadAssignmentIds.includes(item.id)}
+      unread={unreadFileIds.includes(item.id)}
       onRead={read => onRead(read, item.id)}
       onPress={() => {
-        onAssignmentCardPress(item);
+        onFileCardPress(item);
       }}
       onRemind={() => handleRemind(item)}
     />
@@ -344,8 +298,8 @@ const AssignmentsScreen: INavigationScreen = props => {
    */
 
   const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
-    WithCourseInfo<IAssignment>
-  >(currentDisplayAssignments, fuseOptions);
+    WithCourseInfo<IFile>
+  >(currentDisplayFiles, fuseOptions);
 
   const [segment, setSegment] = useState('new');
 
@@ -363,37 +317,35 @@ const AssignmentsScreen: INavigationScreen = props => {
 
   useEffect(() => {
     if (segment === 'new') {
-      setCurrentDisplayAssignments(newAssignments);
+      setCurrentDisplayFiles(newFiles);
     }
-  }, [newAssignments, segment]);
+  }, [newFiles, segment]);
 
   useEffect(() => {
     if (segment === 'unread') {
-      setCurrentDisplayAssignments(unreadAssignments);
+      setCurrentDisplayFiles(unreadFiles);
     }
-  }, [unreadAssignments, segment]);
+  }, [unreadFiles, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
-      setCurrentDisplayAssignments(favAssignments);
+      setCurrentDisplayFiles(favFiles);
     }
-  }, [favAssignments, segment]);
+  }, [favFiles, segment]);
 
   useEffect(() => {
     if (segment === 'hidden') {
-      setCurrentDisplayAssignments(hiddenAssignments);
+      setCurrentDisplayFiles(hiddenFiles);
     }
-  }, [hiddenAssignments, segment]);
+  }, [hiddenFiles, segment]);
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [reminderDate, setReminderDate] = useState(new Date());
-  const [reminderInfo, setReminderInfo] = useState<
-    WithCourseInfo<IAssignment>
-  >();
+  const [reminderInfo, setReminderInfo] = useState<WithCourseInfo<IFile>>();
   const [dateAndroid, setDateAndroid] = useState<Date | null>(null);
   const [timeAndroid, setTimeAndroid] = useState<Date | null>(null);
 
-  const handleRemind = async (notice: WithCourseInfo<IAssignment>) => {
+  const handleRemind = async (notice: WithCourseInfo<IFile>) => {
     if (!(await requestNotificationPermission())) {
       showNotificationPermissionAlert();
       return;
@@ -423,7 +375,7 @@ const AssignmentsScreen: INavigationScreen = props => {
     scheduleNotification(
       `${getTranslation('reminder')}：${reminderInfo.courseName}`,
       `${reminderInfo.title}\n${removeTags(
-        reminderInfo.description || getTranslation('noAssignmentDescription'),
+        reminderInfo.description || getTranslation('noFileDescription'),
       )}`,
       date,
       reminderInfo,
@@ -462,7 +414,7 @@ const AssignmentsScreen: INavigationScreen = props => {
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
-        testID="AssignmentsScreen"
+        testID="FilesScreen"
         style={{
           flex: 1,
           backgroundColor: Colors.system('background', colorScheme),
@@ -474,7 +426,7 @@ const AssignmentsScreen: INavigationScreen = props => {
               backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"
-            placeholder={getTranslation('searchAssignments')}
+            placeholder={getTranslation('searchFiles')}
             onChangeText={setSearchBarText}
             value={searchBarText || ''}
           />
@@ -488,10 +440,10 @@ const AssignmentsScreen: INavigationScreen = props => {
           ListHeaderComponent={
             <SegmentedControl
               values={[
-                getTranslation('new') + ` (${newAssignments.length})`,
-                getTranslation('unread') + ` (${unreadAssignments.length})`,
-                getTranslation('favorite') + ` (${favAssignments.length})`,
-                getTranslation('hidden') + ` (${hiddenAssignments.length})`,
+                getTranslation('new') + ` (${newFiles.length})`,
+                getTranslation('unread') + ` (${unreadFiles.length})`,
+                getTranslation('favorite') + ` (${favFiles.length})`,
+                getTranslation('hidden') + ` (${hiddenFiles.length})`,
               ]}
               selectedIndex={
                 segment === 'new'
@@ -589,16 +541,16 @@ const AssignmentsScreen: INavigationScreen = props => {
   );
 };
 
-const fuseOptions = getFuseOptions<IAssignment>([
-  'attachmentName',
+const fuseOptions = getFuseOptions<IFile>([
   'description',
+  'fileType',
   'title',
   'courseName',
 ]);
 
-AssignmentsScreen.options = getScreenOptions(
-  getTranslation('assignments'),
-  getTranslation('searchAssignments'),
+FileScreen.options = getScreenOptions(
+  getTranslation('files'),
+  getTranslation('searchFiles'),
 );
 
-export default AssignmentsScreen;
+export default FileScreen;

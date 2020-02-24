@@ -4,51 +4,58 @@ import {
   ListRenderItem,
   RefreshControl,
   SafeAreaView,
+  StyleSheet,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import {IFile} from '../redux/types/state';
+import {INotice} from '../redux/types/state';
 import EmptyList from './EmptyList';
-import FileCard from './FileCard';
+import NoticeCard from './NoticeCard';
 import {useColorScheme} from 'react-native-appearance';
 
-export interface IFilesViewProps {
-  files: IFile[];
+export interface INoticeViewProps {
+  notices: INotice[];
   isFetching: boolean;
-  onFileCardPress: (file: IFile) => void;
+  onNoticeCardPress: (notice: INotice) => void;
   onRefresh?: () => void;
 }
 
-const FilesView: React.FC<IFilesViewProps> = props => {
-  const {files, onFileCardPress, isFetching, onRefresh} = props;
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+});
 
-  const renderListItem: ListRenderItem<IFile> = ({item}) => {
+const NoticeView: React.FunctionComponent<INoticeViewProps> = props => {
+  const {notices, isFetching, onNoticeCardPress, onRefresh} = props;
+
+  const renderListItem: ListRenderItem<INotice> = ({item}) => {
     return (
-      <FileCard
+      <NoticeCard
         dragEnabled={false}
         title={item.title}
-        extension={item.fileType}
-        size={item.size}
-        date={item.uploadTime}
-        description={item.description}
+        author={item.publisher}
+        date={item.publishTime}
+        content={item.content}
         markedImportant={item.markedImportant}
-        onPress={() => onFileCardPress(item)}
+        hasAttachment={item.attachmentName ? true : false}
+        onPress={() => onNoticeCardPress(item)}
       />
     );
   };
 
-  const keyExtractor = (item: IFile) => item.id;
+  const keyExtractor = (item: INotice) => item.id;
 
   const colorScheme = useColorScheme();
 
   return (
     <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: Colors.system('background', colorScheme),
-      }}>
+      style={[
+        styles.root,
+        {backgroundColor: Colors.system('background', colorScheme)},
+      ]}>
       <FlatList
         ListEmptyComponent={EmptyList}
-        data={files}
+        data={notices}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
         refreshControl={
@@ -66,4 +73,4 @@ const FilesView: React.FC<IFilesViewProps> = props => {
   );
 };
 
-export default FilesView;
+export default NoticeView;

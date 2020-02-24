@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {FlatList, ListRenderItem, SafeAreaView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {connect} from 'react-redux';
-import SettingsListItem from '../components/SettingsListItem';
+import SettingListItem from '../components/SettingListItem';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {getCoursesForSemester} from '../redux/actions/courses';
@@ -28,7 +28,7 @@ interface ISemestersSettingsScreenDispatchProps {
 type ISemestersSettingsScreenProps = ISemestersSettingsScreenStateProps &
   ISemestersSettingsScreenDispatchProps;
 
-const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> = props => {
+const SemesterSettingScreen: INavigationScreen<ISemestersSettingsScreenProps> = props => {
   const {
     semesters,
     currentSemester,
@@ -53,7 +53,7 @@ const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> 
 
   const renderListItem: ListRenderItem<string> = ({item}) => {
     return (
-      <SettingsListItem
+      <SettingListItem
         variant="none"
         text={item}
         icon={
@@ -95,7 +95,7 @@ const SemestersSettingsScreen: INavigationScreen<ISemestersSettingsScreenProps> 
   );
 };
 
-SemestersSettingsScreen.options = getScreenOptions(
+SemesterSettingScreen.options = getScreenOptions(
   getTranslation('changeSemester'),
 );
 
@@ -117,4 +117,4 @@ const mapDispatchToProps: ISemestersSettingsScreenDispatchProps = {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(SemestersSettingsScreen);
+)(SemesterSettingScreen);

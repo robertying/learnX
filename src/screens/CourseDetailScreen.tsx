@@ -10,10 +10,10 @@ import {
 } from 'react-native-tab-view';
 import {connect} from 'react-redux';
 import AssignmentBoard from '../components/AssignmentBoard';
-import AssignmentsView from '../components/AssignmentsView';
-import FilesView from '../components/FilesView';
+import AssignmentView from '../components/AssignmentView';
+import FileView from '../components/FileView';
 import NoticeBoard from '../components/NoticeBoard';
-import NoticesView from '../components/NoticesView';
+import NoticeView from '../components/NoticeView';
 import Colors from '../constants/Colors';
 import Layout from '../constants/Layout';
 import dayjs from '../helpers/dayjs';
@@ -165,7 +165,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
 
   const NoticesRoute = useMemo(
     () => (
-      <NoticesView
+      <NoticeView
         isFetching={isFetchingNotices}
         notices={notices}
         onNoticeCardPress={onNoticeCardPress}
@@ -183,7 +183,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
 
   const FilesRoute = useMemo(
     () => (
-      <FilesView
+      <FileView
         isFetching={isFetchingFiles}
         files={files}
         onFileCardPress={onFileCardPress}
@@ -195,7 +195,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
 
   const AssignmentsRoute = useMemo(
     () => (
-      <AssignmentsView
+      <AssignmentView
         isFetching={isFetchingAssignments}
         assignments={assignments}
         onAssignmentCardPress={onAssignmentCardPress}

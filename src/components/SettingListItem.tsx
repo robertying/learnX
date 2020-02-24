@@ -16,7 +16,7 @@ import Layout from '../constants/Layout';
 import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
 
-export interface ISettingsListItemProps {
+export interface ISettingListItemProps {
   icon?: React.ReactNode;
   size?: 'small' | 'large';
   text?: string;
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props => {
+const SettingListItem: React.FunctionComponent<ISettingListItemProps> = props => {
   const {
     variant,
     icon,
@@ -143,4 +143,4 @@ const SettingsListItem: React.FunctionComponent<ISettingsListItemProps> = props 
   );
 };
 
-export default SettingsListItem;
+export default SettingListItem;

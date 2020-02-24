@@ -1,13 +1,17 @@
-import React, {useEffect, useMemo, useState, useCallback} from 'react';
+import React, {useEffect, useState, useMemo, useCallback} from 'react';
 import {
-  FlatList,
   Platform,
   RefreshControl,
   SafeAreaView,
-  PushNotification,
+  FlatList,
+  AppState,
+  AppStateStatus,
   View,
+  PushNotification as Notification,
+  Dimensions,
   Text,
 } from 'react-native';
+import {Navigation} from 'react-native-navigation';
 import {
   Provider as PaperProvider,
   Searchbar,
@@ -17,61 +21,177 @@ import {
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {useDispatch} from 'react-redux';
 import EmptyList from '../components/EmptyList';
-import FileCard from '../components/FileCard';
+import NoticeCard from '../components/NoticeCard';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
 import useSearchBar from '../hooks/useSearchBar';
+import {login} from '../redux/actions/auth';
 import {
-  getAllFilesForCourses,
-  pinFile,
-  unpinFile,
-  favFile,
-  unfavFile,
-  readFile,
-  unreadFile,
-} from '../redux/actions/files';
-import {IFile} from '../redux/types/state';
+  getAllNoticesForCourses,
+  pinNotice,
+  unpinNotice,
+  favNotice,
+  unfavNotice,
+  readNotice,
+  unreadNotice,
+} from '../redux/actions/notices';
+import {INotice} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
-import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
-import {IFilePreviewScreenProps} from './FilePreviewScreen';
+import {resetLoading} from '../redux/actions/root';
 import {getFuseOptions} from '../helpers/search';
+import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
+import {INoticeDetailScreenProps} from './NoticeDetailScreen';
+// import BackgroundFetch from 'react-native-background-fetch';
+//import {runBackgroundTask} from '../helpers/background';
 import {
   requestNotificationPermission,
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
-import {removeTags} from '../helpers/html';
-import Snackbar from 'react-native-snackbar';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
 import Layout from '../constants/Layout';
 import Button from '../components/Button';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import {removeTags} from '../helpers/html';
+import Snackbar from 'react-native-snackbar';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import PushNotification from 'react-native-push-notification';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
+import {setSetting} from '../redux/actions/settings';
 
-const FilesScreen: INavigationScreen = props => {
+const NoticeScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
+  const settings = useTypedSelector(state => state.settings);
+  const loginError = useTypedSelector(state => state.auth.error);
+
+  /**
+   * App scope stuff
+   */
+
+  // useEffect(() => {
+  //   BackgroundFetch.configure(
+  //     {
+  //       minimumFetchInterval: 60 * 2,
+  //       enableHeadless: true,
+  //       stopOnTerminate: false,
+  //       startOnBoot: true,
+  //       requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+  //     },
+  //     runBackgroundTask,
+  //   );
+  // }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      PushNotification.configure({
+        requestPermissions: false,
+      });
+    }
+  }, []);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
+
+  useEffect(() => {
+    (async () => {
+      if (settings.hasUpdate && Platform.OS === 'android') {
+        Navigation.mergeOptions('SettingsScreen', {
+          bottomTab: {
+            dotIndicator: {
+              visible: true,
+            },
+          },
+        });
+      }
+    })();
+  }, [settings.hasUpdate]);
+
+  useEffect(() => {
+    dispatch(login());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (loginError) {
+      Snackbar.show({
+        text: getTranslation('loginFailure'),
+        duration: Snackbar.LENGTH_INDEFINITE,
+        action: {
+          text: getTranslation('ok'),
+          textColor: Colors.system('purple', colorScheme),
+          onPress: () => Snackbar.dismiss(),
+        },
+      });
+    }
+  }, [colorScheme, loginError]);
+
+  useEffect(() => {
+    if (DeviceInfo.isIPad()) {
+      const window = Dimensions.get('window');
+      const screen = Dimensions.get('screen');
+      if (
+        window.width < screen.width &&
+        !(screen.height < screen.width && window.width > screen.width * 0.4)
+      ) {
+        dispatch(setSetting('isCompact', true));
+      } else {
+        dispatch(setSetting('isCompact', false));
+      }
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (DeviceInfo.isIPad()) {
+      const listener = ({window, screen}: any) => {
+        if (
+          window.width < screen.width &&
+          !(
+            screen.height < screen.width &&
+            (DeviceInfo.isIPad12_9()
+              ? window.width > screen.width * 0.4
+              : window.width > screen.width / 2)
+          )
+        ) {
+          dispatch(setSetting('isCompact', true));
+        } else {
+          dispatch(setSetting('isCompact', false));
+        }
+      };
+      Dimensions.addEventListener('change', listener);
+
+      return () => Dimensions.removeEventListener('change', listener);
+    }
+  }, [dispatch]);
+
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  useEffect(() => {
+    const listener = (nextAppState: AppStateStatus) => {
+      if (appState.match(/inactive|background/) && nextAppState === 'active') {
+        resetLoading();
+      }
+      setAppState(nextAppState);
+    };
+    AppState.addEventListener('change', listener);
+    return () => AppState.removeEventListener('change', listener);
+  });
 
   /**
    * Prepare data
    */
 
   const courses = useTypedSelector(state => state.courses.items);
-  const files = useTypedSelector(state => state.files.items);
+  const notices = useTypedSelector(state => state.notices.items);
   const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const favFileIds = useTypedSelector(state => state.files.favorites);
-  const pinnedFileIds = useTypedSelector(state => state.files.pinned);
-  const unreadFileIds = useTypedSelector(state => state.files.unread);
+  const favNoticeIds = useTypedSelector(state => state.notices.favorites);
+  const pinnedNoticeIds = useTypedSelector(state => state.notices.pinned);
+  const unreadNoticeIds = useTypedSelector(state => state.notices.unread);
 
   const courseNames = useMemo(
     () =>
@@ -92,88 +212,93 @@ const FilesScreen: INavigationScreen = props => {
     [courses],
   );
 
-  const sortedFiles = useMemo(
+  const sortedNotices = useMemo(
     () =>
-      files
-        .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix())
-        .map(file => ({
-          ...file,
-          ...courseNames[file.courseId],
+      notices
+        .sort(
+          (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
+        )
+        .map(notice => ({
+          ...notice,
+          ...courseNames[notice.courseId],
         })),
-    [files, courseNames],
+    [notices, courseNames],
   );
 
-  const newFiles = useMemo(() => {
-    const newFilesOnly = sortedFiles.filter(
-      i => !favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
-    );
-    return [
-      ...newFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...newFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
-    ];
-  }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
-
-  const unreadFiles = useMemo(() => {
-    const unreadFilesOnly = sortedFiles.filter(
+  const newNotices = useMemo(() => {
+    const newNoticesOnly = sortedNotices.filter(
       i =>
-        unreadFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+        !favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...unreadFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...newNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...newNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
     ];
-  }, [hiddenCourseIds, pinnedFileIds, sortedFiles, unreadFileIds]);
+  }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
 
-  const favFiles = useMemo(() => {
-    const favFilesOnly = sortedFiles.filter(
-      i => favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+  const unreadNotices = useMemo(() => {
+    const unreadNoticesOnly = sortedNotices.filter(
+      i =>
+        unreadNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...favFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...favFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...unreadNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...unreadNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
     ];
-  }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
+  }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices, unreadNoticeIds]);
 
-  const hiddenFiles = useMemo(() => {
-    const hiddenFilesOnly = sortedFiles.filter(i =>
+  const favNotices = useMemo(() => {
+    const favNoticesOnly = sortedNotices.filter(
+      i => favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...favNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...favNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+    ];
+  }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
+
+  const hiddenNotices = useMemo(() => {
+    const hiddenNoticesOnly = sortedNotices.filter(i =>
       hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...hiddenFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...hiddenFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...hiddenNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...hiddenNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
     ];
-  }, [hiddenCourseIds, pinnedFileIds, sortedFiles]);
+  }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
 
-  const [currentDisplayFiles, setCurrentDisplayFiles] = useState(newFiles);
+  const [currentDisplayNotices, setCurrentDisplayNotices] = useState(
+    newNotices,
+  );
 
   /**
    * Fetch and handle error
    */
 
   const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const fileError = useTypedSelector(state => state.files.error);
-  const isFetching = useTypedSelector(state => state.files.isFetching);
+  const noticeError = useTypedSelector(state => state.notices.error);
+  const isFetching = useTypedSelector(state => state.notices.isFetching);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      dispatch(getAllFilesForCourses(courses.map(i => i.id)));
+      dispatch(getAllNoticesForCourses(courses.map(i => i.id)));
     }
   }, [courses, loggedIn, dispatch]);
 
   useEffect(() => {
-    if (files.length === 0) {
+    if (notices.length === 0) {
       invalidateAll();
     }
-  }, [invalidateAll, files.length]);
+  }, [invalidateAll, notices.length]);
 
   useEffect(() => {
-    if (fileError) {
+    if (noticeError) {
       Snackbar.show({
         text: getTranslation('refreshFailure'),
         duration: Snackbar.LENGTH_SHORT,
       });
     }
-  }, [fileError]);
+  }, [noticeError]);
 
   /**
    * Render cards
@@ -181,20 +306,24 @@ const FilesScreen: INavigationScreen = props => {
 
   const isCompact = useTypedSelector(state => state.settings.isCompact);
 
-  const onFileCardPress = useCallback(
-    (file: WithCourseInfo<IFile>) => {
-      const name = 'webview';
+  const onNoticeCardPress = useCallback(
+    (notice: WithCourseInfo<INotice>) => {
+      const name = 'notices.detail';
       const passProps = {
-        filename: file.title,
-        url: file.downloadUrl,
-        ext: file.fileType,
+        title: notice.title,
+        author: notice.publisher,
+        content: notice.content,
+        publishTime: notice.publishTime,
+        attachmentName: notice.attachmentName,
+        attachmentUrl: notice.attachmentUrl,
+        courseName: notice.courseName,
       };
-      const title = file.title;
+      const title = notice.courseName;
 
       if (DeviceInfo.isIPad() && !isCompact) {
-        setDetailView<IFilePreviewScreenProps>(name, passProps, title);
+        setDetailView<INoticeDetailScreenProps>(name, passProps, title);
       } else {
-        pushTo<IFilePreviewScreenProps>(
+        pushTo<INoticeDetailScreenProps>(
           name,
           props.componentId,
           passProps,
@@ -204,7 +333,7 @@ const FilesScreen: INavigationScreen = props => {
         );
       }
 
-      dispatch(readFile(file.id));
+      dispatch(readNotice(notice.id));
     },
     [isCompact, colorScheme, props.componentId, dispatch],
   );
@@ -215,71 +344,71 @@ const FilesScreen: INavigationScreen = props => {
         const notification = await PushNotificationIOS.getInitialNotification();
         if (notification) {
           const data = notification.getData();
-          if ((data as IFile).downloadUrl) {
-            onFileCardPress(data as WithCourseInfo<IFile>);
+          if ((data as INotice).publisher) {
+            onNoticeCardPress(data as WithCourseInfo<INotice>);
           }
         }
       })();
     }
-  }, [onFileCardPress]);
+  }, [onNoticeCardPress]);
 
   useEffect(() => {
     if (Platform.OS === 'ios') {
-      const listener = (notification: PushNotification) => {
+      const listener = (notification: Notification) => {
         const data = notification.getData();
-        if ((data as IFile).downloadUrl) {
-          onFileCardPress(data as WithCourseInfo<IFile>);
+        if ((data as INotice).publisher) {
+          onNoticeCardPress(data as WithCourseInfo<INotice>);
         }
       };
       PushNotificationIOS.addEventListener('localNotification', listener);
       return () =>
         PushNotificationIOS.removeEventListener('localNotification', listener);
     }
-  }, [onFileCardPress]);
+  }, [onNoticeCardPress]);
 
-  const onPinned = (pin: boolean, fileId: string) => {
+  const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {
-      dispatch(pinFile(fileId));
+      dispatch(pinNotice(noticeId));
     } else {
-      dispatch(unpinFile(fileId));
+      dispatch(unpinNotice(noticeId));
     }
   };
 
-  const onFav = (fav: boolean, fileId: string) => {
+  const onFav = (fav: boolean, noticeId: string) => {
     if (fav) {
-      dispatch(favFile(fileId));
+      dispatch(favNotice(noticeId));
     } else {
-      dispatch(unfavFile(fileId));
+      dispatch(unfavNotice(noticeId));
     }
   };
 
-  const onRead = (read: boolean, fileId: string) => {
+  const onRead = (read: boolean, noticeId: string) => {
     if (read) {
-      dispatch(readFile(fileId));
+      dispatch(readNotice(noticeId));
     } else {
-      dispatch(unreadFile(fileId));
+      dispatch(unreadNotice(noticeId));
     }
   };
 
-  const renderListItem = ({item}: {item: WithCourseInfo<IFile>}) => (
-    <FileCard
+  const renderListItem = ({item}: {item: WithCourseInfo<INotice>}) => (
+    <NoticeCard
       title={item.title}
-      extension={item.fileType}
-      size={item.size}
-      date={item.uploadTime}
-      description={item.description}
+      author={item.publisher}
+      date={item.publishTime}
+      content={item.content}
       markedImportant={item.markedImportant}
+      hasAttachment={item.attachmentName ? true : false}
       courseName={item.courseName}
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
-      pinned={pinnedFileIds.includes(item.id)}
+      pinned={pinnedNoticeIds.includes(item.id)}
       onPinned={pin => onPinned(pin, item.id)}
-      fav={favFileIds.includes(item.id)}
+      fav={favNoticeIds.includes(item.id)}
       onFav={fav => onFav(fav, item.id)}
-      unread={unreadFileIds.includes(item.id)}
+      unread={unreadNoticeIds.includes(item.id)}
       onRead={read => onRead(read, item.id)}
       onPress={() => {
-        onFileCardPress(item);
+        onNoticeCardPress(item);
       }}
       onRemind={() => handleRemind(item)}
     />
@@ -298,8 +427,8 @@ const FilesScreen: INavigationScreen = props => {
    */
 
   const [searchResults, searchBarText, setSearchBarText] = useSearchBar<
-    WithCourseInfo<IFile>
-  >(currentDisplayFiles, fuseOptions);
+    WithCourseInfo<INotice>
+  >(currentDisplayNotices, fuseOptions);
 
   const [segment, setSegment] = useState('new');
 
@@ -317,35 +446,35 @@ const FilesScreen: INavigationScreen = props => {
 
   useEffect(() => {
     if (segment === 'new') {
-      setCurrentDisplayFiles(newFiles);
+      setCurrentDisplayNotices(newNotices);
     }
-  }, [newFiles, segment]);
+  }, [newNotices, segment]);
 
   useEffect(() => {
     if (segment === 'unread') {
-      setCurrentDisplayFiles(unreadFiles);
+      setCurrentDisplayNotices(unreadNotices);
     }
-  }, [unreadFiles, segment]);
+  }, [unreadNotices, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
-      setCurrentDisplayFiles(favFiles);
+      setCurrentDisplayNotices(favNotices);
     }
-  }, [favFiles, segment]);
+  }, [favNotices, segment]);
 
   useEffect(() => {
     if (segment === 'hidden') {
-      setCurrentDisplayFiles(hiddenFiles);
+      setCurrentDisplayNotices(hiddenNotices);
     }
-  }, [hiddenFiles, segment]);
+  }, [hiddenNotices, segment]);
 
   const [pickerVisible, setPickerVisible] = useState(false);
   const [reminderDate, setReminderDate] = useState(new Date());
-  const [reminderInfo, setReminderInfo] = useState<WithCourseInfo<IFile>>();
+  const [reminderInfo, setReminderInfo] = useState<WithCourseInfo<INotice>>();
   const [dateAndroid, setDateAndroid] = useState<Date | null>(null);
   const [timeAndroid, setTimeAndroid] = useState<Date | null>(null);
 
-  const handleRemind = async (notice: WithCourseInfo<IFile>) => {
+  const handleRemind = async (notice: WithCourseInfo<INotice>) => {
     if (!(await requestNotificationPermission())) {
       showNotificationPermissionAlert();
       return;
@@ -375,7 +504,7 @@ const FilesScreen: INavigationScreen = props => {
     scheduleNotification(
       `${getTranslation('reminder')}：${reminderInfo.courseName}`,
       `${reminderInfo.title}\n${removeTags(
-        reminderInfo.description || getTranslation('noFileDescription'),
+        reminderInfo.content || getTranslation('noNoticeContent'),
       )}`,
       date,
       reminderInfo,
@@ -414,7 +543,7 @@ const FilesScreen: INavigationScreen = props => {
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
-        testID="FilesScreen"
+        testID="NoticesScreen"
         style={{
           flex: 1,
           backgroundColor: Colors.system('background', colorScheme),
@@ -426,12 +555,13 @@ const FilesScreen: INavigationScreen = props => {
               backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"
-            placeholder={getTranslation('searchFiles')}
+            placeholder={getTranslation('searchNotices')}
             onChangeText={setSearchBarText}
             value={searchBarText || ''}
           />
         )}
         <FlatList
+          testID="FlatList"
           style={{backgroundColor: Colors.system('background', colorScheme)}}
           ListEmptyComponent={EmptyList}
           data={searchResults}
@@ -440,10 +570,10 @@ const FilesScreen: INavigationScreen = props => {
           ListHeaderComponent={
             <SegmentedControl
               values={[
-                getTranslation('new') + ` (${newFiles.length})`,
-                getTranslation('unread') + ` (${unreadFiles.length})`,
-                getTranslation('favorite') + ` (${favFiles.length})`,
-                getTranslation('hidden') + ` (${hiddenFiles.length})`,
+                getTranslation('new') + ` (${newNotices.length})`,
+                getTranslation('unread') + ` (${unreadNotices.length})`,
+                getTranslation('favorite') + ` (${favNotices.length})`,
+                getTranslation('hidden') + ` (${hiddenNotices.length})`,
               ]}
               selectedIndex={
                 segment === 'new'
@@ -541,16 +671,16 @@ const FilesScreen: INavigationScreen = props => {
   );
 };
 
-const fuseOptions = getFuseOptions<IFile>([
-  'description',
-  'fileType',
+const fuseOptions = getFuseOptions<INotice>([
   'title',
+  'content',
   'courseName',
+  'attachmentName',
 ]);
 
-FilesScreen.options = getScreenOptions(
-  getTranslation('files'),
-  getTranslation('searchFiles'),
+NoticeScreen.options = getScreenOptions(
+  getTranslation('notices'),
+  getTranslation('searchNotices'),
 );
 
-export default FilesScreen;
+export default NoticeScreen;

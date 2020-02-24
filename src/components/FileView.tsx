@@ -6,37 +6,37 @@ import {
   SafeAreaView,
 } from 'react-native';
 import Colors from '../constants/Colors';
-import {IAssignment} from '../redux/types/state';
-import AssignmentCard from './AssignmentCard';
+import {IFile} from '../redux/types/state';
 import EmptyList from './EmptyList';
+import FileCard from './FileCard';
 import {useColorScheme} from 'react-native-appearance';
 
-export interface IAssignmentsViewProps {
-  assignments: IAssignment[];
+export interface IFileViewProps {
+  files: IFile[];
   isFetching: boolean;
-  onAssignmentCardPress: (assignment: IAssignment) => void;
+  onFileCardPress: (file: IFile) => void;
   onRefresh?: () => void;
 }
 
-const AssignmentsView: React.FunctionComponent<IAssignmentsViewProps> = props => {
-  const {assignments, onAssignmentCardPress, isFetching, onRefresh} = props;
+const FileView: React.FC<IFileViewProps> = props => {
+  const {files, onFileCardPress, isFetching, onRefresh} = props;
 
-  const renderListItem: ListRenderItem<IAssignment> = ({item}) => {
+  const renderListItem: ListRenderItem<IFile> = ({item}) => {
     return (
-      <AssignmentCard
+      <FileCard
         dragEnabled={false}
         title={item.title}
-        date={item.deadline}
+        extension={item.fileType}
+        size={item.size}
+        date={item.uploadTime}
         description={item.description}
-        hasAttachment={item.attachmentName ? true : false}
-        submitted={item.submitted}
-        graded={item.gradeTime ? true : false}
-        onPress={() => onAssignmentCardPress(item)}
+        markedImportant={item.markedImportant}
+        onPress={() => onFileCardPress(item)}
       />
     );
   };
 
-  const keyExtractor = (item: IAssignment) => item.id;
+  const keyExtractor = (item: IFile) => item.id;
 
   const colorScheme = useColorScheme();
 
@@ -48,7 +48,7 @@ const AssignmentsView: React.FunctionComponent<IAssignmentsViewProps> = props =>
       }}>
       <FlatList
         ListEmptyComponent={EmptyList}
-        data={assignments}
+        data={files}
         renderItem={renderListItem}
         keyExtractor={keyExtractor}
         refreshControl={
@@ -66,4 +66,4 @@ const AssignmentsView: React.FunctionComponent<IAssignmentsViewProps> = props =>
   );
 };
 
-export default AssignmentsView;
+export default FileView;
