@@ -120,7 +120,7 @@ export interface IAssignmentsState {
 }
 
 export interface PersistPartial {
-  _persist: PersistState;
+  _persist?: PersistState;
 }
 
 export interface IAppState {

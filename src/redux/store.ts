@@ -6,8 +6,8 @@ import createSecureStore from 'redux-persist-expo-securestore';
 import thunk from 'redux-thunk';
 import authReducer from './reducers/auth';
 import {mainReducers, rootReducer} from './reducers/root';
-import {IAppState, IAuthState} from './types/state';
-import {TypedUseSelectorHook, useSelector, useDispatch} from 'react-redux';
+import {IAppState, IAuthState, IPersistAppState} from './types/state';
+import {TypedUseSelectorHook, useSelector} from 'react-redux';
 
 declare const window: any;
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -35,7 +35,6 @@ const store = createStore(
 );
 const persistor = persistStore(store);
 
-const useTypedSelector: TypedUseSelectorHook<IAppState> = useSelector;
-const useTypedDispatch = () => useDispatch<typeof store.dispatch>();
+const useTypedSelector: TypedUseSelectorHook<IPersistAppState> = useSelector;
 
-export {appReducer, store, persistor, useTypedSelector, useTypedDispatch};
+export {appReducer, store, persistor, useTypedSelector};
