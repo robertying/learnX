@@ -73,6 +73,13 @@ const CourseScreen: INavigationScreen = props => {
   }, [invalidateAll, courses.length]);
 
   useEffect(() => {
+    if (semesterId) {
+      invalidateAll();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [semesterId]);
+
+  useEffect(() => {
     if (courseError) {
       Snackbar.show({
         text: getTranslation('refreshFailure'),
@@ -110,9 +117,9 @@ const CourseScreen: INavigationScreen = props => {
 
   const onHide = (hide: boolean, courseId: string) => {
     if (hide) {
-      hideCourse(courseId);
+      dispatch(hideCourse(courseId));
     } else {
-      unhideCourse(courseId);
+      dispatch(unhideCourse(courseId));
     }
   };
 
