@@ -210,7 +210,7 @@ export const saveCoursesToCalendar = async (
       calendarId,
       startDate: dayjs(`${event.date} ${event.startTime}`).toISOString(),
       endDate: dayjs(`${event.date} ${event.endTime}`).toISOString(),
-      notes: event.location,
+      location: event.location,
       description: event.location,
     });
   }
