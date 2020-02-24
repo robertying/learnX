@@ -82,7 +82,7 @@ const mockStore: IPersistAppState = {
   },
   notices: {
     isFetching: false,
-    unread: ['26ef84e76d60efc1016d71b8f4c63bc1'],
+    unread: ['26ef84e76db3f55b016db4c4e8832da6'],
     pinned: ['26ef84e86d60f069016dadb09dd673b2'],
     favorites: [
       '26ef84e76d60efc1016d71b8f4c63bc1',
