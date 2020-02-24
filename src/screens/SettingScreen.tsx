@@ -13,6 +13,7 @@ import {
   Navigation,
   OptionsModalPresentationStyle,
 } from 'react-native-navigation';
+import fs from 'react-native-fs';
 import {iOSColors, iOSUIKit} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -43,6 +44,7 @@ import {dataSource} from '../redux/dataSource';
 import RNCalendarEvents from 'react-native-calendar-events';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
+import {fileDir} from '../helpers/share';
 
 const SettingScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -172,20 +174,20 @@ const SettingScreen: INavigationScreen = props => {
         {
           text: getTranslation('ok'),
           onPress: async () => {
-            // RNFetchBlob.fs
-            //   .unlink(`${RNFetchBlob.fs.dirs.DocumentDir}/files`)
-            //   .then(() =>
-            //     Snackbar.show({
-            //       text: getTranslation('clearFileCacheSuccess'),
-            //       duration: Snackbar.LENGTH_SHORT,
-            //     }),
-            //   )
-            //   .catch(() =>
-            //     Snackbar.show({
-            //       text: getTranslation('clearFileCacheFail'),
-            //       duration: Snackbar.LENGTH_SHORT,
-            //     }),
-            //   );
+            try {
+              if (await fs.exists(fileDir)) {
+                await fs.unlink(fileDir);
+              }
+              Snackbar.show({
+                text: getTranslation('clearFileCacheSuccess'),
+                duration: Snackbar.LENGTH_SHORT,
+              });
+            } catch {
+              Snackbar.show({
+                text: getTranslation('clearFileCacheFail'),
+                duration: Snackbar.LENGTH_SHORT,
+              });
+            }
           },
         },
       ],

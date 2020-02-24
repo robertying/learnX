@@ -23,13 +23,14 @@ import {iOSUIKit} from 'react-native-typography';
 import {useColorScheme} from 'react-native-appearance';
 
 export interface IFilePreviewScreenProps {
+  courseName: string;
   filename: string;
   url: string;
   ext: string;
 }
 
 const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
-  const {url, ext, filename} = props;
+  const {url, ext, filename, courseName} = props;
 
   const [loading, setLoading] = useState(false);
   const [filePath, setFilePath] = useState('');
@@ -66,6 +67,7 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
           url,
           filename,
           ext,
+          courseName,
           false,
           setProgress,
         );
@@ -80,7 +82,7 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
         setProgress(0);
       }
     })();
-  }, [ext, filename, url]);
+  }, [ext, filename, url, courseName]);
 
   const fullScreenRef = useRef<boolean>(false);
 
@@ -127,7 +129,14 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
           text: getTranslation('preparingFile'),
           duration: Snackbar.LENGTH_SHORT,
         });
-        shareFile(url, filename, ext);
+        try {
+          shareFile(url, filename, ext, courseName);
+        } catch {
+          Snackbar.show({
+            text: getTranslation('shareFail'),
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
       }
       if (buttonId === 'refresh') {
         setLoading(true);
@@ -136,6 +145,7 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
             url,
             filename,
             ext,
+            courseName,
             true,
             setProgress,
           );
@@ -151,7 +161,7 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
         }
       }
     },
-    [ext, filename, props.componentId, url],
+    [ext, filename, props.componentId, url, courseName],
   );
 
   useEffect(() => {

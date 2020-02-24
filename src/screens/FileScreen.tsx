@@ -188,6 +188,7 @@ const FileScreen: INavigationScreen = props => {
         filename: file.title,
         url: file.downloadUrl,
         ext: file.fileType,
+        courseName: file.courseName,
       };
       const title = file.title;
 
