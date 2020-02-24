@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform, StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Colors from '../constants/Colors';
 import IconText from './IconText';
@@ -26,6 +26,10 @@ const styles = StyleSheet.create({
   flexRow: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  title: {
+    flex: 1,
+    fontWeight: 'bold',
   },
 });
 
@@ -59,13 +63,10 @@ const CourseCard: React.FC<ICourseCardProps> = props => {
         ]}>
         <Text
           style={[
+            styles.title,
             colorScheme === 'dark'
               ? iOSUIKit.bodyEmphasizedWhite
               : iOSUIKit.bodyEmphasized,
-            {
-              flex: 1,
-              fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
-            },
           ]}
           numberOfLines={1}
           ellipsizeMode="tail">

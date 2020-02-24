@@ -15,7 +15,7 @@ import {
   DarkTheme,
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import EmptyList from '../components/EmptyList';
 import FileCard from '../components/FileCard';
 import Colors from '../constants/Colors';
@@ -29,8 +29,10 @@ import {
   unpinFile,
   favFile,
   unfavFile,
+  readFile,
+  unreadFile,
 } from '../redux/actions/files';
-import {ICourse, IFile, IPersistAppState} from '../redux/types/state';
+import {IFile} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from './FilePreviewScreen';
@@ -49,46 +51,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
 
-interface IFilesScreenStateProps {
-  loggedIn: boolean;
-  courses: ICourse[];
-  hiddenCourseIds: string[];
-  isFetching: boolean;
-  files: IFile[];
-  pinnedFileIds: string[];
-  favFileIds: string[];
-  compactWidth: boolean;
-}
-
-interface IFilesScreenDispatchProps {
-  getAllFilesForCourses: (courseIds: string[]) => void;
-  pinFile: (fileId: string) => void;
-  unpinFile: (fileId: string) => void;
-  favFile: (fileId: string) => void;
-  unfavFile: (fileId: string) => void;
-}
-
-type IFilesScreenProps = IFilesScreenStateProps & IFilesScreenDispatchProps;
-
-const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
-  const {
-    loggedIn,
-    courses,
-    files,
-    isFetching,
-    getAllFilesForCourses,
-    pinFile,
-    pinnedFileIds,
-    unpinFile,
-    hiddenCourseIds,
-    favFileIds,
-    favFile,
-    unfavFile,
-    compactWidth,
-  } = props;
-
+const FilesScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
@@ -97,6 +65,13 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   /**
    * Prepare data
    */
+
+  const courses = useTypedSelector(state => state.courses.items);
+  const files = useTypedSelector(state => state.files.items);
+  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const favFileIds = useTypedSelector(state => state.files.favorites);
+  const pinnedFileIds = useTypedSelector(state => state.files.pinned);
+  const unreadFileIds = useTypedSelector(state => state.files.unread);
 
   const courseNames = useMemo(
     () =>
@@ -138,6 +113,17 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     ];
   }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
+  const unreadFiles = useMemo(() => {
+    const unreadFilesOnly = sortedFiles.filter(
+      i =>
+        unreadFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...unreadFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
+      ...unreadFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+    ];
+  }, [hiddenCourseIds, pinnedFileIds, sortedFiles, unreadFileIds]);
+
   const favFiles = useMemo(() => {
     const favFilesOnly = sortedFiles.filter(
       i => favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
@@ -164,11 +150,15 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
    * Fetch and handle error
    */
 
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const fileError = useTypedSelector(state => state.files.error);
+  const isFetching = useTypedSelector(state => state.files.isFetching);
+
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      getAllFilesForCourses(courses.map(i => i.id));
+      dispatch(getAllFilesForCourses(courses.map(i => i.id)));
     }
-  }, [courses, getAllFilesForCourses, loggedIn]);
+  }, [courses, loggedIn, dispatch]);
 
   useEffect(() => {
     if (files.length === 0) {
@@ -176,9 +166,20 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
     }
   }, [invalidateAll, files.length]);
 
+  useEffect(() => {
+    if (fileError) {
+      Snackbar.show({
+        text: getTranslation('refreshFailure'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
+  }, [fileError]);
+
   /**
    * Render cards
    */
+
+  const isCompact = useTypedSelector(state => state.settings.isCompact);
 
   const onFileCardPress = useCallback(
     (file: WithCourseInfo<IFile>) => {
@@ -190,7 +191,7 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       };
       const title = file.title;
 
-      if (DeviceInfo.isIPad() && !compactWidth) {
+      if (DeviceInfo.isIPad() && !isCompact) {
         setDetailView<IFilePreviewScreenProps>(name, passProps, title);
       } else {
         pushTo<IFilePreviewScreenProps>(
@@ -202,8 +203,10 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
           colorScheme === 'dark',
         );
       }
+
+      dispatch(readFile(file.id));
     },
-    [colorScheme, compactWidth, props.componentId],
+    [isCompact, colorScheme, props.componentId, dispatch],
   );
 
   useEffect(() => {
@@ -236,17 +239,25 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
 
   const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {
-      pinFile(fileId);
+      dispatch(pinFile(fileId));
     } else {
-      unpinFile(fileId);
+      dispatch(unpinFile(fileId));
     }
   };
 
   const onFav = (fav: boolean, fileId: string) => {
     if (fav) {
-      favFile(fileId);
+      dispatch(favFile(fileId));
     } else {
-      unfavFile(fileId);
+      dispatch(unfavFile(fileId));
+    }
+  };
+
+  const onRead = (read: boolean, fileId: string) => {
+    if (read) {
+      dispatch(readFile(fileId));
+    } else {
+      dispatch(unreadFile(fileId));
     }
   };
 
@@ -265,6 +276,8 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       onPinned={pin => onPinned(pin, item.id)}
       fav={favFileIds.includes(item.id)}
       onFav={fav => onFav(fav, item.id)}
+      unread={unreadFileIds.includes(item.id)}
+      onRead={read => onRead(read, item.id)}
       onPress={() => {
         onFileCardPress(item);
       }}
@@ -293,13 +306,12 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
   const handleSegmentChange = (value: string) => {
     if (value.startsWith(getTranslation('new'))) {
       setSegment('new');
-      setCurrentDisplayFiles(newFiles);
+    } else if (value.startsWith(getTranslation('unread'))) {
+      setSegment('unread');
     } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
-      setCurrentDisplayFiles(favFiles);
     } else {
       setSegment('hidden');
-      setCurrentDisplayFiles(hiddenFiles);
     }
   };
 
@@ -308,6 +320,12 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
       setCurrentDisplayFiles(newFiles);
     }
   }, [newFiles, segment]);
+
+  useEffect(() => {
+    if (segment === 'unread') {
+      setCurrentDisplayFiles(unreadFiles);
+    }
+  }, [unreadFiles, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
@@ -423,11 +441,18 @@ const FilesScreen: INavigationScreen<IFilesScreenProps> = props => {
             <SegmentedControl
               values={[
                 getTranslation('new') + ` (${newFiles.length})`,
+                getTranslation('unread') + ` (${unreadFiles.length})`,
                 getTranslation('favorite') + ` (${favFiles.length})`,
                 getTranslation('hidden') + ` (${hiddenFiles.length})`,
               ]}
               selectedIndex={
-                segment === 'new' ? 0 : segment === 'favorite' ? 1 : 2
+                segment === 'new'
+                  ? 0
+                  : segment === 'unread'
+                  ? 1
+                  : segment === 'favorite'
+                  ? 2
+                  : 3
               }
               onValueChange={handleSegmentChange}
             />
@@ -528,25 +553,4 @@ FilesScreen.options = getScreenOptions(
   getTranslation('searchFiles'),
 );
 
-function mapStateToProps(state: IPersistAppState): IFilesScreenStateProps {
-  return {
-    loggedIn: state.auth.loggedIn,
-    courses: state.courses.items || [],
-    isFetching: state.files.isFetching,
-    files: state.files.items || [],
-    favFileIds: state.files.favorites || [],
-    pinnedFileIds: state.files.pinned || [],
-    hiddenCourseIds: state.courses.hidden || [],
-    compactWidth: state.settings.compactWidth,
-  };
-}
-
-const mapDispatchToProps: IFilesScreenDispatchProps = {
-  getAllFilesForCourses,
-  pinFile,
-  unpinFile,
-  favFile,
-  unfavFile,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(FilesScreen);
+export default FilesScreen;

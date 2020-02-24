@@ -15,7 +15,7 @@ import {
   DarkTheme,
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
 import Colors from '../constants/Colors';
@@ -29,8 +29,10 @@ import {
   unpinAssignment,
   favAssignment,
   unfavAssignment,
+  readAssignment,
+  unreadAssignment,
 } from '../redux/actions/assignments';
-import {IAssignment, ICourse, IPersistAppState} from '../redux/types/state';
+import {IAssignment} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
 import {IAssignmentDetailScreenProps} from './AssignmentDetailScreen';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
@@ -49,47 +51,12 @@ import {
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
 
-interface IAssignmentsScreenStateProps {
-  loggedIn: boolean;
-  courses: ICourse[];
-  hiddenCourseIds: string[];
-  isFetching: boolean;
-  assignments: IAssignment[];
-  pinnedAssignmentIds: string[];
-  favAssignmentIds: string[];
-  compactWidth: boolean;
-}
-
-interface IAssignmentsScreenDispatchProps {
-  getAllAssignmentsForCourses: (courseIds: string[]) => void;
-  pinAssignment: (assignmentId: string) => void;
-  unpinAssignment: (assignmentId: string) => void;
-  favAssignment: (assignmentId: string) => void;
-  unfavAssignment: (assignmentId: string) => void;
-}
-
-type IAssignmentsScreenProps = IAssignmentsScreenStateProps &
-  IAssignmentsScreenDispatchProps;
-
-const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
-  const {
-    courses,
-    assignments,
-    isFetching,
-    getAllAssignmentsForCourses,
-    pinAssignment,
-    pinnedAssignmentIds,
-    unpinAssignment,
-    hiddenCourseIds,
-    favAssignmentIds,
-    favAssignment,
-    unfavAssignment,
-    compactWidth,
-    loggedIn,
-  } = props;
-
+const AssignmentsScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
@@ -98,6 +65,19 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   /**
    * Prepare data
    */
+
+  const courses = useTypedSelector(state => state.courses.items);
+  const assignments = useTypedSelector(state => state.assignments.items);
+  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const favAssignmentIds = useTypedSelector(
+    state => state.assignments.favorites,
+  );
+  const pinnedAssignmentIds = useTypedSelector(
+    state => state.assignments.pinned,
+  );
+  const unreadAssignmentIds = useTypedSelector(
+    state => state.assignments.unread,
+  );
 
   const courseNames = useMemo(
     () =>
@@ -151,6 +131,23 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     sortedAssignments,
   ]);
 
+  const unreadAssignments = useMemo(() => {
+    const unreadAssignmentsOnly = sortedAssignments.filter(
+      i =>
+        unreadAssignmentIds.includes(i.id) &&
+        !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...unreadAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
+      ...unreadAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+    ];
+  }, [
+    hiddenCourseIds,
+    pinnedAssignmentIds,
+    sortedAssignments,
+    unreadAssignmentIds,
+  ]);
+
   const favAssignments = useMemo(() => {
     const favAssignmentsOnly = sortedAssignments.filter(
       i =>
@@ -186,11 +183,15 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
    * Fetch and handle error
    */
 
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const assignmentError = useTypedSelector(state => state.assignments.error);
+  const isFetching = useTypedSelector(state => state.assignments.isFetching);
+
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      getAllAssignmentsForCourses(courses.map(i => i.id));
+      dispatch(getAllAssignmentsForCourses(courses.map(i => i.id)));
     }
-  }, [courses, getAllAssignmentsForCourses, loggedIn]);
+  }, [courses, loggedIn, dispatch]);
 
   useEffect(() => {
     if (assignments.length === 0) {
@@ -198,9 +199,24 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
     }
   }, [invalidateAll, assignments.length]);
 
+  useEffect(() => {
+    // to calendar
+  }, [assignments]);
+
+  useEffect(() => {
+    if (assignmentError) {
+      Snackbar.show({
+        text: getTranslation('refreshFailure'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
+  }, [assignmentError]);
+
   /**
    * Render cards
    */
+
+  const isCompact = useTypedSelector(state => state.settings.isCompact);
 
   const onAssignmentCardPress = useCallback(
     (assignment: WithCourseInfo<IAssignment>) => {
@@ -221,7 +237,7 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       };
       const title = assignment.courseName;
 
-      if (DeviceInfo.isIPad() && !compactWidth) {
+      if (DeviceInfo.isIPad() && !isCompact) {
         setDetailView<IAssignmentDetailScreenProps>(name, passProps, title);
       } else {
         pushTo<IAssignmentDetailScreenProps>(
@@ -233,8 +249,10 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
           colorScheme === 'dark',
         );
       }
+
+      dispatch(readAssignment(assignment.id));
     },
-    [colorScheme, compactWidth, props.componentId],
+    [isCompact, colorScheme, props.componentId, dispatch],
   );
 
   useEffect(() => {
@@ -267,17 +285,25 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
 
   const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {
-      pinAssignment(assignmentId);
+      dispatch(pinAssignment(assignmentId));
     } else {
-      unpinAssignment(assignmentId);
+      dispatch(unpinAssignment(assignmentId));
     }
   };
 
   const onFav = (fav: boolean, assignmentId: string) => {
     if (fav) {
-      favAssignment(assignmentId);
+      dispatch(favAssignment(assignmentId));
     } else {
-      unfavAssignment(assignmentId);
+      dispatch(unfavAssignment(assignmentId));
+    }
+  };
+
+  const onRead = (read: boolean, assignmentId: string) => {
+    if (read) {
+      dispatch(readAssignment(assignmentId));
+    } else {
+      dispatch(unreadAssignment(assignmentId));
     }
   };
 
@@ -296,6 +322,8 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       onPinned={pin => onPinned(pin, item.id)}
       fav={favAssignmentIds.includes(item.id)}
       onFav={fav => onFav(fav, item.id)}
+      unread={unreadAssignmentIds.includes(item.id)}
+      onRead={read => onRead(read, item.id)}
       onPress={() => {
         onAssignmentCardPress(item);
       }}
@@ -324,13 +352,12 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
   const handleSegmentChange = (value: string) => {
     if (value.startsWith(getTranslation('new'))) {
       setSegment('new');
-      setCurrentDisplayAssignments(newAssignments);
+    } else if (value.startsWith(getTranslation('unread'))) {
+      setSegment('unread');
     } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
-      setCurrentDisplayAssignments(favAssignments);
     } else {
       setSegment('hidden');
-      setCurrentDisplayAssignments(hiddenAssignments);
     }
   };
 
@@ -339,6 +366,12 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
       setCurrentDisplayAssignments(newAssignments);
     }
   }, [newAssignments, segment]);
+
+  useEffect(() => {
+    if (segment === 'unread') {
+      setCurrentDisplayAssignments(unreadAssignments);
+    }
+  }, [unreadAssignments, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
@@ -456,11 +489,18 @@ const AssignmentsScreen: INavigationScreen<IAssignmentsScreenProps> = props => {
             <SegmentedControl
               values={[
                 getTranslation('new') + ` (${newAssignments.length})`,
+                getTranslation('unread') + ` (${unreadAssignments.length})`,
                 getTranslation('favorite') + ` (${favAssignments.length})`,
                 getTranslation('hidden') + ` (${hiddenAssignments.length})`,
               ]}
               selectedIndex={
-                segment === 'new' ? 0 : segment === 'favorite' ? 1 : 2
+                segment === 'new'
+                  ? 0
+                  : segment === 'unread'
+                  ? 1
+                  : segment === 'favorite'
+                  ? 2
+                  : 3
               }
               onValueChange={handleSegmentChange}
             />
@@ -561,27 +601,4 @@ AssignmentsScreen.options = getScreenOptions(
   getTranslation('searchAssignments'),
 );
 
-function mapStateToProps(
-  state: IPersistAppState,
-): IAssignmentsScreenStateProps {
-  return {
-    loggedIn: state.auth.loggedIn,
-    courses: state.courses.items || [],
-    isFetching: state.assignments.isFetching,
-    assignments: state.assignments.items || [],
-    favAssignmentIds: state.assignments.favorites || [],
-    pinnedAssignmentIds: state.assignments.pinned || [],
-    hiddenCourseIds: state.courses.hidden || [],
-    compactWidth: state.settings.compactWidth,
-  };
-}
-
-const mapDispatchToProps: IAssignmentsScreenDispatchProps = {
-  getAllAssignmentsForCourses,
-  pinAssignment,
-  unpinAssignment,
-  favAssignment,
-  unfavAssignment,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(AssignmentsScreen);
+export default AssignmentsScreen;

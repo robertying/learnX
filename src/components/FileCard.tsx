@@ -1,7 +1,8 @@
 import React from 'react';
-import {Platform, StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
@@ -34,7 +35,10 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
+    fontWeight: 'bold',
+  },
+  icon: {
+    marginLeft: 5,
   },
 });
 
@@ -54,6 +58,8 @@ const FileCard: React.FC<IFileCardProps> = props => {
     dragEnabled,
     fav,
     onFav,
+    unread,
+    onRead,
     onRemind,
   } = props;
 
@@ -66,6 +72,8 @@ const FileCard: React.FC<IFileCardProps> = props => {
       onPress={onPress}
       fav={fav}
       onFav={onFav}
+      unread={unread}
+      onRead={onRead}
       onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
@@ -80,24 +88,32 @@ const FileCard: React.FC<IFileCardProps> = props => {
         <View style={styles.flexRow}>
           <Text
             style={[
+              styles.title,
               colorScheme === 'dark'
                 ? iOSUIKit.bodyEmphasizedWhite
                 : iOSUIKit.bodyEmphasized,
-              styles.title,
             ]}
             numberOfLines={1}
             ellipsizeMode="tail">
             {title}
           </Text>
-          <Text style={{fontSize: 13, marginLeft: 5}}>
+          <Text style={[{fontSize: 13}, styles.icon]}>
             {(extension ? extension.toUpperCase() + ' ' : '') + size}
           </Text>
           {markedImportant && (
             <Icon
-              style={{marginLeft: 5}}
+              style={styles.icon}
               name="flag"
               size={18}
               color={Colors.system('red', colorScheme)}
+            />
+          )}
+          {unread && (
+            <MaterialCommunityIcon
+              style={styles.icon}
+              name="checkbox-blank-circle"
+              size={10}
+              color={Colors.system('blue', colorScheme)}
             />
           )}
         </View>

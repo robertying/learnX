@@ -18,9 +18,11 @@ export interface IInteractablePreviewWrapperProps {
   hidden?: boolean;
   onHide?: (hide: boolean) => void;
   pinned?: boolean;
-  fav?: boolean;
   onPinned?: (pin: boolean) => void;
+  fav?: boolean;
   onFav?: (fav: boolean) => void;
+  unread?: boolean;
+  onRead?: (read: boolean) => void;
   onRemind?: () => void;
   onPress: TouchableHighlight['props']['onPress'];
   dragEnabled: boolean;

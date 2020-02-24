@@ -1,7 +1,8 @@
 import React from 'react';
-import {Platform, StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {removeTags} from '../helpers/html';
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
+    fontWeight: 'bold',
   },
   icon: {
     marginLeft: 5,
@@ -57,6 +58,8 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
     onPinned,
     fav,
     onFav,
+    unread,
+    onRead,
     dragEnabled,
     onRemind,
   } = props;
@@ -69,6 +72,8 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
       onPinned={onPinned}
       fav={fav}
       onFav={onFav}
+      unread={unread}
+      onRead={onRead}
       onPress={onPress}
       onRemind={onRemind}
       dragEnabled={dragEnabled}>
@@ -107,6 +112,14 @@ const NoticeCard: React.FC<INoticeCardProps> = props => {
               name="flag"
               size={18}
               color={Colors.system('red', colorScheme)}
+            />
+          )}
+          {unread && (
+            <MaterialCommunityIcon
+              style={styles.icon}
+              name="checkbox-blank-circle"
+              size={10}
+              color={Colors.system('blue', colorScheme)}
             />
           )}
         </View>

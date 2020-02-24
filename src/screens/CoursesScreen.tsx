@@ -1,81 +1,30 @@
 import React, {useEffect, useMemo, useCallback, useState} from 'react';
 import {RefreshControl, SafeAreaView, FlatList} from 'react-native';
-import {connect} from 'react-redux';
 import CourseCard from '../components/CourseCard';
 import EmptyList from '../components/EmptyList';
 import Colors from '../constants/Colors';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
-import {getAllAssignmentsForCourses} from '../redux/actions/assignments';
 import {
   getCoursesForSemester,
   hideCourse,
   unhideCourse,
 } from '../redux/actions/courses';
-import {getAllFilesForCourses} from '../redux/actions/files';
-import {getAllNoticesForCourses} from '../redux/actions/notices';
-import {
-  IAssignment,
-  ICourse,
-  IFile,
-  INotice,
-  IPersistAppState,
-} from '../redux/types/state';
+import {ICourse} from '../redux/types/state';
 import {INavigationScreen} from '../types';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
+import Snackbar from 'react-native-snackbar';
+import {useDispatch} from 'react-redux';
 
-interface ICoursesScreenStateProps {
-  loggedIn: boolean;
-  semesterId: string;
-  courses: ICourse[];
-  notices: INotice[];
-  isFetchingNotices: boolean;
-  files: IFile[];
-  isFetchingFiles: boolean;
-  assignments: IAssignment[];
-  isFetchingAssignments: boolean;
-  hiddenCourseIds: string[];
-  compactWidth: boolean;
-}
-
-interface ICoursesScreenDispatchProps {
-  getCoursesForSemester: (semesterId: string) => void;
-  getAllNoticesForCourses: (courseIds: string[]) => void;
-  getAllFilesForCourses: (courseIds: string[]) => void;
-  getAllAssignmentsForCourses: (courseIds: string[]) => void;
-  hideCourse: (courseId: string) => void;
-  unhideCourse: (courseId: string) => void;
-}
-
-type ICoursesScreenProps = ICoursesScreenStateProps &
-  ICoursesScreenDispatchProps;
-
-const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
-  const {
-    loggedIn,
-    semesterId,
-    getCoursesForSemester,
-    courses,
-    notices,
-    isFetchingNotices,
-    files,
-    isFetchingFiles,
-    assignments,
-    isFetchingAssignments,
-    getAllNoticesForCourses,
-    getAllFilesForCourses,
-    getAllAssignmentsForCourses,
-    hideCourse,
-    unhideCourse,
-    hiddenCourseIds,
-    compactWidth,
-  } = props;
-
+const CoursesScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
@@ -85,7 +34,8 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
    * Prepare data
    */
 
-  const courseIds = useMemo(() => courses.map(i => i.id), [courses]);
+  const courses = useTypedSelector(state => state.courses.items);
+  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
 
   const visibleCourses = useMemo(
     () => courses.filter(i => !hiddenCourseIds.includes(i.id)),
@@ -105,42 +55,37 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
    * Fetch and handle error
    */
 
-  useEffect(() => {
-    if (loggedIn && semesterId && courses.length === 0) {
-      getCoursesForSemester(semesterId);
-    }
-  }, [courses.length, getCoursesForSemester, loggedIn, semesterId]);
-
-  const isFetching =
-    isFetchingNotices || isFetchingFiles || isFetchingAssignments;
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const courseError = useTypedSelector(state => state.courses.error);
+  const isFetching = useTypedSelector(state => state.courses.isFetching);
+  const semesterId = useTypedSelector(state => state.currentSemester);
 
   const invalidateAll = useCallback(() => {
-    if (loggedIn && courseIds.length !== 0) {
-      getAllNoticesForCourses(courseIds);
-      getAllFilesForCourses(courseIds);
-      getAllAssignmentsForCourses(courseIds);
+    if (loggedIn && semesterId) {
+      dispatch(getCoursesForSemester(semesterId));
     }
-  }, [
-    courseIds,
-    getAllAssignmentsForCourses,
-    getAllFilesForCourses,
-    getAllNoticesForCourses,
-    loggedIn,
-  ]);
+  }, [loggedIn, semesterId, dispatch]);
 
   useEffect(() => {
-    if (
-      notices.length === 0 ||
-      files.length === 0 ||
-      assignments.length === 0
-    ) {
+    if (courses.length === 0) {
       invalidateAll();
     }
-  }, [assignments.length, files.length, invalidateAll, notices.length]);
+  }, [invalidateAll, courses.length]);
+
+  useEffect(() => {
+    if (courseError) {
+      Snackbar.show({
+        text: getTranslation('refreshFailure'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
+  }, [courseError]);
 
   /**
    * Render cards
    */
+
+  const isCompact = useTypedSelector(state => state.settings.isCompact);
 
   const onCourseCardPress = (course: ICourse) => {
     const name = 'courses.detail';
@@ -149,7 +94,7 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     };
     const title = course.name;
 
-    if (DeviceInfo.isIPad() && !compactWidth) {
+    if (DeviceInfo.isIPad() && !isCompact) {
       setDetailView<Partial<ICourseDetailScreenProps>>(name, passProps, title);
     } else {
       pushTo<Partial<ICourseDetailScreenProps>>(
@@ -171,6 +116,16 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
     }
   };
 
+  const notices = useTypedSelector(state => state.notices.items);
+  const files = useTypedSelector(state => state.files.items);
+  const assignments = useTypedSelector(state => state.assignments.items);
+
+  const unreadNoticeIds = useTypedSelector(state => state.notices.unread);
+  const unreadFileIds = useTypedSelector(state => state.files.unread);
+  const unreadAssignmentIds = useTypedSelector(
+    state => state.assignments.unread,
+  );
+
   const renderListItem = ({item}: {item: ICourse}) => (
     <CourseCard
       dragEnabled={false}
@@ -179,17 +134,20 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
       semester={semesterId}
       noticesCount={
         notices.filter(
-          notice => notice.courseId === item.id && notice.hasRead === false,
+          notice =>
+            notice.courseId === item.id && unreadNoticeIds.includes(notice.id),
         ).length
       }
       filesCount={
-        files.filter(file => file.courseId === item.id && file.isNew === true)
-          .length
+        files.filter(
+          file => file.courseId === item.id && unreadFileIds.includes(file.id),
+        ).length
       }
       assignmentsCount={
         assignments.filter(
           assignment =>
-            assignment.courseId === item.id && assignment.submitted === false,
+            assignment.courseId === item.id &&
+            unreadAssignmentIds.includes(assignment.id),
         ).length
       }
       hidden={hiddenCourseIds.includes(item.id)}
@@ -272,29 +230,4 @@ const CoursesScreen: INavigationScreen<ICoursesScreenProps> = props => {
 
 CoursesScreen.options = getScreenOptions(getTranslation('courses'));
 
-function mapStateToProps(state: IPersistAppState): ICoursesScreenStateProps {
-  return {
-    loggedIn: state.auth.loggedIn,
-    semesterId: state.currentSemester,
-    courses: state.courses.items,
-    isFetchingNotices: state.notices.isFetching,
-    notices: state.notices.items,
-    isFetchingFiles: state.files.isFetching,
-    files: state.files.items,
-    isFetchingAssignments: state.assignments.isFetching,
-    assignments: state.assignments.items,
-    hiddenCourseIds: state.courses.hidden || [],
-    compactWidth: state.settings.compactWidth,
-  };
-}
-
-const mapDispatchToProps: ICoursesScreenDispatchProps = {
-  getCoursesForSemester,
-  getAllNoticesForCourses,
-  getAllFilesForCourses,
-  getAllAssignmentsForCourses,
-  hideCourse,
-  unhideCourse,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(CoursesScreen);
+export default CoursesScreen;

@@ -19,7 +19,7 @@ import {
   DarkTheme,
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import {connect} from 'react-redux';
+import {useDispatch} from 'react-redux';
 import EmptyList from '../components/EmptyList';
 import NoticeCard from '../components/NoticeCard';
 import Colors from '../constants/Colors';
@@ -34,16 +34,17 @@ import {
   unpinNotice,
   favNotice,
   unfavNotice,
+  readNotice,
+  unreadNotice,
 } from '../redux/actions/notices';
-import {ICourse, INotice, IPersistAppState} from '../redux/types/state';
+import {INotice} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
-import {setCompactWidth} from '../redux/actions/settings';
 import {resetLoading} from '../redux/actions/root';
 import {getFuseOptions} from '../helpers/search';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {INoticeDetailScreenProps} from './NoticeDetailScreen';
-import BackgroundFetch from 'react-native-background-fetch';
-import {runBackgroundTask} from '../helpers/background';
+// import BackgroundFetch from 'react-native-background-fetch';
+//import {runBackgroundTask} from '../helpers/background';
 import {
   requestNotificationPermission,
   showNotificationPermissionAlert,
@@ -55,79 +56,36 @@ import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
-import {loadIcons} from '../helpers/icons';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import PushNotification from 'react-native-push-notification';
 import {useColorScheme} from 'react-native-appearance';
+import {useTypedSelector} from '../redux/store';
+import {setSetting} from '../redux/actions/settings';
 
-interface INoticesScreenStateProps {
-  loggedIn: boolean;
-  loginError?: Error | null;
-  hasUpdate: boolean;
-  compactWidth: boolean;
-  courses: ICourse[];
-  hiddenCourseIds: string[];
-  isFetching: boolean;
-  notices: INotice[];
-  pinnedNoticeIds: string[];
-  favNoticeIds: string[];
-}
+const NoticesScreen: INavigationScreen = props => {
+  const colorScheme = useColorScheme();
 
-interface INoticesScreenDispatchProps {
-  getAllNoticesForCourses: (courseIds: string[]) => void;
-  pinNotice: (noticeId: string) => void;
-  unpinNotice: (noticeId: string) => void;
-  favNotice: (noticeId: string) => void;
-  unfavNotice: (noticeId: string) => void;
-  login: (username?: string | undefined, password?: string | undefined) => void;
-  setCompactWidth: (compactWidth: boolean) => void;
-  resetLoading: () => void;
-}
-
-type INoticesScreenProps = INoticesScreenStateProps &
-  INoticesScreenDispatchProps;
-
-const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
-  const {
-    loggedIn,
-    login,
-    loginError,
-    courses,
-    notices,
-    getAllNoticesForCourses,
-    pinnedNoticeIds,
-    pinNotice,
-    unpinNotice,
-    favNotice,
-    unfavNotice,
-    favNoticeIds,
-    hiddenCourseIds,
-    isFetching,
-    hasUpdate,
-    compactWidth,
-    resetLoading,
-    setCompactWidth,
-  } = props;
+  const dispatch = useDispatch();
+  const settings = useTypedSelector(state => state.settings);
+  const loginError = useTypedSelector(state => state.auth.error);
 
   /**
    * App scope stuff
    */
 
-  const colorScheme = useColorScheme();
-
-  useEffect(() => {
-    BackgroundFetch.configure(
-      {
-        minimumFetchInterval: 60 * 2,
-        enableHeadless: true,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
-      },
-      runBackgroundTask,
-    );
-  }, []);
+  // useEffect(() => {
+  //   BackgroundFetch.configure(
+  //     {
+  //       minimumFetchInterval: 60 * 2,
+  //       enableHeadless: true,
+  //       stopOnTerminate: false,
+  //       startOnBoot: true,
+  //       requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
+  //     },
+  //     runBackgroundTask,
+  //   );
+  // }, []);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
@@ -143,22 +101,21 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
   useEffect(() => {
     (async () => {
-      if (hasUpdate && Platform.OS === 'android') {
+      if (settings.hasUpdate && Platform.OS === 'android') {
         Navigation.mergeOptions('SettingsScreen', {
           bottomTab: {
             dotIndicator: {
               visible: true,
             },
-            icon: (await loadIcons()).settings,
           },
         });
       }
     })();
-  }, [hasUpdate]);
+  }, [settings.hasUpdate]);
 
   useEffect(() => {
-    login();
-  }, [login]);
+    dispatch(login());
+  }, [dispatch]);
 
   useEffect(() => {
     if (loginError) {
@@ -182,12 +139,12 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
         window.width < screen.width &&
         !(screen.height < screen.width && window.width > screen.width * 0.4)
       ) {
-        setCompactWidth(true);
+        dispatch(setSetting('isCompact', true));
       } else {
-        setCompactWidth(false);
+        dispatch(setSetting('isCompact', false));
       }
     }
-  }, [setCompactWidth]);
+  }, [dispatch]);
 
   useEffect(() => {
     if (DeviceInfo.isIPad()) {
@@ -201,16 +158,16 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
               : window.width > screen.width / 2)
           )
         ) {
-          setCompactWidth(true);
+          dispatch(setSetting('isCompact', true));
         } else {
-          setCompactWidth(false);
+          dispatch(setSetting('isCompact', false));
         }
       };
       Dimensions.addEventListener('change', listener);
 
       return () => Dimensions.removeEventListener('change', listener);
     }
-  }, [setCompactWidth]);
+  }, [dispatch]);
 
   const [appState, setAppState] = useState(AppState.currentState);
 
@@ -228,6 +185,13 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   /**
    * Prepare data
    */
+
+  const courses = useTypedSelector(state => state.courses.items);
+  const notices = useTypedSelector(state => state.notices.items);
+  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const favNoticeIds = useTypedSelector(state => state.notices.favorites);
+  const pinnedNoticeIds = useTypedSelector(state => state.notices.pinned);
+  const unreadNoticeIds = useTypedSelector(state => state.notices.unread);
 
   const courseNames = useMemo(
     () =>
@@ -272,6 +236,17 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     ];
   }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
 
+  const unreadNotices = useMemo(() => {
+    const unreadNoticesOnly = sortedNotices.filter(
+      i =>
+        unreadNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+    );
+    return [
+      ...unreadNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
+      ...unreadNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+    ];
+  }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices, unreadNoticeIds]);
+
   const favNotices = useMemo(() => {
     const favNoticesOnly = sortedNotices.filter(
       i => favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
@@ -300,11 +275,15 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
    * Fetch and handle error
    */
 
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const noticeError = useTypedSelector(state => state.notices.error);
+  const isFetching = useTypedSelector(state => state.notices.isFetching);
+
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      getAllNoticesForCourses(courses.map(i => i.id));
+      dispatch(getAllNoticesForCourses(courses.map(i => i.id)));
     }
-  }, [courses, getAllNoticesForCourses, loggedIn]);
+  }, [courses, loggedIn, dispatch]);
 
   useEffect(() => {
     if (notices.length === 0) {
@@ -312,9 +291,20 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
     }
   }, [invalidateAll, notices.length]);
 
+  useEffect(() => {
+    if (noticeError) {
+      Snackbar.show({
+        text: getTranslation('refreshFailure'),
+        duration: Snackbar.LENGTH_SHORT,
+      });
+    }
+  }, [noticeError]);
+
   /**
    * Render cards
    */
+
+  const isCompact = useTypedSelector(state => state.settings.isCompact);
 
   const onNoticeCardPress = useCallback(
     (notice: WithCourseInfo<INotice>) => {
@@ -330,7 +320,7 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       };
       const title = notice.courseName;
 
-      if (DeviceInfo.isIPad() && !compactWidth) {
+      if (DeviceInfo.isIPad() && !isCompact) {
         setDetailView<INoticeDetailScreenProps>(name, passProps, title);
       } else {
         pushTo<INoticeDetailScreenProps>(
@@ -342,8 +332,10 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
           colorScheme === 'dark',
         );
       }
+
+      dispatch(readNotice(notice.id));
     },
-    [compactWidth, colorScheme, props.componentId],
+    [isCompact, colorScheme, props.componentId, dispatch],
   );
 
   useEffect(() => {
@@ -376,17 +368,25 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
 
   const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {
-      pinNotice(noticeId);
+      dispatch(pinNotice(noticeId));
     } else {
-      unpinNotice(noticeId);
+      dispatch(unpinNotice(noticeId));
     }
   };
 
   const onFav = (fav: boolean, noticeId: string) => {
     if (fav) {
-      favNotice(noticeId);
+      dispatch(favNotice(noticeId));
     } else {
-      unfavNotice(noticeId);
+      dispatch(unfavNotice(noticeId));
+    }
+  };
+
+  const onRead = (read: boolean, noticeId: string) => {
+    if (read) {
+      dispatch(readNotice(noticeId));
+    } else {
+      dispatch(unreadNotice(noticeId));
     }
   };
 
@@ -405,6 +405,8 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       onPinned={pin => onPinned(pin, item.id)}
       fav={favNoticeIds.includes(item.id)}
       onFav={fav => onFav(fav, item.id)}
+      unread={unreadNoticeIds.includes(item.id)}
+      onRead={read => onRead(read, item.id)}
       onPress={() => {
         onNoticeCardPress(item);
       }}
@@ -433,13 +435,12 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
   const handleSegmentChange = (value: string) => {
     if (value.startsWith(getTranslation('new'))) {
       setSegment('new');
-      setCurrentDisplayNotices(newNotices);
+    } else if (value.startsWith(getTranslation('unread'))) {
+      setSegment('unread');
     } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
-      setCurrentDisplayNotices(favNotices);
     } else {
       setSegment('hidden');
-      setCurrentDisplayNotices(hiddenNotices);
     }
   };
 
@@ -448,6 +449,12 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
       setCurrentDisplayNotices(newNotices);
     }
   }, [newNotices, segment]);
+
+  useEffect(() => {
+    if (segment === 'unread') {
+      setCurrentDisplayNotices(unreadNotices);
+    }
+  }, [unreadNotices, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
@@ -564,11 +571,18 @@ const NoticesScreen: INavigationScreen<INoticesScreenProps> = props => {
             <SegmentedControl
               values={[
                 getTranslation('new') + ` (${newNotices.length})`,
+                getTranslation('unread') + ` (${unreadNotices.length})`,
                 getTranslation('favorite') + ` (${favNotices.length})`,
                 getTranslation('hidden') + ` (${hiddenNotices.length})`,
               ]}
               selectedIndex={
-                segment === 'new' ? 0 : segment === 'favorite' ? 1 : 2
+                segment === 'new'
+                  ? 0
+                  : segment === 'unread'
+                  ? 1
+                  : segment === 'favorite'
+                  ? 2
+                  : 3
               }
               onValueChange={handleSegmentChange}
             />
@@ -669,30 +683,4 @@ NoticesScreen.options = getScreenOptions(
   getTranslation('searchNotices'),
 );
 
-function mapStateToProps(state: IPersistAppState): INoticesScreenStateProps {
-  return {
-    loggedIn: state.auth.loggedIn,
-    loginError: state.auth.error,
-    courses: state.courses.items || [],
-    isFetching: state.notices.isFetching,
-    notices: state.notices.items || [],
-    favNoticeIds: state.notices.favorites || [],
-    pinnedNoticeIds: state.notices.pinned || [],
-    hiddenCourseIds: state.courses.hidden || [],
-    hasUpdate: state.settings.hasUpdate,
-    compactWidth: state.settings.compactWidth,
-  };
-}
-
-const mapDispatchToProps: INoticesScreenDispatchProps = {
-  getAllNoticesForCourses,
-  pinNotice,
-  unpinNotice,
-  login,
-  setCompactWidth,
-  resetLoading,
-  favNotice,
-  unfavNotice,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(NoticesScreen);
+export default NoticesScreen;

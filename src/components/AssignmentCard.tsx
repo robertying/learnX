@@ -1,7 +1,8 @@
 import React from 'react';
-import {Platform, StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {removeTags} from '../helpers/html';
@@ -33,7 +34,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  status: {
+  title: {
+    flex: 1,
+    fontWeight: 'bold',
+  },
+  icon: {
     marginLeft: 5,
   },
 });
@@ -54,6 +59,8 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
     dragEnabled,
     fav,
     onFav,
+    unread,
+    onRead,
     onRemind,
   } = props;
 
@@ -66,6 +73,8 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
       onPress={onPress}
       fav={fav}
       onFav={onFav}
+      unread={unread}
+      onRead={onRead}
       onRemind={onRemind}
       dragEnabled={dragEnabled}>
       <View
@@ -80,13 +89,10 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
         <View style={styles.flexRow}>
           <Text
             style={[
+              styles.title,
               colorScheme === 'dark'
                 ? iOSUIKit.bodyEmphasizedWhite
                 : iOSUIKit.bodyEmphasized,
-              {
-                flex: 1,
-                fontWeight: Platform.OS === 'android' ? 'bold' : 'normal',
-              },
             ]}
             numberOfLines={1}
             ellipsizeMode="tail">
@@ -94,7 +100,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           </Text>
           {hasAttachment && (
             <Icon
-              style={styles.status}
+              style={styles.icon}
               name="attachment"
               size={18}
               color={Colors.system('yellow', colorScheme)}
@@ -102,7 +108,7 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           )}
           {submitted && (
             <Icon
-              style={styles.status}
+              style={styles.icon}
               name="done"
               size={18}
               color={Colors.system('green', colorScheme)}
@@ -110,10 +116,18 @@ const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
           )}
           {graded && (
             <Icon
-              style={styles.status}
+              style={styles.icon}
               name="grade"
               size={18}
               color={Colors.system('red', colorScheme)}
+            />
+          )}
+          {unread && (
+            <MaterialCommunityIcon
+              style={styles.icon}
+              name="checkbox-blank-circle"
+              size={10}
+              color={Colors.system('blue', colorScheme)}
             />
           )}
         </View>
