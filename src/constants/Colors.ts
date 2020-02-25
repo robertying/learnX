@@ -6,6 +6,7 @@ const colorsDark = {
   green: 'rgb(48,209,88)',
   red: 'rgb(255,69,58)',
   purple: 'rgb(191,90,242)',
+  blue: 'rgb(10,132,255)',
 };
 
 const colorsLight = {
@@ -16,6 +17,7 @@ const colorsLight = {
   green: 'rgb(52,199,89)',
   red: 'rgb(255,59,48)',
   purple: 'rgb(175,82,222)',
+  blue: 'rgb(0,122,255)',
 };
 
 const system = (name: keyof typeof colorsDark, colorScheme?: string) => {
