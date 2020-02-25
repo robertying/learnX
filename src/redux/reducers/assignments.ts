@@ -52,10 +52,15 @@ export default function assignments(
       return {
         ...state,
         isFetching: false,
-        unread: [
-          ...state.unread,
-          ...differenceBy(action.payload, state.items, 'id').map(i => i.id),
-        ],
+        unread:
+          state.items.length === 0
+            ? []
+            : [
+                ...state.unread,
+                ...differenceBy(action.payload, state.items, 'id').map(
+                  i => i.id,
+                ),
+              ],
         items: action.payload,
         error: null,
       };
@@ -75,16 +80,19 @@ export default function assignments(
       return {
         ...state,
         isFetching: false,
-        unread: [
-          ...state.unread,
-          ...differenceBy(
-            action.payload.assignments,
-            state.items.filter(
-              item => item.courseId === action.payload.courseId,
-            ),
-            'id',
-          ).map(i => i.id),
-        ],
+        unread:
+          state.items.length === 0
+            ? []
+            : [
+                ...state.unread,
+                ...differenceBy(
+                  action.payload.assignments,
+                  state.items.filter(
+                    item => item.courseId === action.payload.courseId,
+                  ),
+                  'id',
+                ).map(i => i.id),
+              ],
         items: [
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
