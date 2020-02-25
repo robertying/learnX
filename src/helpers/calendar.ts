@@ -13,7 +13,7 @@ import Snackbar from 'react-native-snackbar';
 import {CalendarEvent} from 'thu-learn-lib-no-native/lib/types';
 import {removeTags} from './html';
 
-export const getCalendar = async () => {
+export const getCalendarId = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
 
   const storedId = store.getState().settings.calendarId;
@@ -40,7 +40,6 @@ export const getCalendar = async () => {
     ownerAccount: 'learnX',
     source: {
       name: 'learnX',
-      type: 'learnX',
       isLocalAccount: true,
     },
   });
@@ -93,7 +92,7 @@ export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
     return;
   }
 
-  const calendarId = await getCalendar();
+  const calendarId = await getCalendarId();
 
   if (!calendarId) {
     throw 'Failed to create new calendar';
@@ -123,7 +122,7 @@ export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
   });
 };
 
-export const getCourseCalendar = async () => {
+export const getCourseCalendarId = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
 
   const existingCalendar = calendars.find(
@@ -141,8 +140,7 @@ export const getCourseCalendar = async () => {
     accessLevel: 'read',
     ownerAccount: 'learnX',
     source: {
-      name: 'learnX - Course',
-      type: 'learnX',
+      name: 'learnX',
       isLocalAccount: true,
     },
   });
@@ -193,7 +191,7 @@ export const saveCoursesToCalendar = async (
     return;
   }
 
-  const calendarId = await getCourseCalendar();
+  const calendarId = await getCourseCalendarId();
 
   const oldEvents = await RNCalendarEvents.fetchAllEvents(
     dayjs(startDate).toISOString(),
@@ -214,4 +212,30 @@ export const saveCoursesToCalendar = async (
       description: event.location,
     });
   }
+};
+
+export const removeCalendars = async () => {
+  const status = await RNCalendarEvents.authorizationStatus();
+  if (status !== 'authorized') {
+    Snackbar.show({
+      text: getTranslation('accessCalendarFailure'),
+      duration: Snackbar.LENGTH_SHORT,
+    });
+    return;
+  }
+
+  const calendars = await RNCalendarEvents.findCalendars();
+
+  const existingCalendars = calendars.filter(value =>
+    value.title.includes('learnX'),
+  );
+
+  for (const calendar of existingCalendars) {
+    await RNCalendarEvents.removeCalendar(calendar.id);
+  }
+
+  Snackbar.show({
+    text: getTranslation('deleteCalendarsSuccess'),
+    duration: Snackbar.LENGTH_SHORT,
+  });
 };

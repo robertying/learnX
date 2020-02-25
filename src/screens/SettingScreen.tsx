@@ -25,6 +25,7 @@ import {
   saveAssignmentsToCalendar,
   getSemesterDuration,
   saveCoursesToCalendar,
+  removeCalendars,
 } from '../helpers/calendar';
 import {getTranslation} from '../helpers/i18n';
 import Snackbar from 'react-native-snackbar';
@@ -195,6 +196,26 @@ const SettingScreen: INavigationScreen = props => {
     );
   };
 
+  const onDeleteCalendarsPress = () => {
+    Alert.alert(
+      getTranslation('deleteCalendars'),
+      getTranslation('deleteCalendarsConfirmation'),
+      [
+        {
+          text: getTranslation('cancel'),
+          style: 'cancel',
+        },
+        {
+          text: getTranslation('ok'),
+          onPress: async () => {
+            await removeCalendars();
+          },
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   const onSemestersPress = () => {
     navigate('settings.semesters');
   };
@@ -358,6 +379,25 @@ const SettingScreen: INavigationScreen = props => {
           />
         );
       case 5:
+        return (
+          <SettingListItem
+            variant="none"
+            icon={
+              <MaterialCommunityIcons
+                name="calendar-remove"
+                size={20}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
+              />
+            }
+            text={getTranslation('deleteCalendars')}
+            onPress={onDeleteCalendarsPress}
+          />
+        );
+      case 6:
         return Platform.OS === 'android' ? (
           <SettingListItem
             variant="none"
@@ -406,7 +446,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 6:
+      case 7:
         return (
           <SettingListItem
             variant="arrow"
@@ -426,7 +466,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onHelpPress}
           />
         );
-      case 7:
+      case 8:
         return (
           <SettingListItem
             variant="arrow"
@@ -445,7 +485,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 8:
+      case 9:
         return (
           <SettingListItem
             variant="arrow"
@@ -488,6 +528,7 @@ const SettingScreen: INavigationScreen = props => {
           {key: 'semesters'},
           {key: 'logout'},
           {key: 'clearFileCache'},
+          {key: 'deleteCalendars'},
           {key: 'checkUpdate'},
           {key: 'help'},
           {key: 'acknowledgement'},

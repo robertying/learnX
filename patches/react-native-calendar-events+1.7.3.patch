@@ -1,0 +1,165 @@
+diff --git a/node_modules/react-native-calendar-events/README.md b/node_modules/react-native-calendar-events/README.md
+index a01211e..a5f1bd1 100644
+--- a/node_modules/react-native-calendar-events/README.md
++++ b/node_modules/react-native-calendar-events/README.md
+@@ -129,6 +129,22 @@ Returns: **Promise**
+
+ <br/>
+
++### removeCalendar
++Removes a calendar.
++
++```javascript
++RNCalendarEvents.removeCalendar(id)
++```
++
++Arguments:
++ - id: String - The id of the calendar to remove.
++
++Returns: **Promise**
++ - fulfilled: Bool - Successful
++ - rejected: Error
++
++<br/>
++
+ ### findEventById
+ Find calendar event by id.
+ Returns a promise with fulfilled found events.
+diff --git a/node_modules/react-native-calendar-events/RNCalendarEvents.m b/node_modules/react-native-calendar-events/RNCalendarEvents.m
+index 2783f30..23ffaf5 100644
+--- a/node_modules/react-native-calendar-events/RNCalendarEvents.m
++++ b/node_modules/react-native-calendar-events/RNCalendarEvents.m
+@@ -805,6 +805,27 @@ - (NSDictionary *)serializeCalendarEvent:(EKEvent *)event
+                   [NSString stringWithFormat:@"Calendar %@ could not be saved", title], error);
+ }
+
++RCT_EXPORT_METHOD(removeCalendar:(NSString *)calendarId resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
++{
++    if (![self isCalendarAccessGranted]) {
++        reject(@"error", @"unauthorized to access calendar", nil);
++        return;
++    }
++
++
++    dispatch_async(serialQueue, ^{
++
++        EKCalendar *calendar = (EKCalendar *)[self.eventStore calendarWithIdentifier:calendarId];
++        NSError *error = nil;
++
++        BOOL success = [self.eventStore removeCalendar:calendar commit:YES error:&error];
++        if (error) {
++            return reject(@"error", [error.userInfo valueForKey:@"NSLocalizedDescription"], nil);
++        }
++        return resolve(@(success));
++    });
++}
++
+ RCT_EXPORT_METHOD(fetchAllEvents:(NSDate *)startDate endDate:(NSDate *)endDate calendars:(NSArray *)calendars resolver:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+ {
+     if (![self isCalendarAccessGranted]) {
+diff --git a/node_modules/react-native-calendar-events/android/src/main/java/com/calendarevents/CalendarEvents.java b/node_modules/react-native-calendar-events/android/src/main/java/com/calendarevents/CalendarEvents.java
+index f24c09b..163f85e 100644
+--- a/node_modules/react-native-calendar-events/android/src/main/java/com/calendarevents/CalendarEvents.java
++++ b/node_modules/react-native-calendar-events/android/src/main/java/com/calendarevents/CalendarEvents.java
+@@ -241,6 +241,22 @@ private int addCalendar(ReadableMap details) throws Exception, SecurityException
+         return Integer.parseInt(calendarUri.getLastPathSegment());
+     }
+
++    private boolean removeCalendar(String calendarID) {
++        int rows = 0;
++
++        try {
++            ContentResolver cr = reactContext.getContentResolver();
++
++            Uri uri = ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, (long) Integer.parseInt(calendarID));
++            rows = cr.delete(uri, null, null);
++
++        } catch (Exception e) {
++            e.printStackTrace();
++        }
++
++        return rows > 0;
++    }
++
+     private WritableNativeArray findAttendeesByEventId(String eventID) {
+         WritableNativeArray result;
+         Cursor cursor;
+@@ -1213,6 +1229,27 @@ public void run() {
+         }
+     }
+
++    @ReactMethod
++    public void removeCalendar(final String CalendarID, final Promise promise) {
++        if (this.haveCalendarReadWritePermissions()) {
++            try {
++                Thread thread = new Thread(new Runnable(){
++                    @Override
++                    public void run() {
++                        boolean successful = removeCalendar(CalendarID);
++                        promise.resolve(successful);
++                    }
++                });
++                thread.start();
++
++            } catch (Exception e) {
++                promise.reject("error removing calendar", e.getMessage());
++            }
++        } else {
++            promise.reject("remove calendar error", "you don't have permissions to remove a calendar");
++        }
++
++    }
+     @ReactMethod
+     public void saveEvent(final String title, final ReadableMap details, final ReadableMap options, final Promise promise) {
+         if (this.haveCalendarReadWritePermissions()) {
+diff --git a/node_modules/react-native-calendar-events/index.android.js b/node_modules/react-native-calendar-events/index.android.js
+index 5ee21cc..2e304c5 100644
+--- a/node_modules/react-native-calendar-events/index.android.js
++++ b/node_modules/react-native-calendar-events/index.android.js
+@@ -29,6 +29,10 @@ export default {
+     });
+   },
+
++  async removeCalendar (id) {
++    return CalendarEvents.removeCalendar(id)
++  },
++
+   async findEventById (id) {
+     return CalendarEvents.findById(id)
+   },
+diff --git a/node_modules/react-native-calendar-events/index.d.ts b/node_modules/react-native-calendar-events/index.d.ts
+index f6772af..3899062 100644
+--- a/node_modules/react-native-calendar-events/index.d.ts
++++ b/node_modules/react-native-calendar-events/index.d.ts
+@@ -176,8 +176,14 @@ export default class ReactNativeCalendarEvents {
+    */
+   static saveCalendar(calendar: CalendarOptions): Promise<string>;
+   /**
+-   * Find calendar event by id.
+-   * @param id - Event ID
++   * Removes a calendar.
++   * @param id - The calendar id
++   * @returns - Promise resolving to boolean to indicate if removal succeeded.
++   */
++  static removeCalendar(id: string): Promise<boolean>;
++  /**
++   * Find calendar  by id.
++   * @param id - Calendar ID
+    */
+   static findEventById(id: string): Promise<CalendarEventReadable | null>;
+   /**
+diff --git a/node_modules/react-native-calendar-events/index.ios.js b/node_modules/react-native-calendar-events/index.ios.js
+index a014262..3a0fcff 100644
+--- a/node_modules/react-native-calendar-events/index.ios.js
++++ b/node_modules/react-native-calendar-events/index.ios.js
+@@ -29,6 +29,10 @@ export default {
+     });
+   },
+
++  removeCalendar (id) {
++    return RNCalendarEvents.removeCalendar(id)
++  },
++
+   findEventById (id) {
+     return RNCalendarEvents.findEventById(id);
+   },
