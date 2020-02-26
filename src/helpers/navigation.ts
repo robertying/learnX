@@ -1,5 +1,7 @@
 import {Navigation, Options} from 'react-native-navigation';
 import {Platform} from 'react-native';
+import Colors from '../constants/Colors';
+import {getAndroidTheme} from './darkmode';
 
 export function pushTo<T>(
   name: string,
@@ -9,27 +11,47 @@ export function pushTo<T>(
   hideBackTitle?: boolean,
   isDarkMode?: boolean,
 ) {
-  Navigation.push(componentId, {
-    component: {
-      name,
-      passProps,
-      options: {
-        layout: {
-          backgroundColor: isDarkMode ? 'black' : 'white',
-        },
-        topBar: {
-          title: {
-            text: title,
-            fontWeight: 'medium',
-            fontSize: 17,
-          },
-          backButton: {
-            showTitle: !hideBackTitle,
+  const colorScheme = isDarkMode ? 'dark' : 'light';
+  if (Platform.OS === 'android') {
+    Navigation.push(componentId, {
+      component: {
+        name,
+        passProps,
+        options: {
+          ...getAndroidTheme(colorScheme),
+          topBar: {
+            backButton: {
+              color: Colors.system('foreground', colorScheme),
+            },
+            title: {
+              text: title,
+              color: Colors.system('foreground', colorScheme),
+            },
+            background: {
+              color: Colors.system('background', colorScheme),
+            },
           },
         },
       },
-    },
-  });
+    });
+  } else {
+    Navigation.push(componentId, {
+      component: {
+        name,
+        passProps,
+        options: {
+          topBar: {
+            backButton: {
+              showTitle: !hideBackTitle,
+            },
+            title: {
+              text: title,
+            },
+          },
+        },
+      },
+    });
+  }
 }
 
 export function setDetailView<T>(name: string, passProps?: T, title?: string) {
@@ -65,8 +87,6 @@ export const getScreenOptions = (
     topBar: {
       title: {
         text: title,
-        fontWeight: 'medium',
-        fontSize: 17,
       },
       ...(searchBarPlaceholder && {
         searchBar: true,
@@ -78,7 +98,7 @@ export const getScreenOptions = (
     },
     bottomTabs: {
       translucent: true,
-      drawBehind: Platform.OS === 'ios' ? true : false,
+      drawBehind: Platform.OS === 'ios',
     },
   };
   return options;

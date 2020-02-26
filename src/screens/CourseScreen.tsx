@@ -1,5 +1,10 @@
 import React, {useEffect, useMemo, useCallback, useState} from 'react';
 import {RefreshControl, SafeAreaView, FlatList} from 'react-native';
+import {
+  Provider as PaperProvider,
+  DefaultTheme,
+  DarkTheme,
+} from 'react-native-paper';
 import CourseCard from '../components/CourseCard';
 import EmptyList from '../components/EmptyList';
 import Colors from '../constants/Colors';
@@ -198,40 +203,42 @@ const CourseScreen: INavigationScreen = props => {
   }, [hiddenCourses, segment]);
 
   return (
-    <SafeAreaView
-      testID="CoursesScreen"
-      style={{
-        flex: 1,
-        backgroundColor: Colors.system('background', colorScheme),
-      }}>
-      <FlatList
-        style={{backgroundColor: Colors.system('background', colorScheme)}}
-        ListEmptyComponent={EmptyList}
-        data={currentDisplayCourses}
-        renderItem={renderListItem}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={
-          <SegmentedControl
-            values={[
-              getTranslation('visible') + ` (${visibleCourses.length})`,
-              getTranslation('hidden') + ` (${hiddenCourses.length})`,
-            ]}
-            selectedIndex={segment === 'visible' ? 0 : 1}
-            onValueChange={handleSegmentChange}
-          />
-        }
-        refreshControl={
-          <RefreshControl
-            colors={[Colors.system('purple', colorScheme)]}
-            progressBackgroundColor={
-              colorScheme === 'dark' ? '#424242' : 'white'
-            }
-            onRefresh={onRefresh}
-            refreshing={isFetching}
-          />
-        }
-      />
-    </SafeAreaView>
+    <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <SafeAreaView
+        testID="CoursesScreen"
+        style={{
+          flex: 1,
+          backgroundColor: Colors.system('background', colorScheme),
+        }}>
+        <FlatList
+          style={{backgroundColor: Colors.system('background', colorScheme)}}
+          ListEmptyComponent={EmptyList}
+          data={currentDisplayCourses}
+          renderItem={renderListItem}
+          keyExtractor={item => item.id}
+          ListHeaderComponent={
+            <SegmentedControl
+              values={[
+                getTranslation('visible') + ` (${visibleCourses.length})`,
+                getTranslation('hidden') + ` (${hiddenCourses.length})`,
+              ]}
+              selectedIndex={segment === 'visible' ? 0 : 1}
+              onValueChange={handleSegmentChange}
+            />
+          }
+          refreshControl={
+            <RefreshControl
+              colors={[Colors.system('purple', colorScheme)]}
+              progressBackgroundColor={
+                colorScheme === 'dark' ? '#424242' : 'white'
+              }
+              onRefresh={onRefresh}
+              refreshing={isFetching}
+            />
+          }
+        />
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 

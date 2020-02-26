@@ -3,6 +3,7 @@ import {Navigation} from 'react-native-navigation';
 import {getAuthLoadingRoot} from './navigation/navigationRoot';
 import registerComponents from './navigation/registerComponents';
 import {Appearance} from 'react-native-appearance';
+import {getAndroidTheme} from './helpers/darkmode';
 
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(() => {
@@ -17,33 +18,17 @@ const startApp = () => {
 
     const colorScheme = Appearance.getColorScheme();
 
-    if (Platform.OS === 'ios') {
-      Navigation.setDefaultOptions({
-        layout: {
-          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
-        },
-      });
+    if (Platform.OS === 'android') {
+      Navigation.setDefaultOptions(getAndroidTheme(colorScheme));
     } else {
       Navigation.setDefaultOptions({
+        window: {
+          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
+        },
         layout: {
           backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
         },
-        statusBar: {
-          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
-          style: colorScheme === 'dark' ? 'light' : 'dark',
-        },
-        topBar: {
-          title: {
-            color: colorScheme === 'dark' ? 'white' : 'black',
-          },
-          background: {
-            color: colorScheme === 'dark' ? 'black' : 'white',
-          },
-        },
-        bottomTabs: {
-          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
-        },
-      });
+      } as any);
     }
 
     const authLoadingRoot = getAuthLoadingRoot();

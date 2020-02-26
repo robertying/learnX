@@ -38,8 +38,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     textAlign: 'center',
     fontStyle: 'italic',
-    position: 'absolute',
-    bottom: 30,
     width: '60%',
   },
 });
@@ -234,17 +232,17 @@ const LoginScreen: INavigationScreen = props => {
           </RaisedButton>
           <ActivityIndicator style={{margin: 10}} animating={loading} />
         </View>
+        <Text
+          style={[
+            iOSUIKit.footnote,
+            styles.note,
+            {
+              color: Colors.system('gray', colorScheme),
+            },
+          ]}>
+          {getTranslation('credentialNote')}
+        </Text>
       </KeyboardAvoidingView>
-      <Text
-        style={[
-          iOSUIKit.footnote,
-          styles.note,
-          {
-            color: Colors.system('gray', colorScheme),
-          },
-        ]}>
-        {getTranslation('credentialNote')}
-      </Text>
     </SafeAreaView>
   );
 };
