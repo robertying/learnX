@@ -25,7 +25,7 @@ const HelpScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme, true);
+    adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
 
   const webViewRef = useRef<WebView>(null);

@@ -59,7 +59,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const isFetchingFiles = useTypedSelector(state => state.files.isFetching);
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme, true);
+    adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
 
   const notices = useMemo(

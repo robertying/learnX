@@ -21,7 +21,7 @@ const SemesterSettingScreen: INavigationScreen = props => {
   const semesters = useTypedSelector(state => state.semesters.items);
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme, true);
+    adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
 
   useEffect(() => {

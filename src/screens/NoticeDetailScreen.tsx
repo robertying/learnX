@@ -18,7 +18,7 @@ const NoticeDetailScreen: INavigationScreen<INoticeDetailScreenProps> = props =>
   const colorScheme = useColorScheme();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme, true);
+    adaptToSystemTheme(props.componentId, colorScheme);
   }, [colorScheme, props.componentId]);
 
   return <NoticeBoard {...props} />;
