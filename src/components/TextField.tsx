@@ -50,6 +50,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
     Animated.timing(opacity, {
       toValue: 1,
       duration: 200,
+      useNativeDriver: false,
     }).start();
 
     if (props.onFocus) {
@@ -61,6 +62,7 @@ const TextField: React.FunctionComponent<ITextFieldProps> = props => {
     Animated.timing(opacity, {
       toValue: 0.01,
       duration: 200,
+      useNativeDriver: false,
     }).start();
 
     if (props.onBlur) {
