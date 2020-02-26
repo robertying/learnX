@@ -4,7 +4,6 @@ Here are some information that may help you to use the App.
 
 - First, go to `Change Current Semester` in `Settings` to make sure you have selected the correct semester you want. Summer semesters sometimes make the App blank since there may be no courses.
 - Please Try to `Logout` in `Settings` and re-login.
-- Change to campus networks. The connections are sometimes broken if you are connected to off-campus networks.
 
 ### iOS: The file won't open. / The file is always blank.
 
