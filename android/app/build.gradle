@@ -5,9 +5,9 @@ apply from: './versionCode.gradle'
 
 import com.android.build.OutputFile
 
-def CI = System.getenv("CI") == "true"
-def enableSeparateBuildPerCPUArchitecture = true
-def enableProguardInReleaseBuilds = true
+project.ext.react = [
+        enableHermes: false,
+]
 
 project.ext.vectoricons = [
         iconFontNames:
@@ -22,6 +22,12 @@ project.ext.vectoricons = [
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+def CI = System.getenv("CI") == "true"
+def enableSeparateBuildPerCPUArchitecture = true
+def enableProguardInReleaseBuilds = true
+def jscFlavor = 'org.webkit:android-jsc:+'
+def enableHermes = project.ext.react.get("enableHermes", false);
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -114,9 +120,13 @@ dependencies {
     implementation "com.facebook.react:react-native:+"
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
-    def hermesPath = "../../node_modules/hermes-engine/android/"
-    debugImplementation files(hermesPath + "hermes-debug.aar")
-    releaseImplementation files(hermesPath + "hermes-release.aar")
+    if (enableHermes) {
+        def hermesPath = "../../node_modules/hermes-engine/android/";
+        debugImplementation files(hermesPath + "hermes-debug.aar")
+        releaseImplementation files(hermesPath + "hermes-release.aar")
+    } else {
+        implementation jscFlavor
+    }
 
     addUnimodulesDependencies([exclude: ['expo-app-loader-provider',
                                          'expo-constants',

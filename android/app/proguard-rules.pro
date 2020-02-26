@@ -97,6 +97,11 @@
 -dontnote io.fabric.sdk.android.**
 
 
+# Hermes
+
+-keep class com.facebook.hermes.unicode.** { *; }
+
+
 # Others
 
 -dontnote ca.jaysoo.extradimensions.**
