@@ -1,6 +1,7 @@
 import {Platform} from 'react-native';
 import Share from 'react-native-share';
 import fs from 'react-native-fs';
+import RNFetchBlob from 'rn-fetch-blob';
 import mime from 'mime-types';
 import {getTranslation} from './i18n';
 
@@ -12,26 +13,20 @@ export const shareFile = async (
 ) => {
   const filePath = await downloadFile(url, name, ext, courseName);
 
-  const mimeType = mime.lookup(ext);
-  if (mimeType) {
-    await Share.open({
-      filename: `${name}.${ext}`,
-      url: filePath,
-      type: mimeType,
-      title: getTranslation('openFile'),
-      showAppsToView: true,
-      failOnCancel: false,
-    });
-  } else {
-    throw new Error('File format not supported');
-  }
+  await Share.open({
+    filename: `${name}.${ext}`,
+    url: (Platform.OS === 'android' ? 'file://' : '') + filePath,
+    type: mime.lookup(ext) || 'text/plain',
+    title: getTranslation('openFile'),
+    showAppsToView: true,
+    failOnCancel: false,
+  });
 };
 
-export const fileDir = `file://${
+export const fileDir =
   Platform.OS === 'ios'
-    ? fs.DocumentDirectoryPath
-    : `${fs.DownloadDirectoryPath}/learnX`
-}/files`;
+    ? `file://${fs.DocumentDirectoryPath}/files`
+    : `${RNFetchBlob.fs.dirs.DocumentDir}`;
 
 export const downloadFile = async (
   url: string,
@@ -42,28 +37,51 @@ export const downloadFile = async (
   onProgress?: (percent: number) => void,
 ) => {
   const courseDir = `${fileDir}/${courseName}`;
-  await fs.mkdir(courseDir);
-
   const filePath = `${courseDir}/${name}.${ext}`;
 
-  if ((await fs.exists(filePath)) && !retry) {
-    return filePath;
-  } else {
-    const {promise} = fs.downloadFile({
-      fromUrl: url,
-      toFile: filePath,
-      begin: () => {},
-      progress: result => {
-        onProgress?.(result.bytesWritten / result.contentLength);
-      },
-    });
+  if (Platform.OS === 'ios') {
+    await fs.mkdir(courseDir);
 
-    const result = await promise;
-    if (result.statusCode !== 200 || result.bytesWritten === 0) {
-      throw new Error('File download failed');
+    if ((await fs.exists(filePath)) && !retry) {
+      return filePath;
+    } else {
+      const {promise} = fs.downloadFile({
+        fromUrl: url,
+        toFile: filePath,
+        begin: () => {},
+        progress: result => {
+          onProgress?.(result.bytesWritten / result.contentLength);
+        },
+      });
+
+      const result = await promise;
+      if (result.statusCode !== 200 || result.bytesWritten === 0) {
+        throw new Error('File download failed');
+      }
+
+      return filePath;
     }
-
-    return filePath;
+  } else {
+    if ((await RNFetchBlob.fs.exists(filePath)) && !retry) {
+      return filePath;
+    } else {
+      await new Promise((resolve, reject) =>
+        RNFetchBlob.config({
+          path: filePath,
+        })
+          .fetch('GET', url)
+          .progress((received, total) => {
+            if (onProgress) {
+              onProgress(received / total);
+            }
+          })
+          .then(res => {
+            resolve(res.path());
+          })
+          .catch(err => reject(err)),
+      );
+      return filePath;
+    }
   }
 };
 

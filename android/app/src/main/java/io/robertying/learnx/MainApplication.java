@@ -7,17 +7,18 @@ import com.facebook.react.ReactPackage;
 import com.reactnativenavigation.NavigationApplication;
 import com.reactnativenavigation.react.NavigationReactNativeHost;
 
+import cl.json.ShareApplication;
+
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
 import org.unimodules.core.interfaces.SingletonModule;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import io.robertying.learnx.generated.BasePackageList;
 
-public class MainApplication extends NavigationApplication {
+public class MainApplication extends NavigationApplication implements ShareApplication {
 
     private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(new BasePackageList().getPackageList(), Arrays.<SingletonModule>asList());
 
@@ -35,7 +36,8 @@ public class MainApplication extends NavigationApplication {
 
                 @Override
                 public List<ReactPackage> getPackages() {
-                    ArrayList<ReactPackage> packages = new PackageList(this).getPackages();
+                    @SuppressWarnings("UnnecessaryLocalVariable")
+                    List<ReactPackage> packages = new PackageList(this).getPackages();
                     List<ReactPackage> unimodules = Arrays.<ReactPackage>asList(
                             new ModuleRegistryAdapter(mModuleRegistryProvider)
                     );
@@ -47,6 +49,11 @@ public class MainApplication extends NavigationApplication {
     @Override
     public ReactNativeHost getReactNativeHost() {
         return mReactNativeHost;
+    }
+
+    @Override
+    public String getFileProviderAuthority() {
+        return BuildConfig.APPLICATION_ID + ".provider";
     }
 
 }

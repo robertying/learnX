@@ -1,5 +1,7 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {View, Platform, SafeAreaView, Text} from 'react-native';
+import {View, Platform, SafeAreaView, Text, StyleSheet} from 'react-native';
+import RNFetchBlob from 'rn-fetch-blob';
+import mime from 'mime-types';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
 import PlaceholderLight from '../components/PlaceholderLight';
@@ -28,6 +30,13 @@ export interface IFilePreviewScreenProps {
   url: string;
   ext: string;
 }
+
+const styles = StyleSheet.create({
+  button: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
+});
 
 const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
   const {url, ext, filename, courseName} = props;
@@ -160,8 +169,14 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
           setProgress(0);
         }
       }
+      if (buttonId === 'open') {
+        RNFetchBlob.android.actionViewIntent(
+          filePath,
+          mime.lookup(ext) || 'text/plain',
+        );
+      }
     },
-    [ext, filename, props.componentId, url, courseName],
+    [ext, filename, props.componentId, url, courseName, filePath],
   );
 
   useEffect(() => {
@@ -236,19 +251,35 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
                 justifyContent: 'space-around',
                 alignItems: 'center',
               }}>
-              <IconButton
-                icon="refresh"
-                color={Colors.system('purple', colorScheme)}
-                size={50}
-                onPress={() => listener({buttonId: 'refresh'}) as any}
-              />
-              <IconButton
-                disabled={loading || !filePath}
-                icon="share"
-                color={Colors.system('purple', colorScheme)}
-                size={50}
-                onPress={() => listener({buttonId: 'share'}) as any}
-              />
+              <View style={styles.button}>
+                <IconButton
+                  icon="refresh"
+                  color={Colors.system('purple', colorScheme)}
+                  size={50}
+                  onPress={() => listener({buttonId: 'refresh'}) as any}
+                />
+                <Text>{getTranslation('refresh')}</Text>
+              </View>
+              <View style={styles.button}>
+                <IconButton
+                  disabled={loading || !filePath}
+                  icon="open-in-new"
+                  color={Colors.system('purple', colorScheme)}
+                  size={50}
+                  onPress={() => listener({buttonId: 'open'}) as any}
+                />
+                <Text>{getTranslation('open')}</Text>
+              </View>
+              <View style={styles.button}>
+                <IconButton
+                  disabled={loading || !filePath}
+                  icon="share"
+                  color={Colors.system('purple', colorScheme)}
+                  size={50}
+                  onPress={() => listener({buttonId: 'share'}) as any}
+                />
+                <Text>{getTranslation('share')}</Text>
+              </View>
             </View>
           </View>
         )}
