@@ -137,7 +137,12 @@ const NoticeScreen: INavigationScreen = props => {
       const screen = Dimensions.get('screen');
       if (
         window.width < screen.width &&
-        !(screen.height < screen.width && window.width > screen.width * 0.4)
+        !(
+          screen.height < screen.width &&
+          (DeviceInfo.isIPad12_9()
+            ? window.width > screen.width * 0.4
+            : window.width > screen.width / 2)
+        )
       ) {
         dispatch(setSetting('isCompact', true));
       } else {
