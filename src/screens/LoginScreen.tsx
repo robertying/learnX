@@ -12,6 +12,7 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -32,6 +33,7 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {iOSUIKit} from 'react-native-typography';
 import {useDispatch} from 'react-redux';
+import {setSetting} from '../redux/actions/settings';
 
 const styles = StyleSheet.create({
   note: {
@@ -39,6 +41,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontStyle: 'italic',
     width: '60%',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
   },
 });
 
@@ -48,6 +55,7 @@ const LoginScreen: INavigationScreen = props => {
   const dispatch = useDispatch();
   const auth = useTypedSelector(state => state.auth);
   const semesters = useTypedSelector(state => state.semesters);
+  const graduate = useTypedSelector(state => state.settings.graduate);
 
   const [loading, setLoading] = useState(false);
 
@@ -217,6 +225,19 @@ const LoginScreen: INavigationScreen = props => {
             value={password}
             onChangeText={handlePasswordChange}
           />
+          <View style={[styles.row, {marginTop: 30}]}>
+            <Switch
+              value={graduate}
+              onValueChange={value => dispatch(setSetting('graduate', value))}
+            />
+            <Text
+              style={{
+                color: Colors.system('purple', colorScheme),
+                marginLeft: 8,
+              }}>
+              {getTranslation('graduate')}
+            </Text>
+          </View>
           <RaisedButton
             testID="LoginButton"
             disabled={loading}

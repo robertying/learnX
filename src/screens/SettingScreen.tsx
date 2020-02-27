@@ -46,6 +46,7 @@ import RNCalendarEvents from 'react-native-calendar-events';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/share';
+import {ISettingsState} from '../redux/types/state';
 
 const SettingScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -238,6 +239,10 @@ const SettingScreen: INavigationScreen = props => {
     setCourseSyncModalVisible(true);
   };
 
+  const onSetting = (key: keyof ISettingsState, enabled: boolean) => {
+    dispatch(setSetting(key, enabled));
+  };
+
   useEffect(() => {
     if (courseSyncModalVisible) {
       (async () => {
@@ -252,10 +257,12 @@ const SettingScreen: INavigationScreen = props => {
           const firstHalfEvents = await dataSource.getCalendar(
             startDate,
             midEndDate,
+            settings.graduate,
           );
           const secondHalfEvents = await dataSource.getCalendar(
             midStartDate,
             endDate,
+            settings.graduate,
           );
           await saveCoursesToCalendar(
             [...firstHalfEvents, ...secondHalfEvents],
@@ -276,7 +283,7 @@ const SettingScreen: INavigationScreen = props => {
         }
       })();
     }
-  }, [courseSyncModalVisible]);
+  }, [courseSyncModalVisible, settings.graduate]);
 
   const renderListItem: ListRenderItem<{}> = ({index}) => {
     switch (index) {
@@ -342,8 +349,28 @@ const SettingScreen: INavigationScreen = props => {
       case 3:
         return (
           <SettingListItem
+            variant="switch"
+            icon={
+              <MaterialCommunityIcons
+                name="account-convert"
+                size={20}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
+              />
+            }
+            text={getTranslation('graduate')}
+            switchValue={settings.graduate}
+            onSwitchValueChange={e => onSetting('graduate', e)}
+          />
+        );
+      case 4:
+        return (
+          <SettingListItem
             variant="none"
-            containerStyle={{marginTop: 10}}
+            containerStyle={{marginTop: 16}}
             icon={
               <MaterialCommunityIcons
                 name="account-off"
@@ -359,7 +386,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onLogoutPress}
           />
         );
-      case 4:
+      case 5:
         return (
           <SettingListItem
             variant="none"
@@ -378,7 +405,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 5:
+      case 6:
         return (
           <SettingListItem
             variant="none"
@@ -397,11 +424,11 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onDeleteCalendarsPress}
           />
         );
-      case 6:
+      case 7:
         return Platform.OS === 'android' ? (
           <SettingListItem
             variant="none"
-            containerStyle={{marginTop: 10}}
+            containerStyle={{marginTop: 16}}
             icon={
               settings.hasUpdate ? (
                 <View>
@@ -446,11 +473,11 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 7:
+      case 8:
         return (
           <SettingListItem
             variant="arrow"
-            containerStyle={{marginTop: 10}}
+            containerStyle={{marginTop: 16}}
             icon={
               <MaterialCommunityIcons
                 name="help"
@@ -466,7 +493,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onHelpPress}
           />
         );
-      case 8:
+      case 9:
         return (
           <SettingListItem
             variant="arrow"
@@ -485,7 +512,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 9:
+      case 10:
         return (
           <SettingListItem
             variant="arrow"
@@ -526,6 +553,7 @@ const SettingScreen: INavigationScreen = props => {
           {key: 'calendarSync'},
           {key: 'courseSync'},
           {key: 'semesters'},
+          {key: 'graduate'},
           {key: 'logout'},
           {key: 'clearFileCache'},
           {key: 'deleteCalendars'},

@@ -29,6 +29,7 @@ export interface ISettingsState {
   lang?: Language | null;
   isCompact: boolean;
   hasUnread: Entity[];
+  graduate: boolean;
 }
 
 export interface ISemestersState {
