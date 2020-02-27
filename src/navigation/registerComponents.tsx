@@ -20,6 +20,7 @@ import FilePreviewScreen from '../screens/FilePreviewScreen';
 import HelpScreen from '../screens/HelpScreen';
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
 import {AppearanceProvider} from 'react-native-appearance';
+import AssignmentSubmitScreen from '../screens/AssignmentSubmitScreen';
 
 const storeWrapped = (Component: React.FC<any>) => (props: any) => (
   <Provider store={store}>
@@ -117,6 +118,12 @@ const registerScreens = () => {
     'webview',
     () => storeWrapped(FilePreviewScreen),
     () => FilePreviewScreen,
+  );
+
+  Navigation.registerComponent(
+    'assignment.submit',
+    () => storeWrapped(AssignmentSubmitScreen),
+    () => AssignmentSubmitScreen,
   );
 };
 

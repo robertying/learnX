@@ -17,6 +17,8 @@ export interface IAssignmentDetailScreenProps {
   gradeLevel?: string;
   gradeContent?: string;
   courseName?: string;
+  studentHomeworkId: string;
+  submittedContent?: string;
 }
 
 const AssignmentDetailScreen: INavigationScreen<IAssignmentDetailScreenProps> = props => {

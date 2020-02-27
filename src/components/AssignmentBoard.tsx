@@ -1,5 +1,11 @@
 import React, {FunctionComponent, useMemo} from 'react';
-import {ScrollView, TouchableHighlightProps, View, Text} from 'react-native';
+import {
+  ScrollView,
+  TouchableHighlightProps,
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
@@ -13,6 +19,11 @@ import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from '../screens/FilePreviewScreen';
 import {getWebViewTemplate} from '../helpers/html';
 import {useColorScheme} from 'react-native-appearance';
+import {
+  Navigation,
+  OptionsModalPresentationStyle,
+} from 'react-native-navigation';
+import {IAssignmentSubmitScreenProps} from '../screens/AssignmentSubmitScreen';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   title: string;
@@ -27,8 +38,25 @@ export type IAssignmentBoardProps = TouchableHighlightProps & {
   gradeLevel?: string;
   componentId: string;
   gradeContent?: string;
+  studentHomeworkId: string;
+  submittedContent?: string;
   beforeNavigation?: () => void;
 };
+
+const styles = StyleSheet.create({
+  padding: {
+    padding: 15,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  row: {
+    padding: 15,
+    paddingLeft: 20,
+    paddingRight: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+});
 
 const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
   const {
@@ -45,6 +73,8 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     gradeLevel,
     componentId,
     beforeNavigation,
+    studentHomeworkId,
+    submittedContent,
   } = props;
 
   const colorScheme = useColorScheme();
@@ -85,12 +115,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
         flex: 1,
         backgroundColor: Colors.system('background', colorScheme),
       }}>
-      <View
-        style={{
-          padding: 15,
-          paddingLeft: 20,
-          paddingRight: 20,
-        }}>
+      <View style={styles.padding}>
         <Text
           style={
             colorScheme === 'dark'
@@ -115,14 +140,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
       <Divider />
       {attachmentName ? (
         <>
-          <View
-            style={{
-              padding: 15,
-              paddingLeft: 20,
-              paddingRight: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
+          <View style={styles.row}>
             <Icon
               style={{marginRight: 5}}
               name="attachment"
@@ -149,14 +167,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
       ) : null}
       {submitTime ? (
         <>
-          <View
-            style={{
-              padding: 15,
-              paddingLeft: 20,
-              paddingRight: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
+          <View style={styles.row}>
             <Icon
               style={{marginRight: 5}}
               name="done"
@@ -181,9 +192,45 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
           <Divider />
         </>
       ) : null}
+      {dayjs().isBefore(dayjs(deadline)) && (
+        <>
+          <View style={styles.row}>
+            <Icon
+              style={{marginRight: 5}}
+              name="file-upload"
+              size={18}
+              color={Colors.system('purple', colorScheme)}
+            />
+            <TextButton
+              textStyle={{
+                color: Colors.system('purple', colorScheme),
+              }}
+              onPress={() =>
+                Navigation.showModal<IAssignmentSubmitScreenProps>({
+                  component: {
+                    name: 'assignment.submit',
+                    passProps: {
+                      studentHomeworkId,
+                      submittedAttachmentName,
+                      submittedContent,
+                    },
+                    options: {
+                      modalPresentationStyle:
+                        OptionsModalPresentationStyle.fullScreen,
+                    },
+                  },
+                })
+              }
+              ellipsizeMode="tail">
+              {getTranslation('submitAssignment')}
+            </TextButton>
+          </View>
+          <Divider />
+        </>
+      )}
       {grade || gradeLevel || gradeContent ? (
         <>
-          <View style={{padding: 15, paddingLeft: 20, paddingRight: 20}}>
+          <View style={styles.padding}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <Icon
                 style={{marginRight: 5}}

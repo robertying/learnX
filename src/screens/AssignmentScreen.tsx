@@ -225,7 +225,7 @@ const AssignmentScreen: INavigationScreen = props => {
   const onAssignmentCardPress = useCallback(
     (assignment: WithCourseInfo<IAssignment>) => {
       const name = 'assignments.detail';
-      const passProps = {
+      const passProps: IAssignmentDetailScreenProps = {
         title: assignment.title,
         deadline: assignment.deadline,
         description: assignment.description,
@@ -238,6 +238,8 @@ const AssignmentScreen: INavigationScreen = props => {
         gradeLevel: assignment.gradeLevel,
         gradeContent: assignment.gradeContent,
         courseName: assignment.courseName,
+        studentHomeworkId: assignment.studentHomeworkId,
+        submittedContent: assignment.submittedContent,
       };
       const title = assignment.courseName;
 

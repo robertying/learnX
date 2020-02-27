@@ -109,6 +109,7 @@ export interface IAssignment {
   gradeTime?: string;
   graderName?: string;
   gradeContent?: string;
+  studentHomeworkId: string;
 }
 export interface IAssignmentsState {
   isFetching: boolean;
