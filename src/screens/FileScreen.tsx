@@ -45,7 +45,6 @@ import {
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import Modal from 'react-native-modal';
-import Layout from '../constants/Layout';
 import Button from '../components/Button';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import {adaptToSystemTheme} from '../helpers/darkmode';
@@ -489,8 +488,7 @@ const FileScreen: INavigationScreen = props => {
             animationIn="bounceIn"
             animationOut="zoomOut"
             useNativeDriver={true}
-            deviceWidth={Layout.initialWindow.width}
-            deviceHeight={Layout.initialWindow.height}>
+            hideModalContentWhileAnimating={true}>
             <DateTimePicker
               style={{
                 backgroundColor: Colors.system('background', colorScheme),

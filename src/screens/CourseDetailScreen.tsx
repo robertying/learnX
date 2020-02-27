@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useCallback, useEffect} from 'react';
-import {Dimensions, Platform, View, SafeAreaView, Text} from 'react-native';
+import {Dimensions, View, SafeAreaView, Text} from 'react-native';
 import Modal from 'react-native-modal';
 import {
   Route,
@@ -15,7 +15,6 @@ import FileView from '../components/FileView';
 import NoticeBoard from '../components/NoticeBoard';
 import NoticeView from '../components/NoticeView';
 import Colors from '../constants/Colors';
-import Layout from '../constants/Layout';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
 import {stripExtension} from '../helpers/share';
@@ -287,12 +286,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
-        deviceWidth={Layout.initialWindow.width}
-        deviceHeight={
-          Platform.OS === 'android'
-            ? Layout.initialWindow.height + 100
-            : Layout.initialWindow.height
-        }>
+        hideModalContentWhileAnimating={true}>
         <View
           style={{
             height: '80%',
@@ -327,6 +321,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
               submitTime={currentModal.data!.submitTime}
               grade={currentModal.data!.grade}
               gradeContent={currentModal.data!.gradeContent}
+              studentHomeworkId={currentModal.data!.studentHomeworkId}
               beforeNavigation={() =>
                 setCurrentModal({type: 'Notice', visible: false})
               }

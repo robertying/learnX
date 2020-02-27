@@ -88,13 +88,13 @@ const LoginScreen: INavigationScreen = props => {
       setLoading(false);
       dispatch(setCurrentSemester(semesters.items[0]));
       Keyboard.dismiss();
-      Navigation.dismissModal('login');
+      Navigation.dismissModal(props.componentId);
       (async () => {
         const navigationRoot = await getNavigationRoot();
         Navigation.setRoot(navigationRoot);
       })();
     }
-  }, [auth.loggedIn, semesters.items, dispatch]);
+  }, [auth.loggedIn, semesters.items, dispatch, props.componentId]);
 
   useEffect(() => {
     if (semesters.error) {

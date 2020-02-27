@@ -38,7 +38,6 @@ import DeviceInfo from '../constants/DeviceInfo';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import Modal from 'react-native-modal';
-import Layout from '../constants/Layout';
 import {ActivityIndicator} from 'react-native-paper';
 import TextButton from '../components/TextButton';
 import {dataSource} from '../redux/dataSource';
@@ -572,8 +571,7 @@ const SettingScreen: INavigationScreen = props => {
         animationIn="bounceIn"
         animationOut="zoomOut"
         useNativeDriver={true}
-        deviceWidth={Layout.initialWindow.width}
-        deviceHeight={Layout.initialWindow.height}>
+        hideModalContentWhileAnimating={true}>
         <View
           style={{
             backgroundColor: Colors.system('background', colorScheme),
