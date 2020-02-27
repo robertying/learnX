@@ -11,7 +11,8 @@ export default {
   downloadingFile: '文件下载中……',
   downloadFileFailure: '文件下载失败',
   courses: '课程',
-  loginFailure: '登录失败。请检查网络连接并确保登录密码正确。',
+  loginFailure:
+    '登录失败。请检查网络连接并确保登录密码正确。如有必要，可尝试注销并重新登录。',
   completeCredentials: '请完整填写用户名与密码',
   username: '用户名',
   password: '密码',

@@ -12,7 +12,7 @@ export default {
   downloadFileFailure: 'Download failed',
   courses: 'Courses',
   loginFailure:
-    'Login failed. Please check the internet connection and make sure your password is correct.',
+    'Login failed. Please check the internet connection and make sure your password is correct. Logout and re-login if necessary.',
   completeCredentials: 'Please complete both the username and the password',
   username: 'Username',
   password: 'Password',
