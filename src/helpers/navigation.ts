@@ -64,13 +64,18 @@ export function setDetailView<T>(name: string, passProps?: T, title?: string) {
           topBar: {
             title: {
               text: title,
-              fontWeight: 'medium',
-              fontSize: 17,
             },
           },
           animations: {
-            setStackRoot: {
-              enabled: false,
+            push: {
+              content: {
+                waitForRender: true,
+                alpha: {
+                  from: 0,
+                  to: 1,
+                  duration: 250,
+                },
+              },
             },
           },
         },
