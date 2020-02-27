@@ -11,7 +11,8 @@ export default {
   downloadingFile: 'Downloading file...',
   downloadFileFailure: 'Download failed',
   courses: 'Courses',
-  loginFailure: 'Login failed',
+  loginFailure:
+    'Login failed. Please check the internet connection and make sure your password is correct.',
   completeCredentials: 'Please complete both the username and the password',
   username: 'Username',
   password: 'Password',
@@ -38,7 +39,7 @@ export default {
   accessCalendarFailure:
     'Cannot access Calendar. Make sure you have given the App permissions.',
   noAssignmentDescription: 'No assignment description',
-  emptyContent: 'No content',
+  emptyContent: 'No Content',
   noFileDescription: 'No file description',
   noNoticeContent: 'No notice content',
   effectAfterReboot: 'Settings will take effect next time the App launches',
@@ -71,4 +72,29 @@ export default {
     'Fetching course schedule...\nThis may fail sometimes\nJust try it again',
   courseSyncSuccess: 'Course schedule synced successfully',
   courseSyncFailure: 'Failed to sync course schedule... Try again later.',
+  credentialNote:
+    'Your credentials will only be stored locally and encrypted safely by system keychain/keystore',
+  unread: 'Unread',
+  shareFail: 'Failed to share this file',
+  deleteCalendars: 'Delete Synced Calendars',
+  deleteCalendarsConfirmation: 'Are you sure to delete synced calendars?',
+  deleteCalendarsSuccess: 'Successfully deleted synced calendars',
+  open: 'Open',
+  share: 'Share',
+  refresh: 'Refresh',
+  submit: 'Submit',
+  submitAssignment: 'Submit',
+  submitAssignmentConfirmation: 'Are you sure to submit the assignment?',
+  submitAssignmentSuccess:
+    'Successfully submitted the assignment. Please refresh to check the result.',
+  submitAssignmentFail: 'Failed to submit the assignment',
+  completeAssignment:
+    'Please either complete the content or upload an attachment',
+  assignmentContentPlaceholder: 'Input assignment content here...',
+  undo: 'Undo',
+  remove: 'Remove',
+  newAttachment: 'New Attachment',
+  addAttachment: 'Add Attachment',
+  overwriteOld: 'will overwrite the old one',
+  graduate: 'Graduate',
 };
