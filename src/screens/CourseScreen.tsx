@@ -32,7 +32,7 @@ const CourseScreen: INavigationScreen = props => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
   }, [colorScheme, props.componentId]);
 
   /**

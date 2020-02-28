@@ -58,7 +58,7 @@ const FileScreen: INavigationScreen = props => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
   }, [colorScheme, props.componentId]);
 
   /**
@@ -422,7 +422,8 @@ const FileScreen: INavigationScreen = props => {
         {Platform.OS === 'android' && (
           <Searchbar
             style={{
-              elevation: 4,
+              elevation: 2,
+              borderRadius: 0,
               backgroundColor: Colors.system('background', colorScheme),
             }}
             clearButtonMode="always"

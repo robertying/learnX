@@ -2,7 +2,10 @@ import {Navigation, Options} from 'react-native-navigation';
 import {Platform} from 'react-native';
 import Colors from '../constants/Colors';
 
-export const getAndroidTheme = (colorScheme: string) => {
+export const getAndroidTheme = (
+  colorScheme: string,
+  hideBackButton?: boolean,
+) => {
   return {
     layout: {
       backgroundColor: Colors.system('background', colorScheme),
@@ -12,9 +15,11 @@ export const getAndroidTheme = (colorScheme: string) => {
       style: colorScheme === 'dark' ? 'light' : 'dark',
     },
     topBar: {
-      backButton: {
-        color: Colors.system('foreground', colorScheme),
-      },
+      backButton: hideBackButton
+        ? undefined
+        : {
+            color: Colors.system('foreground', colorScheme),
+          },
       title: {
         color: Colors.system('foreground', colorScheme),
       },
@@ -31,9 +36,13 @@ export const getAndroidTheme = (colorScheme: string) => {
 export const adaptToSystemTheme = (
   componentId: string,
   colorScheme: string,
+  hideBackButton?: boolean,
 ) => {
   if (Platform.OS === 'android') {
-    Navigation.mergeOptions(componentId, getAndroidTheme(colorScheme));
+    Navigation.mergeOptions(
+      componentId,
+      getAndroidTheme(colorScheme, hideBackButton),
+    );
   } else {
     Navigation.mergeOptions(componentId, {
       window: {

@@ -514,6 +514,7 @@ const SettingScreen: INavigationScreen = props => {
       case 10:
         return (
           <SettingListItem
+            containerStyle={{marginBottom: 16}}
             variant="arrow"
             icon={
               <MaterialIcons
@@ -536,7 +537,7 @@ const SettingScreen: INavigationScreen = props => {
   };
 
   useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme);
+    adaptToSystemTheme(props.componentId, colorScheme, true);
   }, [colorScheme, props.componentId]);
 
   return (
