@@ -1068,7 +1068,14 @@
   resolved "https://registry.npm.taobao.org/@react-native-community/eslint-plugin/download/@react-native-community/eslint-plugin-1.0.0.tgz#ae9a430f2c5795debca491f15a989fce86ea75a0"
   integrity sha1-rppDDyxXld68pJHxWpifzobqdaA=
 
-"@react-native-community/push-notification-ios@1.0.6", "@react-native-community/push-notification-ios@^1.0.1":
+"@react-native-community/push-notification-ios@1.0.7":
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.0.7.tgz#4b3b459fb3d6bdf0a9851efdd430fdc0bd7a05f9"
+  integrity sha512-qY+vdaWVif7ulcdDTd9KryDudbuWtPnT4H0mWGadE73lSNM9X6x131WArAl0+Oo1tqfmE1TKRSocSN7CG0Ou/Q==
+  dependencies:
+    invariant "^2.2.4"
+
+"@react-native-community/push-notification-ios@^1.0.1":
   version "1.0.6"
   resolved "https://registry.npm.taobao.org/@react-native-community/push-notification-ios/download/@react-native-community/push-notification-ios-1.0.6.tgz#d0e90ec91139a6dfa043a572d41fe694db58bf54"
   integrity sha1-0OkOyRE5pt+gQ6Vy1B/mlNtYv1Q=
