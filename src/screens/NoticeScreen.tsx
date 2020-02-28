@@ -43,8 +43,6 @@ import {resetLoading} from '../redux/actions/root';
 import {getFuseOptions} from '../helpers/search';
 import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {INoticeDetailScreenProps} from './NoticeDetailScreen';
-// import BackgroundFetch from 'react-native-background-fetch';
-//import {runBackgroundTask} from '../helpers/background';
 import {
   requestNotificationPermission,
   showNotificationPermissionAlert,
@@ -72,19 +70,6 @@ const NoticeScreen: INavigationScreen = props => {
   /**
    * App scope stuff
    */
-
-  // useEffect(() => {
-  //   BackgroundFetch.configure(
-  //     {
-  //       minimumFetchInterval: 60 * 2,
-  //       enableHeadless: true,
-  //       stopOnTerminate: false,
-  //       startOnBoot: true,
-  //       requiredNetworkType: BackgroundFetch.NETWORK_TYPE_ANY,
-  //     },
-  //     runBackgroundTask,
-  //   );
-  // }, []);
 
   useEffect(() => {
     if (Platform.OS === 'android') {
