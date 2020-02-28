@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "7.8.4",
-    "@react-native-community/async-storage": "1.8.0",
+    "@react-native-community/async-storage": "1.8.1",
     "@react-native-community/datetimepicker": "2.2.2",
     "@react-native-community/push-notification-ios": "1.0.6",
     "darkreader": "4.7.15",
