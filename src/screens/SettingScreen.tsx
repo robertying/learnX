@@ -268,17 +268,19 @@ const SettingScreen: INavigationScreen = props => {
             startDate,
             endDate,
           );
+          setCourseSyncModalVisible(false);
+          await new Promise(r => setTimeout(r, 1500));
           Snackbar.show({
             text: getTranslation('courseSyncSuccess'),
             duration: Snackbar.LENGTH_SHORT,
           });
         } catch {
+          setCourseSyncModalVisible(false);
+          await new Promise(r => setTimeout(r, 1500));
           Snackbar.show({
             text: getTranslation('courseSyncFailure'),
             duration: Snackbar.LENGTH_SHORT,
           });
-        } finally {
-          setCourseSyncModalVisible(false);
         }
       })();
     }
