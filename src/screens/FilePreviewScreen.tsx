@@ -270,16 +270,6 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
                 />
                 <Text>{getTranslation('open')}</Text>
               </View>
-              <View style={styles.button}>
-                <IconButton
-                  disabled={loading || !filePath}
-                  icon="share"
-                  color={Colors.system('purple', colorScheme)}
-                  size={50}
-                  onPress={() => listener({buttonId: 'share'}) as any}
-                />
-                <Text>{getTranslation('share')}</Text>
-              </View>
             </View>
           </View>
         )}
