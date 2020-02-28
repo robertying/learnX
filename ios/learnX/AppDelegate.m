@@ -5,7 +5,6 @@
 #import <UserNotifications/UserNotifications.h>
 #import <UMReactNativeAdapter/UMModuleRegistryAdapter.h>
 #import <ReactNativeNavigation.h>
-#import <TSBackgroundFetch/TSBackgroundFetch.h>
 #import <Firebase.h>
 
 @implementation AppDelegate
@@ -22,9 +21,6 @@
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
   center.delegate = self;
 
-  TSBackgroundFetch *fetch = [TSBackgroundFetch sharedInstance];
-  [fetch registerAppRefreshTask];
-  
   [[UIView appearance] setTintColor:[UIColor systemPurpleColor]];
   if (@available(iOS 13.0, *)) {
     self.window.backgroundColor = [UIColor systemBackgroundColor];

@@ -2,10 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.transistorsoft.fetch</string>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -24,6 +20,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -40,42 +38,37 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Allow learnX to access your calendar for assignment deadline sync</string>
+	<string>Allow learnX to access your calendar</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow learnX to access your camera</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Allow learnX to access your contacts</string>
 	<key>NSDesktopFolderUsageDescription</key>
-	<string>Allow learnX to access your files for sharing</string>
+	<string>Allow learnX to access your files</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>Allow learnX to access your files for sharing</string>
+	<string>Allow learnX to access your files</string>
 	<key>NSDownloadsFolderUsageDescription</key>
-	<string>Allow learnX to access your files for sharing</string>
+	<string>Allow learnX to access your files</string>
 	<key>NSFileProviderDomainUsageDescription</key>
-	<string>Allow learnX to access your files for sharing</string>
+	<string>Allow learnX to access your files</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow learnX to access your microphone</string>
 	<key>NSNetworkVolumesUsageDescription</key>
-	<string>Allow learnX to access your files for sharing</string>
+	<string>Allow learnX to access your files</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Allow learnX to access your photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow learnX to access your photos</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>Allow learnX to access your reminders for assignment deadline sync</string>
+	<string>Allow learnX to access your reminders</string>
 	<key>NSRemovableVolumesUsageDescription</key>
-	<string>Allow learnX to access your files for sharing</string>
+	<string>Allow learnX to access your files</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AntDesign.ttf</string>
 		<string>Ionicons.ttf</string>
 		<string>MaterialCommunityIcons.ttf</string>
 		<string>MaterialIcons.ttf</string>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>processing</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>

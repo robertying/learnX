@@ -32,6 +32,7 @@
 		D4A5362C22E8F0AD00CFC941 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/LaunchScreen.storyboard"; sourceTree = "<group>"; };
 		D4C4AFBE22E90ABE00525042 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D4C4AFC122E924BA00525042 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = learnX/en.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D4D3A19523FFF82C000F6FFC /* learnX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 		F637BF5EECC01BD5184480D8 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -50,6 +51,7 @@
 		13B07FAE1A68108700A75B9A /* learnX */ = {
 			isa = PBXGroup;
 			children = (
+				D4D3A19523FFF82C000F6FFC /* learnX.entitlements */,
 				D4A5362422E8F05C00CFC941 /* InfoPlist.strings */,
 				D4A5362622E8F05C00CFC941 /* LaunchScreen.storyboard */,
 				D415DD5622B9373B00DC4D5C /* GoogleService-Info.plist */,
@@ -311,11 +313,15 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 400;
+				CURRENT_PROJECT_VERSION = 500;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
@@ -325,7 +331,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 7.1.0;
+				MARKETING_VERSION = 8.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -334,6 +340,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX;
 				PRODUCT_NAME = learnX;
 				PROVISIONING_PROFILE_SPECIFIER = "match Development io.robertying.learnX";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "match Development io.robertying.learnX macos";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -347,16 +355,20 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Mac Developer";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 400;
+				CURRENT_PROJECT_VERSION = 500;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
+				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = learnX/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 7.1.0;
+				MARKETING_VERSION = 8.0.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -365,6 +377,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX;
 				PRODUCT_NAME = learnX;
 				PROVISIONING_PROFILE_SPECIFIER = "match Development io.robertying.learnX";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "match Development io.robertying.learnX macos";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
