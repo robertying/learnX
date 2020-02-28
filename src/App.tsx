@@ -1,12 +1,15 @@
 import {Platform, UIManager} from 'react-native';
 import {Navigation} from 'react-native-navigation';
+import DeviceInfo from './constants/DeviceInfo';
 import {getAuthLoadingRoot} from './navigation/navigationRoot';
 import registerComponents from './navigation/registerComponents';
 import {Appearance} from 'react-native-appearance';
 import {getAndroidTheme} from './helpers/darkmode';
 
 const startApp = () => {
-  Navigation.events().registerAppLaunchedListener(() => {
+  Navigation.events().registerAppLaunchedListener(async () => {
+    await DeviceInfo.init();
+
     if (
       Platform.OS === 'android' &&
       UIManager.setLayoutAnimationEnabledExperimental

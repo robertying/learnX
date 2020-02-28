@@ -1,6 +1,12 @@
 import React, {useEffect, useState, useRef, useCallback} from 'react';
-import {View, Platform, SafeAreaView, Text, StyleSheet} from 'react-native';
-import RNFetchBlob from 'rn-fetch-blob';
+import {
+  View,
+  Platform,
+  SafeAreaView,
+  Text,
+  StyleSheet,
+  Linking,
+} from 'react-native';
 import mime from 'mime-types';
 import {Navigation} from 'react-native-navigation';
 import {WebView} from 'react-native-webview';
@@ -8,7 +14,7 @@ import PlaceholderLight from '../components/PlaceholderLight';
 import PlaceholderDark from '../components/PlaceholderDark';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
-import {downloadFile, shareFile} from '../helpers/share';
+import {downloadFile, shareFile, RNFetchBlob} from '../helpers/share';
 import Snackbar from 'react-native-snackbar';
 import {INavigationScreen} from '../types';
 import DeviceInfo from '../constants/DeviceInfo';
@@ -211,22 +217,25 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
             color={Colors.system('purple', colorScheme)}
           />
         )}
-        {Platform.OS === 'ios' && !loading && (filePath ? true : false) && (
-          <WebView
-            ref={webViewRef}
-            style={{
-              backgroundColor: needWhiteBackground(ext)
-                ? 'white'
-                : 'transparent',
-            }}
-            source={{
-              uri: filePath,
-            }}
-            originWhitelist={['*']}
-            decelerationRate="normal"
-            onContentProcessDidTerminate={handleProcessTerminate}
-          />
-        )}
+        {Platform.OS === 'ios' &&
+          !DeviceInfo.isMac() &&
+          !loading &&
+          (filePath ? true : false) && (
+            <WebView
+              ref={webViewRef}
+              style={{
+                backgroundColor: needWhiteBackground(ext)
+                  ? 'white'
+                  : 'transparent',
+              }}
+              source={{
+                uri: filePath,
+              }}
+              originWhitelist={['*']}
+              decelerationRate="normal"
+              onContentProcessDidTerminate={handleProcessTerminate}
+            />
+          )}
         {Platform.OS === 'android' && (
           <View
             style={{
@@ -308,6 +317,45 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
           ))}
         {Platform.OS === 'ios' && loading && (
           <ProgressBar progress={progress} color={Colors.theme} />
+        )}
+        {DeviceInfo.isMac() && (
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: Colors.system('background', colorScheme),
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={[
+                colorScheme === 'dark'
+                  ? iOSUIKit.largeTitleEmphasizedWhite
+                  : iOSUIKit.largeTitleEmphasized,
+                {marginHorizontal: 20, textAlign: 'center'},
+              ]}>{`${filename}.${ext}`}</Text>
+            <View
+              style={{
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+              }}>
+              <View style={styles.button}>
+                <IconButton
+                  disabled={loading || !filePath}
+                  icon="open-in-new"
+                  color={Colors.system('purple', colorScheme)}
+                  size={50}
+                  onPress={() => {
+                    Linking.openURL(filePath);
+                  }}
+                />
+                <Text>{getTranslation('open')}</Text>
+              </View>
+            </View>
+          </View>
         )}
       </SafeAreaView>
     </PaperProvider>

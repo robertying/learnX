@@ -340,8 +340,6 @@ PODS:
     - React
     - React-RCTImage
     - React-RCTText
-  - rn-fetch-blob (0.12.0):
-    - React-Core
   - RNCAsyncStorage (1.8.0):
     - React
   - RNCPushNotificationIOS (1.0.6):
@@ -419,7 +417,6 @@ DEPENDENCIES:
   - ReactCommon/callinvoker (from `../node_modules/react-native/ReactCommon`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
-  - rn-fetch-blob (from `../node_modules/rn-fetch-blob`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-community/async-storage`)"
   - "RNCPushNotificationIOS (from `../node_modules/@react-native-community/push-notification-ios`)"
   - "RNDateTimePicker (from `../node_modules/@react-native-community/datetimepicker`)"
@@ -532,8 +529,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   ReactNativeNavigation:
     :path: "../node_modules/react-native-navigation"
-  rn-fetch-blob:
-    :path: "../node_modules/rn-fetch-blob"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-community/async-storage"
   RNCPushNotificationIOS:
@@ -644,7 +639,6 @@ SPEC CHECKSUMS:
   React-RCTVibration: a1f0345d827a87a33e087d1f5773654494425ec6
   ReactCommon: 55870918392a39971fce8f8ee6d66d5f8d540862
   ReactNativeNavigation: 33657becf06c9c3a805ecb50dce8010fb887a1bb
-  rn-fetch-blob: f065bb7ab7fb48dd002629f8bdcb0336602d3cba
   RNCAsyncStorage: 5d83b49070d41fd72906a116c5e7bdac4ea3a814
   RNCPushNotificationIOS: 05262c52fcfb861a2b79aa8e51cad66263c9ea52
   RNDateTimePicker: 65eadfa62b069b415a6ac1d20a81cacfa26cb37a
@@ -670,6 +664,6 @@ SPEC CHECKSUMS:
   UMTaskManagerInterface: a98e37a576a5220bf43b8faf33cfdc129d2f441d
   Yoga: 2a6a35d2c9c18c1e3db875b1f1ccfc2296b18a59
 
-PODFILE CHECKSUM: 56fc91cf0eb7808be1004e48f67ec24cb38b2e91
+PODFILE CHECKSUM: 043e958e0b9a6b61a50ab76c938417da615f74ba
 
 COCOAPODS: 1.8.4

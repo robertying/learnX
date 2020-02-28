@@ -9,15 +9,15 @@ platform :ios do
 
   desc 'Fetch certificates and provisioning profiles.'
   lane :certificates do
-    match(app_identifier: 'io.robertying.learnX', type: 'development', readonly: is_ci)
-    match(app_identifier: 'io.robertying.learnX', type: 'appstore', readonly: is_ci)
+    match(app_identifier: 'io.robertying.learnX', type: 'development', platform: 'ios', readonly: is_ci)
+    match(app_identifier: 'io.robertying.learnX', type: 'appstore', platform: 'ios', readonly: is_ci)
   end
 
   desc 'Build the iOS application.'
   lane :build do
     certificates
     increment_build_number(xcodeproj: 'ios/learnX.xcodeproj')
-    gym(scheme: 'learnX', workspace: 'ios/learnX.xcworkspace')
+    gym(scheme: 'learnX', workspace: 'ios/learnX.xcworkspace', catalyst_platform: 'ios', clean: true)
   end
 
   desc 'Ship to Testflight.'

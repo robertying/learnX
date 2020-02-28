@@ -16,4 +16,5 @@ export default {
   isIPad: () => _isIPad,
   isIPad12_9: () => _isIPad12_9,
   buildNo: () => _buildNo,
+  isMac: () => Info.getSystemName() === 'Mac OS X',
 };

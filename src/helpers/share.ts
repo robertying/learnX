@@ -1,9 +1,13 @@
 import {Platform} from 'react-native';
 import Share from 'react-native-share';
 import fs from 'react-native-fs';
-import RNFetchBlob from 'rn-fetch-blob';
 import mime from 'mime-types';
 import {getTranslation} from './i18n';
+
+export let RNFetchBlob: typeof import('rn-fetch-blob').default;
+if (Platform.OS === 'android') {
+  RNFetchBlob = require('rn-fetch-blob').default;
+}
 
 export const shareFile = async (
   url: string,
@@ -26,7 +30,7 @@ export const shareFile = async (
 export const fileDir =
   Platform.OS === 'ios'
     ? `file://${fs.DocumentDirectoryPath}/files`
-    : `${RNFetchBlob.fs.dirs.DocumentDir}`;
+    : `${fs.DocumentDirectoryPath}`;
 
 export const downloadFile = async (
   url: string,

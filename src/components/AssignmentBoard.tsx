@@ -24,6 +24,7 @@ import {
   OptionsModalPresentationStyle,
 } from 'react-native-navigation';
 import {IAssignmentSubmitScreenProps} from '../screens/AssignmentSubmitScreen';
+import DeviceInfo from '../constants/DeviceInfo';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   title: string;
@@ -192,7 +193,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
           <Divider />
         </>
       ) : null}
-      {dayjs().isBefore(dayjs(deadline)) && (
+      {!DeviceInfo.isMac() && dayjs().isBefore(dayjs(deadline)) && (
         <>
           <View style={styles.row}>
             <Icon

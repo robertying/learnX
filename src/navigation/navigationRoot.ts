@@ -1,9 +1,9 @@
 import {LayoutBottomTabs, LayoutRoot} from 'react-native-navigation';
 import Colors from '../constants/Colors';
-import DeviceInfo from '../constants/DeviceInfo';
 import {getTranslation} from '../helpers/i18n';
 import {loadIcons} from '../helpers/icons';
 import {Appearance} from 'react-native-appearance';
+import DeviceInfo from '../constants/DeviceInfo';
 
 export const getAuthLoadingRoot = () => {
   const authLoadingRoot: LayoutRoot = {
@@ -29,7 +29,6 @@ const tabColorSettings = {
 
 export const getNavigationRoot = async () => {
   const icons = await loadIcons();
-  await DeviceInfo.init();
 
   const bottomTabs: LayoutBottomTabs = {
     children: [
@@ -46,7 +45,11 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'NoticeTab',
               text: getTranslation('notices'),
-              icon: icons.notifications,
+              icon: icons
+                ? icons.notifications
+                : ({
+                    uri: 'notifications',
+                  } as any),
               ...tabColorSettings,
             },
           },
@@ -65,7 +68,11 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'FileTab',
               text: getTranslation('files'),
-              icon: icons.folder,
+              icon: icons
+                ? icons.folder
+                : ({
+                    uri: 'folder',
+                  } as any),
               ...tabColorSettings,
             },
           },
@@ -84,7 +91,11 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'AssignmentTab',
               text: getTranslation('assignments'),
-              icon: icons.today,
+              icon: icons
+                ? icons.today
+                : ({
+                    uri: 'today',
+                  } as any),
               ...tabColorSettings,
             },
           },
@@ -103,7 +114,11 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'CourseTab',
               text: getTranslation('courses'),
-              icon: icons.apps,
+              icon: icons
+                ? icons.apps
+                : ({
+                    uri: 'apps',
+                  } as any),
               ...tabColorSettings,
             },
           },
@@ -123,7 +138,11 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'SettingTab',
               text: getTranslation('settings'),
-              icon: icons.settings,
+              icon: icons
+                ? icons.settings
+                : ({
+                    uri: 'settings',
+                  } as any),
               ...tabColorSettings,
             },
           },
@@ -154,6 +173,7 @@ export const getNavigationRoot = async () => {
             options: {
               splitView: {
                 displayMode: 'visible',
+                maxWidth: DeviceInfo.isMac() ? 1000 : undefined,
               },
             },
           },
