@@ -15,8 +15,8 @@
 App for Tsinghua University Web Learning, developed with React Native ⚛️
 
 <div align="center">
-    <img src="./docs/screenshots/1.png" height="350" />
-    <img src="./docs/screenshots/6.png" height="350" />
+    <img src="./docs/screenshots/1.png" height="400" />
+    <img src="./docs/screenshots/6.png" height="400" />
 </div>
 
 </div>
