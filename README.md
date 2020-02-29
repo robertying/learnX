@@ -1,24 +1,50 @@
-<img align="right" width="200" src="docs/screenshots/6.png" />
-<img align="right" width="200" src="docs/screenshots/1.png" />
+<div align="center">
 
-# learnX
+<h1>learnX</h1>
 
 [![Build Status](https://travis-ci.com/robertying/learnX.svg?branch=master)](https://travis-ci.com/robertying/learnX)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/robertying/learnX)](https://github.com/robertying/learnX/releases)
+[![Platform iOS](https://img.shields.io/badge/platform-ios-brightgreen)](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1)
+[![Platform Android](https://img.shields.io/badge/platform-android-brightgreen)](https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+[![Platform macOS](https://img.shields.io/badge/platform-macos-brightgreen)](https://github.com/robertying/learnX/releases)
 
-清华大学网络学堂 App，以 React Native 构建。
+![logo](./docs/logo.png)
 
-App for Tsinghua University Web Learning, developed with React Native ⚛️.
+清华大学网络学堂 App，以 React Native 构建
+
+App for Tsinghua University Web Learning, developed with React Native ⚛️
+
+<div align="center">
+    <img src="./docs/screenshots/1.png" height="350" />
+    <img src="./docs/screenshots/6.png" height="350" />
+</div>
+
+</div>
+
+## Download
+
+<a href='https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1'>
+    <img align="center" width=160 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
+</a>
+<a href='https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
+    <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
+</a>
+
+**Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).**
+
+**New! macOS users can now download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).** (Coming soon to Mac App Store)
 
 ## App Features
 
-### Basic Usage
+### Basic
 
 - Get a glance of the newest notices published by teachers.
 - Preview or download uploaded files of each course.
 - See any assignment detail while keeping track of deadlines.
 
-### Advanced Usage
+### Advanced
 
+- Submit assignments
 - Add to Favorites
 - Set a reminder
 - Hide courses
@@ -33,7 +59,7 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️.
 
 This project also serves as a demonstration of how to build a React Native app featuring:
 
-- Latest React Native (0.61)
+- Latest React Native (0.62)
 - Dark Mode for iOS / Dark Theme for Android
 - CocoaPods / AndroidX
 - Redux
@@ -41,17 +67,6 @@ This project also serves as a demonstration of how to build a React Native app f
 - Detox e2e tests (iOS & Android)
 - Continuous integration (Travis CI)
 - Automatic deployment (Fastlane)
-
-## Download
-
-<a href='https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1'>
-    <img align="center" width=160 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
-</a>
-<a href='https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
-    <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
-</a>
-
-**Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).**
 
 ## License
 

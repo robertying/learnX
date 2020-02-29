@@ -12,41 +12,40 @@ layout: default_cn
 
 **Android 用户还可以从 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载最新版本**
 
+**新：macOS 用户可以从 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载最新版本**（Mac App Store 稍后上架）
+
 ## 基础功能
 
 - 第一时间看到老师最新发布的通知及其附件
-
 - 预览或下载课程文件，将文件分享到其他应用
-
 - 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况
 
 ## 高级功能
 
-- 课表系统日历同步
-
-- Deadline 系统日历同步
-
-- 滑动卡片以置顶
-
-- 模糊搜索
-
+- 提交作业
+- 设置定时提醒
+- 隐藏课程
+- 滑动卡片以置顶、收藏
 - 暗黑模式
+- 课表日历同步
+- Deadline 系统日历同步
+- 模糊搜索
+- 切换当前学期
 
 ## 应用截图
 
 <div align="center">
     <img src="screenshots/1.png" width="40%" />
-    <img src="screenshots/6.png" width="40%" />
-</div>
-
-<div align="center">
-    <img src="screenshots/2.png" width="40%" />
     <img src="screenshots/3.png" width="40%" />
 </div>
 
 <div align="center">
     <img src="screenshots/4.png" width="40%" />
     <img src="screenshots/5.png" width="40%" />
+</div>
+
+<div align="center">
+    <img src="screenshots/6.png" width="90%" />
 </div>
 
 ## 反馈与建议
