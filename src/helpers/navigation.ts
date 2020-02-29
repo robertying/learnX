@@ -2,6 +2,7 @@ import {Navigation, Options} from 'react-native-navigation';
 import {Platform} from 'react-native';
 import Colors from '../constants/Colors';
 import {getAndroidTheme} from './darkmode';
+import DeviceInfo from '../constants/DeviceInfo';
 
 export function pushTo<T>(
   name: string,
@@ -87,6 +88,7 @@ export function setDetailView<T>(name: string, passProps?: T, title?: string) {
 export const getScreenOptions = (
   title: string,
   searchBarPlaceholder?: string,
+  hasRefreshButton?: boolean,
 ) => {
   const options: Options = {
     topBar: {
@@ -100,6 +102,15 @@ export const getScreenOptions = (
         hideNavBarOnFocusSearchBar: true,
       }),
       elevation: 0,
+      leftButtons:
+        hasRefreshButton && DeviceInfo.isMac()
+          ? [
+              {
+                id: 'refresh',
+                systemItem: 'refresh',
+              },
+            ]
+          : undefined,
     },
     bottomTabs: {
       translucent: true,

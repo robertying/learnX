@@ -52,6 +52,7 @@ import SegmentedControl from '../components/SegmentedControl';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {saveAssignmentsToCalendar} from '../helpers/calendar';
+import {Navigation} from 'react-native-navigation';
 
 const AssignmentScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -344,6 +345,17 @@ const AssignmentScreen: INavigationScreen = props => {
     invalidateAll();
   };
 
+  useEffect(() => {
+    const handler = Navigation.events().registerNavigationButtonPressedListener(
+      e => {
+        if (e.buttonId === 'refresh') {
+          invalidateAll();
+        }
+      },
+    );
+    return () => handler.remove();
+  }, [invalidateAll]);
+
   /**
    * Search
    */
@@ -604,6 +616,7 @@ const fuseOptions = getFuseOptions<IAssignment>([
 AssignmentScreen.options = getScreenOptions(
   getTranslation('assignments'),
   getTranslation('searchAssignments'),
+  true,
 );
 
 export default AssignmentScreen;

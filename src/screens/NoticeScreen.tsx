@@ -411,6 +411,17 @@ const NoticeScreen: INavigationScreen = props => {
     invalidateAll();
   };
 
+  useEffect(() => {
+    const handler = Navigation.events().registerNavigationButtonPressedListener(
+      e => {
+        if (e.buttonId === 'refresh') {
+          invalidateAll();
+        }
+      },
+    );
+    return () => handler.remove();
+  }, [invalidateAll]);
+
   /**
    * Search
    */
@@ -670,6 +681,7 @@ const fuseOptions = getFuseOptions<INotice>([
 NoticeScreen.options = getScreenOptions(
   getTranslation('notices'),
   getTranslation('searchNotices'),
+  true,
 );
 
 export default NoticeScreen;

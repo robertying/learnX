@@ -25,6 +25,7 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
 import {useDispatch} from 'react-redux';
+import {Navigation} from 'react-native-navigation';
 
 const CourseScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -178,6 +179,17 @@ const CourseScreen: INavigationScreen = props => {
     invalidateAll();
   };
 
+  useEffect(() => {
+    const handler = Navigation.events().registerNavigationButtonPressedListener(
+      e => {
+        if (e.buttonId === 'refresh') {
+          invalidateAll();
+        }
+      },
+    );
+    return () => handler.remove();
+  }, [invalidateAll]);
+
   const [segment, setSegment] = useState('visible');
 
   const handleSegmentChange = (value: string) => {
@@ -242,6 +254,10 @@ const CourseScreen: INavigationScreen = props => {
   );
 };
 
-CourseScreen.options = getScreenOptions(getTranslation('courses'));
+CourseScreen.options = getScreenOptions(
+  getTranslation('courses'),
+  undefined,
+  true,
+);
 
 export default CourseScreen;

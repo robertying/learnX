@@ -51,6 +51,7 @@ import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
+import {Navigation} from 'react-native-navigation';
 
 const FileScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -292,6 +293,17 @@ const FileScreen: INavigationScreen = props => {
   const onRefresh = () => {
     invalidateAll();
   };
+
+  useEffect(() => {
+    const handler = Navigation.events().registerNavigationButtonPressedListener(
+      e => {
+        if (e.buttonId === 'refresh') {
+          invalidateAll();
+        }
+      },
+    );
+    return () => handler.remove();
+  }, [invalidateAll]);
 
   /**
    * Search
@@ -551,6 +563,7 @@ const fuseOptions = getFuseOptions<IFile>([
 FileScreen.options = getScreenOptions(
   getTranslation('files'),
   getTranslation('searchFiles'),
+  true,
 );
 
 export default FileScreen;
