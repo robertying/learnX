@@ -18,6 +18,7 @@ const mockStore: IPersistAppState = {
     hasUpdate: false,
     isCompact: false,
     hasUnread: [Entity.Notice],
+    graduate: false,
   },
   semesters: {
     isFetching: false,
@@ -276,6 +277,7 @@ const mockStore: IPersistAppState = {
         attachmentUrl:
           'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         courseId: '2019-2020-1139283212',
+        studentHomeworkId: '1',
       },
       {
         id: '26ef84e76d60efc1016d6c459d717434',
@@ -289,6 +291,7 @@ const mockStore: IPersistAppState = {
         attachmentUrl:
           'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         courseId: '2019-2020-1139283212',
+        studentHomeworkId: '1',
       },
       {
         id: '26ef84e86cc25980016d39e751d54d3f',
@@ -304,6 +307,7 @@ const mockStore: IPersistAppState = {
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
         submittedAttachmentName: '绘图-2016011097.dwg',
         courseId: '2019-2020-1139282824',
+        studentHomeworkId: '1',
       },
       {
         id: '26ef84e76db3f55b016db4c2dec22c79',
@@ -318,6 +322,7 @@ const mockStore: IPersistAppState = {
         attachmentUrl:
           'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         courseId: '2019-2020-1139283216',
+        studentHomeworkId: '1',
       },
       {
         id: '26ef84e76d60efc1016d7acd91310c35',
@@ -332,6 +337,7 @@ const mockStore: IPersistAppState = {
         attachmentUrl:
           'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         courseId: '2019-2020-1139283216',
+        studentHomeworkId: '1',
       },
     ],
   },

@@ -14,6 +14,7 @@ export default function settings(
     lang: Language.en,
     isCompact: false,
     hasUnread: [Entity.File, Entity.Assignment, Entity.Notice],
+    graduate: false,
   },
   action: ISettingsAction,
 ): ISettingsState {
