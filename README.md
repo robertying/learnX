@@ -30,9 +30,11 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
     <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
 </a>
 
-**Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).**
+- **Self-hosted GitHub Release mirror (CDN): https://app.robertying.io/download/learnX**
 
-**New! macOS users can now download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).** (Coming soon to Mac App Store)
+- Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).
+
+- New! macOS users can now download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases). (Coming soon to Mac App Store)
 
 ## App Features
 
