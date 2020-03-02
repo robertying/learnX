@@ -133,12 +133,12 @@ const SettingScreen: INavigationScreen = props => {
   };
 
   const onCheckUpdatePress = async () => {
-    const {versionString, apkUrl} = await getLatestRelease();
+    const {version, url} = await getLatestRelease();
 
-    if (semverGt(versionString.slice(1), packageConfig.version)) {
+    if (semverGt(version, packageConfig.version)) {
       Alert.alert(
         getTranslation('checkUpdate'),
-        `${getTranslation('foundNewVersion')} ${versionString}`,
+        `${getTranslation('foundNewVersion')} v${version}`,
         [
           {
             text: getTranslation('cancel'),
@@ -147,7 +147,7 @@ const SettingScreen: INavigationScreen = props => {
           {
             text: getTranslation('update'),
             onPress: () => {
-              Linking.openURL(apkUrl);
+              Linking.openURL(url);
             },
           },
         ],
@@ -426,7 +426,7 @@ const SettingScreen: INavigationScreen = props => {
           />
         );
       case 7:
-        return Platform.OS === 'android' ? (
+        return Platform.OS === 'android' || DeviceInfo.isMac() ? (
           <SettingListItem
             variant="none"
             containerStyle={{marginTop: 16}}

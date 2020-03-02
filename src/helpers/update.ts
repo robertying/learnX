@@ -1,14 +1,26 @@
+import DeviceInfo from '../constants/DeviceInfo';
+import {Platform} from 'react-native';
+
 export const getLatestRelease = async () => {
   const response = await fetch(
-    'https://api.github.com/repos/robertying/learnX/releases/latest',
+    'https://app.robertying.io/download/learnX/latest.json',
   );
   const json = await response.json();
+  const version = json.version as string;
 
-  const versionString = json.tag_name as string;
-  const apkUrl = `https://github.com/robertying/learnX/releases/download/${versionString}/learnX-universal-${versionString}.apk`;
+  if (Platform.OS === 'android') {
+    const url = `https://app.robertying.io/download/learnX/learnX-${DeviceInfo.abi()}-v${version}.apk`;
 
-  return {
-    versionString,
-    apkUrl,
-  };
+    return {
+      version,
+      url,
+    };
+  } else {
+    const url = `https://app.robertying.io/download/learnX/learnX-mac-v${version}.zip`;
+
+    return {
+      version,
+      url,
+    };
+  }
 };

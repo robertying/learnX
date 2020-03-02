@@ -20,6 +20,7 @@ import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {setCredentials} from '../redux/dataSource';
 import {useTypedSelector} from '../redux/store';
+import DeviceInfo from '../constants/DeviceInfo';
 
 const AuthLoadingScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -66,11 +67,11 @@ const AuthLoadingScreen: INavigationScreen = props => {
   }, [rehydrated]);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
+    if (Platform.OS === 'android' || DeviceInfo.isMac()) {
       (async () => {
-        const {versionString} = await getLatestRelease();
+        const {version} = await getLatestRelease();
 
-        if (semverGt(versionString.slice(1), packageConfig.version)) {
+        if (semverGt(version, packageConfig.version)) {
           dispatch(setSetting('hasUpdate', true));
           Snackbar.show({
             text: getTranslation('pleaseUpdate'),
