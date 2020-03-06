@@ -30,6 +30,8 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
     <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
 </a>
 
+- **TUNA Mirror: https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX**
+
 - **Self-hosted GitHub Release mirror (CDN): https://app.robertying.io/download/learnX**
 
 - Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).
