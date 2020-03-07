@@ -35,7 +35,7 @@
     "path": "0.12.7",
     "react": "16.13.0",
     "react-native": "0.62.0-rc.4",
-    "react-native-appearance": "0.3.2",
+    "react-native-appearance": "0.3.3",
     "react-native-calendar-events": "1.7.3",
     "react-native-device-info": "5.5.3",
     "react-native-fs": "2.16.6",
