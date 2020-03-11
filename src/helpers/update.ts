@@ -1,22 +1,23 @@
 import DeviceInfo from '../constants/DeviceInfo';
 import {Platform} from 'react-native';
 
+const tunaMirrorUrl =
+  'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease';
+
 export const getLatestRelease = async () => {
-  const response = await fetch(
-    'https://app.robertying.io/download/learnX/latest.json',
-  );
+  const response = await fetch(`${tunaMirrorUrl}/latest.json`);
   const json = await response.json();
   const version = json.version as string;
 
   if (Platform.OS === 'android') {
-    const url = `https://app.robertying.io/download/learnX/learnX-${DeviceInfo.abi()}-v${version}.apk`;
+    const url = `${tunaMirrorUrl}/learnX-${DeviceInfo.abi()}-v${version}.apk`;
 
     return {
       version,
       url,
     };
   } else {
-    const url = `https://app.robertying.io/download/learnX/learnX-mac-v${version}.zip`;
+    const url = `${tunaMirrorUrl}/learnX-mac-v${version}.zip`;
 
     return {
       version,
