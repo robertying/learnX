@@ -2563,7 +2563,14 @@ d@1, d@^1.0.1:
     es5-ext "^0.10.50"
     type "^1.0.1"
 
-darkreader@4.7.15, darkreader@^4.7.15:
+darkreader@4.9.1:
+  version "4.9.1"
+  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.1.tgz#724828b30a0df0a350b2acf93ee98c85da0dc4d0"
+  integrity sha512-EMCHE2Qymg59sxMJVRwMHW7OifuMIf+I0i0rgW2+hrD81X+x80QWWTNEmdrl3306u+Kt16jf0qTWj6B+fxWRUg==
+  dependencies:
+    malevic "0.18.0"
+
+darkreader@^4.7.15:
   version "4.7.15"
   resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.7.15.tgz#f40b78379fb48db88d385bafb658c4dd3d8524d6"
   integrity sha512-i9OzIGJqmbghZ42MI0pHD9hIlEu5LDfOP5TWAg+OyZoO0XsW0D2HoFdCebS4OLRrEr3/TflzDYvUMVnosWR4uA==
@@ -5383,6 +5390,11 @@ malevic@0.16.3:
   version "0.16.3"
   resolved "https://registry.yarnpkg.com/malevic/-/malevic-0.16.3.tgz#acf1bfef2dbcca4789295cf1f33629794f3fb95c"
   integrity sha512-/ekZOKILDitU6igF0zxkuTNLQgNTTs+NafyQ19RXwT+VKN9K3qTngQ+TdqcaZJbhSzRqVIXBw6iso6WV56QlhQ==
+
+malevic@0.18.0:
+  version "0.18.0"
+  resolved "https://registry.yarnpkg.com/malevic/-/malevic-0.18.0.tgz#ed78a644329c410b3d66cb03f62a1c0332a6096c"
+  integrity sha512-d9XfQKexRjGUHugCUAMFjTbPnx1V8sfKcD9sYrk1/W/4/QpsgLR4x5GgkUGfHdsgQ2UbEcJSj6NWWJ+rd/m4aQ==
 
 map-age-cleaner@^0.1.1:
   version "0.1.3"
