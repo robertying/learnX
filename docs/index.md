@@ -10,9 +10,9 @@ layout: default_cn
 
 [![Get it on Google Play](assets/google-play-badge.svg)](https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
 
-- **TUNA 镜像：https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX**
+- **[TUNA 镜像](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
 
-- **自建服务器 CDN：https://app.robertying.io/download/learnX**
+- **[自建服务器 CDN](https://app.robertying.io/download/learnX)**
 
 - Android 用户还可以从 [GitHub Releases](https://github.com/robertying/learnX/releases) 下载最新版本
 
