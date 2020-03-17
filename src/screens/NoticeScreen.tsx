@@ -326,6 +326,7 @@ const NoticeScreen: INavigationScreen = props => {
       }
 
       dispatch(readNotice(notice.id));
+      fetch(notice.url);
     },
     [isCompact, colorScheme, props.componentId, dispatch],
   );

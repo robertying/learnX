@@ -122,6 +122,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
     (notice: INotice) => {
       setCurrentModal({type: 'Notice', data: notice, visible: true});
       dispatch(readNotice(notice.id));
+      fetch(notice.id);
     },
     [dispatch],
   );

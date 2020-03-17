@@ -61,6 +61,7 @@ export interface INotice {
   hasRead: boolean;
   attachmentName?: string;
   attachmentUrl?: string;
+  url: string;
 }
 export interface INoticesState {
   isFetching: boolean;
