@@ -28,6 +28,7 @@ def enableSeparateBuildPerCPUArchitecture = true
 def enableProguardInReleaseBuilds = true
 def jscFlavor = 'org.webkit:android-jsc:+'
 def enableHermes = project.ext.react.get("enableHermes", false);
+def taskName = getGradle().getStartParameter().getTaskRequests().toString()
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -101,6 +102,14 @@ android {
         pickFirst "lib/arm64-v8a/libc++_shared.so"
         pickFirst "lib/x86/libc++_shared.so"
         pickFirst "lib/x86_64/libc++_shared.so"
+
+        exclude "**/libjsc*.so"
+        if (taskName.contains("Debug")) {
+            exclude '**/libhermes-executor-release.so'
+        } else {
+            exclude '**/libhermes-inspector.so'
+            exclude '**/libhermes-executor-debug.so'
+        }
     }
 
     applicationVariants.all { variant ->
@@ -133,11 +142,10 @@ dependencies {
                                          'expo-permissions',
                                          'expo-file-system']])
 
-    implementation 'com.google.firebase:firebase-analytics:17.2.2'
+    implementation 'com.google.firebase:firebase-analytics:17.2.3'
     implementation 'com.google.firebase:firebase-crashlytics:17.0.0-beta01'
 
-    androidTestImplementation('com.wix:detox:+') { transitive = true }
-    androidTestImplementation 'junit:junit:4.13'
+    androidTestImplementation('com.wix:detox:+')
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
