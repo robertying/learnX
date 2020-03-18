@@ -11,7 +11,7 @@ export interface INoticeDetailScreenProps {
   publishTime: string;
   attachmentName?: string;
   attachmentUrl?: string;
-  courseName?: string;
+  courseName: string;
 }
 
 const NoticeDetailScreen: INavigationScreen<INoticeDetailScreenProps> = props => {

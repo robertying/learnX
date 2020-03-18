@@ -305,6 +305,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
               beforeNavigation={() =>
                 setCurrentModal({type: 'Notice', visible: false})
               }
+              courseName={course.name}
             />
           )}
           {currentModal.data && currentModal.type === 'Assignment' && (
@@ -326,6 +327,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
               beforeNavigation={() =>
                 setCurrentModal({type: 'Notice', visible: false})
               }
+              courseName={course.name}
             />
           )}
         </View>

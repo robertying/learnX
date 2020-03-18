@@ -29,6 +29,7 @@ export type INoticeBoardProps = TouchableHighlightProps & {
   attachmentUrl?: string;
   componentId: string;
   beforeNavigation?: () => void;
+  courseName: string;
 };
 
 const styles = StyleSheet.create({
@@ -62,11 +63,13 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
     publishTime,
     componentId,
     beforeNavigation,
+    courseName,
   } = props;
 
   const colorScheme = useColorScheme();
 
   const onAttachmentPress = async (
+    courseName: string,
     filename: string,
     url: string,
     ext: string,
@@ -83,7 +86,7 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
         filename: stripedFilename,
         url,
         ext,
-        courseName: 'notices',
+        courseName: `notices/${courseName}`,
       },
       stripedFilename,
       true,
@@ -152,6 +155,7 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
               }}
               onPress={() =>
                 onAttachmentPress(
+                  courseName,
                   attachmentName,
                   attachmentUrl!,
                   getExtension(attachmentName)!,

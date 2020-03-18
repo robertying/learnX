@@ -16,7 +16,7 @@ export interface IAssignmentDetailScreenProps {
   grade?: number;
   gradeLevel?: string;
   gradeContent?: string;
-  courseName?: string;
+  courseName: string;
   studentHomeworkId: string;
   submittedContent?: string;
 }

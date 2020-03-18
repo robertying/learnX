@@ -42,6 +42,7 @@ export type IAssignmentBoardProps = TouchableHighlightProps & {
   studentHomeworkId: string;
   submittedContent?: string;
   beforeNavigation?: () => void;
+  courseName: string;
 };
 
 const styles = StyleSheet.create({
@@ -76,11 +77,17 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
     beforeNavigation,
     studentHomeworkId,
     submittedContent,
+    courseName,
   } = props;
 
   const colorScheme = useColorScheme();
 
-  const onAttachmentPress = (filename: string, url: string, ext: string) => {
+  const onAttachmentPress = (
+    courseName: string,
+    filename: string,
+    url: string,
+    ext: string,
+  ) => {
     if (beforeNavigation) {
       beforeNavigation();
     }
@@ -93,7 +100,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
         filename: stripedFilename,
         url,
         ext,
-        courseName: 'assignments',
+        courseName: `assignments/${courseName}`,
       },
       stripedFilename,
       true,
@@ -154,6 +161,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               }}
               onPress={() =>
                 onAttachmentPress(
+                  courseName,
                   attachmentName,
                   attachmentUrl!,
                   getExtension(attachmentName)!,
@@ -181,6 +189,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
               }}
               onPress={() =>
                 onAttachmentPress(
+                  courseName,
                   submittedAttachmentName!,
                   submittedAttachmentUrl!,
                   getExtension(submittedAttachmentName!)!,
