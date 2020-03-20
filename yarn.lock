@@ -2634,7 +2634,14 @@ d@1, d@^1.0.1:
     es5-ext "^0.10.50"
     type "^1.0.1"
 
-darkreader@4.9.1, darkreader@^4.7.15:
+darkreader@4.9.2:
+  version "4.9.2"
+  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.2.tgz#f4a1500d4305e1adca2a44f11330dfac4722c7dc"
+  integrity sha512-5Jjf2vK9BmFBzndsomFdrMsndXQwfZkd6o2WyqwexVeryrOkTYW1CLS+MKtPt7/rv+0wn9eBY4iufIDPqaaZ+g==
+  dependencies:
+    malevic "0.18.0"
+
+darkreader@^4.7.15:
   version "4.9.1"
   resolved "https://registry.npm.taobao.org/darkreader/download/darkreader-4.9.1.tgz#724828b30a0df0a350b2acf93ee98c85da0dc4d0"
   integrity sha1-ckgoswoN8KNQsqz5PumMhdoNxNA=
