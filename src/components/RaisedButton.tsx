@@ -8,6 +8,7 @@ import {
   Text,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
+import Colors from '../constants/Colors';
 
 export type IRaisedButtonProps = TouchableOpacityProps & {
   style?: ViewProps['style'];
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 60,
     height: 30,
-    backgroundColor: 'lightblue',
+    backgroundColor: Colors.system('purple'),
     borderRadius: 8,
   },
   text: {
