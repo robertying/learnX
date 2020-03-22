@@ -51,7 +51,7 @@ export default function courses(
     case UNHIDE_COURSE:
       return {
         ...state,
-        hidden: state.hidden.filter(item => item !== action.payload),
+        hidden: state.hidden.filter((item) => item !== action.payload),
       };
   }
   return state;

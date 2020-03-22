@@ -17,7 +17,7 @@ export const getCoursesForSemesterAction = createAsyncAction(
 )<undefined, ICourse[], Error>();
 
 export function getCoursesForSemester(semesterId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getCoursesForSemesterAction.request());
 
     try {

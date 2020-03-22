@@ -58,7 +58,7 @@ export default function files(
             : [
                 ...state.unread,
                 ...differenceBy(action.payload, state.items, 'id').map(
-                  i => i.id,
+                  (i) => i.id,
                 ),
               ],
         items: action.payload,
@@ -88,14 +88,14 @@ export default function files(
                 ...differenceBy(
                   action.payload.files,
                   state.items.filter(
-                    item => item.courseId === action.payload.courseId,
+                    (item) => item.courseId === action.payload.courseId,
                   ),
                   'id',
-                ).map(i => i.id),
+                ).map((i) => i.id),
               ],
         items: [
           ...state.items.filter(
-            item => item.courseId !== action.payload.courseId,
+            (item) => item.courseId !== action.payload.courseId,
           ),
           ...action.payload.files,
         ],
@@ -115,7 +115,7 @@ export default function files(
     case READ_FILE:
       return {
         ...state,
-        unread: state.unread.filter(item => item !== action.payload),
+        unread: state.unread.filter((item) => item !== action.payload),
       };
     case PIN_FILE:
       return {
@@ -125,7 +125,7 @@ export default function files(
     case UNPIN_FILE:
       return {
         ...state,
-        pinned: state.pinned.filter(item => item !== action.payload),
+        pinned: state.pinned.filter((item) => item !== action.payload),
       };
     case FAV_FILE:
       return {
@@ -135,7 +135,7 @@ export default function files(
     case UNFAV_FILE:
       return {
         ...state,
-        favorites: state.favorites.filter(item => item !== action.payload),
+        favorites: state.favorites.filter((item) => item !== action.payload),
       };
   }
   return state;

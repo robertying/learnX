@@ -26,7 +26,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = props => {
+const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = (
+  props,
+) => {
   const {style, ...restProps} = props;
 
   return Platform.OS === 'ios' ? (

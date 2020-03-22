@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const FirebaseScreen: INavigationScreen = props => {
+const FirebaseScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();

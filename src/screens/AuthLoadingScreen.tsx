@@ -22,12 +22,14 @@ import {setCredentials} from '../redux/dataSource';
 import {useTypedSelector} from '../redux/store';
 import DeviceInfo from '../constants/DeviceInfo';
 
-const AuthLoadingScreen: INavigationScreen = props => {
+const AuthLoadingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const rehydrated = useTypedSelector(state => state.auth._persist?.rehydrated);
-  const auth = useTypedSelector(state => state.auth);
+  const rehydrated = useTypedSelector(
+    (state) => state.auth._persist?.rehydrated,
+  );
+  const auth = useTypedSelector((state) => state.auth);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);

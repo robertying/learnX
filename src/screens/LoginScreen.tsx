@@ -49,13 +49,13 @@ const styles = StyleSheet.create({
   },
 });
 
-const LoginScreen: INavigationScreen = props => {
+const LoginScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const auth = useTypedSelector(state => state.auth);
-  const semesters = useTypedSelector(state => state.semesters);
-  const graduate = useTypedSelector(state => state.settings.graduate);
+  const auth = useTypedSelector((state) => state.auth);
+  const semesters = useTypedSelector((state) => state.semesters);
+  const graduate = useTypedSelector((state) => state.settings.graduate);
 
   const [loading, setLoading] = useState(false);
 
@@ -120,7 +120,7 @@ const LoginScreen: INavigationScreen = props => {
       setLogoSize(160);
     } else {
       LayoutAnimation.spring();
-      setLogoSize(oldSize => oldSize + 10);
+      setLogoSize((oldSize) => oldSize + 10);
     }
   };
 
@@ -226,7 +226,7 @@ const LoginScreen: INavigationScreen = props => {
           <View style={[styles.row, {marginTop: 30}]}>
             <Switch
               value={graduate}
-              onValueChange={value => dispatch(setSetting('graduate', value))}
+              onValueChange={(value) => dispatch(setSetting('graduate', value))}
             />
             <Text
               style={{

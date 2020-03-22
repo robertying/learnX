@@ -53,7 +53,7 @@ export const downloadFile = async (
         fromUrl: url,
         toFile: filePath,
         begin: () => {},
-        progress: result => {
+        progress: (result) => {
           onProgress?.(result.bytesWritten / result.contentLength);
         },
       });
@@ -79,10 +79,10 @@ export const downloadFile = async (
               onProgress(received / total);
             }
           })
-          .then(res => {
+          .then((res) => {
             resolve(res.path());
           })
-          .catch(err => reject(err)),
+          .catch((err) => reject(err)),
       );
       return filePath;
     }

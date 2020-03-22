@@ -9,7 +9,7 @@ export interface IPlaceholderProps {
   children?: React.ReactElement;
 }
 
-const Placeholder: React.FunctionComponent<IPlaceholderProps> = props => {
+const Placeholder: React.FunctionComponent<IPlaceholderProps> = (props) => {
   const {loading, renderPlaceholder, children} = props;
 
   const [opacity] = useState(new Animated.Value(1));

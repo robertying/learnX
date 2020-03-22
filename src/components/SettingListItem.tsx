@@ -67,7 +67,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const SettingListItem: React.FunctionComponent<ISettingListItemProps> = props => {
+const SettingListItem: React.FunctionComponent<ISettingListItemProps> = (
+  props,
+) => {
   const {
     variant,
     icon,

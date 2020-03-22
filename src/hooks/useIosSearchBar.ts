@@ -20,7 +20,7 @@ function useIosSearchBar<T extends IEntity>(
         const resultsWithMatches = fuse.search<T>(
           text,
         ) as FuseResultWithMatches<T>[];
-        setSearchResults(resultsWithMatches.map(i => i.item));
+        setSearchResults(resultsWithMatches.map((i) => i.item));
       }
     },
     [entities, fuseOptions],

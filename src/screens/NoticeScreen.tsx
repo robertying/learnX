@@ -61,12 +61,12 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
 
-const NoticeScreen: INavigationScreen = props => {
+const NoticeScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const settings = useTypedSelector(state => state.settings);
-  const loginError = useTypedSelector(state => state.auth.error);
+  const settings = useTypedSelector((state) => state.settings);
+  const loginError = useTypedSelector((state) => state.auth.error);
 
   /**
    * App scope stuff
@@ -223,12 +223,12 @@ const NoticeScreen: INavigationScreen = props => {
    * Prepare data
    */
 
-  const courses = useTypedSelector(state => state.courses.items);
-  const notices = useTypedSelector(state => state.notices.items);
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const favNoticeIds = useTypedSelector(state => state.notices.favorites);
-  const pinnedNoticeIds = useTypedSelector(state => state.notices.pinned);
-  const unreadNoticeIds = useTypedSelector(state => state.notices.unread);
+  const courses = useTypedSelector((state) => state.courses.items);
+  const notices = useTypedSelector((state) => state.notices.items);
+  const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
+  const favNoticeIds = useTypedSelector((state) => state.notices.favorites);
+  const pinnedNoticeIds = useTypedSelector((state) => state.notices.pinned);
+  const unreadNoticeIds = useTypedSelector((state) => state.notices.unread);
 
   const courseNames = useMemo(
     () =>
@@ -255,7 +255,7 @@ const NoticeScreen: INavigationScreen = props => {
         .sort(
           (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
         )
-        .map(notice => ({
+        .map((notice) => ({
           ...notice,
           ...courseNames[notice.courseId],
         })),
@@ -264,43 +264,44 @@ const NoticeScreen: INavigationScreen = props => {
 
   const newNotices = useMemo(() => {
     const newNoticesOnly = sortedNotices.filter(
-      i =>
+      (i) =>
         !favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...newNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...newNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...newNoticesOnly.filter((i) => pinnedNoticeIds.includes(i.id)),
+      ...newNoticesOnly.filter((i) => !pinnedNoticeIds.includes(i.id)),
     ];
   }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
 
   const unreadNotices = useMemo(() => {
     const unreadNoticesOnly = sortedNotices.filter(
-      i =>
+      (i) =>
         unreadNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...unreadNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...unreadNoticesOnly.filter((i) => pinnedNoticeIds.includes(i.id)),
+      ...unreadNoticesOnly.filter((i) => !pinnedNoticeIds.includes(i.id)),
     ];
   }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices, unreadNoticeIds]);
 
   const favNotices = useMemo(() => {
     const favNoticesOnly = sortedNotices.filter(
-      i => favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+      (i) =>
+        favNoticeIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...favNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...favNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...favNoticesOnly.filter((i) => pinnedNoticeIds.includes(i.id)),
+      ...favNoticesOnly.filter((i) => !pinnedNoticeIds.includes(i.id)),
     ];
   }, [favNoticeIds, hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
 
   const hiddenNotices = useMemo(() => {
-    const hiddenNoticesOnly = sortedNotices.filter(i =>
+    const hiddenNoticesOnly = sortedNotices.filter((i) =>
       hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...hiddenNoticesOnly.filter(i => pinnedNoticeIds.includes(i.id)),
-      ...hiddenNoticesOnly.filter(i => !pinnedNoticeIds.includes(i.id)),
+      ...hiddenNoticesOnly.filter((i) => pinnedNoticeIds.includes(i.id)),
+      ...hiddenNoticesOnly.filter((i) => !pinnedNoticeIds.includes(i.id)),
     ];
   }, [hiddenCourseIds, pinnedNoticeIds, sortedNotices]);
 
@@ -312,13 +313,13 @@ const NoticeScreen: INavigationScreen = props => {
    * Fetch and handle error
    */
 
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const noticeError = useTypedSelector(state => state.notices.error);
-  const isFetching = useTypedSelector(state => state.notices.isFetching);
+  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const noticeError = useTypedSelector((state) => state.notices.error);
+  const isFetching = useTypedSelector((state) => state.notices.isFetching);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      dispatch(getAllNoticesForCourses(courses.map(i => i.id)));
+      dispatch(getAllNoticesForCourses(courses.map((i) => i.id)));
     }
   }, [courses, loggedIn, dispatch]);
 
@@ -341,7 +342,7 @@ const NoticeScreen: INavigationScreen = props => {
    * Render cards
    */
 
-  const isCompact = useTypedSelector(state => state.settings.isCompact);
+  const isCompact = useTypedSelector((state) => state.settings.isCompact);
 
   const onNoticeCardPress = useCallback(
     (notice: WithCourseInfo<INotice>) => {
@@ -466,11 +467,11 @@ const NoticeScreen: INavigationScreen = props => {
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
       pinned={pinnedNoticeIds.includes(item.id)}
-      onPinned={pin => onPinned(pin, item.id)}
+      onPinned={(pin) => onPinned(pin, item.id)}
       fav={favNoticeIds.includes(item.id)}
-      onFav={fav => onFav(fav, item.id)}
+      onFav={(fav) => onFav(fav, item.id)}
       unread={unreadNoticeIds.includes(item.id)}
-      onRead={read => onRead(read, item.id)}
+      onRead={(read) => onRead(read, item.id)}
       onPress={() => {
         onNoticeCardPress(item);
       }}
@@ -488,7 +489,7 @@ const NoticeScreen: INavigationScreen = props => {
 
   useEffect(() => {
     const handler = Navigation.events().registerNavigationButtonPressedListener(
-      e => {
+      (e) => {
         if (e.buttonId === 'refresh') {
           invalidateAll();
         }
@@ -642,7 +643,7 @@ const NoticeScreen: INavigationScreen = props => {
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <SegmentedControl
               values={[

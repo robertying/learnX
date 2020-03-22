@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = props => {
+const RaisedButton: React.FunctionComponent<IRaisedButtonProps> = (props) => {
   const {style, textStyle, onPress, children, testID} = props;
 
   return (

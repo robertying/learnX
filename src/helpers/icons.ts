@@ -25,7 +25,7 @@ export const loadIcons = async () => {
   }
 
   const imageSources = await Promise.all<number>(
-    iconNames.map(name => Icon.getImageSource(name, size)),
+    iconNames.map((name) => Icon.getImageSource(name, size)),
   );
 
   _icons = imageSources.reduce<IIcons>(

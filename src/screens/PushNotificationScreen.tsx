@@ -38,15 +38,15 @@ const styles = StyleSheet.create({
   },
 });
 
-const PushNotificationScreen: INavigationScreen = props => {
+const PushNotificationScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
 
-  const auth = useTypedSelector(state => state.auth);
-  const settings = useTypedSelector(state => state.settings);
+  const auth = useTypedSelector((state) => state.auth);
+  const settings = useTypedSelector((state) => state.settings);
   const pushNotificationsSettings = settings.pushNotifications;
-  const firebaseAuth = useTypedSelector(state => state.auth.firebase);
+  const firebaseAuth = useTypedSelector((state) => state.auth.firebase);
 
   const navigate = (name: string) => {
     if (DeviceInfo.isIPad() && !settings.isCompact) {
@@ -71,7 +71,7 @@ const PushNotificationScreen: INavigationScreen = props => {
 
   useEffect(() => {
     (async () => {
-      PushNotificationIOS.checkPermissions(permissions => {
+      PushNotificationIOS.checkPermissions((permissions) => {
         if (permissions.alert || permissions.badge || permissions.sound) {
           setPermissionGranted(true);
         } else {
@@ -316,7 +316,9 @@ const PushNotificationScreen: INavigationScreen = props => {
             !pushNotificationsSettings.agreementAcknowledged
           }
           switchValue={pushNotificationsSettings.enabled}
-          onSwitchValueChange={enabled => handlePushNotificationEnable(enabled)}
+          onSwitchValueChange={(enabled) =>
+            handlePushNotificationEnable(enabled)
+          }
         />
       </ScrollView>
     </SafeAreaView>

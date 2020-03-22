@@ -44,7 +44,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = props => {
+const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = (
+  props,
+) => {
   const {url, ext, filename, courseName} = props;
 
   const [loading, setLoading] = useState(false);

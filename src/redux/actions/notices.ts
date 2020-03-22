@@ -25,12 +25,12 @@ export const getNoticesForCourseAction = createAsyncAction(
 )<undefined, {courseId: string; notices: INotice[]}, Error>();
 
 export function getNoticesForCourse(courseId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getNoticesForCourseAction.request());
 
     try {
       const results = await dataSource.getNotificationList(courseId);
-      const notices = results.map(result => ({
+      const notices = results.map((result) => ({
         ...result,
         courseId,
       }));
@@ -48,7 +48,7 @@ export const getAllNoticesForCoursesAction = createAsyncAction(
 )<undefined, INotice[], Error>();
 
 export function getAllNoticesForCourses(courseIds: string[]): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getAllNoticesForCoursesAction.request());
 
     try {
@@ -57,9 +57,9 @@ export function getAllNoticesForCourses(courseIds: string[]): IThunkResult {
         ContentType.NOTIFICATION,
       );
       const notices = Object.keys(results)
-        .map(courseId => {
+        .map((courseId) => {
           const noticesForCourse = results[courseId] as Notification[];
-          return noticesForCourse.map(notice => ({
+          return noticesForCourse.map((notice) => ({
             ...notice,
             courseId,
           }));

@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = props => {
+const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
   const {
     title,
     deadline,

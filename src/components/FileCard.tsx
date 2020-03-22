@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const FileCard: React.FC<IFileCardProps> = props => {
+const FileCard: React.FC<IFileCardProps> = (props) => {
   const {
     onPress,
     title,

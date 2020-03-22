@@ -27,7 +27,7 @@ import Snackbar from 'react-native-snackbar';
 import {useDispatch} from 'react-redux';
 import {Navigation} from 'react-native-navigation';
 
-const CourseScreen: INavigationScreen = props => {
+const CourseScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
@@ -40,16 +40,16 @@ const CourseScreen: INavigationScreen = props => {
    * Prepare data
    */
 
-  const courses = useTypedSelector(state => state.courses.items);
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const courses = useTypedSelector((state) => state.courses.items);
+  const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
 
   const visibleCourses = useMemo(
-    () => courses.filter(i => !hiddenCourseIds.includes(i.id)),
+    () => courses.filter((i) => !hiddenCourseIds.includes(i.id)),
     [courses, hiddenCourseIds],
   );
 
   const hiddenCourses = useMemo(
-    () => courses.filter(i => hiddenCourseIds.includes(i.id)),
+    () => courses.filter((i) => hiddenCourseIds.includes(i.id)),
     [courses, hiddenCourseIds],
   );
 
@@ -61,10 +61,10 @@ const CourseScreen: INavigationScreen = props => {
    * Fetch and handle error
    */
 
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const courseError = useTypedSelector(state => state.courses.error);
-  const isFetching = useTypedSelector(state => state.courses.isFetching);
-  const semesterId = useTypedSelector(state => state.currentSemester);
+  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const courseError = useTypedSelector((state) => state.courses.error);
+  const isFetching = useTypedSelector((state) => state.courses.isFetching);
+  const semesterId = useTypedSelector((state) => state.currentSemester);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && semesterId) {
@@ -98,7 +98,7 @@ const CourseScreen: INavigationScreen = props => {
    * Render cards
    */
 
-  const isCompact = useTypedSelector(state => state.settings.isCompact);
+  const isCompact = useTypedSelector((state) => state.settings.isCompact);
 
   const onCourseCardPress = (course: ICourse) => {
     const name = 'courses.detail';
@@ -129,14 +129,14 @@ const CourseScreen: INavigationScreen = props => {
     }
   };
 
-  const notices = useTypedSelector(state => state.notices.items);
-  const files = useTypedSelector(state => state.files.items);
-  const assignments = useTypedSelector(state => state.assignments.items);
+  const notices = useTypedSelector((state) => state.notices.items);
+  const files = useTypedSelector((state) => state.files.items);
+  const assignments = useTypedSelector((state) => state.assignments.items);
 
-  const unreadNoticeIds = useTypedSelector(state => state.notices.unread);
-  const unreadFileIds = useTypedSelector(state => state.files.unread);
+  const unreadNoticeIds = useTypedSelector((state) => state.notices.unread);
+  const unreadFileIds = useTypedSelector((state) => state.files.unread);
   const unreadAssignmentIds = useTypedSelector(
-    state => state.assignments.unread,
+    (state) => state.assignments.unread,
   );
 
   const renderListItem = ({item}: {item: ICourse}) => (
@@ -147,24 +147,25 @@ const CourseScreen: INavigationScreen = props => {
       semester={semesterId}
       noticesCount={
         notices.filter(
-          notice =>
+          (notice) =>
             notice.courseId === item.id && unreadNoticeIds.includes(notice.id),
         ).length
       }
       filesCount={
         files.filter(
-          file => file.courseId === item.id && unreadFileIds.includes(file.id),
+          (file) =>
+            file.courseId === item.id && unreadFileIds.includes(file.id),
         ).length
       }
       assignmentsCount={
         assignments.filter(
-          assignment =>
+          (assignment) =>
             assignment.courseId === item.id &&
             unreadAssignmentIds.includes(assignment.id),
         ).length
       }
       hidden={hiddenCourseIds.includes(item.id)}
-      onHide={hide => onHide!(hide, item.id)}
+      onHide={(hide) => onHide!(hide, item.id)}
       onPress={() => {
         onCourseCardPress(item);
       }}
@@ -181,7 +182,7 @@ const CourseScreen: INavigationScreen = props => {
 
   useEffect(() => {
     const handler = Navigation.events().registerNavigationButtonPressedListener(
-      e => {
+      (e) => {
         if (e.buttonId === 'refresh') {
           invalidateAll();
         }
@@ -227,7 +228,7 @@ const CourseScreen: INavigationScreen = props => {
           ListEmptyComponent={EmptyList}
           data={currentDisplayCourses}
           renderItem={renderListItem}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <SegmentedControl
               values={[

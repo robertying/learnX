@@ -18,7 +18,7 @@ export interface IFileViewProps {
   onRefresh?: () => void;
 }
 
-const FileView: React.FC<IFileViewProps> = props => {
+const FileView: React.FC<IFileViewProps> = (props) => {
   const {files, onFileCardPress, isFetching, onRefresh} = props;
 
   const renderListItem: ListRenderItem<IFile> = ({item}) => {

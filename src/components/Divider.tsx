@@ -4,7 +4,7 @@ import {useColorScheme} from 'react-native-appearance';
 
 export type IDividerProps = ViewProps;
 
-const Divider: React.FC<IDividerProps> = props => {
+const Divider: React.FC<IDividerProps> = (props) => {
   const colorScheme = useColorScheme();
 
   return (

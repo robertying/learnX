@@ -15,7 +15,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const EmptyList: React.FC<ViewProps> = props => {
+const EmptyList: React.FC<ViewProps> = (props) => {
   const {style} = props;
 
   const colorScheme = useColorScheme();

@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const CourseCard: React.FC<ICourseCardProps> = props => {
+const CourseCard: React.FC<ICourseCardProps> = (props) => {
   const {
     onPress,
     courseName,

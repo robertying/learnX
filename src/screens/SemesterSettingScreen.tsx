@@ -16,12 +16,12 @@ import {getAllNoticesForCoursesAction} from '../redux/actions/notices';
 import {getAllFilesForCoursesAction} from '../redux/actions/files';
 import {getAllAssignmentsForCoursesAction} from '../redux/actions/assignments';
 
-const SemesterSettingScreen: INavigationScreen = props => {
+const SemesterSettingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const currentSemester = useTypedSelector(state => state.currentSemester);
-  const semesters = useTypedSelector(state => state.semesters.items);
+  const currentSemester = useTypedSelector((state) => state.currentSemester);
+  const semesters = useTypedSelector((state) => state.semesters.items);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);

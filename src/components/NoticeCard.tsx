@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const NoticeCard: React.FC<INoticeCardProps> = props => {
+const NoticeCard: React.FC<INoticeCardProps> = (props) => {
   const {
     onPress,
     title,

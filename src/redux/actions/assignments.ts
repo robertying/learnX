@@ -32,12 +32,12 @@ export const getAssignmentsForCourseAction = createAsyncAction(
 >();
 
 export function getAssignmentsForCourse(courseId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getAssignmentsForCourseAction.request());
 
     try {
       const results = await dataSource.getHomeworkList(courseId);
-      const assignments = results.map(result => ({
+      const assignments = results.map((result) => ({
         ...result,
         courseId,
       }));
@@ -55,7 +55,7 @@ export const getAllAssignmentsForCoursesAction = createAsyncAction(
 )<undefined, IAssignment[], Error>();
 
 export function getAllAssignmentsForCourses(courseIds: string[]): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
     try {
@@ -64,9 +64,9 @@ export function getAllAssignmentsForCourses(courseIds: string[]): IThunkResult {
         ContentType.HOMEWORK,
       );
       const assignments = Object.keys(results)
-        .map(courseId => {
+        .map((courseId) => {
           const assignmentsForCourse = results[courseId] as Homework[];
-          return assignmentsForCourse.map(assignment => ({
+          return assignmentsForCourse.map((assignment) => ({
             ...assignment,
             courseId,
           }));

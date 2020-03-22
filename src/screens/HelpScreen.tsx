@@ -21,7 +21,7 @@ const markdown = getLocale().startsWith('zh')
         module.exports = fs.readFileSync(require.resolve('../assets/HELP_EN.md'), 'utf8')
 `;
 
-const HelpScreen: INavigationScreen = props => {
+const HelpScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
@@ -30,7 +30,9 @@ const HelpScreen: INavigationScreen = props => {
 
   const webViewRef = useRef<WebView>(null);
 
-  const onNavigationStateChange: WebViewProps['onNavigationStateChange'] = e => {
+  const onNavigationStateChange: WebViewProps['onNavigationStateChange'] = (
+    e,
+  ) => {
     if (e.navigationType === 'click') {
       if (webViewRef.current) {
         webViewRef.current.stopLoading();

@@ -25,9 +25,7 @@ const loginScreenDescription = () => {
   });
 
   it('should login after click button', async () => {
-    await element(by.id('LoginButton'))
-      .atIndex(0)
-      .tap();
+    await element(by.id('LoginButton')).atIndex(0).tap();
   });
 };
 

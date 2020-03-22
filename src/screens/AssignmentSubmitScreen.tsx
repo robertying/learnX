@@ -60,7 +60,9 @@ const styles = StyleSheet.create({
   },
 });
 
-const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = props => {
+const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = (
+  props,
+) => {
   const {studentHomeworkId, submittedAttachmentName, submittedContent} = props;
 
   const colorScheme = useColorScheme();

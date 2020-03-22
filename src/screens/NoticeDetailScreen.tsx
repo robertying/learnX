@@ -14,7 +14,9 @@ export interface INoticeDetailScreenProps {
   courseName: string;
 }
 
-const NoticeDetailScreen: INavigationScreen<INoticeDetailScreenProps> = props => {
+const NoticeDetailScreen: INavigationScreen<INoticeDetailScreenProps> = (
+  props,
+) => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {

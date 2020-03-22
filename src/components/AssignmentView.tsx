@@ -18,7 +18,9 @@ export interface IAssignmentViewProps {
   onRefresh?: () => void;
 }
 
-const AssignmentView: React.FunctionComponent<IAssignmentViewProps> = props => {
+const AssignmentView: React.FunctionComponent<IAssignmentViewProps> = (
+  props,
+) => {
   const {assignments, onAssignmentCardPress, isFetching, onRefresh} = props;
 
   const renderListItem: ListRenderItem<IAssignment> = ({item}) => {

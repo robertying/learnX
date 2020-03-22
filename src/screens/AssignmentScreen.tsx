@@ -55,7 +55,7 @@ import {useTypedSelector} from '../redux/store';
 import {saveAssignmentsToCalendar} from '../helpers/calendar';
 import {Navigation} from 'react-native-navigation';
 
-const AssignmentScreen: INavigationScreen = props => {
+const AssignmentScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
@@ -68,17 +68,17 @@ const AssignmentScreen: INavigationScreen = props => {
    * Prepare data
    */
 
-  const courses = useTypedSelector(state => state.courses.items);
-  const assignments = useTypedSelector(state => state.assignments.items);
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const courses = useTypedSelector((state) => state.courses.items);
+  const assignments = useTypedSelector((state) => state.assignments.items);
+  const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
   const favAssignmentIds = useTypedSelector(
-    state => state.assignments.favorites,
+    (state) => state.assignments.favorites,
   );
   const pinnedAssignmentIds = useTypedSelector(
-    state => state.assignments.pinned,
+    (state) => state.assignments.pinned,
   );
   const unreadAssignmentIds = useTypedSelector(
-    state => state.assignments.unread,
+    (state) => state.assignments.unread,
   );
 
   const courseNames = useMemo(
@@ -104,12 +104,12 @@ const AssignmentScreen: INavigationScreen = props => {
     () =>
       [
         ...assignments
-          .filter(item => dayjs(item.deadline).unix() > dayjs().unix())
+          .filter((item) => dayjs(item.deadline).unix() > dayjs().unix())
           .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix()),
         ...assignments
-          .filter(item => dayjs(item.deadline).unix() < dayjs().unix())
+          .filter((item) => dayjs(item.deadline).unix() < dayjs().unix())
           .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
-      ].map(assignment => ({
+      ].map((assignment) => ({
         ...assignment,
         ...courseNames[assignment.courseId],
       })),
@@ -118,13 +118,13 @@ const AssignmentScreen: INavigationScreen = props => {
 
   const newAssignments = useMemo(() => {
     const newAssignmentsOnly = sortedAssignments.filter(
-      i =>
+      (i) =>
         !favAssignmentIds.includes(i.id) &&
         !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...newAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...newAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...newAssignmentsOnly.filter((i) => pinnedAssignmentIds.includes(i.id)),
+      ...newAssignmentsOnly.filter((i) => !pinnedAssignmentIds.includes(i.id)),
     ];
   }, [
     favAssignmentIds,
@@ -135,13 +135,17 @@ const AssignmentScreen: INavigationScreen = props => {
 
   const unreadAssignments = useMemo(() => {
     const unreadAssignmentsOnly = sortedAssignments.filter(
-      i =>
+      (i) =>
         unreadAssignmentIds.includes(i.id) &&
         !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...unreadAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...unreadAssignmentsOnly.filter((i) =>
+        pinnedAssignmentIds.includes(i.id),
+      ),
+      ...unreadAssignmentsOnly.filter(
+        (i) => !pinnedAssignmentIds.includes(i.id),
+      ),
     ];
   }, [
     hiddenCourseIds,
@@ -152,13 +156,13 @@ const AssignmentScreen: INavigationScreen = props => {
 
   const favAssignments = useMemo(() => {
     const favAssignmentsOnly = sortedAssignments.filter(
-      i =>
+      (i) =>
         favAssignmentIds.includes(i.id) &&
         !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...favAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...favAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...favAssignmentsOnly.filter((i) => pinnedAssignmentIds.includes(i.id)),
+      ...favAssignmentsOnly.filter((i) => !pinnedAssignmentIds.includes(i.id)),
     ];
   }, [
     favAssignmentIds,
@@ -168,12 +172,16 @@ const AssignmentScreen: INavigationScreen = props => {
   ]);
 
   const hiddenAssignments = useMemo(() => {
-    const hiddenAssignmentsOnly = sortedAssignments.filter(i =>
+    const hiddenAssignmentsOnly = sortedAssignments.filter((i) =>
       hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...hiddenAssignmentsOnly.filter(i => pinnedAssignmentIds.includes(i.id)),
-      ...hiddenAssignmentsOnly.filter(i => !pinnedAssignmentIds.includes(i.id)),
+      ...hiddenAssignmentsOnly.filter((i) =>
+        pinnedAssignmentIds.includes(i.id),
+      ),
+      ...hiddenAssignmentsOnly.filter(
+        (i) => !pinnedAssignmentIds.includes(i.id),
+      ),
     ];
   }, [hiddenCourseIds, pinnedAssignmentIds, sortedAssignments]);
 
@@ -185,14 +193,14 @@ const AssignmentScreen: INavigationScreen = props => {
    * Fetch and handle error
    */
 
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const assignmentError = useTypedSelector(state => state.assignments.error);
-  const isFetching = useTypedSelector(state => state.assignments.isFetching);
-  const calendarSync = useTypedSelector(state => state.settings.calendarSync);
+  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const assignmentError = useTypedSelector((state) => state.assignments.error);
+  const isFetching = useTypedSelector((state) => state.assignments.isFetching);
+  const calendarSync = useTypedSelector((state) => state.settings.calendarSync);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      dispatch(getAllAssignmentsForCourses(courses.map(i => i.id)));
+      dispatch(getAllAssignmentsForCourses(courses.map((i) => i.id)));
     }
   }, [courses, loggedIn, dispatch]);
 
@@ -221,7 +229,7 @@ const AssignmentScreen: INavigationScreen = props => {
    * Render cards
    */
 
-  const isCompact = useTypedSelector(state => state.settings.isCompact);
+  const isCompact = useTypedSelector((state) => state.settings.isCompact);
 
   const onAssignmentCardPress = useCallback(
     (assignment: WithCourseInfo<IAssignment>) => {
@@ -354,11 +362,11 @@ const AssignmentScreen: INavigationScreen = props => {
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
       pinned={pinnedAssignmentIds.includes(item.id)}
-      onPinned={pin => onPinned(pin, item.id)}
+      onPinned={(pin) => onPinned(pin, item.id)}
       fav={favAssignmentIds.includes(item.id)}
-      onFav={fav => onFav(fav, item.id)}
+      onFav={(fav) => onFav(fav, item.id)}
       unread={unreadAssignmentIds.includes(item.id)}
-      onRead={read => onRead(read, item.id)}
+      onRead={(read) => onRead(read, item.id)}
       onPress={() => {
         onAssignmentCardPress(item);
       }}
@@ -376,7 +384,7 @@ const AssignmentScreen: INavigationScreen = props => {
 
   useEffect(() => {
     const handler = Navigation.events().registerNavigationButtonPressedListener(
-      e => {
+      (e) => {
         if (e.buttonId === 'refresh') {
           invalidateAll();
         }
@@ -531,7 +539,7 @@ const AssignmentScreen: INavigationScreen = props => {
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <SegmentedControl
               values={[

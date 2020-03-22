@@ -47,12 +47,12 @@ import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/share';
 import {ISettingsState} from '../redux/types/state';
 
-const SettingScreen: INavigationScreen = props => {
+const SettingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const settings = useTypedSelector(state => state.settings);
-  const assignments = useTypedSelector(state => state.assignments.items);
+  const settings = useTypedSelector((state) => state.settings);
+  const assignments = useTypedSelector((state) => state.assignments.items);
 
   const navigate = (name: string) => {
     if (DeviceInfo.isIPad() && !settings.isCompact) {
@@ -273,14 +273,14 @@ const SettingScreen: INavigationScreen = props => {
             endDate,
           );
           setCourseSyncModalVisible(false);
-          await new Promise(r => setTimeout(r, 1500));
+          await new Promise((r) => setTimeout(r, 1500));
           Snackbar.show({
             text: getTranslation('courseSyncSuccess'),
             duration: Snackbar.LENGTH_SHORT,
           });
         } catch {
           setCourseSyncModalVisible(false);
-          await new Promise(r => setTimeout(r, 1500));
+          await new Promise((r) => setTimeout(r, 1500));
           Snackbar.show({
             text: getTranslation('courseSyncFailure'),
             duration: Snackbar.LENGTH_SHORT,
@@ -392,7 +392,7 @@ const SettingScreen: INavigationScreen = props => {
             }
             text={getTranslation('graduate')}
             switchValue={settings.graduate}
-            onSwitchValueChange={e => onSetting('graduate', e)}
+            onSwitchValueChange={(e) => onSetting('graduate', e)}
           />
         );
       case 5:

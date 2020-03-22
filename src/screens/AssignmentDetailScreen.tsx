@@ -21,7 +21,9 @@ export interface IAssignmentDetailScreenProps {
   submittedContent?: string;
 }
 
-const AssignmentDetailScreen: INavigationScreen<IAssignmentDetailScreenProps> = props => {
+const AssignmentDetailScreen: INavigationScreen<IAssignmentDetailScreenProps> = (
+  props,
+) => {
   const colorScheme = useColorScheme();
 
   useEffect(() => {

@@ -25,7 +25,7 @@ export const getFilesForCourseAction = createAsyncAction(
 )<undefined, {courseId: string; files: IFile[]}, Error>();
 
 export function getFilesForCourse(courseId: string): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getFilesForCourseAction.request());
 
     try {
@@ -33,7 +33,7 @@ export function getFilesForCourse(courseId: string): IThunkResult {
         courseId,
         CourseType.STUDENT,
       );
-      const files = results.map(result => ({...result, courseId}));
+      const files = results.map((result) => ({...result, courseId}));
       dispatch(getFilesForCourseAction.success({files, courseId}));
     } catch (err) {
       dispatch(getFilesForCourseAction.failure(new Error(err)));
@@ -48,7 +48,7 @@ export const getAllFilesForCoursesAction = createAsyncAction(
 )<undefined, IFile[], Error>();
 
 export function getAllFilesForCourses(courseIds: string[]): IThunkResult {
-  return async dispatch => {
+  return async (dispatch) => {
     dispatch(getAllFilesForCoursesAction.request());
 
     try {
@@ -57,9 +57,9 @@ export function getAllFilesForCourses(courseIds: string[]): IThunkResult {
         ContentType.FILE,
       );
       const files = Object.keys(results)
-        .map(courseId => {
+        .map((courseId) => {
           const filesForCourse = results[courseId] as File[];
-          return filesForCourse.map(file => ({...file, courseId}));
+          return filesForCourse.map((file) => ({...file, courseId}));
         })
         .reduce((a, b) => a.concat(b));
       dispatch(getAllFilesForCoursesAction.success(files));

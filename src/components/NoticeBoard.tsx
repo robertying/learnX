@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const NoticeBoard: FunctionComponent<INoticeBoardProps> = props => {
+const NoticeBoard: FunctionComponent<INoticeBoardProps> = (props) => {
   const {
     title,
     author,

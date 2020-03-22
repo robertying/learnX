@@ -18,12 +18,12 @@ export const getCalendarId = async () => {
 
   const storedId = store.getState().settings.calendarId;
   if (storedId) {
-    if (calendars.some(value => value.id === storedId)) {
+    if (calendars.some((value) => value.id === storedId)) {
       return storedId;
     }
   }
 
-  const existingCalendar = calendars.find(value => value.title === 'learnX');
+  const existingCalendar = calendars.find((value) => value.title === 'learnX');
   if (existingCalendar) {
     store.dispatch(setSetting('calendarId', existingCalendar.id));
     return existingCalendar.id;
@@ -98,14 +98,14 @@ export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
     throw 'Failed to create new calendar';
   }
 
-  const savingAssignments = [...assignments].filter(item =>
+  const savingAssignments = [...assignments].filter((item) =>
     dayjs(item.deadline).isAfter(dayjs()),
   );
 
   const courses = store.getState().courses.items;
 
-  savingAssignments.forEach(async assignment => {
-    const course = courses.find(value => value.id === assignment.courseId);
+  savingAssignments.forEach(async (assignment) => {
+    const course = courses.find((value) => value.id === assignment.courseId);
     if (course) {
       await saveAssignmentEvent(
         calendarId,
@@ -126,7 +126,7 @@ export const getCourseCalendarId = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
 
   const existingCalendar = calendars.find(
-    value => value.title === 'learnX - Course',
+    (value) => value.title === 'learnX - Course',
   );
   if (existingCalendar) {
     return existingCalendar.id;
@@ -226,7 +226,7 @@ export const removeCalendars = async () => {
 
   const calendars = await RNCalendarEvents.findCalendars();
 
-  const existingCalendars = calendars.filter(value =>
+  const existingCalendars = calendars.filter((value) =>
     value.title.includes('learnX'),
   );
 

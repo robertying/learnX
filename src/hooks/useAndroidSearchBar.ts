@@ -17,7 +17,7 @@ function useAndroidSearchBar<T extends IEntity>(
       const resultsWithMatches = fuse.search<T>(
         searchBarText,
       ) as FuseResultWithMatches<T>[];
-      setSearchResults(resultsWithMatches.map(i => i.item));
+      setSearchResults(resultsWithMatches.map((i) => i.item));
     } else {
       setSearchResults(entities);
     }

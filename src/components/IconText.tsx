@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const IconText: React.FunctionComponent<IIconTextProps> = props => {
+const IconText: React.FunctionComponent<IIconTextProps> = (props) => {
   return (
     <View style={styles.root}>
       <Icon size={iOSUIKit.bodyObject.fontSize} {...props} />

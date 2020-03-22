@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const TextField: React.FunctionComponent<ITextFieldProps> = props => {
+const TextField: React.FunctionComponent<ITextFieldProps> = (props) => {
   const {
     containerStyle,
     style,

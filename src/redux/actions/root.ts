@@ -8,7 +8,7 @@ export const resetLoading = createAction(RESET_LOADING)();
 export const clearStoreAction = createAction(CLEAR_STORE)();
 
 export function clearStore(): IThunkResult {
-  return dispatch => {
+  return (dispatch) => {
     dispatch(clearStoreAction());
     persistor.purge();
   };

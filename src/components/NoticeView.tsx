@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const NoticeView: React.FunctionComponent<INoticeViewProps> = props => {
+const NoticeView: React.FunctionComponent<INoticeViewProps> = (props) => {
   const {notices, isFetching, onNoticeCardPress, onRefresh} = props;
 
   const renderListItem: ListRenderItem<INotice> = ({item}) => {

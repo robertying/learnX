@@ -58,7 +58,7 @@ export default function notices(
             : [
                 ...state.unread,
                 ...differenceBy(action.payload, state.items, 'id').map(
-                  i => i.id,
+                  (i) => i.id,
                 ),
               ],
         items: action.payload,
@@ -88,14 +88,14 @@ export default function notices(
                 ...differenceBy(
                   action.payload.notices,
                   state.items.filter(
-                    item => item.courseId === action.payload.courseId,
+                    (item) => item.courseId === action.payload.courseId,
                   ),
                   'id',
-                ).map(i => i.id),
+                ).map((i) => i.id),
               ],
         items: [
           ...state.items.filter(
-            item => item.courseId !== action.payload.courseId,
+            (item) => item.courseId !== action.payload.courseId,
           ),
           ...action.payload.notices,
         ],
@@ -115,7 +115,7 @@ export default function notices(
     case READ_NOTICE:
       return {
         ...state,
-        unread: state.unread.filter(item => item !== action.payload),
+        unread: state.unread.filter((item) => item !== action.payload),
       };
     case PIN_NOTICE:
       return {
@@ -125,7 +125,7 @@ export default function notices(
     case UNPIN_NOTICE:
       return {
         ...state,
-        pinned: state.pinned.filter(item => item !== action.payload),
+        pinned: state.pinned.filter((item) => item !== action.payload),
       };
     case FAV_NOTICE:
       return {
@@ -135,7 +135,7 @@ export default function notices(
     case UNFAV_NOTICE:
       return {
         ...state,
-        favorites: state.favorites.filter(item => item !== action.payload),
+        favorites: state.favorites.filter((item) => item !== action.payload),
       };
   }
   return state;

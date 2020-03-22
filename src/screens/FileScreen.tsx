@@ -54,7 +54,7 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {Navigation} from 'react-native-navigation';
 
-const FileScreen: INavigationScreen = props => {
+const FileScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
@@ -67,12 +67,12 @@ const FileScreen: INavigationScreen = props => {
    * Prepare data
    */
 
-  const courses = useTypedSelector(state => state.courses.items);
-  const files = useTypedSelector(state => state.files.items);
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const favFileIds = useTypedSelector(state => state.files.favorites);
-  const pinnedFileIds = useTypedSelector(state => state.files.pinned);
-  const unreadFileIds = useTypedSelector(state => state.files.unread);
+  const courses = useTypedSelector((state) => state.courses.items);
+  const files = useTypedSelector((state) => state.files.items);
+  const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
+  const favFileIds = useTypedSelector((state) => state.files.favorites);
+  const pinnedFileIds = useTypedSelector((state) => state.files.pinned);
+  const unreadFileIds = useTypedSelector((state) => state.files.unread);
 
   const courseNames = useMemo(
     () =>
@@ -97,7 +97,7 @@ const FileScreen: INavigationScreen = props => {
     () =>
       files
         .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix())
-        .map(file => ({
+        .map((file) => ({
           ...file,
           ...courseNames[file.courseId],
         })),
@@ -106,42 +106,43 @@ const FileScreen: INavigationScreen = props => {
 
   const newFiles = useMemo(() => {
     const newFilesOnly = sortedFiles.filter(
-      i => !favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+      (i) =>
+        !favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...newFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...newFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...newFilesOnly.filter((i) => pinnedFileIds.includes(i.id)),
+      ...newFilesOnly.filter((i) => !pinnedFileIds.includes(i.id)),
     ];
   }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
   const unreadFiles = useMemo(() => {
     const unreadFilesOnly = sortedFiles.filter(
-      i =>
+      (i) =>
         unreadFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...unreadFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...unreadFilesOnly.filter((i) => pinnedFileIds.includes(i.id)),
+      ...unreadFilesOnly.filter((i) => !pinnedFileIds.includes(i.id)),
     ];
   }, [hiddenCourseIds, pinnedFileIds, sortedFiles, unreadFileIds]);
 
   const favFiles = useMemo(() => {
     const favFilesOnly = sortedFiles.filter(
-      i => favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
+      (i) => favFileIds.includes(i.id) && !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...favFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...favFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...favFilesOnly.filter((i) => pinnedFileIds.includes(i.id)),
+      ...favFilesOnly.filter((i) => !pinnedFileIds.includes(i.id)),
     ];
   }, [favFileIds, hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
   const hiddenFiles = useMemo(() => {
-    const hiddenFilesOnly = sortedFiles.filter(i =>
+    const hiddenFilesOnly = sortedFiles.filter((i) =>
       hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...hiddenFilesOnly.filter(i => pinnedFileIds.includes(i.id)),
-      ...hiddenFilesOnly.filter(i => !pinnedFileIds.includes(i.id)),
+      ...hiddenFilesOnly.filter((i) => pinnedFileIds.includes(i.id)),
+      ...hiddenFilesOnly.filter((i) => !pinnedFileIds.includes(i.id)),
     ];
   }, [hiddenCourseIds, pinnedFileIds, sortedFiles]);
 
@@ -151,13 +152,13 @@ const FileScreen: INavigationScreen = props => {
    * Fetch and handle error
    */
 
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const fileError = useTypedSelector(state => state.files.error);
-  const isFetching = useTypedSelector(state => state.files.isFetching);
+  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const fileError = useTypedSelector((state) => state.files.error);
+  const isFetching = useTypedSelector((state) => state.files.isFetching);
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && courses.length !== 0) {
-      dispatch(getAllFilesForCourses(courses.map(i => i.id)));
+      dispatch(getAllFilesForCourses(courses.map((i) => i.id)));
     }
   }, [courses, loggedIn, dispatch]);
 
@@ -180,7 +181,7 @@ const FileScreen: INavigationScreen = props => {
    * Render cards
    */
 
-  const isCompact = useTypedSelector(state => state.settings.isCompact);
+  const isCompact = useTypedSelector((state) => state.settings.isCompact);
 
   const onFileCardPress = useCallback(
     (file: WithCourseInfo<IFile>) => {
@@ -301,11 +302,11 @@ const FileScreen: INavigationScreen = props => {
       courseTeacherName={item.courseTeacherName}
       dragEnabled={item.courseName && item.courseTeacherName ? true : false}
       pinned={pinnedFileIds.includes(item.id)}
-      onPinned={pin => onPinned(pin, item.id)}
+      onPinned={(pin) => onPinned(pin, item.id)}
       fav={favFileIds.includes(item.id)}
-      onFav={fav => onFav(fav, item.id)}
+      onFav={(fav) => onFav(fav, item.id)}
       unread={unreadFileIds.includes(item.id)}
-      onRead={read => onRead(read, item.id)}
+      onRead={(read) => onRead(read, item.id)}
       onPress={() => {
         onFileCardPress(item);
       }}
@@ -323,7 +324,7 @@ const FileScreen: INavigationScreen = props => {
 
   useEffect(() => {
     const handler = Navigation.events().registerNavigationButtonPressedListener(
-      e => {
+      (e) => {
         if (e.buttonId === 'refresh') {
           invalidateAll();
         }
@@ -476,7 +477,7 @@ const FileScreen: INavigationScreen = props => {
           ListEmptyComponent={EmptyList}
           data={searchResults}
           renderItem={renderListItem}
-          keyExtractor={item => item.id}
+          keyExtractor={(item) => item.id}
           ListHeaderComponent={
             <SegmentedControl
               values={[

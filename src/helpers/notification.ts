@@ -19,8 +19,8 @@ export const requestNotificationPermission = async () => {
   } else {
     await PushNotification.requestPermissions(['alert', 'badge', 'sound']);
 
-    const result = await new Promise<PushNotificationPermissions>(resolve =>
-      PushNotification.checkPermissions(value => resolve(value)),
+    const result = await new Promise<PushNotificationPermissions>((resolve) =>
+      PushNotification.checkPermissions((value) => resolve(value)),
     );
 
     return result.alert;

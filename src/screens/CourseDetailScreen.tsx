@@ -38,24 +38,28 @@ export interface ICourseDetailScreenProps {
   course: ICourse;
 }
 
-const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props => {
+const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = (
+  props,
+) => {
   const {course} = props;
 
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
-  const rawNotices = useTypedSelector(state => state.notices.items);
-  const rawFiles = useTypedSelector(state => state.files.items);
-  const rawAssignments = useTypedSelector(state => state.assignments.items);
+  const rawNotices = useTypedSelector((state) => state.notices.items);
+  const rawFiles = useTypedSelector((state) => state.files.items);
+  const rawAssignments = useTypedSelector((state) => state.assignments.items);
   const error = useTypedSelector(
-    state =>
+    (state) =>
       state.notices.error || state.assignments.error || state.files.error,
   );
-  const isFetchingNotices = useTypedSelector(state => state.notices.isFetching);
-  const isFetchingAssignments = useTypedSelector(
-    state => state.assignments.isFetching,
+  const isFetchingNotices = useTypedSelector(
+    (state) => state.notices.isFetching,
   );
-  const isFetchingFiles = useTypedSelector(state => state.files.isFetching);
+  const isFetchingAssignments = useTypedSelector(
+    (state) => state.assignments.isFetching,
+  );
+  const isFetchingFiles = useTypedSelector((state) => state.files.isFetching);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
@@ -64,7 +68,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const notices = useMemo(
     () =>
       rawNotices
-        .filter(item => item.courseId === course.id)
+        .filter((item) => item.courseId === course.id)
         .sort(
           (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
         ),
@@ -74,7 +78,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const files = useMemo(
     () =>
       rawFiles
-        .filter(item => item.courseId === course.id)
+        .filter((item) => item.courseId === course.id)
         .sort(
           (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix(),
         ),
@@ -84,7 +88,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = props =>
   const assignments = useMemo(
     () =>
       rawAssignments
-        .filter(item => item.courseId === course.id)
+        .filter((item) => item.courseId === course.id)
         .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix()),
     [course, rawAssignments],
   );

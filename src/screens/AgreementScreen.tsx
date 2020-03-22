@@ -26,12 +26,12 @@ const markdown = getLocale().startsWith('zh')
         module.exports = fs.readFileSync(require.resolve('../assets/AGREEMENT_EN.md'), 'utf8')
 `;
 
-const AgreementScreen: INavigationScreen = props => {
+const AgreementScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
   const pushNotificationSettings = useTypedSelector(
-    state => state.settings.pushNotifications,
+    (state) => state.settings.pushNotifications,
   );
 
   useEffect(() => {
@@ -40,7 +40,9 @@ const AgreementScreen: INavigationScreen = props => {
 
   const webViewRef = useRef<WebView>(null);
 
-  const onNavigationStateChange: WebViewProps['onNavigationStateChange'] = e => {
+  const onNavigationStateChange: WebViewProps['onNavigationStateChange'] = (
+    e,
+  ) => {
     if (e.navigationType === 'click') {
       if (webViewRef.current) {
         webViewRef.current.stopLoading();

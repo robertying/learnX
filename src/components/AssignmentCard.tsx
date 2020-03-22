@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
 });
 
-const AssignmentCard: React.FC<IAssignmentCardProps> = props => {
+const AssignmentCard: React.FC<IAssignmentCardProps> = (props) => {
   const {
     onPress,
     title,

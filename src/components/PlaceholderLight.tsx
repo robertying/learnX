@@ -40,8 +40,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const PlaceholderLight: React.FunctionComponent<IPlaceholderLightProps> = props => {
-  const renderPlaceholder: IPlaceholderProps['renderPlaceholder'] = animatedStyle => {
+const PlaceholderLight: React.FunctionComponent<IPlaceholderLightProps> = (
+  props,
+) => {
+  const renderPlaceholder: IPlaceholderProps['renderPlaceholder'] = (
+    animatedStyle,
+  ) => {
     return (
       <View style={[styles.root, props.style]}>
         <Animated.View
