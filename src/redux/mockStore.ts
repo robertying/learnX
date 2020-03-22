@@ -19,6 +19,10 @@ const mockStore: IPersistAppState = {
     isCompact: false,
     hasUnread: [Entity.Notice],
     graduate: false,
+    pushNotifications: {
+      agreementAcknowledged: false,
+      enabled: false,
+    },
   },
   semesters: {
     isFetching: false,
@@ -101,6 +105,7 @@ const mockStore: IPersistAppState = {
         markedImportant: true,
         publishTime: '2019-10-09 07:21',
         courseId: '2019-2020-1139282934',
+        url: 'https://www.example.com',
       },
       {
         id: '26ef84e76d60efc1016d71b8f4c63bc1',
@@ -112,6 +117,7 @@ const mockStore: IPersistAppState = {
         markedImportant: true,
         publishTime: '2019-09-27 15:52',
         courseId: '2019-2020-1139282934',
+        url: 'https://www.example.com',
       },
       {
         id: '26ef84e76db3f55b016db4c4e8832da6',
@@ -123,6 +129,7 @@ const mockStore: IPersistAppState = {
         markedImportant: false,
         publishTime: '2019-10-10 16:22',
         courseId: '2019-2020-1139283216',
+        url: 'https://www.example.com',
       },
       {
         id: '26ef84e76d60efc1016daba2cc3451fc',
@@ -134,6 +141,7 @@ const mockStore: IPersistAppState = {
         markedImportant: true,
         publishTime: '2019-10-08 21:46',
         courseId: '2019-2020-1139283217',
+        url: 'https://www.example.com',
       },
       {
         id: '26ef84e76d60efc1016d7fdd00382858',
@@ -145,6 +153,7 @@ const mockStore: IPersistAppState = {
         markedImportant: true,
         publishTime: '2019-09-30 09:49',
         courseId: '2019-2020-1139283221',
+        url: 'https://www.example.com',
       },
       {
         id: '26ef84e76cc258ed016d3fa2f27d5f10',
@@ -155,6 +164,7 @@ const mockStore: IPersistAppState = {
         markedImportant: false,
         publishTime: '2019-09-17 22:30',
         courseId: '2019-2020-1139283221',
+        url: 'https://www.example.com',
       },
       {
         id: '26ef84e76cc258ed016d3ea25a95157d',
@@ -166,6 +176,7 @@ const mockStore: IPersistAppState = {
         markedImportant: false,
         publishTime: '2019-09-17 17:50',
         courseId: '2019-2020-1139283221',
+        url: 'https://www.example.com',
       },
     ],
   },

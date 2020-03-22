@@ -4,10 +4,15 @@ export interface IAuth {
   username: string | null;
   password: string | null;
 }
+export interface IFirebaseAuth {
+  email: string;
+  refreshToken: string;
+}
 export interface IAuthState extends IAuth {
   loggingIn: boolean;
   loggedIn: boolean;
   error?: Error | null;
+  firebase?: IFirebaseAuth;
 }
 
 export enum Entity {
@@ -18,6 +23,11 @@ export enum Entity {
 export enum Language {
   'zh',
   'en',
+}
+export interface IPushNotificationSettings {
+  agreementAcknowledged: boolean;
+  deviceToken?: string;
+  enabled: boolean;
 }
 export interface ISettingsState {
   calendarSync: boolean;
@@ -30,6 +40,7 @@ export interface ISettingsState {
   isCompact: boolean;
   hasUnread: Entity[];
   graduate: boolean;
+  pushNotifications: IPushNotificationSettings;
 }
 
 export interface ISemestersState {

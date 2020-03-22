@@ -1,5 +1,10 @@
 import {IAuthAction} from '../types/actions';
-import {LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS} from '../types/constants';
+import {
+  LOGIN_FAILURE,
+  LOGIN_REQUEST,
+  LOGIN_SUCCESS,
+  SET_FIREBASE_AUTH,
+} from '../types/constants';
 import {IAuthState} from '../types/state';
 
 export default function auth(
@@ -34,6 +39,11 @@ export default function auth(
         loggingIn: false,
         loggedIn: false,
         error: action.payload,
+      };
+    case SET_FIREBASE_AUTH:
+      return {
+        ...state,
+        firebase: action.payload,
       };
   }
   return state;

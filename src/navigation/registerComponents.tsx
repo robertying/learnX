@@ -21,6 +21,9 @@ import HelpScreen from '../screens/HelpScreen';
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
 import {AppearanceProvider} from 'react-native-appearance';
 import AssignmentSubmitScreen from '../screens/AssignmentSubmitScreen';
+import PushNotificationScreen from '../screens/PushNotificationScreen';
+import AgreementScreen from '../screens/AgreementScreen';
+import FirebaseScreen from '../screens/FirebaseScreen';
 
 const storeWrapped = (Component: React.FC<any>) => (props: any) => (
   <Provider store={store}>
@@ -112,6 +115,21 @@ const registerScreens = () => {
     'settings.help',
     () => storeWrapped(HelpScreen),
     () => HelpScreen,
+  );
+  Navigation.registerComponent(
+    'settings.pushNotifications',
+    () => storeWrapped(PushNotificationScreen),
+    () => PushNotificationScreen,
+  );
+  Navigation.registerComponent(
+    'settings.pushNotifications.agreement',
+    () => storeWrapped(AgreementScreen),
+    () => AgreementScreen,
+  );
+  Navigation.registerComponent(
+    'settings.pushNotifications.firebase',
+    () => storeWrapped(FirebaseScreen),
+    () => FirebaseScreen,
   );
 
   Navigation.registerComponent(

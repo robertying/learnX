@@ -15,7 +15,7 @@ const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const authPersistConfig: PersistConfig<IAuthState> = {
   key: 'auth',
   storage: createSecureStore(),
-  whitelist: ['username', 'password'],
+  whitelist: ['username', 'password', 'firebase'],
 };
 const rootPersistConfig: PersistConfig<IAppState> = {
   key: 'root',

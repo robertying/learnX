@@ -10,7 +10,7 @@ import {
   readAssignment,
   unreadAssignment,
 } from '../actions/assignments';
-import {loginAction} from '../actions/auth';
+import {loginAction, setFirebaseAuth} from '../actions/auth';
 import {
   getCoursesForSemesterAction,
   hideCourse,
@@ -47,7 +47,8 @@ import {
 import {IPersistAppState} from './state';
 
 export type ILoginAction = ActionType<typeof loginAction>;
-export type IAuthAction = ILoginAction;
+export type ISetFirebaseAuthAction = ActionType<typeof setFirebaseAuth>;
+export type IAuthAction = ILoginAction | ISetFirebaseAuthAction;
 
 export type IGetAllSemestersAction = ActionType<typeof getAllSemestersAction>;
 export type ISetCurrentSemesterAction = ActionType<typeof setCurrentSemester>;

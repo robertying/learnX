@@ -1,8 +1,13 @@
-import {createAsyncAction} from 'typesafe-actions';
+import {createAsyncAction, createAction} from 'typesafe-actions';
 import {dataSource} from '../dataSource';
 import {IThunkResult} from '../types/actions';
-import {LOGIN_FAILURE, LOGIN_REQUEST, LOGIN_SUCCESS} from '../types/constants';
-import {IAuth} from '../types/state';
+import {
+  LOGIN_FAILURE,
+  LOGIN_REQUEST,
+  LOGIN_SUCCESS,
+  SET_FIREBASE_AUTH,
+} from '../types/constants';
+import {IAuth, IFirebaseAuth} from '../types/state';
 
 export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
@@ -25,3 +30,8 @@ export function login(username?: string, password?: string): IThunkResult {
     }
   };
 }
+
+export const setFirebaseAuth = createAction(
+  SET_FIREBASE_AUTH,
+  (firebaseAuth: IFirebaseAuth) => firebaseAuth,
+)();

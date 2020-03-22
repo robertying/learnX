@@ -36,6 +36,7 @@ import {
   unfavNotice,
   readNotice,
   unreadNotice,
+  getNoticesForCourseAction,
 } from '../redux/actions/notices';
 import {INotice} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
@@ -71,13 +72,52 @@ const NoticeScreen: INavigationScreen = props => {
    * App scope stuff
    */
 
+  const pushNotificationListener = useCallback(
+    (token: string) => {
+      dispatch(
+        setSetting('pushNotifications', {
+          ...settings.pushNotifications,
+          deviceToken: token,
+        }),
+      );
+    },
+    [dispatch, settings.pushNotifications],
+  );
+
+  const pushNotificationErrorListener = useCallback(() => {
+    Snackbar.show({
+      text: getTranslation('deviceTokenFailure'),
+      duration: Snackbar.LENGTH_SHORT,
+    });
+  }, []);
+
   useEffect(() => {
     if (Platform.OS === 'android') {
       PushNotification.configure({
         requestPermissions: false,
       });
+    } else {
+      PushNotificationIOS.addEventListener(
+        'register',
+        pushNotificationListener,
+      );
+      PushNotificationIOS.addEventListener(
+        'registrationError',
+        pushNotificationErrorListener,
+      );
+
+      return () => {
+        PushNotificationIOS.removeEventListener(
+          'register',
+          pushNotificationListener,
+        );
+        PushNotificationIOS.removeEventListener(
+          'registrationError',
+          pushNotificationErrorListener,
+        );
+      };
     }
-  }, []);
+  }, [pushNotificationErrorListener, pushNotificationListener]);
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme, true);
@@ -167,6 +207,11 @@ const NoticeScreen: INavigationScreen = props => {
     const listener = (nextAppState: AppStateStatus) => {
       if (appState.match(/inactive|background/) && nextAppState === 'active') {
         resetLoading();
+      }
+      if (nextAppState.match(/inactive|background/) && appState === 'active') {
+        if (Platform.OS === 'ios') {
+          PushNotificationIOS.setApplicationIconBadgeNumber(0);
+        }
       }
       setAppState(nextAppState);
     };
@@ -358,6 +403,32 @@ const NoticeScreen: INavigationScreen = props => {
         PushNotificationIOS.removeEventListener('localNotification', listener);
     }
   }, [onNoticeCardPress]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const listener = (notification: Notification) => {
+        const data = notification.getData() as any;
+        if (data.notice) {
+          const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
+          dispatch(
+            getNoticesForCourseAction.success({
+              notices: [notice, ...notices],
+              courseId: notice.courseId,
+            }),
+          );
+          Navigation.mergeOptions(props.componentId, {
+            bottomTabs: {
+              currentTabIndex: 0,
+            },
+          });
+          onNoticeCardPress(notice);
+        }
+      };
+      PushNotificationIOS.addEventListener('notification', listener);
+      return () =>
+        PushNotificationIOS.removeEventListener('notification', listener);
+    }
+  }, [dispatch, notices, onNoticeCardPress, props.componentId]);
 
   const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {

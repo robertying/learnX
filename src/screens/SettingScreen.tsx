@@ -111,6 +111,8 @@ const SettingScreen: INavigationScreen = props => {
     navigate('settings.help');
   };
 
+  const [assignmentSyncing, setAssignmentSyncing] = useState(false);
+
   const onCalendarSyncSwitchChange = async (enabled: boolean) => {
     if (enabled) {
       const status = await RNCalendarEvents.authorizationStatus();
@@ -126,7 +128,9 @@ const SettingScreen: INavigationScreen = props => {
       }
 
       if (assignments) {
-        saveAssignmentsToCalendar(assignments);
+        setAssignmentSyncing(true);
+        await saveAssignmentsToCalendar(assignments);
+        setAssignmentSyncing(false);
       }
     }
     dispatch(setSetting('calendarSync', enabled));
@@ -286,12 +290,35 @@ const SettingScreen: INavigationScreen = props => {
     }
   }, [courseSyncModalVisible, settings.graduate]);
 
+  const onPushNotificationPress = () => {
+    navigate('settings.pushNotifications');
+  };
+
   const renderListItem: ListRenderItem<{}> = ({index}) => {
     switch (index) {
       case 0:
         return (
           <SettingListItem
             containerStyle={{marginTop: 10}}
+            variant="arrow"
+            icon={
+              <MaterialIcons
+                name="notifications-active"
+                size={20}
+                color={
+                  colorScheme === 'dark'
+                    ? Colors.system('gray', 'dark')
+                    : undefined
+                }
+              />
+            }
+            text={getTranslation('pushNotifications')}
+            onPress={onPushNotificationPress}
+          />
+        );
+      case 1:
+        return (
+          <SettingListItem
             variant="switch"
             icon={
               <MaterialCommunityIcons
@@ -304,12 +331,13 @@ const SettingScreen: INavigationScreen = props => {
                 }
               />
             }
+            loading={assignmentSyncing}
             text={getTranslation('calendarSync')}
             switchValue={settings.calendarSync}
             onSwitchValueChange={onCalendarSyncSwitchChange}
           />
         );
-      case 1:
+      case 2:
         return (
           <SettingListItem
             variant="none"
@@ -328,7 +356,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={handleCourseSync}
           />
         );
-      case 2:
+      case 3:
         return (
           <SettingListItem
             variant="arrow"
@@ -347,7 +375,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onSemestersPress}
           />
         );
-      case 3:
+      case 4:
         return (
           <SettingListItem
             variant="switch"
@@ -367,7 +395,7 @@ const SettingScreen: INavigationScreen = props => {
             onSwitchValueChange={e => onSetting('graduate', e)}
           />
         );
-      case 4:
+      case 5:
         return (
           <SettingListItem
             variant="none"
@@ -387,7 +415,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onLogoutPress}
           />
         );
-      case 5:
+      case 6:
         return (
           <SettingListItem
             variant="none"
@@ -406,7 +434,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onClearFileCachePress}
           />
         );
-      case 6:
+      case 7:
         return (
           <SettingListItem
             variant="none"
@@ -425,7 +453,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onDeleteCalendarsPress}
           />
         );
-      case 7:
+      case 8:
         return Platform.OS === 'android' || DeviceInfo.isMac() ? (
           <SettingListItem
             variant="none"
@@ -474,7 +502,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onCheckUpdatePress}
           />
         ) : null;
-      case 8:
+      case 9:
         return (
           <SettingListItem
             variant="arrow"
@@ -494,7 +522,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onHelpPress}
           />
         );
-      case 9:
+      case 10:
         return (
           <SettingListItem
             variant="arrow"
@@ -513,7 +541,7 @@ const SettingScreen: INavigationScreen = props => {
             onPress={onAcknowledgementsPress}
           />
         );
-      case 10:
+      case 11:
         return (
           <SettingListItem
             containerStyle={{marginBottom: 16}}
@@ -552,6 +580,7 @@ const SettingScreen: INavigationScreen = props => {
       <FlatList
         style={{backgroundColor: Colors.system('background', colorScheme)}}
         data={[
+          {key: 'pushNotifications'},
           {key: 'calendarSync'},
           {key: 'courseSync'},
           {key: 'semesters'},

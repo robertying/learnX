@@ -29,7 +29,7 @@ export const requestNotificationPermission = async () => {
 
 export const showNotificationPermissionAlert = () => {
   Alert.alert(
-    getTranslation('pushNotification'),
+    getTranslation('pushNotifications'),
     getTranslation('pushNotificationReminder'),
     [
       {

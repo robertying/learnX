@@ -57,7 +57,7 @@ export default {
   favorite: 'Favorite',
   hidden: 'Hidden',
   visible: 'Visible',
-  pushNotification: 'Push Notification',
+  pushNotifications: 'Push Notifications',
   pushNotificationReminder:
     'You need to enable Notifications for the App to set reminders',
   goToSettings: 'Go to Settings',
@@ -97,4 +97,32 @@ export default {
   addAttachment: 'Add Attachment',
   overwriteOld: 'will overwrite the old one',
   graduate: 'Graduate',
+  deviceTokenFailure:
+    'Failed to register the device for Push Notifications. Try restarting the App or checking the permissions.',
+  acknowledge: 'Acknowledge',
+  acknowledged: 'Acknowledged',
+  agreement: 'User Agreement',
+  firebaseLoginFailure:
+    'Login failed. Please check the internet connection and make sure your password is correct.',
+  firebaseRegisterFailure:
+    'Register failed. Please check the internet connection and make sure the email is valid.',
+  firebaseCompleteCredentials:
+    'Please complete both the email and the password',
+  passwordMinimalLength: 'Please use a password with the minimal length of 6',
+  email: 'Email',
+  register: 'Register',
+  firebaseNote:
+    'This account will be used to store your Tsinghua credentials in third-party services.',
+  firebasePrerequisites:
+    'Please grant proper permissions and acknowledge the user agreement.',
+  pushNotificationEnableFailure: 'Failed to enable Push Notifications',
+  pushNotificationPermissions: 'Push Notification Permissions',
+  granted: 'Granted',
+  grantPermissions: 'Grant Permissions',
+  readAgreement: 'Read Agreement',
+  accountManagement: 'Account Management',
+  tapToReLogin: 'Tap to re-login',
+  loginRegister: 'Login / Register',
+  pushNotificationStatus: 'Push Notification Status',
+  enabled: 'Enabled',
 };

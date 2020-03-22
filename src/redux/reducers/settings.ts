@@ -15,6 +15,7 @@ export default function settings(
     isCompact: false,
     hasUnread: [Entity.File, Entity.Assignment, Entity.Notice],
     graduate: false,
+    pushNotifications: {agreementAcknowledged: false, enabled: false},
   },
   action: ISettingsAction,
 ): ISettingsState {

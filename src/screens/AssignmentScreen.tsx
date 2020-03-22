@@ -31,6 +31,7 @@ import {
   unfavAssignment,
   readAssignment,
   unreadAssignment,
+  getAssignmentsForCourseAction,
 } from '../redux/actions/assignments';
 import {IAssignment} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
@@ -288,6 +289,34 @@ const AssignmentScreen: INavigationScreen = props => {
         PushNotificationIOS.removeEventListener('localNotification', listener);
     }
   }, [onAssignmentCardPress]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const listener = (notification: PushNotification) => {
+        const data = notification.getData() as any;
+        if (data.assignment) {
+          const assignment = JSON.parse(data.assignment) as WithCourseInfo<
+            IAssignment
+          >;
+          dispatch(
+            getAssignmentsForCourseAction.success({
+              assignments: [assignment, ...assignments],
+              courseId: assignment.courseId,
+            }),
+          );
+          Navigation.mergeOptions(props.componentId, {
+            bottomTabs: {
+              currentTabIndex: 2,
+            },
+          });
+          onAssignmentCardPress(assignment);
+        }
+      };
+      PushNotificationIOS.addEventListener('notification', listener);
+      return () =>
+        PushNotificationIOS.removeEventListener('notification', listener);
+    }
+  }, [assignments, dispatch, onAssignmentCardPress, props.componentId]);
 
   const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {

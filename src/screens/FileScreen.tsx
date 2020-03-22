@@ -31,6 +31,7 @@ import {
   unfavFile,
   readFile,
   unreadFile,
+  getFilesForCourseAction,
 } from '../redux/actions/files';
 import {IFile} from '../redux/types/state';
 import {INavigationScreen, WithCourseInfo} from '../types';
@@ -237,6 +238,32 @@ const FileScreen: INavigationScreen = props => {
         PushNotificationIOS.removeEventListener('localNotification', listener);
     }
   }, [onFileCardPress]);
+
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      const listener = (notification: PushNotification) => {
+        const data = notification.getData() as any;
+        if (data.file) {
+          const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
+          dispatch(
+            getFilesForCourseAction.success({
+              files: [file, ...files],
+              courseId: file.courseId,
+            }),
+          );
+          Navigation.mergeOptions(props.componentId, {
+            bottomTabs: {
+              currentTabIndex: 1,
+            },
+          });
+          onFileCardPress(file);
+        }
+      };
+      PushNotificationIOS.addEventListener('notification', listener);
+      return () =>
+        PushNotificationIOS.removeEventListener('notification', listener);
+    }
+  }, [dispatch, files, onFileCardPress, props.componentId]);
 
   const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {
