@@ -9,6 +9,7 @@ import {
   ViewProps,
   StyleSheet,
   Text,
+  ActivityIndicator,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -29,6 +30,8 @@ export interface ISettingListItemProps {
   onPress?: TouchableHighlightProps['onPress'];
   style?: ViewProps['style'];
   containerStyle?: TouchableHighlightProps['style'];
+  switchDisabled?: boolean;
+  loading?: boolean;
 }
 
 const styles = StyleSheet.create({
@@ -78,6 +81,8 @@ const SettingListItem: React.FunctionComponent<ISettingListItemProps> = props =>
     size,
     textStyle,
     secondaryTextStyle,
+    switchDisabled,
+    loading,
   } = props;
 
   const colorScheme = useColorScheme();
@@ -116,13 +121,19 @@ const SettingListItem: React.FunctionComponent<ISettingListItemProps> = props =>
           </Text>
         </View>
         <View style={styles.right}>
-          {variant === 'switch' ? (
-            <Switch value={switchValue} onValueChange={onSwitchValueChange} />
+          {loading ? (
+            <ActivityIndicator animating />
+          ) : variant === 'switch' ? (
+            <Switch
+              disabled={switchDisabled}
+              value={switchValue}
+              onValueChange={onSwitchValueChange}
+            />
           ) : (
             <>
               <Text
                 style={[
-                  {color: Colors.system('foreground', colorScheme)},
+                  {color: Colors.system('gray', colorScheme)},
                   styles.rightText,
                   secondaryTextStyle,
                 ]}>
