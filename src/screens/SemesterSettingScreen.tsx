@@ -12,6 +12,9 @@ import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
+import {getAllNoticesForCoursesAction} from '../redux/actions/notices';
+import {getAllFilesForCoursesAction} from '../redux/actions/files';
+import {getAllAssignmentsForCoursesAction} from '../redux/actions/assignments';
 
 const SemesterSettingScreen: INavigationScreen = props => {
   const colorScheme = useColorScheme();
@@ -46,7 +49,12 @@ const SemesterSettingScreen: INavigationScreen = props => {
             />
           ) : null
         }
-        onPress={() => dispatch(setCurrentSemester(item))}
+        onPress={async () => {
+          dispatch(getAllNoticesForCoursesAction.success([]));
+          dispatch(getAllFilesForCoursesAction.success([]));
+          dispatch(getAllAssignmentsForCoursesAction.success([]));
+          dispatch(setCurrentSemester(item));
+        }}
       />
     );
   };
