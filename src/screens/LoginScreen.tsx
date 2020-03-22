@@ -124,9 +124,7 @@ const LoginScreen: INavigationScreen = props => {
     }
   };
 
-  const handleKeyboardNext = () =>
-    passwordTextFieldRef.current &&
-    (passwordTextFieldRef.current as any).getNode().focus();
+  const handleKeyboardNext = () => passwordTextFieldRef.current?.focus();
 
   const handleUsernameChange = (text: string) => setUsername(text);
 
