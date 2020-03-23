@@ -25,7 +25,7 @@ There are a few scenarios that can demonstrate the security of the services:
 - The hacker gets full control of your Firebase Auth account. Your password is safe since the hacker does not know the encryption key.
 - The hacker breaches the Firebase database and gets your data. Your password is safe since the hacker does not know the encryption key.
 - The hacker knows the AES encryption key. Your password will be temporarily at risk since the hacker knows the encryption key. The risk will be eliminated once I change the key and re-encrypt your password.
-- _I am the hacker_. Your password would be leaked, because I know the key for AES encryptions.
+- *I am the hacker*. Your password would be leaked, because I know the key for AES encryptions.
 
 ### Prerequisites
 
