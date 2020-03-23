@@ -167,32 +167,53 @@ const PushNotificationScreen: INavigationScreen = (props) => {
         if (!response.ok) {
           throw new Error();
         }
-      }
 
-      response = await fetch(
-        'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users/apns',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: 'Bearer ' + idToken,
+        response = await fetch(
+          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users/apns',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: 'Bearer ' + idToken,
+            },
+            body: JSON.stringify({
+              token: pushNotificationsSettings.deviceToken,
+              sandbox: __DEV__ ? 'true' : 'false',
+            }),
           },
-          body: JSON.stringify({
-            token: enabled ? pushNotificationsSettings.deviceToken : '',
-            sandbox: __DEV__ ? 'true' : 'false',
-          }),
-        },
-      );
-
-      if (response.ok) {
-        dispatch(
-          setSetting('pushNotifications', {
-            ...pushNotificationsSettings,
-            enabled,
-          }),
         );
+
+        if (response.ok) {
+          dispatch(
+            setSetting('pushNotifications', {
+              ...pushNotificationsSettings,
+              enabled,
+            }),
+          );
+        } else {
+          throw new Error();
+        }
       } else {
-        throw new Error();
+        response = await fetch(
+          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users',
+          {
+            method: 'DELETE',
+            headers: {
+              Authorization: 'Bearer ' + idToken,
+            },
+          },
+        );
+
+        if (response.ok) {
+          dispatch(
+            setSetting('pushNotifications', {
+              ...pushNotificationsSettings,
+              enabled,
+            }),
+          );
+        } else {
+          throw new Error();
+        }
       }
     } catch (error) {
       Snackbar.show({
