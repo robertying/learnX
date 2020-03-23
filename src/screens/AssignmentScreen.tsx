@@ -234,22 +234,7 @@ const AssignmentScreen: INavigationScreen = (props) => {
   const onAssignmentCardPress = useCallback(
     (assignment: WithCourseInfo<IAssignment>) => {
       const name = 'assignments.detail';
-      const passProps: IAssignmentDetailScreenProps = {
-        title: assignment.title,
-        deadline: assignment.deadline,
-        description: assignment.description,
-        attachmentName: assignment.attachmentName,
-        attachmentUrl: assignment.attachmentUrl,
-        submittedAttachmentName: assignment.submittedAttachmentName,
-        submittedAttachmentUrl: assignment.submittedAttachmentUrl,
-        submitTime: assignment.submitTime,
-        grade: assignment.grade,
-        gradeLevel: assignment.gradeLevel,
-        gradeContent: assignment.gradeContent,
-        courseName: assignment.courseName,
-        studentHomeworkId: assignment.studentHomeworkId,
-        submittedContent: assignment.submittedContent,
-      };
+      const passProps: IAssignmentDetailScreenProps = assignment;
       const title = assignment.courseName;
 
       if (DeviceInfo.isIPad() && !isCompact) {

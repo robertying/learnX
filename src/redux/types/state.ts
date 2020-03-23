@@ -122,6 +122,8 @@ export interface IAssignment {
   gradeTime?: string;
   graderName?: string;
   gradeContent?: string;
+  gradeAttachmentName?: string;
+  gradeAttachmentUrl?: string;
   studentHomeworkId: string;
 }
 export interface IAssignmentsState {

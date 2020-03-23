@@ -332,6 +332,8 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = (
                 setCurrentModal({type: 'Notice', visible: false})
               }
               courseName={course.name}
+              gradeAttachmentName={currentModal.data!.gradeAttachmentName}
+              gradeAttachmentUrl={currentModal.data!.gradeAttachmentUrl}
             />
           )}
         </View>

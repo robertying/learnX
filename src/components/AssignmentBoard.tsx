@@ -39,6 +39,8 @@ export type IAssignmentBoardProps = TouchableHighlightProps & {
   gradeLevel?: string;
   componentId: string;
   gradeContent?: string;
+  gradeAttachmentName?: string;
+  gradeAttachmentUrl?: string;
   studentHomeworkId: string;
   submittedContent?: string;
   beforeNavigation?: () => void;
@@ -78,6 +80,8 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
     studentHomeworkId,
     submittedContent,
     courseName,
+    gradeAttachmentName,
+    gradeAttachmentUrl,
   } = props;
 
   const colorScheme = useColorScheme();
@@ -238,7 +242,10 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
           <Divider />
         </>
       )}
-      {grade || gradeLevel || gradeContent ? (
+      {grade ||
+      gradeLevel ||
+      gradeContent ||
+      (gradeAttachmentName && gradeAttachmentUrl) ? (
         <>
           <View style={styles.padding}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -261,11 +268,36 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
             {gradeContent && (
               <Text
                 style={{
-                  marginTop: 5,
+                  marginVertical: 5,
                   color: Colors.system('foreground', colorScheme),
                 }}>
                 {gradeContent}
               </Text>
+            )}
+            {gradeAttachmentName && gradeAttachmentUrl && (
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Icon
+                  style={{marginRight: 5}}
+                  name="question-answer"
+                  size={18}
+                  color={Colors.system('purple', colorScheme)}
+                />
+                <TextButton
+                  textStyle={{
+                    color: Colors.system('purple', colorScheme),
+                  }}
+                  onPress={() =>
+                    onAttachmentPress(
+                      courseName,
+                      gradeAttachmentName!,
+                      gradeAttachmentUrl!,
+                      getExtension(gradeAttachmentName!)!,
+                    )
+                  }
+                  ellipsizeMode="tail">
+                  {gradeAttachmentName!}
+                </TextButton>
+              </View>
             )}
           </View>
           <Divider />
