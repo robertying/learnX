@@ -8,6 +8,8 @@ import {getTranslation} from './i18n';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 
+export const serviceUrl = 'https://app.robertying.io/api';
+
 export const requestNotificationPermission = async () => {
   if (Platform.OS === 'ios') {
     const result = await PushNotificationIOS.requestPermissions({

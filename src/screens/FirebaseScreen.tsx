@@ -24,6 +24,7 @@ import {setFirebaseAuth} from '../redux/actions/auth';
 import {INavigationScreen} from '../types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import TextButton from '../components/TextButton';
+import {serviceUrl} from '../helpers/notification';
 
 const styles = StyleSheet.create({
   note: {
@@ -74,20 +75,17 @@ const FirebaseScreen: INavigationScreen = (props) => {
       setLoading(true);
 
       try {
-        const response = await fetch(
-          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users/login',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email,
-              password,
-              returnSecureToken: true,
-            }),
+        const response = await fetch(`${serviceUrl}/users/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        );
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        });
         const result = await response.json();
 
         dispatch(setFirebaseAuth(result));
@@ -126,20 +124,17 @@ const FirebaseScreen: INavigationScreen = (props) => {
       setLoading(true);
 
       try {
-        const response = await fetch(
-          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users/signup',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email,
-              password,
-              returnSecureToken: true,
-            }),
+        const response = await fetch(`${serviceUrl}/users/signup`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-        );
+          body: JSON.stringify({
+            email,
+            password,
+            returnSecureToken: true,
+          }),
+        });
         const result = await response.json();
 
         dispatch(setFirebaseAuth(result));

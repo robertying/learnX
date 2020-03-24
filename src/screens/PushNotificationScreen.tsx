@@ -23,6 +23,7 @@ import DeviceInfo from '../constants/DeviceInfo';
 import {Navigation} from 'react-native-navigation';
 import {setSetting} from '../redux/actions/settings';
 import Snackbar from 'react-native-snackbar';
+import {serviceUrl} from '../helpers/notification';
 
 const styles = StyleSheet.create({
   sectionTitle: {
@@ -133,55 +134,46 @@ const PushNotificationScreen: INavigationScreen = (props) => {
     try {
       setEnableLoading(true);
 
-      let response = await fetch(
-        'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users/token',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: firebaseAuth?.refreshToken,
-          }),
+      let response = await fetch(`${serviceUrl}/users/token`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          token: firebaseAuth?.refreshToken,
+        }),
+      });
       const result = await response.json();
       const idToken = result.id_token;
 
       if (enabled) {
-        response = await fetch(
-          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + idToken,
-            },
-            body: JSON.stringify({
-              username: auth.username,
-              password: auth.password,
-            }),
+        response = await fetch(`${serviceUrl}/users`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + idToken,
           },
-        );
+          body: JSON.stringify({
+            username: auth.username,
+            password: auth.password,
+          }),
+        });
 
         if (!response.ok) {
           throw new Error();
         }
 
-        response = await fetch(
-          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users/apns',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: 'Bearer ' + idToken,
-            },
-            body: JSON.stringify({
-              token: pushNotificationsSettings.deviceToken,
-              sandbox: __DEV__ ? 'true' : 'false',
-            }),
+        response = await fetch(`${serviceUrl}/users/apns`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + idToken,
           },
-        );
+          body: JSON.stringify({
+            token: pushNotificationsSettings.deviceToken,
+            sandbox: __DEV__ ? 'true' : 'false',
+          }),
+        });
 
         if (response.ok) {
           dispatch(
@@ -194,15 +186,12 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           throw new Error();
         }
       } else {
-        response = await fetch(
-          'https://asia-northeast1-learnx-513c0.cloudfunctions.net/users',
-          {
-            method: 'DELETE',
-            headers: {
-              Authorization: 'Bearer ' + idToken,
-            },
+        response = await fetch(`${serviceUrl}/users`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: 'Bearer ' + idToken,
           },
-        );
+        });
 
         if (response.ok) {
           dispatch(
