@@ -95,6 +95,8 @@ export default {
   acknowledge: '我已知悉',
   acknowledged: '已阅读',
   agreement: '功能声明',
+  firebaseLoginSuccess: '登录成功',
+  firebaseRegisterSuccess: '注册成功',
   firebaseLoginFailure: '登录失败，请检查网络连接并确保登录密码正确',
   firebaseRegisterFailure: '注册失败，请检查网络连接并确保邮箱有效',
   firebaseCompleteCredentials: '请完整填写邮箱与密码',

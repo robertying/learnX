@@ -92,6 +92,10 @@ const FirebaseScreen: INavigationScreen = (props) => {
 
         dispatch(setFirebaseAuth(result));
         Navigation.dismissModal(props.componentId);
+        Snackbar.show({
+          text: getTranslation('firebaseLoginSuccess'),
+          duration: Snackbar.LENGTH_SHORT,
+        });
       } catch {
         Snackbar.show({
           text: getTranslation('firebaseLoginFailure'),
@@ -140,6 +144,10 @@ const FirebaseScreen: INavigationScreen = (props) => {
 
         dispatch(setFirebaseAuth(result));
         Navigation.dismissModal(props.componentId);
+        Snackbar.show({
+          text: getTranslation('firebaseRegisterSuccess'),
+          duration: Snackbar.LENGTH_SHORT,
+        });
       } catch {
         Snackbar.show({
           text: getTranslation('firebaseRegisterFailure'),

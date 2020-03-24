@@ -102,6 +102,8 @@ export default {
   acknowledge: 'Acknowledge',
   acknowledged: 'Acknowledged',
   agreement: 'User Agreement',
+  firebaseLoginSuccess: 'Successfully logged in',
+  firebaseRegisterSuccess: 'Successfully registered',
   firebaseLoginFailure:
     'Login failed. Please check the internet connection and make sure your password is correct.',
   firebaseRegisterFailure:
