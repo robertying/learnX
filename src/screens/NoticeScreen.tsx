@@ -410,12 +410,14 @@ const NoticeScreen: INavigationScreen = (props) => {
         const data = notification.getData() as any;
         if (data.notice) {
           const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
-          dispatch(
-            getNoticesForCourseAction.success({
-              notices: [notice, ...notices],
-              courseId: notice.courseId,
-            }),
-          );
+          if (!notices.find((n) => n.id === notice.id)) {
+            dispatch(
+              getNoticesForCourseAction.success({
+                notices: [notice, ...notices],
+                courseId: notice.courseId,
+              }),
+            );
+          }
           Navigation.mergeOptions(props.componentId, {
             bottomTabs: {
               currentTabIndex: 0,
@@ -436,12 +438,14 @@ const NoticeScreen: INavigationScreen = (props) => {
         const data = remoteMessage.data;
         if (data?.notice) {
           const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
-          dispatch(
-            getNoticesForCourseAction.success({
-              notices: [notice, ...notices],
-              courseId: notice.courseId,
-            }),
-          );
+          if (!notices.find((n) => n.id === notice.id)) {
+            dispatch(
+              getNoticesForCourseAction.success({
+                notices: [notice, ...notices],
+                courseId: notice.courseId,
+              }),
+            );
+          }
 
           scheduleNotification(
             `${notice.courseName}`,

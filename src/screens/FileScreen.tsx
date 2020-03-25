@@ -247,12 +247,14 @@ const FileScreen: INavigationScreen = (props) => {
         const data = notification.getData() as any;
         if (data.file) {
           const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
-          dispatch(
-            getFilesForCourseAction.success({
-              files: [file, ...files],
-              courseId: file.courseId,
-            }),
-          );
+          if (!files.find((n) => n.id === file.id)) {
+            dispatch(
+              getFilesForCourseAction.success({
+                files: [file, ...files],
+                courseId: file.courseId,
+              }),
+            );
+          }
           Navigation.mergeOptions(props.componentId, {
             bottomTabs: {
               currentTabIndex: 1,
@@ -273,12 +275,14 @@ const FileScreen: INavigationScreen = (props) => {
         const data = remoteMessage.data;
         if (data?.file) {
           const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
-          dispatch(
-            getFilesForCourseAction.success({
-              files: [file, ...files],
-              courseId: file.courseId,
-            }),
-          );
+          if (!files.find((n) => n.id === file.id)) {
+            dispatch(
+              getFilesForCourseAction.success({
+                files: [file, ...files],
+                courseId: file.courseId,
+              }),
+            );
+          }
 
           scheduleNotification(
             `${file.courseName}`,

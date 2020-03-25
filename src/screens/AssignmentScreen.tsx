@@ -292,12 +292,14 @@ const AssignmentScreen: INavigationScreen = (props) => {
           const assignment = JSON.parse(data.assignment) as WithCourseInfo<
             IAssignment
           >;
-          dispatch(
-            getAssignmentsForCourseAction.success({
-              assignments: [assignment, ...assignments],
-              courseId: assignment.courseId,
-            }),
-          );
+          if (!assignments.find((n) => n.id === assignment.id)) {
+            dispatch(
+              getAssignmentsForCourseAction.success({
+                assignments: [assignment, ...assignments],
+                courseId: assignment.courseId,
+              }),
+            );
+          }
           Navigation.mergeOptions(props.componentId, {
             bottomTabs: {
               currentTabIndex: 2,
@@ -320,12 +322,14 @@ const AssignmentScreen: INavigationScreen = (props) => {
           const assignment = JSON.parse(data.assignment) as WithCourseInfo<
             IAssignment
           >;
-          dispatch(
-            getAssignmentsForCourseAction.success({
-              assignments: [assignment, ...assignments],
-              courseId: assignment.courseId,
-            }),
-          );
+          if (!assignments.find((n) => n.id === assignment.id)) {
+            dispatch(
+              getAssignmentsForCourseAction.success({
+                assignments: [assignment, ...assignments],
+                courseId: assignment.courseId,
+              }),
+            );
+          }
 
           scheduleNotification(
             `${assignment.courseName}`,
