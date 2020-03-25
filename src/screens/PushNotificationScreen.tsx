@@ -5,8 +5,10 @@ import {
   Linking,
   StyleSheet,
   ScrollView,
+  Platform,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
+import messaging from '@react-native-firebase/messaging';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {iOSUIKit} from 'react-native-typography';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -24,6 +26,7 @@ import {Navigation} from 'react-native-navigation';
 import {setSetting} from '../redux/actions/settings';
 import Snackbar from 'react-native-snackbar';
 import {serviceUrl} from '../helpers/notification';
+import PushNotification from 'react-native-push-notification';
 
 const styles = StyleSheet.create({
   sectionTitle: {
@@ -57,28 +60,49 @@ const PushNotificationScreen: INavigationScreen = (props) => {
 
   useEffect(() => {
     (async () => {
-      PushNotificationIOS.checkPermissions((permissions) => {
-        if (permissions.alert || permissions.badge || permissions.sound) {
-          setPermissionGranted(true);
-        } else {
-          setPermissionGranted(false);
-        }
-      });
+      if (Platform.OS === 'ios') {
+        PushNotificationIOS.checkPermissions((permissions) => {
+          if (permissions.alert || permissions.badge || permissions.sound) {
+            setPermissionGranted(true);
+          } else {
+            setPermissionGranted(false);
+          }
+        });
+      } else {
+        PushNotification.checkPermissions((permissions) => {
+          if (permissions.alert) {
+            setPermissionGranted(true);
+          } else {
+            setPermissionGranted(false);
+          }
+        });
+      }
     })();
   }, []);
 
   const handlePermissions = async () => {
-    const results = await PushNotificationIOS.requestPermissions({
-      alert: true,
-      badge: true,
-      sound: true,
-    });
+    if (Platform.OS === 'ios') {
+      const results = await PushNotificationIOS.requestPermissions({
+        alert: true,
+        badge: true,
+        sound: true,
+      });
 
-    if (results.alert || results.badge || results.sound) {
-      setPermissionGranted(true);
+      if (results.alert || results.badge || results.sound) {
+        setPermissionGranted(true);
+      } else {
+        setPermissionGranted(false);
+        Linking.openSettings();
+      }
     } else {
-      setPermissionGranted(false);
-      Linking.openSettings();
+      PushNotification.checkPermissions((permissions) => {
+        if (!permissions.alert) {
+          Snackbar.show({
+            text: getTranslation('pushNotificationReminder'),
+            duration: Snackbar.LENGTH_SHORT,
+          });
+        }
+      });
     }
   };
 
@@ -93,7 +117,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
     );
   };
 
-  const handleFirebase = () => {
+  const handleFirebase = async () => {
     if (
       !pushNotificationsSettings.agreementAcknowledged ||
       !permissionGranted
@@ -103,6 +127,24 @@ const PushNotificationScreen: INavigationScreen = (props) => {
         duration: Snackbar.LENGTH_SHORT,
       });
       return;
+    }
+
+    if (Platform.OS === 'android') {
+      try {
+        const token = await messaging().getToken();
+        dispatch(
+          setSetting('pushNotifications', {
+            ...settings.pushNotifications,
+            deviceToken: token,
+          }),
+        );
+      } catch {
+        Snackbar.show({
+          text: getTranslation('googleServicesFail'),
+          duration: Snackbar.LENGTH_SHORT,
+        });
+        return;
+      }
     }
 
     Navigation.showModal({
@@ -155,7 +197,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           throw new Error();
         }
 
-        response = await fetch(`${serviceUrl}/users/apns`, {
+        response = await fetch(`${serviceUrl}/users/device`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -165,6 +207,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
             uuid: DeviceInfo.getUniqueId(),
             token: pushNotificationsSettings.deviceToken,
             sandbox: __DEV__ ? 'true' : 'false',
+            os: Platform.OS,
           }),
         });
 
@@ -179,7 +222,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           throw new Error();
         }
       } else {
-        response = await fetch(`${serviceUrl}/users/apns`, {
+        response = await fetch(`${serviceUrl}/users/device`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -188,6 +231,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           body: JSON.stringify({
             uuid: DeviceInfo.getUniqueId(),
             token: '',
+            os: Platform.OS,
           }),
         });
 

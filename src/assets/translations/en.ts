@@ -59,7 +59,7 @@ export default {
   visible: 'Visible',
   pushNotifications: 'Push Notifications',
   pushNotificationReminder:
-    'You need to enable Notifications for the App to set reminders',
+    'You need to enable Notification Permissions for the App',
   goToSettings: 'Go to Settings',
   reminder: 'Reminder',
   reminderSet: 'Reminder set successfully',
@@ -127,4 +127,5 @@ export default {
   loginRegister: 'Login / Register',
   pushNotificationStatus: 'Push Notification Status',
   enabled: 'Enabled',
+  googleServicesFail: 'Failed to connect to Google Services',
 };

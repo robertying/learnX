@@ -15,6 +15,7 @@ import {
   DarkTheme,
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import messaging from '@react-native-firebase/messaging';
 import {useDispatch} from 'react-redux';
 import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
@@ -311,6 +312,37 @@ const AssignmentScreen: INavigationScreen = (props) => {
     }
   }, [assignments, dispatch, onAssignmentCardPress, props.componentId]);
 
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+        const data = remoteMessage.data;
+        if (data?.assignment) {
+          const assignment = JSON.parse(data.assignment) as WithCourseInfo<
+            IAssignment
+          >;
+          dispatch(
+            getAssignmentsForCourseAction.success({
+              assignments: [assignment, ...assignments],
+              courseId: assignment.courseId,
+            }),
+          );
+
+          scheduleNotification(
+            `${assignment.courseName}`,
+            `${assignment.title}\n${removeTags(
+              assignment.description ||
+                getTranslation('noAssignmentDescription'),
+            )}`,
+            new Date(),
+            assignment,
+          );
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [dispatch, assignments]);
+
   const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {
       dispatch(pinAssignment(assignmentId));
@@ -432,7 +464,7 @@ const AssignmentScreen: INavigationScreen = (props) => {
   const [dateAndroid, setDateAndroid] = useState<Date | null>(null);
   const [timeAndroid, setTimeAndroid] = useState<Date | null>(null);
 
-  const handleRemind = async (notice: WithCourseInfo<IAssignment>) => {
+  const handleRemind = async (assignment: WithCourseInfo<IAssignment>) => {
     if (!(await requestNotificationPermission())) {
       showNotificationPermissionAlert();
       return;
@@ -440,7 +472,7 @@ const AssignmentScreen: INavigationScreen = (props) => {
     setDateAndroid(null);
     setTimeAndroid(null);
     setPickerVisible(true);
-    setReminderInfo(notice);
+    setReminderInfo(assignment);
   };
 
   const handleReminderSet = useCallback(() => {

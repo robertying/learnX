@@ -57,7 +57,7 @@ export default {
   hidden: '屏蔽',
   visible: '可见',
   pushNotifications: '推送通知',
-  pushNotificationReminder: '设置定时提醒要求 App 具有推送通知权限',
+  pushNotificationReminder: '此设置要求 App 具有推送通知权限',
   goToSettings: '前往“设置”',
   reminder: '定时提醒',
   reminderSet: '定时提醒已设置',
@@ -115,4 +115,5 @@ export default {
   loginRegister: '登录 / 注册',
   pushNotificationStatus: '推送通知状态',
   enabled: '启用',
+  googleServicesFail: '无法连接 Google 服务',
 };

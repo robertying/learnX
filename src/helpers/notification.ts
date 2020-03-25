@@ -40,7 +40,8 @@ export const showNotificationPermissionAlert = () => {
       },
       {
         text: getTranslation('goToSettings'),
-        onPress: () => Linking.openURL('app-settings:'),
+        onPress: () =>
+          Platform.OS === 'ios' && Linking.openURL('app-settings:'),
       },
     ],
     {cancelable: false},

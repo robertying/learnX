@@ -43,6 +43,7 @@ import {
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
+import messaging from '@react-native-firebase/messaging';
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import Modal from 'react-native-modal';
@@ -266,6 +267,34 @@ const FileScreen: INavigationScreen = (props) => {
     }
   }, [dispatch, files, onFileCardPress, props.componentId]);
 
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+        const data = remoteMessage.data;
+        if (data?.file) {
+          const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
+          dispatch(
+            getFilesForCourseAction.success({
+              files: [file, ...files],
+              courseId: file.courseId,
+            }),
+          );
+
+          scheduleNotification(
+            `${file.courseName}`,
+            `${file.title}\n${removeTags(
+              file.description || getTranslation('noFileDescription'),
+            )}`,
+            new Date(),
+            file,
+          );
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [dispatch, files]);
+
   const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {
       dispatch(pinFile(fileId));
@@ -385,7 +414,7 @@ const FileScreen: INavigationScreen = (props) => {
   const [dateAndroid, setDateAndroid] = useState<Date | null>(null);
   const [timeAndroid, setTimeAndroid] = useState<Date | null>(null);
 
-  const handleRemind = async (notice: WithCourseInfo<IFile>) => {
+  const handleRemind = async (file: WithCourseInfo<IFile>) => {
     if (!(await requestNotificationPermission())) {
       showNotificationPermissionAlert();
       return;
@@ -393,7 +422,7 @@ const FileScreen: INavigationScreen = (props) => {
     setDateAndroid(null);
     setTimeAndroid(null);
     setPickerVisible(true);
-    setReminderInfo(notice);
+    setReminderInfo(file);
   };
 
   const handleReminderSet = useCallback(() => {

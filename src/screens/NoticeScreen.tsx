@@ -56,7 +56,7 @@ import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
-import PushNotification from 'react-native-push-notification';
+import messaging from '@react-native-firebase/messaging';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
@@ -92,11 +92,7 @@ const NoticeScreen: INavigationScreen = (props) => {
   }, []);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      PushNotification.configure({
-        requestPermissions: false,
-      });
-    } else {
+    if (Platform.OS === 'ios') {
       if (DeviceInfo.isMac()) {
         PushNotificationIOS.setApplicationIconBadgeNumber(0);
       }
@@ -433,6 +429,34 @@ const NoticeScreen: INavigationScreen = (props) => {
         PushNotificationIOS.removeEventListener('notification', listener);
     }
   }, [dispatch, notices, onNoticeCardPress, props.componentId]);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+        const data = remoteMessage.data;
+        if (data?.notice) {
+          const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
+          dispatch(
+            getNoticesForCourseAction.success({
+              notices: [notice, ...notices],
+              courseId: notice.courseId,
+            }),
+          );
+
+          scheduleNotification(
+            `${notice.courseName}`,
+            `${notice.title}\n${removeTags(
+              notice.content || getTranslation('noNoticeContent'),
+            )}`,
+            new Date(),
+            notice,
+          );
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [dispatch, notices]);
 
   const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {
