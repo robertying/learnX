@@ -97,6 +97,9 @@ const NoticeScreen: INavigationScreen = (props) => {
         requestPermissions: false,
       });
     } else {
+      if (DeviceInfo.isMac()) {
+        PushNotificationIOS.setApplicationIconBadgeNumber(0);
+      }
       PushNotificationIOS.addEventListener(
         'register',
         pushNotificationListener,
