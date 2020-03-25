@@ -1356,11 +1356,11 @@
     serve-static "^1.13.1"
 
 "@react-native-community/cli-platform-android@^4.2.0":
-  version "4.3.0"
-  resolved "https://registry.npm.taobao.org/@react-native-community/cli-platform-android/download/@react-native-community/cli-platform-android-4.3.0.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40react-native-community%2Fcli-platform-android%2Fdownload%2F%40react-native-community%2Fcli-platform-android-4.3.0.tgz#905061bca89f8daa85825b04f977c0c120bc74f4"
-  integrity sha1-kFBhvKifjaqFglsE+XfAwSC8dPQ=
+  version "4.4.0"
+  resolved "https://registry.npm.taobao.org/@react-native-community/cli-platform-android/download/@react-native-community/cli-platform-android-4.4.0.tgz#8b836a89df65b323f540a8ba55daa34e4243f753"
+  integrity sha1-i4Nqid9lsyP1QKi6VdqjTkJD91M=
   dependencies:
-    "@react-native-community/cli-tools" "^4.2.2"
+    "@react-native-community/cli-tools" "^4.4.0"
     chalk "^3.0.0"
     execa "^1.0.0"
     fs-extra "^8.1.0"
@@ -1372,11 +1372,11 @@
     xmldoc "^1.1.2"
 
 "@react-native-community/cli-platform-ios@^4.2.0":
-  version "4.3.0"
-  resolved "https://registry.npm.taobao.org/@react-native-community/cli-platform-ios/download/@react-native-community/cli-platform-ios-4.3.0.tgz?cache=0&sync_timestamp=1583851594020&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40react-native-community%2Fcli-platform-ios%2Fdownload%2F%40react-native-community%2Fcli-platform-ios-4.3.0.tgz#337f7a87d30e8fb5f4240ab85833adc27e50a480"
-  integrity sha1-M396h9MOj7X0JAq4WDOtwn5QpIA=
+  version "4.4.0"
+  resolved "https://registry.npm.taobao.org/@react-native-community/cli-platform-ios/download/@react-native-community/cli-platform-ios-4.4.0.tgz#233508b9967b33ee9cbf7c2bd3bc328814b217bd"
+  integrity sha1-IzUIuZZ7M+6cv3wr07wyiBSyF70=
   dependencies:
-    "@react-native-community/cli-tools" "^4.2.2"
+    "@react-native-community/cli-tools" "^4.4.0"
     chalk "^3.0.0"
     glob "^7.1.3"
     js-yaml "^3.13.1"
@@ -1384,30 +1384,30 @@
     plist "^3.0.1"
     xcode "^2.0.0"
 
-"@react-native-community/cli-tools@^4.2.2":
-  version "4.2.2"
-  resolved "https://registry.npm.taobao.org/@react-native-community/cli-tools/download/@react-native-community/cli-tools-4.2.2.tgz#953354bc4d14afa76483cdd097a18407016dab34"
-  integrity sha1-lTNUvE0Ur6dkg83Ql6GEBwFtqzQ=
+"@react-native-community/cli-tools@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.npm.taobao.org/@react-native-community/cli-tools/download/@react-native-community/cli-tools-4.4.0.tgz#dc7bfde180af8ea5d68c9d9df908dc7bd07546d8"
+  integrity sha1-3Hv94YCvjqXWjJ2d+Qjce9B1Rtg=
   dependencies:
     chalk "^3.0.0"
     lodash "^4.17.15"
     mime "^2.4.1"
-    node-fetch "^2.5.0"
+    node-fetch "^2.6.0"
 
-"@react-native-community/cli-types@^4.3.0":
-  version "4.3.0"
-  resolved "https://registry.npm.taobao.org/@react-native-community/cli-types/download/@react-native-community/cli-types-4.3.0.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40react-native-community%2Fcli-types%2Fdownload%2F%40react-native-community%2Fcli-types-4.3.0.tgz#800ef014b6cb41bed18c4bde3f6eb617792038d1"
-  integrity sha1-gA7wFLbLQb7RjEveP262F3kgONE=
+"@react-native-community/cli-types@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.npm.taobao.org/@react-native-community/cli-types/download/@react-native-community/cli-types-4.4.0.tgz#c030af8c970a98e9360645f18890a85ddb9a8f37"
+  integrity sha1-wDCvjJcKmOk2BkXxiJCoXduajzc=
 
-"@react-native-community/cli@4.3.0", "@react-native-community/cli@^4.2.0":
-  version "4.3.0"
-  resolved "https://registry.npm.taobao.org/@react-native-community/cli/download/@react-native-community/cli-4.3.0.tgz?cache=0&sync_timestamp=1583851594569&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40react-native-community%2Fcli%2Fdownload%2F%40react-native-community%2Fcli-4.3.0.tgz#5a44a6dd550c92e2260b96f40b91ef6327adc2d3"
-  integrity sha1-WkSm3VUMkuImC5b0C5HvYyetwtM=
+"@react-native-community/cli@4.4.0", "@react-native-community/cli@^4.2.0":
+  version "4.4.0"
+  resolved "https://registry.npm.taobao.org/@react-native-community/cli/download/@react-native-community/cli-4.4.0.tgz#6d3464baee332ea16c23da32ec4c16b74fd480cd"
+  integrity sha1-bTRkuu4zLqFsI9oy7EwWt0/UgM0=
   dependencies:
     "@hapi/joi" "^15.0.3"
     "@react-native-community/cli-debugger-ui" "^4.2.1"
-    "@react-native-community/cli-tools" "^4.2.2"
-    "@react-native-community/cli-types" "^4.3.0"
+    "@react-native-community/cli-tools" "^4.4.0"
+    "@react-native-community/cli-types" "^4.4.0"
     chalk "^3.0.0"
     command-exists "^1.2.8"
     commander "^2.19.0"
@@ -7727,7 +7727,7 @@ nice-try@^1.0.4:
   resolved "https://registry.npm.taobao.org/nice-try/download/nice-try-1.0.5.tgz?cache=0&sync_timestamp=1584699726257&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fnice-try%2Fdownload%2Fnice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"
   integrity sha1-ozeKdpbOfSI+iPybdkvX7xCJ42Y=
 
-node-fetch@2.6.0, node-fetch@^2.2.0, node-fetch@^2.5.0:
+node-fetch@2.6.0, node-fetch@^2.2.0, node-fetch@^2.6.0:
   version "2.6.0"
   resolved "https://registry.npm.taobao.org/node-fetch/download/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
   integrity sha1-5jNFY4bUqlWGP2dqerDaqP3ssP0=
@@ -8611,9 +8611,9 @@ pseudomap@^1.0.2:
   integrity sha1-8FKijacOYYkX7wqKw0wa5aaChrM=
 
 psl@^1.1.28:
-  version "1.7.0"
-  resolved "https://registry.npm.taobao.org/psl/download/psl-1.7.0.tgz?cache=0&sync_timestamp=1577538558975&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fpsl%2Fdownload%2Fpsl-1.7.0.tgz#f1c4c47a8ef97167dea5d6bbf4816d736e884a3c"
-  integrity sha1-8cTEeo75cWfepda79IFtc26ISjw=
+  version "1.8.0"
+  resolved "https://registry.npm.taobao.org/psl/download/psl-1.8.0.tgz?cache=0&sync_timestamp=1585142991033&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fpsl%2Fdownload%2Fpsl-1.8.0.tgz#9326f8bcfb013adcc005fdff056acce020e51c24"
+  integrity sha1-kyb4vPsBOtzABf3/BWrM4CDlHCQ=
 
 pump@^3.0.0:
   version "3.0.0"
