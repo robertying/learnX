@@ -8,6 +8,11 @@ import {getTranslation} from './i18n';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
 
+export let messaging: typeof import('@react-native-firebase/messaging').default;
+if (Platform.OS === 'android') {
+  messaging = require('@react-native-firebase/messaging').default;
+}
+
 export const serviceUrl = 'https://app.robertying.io/api';
 
 export const requestNotificationPermission = async () => {

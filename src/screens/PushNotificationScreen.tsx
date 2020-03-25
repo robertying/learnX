@@ -8,7 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
-import messaging from '@react-native-firebase/messaging';
+import {messaging} from '../helpers/notification';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {iOSUIKit} from 'react-native-typography';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';

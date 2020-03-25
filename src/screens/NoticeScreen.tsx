@@ -56,7 +56,7 @@ import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
-import messaging from '@react-native-firebase/messaging';
+import {messaging} from '../helpers/notification';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';

@@ -43,7 +43,7 @@ import {
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
-import messaging from '@react-native-firebase/messaging';
+import {messaging} from '../helpers/notification';
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import Modal from 'react-native-modal';

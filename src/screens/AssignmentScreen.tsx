@@ -15,7 +15,7 @@ import {
   DarkTheme,
 } from 'react-native-paper';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import messaging from '@react-native-firebase/messaging';
+import {messaging} from '../helpers/notification';
 import {useDispatch} from 'react-redux';
 import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
