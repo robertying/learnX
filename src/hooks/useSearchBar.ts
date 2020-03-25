@@ -1,4 +1,4 @@
-import {FuseOptions} from 'fuse.js';
+import {IFuseOptions} from 'fuse.js';
 import {Platform} from 'react-native';
 import useAndroidSearchBar from './useAndroidSearchBar';
 import useIosSearchBar from './useIosSearchBar';
@@ -6,7 +6,7 @@ import {IEntity} from '../types';
 
 function useSearchBar<T extends IEntity>(
   entities: Array<T>,
-  fuseOptions: FuseOptions<T>,
+  fuseOptions: IFuseOptions<T>,
 ): [
   T[],
   string | undefined,

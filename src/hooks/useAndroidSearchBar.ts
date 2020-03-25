@@ -1,11 +1,11 @@
-import Fuse, {FuseOptions, FuseResultWithMatches} from 'fuse.js';
+import Fuse, {IFuseOptions} from 'fuse.js';
 import {useEffect, useState, useCallback} from 'react';
 import {Navigation} from 'react-native-navigation';
 import {IEntity} from '../types';
 
 function useAndroidSearchBar<T extends IEntity>(
   entities: Array<T>,
-  fuseOptions: FuseOptions<T>,
+  fuseOptions: IFuseOptions<T>,
 ): [string, React.Dispatch<React.SetStateAction<string>>, Array<T>, boolean] {
   const [searchBarText, setSearchBarText] = useState('');
 
@@ -14,9 +14,7 @@ function useAndroidSearchBar<T extends IEntity>(
   useEffect(() => {
     if (searchBarText) {
       const fuse = new Fuse(entities, fuseOptions);
-      const resultsWithMatches = fuse.search<T>(
-        searchBarText,
-      ) as FuseResultWithMatches<T>[];
+      const resultsWithMatches = fuse.search<T>(searchBarText);
       setSearchResults(resultsWithMatches.map((i) => i.item));
     } else {
       setSearchResults(entities);
