@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.com/robertying/learnX.svg?branch=master)](https://travis-ci.com/robertying/learnX)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/robertying/learnX)](https://github.com/robertying/learnX/releases)
-[![Platform iOS](https://img.shields.io/badge/platform-ios-brightgreen)](https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1)
+[![Platform iOS](https://img.shields.io/badge/platform-ios-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115?ls=1)
 [![Platform Android](https://img.shields.io/badge/platform-android-brightgreen)](https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
 [![Platform macOS](https://img.shields.io/badge/platform-macos-brightgreen)](https://github.com/robertying/learnX/releases)
 
@@ -23,20 +23,24 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 
 ## Download
 
-<a href='https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?ls=1'>
+<a href='https://apps.apple.com/cn/app/learnx/id1459073115?ls=1'>
     <img align="center" width=160 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
 </a>
 <a href='https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
     <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
 </a>
 
-- **TUNA Mirror: https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX**
+### Android Alternatives
 
-- **Self-hosted GitHub Release mirror (CDN): https://app.robertying.io/download/learnX**
+- **[TUNA Mirror](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
 
-- Android users can also download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases).
+- [Self-hosted GitHub Release mirror (CDN)](https://app.robertying.io/download/learnX)
 
-- New! macOS users can now download the latest version from [GitHub Releases](https://github.com/robertying/learnX/releases). (Coming soon to Mac App Store)
+- [GitHub Releases](https://github.com/robertying/learnX/releases)
+
+### macOS Alternatives
+
+- [GitHub Releases](https://github.com/robertying/learnX/releases)
 
 ## App Features
 
@@ -48,6 +52,7 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 
 ### Advanced
 
+- Push notifications (unofficial)
 - Submit assignments
 - Add to Favorites
 - Set a reminder
