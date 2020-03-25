@@ -10,16 +10,16 @@ import {useDispatch} from 'react-redux';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import {iOSUIKit} from 'react-native-typography';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import DeviceInfo from 'react-native-device-info';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
-import {getScreenOptions, setDetailView, pushTo} from '../helpers/navigation';
+import {getScreenOptions, pushTo} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import RaisedButton from '../components/RaisedButton';
 import SettingListItem from '../components/SettingListItem';
-import DeviceInfo from '../constants/DeviceInfo';
 import {Navigation} from 'react-native-navigation';
 import {setSetting} from '../redux/actions/settings';
 import Snackbar from 'react-native-snackbar';
@@ -48,21 +48,6 @@ const PushNotificationScreen: INavigationScreen = (props) => {
   const settings = useTypedSelector((state) => state.settings);
   const pushNotificationsSettings = settings.pushNotifications;
   const firebaseAuth = useTypedSelector((state) => state.auth.firebase);
-
-  const navigate = (name: string) => {
-    if (DeviceInfo.isIPad() && !settings.isCompact) {
-      setDetailView(name, props.componentId);
-    } else {
-      pushTo(
-        name,
-        props.componentId,
-        undefined,
-        undefined,
-        false,
-        colorScheme === 'dark',
-      );
-    }
-  };
 
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme);
@@ -98,7 +83,14 @@ const PushNotificationScreen: INavigationScreen = (props) => {
   };
 
   const handleAgreement = () => {
-    navigate('settings.pushNotifications.agreement');
+    pushTo(
+      'settings.pushNotifications.agreement',
+      props.componentId,
+      undefined,
+      undefined,
+      false,
+      colorScheme === 'dark',
+    );
   };
 
   const handleFirebase = () => {
@@ -170,6 +162,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
             Authorization: 'Bearer ' + idToken,
           },
           body: JSON.stringify({
+            uuid: DeviceInfo.getUniqueId(),
             token: pushNotificationsSettings.deviceToken,
             sandbox: __DEV__ ? 'true' : 'false',
           }),
@@ -186,11 +179,16 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           throw new Error();
         }
       } else {
-        response = await fetch(`${serviceUrl}/users`, {
-          method: 'DELETE',
+        response = await fetch(`${serviceUrl}/users/apns`, {
+          method: 'POST',
           headers: {
+            'Content-Type': 'application/json',
             Authorization: 'Bearer ' + idToken,
           },
+          body: JSON.stringify({
+            uuid: DeviceInfo.getUniqueId(),
+            token: '',
+          }),
         });
 
         if (response.ok) {
