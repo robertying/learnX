@@ -4,9 +4,10 @@
 
 [![Build Status](https://travis-ci.com/robertying/learnX.svg?branch=master)](https://travis-ci.com/robertying/learnX)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/robertying/learnX)](https://github.com/robertying/learnX/releases)
-[![Platform iOS](https://img.shields.io/badge/platform-ios-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115?ls=1)
-[![Platform Android](https://img.shields.io/badge/platform-android-brightgreen)](https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
-[![Platform macOS](https://img.shields.io/badge/platform-macos-brightgreen)](https://github.com/robertying/learnX/releases)
+[![Platform iOS](https://img.shields.io/badge/platform-ios-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone)
+[![Platform iPadOS](https://img.shields.io/badge/platform-ipados-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=ipad)
+[![Platform macOS](https://img.shields.io/badge/platform-macos-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac)
+[![Platform Android](https://img.shields.io/badge/platform-android-brightgreen)](https://play.google.com/store/apps/details?id=io.robertying.learnx)
 
 ![logo](./docs/logo.png)
 
@@ -23,11 +24,14 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 
 ## Download
 
-<a href='https://apps.apple.com/cn/app/learnx/id1459073115?ls=1'>
-    <img align="center" width=160 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
+<a href='https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone'>
+    <img align="center" height=50 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
 </a>
-<a href='https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
-    <img align="center" width=200 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
+<a href='https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac'>
+    <img align="center" height=50 alt='Download on the Mac App Store' src='docs/assets/Download_on_the_Mac_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
+</a>
+<a href='https://play.google.com/store/apps/details?id=io.robertying.learnx'>
+    <img align="center" height=72 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
 </a>
 
 ### Android Alternatives
@@ -37,6 +41,10 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 - [Self-hosted GitHub Release mirror (CDN)](https://app.robertying.io/download/learnX)
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
+
+### iOS Alternatives
+
+- [TestFlight Beta](https://testflight.apple.com/join/5SPCH86w)
 
 ### macOS Alternatives
 

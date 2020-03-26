@@ -6,9 +6,11 @@ layout: default_cn
 
 ## 下载
 
-&nbsp;&nbsp;&nbsp;[![Download on the App Store](assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg)](https://apps.apple.com/cn/app/learnx/id1459073115?ls=1)
+&nbsp;&nbsp;&nbsp;&nbsp;[![Download on the App Store](assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone)
 
-[![Get it on Google Play](assets/google-play-badge.svg)](https://play.google.com/store/apps/details?id=io.robertying.learnx&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1)
+&nbsp;&nbsp;&nbsp;&nbsp;[![Download on the Mac App Store](assets/Download_on_the_Mac_App_Store_Badge_US-UK_RGB_blk_092917.svg)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac)
+
+[![Get it on Google Play](assets/google-play-badge.svg)](https://play.google.com/store/apps/details?id=io.robertying.learnx)
 
 ### Android 镜像
 
