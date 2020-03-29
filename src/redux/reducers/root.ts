@@ -10,10 +10,8 @@ import currentSemester from './currentSemester';
 import files from './files';
 import notices from './notices';
 import semesters from './semesters';
-import settings from './settings';
 
 export const mainReducers = {
-  settings,
   assignments,
   courses,
   currentSemester,

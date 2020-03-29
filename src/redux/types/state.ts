@@ -141,7 +141,7 @@ export interface PersistPartial {
 
 export interface IAppState {
   auth: IAuthState & PersistPartial;
-  settings: ISettingsState;
+  settings: ISettingsState & PersistPartial;
   semesters: ISemestersState;
   currentSemester: string;
   courses: ICoursesState;

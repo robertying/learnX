@@ -5,8 +5,14 @@ import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 import createSecureStore from 'redux-persist-expo-securestore';
 import thunk from 'redux-thunk';
 import authReducer from './reducers/auth';
+import settingsReducer from './reducers/settings';
 import {mainReducers, rootReducer} from './reducers/root';
-import {IAppState, IAuthState, IPersistAppState} from './types/state';
+import {
+  IAppState,
+  IAuthState,
+  IPersistAppState,
+  ISettingsState,
+} from './types/state';
 import {TypedUseSelectorHook, useSelector} from 'react-redux';
 
 declare const window: any;
@@ -17,15 +23,21 @@ const authPersistConfig: PersistConfig<IAuthState> = {
   storage: createSecureStore(),
   whitelist: ['username', 'password', 'firebase'],
 };
+const settingsPersistConfig: PersistConfig<ISettingsState> = {
+  key: 'settings',
+  storage: AsyncStorage,
+  blacklist: ['hasUpdate', 'isCompact'],
+};
 const rootPersistConfig: PersistConfig<IAppState> = {
   key: 'root',
   storage: AsyncStorage,
   stateReconciler: autoMergeLevel2,
-  blacklist: ['auth'],
+  blacklist: ['auth', 'settings'],
 };
 
 const appReducer = combineReducers({
   auth: persistReducer(authPersistConfig, authReducer),
+  settings: persistReducer(settingsPersistConfig, settingsReducer),
   ...mainReducers,
 });
 

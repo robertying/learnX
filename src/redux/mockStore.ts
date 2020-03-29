@@ -23,6 +23,10 @@ const mockStore: IPersistAppState = {
       agreementAcknowledged: false,
       enabled: false,
     },
+    _persist: {
+      rehydrated: true,
+      version: -1,
+    },
   },
   semesters: {
     isFetching: false,
