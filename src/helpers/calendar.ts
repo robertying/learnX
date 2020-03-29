@@ -12,6 +12,7 @@ import {getTranslation} from './i18n';
 import Snackbar from 'react-native-snackbar';
 import {CalendarEvent} from 'thu-learn-lib-no-native/lib/types';
 import {removeTags} from './html';
+import {Dayjs} from 'dayjs';
 
 export const getCalendarId = async () => {
   const calendars = await RNCalendarEvents.findCalendars();
@@ -179,8 +180,8 @@ export const getSemesterDuration = () => {
 
 export const saveCoursesToCalendar = async (
   events: CalendarEvent[],
-  startDate: string,
-  endDate: string,
+  startDate: Dayjs,
+  endDate: Dayjs,
 ) => {
   const status = await RNCalendarEvents.authorizationStatus();
   if (status !== 'authorized') {
@@ -194,8 +195,8 @@ export const saveCoursesToCalendar = async (
   const calendarId = await getCourseCalendarId();
 
   const oldEvents = await RNCalendarEvents.fetchAllEvents(
-    dayjs(startDate).toISOString(),
-    dayjs(endDate).toISOString(),
+    startDate.toISOString(),
+    endDate.toISOString(),
     [calendarId],
   );
 

@@ -68,10 +68,10 @@ export default {
   offlineLoginError: 'Login failed. Tap here to try again.',
   noGrade: 'No grade specified',
   courseSync: 'Sync Courses to Calendar',
-  fetchingCourseSchedule:
-    'Fetching course schedule...\nThis may fail sometimes\nJust try it again',
+  fetchingCourseSchedule: 'Fetching course schedule for next 30 days...',
   courseSyncSuccess: 'Course schedule synced successfully',
-  courseSyncFailure: 'Failed to sync course schedule... Try again later.',
+  courseSyncFailure:
+    'Failed to sync course schedule... Try again later or tomorrow.',
   credentialNote:
     'Your credentials will only be stored locally and encrypted safely by system keychain/keystore',
   unread: 'Unread',

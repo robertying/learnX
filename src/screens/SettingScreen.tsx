@@ -23,7 +23,6 @@ import SettingListItem from '../components/SettingListItem';
 import Colors from '../constants/Colors';
 import {
   saveAssignmentsToCalendar,
-  getSemesterDuration,
   saveCoursesToCalendar,
   removeCalendars,
 } from '../helpers/calendar';
@@ -46,6 +45,7 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/share';
 import {ISettingsState} from '../redux/types/state';
+import dayjs from '../helpers/dayjs';
 
 const SettingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -249,29 +249,16 @@ const SettingScreen: INavigationScreen = (props) => {
   useEffect(() => {
     if (courseSyncModalVisible) {
       (async () => {
-        const {
-          startDate,
-          midEndDate,
-          midStartDate,
-          endDate,
-        } = getSemesterDuration();
+        const today = dayjs();
+        const monthFromToday = today.add(1, 'month');
 
         try {
-          const firstHalfEvents = await dataSource.getCalendar(
-            startDate,
-            midEndDate,
+          const events = await dataSource.getCalendar(
+            today.format('YYYYMMDD'),
+            monthFromToday.format('YYYYMMDD'),
             settings.graduate,
           );
-          const secondHalfEvents = await dataSource.getCalendar(
-            midStartDate,
-            endDate,
-            settings.graduate,
-          );
-          await saveCoursesToCalendar(
-            [...firstHalfEvents, ...secondHalfEvents],
-            startDate,
-            endDate,
-          );
+          await saveCoursesToCalendar(events, today, monthFromToday);
           setCourseSyncModalVisible(false);
           await new Promise((r) => setTimeout(r, 1500));
           Snackbar.show({
@@ -608,7 +595,7 @@ const SettingScreen: INavigationScreen = (props) => {
           style={{
             backgroundColor: Colors.system('background', colorScheme),
             width: '100%',
-            height: 190,
+            height: 150,
             padding: 20,
             flexDirection: 'column',
             justifyContent: 'space-between',
