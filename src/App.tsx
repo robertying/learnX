@@ -1,4 +1,4 @@
-import {Platform, UIManager} from 'react-native';
+import {Platform, UIManager, unstable_enableLogBox} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import DeviceInfo from './constants/DeviceInfo';
 import {getAuthLoadingRoot} from './navigation/navigationRoot';
@@ -8,6 +8,8 @@ import {getAndroidTheme} from './helpers/darkmode';
 
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(async () => {
+    unstable_enableLogBox();
+
     await DeviceInfo.init();
 
     if (
