@@ -74,7 +74,15 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
   const [content, setContent] = useState(
     removeTags(submittedContent || '').replace('-->', ''),
   );
-  const [fileResult, setFileResult] = useState<DocumentPicker.DocumentResult>();
+  const [fileResult, setFileResult] = useState<{
+    type: 'success';
+    name: string;
+    size: number;
+    uri: string;
+    lastModified?: number | undefined;
+    file?: any;
+    output?: any;
+  }>();
 
   const handleFilePick = async () => {
     const result = await DocumentPicker.getDocumentAsync({
