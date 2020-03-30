@@ -46,6 +46,7 @@ import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/share';
 import {ISettingsState} from '../redux/types/state';
 import dayjs from '../helpers/dayjs';
+import {useWindow} from '../hooks/useWindow';
 
 const SettingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -557,6 +558,8 @@ const SettingScreen: INavigationScreen = (props) => {
     adaptToSystemTheme(props.componentId, colorScheme, true);
   }, [colorScheme, props.componentId]);
 
+  const window = useWindow();
+
   return (
     <SafeAreaView
       testID="SettingsScreen"
@@ -589,6 +592,8 @@ const SettingScreen: INavigationScreen = (props) => {
         }
         animationIn="bounceIn"
         animationOut="zoomOut"
+        deviceHeight={window.height}
+        deviceWidth={window.width}
         useNativeDriver={true}
         hideModalContentWhileAnimating={true}>
         <View

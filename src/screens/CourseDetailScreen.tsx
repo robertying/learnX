@@ -33,6 +33,7 @@ import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
+import {useWindow} from '../hooks/useWindow';
 
 export interface ICourseDetailScreenProps {
   course: ICourse;
@@ -265,6 +266,8 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = (
     }
   };
 
+  const window = useWindow();
+
   return (
     <SafeAreaView
       style={{
@@ -290,6 +293,8 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = (
         }
         animationIn="bounceIn"
         animationOut="zoomOut"
+        deviceHeight={window.height}
+        deviceWidth={window.width}
         useNativeDriver={true}
         hideModalContentWhileAnimating={true}>
         <View

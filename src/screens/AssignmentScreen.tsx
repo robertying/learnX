@@ -55,6 +55,7 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {saveAssignmentsToCalendar} from '../helpers/calendar';
 import {Navigation} from 'react-native-navigation';
+import {useWindow} from '../hooks/useWindow';
 
 const AssignmentScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -534,6 +535,8 @@ const AssignmentScreen: INavigationScreen = (props) => {
     }
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
+  const window = useWindow();
+
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
@@ -611,6 +614,8 @@ const AssignmentScreen: INavigationScreen = (props) => {
             }
             animationIn="bounceIn"
             animationOut="zoomOut"
+            deviceHeight={window.height}
+            deviceWidth={window.width}
             useNativeDriver={true}
             hideModalContentWhileAnimating={true}>
             <DateTimePicker

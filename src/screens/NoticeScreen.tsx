@@ -60,6 +60,7 @@ import {messaging} from '../helpers/notification';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
+import {useWindow} from '../hooks/useWindow';
 
 const NoticeScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -647,6 +648,8 @@ const NoticeScreen: INavigationScreen = (props) => {
     }
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
+  const window = useWindow();
+
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <SafeAreaView
@@ -725,6 +728,8 @@ const NoticeScreen: INavigationScreen = (props) => {
             }
             animationIn="bounceIn"
             animationOut="zoomOut"
+            deviceHeight={window.height}
+            deviceWidth={window.width}
             useNativeDriver={true}
             hideModalContentWhileAnimating={true}>
             <DateTimePicker
