@@ -118,15 +118,20 @@ const AssignmentScreen: INavigationScreen = (props) => {
     [assignments, courseNames],
   );
 
-  const newAssignments = useMemo(() => {
-    const newAssignmentsOnly = sortedAssignments.filter(
+  const finishedAssignments = useMemo(() => {
+    const finishedAssignmentsOnly = sortedAssignments.filter(
       (i) =>
+        i.submitted &&
         !favAssignmentIds.includes(i.id) &&
         !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...newAssignmentsOnly.filter((i) => pinnedAssignmentIds.includes(i.id)),
-      ...newAssignmentsOnly.filter((i) => !pinnedAssignmentIds.includes(i.id)),
+      ...finishedAssignmentsOnly.filter((i) =>
+        pinnedAssignmentIds.includes(i.id),
+      ),
+      ...finishedAssignmentsOnly.filter(
+        (i) => !pinnedAssignmentIds.includes(i.id),
+      ),
     ];
   }, [
     favAssignmentIds,
@@ -135,25 +140,26 @@ const AssignmentScreen: INavigationScreen = (props) => {
     sortedAssignments,
   ]);
 
-  const unreadAssignments = useMemo(() => {
-    const unreadAssignmentsOnly = sortedAssignments.filter(
+  const unfinishedAssignments = useMemo(() => {
+    const unfinishedAssignmentsOnly = sortedAssignments.filter(
       (i) =>
-        unreadAssignmentIds.includes(i.id) &&
+        !i.submitted &&
+        !favAssignmentIds.includes(i.id) &&
         !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...unreadAssignmentsOnly.filter((i) =>
+      ...unfinishedAssignmentsOnly.filter((i) =>
         pinnedAssignmentIds.includes(i.id),
       ),
-      ...unreadAssignmentsOnly.filter(
+      ...unfinishedAssignmentsOnly.filter(
         (i) => !pinnedAssignmentIds.includes(i.id),
       ),
     ];
   }, [
+    favAssignmentIds,
     hiddenCourseIds,
     pinnedAssignmentIds,
     sortedAssignments,
-    unreadAssignmentIds,
   ]);
 
   const favAssignments = useMemo(() => {
@@ -188,7 +194,7 @@ const AssignmentScreen: INavigationScreen = (props) => {
   }, [hiddenCourseIds, pinnedAssignmentIds, sortedAssignments]);
 
   const [currentDisplayAssignments, setCurrentDisplayAssignments] = useState(
-    newAssignments,
+    unfinishedAssignments,
   );
 
   /**
@@ -423,13 +429,13 @@ const AssignmentScreen: INavigationScreen = (props) => {
     WithCourseInfo<IAssignment>
   >(currentDisplayAssignments, fuseOptions);
 
-  const [segment, setSegment] = useState('new');
+  const [segment, setSegment] = useState('unfinished');
 
   const handleSegmentChange = (value: string) => {
-    if (value.startsWith(getTranslation('new'))) {
-      setSegment('new');
-    } else if (value.startsWith(getTranslation('unread'))) {
-      setSegment('unread');
+    if (value.startsWith(getTranslation('unfinished'))) {
+      setSegment('unfinished');
+    } else if (value.startsWith(getTranslation('finished'))) {
+      setSegment('finished');
     } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
     } else {
@@ -438,16 +444,16 @@ const AssignmentScreen: INavigationScreen = (props) => {
   };
 
   useEffect(() => {
-    if (segment === 'new') {
-      setCurrentDisplayAssignments(newAssignments);
+    if (segment === 'unfinished') {
+      setCurrentDisplayAssignments(unfinishedAssignments);
     }
-  }, [newAssignments, segment]);
+  }, [unfinishedAssignments, segment]);
 
   useEffect(() => {
-    if (segment === 'unread') {
-      setCurrentDisplayAssignments(unreadAssignments);
+    if (segment === 'finished') {
+      setCurrentDisplayAssignments(finishedAssignments);
     }
-  }, [unreadAssignments, segment]);
+  }, [finishedAssignments, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
@@ -567,15 +573,16 @@ const AssignmentScreen: INavigationScreen = (props) => {
           ListHeaderComponent={
             <SegmentedControl
               values={[
-                getTranslation('new') + ` (${newAssignments.length})`,
-                getTranslation('unread') + ` (${unreadAssignments.length})`,
+                getTranslation('unfinished') +
+                  ` (${unfinishedAssignments.length})`,
+                getTranslation('finished') + ` (${finishedAssignments.length})`,
                 getTranslation('favorite') + ` (${favAssignments.length})`,
                 getTranslation('hidden') + ` (${hiddenAssignments.length})`,
               ]}
               selectedIndex={
-                segment === 'new'
+                segment === 'unfinished'
                   ? 0
-                  : segment === 'unread'
+                  : segment === 'finished'
                   ? 1
                   : segment === 'favorite'
                   ? 2

@@ -116,4 +116,6 @@ export default {
   pushNotificationStatus: '推送通知状态',
   enabled: '启用',
   googleServicesFail: '无法连接 Google 服务',
+  unfinished: '未完成',
+  finished: '已完成',
 };

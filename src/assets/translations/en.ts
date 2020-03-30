@@ -128,4 +128,6 @@ export default {
   pushNotificationStatus: 'Push Notification Status',
   enabled: 'Enabled',
   googleServicesFail: 'Failed to connect to Google Services',
+  unfinished: 'Unfinished',
+  finished: 'Finished',
 };
