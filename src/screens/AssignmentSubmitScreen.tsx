@@ -26,6 +26,13 @@ import Snackbar from 'react-native-snackbar';
 import {Navigation} from 'react-native-navigation';
 import Divider from '../components/Divider';
 import {removeTags} from '../helpers/html';
+import {
+  ProgressBar,
+  DarkTheme,
+  DefaultTheme,
+  Provider as PaperProvider,
+} from 'react-native-paper';
+import {useWindow} from '../hooks/useWindow';
 
 export interface IAssignmentSubmitScreenProps {
   studentHomeworkId: string;
@@ -94,13 +101,20 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
   };
 
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const handleSubmit = async () => {
     setUploading(true);
 
     try {
       if (attachmentRemoved) {
-        await submitAssignment(studentHomeworkId, '', undefined, true);
+        await submitAssignment(
+          studentHomeworkId,
+          '',
+          undefined,
+          setProgress,
+          true,
+        );
       } else if (content || fileResult) {
         await submitAssignment(
           studentHomeworkId,
@@ -111,10 +125,12 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
                 name: fileResult.name!,
               }
             : undefined,
+          setProgress,
         );
       }
 
       setUploading(false);
+      setProgress(0);
       await Navigation.dismissModal(props.componentId);
       Snackbar.show({
         text: getTranslation('submitAssignmentSuccess'),
@@ -122,6 +138,7 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
       });
     } catch {
       setUploading(false);
+      setProgress(0);
       Snackbar.show({
         text: getTranslation('submitAssignmentFail'),
         duration: Snackbar.LENGTH_SHORT,
@@ -174,165 +191,178 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
     Navigation.dismissModal(props.componentId);
   };
 
+  const window = useWindow();
+
   return (
-    <SafeAreaView
-      style={{
-        flex: 1,
-        backgroundColor: Colors.system('background', colorScheme),
-      }}>
-      <KeyboardAvoidingView
+    <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <SafeAreaView
         style={{
           flex: 1,
-        }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <TextButton
-          style={styles.cancel}
-          textStyle={{
-            color: Colors.system('purple', colorScheme),
+          backgroundColor: Colors.system('background', colorScheme),
+        }}>
+        <KeyboardAvoidingView
+          style={{
+            flex: 1,
           }}
-          onPress={handleCancel}>
-          {getTranslation('cancel')}
-        </TextButton>
-        <Divider />
-        <TextInput
-          style={[
-            styles.textInput,
-            {
-              color: Colors.system('foreground', colorScheme),
-            },
-          ]}
-          placeholderTextColor={Colors.system('purple', colorScheme)}
-          multiline
-          placeholder={getTranslation('assignmentContentPlaceholder')}
-          value={content}
-          onChangeText={setContent}
-        />
-        <Divider />
-        {submittedAttachmentName && (
-          <>
-            <View style={styles.row}>
-              <Icon
-                style={{marginRight: 5}}
-                name="attach-file"
-                size={18}
-                color={Colors.system('purple', colorScheme)}
-              />
-              <TextButton
-                style={{flex: 1}}
-                textStyle={{
-                  color:
-                    attachmentRemoved || fileResult
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <TextButton
+            style={styles.cancel}
+            textStyle={{
+              color: Colors.system('purple', colorScheme),
+            }}
+            onPress={handleCancel}>
+            {getTranslation('cancel')}
+          </TextButton>
+          <Divider />
+          <TextInput
+            style={[
+              styles.textInput,
+              {
+                color: Colors.system('foreground', colorScheme),
+              },
+            ]}
+            placeholderTextColor={Colors.system('purple', colorScheme)}
+            multiline
+            placeholder={getTranslation('assignmentContentPlaceholder')}
+            value={content}
+            onChangeText={setContent}
+          />
+          <Divider />
+          {submittedAttachmentName && (
+            <>
+              <View style={styles.row}>
+                <Icon
+                  style={{marginRight: 5}}
+                  name="attach-file"
+                  size={18}
+                  color={Colors.system('purple', colorScheme)}
+                />
+                <TextButton
+                  style={{flex: 1}}
+                  textStyle={{
+                    color:
+                      attachmentRemoved || fileResult
+                        ? Colors.system('gray', colorScheme)
+                        : Colors.system('purple', colorScheme),
+                    textDecorationLine:
+                      attachmentRemoved || fileResult ? 'line-through' : 'none',
+                  }}
+                  ellipsizeMode="tail">
+                  {submittedAttachmentName}
+                </TextButton>
+                {!fileResult && (
+                  <TextButton
+                    style={{flex: 0}}
+                    textStyle={{
+                      color: Colors.system('red', colorScheme),
+                    }}
+                    onPress={handleRemove}>
+                    {attachmentRemoved
+                      ? getTranslation('undo')
+                      : getTranslation('remove')}
+                  </TextButton>
+                )}
+              </View>
+              <Divider />
+            </>
+          )}
+          {fileResult && (
+            <>
+              <View style={styles.row}>
+                <Icon
+                  style={{marginRight: 5}}
+                  name="attach-file"
+                  size={18}
+                  color={Colors.system('purple', colorScheme)}
+                />
+                <TextButton
+                  style={{flex: 1}}
+                  textStyle={{
+                    color: Colors.system('purple', colorScheme),
+                  }}
+                  ellipsizeMode="tail">
+                  {fileResult.name!}
+                </TextButton>
+                {
+                  <TextButton
+                    style={{flex: 0}}
+                    textStyle={{
+                      color: Colors.system('red', colorScheme),
+                    }}
+                    onPress={handleRemoveNew}>
+                    {getTranslation('remove')}
+                  </TextButton>
+                }
+              </View>
+              <Divider />
+            </>
+          )}
+          {!fileResult && (
+            <>
+              <View style={styles.row}>
+                <TextButton
+                  disabled={attachmentRemoved}
+                  textStyle={{
+                    color: attachmentRemoved
                       ? Colors.system('gray', colorScheme)
                       : Colors.system('purple', colorScheme),
-                  textDecorationLine:
-                    attachmentRemoved || fileResult ? 'line-through' : 'none',
-                }}
-                ellipsizeMode="tail">
-                {submittedAttachmentName}
-              </TextButton>
-              {!fileResult && (
-                <TextButton
-                  style={{flex: 0}}
-                  textStyle={{
-                    color: Colors.system('red', colorScheme),
                   }}
-                  onPress={handleRemove}>
-                  {attachmentRemoved
-                    ? getTranslation('undo')
-                    : getTranslation('remove')}
+                  onPress={handleFilePick}>
+                  {submittedAttachmentName
+                    ? getTranslation('newAttachment')
+                    : getTranslation('addAttachment')}
                 </TextButton>
-              )}
-            </View>
-            <Divider />
-          </>
-        )}
-        {fileResult && (
-          <>
-            <View style={styles.row}>
-              <Icon
-                style={{marginRight: 5}}
-                name="attach-file"
-                size={18}
+                {submittedAttachmentName && (
+                  <Text
+                    style={[
+                      iOSUIKit.footnote,
+                      styles.note,
+                      {
+                        color: Colors.system('gray', colorScheme),
+                      },
+                    ]}>
+                    {getTranslation('overwriteOld')}
+                  </Text>
+                )}
+              </View>
+              <Divider />
+            </>
+          )}
+          <View
+            style={[
+              styles.row,
+              {
+                flexDirection: 'row-reverse',
+              },
+            ]}>
+            <RaisedButton
+              disabled={uploading}
+              style={{
+                backgroundColor: Colors.system('purple', colorScheme),
+                width: 100,
+                height: 40,
+              }}
+              textStyle={{color: 'white'}}
+              onPress={handleSubmitPress}>
+              {getTranslation('submit')}
+            </RaisedButton>
+            <ActivityIndicator
+              style={{marginHorizontal: 16}}
+              animating={uploading}
+            />
+            {uploading && (
+              <ProgressBar
+                progress={progress}
+                style={{
+                  width: window.width - 100 - 16 - 40 - 36,
+                }}
                 color={Colors.system('purple', colorScheme)}
               />
-              <TextButton
-                style={{flex: 1}}
-                textStyle={{
-                  color: Colors.system('purple', colorScheme),
-                }}
-                ellipsizeMode="tail">
-                {fileResult.name!}
-              </TextButton>
-              {
-                <TextButton
-                  style={{flex: 0}}
-                  textStyle={{
-                    color: Colors.system('red', colorScheme),
-                  }}
-                  onPress={handleRemoveNew}>
-                  {getTranslation('remove')}
-                </TextButton>
-              }
-            </View>
-            <Divider />
-          </>
-        )}
-        {!fileResult && (
-          <>
-            <View style={styles.row}>
-              <TextButton
-                disabled={attachmentRemoved}
-                textStyle={{
-                  color: attachmentRemoved
-                    ? Colors.system('gray', colorScheme)
-                    : Colors.system('purple', colorScheme),
-                }}
-                onPress={handleFilePick}>
-                {submittedAttachmentName
-                  ? getTranslation('newAttachment')
-                  : getTranslation('addAttachment')}
-              </TextButton>
-              {submittedAttachmentName && (
-                <Text
-                  style={[
-                    iOSUIKit.footnote,
-                    styles.note,
-                    {
-                      color: Colors.system('gray', colorScheme),
-                    },
-                  ]}>
-                  {getTranslation('overwriteOld')}
-                </Text>
-              )}
-            </View>
-            <Divider />
-          </>
-        )}
-        <View
-          style={[
-            styles.row,
-            {
-              flexDirection: 'row-reverse',
-            },
-          ]}>
-          <RaisedButton
-            disabled={uploading}
-            style={{
-              backgroundColor: Colors.system('purple', colorScheme),
-              width: 100,
-              height: 40,
-            }}
-            textStyle={{color: 'white'}}
-            onPress={handleSubmitPress}>
-            {getTranslation('submit')}
-          </RaisedButton>
-          <ActivityIndicator
-            style={{marginHorizontal: 16}}
-            animating={uploading}
-          />
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            )}
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </PaperProvider>
   );
 };
 

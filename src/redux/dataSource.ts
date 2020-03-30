@@ -1,5 +1,6 @@
 import {Learn2018Helper} from 'thu-learn-lib-no-native';
 import mime from 'mime-types';
+import axios from 'axios';
 
 let dataSource = new Learn2018Helper();
 
@@ -22,6 +23,7 @@ const submitAssignment = async (
     uri: string;
     name: string;
   },
+  onProgress?: (progress: number) => void,
   remove: boolean = false,
 ) => {
   if (!content && !attachment && !remove) {
@@ -41,15 +43,15 @@ const submitAssignment = async (
   }
 
   try {
-    const res = await fetch(submitAssignmentUrl, {
-      method: 'POST',
-      body,
+    const res = await axios.post(submitAssignmentUrl, body, {
+      onUploadProgress: (e) => onProgress?.(e.loaded / e.total),
     });
-    if (!res.ok) {
-      throw new Error('Sumbit assignment failed');
+
+    if (res.status !== 200) {
+      throw new Error('Submit assignment failed');
     }
   } catch {
-    throw new Error('Sumbit assignment failed');
+    throw new Error('Submit assignment failed');
   }
 };
 
