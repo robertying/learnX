@@ -116,7 +116,7 @@ export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
           ' - ' +
           course.name,
         removeTags(assignment.description),
-        assignment.deadline,
+        dayjs(assignment.deadline).subtract(1, 'hour').toISOString(),
         assignment.deadline,
       );
     }
