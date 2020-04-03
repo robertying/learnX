@@ -1495,10 +1495,10 @@
     wcwidth "^1.0.1"
     ws "^1.1.0"
 
-"@react-native-community/datetimepicker@2.3.0":
-  version "2.3.0"
-  resolved "http://r.cnpmjs.org/@react-native-community/datetimepicker/download/@react-native-community/datetimepicker-2.3.0.tgz#fd3e430ef608a92af77f841f2a4593d8f03693c4"
-  integrity sha1-/T5DDvYIqSr3f4QfKkWT2PA2k8Q=
+"@react-native-community/datetimepicker@2.3.1":
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/datetimepicker/-/datetimepicker-2.3.1.tgz#375a9aaac19303424e30330f9f20e4b08d2ec086"
+  integrity sha512-Vz5ogawyP7uVPsYjlqXR8rn66cFX8FbvRVCLbwPm1s8x4VSOSEZCqasm1nwX4ULLA+UMCI0tYa5efRd6lDrZ2g==
   dependencies:
     invariant "^2.2.4"
 
