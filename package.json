@@ -25,7 +25,7 @@
     "@react-native-community/datetimepicker": "2.3.1",
     "@react-native-community/push-notification-ios": "1.1.1",
     "@react-native-firebase/app": "6.4.0",
-    "@react-native-firebase/messaging": "6.3.4",
+    "@react-native-firebase/messaging": "6.4.0",
     "axios": "0.19.2",
     "darkreader": "4.9.2",
     "dayjs": "1.8.23",
