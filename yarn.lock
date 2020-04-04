@@ -1526,10 +1526,10 @@
   resolved "http://r.cnpmjs.org/@react-native-community/eslint-plugin/download/@react-native-community/eslint-plugin-1.0.0.tgz#ae9a430f2c5795debca491f15a989fce86ea75a0"
   integrity sha1-rppDDyxXld68pJHxWpifzobqdaA=
 
-"@react-native-community/push-notification-ios@1.0.6":
-  version "1.0.6"
-  resolved "http://r.cnpmjs.org/@react-native-community/push-notification-ios/download/@react-native-community/push-notification-ios-1.0.6.tgz#d0e90ec91139a6dfa043a572d41fe694db58bf54"
-  integrity sha1-0OkOyRE5pt+gQ6Vy1B/mlNtYv1Q=
+"@react-native-community/push-notification-ios@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@react-native-community/push-notification-ios/-/push-notification-ios-1.1.1.tgz#80d5684d05d211a832f88d78720d63e53119a027"
+  integrity sha512-kgm8BKlru5OjwxxynReC1MM/JXwXZ/zOSGYORhbmnrBC8LTlogYA1ZMJ9HY9ltEpw6gDndQEsfFOkXHYeAPSCw==
   dependencies:
     invariant "^2.2.4"
 
