@@ -1554,10 +1554,10 @@
     opencollective-postinstall "^2.0.1"
     superstruct "^0.6.2"
 
-"@react-native-firebase/messaging@6.3.4":
-  version "6.3.4"
-  resolved "http://r.cnpmjs.org/@react-native-firebase/messaging/download/@react-native-firebase/messaging-6.3.4.tgz#6a9154957e32f5e4a10cca29ed5d95a72ef1a2e7"
-  integrity sha1-apFUlX4y9eShDMop7V2Vpy7xouc=
+"@react-native-firebase/messaging@6.4.0":
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/@react-native-firebase/messaging/-/messaging-6.4.0.tgz#712a7d2ea406f7f3d63fe2618f70f4f584b6d047"
+  integrity sha512-Ko+jAF7jgNZnGu697RE+o4RUB1Rqsqfk6+p+K2xuGFlorWLHFYrpqWuKyMZ13jieMp+NGg2C19PWzUJ0ozcdNg==
 
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
