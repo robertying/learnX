@@ -344,7 +344,7 @@ PODS:
     - React-RCTText
   - RNCAsyncStorage (1.9.0):
     - React
-  - RNCPushNotificationIOS (1.1.1):
+  - RNCPushNotificationIOS (1.0.7):
     - React
   - RNDateTimePicker (2.3.1):
     - React
@@ -634,7 +634,7 @@ SPEC CHECKSUMS:
   ReactCommon: ed4e11d27609d571e7eee8b65548efc191116eb3
   ReactNativeNavigation: 667586f6924fbd09512e2933fe70497db914b758
   RNCAsyncStorage: 453cd7c335ec9ba3b877e27d02238956b76f3268
-  RNCPushNotificationIOS: a0b6894f4ad9b93d9dac467fdf4d055660ac8a0d
+  RNCPushNotificationIOS: eea954fa69537d4a8db898fe1b1a06e2b7e15841
   RNDateTimePicker: 5b151d197435a4e929bfb6f285ed2372561e3578
   RNDeviceInfo: 6a3d16fce033f6979c4a6a41e62244d183e8c765
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
