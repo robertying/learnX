@@ -112,10 +112,6 @@ export const getScreenOptions = (
             ]
           : undefined,
     },
-    bottomTabs: {
-      translucent: true,
-      drawBehind: Platform.OS === 'ios',
-    },
   };
   return options;
 };
