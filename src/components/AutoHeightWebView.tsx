@@ -55,6 +55,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = (props) => {
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
       scrollEnabled={false}
+      sharedCookiesEnabled
       {...props}
       style={[{height, backgroundColor: 'transparent'}, props.style]}
     />
