@@ -442,7 +442,7 @@ const SettingScreen: INavigationScreen = (props) => {
           />
         );
       case 8:
-        return Platform.OS === 'android' || DeviceInfo.isMac() ? (
+        return Platform.OS === 'android' ? (
           <SettingListItem
             variant="none"
             containerStyle={{marginTop: 16}}

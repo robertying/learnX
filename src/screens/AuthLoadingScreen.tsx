@@ -20,7 +20,6 @@ import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {setCredentials} from '../redux/dataSource';
 import {useTypedSelector} from '../redux/store';
-import DeviceInfo from '../constants/DeviceInfo';
 
 const AuthLoadingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -69,7 +68,7 @@ const AuthLoadingScreen: INavigationScreen = (props) => {
   }, [rehydrated]);
 
   useEffect(() => {
-    if (Platform.OS === 'android' || DeviceInfo.isMac()) {
+    if (Platform.OS === 'android') {
       (async () => {
         const {version} = await getLatestRelease();
 
