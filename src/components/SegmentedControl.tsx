@@ -1,14 +1,10 @@
 import React from 'react';
-import {
-  View,
-  SegmentedControlIOSProps,
-  Platform,
-  SegmentedControlIOS,
-  StyleSheet,
-} from 'react-native';
-import {Chip} from 'react-native-paper';
+import {StyleSheet} from 'react-native';
+import SegmentedControl, {
+  SegmentedControlProps,
+} from '@react-native-community/segmented-control';
 
-export type ISegmentedControlProps = SegmentedControlIOSProps;
+export type ISegmentedControlProps = SegmentedControlProps;
 
 const styles = StyleSheet.create({
   seg: {
@@ -26,25 +22,12 @@ const styles = StyleSheet.create({
   },
 });
 
-const SegmentedControl: React.FunctionComponent<ISegmentedControlProps> = (
+const MySegmentedControl: React.FunctionComponent<ISegmentedControlProps> = (
   props,
 ) => {
   const {style, ...restProps} = props;
 
-  return Platform.OS === 'ios' ? (
-    <SegmentedControlIOS style={[styles.seg, style]} {...restProps} />
-  ) : (
-    <View style={[styles.root, style]}>
-      {props.values?.map((value, index) => (
-        <Chip
-          key={value}
-          selected={index === props.selectedIndex}
-          onPress={() => props.onValueChange?.(value)}>
-          {value}
-        </Chip>
-      ))}
-    </View>
-  );
+  return <SegmentedControl style={[styles.seg, style]} {...restProps} />;
 };
 
-export default SegmentedControl;
+export default MySegmentedControl;

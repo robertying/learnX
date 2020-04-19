@@ -277,6 +277,8 @@ PODS:
     - React
   - react-native-calendar-events (1.7.3):
     - React
+  - react-native-segmented-control (1.4.0):
+    - React
   - react-native-webview (9.2.1):
     - React
   - React-RCTActionSheet (0.62.2):
@@ -409,6 +411,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-appearance (from `../node_modules/react-native-appearance`)
   - react-native-calendar-events (from `../node_modules/react-native-calendar-events`)
+  - "react-native-segmented-control (from `../node_modules/@react-native-community/segmented-control`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -509,6 +512,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-appearance"
   react-native-calendar-events:
     :path: "../node_modules/react-native-calendar-events"
+  react-native-segmented-control:
+    :path: "../node_modules/@react-native-community/segmented-control"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-RCTActionSheet:
@@ -621,6 +626,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 512e560d0e985d0e8c479a54a4e5c147a9c83493
   react-native-appearance: 98e4530857c366de634f58e5db91bf97feaa96ff
   react-native-calendar-events: eaa63134881d97488feb21ea114158f712894018
+  react-native-segmented-control: 6ad7533758f4567e1e97136a67986f4167fd106a
   react-native-webview: 9fb615251c147d1b94157b31fa0ea9c68b234c04
   React-RCTActionSheet: f41ea8a811aac770e0cc6e0ad6b270c644ea8b7c
   React-RCTAnimation: 49ab98b1c1ff4445148b72a3d61554138565bad0
