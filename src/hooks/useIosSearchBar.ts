@@ -1,11 +1,11 @@
-import Fuse, {IFuseOptions} from 'fuse.js';
+import Fuse from 'fuse.js';
 import {useEffect, useState, useCallback} from 'react';
 import {Navigation} from 'react-native-navigation';
 import {IEntity} from '../types';
 
 function useIosSearchBar<T extends IEntity>(
   entities: Array<T>,
-  fuseOptions: IFuseOptions<T>,
+  fuseOptions: Fuse.IFuseOptions<T>,
 ): Array<T> {
   const [searchResults, setSearchResults] = useState(entities);
 

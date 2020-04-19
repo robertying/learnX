@@ -1,9 +1,9 @@
-import {IFuseOptions} from 'fuse.js';
+import Fuse from 'fuse.js';
 import {WithCourseInfo} from '../types';
 
 export function getFuseOptions<T>(
-  keys: IFuseOptions<WithCourseInfo<T>>['keys'],
-): IFuseOptions<WithCourseInfo<T>> {
+  keys: Fuse.IFuseOptions<WithCourseInfo<T>>['keys'],
+): Fuse.IFuseOptions<WithCourseInfo<T>> {
   return {
     shouldSort: true,
     threshold: 0.6,

@@ -1,11 +1,11 @@
-import Fuse, {IFuseOptions} from 'fuse.js';
+import Fuse from 'fuse.js';
 import {useEffect, useState, useCallback} from 'react';
 import {Navigation} from 'react-native-navigation';
 import {IEntity} from '../types';
 
 function useAndroidSearchBar<T extends IEntity>(
   entities: Array<T>,
-  fuseOptions: IFuseOptions<T>,
+  fuseOptions: Fuse.IFuseOptions<T>,
 ): [string, React.Dispatch<React.SetStateAction<string>>, Array<T>, boolean] {
   const [searchBarText, setSearchBarText] = useState('');
 
