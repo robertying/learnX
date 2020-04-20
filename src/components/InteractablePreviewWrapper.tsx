@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics';
 import React, {PropsWithChildren, useRef} from 'react';
 import {
   Platform,
@@ -68,25 +67,21 @@ function InteractablePreviewWrapper(
 
   const handlePin = () => {
     onPinned?.(!pinned);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     snapRef.current?.snapTo({index: 0});
   };
 
   const handleFav = () => {
     onFav?.(!fav);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     snapRef.current?.snapTo({index: 0});
   };
 
   const handleHide = () => {
     onHide?.(!hidden);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     snapRef.current?.snapTo({index: 0});
   };
 
   const handleRemind = () => {
     onRemind?.();
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     snapRef.current?.snapTo({index: 0});
   };
 
