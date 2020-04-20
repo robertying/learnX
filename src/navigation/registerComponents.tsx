@@ -24,6 +24,7 @@ import AssignmentSubmitScreen from '../screens/AssignmentSubmitScreen';
 import PushNotificationScreen from '../screens/PushNotificationScreen';
 import AgreementScreen from '../screens/AgreementScreen';
 import FirebaseScreen from '../screens/FirebaseScreen';
+import CalendarScreen from '../screens/CalendarScreen';
 
 const storeWrapped = (Component: React.FC<any>) => (props: any) => (
   <Provider store={store}>
@@ -130,6 +131,11 @@ const registerScreens = () => {
     'settings.pushNotifications.firebase',
     () => storeWrapped(FirebaseScreen),
     () => FirebaseScreen,
+  );
+  Navigation.registerComponent(
+    'settings.calendar',
+    () => storeWrapped(CalendarScreen),
+    () => CalendarScreen,
   );
 
   Navigation.registerComponent(

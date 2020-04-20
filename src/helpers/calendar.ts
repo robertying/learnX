@@ -1,4 +1,6 @@
-import RNCalendarEvents from 'react-native-calendar-events';
+import * as Calendar from 'expo-calendar';
+import Snackbar from 'react-native-snackbar';
+import {Dayjs} from 'dayjs';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {
@@ -7,175 +9,64 @@ import {
   setSetting,
 } from '../redux/actions/settings';
 import {store} from '../redux/store';
-import {IAssignment} from '../redux/types/state';
+import {IAssignment, ISettingsState} from '../redux/types/state';
 import {getTranslation} from './i18n';
-import Snackbar from 'react-native-snackbar';
 import {CalendarEvent} from 'thu-learn-lib-no-native/lib/types';
 import {removeTags} from './html';
-import {Dayjs} from 'dayjs';
+import {Platform} from 'react-native';
 
-export const getCalendarId = async () => {
-  const calendars = await RNCalendarEvents.findCalendars();
+async function getDefaultCalendarSource(entityType: string) {
+  const calendars = await Calendar.getCalendarsAsync(entityType);
 
-  const storedId = store.getState().settings.calendarId;
+  const iCloudCalendar = calendars.find((c) => c.source.name === 'iCloud');
+  if (iCloudCalendar) {
+    return iCloudCalendar.source;
+  }
+
+  const localCalendar = calendars.find(
+    (c) => c.source.type === Calendar.SourceType.LOCAL,
+  );
+  return localCalendar!.source;
+}
+
+export const getCourseCalendarId = async () => {
+  const calendars = await Calendar.getCalendarsAsync();
+
+  const storedId = store.getState().settings.courseCalendarId;
   if (storedId) {
     if (calendars.some((value) => value.id === storedId)) {
       return storedId;
     }
   }
 
-  const existingCalendar = calendars.find((value) => value.title === 'learnX');
-  if (existingCalendar) {
-    store.dispatch(setSetting('calendarId', existingCalendar.id));
-    return existingCalendar.id;
-  }
-
-  store.dispatch(clearEventIds());
-
-  const newId = await RNCalendarEvents.saveCalendar({
-    title: 'learnX',
-    color: Colors.theme,
-    entityType: 'event',
-    name: 'learnX',
-    accessLevel: 'read',
-    ownerAccount: 'learnX',
-    source: {
-      name: 'learnX',
-      isLocalAccount: true,
-    },
-  });
-  if (newId) {
-    store.dispatch(setSetting('calendarId', newId));
-  }
-  return newId;
-};
-
-export const saveAssignmentEvent = async (
-  calendarId: string,
-  assignmentId: string,
-  title: string,
-  note: string,
-  startTime: string,
-  endTime: string,
-) => {
-  const syncedAssignments = store.getState().settings.syncedAssignments;
-  if (
-    syncedAssignments &&
-    Object.keys(syncedAssignments).includes(assignmentId)
-  ) {
-    await RNCalendarEvents.saveEvent(title, {
-      id: syncedAssignments[assignmentId],
-      calendarId,
-      startDate: startTime,
-      endDate: endTime,
-      notes: note,
-      description: note,
-    });
-  } else {
-    const eventId = await RNCalendarEvents.saveEvent(title, {
-      calendarId,
-      startDate: startTime,
-      endDate: endTime,
-      notes: note,
-      description: note,
-    });
-    store.dispatch(setEventIdForAssignment(assignmentId, eventId));
-  }
-};
-
-export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
-  const status = await RNCalendarEvents.authorizationStatus();
-  if (status !== 'authorized') {
-    Snackbar.show({
-      text: getTranslation('accessCalendarFailure'),
-      duration: Snackbar.LENGTH_SHORT,
-    });
-    return;
-  }
-
-  const calendarId = await getCalendarId();
-
-  if (!calendarId) {
-    throw 'Failed to create new calendar';
-  }
-
-  const savingAssignments = [...assignments].filter((item) =>
-    dayjs(item.deadline).isAfter(dayjs()),
-  );
-
-  const courses = store.getState().courses.items;
-
-  savingAssignments.forEach(async (assignment) => {
-    const course = courses.find((value) => value.id === assignment.courseId);
-    if (course) {
-      await saveAssignmentEvent(
-        calendarId,
-        assignment.id,
-        (assignment.submitted ? '✅ ' : '') +
-          assignment.title +
-          ' - ' +
-          course.name,
-        removeTags(assignment.description),
-        dayjs(assignment.deadline).subtract(1, 'hour').toISOString(),
-        assignment.deadline,
-      );
-    }
-  });
-};
-
-export const getCourseCalendarId = async () => {
-  const calendars = await RNCalendarEvents.findCalendars();
-
   const existingCalendar = calendars.find(
-    (value) => value.title === 'learnX - Course',
+    (value) => value.title === getTranslation('courseCalendarName'),
   );
   if (existingCalendar) {
+    store.dispatch(setSetting('courseCalendarId', existingCalendar.id));
     return existingCalendar.id;
   }
 
-  const newId = await RNCalendarEvents.saveCalendar({
-    title: 'learnX - Course',
+  const defaultCalendarSource =
+    Platform.OS === 'ios'
+      ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
+      : ({isLocalAccount: true, name: 'learnX'} as Calendar.Source);
+
+  const newCalendarID = await Calendar.createCalendarAsync({
+    title: getTranslation('courseCalendarName'),
     color: Colors.theme,
-    entityType: 'event',
-    name: 'learnX - Course',
-    accessLevel: 'read',
+    entityType: Calendar.EntityTypes.EVENT,
+    sourceId: defaultCalendarSource.id,
+    source: defaultCalendarSource,
+    name: getTranslation('courseCalendarName'),
     ownerAccount: 'learnX',
-    source: {
-      name: 'learnX',
-      isLocalAccount: true,
-    },
+    accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
 
-  return newId;
-};
-
-export const getSemesterDuration = () => {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = date.getMonth() /* 0-11 */ + 1;
-
-  if (month >= 7) {
-    return {
-      startDate: `${year}0901`,
-      midEndDate: `${year}1101`,
-      midStartDate: `${year}1102`,
-      endDate: `${year + 1}0201`,
-    };
-  } else if (month === 1) {
-    return {
-      startDate: `${year - 1}0901`,
-      midEndDate: `${year - 1}1101`,
-      midStartDate: `${year - 1}1102`,
-      endDate: `${year}0201`,
-    };
-  } else {
-    return {
-      startDate: `${year}0201`,
-      midEndDate: `${year}0501`,
-      midStartDate: `${year}0502`,
-      endDate: `${year}0701`,
-    };
+  if (newCalendarID) {
+    store.dispatch(setSetting('courseCalendarId', newCalendarID));
   }
+  return newCalendarID;
 };
 
 export const saveCoursesToCalendar = async (
@@ -183,60 +74,279 @@ export const saveCoursesToCalendar = async (
   startDate: Dayjs,
   endDate: Dayjs,
 ) => {
-  const status = await RNCalendarEvents.authorizationStatus();
-  if (status !== 'authorized') {
+  const {status} = await Calendar.requestCalendarPermissionsAsync();
+  if (status !== 'granted') {
     Snackbar.show({
       text: getTranslation('accessCalendarFailure'),
-      duration: Snackbar.LENGTH_SHORT,
+      duration: Snackbar.LENGTH_LONG,
     });
     return;
   }
 
   const calendarId = await getCourseCalendarId();
 
-  const oldEvents = await RNCalendarEvents.fetchAllEvents(
-    startDate.toISOString(),
-    endDate.toISOString(),
+  const oldEvents = await Calendar.getEventsAsync(
     [calendarId],
+    startDate.toDate(),
+    endDate.toDate(),
   );
 
-  for (const e of oldEvents) {
-    await RNCalendarEvents.removeEvent(e.id);
+  await Promise.all(
+    oldEvents.map(async (e) => await Calendar.deleteEventAsync(e.id)),
+  );
+
+  const alarms = store.getState().settings.alarms;
+
+  await Promise.all(
+    events.map(
+      async (e) =>
+        await Calendar.createEventAsync(calendarId, {
+          title: e.courseName,
+          startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
+          endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
+          location: e.location,
+          notes: e.location,
+          alarms: alarms.courseAlarm
+            ? [
+                {
+                  relativeOffset: -(alarms.courseAlarmOffset ?? 15),
+                },
+              ]
+            : [],
+        }),
+    ),
+  );
+};
+
+export const getAssignmentCalendarIdAndroid = async () => {
+  const calendars = await Calendar.getCalendarsAsync();
+
+  const storedId = store.getState().settings.assignmentCalendarId;
+  if (storedId) {
+    if (calendars.some((value) => value.id === storedId)) {
+      return storedId;
+    }
   }
 
-  for (const event of events) {
-    await RNCalendarEvents.saveEvent(event.courseName, {
-      calendarId,
-      startDate: dayjs(`${event.date} ${event.startTime}`).toISOString(),
-      endDate: dayjs(`${event.date} ${event.endTime}`).toISOString(),
-      location: event.location,
-      description: event.location,
-    });
+  const existingCalendar = calendars.find(
+    (value) => value.title === getTranslation('assignmentCalendarName'),
+  );
+  if (existingCalendar) {
+    store.dispatch(setSetting('assignmentCalendarId', existingCalendar.id));
+    return existingCalendar.id;
+  }
+
+  store.dispatch(clearEventIds());
+
+  const newCalendarID = await Calendar.createCalendarAsync({
+    title: getTranslation('assignmentCalendarName'),
+    color: Colors.theme,
+    entityType: Calendar.EntityTypes.EVENT,
+    source: {
+      isLocalAccount: true,
+      name: 'learnX',
+      type: Calendar.SourceType.LOCAL,
+    },
+    name: getTranslation('assignmentCalendarName'),
+    ownerAccount: 'learnX',
+    accessLevel: Calendar.CalendarAccessLevel.OWNER,
+  });
+
+  if (newCalendarID) {
+    store.dispatch(setSetting('assignmentCalendarId', newCalendarID));
+  }
+  return newCalendarID;
+};
+
+export const getAssignmentReminderIdIOS = async () => {
+  const calendars = await Calendar.getCalendarsAsync(
+    Calendar.EntityTypes.REMINDER,
+  );
+
+  const storedId = store.getState().settings.assignmentCalendarId;
+  if (storedId) {
+    if (calendars.some((value) => value.id === storedId)) {
+      return storedId;
+    }
+  }
+
+  const existingCalendar = calendars.find(
+    (value) => value.title === getTranslation('assignmentCalendarName'),
+  );
+  if (existingCalendar) {
+    store.dispatch(setSetting('assignmentCalendarId', existingCalendar.id));
+    return existingCalendar.id;
+  }
+
+  store.dispatch(clearEventIds());
+
+  const defaultCalendarSource = await getDefaultCalendarSource(
+    Calendar.EntityTypes.REMINDER,
+  );
+  const newCalendarID = await Calendar.createCalendarAsync({
+    title: getTranslation('assignmentCalendarName'),
+    color: Colors.theme,
+    entityType: Calendar.EntityTypes.REMINDER,
+    sourceId: defaultCalendarSource.id,
+    source: defaultCalendarSource,
+    name: getTranslation('assignmentCalendarName'),
+    ownerAccount: 'learnX',
+    accessLevel: Calendar.CalendarAccessLevel.OWNER,
+  });
+
+  if (newCalendarID) {
+    store.dispatch(setSetting('assignmentCalendarId', newCalendarID));
+  }
+  return newCalendarID;
+};
+
+export const saveAssignmentEvent = async (
+  settings: ISettingsState,
+  calendarId: string,
+  assignmentId: string,
+  title: string,
+  note: string,
+  startDate: Dayjs,
+  dueDate: Dayjs,
+  completed: boolean,
+  completionDate?: Dayjs,
+) => {
+  const syncedAssignments = settings.syncedAssignments;
+  const alarms = settings.alarms;
+
+  if (Platform.OS === 'ios') {
+    const details: Calendar.Reminder = {
+      title,
+      startDate: startDate.toDate(),
+      dueDate: dueDate.toDate(),
+      completed,
+      completionDate: completionDate?.toDate(),
+      notes: note,
+      alarms: alarms.assignmentAlarm
+        ? [
+            {
+              relativeOffset: -(alarms.assignmentAlarmOffset ?? 24 * 60),
+            },
+          ]
+        : [],
+    };
+    if (
+      syncedAssignments &&
+      Object.keys(syncedAssignments).includes(assignmentId)
+    ) {
+      await Calendar.updateReminderAsync(
+        syncedAssignments[assignmentId],
+        details,
+      );
+    } else {
+      const eventId = await Calendar.createReminderAsync(calendarId, details);
+      store.dispatch(setEventIdForAssignment(assignmentId, eventId));
+    }
+  } else {
+    const details: Partial<Calendar.Event> = {
+      title: (completed ? '✅ ' : '') + title,
+      startDate: dueDate.subtract(1, 'hour').toDate(),
+      endDate: dueDate.toDate(),
+      notes: note,
+      alarms: alarms.assignmentAlarm
+        ? [
+            {
+              relativeOffset: -(alarms.assignmentAlarmOffset ?? 24 * 60),
+              method: Calendar.AlarmMethod.DEFAULT,
+            },
+          ]
+        : [],
+    };
+    if (
+      syncedAssignments &&
+      Object.keys(syncedAssignments).includes(assignmentId)
+    ) {
+      await Calendar.updateEventAsync(syncedAssignments[assignmentId], details);
+    } else {
+      const eventId = await Calendar.createEventAsync(calendarId, details);
+      store.dispatch(setEventIdForAssignment(assignmentId, eventId));
+    }
   }
 };
 
+export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
+  if (Platform.OS === 'ios') {
+    const {status} = await Calendar.requestRemindersPermissionsAsync();
+    if (status !== 'granted') {
+      Snackbar.show({
+        text: getTranslation('accessReminderFailure'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      return;
+    }
+  } else {
+    const {status} = await Calendar.requestCalendarPermissionsAsync();
+    if (status !== 'granted') {
+      Snackbar.show({
+        text: getTranslation('accessCalendarFailure'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      return;
+    }
+  }
+
+  const calendarId = await (Platform.OS === 'ios'
+    ? getAssignmentReminderIdIOS()
+    : getAssignmentCalendarIdAndroid());
+
+  const savingAssignments = [...assignments].filter((item) =>
+    dayjs(item.deadline).isAfter(dayjs()),
+  );
+  const courses = store.getState().courses.items;
+  const settings = store.getState().settings;
+
+  await Promise.all(
+    savingAssignments.map(async (assignment) => {
+      const course = courses.find((value) => value.id === assignment.courseId);
+      if (course) {
+        await saveAssignmentEvent(
+          settings,
+          calendarId,
+          assignment.id,
+          assignment.title + ' - ' + course.name,
+          removeTags(assignment.description),
+          dayjs(),
+          dayjs(assignment.deadline),
+          assignment.submitted,
+          assignment.submitTime ? dayjs(assignment.submitTime) : undefined,
+        );
+      }
+    }),
+  );
+};
+
 export const removeCalendars = async () => {
-  const status = await RNCalendarEvents.authorizationStatus();
-  if (status !== 'authorized') {
+  const {status} = await Calendar.requestCalendarPermissionsAsync();
+  if (status !== 'granted') {
     Snackbar.show({
       text: getTranslation('accessCalendarFailure'),
-      duration: Snackbar.LENGTH_SHORT,
+      duration: Snackbar.LENGTH_LONG,
     });
     return;
   }
 
-  const calendars = await RNCalendarEvents.findCalendars();
-
-  const existingCalendars = calendars.filter((value) =>
-    value.title.includes('learnX'),
+  const calendars = await Calendar.getCalendarsAsync();
+  const reminders = await Calendar.getCalendarsAsync(
+    Calendar.EntityTypes.REMINDER,
   );
 
-  for (const calendar of existingCalendars) {
-    await RNCalendarEvents.removeCalendar(calendar.id);
-  }
+  const existingCalendars = [...calendars, ...reminders].filter((c) =>
+    c.title.includes('learnX'),
+  );
+
+  await Promise.all(
+    existingCalendars.map(async (c) => {
+      await Calendar.deleteCalendarAsync(c.id).catch(() => {});
+    }),
+  );
 
   Snackbar.show({
     text: getTranslation('deleteCalendarsSuccess'),
-    duration: Snackbar.LENGTH_SHORT,
+    duration: Snackbar.LENGTH_LONG,
   });
 };

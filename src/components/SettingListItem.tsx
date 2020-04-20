@@ -10,6 +10,10 @@ import {
   StyleSheet,
   Text,
   ActivityIndicator,
+  Platform,
+  TouchableNativeFeedback,
+  TextInput,
+  TextInputProperties,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -24,7 +28,7 @@ export interface ISettingListItemProps {
   textStyle?: TextProps['style'];
   secondaryText?: string;
   secondaryTextStyle?: TextProps['style'];
-  variant: 'switch' | 'arrow' | 'none';
+  variant: 'switch' | 'arrow' | 'input' | 'none';
   switchValue?: boolean;
   onSwitchValueChange?: SwitchProps['onValueChange'];
   onPress?: TouchableHighlightProps['onPress'];
@@ -32,6 +36,9 @@ export interface ISettingListItemProps {
   containerStyle?: TouchableHighlightProps['style'];
   switchDisabled?: boolean;
   loading?: boolean;
+  inputValue?: string;
+  onInputValueChange?: TextInputProperties['onChangeText'];
+  keyboardType?: TextInputProperties['keyboardType'];
 }
 
 const styles = StyleSheet.create({
@@ -85,74 +92,96 @@ const SettingListItem: React.FunctionComponent<ISettingListItemProps> = (
     secondaryTextStyle,
     switchDisabled,
     loading,
+    inputValue,
+    onInputValueChange,
+    keyboardType,
   } = props;
 
   const colorScheme = useColorScheme();
 
-  return (
+  const children = (
+    <View
+      style={[
+        styles.root,
+        {
+          height: size === 'large' ? 100 : Layout.normalBlockHeight,
+          backgroundColor: Colors.system('background', colorScheme),
+        },
+        style,
+      ]}>
+      <View style={styles.left}>
+        <View
+          style={[
+            styles.leftView,
+            {width: size === 'large' ? 100 : Layout.normalBlockHeight},
+          ]}>
+          {icon}
+        </View>
+        <Text
+          style={[
+            {color: Colors.system('foreground', colorScheme)},
+            styles.leftText,
+            textStyle,
+          ]}>
+          {text}
+        </Text>
+      </View>
+      <View style={styles.right}>
+        {loading ? (
+          <ActivityIndicator animating />
+        ) : variant === 'switch' ? (
+          <Switch
+            disabled={switchDisabled}
+            value={switchValue}
+            onValueChange={onSwitchValueChange}
+          />
+        ) : variant === 'input' ? (
+          <TextInput
+            style={{
+              color: Colors.system('gray', colorScheme),
+              fontSize: 17,
+              width: 50,
+            }}
+            value={inputValue}
+            onChangeText={onInputValueChange}
+            keyboardType={keyboardType}
+          />
+        ) : (
+          <>
+            <Text
+              style={[
+                {color: Colors.system('gray', colorScheme)},
+                styles.rightText,
+                secondaryTextStyle,
+              ]}>
+              {secondaryText}
+            </Text>
+            {variant === 'arrow' ? (
+              <Ionicons name="ios-arrow-forward" size={20} color="lightgrey" />
+            ) : null}
+          </>
+        )}
+      </View>
+    </View>
+  );
+
+  return Platform.OS === 'ios' ? (
     <TouchableHighlight
-      underlayColor={
-        colorScheme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'
-      }
+      underlayColor={Colors.system('foreground', colorScheme)}
       onPress={onPress}
       style={containerStyle}>
-      <View
-        style={[
-          styles.root,
-          {
-            height: size === 'large' ? 100 : Layout.normalBlockHeight,
-            backgroundColor: Colors.system('background', colorScheme),
-          },
-          style,
-        ]}>
-        <View style={styles.left}>
-          <View
-            style={[
-              styles.leftView,
-              {width: size === 'large' ? 100 : Layout.normalBlockHeight},
-            ]}>
-            {icon}
-          </View>
-          <Text
-            style={[
-              {color: Colors.system('foreground', colorScheme)},
-              styles.leftText,
-              textStyle,
-            ]}>
-            {text}
-          </Text>
-        </View>
-        <View style={styles.right}>
-          {loading ? (
-            <ActivityIndicator animating />
-          ) : variant === 'switch' ? (
-            <Switch
-              disabled={switchDisabled}
-              value={switchValue}
-              onValueChange={onSwitchValueChange}
-            />
-          ) : (
-            <>
-              <Text
-                style={[
-                  {color: Colors.system('gray', colorScheme)},
-                  styles.rightText,
-                  secondaryTextStyle,
-                ]}>
-                {secondaryText}
-              </Text>
-              {variant === 'arrow' ? (
-                <Ionicons
-                  name="ios-arrow-forward"
-                  size={20}
-                  color="lightgrey"
-                />
-              ) : null}
-            </>
-          )}
-        </View>
-      </View>
+      {children}
     </TouchableHighlight>
+  ) : (
+    <TouchableNativeFeedback
+      onPress={onPress}
+      background={TouchableNativeFeedback.Ripple(
+        colorScheme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)',
+        false,
+      )}
+      style={containerStyle}>
+      {children}
+    </TouchableNativeFeedback>
   );
 };
 

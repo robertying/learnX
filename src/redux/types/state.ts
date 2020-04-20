@@ -29,12 +29,20 @@ export interface IPushNotificationSettings {
   deviceToken?: string;
   enabled: boolean;
 }
+export interface IAlarmSettings {
+  courseAlarm: boolean;
+  courseAlarmOffset?: number;
+  assignmentAlarm: boolean;
+  assignmentAlarmOffset?: number;
+}
 export interface ISettingsState {
   calendarSync: boolean;
-  calendarId?: string;
+  courseCalendarId?: string;
+  assignmentCalendarId?: string;
   syncedAssignments: {
     [assignmentId: string]: string;
   };
+  alarms: IAlarmSettings;
   hasUpdate: boolean;
   lang?: Language | null;
   isCompact: boolean;

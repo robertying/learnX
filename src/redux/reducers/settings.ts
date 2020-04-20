@@ -16,6 +16,10 @@ export default function settings(
     hasUnread: [Entity.File, Entity.Assignment, Entity.Notice],
     graduate: false,
     pushNotifications: {agreementAcknowledged: false, enabled: false},
+    alarms: {
+      assignmentAlarm: false,
+      courseAlarm: false,
+    },
   },
   action: ISettingsAction,
 ): ISettingsState {

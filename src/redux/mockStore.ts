@@ -13,6 +13,10 @@ const mockStore: IPersistAppState = {
     },
   },
   settings: {
+    alarms: {
+      courseAlarm: false,
+      assignmentAlarm: false,
+    },
     calendarSync: false,
     syncedAssignments: {},
     hasUpdate: false,
