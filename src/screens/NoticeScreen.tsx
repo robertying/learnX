@@ -10,6 +10,8 @@ import {
   PushNotification as Notification,
   Dimensions,
   Text,
+  useColorScheme,
+  useWindowDimensions,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -57,10 +59,8 @@ import Snackbar from 'react-native-snackbar';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
 import {messaging} from '../helpers/notification';
-import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
-import {useWindow} from '../hooks/useWindow';
 
 const NoticeScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -645,7 +645,7 @@ const NoticeScreen: INavigationScreen = (props) => {
     }
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
-  const window = useWindow();
+  const window = useWindowDimensions();
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

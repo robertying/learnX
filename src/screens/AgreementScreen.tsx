@@ -1,12 +1,11 @@
 import React, {useRef, useEffect} from 'react';
-import {SafeAreaView, Linking} from 'react-native';
+import {SafeAreaView, Linking, useColorScheme} from 'react-native';
 import {getTranslation, getLocale} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import MarkdownWebView from 'react-native-github-markdown';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {useDispatch} from 'react-redux';
 import {Navigation} from 'react-native-navigation';
-import {useColorScheme} from 'react-native-appearance';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import Colors from '../constants/Colors';

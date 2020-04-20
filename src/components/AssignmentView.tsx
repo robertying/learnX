@@ -4,12 +4,12 @@ import {
   ListRenderItem,
   RefreshControl,
   SafeAreaView,
+  useColorScheme,
 } from 'react-native';
 import Colors from '../constants/Colors';
 import {IAssignment} from '../redux/types/state';
 import AssignmentCard from './AssignmentCard';
 import EmptyList from './EmptyList';
-import {useColorScheme} from 'react-native-appearance';
 
 export interface IAssignmentViewProps {
   assignments: IAssignment[];

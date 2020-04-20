@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {Platform} from 'react-native';
+import {Platform, useColorScheme} from 'react-native';
 import {
   Navigation,
   OptionsModalPresentationStyle,
@@ -17,7 +17,6 @@ import {INavigationScreen} from '../types';
 import semverGt from 'semver/functions/gt';
 import {resetLoading} from '../redux/actions/root';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import {useColorScheme} from 'react-native-appearance';
 import {setCredentials} from '../redux/dataSource';
 import {useTypedSelector} from '../redux/store';
 

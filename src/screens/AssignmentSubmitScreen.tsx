@@ -10,6 +10,8 @@ import {
   Keyboard,
   ActivityIndicator,
   Platform,
+  useColorScheme,
+  useWindowDimensions,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import * as DocumentPicker from 'expo-document-picker';
@@ -20,7 +22,6 @@ import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import {useColorScheme} from 'react-native-appearance';
 import RaisedButton from '../components/RaisedButton';
 import Snackbar from 'react-native-snackbar';
 import {Navigation} from 'react-native-navigation';
@@ -32,7 +33,6 @@ import {
   DefaultTheme,
   Provider as PaperProvider,
 } from 'react-native-paper';
-import {useWindow} from '../hooks/useWindow';
 
 export interface IAssignmentSubmitScreenProps {
   studentHomeworkId: string;
@@ -191,7 +191,7 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
     Navigation.dismissModal(props.componentId);
   };
 
-  const window = useWindow();
+  const window = useWindowDimensions();
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

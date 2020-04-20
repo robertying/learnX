@@ -13,6 +13,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Switch,
+  useColorScheme,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -29,7 +30,6 @@ import {getAllSemesters} from '../redux/actions/semesters';
 import {INavigationScreen} from '../types';
 import {getNavigationRoot} from '../navigation/navigationRoot';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {iOSUIKit} from 'react-native-typography';
 import {useDispatch} from 'react-redux';

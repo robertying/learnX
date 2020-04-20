@@ -1,6 +1,11 @@
 import React from 'react';
-import {Platform, SafeAreaView, View, StyleSheet} from 'react-native';
-import {useColorScheme} from 'react-native-appearance';
+import {
+  Platform,
+  SafeAreaView,
+  View,
+  StyleSheet,
+  useColorScheme,
+} from 'react-native';
 import Colors from '../constants/Colors';
 
 const styles = StyleSheet.create({

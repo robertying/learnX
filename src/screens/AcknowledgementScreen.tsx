@@ -1,12 +1,17 @@
 import React, {useEffect} from 'react';
-import {SafeAreaView, ScrollView, StyleSheet, Text} from 'react-native';
+import {
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useColorScheme,
+} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
 import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
 
 const deps = [

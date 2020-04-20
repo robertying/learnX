@@ -1,8 +1,8 @@
 import {LayoutBottomTabs, LayoutRoot} from 'react-native-navigation';
+import {Appearance} from 'react-native';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import {loadIcons} from '../helpers/icons';
-import {Appearance} from 'react-native-appearance';
 import DeviceInfo from '../constants/DeviceInfo';
 
 export const getAuthLoadingRoot = () => {

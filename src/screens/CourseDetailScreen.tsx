@@ -1,5 +1,12 @@
 import React, {useMemo, useState, useCallback, useEffect} from 'react';
-import {Dimensions, View, SafeAreaView, Text} from 'react-native';
+import {
+  Dimensions,
+  View,
+  SafeAreaView,
+  Text,
+  useColorScheme,
+  useWindowDimensions,
+} from 'react-native';
 import Modal from 'react-native-modal';
 import {
   Route,
@@ -30,10 +37,8 @@ import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from './FilePreviewScreen';
 import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
-import {useWindow} from '../hooks/useWindow';
 
 export interface ICourseDetailScreenProps {
   course: ICourse;
@@ -266,7 +271,7 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = (
     }
   };
 
-  const window = useWindow();
+  const window = useWindowDimensions();
 
   return (
     <SafeAreaView

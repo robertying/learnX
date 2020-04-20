@@ -6,6 +6,7 @@ import {
   Text,
   StyleSheet,
   Linking,
+  useColorScheme,
 } from 'react-native';
 import mime from 'mime-types';
 import {Navigation} from 'react-native-navigation';
@@ -28,7 +29,6 @@ import {
   Provider as PaperProvider,
 } from 'react-native-paper';
 import {iOSUIKit} from 'react-native-typography';
-import {useColorScheme} from 'react-native-appearance';
 
 export interface IFilePreviewScreenProps {
   courseName: string;
