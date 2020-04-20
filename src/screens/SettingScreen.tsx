@@ -1,31 +1,24 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import {
   Alert,
-  FlatList,
   Linking,
-  ListRenderItem,
   Platform,
   SafeAreaView,
   View,
-  Text,
+  ScrollView,
 } from 'react-native';
 import {
   Navigation,
   OptionsModalPresentationStyle,
 } from 'react-native-navigation';
 import fs from 'react-native-fs';
-import {iOSColors, iOSUIKit} from 'react-native-typography';
+import {iOSColors} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch} from 'react-redux';
 import packageConfig from '../../package.json';
 import SettingListItem from '../components/SettingListItem';
 import Colors from '../constants/Colors';
-import {
-  saveAssignmentsToCalendar,
-  saveCoursesToCalendar,
-  removeCalendars,
-} from '../helpers/calendar';
 import {getTranslation} from '../helpers/i18n';
 import Snackbar from 'react-native-snackbar';
 import {getLatestRelease} from '../helpers/update';
@@ -36,24 +29,16 @@ import semverGt from 'semver/functions/gt';
 import DeviceInfo from '../constants/DeviceInfo';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import Modal from 'react-native-modal';
-import {ActivityIndicator} from 'react-native-paper';
-import TextButton from '../components/TextButton';
-import {dataSource} from '../redux/dataSource';
-import RNCalendarEvents from 'react-native-calendar-events';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/share';
 import {ISettingsState} from '../redux/types/state';
-import dayjs from '../helpers/dayjs';
-import {useWindow} from '../hooks/useWindow';
 
 const SettingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
   const settings = useTypedSelector((state) => state.settings);
-  const assignments = useTypedSelector((state) => state.assignments.items);
 
   const navigate = (name: string) => {
     if (DeviceInfo.isIPad() && !settings.isCompact) {
@@ -68,10 +53,6 @@ const SettingScreen: INavigationScreen = (props) => {
         colorScheme === 'dark',
       );
     }
-  };
-
-  const onAcknowledgementsPress = () => {
-    navigate('settings.acknowledgements');
   };
 
   const onLogoutPress = () => {
@@ -104,39 +85,6 @@ const SettingScreen: INavigationScreen = (props) => {
     );
   };
 
-  const onAboutPress = () => {
-    navigate('settings.about');
-  };
-
-  const onHelpPress = () => {
-    navigate('settings.help');
-  };
-
-  const [assignmentSyncing, setAssignmentSyncing] = useState(false);
-
-  const onCalendarSyncSwitchChange = async (enabled: boolean) => {
-    if (enabled) {
-      const status = await RNCalendarEvents.authorizationStatus();
-      if (status !== 'authorized') {
-        const result = await RNCalendarEvents.authorizeEventStore();
-        if (result !== 'authorized') {
-          Snackbar.show({
-            text: getTranslation('accessCalendarFailure'),
-            duration: Snackbar.LENGTH_SHORT,
-          });
-          return;
-        }
-      }
-
-      if (assignments) {
-        setAssignmentSyncing(true);
-        await saveAssignmentsToCalendar(assignments);
-        setAssignmentSyncing(false);
-      }
-    }
-    dispatch(setSetting('calendarSync', enabled));
-  };
-
   const onCheckUpdatePress = async () => {
     const {version, url} = await getLatestRelease();
 
@@ -162,7 +110,7 @@ const SettingScreen: INavigationScreen = (props) => {
     } else {
       Snackbar.show({
         text: getTranslation('noUpdate'),
-        duration: Snackbar.LENGTH_SHORT,
+        duration: Snackbar.LENGTH_LONG,
       });
       dispatch(setSetting('hasUpdate', false));
     }
@@ -186,12 +134,12 @@ const SettingScreen: INavigationScreen = (props) => {
               }
               Snackbar.show({
                 text: getTranslation('clearFileCacheSuccess'),
-                duration: Snackbar.LENGTH_SHORT,
+                duration: Snackbar.LENGTH_LONG,
               });
             } catch {
               Snackbar.show({
                 text: getTranslation('clearFileCacheFail'),
-                duration: Snackbar.LENGTH_SHORT,
+                duration: Snackbar.LENGTH_LONG,
               });
             }
           },
@@ -199,48 +147,6 @@ const SettingScreen: INavigationScreen = (props) => {
       ],
       {cancelable: true},
     );
-  };
-
-  const onDeleteCalendarsPress = () => {
-    Alert.alert(
-      getTranslation('deleteCalendars'),
-      getTranslation('deleteCalendarsConfirmation'),
-      [
-        {
-          text: getTranslation('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: getTranslation('ok'),
-          onPress: async () => {
-            await removeCalendars();
-          },
-        },
-      ],
-      {cancelable: true},
-    );
-  };
-
-  const onSemestersPress = () => {
-    navigate('settings.semesters');
-  };
-
-  const [courseSyncModalVisible, setCourseSyncModalVisible] = useState(false);
-
-  const handleCourseSync = async () => {
-    const status = await RNCalendarEvents.authorizationStatus();
-    if (status !== 'authorized') {
-      const result = await RNCalendarEvents.authorizeEventStore();
-      if (result !== 'authorized') {
-        Snackbar.show({
-          text: getTranslation('accessCalendarFailure'),
-          duration: Snackbar.LENGTH_LONG,
-        });
-        return;
-      }
-    }
-
-    setCourseSyncModalVisible(true);
   };
 
   const onSetting = (key: keyof ISettingsState, enabled: boolean) => {
@@ -248,201 +154,117 @@ const SettingScreen: INavigationScreen = (props) => {
   };
 
   useEffect(() => {
-    if (courseSyncModalVisible) {
-      (async () => {
-        const today = dayjs();
-        const monthFromToday = today.add(1, 'month');
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
-        try {
-          const events = await dataSource.getCalendar(
-            today.format('YYYYMMDD'),
-            monthFromToday.format('YYYYMMDD'),
-            settings.graduate,
-          );
-          await saveCoursesToCalendar(events, today, monthFromToday);
-          setCourseSyncModalVisible(false);
-          await new Promise((r) => setTimeout(r, 1500));
-          Snackbar.show({
-            text: getTranslation('courseSyncSuccess'),
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        } catch {
-          setCourseSyncModalVisible(false);
-          await new Promise((r) => setTimeout(r, 1500));
-          Snackbar.show({
-            text: getTranslation('courseSyncFailure'),
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        }
-      })();
-    }
-  }, [courseSyncModalVisible, settings.graduate]);
-
-  const onPushNotificationPress = () => {
-    navigate('settings.pushNotifications');
-  };
-
-  const renderListItem: ListRenderItem<{}> = ({index}) => {
-    switch (index) {
-      case 0:
-        return (
-          <SettingListItem
-            containerStyle={{marginTop: 10}}
-            variant="arrow"
-            icon={
-              <MaterialIcons
-                name="notifications-active"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('pushNotifications')}
-            onPress={onPushNotificationPress}
-          />
-        );
-      case 1:
-        return (
-          <SettingListItem
-            variant="switch"
-            icon={
-              <MaterialCommunityIcons
-                name="calendar-alert"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            loading={assignmentSyncing}
-            text={getTranslation('calendarSync')}
-            switchValue={settings.calendarSync}
-            onSwitchValueChange={onCalendarSyncSwitchChange}
-          />
-        );
-      case 2:
-        return (
-          <SettingListItem
-            variant="none"
-            icon={
-              <MaterialCommunityIcons
-                name="calendar-month"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('courseSync')}
-            onPress={handleCourseSync}
-          />
-        );
-      case 3:
-        return (
-          <SettingListItem
-            variant="arrow"
-            icon={
-              <MaterialCommunityIcons
-                name="book"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('changeSemester')}
-            onPress={onSemestersPress}
-          />
-        );
-      case 4:
-        return (
-          <SettingListItem
-            variant="switch"
-            icon={
-              <MaterialCommunityIcons
-                name="account-convert"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('graduate')}
-            switchValue={settings.graduate}
-            onSwitchValueChange={(e) => onSetting('graduate', e)}
-          />
-        );
-      case 5:
-        return (
-          <SettingListItem
-            variant="none"
-            containerStyle={{marginTop: 16}}
-            icon={
-              <MaterialCommunityIcons
-                name="account-off"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('logout')}
-            onPress={onLogoutPress}
-          />
-        );
-      case 6:
-        return (
-          <SettingListItem
-            variant="none"
-            icon={
-              <MaterialCommunityIcons
-                name="file-hidden"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('clearFileCache')}
-            onPress={onClearFileCachePress}
-          />
-        );
-      case 7:
-        return (
-          <SettingListItem
-            variant="none"
-            icon={
-              <MaterialCommunityIcons
-                name="calendar-remove"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('deleteCalendars')}
-            onPress={onDeleteCalendarsPress}
-          />
-        );
-      case 8:
-        return Platform.OS === 'android' ? (
+  return (
+    <SafeAreaView
+      testID="SettingsScreen"
+      style={{
+        flex: 1,
+        backgroundColor: Colors.system('background', colorScheme),
+      }}>
+      <ScrollView>
+        <SettingListItem
+          containerStyle={{marginTop: 8}}
+          variant="arrow"
+          icon={
+            <MaterialIcons
+              name="notifications-active"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('pushNotifications')}
+          onPress={() => navigate('settings.pushNotifications')}
+        />
+        <SettingListItem
+          variant="arrow"
+          icon={
+            <MaterialCommunityIcons
+              name="calendar-alert"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('calendarReminders')}
+          onPress={() => navigate('settings.calendar')}
+        />
+        <SettingListItem
+          variant="arrow"
+          icon={
+            <MaterialCommunityIcons
+              name="book"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('changeSemester')}
+          onPress={() => navigate('settings.semesters')}
+        />
+        <SettingListItem
+          variant="switch"
+          icon={
+            <MaterialCommunityIcons
+              name="account-convert"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('graduate')}
+          switchValue={settings.graduate}
+          onSwitchValueChange={(e) => onSetting('graduate', e)}
+        />
+        <SettingListItem
+          variant="none"
+          containerStyle={{marginTop: 16}}
+          icon={
+            <MaterialCommunityIcons
+              name="account-off"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('logout')}
+          onPress={onLogoutPress}
+        />
+        <SettingListItem
+          variant="none"
+          icon={
+            <MaterialCommunityIcons
+              name="file-hidden"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('clearFileCache')}
+          onPress={onClearFileCachePress}
+        />
+        {Platform.OS === 'android' && (
           <SettingListItem
             variant="none"
             containerStyle={{marginTop: 16}}
@@ -489,142 +311,58 @@ const SettingScreen: INavigationScreen = (props) => {
             }
             onPress={onCheckUpdatePress}
           />
-        ) : null;
-      case 9:
-        return (
-          <SettingListItem
-            variant="arrow"
-            containerStyle={{marginTop: 16}}
-            icon={
-              <MaterialCommunityIcons
-                name="help"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('help')}
-            onPress={onHelpPress}
-          />
-        );
-      case 10:
-        return (
-          <SettingListItem
-            variant="arrow"
-            icon={
-              <MaterialCommunityIcons
-                name="tag-heart"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('acknowledgements')}
-            onPress={onAcknowledgementsPress}
-          />
-        );
-      case 11:
-        return (
-          <SettingListItem
-            containerStyle={{marginBottom: 16}}
-            variant="arrow"
-            icon={
-              <MaterialIcons
-                name="copyright"
-                size={20}
-                color={
-                  colorScheme === 'dark'
-                    ? Colors.system('gray', 'dark')
-                    : undefined
-                }
-              />
-            }
-            text={getTranslation('about')}
-            onPress={onAboutPress}
-          />
-        );
-      default:
-        return null;
-    }
-  };
-
-  useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme, true);
-  }, [colorScheme, props.componentId]);
-
-  const window = useWindow();
-
-  return (
-    <SafeAreaView
-      testID="SettingsScreen"
-      style={{
-        flex: 1,
-        backgroundColor: Colors.system('background', colorScheme),
-      }}>
-      <FlatList
-        style={{backgroundColor: Colors.system('background', colorScheme)}}
-        data={[
-          {key: 'pushNotifications'},
-          {key: 'calendarSync'},
-          {key: 'courseSync'},
-          {key: 'semesters'},
-          {key: 'graduate'},
-          {key: 'logout'},
-          {key: 'clearFileCache'},
-          {key: 'deleteCalendars'},
-          {key: 'checkUpdate'},
-          {key: 'help'},
-          {key: 'acknowledgement'},
-          {key: 'about'},
-        ]}
-        renderItem={renderListItem}
-      />
-      <Modal
-        isVisible={courseSyncModalVisible}
-        backdropColor={
-          colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
-        }
-        animationIn="bounceIn"
-        animationOut="zoomOut"
-        deviceHeight={window.height}
-        deviceWidth={window.width}
-        useNativeDriver={true}
-        hideModalContentWhileAnimating={true}>
-        <View
-          style={{
-            backgroundColor: Colors.system('background', colorScheme),
-            width: '100%',
-            height: 150,
-            padding: 20,
-            flexDirection: 'column',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <Text
-            style={[
-              colorScheme === 'dark' ? iOSUIKit.bodyWhite : iOSUIKit.body,
-              {textAlign: 'center'},
-            ]}>
-            {getTranslation('fetchingCourseSchedule')}
-          </Text>
-          <ActivityIndicator
-            style={{margin: 20}}
-            color={Colors.system('purple', colorScheme)}
-            animating={true}
-          />
-          <TextButton
-            textStyle={{color: Colors.system('purple', colorScheme)}}
-            onPress={() => setCourseSyncModalVisible(false)}>
-            {getTranslation('cancel')}
-          </TextButton>
-        </View>
-      </Modal>
+        )}
+        <SettingListItem
+          variant="arrow"
+          containerStyle={{marginTop: 16}}
+          icon={
+            <MaterialCommunityIcons
+              name="help"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('help')}
+          onPress={() => navigate('settings.help')}
+        />
+        <SettingListItem
+          variant="arrow"
+          icon={
+            <MaterialCommunityIcons
+              name="tag-heart"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('acknowledgements')}
+          onPress={() => navigate('settings.acknowledgements')}
+        />
+        <SettingListItem
+          containerStyle={{marginBottom: 16}}
+          variant="arrow"
+          icon={
+            <MaterialIcons
+              name="copyright"
+              size={20}
+              color={
+                colorScheme === 'dark'
+                  ? Colors.system('gray', 'dark')
+                  : undefined
+              }
+            />
+          }
+          text={getTranslation('about')}
+          onPress={() => navigate('settings.about')}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 };
