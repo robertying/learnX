@@ -45,11 +45,8 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'NoticeTab',
               text: getTranslation('notices'),
-              icon: icons
-                ? icons.notifications
-                : ({
-                    uri: 'notifications',
-                  } as any),
+              icon: icons['bell-outline'],
+              selectedIcon: icons.bell,
               ...tabColorSettings,
             },
           },
@@ -68,11 +65,8 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'FileTab',
               text: getTranslation('files'),
-              icon: icons
-                ? icons.folder
-                : ({
-                    uri: 'folder',
-                  } as any),
+              icon: icons['folder-outline'],
+              selectedIcon: icons.folder,
               ...tabColorSettings,
             },
           },
@@ -91,11 +85,8 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'AssignmentTab',
               text: getTranslation('assignments'),
-              icon: icons
-                ? icons.today
-                : ({
-                    uri: 'today',
-                  } as any),
+              icon: icons['calendar-blank'],
+              selectedIcon: icons['calendar-check'],
               ...tabColorSettings,
             },
           },
@@ -114,11 +105,7 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'CourseTab',
               text: getTranslation('courses'),
-              icon: icons
-                ? icons.apps
-                : ({
-                    uri: 'apps',
-                  } as any),
+              icon: icons.apps,
               ...tabColorSettings,
             },
           },
@@ -138,11 +125,8 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'SettingTab',
               text: getTranslation('settings'),
-              icon: icons
-                ? icons.settings
-                : ({
-                    uri: 'settings',
-                  } as any),
+              icon: icons['settings-outline'],
+              selectedIcon: icons.settings,
               ...tabColorSettings,
             },
           },

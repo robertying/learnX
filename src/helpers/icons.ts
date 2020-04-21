@@ -1,12 +1,15 @@
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import DeviceInfo from '../constants/DeviceInfo';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const iconNames = [
-  'notifications',
+  'bell',
+  'bell-outline',
   'folder',
-  'today',
+  'folder-outline',
+  'calendar-blank',
+  'calendar-check',
   'apps',
   'settings',
+  'settings-outline',
 ] as const;
 type IIcon = typeof iconNames[number];
 export type IIcons = Record<IIcon, number>;
@@ -16,10 +19,6 @@ let _icons: IIcons;
 const size = 25;
 
 export const loadIcons = async () => {
-  if (DeviceInfo.isMac()) {
-    return null;
-  }
-
   if (_icons) {
     return _icons;
   }
