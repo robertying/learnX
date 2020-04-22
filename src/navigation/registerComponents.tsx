@@ -25,125 +25,126 @@ import AgreementScreen from '../screens/AgreementScreen';
 import FirebaseScreen from '../screens/FirebaseScreen';
 import CalendarScreen from '../screens/CalendarScreen';
 
-const storeWrapped = (Component: React.FC<any>) => (props: any) => (
-  <Provider store={store}>
-    <Component {...props} />
-  </Provider>
-);
+const wrapped = (Component: React.FC<any>) =>
+  gestureHandlerRootHOC((props: any) => (
+    <Provider store={store}>
+      <Component {...props} />
+    </Provider>
+  ));
 
 const registerScreens = () => {
   Navigation.registerComponent(
     'empty',
-    () => storeWrapped(EmptyScreen),
+    () => wrapped(EmptyScreen),
     () => EmptyScreen,
   );
 
   Navigation.registerComponent(
     'auth.loading',
-    () => storeWrapped(AuthLoadingScreen),
+    () => wrapped(AuthLoadingScreen),
     () => AuthLoadingScreen,
   );
 
   Navigation.registerComponent(
     'login',
-    () => storeWrapped(LoginScreen),
+    () => wrapped(LoginScreen),
     () => LoginScreen,
   );
 
   Navigation.registerComponent(
     'notices.index',
-    () => storeWrapped(NoticeScreen),
+    () => wrapped(NoticeScreen),
     () => NoticeScreen,
   );
   Navigation.registerComponent(
     'notices.detail',
-    () => storeWrapped(NoticeDetailScreen),
+    () => wrapped(NoticeDetailScreen),
     () => NoticeDetailScreen,
   );
 
   Navigation.registerComponent(
     'files.index',
-    () => storeWrapped(FileScreen),
+    () => wrapped(FileScreen),
     () => FileScreen,
   );
 
   Navigation.registerComponent(
     'assignments.index',
-    () => storeWrapped(AssignmentScreen),
+    () => wrapped(AssignmentScreen),
     () => AssignmentScreen,
   );
   Navigation.registerComponent(
     'assignments.detail',
-    () => storeWrapped(AssignmentDetailScreen),
+    () => wrapped(AssignmentDetailScreen),
     () => AssignmentDetailScreen,
   );
 
   Navigation.registerComponent(
     'courses.index',
-    () => storeWrapped(CourseScreen),
+    () => wrapped(CourseScreen),
     () => CourseScreen,
   );
   Navigation.registerComponent(
     'courses.detail',
-    () => gestureHandlerRootHOC(storeWrapped(CourseDetailScreen)),
+    () => wrapped(CourseDetailScreen),
     () => CourseDetailScreen,
   );
 
   Navigation.registerComponent(
     'settings.index',
-    () => storeWrapped(SettingScreen),
+    () => wrapped(SettingScreen),
     () => SettingScreen,
   );
   Navigation.registerComponent(
     'settings.semesters',
-    () => storeWrapped(SemesterSettingScreen),
+    () => wrapped(SemesterSettingScreen),
     () => SemesterSettingScreen,
   );
   Navigation.registerComponent(
     'settings.acknowledgements',
-    () => storeWrapped(AcknowledgementScreen),
+    () => wrapped(AcknowledgementScreen),
     () => AcknowledgementScreen,
   );
   Navigation.registerComponent(
     'settings.about',
-    () => storeWrapped(AboutScreen),
+    () => wrapped(AboutScreen),
     () => AboutScreen,
   );
   Navigation.registerComponent(
     'settings.help',
-    () => storeWrapped(HelpScreen),
+    () => wrapped(HelpScreen),
     () => HelpScreen,
   );
   Navigation.registerComponent(
     'settings.pushNotifications',
-    () => storeWrapped(PushNotificationScreen),
+    () => wrapped(PushNotificationScreen),
     () => PushNotificationScreen,
   );
   Navigation.registerComponent(
     'settings.pushNotifications.agreement',
-    () => storeWrapped(AgreementScreen),
+    () => wrapped(AgreementScreen),
     () => AgreementScreen,
   );
   Navigation.registerComponent(
     'settings.pushNotifications.firebase',
-    () => storeWrapped(FirebaseScreen),
+    () => wrapped(FirebaseScreen),
     () => FirebaseScreen,
   );
   Navigation.registerComponent(
     'settings.calendar',
-    () => storeWrapped(CalendarScreen),
+    () => wrapped(CalendarScreen),
     () => CalendarScreen,
   );
 
   Navigation.registerComponent(
     'webview',
-    () => storeWrapped(FilePreviewScreen),
+    () => wrapped(FilePreviewScreen),
     () => FilePreviewScreen,
   );
 
   Navigation.registerComponent(
     'assignment.submit',
-    () => storeWrapped(AssignmentSubmitScreen),
+    () => wrapped(AssignmentSubmitScreen),
     () => AssignmentSubmitScreen,
   );
 };
