@@ -23,6 +23,9 @@ const startApp = () => {
       UIManager.setLayoutAnimationEnabledExperimental(true);
     }
 
+
+registerBackgroundTasks();
+
     registerComponents();
 
     const colorScheme = Appearance.getColorScheme();
