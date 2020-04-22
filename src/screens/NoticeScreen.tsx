@@ -145,15 +145,18 @@ const NoticeScreen: INavigationScreen = (props) => {
     if (loginError) {
       Snackbar.show({
         text: getTranslation('loginFailure'),
-        duration: Snackbar.LENGTH_INDEFINITE,
+        duration: 6000,
         action: {
-          text: getTranslation('ok'),
+          text: getTranslation('retry'),
           textColor: Colors.system('purple', colorScheme),
-          onPress: () => Snackbar.dismiss(),
+          onPress: () => {
+            dispatch(login());
+            Snackbar.dismiss();
+        },
         },
       });
     }
-  }, [colorScheme, loginError]);
+  }, [colorScheme, dispatch, loginError]);
 
   useEffect(() => {
     if (DeviceInfo.isIPad()) {
