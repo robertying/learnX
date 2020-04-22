@@ -43,6 +43,7 @@ import {
   clearEventIds,
   setEventIdForAssignment,
   setSetting,
+  removeEventIdForAssignment,
 } from '../actions/settings';
 import {IPersistAppState} from './state';
 
@@ -114,11 +115,15 @@ export type ISetSettingAction = ActionType<typeof setSetting>;
 export type ISetEventIdForAssignment = ActionType<
   typeof setEventIdForAssignment
 >;
+export type IRemoveEventIdForAssignment = ActionType<
+  typeof removeEventIdForAssignment
+>;
 export type IClearEventIds = ActionType<typeof clearEventIds>;
 
 export type ISettingsAction =
   | ISetSettingAction
   | ISetEventIdForAssignment
+  | IRemoveEventIdForAssignment
   | IClearEventIds;
 
 export type IResetLoadingAction = ActionType<typeof resetLoading>;

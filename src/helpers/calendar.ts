@@ -7,6 +7,7 @@ import {
   clearEventIds,
   setEventIdForAssignment,
   setSetting,
+  removeEventIdForAssignment,
 } from '../redux/actions/settings';
 import {store} from '../redux/store';
 import {IAssignment, ISettingsState} from '../redux/types/state';
@@ -234,10 +235,14 @@ export const saveAssignmentEvent = async (
       syncedAssignments &&
       Object.keys(syncedAssignments).includes(assignmentId)
     ) {
-      await Calendar.updateReminderAsync(
-        syncedAssignments[assignmentId],
-        details,
-      );
+      try {
+        await Calendar.updateReminderAsync(
+          syncedAssignments[assignmentId],
+          details,
+        );
+      } catch {
+        store.dispatch(removeEventIdForAssignment(assignmentId));
+      }
     } else {
       const eventId = await Calendar.createReminderAsync(calendarId, details);
       store.dispatch(setEventIdForAssignment(assignmentId, eventId));
@@ -261,7 +266,14 @@ export const saveAssignmentEvent = async (
       syncedAssignments &&
       Object.keys(syncedAssignments).includes(assignmentId)
     ) {
-      await Calendar.updateEventAsync(syncedAssignments[assignmentId], details);
+      try {
+        await Calendar.updateEventAsync(
+          syncedAssignments[assignmentId],
+          details,
+        );
+      } catch {
+        store.dispatch(removeEventIdForAssignment(assignmentId));
+      }
     } else {
       const eventId = await Calendar.createEventAsync(calendarId, details);
       store.dispatch(setEventIdForAssignment(assignmentId, eventId));
@@ -270,20 +282,19 @@ export const saveAssignmentEvent = async (
 };
 
 export const saveAssignmentsToCalendar = async (assignments: IAssignment[]) => {
+  const {status} = await Calendar.requestCalendarPermissionsAsync();
+  if (status !== 'granted') {
+    Snackbar.show({
+      text: getTranslation('accessCalendarFailure'),
+      duration: Snackbar.LENGTH_LONG,
+    });
+    return;
+  }
   if (Platform.OS === 'ios') {
     const {status} = await Calendar.requestRemindersPermissionsAsync();
     if (status !== 'granted') {
       Snackbar.show({
         text: getTranslation('accessReminderFailure'),
-        duration: Snackbar.LENGTH_LONG,
-      });
-      return;
-    }
-  } else {
-    const {status} = await Calendar.requestCalendarPermissionsAsync();
-    if (status !== 'granted') {
-      Snackbar.show({
-        text: getTranslation('accessCalendarFailure'),
         duration: Snackbar.LENGTH_LONG,
       });
       return;
@@ -328,6 +339,16 @@ export const removeCalendars = async () => {
       duration: Snackbar.LENGTH_LONG,
     });
     return;
+  }
+  if (Platform.OS === 'ios') {
+    const {status} = await Calendar.requestRemindersPermissionsAsync();
+    if (status !== 'granted') {
+      Snackbar.show({
+        text: getTranslation('accessReminderFailure'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      return;
+    }
   }
 
   const calendars = await Calendar.getCalendarsAsync();

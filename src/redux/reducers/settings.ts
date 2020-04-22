@@ -2,6 +2,7 @@ import {ISettingsAction} from '../types/actions';
 import {
   CLEAR_EVENT_IDS,
   SET_EVENT_ID_FOR_ASSIGNMENT,
+  REMOVE_EVENT_ID_FOR_ASSIGNMENT,
   SET_SETTING,
 } from '../types/constants';
 import {ISettingsState, Entity, Language} from '../types/state';
@@ -36,6 +37,13 @@ export default function settings(
           ...state.syncedAssignments,
           ...action.payload,
         },
+      };
+    case REMOVE_EVENT_ID_FOR_ASSIGNMENT:
+      const syncedAssignments = {...state.syncedAssignments};
+      delete syncedAssignments[action.payload];
+      return {
+        ...state,
+        syncedAssignments,
       };
     case CLEAR_EVENT_IDS:
       return {

@@ -3,6 +3,7 @@ import {
   SET_SETTING,
   SET_EVENT_ID_FOR_ASSIGNMENT,
   CLEAR_EVENT_IDS,
+  REMOVE_EVENT_ID_FOR_ASSIGNMENT,
 } from '../types/constants';
 import {ISettingsState} from '../types/state';
 
@@ -23,6 +24,11 @@ export const setSetting: <T extends keyof ISettingsState>(
 export const setEventIdForAssignment = createAction(
   SET_EVENT_ID_FOR_ASSIGNMENT,
   (assignmentId: string, eventId: string) => ({[assignmentId]: eventId}),
+)();
+
+export const removeEventIdForAssignment = createAction(
+  REMOVE_EVENT_ID_FOR_ASSIGNMENT,
+  (assignmentId: string) => assignmentId,
 )();
 
 export const clearEventIds = createAction(CLEAR_EVENT_IDS)();
