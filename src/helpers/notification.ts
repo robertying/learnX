@@ -1,37 +1,12 @@
-import {
-  Alert,
-  Linking,
-  PushNotificationPermissions,
-  Platform,
-} from 'react-native';
+import {Alert, Linking, Platform} from 'react-native';
+import * as Notifications from 'expo-notifications';
 import {getTranslation} from './i18n';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import PushNotification from 'react-native-push-notification';
-
-export let messaging: typeof import('@react-native-firebase/messaging').default;
-if (Platform.OS === 'android') {
-  messaging = require('@react-native-firebase/messaging').default;
-}
 
 export const serviceUrl = 'https://app.robertying.io/api';
 
 export const requestNotificationPermission = async () => {
-  if (Platform.OS === 'ios') {
-    const result = await PushNotificationIOS.requestPermissions({
-      alert: true,
-      badge: true,
-      sound: true,
-    });
-    return result.alert;
-  } else {
-    await PushNotification.requestPermissions(['alert', 'badge', 'sound']);
-
-    const result = await new Promise<PushNotificationPermissions>((resolve) =>
-      PushNotification.checkPermissions((value) => resolve(value)),
-    );
-
-    return result.alert;
-  }
+  const {status} = await Notifications.requestPermissionsAsync();
+  return status;
 };
 
 export const showNotificationPermissionAlert = () => {
@@ -53,25 +28,22 @@ export const showNotificationPermissionAlert = () => {
   );
 };
 
-export const scheduleNotification = (
+export const scheduleNotification = async (
   title: string,
   body: string,
   date: Date,
-  userInfo?: Object,
+  userInfo?: any,
 ) => {
-  if (Platform.OS === 'ios') {
-    PushNotificationIOS.scheduleLocalNotification({
-      fireDate: date.toISOString(),
-      alertTitle: title,
-      alertBody: body,
-      userInfo,
-    });
-  } else {
-    PushNotification.localNotificationSchedule({
-      date,
+  await Notifications.scheduleNotificationAsync({
+    content: {
       title,
-      message: body,
-      userInfo,
-    });
-  }
+      body,
+      badge: 1,
+      sound: true,
+      vibrate: [0],
+      priority: 'high',
+      data: userInfo,
+    },
+    trigger: date,
+  });
 };

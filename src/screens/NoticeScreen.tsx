@@ -7,11 +7,11 @@ import {
   AppState,
   AppStateStatus,
   View,
-  PushNotification as Notification,
   Dimensions,
   Text,
   useColorScheme,
   useWindowDimensions,
+  PushNotificationIOS,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -20,7 +20,7 @@ import {
   DefaultTheme,
   DarkTheme,
 } from 'react-native-paper';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import * as Notifications from 'expo-notifications';
 import {useDispatch} from 'react-redux';
 import EmptyList from '../components/EmptyList';
 import NoticeCard from '../components/NoticeCard';
@@ -58,7 +58,6 @@ import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
-import {messaging} from '../helpers/notification';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
 
@@ -72,56 +71,6 @@ const NoticeScreen: INavigationScreen = (props) => {
   /**
    * App scope stuff
    */
-
-  const pushNotificationListener = useCallback(
-    (token: string) => {
-      dispatch(
-        setSetting('pushNotifications', {
-          ...settings.pushNotifications,
-          deviceToken: token,
-        }),
-      );
-    },
-    [dispatch, settings.pushNotifications],
-  );
-
-  const pushNotificationErrorListener = useCallback(() => {
-    Snackbar.show({
-      text: getTranslation('deviceTokenFailure'),
-      duration: Snackbar.LENGTH_SHORT,
-    });
-  }, []);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      if (DeviceInfo.isMac()) {
-        PushNotificationIOS.setApplicationIconBadgeNumber(0);
-      }
-      PushNotificationIOS.addEventListener(
-        'register',
-        pushNotificationListener,
-      );
-      PushNotificationIOS.addEventListener(
-        'registrationError',
-        pushNotificationErrorListener,
-      );
-
-      return () => {
-        PushNotificationIOS.removeEventListener(
-          'register',
-          pushNotificationListener,
-        );
-        PushNotificationIOS.removeEventListener(
-          'registrationError',
-          pushNotificationErrorListener,
-        );
-      };
-    }
-  }, [pushNotificationErrorListener, pushNotificationListener]);
-
-  useEffect(() => {
-    adaptToSystemTheme(props.componentId, colorScheme, true);
-  }, [colorScheme, props.componentId]);
 
   useEffect(() => {
     (async () => {
@@ -152,7 +101,7 @@ const NoticeScreen: INavigationScreen = (props) => {
           onPress: () => {
             dispatch(login());
             Snackbar.dismiss();
-        },
+          },
         },
       });
     }
@@ -210,7 +159,7 @@ const NoticeScreen: INavigationScreen = (props) => {
       }
       if (nextAppState.match(/inactive|background/) && appState === 'active') {
         if (Platform.OS === 'ios') {
-          PushNotificationIOS.setApplicationIconBadgeNumber(0);
+          Notifications.setBadgeCountAsync(0);
         }
       }
       setAppState(nextAppState);
@@ -218,6 +167,10 @@ const NoticeScreen: INavigationScreen = (props) => {
     AppState.addEventListener('change', listener);
     return () => AppState.removeEventListener('change', listener);
   });
+
+  useEffect(() => {
+    adaptToSystemTheme(props.componentId, colorScheme, true);
+  }, [colorScheme, props.componentId]);
 
   /**
    * Prepare data
@@ -381,40 +334,18 @@ const NoticeScreen: INavigationScreen = (props) => {
     if (Platform.OS === 'ios') {
       (async () => {
         const notification = await PushNotificationIOS.getInitialNotification();
-        if (notification) {
-          const data = notification.getData();
-          if ((data as INotice).publisher) {
-            onNoticeCardPress(data as WithCourseInfo<INotice>);
-          }
-        }
-      })();
-    }
-  }, [onNoticeCardPress]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const listener = (notification: Notification) => {
-        const data = notification.getData();
-        if ((data as INotice).publisher) {
-          onNoticeCardPress(data as WithCourseInfo<INotice>);
-        }
-      };
-      PushNotificationIOS.addEventListener('localNotification', listener);
-      return () =>
-        PushNotificationIOS.removeEventListener('localNotification', listener);
-    }
-  }, [onNoticeCardPress]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const listener = (notification: Notification) => {
-        const data = notification.getData() as any;
-        if (data.notice) {
-          const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
+        const data = notification?.getData() as any;
+        if (data?.notice) {
+          const notice = JSON.parse(data.notice as string) as WithCourseInfo<
+            INotice
+          >;
           if (!notices.find((n) => n.id === notice.id)) {
             dispatch(
               getNoticesForCourseAction.success({
-                notices: [notice, ...notices],
+                notices: [
+                  notice,
+                  ...notices.filter((i) => i.courseId === notice.courseId),
+                ],
                 courseId: notice.courseId,
               }),
             );
@@ -426,42 +357,91 @@ const NoticeScreen: INavigationScreen = (props) => {
           });
           onNoticeCardPress(notice);
         }
-      };
-      PushNotificationIOS.addEventListener('notification', listener);
-      return () =>
-        PushNotificationIOS.removeEventListener('notification', listener);
+      })();
     }
   }, [dispatch, notices, onNoticeCardPress, props.componentId]);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-        const data = remoteMessage.data;
-        if (data?.notice) {
-          const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
-          if (!notices.find((n) => n.id === notice.id)) {
-            dispatch(
-              getNoticesForCourseAction.success({
-                notices: [notice, ...notices],
-                courseId: notice.courseId,
-              }),
-            );
-          }
-
-          scheduleNotification(
-            `${notice.courseName}`,
-            `${notice.title}\n${removeTags(
-              notice.content || getTranslation('noNoticeContent'),
-            )}`,
-            new Date(),
-            notice,
+    const sub = Notifications.addNotificationReceivedListener((e) => {
+      const data = e.request.content.data;
+      if (data.notice) {
+        const notice = JSON.parse(data.notice as string) as WithCourseInfo<
+          INotice
+        >;
+        if (!notices.find((n) => n.id === notice.id)) {
+          dispatch(
+            getNoticesForCourseAction.success({
+              notices: [
+                notice,
+                ...notices.filter((i) => i.courseId === notice.courseId),
+              ],
+              courseId: notice.courseId,
+            }),
           );
         }
-      });
-
-      return () => unsubscribe();
-    }
+      }
+    });
+    return () => sub.remove();
   }, [dispatch, notices]);
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((e) => {
+      const data = e.notification.request.content.data;
+      if (data?.notice) {
+        const notice = JSON.parse(data.notice as string) as WithCourseInfo<
+          INotice
+        >;
+        if (!notices.find((n) => n.id === notice.id)) {
+          dispatch(
+            getNoticesForCourseAction.success({
+              notices: [
+                notice,
+                ...notices.filter((i) => i.courseId === notice.courseId),
+              ],
+              courseId: notice.courseId,
+            }),
+          );
+        }
+        Navigation.mergeOptions(props.componentId, {
+          bottomTabs: {
+            currentTabIndex: 0,
+          },
+        });
+        onNoticeCardPress(notice);
+      }
+    });
+    return () => sub.remove();
+  }, [dispatch, notices, onNoticeCardPress, props.componentId]);
+
+  // useEffect(() => {
+  //   if (Platform.OS === 'android') {
+  //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+  //       const data = remoteMessage.data;
+  //       if (data?.notice) {
+  //         const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
+  //         if (!notices.find((n) => n.id === notice.id)) {
+  //           dispatch(
+  //             getNoticesForCourseAction.success({
+  //               notices: [notice, ...notices],
+  //               courseId: notice.courseId,
+  //             }),
+  //           );
+  //         }
+
+  //         scheduleNotification(
+  //           `${notice.courseName}`,
+  //           `${notice.title}\n${removeTags(
+  //             notice.content || getTranslation('noNoticeContent'),
+  //           )}`,
+  //           new Date(),
+  //           notice,
+  //         );
+  //       }
+  //     });
+
+  //     return () => unsubscribe();
+  //   }
+  // }, [dispatch, notices]);
 
   const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {
@@ -615,7 +595,9 @@ const NoticeScreen: INavigationScreen = (props) => {
         reminderInfo.content || getTranslation('noNoticeContent'),
       )}`,
       date,
-      reminderInfo,
+      {
+        notice: JSON.stringify(reminderInfo),
+      },
     );
     setPickerVisible(false);
     setReminderInfo(undefined);

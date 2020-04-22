@@ -4,11 +4,11 @@ import {
   Platform,
   RefreshControl,
   SafeAreaView,
-  PushNotification,
   View,
   Text,
   useColorScheme,
   useWindowDimensions,
+  PushNotificationIOS,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -16,7 +16,7 @@ import {
   DefaultTheme,
   DarkTheme,
 } from 'react-native-paper';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import * as Notifications from 'expo-notifications';
 import {useDispatch} from 'react-redux';
 import EmptyList from '../components/EmptyList';
 import FileCard from '../components/FileCard';
@@ -45,7 +45,6 @@ import {
   showNotificationPermissionAlert,
   scheduleNotification,
 } from '../helpers/notification';
-import {messaging} from '../helpers/notification';
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
 import Modal from 'react-native-modal';
@@ -218,40 +217,16 @@ const FileScreen: INavigationScreen = (props) => {
     if (Platform.OS === 'ios') {
       (async () => {
         const notification = await PushNotificationIOS.getInitialNotification();
-        if (notification) {
-          const data = notification.getData();
-          if ((data as IFile).downloadUrl) {
-            onFileCardPress(data as WithCourseInfo<IFile>);
-          }
-        }
-      })();
-    }
-  }, [onFileCardPress]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const listener = (notification: PushNotification) => {
-        const data = notification.getData();
-        if ((data as IFile).downloadUrl) {
-          onFileCardPress(data as WithCourseInfo<IFile>);
-        }
-      };
-      PushNotificationIOS.addEventListener('localNotification', listener);
-      return () =>
-        PushNotificationIOS.removeEventListener('localNotification', listener);
-    }
-  }, [onFileCardPress]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const listener = (notification: PushNotification) => {
-        const data = notification.getData() as any;
-        if (data.file) {
-          const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
+        const data = notification?.getData() as any;
+        if (data?.file) {
+          const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
           if (!files.find((n) => n.id === file.id)) {
             dispatch(
               getFilesForCourseAction.success({
-                files: [file, ...files],
+                files: [
+                  file,
+                  ...files.filter((i) => i.courseId === file.courseId),
+                ],
                 courseId: file.courseId,
               }),
             );
@@ -263,42 +238,87 @@ const FileScreen: INavigationScreen = (props) => {
           });
           onFileCardPress(file);
         }
-      };
-      PushNotificationIOS.addEventListener('notification', listener);
-      return () =>
-        PushNotificationIOS.removeEventListener('notification', listener);
+      })();
     }
   }, [dispatch, files, onFileCardPress, props.componentId]);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-        const data = remoteMessage.data;
-        if (data?.file) {
-          const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
-          if (!files.find((n) => n.id === file.id)) {
-            dispatch(
-              getFilesForCourseAction.success({
-                files: [file, ...files],
-                courseId: file.courseId,
-              }),
-            );
-          }
-
-          scheduleNotification(
-            `${file.courseName}`,
-            `${file.title}\n${removeTags(
-              file.description || getTranslation('noFileDescription'),
-            )}`,
-            new Date(),
-            file,
+    const sub = Notifications.addNotificationReceivedListener((e) => {
+      const data = e.request.content.data;
+      if (data.file) {
+        const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
+        if (!files.find((n) => n.id === file.id)) {
+          dispatch(
+            getFilesForCourseAction.success({
+              files: [
+                file,
+                ...files.filter((i) => i.courseId === file.courseId),
+              ],
+              courseId: file.courseId,
+            }),
           );
         }
-      });
-
-      return () => unsubscribe();
-    }
+      }
+    });
+    return () => sub.remove();
   }, [dispatch, files]);
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((e) => {
+      const data = e.notification.request.content.data;
+      if (data.file) {
+        const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
+        if (!files.find((n) => n.id === file.id)) {
+          dispatch(
+            getFilesForCourseAction.success({
+              files: [
+                file,
+                ...files.filter((i) => i.courseId === file.courseId),
+              ],
+              courseId: file.courseId,
+            }),
+          );
+        }
+        Navigation.mergeOptions(props.componentId, {
+          bottomTabs: {
+            currentTabIndex: 1,
+          },
+        });
+        onFileCardPress(file);
+      }
+    });
+    return () => sub.remove();
+  }, [dispatch, files, onFileCardPress, props.componentId]);
+
+  // useEffect(() => {
+  //   if (Platform.OS === 'android') {
+  //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+  //       const data = remoteMessage.data;
+  //       if (data?.file) {
+  //         const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
+  //         if (!files.find((n) => n.id === file.id)) {
+  //           dispatch(
+  //             getFilesForCourseAction.success({
+  //               files: [file, ...files],
+  //               courseId: file.courseId,
+  //             }),
+  //           );
+  //         }
+
+  //         scheduleNotification(
+  //           `${file.courseName}`,
+  //           `${file.title}\n${removeTags(
+  //             file.description || getTranslation('noFileDescription'),
+  //           )}`,
+  //           new Date(),
+  //           file,
+  //         );
+  //       }
+  //     });
+
+  //     return () => unsubscribe();
+  //   }
+  // }, [dispatch, files]);
 
   const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {
@@ -452,7 +472,9 @@ const FileScreen: INavigationScreen = (props) => {
         reminderInfo.description || getTranslation('noFileDescription'),
       )}`,
       date,
-      reminderInfo,
+      {
+        file: JSON.stringify(reminderInfo),
+      },
     );
     setPickerVisible(false);
     setReminderInfo(undefined);

@@ -4,11 +4,11 @@ import {
   Platform,
   RefreshControl,
   SafeAreaView,
-  PushNotification,
   View,
   Text,
   useColorScheme,
   useWindowDimensions,
+  PushNotificationIOS,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -16,9 +16,8 @@ import {
   DefaultTheme,
   DarkTheme,
 } from 'react-native-paper';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
-import {messaging} from '../helpers/notification';
 import {useDispatch} from 'react-redux';
+import * as Notifications from 'expo-notifications';
 import AssignmentCard from '../components/AssignmentCard';
 import EmptyList from '../components/EmptyList';
 import Colors from '../constants/Colors';
@@ -267,42 +266,20 @@ const AssignmentScreen: INavigationScreen = (props) => {
     if (Platform.OS === 'ios') {
       (async () => {
         const notification = await PushNotificationIOS.getInitialNotification();
-        if (notification) {
-          const data = notification.getData();
-          if ((data as IAssignment).deadline) {
-            onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
-          }
-        }
-      })();
-    }
-  }, [onAssignmentCardPress]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const listener = (notification: PushNotification) => {
-        const data = notification.getData();
-        if ((data as IAssignment).deadline) {
-          onAssignmentCardPress(data as WithCourseInfo<IAssignment>);
-        }
-      };
-      PushNotificationIOS.addEventListener('localNotification', listener);
-      return () =>
-        PushNotificationIOS.removeEventListener('localNotification', listener);
-    }
-  }, [onAssignmentCardPress]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const listener = (notification: PushNotification) => {
-        const data = notification.getData() as any;
-        if (data.assignment) {
-          const assignment = JSON.parse(data.assignment) as WithCourseInfo<
-            IAssignment
-          >;
+        const data = notification?.getData() as any;
+        if (data?.assignment) {
+          const assignment = JSON.parse(
+            data.assignment as string,
+          ) as WithCourseInfo<IAssignment>;
           if (!assignments.find((n) => n.id === assignment.id)) {
             dispatch(
               getAssignmentsForCourseAction.success({
-                assignments: [assignment, ...assignments],
+                assignments: [
+                  assignment,
+                  ...assignments.filter(
+                    (i) => i.courseId === assignment.courseId,
+                  ),
+                ],
                 courseId: assignment.courseId,
               }),
             );
@@ -314,45 +291,98 @@ const AssignmentScreen: INavigationScreen = (props) => {
           });
           onAssignmentCardPress(assignment);
         }
-      };
-      PushNotificationIOS.addEventListener('notification', listener);
-      return () =>
-        PushNotificationIOS.removeEventListener('notification', listener);
+      })();
     }
-  }, [assignments, dispatch, onAssignmentCardPress, props.componentId]);
+  }, [dispatch, assignments, onAssignmentCardPress, props.componentId]);
 
   useEffect(() => {
-    if (Platform.OS === 'android') {
-      const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-        const data = remoteMessage.data;
-        if (data?.assignment) {
-          const assignment = JSON.parse(data.assignment) as WithCourseInfo<
-            IAssignment
-          >;
-          if (!assignments.find((n) => n.id === assignment.id)) {
-            dispatch(
-              getAssignmentsForCourseAction.success({
-                assignments: [assignment, ...assignments],
-                courseId: assignment.courseId,
-              }),
-            );
-          }
-
-          scheduleNotification(
-            `${assignment.courseName}`,
-            `${assignment.title}\n${removeTags(
-              assignment.description ||
-                getTranslation('noAssignmentDescription'),
-            )}`,
-            new Date(),
-            assignment,
+    const sub = Notifications.addNotificationReceivedListener((e) => {
+      const data = e.request.content.data;
+      if (data.assignment) {
+        const assignment = JSON.parse(
+          data.assignment as string,
+        ) as WithCourseInfo<IAssignment>;
+        if (!assignments.find((n) => n.id === assignment.id)) {
+          dispatch(
+            getAssignmentsForCourseAction.success({
+              assignments: [
+                assignment,
+                ...assignments.filter(
+                  (i) => i.courseId === assignment.courseId,
+                ),
+              ],
+              courseId: assignment.courseId,
+            }),
           );
         }
-      });
-
-      return () => unsubscribe();
-    }
+      }
+    });
+    return () => sub.remove();
   }, [dispatch, assignments]);
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener((e) => {
+      const data = e.notification.request.content.data;
+      if (data.assignment) {
+        const assignment = JSON.parse(
+          data.assignment as string,
+        ) as WithCourseInfo<IAssignment>;
+        if (!assignments.find((n) => n.id === assignment.id)) {
+          dispatch(
+            getAssignmentsForCourseAction.success({
+              assignments: [
+                assignment,
+                ...assignments.filter(
+                  (i) => i.courseId === assignment.courseId,
+                ),
+              ],
+              courseId: assignment.courseId,
+            }),
+          );
+        }
+        Navigation.mergeOptions(props.componentId, {
+          bottomTabs: {
+            currentTabIndex: 2,
+          },
+        });
+        onAssignmentCardPress(assignment);
+      }
+    });
+    return () => sub.remove();
+  }, [assignments, dispatch, onAssignmentCardPress, props.componentId]);
+
+  // useEffect(() => {
+  //   if (Platform.OS === 'android') {
+  //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+  //       const data = remoteMessage.data;
+  //       if (data?.assignment) {
+  //         const assignment = JSON.parse(data.assignment) as WithCourseInfo<
+  //           IAssignment
+  //         >;
+  //         if (!assignments.find((n) => n.id === assignment.id)) {
+  //           dispatch(
+  //             getAssignmentsForCourseAction.success({
+  //               assignments: [assignment, ...assignments],
+  //               courseId: assignment.courseId,
+  //             }),
+  //           );
+  //         }
+
+  //         scheduleNotification(
+  //           `${assignment.courseName}`,
+  //           `${assignment.title}\n${removeTags(
+  //             assignment.description ||
+  //               getTranslation('noAssignmentDescription'),
+  //           )}`,
+  //           new Date(),
+  //           assignment,
+  //         );
+  //       }
+  //     });
+
+  //     return () => unsubscribe();
+  //   }
+  // }, [dispatch, assignments]);
 
   const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {
@@ -508,7 +538,9 @@ const AssignmentScreen: INavigationScreen = (props) => {
         reminderInfo.description || getTranslation('noAssignmentDescription'),
       )}`,
       date,
-      reminderInfo,
+      {
+        assignment: JSON.stringify(reminderInfo),
+      },
     );
     setPickerVisible(false);
     setReminderInfo(undefined);
