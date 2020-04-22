@@ -1,0 +1,19 @@
+diff --git a/node_modules/redux-persist/lib/persistReducer.js b/node_modules/redux-persist/lib/persistReducer.js
+index 1116881..604ac53 100644
+--- a/node_modules/redux-persist/lib/persistReducer.js
++++ b/node_modules/redux-persist/lib/persistReducer.js
+@@ -128,14 +128,6 @@ function persistReducer(config, baseReducer) {
+     } else if (action.type === _constants.PAUSE) {
+       _paused = true;
+     } else if (action.type === _constants.REHYDRATE) {
+-      // noop on restState if purging
+-      if (_purge) return _objectSpread({}, restState, {
+-        _persist: _objectSpread({}, _persist, {
+-          rehydrated: true
+-        }) // @NOTE if key does not match, will continue to default else below
+-
+-      });
+-
+       if (action.key === config.key) {
+         var reducedState = baseReducer(restState, action);
+         var inboundState = action.payload; // only reconcile state if stateReconciler and inboundState are both defined
