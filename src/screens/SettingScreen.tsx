@@ -31,7 +31,7 @@ import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
-import {fileDir} from '../helpers/share';
+import {fileDir} from '../helpers/fs';
 import {ISettingsState} from '../redux/types/state';
 
 const SettingScreen: INavigationScreen = (props) => {

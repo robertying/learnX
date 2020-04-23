@@ -17,7 +17,7 @@ import NoticeView from '../components/NoticeView';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
-import {stripExtension} from '../helpers/share';
+import {stripExtension} from '../helpers/fs';
 import {
   getAssignmentsForCourse,
   readAssignment,

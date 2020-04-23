@@ -14,7 +14,7 @@ import PlaceholderLight from '../components/PlaceholderLight';
 import PlaceholderDark from '../components/PlaceholderDark';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
-import {downloadFile, shareFile, RNFetchBlob} from '../helpers/share';
+import {downloadFile, shareFile, RNFetchBlob} from '../helpers/fs';
 import Snackbar from 'react-native-snackbar';
 import {INavigationScreen} from '../types';
 import DeviceInfo from '../constants/DeviceInfo';

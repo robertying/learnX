@@ -12,7 +12,7 @@ import AutoHeightWebView from '../components/AutoHeightWebView';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {getTranslation} from '../helpers/i18n';
-import {getExtension, stripExtension} from '../helpers/share';
+import {getExtension, stripExtension} from '../helpers/fs';
 import Divider from './Divider';
 import TextButton from './TextButton';
 import {pushTo} from '../helpers/navigation';

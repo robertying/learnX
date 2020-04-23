@@ -11,7 +11,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Colors from '../constants/Colors';
 import dayjs from '../helpers/dayjs';
 import {getLocale, getTranslation} from '../helpers/i18n';
-import {getExtension, stripExtension} from '../helpers/share';
+import {getExtension, stripExtension} from '../helpers/fs';
 import AutoHeightWebView from './AutoHeightWebView';
 import Divider from './Divider';
 import TextButton from './TextButton';
