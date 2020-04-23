@@ -1,11 +1,12 @@
 import React, {useRef, useEffect} from 'react';
-import {SafeAreaView, Linking, useColorScheme} from 'react-native';
+import {SafeAreaView, Linking} from 'react-native';
 import {getTranslation, getLocale} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import MarkdownWebView from 'react-native-github-markdown';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
 
 declare const preval: any;

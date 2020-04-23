@@ -1,10 +1,5 @@
 import React, {useEffect} from 'react';
-import {
-  FlatList,
-  ListRenderItem,
-  SafeAreaView,
-  useColorScheme,
-} from 'react-native';
+import {FlatList, ListRenderItem, SafeAreaView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch} from 'react-redux';
 import SettingListItem from '../components/SettingListItem';
@@ -15,6 +10,7 @@ import {getAllSemesters} from '../redux/actions/semesters';
 import {INavigationScreen} from '../types';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {getAllNoticesForCoursesAction} from '../redux/actions/notices';
 import {getAllFilesForCoursesAction} from '../redux/actions/files';

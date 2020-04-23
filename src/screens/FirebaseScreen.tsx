@@ -9,11 +9,11 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  useColorScheme,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {iOSUIKit} from 'react-native-typography';
 import {useDispatch} from 'react-redux';
+import {useColorScheme} from 'react-native-appearance';
 import Snackbar from 'react-native-snackbar';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import RaisedButton from '../components/RaisedButton';

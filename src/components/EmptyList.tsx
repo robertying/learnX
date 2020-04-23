@@ -1,8 +1,9 @@
 import React from 'react';
-import {Text, View, ViewProps, StyleSheet, useColorScheme} from 'react-native';
+import {Text, View, ViewProps, StyleSheet} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {getTranslation} from '../helpers/i18n';
+import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
 
 const styles = StyleSheet.create({

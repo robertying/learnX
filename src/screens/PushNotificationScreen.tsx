@@ -6,7 +6,6 @@ import {
   StyleSheet,
   ScrollView,
   Platform,
-  useColorScheme,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
 import {messaging} from '../helpers/notification';
@@ -19,6 +18,7 @@ import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import {getScreenOptions, pushTo} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import RaisedButton from '../components/RaisedButton';
 import SettingListItem from '../components/SettingListItem';

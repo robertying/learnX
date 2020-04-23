@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   View,
   ScrollView,
-  useColorScheme,
 } from 'react-native';
 import {
   Navigation,
@@ -30,6 +29,7 @@ import semverGt from 'semver/functions/gt';
 import DeviceInfo from '../constants/DeviceInfo';
 import {pushTo, setDetailView, getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/share';
 import {ISettingsState} from '../redux/types/state';

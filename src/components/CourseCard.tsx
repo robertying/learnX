@@ -1,11 +1,12 @@
 import React from 'react';
-import {StyleSheet, View, Text, useColorScheme} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Colors from '../constants/Colors';
 import IconText from './IconText';
 import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface ICourseCardProps extends IInteractablePreviewWrapperProps {
   courseName: string;

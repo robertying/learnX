@@ -1,10 +1,5 @@
 import React, {useEffect, useMemo, useCallback, useState} from 'react';
-import {
-  RefreshControl,
-  SafeAreaView,
-  FlatList,
-  useColorScheme,
-} from 'react-native';
+import {RefreshControl, SafeAreaView, FlatList} from 'react-native';
 import {
   Provider as PaperProvider,
   DefaultTheme,
@@ -26,6 +21,7 @@ import {setDetailView, pushTo, getScreenOptions} from '../helpers/navigation';
 import {ICourseDetailScreenProps} from './CourseDetailScreen';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
 import {useDispatch} from 'react-redux';

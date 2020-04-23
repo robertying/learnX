@@ -6,7 +6,6 @@ import {
   ScrollView,
   Platform,
   Alert,
-  useColorScheme,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
 import * as Calendar from 'expo-calendar';
@@ -17,6 +16,7 @@ import {getTranslation} from '../helpers/i18n';
 import {INavigationScreen} from '../types';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import SettingListItem from '../components/SettingListItem';
 import {setSetting} from '../redux/actions/settings';

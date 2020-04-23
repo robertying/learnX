@@ -1,6 +1,7 @@
 import React from 'react';
-import {SafeAreaView, useColorScheme} from 'react-native';
+import {SafeAreaView} from 'react-native';
 import EmptyList from './EmptyList';
+import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
 
 const EmptyScreen: React.FC = () => {

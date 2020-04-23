@@ -5,12 +5,12 @@ import {
   RefreshControl,
   SafeAreaView,
   StyleSheet,
-  useColorScheme,
 } from 'react-native';
 import Colors from '../constants/Colors';
 import {INotice} from '../redux/types/state';
 import EmptyList from './EmptyList';
 import NoticeCard from './NoticeCard';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface INoticeViewProps {
   notices: INotice[];

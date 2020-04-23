@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet, View, Text, useColorScheme} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -10,6 +10,7 @@ import {getLocale, getTranslation} from '../helpers/i18n';
 import InteractablePreviewWrapper, {
   IInteractablePreviewWrapperProps,
 } from './InteractablePreviewWrapper';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IAssignmentCardProps extends IInteractablePreviewWrapperProps {
   title: string;

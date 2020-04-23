@@ -1,5 +1,6 @@
 import React from 'react';
-import {View, ViewProps, StyleSheet, useColorScheme} from 'react-native';
+import {View, ViewProps, StyleSheet} from 'react-native';
+import {useColorScheme} from 'react-native-appearance';
 
 export type IDividerProps = ViewProps;
 

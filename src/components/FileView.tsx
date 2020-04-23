@@ -4,12 +4,12 @@ import {
   ListRenderItem,
   RefreshControl,
   SafeAreaView,
-  useColorScheme,
 } from 'react-native';
 import Colors from '../constants/Colors';
 import {IFile} from '../redux/types/state';
 import EmptyList from './EmptyList';
 import FileCard from './FileCard';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IFileViewProps {
   files: IFile[];

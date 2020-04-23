@@ -19,6 +19,7 @@ import SettingScreen from '../screens/SettingScreen';
 import FilePreviewScreen from '../screens/FilePreviewScreen';
 import HelpScreen from '../screens/HelpScreen';
 import {gestureHandlerRootHOC} from 'react-native-gesture-handler';
+import {AppearanceProvider} from 'react-native-appearance';
 import AssignmentSubmitScreen from '../screens/AssignmentSubmitScreen';
 import PushNotificationScreen from '../screens/PushNotificationScreen';
 import AgreementScreen from '../screens/AgreementScreen';
@@ -28,7 +29,9 @@ import CalendarScreen from '../screens/CalendarScreen';
 const wrapped = (Component: React.FC<any>) =>
   gestureHandlerRootHOC((props: any) => (
     <Provider store={store}>
-      <Component {...props} />
+      <AppearanceProvider>
+        <Component {...props} />
+      </AppearanceProvider>
     </Provider>
   ));
 

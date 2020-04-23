@@ -14,11 +14,11 @@ import {
   TouchableNativeFeedback,
   TextInput,
   TextInputProperties,
-  useColorScheme,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Layout from '../constants/Layout';
+import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
 
 export interface ISettingListItemProps {

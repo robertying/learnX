@@ -5,7 +5,6 @@ import {
   ScrollView,
   Text,
   StyleSheet,
-  useColorScheme,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import packageConfig from '../../package.json';
@@ -16,6 +15,7 @@ import {INavigationScreen} from '../types';
 import DeviceInfo from '../constants/DeviceInfo';
 import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 const styles = StyleSheet.create({
   center: {

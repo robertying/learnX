@@ -5,7 +5,6 @@ import {
   View,
   StyleSheet,
   Text,
-  useColorScheme,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -18,6 +17,7 @@ import Divider from './Divider';
 import TextButton from './TextButton';
 import {pushTo} from '../helpers/navigation';
 import {getWebViewTemplate} from '../helpers/html';
+import {useColorScheme} from 'react-native-appearance';
 import {IFilePreviewScreenProps} from '../screens/FilePreviewScreen';
 
 export type INoticeBoardProps = TouchableHighlightProps & {

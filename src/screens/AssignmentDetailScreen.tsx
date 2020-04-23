@@ -1,8 +1,8 @@
 import React, {useEffect} from 'react';
-import {useColorScheme} from 'react-native';
 import AssignmentBoard from '../components/AssignmentBoard';
 import {INavigationScreen} from '../types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IAssignmentDetailScreenProps {
   title: string;

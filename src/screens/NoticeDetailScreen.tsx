@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import NoticeBoard from '../components/NoticeBoard';
 import {INavigationScreen} from '../types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
-import {useColorScheme} from 'react-native';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface INoticeDetailScreenProps {
   title: string;

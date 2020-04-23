@@ -1,9 +1,9 @@
 import {Navigation, Options} from 'react-native-navigation';
-import {Platform, ColorSchemeName} from 'react-native';
+import {Platform} from 'react-native';
 import Colors from '../constants/Colors';
 
 export const getAndroidTheme = (
-  colorScheme: ColorSchemeName,
+  colorScheme: string,
   hideBackButton?: boolean,
 ) => {
   return {
@@ -35,7 +35,7 @@ export const getAndroidTheme = (
 
 export const adaptToSystemTheme = (
   componentId: string,
-  colorScheme: ColorSchemeName,
+  colorScheme: string,
   hideBackButton?: boolean,
 ) => {
   if (Platform.OS === 'android') {

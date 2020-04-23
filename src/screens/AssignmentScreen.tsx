@@ -6,8 +6,6 @@ import {
   SafeAreaView,
   View,
   Text,
-  useColorScheme,
-  useWindowDimensions,
   PushNotificationIOS,
 } from 'react-native';
 import {
@@ -52,9 +50,11 @@ import {
 } from '../helpers/notification';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import SegmentedControl from '../components/SegmentedControl';
+import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {saveAssignmentsToCalendar} from '../helpers/calendar';
 import {Navigation} from 'react-native-navigation';
+import {useWindow} from '../hooks/useWindow';
 
 const AssignmentScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -573,7 +573,7 @@ const AssignmentScreen: INavigationScreen = (props) => {
     }
   }, [dateAndroid, handleReminderSet, timeAndroid]);
 
-  const window = useWindowDimensions();
+  const window = useWindow();
 
   return (
     <PaperProvider theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

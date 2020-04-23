@@ -5,7 +5,6 @@ import {
   View,
   Text,
   StyleSheet,
-  useColorScheme,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -19,6 +18,7 @@ import TextButton from './TextButton';
 import {pushTo} from '../helpers/navigation';
 import {IFilePreviewScreenProps} from '../screens/FilePreviewScreen';
 import {getWebViewTemplate} from '../helpers/html';
+import {useColorScheme} from 'react-native-appearance';
 import {
   Navigation,
   OptionsModalPresentationStyle,

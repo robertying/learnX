@@ -5,13 +5,13 @@ import {
   TouchableHighlight,
   View,
   StyleSheet,
-  useColorScheme,
 } from 'react-native';
 import Interactable from 'react-native-interactable';
 import Colors from '../constants/Colors';
 import Button from './Button';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {useColorScheme} from 'react-native-appearance';
 
 export interface IInteractablePreviewWrapperProps {
   hidden?: boolean;

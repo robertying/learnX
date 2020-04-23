@@ -1,5 +1,3 @@
-import {ColorSchemeName} from 'react-native';
-
 const colorsDark = {
   background: 'black',
   foreground: 'white',
@@ -22,10 +20,7 @@ const colorsLight = {
   blue: 'rgb(0,122,255)',
 };
 
-const system = (
-  name: keyof typeof colorsDark,
-  colorScheme?: ColorSchemeName,
-) => {
+const system = (name: keyof typeof colorsDark, colorScheme?: string) => {
   return colorScheme === 'dark' ? colorsDark[name] : colorsLight[name];
 };
 
