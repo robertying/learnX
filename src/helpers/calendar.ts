@@ -352,9 +352,10 @@ export const removeCalendars = async () => {
   }
 
   const calendars = await Calendar.getCalendarsAsync();
-  const reminders = await Calendar.getCalendarsAsync(
-    Calendar.EntityTypes.REMINDER,
-  );
+  const reminders =
+    Platform.OS === 'ios'
+      ? await Calendar.getCalendarsAsync(Calendar.EntityTypes.REMINDER)
+      : [];
 
   const existingCalendars = [...calendars, ...reminders].filter((c) =>
     c.title.includes('learnX'),
