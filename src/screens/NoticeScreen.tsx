@@ -9,7 +9,6 @@ import {
   View,
   Dimensions,
   Text,
-  PushNotificationIOS,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {
@@ -331,10 +330,9 @@ const NoticeScreen: INavigationScreen = (props) => {
   );
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      (async () => {
-        const notification = await PushNotificationIOS.getInitialNotification();
-        const data = notification?.getData() as any;
+    const sub = Notifications.addNotificationReceivedListener((e) => {
+      const data =
+        e.request.content.data ?? (e.request.trigger as any).remoteMessage.data;
         if (data?.notice) {
           const notice = JSON.parse(data.notice as string) as WithCourseInfo<
             INotice
@@ -350,43 +348,16 @@ const NoticeScreen: INavigationScreen = (props) => {
               }),
             );
           }
-          Navigation.mergeOptions(props.componentId, {
-            bottomTabs: {
-              currentTabIndex: 0,
-            },
-          });
-          onNoticeCardPress(notice);
         }
-      })();
-    }
-  }, [dispatch, notices, onNoticeCardPress, props.componentId]);
-
-  useEffect(() => {
-    const sub = Notifications.addNotificationReceivedListener((e) => {
-      const data = e.request.content.data;
-      if (data.notice) {
-        const notice = JSON.parse(data.notice as string) as WithCourseInfo<
-          INotice
-        >;
-        if (!notices.find((n) => n.id === notice.id)) {
-          dispatch(
-            getNoticesForCourseAction.success({
-              notices: [
-                notice,
-                ...notices.filter((i) => i.courseId === notice.courseId),
-              ],
-              courseId: notice.courseId,
-            }),
-          );
-        }
-      }
     });
     return () => sub.remove();
   }, [dispatch, notices]);
 
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener((e) => {
-      const data = e.notification.request.content.data;
+      const data =
+        e.notification.request.content.data ??
+        (e.notification.request.trigger as any).remoteMessage.data;
       if (data?.notice) {
         const notice = JSON.parse(data.notice as string) as WithCourseInfo<
           INotice
@@ -408,40 +379,16 @@ const NoticeScreen: INavigationScreen = (props) => {
           },
         });
         onNoticeCardPress(notice);
+
+        if (Platform.OS === 'android') {
+          Notifications.dismissNotificationAsync(
+            e.notification.request.identifier,
+          );
+        }
       }
     });
     return () => sub.remove();
   }, [dispatch, notices, onNoticeCardPress, props.componentId]);
-
-  // useEffect(() => {
-  //   if (Platform.OS === 'android') {
-  //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-  //       const data = remoteMessage.data;
-  //       if (data?.notice) {
-  //         const notice = JSON.parse(data.notice) as WithCourseInfo<INotice>;
-  //         if (!notices.find((n) => n.id === notice.id)) {
-  //           dispatch(
-  //             getNoticesForCourseAction.success({
-  //               notices: [notice, ...notices],
-  //               courseId: notice.courseId,
-  //             }),
-  //           );
-  //         }
-
-  //         scheduleNotification(
-  //           `${notice.courseName}`,
-  //           `${notice.title}\n${removeTags(
-  //             notice.content || getTranslation('noNoticeContent'),
-  //           )}`,
-  //           new Date(),
-  //           notice,
-  //         );
-  //       }
-  //     });
-
-  //     return () => unsubscribe();
-  //   }
-  // }, [dispatch, notices]);
 
   const onPinned = (pin: boolean, noticeId: string) => {
     if (pin) {

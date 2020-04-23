@@ -7,8 +7,6 @@
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
 
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-
     <application
         android:name=".MainApplication"
         android:allowBackup="false"
@@ -19,37 +17,11 @@
         android:usesCleartextTraffic="true">
 
         <meta-data
-            android:name="com.dieam.reactnativepushnotification.notification_channel_name"
-            android:value="Local Notifications" />
-        <meta-data
-            android:name="com.dieam.reactnativepushnotification.notification_channel_description"
-            android:value="Reminders for notices, files and assignments" />
-        <meta-data
-            android:name="com.dieam.reactnativepushnotification.notification_color"
-            android:value="#bf5af2" />
-        <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_notification" />
+            android:resource="@drawable/ic_notification" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:value="#bf5af2" />
-
-        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationPublisher" />
-        <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationBootEventReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-
-        <service android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationRegistrationService" />
-
-        <service
-            android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationListenerServiceGcm"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-            </intent-filter>
-        </service>
+            android:resource="@color/theme" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

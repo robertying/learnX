@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   View,
   Text,
-  PushNotificationIOS,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -214,38 +213,10 @@ const FileScreen: INavigationScreen = (props) => {
   );
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      (async () => {
-        const notification = await PushNotificationIOS.getInitialNotification();
-        const data = notification?.getData() as any;
-        if (data?.file) {
-          const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
-          if (!files.find((n) => n.id === file.id)) {
-            dispatch(
-              getFilesForCourseAction.success({
-                files: [
-                  file,
-                  ...files.filter((i) => i.courseId === file.courseId),
-                ],
-                courseId: file.courseId,
-              }),
-            );
-          }
-          Navigation.mergeOptions(props.componentId, {
-            bottomTabs: {
-              currentTabIndex: 1,
-            },
-          });
-          onFileCardPress(file);
-        }
-      })();
-    }
-  }, [dispatch, files, onFileCardPress, props.componentId]);
-
-  useEffect(() => {
     const sub = Notifications.addNotificationReceivedListener((e) => {
-      const data = e.request.content.data;
-      if (data.file) {
+      const data =
+        e.request.content.data ?? (e.request.trigger as any).remoteMessage.data;
+      if (data?.file) {
         const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
         if (!files.find((n) => n.id === file.id)) {
           dispatch(
@@ -265,8 +236,10 @@ const FileScreen: INavigationScreen = (props) => {
 
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener((e) => {
-      const data = e.notification.request.content.data;
-      if (data.file) {
+      const data =
+        e.notification.request.content.data ??
+        (e.notification.request.trigger as any).remoteMessage.data;
+      if (data?.file) {
         const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
         if (!files.find((n) => n.id === file.id)) {
           dispatch(
@@ -285,40 +258,16 @@ const FileScreen: INavigationScreen = (props) => {
           },
         });
         onFileCardPress(file);
+
+        if (Platform.OS === 'android') {
+          Notifications.dismissNotificationAsync(
+            e.notification.request.identifier,
+          );
+        }
       }
     });
     return () => sub.remove();
   }, [dispatch, files, onFileCardPress, props.componentId]);
-
-  // useEffect(() => {
-  //   if (Platform.OS === 'android') {
-  //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-  //       const data = remoteMessage.data;
-  //       if (data?.file) {
-  //         const file = JSON.parse(data.file) as WithCourseInfo<IFile>;
-  //         if (!files.find((n) => n.id === file.id)) {
-  //           dispatch(
-  //             getFilesForCourseAction.success({
-  //               files: [file, ...files],
-  //               courseId: file.courseId,
-  //             }),
-  //           );
-  //         }
-
-  //         scheduleNotification(
-  //           `${file.courseName}`,
-  //           `${file.title}\n${removeTags(
-  //             file.description || getTranslation('noFileDescription'),
-  //           )}`,
-  //           new Date(),
-  //           file,
-  //         );
-  //       }
-  //     });
-
-  //     return () => unsubscribe();
-  //   }
-  // }, [dispatch, files]);
 
   const onPinned = (pin: boolean, fileId: string) => {
     if (pin) {

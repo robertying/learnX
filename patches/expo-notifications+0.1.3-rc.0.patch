@@ -1,0 +1,78 @@
+diff --git a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/FirebaseListenerService.java b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/FirebaseListenerService.java
+index 2c9ce60..a1bb7de 100644
+--- a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/FirebaseListenerService.java
++++ b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/FirebaseListenerService.java
+@@ -3,6 +3,7 @@ package expo.modules.notifications;
+ import com.google.firebase.messaging.FirebaseMessagingService;
+ import com.google.firebase.messaging.RemoteMessage;
+
++import org.json.JSONException;
+ import org.json.JSONObject;
+
+ import java.lang.ref.WeakReference;
+@@ -90,7 +91,19 @@ public class FirebaseListenerService extends FirebaseMessagingService {
+     if (identifier == null) {
+       identifier = UUID.randomUUID().toString();
+     }
+-    JSONObject payload = new JSONObject(remoteMessage.getData());
++
++    JSONObject payload = new JSONObject();
++
++    try {
++      RemoteMessage.Notification notification = remoteMessage.getNotification();
++      payload.put("title", notification.getTitle());
++      payload.put("message", notification.getBody());
++      payload.put("sound", notification.getSound());
++    }
++    catch (JSONException e) {
++
++    }
++
+     NotificationContent content = new JSONNotificationContentBuilder().setPayload(payload).build();
+     NotificationRequest request = new NotificationRequest(identifier, content, new FirebaseNotificationTrigger(remoteMessage));
+     return new Notification(request, new Date(remoteMessage.getSentTime()));
+diff --git a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.java b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.java
+index 159e6eb..7fcb76a 100644
+--- a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.java
++++ b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/notifications/presentation/builders/ExpoNotificationBuilder.java
+@@ -2,6 +2,8 @@ package expo.modules.notifications.notifications.presentation.builders;
+
+ import android.app.Notification;
+ import android.content.Context;
++import android.content.pm.ApplicationInfo;
++import android.content.pm.PackageManager;
+ import android.os.Bundle;
+ import android.os.Parcel;
+ import android.provider.Settings;
+@@ -9,6 +11,8 @@ import android.util.Log;
+
+ import androidx.annotation.Nullable;
+ import androidx.core.app.NotificationCompat;
++import androidx.core.content.ContextCompat;
++
+ import expo.modules.notifications.notifications.enums.NotificationPriority;
+ import expo.modules.notifications.notifications.interfaces.NotificationBuilder;
+ import expo.modules.notifications.notifications.model.NotificationContent;
+@@ -32,7 +36,21 @@ public class ExpoNotificationBuilder extends ChannelAwareNotificationBuilder {
+
+   protected NotificationCompat.Builder createBuilder() {
+     NotificationCompat.Builder builder = super.createBuilder();
+-    builder.setSmallIcon(getContext().getApplicationInfo().icon);
++
++    try {
++      ApplicationInfo app = getContext().getPackageManager().getApplicationInfo(getContext().getPackageName(), PackageManager.GET_META_DATA);
++      Bundle bundle = app.metaData;
++
++      int icon = bundle.getInt("com.google.firebase.messaging.default_notification_icon");
++      int color = bundle.getInt("com.google.firebase.messaging.default_notification_color");
++
++      builder.setSmallIcon(icon);
++      builder.setColor(ContextCompat.getColor(getContext(), color));
++    }
++    catch (PackageManager.NameNotFoundException e) {
++
++    }
++
+     builder.setPriority(getPriority());
+
+     NotificationContent content = getNotificationContent();

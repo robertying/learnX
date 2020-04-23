@@ -6,7 +6,6 @@ import {
   SafeAreaView,
   View,
   Text,
-  PushNotificationIOS,
 } from 'react-native';
 import {
   Provider as PaperProvider,
@@ -263,42 +262,10 @@ const AssignmentScreen: INavigationScreen = (props) => {
   );
 
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      (async () => {
-        const notification = await PushNotificationIOS.getInitialNotification();
-        const data = notification?.getData() as any;
-        if (data?.assignment) {
-          const assignment = JSON.parse(
-            data.assignment as string,
-          ) as WithCourseInfo<IAssignment>;
-          if (!assignments.find((n) => n.id === assignment.id)) {
-            dispatch(
-              getAssignmentsForCourseAction.success({
-                assignments: [
-                  assignment,
-                  ...assignments.filter(
-                    (i) => i.courseId === assignment.courseId,
-                  ),
-                ],
-                courseId: assignment.courseId,
-              }),
-            );
-          }
-          Navigation.mergeOptions(props.componentId, {
-            bottomTabs: {
-              currentTabIndex: 2,
-            },
-          });
-          onAssignmentCardPress(assignment);
-        }
-      })();
-    }
-  }, [dispatch, assignments, onAssignmentCardPress, props.componentId]);
-
-  useEffect(() => {
     const sub = Notifications.addNotificationReceivedListener((e) => {
-      const data = e.request.content.data;
-      if (data.assignment) {
+      const data =
+        e.request.content.data ?? (e.request.trigger as any).remoteMessage.data;
+      if (data?.assignment) {
         const assignment = JSON.parse(
           data.assignment as string,
         ) as WithCourseInfo<IAssignment>;
@@ -322,8 +289,10 @@ const AssignmentScreen: INavigationScreen = (props) => {
 
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener((e) => {
-      const data = e.notification.request.content.data;
-      if (data.assignment) {
+      const data =
+        e.notification.request.content.data ??
+        (e.notification.request.trigger as any).remoteMessage.data;
+      if (data?.assignment) {
         const assignment = JSON.parse(
           data.assignment as string,
         ) as WithCourseInfo<IAssignment>;
@@ -346,43 +315,16 @@ const AssignmentScreen: INavigationScreen = (props) => {
           },
         });
         onAssignmentCardPress(assignment);
+
+        if (Platform.OS === 'android') {
+          Notifications.dismissNotificationAsync(
+            e.notification.request.identifier,
+          );
+        }
       }
     });
     return () => sub.remove();
   }, [assignments, dispatch, onAssignmentCardPress, props.componentId]);
-
-  // useEffect(() => {
-  //   if (Platform.OS === 'android') {
-  //     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-  //       const data = remoteMessage.data;
-  //       if (data?.assignment) {
-  //         const assignment = JSON.parse(data.assignment) as WithCourseInfo<
-  //           IAssignment
-  //         >;
-  //         if (!assignments.find((n) => n.id === assignment.id)) {
-  //           dispatch(
-  //             getAssignmentsForCourseAction.success({
-  //               assignments: [assignment, ...assignments],
-  //               courseId: assignment.courseId,
-  //             }),
-  //           );
-  //         }
-
-  //         scheduleNotification(
-  //           `${assignment.courseName}`,
-  //           `${assignment.title}\n${removeTags(
-  //             assignment.description ||
-  //               getTranslation('noAssignmentDescription'),
-  //           )}`,
-  //           new Date(),
-  //           assignment,
-  //         );
-  //       }
-  //     });
-
-  //     return () => unsubscribe();
-  //   }
-  // }, [dispatch, assignments]);
 
   const onPinned = (pin: boolean, assignmentId: string) => {
     if (pin) {

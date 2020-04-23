@@ -20,7 +20,7 @@ import io.robertying.learnx.generated.BasePackageList;
 
 public class MainApplication extends NavigationApplication implements ShareApplication {
 
-    private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(new BasePackageList().getPackageList(), Arrays.<SingletonModule>asList());
+    private final ReactModuleRegistryProvider mModuleRegistryProvider = new ReactModuleRegistryProvider(new BasePackageList().getPackageList(), null);
 
     private final ReactNativeHost mReactNativeHost =
             new NavigationReactNativeHost(this) {

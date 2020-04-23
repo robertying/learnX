@@ -90,7 +90,6 @@ android {
         }
         release {
             minifyEnabled enableProguardInReleaseBuilds
-            shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             proguardFile "${rootProject.projectDir}/../node_modules/detox/android/detox/proguard-rules-app.pro"
             signingConfig signingConfigs.release
@@ -138,8 +137,6 @@ dependencies {
     }
 
     addUnimodulesDependencies([exclude: ['expo-app-loader-provider',
-                                         'expo-constants',
-                                         'expo-permissions',
                                          'expo-file-system']])
 
     implementation 'com.google.firebase:firebase-analytics:17.3.0'
