@@ -33,5 +33,5 @@ export function login(username?: string, password?: string): IThunkResult {
 
 export const setFirebaseAuth = createAction(
   SET_FIREBASE_AUTH,
-  (firebaseAuth: IFirebaseAuth) => firebaseAuth,
+  (firebaseAuth?: IFirebaseAuth) => firebaseAuth,
 )();

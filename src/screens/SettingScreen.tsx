@@ -56,6 +56,14 @@ const SettingScreen: INavigationScreen = (props) => {
   };
 
   const onLogoutPress = () => {
+    if (settings.pushNotifications.enabled) {
+      Snackbar.show({
+        text: getTranslation('disablePushNotifications'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      return;
+    }
+
     Alert.alert(
       getTranslation('logout'),
       getTranslation('logoutConfirmation'),

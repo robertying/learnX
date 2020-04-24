@@ -9,6 +9,7 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import {iOSUIKit} from 'react-native-typography';
@@ -25,6 +26,7 @@ import {INavigationScreen} from '../types';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import TextButton from '../components/TextButton';
 import {serviceUrl} from '../helpers/notification';
+import {useTypedSelector} from '../redux/store';
 
 const styles = StyleSheet.create({
   note: {
@@ -49,6 +51,9 @@ const FirebaseScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
 
   const dispatch = useDispatch();
+  const pushNotificationsSettings = useTypedSelector(
+    (state) => state.settings.pushNotifications,
+  );
 
   const [loading, setLoading] = useState(false);
 
@@ -88,16 +93,50 @@ const FirebaseScreen: INavigationScreen = (props) => {
         });
         const result = await response.json();
 
+        if (!result.emailVerified) {
+          Snackbar.show({
+            text: getTranslation('verifyEmail'),
+            duration: Snackbar.LENGTH_LONG,
+            action: {
+              text: getTranslation('resend'),
+              onPress: async () => {
+                try {
+                  await fetch(`${serviceUrl}/users/verify`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                      email,
+                      password,
+                    }),
+                  });
+                  Snackbar.show({
+                    text: getTranslation('verificationEmailSent'),
+                    duration: Snackbar.LENGTH_LONG,
+                  });
+                } catch {
+                  Snackbar.show({
+                    text: getTranslation('networkError'),
+                    duration: Snackbar.LENGTH_LONG,
+                  });
+                }
+              },
+            },
+          });
+          return;
+        }
+
         dispatch(setFirebaseAuth(result));
         Navigation.dismissModal(props.componentId);
         Snackbar.show({
           text: getTranslation('firebaseLoginSuccess'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
       } catch {
         Snackbar.show({
           text: getTranslation('firebaseLoginFailure'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
       } finally {
         setLoading(false);
@@ -105,7 +144,7 @@ const FirebaseScreen: INavigationScreen = (props) => {
     } else {
       Snackbar.show({
         text: getTranslation('firebaseCompleteCredentials'),
-        duration: Snackbar.LENGTH_SHORT,
+        duration: Snackbar.LENGTH_LONG,
       });
     }
   };
@@ -117,7 +156,7 @@ const FirebaseScreen: INavigationScreen = (props) => {
       if (password.length < 6) {
         Snackbar.show({
           text: getTranslation('passwordMinimalLength'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
         return;
       }
@@ -135,18 +174,16 @@ const FirebaseScreen: INavigationScreen = (props) => {
             returnSecureToken: true,
           }),
         });
-        const result = await response.json();
+        await response.json();
 
-        dispatch(setFirebaseAuth(result));
-        Navigation.dismissModal(props.componentId);
         Snackbar.show({
           text: getTranslation('firebaseRegisterSuccess'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
       } catch {
         Snackbar.show({
           text: getTranslation('firebaseRegisterFailure'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
       } finally {
         setLoading(false);
@@ -154,9 +191,79 @@ const FirebaseScreen: INavigationScreen = (props) => {
     } else {
       Snackbar.show({
         text: getTranslation('firebaseCompleteCredentials'),
-        duration: Snackbar.LENGTH_SHORT,
+        duration: Snackbar.LENGTH_LONG,
       });
     }
+  };
+
+  const handlePasswordReset = async () => {
+    Keyboard.dismiss();
+
+    if (!email) {
+      Snackbar.show({
+        text: getTranslation('firebaseNoEmail'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await fetch(`${serviceUrl}/users/reset`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+        }),
+      });
+
+      Snackbar.show({
+        text: getTranslation('resetEmailSent'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+    } catch {
+      Snackbar.show({
+        text: getTranslation('networkError'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    if (pushNotificationsSettings.enabled) {
+      Snackbar.show({
+        text: getTranslation('disablePushNotifications'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      return;
+    }
+
+    Alert.alert(
+      getTranslation('logout'),
+      getTranslation('logoutConfirmation'),
+      [
+        {
+          text: getTranslation('cancel'),
+          style: 'cancel',
+        },
+        {
+          text: getTranslation('ok'),
+          onPress: () => {
+            dispatch(setFirebaseAuth(undefined));
+            Snackbar.show({
+              text: getTranslation('logoutSuccess'),
+              duration: Snackbar.LENGTH_LONG,
+            });
+          },
+        },
+      ],
+      {cancelable: true},
+    );
   };
 
   return (
@@ -239,6 +346,18 @@ const FirebaseScreen: INavigationScreen = (props) => {
               {getTranslation('login')}
             </RaisedButton>
           </View>
+          <TextButton
+            style={{flex: 0, margin: 10}}
+            textStyle={{color: Colors.system('purple')}}
+            onPress={handlePasswordReset}>
+            {getTranslation('resetPassword')}
+          </TextButton>
+          <TextButton
+            style={{flex: 0, margin: 10}}
+            textStyle={{color: Colors.system('purple')}}
+            onPress={handleLogout}>
+            {getTranslation('logout')}
+          </TextButton>
           <ActivityIndicator style={{margin: 10}} animating={loading} />
         </View>
         <Text

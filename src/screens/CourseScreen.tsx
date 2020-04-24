@@ -26,6 +26,7 @@ import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
 import {useDispatch} from 'react-redux';
 import {Navigation} from 'react-native-navigation';
+import {updateFirebaseUser} from '../helpers/notification';
 
 const CourseScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -65,6 +66,9 @@ const CourseScreen: INavigationScreen = (props) => {
   const courseError = useTypedSelector((state) => state.courses.error);
   const isFetching = useTypedSelector((state) => state.courses.isFetching);
   const semesterId = useTypedSelector((state) => state.currentSemester);
+  const includeHiddenCourses = useTypedSelector(
+    (state) => state.settings.pushNotifications.includeHiddenCourses,
+  );
 
   const invalidateAll = useCallback(() => {
     if (loggedIn && semesterId) {
@@ -82,6 +86,12 @@ const CourseScreen: INavigationScreen = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [semesterId]);
+
+  useEffect(() => {
+    updateFirebaseUser({
+      hiddenCourses: includeHiddenCourses ? [] : hiddenCourseIds,
+    });
+  }, [hiddenCourseIds, includeHiddenCourses]);
 
   useEffect(() => {
     if (courseError) {

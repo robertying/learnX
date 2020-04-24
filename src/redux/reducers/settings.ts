@@ -16,7 +16,11 @@ export default function settings(
     isCompact: false,
     hasUnread: [Entity.File, Entity.Assignment, Entity.Notice],
     graduate: false,
-    pushNotifications: {agreementAcknowledged: false, enabled: false},
+    pushNotifications: {
+      agreementAcknowledged: false,
+      enabled: false,
+      includeHiddenCourses: false,
+    },
     alarms: {
       assignmentAlarm: false,
       courseAlarm: false,

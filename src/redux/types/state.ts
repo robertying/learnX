@@ -28,6 +28,7 @@ export interface IPushNotificationSettings {
   agreementAcknowledged: boolean;
   deviceToken?: string;
   enabled: boolean;
+  includeHiddenCourses: boolean;
 }
 export interface IAlarmSettings {
   courseAlarm: boolean;

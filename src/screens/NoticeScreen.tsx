@@ -47,6 +47,7 @@ import {
   requestNotificationPermission,
   showNotificationPermissionAlert,
   scheduleNotification,
+  updateDeviceToken,
 } from '../helpers/notification';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
@@ -73,16 +74,21 @@ const NoticeScreen: INavigationScreen = (props) => {
 
   useEffect(() => {
     (async () => {
-      if (settings.hasUpdate && Platform.OS === 'android') {
-        Navigation.mergeOptions('SettingsScreen', {
-          bottomTab: {
-            dotIndicator: {
-              visible: true,
-            },
-          },
-        });
-      }
+      const token = await Notifications.getDevicePushTokenAsync();
+      updateDeviceToken(token.data);
     })();
+  }, []);
+
+  useEffect(() => {
+    if (settings.hasUpdate && Platform.OS === 'android') {
+      Navigation.mergeOptions('SettingsScreen', {
+        bottomTab: {
+          dotIndicator: {
+            visible: true,
+          },
+        },
+      });
+    }
   }, [settings.hasUpdate]);
 
   useEffect(() => {
@@ -333,22 +339,22 @@ const NoticeScreen: INavigationScreen = (props) => {
     const sub = Notifications.addNotificationReceivedListener((e) => {
       const data =
         e.request.content.data ?? (e.request.trigger as any).remoteMessage.data;
-        if (data?.notice) {
-          const notice = JSON.parse(data.notice as string) as WithCourseInfo<
-            INotice
-          >;
-          if (!notices.find((n) => n.id === notice.id)) {
-            dispatch(
-              getNoticesForCourseAction.success({
-                notices: [
-                  notice,
-                  ...notices.filter((i) => i.courseId === notice.courseId),
-                ],
-                courseId: notice.courseId,
-              }),
-            );
-          }
+      if (data?.notice) {
+        const notice = JSON.parse(data.notice as string) as WithCourseInfo<
+          INotice
+        >;
+        if (!notices.find((n) => n.id === notice.id)) {
+          dispatch(
+            getNoticesForCourseAction.success({
+              notices: [
+                notice,
+                ...notices.filter((i) => i.courseId === notice.courseId),
+              ],
+              courseId: notice.courseId,
+            }),
+          );
         }
+      }
     });
     return () => sub.remove();
   }, [dispatch, notices]);

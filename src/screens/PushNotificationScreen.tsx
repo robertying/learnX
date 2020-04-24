@@ -8,8 +8,7 @@ import {
   Platform,
 } from 'react-native';
 import {useDispatch} from 'react-redux';
-import {messaging} from '../helpers/notification';
-import PushNotificationIOS from '@react-native-community/push-notification-ios';
+import * as Notifications from 'expo-notifications';
 import {iOSUIKit} from 'react-native-typography';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
@@ -25,8 +24,10 @@ import SettingListItem from '../components/SettingListItem';
 import {Navigation} from 'react-native-navigation';
 import {setSetting} from '../redux/actions/settings';
 import Snackbar from 'react-native-snackbar';
-import {serviceUrl} from '../helpers/notification';
-import PushNotification from 'react-native-push-notification';
+import {
+  serviceUrl,
+  requestNotificationPermission,
+} from '../helpers/notification';
 
 const styles = StyleSheet.create({
   sectionTitle: {
@@ -40,6 +41,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 0,
   },
+  note: {
+    margin: 6,
+    marginHorizontal: 24,
+  },
 });
 
 const PushNotificationScreen: INavigationScreen = (props) => {
@@ -48,6 +53,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
   const dispatch = useDispatch();
 
   const auth = useTypedSelector((state) => state.auth);
+  const hiddenCourses = useTypedSelector((state) => state.courses.hidden);
   const settings = useTypedSelector((state) => state.settings);
   const pushNotificationsSettings = settings.pushNotifications;
   const firebaseAuth = useTypedSelector((state) => state.auth.firebase);
@@ -60,49 +66,16 @@ const PushNotificationScreen: INavigationScreen = (props) => {
 
   useEffect(() => {
     (async () => {
-      if (Platform.OS === 'ios') {
-        PushNotificationIOS.checkPermissions((permissions) => {
-          if (permissions.alert || permissions.badge || permissions.sound) {
-            setPermissionGranted(true);
-          } else {
-            setPermissionGranted(false);
-          }
-        });
-      } else {
-        PushNotification.checkPermissions((permissions) => {
-          if (permissions.alert) {
-            setPermissionGranted(true);
-          } else {
-            setPermissionGranted(false);
-          }
-        });
+      const {status} = await Notifications.getPermissionsAsync();
+      if (status) {
+        setPermissionGranted(true);
       }
     })();
   }, []);
 
   const handlePermissions = async () => {
-    if (Platform.OS === 'ios') {
-      const results = await PushNotificationIOS.requestPermissions({
-        alert: true,
-        badge: true,
-        sound: true,
-      });
-
-      if (results.alert || results.badge || results.sound) {
-        setPermissionGranted(true);
-      } else {
-        setPermissionGranted(false);
-        Linking.openSettings();
-      }
-    } else {
-      PushNotification.checkPermissions((permissions) => {
-        if (!permissions.alert) {
-          Snackbar.show({
-            text: getTranslation('pushNotificationReminder'),
-            duration: Snackbar.LENGTH_SHORT,
-          });
-        }
-      });
+    if (await requestNotificationPermission()) {
+      setPermissionGranted(true);
     }
   };
 
@@ -124,27 +97,32 @@ const PushNotificationScreen: INavigationScreen = (props) => {
     ) {
       Snackbar.show({
         text: getTranslation('firebasePrerequisites'),
-        duration: Snackbar.LENGTH_SHORT,
+        duration: Snackbar.LENGTH_LONG,
       });
       return;
     }
 
-    if (Platform.OS === 'android') {
-      try {
-        const token = await messaging().getToken();
-        dispatch(
-          setSetting('pushNotifications', {
-            ...settings.pushNotifications,
-            deviceToken: token,
-          }),
-        );
-      } catch {
+    try {
+      const token = await Notifications.getDevicePushTokenAsync();
+      dispatch(
+        setSetting('pushNotifications', {
+          ...settings.pushNotifications,
+          deviceToken: token.data,
+        }),
+      );
+    } catch {
+      if (Platform.OS === 'android') {
         Snackbar.show({
           text: getTranslation('googleServicesFail'),
-          duration: Snackbar.LENGTH_SHORT,
+          duration: Snackbar.LENGTH_LONG,
         });
-        return;
+      } else {
+        Snackbar.show({
+          text: getTranslation('deviceTokenFailure'),
+          duration: Snackbar.LENGTH_LONG,
+        });
       }
+      return;
     }
 
     Navigation.showModal({
@@ -160,7 +138,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
     if (!pushNotificationsSettings.deviceToken) {
       Snackbar.show({
         text: getTranslation('deviceTokenFailure'),
-        duration: Snackbar.LENGTH_SHORT,
+        duration: Snackbar.LENGTH_LONG,
       });
       return;
     }
@@ -190,6 +168,9 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           body: JSON.stringify({
             username: auth.username,
             password: auth.password,
+            hiddenCourses: pushNotificationsSettings.includeHiddenCourses
+              ? []
+              : hiddenCourses,
           }),
         });
 
@@ -249,7 +230,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
     } catch (error) {
       Snackbar.show({
         text: getTranslation('pushNotificationEnableFailure'),
-        duration: Snackbar.LENGTH_SHORT,
+        duration: Snackbar.LENGTH_LONG,
       });
     } finally {
       setEnableLoading(false);
@@ -370,6 +351,19 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           switchValue={pushNotificationsSettings.enabled}
           onSwitchValueChange={(enabled) =>
             handlePushNotificationEnable(enabled)
+          }
+        />
+        <SettingListItem
+          variant="switch"
+          text={getTranslation('includeHiddenCourses')}
+          switchValue={pushNotificationsSettings.includeHiddenCourses}
+          onSwitchValueChange={(enabled) =>
+            dispatch(
+              setSetting('pushNotifications', {
+                ...pushNotificationsSettings,
+                includeHiddenCourses: enabled,
+              }),
+            )
           }
         />
       </ScrollView>
