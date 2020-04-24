@@ -1,4 +1,4 @@
-import {Platform, UIManager, unstable_enableLogBox} from 'react-native';
+import {Platform, UIManager} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import * as Notifications from 'expo-notifications';
 import DeviceInfo from './constants/DeviceInfo';
@@ -7,8 +7,6 @@ import registerComponents from './navigation/registerComponents';
 import {Appearance} from 'react-native-appearance';
 import {getAndroidTheme} from './helpers/darkmode';
 import {registerBackgroundTasks} from './helpers/background';
-
-unstable_enableLogBox();
 
 if (
   Platform.OS === 'android' &&
