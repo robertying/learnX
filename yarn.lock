@@ -3899,10 +3899,10 @@ funpermaproxy@^1.0.1:
   resolved "https://registry.yarnpkg.com/funpermaproxy/-/funpermaproxy-1.0.1.tgz#4650e69b7c334d9717c06beba9b339cc08ac3335"
   integrity sha512-9pEzs5vnNtR7ZGihly98w/mQ7blsvl68Wj30ZCDAXy7qDN4CWLLjdfjtH/P2m6whsnaJkw15hysCNHMXue+wdA==
 
-fuse.js@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-5.1.0.tgz#192a670e48bc3ac0247cf9a61590714ab991f7a8"
-  integrity sha512-R8nPr9tQx0HdjRJsqkESimL7o/2Xe0/Lw0cMBrBjkAKAJFq6D6u/o3obteqxkvOJNEgS4xPP78dxoNMaCWNoGg==
+fuse.js@5.2.3:
+  version "5.2.3"
+  resolved "https://registry.yarnpkg.com/fuse.js/-/fuse.js-5.2.3.tgz#fdf3aa62859782b3f73ddfa57a9ca81517280c91"
+  integrity sha512-ld3AEgKtKnnXCtJavtygAb+aLlD5aVvLwTocXXBSStLA6JGFI6oMxTvumwh46N2/3gs3A7JNDu1px5F1/cq84g==
 
 gauge@~2.7.3:
   version "2.7.4"

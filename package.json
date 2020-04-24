@@ -32,7 +32,7 @@
     "expo-document-picker": "8.1.0",
     "expo-haptics": "8.1.0",
     "expo-secure-store": "8.1.0",
-    "fuse.js": "5.1.0",
+    "fuse.js": "5.2.3",
     "lodash.differenceby": "4.8.0",
     "mime-types": "2.1.26",
     "path": "0.12.7",
