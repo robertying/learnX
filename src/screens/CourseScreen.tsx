@@ -73,10 +73,8 @@ const CourseScreen: INavigationScreen = (props) => {
   }, [loggedIn, semesterId, dispatch]);
 
   useEffect(() => {
-    if (courses.length === 0) {
-      invalidateAll();
-    }
-  }, [invalidateAll, courses.length]);
+    invalidateAll();
+  }, [invalidateAll]);
 
   useEffect(() => {
     if (semesterId) {
