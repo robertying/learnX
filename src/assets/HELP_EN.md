@@ -17,9 +17,7 @@ Here are some information that may help you to use the App.
 
 ### iOS: There are multiple calendar events in my Calendar.
 
-- This is a known issue.
-- Please go to Calendar and tap `Calendars` on the bottom. Tap the information icon on the right of `learnX` calendar. Scroll down and you can delete this calendar. You can first delete all `learnX` calendar and go back to the App to refresh the `Assignment` screen. The App will then write current assignment deadlines into Calendar.
-- If you cannot delete the calendar, please create a new dummy calendar and then delete the `learnX` calendar. You can delete the dummy calendar after the `learnX` calendar is recreated by the App.
+- Please go to `Calendar & Reminders` in `Settings` and click `Delete Synced Calendars & Reminders`.
 
 ### I have other issues. / I have suggestions.
 

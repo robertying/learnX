@@ -68,7 +68,7 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 - Pin at the top
 - Dark mode
 - Course schedule calendar sync
-- Deadline calendar sync
+- Assignment calendar/reminder sync
 - Search
 - Switch among semesters
 
