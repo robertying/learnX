@@ -256,6 +256,9 @@ const AssignmentScreen: INavigationScreen = (props) => {
         );
       }
 
+      if (DeviceInfo.isMac()) {
+        Notifications.setBadgeCountAsync(0);
+      }
       dispatch(readAssignment(assignment.id));
     },
     [isCompact, colorScheme, props.componentId, dispatch],

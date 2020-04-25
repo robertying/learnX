@@ -329,6 +329,9 @@ const NoticeScreen: INavigationScreen = (props) => {
         );
       }
 
+      if (DeviceInfo.isMac()) {
+        Notifications.setBadgeCountAsync(0);
+      }
       dispatch(readNotice(notice.id));
       fetch(notice.url);
     },

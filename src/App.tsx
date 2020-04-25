@@ -17,9 +17,6 @@ if (
 
 Notifications.setNotificationHandler({
   handleNotification: async () => {
-    if (DeviceInfo.isMac()) {
-      Notifications.setBadgeCountAsync(0);
-    }
     return {
       shouldShowAlert: true,
       shouldPlaySound: true,

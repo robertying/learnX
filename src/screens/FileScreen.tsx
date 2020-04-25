@@ -207,6 +207,9 @@ const FileScreen: INavigationScreen = (props) => {
         );
       }
 
+      if (DeviceInfo.isMac()) {
+        Notifications.setBadgeCountAsync(0);
+      }
       dispatch(readFile(file.id));
     },
     [isCompact, colorScheme, props.componentId, dispatch],
