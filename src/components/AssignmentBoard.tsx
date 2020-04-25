@@ -24,7 +24,6 @@ import {
   OptionsModalPresentationStyle,
 } from 'react-native-navigation';
 import {IAssignmentSubmitScreenProps} from '../screens/AssignmentSubmitScreen';
-import DeviceInfo from '../constants/DeviceInfo';
 
 export type IAssignmentBoardProps = TouchableHighlightProps & {
   title: string;

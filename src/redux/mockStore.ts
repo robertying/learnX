@@ -26,6 +26,7 @@ const mockStore: IPersistAppState = {
     pushNotifications: {
       agreementAcknowledged: false,
       enabled: false,
+      includeHiddenCourses: false,
     },
     _persist: {
       rehydrated: true,
