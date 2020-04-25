@@ -42,7 +42,6 @@ const backgroundFetch = () => {
       const state = store.getState();
       const isFetching = state.assignments.isFetching;
       if (wasFetching && !isFetching) {
-        console.log('11');
         if (
           Platform.OS === 'android' &&
           state.settings.calendarSync &&
