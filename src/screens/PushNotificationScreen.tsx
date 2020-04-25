@@ -102,29 +102,6 @@ const PushNotificationScreen: INavigationScreen = (props) => {
       return;
     }
 
-    try {
-      const token = await Notifications.getDevicePushTokenAsync();
-      dispatch(
-        setSetting('pushNotifications', {
-          ...settings.pushNotifications,
-          deviceToken: token.data,
-        }),
-      );
-    } catch {
-      if (Platform.OS === 'android') {
-        Snackbar.show({
-          text: getTranslation('googleServicesFail'),
-          duration: Snackbar.LENGTH_LONG,
-        });
-      } else {
-        Snackbar.show({
-          text: getTranslation('deviceTokenFailure'),
-          duration: Snackbar.LENGTH_LONG,
-        });
-      }
-      return;
-    }
-
     Navigation.showModal({
       component: {
         name: 'settings.pushNotifications.firebase',
@@ -135,7 +112,35 @@ const PushNotificationScreen: INavigationScreen = (props) => {
   const [enableLoading, setEnableLoading] = useState(false);
 
   const handlePushNotificationEnable = async (enabled: boolean) => {
-    if (!pushNotificationsSettings.deviceToken) {
+    let deviceToken = null;
+
+    if (enabled) {
+      try {
+        const token = await Notifications.getDevicePushTokenAsync();
+        deviceToken = token.data;
+        dispatch(
+          setSetting('pushNotifications', {
+            ...settings.pushNotifications,
+            deviceToken: token.data,
+          }),
+        );
+      } catch {
+        if (Platform.OS === 'android') {
+          Snackbar.show({
+            text: getTranslation('googleServicesFail'),
+            duration: Snackbar.LENGTH_LONG,
+          });
+        } else {
+          Snackbar.show({
+            text: getTranslation('deviceTokenFailure'),
+            duration: Snackbar.LENGTH_LONG,
+          });
+        }
+        return;
+      }
+    }
+
+    if (!deviceToken && enabled) {
       Snackbar.show({
         text: getTranslation('deviceTokenFailure'),
         duration: Snackbar.LENGTH_LONG,
@@ -186,7 +191,7 @@ const PushNotificationScreen: INavigationScreen = (props) => {
           },
           body: JSON.stringify({
             uuid: DeviceInfo.getUniqueId(),
-            token: pushNotificationsSettings.deviceToken,
+            token: deviceToken,
             sandbox: __DEV__ ? 'true' : 'false',
             os: Platform.OS,
           }),
