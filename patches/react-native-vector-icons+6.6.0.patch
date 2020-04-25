@@ -10,4 +10,24 @@ index 9a1d11d..d247974 100644
 +  s.resources      = "Fonts/AntDesign.ttf", "Fonts/Ionicons.ttf", "Fonts/MaterialCommunityIcons.ttf", "Fonts/MaterialIcons.ttf"
    s.preserve_paths = "**/*.js"
    s.dependency 'React'
- 
+
+diff --git a/node_modules/react-native-vector-icons/RNVectorIconsManager/RNVectorIconsManager.m b/node_modules/react-native-vector-icons/RNVectorIconsManager/RNVectorIconsManager.m
+index 809cc26..097b98c 100644
+--- a/node_modules/react-native-vector-icons/RNVectorIconsManager/RNVectorIconsManager.m
++++ b/node_modules/react-native-vector-icons/RNVectorIconsManager/RNVectorIconsManager.m
+@@ -55,12 +55,13 @@ - (NSString *)generateFilePath:(NSString *)glyph withFontName:(NSString *)fontNa
+ {
+   CGFloat screenScale = RCTScreenScale();
+   NSString *hexColor = [self hexStringFromColor:color];
+-  NSString *fileName = [NSString stringWithFormat:@"tmp/RNVectorIcons_%@_%@_%hu_%.f%@@%.fx.png",
++  NSString *fileName = [NSString stringWithFormat:@"%@RNVectorIcons_%@_%@_%hu_%.f%@@%.fx.png",
++                                                  NSTemporaryDirectory(),
+                                                   identifier, fontName,
+                                                   [glyph characterAtIndex:0],
+                                                   fontSize, hexColor, screenScale];
+
+-  return [NSHomeDirectory() stringByAppendingPathComponent:fileName];
++  return fileName;
+ }
+
+ - (BOOL)createAndSaveGlyphImage:(NSString *)glyph withFont:(UIFont *)font
