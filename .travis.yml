@@ -2,7 +2,7 @@ jobs:
   include:
     - language: android
       os: linux
-      dist: bionic
+      dist: trusty
       android:
         components:
           - tools
