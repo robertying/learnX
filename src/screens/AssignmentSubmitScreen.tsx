@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
-import * as DocumentPicker from 'expo-document-picker';
+import DocumentPicker from 'react-native-document-picker';
 import {submitAssignment} from '../redux/dataSource';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import TextButton from '../components/TextButton';
@@ -67,6 +67,13 @@ const styles = StyleSheet.create({
   },
 });
 
+interface DocumentPickerResponse {
+  uri: string;
+  type: string;
+  name: string;
+  size: string;
+}
+
 const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = (
   props,
 ) => {
@@ -81,22 +88,21 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
   const [content, setContent] = useState(
     removeTags(submittedContent || '').replace('-->', ''),
   );
-  const [fileResult, setFileResult] = useState<{
-    type: 'success';
-    name: string;
-    size: number;
-    uri: string;
-    lastModified?: number | undefined;
-    file?: any;
-    output?: any;
-  }>();
+  const [fileResult, setFileResult] = useState<DocumentPickerResponse>();
 
   const handleFilePick = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      copyToCacheDirectory: false,
-    });
-    if (result.type === 'success') {
+    try {
+      const result = await DocumentPicker.pick<'ios' | 'android'>({
+        type: ['public.item', '*/*'] as any,
+      });
       setFileResult(result);
+    } catch (err) {
+      if (!DocumentPicker.isCancel(err)) {
+        Snackbar.show({
+          text: getTranslation('pickFileError'),
+          duration: Snackbar.LENGTH_LONG,
+        });
+      }
     }
   };
 
@@ -121,8 +127,8 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
           content,
           fileResult
             ? {
-                uri: fileResult.uri!,
-                name: fileResult.name!,
+                uri: fileResult.uri,
+                name: fileResult.name,
               }
             : undefined,
           setProgress,

@@ -206,7 +206,7 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
           <Divider />
         </>
       ) : null}
-      {!DeviceInfo.isMac() && dayjs().isBefore(dayjs(deadline)) && (
+      {dayjs().isBefore(dayjs(deadline)) && (
         <>
           <View style={styles.row}>
             <Icon
