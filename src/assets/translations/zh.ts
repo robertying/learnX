@@ -139,4 +139,5 @@ export default {
   includeHiddenCourses: '接收已屏蔽课程的通知',
   disablePushNotifications: '请先关闭推送通知服务',
   pickFileError: '选取文件失败',
+  all: '全部',
 };

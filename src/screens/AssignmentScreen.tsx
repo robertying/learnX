@@ -116,20 +116,15 @@ const AssignmentScreen: INavigationScreen = (props) => {
     [assignments, courseNames],
   );
 
-  const finishedAssignments = useMemo(() => {
-    const finishedAssignmentsOnly = sortedAssignments.filter(
+  const newAssignments = useMemo(() => {
+    const newAssignmentsOnly = sortedAssignments.filter(
       (i) =>
-        i.submitted &&
         !favAssignmentIds.includes(i.id) &&
         !hiddenCourseIds.includes(i.courseId),
     );
     return [
-      ...finishedAssignmentsOnly.filter((i) =>
-        pinnedAssignmentIds.includes(i.id),
-      ),
-      ...finishedAssignmentsOnly.filter(
-        (i) => !pinnedAssignmentIds.includes(i.id),
-      ),
+      ...newAssignmentsOnly.filter((i) => pinnedAssignmentIds.includes(i.id)),
+      ...newAssignmentsOnly.filter((i) => !pinnedAssignmentIds.includes(i.id)),
     ];
   }, [
     favAssignmentIds,
@@ -143,7 +138,8 @@ const AssignmentScreen: INavigationScreen = (props) => {
       (i) =>
         !i.submitted &&
         !favAssignmentIds.includes(i.id) &&
-        !hiddenCourseIds.includes(i.courseId),
+        !hiddenCourseIds.includes(i.courseId) &&
+        dayjs(i.deadline).isAfter(dayjs()),
     );
     return [
       ...unfinishedAssignmentsOnly.filter((i) =>
@@ -409,8 +405,8 @@ const AssignmentScreen: INavigationScreen = (props) => {
   const handleSegmentChange = (value: string) => {
     if (value.startsWith(getTranslation('unfinished'))) {
       setSegment('unfinished');
-    } else if (value.startsWith(getTranslation('finished'))) {
-      setSegment('finished');
+    } else if (value.startsWith(getTranslation('all'))) {
+      setSegment('all');
     } else if (value.startsWith(getTranslation('favorite'))) {
       setSegment('favorite');
     } else {
@@ -425,10 +421,10 @@ const AssignmentScreen: INavigationScreen = (props) => {
   }, [unfinishedAssignments, segment]);
 
   useEffect(() => {
-    if (segment === 'finished') {
-      setCurrentDisplayAssignments(finishedAssignments);
+    if (segment === 'all') {
+      setCurrentDisplayAssignments(newAssignments);
     }
-  }, [finishedAssignments, segment]);
+  }, [newAssignments, segment]);
 
   useEffect(() => {
     if (segment === 'favorite') {
@@ -552,14 +548,14 @@ const AssignmentScreen: INavigationScreen = (props) => {
               values={[
                 getTranslation('unfinished') +
                   ` (${unfinishedAssignments.length})`,
-                getTranslation('finished') + ` (${finishedAssignments.length})`,
+                getTranslation('all') + ` (${newAssignments.length})`,
                 getTranslation('favorite') + ` (${favAssignments.length})`,
                 getTranslation('hidden') + ` (${hiddenAssignments.length})`,
               ]}
               selectedIndex={
                 segment === 'unfinished'
                   ? 0
-                  : segment === 'finished'
+                  : segment === 'all'
                   ? 1
                   : segment === 'favorite'
                   ? 2

@@ -155,4 +155,5 @@ export default {
   includeHiddenCourses: 'Include hidden courses',
   disablePushNotifications: 'Please disable push notification service first',
   pickFileError: 'Failed to pick the file',
+  all: 'All',
 };
