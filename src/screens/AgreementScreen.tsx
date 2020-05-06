@@ -13,6 +13,7 @@ import Colors from '../constants/Colors';
 import RaisedButton from '../components/RaisedButton';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
+import DeviceInfo from '../constants/DeviceInfo';
 
 declare const preval: any;
 
@@ -74,6 +75,11 @@ const AgreementScreen: INavigationScreen = (props) => {
         highlight
         darkMode={colorScheme === 'dark'}
         onNavigationStateChange={onNavigationStateChange}
+        injectedJavaScript={
+          DeviceInfo.isMac()
+            ? 'document.body.style.backgroundColor = "rgb(30,30,30)"'
+            : ''
+        }
       />
       <RaisedButton
         style={[
