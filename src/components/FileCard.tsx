@@ -97,7 +97,11 @@ const FileCard: React.FC<IFileCardProps> = (props) => {
             ellipsizeMode="tail">
             {title}
           </Text>
-          <Text style={[{fontSize: 13}, styles.icon]}>
+          <Text
+            style={[
+              {fontSize: 13, color: Colors.system('foreground', colorScheme)},
+              styles.icon,
+            ]}>
             {(extension ? extension.toUpperCase() + ' ' : '') + size}
           </Text>
           {markedImportant && (

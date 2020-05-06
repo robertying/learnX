@@ -269,7 +269,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = (
                   size={50}
                   onPress={() => listener({buttonId: 'refresh'}) as any}
                 />
-                <Text>{getTranslation('refresh')}</Text>
+                <Text style={{color: Colors.system('foreground', colorScheme)}}>
+                  {getTranslation('refresh')}
+                </Text>
               </View>
               <View style={styles.button}>
                 <IconButton
@@ -279,7 +281,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = (
                   size={50}
                   onPress={() => listener({buttonId: 'open'}) as any}
                 />
-                <Text>{getTranslation('open')}</Text>
+                <Text style={{color: Colors.system('foreground', colorScheme)}}>
+                  {getTranslation('open')}
+                </Text>
               </View>
             </View>
           </View>
@@ -354,7 +358,9 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = (
                     Linking.openURL(filePath);
                   }}
                 />
-                <Text>{getTranslation('open')}</Text>
+                <Text style={{color: Colors.system('foreground', colorScheme)}}>
+                  {getTranslation('open')}
+                </Text>
               </View>
             </View>
           </View>
