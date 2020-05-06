@@ -1,5 +1,7 @@
+import DeviceInfo from './DeviceInfo';
+
 const colorsDark = {
-  background: 'black',
+  background: DeviceInfo.isMac() ? 'rgb(30,30,30)' : 'black',
   foreground: 'white',
   gray: 'rgb(152,152,157)',
   yellow: 'rgb(255,214,10)',
@@ -27,7 +29,5 @@ const system = (name: keyof typeof colorsDark, colorScheme?: string) => {
 export default {
   theme: 'rgba(102,8,116,1)',
   lightTheme: 'rgba(102,8,116,0.6)',
-  // background: '#f0f0f0',
-  // placeholder: '#eeeeee',
   system,
 };

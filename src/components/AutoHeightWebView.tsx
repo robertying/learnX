@@ -5,8 +5,14 @@ import {
   WebViewMessageEvent,
   WebViewNavigation,
 } from 'react-native-webview/lib/WebViewTypes';
+import DeviceInfo from '../constants/DeviceInfo';
 
 const injectedScript = `
+  ${
+    DeviceInfo.isMac()
+      ? 'document.body.style.backgroundColor = "rgb(30,30,30)"'
+      : ''
+  }
   function waitForBridge() {
     if (!window.ReactNativeWebView.postMessage) {
       setTimeout(waitForBridge, 200);
