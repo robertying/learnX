@@ -25,3 +25,12 @@ export const getLatestRelease = async () => {
     };
   }
 };
+
+export const getReleaseNote = async (version: string) => {
+  const response = await fetch(
+    `https://api.github.com/repos/robertying/learnX/releases/tags/v${version}`,
+  );
+  const json = await response.json();
+  const body = json.body as string;
+  return body;
+};

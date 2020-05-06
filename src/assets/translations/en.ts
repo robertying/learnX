@@ -23,6 +23,7 @@ export default {
   cancel: 'Cancel',
   ok: 'Ok',
   checkUpdate: 'Check for Update',
+  checkingUpdate: 'Checking for update...',
   foundNewVersion: 'New version found',
   pleaseUpdate:
     'New version found. Please go to Settings to download the update.',

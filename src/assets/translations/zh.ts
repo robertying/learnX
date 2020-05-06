@@ -22,6 +22,7 @@ export default {
   logoutSuccess: '注销成功',
   cancel: '取消',
   ok: '确定',
+  checkingUpdate: '检查更新中……',
   checkUpdate: '检查更新',
   foundNewVersion: '发现新版本',
   pleaseUpdate: '发现新版本，请前往设置下载更新',

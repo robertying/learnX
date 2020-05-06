@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   Alert,
   Linking,
@@ -6,13 +6,16 @@ import {
   SafeAreaView,
   View,
   ScrollView,
+  useWindowDimensions,
+  Text,
 } from 'react-native';
 import {
   Navigation,
   OptionsModalPresentationStyle,
 } from 'react-native-navigation';
 import fs from 'react-native-fs';
-import {iOSColors} from 'react-native-typography';
+import Modal from 'react-native-modal';
+import {iOSColors, iOSUIKit} from 'react-native-typography';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {useDispatch} from 'react-redux';
@@ -21,7 +24,7 @@ import SettingListItem from '../components/SettingListItem';
 import Colors from '../constants/Colors';
 import {getTranslation} from '../helpers/i18n';
 import Snackbar from 'react-native-snackbar';
-import {getLatestRelease} from '../helpers/update';
+import {getLatestRelease, getReleaseNote} from '../helpers/update';
 import {clearStore} from '../redux/actions/root';
 import {setSetting} from '../redux/actions/settings';
 import {INavigationScreen} from '../types';
@@ -33,6 +36,9 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {fileDir} from '../helpers/fs';
 import {ISettingsState} from '../redux/types/state';
+import Button from '../components/Button';
+import MarkdownWebView from 'react-native-github-markdown';
+import WebView, {WebViewProps} from 'react-native-webview';
 
 const SettingScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -93,37 +99,6 @@ const SettingScreen: INavigationScreen = (props) => {
     );
   };
 
-  const onCheckUpdatePress = async () => {
-    const {version, url} = await getLatestRelease();
-
-    if (semverGt(version, packageConfig.version)) {
-      Alert.alert(
-        getTranslation('checkUpdate'),
-        `${getTranslation('foundNewVersion')} v${version}`,
-        [
-          {
-            text: getTranslation('cancel'),
-            style: 'cancel',
-          },
-          {
-            text: getTranslation('update'),
-            onPress: () => {
-              Linking.openURL(url);
-            },
-          },
-        ],
-        {cancelable: true},
-      );
-      dispatch(setSetting('hasUpdate', true));
-    } else {
-      Snackbar.show({
-        text: getTranslation('noUpdate'),
-        duration: Snackbar.LENGTH_LONG,
-      });
-      dispatch(setSetting('hasUpdate', false));
-    }
-  };
-
   const onClearFileCachePress = () => {
     Alert.alert(
       getTranslation('clearFileCache'),
@@ -164,6 +139,52 @@ const SettingScreen: INavigationScreen = (props) => {
   useEffect(() => {
     adaptToSystemTheme(props.componentId, colorScheme, true);
   }, [colorScheme, props.componentId]);
+
+  const window = useWindowDimensions();
+
+  const webViewRef = useRef<WebView>(null);
+
+  const onNavigationStateChange: WebViewProps['onNavigationStateChange'] = (
+    e,
+  ) => {
+    if (e.navigationType === 'click') {
+      if (webViewRef.current) {
+        webViewRef.current.stopLoading();
+      }
+      Linking.openURL(e.url);
+    }
+  };
+
+  const [release, setRelease] = useState<{version: string; url: string}>();
+
+  const [releaseNote, setReleaseNote] = useState('');
+
+  const onCheckUpdatePress = async () => {
+    setReleaseNote('');
+
+    Snackbar.show({
+      text: getTranslation('checkingUpdate'),
+      duration: Snackbar.LENGTH_LONG,
+    });
+
+    const {version, url} = await getLatestRelease();
+
+    try {
+      const releaseNote = await getReleaseNote(version);
+      setReleaseNote(releaseNote);
+    } catch {}
+
+    if (semverGt(version, packageConfig.version)) {
+      setRelease({version, url});
+      dispatch(setSetting('hasUpdate', true));
+    } else {
+      Snackbar.show({
+        text: getTranslation('noUpdate'),
+        duration: Snackbar.LENGTH_LONG,
+      });
+      dispatch(setSetting('hasUpdate', false));
+    }
+  };
 
   return (
     <SafeAreaView
@@ -371,6 +392,75 @@ const SettingScreen: INavigationScreen = (props) => {
           onPress={() => navigate('settings.about')}
         />
       </ScrollView>
+      <Modal
+        isVisible={release ? true : false}
+        onBackdropPress={() => setRelease(undefined)}
+        backdropColor={
+          colorScheme === 'dark' ? 'rgba(255,255,255,0.25)' : undefined
+        }
+        animationIn="bounceIn"
+        animationOut="zoomOut"
+        deviceHeight={window.height}
+        deviceWidth={window.width}
+        useNativeDriver={true}
+        hideModalContentWhileAnimating={true}>
+        <View
+          style={{
+            height: '50%',
+            backgroundColor: Colors.system('background', colorScheme),
+          }}>
+          <Text
+            style={[
+              colorScheme === 'dark'
+                ? iOSUIKit.title3EmphasizedWhite
+                : iOSUIKit.title3Emphasized,
+              {margin: 24},
+            ]}>
+            {release?.version ? `v${release?.version}` : ''}
+          </Text>
+          <MarkdownWebView
+            style={{backgroundColor: 'transparent'}}
+            ref={webViewRef}
+            content={releaseNote}
+            highlight
+            darkMode={colorScheme === 'dark'}
+            onNavigationStateChange={onNavigationStateChange}
+          />
+          <View
+            style={{
+              backgroundColor: Colors.system('background', colorScheme),
+              width: '100%',
+              height: 50,
+              paddingHorizontal: 15,
+              flexDirection: 'row',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+            }}>
+            <Button
+              style={{marginHorizontal: 20}}
+              onPress={() => setRelease(undefined)}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: Colors.system('purple', colorScheme),
+                }}>
+                {getTranslation('cancel')}
+              </Text>
+            </Button>
+            <Button
+              style={{marginHorizontal: 20}}
+              onPress={() => release?.url && Linking.openURL(release?.url)}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  color: Colors.system('purple', colorScheme),
+                }}>
+                {getTranslation('update')}
+              </Text>
+            </Button>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
