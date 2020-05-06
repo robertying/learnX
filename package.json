@@ -2,7 +2,7 @@
   "name": "learnX",
   "private": true,
   "license": "MIT",
-  "version": "10.1.0",
+  "version": "10.2.0",
   "scripts": {
     "android": "react-native run-android --no-jetifier",
     "android:beta": "fastlane android beta",
@@ -44,7 +44,7 @@
     "react-native-document-picker": "3.3.3",
     "react-native-fs": "2.16.6",
     "react-native-gesture-handler": "1.6.1",
-    "react-native-github-markdown": "4.0.0",
+    "react-native-github-markdown": "4.0.1",
     "react-native-interactable": "2.0.1",
     "react-native-localize": "1.4.0",
     "react-native-modal": "11.5.6",
