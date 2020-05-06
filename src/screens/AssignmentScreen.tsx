@@ -268,19 +268,18 @@ const AssignmentScreen: INavigationScreen = (props) => {
         const assignment = JSON.parse(
           data.assignment as string,
         ) as WithCourseInfo<IAssignment>;
-        if (!assignments.find((n) => n.id === assignment.id)) {
-          dispatch(
-            getAssignmentsForCourseAction.success({
-              assignments: [
-                assignment,
-                ...assignments.filter(
-                  (i) => i.courseId === assignment.courseId,
-                ),
-              ],
-              courseId: assignment.courseId,
-            }),
-          );
-        }
+        dispatch(
+          getAssignmentsForCourseAction.success({
+            assignments: [
+              assignment,
+              ...assignments.filter(
+                (i) =>
+                  i.courseId === assignment.courseId && i.id !== assignment.id,
+              ),
+            ],
+            courseId: assignment.courseId,
+          }),
+        );
       }
     });
     return () => sub.remove();
@@ -295,19 +294,18 @@ const AssignmentScreen: INavigationScreen = (props) => {
         const assignment = JSON.parse(
           data.assignment as string,
         ) as WithCourseInfo<IAssignment>;
-        if (!assignments.find((n) => n.id === assignment.id)) {
-          dispatch(
-            getAssignmentsForCourseAction.success({
-              assignments: [
-                assignment,
-                ...assignments.filter(
-                  (i) => i.courseId === assignment.courseId,
-                ),
-              ],
-              courseId: assignment.courseId,
-            }),
-          );
-        }
+        dispatch(
+          getAssignmentsForCourseAction.success({
+            assignments: [
+              assignment,
+              ...assignments.filter(
+                (i) =>
+                  i.courseId === assignment.courseId && i.id !== assignment.id,
+              ),
+            ],
+            courseId: assignment.courseId,
+          }),
+        );
         Navigation.mergeOptions(props.componentId, {
           bottomTabs: {
             currentTabIndex: 2,

@@ -346,17 +346,17 @@ const NoticeScreen: INavigationScreen = (props) => {
         const notice = JSON.parse(data.notice as string) as WithCourseInfo<
           INotice
         >;
-        if (!notices.find((n) => n.id === notice.id)) {
-          dispatch(
-            getNoticesForCourseAction.success({
-              notices: [
-                notice,
-                ...notices.filter((i) => i.courseId === notice.courseId),
-              ],
-              courseId: notice.courseId,
-            }),
-          );
-        }
+        dispatch(
+          getNoticesForCourseAction.success({
+            notices: [
+              notice,
+              ...notices.filter(
+                (i) => i.courseId === notice.courseId && i.id !== notice.id,
+              ),
+            ],
+            courseId: notice.courseId,
+          }),
+        );
       }
     });
     return () => sub.remove();
@@ -371,17 +371,17 @@ const NoticeScreen: INavigationScreen = (props) => {
         const notice = JSON.parse(data.notice as string) as WithCourseInfo<
           INotice
         >;
-        if (!notices.find((n) => n.id === notice.id)) {
-          dispatch(
-            getNoticesForCourseAction.success({
-              notices: [
-                notice,
-                ...notices.filter((i) => i.courseId === notice.courseId),
-              ],
-              courseId: notice.courseId,
-            }),
-          );
-        }
+        dispatch(
+          getNoticesForCourseAction.success({
+            notices: [
+              notice,
+              ...notices.filter(
+                (i) => i.courseId === notice.courseId && i.id !== notice.id,
+              ),
+            ],
+            courseId: notice.courseId,
+          }),
+        );
         Navigation.mergeOptions(props.componentId, {
           bottomTabs: {
             currentTabIndex: 0,

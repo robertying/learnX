@@ -221,17 +221,17 @@ const FileScreen: INavigationScreen = (props) => {
         e.request.content.data ?? (e.request.trigger as any).remoteMessage.data;
       if (data?.file) {
         const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
-        if (!files.find((n) => n.id === file.id)) {
-          dispatch(
-            getFilesForCourseAction.success({
-              files: [
-                file,
-                ...files.filter((i) => i.courseId === file.courseId),
-              ],
-              courseId: file.courseId,
-            }),
-          );
-        }
+        dispatch(
+          getFilesForCourseAction.success({
+            files: [
+              file,
+              ...files.filter(
+                (i) => i.courseId === file.courseId && i.id !== file.id,
+              ),
+            ],
+            courseId: file.courseId,
+          }),
+        );
       }
     });
     return () => sub.remove();
@@ -244,17 +244,17 @@ const FileScreen: INavigationScreen = (props) => {
         (e.notification.request.trigger as any).remoteMessage.data;
       if (data?.file) {
         const file = JSON.parse(data.file as string) as WithCourseInfo<IFile>;
-        if (!files.find((n) => n.id === file.id)) {
-          dispatch(
-            getFilesForCourseAction.success({
-              files: [
-                file,
-                ...files.filter((i) => i.courseId === file.courseId),
-              ],
-              courseId: file.courseId,
-            }),
-          );
-        }
+        dispatch(
+          getFilesForCourseAction.success({
+            files: [
+              file,
+              ...files.filter(
+                (i) => i.courseId === file.courseId && i.id !== file.id,
+              ),
+            ],
+            courseId: file.courseId,
+          }),
+        );
         Navigation.mergeOptions(props.componentId, {
           bottomTabs: {
             currentTabIndex: 1,
