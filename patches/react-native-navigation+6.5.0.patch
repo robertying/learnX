@@ -1,0 +1,12 @@
+diff --git a/node_modules/react-native-navigation/lib/ios/RNNSplitViewControllerPresenter.m b/node_modules/react-native-navigation/lib/ios/RNNSplitViewControllerPresenter.m
+index b9ee985..dd67568 100644
+--- a/node_modules/react-native-navigation/lib/ios/RNNSplitViewControllerPresenter.m
++++ b/node_modules/react-native-navigation/lib/ios/RNNSplitViewControllerPresenter.m
+@@ -16,6 +16,7 @@ - (void)applyOptions:(RNNNavigationOptions *)options {
+ 	[self.splitViewController rnn_setPrimaryEdge:options.splitView.primaryEdge];
+ 	[self.splitViewController rnn_setMinWidth:options.splitView.minWidth];
+ 	[self.splitViewController rnn_setMaxWidth:options.splitView.maxWidth];
++    [[self.splitViewController view] setBackgroundColor:[UIColor separatorColor]];
+ }
+
+
