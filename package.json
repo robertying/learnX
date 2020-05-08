@@ -23,7 +23,7 @@
     "@babel/runtime": "7.9.6",
     "@react-native-community/async-storage": "1.10.0",
     "@react-native-community/datetimepicker": "2.3.2",
-    "@react-native-community/segmented-control": "1.5.0",
+    "@react-native-community/segmented-control": "1.6.0",
     "axios": "0.19.2",
     "darkreader": "4.9.2",
     "dayjs": "1.8.26",
