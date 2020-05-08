@@ -6719,14 +6719,14 @@ react-native-navigation@6.5.0:
     react-lifecycles-compat "2.0.0"
     tslib "1.9.3"
 
-react-native-paper@3.9.0:
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/react-native-paper/-/react-native-paper-3.9.0.tgz#9cc3a0c9c4b1c29e5a466e51036373ffefb91a0e"
-  integrity sha512-MMhnnfeejzo6wR6/FbuNTFXcUOGgQUnNEbcv9YTsaSFNiVZ/TRYc3bKEpIpzbITuIuIg2kmkkqolvoUwwbZ2gg==
+react-native-paper@3.10.1:
+  version "3.10.1"
+  resolved "https://registry.yarnpkg.com/react-native-paper/-/react-native-paper-3.10.1.tgz#4fca72b9f154fc5ad3710d633787c55e878e8f36"
+  integrity sha512-rl1B9z/S3Q+D4lzTqQOVjpKTd7eLOUhxp7HRufsw8lq4hznAAckynelxOkHxZLHyWT1w9SX4Hdv654i4Uo1KEg==
   dependencies:
     "@callstack/react-theme-provider" "^3.0.5"
     color "^3.1.2"
-    react-native-safe-area-view "^0.14.6"
+    react-native-safe-area-view "^0.14.9"
 
 react-native-reanimated@1.8.0:
   version "1.8.0"
@@ -6735,7 +6735,7 @@ react-native-reanimated@1.8.0:
   dependencies:
     fbjs "^1.0.0"
 
-react-native-safe-area-view@^0.14.6:
+react-native-safe-area-view@^0.14.9:
   version "0.14.9"
   resolved "https://registry.yarnpkg.com/react-native-safe-area-view/-/react-native-safe-area-view-0.14.9.tgz#90ee8383037010d9a5055a97cf97e4c1da1f0c3d"
   integrity sha512-WII/ulhpVyL/qbYb7vydq7dJAfZRBcEhg4/UWt6F6nAKpLa3gAceMOxBxI914ppwSP/TdUsandFy6lkJQE0z4A==
