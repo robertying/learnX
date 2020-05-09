@@ -6674,10 +6674,10 @@ react-native-device-info@5.5.7:
   resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-5.5.7.tgz#aafe2581a702637a66fc04f333052980a4f9e8c5"
   integrity sha512-0021blhx/N1+mWQPOW3QAMWhOjYdG0uC5n+P6sMXZD3pF9aiIeCKuw4JpBpfNXXpUmDmQ7qWgHZUZO7JBMRijw==
 
-react-native-document-picker@3.3.3:
-  version "3.3.3"
-  resolved "https://registry.yarnpkg.com/react-native-document-picker/-/react-native-document-picker-3.3.3.tgz#7c980ddc069c752b3566081c364536f3347d5eb7"
-  integrity sha512-lPJVCPsxa22yvSvWVDP9GSd6DwSXvU5RDcqbqJuJrFN0KHXTP3CwFNvdYCM9Jq2aUaGVxzi3UBKYTSKmyPoS9A==
+react-native-document-picker@3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/react-native-document-picker/-/react-native-document-picker-3.4.0.tgz#7bbd110b8474a3322ac3178ec5446e2df64c8339"
+  integrity sha512-YdjiiElDdvOj55IDPNJ0kxXxzDRWyDymV/iYZJt34ueRWWFLIff+DymSjBc0QljrIFv7pODws2lo81+5Y0ww0w==
 
 react-native-fs@2.16.6:
   version "2.16.6"
