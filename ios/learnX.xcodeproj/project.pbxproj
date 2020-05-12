@@ -291,7 +291,7 @@
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1021;
+				CURRENT_PROJECT_VERSION = 1030;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -304,7 +304,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 10.2.0;
+				MARKETING_VERSION = 10.3.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -330,7 +330,7 @@
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1021;
+				CURRENT_PROJECT_VERSION = 1030;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = learnX/Info.plist;
@@ -338,7 +338,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 10.2.0;
+				MARKETING_VERSION = 10.3.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
