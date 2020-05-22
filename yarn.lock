@@ -6756,10 +6756,10 @@ react-native-appearance@0.3.4:
     invariant "^2.2.4"
     use-subscription "^1.0.0"
 
-react-native-device-info@5.5.7:
-  version "5.5.7"
-  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-5.5.7.tgz#aafe2581a702637a66fc04f333052980a4f9e8c5"
-  integrity sha512-0021blhx/N1+mWQPOW3QAMWhOjYdG0uC5n+P6sMXZD3pF9aiIeCKuw4JpBpfNXXpUmDmQ7qWgHZUZO7JBMRijw==
+react-native-device-info@5.5.8:
+  version "5.5.8"
+  resolved "https://registry.yarnpkg.com/react-native-device-info/-/react-native-device-info-5.5.8.tgz#5b971db0b550b1e53eb176c5042812429cf3a16b"
+  integrity sha512-Y4EkBXUfdpDMP+utVaQcgWnNXoqf7B6rLCS0hwpaifzhrzC7cb51vhaPBN1p4Kqym3AfqZ6VoMjorvFJLRAjqg==
 
 react-native-document-picker@3.4.0:
   version "3.4.0"
