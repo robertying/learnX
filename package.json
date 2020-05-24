@@ -38,7 +38,7 @@
     "mime-types": "2.1.27",
     "path": "0.12.7",
     "react": "16.13.1",
-    "react-native": "0.62.2",
+    "react-native": "0.63.0-rc.1",
     "react-native-appearance": "0.3.4",
     "react-native-device-info": "5.5.7",
     "react-native-document-picker": "3.4.0",

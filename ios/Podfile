@@ -2,13 +2,22 @@ source 'https://cdn.cocoapods.org/'
 
 platform :ios, '11.0'
 
-require_relative '../node_modules/react-native-unimodules/cocoapods'
+require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+require_relative '../node_modules/react-native-unimodules/cocoapods'
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
+
+    if target.respond_to?(:product_type) and target.product_type == "com.apple.product-type.bundle"
+      puts "Fix resource_bundles for Catalyst"
+      target.build_configurations.each do |config|
+        config.build_settings['CODE_SIGN_IDENTITY[sdk=macosx*]'] = '-'
+      end
+    end
+
     if target.name == "Pods-learnX"
-      puts "Updating #{target.name} to exclude Firebase/Crashlytics for Catalyst"
+      puts "Exclude Firebase/Crashlytics for Catalyst"
       target.build_configurations.each do |config|
         xcconfig_path = config.base_configuration_reference.real_path
         xcconfig = File.read(xcconfig_path)
@@ -19,45 +28,18 @@ post_install do |installer|
         File.open(xcconfig_path, "w") { |file| file << new_xcconfig }
       end
     end
+
   end
 end
 
 target 'learnX' do
-  pod 'FBLazyVector', :path => "../node_modules/react-native/Libraries/FBLazyVector"
-  pod 'FBReactNativeSpec', :path => "../node_modules/react-native/Libraries/FBReactNativeSpec"
-  pod 'RCTRequired', :path => "../node_modules/react-native/Libraries/RCTRequired"
-  pod 'RCTTypeSafety', :path => "../node_modules/react-native/Libraries/TypeSafety"
-  pod 'React', :path => '../node_modules/react-native/'
-  pod 'React-Core', :path => '../node_modules/react-native/'
-  pod 'React-CoreModules', :path => '../node_modules/react-native/React/CoreModules'
-  pod 'React-Core/DevSupport', :path => '../node_modules/react-native/'
-  pod 'React-RCTActionSheet', :path => '../node_modules/react-native/Libraries/ActionSheetIOS'
-  pod 'React-RCTAnimation', :path => '../node_modules/react-native/Libraries/NativeAnimation'
-  pod 'React-RCTBlob', :path => '../node_modules/react-native/Libraries/Blob'
-  pod 'React-RCTImage', :path => '../node_modules/react-native/Libraries/Image'
-  pod 'React-RCTLinking', :path => '../node_modules/react-native/Libraries/LinkingIOS'
-  pod 'React-RCTNetwork', :path => '../node_modules/react-native/Libraries/Network'
-  pod 'React-RCTSettings', :path => '../node_modules/react-native/Libraries/Settings'
-  pod 'React-RCTText', :path => '../node_modules/react-native/Libraries/Text'
-  pod 'React-RCTVibration', :path => '../node_modules/react-native/Libraries/Vibration'
-  pod 'React-Core/RCTWebSocket', :path => '../node_modules/react-native/'
 
-  pod 'React-cxxreact', :path => '../node_modules/react-native/ReactCommon/cxxreact'
-  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi'
-  pod 'React-jsiexecutor', :path => '../node_modules/react-native/ReactCommon/jsiexecutor'
-  pod 'React-jsinspector', :path => '../node_modules/react-native/ReactCommon/jsinspector'
-  pod 'ReactCommon/callinvoker', :path => "../node_modules/react-native/ReactCommon"
-  pod 'ReactCommon/turbomodule/core', :path => "../node_modules/react-native/ReactCommon"
-  pod 'Yoga', :path => '../node_modules/react-native/ReactCommon/yoga', :modular_headers => true
-
-  pod 'DoubleConversion', :podspec => '../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec'
-  pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
-  pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
+  config = use_native_modules!
+  use_react_native!(:path => config["reactNativePath"])
 
   pod 'Firebase/Analytics'
   pod 'Firebase/Crashlytics'
 
-  use_native_modules!
   use_unimodules!(exclude: ['expo-file-system', 'expo-app-loader-provider', 'expo-image-loader', 'expo-constants', 'expo-application'])
 
 end
