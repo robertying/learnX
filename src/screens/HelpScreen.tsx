@@ -15,12 +15,24 @@ const markdown = getLocale().startsWith('zh')
   ? preval`
       const fs = require('fs');
       const path = require('path');
-      module.exports = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/HELP_CN.md'), 'utf8')
+      let str;
+      if (process.cwd().includes("ios")) {
+        str = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/HELP_CN.md'), 'utf8');
+      } else {
+        str = fs.readFileSync(path.resolve(process.cwd(), './src/assets/HELP_CN.md'), 'utf8');
+      }
+      module.exports = str
 `
   : preval`
       const fs = require('fs');
       const path = require('path');
-      module.exports = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/HELP_EN.md'), 'utf8')
+      let str;
+      if (process.cwd().includes("ios")) {
+        str = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/HELP_EN.md'), 'utf8');
+      } else {
+        str = fs.readFileSync(path.resolve(process.cwd(), './src/assets/HELP_EN.md'), 'utf8');
+      }
+      module.exports = str
 `;
 
 const HelpScreen: INavigationScreen = (props) => {
