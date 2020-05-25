@@ -8,7 +8,6 @@ import {getScreenOptions} from '../helpers/navigation';
 import {adaptToSystemTheme} from '../helpers/darkmode';
 import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
-import DeviceInfo from '../constants/DeviceInfo';
 
 declare const preval: any;
 
@@ -44,6 +43,13 @@ const HelpScreen: INavigationScreen = (props) => {
     }
   };
 
+  const injectedScript = `
+  document.body.style.backgroundColor = "${Colors.system(
+    'background',
+    colorScheme,
+  )}"
+`;
+
   return (
     <SafeAreaView
       style={{
@@ -57,11 +63,7 @@ const HelpScreen: INavigationScreen = (props) => {
         highlight
         darkMode={colorScheme === 'dark'}
         onNavigationStateChange={onNavigationStateChange}
-        injectedJavaScript={
-          DeviceInfo.isMac()
-            ? 'document.body.style.backgroundColor = "rgb(30,30,30)"'
-            : ''
-        }
+        injectedJavaScript={injectedScript}
       />
     </SafeAreaView>
   );
