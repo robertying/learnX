@@ -14,12 +14,14 @@ declare const preval: any;
 
 const markdown = getLocale().startsWith('zh')
   ? preval`
-        const fs = require('fs')
-        module.exports = fs.readFileSync(require.resolve('../assets/HELP_CN.md'), 'utf8')
+      const fs = require('fs');
+      const path = require('path');
+      module.exports = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/HELP_CN.md'), 'utf8')
 `
   : preval`
-        const fs = require('fs')
-        module.exports = fs.readFileSync(require.resolve('../assets/HELP_EN.md'), 'utf8')
+      const fs = require('fs');
+      const path = require('path');
+      module.exports = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/HELP_EN.md'), 'utf8')
 `;
 
 const HelpScreen: INavigationScreen = (props) => {

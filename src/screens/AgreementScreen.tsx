@@ -19,12 +19,14 @@ declare const preval: any;
 
 const markdown = getLocale().startsWith('zh')
   ? preval`
-        const fs = require('fs')
-        module.exports = fs.readFileSync(require.resolve('../assets/AGREEMENT_CN.md'), 'utf8')
+      const fs = require('fs');
+      const path = require('path');
+      module.exports = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/AGREEMENT_CN.md'), 'utf8')
 `
   : preval`
-        const fs = require('fs')
-        module.exports = fs.readFileSync(require.resolve('../assets/AGREEMENT_EN.md'), 'utf8')
+      const fs = require('fs');
+      const path = require('path');
+      module.exports = fs.readFileSync(path.resolve(process.cwd(), '../src/assets/AGREEMENT_EN.md'), 'utf8')
 `;
 
 const AgreementScreen: INavigationScreen = (props) => {
