@@ -1187,10 +1187,10 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@react-native-community/async-storage@1.10.3":
-  version "1.10.3"
-  resolved "https://registry.yarnpkg.com/@react-native-community/async-storage/-/async-storage-1.10.3.tgz#6974404a903a317f462bd0ac3fafa7c0291679df"
-  integrity sha512-f3G3dX5aoFZZC1G7alnaFmlTpXn8HPfpR8H3Hf7wbbQrQvZmW7mW2fXHv/oj99FNPd228bneL3GOnjGe2Epkww==
+"@react-native-community/async-storage@1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/async-storage/-/async-storage-1.11.0.tgz#bf81b8813080846f150c67f531987c429b442166"
+  integrity sha512-Pq9LlmvtCEKAGdkyrgTcRxNh2fnHFykEj2qnRYijOl1pDIl2MkD5IxaXu5eOL0wgOtAl4U//ff4z40Td6XR5rw==
   dependencies:
     deep-assign "^3.0.0"
 

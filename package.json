@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@babel/runtime": "7.10.1",
-    "@react-native-community/async-storage": "1.10.3",
+    "@react-native-community/async-storage": "1.11.0",
     "@react-native-community/datetimepicker": "2.4.0",
     "@react-native-community/segmented-control": "1.6.1",
     "axios": "0.19.2",
