@@ -25,7 +25,7 @@
     "@react-native-community/datetimepicker": "2.4.0",
     "@react-native-community/segmented-control": "1.6.1",
     "axios": "0.19.2",
-    "darkreader": "4.9.2",
+    "darkreader": "4.9.10",
     "dayjs": "1.8.27",
     "expo-background-fetch": "8.1.0",
     "expo-calendar": "8.1.0",

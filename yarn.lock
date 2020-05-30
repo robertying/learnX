@@ -2831,7 +2831,14 @@ csstype@^2.2.0:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.10.tgz#e63af50e66d7c266edb6b32909cfd0aabe03928b"
   integrity sha512-D34BqZU4cIlMCY93rZHbrq9pjTAQJ3U8S8rfBqjwHxkGPThWFjzZDQpgMJY0QViLxth6ZKYiwFBo14RdN44U/w==
 
-darkreader@4.9.2, darkreader@^4.7.15:
+darkreader@4.9.10:
+  version "4.9.10"
+  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.10.tgz#0cd2547d1642a2a82e800fd0113ca8194140ab69"
+  integrity sha512-aaJIxntclYQxWe89dm/gk6rvgjXppAy2b8MAom2+o6pFnc2VYyNFz6gmOPVoZAiQ7ZqmUnxPcWXp/09fU48ooA==
+  dependencies:
+    malevic "0.18.3"
+
+darkreader@^4.7.15:
   version "4.9.2"
   resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.2.tgz#f4a1500d4305e1adca2a44f11330dfac4722c7dc"
   integrity sha512-5Jjf2vK9BmFBzndsomFdrMsndXQwfZkd6o2WyqwexVeryrOkTYW1CLS+MKtPt7/rv+0wn9eBY4iufIDPqaaZ+g==
@@ -5598,6 +5605,11 @@ malevic@0.18.0:
   version "0.18.0"
   resolved "https://registry.yarnpkg.com/malevic/-/malevic-0.18.0.tgz#ed78a644329c410b3d66cb03f62a1c0332a6096c"
   integrity sha512-d9XfQKexRjGUHugCUAMFjTbPnx1V8sfKcD9sYrk1/W/4/QpsgLR4x5GgkUGfHdsgQ2UbEcJSj6NWWJ+rd/m4aQ==
+
+malevic@0.18.3:
+  version "0.18.3"
+  resolved "https://registry.yarnpkg.com/malevic/-/malevic-0.18.3.tgz#0d9853b4cb1ff381242f467d142c487112d9fbc2"
+  integrity sha512-RswIMGEfyFOjLK9JW82AWMcK9PLoEi27oZ7vWxVliBPnIYe9DBVcGEGlDoFd5A36YhVp/3Ci/aNasS6s4XYSLw==
 
 map-age-cleaner@^0.1.1:
   version "0.1.3"
