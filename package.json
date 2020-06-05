@@ -29,7 +29,7 @@
     "dayjs": "1.8.27",
     "expo-background-fetch": "8.1.0",
     "expo-calendar": "8.1.0",
-    "expo-notifications": "0.1.7",
+    "expo-notifications": "0.3.1",
     "expo-permissions": "8.1.0",
     "expo-secure-store": "8.1.0",
     "expo-task-manager": "8.1.0",
