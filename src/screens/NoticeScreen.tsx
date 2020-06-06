@@ -51,6 +51,7 @@ import {
 } from '../helpers/notification';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Modal from 'react-native-modal';
+import Device from 'react-native-device-info';
 import Button from '../components/Button';
 import {removeTags} from '../helpers/html';
 import Snackbar from 'react-native-snackbar';
@@ -74,8 +75,10 @@ const NoticeScreen: INavigationScreen = (props) => {
 
   useEffect(() => {
     (async () => {
-      const token = await Notifications.getDevicePushTokenAsync();
-      updateDeviceToken(token.data);
+      if (!Device.isEmulatorSync()) {
+        const token = await Notifications.getDevicePushTokenAsync();
+        updateDeviceToken(token.data);
+      }
     })();
   }, []);
 
