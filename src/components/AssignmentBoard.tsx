@@ -128,11 +128,12 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
       }}>
       <View style={styles.padding}>
         <Text
-          style={
+          style={[
             colorScheme === 'dark'
               ? iOSUIKit.title3EmphasizedWhite
-              : iOSUIKit.title3Emphasized
-          }>
+              : iOSUIKit.title3Emphasized,
+            {letterSpacing: 0},
+          ]}>
           {title}
         </Text>
         <Text

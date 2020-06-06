@@ -414,7 +414,7 @@ const SettingScreen: INavigationScreen = (props) => {
               colorScheme === 'dark'
                 ? iOSUIKit.title3EmphasizedWhite
                 : iOSUIKit.title3Emphasized,
-              {margin: 24},
+              {margin: 24, letterSpacing: 0},
             ]}>
             {release?.version ? `v${release?.version}` : ''}
           </Text>

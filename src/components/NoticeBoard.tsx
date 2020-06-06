@@ -111,11 +111,12 @@ const NoticeBoard: FunctionComponent<INoticeBoardProps> = (props) => {
       }}>
       <View style={styles.root}>
         <Text
-          style={
+          style={[
             colorScheme === 'dark'
               ? iOSUIKit.title3EmphasizedWhite
-              : iOSUIKit.title3Emphasized
-          }>
+              : iOSUIKit.title3Emphasized,
+            {letterSpacing: 0},
+          ]}>
           {title}
         </Text>
         <View style={styles.info}>
