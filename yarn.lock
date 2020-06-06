@@ -7898,6 +7898,7 @@ through@^2.3.6, through@^2.3.8:
 
 "thu-learn-lib-no-native@https://github.com/robertying/thu-learn-lib-no-native.git":
   version "2.3.4"
+  uid e3376956473622d66692e282a5b59759505ee351
   resolved "https://github.com/robertying/thu-learn-lib-no-native.git#e3376956473622d66692e282a5b59759505ee351"
   dependencies:
     cheerio-without-node-native "0.20.2"
