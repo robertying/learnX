@@ -43,7 +43,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "10.4.0"
+        versionName "10.5.0"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -131,10 +131,10 @@ dependencies {
         implementation jscFlavor
     }
 
-    addUnimodulesDependencies()
+    addUnimodulesDependencies([exclude: ['expo-file-system', 'expo-app-loader-provider', 'expo-image-loader', 'expo-constants', 'expo-application']])
 
-    implementation 'com.google.firebase:firebase-analytics:17.4.2'
-    implementation 'com.google.firebase:firebase-crashlytics:17.0.0'
+    implementation 'com.google.firebase:firebase-analytics:17.4.3'
+    implementation 'com.google.firebase:firebase-crashlytics:17.0.1'
     implementation 'com.google.firebase:firebase-messaging:20.2.0'
 
     androidTestImplementation('com.wix:detox:+')
