@@ -3,6 +3,7 @@ import Share from 'react-native-share';
 import fs from 'react-native-fs';
 import mime from 'mime-types';
 import {getTranslation} from './i18n';
+import {dataSource} from '../redux/dataSource';
 
 export let RNFetchBlob: typeof import('rn-fetch-blob').default;
 if (Platform.OS === 'android') {
@@ -61,6 +62,14 @@ export const downloadFile = async (
       const result = await promise;
       if (result.statusCode !== 200 || result.bytesWritten === 0) {
         throw new Error('File download failed');
+      }
+
+      if (result.bytesWritten < 100) {
+        const file = await fs.readFile(filePath);
+        if (file.includes('location.href')) {
+          await dataSource.login();
+          throw new Error('File download failed');
+        }
       }
 
       return filePath;
