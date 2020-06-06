@@ -256,26 +256,26 @@ const AssignmentBoard: FunctionComponent<IAssignmentBoardProps> = (props) => {
                 color={Colors.system('purple', colorScheme)}
               />
               <Text style={{color: Colors.system('foreground', colorScheme)}}>
-                {grade && gradeLevel
-                  ? `${gradeLevel} / ${grade}`
-                  : grade
-                  ? grade
-                  : gradeLevel
-                  ? gradeLevel
-                  : getTranslation('noGrade')}
+                {gradeLevel ?? grade ?? getTranslation('noGrade')}
               </Text>
             </View>
             {gradeContent && (
               <Text
                 style={{
-                  marginVertical: 5,
+                  marginTop: 10,
+                  lineHeight: 17,
                   color: Colors.system('foreground', colorScheme),
                 }}>
                 {gradeContent}
               </Text>
             )}
             {gradeAttachmentName && gradeAttachmentUrl && (
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginTop: 10,
+                }}>
                 <Icon
                   style={{marginRight: 5}}
                   name="question-answer"
