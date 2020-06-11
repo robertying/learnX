@@ -27,11 +27,11 @@ Notifications.setNotificationHandler({
 
 registerBackgroundTasks();
 
+registerComponents();
+
 const startApp = () => {
   Navigation.events().registerAppLaunchedListener(async () => {
     await DeviceInfo.init();
-
-    registerComponents();
 
     const colorScheme = Appearance.getColorScheme();
 
