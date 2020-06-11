@@ -249,7 +249,11 @@ const LoginScreen: INavigationScreen = (props) => {
             onPress={onLoginButtonPress}>
             {getTranslation('login')}
           </RaisedButton>
-          <ActivityIndicator style={{margin: 10}} animating={loading} />
+          <ActivityIndicator
+            style={{margin: 10}}
+            animating={loading}
+            color={Platform.OS === 'android' ? Colors.theme : undefined}
+          />
         </View>
         <Text
           style={[

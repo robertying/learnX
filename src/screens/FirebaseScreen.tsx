@@ -358,7 +358,11 @@ const FirebaseScreen: INavigationScreen = (props) => {
             onPress={handleLogout}>
             {getTranslation('logout')}
           </TextButton>
-          <ActivityIndicator style={{margin: 10}} animating={loading} />
+          <ActivityIndicator
+            style={{margin: 10}}
+            animating={loading}
+            color={Platform.OS === 'android' ? Colors.theme : undefined}
+          />
         </View>
         <Text
           style={[

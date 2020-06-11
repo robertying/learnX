@@ -355,6 +355,7 @@ const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = 
             <ActivityIndicator
               style={{marginHorizontal: 16}}
               animating={uploading}
+              color={Platform.OS === 'android' ? Colors.theme : undefined}
             />
             {uploading && (
               <ProgressBar

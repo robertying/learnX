@@ -128,7 +128,10 @@ const SettingListItem: React.FunctionComponent<ISettingListItemProps> = (
       </View>
       <View style={styles.right}>
         {loading ? (
-          <ActivityIndicator animating />
+          <ActivityIndicator
+            animating
+            color={Platform.OS === 'android' ? Colors.theme : undefined}
+          />
         ) : variant === 'switch' ? (
           <Switch
             disabled={switchDisabled}
