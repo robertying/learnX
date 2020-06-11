@@ -52,6 +52,7 @@
 # Expo
 
 -keep class expo.modules.** { *; }
+-keep class org.unimodules.** { *; }
 
 
 # Crashlytics

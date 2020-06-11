@@ -1,21 +1,21 @@
 PODS:
   - boost-for-react-native (1.63.0)
   - DoubleConversion (1.1.6)
-  - EXBackgroundFetch (8.3.0):
+  - EXBackgroundFetch (8.1.0):
     - UMCore
     - UMTaskManagerInterface
-  - EXCalendar (8.2.1):
+  - EXCalendar (8.1.0):
     - UMCore
     - UMPermissionsInterface
-  - EXNotifications (0.3.1):
+  - EXNotifications (0.3.2):
     - UMCore
     - UMPermissionsInterface
-  - EXPermissions (9.0.1):
+  - EXPermissions (8.1.0):
     - UMCore
     - UMPermissionsInterface
-  - EXSecureStore (9.0.1):
+  - EXSecureStore (8.1.0):
     - UMCore
-  - EXTaskManager (8.3.0):
+  - EXTaskManager (8.1.0):
     - UMAppLoader
     - UMConstantsInterface
     - UMCore
@@ -119,7 +119,7 @@ PODS:
     - nanopb/encode (= 1.30905.0)
   - nanopb/decode (1.30905.0)
   - nanopb/encode (1.30905.0)
-  - PromisesObjC (1.2.8)
+  - PromisesObjC (1.2.9)
   - RCTRequired (0.63.0-rc.1)
   - RCTTypeSafety (0.63.0-rc.1):
     - FBLazyVector (= 0.63.0-rc.1)
@@ -288,7 +288,7 @@ PODS:
   - React-jsinspector (0.63.0-rc.1)
   - react-native-appearance (0.3.4):
     - React
-  - react-native-document-picker (3.4.0):
+  - react-native-document-picker (3.5.1):
     - React
   - react-native-segmented-control (2.0.0):
     - React
@@ -354,13 +354,13 @@ PODS:
     - React-Core (= 0.63.0-rc.1)
     - React-cxxreact (= 0.63.0-rc.1)
     - React-jsi (= 0.63.0-rc.1)
-  - ReactNativeNavigation (6.7.1):
+  - ReactNativeNavigation (6.7.2):
     - React
     - React-RCTImage
     - React-RCTText
   - RNCAsyncStorage (1.11.0):
     - React
-  - RNDateTimePicker (2.4.0):
+  - RNDateTimePicker (2.4.1):
     - React
   - RNDeviceInfo (5.6.1):
     - React
@@ -372,29 +372,29 @@ PODS:
     - React
   - RNReanimated (1.9.0):
     - React
-  - RNShare (3.3.2):
+  - RNShare (3.3.3):
     - React
   - RNSnackbar (2.2.2):
     - React
   - RNVectorIcons (6.6.0):
     - React
-  - UMAppLoader (1.2.0)
-  - UMBarCodeScannerInterface (5.2.1)
-  - UMCameraInterface (5.2.1)
-  - UMConstantsInterface (5.2.1)
-  - UMCore (5.3.0)
-  - UMFaceDetectorInterface (5.2.1)
-  - UMFileSystemInterface (5.2.1)
-  - UMFontInterface (5.2.1)
-  - UMImageLoaderInterface (5.2.1)
-  - UMPermissionsInterface (5.2.1):
+  - UMAppLoader (1.0.2)
+  - UMBarCodeScannerInterface (5.1.0)
+  - UMCameraInterface (5.1.0)
+  - UMConstantsInterface (5.1.0)
+  - UMCore (5.1.2)
+  - UMFaceDetectorInterface (5.1.0)
+  - UMFileSystemInterface (5.1.0)
+  - UMFontInterface (5.1.0)
+  - UMImageLoaderInterface (5.1.0)
+  - UMPermissionsInterface (5.1.0):
     - UMCore
-  - UMReactNativeAdapter (5.4.0):
+  - UMReactNativeAdapter (5.2.0):
     - React-Core
     - UMCore
     - UMFontInterface
-  - UMSensorsInterface (5.2.1)
-  - UMTaskManagerInterface (5.2.1)
+  - UMSensorsInterface (5.1.0)
+  - UMTaskManagerInterface (5.1.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -609,12 +609,12 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   DoubleConversion: cde416483dac037923206447da6e1454df403714
-  EXBackgroundFetch: 6e4836e2998b1e045d574fbc2018b6f288e929b6
-  EXCalendar: 9157be548211a7b283535d5a5cf7c6843d26108b
-  EXNotifications: 0b3ee1b4e63b3f7182f455e204fcb640e61af17e
-  EXPermissions: 80ac3acbdb145930079810fe5b08c022b3428aa8
-  EXSecureStore: 908934a8b02301997fee88e3f4c05eea4e2a9ffb
-  EXTaskManager: 019344613fa2ad14a85e5b6c2699707eee35a62d
+  EXBackgroundFetch: d876383d77a17fab25b2bd98437b6cf2297de353
+  EXCalendar: 1339d99ca2246559121f86c050f29f689ccf773d
+  EXNotifications: cb377772a90e4f1d2038c54f6d3586f4db217eec
+  EXPermissions: 24b97f734ce9172d245a5be38ad9ccfcb6135964
+  EXSecureStore: 7a03e21e80ae59bf8e86c55e7a400f60db2da639
+  EXTaskManager: 6cc65abbc1b226524d551ef2a08a7afe8be03044
   FBLazyVector: 80d80617d51e24046a0bcc817cd9209027ecfaa9
   FBReactNativeSpec: b0fff079b3d224bd19ddd66857a9ebd879248c22
   Firebase: 7cf5f9c67f03cb3b606d1d6535286e1080e57eb6
@@ -633,7 +633,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 39530bc0ad980530298e9c4af8549e991fd033b1
   Interactable: 411887c89fa16ac41f8e7898aca06dcad55e5f22
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
-  PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
+  PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
   RCTRequired: 6d452db9ed41ed479dded8b25cefaea171af100a
   RCTTypeSafety: 9f116cdf6450aae848567f03de76a519ce8b5ffa
   React: ae32f1a326e384e477a4130efaf35785cf66c482
@@ -645,7 +645,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: c40a9c0e687bd7a44cc0a616ff4592a823732a0d
   React-jsinspector: 655f32d922ffb180714c0bec652e7e0923b5a5dd
   react-native-appearance: 0f0e5fc2fcef70e03d48c8fe6b00b9158c2ba8aa
-  react-native-document-picker: d694111879537cec2c258a1dcd2243d9df746824
+  react-native-document-picker: fa8cd9e4bf353a46bb56c36e5850fbbf0a29bd17
   react-native-segmented-control: 450c563d38339ba50ae8303fb12b1fe7ec01f7bd
   react-native-webview: 0bacc79175bc44869e4c1a015b9bc21df8cf4feb
   React-RCTActionSheet: ead415a8470cd3552f8cadce3b9b32e0d52e46a7
@@ -658,30 +658,30 @@ SPEC CHECKSUMS:
   React-RCTText: 1aa0fd4251b108777dd6218eb92d3613514b150f
   React-RCTVibration: b630e8fd023809796d47917d27caa343ade0678d
   ReactCommon: 6d0c6086911f7bf87b8406a92bb2ec66aeefd2e1
-  ReactNativeNavigation: dd4a4a76d2deb5130d809ec4a6f7f2b182fa1a11
+  ReactNativeNavigation: d440bab8f6f1a836274255349069b919cbb34c85
   RNCAsyncStorage: d059c3ee71738c39834a627476322a5a8cd5bf36
-  RNDateTimePicker: c4285bfdd87430f1e575b81a4742b7586a09d53e
+  RNDateTimePicker: 24daf2c23032af1bfa396174f8a2a9d3e92b37ca
   RNDeviceInfo: b6e650fbd234732c759544218657d549b4339038
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: 8f09cd560f8d533eb36da5a6c5a843af9f056b38
   RNLocalize: b6df30cc25ae736d37874f9bce13351db2f56796
   RNReanimated: b5ccb50650ba06f6e749c7c329a1bc3ae0c88b43
-  RNShare: bd6518701db274b8ba282b33620885f2225a5bcf
+  RNShare: f4ec422e27904e0dc9310038d1110460a59ad30d
   RNSnackbar: 8694815358c8a7fa0b75d0698d7bbfaa4d8babf2
   RNVectorIcons: 3a1e4dbcb496a154d1b1e6bb162170e18d27c694
-  UMAppLoader: 61049c8d55590b74e9ae1d5429bf68d96b4a2528
-  UMBarCodeScannerInterface: e5e4c87797d3d01214e25cd1618866caf5d4f17f
-  UMCameraInterface: 415ac060034edecacdbbaa739c223e3f276e0056
-  UMConstantsInterface: 1a52f2d884c95e8829439da13e36b7669a1a8fb4
-  UMCore: d98083b522b08c0a8ba3992bc263c624ae5d887c
-  UMFaceDetectorInterface: 67c6c82451338da01a4bc00ec46365a2a8ea9057
-  UMFileSystemInterface: 303d696ede28102a7e11d111808bd2ed2c5eb62f
-  UMFontInterface: 6edf1ee8bc55d2030766f8cf0a7b20a5d5a913b0
-  UMImageLoaderInterface: 9cdbf3bab6a513bddd88505cb2340fe02d6a11c0
-  UMPermissionsInterface: 019170ad655f464e3f8d23d2a8bcbda2e645cde4
-  UMReactNativeAdapter: 538efe92e781b5d7678cf95b34c46f2d0989a557
-  UMSensorsInterface: cb5bf31d52c4349f0ff9e3c049bbe4df0d80d383
-  UMTaskManagerInterface: 80653f25c55d9e6d79d6a0a65589fa213feaee11
+  UMAppLoader: ee77a072f9e15128f777ccd6d2d00f52ab4387e6
+  UMBarCodeScannerInterface: 9dc692b87e5f20fe277fa57aa47f45d418c3cc6c
+  UMCameraInterface: 625878bbf2ba188a8548675e1d1d2e438a653e6d
+  UMConstantsInterface: 64060cf86587bcd90b1dbd804cceb6d377a308c1
+  UMCore: eb200e882eadafcd31ead290770835fd648c0945
+  UMFaceDetectorInterface: d6677d6ddc9ab95a0ca857aa7f8ba76656cc770f
+  UMFileSystemInterface: c70ea7147198b9807080f3597f26236be49b0165
+  UMFontInterface: d9d3b27af698c5389ae9e20b99ef56a083f491fb
+  UMImageLoaderInterface: 14dd2c46c67167491effc9e91250e9510f12709e
+  UMPermissionsInterface: 5e83a9167c177e4a0f0a3539345983cc749efb3e
+  UMReactNativeAdapter: 126da3486c1a1f11945b649d557d6c2ebb9407b2
+  UMSensorsInterface: 48941f70175e2975af1a9386c6d6cb16d8126805
+  UMTaskManagerInterface: cb890c79c63885504ddc0efd7a7d01481760aca2
   Yoga: 5d62aa8f4e862e282e19a25865ef8124c70f2711
 
 PODFILE CHECKSUM: 68748d0758ef42c79e9a4b6d91ebf6f91a24be3b
