@@ -22,7 +22,7 @@
   "dependencies": {
     "@babel/runtime": "7.10.2",
     "@react-native-community/async-storage": "1.11.0",
-    "@react-native-community/datetimepicker": "2.4.1",
+    "@react-native-community/datetimepicker": "2.4.2",
     "@react-native-community/segmented-control": "2.0.0",
     "axios": "0.19.2",
     "darkreader": "4.9.10",
