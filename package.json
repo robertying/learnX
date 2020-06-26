@@ -70,7 +70,7 @@
   },
   "devDependencies": {
     "@babel/core": "7.10.3",
-    "@react-native-community/cli": "4.10.0",
+    "@react-native-community/cli": "4.10.1",
     "@react-native-community/eslint-config": "2.0.0",
     "@react-native-community/eslint-plugin": "1.1.0",
     "@types/detox": "16.4.1",
