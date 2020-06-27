@@ -75,7 +75,7 @@
     "@react-native-community/eslint-plugin": "1.1.0",
     "@types/detox": "16.4.1",
     "@types/jasmine": "3.5.11",
-    "@types/jest": "26.0.0",
+    "@types/jest": "26.0.3",
     "@types/lodash.differenceby": "4.8.6",
     "@types/mime-types": "2.1.0",
     "@types/react": "16.9.41",
