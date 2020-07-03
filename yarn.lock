@@ -2828,10 +2828,10 @@ csstype@^2.2.0:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.10.tgz#e63af50e66d7c266edb6b32909cfd0aabe03928b"
   integrity sha512-D34BqZU4cIlMCY93rZHbrq9pjTAQJ3U8S8rfBqjwHxkGPThWFjzZDQpgMJY0QViLxth6ZKYiwFBo14RdN44U/w==
 
-darkreader@4.9.10:
-  version "4.9.10"
-  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.10.tgz#0cd2547d1642a2a82e800fd0113ca8194140ab69"
-  integrity sha512-aaJIxntclYQxWe89dm/gk6rvgjXppAy2b8MAom2+o6pFnc2VYyNFz6gmOPVoZAiQ7ZqmUnxPcWXp/09fU48ooA==
+darkreader@4.9.12:
+  version "4.9.12"
+  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.12.tgz#78ac98c08f97b37731c6d590f61de529bfd5d748"
+  integrity sha512-la1uVcqP/NcsXR+VxKz1YD4A9Od9kyEqHiIpcWA+NPoCCG2zFcsmkVczu5+oQRMIOkGEAje8xS4b/ef138NUUw==
   dependencies:
     malevic "0.18.3"
 
