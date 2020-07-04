@@ -26,7 +26,7 @@
     "@react-native-community/segmented-control": "2.0.1",
     "axios": "0.19.2",
     "darkreader": "4.9.12",
-    "dayjs": "1.8.28",
+    "dayjs": "1.8.29",
     "expo-background-fetch": "8.1.0",
     "expo-calendar": "8.1.0",
     "expo-notifications": "0.3.2",
