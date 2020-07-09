@@ -15,7 +15,7 @@ import {
   Switch,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import RaisedButton from '../components/RaisedButton';
 import TextField from '../components/TextField';
 import Colors from '../constants/Colors';
@@ -187,8 +187,8 @@ const LoginScreen: INavigationScreen = (props) => {
           <TextField
             testID="UsernameTextField"
             icon={
-              <AntDesign
-                name="user"
+              <Icon
+                name="account"
                 size={25}
                 color={Colors.system('purple', colorScheme)}
               />
@@ -207,8 +207,8 @@ const LoginScreen: INavigationScreen = (props) => {
             testID="PasswordTextField"
             containerStyle={{marginTop: 20}}
             icon={
-              <AntDesign
-                name="key"
+              <Icon
+                name="lastpass"
                 size={25}
                 color={Colors.system('purple', colorScheme)}
               />

@@ -16,7 +16,7 @@ import {iOSUIKit} from 'react-native-typography';
 import {useDispatch} from 'react-redux';
 import {useColorScheme} from 'react-native-appearance';
 import Snackbar from 'react-native-snackbar';
-import AntDesign from 'react-native-vector-icons/AntDesign';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import RaisedButton from '../components/RaisedButton';
 import TextField from '../components/TextField';
 import Colors from '../constants/Colors';
@@ -285,8 +285,8 @@ const FirebaseScreen: INavigationScreen = (props) => {
           }}>
           <TextField
             icon={
-              <AntDesign
-                name="user"
+              <Icon
+                name="account"
                 size={25}
                 color={Colors.system('purple', colorScheme)}
               />
@@ -304,8 +304,8 @@ const FirebaseScreen: INavigationScreen = (props) => {
           <TextField
             containerStyle={{marginTop: 20}}
             icon={
-              <AntDesign
-                name="key"
+              <Icon
+                name="lastpass"
                 size={25}
                 color={Colors.system('purple', colorScheme)}
               />

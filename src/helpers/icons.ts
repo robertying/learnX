@@ -1,15 +1,11 @@
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 const iconNames = [
-  'bell',
-  'bell-outline',
+  'notifications',
   'folder',
-  'folder-outline',
-  'calendar-blank',
-  'calendar-check',
+  'event',
   'apps',
   'settings',
-  'settings-outline',
 ] as const;
 type IIcon = typeof iconNames[number];
 export type IIcons = Record<IIcon, number>;

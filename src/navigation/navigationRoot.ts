@@ -45,8 +45,7 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'NoticeTab',
               text: getTranslation('notices'),
-              icon: icons['bell-outline'],
-              selectedIcon: icons.bell,
+              icon: icons.notifications,
               ...tabColorSettings,
             },
           },
@@ -65,8 +64,7 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'FileTab',
               text: getTranslation('files'),
-              icon: icons['folder-outline'],
-              selectedIcon: icons.folder,
+              icon: icons.folder,
               ...tabColorSettings,
             },
           },
@@ -85,8 +83,7 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'AssignmentTab',
               text: getTranslation('assignments'),
-              icon: icons['calendar-blank'],
-              selectedIcon: icons['calendar-check'],
+              icon: icons.event,
               ...tabColorSettings,
             },
           },
@@ -125,8 +122,7 @@ export const getNavigationRoot = async () => {
             bottomTab: {
               testID: 'SettingTab',
               text: getTranslation('settings'),
-              icon: icons['settings-outline'],
-              selectedIcon: icons.settings,
+              icon: icons.settings,
               ...tabColorSettings,
             },
           },

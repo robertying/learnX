@@ -16,7 +16,7 @@ import {
   TextInputProperties,
 } from 'react-native';
 import {iOSUIKit} from 'react-native-typography';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import Layout from '../constants/Layout';
 import {useColorScheme} from 'react-native-appearance';
 import Colors from '../constants/Colors';
@@ -160,7 +160,7 @@ const SettingListItem: React.FunctionComponent<ISettingListItemProps> = (
               {secondaryText}
             </Text>
             {variant === 'arrow' ? (
-              <Ionicons name="ios-arrow-forward" size={20} color="lightgrey" />
+              <Icon name="keyboard-arrow-right" size={20} color="lightgrey" />
             ) : null}
           </>
         )}
