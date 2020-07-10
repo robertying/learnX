@@ -40,6 +40,6 @@ target 'learnX' do
   pod 'Firebase/Analytics'
   pod 'Firebase/Crashlytics'
 
-  use_unimodules!(exclude: ['expo-file-system', 'expo-app-loader-provider', 'expo-image-loader', 'expo-constants', 'expo-application'])
+  use_unimodules!(exclude: ['expo-application', 'expo-file-system', 'expo-image-loader'])
 
 end

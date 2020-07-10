@@ -12,8 +12,6 @@ project.ext.react = [
 project.ext.vectoricons = [
         iconFontNames:
                 [
-                        'AntDesign.ttf',
-                        'Ionicons.ttf',
                         'MaterialCommunityIcons.ttf',
                         'MaterialIcons.ttf'
                 ]
@@ -44,7 +42,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode Integer.parseInt(VERSION_CODE)
-        versionName "10.6.0"
+        versionName "10.7.0"
         testBuildType System.getProperty('testBuildType', 'debug')
         testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
     }
@@ -122,7 +120,7 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"
-    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
 
     if (enableHermes) {
         def hermesPath = "../../node_modules/hermes-engine/android/";
@@ -135,8 +133,8 @@ dependencies {
     addUnimodulesDependencies([exclude: ['expo-application', 'expo-file-system', 'expo-image-loader']])
 
     implementation 'com.google.firebase:firebase-analytics:17.4.3'
-    implementation 'com.google.firebase:firebase-crashlytics:17.0.1'
-    implementation 'com.google.firebase:firebase-messaging:20.2.0'
+    implementation 'com.google.firebase:firebase-crashlytics:17.1.0'
+    implementation 'com.google.firebase:firebase-messaging:20.2.1'
 
     androidTestImplementation('com.wix:detox:+')
 }

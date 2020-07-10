@@ -7,7 +7,7 @@ jobs:
         components:
           - tools
           - platform-tools
-          - build-tools-30.0.0
+          - build-tools-30.0.1
           - android-30
           - extra-google-google_play_services
           - extra-google-m2repository
@@ -24,7 +24,7 @@ jobs:
         - tar xf secrets.tar.gz
         - nvm install node
         - npm install -g yarn
-        - yes | sdkmanager "build-tools;30.0.0"
+        - yes | sdkmanager "build-tools;30.0.1"
       install:
         - gem install fastlane
         - yarn install
