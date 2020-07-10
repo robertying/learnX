@@ -2,6 +2,7 @@ import {Platform} from 'react-native';
 import Share from 'react-native-share';
 import fs from 'react-native-fs';
 import mime from 'mime-types';
+import qs from 'qs';
 import {getTranslation} from './i18n';
 import {dataSource} from '../redux/dataSource';
 
@@ -41,8 +42,9 @@ export const downloadFile = async (
   retry?: boolean,
   onProgress?: (percent: number) => void,
 ) => {
+  const id = url.split('?')[1] ? qs.parse(url.split('?')[1])?.wjid : 'dummy';
   const courseDir = `${fileDir}/${courseName}`;
-  const filePath = `${courseDir}/${name}.${ext}`;
+  const filePath = `${courseDir}/${name}-${id}.${ext}`;
 
   if (Platform.OS === 'ios') {
     await fs.mkdir(courseDir);
