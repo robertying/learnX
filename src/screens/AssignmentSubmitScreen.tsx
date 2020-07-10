@@ -71,7 +71,7 @@ interface DocumentPickerResponse {
   uri: string;
   type: string;
   name: string;
-  size: string;
+  size: number;
 }
 
 const AssignmentSubmitScreen: INavigationScreen<IAssignmentSubmitScreenProps> = (
