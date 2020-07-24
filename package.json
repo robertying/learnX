@@ -24,7 +24,7 @@
     "@react-native-community/async-storage": "1.11.0",
     "@react-native-community/datetimepicker": "2.6.0",
     "@react-native-community/segmented-control": "2.1.0",
-    "@types/qs": "6.9.3",
+    "@types/qs": "6.9.4",
     "axios": "0.19.2",
     "darkreader": "4.9.14",
     "dayjs": "1.8.29",
