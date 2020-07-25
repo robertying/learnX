@@ -32,9 +32,9 @@ const EmptyList: React.FC<ViewProps> = (props) => {
       <Icon
         name="check-circle"
         color={
-          colorScheme === 'dark'
+          (colorScheme === 'dark'
             ? iOSUIKit.footnoteWhiteObject.color
-            : iOSUIKit.footnoteObject.color
+            : iOSUIKit.footnoteObject.color) as string
         }
         size={40}
       />
