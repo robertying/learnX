@@ -157,4 +157,7 @@ export default {
   disablePushNotifications: 'Please disable push notification service first',
   pickFileError: 'Failed to pick the file',
   all: 'All',
+  enroll: 'Reviews',
+  discuss: 'Discussions',
+  thursday: 'Thursday',
 };

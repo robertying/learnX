@@ -25,6 +25,7 @@ import PushNotificationScreen from '../screens/PushNotificationScreen';
 import AgreementScreen from '../screens/AgreementScreen';
 import FirebaseScreen from '../screens/FirebaseScreen';
 import CalendarScreen from '../screens/CalendarScreen';
+import ThursdayScreen from '../screens/ThursdayScreen';
 
 const wrapped = (Component: React.FC<any>) =>
   gestureHandlerRootHOC((props: any) => (
@@ -149,6 +150,12 @@ const registerScreens = () => {
     'assignment.submit',
     () => wrapped(AssignmentSubmitScreen),
     () => AssignmentSubmitScreen,
+  );
+
+  Navigation.registerComponent(
+    'thursday',
+    () => wrapped(ThursdayScreen),
+    () => ThursdayScreen,
   );
 };
 

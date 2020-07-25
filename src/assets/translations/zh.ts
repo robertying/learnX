@@ -141,4 +141,7 @@ export default {
   disablePushNotifications: '请先关闭推送通知服务',
   pickFileError: '选取文件失败',
   all: '全部',
+  enroll: '课程评价',
+  discuss: '答疑讨论',
+  thursday: '星期四',
 };

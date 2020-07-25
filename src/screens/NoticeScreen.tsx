@@ -61,6 +61,7 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import {setSetting} from '../redux/actions/settings';
 import {useWindow} from '../hooks/useWindow';
+import {loginLearnX} from '../helpers/thursday';
 
 const NoticeScreen: INavigationScreen = (props) => {
   const colorScheme = useColorScheme();
@@ -72,6 +73,14 @@ const NoticeScreen: INavigationScreen = (props) => {
   /**
    * App scope stuff
    */
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await loginLearnX();
+      } catch {}
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {

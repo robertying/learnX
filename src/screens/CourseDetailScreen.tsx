@@ -1,5 +1,5 @@
 import React, {useMemo, useState, useCallback, useEffect} from 'react';
-import {Dimensions, View, SafeAreaView, Text} from 'react-native';
+import {Dimensions, View, SafeAreaView, Text, StyleSheet} from 'react-native';
 import Modal from 'react-native-modal';
 import {
   Route,
@@ -34,6 +34,19 @@ import {useColorScheme} from 'react-native-appearance';
 import {useTypedSelector} from '../redux/store';
 import Snackbar from 'react-native-snackbar';
 import {useWindow} from '../hooks/useWindow';
+import TextButton from '../components/TextButton';
+import Divider from '../components/Divider';
+import {ThursdayScreenProps} from './ThursdayScreen';
+
+const styles = StyleSheet.create({
+  thursdayButtons: {
+    flexDirection: 'row',
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+  },
+  textCenter: {textAlign: 'center'},
+});
 
 export interface ICourseDetailScreenProps {
   course: ICourse;
@@ -268,12 +281,46 @@ const CourseDetailScreen: INavigationScreen<ICourseDetailScreenProps> = (
 
   const window = useWindow();
 
+  const handlePushToThursday = (type: 'enroll' | 'discuss') => {
+    pushTo<ThursdayScreenProps>(
+      'thursday',
+      props.componentId,
+      {
+        type,
+        courseName: course.name,
+        courseTeacherName: course.teacherName ?? '',
+      },
+      getTranslation('thursday'),
+      true,
+      colorScheme === 'dark',
+    );
+  };
+
   return (
     <SafeAreaView
       style={{
         flex: 1,
         backgroundColor: Colors.system('background', colorScheme),
       }}>
+      <View style={styles.thursdayButtons}>
+        <TextButton
+          textStyle={[
+            styles.textCenter,
+            {color: Colors.system('purple', colorScheme)},
+          ]}
+          onPress={() => handlePushToThursday('enroll')}>
+          课程评价
+        </TextButton>
+        <TextButton
+          textStyle={[
+            styles.textCenter,
+            {color: Colors.system('purple', colorScheme)},
+          ]}
+          onPress={() => handlePushToThursday('discuss')}>
+          答疑讨论
+        </TextButton>
+      </View>
+      <Divider />
       <TabView
         navigationState={{index, routes}}
         renderTabBar={renderTabBar}
