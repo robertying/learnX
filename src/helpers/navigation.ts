@@ -98,7 +98,7 @@ export const getScreenOptions = (
       ...(searchBarPlaceholder && {
         searchBar: true,
         searchBarHiddenWhenScrolling: true,
-        searchBarPlaceholder: searchBarPlaceholder,
+        // searchBarPlaceholder: searchBarPlaceholder,
         hideNavBarOnFocusSearchBar: true,
       }),
       elevation: 0,
