@@ -2741,7 +2741,12 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.2.tgz#ee5ff8f208c8cd613b389f7b222c9801ca62b3f7"
   integrity sha512-ofovWglpqoqbfLNOTBNZLSbMuGrblAf1efvvArGKOZMBrIoJeu5UsAipQolkijtyQx5MtAzT/J9IHj/CEY1mJw==
 
-darkreader@4.9.15, darkreader@^4.9.14:
+darkreader@4.9.16:
+  version "4.9.16"
+  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.16.tgz#8a6db8da187abb9f4fcad4cf9f382ec1015adef1"
+  integrity sha512-vzBJkDL/O4H7d6CamCaqm+XHVF6diaZ6RORBCVxPBUvETlyJf6ERQhw4kzpJQOlpZdkwAvQ9Yy3LvF7rQHpdZg==
+
+darkreader@^4.9.14:
   version "4.9.15"
   resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.15.tgz#825b98ca8fee91ac8e33741e763ee3e5daea0c4d"
   integrity sha512-udEIDogv5TAAwAPR/DjD1DLKwyi93tTslG/iZ6UayFGvfmDOiE5UJQn5QHQC6mtf2EaWULjGbIcrldLDgj/5jw==
