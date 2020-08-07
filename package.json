@@ -27,7 +27,7 @@
     "@types/qs": "6.9.4",
     "axios": "0.19.2",
     "darkreader": "4.9.16",
-    "dayjs": "1.8.31",
+    "dayjs": "1.8.32",
     "expo-background-fetch": "8.3.0",
     "expo-calendar": "8.2.1",
     "expo-notifications": "0.4.0",
