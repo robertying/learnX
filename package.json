@@ -34,7 +34,7 @@
     "expo-permissions": "9.0.1",
     "expo-secure-store": "9.0.1",
     "expo-task-manager": "8.3.0",
-    "fuse.js": "6.4.0",
+    "fuse.js": "6.4.1",
     "lodash.differenceby": "4.8.0",
     "mime-types": "2.1.27",
     "path": "0.12.7",
