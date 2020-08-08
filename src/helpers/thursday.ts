@@ -6,6 +6,7 @@ import {
 } from 'amazon-cognito-identity-js';
 import CookieManager from '@react-native-community/cookies';
 import {decode} from 'js-base64';
+import {Platform} from 'react-native';
 
 declare const preval: any;
 const raw = preval`
@@ -91,23 +92,30 @@ const THURSDAY_URL = 'https://thu.community';
 const DOMAIN = '.thu.community';
 
 const setCookie = (name: string, value: string) =>
-  CookieManager.set(
-    THURSDAY_URL,
-    {
-      name,
-      value,
-      domain: DOMAIN,
-      secure: true,
-      httpOnly: true,
-    },
-    true,
-  );
+  Platform.OS === 'ios'
+    ? CookieManager.set(
+        THURSDAY_URL,
+        {
+          name,
+          value,
+          domain: DOMAIN,
+          secure: true,
+          httpOnly: false,
+        },
+        true,
+      )
+    : CookieManager.setFromResponse(
+        THURSDAY_URL,
+        `${name}=${value}; Domain=${DOMAIN}; Path=/; Secure;`,
+      );
 
 export const setCookieFromCredentials = async () => {
   const credentials = await getLearnXCredentials();
   if (!credentials) {
     return;
   }
+
+  await CookieManager.clearAll(true);
 
   await setCookie(
     `CognitoIdentityServiceProvider.${json.clientId}.LastAuthUser`,
