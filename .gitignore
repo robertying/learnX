@@ -83,3 +83,5 @@ android/app/google-services.json
 
 # patches
 !patches/node_modules
+
+.env
