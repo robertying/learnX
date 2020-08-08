@@ -195,7 +195,7 @@ const SettingScreen: INavigationScreen = (props) => {
       }}>
       <ScrollView>
         <SettingListItem
-          containerStyle={{marginTop: 8}}
+          style={{marginTop: 8}}
           variant="arrow"
           icon={
             <MaterialIcons
@@ -262,7 +262,7 @@ const SettingScreen: INavigationScreen = (props) => {
         />
         <SettingListItem
           variant="none"
-          containerStyle={{marginTop: 16}}
+          style={{marginTop: 16}}
           icon={
             <MaterialCommunityIcons
               name="account-off"
@@ -296,7 +296,7 @@ const SettingScreen: INavigationScreen = (props) => {
         {Platform.OS === 'android' && (
           <SettingListItem
             variant="none"
-            containerStyle={{marginTop: 16}}
+            style={{marginTop: 16}}
             icon={
               settings.hasUpdate ? (
                 <View>
@@ -343,7 +343,7 @@ const SettingScreen: INavigationScreen = (props) => {
         )}
         <SettingListItem
           variant="arrow"
-          containerStyle={{marginTop: 16}}
+          style={{marginTop: 16}}
           icon={
             <MaterialCommunityIcons
               name="help"
@@ -375,7 +375,7 @@ const SettingScreen: INavigationScreen = (props) => {
           onPress={() => navigate('settings.acknowledgements')}
         />
         <SettingListItem
-          containerStyle={{marginBottom: 16}}
+          style={{marginBottom: 16}}
           variant="arrow"
           icon={
             <MaterialIcons
