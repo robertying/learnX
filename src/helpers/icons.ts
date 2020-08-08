@@ -6,6 +6,10 @@ const iconNames = [
   'event',
   'apps',
   'settings',
+  'refresh',
+  'arrow-back',
+  'fullscreen',
+  'fullscreen-exit',
 ] as const;
 type IIcon = typeof iconNames[number];
 export type IIcons = Record<IIcon, number>;
@@ -28,5 +32,9 @@ export const loadIcons = async () => {
     {} as any,
   );
 
+  return _icons;
+};
+
+export const loadIconsSync = () => {
   return _icons;
 };

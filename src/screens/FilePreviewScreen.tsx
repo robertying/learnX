@@ -29,6 +29,7 @@ import {
 } from 'react-native-paper';
 import {iOSUIKit} from 'react-native-typography';
 import {useColorScheme} from 'react-native-appearance';
+import {loadIconsSync} from '../helpers/icons';
 
 export interface IFilePreviewScreenProps {
   courseName: string;
@@ -68,7 +69,8 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = (
             },
             {
               id: 'toggle',
-              systemItem: 'rewind',
+              icon: loadIconsSync().fullscreen,
+              color: Colors.system('purple'),
             },
           ],
         },
@@ -124,7 +126,10 @@ const FilePreviewScreen: INavigationScreen<IFilePreviewScreenProps> = (
                   },
                   {
                     id: 'toggle',
-                    systemItem: fullScreen ? 'rewind' : 'fastForward',
+                    icon: fullScreen
+                      ? loadIconsSync().fullscreen
+                      : loadIconsSync()['fullscreen-exit'],
+                    color: Colors.system('purple'),
                   },
                 ]
               : [
