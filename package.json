@@ -27,7 +27,7 @@
     "@react-native-community/segmented-control": "2.1.1",
     "@types/qs": "6.9.4",
     "amazon-cognito-identity-js": "4.3.4",
-    "axios": "0.19.2",
+    "axios": "0.20.0",
     "darkreader": "4.9.16",
     "dayjs": "1.8.32",
     "expo-background-fetch": "8.4.0",
