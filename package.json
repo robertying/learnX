@@ -79,7 +79,7 @@
     "@react-native-community/eslint-config": "2.0.0",
     "@react-native-community/eslint-plugin": "1.1.0",
     "@types/detox": "16.4.1",
-    "@types/jasmine": "3.5.13",
+    "@types/jasmine": "3.5.14",
     "@types/jest": "26.0.10",
     "@types/js-base64": "3.0.0",
     "@types/lodash.differenceby": "4.8.6",
