@@ -29,7 +29,7 @@
     "amazon-cognito-identity-js": "4.3.4",
     "axios": "0.20.0",
     "darkreader": "4.9.16",
-    "dayjs": "1.8.34",
+    "dayjs": "1.8.35",
     "expo-background-fetch": "8.4.0",
     "expo-calendar": "8.3.0",
     "expo-notifications": "0.5.0",
