@@ -2945,10 +2945,10 @@ detect-newline@^3.0.0:
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==
 
-detox@17.4.5:
-  version "17.4.5"
-  resolved "https://registry.yarnpkg.com/detox/-/detox-17.4.5.tgz#3d6dbf1a3ba5903625aeea4452ba773b28e2db12"
-  integrity sha512-TGphxJAPp90U+OoRwV32WqLoEUt2BBHIRQDVLKcHhR0Z/+LbfMqxl0ij+Na1Gi+L2XhDAV8Xz48lNNmqhF6jzw==
+detox@17.4.10:
+  version "17.4.10"
+  resolved "https://registry.yarnpkg.com/detox/-/detox-17.4.10.tgz#11fbafc6e5de8067eacd57134cf47ee696544863"
+  integrity sha512-yc68cdRbc5ebMha+pNYc+izt/Cgk9yhOgabQGHTboUKa8zJBarouaT9moQbChKdJTqvyAGVwj1QNQadfi8unbA==
   dependencies:
     bunyan "^1.8.12"
     bunyan-debug-stream "^1.1.0"
@@ -2972,6 +2972,7 @@ detox@17.4.5:
     ws "^3.3.1"
     yargs "^13.0.0"
     yargs-parser "^13.0.0"
+    yargs-unparser "^1.6.3"
 
 diff-sequences@^25.2.6:
   version "25.2.6"
@@ -3827,6 +3828,13 @@ flat-cache@^2.0.1:
     rimraf "2.6.3"
     write "1.0.3"
 
+flat@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/flat/-/flat-4.1.0.tgz#090bec8b05e39cba309747f1d588f04dbaf98db2"
+  integrity sha512-Px/TiLIznH7gEDlPXcUD4KnBusa6kR6ayRUVcnEAbreRIuhkqow/mun59BuRXwoYk7ZQOLW1ZM05ilIvK38hFw==
+  dependencies:
+    is-buffer "~2.0.3"
+
 flatted@^2.0.0:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/flatted/-/flatted-2.0.2.tgz#4575b21e2bcee7434aa9be662f4b7b5f9c2b5138"
@@ -4425,6 +4433,11 @@ is-buffer@^1.1.5:
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-1.1.6.tgz#efaa2ea9daa0d7ab2ea13a97b2b8ad51fefbe8be"
   integrity sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==
 
+is-buffer@~2.0.3:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-2.0.4.tgz#3e572f23c8411a5cfd9557c849e3665e0b290623"
+  integrity sha512-Kq1rokWXOPXWuaMAqZiJW4XxsmD9zGx9q4aePabbn3qCRGedtH7Cm+zV8WETitMfu1wdh+Rvd6w5egwSngUX2A==
+
 is-callable@^1.1.4, is-callable@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/is-callable/-/is-callable-1.2.0.tgz#83336560b54a38e35e3a2df7afd0454d691468bb"
@@ -4556,6 +4569,11 @@ is-obj@^1.0.0, is-obj@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/is-obj/-/is-obj-1.0.1.tgz#3e4729ac1f5fde025cd7d83a896dab9f4f67db0f"
   integrity sha1-PkcprB9f3gJc19g6iW2rn09n2w8=
+
+is-plain-obj@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/is-plain-obj/-/is-plain-obj-1.1.0.tgz#71a50c8429dfca773c92a390a4a03b39fcd51d3e"
+  integrity sha1-caUMhCnfync8kqOQpKA7OfzVHT4=
 
 is-plain-object@^2.0.3, is-plain-object@^2.0.4:
   version "2.0.4"
@@ -9000,6 +9018,17 @@ yargs-parser@^18.1.2:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
 
+yargs-unparser@^1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/yargs-unparser/-/yargs-unparser-1.6.3.tgz#7b939b45c5a8d5ffb7648341792feba0fdae8117"
+  integrity sha512-xI32EGCq5mJiSCsQaEPLljD+R3Hq/VG08YGoLTOqu/gHAtCa2S4qPMG20ol4TpKWgSU7j3KMZHvSirNPK0DSjA==
+  dependencies:
+    camelcase "^5.3.1"
+    decamelize "^1.2.0"
+    flat "^4.1.0"
+    is-plain-obj "^1.1.0"
+    yargs "^14.2.3"
+
 yargs@^13.0.0:
   version "13.3.2"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-13.3.2.tgz#ad7ffefec1aa59565ac915f82dccb38a9c31a2dd"
@@ -9016,7 +9045,7 @@ yargs@^13.0.0:
     y18n "^4.0.0"
     yargs-parser "^13.1.2"
 
-yargs@^14.2.0:
+yargs@^14.2.0, yargs@^14.2.3:
   version "14.2.3"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-14.2.3.tgz#1a1c3edced1afb2a2fea33604bc6d1d8d688a414"
   integrity sha512-ZbotRWhF+lkjijC/VhmOT9wSgyBQ7+zr13+YLkhfsSiTriYsMzkTUFP18pFhWwBeMa5gUc1MzbhrO6/VB7c9Xg==
