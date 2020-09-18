@@ -25,7 +25,7 @@
     "@react-native-community/cookies": "4.0.1",
     "@react-native-community/datetimepicker": "2.6.1",
     "@react-native-community/segmented-control": "2.1.2",
-    "@types/qs": "6.9.4",
+    "@types/qs": "6.9.5",
     "amazon-cognito-identity-js": "4.4.0",
     "axios": "0.20.0",
     "darkreader": "4.9.17",
