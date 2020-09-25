@@ -2897,10 +2897,10 @@ detect-newline@^3.0.0:
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==
 
-detox@17.4.10:
-  version "17.4.10"
-  resolved "https://registry.yarnpkg.com/detox/-/detox-17.4.10.tgz#11fbafc6e5de8067eacd57134cf47ee696544863"
-  integrity sha512-yc68cdRbc5ebMha+pNYc+izt/Cgk9yhOgabQGHTboUKa8zJBarouaT9moQbChKdJTqvyAGVwj1QNQadfi8unbA==
+detox@17.6.1:
+  version "17.6.1"
+  resolved "https://registry.yarnpkg.com/detox/-/detox-17.6.1.tgz#3bdd8cbdcc079b1c4b604181fe505615db563832"
+  integrity sha512-NPZabH3ixOdXCbDDQeRToUxXTN1kHiK7WhCCjH4YHtKNaprcYiYqPgIloEykauHvpgynebmyTBxOY6hDtsiO4Q==
   dependencies:
     bunyan "^1.8.12"
     bunyan-debug-stream "^1.1.0"
@@ -2914,6 +2914,7 @@ detox@17.4.10:
     lodash "^4.17.5"
     minimist "^1.2.0"
     proper-lockfile "^3.0.2"
+    resolve-from "^5.0.0"
     sanitize-filename "^1.6.1"
     shell-utils "^1.0.9"
     signal-exit "^3.0.3"
