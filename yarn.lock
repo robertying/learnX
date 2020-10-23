@@ -1191,10 +1191,10 @@
   resolved "https://registry.yarnpkg.com/@react-native-community/eslint-plugin/-/eslint-plugin-1.1.0.tgz#e42b1bef12d2415411519fd528e64b593b1363dc"
   integrity sha512-W/J0fNYVO01tioHjvYWQ9m6RgndVtbElzYozBq1ZPrHO/iCzlqoySHl4gO/fpCl9QEFjvJfjPgtPMTMlsoq5DQ==
 
-"@react-native-community/segmented-control@2.1.2":
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/@react-native-community/segmented-control/-/segmented-control-2.1.2.tgz#13dd38a2f1972f7c9061f74b9e8e9fd35cbfa6a8"
-  integrity sha512-2UEr+Dqk+VHcMaZPOcKSo0GqFZG91DjngeACy+DOB2gRvph/FGKjABV6HlQJqdhQeQs/4NgoycCjAH+Z8ilIVg==
+"@react-native-community/segmented-control@2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@react-native-community/segmented-control/-/segmented-control-2.2.0.tgz#be961036c4383359035b0aeb3603ac5fb186a236"
+  integrity sha512-y0VCahoVNNh8SWpIb9t01w/aHB0HdYscUkbY0KNdBlCELwvLVsF3sR3jjAjLM1jtoEbLxQkeK276yZo+PRr22g==
 
 "@sinonjs/commons@^1.7.0":
   version "1.8.1"
