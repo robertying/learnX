@@ -5189,7 +5189,12 @@ jetifier@1.6.6, jetifier@^1.6.2:
   resolved "https://registry.yarnpkg.com/jetifier/-/jetifier-1.6.6.tgz#fec8bff76121444c12dc38d2dad6767c421dab68"
   integrity sha512-JNAkmPeB/GS2tCRqUzRPsTOHpGDah7xP18vGJfIjZC+W2sxEHbxgJxetIjIqhjQ3yYbYNEELkM/spKLtwoOSUQ==
 
-js-base64@3.5.2, js-base64@^3.5.2:
+js-base64@3.6.0:
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.6.0.tgz#773e1de628f4f298d65a7e9842c50244751f5756"
+  integrity sha512-wVdUBYQeY2gY73RIlPrysvpYx+2vheGo8Y1SNQv/BzHToWpAZzJU7Z6uheKMAe+GLSBig5/Ps2nxg/8tRB73xg==
+
+js-base64@^3.5.2:
   version "3.5.2"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-3.5.2.tgz#3cc800e4f10812b55fb5ec53e7cabaef35dc6d3c"
   integrity sha512-VG2qfvV5rEQIVxq9UmAVyWIaOdZGt9M16BLu8vFkyWyhv709Hyg4nKUb5T+Ru+HmAr9RHdF+kQDKAhbJlcdKeQ==
