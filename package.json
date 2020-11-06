@@ -37,7 +37,7 @@
     "expo-secure-store": "9.1.0",
     "expo-task-manager": "8.4.0",
     "fuse.js": "6.4.1",
-    "js-base64": "3.5.2",
+    "js-base64": "3.6.0",
     "lodash.differenceby": "4.8.0",
     "mime-types": "2.1.27",
     "path": "0.12.7",
