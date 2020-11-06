@@ -20,7 +20,7 @@
     "postinstall": "patch-package && jetifier && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh"
   },
   "dependencies": {
-    "@babel/runtime": "7.12.1",
+    "@babel/runtime": "7.12.5",
     "@react-native-community/async-storage": "1.12.1",
     "@react-native-community/cookies": "4.0.1",
     "@react-native-community/datetimepicker": "2.6.1",
