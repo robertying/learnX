@@ -78,7 +78,7 @@
     "@react-native-community/cli": "4.13.0",
     "@react-native-community/eslint-config": "2.0.0",
     "@react-native-community/eslint-plugin": "1.1.0",
-    "@types/detox": "16.4.1",
+    "@types/detox": "16.4.2",
     "@types/jasmine": "3.6.0",
     "@types/jest": "26.0.15",
     "@types/js-base64": "3.0.0",

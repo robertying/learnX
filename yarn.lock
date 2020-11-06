@@ -1243,10 +1243,10 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/detox@16.4.1":
-  version "16.4.1"
-  resolved "https://registry.yarnpkg.com/@types/detox/-/detox-16.4.1.tgz#f707cc9d55149bc60772d2509ac3f61f51c62365"
-  integrity sha512-Wb/2OKWlzmqpvPTuZls2j/bTjlf/NlhSFXEQDd7bwvbuUTjX42ntlH7jzzHN9M65gwe03b0WhJ32SNLYPve82g==
+"@types/detox@16.4.2":
+  version "16.4.2"
+  resolved "https://registry.yarnpkg.com/@types/detox/-/detox-16.4.2.tgz#41bc34d7cb14d1137152478aa1865c7f44aab703"
+  integrity sha512-QdOEIRRrGRmAX/J5PNPU4aJlFdImxtuhl7Oqf1J8yZCMgdECjW4TicN7Lp6voeJZ6FiBnhaFNSHf8rGS6wmsEA==
 
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
