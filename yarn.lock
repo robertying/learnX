@@ -674,7 +674,7 @@
     pirates "^4.0.0"
     source-map-support "^0.5.16"
 
-"@babel/runtime@7.12.5", "@babel/runtime@^7.0.0", "@babel/runtime@^7.10.4", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
+"@babel/runtime@7.12.5", "@babel/runtime@^7.0.0", "@babel/runtime@^7.12.0", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.4", "@babel/runtime@^7.9.2":
   version "7.12.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.12.5.tgz#410e7e487441e1b360c29be715d870d9b985882e"
   integrity sha512-plcc+hbExy3McchJCEQG3knOsuh3HH+Prx1P6cLIkET/0dLuQDEnrT+s27Axgc9bqfsmNUNHfscgMUdBpC9xfg==
@@ -2777,7 +2777,7 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.4.tgz#b156d7be03b84ff425c9a0a4b1e5f4da9c5ca888"
   integrity sha512-xc8DUsCLmjvCfoD7LTGE0ou2MIWLx0K9RCZwSHMOdynqRsP4MtUcLeqh1HcQ2dInwDTqn+3CE0/FZh1et+p4jA==
 
-darkreader@4.9.22, darkreader@^4.9.14:
+darkreader@4.9.22, darkreader@^4.9.21:
   version "4.9.22"
   resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.22.tgz#91d75afff09209fd4bb27f264eb83d6f30dfebcc"
   integrity sha512-Ug/v1lTCyn/AAXoimt9mbLNnNj6YojiuPfibhjZIfO3Q1QffTYzz6DiRQNHw8ETpelhH4ap1r2ruGVLbT+10xQ==
@@ -4162,7 +4162,7 @@ hermes-profile-transformer@^0.0.6:
   dependencies:
     source-map "^0.7.3"
 
-highlight.js@^10.1.1:
+highlight.js@^10.2.1:
   version "10.3.2"
   resolved "https://registry.yarnpkg.com/highlight.js/-/highlight.js-10.3.2.tgz#135fd3619a00c3cbb8b4cd6dbc78d56bfcbc46f1"
   integrity sha512-3jRT7OUYsVsKvukNKZCtnvRcFyCJqSEIuIMsEybAXRiFSwpt65qjPd/Pr+UOdYt7WJlt+lj3+ypUsHiySBp/Jw==
@@ -5613,7 +5613,7 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marked@^1.1.0:
+marked@^1.2.0:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/marked/-/marked-1.2.3.tgz#58817ba348a7c9398cb94d40d12e0d08df83af57"
   integrity sha512-RQuL2i6I6Gn+9n81IDNGbL0VHnta4a+8ZhqvryXEniTb/hQNtf3i26hi1XWUhzb9BgVyWHKR3UO8MaHtKoYibw==
@@ -6964,15 +6964,15 @@ react-native-gesture-handler@1.8.0:
     invariant "^2.2.4"
     prop-types "^15.7.2"
 
-react-native-github-markdown@4.0.4:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/react-native-github-markdown/-/react-native-github-markdown-4.0.4.tgz#eb178742e57a7a973095bd552d8d27e098dfc3c9"
-  integrity sha512-GQSmymEjDEi0ue6LWsyvfiSCbfI/7IVfgTza3hzzP/i+1A4S/QnAAIrja6u5ZtQems1KPM4xTPwBIkc/rer6ug==
+react-native-github-markdown@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-github-markdown/-/react-native-github-markdown-4.1.0.tgz#74684ef8f9efc879a1d8ac79084e92c349536eb9"
+  integrity sha512-o74Lw+RyWHp5OBYEedyupLa9eMPF2H3F3Yri3WHFYL+tRvK3qnHVqhvckrzA8LIV6S1dv6fGlabZNgxNVNgGLw==
   dependencies:
-    "@babel/runtime" "^7.10.4"
-    darkreader "^4.9.14"
-    highlight.js "^10.1.1"
-    marked "^1.1.0"
+    "@babel/runtime" "^7.12.0"
+    darkreader "^4.9.21"
+    highlight.js "^10.2.1"
+    marked "^1.2.0"
 
 react-native-interactable@2.0.1:
   version "2.0.1"
