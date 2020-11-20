@@ -2900,7 +2900,12 @@ csstype@^3.0.2:
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.5.tgz#7fdec6a28a67ae18647c51668a9ff95bb2fa7bb8"
   integrity sha512-uVDi8LpBUKQj6sdxNaTetL6FpeCqTjOvAQuQUa/qAqq8oOd4ivkbhgnqayl0dnPal8Tb/yB1tF+gOvCBiicaiQ==
 
-darkreader@4.9.22, darkreader@^4.9.21:
+darkreader@4.9.24:
+  version "4.9.24"
+  resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.24.tgz#ec8a00faba880c764df44b7c18d5e249e843c485"
+  integrity sha512-l4uTxhwcNAX87XW99fleH+wYkzGRSSVOD/35tmbp/Ey05ftmoc7U+VXhosqY9wOzmhqUaRl4a3X9VH4R4AsYuw==
+
+darkreader@^4.9.21:
   version "4.9.22"
   resolved "https://registry.yarnpkg.com/darkreader/-/darkreader-4.9.22.tgz#91d75afff09209fd4bb27f264eb83d6f30dfebcc"
   integrity sha512-Ug/v1lTCyn/AAXoimt9mbLNnNj6YojiuPfibhjZIfO3Q1QffTYzz6DiRQNHw8ETpelhH4ap1r2ruGVLbT+10xQ==
