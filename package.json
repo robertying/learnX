@@ -74,7 +74,7 @@
     "typesafe-actions": "5.1.0"
   },
   "devDependencies": {
-    "@babel/core": "7.12.3",
+    "@babel/core": "7.12.7",
     "@react-native-community/cli": "4.13.1",
     "@react-native-community/eslint-config": "2.0.0",
     "@react-native-community/eslint-plugin": "1.1.0",
