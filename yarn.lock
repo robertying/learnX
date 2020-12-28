@@ -3053,10 +3053,10 @@ detect-newline@^3.0.0:
   resolved "https://registry.yarnpkg.com/detect-newline/-/detect-newline-3.1.0.tgz#576f5dfc63ae1a192ff192d8ad3af6308991b651"
   integrity sha512-TLz+x/vEXm/Y7P7wn1EJFNLxYpUD4TgMosxY6fAVJUnJMbupHBOncxyWUG9OpTaH9EBD7uFI5LfEgmMOc54DsA==
 
-detox@17.13.0:
-  version "17.13.0"
-  resolved "https://registry.yarnpkg.com/detox/-/detox-17.13.0.tgz#6ada40dced34531aa26c27d8c2bca3e283e1fd5c"
-  integrity sha512-AJfKgF6bAmm08zBPifaWzxoqKmdjIcBUZw7jicpvkP4RRpQqqq12FOx/DYI2vzmLUXqP2fY1Vy3IOfupEeDsZA==
+detox@17.14.9:
+  version "17.14.9"
+  resolved "https://registry.yarnpkg.com/detox/-/detox-17.14.9.tgz#e269de0937e615eac92ac283b2303751bcf2c072"
+  integrity sha512-WLpl7BJ2xecZJ02hFFWgzo61RnlO/LlsH/U8GWztoXsT0z0t9iKsBci8AhSSErQfH0IHnNtDcZknIxt0gzNhoQ==
   dependencies:
     bunyan "^1.8.12"
     bunyan-debug-stream "^1.1.0"
