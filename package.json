@@ -80,7 +80,7 @@
     "@react-native-community/eslint-plugin": "1.1.0",
     "@types/detox": "16.4.2",
     "@types/jasmine": "3.6.2",
-    "@types/jest": "26.0.15",
+    "@types/jest": "26.0.20",
     "@types/js-base64": "3.0.0",
     "@types/lodash.differenceby": "4.8.6",
     "@types/mime-types": "2.1.0",
