@@ -28,7 +28,7 @@
     "@types/qs": "6.9.5",
     "amazon-cognito-identity-js": "4.4.0",
     "axios": "0.21.0",
-    "darkreader": "4.9.24",
+    "darkreader": "4.9.27",
     "dayjs": "1.9.6",
     "expo-background-fetch": "8.4.0",
     "expo-calendar": "8.3.0",
