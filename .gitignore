@@ -20,7 +20,6 @@ DerivedData
 *.hmap
 *.ipa
 *.xcuserstate
-*.dSYM.zip
 
 # Android/IntelliJ
 #
@@ -29,8 +28,6 @@ build/
 .gradle
 local.properties
 *.iml
-android/app/release/
-generated/
 
 # node.js
 #
@@ -51,12 +48,9 @@ buck-out/
 # For more information about the recommended setup visit:
 # https://docs.fastlane.tools/best-practices/source-control/
 
-fastlane/report.xml
-fastlane/Preview.html
-fastlane/screenshots
-fastlane/README.md
-fastlane/key.json
-Gemfile.lock
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots
 
 # Bundle artifact
 *.jsbundle
@@ -64,24 +58,10 @@ Gemfile.lock
 # CocoaPods
 /ios/Pods/
 
-# VSCode
-.vscode/
+# Expo unimodules
+/android/app/src/main/java/io/robertying/learnx/generated/
 
-# dotenv
-.env.default
-
-# travis
-secrets.tar.gz
-
-# GitHub Pages
-_site
-.sass-cache
-
-# Firebase
-ios/GoogleService-Info.plist
-android/app/google-services.json
-
-# patches
-!patches/node_modules
-
+# secrets
 .env
+android/app/src/main/assets/appcenter-config.json
+ios/AppCenter-Config.plist

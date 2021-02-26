@@ -1,5 +1,5 @@
 diff --git a/node_modules/redux-persist/lib/persistReducer.js b/node_modules/redux-persist/lib/persistReducer.js
-index 1116881..604ac53 100644
+index 1116881..1c5eb59 100644
 --- a/node_modules/redux-persist/lib/persistReducer.js
 +++ b/node_modules/redux-persist/lib/persistReducer.js
 @@ -128,14 +128,6 @@ function persistReducer(config, baseReducer) {

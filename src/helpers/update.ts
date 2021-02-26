@@ -1,5 +1,5 @@
-import DeviceInfo from '../constants/DeviceInfo';
 import {Platform} from 'react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 
 const tunaMirrorUrl =
   'https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease';
@@ -24,13 +24,4 @@ export const getLatestRelease = async () => {
       url,
     };
   }
-};
-
-export const getReleaseNote = async (version: string) => {
-  const response = await fetch(
-    `https://api.github.com/repos/robertying/learnX/releases/tags/v${version}`,
-  );
-  const json = await response.json();
-  const body = json.body as string;
-  return body;
 };

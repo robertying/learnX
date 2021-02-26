@@ -1,9 +1,18 @@
 module.exports = {
   presets: ['module:metro-react-native-babel-preset'],
-  plugins: ['preval'],
+  plugins: [
+    [
+      'module-resolver',
+      {
+        root: ['./src'],
+        extensions: ['.ts', '.tsx'],
+      },
+    ],
+    'preval',
+  ],
   env: {
     production: {
-      plugins: ['transform-remove-console', 'react-native-paper/babel'],
+      plugins: ['react-native-paper/babel'],
     },
   },
 };

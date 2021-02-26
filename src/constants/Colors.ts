@@ -1,33 +1,16 @@
-import DeviceInfo from './DeviceInfo';
+import {DynamicColorIOS, Platform} from 'react-native';
 
-const colorsDark = {
-  background: DeviceInfo.isMac() ? 'rgb(30,30,30)' : 'black',
-  foreground: 'white',
-  gray: 'rgb(152,152,157)',
-  yellow: 'rgb(255,214,10)',
-  green: 'rgb(48,209,88)',
-  red: 'rgb(255,69,58)',
-  purple: 'rgb(191,90,242)',
-  blue: 'rgb(10,132,255)',
-};
+const plainTheme = '#9c27b0';
 
-const colorsLight = {
-  background: 'white',
-  foreground: 'black',
-  gray: 'rgb(142,142,147)',
-  yellow: 'rgb(255,204,0)',
-  green: 'rgb(52,199,89)',
-  red: 'rgb(255,59,48)',
-  purple: 'rgb(175,82,222)',
-  blue: 'rgb(0,122,255)',
-};
-
-const system = (name: keyof typeof colorsDark, colorScheme?: string) => {
-  return colorScheme === 'dark' ? colorsDark[name] : colorsLight[name];
-};
+const theme =
+  Platform.OS === 'ios'
+    ? ((DynamicColorIOS({
+        light: '#9c27b0',
+        dark: '#bb86fc',
+      }) as unknown) as string)
+    : '#9c27b0';
 
 export default {
-  theme: 'rgba(102,8,116,1)',
-  lightTheme: 'rgba(102,8,116,0.6)',
-  system,
+  plainTheme,
+  theme,
 };

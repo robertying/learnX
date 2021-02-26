@@ -1,4 +1,4 @@
-# React Native
+# react native
 
 # Keep our interfaces so they can be used by other ProGuard rules.
 # See http://sourceforge.net/p/proguard/bugs/466/
@@ -30,15 +30,12 @@
 
 -dontwarn com.facebook.react.**
 -keep,includedescriptorclasses class com.facebook.react.bridge.** { *; }
+-keep,includedescriptorclasses class com.facebook.react.turbomodule.core.** { *; }
 
 
-# okhttp
-
--keepattributes Signature
--keepattributes *Annotation*
--keep class okhttp3.** { *; }
--keep interface okhttp3.** { *; }
--dontwarn okhttp3.**
+# hermes
+-keep class com.facebook.hermes.unicode.** { *; }
+-keep class com.facebook.jni.** { *; }
 
 
 # okio
@@ -49,19 +46,13 @@
 -dontwarn okio.**
 
 
-# Expo
+# expo
 
 -keep class expo.modules.** { *; }
 -keep class org.unimodules.** { *; }
 
 
-# Crashlytics
+# crash reports
 
--keepattributes *Annotation*
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
-
-
-# Hermes
-
--keep class com.facebook.hermes.unicode.** { *; }

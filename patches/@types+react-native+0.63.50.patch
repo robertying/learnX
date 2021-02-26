@@ -1,0 +1,14 @@
+diff --git a/node_modules/@types/react-native/index.d.ts b/node_modules/@types/react-native/index.d.ts
+index 0864c68..d4e257d 100644
+--- a/node_modules/@types/react-native/index.d.ts
++++ b/node_modules/@types/react-native/index.d.ts
+@@ -2252,6 +2252,9 @@ export interface AccessibilityProps extends AccessibilityPropsAndroid, Accessibi
+      */
+     accessibilityValue?: AccessibilityValue;
+ 
++    accessibilityComponentType?: any;
++    accessibilityTraits?: any;
++
+     /**
+      * When `accessible` is true, the system will try to invoke this function when the user performs an accessibility custom action.
+      */

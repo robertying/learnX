@@ -1,168 +1,89 @@
-import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {iOSUIKit} from 'react-native-typography';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import Colors from '../constants/Colors';
-import dayjs from '../helpers/dayjs';
-import {getTranslation} from '../helpers/i18n';
-import InteractablePreviewWrapper, {
-  IInteractablePreviewWrapperProps,
-} from './InteractablePreviewWrapper';
-import {useColorScheme} from 'react-native-appearance';
+import React, {memo} from 'react';
+import {StyleSheet, View} from 'react-native';
+import {
+  Caption,
+  Paragraph,
+  Title,
+  Colors,
+  Subheading,
+} from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import dayjs from 'dayjs';
+import Styles from 'constants/Styles';
+import {File} from 'data/types/state';
+import {removeTags} from 'helpers/html';
+import CardWrapper, {CardWrapperProps} from './CardWrapper';
 
-export interface IFileCardProps extends IInteractablePreviewWrapperProps {
-  title: string;
-  extension: string;
-  size: string;
-  date: string;
-  description?: string;
-  markedImportant: boolean;
-  courseName?: string;
-  courseTeacherName?: string;
+export interface FileCardProps extends CardWrapperProps {
+  data: File;
+  hideCourseName?: boolean;
 }
 
-const styles = StyleSheet.create({
-  root: {
-    padding: 15,
-    paddingLeft: 20,
-    paddingRight: 20,
-  },
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  title: {
-    flex: 1,
-    fontWeight: 'bold',
-  },
-  icon: {
-    marginLeft: 5,
-  },
-});
-
-const FileCard: React.FC<IFileCardProps> = (props) => {
-  const {
-    onPress,
+const FileCard: React.FC<FileCardProps> = ({
+  data: {
     title,
-    size,
-    date,
-    courseName,
-    extension,
-    courseTeacherName,
-    markedImportant,
-    pinned,
-    onPinned,
     description,
-    dragEnabled,
-    fav,
-    onFav,
-    unread,
-    onRead,
-    onRemind,
-  } = props;
-
-  const colorScheme = useColorScheme();
-
+    courseName,
+    size,
+    fileType,
+    markedImportant,
+    isNew,
+    uploadTime,
+  },
+  hideCourseName,
+  ...restProps
+}) => {
   return (
-    <InteractablePreviewWrapper
-      pinned={pinned}
-      onPinned={onPinned}
-      onPress={onPress}
-      fav={fav}
-      onFav={onFav}
-      unread={unread}
-      onRead={onRead}
-      onRemind={onRemind}
-      dragEnabled={dragEnabled}>
-      <View
-        style={[
-          styles.root,
-          {
-            backgroundColor: Colors.system('background', colorScheme),
-            borderLeftColor: Colors.system('purple', colorScheme),
-            borderLeftWidth: pinned ? 10 : 0,
-          },
-        ]}>
-        <View style={styles.flexRow}>
-          <Text
-            style={[
-              styles.title,
-              colorScheme === 'dark'
-                ? iOSUIKit.bodyEmphasizedWhite
-                : iOSUIKit.bodyEmphasized,
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="tail">
-            {title}
-          </Text>
-          <Text
-            style={[
-              {fontSize: 13, color: Colors.system('foreground', colorScheme)},
-              styles.icon,
-            ]}>
-            {(extension ? extension.toUpperCase() + ' ' : '') + size}
-          </Text>
-          {markedImportant && (
-            <Icon
-              style={styles.icon}
-              name="flag"
-              size={18}
-              color={Colors.system('red', colorScheme)}
-            />
-          )}
-          {unread && (
-            <MaterialCommunityIcon
-              style={styles.icon}
-              name="checkbox-blank-circle"
-              size={10}
-              color={Colors.system('blue', colorScheme)}
-            />
-          )}
+    <CardWrapper {...restProps}>
+      <View style={Styles.flex1}>
+        <View style={Styles.flexRowCenter}>
+          <View style={styles.title}>
+            {hideCourseName ? null : (
+              <Subheading numberOfLines={1}>{courseName}</Subheading>
+            )}
+            <Title numberOfLines={1}>{title}</Title>
+          </View>
+          <View style={[Styles.flexRowCenter, styles.icons]}>
+            {markedImportant ? (
+              <Icon
+                style={styles.icon}
+                name="flag"
+                color={Colors.red500}
+                size={20}
+              />
+            ) : null}
+            {isNew ? (
+              <Icon
+                style={styles.icon}
+                name="checkbox-blank-circle"
+                color={Colors.blue500}
+              />
+            ) : null}
+          </View>
         </View>
-        <View
-          style={{
-            marginTop: 8,
-          }}>
-          <Text
-            style={
-              colorScheme === 'dark' ? iOSUIKit.subheadWhite : iOSUIKit.subhead
-            }
-            numberOfLines={3}>
-            {description || getTranslation('noFileDescription')}
-          </Text>
-        </View>
-        <View
-          style={[
-            styles.flexRow,
-            {
-              marginTop: 10,
-            },
-          ]}>
-          <Text
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            style={{
-              flex: 1,
-              color: Colors.system('gray', colorScheme),
-              fontSize: 13,
-            }}>
-            {courseName &&
-              courseTeacherName &&
-              `${courseTeacherName} / ${courseName} `}
-          </Text>
-          <Text
-            style={{
-              color: Colors.system('gray', colorScheme),
-              fontSize: 13,
-            }}>
-            {dayjs(date).fromNow()}
-          </Text>
+        {removeTags(description) ? (
+          <Paragraph numberOfLines={2}>{removeTags(description)}</Paragraph>
+        ) : null}
+        <View style={Styles.flexRowCenter}>
+          <Caption>{`${fileType.toUpperCase()} ${size}`}</Caption>
+          <Caption>{dayjs(uploadTime).fromNow()}</Caption>
         </View>
       </View>
-    </InteractablePreviewWrapper>
+    </CardWrapper>
   );
 };
 
-export default FileCard;
+const styles = StyleSheet.create({
+  title: {
+    flex: 10,
+  },
+  icons: {
+    flex: 2,
+    justifyContent: 'flex-end',
+  },
+  icon: {
+    marginLeft: 6,
+  },
+});
+
+export default memo(FileCard);

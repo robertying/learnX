@@ -1,14 +1,17 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-native",
+    "target": "esnext",
+    "module": "commonjs",
     "lib": ["esnext"],
-    "moduleResolution": "node",
+    "jsx": "react-native",
     "noEmit": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
+    "isolatedModules": true,
     "strict": true,
-    "target": "esnext"
+    "moduleResolution": "node",
+    "baseUrl": "./src",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*", "tests/**/*", "e2e/**/*", "@types/**/*"]
+  "include": ["src/**/*"]
 }

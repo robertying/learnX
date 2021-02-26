@@ -1,44 +1,41 @@
 import React from 'react';
-import {
-  Text,
-  TextProps,
-  TouchableOpacity,
-  TouchableOpacityProps,
-  StyleSheet,
-} from 'react-native';
-import {iOSUIKit} from 'react-native-typography';
-import Colors from '../constants/Colors';
+import {TextProps, TouchableOpacity, TouchableOpacityProps} from 'react-native';
+import {Text, useTheme} from 'react-native-paper';
+import Styles from 'constants/Styles';
 
-export type ITextButtonProps = TouchableOpacityProps & {
-  textStyle?: TextProps['style'];
-  children: string;
-  ellipsizeMode?: TextProps['ellipsizeMode'];
-};
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  text: {color: Colors.theme, fontSize: iOSUIKit.bodyObject.fontSize},
-});
-
-class TextButton extends React.Component<ITextButtonProps> {
-  render() {
-    const {textStyle, children, ellipsizeMode} = this.props;
-    return (
-      <TouchableOpacity
-        activeOpacity={0.6}
-        {...this.props}
-        style={[styles.root, this.props.style]}>
-        <Text
-          style={[styles.text, textStyle]}
-          numberOfLines={1}
-          ellipsizeMode={ellipsizeMode || 'clip'}>
-          {children}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
+export interface TextButtonProps extends TextProps {
+  disabled?: boolean;
+  containerStyle?: TouchableOpacityProps['style'];
+  onPress?: TouchableOpacityProps['onPress'];
 }
+
+const TextButton: React.FC<TextButtonProps> = ({
+  containerStyle,
+  onPress,
+  style,
+  ellipsizeMode,
+  disabled,
+  ...restProps
+}) => {
+  const theme = useTheme();
+
+  return (
+    <TouchableOpacity
+      style={[Styles.flexRowCenter, containerStyle]}
+      activeOpacity={0.6}
+      onPress={onPress}
+      disabled={disabled}>
+      <Text
+        style={[
+          {color: disabled ? theme.colors.disabled : theme.colors.primary},
+          style,
+        ]}
+        numberOfLines={1}
+        ellipsizeMode={ellipsizeMode ?? 'middle'}
+        {...restProps}
+      />
+    </TouchableOpacity>
+  );
+};
 
 export default TextButton;

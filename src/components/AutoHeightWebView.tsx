@@ -5,17 +5,15 @@ import {
   WebViewMessageEvent,
   WebViewNavigation,
 } from 'react-native-webview/lib/WebViewTypes';
-import {useColorScheme} from 'react-native-appearance';
-import Colors from '../constants/Colors';
 
 const AutoHeightWebView: React.FC<WebViewProps> = (props) => {
-  const [height, setHeight] = useState(400);
+  const [height, setHeight] = useState(0);
+
+  const webViewRef = useRef<WebView>(null);
 
   const onMessage = (e: WebViewMessageEvent) => {
     setHeight(parseInt(e.nativeEvent.data, 10));
   };
-
-  const webViewRef = useRef<WebView>(null);
 
   const onNavigationStateChange = (e: WebViewNavigation) => {
     if (e.navigationType === 'click') {
@@ -26,30 +24,24 @@ const AutoHeightWebView: React.FC<WebViewProps> = (props) => {
     }
   };
 
-  const colorScheme = useColorScheme();
-
   const injectedScript = `
-  document.body.style.backgroundColor = "${Colors.system(
-    'background',
-    colorScheme,
-  )}"
-  function waitForBridge() {
-    if (!window.ReactNativeWebView.postMessage) {
-      setTimeout(waitForBridge, 200);
-    } else {
-      window.ReactNativeWebView.postMessage(
-        Math.max(
-          document.documentElement.clientHeight,
-          document.documentElement.scrollHeight,
-          document.body.clientHeight,
-          document.body.scrollHeight
-        )
-      );
+    function waitForBridge() {
+      if (!window.ReactNativeWebView.postMessage) {
+        setTimeout(waitForBridge, 200);
+      } else {
+        window.ReactNativeWebView.postMessage(
+          Math.max(
+            document.documentElement.clientHeight,
+            document.documentElement.scrollHeight,
+            document.body.clientHeight,
+            document.body.scrollHeight
+          )
+        );
+      }
     }
-  }
-  waitForBridge();
-  true;
-`;
+    waitForBridge();
+    true;
+  `;
 
   return (
     <WebView
@@ -64,6 +56,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = (props) => {
       decelerationRate="normal"
       scrollEnabled={false}
       sharedCookiesEnabled
+      androidHardwareAccelerationDisabled={true}
       {...props}
       style={[{height, backgroundColor: 'transparent'}, props.style]}
     />

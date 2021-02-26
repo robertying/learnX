@@ -1,0 +1,15 @@
+diff --git a/node_modules/react-native/scripts/react-native-xcode.sh b/node_modules/react-native/scripts/react-native-xcode.sh
+index 9b059a6..1fbe49b 100755
+--- a/node_modules/react-native/scripts/react-native-xcode.sh
++++ b/node_modules/react-native/scripts/react-native-xcode.sh
+@@ -148,6 +148,10 @@ case "$PLATFORM_NAME" in
+     ;;
+ esac
+
++if [ "${IS_MACCATALYST}" = "YES" ]; then
++  BUNDLE_PLATFORM="ios"
++fi
++
+ EMIT_SOURCEMAP=
+ if [[ ! -z "$SOURCEMAP_FILE" ]]; then
+   EMIT_SOURCEMAP=true

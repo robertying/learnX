@@ -1,118 +1,26 @@
-import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
-import {iOSUIKit} from 'react-native-typography';
-import Colors from '../constants/Colors';
-import IconText from './IconText';
-import InteractablePreviewWrapper, {
-  IInteractablePreviewWrapperProps,
-} from './InteractablePreviewWrapper';
-import {useColorScheme} from 'react-native-appearance';
+import React, {memo} from 'react';
+import {View} from 'react-native';
+import {Subheading, Title} from 'react-native-paper';
+import Styles from 'constants/Styles';
+import {Course} from 'data/types/state';
+import CardWrapper, {CardWrapperProps} from './CardWrapper';
 
-export interface ICourseCardProps extends IInteractablePreviewWrapperProps {
-  courseName: string;
-  courseTeacherName: string;
-  noticesCount: number;
-  filesCount: number;
-  assignmentsCount: number;
-  semester: string;
+export interface CourseCardProps extends CardWrapperProps {
+  data: Course;
 }
 
-const styles = StyleSheet.create({
-  root: {
-    padding: 15,
-    paddingLeft: 20,
-    paddingRight: 20,
-  },
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  title: {
-    flex: 1,
-    fontWeight: 'bold',
-  },
-});
-
-const CourseCard: React.FC<ICourseCardProps> = (props) => {
-  const {
-    onPress,
-    courseName,
-    courseTeacherName,
-    noticesCount,
-    filesCount,
-    assignmentsCount,
-    semester,
-    hidden,
-    onHide,
-  } = props;
-
-  const colorScheme = useColorScheme();
-
+const CourseCard: React.FC<CourseCardProps> = ({
+  data: {name, teacherName},
+  ...restProps
+}) => {
   return (
-    <InteractablePreviewWrapper
-      hidden={hidden}
-      onHide={onHide}
-      onPress={onPress}
-      dragEnabled={true}>
-      <View
-        style={[
-          styles.root,
-          {
-            backgroundColor: Colors.system('background', colorScheme),
-          },
-        ]}>
-        <Text
-          style={[
-            styles.title,
-            colorScheme === 'dark'
-              ? iOSUIKit.bodyEmphasizedWhite
-              : iOSUIKit.bodyEmphasized,
-          ]}
-          numberOfLines={1}
-          ellipsizeMode="tail">
-          {courseName}
-        </Text>
-        <View style={{flexDirection: 'row', alignItems: 'flex-end', flex: 1}}>
-          <View style={{flex: 1}}>
-            <Text
-              style={[
-                colorScheme === 'dark'
-                  ? iOSUIKit.subheadWhite
-                  : iOSUIKit.subhead,
-                {marginTop: 10},
-              ]}>
-              {courseTeacherName}
-            </Text>
-            <Text
-              style={{
-                color: Colors.system('gray', colorScheme),
-                fontSize: 13,
-                marginTop: 10,
-              }}>
-              {semester}
-            </Text>
-          </View>
-          <View style={[styles.flexRow, {flex: 1}]}>
-            <IconText
-              name="notifications"
-              color={Colors.system('gray', colorScheme)}
-              text={`${noticesCount}`}
-            />
-            <IconText
-              name="folder"
-              color={Colors.system('gray', colorScheme)}
-              text={`${filesCount}`}
-            />
-            <IconText
-              name="today"
-              color={Colors.system('gray', colorScheme)}
-              text={`${assignmentsCount}`}
-            />
-          </View>
-        </View>
+    <CardWrapper {...restProps}>
+      <View style={Styles.flex1}>
+        <Subheading numberOfLines={1}>{teacherName}</Subheading>
+        <Title>{name}</Title>
       </View>
-    </InteractablePreviewWrapper>
+    </CardWrapper>
   );
 };
 
-export default CourseCard;
+export default memo(CourseCard);

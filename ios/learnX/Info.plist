@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<string>zh_CN</string>
 	<key>CFBundleDisplayName</key>
 	<string>learnX</string>
 	<key>CFBundleExecutable</key>
@@ -18,16 +18,31 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>learnx</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>learnx</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>CodePushDeploymentKey</key>
+	<string>EjrHubcr171-4yRMO1ktdlWPtBp9ci0WQGR0_</string>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.utilities</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
 	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>localhost</key>
@@ -35,46 +50,47 @@
 				<key>NSExceptionAllowsInsecureHTTPLoads</key>
 				<true/>
 			</dict>
+			<key>zhjw.cic.tsinghua.edu.cn</key>
+			<dict>
+				<key>NSExceptionAllowsInsecureHTTPLoads</key>
+				<true/>
+			</dict>
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Allow learnX to access your calendar</string>
+	<string>允许 learnX 访问您的日历</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow learnX to access your camera</string>
+	<string>允许 learnX 访问您的相机</string>
 	<key>NSContactsUsageDescription</key>
-	<string>Allow learnX to access your contacts</string>
+	<string>允许 learnX 访问您的联系人</string>
 	<key>NSDesktopFolderUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>允许 learnX 访问您的文件</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>允许 learnX 访问您的文件</string>
 	<key>NSDownloadsFolderUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>允许 learnX 访问您的文件</string>
 	<key>NSFileProviderDomainUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>允许 learnX 访问您的文件</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow learnX to access your microphone</string>
+	<string>允许 learnX 访问您的麦克风</string>
 	<key>NSNetworkVolumesUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>允许 learnX 访问您的文件</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
+	<string>允许 learnX 访问您的照片</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
+	<string>允许 learnX 访问您的照片</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>Allow learnX to access your reminders</string>
+	<string>允许 learnX 访问您的提醒事项</string>
 	<key>NSRemovableVolumesUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>允许 learnX 访问您的文件</string>
 	<key>UIAppFonts</key>
 	<array>
-		<string>AntDesign.ttf</string>
-		<string>Ionicons.ttf</string>
-		<string>MaterialCommunityIcons.ttf</string>
 		<string>MaterialIcons.ttf</string>
-	</array>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
+		<string>MaterialCommunityIcons.ttf</string>
 	</array>
 	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
@@ -87,12 +103,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
+	<key>UIViewControllerBasedStatusBarAppearance</key>
+	<false/>
 </dict>
 </plist>
