@@ -1,5 +1,5 @@
 import {PersistState} from 'redux-persist';
-import {ApiError, SemesterType} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError} from 'thu-learn-lib-no-native/lib/types';
 import {FilterSelection} from 'components/Filter';
 
 export interface Auth {

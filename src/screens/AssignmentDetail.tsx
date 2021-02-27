@@ -9,7 +9,6 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {StackScreenProps} from '@react-navigation/stack';
-import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -21,15 +20,12 @@ import {ScreenParams} from 'screens/types';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
-import useDetailNavigator from 'hooks/useDetailNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
 
 const AssignmentDetail: React.FC<
   StackScreenProps<ScreenParams, 'AssignmentDetail'>
 > = ({route, navigation}) => {
   const theme = useTheme();
-
-  const detailNavigator = useDetailNavigator();
 
   const {
     id,

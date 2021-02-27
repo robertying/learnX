@@ -2,7 +2,6 @@ import React, {useEffect, useLayoutEffect, useMemo} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {Caption, Divider, Title, useTheme} from 'react-native-paper';
 import {StackScreenProps} from '@react-navigation/stack';
-import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import TextButton from 'components/TextButton';
@@ -13,14 +12,11 @@ import {ScreenParams} from 'screens/types';
 import {getWebViewTemplate} from 'helpers/html';
 import {stripExtension, getExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
-import useDetailNavigator from 'hooks/useDetailNavigator';
 
 const NoticeDetail: React.FC<
   StackScreenProps<ScreenParams, 'NoticeDetail'>
 > = ({route, navigation}) => {
   const theme = useTheme();
-
-  const detailNavigator = useDetailNavigator();
 
   const {
     id,
