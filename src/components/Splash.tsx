@@ -1,12 +1,11 @@
 import React from 'react';
-import {Image, StyleSheet, useColorScheme} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {Image, StyleSheet, useColorScheme, View} from 'react-native';
 
 const Splash: React.FC = () => {
   const colorScheme = useColorScheme();
 
   return (
-    <SafeAreaView
+    <View
       style={[
         styles.center,
         {
@@ -21,7 +20,7 @@ const Splash: React.FC = () => {
             : require('../../ios/learnX/Assets.xcassets/MaskedAppIcon.imageset/MaskedAppIcon.png')
         }
       />
-    </SafeAreaView>
+    </View>
   );
 };
 
