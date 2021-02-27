@@ -318,11 +318,11 @@ PODS:
     - React-Core
   - RNCMaskedView (0.2.2):
     - React-Core
-  - RNDeviceInfo (8.0.1):
+  - RNDeviceInfo (8.0.2):
     - React-Core
   - RNFS (2.16.6):
     - React
-  - RNGestureHandler (1.10.2):
+  - RNGestureHandler (1.10.3):
     - React-Core
   - RNReanimated (1.13.2):
     - React-Core
@@ -572,9 +572,9 @@ SPEC CHECKSUMS:
   ReactCommon: 33191ccc8250b4e206884a1e3b68b2011b6b7899
   RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
   RNCMaskedView: 87b54b03b0e48e1c30148f9ed413374721ec1e80
-  RNDeviceInfo: 921a809eaf9de79645a24de1c6ca90db6cb91786
+  RNDeviceInfo: a9601119924a67d2479d3facf04cec7b658f44ed
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
-  RNGestureHandler: e66feb0fda7da74ea6a3094656b3c1efe05f5c07
+  RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNReanimated: e03f7425cb7a38dcf1b644d680d1bfc91c3337ad
   RNScreens: f0d7a2a440a8ba9f4574ca1ddb3368f473891be4
   RNShare: 8af5349f05fc042d230674dd650d19789187ff9c
