@@ -142,7 +142,7 @@ android {
         applicationId 'io.robertying.learnx'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1600
+        versionCode 9201620
         versionName '12.1.0'
     }
     splits {
