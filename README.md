@@ -1,92 +1,77 @@
 <div align="center">
 
+![logo](./docs/assets/logo.png)
+
 <h1>learnX</h1>
-
-[![Build Status](https://travis-ci.com/robertying/learnX.svg?branch=master)](https://travis-ci.com/robertying/learnX)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/robertying/learnX)](https://github.com/robertying/learnX/releases)
-[![Platform iOS](https://img.shields.io/badge/platform-ios-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone)
-[![Platform iPadOS](https://img.shields.io/badge/platform-ipados-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=ipad)
-[![Platform macOS](https://img.shields.io/badge/platform-macos-brightgreen)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac)
-[![Platform Android](https://img.shields.io/badge/platform-android-brightgreen)](https://play.google.com/store/apps/details?id=io.robertying.learnx)
-
-![logo](./docs/logo.png)
 
 清华大学网络学堂 App，以 React Native 构建
 
 App for Tsinghua University Web Learning, developed with React Native ⚛️
 
+[![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/robertying/learnX?color=brightgreen)](https://github.com/robertying/learnX/releases)
+[![Platform iOS](https://img.shields.io/badge/platform-ios-blue)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone)
+[![Platform iPadOS](https://img.shields.io/badge/platform-ipados-blue)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=ipad)
+[![Platform macOS](https://img.shields.io/badge/platform-macos-blue)](https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac)
+[![Platform Android](https://img.shields.io/badge/platform-android-red)](https://play.google.com/store/apps/details?id=io.robertying.learnx)
+
 <div align="center">
-    <img src="./docs/screenshots/1.png" height="400" />
-    <img src="./docs/screenshots/6.png" height="400" />
+    <img src="./docs/screenshots/iphone.png" alt="iphone screenshot" height="400" />
+    <img src="./docs/screenshots/mac.png" alt="mac screenshot" height="400" />
 </div>
 
 </div>
 
-## Download
+## 下载
 
 <a href='https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone'>
-    <img align="center" height=50 alt='Download on the App Store' src='docs/assets/Download_on_the_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
+    <img align="center" height=50 alt='App Store 下载' src='docs/assets/Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917.svg' />
 </a>
 <a href='https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac'>
-    <img align="center" height=50 alt='Download on the Mac App Store' src='docs/assets/Download_on_the_Mac_App_Store_Badge_US-UK_RGB_blk_092917.svg' />
+    <img align="center" height=50 alt='Mac App Store 下载' src='docs/assets/Download_on_the_Mac_App_Store_Badge_CNSC_RGB_blk_092917.svg' />
 </a>
 <a href='https://play.google.com/store/apps/details?id=io.robertying.learnx'>
-    <img align="center" height=72 alt='Get it on Google Play' src='docs/assets/google-play-badge.svg' />
+    <img align="center" height=72 alt='下载应用，请到 Google Play' src='docs/assets/google-play-badge.png' />
 </a>
 
-### Android Alternatives
+### 其他下载方式
 
-- **[TUNA Mirror](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
+#### Android
 
-- [Self-hosted GitHub Release mirror (CDN)](https://app.robertying.io/download/learnX)
-
-- [GitHub Releases](https://github.com/robertying/learnX/releases)
-
-### iOS Alternatives
-
-- [TestFlight Beta](https://testflight.apple.com/join/5SPCH86w)
-
-### macOS Alternatives
+- **[TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
-## App Features
+#### iOS
 
-### Basic
+- [TestFlight 测试](https://testflight.apple.com/join/5SPCH86w)
 
-- Get a glance of the newest notices published by teachers.
-- Preview or download uploaded files of each course.
-- See any assignment detail while keeping track of deadlines.
+#### macOS
 
-### Advanced
+- [GitHub Releases](https://github.com/robertying/learnX/releases)
 
-- Push notifications (unofficial)
-- Submit assignments
-- Add to Favorites
-- Set a reminder
-- Hide courses
-- Pin at the top
-- Dark mode
-- Course schedule calendar sync
-- Assignment calendar/reminder sync
-- Search
-- Switch among semesters
+## 功能
 
-## Project Features
+> 注意：本应用只适用于清华大学学生
 
-This project also serves as a demonstration of how to build a React Native app featuring:
+### 基础功能
 
-- Latest React Native (0.63)
-- Mac Catalyst
-- Dark Mode for iOS / Dark Theme for Android
-- CocoaPods / AndroidX
-- Redux
-- TypeScript
-- Detox e2e tests (iOS & Android)
-- Continuous integration (Travis CI)
-- Automatic deployment (Fastlane)
+- 第一时间看到老师最新发布的通知及其附件
+- 预览或下载课程文件，将文件分享到其他应用
+- 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况
 
-## License
+### 高级功能
+
+- 课表日历同步
+- Deadline 日历同步
+- 归档内容
+- 提交作业
+- 收藏内容
+- 隐藏课程
+- 暗黑模式
+- 全局搜索
+- 切换学期
+
+## 开源协议 License
 
 以 MIT 许可证开源，但**不包含**下列情况：
 
