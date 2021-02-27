@@ -20,7 +20,6 @@ import {ScreenParams} from 'screens/types';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
-import DeviceInfo from 'constants/DeviceInfo';
 
 const AssignmentDetail: React.FC<
   StackScreenProps<ScreenParams, 'AssignmentDetail'>
@@ -93,7 +92,7 @@ const AssignmentDetail: React.FC<
   }, [navigation, disableAnimation]);
 
   useEffect(() => {
-    if (!DeviceInfo.isMac() && dayjs().isBefore(dayjs(deadline))) {
+    if (dayjs().isBefore(dayjs(deadline))) {
       navigation.setOptions({
         headerRight: () => (
           <IconButton
