@@ -1,10 +1,4 @@
----
-title: learnX - 隐私政策
-permalink: /cn/privacy
-layout: default_cn
----
-
-# 隐私政策
+# learnX 隐私政策
 
 Rui Ying 将 learnX 应用程序构建为免费应用程序。本服务由 Rui Ying 免费提供，旨在按原样使用。
 
@@ -22,10 +16,9 @@ Rui Ying 将 learnX 应用程序构建为免费应用程序。本服务由 Rui Y
 
 可能使用的第三方服务提供商的隐私政策：
 
-- [Google Play 服务](https://www.google.com/policies/privacy/)
-- [Firebase Analytics](https://firebase.google.com/policies/analytics)
-- [Fabric](https://fabric.io/privacy)
-- [Crashlytics](http://try.crashlytics.com/terms/privacy-policy.pdf)
+- [Google Play 服务](https://policies.google.com/privacy)
+- [Firebase](https://firebase.google.com/policies/analytics)
+- [Visual Studio App Center](https://docs.microsoft.com/zh-cn/appcenter/gdpr/data-from-your-end-users)
 
 ## 日志数据
 

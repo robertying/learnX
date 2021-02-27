@@ -1,10 +1,4 @@
----
-title: learnX - Privacy Policy
-permalink: /en/privacy
-layout: default_cn
----
-
-# Privacy Policy
+# learnX Privacy Policy
 
 Rui Ying built the learnX app as a Free app. This SERVICE is provided by Rui Ying at no cost and is intended for use as is.
 
@@ -22,10 +16,9 @@ The app does use third party services that may collect information used to ident
 
 Link to privacy policy of third party service providers that may be used by the app:
 
-- [Google Play Services](https://www.google.com/policies/privacy/)
-- [Firebase Analytics](https://firebase.google.com/policies/analytics)
-- [Fabric](https://fabric.io/privacy)
-- [Crashlytics](http://try.crashlytics.com/terms/privacy-policy.pdf)
+- [Google Play Services](https://policies.google.com/privacy)
+- [Firebase](https://firebase.google.com/policies/analytics)
+- [Visual Studio App Center](https://docs.microsoft.com/zh-cn/appcenter/gdpr/data-from-your-end-users)
 
 ## Log Data
 
