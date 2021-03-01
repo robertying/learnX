@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "12.1.0",
+  "version": "12.1.1",
   "private": true,
   "scripts": {
     "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
@@ -42,7 +42,7 @@
     "darkreader": "4.9.27",
     "dayjs": "1.10.4",
     "dotenv": "8.2.0",
-    "eslint": "7.20.0",
+    "eslint": "7.21.0",
     "expo-calendar": "9.0.0",
     "expo-file-system": "10.0.0",
     "expo-haptics": "9.0.0",
@@ -53,7 +53,7 @@
     "jest": "26.6.3",
     "metro-react-native-babel-preset": "0.65.1",
     "mime-types": "2.1.29",
-    "patch-package": "6.2.2",
+    "patch-package": "6.4.2",
     "path": "0.12.7",
     "postinstall-postinstall": "2.1.0",
     "prettier": "2.2.1",
