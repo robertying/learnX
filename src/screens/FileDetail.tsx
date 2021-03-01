@@ -13,7 +13,7 @@ import WebView from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import {needWhiteBackground} from 'helpers/html';
+import {canRenderInMacWebview, needWhiteBackground} from 'helpers/html';
 import {downloadFile, openFile, shareFile} from 'helpers/fs';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
@@ -128,7 +128,10 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
           </Text>
         </View>
       ) : path ? (
-        Platform.OS === 'ios' ? (
+        (Platform.OS === 'ios' && !DeviceInfo.isMac()) ||
+        (Platform.OS === 'ios' &&
+          DeviceInfo.isMac() &&
+          canRenderInMacWebview(fileType)) ? (
           <WebView
             ref={webViewRef}
             style={{

@@ -1,3 +1,5 @@
+import mime from 'mime-types';
+
 declare const preval: any;
 
 export const darkreader = preval`
@@ -51,6 +53,16 @@ export const getWebViewTemplate = (
 
 export const needWhiteBackground = (ext: string) => {
   return ['doc', 'docx', 'xls', 'xlsx'].includes(ext);
+};
+
+export const canRenderInMacWebview = (ext: string) => {
+  console.log(mime.lookup(ext));
+  return (
+    ext === 'pdf' ||
+    (mime.lookup(ext) !== false &&
+      mime.lookup(ext).toString().includes('image/') &&
+      !mime.lookup(ext).toString().includes('vnd.'))
+  );
 };
 
 export const removeTags = (html?: string) => {
