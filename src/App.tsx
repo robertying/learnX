@@ -438,7 +438,7 @@ const MainTab = () => {
         inactiveTintColor: 'gray',
         adaptive: windowSize.width >= 750 ? false : true,
         labelStyle: {
-          marginBottom: 5,
+          marginBottom: 4,
         },
       }}>
       <MainNavigator.Screen
