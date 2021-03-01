@@ -10,6 +10,7 @@
     "ios": "react-native run-ios",
     "test": "jest",
     "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "tsc --noUnusedLocals",
     "prettier": "prettier --write src/**/*",
     "release": "appcenter codepush release-react -a robertying/learnX-iOS && appcenter codepush release-react -a robertying/learnX-Android"
   },

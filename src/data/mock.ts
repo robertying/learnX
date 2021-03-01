@@ -34,6 +34,7 @@ const mockStore: PersistAppState = {
       file: 'all',
       course: 'all',
     },
+    lastShowChangelogVersion: null,
     _persist: {
       rehydrated: true,
       version: -1,
