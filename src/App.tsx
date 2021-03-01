@@ -437,6 +437,9 @@ const MainTab = () => {
         activeTintColor: theme.colors.primary,
         inactiveTintColor: 'gray',
         adaptive: windowSize.width >= 750 ? false : true,
+        labelStyle: {
+          marginBottom: 5,
+        },
       }}>
       <MainNavigator.Screen
         name="NoticeStack"
