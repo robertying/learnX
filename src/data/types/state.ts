@@ -141,7 +141,7 @@ export interface File {
   title: string;
   description: string;
   size: string;
-  fileType: string;
+  fileType?: string | null;
   markedImportant: boolean;
   isNew: boolean;
   uploadTime: string;

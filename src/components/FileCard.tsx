@@ -65,7 +65,7 @@ const FileCard: React.FC<FileCardProps> = ({
           <Paragraph numberOfLines={2}>{removeTags(description)}</Paragraph>
         ) : null}
         <View style={Styles.flexRowCenter}>
-          <Caption>{`${fileType.toUpperCase()} ${size}`}</Caption>
+          <Caption>{`${fileType?.toUpperCase() ?? ''} ${size}`}</Caption>
           <Caption>{dayjs(uploadTime).fromNow()}</Caption>
         </View>
       </View>
