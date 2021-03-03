@@ -43,6 +43,10 @@ const submitAssignment = async (
   }
 
   try {
+    await dataSource.login();
+  } catch {}
+
+  try {
     const res = await axios.post(submitAssignmentUrl, body, {
       onUploadProgress: (e) => onProgress?.(e.loaded / e.total),
     });
