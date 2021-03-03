@@ -57,17 +57,20 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
     await shareFile(route.params);
   }, [route.params]);
 
-  const handleOpen = async () => {
-    if (Platform.OS === 'android') {
-      try {
+  const handleOpen = useCallback(async () => {
+    try {
+      if (Platform.OS === 'android') {
         await openFile(path, fileType);
-      } catch {
-        toast('文件打开失败', 'error');
+      } else {
+        await Linking.openURL(path);
       }
-    } else {
-      await Linking.openURL(path);
+    } catch {
+      toast(
+        '文件打开失败。请重新下载文件或确保存在可打开此文件类型的应用。',
+        'error',
+      );
     }
-  };
+  }, [fileType, path, toast]);
 
   useLayoutEffect(() => {
     if (disableAnimation) {
@@ -108,7 +111,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
           {DeviceInfo.isMac() && (
             <IconButton
               disabled={error || !path}
-              onPress={() => Linking.openURL(path)}
+              onPress={handleOpen}
               icon={(props) => <Icon {...props} name="open-in-new" />}
             />
           )}
@@ -118,6 +121,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
   }, [
     error,
     handleDownload,
+    handleOpen,
     handleShare,
     navigation,
     path,
