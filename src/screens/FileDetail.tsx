@@ -53,6 +53,22 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
     [route.params, toast],
   );
 
+  const handleShare = useCallback(async () => {
+    await shareFile(route.params);
+  }, [route.params]);
+
+  const handleOpen = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        await openFile(path, fileType);
+      } catch {
+        toast('文件打开失败', 'error');
+      }
+    } else {
+      await Linking.openURL(path);
+    }
+  };
+
   useLayoutEffect(() => {
     if (disableAnimation) {
       navigation.setOptions({
@@ -86,7 +102,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
           <IconButton
             style={DeviceInfo.isMac() ? Styles.mr0 : undefined}
             disabled={error || !path}
-            onPress={() => shareFile(route.params)}
+            onPress={handleShare}
             icon={(props) => <Icon {...props} name="ios-share" />}
           />
           {DeviceInfo.isMac() && (
@@ -102,9 +118,9 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
   }, [
     error,
     handleDownload,
+    handleShare,
     navigation,
     path,
-    route.params,
     showMaster,
     toggleMaster,
   ]);
@@ -148,19 +164,11 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
         ) : (
           <View style={styles.actions}>
             <View style={styles.colCenter}>
-              <IconButton
-                icon="share"
-                size={48}
-                onPress={() => shareFile(route.params)}
-              />
+              <IconButton icon="share" size={48} onPress={handleShare} />
               <Text style={Styles.spacey1}>分享</Text>
             </View>
             <View style={styles.colCenter}>
-              <IconButton
-                icon="open-in-new"
-                size={48}
-                onPress={() => openFile(path, fileType)}
-              />
+              <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
               <Text style={Styles.spacey1}>打开</Text>
             </View>
           </View>
