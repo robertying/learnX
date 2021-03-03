@@ -1,11 +1,11 @@
 diff --git a/node_modules/react-native/scripts/react-native-xcode.sh b/node_modules/react-native/scripts/react-native-xcode.sh
-index 9b059a6..1fbe49b 100755
+index 09b6c40..a6aef24 100755
 --- a/node_modules/react-native/scripts/react-native-xcode.sh
 +++ b/node_modules/react-native/scripts/react-native-xcode.sh
-@@ -148,6 +148,10 @@ case "$PLATFORM_NAME" in
+@@ -127,6 +127,10 @@ case "$PLATFORM_NAME" in
      ;;
  esac
-
+ 
 +if [ "${IS_MACCATALYST}" = "YES" ]; then
 +  BUNDLE_PLATFORM="ios"
 +fi
