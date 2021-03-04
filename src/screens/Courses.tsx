@@ -1,7 +1,8 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {StackScreenProps} from '@react-navigation/stack';
 import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
+import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
@@ -26,8 +27,30 @@ const Courses: React.FC<StackScreenProps<ScreenParams, 'Courses'>> = ({
   const hiddenIds = useTypedSelector((state) => state.courses.hidden);
   const fetching = useTypedSelector((state) => state.courses.fetching);
 
-  const all = courses.filter((i) => !hiddenIds.includes(i.id));
-  const hidden = courses.filter((i) => hiddenIds.includes(i.id));
+  const notices = useTypedSelector((state) => state.notices.items);
+  const assignments = useTypedSelector((state) => state.assignments.items);
+  const files = useTypedSelector((state) => state.files.items);
+
+  const coursesWithCounts = useMemo(() => {
+    return courses.map((course) => ({
+      ...course,
+      unreadNoticeCount: notices.filter(
+        (notice) => notice.courseId === course.id && !notice.hasRead,
+      ).length,
+      unfinishedAssignmentCount: assignments.filter(
+        (assignment) =>
+          assignment.courseId === course.id &&
+          !assignment.submitted &&
+          dayjs(assignment.deadline).isAfter(dayjs()),
+      ).length,
+      unreadFileCount: files.filter(
+        (file) => file.courseId === course.id && file.isNew,
+      ).length,
+    }));
+  }, [assignments, courses, files, notices]);
+
+  const all = coursesWithCounts.filter((i) => !hiddenIds.includes(i.id));
+  const hidden = coursesWithCounts.filter((i) => hiddenIds.includes(i.id));
 
   const handleRefresh = () => {
     if (loggedIn && currentSemesterId) {
