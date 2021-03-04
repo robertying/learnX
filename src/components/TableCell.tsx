@@ -71,7 +71,7 @@ const TableCell: React.FC<TableCellProps> = ({
             style={styles.icon}
             size={48}
             icon="account"
-            color={theme.colors.text}
+            color={theme.colors.background}
           />
         ) : null}
         {iconName ? (

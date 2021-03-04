@@ -82,11 +82,6 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
     <SafeArea>
       <ScrollView style={Styles.flex1}>
         <TableCell
-          imageSrc={
-            userInfo.avatarUrl
-              ? {uri: userInfo.avatarUrl, cache: 'force-cache'}
-              : undefined
-          }
           imageAlt={userInfo.name ?? username ?? 'learnX'}
           primaryText={userInfo.name ?? username ?? 'learnX'}
           secondaryText={userInfo.department ?? undefined}
