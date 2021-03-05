@@ -21,8 +21,11 @@ const ToastProvider: React.FC = ({children}) => {
 
   const handleToast = useCallback(
     (text: string, type: ToastType, duration?: number) => {
+      setToastDuration(
+        duration ??
+          (type === 'success' ? 3000 : type === 'warning' ? 4000 : 5000),
+      );
       setToastText(text);
-      setToastDuration(duration ?? 3000);
       if (text) {
         Haptics.notificationAsync(
           type === 'success'
