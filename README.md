@@ -52,24 +52,34 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 ## 功能 Features
 
 > 注意：本应用只适用于清华大学学生
+>
+> Attention: this App is only for Tsinghua University students
 
 ### 基础功能 Basic
 
 - 第一时间看到老师最新发布的通知及其附件
+
+  Get a glance of the newest notices published by teachers
+
 - 预览或下载课程文件，将文件分享到其他应用
+
+  Preview or download uploaded files of each course
+
 - 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况
+
+  See any assignment detail while keeping track of deadlines
 
 ### 高级功能 Advanced
 
-- 课表日历同步
-- Deadline 日历同步
-- 归档内容
-- 提交作业
-- 收藏内容
-- 隐藏课程
-- 暗黑模式
-- 全局搜索
-- 切换学期
+- 课表日历同步 Course schedule calendar sync
+- 作业日历/提醒事项同步 Assignment calendar/reminder sync
+- 归档内容 Archiving read posts
+- 提交作业 Submitting assignments
+- 收藏内容 Adding to Favorites
+- 隐藏课程 Hiding courses
+- 暗黑模式 Dark mode
+- 全局搜索 Global search
+- 切换学期 Switching among semesters
 
 ## 开源协议 License
 
