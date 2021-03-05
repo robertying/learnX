@@ -184,6 +184,11 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
           <Skeleton />
           <Skeleton />
           <Skeleton />
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
         </SafeArea>
       )}
       {progress ? (
