@@ -14,13 +14,14 @@
 		D40C629F25E8DE9B002C1255 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40C629E25E8DE9B002C1255 /* Assets.xcassets */; };
 		D40C62A225E8DEE7002C1255 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D40C62A125E8DEE7002C1255 /* AppCenter-Config.plist */; };
 		D40C638B25E8E761002C1255 /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40C638A25E8E761002C1255 /* Dummy.swift */; };
+		D435441F25F122D4004A5B82 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D435442125F122D4004A5B82 /* InfoPlist.strings */; };
+		D479A49E25F2540A0096EAB7 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D435442525F1243E004A5B82 /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* learnX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = learnX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = learnX/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = learnX/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = learnX/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = learnX/main.m; sourceTree = "<group>"; };
 		1F58862032F50AAC2089FEB0 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		38477ABDF9561E7AE0BB02AE /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
@@ -31,6 +32,9 @@
 		D40C62A425E8DF37002C1255 /* learnX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 		D40C638A25E8E761002C1255 /* Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Dummy.swift; path = learnX/Dummy.swift; sourceTree = "<group>"; };
 		D40C638D25E8E791002C1255 /* learnX-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "learnX-Bridging-Header.h"; path = "learnX/learnX-Bridging-Header.h"; sourceTree = "<group>"; };
+		D435442025F122D4004A5B82 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D435442325F122D9004A5B82 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		D435442525F1243E004A5B82 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = learnX/Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -55,7 +59,8 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				D40C629E25E8DE9B002C1255 /* Assets.xcassets */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
-				13B07FB61A68108700A75B9A /* Info.plist */,
+				D435442525F1243E004A5B82 /* Info.plist */,
+				D435442125F122D4004A5B82 /* InfoPlist.strings */,
 				D40C62A125E8DEE7002C1255 /* AppCenter-Config.plist */,
 				D40C62A425E8DF37002C1255 /* learnX.entitlements */,
 			);
@@ -130,7 +135,7 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1210;
+				LastUpgradeCheck = 1240;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1240;
@@ -139,10 +144,11 @@
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "learnX" */;
 			compatibilityVersion = "Xcode 12.0";
-			developmentRegion = "zh-Hans";
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				Base,
+				en,
 				"zh-Hans",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
@@ -162,6 +168,8 @@
 			files = (
 				D40C629F25E8DE9B002C1255 /* Assets.xcassets in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				D435441F25F122D4004A5B82 /* InfoPlist.strings in Resources */,
+				D479A49E25F2540A0096EAB7 /* Info.plist in Resources */,
 				D40C62A225E8DEE7002C1255 /* AppCenter-Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -255,6 +263,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		D435442125F122D4004A5B82 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D435442025F122D4004A5B82 /* en */,
+				D435442325F122D9004A5B82 /* zh-Hans */,
+			);
+			name = InfoPlist.strings;
+			path = learnX;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
@@ -450,6 +471,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

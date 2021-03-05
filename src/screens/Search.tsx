@@ -7,9 +7,11 @@ import {
   View,
 } from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
+import {StackActions} from '@react-navigation/native';
 import {Searchbar, Subheading, useTheme} from 'react-native-paper';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
+import useDetailNavigator from 'hooks/useDetailNavigator';
 import Styles from 'constants/Styles';
 import {useTypedSelector} from 'data/store';
 import {Notice, Assignment, File} from 'data/types/state';
@@ -18,9 +20,8 @@ import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
+import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
-import useDetailNavigator from 'hooks/useDetailNavigator';
-import {StackActions} from '@react-navigation/native';
 
 const Search: React.FC<StackScreenProps<ScreenParams, 'Search'>> = ({
   navigation,
@@ -63,7 +64,7 @@ const Search: React.FC<StackScreenProps<ScreenParams, 'Search'>> = ({
       <View style={Styles.flex1}>
         <Searchbar
           style={styles.searchBar}
-          placeholder="搜索通知、作业、文件……"
+          placeholder={t('searchPlaceholder')}
           onChangeText={setSearchQuery}
           value={searchQuery}
           autoFocus
@@ -80,9 +81,13 @@ const Search: React.FC<StackScreenProps<ScreenParams, 'Search'>> = ({
           <SectionList<Notice | Assignment | File>
             contentContainerStyle={{paddingBottom: safeAreaInsets.bottom}}
             sections={[
-              {key: 'notice', title: '通知', data: noticeResult},
-              {key: 'assignment', title: '作业', data: assignmentResult},
-              {key: 'file', title: '文件', data: fileResult},
+              {key: 'notice', title: t('notices'), data: noticeResult},
+              {
+                key: 'assignment',
+                title: t('assignments'),
+                data: assignmentResult,
+              },
+              {key: 'file', title: t('files'), data: fileResult},
             ]}
             keyExtractor={(item) => item.id}
             renderItem={({item, section: {key}}) =>

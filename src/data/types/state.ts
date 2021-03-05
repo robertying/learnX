@@ -50,6 +50,7 @@ export interface Course {
   semesterId: string;
   id: string;
   name: string;
+  englishName: string;
   teacherName: string;
   timeAndLocation: string[];
   teacherNumber: string;

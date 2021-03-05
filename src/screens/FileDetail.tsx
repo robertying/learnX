@@ -15,6 +15,7 @@ import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {canRenderInMacWebview, needWhiteBackground} from 'helpers/html';
 import {downloadFile, openFile, shareFile} from 'helpers/fs';
+import {t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
@@ -47,7 +48,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
         setProgress(0);
       } catch (e) {
         setError(true);
-        toast('文件下载失败', 'error');
+        toast(t('fileDownloadFailed'), 'error');
       }
     },
     [route.params, toast],
@@ -65,10 +66,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
         await Linking.openURL(path);
       }
     } catch {
-      toast(
-        '文件打开失败。请重新下载文件或确保存在可打开此文件类型的应用。',
-        'error',
-      );
+      toast(t('openFileFailed'), 'error');
     }
   }, [fileType, path, toast]);
 
@@ -82,7 +80,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
 
   useEffect(() => {
     navigation.setOptions({
-      headerBackTitle: '返回',
+      headerBackTitle: t('back'),
       headerRight: () => (
         <View style={Styles.flexRow}>
           {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
@@ -144,7 +142,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
             size={56}
           />
           <Text style={[Styles.spacey1, {color: theme.colors.placeholder}]}>
-            文件下载失败，请重试
+            {t('fileDownloadFailed')}
           </Text>
         </View>
       ) : path ? (
@@ -169,11 +167,11 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
           <View style={styles.actions}>
             <View style={styles.colCenter}>
               <IconButton icon="share" size={48} onPress={handleShare} />
-              <Text style={Styles.spacey1}>分享</Text>
+              <Text style={Styles.spacey1}>{t('share')}</Text>
             </View>
             <View style={styles.colCenter}>
               <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
-              <Text style={Styles.spacey1}>打开</Text>
+              <Text style={Styles.spacey1}>{t('open')}</Text>
             </View>
           </View>
         )

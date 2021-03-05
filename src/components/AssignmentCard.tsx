@@ -13,6 +13,7 @@ import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import {Assignment} from 'data/types/state';
 import {removeTags} from 'helpers/html';
+import {getLocale} from 'helpers/i18n';
 import CardWrapper, {CardWrapperProps} from 'components/CardWrapper';
 
 export interface AssignmentCardProps extends CardWrapperProps {
@@ -86,9 +87,13 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         <View style={Styles.flexRowCenter}>
           <Caption>{courseTeacherName}</Caption>
           <Caption>
-            {dayjs().isAfter(dayjs(deadline))
-              ? dayjs().to(dayjs(deadline)) + '截止'
-              : '还剩 ' + dayjs().to(dayjs(deadline), true)}
+            {getLocale().startsWith('zh')
+              ? dayjs().isAfter(dayjs(deadline))
+                ? dayjs().to(dayjs(deadline)) + '截止'
+                : '还剩 ' + dayjs().to(dayjs(deadline), true)
+              : dayjs().isAfter(dayjs(deadline))
+              ? 'closed ' + dayjs().to(dayjs(deadline))
+              : 'due in ' + dayjs().to(dayjs(deadline), true)}
           </Caption>
         </View>
       </View>

@@ -3,6 +3,7 @@ import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
 import {Badge, Colors, List, Surface, Text} from 'react-native-paper';
 import Animated, {Easing} from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import {t} from 'helpers/i18n';
 
 export type FilterSelection =
   | 'all'
@@ -135,7 +136,7 @@ const Filter: React.FC<FilterProps> = ({
         {unfinishedCount !== undefined ? (
           <ListItem
             name="unfinished"
-            text="未完成"
+            text={t('unfinished')}
             count={unfinishedCount}
             badgeColor={Colors.orange500}
           />
@@ -143,21 +144,21 @@ const Filter: React.FC<FilterProps> = ({
         {unfinishedCount !== undefined ? (
           <ListItem
             name="finished"
-            text="已完成"
+            text={t('finished')}
             count={allCount - unfinishedCount}
             badgeColor={Colors.green500}
           />
         ) : null}
         <ListItem
           name="all"
-          text="全部"
+          text={t('all')}
           count={allCount}
           badgeColor={Colors.grey500}
         />
         {unreadCount !== undefined ? (
           <ListItem
             name="unread"
-            text="未读"
+            text={t('unread')}
             count={unreadCount}
             badgeColor={Colors.blue500}
           />
@@ -165,7 +166,7 @@ const Filter: React.FC<FilterProps> = ({
         {favCount !== undefined ? (
           <ListItem
             name="fav"
-            text="收藏"
+            text={t('fav')}
             count={favCount}
             badgeColor={Colors.red500}
           />
@@ -173,14 +174,14 @@ const Filter: React.FC<FilterProps> = ({
         {archivedCount !== undefined ? (
           <ListItem
             name="archived"
-            text="归档"
+            text={t('archived')}
             count={archivedCount}
             badgeColor={Colors.grey500}
           />
         ) : null}
         <ListItem
           name="hidden"
-          text="屏蔽"
+          text={t('hidden')}
           count={hiddenCount}
           badgeColor={Colors.grey500}
         />

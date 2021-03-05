@@ -6,6 +6,7 @@ import {
   SET_HIDE_COURSE,
 } from 'data/types/constants';
 import {CoursesState} from 'data/types/state';
+import {getLocale} from 'helpers/i18n';
 
 export default function courses(
   state: CoursesState = {
@@ -31,7 +32,10 @@ export default function courses(
         names: action.payload.reduce(
           (prev, curr) => ({
             ...prev,
-            [curr.id]: {name: curr.name, teacherName: curr.teacherName},
+            [curr.id]: {
+              name: getLocale().startsWith('zh') ? curr.name : curr.englishName,
+              teacherName: curr.teacherName,
+            },
           }),
           {},
         ),

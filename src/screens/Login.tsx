@@ -22,12 +22,13 @@ import {FailReason} from 'thu-learn-lib-no-native/lib/types';
 import useToast from 'hooks/useToast';
 import {useTypedSelector} from 'data/store';
 import {login} from 'data/actions/auth';
+import {setMockStore} from 'data/actions/root';
 import {setSetting} from 'data/actions/settings';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 import env from 'helpers/env';
-import {setMockStore} from 'data/actions/root';
+import {t} from 'helpers/i18n';
 
 const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
   const theme = useTheme();
@@ -52,12 +53,12 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
     Keyboard.dismiss();
 
     if (!username) {
-      toast('请输入用户名或学号', 'error');
+      toast(t('missingUsername'), 'error');
       return;
     }
 
     if (!password) {
-      toast('请输入密码', 'error');
+      toast(t('missingPassword'), 'error');
       return;
     }
 
@@ -75,9 +76,9 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
       if (loading && error && !loggingIn) {
         await new Promise((resolve) => setTimeout(resolve, 500));
         if (error?.reason === FailReason.BAD_CREDENTIAL) {
-          toast('账号或密码错误', 'error');
+          toast(t('credentialError'), 'error');
         } else {
-          toast('未知错误：' + error?.reason, 'error');
+          toast(t('unknownError') + error?.reason, 'error');
         }
         setLoading(false);
       }
@@ -100,7 +101,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
           />
           <TextInput
             style={styles.textInput}
-            label="用户名 / 学号"
+            label={t('usernameOrId')}
             textContentType="username"
             autoCompleteType="username"
             returnKeyType="next"
@@ -115,7 +116,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
           <TextInput
             ref={passwordTextInputRef}
             style={styles.textInput}
-            label="密码"
+            label={t('password')}
             textContentType="password"
             autoCompleteType="password"
             returnKeyType="done"
@@ -132,12 +133,10 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
                 dispatch(setSetting('graduate', checked))
               }
             />
-            <Text style={Styles.spacex1}>研究生</Text>
+            <Text style={Styles.spacex1}>{t('graduate')}</Text>
           </View>
           <View style={styles.noteContainer}>
-            <Caption style={styles.note}>
-              您的用户信息仅会被保存在本地，并经操作系统安全地加密
-            </Caption>
+            <Caption style={styles.note}>{t('securityNote')}</Caption>
           </View>
           <Button
             style={styles.button}
@@ -145,7 +144,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
             loading={loading}
             disabled={loading}
             onPress={handleLogin}>
-            登录
+            {t('login')}
           </Button>
         </KeyboardAvoidingView>
       </ScrollView>

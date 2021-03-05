@@ -10,6 +10,7 @@ import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
 import {ScreenParams} from 'screens/types';
 import {getWebViewTemplate} from 'helpers/html';
+import {getLocale, t} from 'helpers/i18n';
 import {stripExtension, getExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
 
@@ -34,7 +35,7 @@ const NoticeDetail: React.FC<
   const html = useMemo(
     () =>
       getWebViewTemplate(
-        content || '无通知内容',
+        content || t('noNoticeContent'),
         theme.dark,
         theme.colors.surface,
       ),
@@ -75,7 +76,11 @@ const NoticeDetail: React.FC<
           <View style={Styles.flexRowCenter}>
             <Caption>{publisher}</Caption>
             <Caption>
-              {dayjs(publishTime).format('YYYY 年 M 月 D 日 dddd HH:mm')}
+              {dayjs(publishTime).format(
+                getLocale().startsWith('zh')
+                  ? 'YYYY 年 M 月 D 日 dddd HH:mm'
+                  : 'MMM D, YYYY HH:mm',
+              )}
             </Caption>
           </View>
         </View>

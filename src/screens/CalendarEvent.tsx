@@ -14,6 +14,7 @@ import {
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'helpers/event';
+import {getLocale, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {ScreenParams} from './types';
@@ -53,17 +54,14 @@ const CalendarEvent: React.FC<
         graduate,
       );
       await saveCoursesToCalendar(events, today, monthFromToday);
-      toast('课表同步成功', 'success');
+      toast(t('courseScheduleSyncSucceeded'), 'success');
     } catch (err) {
       if ((err as Error).message === 'Missing calendar permission') {
-        toast('课表同步失败：请给予 App 日历访问权限', 'error');
+        toast(t('courseScheduleSyncNoCalendarPermission'), 'error');
       } else if ((err as Error).message === 'Missing reminder permission') {
-        toast('课表同步失败：请给予 App 提醒事项访问权限', 'error');
+        toast(t('courseScheduleSyncNoReminderPermission'), 'error');
       } else {
-        toast(
-          '课表同步失败：由于网络学堂日历 API 不稳定，请多次尝试，或明天再试；若三天内一直同步失败，请提交问题反馈',
-          'error',
-        );
+        toast(t('courseScheduleSyncRepetitiveError'), 'error');
       }
     } finally {
       setCourseSyncing(false);
@@ -79,11 +77,11 @@ const CalendarEvent: React.FC<
           await saveAssignmentsToReminderOrCalendar(assignments);
         } catch (err) {
           if ((err as Error).message === 'Missing calendar permission') {
-            toast('作业同步失败：请给予 App 日历访问权限', 'error');
+            toast(t('assignmentSyncNoCalendarPermission'), 'error');
           } else if ((err as Error).message === 'Missing reminder permission') {
-            toast('作业同步失败：请给予 App 提醒事项访问权限', 'error');
+            toast(t('assignmentSyncNoReminderPermission'), 'error');
           } else {
-            toast('作业同步失败：' + (err as Error).message, 'error');
+            toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
           }
         } finally {
           setAssignmentSyncing(false);
@@ -95,28 +93,28 @@ const CalendarEvent: React.FC<
 
   const handleCalendarDelete = () => {
     Alert.alert(
-      '删除已同步的日历与提醒事项',
-      '确定删除已同步的日历与提醒事项？该操作不可撤销。',
+      t('deleteSyncedCalendarsAndReminders'),
+      t('deleteSyncedCalendarsAndRemindersConfirmation'),
       [
         {
-          text: '取消',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: '确定',
+          text: t('ok'),
           onPress: async () => {
             try {
               await removeCalendars();
-              toast('删除成功', 'success');
+              toast(t('deleteSucceeded'), 'success');
             } catch (err) {
               if ((err as Error).message === 'Missing calendar permission') {
-                toast('删除失败：请给予 App 日历访问权限', 'error');
+                toast(t('deleteFailedNoCalendarPermission'), 'error');
               } else if (
                 (err as Error).message === 'Missing reminder permission'
               ) {
-                toast('删除失败：请给予 App 提醒事项访问权限', 'error');
+                toast(t('deleteFailedNoReminderPermission'), 'error');
               } else {
-                toast('删除失败：' + (err as Error).message, 'error');
+                toast(t('deleteFailed') + (err as Error).message, 'error');
               }
             }
           },
@@ -133,7 +131,7 @@ const CalendarEvent: React.FC<
       <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
         <TableCell
           iconName="people"
-          primaryText="研究生"
+          primaryText={t('graduate')}
           switchValue={graduate}
           onSwitchValueChange={(value) =>
             dispatch(setSetting('graduate', value))
@@ -142,14 +140,14 @@ const CalendarEvent: React.FC<
         />
         <TableCell
           iconName="event"
-          primaryText="同步课表"
+          primaryText={t('syncCourseSchedule')}
           type="none"
           onPress={handleCourseSync}
           loading={courseSyncing}
         />
         <TableCell
           iconName="access-alarm"
-          primaryText="上课提醒"
+          primaryText={t('classAlarm')}
           switchValue={alarms.courseAlarm}
           onSwitchValueChange={(value) =>
             dispatch(setSetting('alarms', {...alarms, courseAlarm: value}))
@@ -158,7 +156,7 @@ const CalendarEvent: React.FC<
         />
         {alarms.courseAlarm && (
           <TableCell
-            primaryText="上课多久前提醒（分钟）"
+            primaryText={t('classAlarmBefore')}
             inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
             onInputValueChange={(v) =>
               parseInt(v, 10) &&
@@ -173,13 +171,18 @@ const CalendarEvent: React.FC<
           />
         )}
         <Caption style={styles.caption}>
-          手动同步 30 天内的{graduate ? '研究生' : '本科生'}
-          课表到日历；请在更改提醒设置后重新同步以应用更改。
+          {getLocale().startsWith('zh')
+            ? `手动同步 30 天内的${
+                graduate ? '研究生' : '本科生'
+              }课表到日历；请在更改提醒设置后重新同步以应用更改。`
+            : `Manually sync 30-day ${
+                graduate ? 'graduate' : 'undergraduate'
+              } course schedule to your calendar. Please re-sync after any alarm setting change.`}
         </Caption>
         <TableCell
           style={styles.marginTop}
           iconName="event-note"
-          primaryText="作业自动同步"
+          primaryText={t('assignmentAutoSync')}
           switchValue={assignmentSync}
           onSwitchValueChange={handleAssignmentSync}
           type="switch"
@@ -187,7 +190,7 @@ const CalendarEvent: React.FC<
         />
         <TableCell
           iconName="access-alarm"
-          primaryText="作业提醒"
+          primaryText={t('assignmentAlarm')}
           switchValue={alarms.assignmentAlarm}
           onSwitchValueChange={(value) =>
             dispatch(setSetting('alarms', {...alarms, assignmentAlarm: value}))
@@ -197,7 +200,7 @@ const CalendarEvent: React.FC<
         />
         {alarms.assignmentAlarm && (
           <TableCell
-            primaryText="截止时间多久前提醒（分钟）"
+            primaryText={t('assignmentAlarmOffset')}
             inputValue={(alarms.assignmentAlarmOffset ?? 24 * 60).toString()}
             onInputValueChange={(v) =>
               parseInt(v, 10) &&
@@ -214,7 +217,7 @@ const CalendarEvent: React.FC<
         {Platform.OS === 'ios' ? (
           <TableCell
             iconName="event-available"
-            primaryText="同步作业到日历"
+            primaryText={t('syncAssignmentsToCalendar')}
             switchValue={syncAssignmentsToCalendar}
             onSwitchValueChange={(value) =>
               dispatch(setSetting('syncAssignmentsToCalendar', value))
@@ -223,15 +226,22 @@ const CalendarEvent: React.FC<
           />
         ) : null}
         <Caption style={styles.caption}>
-          {Platform.OS === 'ios' && !syncAssignmentsToCalendar
-            ? '每次刷新后，作业会自动同步到“提醒事项”；'
-            : '每次刷新后，作业会自动同步到“日历”；'}
-          已屏蔽课程的作业或已过期的作业不会被同步；请在更改提醒或同步设置后刷新作业以应用更改。
+          {getLocale().startsWith('zh')
+            ? `${
+                Platform.OS === 'ios' && !syncAssignmentsToCalendar
+                  ? '每次刷新后，作业会自动同步到“提醒事项”；'
+                  : '每次刷新后，作业会自动同步到“日历”；'
+              }已屏蔽课程的作业或已过期的作业不会被同步；请在更改提醒或同步设置后刷新作业以应用更改。`
+            : `${
+                Platform.OS === 'ios' && !syncAssignmentsToCalendar
+                  ? 'Assignments will be synced to Reminders every time after refreshing. '
+                  : 'Assignments will be synced to Calendar every time after refreshing. '
+              }Assignments that are hidden or have passed the due date will not be synced. Please refresh assignments after any alarm or sync setting changes.`}
         </Caption>
         <TableCell
           style={styles.marginTop}
           iconName="event-busy"
-          primaryText="删除已同步的日历与提醒事项"
+          primaryText={t('deleteSyncedCalendarsAndReminders')}
           type="none"
           onPress={handleCalendarDelete}
         />

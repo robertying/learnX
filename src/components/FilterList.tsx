@@ -18,11 +18,12 @@ import {useTypedSelector} from 'data/store';
 import useToast from 'hooks/useToast';
 import {ScreenParams} from 'screens/types';
 import Styles from 'constants/Styles';
+import DeviceInfo from 'constants/DeviceInfo';
+import {getLocale, t} from 'helpers/i18n';
 import Filter, {FilterSelection} from './Filter';
 import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
 import {CardWrapperProps} from './CardWrapper';
-import DeviceInfo from 'constants/DeviceInfo';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
   data: T;
@@ -164,9 +165,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
 
     if (fav) {
-      toast('已从收藏移除', 'success');
+      toast(t('removeFromFav'), 'success');
     } else {
-      toast('已添加到收藏', 'success');
+      toast(t('addToFav'), 'success');
     }
   };
 
@@ -185,9 +186,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       }
 
       if (archived) {
-        toast('已撤销归档', 'success');
+        toast(t('undoArchive'), 'success');
       } else {
-        toast('已归档', 'success');
+        toast(t('archiveSucceeded'), 'success');
       }
 
       if (selectionMode) {
@@ -201,9 +202,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     dispatch(setHideCourse(id, !hidden));
 
     if (hidden) {
-      toast('已撤销屏蔽', 'success');
+      toast(t('undoHide'), 'success');
     } else {
-      toast('已屏蔽', 'success');
+      toast(t('hideSucceeded'), 'success');
     }
   };
 
@@ -243,9 +244,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
           />
         ),
-        headerTitle: `已选中 ${
-          Object.values(selection).filter((s) => s === true).length
-        } 个`,
+        headerTitle: getLocale().startsWith('zh')
+          ? `已选中 ${
+              Object.values(selection).filter((s) => s === true).length
+            } 个`
+          : `${
+              Object.values(selection).filter((s) => s === true).length
+            } selected`,
         headerTitleAlign: 'center',
       });
     } else {
@@ -293,16 +298,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               filterSelected === 'all'
                 ? defaultSubtitle
                 : filterSelected === 'unread'
-                ? '未读'
+                ? t('unread')
                 : filterSelected === 'fav'
-                ? '收藏'
+                ? t('fav')
                 : filterSelected === 'archived'
-                ? '归档'
+                ? t('archived')
                 : filterSelected === 'hidden'
-                ? '屏蔽'
+                ? t('hidden')
                 : filterSelected === 'unfinished'
-                ? '未完成'
-                : '已完成'
+                ? t('unfinished')
+                : t('finished')
             }
           />
         ),

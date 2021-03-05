@@ -6,6 +6,7 @@ import {useDispatch} from 'react-redux';
 import {useTypedSelector} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import {removeFileDir} from 'helpers/fs';
+import {getLocale, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import TableCell from 'components/TableCell';
@@ -24,21 +25,21 @@ const FileCache: React.FC<StackScreenProps<ScreenParams, 'FileCache'>> = (
 
   const handleClearCache = () => {
     Alert.alert(
-      '清空文件缓存',
-      '确定清空文件缓存？该操作不可撤销。',
+      t('clearFileCache'),
+      t('clearFileCacheConfirmation'),
       [
         {
-          text: '取消',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: '确定',
+          text: t('ok'),
           onPress: async () => {
             try {
               await removeFileDir();
-              toast('清空文件缓存成功', 'success');
+              toast(t('clearFileCacheSucceeded'), 'success');
             } catch (e) {
-              toast('清空文件缓存失败：' + (e as Error).message, 'error');
+              toast(t('clearFileCacheFailed') + (e as Error).message, 'error');
             }
           },
         },
@@ -54,7 +55,7 @@ const FileCache: React.FC<StackScreenProps<ScreenParams, 'FileCache'>> = (
       <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
         <TableCell
           iconName="cached"
-          primaryText="保存打开的文件到“文档”"
+          primaryText={t('fileUseDocumentDir')}
           switchValue={fileUseDocumentDir}
           onSwitchValueChange={(value) =>
             dispatch(setSetting('fileUseDocumentDir', value))
@@ -62,14 +63,18 @@ const FileCache: React.FC<StackScreenProps<ScreenParams, 'FileCache'>> = (
           type="switch"
         />
         <Caption style={styles.caption}>
-          {fileUseDocumentDir
-            ? '文件保存在 App 的“文档”中，只会随 App 卸载而被删除。'
-            : '文件保存在 App 的“缓存”中，会在设备空间不足或其他系统预设情况下被自动清除以节约空间。'}
+          {getLocale().startsWith('zh')
+            ? fileUseDocumentDir
+              ? '文件保存在 App 的“文档”中，只会随 App 卸载而被删除。'
+              : '文件保存在 App 的“缓存”中，会在设备空间不足或其他系统预设情况下被自动清除以节约空间。'
+            : fileUseDocumentDir
+            ? 'Files are saved in App Document folder and will only be deleted along with the App.'
+            : 'Files are saved in App Cache Folder and will be deleted by the system on demand.'}
         </Caption>
         <TableCell
           style={styles.marginTop}
           iconName="delete"
-          primaryText="清空文件缓存"
+          primaryText={t('clearFileCache')}
           type="none"
           onPress={handleClearCache}
         />

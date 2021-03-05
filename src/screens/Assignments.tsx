@@ -13,6 +13,7 @@ import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilteredData from 'hooks/useFilteredData';
 import useToast from 'hooks/useToast';
 import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
+import {t} from 'helpers/i18n';
 
 const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
   navigation,
@@ -74,11 +75,11 @@ const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
           await saveAssignmentsToReminderOrCalendar(assignmentState.items);
         } catch (err) {
           if ((err as Error).message === 'Missing calendar permission') {
-            toast('作业同步失败：请给予 App 日历访问权限', 'error');
+            toast(t('assignmentSyncNoCalendarPermission'), 'error');
           } else if ((err as Error).message === 'Missing reminder permission') {
-            toast('作业同步失败：请给予 App 提醒事项访问权限', 'error');
+            toast(t('assignmentSyncNoReminderPermission'), 'error');
           } else {
-            toast('作业同步失败：' + (err as Error).message, 'error');
+            toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
           }
         }
       })();

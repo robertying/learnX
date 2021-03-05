@@ -21,7 +21,7 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 
 </div>
 
-## 下载
+## 下载 Download
 
 <a href='https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone'>
     <img align="center" height=50 alt='App Store 下载' src='docs/assets/Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917.svg' />
@@ -33,33 +33,33 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
     <img align="center" height=72 alt='下载应用，请到 Google Play' src='docs/assets/google-play-badge.png' />
 </a>
 
-### 其他下载方式
+### 其他下载方式 Alternatives
 
 #### Android
 
-- **[TUNA 镜像（推荐）](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
+- **[TUNA 镜像（推荐） TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
 #### iOS
 
-- [TestFlight 测试](https://testflight.apple.com/join/5SPCH86w)
+- [TestFlight 测试 Beta](https://testflight.apple.com/join/5SPCH86w)
 
 #### macOS
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
-## 功能
+## 功能 Features
 
 > 注意：本应用只适用于清华大学学生
 
-### 基础功能
+### 基础功能 Basic
 
 - 第一时间看到老师最新发布的通知及其附件
 - 预览或下载课程文件，将文件分享到其他应用
 - 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况
 
-### 高级功能
+### 高级功能 Advanced
 
 - 课表日历同步
 - Deadline 日历同步

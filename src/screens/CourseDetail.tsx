@@ -22,6 +22,7 @@ import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
+import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 
 const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
@@ -154,9 +155,9 @@ const CourseDetail: React.FC<
 
   const [index, setIndex] = React.useState(0);
   const [routes] = React.useState([
-    {key: 'notice', title: '通知'},
-    {key: 'assignment', title: '作业'},
-    {key: 'file', title: '文件'},
+    {key: 'notice', title: t('notices')},
+    {key: 'assignment', title: t('assignments')},
+    {key: 'file', title: t('files')},
   ]);
 
   const renderLabel = ({

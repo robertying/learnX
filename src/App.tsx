@@ -33,8 +33,10 @@ import {PersistGate} from 'redux-persist/integration/react';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
+import {getLocale, t} from 'helpers/i18n';
 import Notices from 'screens/Notices';
 import Search from 'screens/Search';
 import NoticeDetail from 'screens/NoticeDetail';
@@ -76,7 +78,7 @@ import useToast from 'hooks/useToast';
 import packageJson from '../package.json';
 
 dayjs.extend(relativeTime);
-dayjs.locale('zh-cn');
+dayjs.locale(getLocale().startsWith('zh') ? 'zh-cn' : 'en');
 
 const BackButton = () => {
   const navigation = useNavigation();
@@ -141,7 +143,7 @@ const getDetailScreenOptions = () =>
     | 'AssignmentSubmission'
   >): StackNavigationOptions {
     return {
-      title: '返回',
+      title: t('back'),
       headerTitleAlign: 'center',
       headerTitleStyle: {
         fontSize: 17,
@@ -152,7 +154,9 @@ const getDetailScreenOptions = () =>
           {...props}
           title={
             (route.params as Course).semesterId
-              ? (route.params as Course).name
+              ? getLocale().startsWith('zh')
+                ? (route.params as Course).name
+                : (route.params as Course).englishName
               : (route.params as File).downloadUrl
               ? (route.params as Notice | Assignment).title
               : (route.params as Notice | Assignment).courseName
@@ -166,6 +170,9 @@ const getDetailScreenOptions = () =>
           }
         />
       ),
+      headerBackTitleStyle: {
+        maxWidth: 60,
+      },
       headerRight: (route.params as File).downloadUrl
         ? () => (
             <View style={Styles.flexRow}>
@@ -207,7 +214,7 @@ const NoticeStack = () => (
     <NoticeStackNavigator.Screen
       name="Notices"
       component={Notices}
-      options={getScreenOptions('通知')}
+      options={getScreenOptions(t('notices'))}
     />
     <NoticeStackNavigator.Screen
       name="NoticeDetail"
@@ -227,7 +234,7 @@ const AssignmentStack = () => (
     <AssignmentStackNavigator.Screen
       name="Assignments"
       component={Assignments}
-      options={getScreenOptions('作业')}
+      options={getScreenOptions(t('assignments'))}
     />
     <AssignmentStackNavigator.Screen
       name="AssignmentDetail"
@@ -247,7 +254,7 @@ const FileStack = () => (
     <FileStackNavigator.Screen
       name="Files"
       component={Files}
-      options={getScreenOptions('文件')}
+      options={getScreenOptions(t('files'))}
     />
     <FileStackNavigator.Screen
       name="FileDetail"
@@ -262,7 +269,7 @@ const CourseStack = () => (
     <CourseStackNavigator.Screen
       name="Courses"
       component={Courses}
-      options={getScreenOptions('课程')}
+      options={getScreenOptions(t('courses'))}
     />
     <CourseStackNavigator.Screen
       name="CourseDetail"
@@ -293,49 +300,49 @@ const SettingDetails = (
       name="CourseX"
       component={CourseX}
       options={{
-        title: '课程信息共享计划',
+        title: t('courseX'),
       }}
     />
     <SettingStackNavigator.Screen
       name="CalendarEvent"
       component={CalendarEvent}
       options={{
-        title: '日历与提醒事项',
+        title: t('calendarsAndReminders'),
       }}
     />
     <SettingStackNavigator.Screen
       name="SemesterSelection"
       component={SemesterSelection}
       options={{
-        title: '学期切换',
+        title: t('semesterSelection'),
       }}
     />
     <SettingStackNavigator.Screen
       name="FileCache"
       component={FileCache}
       options={{
-        title: '文件缓存',
+        title: t('fileCache'),
       }}
     />
     <SettingStackNavigator.Screen
       name="Help"
       component={Help}
       options={{
-        title: '帮助与反馈',
+        title: t('helpAndFeedback'),
       }}
     />
     <SettingStackNavigator.Screen
       name="About"
       component={About}
       options={{
-        title: '关于',
+        title: t('about'),
       }}
     />
     <SettingStackNavigator.Screen
       name="Changelog"
       component={Changelog}
       options={{
-        title: '更新日志',
+        title: t('changelog'),
       }}
     />
   </>
@@ -353,7 +360,7 @@ const SettingStack = () => (
       name="Settings"
       component={Settings}
       options={{
-        title: '设置',
+        title: t('settings'),
       }}
     />
     {SettingDetails}
@@ -444,28 +451,28 @@ const MainTab = () => {
       <MainNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
-        options={{title: '通知'}}
+        options={{title: t('notices')}}
       />
       <MainNavigator.Screen
         name="AssignmentStack"
         component={AssignmentStack}
-        options={{title: '作业'}}
+        options={{title: t('assignments')}}
       />
       <MainNavigator.Screen
         name="FileStack"
         component={FileStack}
-        options={{title: '文件'}}
+        options={{title: t('files')}}
       />
       <MainNavigator.Screen
         name="CourseStack"
         component={CourseStack}
-        options={{title: '课程'}}
+        options={{title: t('courses')}}
       />
       <MainNavigator.Screen
         name="SettingStack"
         component={SettingStack}
         options={{
-          title: '设置',
+          title: t('settings'),
           tabBarBadge: newChangelog || newUpdate ? ' ' : undefined,
           tabBarBadgeStyle: {
             backgroundColor: 'red',
@@ -484,7 +491,7 @@ const SearchStack = () => (
       component={Search}
       options={{
         headerLeft: () => <BackButton />,
-        title: '搜索',
+        title: t('search'),
       }}
     />
     <SearchNavigator.Screen
@@ -516,10 +523,10 @@ const AssignmentSubmissionStack = () => (
           <TextButton
             style={{fontSize: 17, fontWeight: 'bold'}}
             containerStyle={{marginRight: 16}}>
-            提交
+            {t('submit')}
           </TextButton>
         ),
-        title: '作业提交',
+        title: t('assignmentSubmission'),
       }}
     />
     <AssignmentSubmissionNavigator.Screen
@@ -629,11 +636,7 @@ const Container = () => {
 
   useEffect(() => {
     if (auth.username && auth.password && loginError) {
-      toast(
-        '登录失败，请检查网络连接并确保输入的用户名与密码正确。',
-        'warning',
-        10 * 1000,
-      );
+      toast(t('loginFailed'), 'warning', 10 * 1000);
     }
   }, [auth.password, auth.username, loginError, toast]);
 

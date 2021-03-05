@@ -19,6 +19,7 @@ import Styles from 'constants/Styles';
 import {ScreenParams} from 'screens/types';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
+import {getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 
 const AssignmentDetail: React.FC<
@@ -55,7 +56,7 @@ const AssignmentDetail: React.FC<
   const html = useMemo(
     () =>
       getWebViewTemplate(
-        description || '无作业描述',
+        description || t('noAssignmentDescription'),
         theme.dark,
         theme.colors.surface,
       ),
@@ -111,12 +112,20 @@ const AssignmentDetail: React.FC<
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
             <Caption>
-              {dayjs().isAfter(dayjs(deadline))
-                ? dayjs().to(dayjs(deadline)) + '截止'
-                : '还剩 ' + dayjs().to(dayjs(deadline), true)}
+              {getLocale().startsWith('zh')
+                ? dayjs().isAfter(dayjs(deadline))
+                  ? dayjs().to(dayjs(deadline)) + '截止'
+                  : '还剩 ' + dayjs().to(dayjs(deadline), true)
+                : dayjs().isAfter(dayjs(deadline))
+                ? 'closed ' + dayjs().to(dayjs(deadline))
+                : 'due in ' + dayjs().to(dayjs(deadline), true)}
             </Caption>
             <Caption>
-              {dayjs(deadline).format('YYYY 年 M 月 D 日 dddd HH:mm')}
+              {dayjs(deadline).format(
+                getLocale().startsWith('zh')
+                  ? 'YYYY 年 M 月 D 日 dddd HH:mm'
+                  : 'ddd, MMM D, YYYY HH:mm',
+              )}
             </Caption>
           </View>
         </View>
@@ -167,7 +176,9 @@ const AssignmentDetail: React.FC<
                 ) : null}
                 <Caption>
                   {dayjs(submitTime).format(
-                    'YYYY 年 M 月 D 日 dddd HH:mm 提交',
+                    getLocale().startsWith('zh')
+                      ? 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
+                      : '[submitted at] HH:mm, MMM D, YYYY',
                   )}
                 </Caption>
               </View>
@@ -201,7 +212,11 @@ const AssignmentDetail: React.FC<
                   <Text style={Styles.spacey1}>{removeTags(gradeContent)}</Text>
                 ) : null}
                 <Caption>
-                  {dayjs(gradeTime).format('YYYY 年 M 月 D 日 dddd HH:mm 批改')}
+                  {dayjs(gradeTime).format(
+                    getLocale().startsWith('zh')
+                      ? 'YYYY 年 M 月 D 日 dddd HH:mm 批改'
+                      : '[graded at] HH:mm, MMM D, YYYY',
+                  )}
                 </Caption>
               </View>
             </View>

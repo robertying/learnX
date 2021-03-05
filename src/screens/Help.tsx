@@ -5,6 +5,7 @@ import {Title, Text} from 'react-native-paper';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
+import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 
 const Help: React.FC<StackScreenProps<ScreenParams, 'Help'>> = (props) => {
@@ -15,7 +16,7 @@ const Help: React.FC<StackScreenProps<ScreenParams, 'Help'>> = (props) => {
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewPaddings}>
-        <Title>邮件</Title>
+        <Title>{t('email')}</Title>
         <Text
           style={[styles.text, styles.link]}
           onPress={() => Linking.openURL('mailto:yingrui205@gmail.com')}>

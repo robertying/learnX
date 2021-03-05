@@ -25,6 +25,7 @@ import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
 import {getExtension, stripExtension} from 'helpers/fs';
 import {removeTags} from 'helpers/html';
+import {getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 import {submitAssignment} from 'data/source';
 import useToast from 'hooks/useToast';
@@ -69,7 +70,7 @@ const AssignmentSubmission: React.FC<
       setAttachmentResult(result);
     } catch (err) {
       if (!DocumentPicker.isCancel(err)) {
-        toast('选取文件失败', 'error');
+        toast(t('filePickFailed'), 'error');
       }
     }
   };
@@ -115,11 +116,11 @@ const AssignmentSubmission: React.FC<
       setUploading(false);
       setProgress(0);
       navigation.goBack();
-      toast('作业提交成功', 'success');
+      toast(t('assignmentSubmittionSucceeded'), 'success');
     } catch {
       setUploading(false);
       setProgress(0);
-      toast('作业提交失败', 'error');
+      toast(t('assignmentSubmittionFailed'), 'error');
     }
   }, [
     attachmentResult,
@@ -134,15 +135,15 @@ const AssignmentSubmission: React.FC<
     Keyboard.dismiss();
 
     Alert.alert(
-      '提交作业',
-      '确定提交作业？',
+      t('submitAssignment'),
+      t('submitAssignmentConfirmation'),
       [
         {
-          text: '取消',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: '确定',
+          text: t('ok'),
           onPress: handleSubmit,
         },
       ],
@@ -160,7 +161,7 @@ const AssignmentSubmission: React.FC<
           style={{fontSize: 17, fontWeight: 'bold'}}
           containerStyle={{marginRight: 16}}
           onPress={handleSubmitPress}>
-          提交
+          {t('submit')}
         </TextButton>
       ),
     });
@@ -186,7 +187,7 @@ const AssignmentSubmission: React.FC<
           <TextInput
             style={Styles.flex1}
             multiline
-            placeholder="可在此处填写作业内容……"
+            placeholder={t('assignmentSubmittionContentPlaceholder')}
             value={content}
             onChangeText={setContent}
           />
@@ -224,7 +225,9 @@ const AssignmentSubmission: React.FC<
                 mode="contained"
                 style={[styles.submitButton, Styles.spacey1]}
                 onPress={handleAttachmentRemove}>
-                {removeAttachment ? '撤销移除已上传附件' : '移除已上传附件'}
+                {removeAttachment
+                  ? t('undoRemoveAttachment')
+                  : t('removeAttachment')}
               </Button>
             ) : undefined}
             {!removeAttachment ? (
@@ -233,17 +236,19 @@ const AssignmentSubmission: React.FC<
                 style={[styles.submitButton, Styles.spacey1]}
                 onPress={handleDocumentPick}>
                 {attachmentResult
-                  ? '重新上传附件'
+                  ? t('reUploadAttachment')
                   : submittedAttachmentName
-                  ? '覆盖已上传附件'
-                  : '上传附件'}
+                  ? t('overwriteAttachment')
+                  : t('uploadAttachment')}
               </Button>
             ) : undefined}
           </View>
           {submitTime && (
             <Caption style={Styles.spacey1}>
               {dayjs(submitTime).format(
-                '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm',
+                getLocale().startsWith('zh')
+                  ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
+                  : '[last submitted at] HH:mm, MMM D, YYYY',
               )}
             </Caption>
           )}

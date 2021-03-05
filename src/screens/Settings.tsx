@@ -12,6 +12,7 @@ import {setSetting} from 'data/actions/settings';
 import {clearStore} from 'data/actions/root';
 import {useTypedSelector} from 'data/store';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
@@ -45,15 +46,15 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
 
   const handleLogout = () => {
     Alert.alert(
-      '注销账号',
-      '确定注销账号？',
+      t('logout'),
+      t('logoutConfirmation'),
       [
         {
-          text: '取消',
+          text: t('cancel'),
           style: 'cancel',
         },
         {
-          text: '确定',
+          text: t('ok'),
           onPress: () => {
             dispatch(clearStore());
           },
@@ -89,26 +90,26 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
         />
         <TableCell
           iconName="person-remove"
-          primaryText="注销"
+          primaryText={t('logout')}
           type="none"
           onPress={handleLogout}
         />
         <TableCell
           style={styles.marginTop}
           iconName="date-range"
-          primaryText="日历与提醒事项"
+          primaryText={t('calendarsAndReminders')}
           type="arrow"
           onPress={() => handlePush('CalendarEvent')}
         />
         <TableCell
           iconName="loop"
-          primaryText="学期切换"
+          primaryText={t('semesterSelection')}
           type="arrow"
           onPress={() => handlePush('SemesterSelection')}
         />
         <TableCell
           iconName="rule-folder"
-          primaryText="文件缓存"
+          primaryText={t('fileCache')}
           type="arrow"
           onPress={() => handlePush('FileCache')}
         />
@@ -123,7 +124,7 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
           style={styles.marginTop}
           iconName="sticky-note-2"
           badge={newChangelog}
-          primaryText="更新日志"
+          primaryText={t('changelog')}
           type="arrow"
           onPress={() => handlePush('Changelog')}
         />
@@ -131,20 +132,20 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
           <TableCell
             iconName="update"
             badge
-            primaryText={`检测到新版本 v${update.version}`}
+            primaryText={`${t('foundNewVersion')} v${update.version}`}
             type="none"
             onPress={() => Linking.openURL(update.url)}
           />
         )}
         <TableCell
           iconName="help"
-          primaryText="帮助与反馈"
+          primaryText={t('helpAndFeedback')}
           type="arrow"
           onPress={() => handlePush('Help')}
         />
         <TableCell
           iconName="copyright"
-          primaryText="关于"
+          primaryText={t('about')}
           type="arrow"
           onPress={() => handlePush('About')}
         />
