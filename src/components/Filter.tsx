@@ -1,7 +1,6 @@
 import React, {memo, useEffect, useRef, useState} from 'react';
 import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
-import {Badge, Colors, List, Surface, Text} from 'react-native-paper';
-import Animated, {Easing} from 'react-native-reanimated';
+import Animated, {EasingNode} from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {t} from 'helpers/i18n';
 
@@ -59,13 +58,13 @@ const Filter: React.FC<FilterProps> = ({
       Animated.timing(position.current, {
         duration: 200,
         toValue: 1,
-        easing: Easing.out(Easing.ease),
+        easing: EasingNode.out(EasingNode.ease),
       }).start();
     } else {
       Animated.timing(position.current, {
         duration: 200,
         toValue: 0,
-        easing: Easing.in(Easing.ease),
+        easing: EasingNode.in(EasingNode.ease),
       }).start();
     }
   }, [visible, position]);

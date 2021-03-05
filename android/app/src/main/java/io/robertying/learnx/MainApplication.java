@@ -8,8 +8,10 @@ import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactInstanceManager;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.JSIModulePackage;
 import com.facebook.soloader.SoLoader;
 import com.microsoft.codepush.react.CodePush;
+import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 
 import org.unimodules.adapters.react.ModuleRegistryAdapter;
 import org.unimodules.adapters.react.ReactModuleRegistryProvider;
@@ -54,6 +56,11 @@ public class MainApplication extends Application implements ReactApplication {
                 @Override
                 protected String getJSBundleFile() {
                     return CodePush.getJSBundleFile();
+                }
+
+                @Override
+                protected JSIModulePackage getJSIModulePackage() {
+                    return new ReanimatedJSIModulePackage();
                 }
             };
 

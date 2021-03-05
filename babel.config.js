@@ -9,6 +9,7 @@ module.exports = {
       },
     ],
     'preval',
+    'react-native-reanimated/plugin',
   ],
   env: {
     production: {
