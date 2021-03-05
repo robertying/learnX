@@ -61,18 +61,10 @@
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Allow learnX to access your calendars</string>
-	<key>NSRemindersUsageDescription</key>
-	<string>Allow learnX to access your reminders</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Allow learnX to access your contacts</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow learnX to access your camera</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Allow learnX to access your microphone</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Allow learnX to access your contacts</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Allow learnX to access your files</string>
 	<key>NSDocumentsFolderUsageDescription</key>
@@ -81,8 +73,16 @@
 	<string>Allow learnX to access your files</string>
 	<key>NSFileProviderDomainUsageDescription</key>
 	<string>Allow learnX to access your files</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allow learnX to access your microphone</string>
 	<key>NSNetworkVolumesUsageDescription</key>
 	<string>Allow learnX to access your files</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Allow learnX to access your photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Allow learnX to access your photos</string>
+	<key>NSRemindersUsageDescription</key>
+	<string>Allow learnX to access your reminders</string>
 	<key>NSRemovableVolumesUsageDescription</key>
 	<string>Allow learnX to access your files</string>
 	<key>UIAppFonts</key>

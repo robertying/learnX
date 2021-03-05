@@ -15,7 +15,6 @@
 		D40C62A225E8DEE7002C1255 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D40C62A125E8DEE7002C1255 /* AppCenter-Config.plist */; };
 		D40C638B25E8E761002C1255 /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40C638A25E8E761002C1255 /* Dummy.swift */; };
 		D435441F25F122D4004A5B82 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D435442125F122D4004A5B82 /* InfoPlist.strings */; };
-		D479A49E25F2540A0096EAB7 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D435442525F1243E004A5B82 /* Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -169,7 +168,6 @@
 				D40C629F25E8DE9B002C1255 /* Assets.xcassets in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				D435441F25F122D4004A5B82 /* InfoPlist.strings in Resources */,
-				D479A49E25F2540A0096EAB7 /* Info.plist in Resources */,
 				D40C62A225E8DEE7002C1255 /* AppCenter-Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -288,7 +286,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1650;
+				CURRENT_PROJECT_VERSION = 1670;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -297,7 +295,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 12.2.0;
+				MARKETING_VERSION = 12.3.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -326,7 +324,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1650;
+				CURRENT_PROJECT_VERSION = 1670;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = learnX/Info.plist;
@@ -334,7 +332,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 12.2.0;
+				MARKETING_VERSION = 12.3.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
