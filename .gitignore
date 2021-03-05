@@ -58,6 +58,9 @@ buck-out/
 # CocoaPods
 /ios/Pods/
 
+# vscode
+.vscode/
+
 # Expo unimodules
 /android/app/src/main/java/io/robertying/learnx/generated/
 
