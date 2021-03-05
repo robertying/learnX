@@ -66,7 +66,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'flex-end',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   section: {
     flex: 1,
