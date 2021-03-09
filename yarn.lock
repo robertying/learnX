@@ -9047,8 +9047,8 @@ through@^2.3.6:
   integrity sha1-DdTJ/6q8NXlgsbckEV1+Doai4fU=
 
 "thu-learn-lib-no-native@https://github.com/robertying/thu-learn-lib-no-native.git":
-  version "2.5.0"
-  resolved "https://github.com/robertying/thu-learn-lib-no-native.git#340cd4c815cd072d9bf70223b6cc42282c229573"
+  version "2.5.1"
+  resolved "https://github.com/robertying/thu-learn-lib-no-native.git#9d0bb9c1b3012b670256d729bda36110cd1acf63"
   dependencies:
     cheerio-without-node-native "0.20.2"
     cross-fetch "^3.0.6"
