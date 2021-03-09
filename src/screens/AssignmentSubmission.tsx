@@ -19,6 +19,7 @@ import {
   TextInput,
   useTheme,
 } from 'react-native-paper';
+import {useDispatch} from 'react-redux';
 import dayjs from 'dayjs';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
@@ -28,6 +29,7 @@ import {removeTags} from 'helpers/html';
 import {getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 import {submitAssignment} from 'data/source';
+import {getAssignmentsForCourse} from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
 import {ScreenParams} from './types';
 
@@ -39,6 +41,7 @@ const AssignmentSubmission: React.FC<
 
   const {
     id,
+    courseId,
     courseName,
     studentHomeworkId,
     submitTime,
@@ -46,6 +49,8 @@ const AssignmentSubmission: React.FC<
     submittedAttachmentUrl,
     submittedContent,
   } = route.params;
+
+  const dispatch = useDispatch();
 
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),
@@ -115,8 +120,11 @@ const AssignmentSubmission: React.FC<
 
       setUploading(false);
       setProgress(0);
-      navigation.goBack();
+
+      dispatch(getAssignmentsForCourse(courseId));
+
       toast(t('assignmentSubmittionSucceeded'), 'success');
+      navigation.goBack();
     } catch {
       setUploading(false);
       setProgress(0);
@@ -125,6 +133,8 @@ const AssignmentSubmission: React.FC<
   }, [
     attachmentResult,
     content,
+    courseId,
+    dispatch,
     navigation,
     removeAttachment,
     studentHomeworkId,
