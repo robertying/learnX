@@ -9,6 +9,7 @@ import {
   IconButton,
 } from 'react-native-paper';
 import {StackScreenProps} from '@react-navigation/stack';
+import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -17,6 +18,7 @@ import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
 import {ScreenParams} from 'screens/types';
+import useDetailNavigator from 'hooks/useDetailNavigator';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
 import {getLocale, t} from 'helpers/i18n';
@@ -26,6 +28,8 @@ const AssignmentDetail: React.FC<
   StackScreenProps<ScreenParams, 'AssignmentDetail'>
 > = ({route, navigation}) => {
   const theme = useTheme();
+
+  const detailNavigator = useDetailNavigator();
 
   const {
     id,
@@ -78,11 +82,17 @@ const AssignmentDetail: React.FC<
   };
 
   const handleSubmit = useCallback(() => {
-    navigation.navigate('AssignmentSubmission', {
-      screen: 'AssignmentSubmission',
-      params: route.params,
-    } as any);
-  }, [navigation, route.params]);
+    if (detailNavigator) {
+      detailNavigator.dispatch(
+        StackActions.push('AssignmentSubmission', route.params),
+      );
+    } else {
+      navigation.navigate('AssignmentSubmission', {
+        screen: 'AssignmentSubmission',
+        params: route.params,
+      } as any);
+    }
+  }, [detailNavigator, navigation, route.params]);
 
   useLayoutEffect(() => {
     if (disableAnimation) {
