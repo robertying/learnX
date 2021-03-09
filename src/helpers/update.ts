@@ -10,7 +10,7 @@ export const getLatestRelease = async () => {
   const version = json.version as string;
 
   if (Platform.OS === 'android') {
-    const url = `${tunaMirrorUrl}/learnX-${DeviceInfo.abi()}-v${version}.apk`;
+    const url = `${tunaMirrorUrl}/learnX-${await DeviceInfo.abi()}-v${version}.apk`;
 
     return {
       version,
