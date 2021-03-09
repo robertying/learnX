@@ -244,9 +244,11 @@ PODS:
     - React-jsi (= 0.64.0-rc.4)
     - React-perflogger (= 0.64.0-rc.4)
   - React-jsinspector (0.64.0-rc.4)
-  - react-native-document-picker (5.0.0):
+  - react-native-document-picker (5.0.1):
     - React-Core
-  - react-native-safe-area-context (3.1.9):
+  - react-native-safe-area-context (3.2.0):
+    - React-Core
+  - react-native-viewpager (5.0.12):
     - React-Core
   - react-native-webview (11.2.3):
     - React-Core
@@ -403,6 +405,7 @@ DEPENDENCIES:
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-document-picker (from `../node_modules/react-native-document-picker`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
+  - react-native-viewpager (from `../node_modules/react-native-pager-view`)
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
@@ -497,6 +500,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-document-picker"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
+  react-native-viewpager:
+    :path: "../node_modules/react-native-pager-view"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-perflogger:
@@ -587,8 +592,9 @@ SPEC CHECKSUMS:
   React-jsi: 96e5b9263454e19a406f04423085c6fcb363e07e
   React-jsiexecutor: 797f55a85b3b465d34314f09597e82ab9a4e7f29
   React-jsinspector: 7e9eedd0e2e14cc4dd73799422cdfd54a639ef93
-  react-native-document-picker: ca0c8769c3848866970dc9164e809c6ea45cb5d6
-  react-native-safe-area-context: b6e0e284002381d2ff29fa4fff42b4d8282e3c94
+  react-native-document-picker: d6a15c20e1b2d488af459aefff831839e9995927
+  react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
+  react-native-viewpager: 98a850d1c7ac6263122d82618a77062a5f427073
   react-native-webview: 6520e3e7b4933de76b95ef542c8d7115cf45b68e
   React-perflogger: 22385ffdf9f2ce78ba0251c260924c6bbefbe916
   React-RCTActionSheet: 6337f324f825b15a506bfc18f1ac08592f8ef78f
