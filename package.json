@@ -25,7 +25,7 @@
     "@react-navigation/stack": "5.14.3",
     "@types/jest": "26.0.20",
     "@types/mime-types": "2.1.0",
-    "@types/react-native": "0.63.50",
+    "@types/react-native": "0.63.51",
     "@types/react-native-share": "3.3.1",
     "@types/react-native-vector-icons": "6.4.6",
     "@types/react-redux": "7.1.16",
