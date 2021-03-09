@@ -50,11 +50,15 @@ const submitAssignment = async (
     const res = await axios.post(submitAssignmentUrl, body, {
       onUploadProgress: (e) => onProgress?.(e.loaded / e.total),
     });
+
     if (res.status !== 200) {
-      throw new Error('Submit assignment failed');
+      throw new Error('Failed to submit the assignment: invalid login session');
+    }
+    if (res.data?.result === 'error') {
+      throw new Error('Failed to submit the assignment: ' + res.data?.msg);
     }
   } catch {
-    throw new Error('Submit assignment failed');
+    throw new Error('Failed to submit the assignment: unknown error');
   }
 };
 
