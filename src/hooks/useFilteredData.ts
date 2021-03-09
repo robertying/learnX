@@ -40,13 +40,13 @@ function useFilteredData<T extends Notice | Assignment | File>(
   ]);
 
   const _unfinished = useMemo(
-    () => data.filter((i) => !(i as Assignment).submitted),
-    [data],
+    () => _all.filter((i) => !(i as Assignment).submitted),
+    [_all],
   );
 
   const _finished = useMemo(
-    () => data.filter((i) => (i as Assignment).submitted),
-    [data],
+    () => _all.filter((i) => (i as Assignment).submitted),
+    [_all],
   );
 
   return [_all, _unread, _fav, _archived, _hidden, _unfinished, _finished];
