@@ -71,6 +71,7 @@ import {login} from 'data/actions/auth';
 import {getAllSemesters, getCurrentSemester} from 'data/actions/semesters';
 import {resetLoading} from 'data/actions/root';
 import {getCoursesForSemester} from 'data/actions/courses';
+import {setCredentials} from 'data/source';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import DeviceInfo from 'constants/DeviceInfo';
 import TextButton from 'components/TextButton';
@@ -372,6 +373,7 @@ const MainTab = () => {
 
   const dispatch = useDispatch();
   const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const auth = useTypedSelector((state) => state.auth);
   const currentSemester = useTypedSelector((state) => state.semesters.current);
   const semesters = useTypedSelector((state) => state.semesters.items);
   const newChangelog = useTypedSelector(
@@ -380,6 +382,12 @@ const MainTab = () => {
   const newUpdate = useTypedSelector((state) => state.settings.newUpdate);
 
   const windowSize = useWindowDimensions();
+
+  useEffect(() => {
+    if (loggedIn && auth.username && auth.password) {
+      setCredentials(auth.username, auth.password);
+    }
+  }, [auth.password, auth.username, loggedIn]);
 
   useEffect(() => {
     if (!loggedIn) {
