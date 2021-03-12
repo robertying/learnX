@@ -61,7 +61,7 @@
     "react": "17.0.1",
     "react-native": "0.64.0-rc.4",
     "react-native-code-push": "7.0.0",
-    "react-native-device-info": "8.0.2",
+    "react-native-device-info": "8.0.5",
     "react-native-document-picker": "5.0.1",
     "react-native-fs": "2.16.6",
     "react-native-gesture-handler": "1.10.3",
