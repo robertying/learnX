@@ -1064,10 +1064,10 @@
     minimatch "^3.0.4"
     strip-json-comments "^3.1.1"
 
-"@expo/config-plugins@1.0.20", "@expo/config-plugins@~1.0.13":
-  version "1.0.20"
-  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.20.tgz#b1964daf063d7ce07c3f135aa92ccf1c60cd6e46"
-  integrity sha512-BucZQbi7edu8Pin8zFUNsaQeZAj/8ga7Ei3PKivKZKd5F53DdFU6Yb+ZDyQ0UeOGDi0hZlZWdaBzmQqHEg37TQ==
+"@expo/config-plugins@1.0.21", "@expo/config-plugins@~1.0.13":
+  version "1.0.21"
+  resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-1.0.21.tgz#5a6f5c818dd7bccc2f3e381cbf8b0657c38bb302"
+  integrity sha512-sMTF0/lx52ovJPz9iH5l0aKRpPFFtYoAQ+38AYhXI890Sswr1UU4Pq3IA5RMdvtOTkTzNREr21WvEHd7X8D1dA==
   dependencies:
     "@expo/config-types" "^40.0.0-beta.2"
     "@expo/configure-splash-screen" "0.3.4"
@@ -1090,15 +1090,15 @@
   integrity sha512-t9pHCQMXOP4nwd7LGXuHkLlFy0JdfknRSCAeVF4Kw2/y+5OBbR9hW9ZVnetpBf0kORrekgiI7K/qDaa3hh5+Qg==
 
 "@expo/config@^3.3.18":
-  version "3.3.30"
-  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.30.tgz#4e2f23c84b6563b940f0f32b941ce8495cdb2825"
-  integrity sha512-mOFebiAcowOD9MCpXGtZG/oMku1vAOazGx9BGaDnrod5YHjmrIN65W+hP+eK2dQBcJV1VjbU5K3VpkXO6aWwBA==
+  version "3.3.31"
+  resolved "https://registry.yarnpkg.com/@expo/config/-/config-3.3.31.tgz#6651a06230589bb93f031529537fd2b2b36e566e"
+  integrity sha512-LRNWctdc9TI7C2BIrqShS97LT+Oe2TuazWh5uFdvxT1gMe7N4TslyLwaYHPiOgetukRtTAOP5+ekXXyc656VdA==
   dependencies:
     "@babel/core" "7.9.0"
     "@babel/plugin-proposal-class-properties" "~7.12.13"
     "@babel/preset-env" "~7.12.13"
     "@babel/preset-typescript" "~7.12.13"
-    "@expo/config-plugins" "1.0.20"
+    "@expo/config-plugins" "1.0.21"
     "@expo/config-types" "^40.0.0-beta.2"
     "@expo/json-file" "8.2.28-alpha.0"
     fs-extra "9.0.0"
@@ -1965,9 +1965,9 @@
     "@babel/types" "^7.0.0"
 
 "@types/babel__traverse@*", "@types/babel__traverse@^7.0.4", "@types/babel__traverse@^7.0.6":
-  version "7.11.0"
-  resolved "https://registry.yarnpkg.com/@types/babel__traverse/-/babel__traverse-7.11.0.tgz#b9a1efa635201ba9bc850323a8793ee2d36c04a0"
-  integrity sha512-kSjgDMZONiIfSH1Nxcr5JIRMwUetDki63FSQfpTCz8ogF3Ulqm8+mr5f78dUYs6vMiB6gBusQqfQmBvHZj/lwg==
+  version "7.11.1"
+  resolved "https://registry.yarnpkg.com/@types/babel__traverse/-/babel__traverse-7.11.1.tgz#654f6c4f67568e24c23b367e947098c6206fa639"
+  integrity sha512-Vs0hm0vPahPMYi9tDjtP66llufgO3ST16WXaSTtDGEl9cewAl3AibmxWw6TINOqHPT9z0uABKAYjT9jNSg4npw==
   dependencies:
     "@babel/types" "^7.3.0"
 
@@ -2034,9 +2034,9 @@
   integrity sha1-nKUs2jY/aZxpRmwqbM2q2RPqenM=
 
 "@types/node@*":
-  version "14.14.33"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.33.tgz#9e4f8c64345522e4e8ce77b334a8aaa64e2b6c78"
-  integrity sha512-oJqcTrgPUF29oUP8AsUqbXGJNuPutsetaa9kTQAQce5Lx5dTYWV02ScBiT/k1BX/Z7pKeqedmvp39Wu4zR7N7g==
+  version "14.14.34"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-14.14.34.tgz#07935194fc049069a1c56c0c274265abeddf88da"
+  integrity sha512-dBPaxocOK6UVyvhbnpFIj2W+S+1cBTkHQbFQfeeJhoKFbzYcVUGHvddeWPSucKATb3F0+pgDq0i6ghEaZjsugA==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -3078,9 +3078,9 @@ camelcase@^6.0.0:
   integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
 
 caniuse-lite@^1.0.30001181:
-  version "1.0.30001197"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001197.tgz#47ad15b977d2f32b3ec2fe2b087e0c50443771db"
-  integrity sha512-8aE+sqBqtXz4G8g35Eg/XEaFr2N7rd/VQ6eABGBmNtcB8cN6qNJhMi6oSFy4UWWZgqgL3filHT8Nha4meu3tsw==
+  version "1.0.30001199"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001199.tgz#062afccaad21023e2e647d767bac4274b8b8fd7f"
+  integrity sha512-ifbK2eChUCFUwGhlEzIoVwzFt1+iriSjyKKFYNfv6hN34483wyWpLLavYQXhnR036LhkdUYaSDpHg1El++VgHQ==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -3428,9 +3428,9 @@ cosmiconfig@^6.0.0:
     yaml "^1.7.2"
 
 cross-fetch@^3.0.4, cross-fetch@^3.0.6:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.0.6.tgz#3a4040bc8941e653e0e9cf17f29ebcd177d3365c"
-  integrity sha512-KBPUbqgFjzWlVcURG+Svp9TlhA5uliYtiNx/0r8nv0pdypeQCRJ9IaSIc3q/x3q8t3F75cHuwxVql1HFGHCNJQ==
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/cross-fetch/-/cross-fetch-3.1.0.tgz#6447c13cc8887fa2a66caef92888d7fdaab6e0d1"
+  integrity sha512-a+yso9lSpXQI9DH+YjAu/m0dVfP8IVoZDPBLLFcvGpeq3KHNdikkekTOdkHiXEuTq4GBOeO0MfWkE40yzF1w7g==
   dependencies:
     node-fetch "2.6.1"
 
@@ -3801,9 +3801,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.649:
-  version "1.3.683"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.683.tgz#2c9ab53ff5275cf3dd49278af714d0f8975204f7"
-  integrity sha512-8mFfiAesXdEdE0DhkMKO7W9U6VU/9T3VTWwZ+4g84/YMP4kgwgFtQgUxuu7FUMcvSeKSNhFQNU+WZ68BQTLT5A==
+  version "1.3.687"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.687.tgz#c336184b7ab70427ffe2ee79eaeaedbc1ad8c374"
+  integrity sha512-IpzksdQNl3wdgkzf7dnA7/v10w0Utf1dF2L+B4+gKrloBrxCut+au+kky3PYvle3RMdSxZP+UiCZtLbcYRxSNQ==
 
 emittery@^0.7.1:
   version "0.7.2"
@@ -6009,9 +6009,9 @@ jscodeshift@^0.11.0:
     write-file-atomic "^2.3.0"
 
 jsdom@^16.4.0:
-  version "16.5.0"
-  resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-16.5.0.tgz#9e453505600cc5a70b385750d35256f380730cc4"
-  integrity sha512-QxZH0nmDTnTTVI0YDm4RUlaUPl5dcyn62G5TMDNfMmTW+J1u1v9gCR8WR+WZ6UghAa7nKJjDOFaI00eMMWvJFQ==
+  version "16.5.1"
+  resolved "https://registry.yarnpkg.com/jsdom/-/jsdom-16.5.1.tgz#4ced6bbd7b77d67fb980e64d9e3e6fb900f97dd6"
+  integrity sha512-pF73EOsJgwZekbDHEY5VO/yKXUkab/DuvrQB/ANVizbr6UAHJsDdHXuotZYwkJSGQl1JM+ivXaqY+XBDDL4TiA==
   dependencies:
     abab "^2.0.5"
     acorn "^8.0.5"
@@ -6873,9 +6873,9 @@ mute-stream@0.0.8:
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
 nanoid@^3.1.15:
-  version "3.1.20"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.20.tgz#badc263c6b1dcf14b71efaa85f6ab4c1d6cfc788"
-  integrity sha512-a1cQNyczgKbLX9jwbS/+d7W8fX/RfgYR7lVWwWOGIPNgK2m0MWvrGF6/m4kk6U3QcFMnZf3RIhL0v2Jgh/0Uxw==
+  version "3.1.21"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.21.tgz#25bfee7340ac4185866fbfb2c9006d299da1be7f"
+  integrity sha512-A6oZraK4DJkAOICstsGH98dvycPr/4GGDH7ZWKmMdd3vGcOurZ6JmWFUt0DA5bzrrn2FrUjmv6mFNWvv8jpppA==
 
 nanomatch@^1.2.9:
   version "1.2.13"
@@ -6955,9 +6955,9 @@ node-modules-regexp@^1.0.0:
   integrity sha1-jZ2+KJZKSsVxLpExZCEHxx6Q7EA=
 
 node-notifier@^8.0.0:
-  version "8.0.1"
-  resolved "https://registry.yarnpkg.com/node-notifier/-/node-notifier-8.0.1.tgz#f86e89bbc925f2b068784b31f382afdc6ca56be1"
-  integrity sha512-BvEXF+UmsnAfYfoapKM9nGxnP+Wn7P91YfXmrKnfcYCx6VBeoN5Ez5Ogck6I8Bi5k4RlpqRYaw75pAwzX9OphA==
+  version "8.0.2"
+  resolved "https://registry.yarnpkg.com/node-notifier/-/node-notifier-8.0.2.tgz#f3167a38ef0d2c8a866a83e318c1ba0efeb702c5"
+  integrity sha512-oJP/9NAdd9+x2Q+rfphB2RJCHjod70RcRLjosiPMMu5gjIfwVnOUGq2nbTjTUbmy0DJ/tFIVT30+Qe3nzl4TJg==
   dependencies:
     growly "^1.3.0"
     is-wsl "^2.2.0"
@@ -9871,9 +9871,9 @@ yallist@^4.0.0:
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 
 yaml@^1.7.2:
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.0.tgz#3b593add944876077d4d683fee01081bd9fff31e"
-  integrity sha512-yr2icI4glYaNG+KWONODapy2/jDdMSDnrONSjblABjD9B4Z5LgiircSt8m8sRZFNi08kG9Sm0uSHtEmP3zaEGg==
+  version "1.10.1"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.1.tgz#bb13d805ed104fba38f533570f3441027eeeca22"
+  integrity sha512-z/asvd+V08l1ywhaemZVirCwjdzLo6O1/0j2JbYCsGjiezupNQqjs5IIPyNtctbHjPEckqzVGd4jvpU5Lr25vQ==
 
 yargs-parser@^18.1.2:
   version "18.1.3"
@@ -9884,9 +9884,9 @@ yargs-parser@^18.1.2:
     decamelize "^1.2.0"
 
 yargs-parser@^20.2.2:
-  version "20.2.6"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.6.tgz#69f920addf61aafc0b8b89002f5d66e28f2d8b20"
-  integrity sha512-AP1+fQIWSM/sMiET8fyayjx/J+JmTPt2Mr0FkrgqB4todtfa53sOsrSAcIrJRD5XS20bKUwaDIuMkWKCEiQLKA==
+  version "20.2.7"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-20.2.7.tgz#61df85c113edfb5a7a4e36eb8aa60ef423cbc90a"
+  integrity sha512-FiNkvbeHzB/syOjIUxFDCnhSfzAL8R5vs40MgLFBorXACCOAEaWu0gRZl14vG8MR9AOJIZbmkjhusqBYZ3HTHw==
 
 yargs@^15.1.0, yargs@^15.3.1, yargs@^15.4.1:
   version "15.4.1"
