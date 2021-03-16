@@ -1,7 +1,8 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useMemo} from 'react';
 import {StackScreenProps} from '@react-navigation/stack';
 import {StackActions} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
+import dayjs from 'dayjs';
 import {ScreenParams} from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
@@ -44,6 +45,12 @@ const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
     hiddenCourseIds,
   );
 
+  const sync = useMemo(
+    () =>
+      all.filter((assignment) => dayjs(assignment.deadline).isAfter(dayjs())),
+    [all],
+  );
+
   const handleRefresh = useCallback(() => {
     if (loggedIn && courseIds.length !== 0) {
       dispatch(getAllAssignmentsForCourses(courseIds));
@@ -72,7 +79,7 @@ const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
     if (assignmentSync) {
       (async () => {
         try {
-          await saveAssignmentsToReminderOrCalendar(assignmentState.items);
+          await saveAssignmentsToReminderOrCalendar(sync);
         } catch (err) {
           if ((err as Error).message === 'Missing calendar permission') {
             toast(t('assignmentSyncNoCalendarPermission'), 'error');
@@ -84,7 +91,7 @@ const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
         }
       })();
     }
-  }, [assignmentState.items, assignmentSync, toast]);
+  }, [sync, assignmentSync, toast]);
 
   return (
     <SafeArea>

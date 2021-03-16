@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import {Caption} from 'react-native-paper';
@@ -17,6 +17,7 @@ import {
 import {getLocale, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
+import useFilteredData from 'hooks/useFilteredData';
 import {ScreenParams} from './types';
 
 const CalendarEvent: React.FC<
@@ -34,9 +35,22 @@ const CalendarEvent: React.FC<
   const alarms = useTypedSelector((state) => state.settings.alarms);
   const graduate = useTypedSelector((state) => state.settings.graduate);
   const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
-  const assignments = useTypedSelector(
-    (state) => state.assignments.items,
-  ).filter((i) => !hiddenCourseIds.includes(i.courseId));
+  const assignmentState = useTypedSelector((state) => state.assignments);
+
+  const [all] = useFilteredData(
+    assignmentState.items,
+    assignmentState.unread,
+    assignmentState.favorites,
+    assignmentState.archived,
+    assignmentState.pinned,
+    hiddenCourseIds,
+  );
+
+  const sync = useMemo(
+    () =>
+      all.filter((assignment) => dayjs(assignment.deadline).isAfter(dayjs())),
+    [all],
+  );
 
   const [courseSyncing, setCourseSyncing] = useState(false);
   const [assignmentSyncing, setAssignmentSyncing] = useState(false);
@@ -70,22 +84,20 @@ const CalendarEvent: React.FC<
 
   const handleAssignmentSync = async (enabled: boolean) => {
     if (enabled) {
-      if (assignments) {
-        setAssignmentSyncing(true);
+      setAssignmentSyncing(true);
 
-        try {
-          await saveAssignmentsToReminderOrCalendar(assignments);
-        } catch (err) {
-          if ((err as Error).message === 'Missing calendar permission') {
-            toast(t('assignmentSyncNoCalendarPermission'), 'error');
-          } else if ((err as Error).message === 'Missing reminder permission') {
-            toast(t('assignmentSyncNoReminderPermission'), 'error');
-          } else {
-            toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
-          }
-        } finally {
-          setAssignmentSyncing(false);
+      try {
+        await saveAssignmentsToReminderOrCalendar(sync);
+      } catch (err) {
+        if ((err as Error).message === 'Missing calendar permission') {
+          toast(t('assignmentSyncNoCalendarPermission'), 'error');
+        } else if ((err as Error).message === 'Missing reminder permission') {
+          toast(t('assignmentSyncNoReminderPermission'), 'error');
+        } else {
+          toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
         }
+      } finally {
+        setAssignmentSyncing(false);
       }
     }
     dispatch(setSetting('assignmentSync', enabled));
@@ -231,12 +243,12 @@ const CalendarEvent: React.FC<
                 Platform.OS === 'ios' && !syncAssignmentsToCalendar
                   ? '每次刷新后，作业会自动同步到“提醒事项”；'
                   : '每次刷新后，作业会自动同步到“日历”；'
-              }已屏蔽课程的作业或已过期的作业不会被同步；请在更改提醒或同步设置后刷新作业以应用更改。`
+              }已屏蔽课程的作业或已归档、已过期的作业不会被同步；请在更改提醒或同步设置后刷新作业以应用更改。`
             : `${
                 Platform.OS === 'ios' && !syncAssignmentsToCalendar
                   ? 'Assignments will be synced to Reminders every time after refreshing. '
                   : 'Assignments will be synced to Calendar every time after refreshing. '
-              }Assignments that are hidden or have passed the due date will not be synced. Please refresh assignments after any alarm or sync setting changes.`}
+              }Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alarm or sync setting changes.`}
         </Caption>
         <TableCell
           style={styles.marginTop}
