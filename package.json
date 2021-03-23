@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "12.4.0",
+  "version": "12.4.1",
   "private": true,
   "scripts": {
     "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
@@ -51,6 +51,8 @@
     "expo-permissions": "11.0.0",
     "expo-secure-store": "10.0.0",
     "fuse.js": "6.4.6",
+    "graphql": "15.5.0",
+    "graphql-request": "3.4.0",
     "jest": "26.6.3",
     "metro-react-native-babel-preset": "0.65.2",
     "mime-types": "2.1.29",

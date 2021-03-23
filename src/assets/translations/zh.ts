@@ -4,7 +4,6 @@ export default {
   assignments: '作业',
   files: '文件',
   courses: '课程',
-  courseX: '课程共享计划',
   calendarsAndReminders: '日历与提醒事项',
   semesterSelection: '学期切换',
   fileCache: '文件缓存',
@@ -100,4 +99,11 @@ export default {
   archiveSucceeded: '已归档',
   undoHide: '已撤销屏蔽',
   hideSucceeded: '已屏蔽',
+  courseInformationSharing: '课程信息共享计划',
+  joinCourseInformationSharing: '加入课程信息共享计划',
+  joinCourseInformationSharingConfirmation:
+    '确定加入课程信息共享计划？当前学期的课程信息将会被自动上传；上传内容不包含任何个人信息。',
+  courseX: '课程信息共享计划 courseX',
+  courseInformation: '课程信息',
+  courseReviews: '课程评价',
 };

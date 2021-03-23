@@ -52,10 +52,12 @@ import Login from 'screens/Login';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import FileCache from 'screens/FileCache';
-import CourseX from 'screens/CourseX';
+import CourseInformationSharing from 'screens/CourseInformationSharing';
 import Help from 'screens/Help';
 import About from 'screens/About';
 import Changelog from 'screens/Changelog';
+import AssignmentSubmission from 'screens/AssignmentSubmission';
+import CourseX from 'screens/CourseX';
 import {ToastProvider} from 'components/Toast';
 import Splash from 'components/Splash';
 import HeaderTitle from 'components/HeaderTitle';
@@ -72,7 +74,6 @@ import {getAllSemesters, getCurrentSemester} from 'data/actions/semesters';
 import {resetLoading} from 'data/actions/root';
 import {getCoursesForSemester} from 'data/actions/courses';
 import {setCredentials} from 'data/source';
-import AssignmentSubmission from 'screens/AssignmentSubmission';
 import DeviceInfo from 'constants/DeviceInfo';
 import TextButton from 'components/TextButton';
 import useToast from 'hooks/useToast';
@@ -112,6 +113,12 @@ const getScreenOptions = (title: string) =>
             style={Styles.ml0}
             icon={(props) => <MaterialIcons {...props} name="filter-list" />}
           />
+          {title === t('courses') && (
+            <IconButton
+              style={Styles.ml0}
+              icon={(props) => <MaterialIcons {...props} name="star" />}
+            />
+          )}
         </View>
       ),
       headerRight: () => (
@@ -142,6 +149,7 @@ const getDetailScreenOptions = () =>
     | 'FileDetail'
     | 'CourseDetail'
     | 'AssignmentSubmission'
+    | 'CourseX'
   >): StackNavigationOptions {
     return {
       title: t('back'),
@@ -150,31 +158,35 @@ const getDetailScreenOptions = () =>
         fontSize: 17,
         fontWeight: '600',
       },
-      headerTitle: (props) => (
-        <HeaderTitle
-          {...props}
-          title={
-            (route.params as Course).semesterId
-              ? getLocale().startsWith('zh')
-                ? (route.params as Course).name
-                : (route.params as Course).englishName
-              : (route.params as File).downloadUrl
-              ? (route.params as Notice | Assignment).title
-              : (route.params as Notice | Assignment).courseName
-          }
-          subtitle={
-            (route.params as Course).semesterId
-              ? (route.params as Course).teacherName
-              : (route.params as File).downloadUrl
-              ? (route.params as Notice | Assignment).courseName
-              : (route.params as Notice | Assignment).courseTeacherName
-          }
-        />
-      ),
+      headerTitle:
+        route.name === 'CourseX'
+          ? t('courseX')
+          : (props) =>
+              route.params ? (
+                <HeaderTitle
+                  {...props}
+                  title={
+                    (route.params as Course).semesterId
+                      ? getLocale().startsWith('zh')
+                        ? (route.params as Course).name
+                        : (route.params as Course).englishName
+                      : (route.params as File).downloadUrl
+                      ? (route.params as Notice | Assignment).title
+                      : (route.params as Notice | Assignment).courseName
+                  }
+                  subtitle={
+                    (route.params as Course).semesterId
+                      ? (route.params as Course).teacherName
+                      : (route.params as File).downloadUrl
+                      ? (route.params as Notice | Assignment).courseName
+                      : (route.params as Notice | Assignment).courseTeacherName
+                  }
+                />
+              ) : undefined,
       headerBackTitleStyle: {
         maxWidth: 60,
       },
-      headerRight: (route.params as File).downloadUrl
+      headerRight: (route.params as File)?.downloadUrl
         ? () => (
             <View style={Styles.flexRow}>
               <IconButton
@@ -205,6 +217,7 @@ const FileStackNavigator = createStackNavigator<ScreenParams>();
 const CourseStackNavigator = createStackNavigator<ScreenParams>();
 const SettingStackNavigator = createStackNavigator<ScreenParams>();
 const MainNavigator = createBottomTabNavigator();
+const CourseXNavigator = createStackNavigator<ScreenParams>();
 const SearchNavigator = createStackNavigator<ScreenParams>();
 const AssignmentSubmissionNavigator = createStackNavigator<ScreenParams>();
 const RootNavigator = createStackNavigator();
@@ -298,10 +311,10 @@ const CourseStack = () => (
 const SettingDetails = (
   <>
     <SettingStackNavigator.Screen
-      name="CourseX"
-      component={CourseX}
+      name="CourseInformationSharing"
+      component={CourseInformationSharing}
       options={{
-        title: t('courseX'),
+        title: t('courseInformationSharing'),
       }}
     />
     <SettingStackNavigator.Screen
@@ -380,6 +393,9 @@ const MainTab = () => {
     (state) => state.settings.lastShowChangelogVersion !== packageJson.version,
   );
   const newUpdate = useTypedSelector((state) => state.settings.newUpdate);
+  const courseInformationSharingBadgeShown = useTypedSelector(
+    (state) => state.settings.courseInformationSharingBadgeShown,
+  );
 
   const windowSize = useWindowDimensions();
 
@@ -481,7 +497,10 @@ const MainTab = () => {
         component={SettingStack}
         options={{
           title: t('settings'),
-          tabBarBadge: newChangelog || newUpdate ? ' ' : undefined,
+          tabBarBadge:
+            newChangelog || newUpdate || !courseInformationSharingBadgeShown
+              ? ' '
+              : undefined,
           tabBarBadgeStyle: {
             backgroundColor: 'red',
             transform: [{scale: 0.5}],
@@ -491,6 +510,19 @@ const MainTab = () => {
     </MainNavigator.Navigator>
   );
 };
+
+const CourseXStack = () => (
+  <CourseXNavigator.Navigator>
+    <CourseXNavigator.Screen
+      name="CourseX"
+      component={CourseX}
+      options={{
+        headerLeft: () => <BackButton />,
+        title: t('courseX'),
+      }}
+    />
+  </CourseXNavigator.Navigator>
+);
 
 const SearchStack = () => (
   <SearchNavigator.Navigator>
@@ -575,6 +607,11 @@ const DetailStack = () => (
     <DetailNavigator.Screen
       name="AssignmentSubmission"
       component={AssignmentSubmission}
+      options={getDetailScreenOptions()}
+    />
+    <DetailNavigator.Screen
+      name="CourseX"
+      component={CourseX}
       options={getDetailScreenOptions()}
     />
     {SettingDetails}
@@ -675,6 +712,11 @@ const Container = () => {
             {loggedIn ? (
               <>
                 <RootNavigator.Screen name="Main" component={MainTab} />
+                <RootNavigator.Screen
+                  name="CourseX"
+                  component={CourseXStack}
+                  options={{gestureEnabled: false}}
+                />
                 <RootNavigator.Screen
                   name="Search"
                   component={SearchStack}

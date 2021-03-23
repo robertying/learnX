@@ -36,6 +36,7 @@ export interface SettingsState {
   fileUseDocumentDir: boolean;
   newUpdate: boolean;
   courseInformationSharing: boolean;
+  courseInformationSharingBadgeShown: boolean;
   lastShowChangelogVersion: string | null;
 }
 

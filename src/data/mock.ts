@@ -28,6 +28,7 @@ const mockStore: PersistAppState = {
     graduate: false,
     fileUseDocumentDir: false,
     courseInformationSharing: false,
+    courseInformationSharingBadgeShown: false,
     tabFilterSelections: {
       notice: 'all',
       assignment: 'unfinished',

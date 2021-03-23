@@ -4,7 +4,6 @@ export default {
   assignments: 'Assignments',
   files: 'Files',
   courses: 'Courses',
-  courseX: 'Course Information Sharing',
   calendarsAndReminders: 'Calendars & Reminders',
   semesterSelection: 'Semester Selection',
   fileCache: 'File Cache',
@@ -107,4 +106,11 @@ export default {
   archiveSucceeded: 'Archived',
   undoHide: 'Undo hiding',
   hideSucceeded: 'Hidden',
+  courseInformationSharing: 'Course Information Sharing',
+  joinCourseInformationSharing: 'Enable Course Information Sharing',
+  joinCourseInformationSharingConfirmation:
+    'Do you want to enable Course Information Sharing? Information of courses of the current semester will be uploaded. Personal information will never be uploaded or shared.',
+  courseX: 'courseX',
+  courseInformation: 'Information',
+  courseReviews: 'Reviews',
 };

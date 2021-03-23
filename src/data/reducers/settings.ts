@@ -26,6 +26,7 @@ export default function settings(
       courseAlarm: false,
     },
     courseInformationSharing: false,
+    courseInformationSharingBadgeShown: false,
     lastShowChangelogVersion: null,
   },
   action: SettingsAction,

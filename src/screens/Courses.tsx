@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {StackScreenProps} from '@react-navigation/stack';
 import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
@@ -11,6 +11,7 @@ import {getCoursesForSemester} from 'data/actions/courses';
 import {Course} from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {getSemesterTextFromId} from 'helpers/parse';
+import {uploadCourses} from 'helpers/coursex';
 import {ScreenParams} from './types';
 
 const Courses: React.FC<StackScreenProps<ScreenParams, 'Courses'>> = ({
@@ -22,6 +23,9 @@ const Courses: React.FC<StackScreenProps<ScreenParams, 'Courses'>> = ({
   const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
   const currentSemesterId = useTypedSelector(
     (state) => state.semesters.current,
+  );
+  const courseInformationSharing = useTypedSelector(
+    (state) => state.settings.courseInformationSharing,
   );
   const courses = useTypedSelector((state) => state.courses.items);
   const hiddenIds = useTypedSelector((state) => state.courses.hidden);
@@ -70,6 +74,16 @@ const Courses: React.FC<StackScreenProps<ScreenParams, 'Courses'>> = ({
       navigation.push('CourseDetail', item);
     }
   };
+
+  useEffect(() => {
+    if (courseInformationSharing) {
+      (async () => {
+        try {
+          await uploadCourses(courses);
+        } catch {}
+      })();
+    }
+  }, [courseInformationSharing, courses]);
 
   return (
     <SafeArea>

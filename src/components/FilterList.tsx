@@ -3,6 +3,7 @@ import {View, FlatList, RefreshControl} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {IconButton} from 'react-native-paper';
 import {StackNavigationProp} from '@react-navigation/stack';
+import {StackActions} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Assignment, Course, File, Notice} from 'data/types/state';
@@ -16,6 +17,7 @@ import {setHideCourse} from 'data/actions/courses';
 import {setSetting} from 'data/actions/settings';
 import {useTypedSelector} from 'data/store';
 import useToast from 'hooks/useToast';
+import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -72,6 +74,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const dispatch = useDispatch();
 
   const toast = useToast();
+
+  const detailNavigator = useDetailNavigator();
 
   const tabFilterSelections = useTypedSelector(
     (state) => state.settings.tabFilterSelections,
@@ -208,6 +212,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   };
 
+  const handleNavigateCourseX = useCallback(() => {
+    if (detailNavigator) {
+      detailNavigator.dispatch(StackActions.push('CourseX'));
+    } else {
+      navigation.navigate('CourseX', {
+        screen: 'CourseX',
+      } as any);
+    }
+  }, [detailNavigator, navigation]);
+
   useEffect(() => {
     if (selectionMode) {
       navigation.setOptions({
@@ -268,6 +282,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               onPress={handleFilter}
               icon={(props) => <MaterialIcons {...props} name="filter-list" />}
             />
+            {type === 'course' && (
+              <IconButton
+                style={Styles.ml0}
+                icon={(props) => <MaterialIcons {...props} name="star" />}
+                onPress={handleNavigateCourseX}
+              />
+            )}
           </View>
         ),
         headerRight: () => (
@@ -318,12 +339,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     filterSelected,
     handleArchive,
     handleCheckAll,
+    handleNavigateCourseX,
     handleSelect,
     navigation,
     onRefresh,
     selection,
     selectionMode,
     selectionModeDisabled,
+    type,
   ]);
 
   return (

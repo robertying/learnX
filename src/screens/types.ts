@@ -15,7 +15,7 @@ export type ScreenParams = {
   Courses: undefined;
   CourseDetail: Course & ExtraParams;
   Settings: undefined;
-  CourseX: ExtraParams;
+  CourseInformationSharing: ExtraParams;
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;
   FileCache: ExtraParams;
@@ -25,6 +25,11 @@ export type ScreenParams = {
   Search:
     | {
         query?: string;
+      }
+    | undefined;
+  CourseX:
+    | {
+        id?: string;
       }
     | undefined;
   Login: undefined;

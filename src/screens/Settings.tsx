@@ -27,6 +27,9 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
   const newChangelog = useTypedSelector(
     (state) => state.settings.lastShowChangelogVersion !== packageJson.version,
   );
+  const courseInformationSharingBadgeShown = useTypedSelector(
+    (state) => state.settings.courseInformationSharingBadgeShown,
+  );
 
   const [update, setUpdate] = useState<{version: string; url: string} | null>(
     null,
@@ -113,13 +116,14 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
           type="arrow"
           onPress={() => handlePush('FileCache')}
         />
-        {/* <TableCell
+        <TableCell
           style={styles.marginTop}
           iconName="grade"
-          primaryText="课程信息共享计划"
+          badge={!courseInformationSharingBadgeShown}
+          primaryText={t('courseInformationSharing')}
           type="arrow"
-          onPress={() => handlePush('CourseX')}
-        /> */}
+          onPress={() => handlePush('CourseInformationSharing')}
+        />
         <TableCell
           style={styles.marginTop}
           iconName="sticky-note-2"
