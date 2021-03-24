@@ -71,6 +71,7 @@ App for Tsinghua University Web Learning, developed with React Native ⚛️
 
 ### 高级功能 Advanced
 
+- courseX 课程信息共享计划 Course Information Sharing
 - 课表日历同步 Course schedule calendar sync
 - 作业日历/提醒事项同步 Assignment calendar/reminder sync
 - 归档内容 Archiving read posts
