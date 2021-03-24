@@ -254,7 +254,7 @@ const CourseDetail: React.FC<
         activeOpacity={0.6}
         style={[
           styles.courseXContainer,
-          {backgroundColor: theme.colors.background},
+          {backgroundColor: theme.colors.surface},
         ]}
         onPress={handleNavigateCourseX}>
         <Text style={styles.textButton}>{t('courseInformation')}</Text>
