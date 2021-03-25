@@ -60,31 +60,31 @@
 		</dict>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Allow learnX to access your calendars</string>
+	<string>Allow learnX to sync courses and assignments to your calendars</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow learnX to access your camera</string>
+	<string>Allow learnX to access your camera and use the photo for assignment submission</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Allow learnX to access your contacts</string>
 	<key>NSDesktopFolderUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>NSDownloadsFolderUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>NSFileProviderDomainUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow learnX to access your microphone</string>
 	<key>NSNetworkVolumesUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Allow learnX to access your photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
+	<string>Allow learnX to access your photos and use them for your assignment submission</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>Allow learnX to access your reminders</string>
+	<string>Allow learnX to sync assignments to your reminders</string>
 	<key>NSRemovableVolumesUsageDescription</key>
-	<string>Allow learnX to access your files</string>
+	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>
