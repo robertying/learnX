@@ -39,12 +39,7 @@ target 'learnX' do
 end
 
 def catalyst_unsupported_pods
-  [
-    'AppCenterReactNativeShared',
-    'appcenter-core',
-    'appcenter-analytics',
-    'appcenter-crashes',
-  ]
+  []
 end
 
 post_install do |installer|
