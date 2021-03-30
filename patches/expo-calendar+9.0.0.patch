@@ -1,0 +1,25 @@
+diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.java b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.java
+index 2caa8d5..e67ba08 100644
+--- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.java
++++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.java
+@@ -7,6 +7,7 @@ import android.content.ContentValues;
+ import android.content.Context;
+ import android.content.Intent;
+ import android.database.Cursor;
++import android.database.sqlite.SQLiteException;
+ import android.net.Uri;
+ import android.os.AsyncTask;
+ import android.os.Bundle;
+@@ -878,7 +879,11 @@ public class CalendarModule extends ExportedModule implements RegistryLifecycleL
+         reminderValues.put(CalendarContract.Reminders.MINUTES, minutes);
+         reminderValues.put(CalendarContract.Reminders.METHOD, method);
+ 
+-        resolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues);
++        try {
++          resolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues);
++        } catch (SQLiteException e) {
++
++        }
+       }
+     }
+   }
