@@ -1,22 +1,22 @@
 PODS:
-  - appcenter-analytics (4.0.2):
+  - appcenter-analytics (4.1.0):
     - AppCenter/Analytics (~> 4.0)
     - AppCenterReactNativeShared (~> 4.0)
     - React-Core
-  - appcenter-core (4.0.2):
+  - appcenter-core (4.1.0):
     - AppCenterReactNativeShared (~> 4.0)
     - React-Core
-  - appcenter-crashes (4.0.2):
+  - appcenter-crashes (4.1.0):
     - AppCenter/Crashes (~> 4.0)
     - AppCenterReactNativeShared (~> 4.0)
     - React-Core
-  - AppCenter/Analytics (4.1.0):
+  - AppCenter/Analytics (4.1.1):
     - AppCenter/Core
-  - AppCenter/Core (4.1.0)
-  - AppCenter/Crashes (4.1.0):
+  - AppCenter/Core (4.1.1)
+  - AppCenter/Crashes (4.1.1):
     - AppCenter/Core
-  - AppCenterReactNativeShared (4.0.2):
-    - AppCenter/Core (= 4.1.0)
+  - AppCenterReactNativeShared (4.1.0):
+    - AppCenter/Core (= 4.1.1)
   - Base64 (1.1.2)
   - boost-for-react-native (1.63.0)
   - CodePush (7.0.0):
@@ -250,7 +250,7 @@ PODS:
     - React-Core
   - react-native-safe-area-context (3.2.0):
     - React-Core
-  - react-native-webview (11.3.1):
+  - react-native-webview (11.3.2):
     - React-Core
   - React-perflogger (0.64.0)
   - React-RCTActionSheet (0.64.0):
@@ -320,7 +320,7 @@ PODS:
     - React-Core
   - RNCMaskedView (0.2.3):
     - React-Core
-  - RNDeviceInfo (8.0.6):
+  - RNDeviceInfo (8.0.7):
     - React-Core
   - RNFS (2.16.6):
     - React
@@ -328,7 +328,7 @@ PODS:
     - React-Core
   - RNLocalize (2.0.2):
     - React-Core
-  - RNReanimated (2.0.0):
+  - RNReanimated (2.0.1):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -359,7 +359,7 @@ PODS:
     - Yoga
   - RNScreens (2.18.1):
     - React-Core
-  - RNShare (5.1.6):
+  - RNShare (5.1.7):
     - React-Core
   - RNVectorIcons (8.1.0):
     - React-Core
@@ -562,11 +562,11 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AppCenter: 8832b158d17e54845c3b88a91076218f0b07174d
-  appcenter-analytics: f1bcf80219acb97acdabeda751a1591869f83dfd
-  appcenter-core: 92618da8986eef80bae39d1bb2b4c9fa0fc873bd
-  appcenter-crashes: 6fe933bbc9a1d2b64e451b348169640a9fea8729
-  AppCenterReactNativeShared: e1db64e8c65dfdca495efd1a1f77892cbc21342b
+  AppCenter: cd53e3ed3563cc720bcb806c9731a12389b40d44
+  appcenter-analytics: aa074250b2cb182d6f7d67d9c236dd4606673ab5
+  appcenter-core: c97920e79eba2321a262d3733cb2a6f1097db539
+  appcenter-crashes: 804ae51c5d1742ce20fdb6a68b3d06208a404ad5
+  AppCenterReactNativeShared: 2d5a53b6cbd2fe7f63f0033e9f0a40757a4eacf5
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost-for-react-native: 39c7adb57c4e60d6c5479dd8623128eb5b3f0f2c
   CodePush: 4e72e70067c1442ddfe25e3e53b23a6fa573f5c6
@@ -595,7 +595,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: cc847dd5fe2fc51c3a98bd8f2fd1e452db795c48
   react-native-pager-view: c1ec84a464024641ccb1102e9ec12be020d3d74c
   react-native-safe-area-context: f0906bf8bc9835ac9a9d3f97e8bde2a997d8da79
-  react-native-webview: 07fca3f4378bd6ea26254bf63119bfd70f4fabeb
+  react-native-webview: 71567b6bf3d4e55914e580d720cc8f7df64af817
   React-perflogger: 9c547d8f06b9bf00cb447f2b75e8d7f19b7e02af
   React-RCTActionSheet: 3080b6e12e0e1a5b313c8c0050699b5c794a1b11
   React-RCTAnimation: 3f96f21a497ae7dabf4d2f150ee43f906aaf516f
@@ -610,13 +610,13 @@ SPEC CHECKSUMS:
   ReactCommon: cfe2b7fd20e0dbd2d1185cd7d8f99633fbc5ff05
   RNCAsyncStorage: fe58eec522885718d6b297b7b658bf87d7ca557b
   RNCMaskedView: 3beac403b5178d5df732dc211899ac88593d42ef
-  RNDeviceInfo: a91ad51aaf8dc7079f56614045cf6f0a923237bb
+  RNDeviceInfo: 55463fa6e252ca3f0e2ba6001a7b82f879914338
   RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNLocalize: 43f6c30d8e19ad92282ae434d310fb463b31f419
-  RNReanimated: 64f6c5789f82818c07ba3c71864b73619cb23c76
+  RNReanimated: 7d2b97cf2dd7c8c69956080fe911edc08cf0a8c7
   RNScreens: f7ad633b2e0190b77b6a7aab7f914fad6f198d8d
-  RNShare: 2db8b0346a4859f83d15528602ed5b6120a0452a
+  RNShare: 503c37af86611beadccba46156fcc42170c9fb42
   RNVectorIcons: 0ac9c0eb01c7d5c761939d976dea6a1628fa0be1
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   UMCore: 97ba5041c9c92317ce61739f6d126a692c8ef4a8
@@ -626,6 +626,6 @@ SPEC CHECKSUMS:
   UMReactNativeAdapter: 172def7895b2cb44a7dd021336e316d5fa8ea958
   Yoga: 8c8436d4171c87504c648ae23b1d81242bdf3bbf
 
-PODFILE CHECKSUM: 0bc3c0603e88ee0fb8611654d172ce82af4601ca
+PODFILE CHECKSUM: 03be937b268fa4a7715405bdee81f519731004bd
 
 COCOAPODS: 1.10.1
