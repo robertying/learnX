@@ -30,7 +30,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
 
   const theme = useTheme();
   const toast = useToast();
-  const {showMaster, toggleMaster} = useContext(SplitViewContext);
+  const {showDetail, showMaster, toggleMaster} = useContext(SplitViewContext);
 
   const webViewRef = useRef<WebView>(null);
 
@@ -93,6 +93,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
                   name={showMaster ? 'fullscreen' : 'fullscreen-exit'}
                 />
               )}
+              disabled={!showDetail}
             />
           )}
           <IconButton
@@ -123,6 +124,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
     handleShare,
     navigation,
     path,
+    showDetail,
     showMaster,
     toggleMaster,
   ]);

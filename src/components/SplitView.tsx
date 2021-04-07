@@ -5,10 +5,12 @@ import {NavigationContainerRef} from '@react-navigation/native';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: React.RefObject<NavigationContainerRef> | null;
+  showDetail: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
 }>({
   detailNavigationContainerRef: null,
+  showDetail: false,
   showMaster: true,
   toggleMaster: () => {},
 });
@@ -31,6 +33,7 @@ const SplitViewProvider: React.FC<SplitViewProps> = ({
     <SplitViewContext.Provider
       value={{
         detailNavigationContainerRef,
+        showDetail,
         showMaster,
         toggleMaster: setShowMaster,
       }}>
