@@ -111,7 +111,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
             enablesReturnKeyAutomatically
             onSubmitEditing={handleNext}
             value={username}
-            onChangeText={setUsername}
+            onChangeText={(v) => setUsername(v.trim())}
           />
           <TextInput
             ref={passwordTextInputRef}
@@ -123,7 +123,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
             secureTextEntry
             enablesReturnKeyAutomatically
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(v) => setPassword(v.trim())}
           />
           <View style={styles.switchContainer}>
             <Switch
