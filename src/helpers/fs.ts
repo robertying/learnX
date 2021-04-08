@@ -13,16 +13,23 @@ export const downloadFile = async (
   refresh?: boolean,
   onProgress?: (progress: number) => void,
 ) => {
-  const dir = `${
+  let dir = `${
     store.getState().settings.fileUseDocumentDir
       ? ExpoFileSystem.documentDirectory
       : ExpoFileSystem.cacheDirectory
   }learnX-files/${file.courseName}/${file.id}`;
+  if (Platform.OS === 'android') {
+    dir = encodeURI(dir);
+  }
   await fs.mkdir(dir);
 
-  const path = `${dir}/${file.courseName}-${file.title}${
+  let path = `${dir}/${file.courseName}-${file.title}${
     file.fileType ? `.${file.fileType}` : ''
   }`;
+
+  if (Platform.OS === 'android') {
+    path = encodeURI(path);
+  }
 
   if (!refresh && (await fs.exists(path))) {
     return path;
@@ -63,7 +70,7 @@ export const downloadFile = async (
   } else {
     const downloadResumable = ExpoFileSystem.createDownloadResumable(
       file.downloadUrl,
-      'file://' + path,
+      path,
       {},
       (result) => {
         onProgress?.(
