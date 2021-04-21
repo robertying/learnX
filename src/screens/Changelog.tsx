@@ -42,6 +42,7 @@ const Changelog: React.FC<StackScreenProps<ScreenParams, 'Changelog'>> = (
         source={{
           uri: 'https://github.com/robertying/learnX/releases',
         }}
+        style={{backgroundColor: 'transparent'}}
       />
     </SafeArea>
   );
