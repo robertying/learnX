@@ -48,8 +48,16 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
           courseName: courseName.name,
           courseTeacherName: courseName.teacherName,
         }))
-        .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix());
-      dispatch(getAssignmentsForCourseAction.success({courseId, assignments}));
+        .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+      const sorted = [
+        ...assignments
+          .filter((a) => dayjs(a.deadline).isAfter(dayjs()))
+          .reverse(),
+        ...assignments.filter((a) => !dayjs(a.deadline).isAfter(dayjs())),
+      ];
+      dispatch(
+        getAssignmentsForCourseAction.success({courseId, assignments: sorted}),
+      );
     } catch (err) {
       dispatch(getAssignmentsForCourseAction.failure(err));
     }
@@ -84,8 +92,14 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
           }));
         })
         .reduce((a, b) => a.concat(b))
-        .sort((a, b) => dayjs(a.deadline).unix() - dayjs(b.deadline).unix());
-      dispatch(getAllAssignmentsForCoursesAction.success(assignments));
+        .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+      const sorted = [
+        ...assignments
+          .filter((a) => dayjs(a.deadline).isAfter(dayjs()))
+          .reverse(),
+        ...assignments.filter((a) => !dayjs(a.deadline).isAfter(dayjs())),
+      ];
+      dispatch(getAllAssignmentsForCoursesAction.success(sorted));
     } catch (err) {
       dispatch(getAllAssignmentsForCoursesAction.failure(err));
     }
