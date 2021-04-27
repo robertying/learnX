@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-fs/Downloader.m b/node_modules/react-native-fs/Downloader.m
-index bf10268..08b599f 100644
+index cb2ca23..7f6dda3 100644
 --- a/node_modules/react-native-fs/Downloader.m
 +++ b/node_modules/react-native-fs/Downloader.m
 @@ -76,6 +76,9 @@
@@ -12,3 +12,13 @@ index bf10268..08b599f 100644
      _statusCode = [NSNumber numberWithLong:httpResponse.statusCode];
      _contentLength = [NSNumber numberWithLong:httpResponse.expectedContentLength];
      return _params.beginCallback(_statusCode, _contentLength, httpResponse.allHeaderFields);
+@@ -112,6 +115,9 @@
+ {
+   NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)downloadTask.response;
+   if (!_statusCode) {
++    if (!([httpResponse respondsToSelector:@selector(statusCode)]) || httpResponse == nil) {
++      return;
++    }
+     _statusCode = [NSNumber numberWithLong:httpResponse.statusCode];
+   }
+   NSURL *destURL = [NSURL fileURLWithPath:_params.toFile];

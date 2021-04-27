@@ -35,6 +35,13 @@ export const downloadFile = async (
     return path;
   }
 
+  if (
+    !file.downloadUrl.startsWith('http://') &&
+    !file.downloadUrl.startsWith('https://')
+  ) {
+    throw new Error('Invalid file url');
+  }
+
   if (Platform.OS === 'ios') {
     const downloadPromise = fs.downloadFile({
       fromUrl: file.downloadUrl,
