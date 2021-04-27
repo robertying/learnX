@@ -1,4 +1,7 @@
 import mime from 'mime-types';
+import {getSystemVersion} from 'react-native-device-info';
+import semverGte from 'semver/functions/gte';
+import semverCoerce from 'semver/functions/coerce';
 
 declare const preval: any;
 
@@ -57,7 +60,8 @@ export const needWhiteBackground = (ext?: string | null) => {
 
 export const canRenderInMacWebview = (ext?: string | null) => {
   return ext &&
-    (ext === 'pdf' ||
+    ((semverGte(semverCoerce(getSystemVersion())!, semverCoerce('14.0')!) &&
+      ext === 'pdf') ||
       (mime.lookup(ext) !== false &&
         mime.lookup(ext).toString().includes('image/') &&
         !mime.lookup(ext).toString().includes('vnd.')))
