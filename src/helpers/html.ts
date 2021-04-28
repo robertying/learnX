@@ -29,8 +29,8 @@ export const getWebViewTemplate = (
       <meta name="viewport" content="width=device-width, initial-scale=1" />
       <style>
         body {
-          margin: 16px 0px 0px 0px;
-          padding: 0px 16px;
+          margin: 0px;
+          padding: 0px 16px 16px 16px;
         }
       </style>
       ${
