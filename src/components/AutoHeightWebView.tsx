@@ -1,5 +1,5 @@
 import React, {useRef, useState} from 'react';
-import {Linking} from 'react-native';
+import {Linking, Platform} from 'react-native';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {
   WebViewMessageEvent,
@@ -45,19 +45,25 @@ const AutoHeightWebView: React.FC<WebViewProps> = (props) => {
 
   return (
     <WebView
-      originWhitelist={['*']}
       ref={webViewRef}
       injectedJavaScript={injectedScript}
       onMessage={onMessage}
-      javaScriptEnabled={true}
-      showsHorizontalScrollIndicator={false}
+      javaScriptEnabled
+      showsHorizontalScrollIndicator
       showsVerticalScrollIndicator={false}
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
-      sharedCookiesEnabled
-      androidHardwareAccelerationDisabled={true}
+      originWhitelist={['*']}
       {...props}
-      style={[{height, backgroundColor: 'transparent'}, props.style]}
+      style={[
+        {
+          height,
+          backgroundColor: 'transparent',
+          opacity: Platform.OS === 'android' ? 0.99 : 1,
+          minHeight: 1,
+        },
+        props.style,
+      ]}
     />
   );
 };
