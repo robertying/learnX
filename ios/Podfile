@@ -13,6 +13,7 @@ target 'learnX' do
     'expo-asset',
     'expo-constants',
     'expo-image-loader',
+    'expo-permissions',
     'unimodules-app-loader',
     'unimodules-barcode-scanner-interface',
     'unimodules-camera-interface',
