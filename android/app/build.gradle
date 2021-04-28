@@ -142,8 +142,8 @@ android {
         applicationId 'io.robertying.learnx'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9201720
-        versionName '13.1.0'
+        versionCode 9201730
+        versionName '13.2.0'
     }
     splits {
         abi {
@@ -221,10 +221,13 @@ dependencies {
             'expo-asset',
             'expo-constants',
             'expo-image-loader',
+            'expo-permissions',
             'unimodules-app-loader',
             'unimodules-barcode-scanner-interface',
             'unimodules-camera-interface',
             'unimodules-constants-interface',
+            'unimodules-font-interface',
+            'unimodules-permissions-interface',
             'unimodules-face-detector-interface',
             'unimodules-image-loader-interface',
             'unimodules-sensors-interface',
