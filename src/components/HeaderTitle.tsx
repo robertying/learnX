@@ -18,7 +18,11 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({title, subtitle}) => {
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="middle">
         {title}
       </Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+      {subtitle ? (
+        <Text style={styles.subtitle} numberOfLines={1} ellipsizeMode="middle">
+          {subtitle}
+        </Text>
+      ) : null}
     </View>
   );
 };
