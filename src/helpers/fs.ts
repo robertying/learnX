@@ -121,10 +121,9 @@ export const shareFile = async (file: File) => {
     url: path,
     type: (file.fileType && mime.lookup(file.fileType)) || 'text/plain',
     title: '分享文件',
-    message: `分享 ${file.title}`,
     showAppsToView: true,
     failOnCancel: false,
-  });
+  } as any);
 };
 
 export const removeFileDir = async () => {
