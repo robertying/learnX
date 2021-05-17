@@ -1,3 +1,78 @@
+diff --git a/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/HeaderUtil.java b/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/HeaderUtil.java
+deleted file mode 100644
+index 44dddd2..0000000
+--- a/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/HeaderUtil.java
++++ /dev/null
+@@ -1,45 +0,0 @@
+-/*
+- * Copyright (c) Facebook, Inc. and its affiliates.
+- *
+- * This source code is licensed under the MIT license found in the
+- * LICENSE file in the root directory of this source tree.
+- */
+-
+-package com.facebook.react.modules.network;
+-
+-/**
+- * The class purpose is to weaken too strict OkHttp restriction on http headers. See:
+- * https://github.com/square/okhttp/issues/2016 Auth headers might have an Authentication
+- * information. It is better to get 401 from the server in this case, rather than non descriptive
+- * error as 401 could be handled to invalidate the wrong token in the client code.
+- */
+-public class HeaderUtil {
+-
+-  public static String stripHeaderName(String name) {
+-    StringBuilder builder = new StringBuilder(name.length());
+-    boolean modified = false;
+-    for (int i = 0, length = name.length(); i < length; i++) {
+-      char c = name.charAt(i);
+-      if (c > '\u0020' && c < '\u007f') {
+-        builder.append(c);
+-      } else {
+-        modified = true;
+-      }
+-    }
+-    return modified ? builder.toString() : name;
+-  }
+-
+-  public static String stripHeaderValue(String value) {
+-    StringBuilder builder = new StringBuilder(value.length());
+-    boolean modified = false;
+-    for (int i = 0, length = value.length(); i < length; i++) {
+-      char c = value.charAt(i);
+-      if ((c > '\u001f' && c < '\u007f') || c == '\t') {
+-        builder.append(c);
+-      } else {
+-        modified = true;
+-      }
+-    }
+-    return modified ? builder.toString() : value;
+-  }
+-}
+diff --git a/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/NetworkingModule.java b/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/NetworkingModule.java
+index a584d4f..7e402f0 100644
+--- a/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/NetworkingModule.java
++++ b/node_modules/react-native/ReactAndroid/src/main/java/com/facebook/react/modules/network/NetworkingModule.java
+@@ -743,15 +743,15 @@ public final class NetworkingModule extends NativeNetworkingAndroidSpec {
+       if (header == null || header.size() != 2) {
+         return null;
+       }
+-      String headerName = HeaderUtil.stripHeaderName(header.getString(0));
+-      String headerValue = HeaderUtil.stripHeaderValue(header.getString(1));
++      String headerName = header.getString(0);
++      String headerValue = header.getString(1);
+       if (headerName == null || headerValue == null) {
+         return null;
+       }
+-      headersBuilder.add(headerName, headerValue);
++      headersBuilder.addUnsafeNonAscii(headerName, headerValue);
+     }
+     if (headersBuilder.get(USER_AGENT_HEADER_NAME) == null && mDefaultUserAgent != null) {
+-      headersBuilder.add(USER_AGENT_HEADER_NAME, mDefaultUserAgent);
++      headersBuilder.addUnsafeNonAscii(USER_AGENT_HEADER_NAME, mDefaultUserAgent);
+     }
+
+     // Sanitize content encoding header, supported only when request specify payload as string
 diff --git a/node_modules/react-native/scripts/react-native-xcode.sh b/node_modules/react-native/scripts/react-native-xcode.sh
 index 09b6c40..a6aef24 100755
 --- a/node_modules/react-native/scripts/react-native-xcode.sh
@@ -5,7 +80,7 @@ index 09b6c40..a6aef24 100755
 @@ -127,6 +127,10 @@ case "$PLATFORM_NAME" in
      ;;
  esac
- 
+
 +if [ "${IS_MACCATALYST}" = "YES" ]; then
 +  BUNDLE_PLATFORM="ios"
 +fi
