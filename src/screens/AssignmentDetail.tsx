@@ -60,7 +60,7 @@ const AssignmentDetail: React.FC<
   const html = useMemo(
     () =>
       getWebViewTemplate(
-        description || t('noAssignmentDescription'),
+        description || `<p>${t('noAssignmentDescription')}</p>`,
         theme.dark,
         theme.colors.surface,
       ),

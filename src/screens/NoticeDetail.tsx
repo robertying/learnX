@@ -34,7 +34,7 @@ const NoticeDetail: React.FC<StackScreenProps<ScreenParams, 'NoticeDetail'>> =
     const html = useMemo(
       () =>
         getWebViewTemplate(
-          content || t('noNoticeContent'),
+          content || `<p>${t('noNoticeContent')}</p>`,
           theme.dark,
           theme.colors.surface,
         ),
