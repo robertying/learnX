@@ -227,7 +227,7 @@ const AssignmentSubmission: React.FC<
               {attachmentResult.name}
             </TextButton>
           ) : undefined}
-          <View style={Styles.flexRow}>
+          <View style={styles.attachmentActionButtons}>
             {submittedAttachmentName ? (
               <Button
                 mode="contained"
@@ -281,6 +281,11 @@ const styles = StyleSheet.create({
   submitButton: {
     alignSelf: 'flex-start',
     marginRight: 8,
+  },
+  attachmentActionButtons: {
+    flexWrap: 'wrap',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
 
