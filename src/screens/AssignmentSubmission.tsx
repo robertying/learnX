@@ -55,10 +55,8 @@ const AssignmentSubmission: React.FC<
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),
   );
-  const [
-    attachmentResult,
-    setAttachmentResult,
-  ] = useState<DocumentPickerResponse | null>(null);
+  const [attachmentResult, setAttachmentResult] =
+    useState<DocumentPickerResponse | null>(null);
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);

@@ -349,8 +349,7 @@ const mockStore: PersistAppState = {
         studentHomeworkId: '1',
         courseName: '通信与网络',
         courseTeacherName: '周世东',
-        url:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         graded: false,
         answerContent: '答案已上传',
       },
@@ -371,8 +370,7 @@ const mockStore: PersistAppState = {
         studentHomeworkId: '1',
         courseName: '通信与网络',
         courseTeacherName: '周世东',
-        url:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         graded: true,
         grade: 80,
         gradeContent:
@@ -398,8 +396,7 @@ const mockStore: PersistAppState = {
         studentHomeworkId: '1',
         courseName: '通信与网络',
         courseTeacherName: '周世东',
-        url:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         graded: false,
       },
       {
@@ -418,8 +415,7 @@ const mockStore: PersistAppState = {
         studentHomeworkId: '1',
         courseName: '通信与网络',
         courseTeacherName: '周世东',
-        url:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         graded: false,
       },
       {
@@ -438,8 +434,7 @@ const mockStore: PersistAppState = {
         studentHomeworkId: '1',
         courseName: '通信与网络',
         courseTeacherName: '周世东',
-        url:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         graded: false,
       },
     ],

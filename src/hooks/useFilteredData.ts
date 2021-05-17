@@ -19,25 +19,25 @@ function useFilteredData<T extends Notice | Assignment | File>(
     ];
   }, [data, archived, hidden, pinned]);
 
-  const _unread = useMemo(() => _all.filter((i) => unread.includes(i.id)), [
-    _all,
-    unread,
-  ]);
+  const _unread = useMemo(
+    () => _all.filter((i) => unread.includes(i.id)),
+    [_all, unread],
+  );
 
-  const _fav = useMemo(() => _all.filter((i) => fav.includes(i.id)), [
-    _all,
-    fav,
-  ]);
+  const _fav = useMemo(
+    () => _all.filter((i) => fav.includes(i.id)),
+    [_all, fav],
+  );
 
   const _hidden = useMemo(
     () => data.filter((i) => hidden.includes(i.courseId)),
     [hidden, data],
   );
 
-  const _archived = useMemo(() => data.filter((i) => archived.includes(i.id)), [
-    data,
-    archived,
-  ]);
+  const _archived = useMemo(
+    () => data.filter((i) => archived.includes(i.id)),
+    [data, archived],
+  );
 
   const _unfinished = useMemo(
     () => _all.filter((i) => !(i as Assignment).submitted),

@@ -146,141 +146,140 @@ const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
   );
 };
 
-const CourseDetail: React.FC<
-  StackScreenProps<ScreenParams, 'CourseDetail'>
-> = ({
-  navigation,
-  route: {
-    params: {disableAnimation, ...course},
-  },
-}) => {
-  const theme = useTheme();
-
-  const layout = useWindowDimensions();
-
-  const detailNavigator = useDetailNavigator();
-
-  const notices = useTypedSelector((state) => state.notices.items);
-  const assignments = useTypedSelector((state) => state.assignments.items);
-  const files = useTypedSelector((state) => state.files.items);
-
-  const [index, setIndex] = React.useState(0);
-  const [routes] = React.useState([
-    {key: 'notice', title: t('notices')},
-    {key: 'assignment', title: t('assignments')},
-    {key: 'file', title: t('files')},
-  ]);
-
-  const renderLabel = ({
-    route,
-  }: Scene<Route> & {
-    focused: boolean;
-    color: string;
-  }) => <Text>{route.title}</Text>;
-
-  const renderTabBar = (
-    props: SceneRendererProps & {
-      navigationState: NavigationState<Route>;
-    },
-  ) => (
-    <TabBar
-      style={{backgroundColor: theme.colors.surface}}
-      indicatorStyle={{
-        backgroundColor: theme.colors.primary,
-      }}
-      {...props}
-      renderLabel={renderLabel}
-    />
-  );
-
-  const renderScene = ({
-    route,
-  }: {
+const CourseDetail: React.FC<StackScreenProps<ScreenParams, 'CourseDetail'>> =
+  ({
+    navigation,
     route: {
-      key: string;
-    };
+      params: {disableAnimation, ...course},
+    },
   }) => {
-    switch (route.key) {
-      case 'notice':
-        return (
-          <Notices
-            courseId={course.id}
-            data={notices.filter((i) => i.courseId === course.id)}
-          />
-        );
-      case 'assignment':
-        return (
-          <Assignments
-            courseId={course.id}
-            data={assignments.filter((i) => i.courseId === course.id)}
-          />
-        );
-      case 'file':
-        return (
-          <Files
-            courseId={course.id}
-            data={files.filter((i) => i.courseId === course.id)}
-          />
-        );
-      default:
-        return null;
-    }
-  };
+    const theme = useTheme();
 
-  const handleNavigateCourseX = useCallback(() => {
-    if (detailNavigator) {
-      detailNavigator.dispatch(StackActions.push('CourseX', {id: course.id}));
-    } else {
-      navigation.navigate('CourseX', {
-        screen: 'CourseX',
-        params: {
-          id: course.id,
-        },
-      } as any);
-    }
-  }, [course.id, detailNavigator, navigation]);
+    const layout = useWindowDimensions();
 
-  useLayoutEffect(() => {
-    if (disableAnimation) {
-      navigation.setOptions({
-        animationEnabled: false,
-      });
-    }
-  }, [navigation, disableAnimation]);
+    const detailNavigator = useDetailNavigator();
 
-  return (
-    <SafeArea>
-      <TouchableOpacity
-        activeOpacity={0.6}
-        style={[
-          styles.courseXContainer,
-          {backgroundColor: theme.colors.surface},
-        ]}
-        onPress={handleNavigateCourseX}>
-        <Text style={styles.textButton}>{t('courseInformation')}</Text>
-        <Icon
-          style={styles.icon}
-          name="star"
-          color={theme.colors.primary}
-          size={18}
-        />
-        <Text style={styles.textButton}>{t('courseReviews')}</Text>
-      </TouchableOpacity>
-      <Divider />
-      <TabView
-        navigationState={{index, routes}}
-        renderScene={renderScene}
-        renderTabBar={renderTabBar}
-        onIndexChange={setIndex}
-        initialLayout={{width: layout.width}}
-        tabBarPosition="top"
-        lazy={false}
-        renderLazyPlaceholder={() => null}
-        lazyPreloadDistance={0}
+    const notices = useTypedSelector((state) => state.notices.items);
+    const assignments = useTypedSelector((state) => state.assignments.items);
+    const files = useTypedSelector((state) => state.files.items);
+
+    const [index, setIndex] = React.useState(0);
+    const [routes] = React.useState([
+      {key: 'notice', title: t('notices')},
+      {key: 'assignment', title: t('assignments')},
+      {key: 'file', title: t('files')},
+    ]);
+
+    const renderLabel = ({
+      route,
+    }: Scene<Route> & {
+      focused: boolean;
+      color: string;
+    }) => <Text>{route.title}</Text>;
+
+    const renderTabBar = (
+      props: SceneRendererProps & {
+        navigationState: NavigationState<Route>;
+      },
+    ) => (
+      <TabBar
+        style={{backgroundColor: theme.colors.surface}}
+        indicatorStyle={{
+          backgroundColor: theme.colors.primary,
+        }}
+        {...props}
+        renderLabel={renderLabel}
       />
-    </SafeArea>
-  );
-};
+    );
+
+    const renderScene = ({
+      route,
+    }: {
+      route: {
+        key: string;
+      };
+    }) => {
+      switch (route.key) {
+        case 'notice':
+          return (
+            <Notices
+              courseId={course.id}
+              data={notices.filter((i) => i.courseId === course.id)}
+            />
+          );
+        case 'assignment':
+          return (
+            <Assignments
+              courseId={course.id}
+              data={assignments.filter((i) => i.courseId === course.id)}
+            />
+          );
+        case 'file':
+          return (
+            <Files
+              courseId={course.id}
+              data={files.filter((i) => i.courseId === course.id)}
+            />
+          );
+        default:
+          return null;
+      }
+    };
+
+    const handleNavigateCourseX = useCallback(() => {
+      if (detailNavigator) {
+        detailNavigator.dispatch(StackActions.push('CourseX', {id: course.id}));
+      } else {
+        navigation.navigate('CourseX', {
+          screen: 'CourseX',
+          params: {
+            id: course.id,
+          },
+        } as any);
+      }
+    }, [course.id, detailNavigator, navigation]);
+
+    useLayoutEffect(() => {
+      if (disableAnimation) {
+        navigation.setOptions({
+          animationEnabled: false,
+        });
+      }
+    }, [navigation, disableAnimation]);
+
+    return (
+      <SafeArea>
+        <TouchableOpacity
+          activeOpacity={0.6}
+          style={[
+            styles.courseXContainer,
+            {backgroundColor: theme.colors.surface},
+          ]}
+          onPress={handleNavigateCourseX}>
+          <Text style={styles.textButton}>{t('courseInformation')}</Text>
+          <Icon
+            style={styles.icon}
+            name="star"
+            color={theme.colors.primary}
+            size={18}
+          />
+          <Text style={styles.textButton}>{t('courseReviews')}</Text>
+        </TouchableOpacity>
+        <Divider />
+        <TabView
+          navigationState={{index, routes}}
+          renderScene={renderScene}
+          renderTabBar={renderTabBar}
+          onIndexChange={setIndex}
+          initialLayout={{width: layout.width}}
+          tabBarPosition="top"
+          lazy={false}
+          renderLazyPlaceholder={() => null}
+          lazyPreloadDistance={0}
+        />
+      </SafeArea>
+    );
+  };
 
 const styles = StyleSheet.create({
   courseXContainer: {

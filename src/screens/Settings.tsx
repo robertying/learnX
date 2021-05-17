@@ -31,9 +31,8 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
     (state) => state.settings.courseInformationSharingBadgeShown,
   );
 
-  const [update, setUpdate] = useState<{version: string; url: string} | null>(
-    null,
-  );
+  const [update, setUpdate] =
+    useState<{version: string; url: string} | null>(null);
 
   const handlePush = (name: keyof ScreenParams) => {
     if (detailNavigator) {

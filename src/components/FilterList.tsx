@@ -87,19 +87,21 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const [filterVisible, setFilterVisible] = useState(false);
 
-  const data = (filterSelected === 'unfinished' && unfinished
-    ? unfinished
-    : filterSelected === 'finished' && finished
-    ? finished
-    : filterSelected === 'all'
-    ? all
-    : filterSelected === 'unread' && unread
-    ? unread
-    : filterSelected === 'fav'
-    ? fav
-    : filterSelected === 'archived'
-    ? archived
-    : hidden)!;
+  const data = (
+    filterSelected === 'unfinished' && unfinished
+      ? unfinished
+      : filterSelected === 'finished' && finished
+      ? finished
+      : filterSelected === 'all'
+      ? all
+      : filterSelected === 'unread' && unread
+      ? unread
+      : filterSelected === 'fav'
+      ? fav
+      : filterSelected === 'archived'
+      ? archived
+      : hidden
+  )!;
 
   const favIds = fav?.map((i) => i.id);
   const archivedIds = archived?.map((i) => i.id);
