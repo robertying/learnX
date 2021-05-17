@@ -155,6 +155,8 @@ android {
     }
     signingConfigs {
         debug {
+            enableV3Signing true
+            enableV4Signing true
             storeFile file('debug.keystore')
             storePassword 'android'
             keyAlias 'androiddebugkey'
@@ -162,6 +164,8 @@ android {
         }
         if (CI) {
             release {
+                enableV3Signing true
+                enableV4Signing true
                 storeFile file('release.keystore')
                 storePassword System.getenv('LEARNX_RELEASE_STORE_PASSWORD')
                 keyAlias System.getenv('LEARNX_RELEASE_KEY_ALIAS')
@@ -172,6 +176,8 @@ android {
             properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
             release {
+                enableV3Signing true
+                enableV4Signing true
                 storeFile file('release.keystore')
                 storePassword properties.getProperty('LEARNX_RELEASE_STORE_PASSWORD')
                 keyAlias properties.getProperty('LEARNX_RELEASE_KEY_ALIAS')
