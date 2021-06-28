@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import {useEffect, useRef} from 'react';
 import {Linking} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import WebView, {WebViewNavigation} from 'react-native-webview';

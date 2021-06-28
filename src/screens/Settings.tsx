@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Alert, Linking, Platform, ScrollView, StyleSheet} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';

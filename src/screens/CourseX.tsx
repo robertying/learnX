@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import {useRef, useState} from 'react';
 import {Linking, StyleSheet, View} from 'react-native';
 import {IconButton, ProgressBar, useTheme} from 'react-native-paper';
 import WebView, {WebViewNavigation} from 'react-native-webview';

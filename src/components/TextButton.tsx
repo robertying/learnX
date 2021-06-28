@@ -1,4 +1,3 @@
-import React from 'react';
 import {TextProps, TouchableOpacity, TouchableOpacityProps} from 'react-native';
 import {Text, useTheme} from 'react-native-paper';
 import Styles from 'constants/Styles';

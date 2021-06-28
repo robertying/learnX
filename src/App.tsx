@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {
   AppState,
   AppStateStatus,
@@ -661,7 +661,7 @@ const Container = () => {
 
   const [appState, setAppState] = useState(AppState.currentState);
 
-  const mainNavigationContainerRef = React.useRef<NavigationContainerRef>(null);
+  const mainNavigationContainerRef = useRef<NavigationContainerRef>(null);
   const detailNavigationContainerRef = useRef<NavigationContainerRef>(null);
 
   useEffect(() => {

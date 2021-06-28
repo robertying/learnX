@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import {useEffect, useMemo} from 'react';
 import {StackScreenProps} from '@react-navigation/stack';
 import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';

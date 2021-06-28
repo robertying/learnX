@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import {useCallback, useEffect} from 'react';
 import {StackScreenProps} from '@react-navigation/stack';
 import {StackActions} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';

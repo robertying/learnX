@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useRef, useState} from 'react';
+import {memo, useEffect, useRef, useState} from 'react';
 import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
 import {Badge, Colors, Divider, List, Surface, Text} from 'react-native-paper';
 import Animated, {EasingNode} from 'react-native-reanimated';

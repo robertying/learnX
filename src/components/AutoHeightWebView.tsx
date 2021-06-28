@@ -1,4 +1,4 @@
-import React, {useRef, useState} from 'react';
+import {useRef, useState} from 'react';
 import {Linking, Platform} from 'react-native';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {

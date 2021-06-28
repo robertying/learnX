@@ -1,4 +1,4 @@
-import React, {useEffect, useLayoutEffect, useMemo} from 'react';
+import {useEffect, useLayoutEffect, useMemo} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {Caption, Divider, Title, useTheme} from 'react-native-paper';
 import {StackScreenProps} from '@react-navigation/stack';

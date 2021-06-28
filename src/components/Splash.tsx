@@ -1,4 +1,3 @@
-import React from 'react';
 import {Image, StyleSheet, useColorScheme, View} from 'react-native';
 
 const Splash: React.FC = () => {

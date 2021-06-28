@@ -1,4 +1,4 @@
-import React, {useCallback, useLayoutEffect} from 'react';
+import {useCallback, useLayoutEffect, useState} from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -163,8 +163,8 @@ const CourseDetail: React.FC<StackScreenProps<ScreenParams, 'CourseDetail'>> =
     const assignments = useTypedSelector(state => state.assignments.items);
     const files = useTypedSelector(state => state.files.items);
 
-    const [index, setIndex] = React.useState(0);
-    const [routes] = React.useState([
+    const [index, setIndex] = useState(0);
+    const [routes] = useState([
       {key: 'notice', title: t('notices')},
       {key: 'assignment', title: t('assignments')},
       {key: 'file', title: t('files')},

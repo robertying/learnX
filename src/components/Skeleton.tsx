@@ -1,4 +1,4 @@
-import React, {useEffect, useCallback, useRef} from 'react';
+import {useEffect, useCallback, useRef} from 'react';
 import {StyleSheet, View, Animated} from 'react-native';
 import {useTheme} from 'react-native-paper';
 

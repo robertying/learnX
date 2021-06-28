@@ -1,4 +1,3 @@
-import React from 'react';
 import {Alert, ScrollView, StyleSheet} from 'react-native';
 import {StackScreenProps} from '@react-navigation/stack';
 import {Caption} from 'react-native-paper';

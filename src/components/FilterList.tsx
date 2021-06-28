@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {View, FlatList, RefreshControl} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {IconButton} from 'react-native-paper';

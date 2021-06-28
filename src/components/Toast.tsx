@@ -1,4 +1,4 @@
-import React, {createContext, useCallback, useState} from 'react';
+import {createContext, useCallback, useState} from 'react';
 import {StyleSheet} from 'react-native';
 import {Snackbar} from 'react-native-paper';
 import * as Haptics from 'expo-haptics';

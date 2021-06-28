@@ -1,4 +1,4 @@
-import React, {createContext, useState} from 'react';
+import {createContext, useState, Children} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Divider} from 'react-native-paper';
 import {NavigationContainerRef} from '@react-navigation/native';
@@ -44,16 +44,16 @@ const SplitViewProvider: React.FC<SplitViewProps> = ({
               styles.master,
               {flex: showDetail ? 0 : 1, display: showMaster ? 'flex' : 'none'},
             ]}>
-            {React.Children.toArray(children)[0]}
+            {Children.toArray(children)[0]}
           </View>
           {showDetail && <Divider style={styles.divider} />}
           <View
             style={[styles.detail, {display: showDetail ? 'flex' : 'none'}]}>
-            {React.Children.toArray(children)[1]}
+            {Children.toArray(children)[1]}
           </View>
         </View>
       ) : (
-        <>{React.Children.toArray(children)[0]}</>
+        <>{Children.toArray(children)[0]}</>
       )}
     </SplitViewContext.Provider>
   );

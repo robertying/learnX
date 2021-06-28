@@ -1,4 +1,4 @@
-import React, {memo} from 'react';
+import {memo} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Caption, Subheading, Title, useTheme} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';

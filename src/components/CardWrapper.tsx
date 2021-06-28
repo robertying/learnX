@@ -1,4 +1,4 @@
-import React, {PropsWithChildren, useRef} from 'react';
+import {PropsWithChildren, useRef} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {TouchableRipple, Colors, useTheme, Checkbox} from 'react-native-paper';
 import Interactable from 'react-native-interactable';

@@ -1,4 +1,3 @@
-import React from 'react';
 import {SafeAreaView, SafeAreaViewProps} from 'react-native-safe-area-context';
 import Styles from 'constants/Styles';
 
