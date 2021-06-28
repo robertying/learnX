@@ -24,16 +24,16 @@ const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
   const toast = useToast();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
   const courseIds = useTypedSelector(
-    (state) => state.courses.items.map((i) => i.id),
+    state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
-  const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
-  const assignmentState = useTypedSelector((state) => state.assignments);
-  const fetching = useTypedSelector((state) => state.assignments.fetching);
+  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const assignmentState = useTypedSelector(state => state.assignments);
+  const fetching = useTypedSelector(state => state.assignments.fetching);
   const assignmentSync = useTypedSelector(
-    (state) => state.settings.assignmentSync,
+    state => state.settings.assignmentSync,
   );
 
   const [all, _, fav, archived, hidden, unfinished, finished] = useFilteredData(
@@ -46,8 +46,7 @@ const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
   );
 
   const sync = useMemo(
-    () =>
-      all.filter((assignment) => dayjs(assignment.deadline).isAfter(dayjs())),
+    () => all.filter(assignment => dayjs(assignment.deadline).isAfter(dayjs())),
     [all],
   );
 

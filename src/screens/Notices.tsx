@@ -18,14 +18,14 @@ const Notices: React.FC<StackScreenProps<ScreenParams, 'Notices'>> = ({
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
   const courseIds = useTypedSelector(
-    (state) => state.courses.items.map((i) => i.id),
+    state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
-  const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
-  const noticeState = useTypedSelector((state) => state.notices);
-  const fetching = useTypedSelector((state) => state.notices.fetching);
+  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+  const noticeState = useTypedSelector(state => state.notices);
+  const fetching = useTypedSelector(state => state.notices.fetching);
 
   const [all, unread, fav, archived, hidden] = useFilteredData(
     noticeState.items,

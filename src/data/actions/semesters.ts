@@ -19,7 +19,7 @@ export const getAllSemestersAction = createAsyncAction(
 )<undefined, string[], ApiError>();
 
 export function getAllSemesters(): ThunkResult {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch(getAllSemestersAction.request());
 
     try {

@@ -33,9 +33,9 @@ const Search: React.FC<StackScreenProps<ScreenParams, 'Search'>> = ({
 
   const detailNavigator = useDetailNavigator();
 
-  const notices = useTypedSelector((state) => state.notices.items);
-  const assignments = useTypedSelector((state) => state.assignments.items);
-  const files = useTypedSelector((state) => state.files.items);
+  const notices = useTypedSelector(state => state.notices.items);
+  const assignments = useTypedSelector(state => state.assignments.items);
+  const files = useTypedSelector(state => state.files.items);
 
   const [searchQuery, setSearchQuery] = useState(route.params?.query ?? '');
 
@@ -89,7 +89,7 @@ const Search: React.FC<StackScreenProps<ScreenParams, 'Search'>> = ({
               },
               {key: 'file', title: t('files'), data: fileResult},
             ]}
-            keyExtractor={(item) => item.id}
+            keyExtractor={item => item.id}
             renderItem={({item, section: {key}}) =>
               key === 'notice' ? (
                 <NoticeCard

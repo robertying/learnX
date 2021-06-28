@@ -35,7 +35,7 @@ export default function notices(
       return {
         ...state,
         fetching: false,
-        unread: action.payload.filter((i) => !i.hasRead).map((i) => i.id),
+        unread: action.payload.filter(i => !i.hasRead).map(i => i.id),
         items: action.payload,
         error: null,
       };
@@ -57,15 +57,15 @@ export default function notices(
         fetching: false,
         unread: [
           ...state.unread.filter(
-            (id) =>
-              state.items.find((i) => i.id === id)?.courseId !==
+            id =>
+              state.items.find(i => i.id === id)?.courseId !==
               action.payload.courseId,
           ),
-          ...action.payload.notices.filter((i) => !i.hasRead).map((i) => i.id),
+          ...action.payload.notices.filter(i => !i.hasRead).map(i => i.id),
         ],
         items: [
           ...state.items.filter(
-            (item) => item.courseId !== action.payload.courseId,
+            item => item.courseId !== action.payload.courseId,
           ),
           ...action.payload.notices,
         ],
@@ -86,9 +86,7 @@ export default function notices(
       } else {
         return {
           ...state,
-          unread: state.unread.filter(
-            (item) => item !== action.payload.noticeId,
-          ),
+          unread: state.unread.filter(item => item !== action.payload.noticeId),
         };
       }
     case SET_PIN_NOTICE:
@@ -100,9 +98,7 @@ export default function notices(
       } else {
         return {
           ...state,
-          pinned: state.pinned.filter(
-            (item) => item !== action.payload.noticeId,
-          ),
+          pinned: state.pinned.filter(item => item !== action.payload.noticeId),
         };
       }
     case SET_FAV_NOTICE:
@@ -115,7 +111,7 @@ export default function notices(
         return {
           ...state,
           favorites: state.favorites.filter(
-            (item) => item !== action.payload.noticeId,
+            item => item !== action.payload.noticeId,
           ),
         };
       }
@@ -129,7 +125,7 @@ export default function notices(
         return {
           ...state,
           archived: state.archived.filter(
-            (i) => !action.payload.noticeIds.includes(i),
+            i => !action.payload.noticeIds.includes(i),
           ),
         };
       }

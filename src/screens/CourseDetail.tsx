@@ -36,8 +36,8 @@ const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
   const navigation = useNavigation<StackNavigationProp<ScreenParams>>();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
-  const fetching = useTypedSelector((state) => state.notices.fetching);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const fetching = useTypedSelector(state => state.notices.fetching);
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -56,7 +56,7 @@ const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
           onPress={() => navigation.push('NoticeDetail', item)}
         />
       )}
-      keyExtractor={(item) => item.id}
+      keyExtractor={item => item.id}
       refreshing={fetching}
       onRefresh={handleRefresh}
       contentContainerStyle={[
@@ -78,8 +78,8 @@ const Assignments = ({
   const navigation = useNavigation<StackNavigationProp<ScreenParams>>();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
-  const fetching = useTypedSelector((state) => state.assignments.fetching);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const fetching = useTypedSelector(state => state.assignments.fetching);
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -98,7 +98,7 @@ const Assignments = ({
           onPress={() => navigation.push('AssignmentDetail', item)}
         />
       )}
-      keyExtractor={(item) => item.id}
+      keyExtractor={item => item.id}
       refreshing={fetching}
       onRefresh={handleRefresh}
       contentContainerStyle={[
@@ -114,8 +114,8 @@ const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
   const navigation = useNavigation<StackNavigationProp<ScreenParams>>();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
-  const fetching = useTypedSelector((state) => state.files.fetching);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const fetching = useTypedSelector(state => state.files.fetching);
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -134,7 +134,7 @@ const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
           onPress={() => navigation.push('FileDetail', item)}
         />
       )}
-      keyExtractor={(item) => item.id}
+      keyExtractor={item => item.id}
       refreshing={fetching}
       onRefresh={handleRefresh}
       contentContainerStyle={[
@@ -159,9 +159,9 @@ const CourseDetail: React.FC<StackScreenProps<ScreenParams, 'CourseDetail'>> =
 
     const detailNavigator = useDetailNavigator();
 
-    const notices = useTypedSelector((state) => state.notices.items);
-    const assignments = useTypedSelector((state) => state.assignments.items);
-    const files = useTypedSelector((state) => state.files.items);
+    const notices = useTypedSelector(state => state.notices.items);
+    const assignments = useTypedSelector(state => state.assignments.items);
+    const files = useTypedSelector(state => state.files.items);
 
     const [index, setIndex] = React.useState(0);
     const [routes] = React.useState([
@@ -204,21 +204,21 @@ const CourseDetail: React.FC<StackScreenProps<ScreenParams, 'CourseDetail'>> =
           return (
             <Notices
               courseId={course.id}
-              data={notices.filter((i) => i.courseId === course.id)}
+              data={notices.filter(i => i.courseId === course.id)}
             />
           );
         case 'assignment':
           return (
             <Assignments
               courseId={course.id}
-              data={assignments.filter((i) => i.courseId === course.id)}
+              data={assignments.filter(i => i.courseId === course.id)}
             />
           );
         case 'file':
           return (
             <Files
               courseId={course.id}
-              data={files.filter((i) => i.courseId === course.id)}
+              data={files.filter(i => i.courseId === course.id)}
             />
           );
         default:

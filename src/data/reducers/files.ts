@@ -35,7 +35,7 @@ export default function files(
       return {
         ...state,
         fetching: false,
-        unread: action.payload.filter((i) => i.isNew).map((i) => i.id),
+        unread: action.payload.filter(i => i.isNew).map(i => i.id),
         items: action.payload,
         error: null,
       };
@@ -57,15 +57,15 @@ export default function files(
         fetching: false,
         unread: [
           ...state.unread.filter(
-            (id) =>
-              state.items.find((i) => i.id === id)?.courseId !==
+            id =>
+              state.items.find(i => i.id === id)?.courseId !==
               action.payload.courseId,
           ),
-          ...action.payload.files.filter((i) => i.isNew).map((i) => i.id),
+          ...action.payload.files.filter(i => i.isNew).map(i => i.id),
         ],
         items: [
           ...state.items.filter(
-            (item) => item.courseId !== action.payload.courseId,
+            item => item.courseId !== action.payload.courseId,
           ),
           ...action.payload.files,
         ],
@@ -86,7 +86,7 @@ export default function files(
       } else {
         return {
           ...state,
-          unread: state.unread.filter((item) => item !== action.payload.fileId),
+          unread: state.unread.filter(item => item !== action.payload.fileId),
         };
       }
     case SET_PIN_FILE:
@@ -98,7 +98,7 @@ export default function files(
       } else {
         return {
           ...state,
-          pinned: state.pinned.filter((item) => item !== action.payload.fileId),
+          pinned: state.pinned.filter(item => item !== action.payload.fileId),
         };
       }
     case SET_FAV_FILE:
@@ -111,7 +111,7 @@ export default function files(
         return {
           ...state,
           favorites: state.favorites.filter(
-            (item) => item !== action.payload.fileId,
+            item => item !== action.payload.fileId,
           ),
         };
       }
@@ -125,7 +125,7 @@ export default function files(
         return {
           ...state,
           archived: state.archived.filter(
-            (i) => !action.payload.fileIds.includes(i),
+            i => !action.payload.fileIds.includes(i),
           ),
         };
       }

@@ -20,41 +20,39 @@ const Courses: React.FC<StackScreenProps<ScreenParams, 'Courses'>> = ({
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
-  const currentSemesterId = useTypedSelector(
-    (state) => state.semesters.current,
-  );
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const currentSemesterId = useTypedSelector(state => state.semesters.current);
   const courseInformationSharing = useTypedSelector(
-    (state) => state.settings.courseInformationSharing,
+    state => state.settings.courseInformationSharing,
   );
-  const courses = useTypedSelector((state) => state.courses.items);
-  const hiddenIds = useTypedSelector((state) => state.courses.hidden);
-  const fetching = useTypedSelector((state) => state.courses.fetching);
+  const courses = useTypedSelector(state => state.courses.items);
+  const hiddenIds = useTypedSelector(state => state.courses.hidden);
+  const fetching = useTypedSelector(state => state.courses.fetching);
 
-  const notices = useTypedSelector((state) => state.notices.items);
-  const assignments = useTypedSelector((state) => state.assignments.items);
-  const files = useTypedSelector((state) => state.files.items);
+  const notices = useTypedSelector(state => state.notices.items);
+  const assignments = useTypedSelector(state => state.assignments.items);
+  const files = useTypedSelector(state => state.files.items);
 
   const coursesWithCounts = useMemo(() => {
-    return courses.map((course) => ({
+    return courses.map(course => ({
       ...course,
       unreadNoticeCount: notices.filter(
-        (notice) => notice.courseId === course.id && !notice.hasRead,
+        notice => notice.courseId === course.id && !notice.hasRead,
       ).length,
       unfinishedAssignmentCount: assignments.filter(
-        (assignment) =>
+        assignment =>
           assignment.courseId === course.id &&
           !assignment.submitted &&
           dayjs(assignment.deadline).isAfter(dayjs()),
       ).length,
       unreadFileCount: files.filter(
-        (file) => file.courseId === course.id && file.isNew,
+        file => file.courseId === course.id && file.isNew,
       ).length,
     }));
   }, [assignments, courses, files, notices]);
 
-  const all = coursesWithCounts.filter((i) => !hiddenIds.includes(i.id));
-  const hidden = coursesWithCounts.filter((i) => hiddenIds.includes(i.id));
+  const all = coursesWithCounts.filter(i => !hiddenIds.includes(i.id));
+  const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));
 
   const handleRefresh = () => {
     if (loggedIn && currentSemesterId) {

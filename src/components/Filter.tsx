@@ -93,7 +93,7 @@ const Filter: React.FC<FilterProps> = ({
           </Badge>
         </View>
       }
-      left={(props) => (
+      left={props => (
         <List.Icon
           {...props}
           icon={
@@ -106,7 +106,7 @@ const Filter: React.FC<FilterProps> = ({
               : name === 'archived'
               ? 'archive'
               : name === 'hidden'
-              ? (p) => <MaterialIcons name="visibility-off" {...p} />
+              ? p => <MaterialIcons name="visibility-off" {...p} />
               : name === 'unfinished'
               ? 'checkbox-blank-circle-outline'
               : 'checkbox-marked-circle-outline'
@@ -115,7 +115,7 @@ const Filter: React.FC<FilterProps> = ({
       )}
       right={
         selected === name
-          ? (props) => <List.Icon {...props} icon="check" />
+          ? props => <List.Icon {...props} icon="check" />
           : undefined
       }
       onPress={() => onSelectionChange(name)}

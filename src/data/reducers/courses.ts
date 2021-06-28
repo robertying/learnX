@@ -56,9 +56,7 @@ export default function courses(
       } else {
         return {
           ...state,
-          hidden: state.hidden.filter(
-            (item) => item !== action.payload.courseId,
-          ),
+          hidden: state.hidden.filter(item => item !== action.payload.courseId),
         };
       }
     default:

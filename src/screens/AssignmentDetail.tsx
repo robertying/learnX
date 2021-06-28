@@ -108,7 +108,7 @@ const AssignmentDetail: React.FC<
         headerRight: () => (
           <IconButton
             onPress={handleSubmit}
-            icon={(props) => <MaterialIcons {...props} name="file-upload" />}
+            icon={props => <MaterialIcons {...props} name="file-upload" />}
           />
         ),
       });

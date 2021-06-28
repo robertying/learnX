@@ -42,7 +42,7 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
       const results = await dataSource.getHomeworkList(courseId);
       const courseName = getState().courses.names[courseId];
       const assignments = results
-        .map<Assignment>((result) => ({
+        .map<Assignment>(result => ({
           ...result,
           courseId,
           courseName: courseName.name,
@@ -51,9 +51,9 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
         .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
       const sorted = [
         ...assignments
-          .filter((a) => dayjs(a.deadline).isAfter(dayjs()))
+          .filter(a => dayjs(a.deadline).isAfter(dayjs()))
           .reverse(),
-        ...assignments.filter((a) => !dayjs(a.deadline).isAfter(dayjs())),
+        ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
       ];
       dispatch(
         getAssignmentsForCourseAction.success({courseId, assignments: sorted}),
@@ -81,10 +81,10 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
       );
       const courseNames = getState().courses.names;
       const assignments = Object.keys(results)
-        .map((courseId) => {
+        .map(courseId => {
           const assignmentsForCourse = results[courseId] as Homework[];
           const courseName = courseNames[courseId];
-          return assignmentsForCourse.map<Assignment>((assignment) => ({
+          return assignmentsForCourse.map<Assignment>(assignment => ({
             ...assignment,
             courseId,
             courseName: courseName.name,
@@ -95,9 +95,9 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
         .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
       const sorted = [
         ...assignments
-          .filter((a) => dayjs(a.deadline).isAfter(dayjs()))
+          .filter(a => dayjs(a.deadline).isAfter(dayjs()))
           .reverse(),
-        ...assignments.filter((a) => !dayjs(a.deadline).isAfter(dayjs())),
+        ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
       ];
       dispatch(getAllAssignmentsForCoursesAction.success(sorted));
     } catch (err) {

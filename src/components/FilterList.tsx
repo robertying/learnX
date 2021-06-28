@@ -78,10 +78,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const detailNavigator = useDetailNavigator();
 
   const tabFilterSelections = useTypedSelector(
-    (state) => state.settings.tabFilterSelections,
+    state => state.settings.tabFilterSelections,
   );
   const filterSelected = useTypedSelector(
-    (state) =>
+    state =>
       state.settings.tabFilterSelections[type] ?? defaultSelected ?? 'all',
   );
 
@@ -103,9 +103,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       : hidden
   )!;
 
-  const favIds = fav?.map((i) => i.id);
-  const archivedIds = archived?.map((i) => i.id);
-  const hiddenIds = hidden.map((i) => i.id);
+  const favIds = fav?.map(i => i.id);
+  const archivedIds = archived?.map(i => i.id);
+  const hiddenIds = hidden.map(i => i.id);
 
   const [selectionMode, setSelectionMode] = useState(false);
   const [selection, setSelection] = useState<Record<string, boolean>>(
@@ -119,7 +119,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const handleFilter = () => {
-    setFilterVisible((v) => !v);
+    setFilterVisible(v => !v);
   };
 
   const handleFilterSelect = (selected: FilterSelection) => {
@@ -149,7 +149,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   }, [data, selectionMode]);
 
   const handleCheckAll = useCallback(() => {
-    const allChecked = Object.values(selection).every((s) => s === true);
+    const allChecked = Object.values(selection).every(s => s === true);
     setSelection(
       data.reduce(
         (prev, curr) => ({
@@ -231,12 +231,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <View style={Styles.flexRow}>
             <IconButton
               onPress={handleSelect}
-              icon={(props) => <MaterialIcons {...props} name="subject" />}
+              icon={props => <MaterialIcons {...props} name="subject" />}
             />
             <IconButton
               style={Styles.ml0}
               onPress={handleCheckAll}
-              icon={(props) => <MaterialIcons {...props} name="done-all" />}
+              icon={props => <MaterialIcons {...props} name="done-all" />}
             />
           </View>
         ),
@@ -245,10 +245,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             onPress={() =>
               handleArchive(
                 filterSelected === 'archived',
-                Object.keys(selection).filter((id) => selection[id] === true),
+                Object.keys(selection).filter(id => selection[id] === true),
               )
             }
-            icon={(props) => (
+            icon={props => (
               <MaterialCommunityIcons
                 {...props}
                 name={
@@ -262,10 +262,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ),
         headerTitle: getLocale().startsWith('zh')
           ? `已选中 ${
-              Object.values(selection).filter((s) => s === true).length
+              Object.values(selection).filter(s => s === true).length
             } 个`
           : `${
-              Object.values(selection).filter((s) => s === true).length
+              Object.values(selection).filter(s => s === true).length
             } selected`,
         headerTitleAlign: 'center',
       });
@@ -276,18 +276,18 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             {selectionModeDisabled ? null : (
               <IconButton
                 onPress={handleSelect}
-                icon={(props) => <MaterialIcons {...props} name="subject" />}
+                icon={props => <MaterialIcons {...props} name="subject" />}
               />
             )}
             <IconButton
               style={selectionModeDisabled ? undefined : Styles.ml0}
               onPress={handleFilter}
-              icon={(props) => <MaterialIcons {...props} name="filter-list" />}
+              icon={props => <MaterialIcons {...props} name="filter-list" />}
             />
             {type === 'course' && (
               <IconButton
                 style={Styles.ml0}
-                icon={(props) => <MaterialIcons {...props} name="star" />}
+                icon={props => <MaterialIcons {...props} name="star" />}
                 onPress={handleNavigateCourseX}
               />
             )}
@@ -298,7 +298,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             {DeviceInfo.isMac() && (
               <IconButton
                 style={Styles.mr0}
-                icon={(props) => (
+                icon={props => (
                   <MaterialIcons
                     {...props}
                     name="refresh"
@@ -309,11 +309,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
             <IconButton
               onPress={() => navigation.navigate('Search')}
-              icon={(props) => <MaterialIcons {...props} name="search" />}
+              icon={props => <MaterialIcons {...props} name="search" />}
             />
           </View>
         ),
-        headerTitle: (props) => (
+        headerTitle: props => (
           <HeaderTitle
             {...props}
             title={props.children!}
@@ -378,7 +378,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             data={item}
             selectionMode={selectionMode}
             checked={selection[item.id]}
-            onCheck={(checked) =>
+            onCheck={checked =>
               setSelection({...selection, [item.id]: checked})
             }
             onPress={() => {
@@ -399,7 +399,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             }
           />
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         refreshControl={
           !selectionMode ? (
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

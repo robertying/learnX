@@ -16,7 +16,7 @@ export const getUserInfoAction = createAsyncAction(
 )<undefined, User, Error>();
 
 export function getUserInfo(): ThunkResult {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch(getUserInfoAction.request());
 
     try {

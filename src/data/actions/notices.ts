@@ -35,7 +35,7 @@ export function getNoticesForCourse(courseId: string): ThunkResult {
       const results = await dataSource.getNotificationList(courseId);
       const courseName = getState().courses.names[courseId];
       const notices = results
-        .map<Notice>((result) => ({
+        .map<Notice>(result => ({
           ...result,
           courseId,
           courseName: courseName.name,
@@ -68,10 +68,10 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
       );
       const courseNames = getState().courses.names;
       const notices = Object.keys(results)
-        .map((courseId) => {
+        .map(courseId => {
           const noticesForCourse = results[courseId] as Notification[];
           const courseName = courseNames[courseId];
-          return noticesForCourse.map<Notice>((notice) => ({
+          return noticesForCourse.map<Notice>(notice => ({
             ...notice,
             courseId,
             courseName: courseName.name,

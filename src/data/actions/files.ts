@@ -39,7 +39,7 @@ export function getFilesForCourse(courseId: string): ThunkResult {
       );
       const courseName = getState().courses.names[courseId];
       const files = results
-        .map<File>((result) => ({
+        .map<File>(result => ({
           ...result,
           courseId,
           courseName: courseName.name,
@@ -72,10 +72,10 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
       );
       const courseNames = getState().courses.names;
       const files = Object.keys(results)
-        .map((courseId) => {
+        .map(courseId => {
           const filesForCourse = results[courseId] as IFile[];
           const courseName = courseNames[courseId];
-          return filesForCourse.map<File>((file) => ({
+          return filesForCourse.map<File>(file => ({
             ...file,
             courseId,
             courseName: courseName.name,

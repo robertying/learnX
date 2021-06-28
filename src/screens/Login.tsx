@@ -36,9 +36,9 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
   const toast = useToast();
 
   const dispatch = useDispatch();
-  const loggingIn = useTypedSelector((state) => state.auth.loggingIn);
-  const error = useTypedSelector((state) => state.auth.error);
-  const graduate = useTypedSelector((state) => state.settings.graduate);
+  const loggingIn = useTypedSelector(state => state.auth.loggingIn);
+  const error = useTypedSelector(state => state.auth.error);
+  const graduate = useTypedSelector(state => state.settings.graduate);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -74,7 +74,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
   useEffect(() => {
     (async () => {
       if (loading && error && !loggingIn) {
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 500));
         if (error?.reason === FailReason.BAD_CREDENTIAL) {
           toast(t('credentialError'), 'error');
         } else {
@@ -111,7 +111,7 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
             enablesReturnKeyAutomatically
             onSubmitEditing={handleNext}
             value={username}
-            onChangeText={(v) => setUsername(v.trim())}
+            onChangeText={v => setUsername(v.trim())}
           />
           <TextInput
             ref={passwordTextInputRef}
@@ -123,15 +123,15 @@ const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
             secureTextEntry
             enablesReturnKeyAutomatically
             value={password}
-            onChangeText={(v) => setPassword(v.trim())}
+            onChangeText={v => setPassword(v.trim())}
           />
           <View style={styles.switchContainer}>
             <Switch
               style={Styles.spacex1}
               value={graduate}
-              onValueChange={(checked) =>
-                dispatch(setSetting('graduate', checked))
-              }
+              onValueChange={checked => {
+                dispatch(setSetting('graduate', checked));
+              }}
             />
             <Text style={Styles.spacex1}>{t('graduate')}</Text>
           </View>

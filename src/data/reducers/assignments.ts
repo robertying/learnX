@@ -56,7 +56,7 @@ export default function assignments(
         fetching: false,
         items: [
           ...state.items.filter(
-            (item) => item.courseId !== action.payload.courseId,
+            item => item.courseId !== action.payload.courseId,
           ),
           ...action.payload.assignments,
         ],
@@ -78,7 +78,7 @@ export default function assignments(
         return {
           ...state,
           unread: state.unread.filter(
-            (item) => item !== action.payload.assignmentId,
+            item => item !== action.payload.assignmentId,
           ),
         };
       }
@@ -92,7 +92,7 @@ export default function assignments(
         return {
           ...state,
           pinned: state.pinned.filter(
-            (item) => item !== action.payload.assignmentId,
+            item => item !== action.payload.assignmentId,
           ),
         };
       }
@@ -106,7 +106,7 @@ export default function assignments(
         return {
           ...state,
           favorites: state.favorites.filter(
-            (item) => item !== action.payload.assignmentId,
+            item => item !== action.payload.assignmentId,
           ),
         };
       }
@@ -120,7 +120,7 @@ export default function assignments(
         return {
           ...state,
           archived: state.archived.filter(
-            (i) => !action.payload.assignmentIds.includes(i),
+            i => !action.payload.assignmentIds.includes(i),
           ),
         };
       }

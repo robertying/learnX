@@ -21,20 +21,20 @@ import useFilteredData from 'hooks/useFilteredData';
 import {ScreenParams} from './types';
 
 const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
-  (props) => {
+  props => {
     const toast = useToast();
 
     const dispatch = useDispatch();
     const assignmentSync = useTypedSelector(
-      (state) => state.settings.assignmentSync,
+      state => state.settings.assignmentSync,
     );
     const syncAssignmentsToCalendar = useTypedSelector(
-      (state) => state.settings.syncAssignmentsToCalendar,
+      state => state.settings.syncAssignmentsToCalendar,
     );
-    const alarms = useTypedSelector((state) => state.settings.alarms);
-    const graduate = useTypedSelector((state) => state.settings.graduate);
-    const hiddenCourseIds = useTypedSelector((state) => state.courses.hidden);
-    const assignmentState = useTypedSelector((state) => state.assignments);
+    const alarms = useTypedSelector(state => state.settings.alarms);
+    const graduate = useTypedSelector(state => state.settings.graduate);
+    const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
+    const assignmentState = useTypedSelector(state => state.assignments);
 
     const [all] = useFilteredData(
       assignmentState.items,
@@ -47,7 +47,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
 
     const sync = useMemo(
       () =>
-        all.filter((assignment) => dayjs(assignment.deadline).isAfter(dayjs())),
+        all.filter(assignment => dayjs(assignment.deadline).isAfter(dayjs())),
       [all],
     );
 
@@ -144,7 +144,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
             iconName="people"
             primaryText={t('graduate')}
             switchValue={graduate}
-            onSwitchValueChange={(value) =>
+            onSwitchValueChange={value =>
               dispatch(setSetting('graduate', value))
             }
             type="switch"
@@ -160,7 +160,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
             iconName="access-alarm"
             primaryText={t('classAlarm')}
             switchValue={alarms.courseAlarm}
-            onSwitchValueChange={(value) =>
+            onSwitchValueChange={value =>
               dispatch(setSetting('alarms', {...alarms, courseAlarm: value}))
             }
             type="switch"
@@ -169,7 +169,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
             <TableCell
               primaryText={t('classAlarmBefore')}
               inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
-              onInputValueChange={(v) =>
+              onInputValueChange={v =>
                 parseInt(v, 10) &&
                 dispatch(
                   setSetting('alarms', {
@@ -203,7 +203,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
             iconName="access-alarm"
             primaryText={t('assignmentAlarm')}
             switchValue={alarms.assignmentAlarm}
-            onSwitchValueChange={(value) =>
+            onSwitchValueChange={value =>
               dispatch(
                 setSetting('alarms', {...alarms, assignmentAlarm: value}),
               )
@@ -215,7 +215,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
             <TableCell
               primaryText={t('assignmentAlarmOffset')}
               inputValue={(alarms.assignmentAlarmOffset ?? 24 * 60).toString()}
-              onInputValueChange={(v) =>
+              onInputValueChange={v =>
                 parseInt(v, 10) &&
                 dispatch(
                   setSetting('alarms', {
@@ -232,7 +232,7 @@ const CalendarEvent: React.FC<StackScreenProps<ScreenParams, 'CalendarEvent'>> =
               iconName="event-available"
               primaryText={t('syncAssignmentsToCalendar')}
               switchValue={syncAssignmentsToCalendar}
-              onSwitchValueChange={(value) =>
+              onSwitchValueChange={value =>
                 dispatch(setSetting('syncAssignmentsToCalendar', value))
               }
               type="switch"

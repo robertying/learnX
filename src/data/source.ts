@@ -48,7 +48,7 @@ const submitAssignment = async (
 
   try {
     const res = await axios.post(submitAssignmentUrl, body, {
-      onUploadProgress: (e) => onProgress?.(e.loaded / e.total),
+      onUploadProgress: e => onProgress?.(e.loaded / e.total),
     });
 
     if (res.status !== 200) {

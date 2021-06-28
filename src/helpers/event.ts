@@ -19,13 +19,13 @@ const assignmentCalendarReminderName = 'learnX 作业';
 const getDefaultCalendarSource = async (entityType: string) => {
   const calendars = await Calendar.getCalendarsAsync(entityType);
 
-  const iCloudCalendar = calendars.find((c) => c.source.name === 'iCloud');
+  const iCloudCalendar = calendars.find(c => c.source.name === 'iCloud');
   if (iCloudCalendar) {
     return iCloudCalendar.source;
   }
 
   const localCalendar = calendars.find(
-    (c) => c.source.type === Calendar.SourceType.LOCAL,
+    c => c.source.type === Calendar.SourceType.LOCAL,
   );
   if (localCalendar) {
     return localCalendar.source;
@@ -41,13 +41,13 @@ export const getCourseCalendarId = async () => {
 
   const storedId = settings.courseCalendarId;
   if (storedId) {
-    if (calendars.some((value) => value.id === storedId)) {
+    if (calendars.some(value => value.id === storedId)) {
       return storedId;
     }
   }
 
   const existingCalendar = calendars.find(
-    (value) => value.title === courseCalendarName,
+    value => value.title === courseCalendarName,
   );
   if (existingCalendar) {
     store.dispatch(setSetting('courseCalendarId', existingCalendar.id));
@@ -104,14 +104,14 @@ export const saveCoursesToCalendar = async (
   );
 
   await Promise.all(
-    oldEvents.map(async (e) => await Calendar.deleteEventAsync(e.id)),
+    oldEvents.map(async e => await Calendar.deleteEventAsync(e.id)),
   );
 
   const alarms = settings.alarms;
 
   await Promise.all(
     events.map(
-      async (e) =>
+      async e =>
         await Calendar.createEventAsync(calendarId, {
           title: e.courseName,
           startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
@@ -138,13 +138,13 @@ export const getAssignmentCalendarId = async () => {
   const storedId = store.getState().settings.assignmentCalendarId;
 
   if (storedId) {
-    if (calendars.some((value) => value.id === storedId)) {
+    if (calendars.some(value => value.id === storedId)) {
       return storedId;
     }
   }
 
   const existingCalendar = calendars.find(
-    (value) => value.title === assignmentCalendarReminderName,
+    value => value.title === assignmentCalendarReminderName,
   );
   if (existingCalendar) {
     store.dispatch(setSetting('assignmentCalendarId', existingCalendar.id));
@@ -182,13 +182,13 @@ export const getAssignmentReminderId = async () => {
 
   const storedId = store.getState().settings.assignmentReminderId;
   if (storedId) {
-    if (reminders.some((value) => value.id === storedId)) {
+    if (reminders.some(value => value.id === storedId)) {
       return storedId;
     }
   }
 
   const existingReminder = reminders.find(
-    (value) => value.title === assignmentCalendarReminderName,
+    value => value.title === assignmentCalendarReminderName,
   );
   if (existingReminder) {
     store.dispatch(setSetting('assignmentReminderId', existingReminder.id));
@@ -320,15 +320,15 @@ export const saveAssignmentsToReminderOrCalendar = async (
       ? await getAssignmentReminderId()
       : await getAssignmentCalendarId();
 
-  const savingAssignments = [...assignments].filter((item) =>
+  const savingAssignments = [...assignments].filter(item =>
     dayjs(item.deadline).isAfter(dayjs()),
   );
 
   const courses = store.getState().courses.items;
 
   await Promise.all(
-    savingAssignments.map(async (assignment) => {
-      const course = courses.find((value) => value.id === assignment.courseId);
+    savingAssignments.map(async assignment => {
+      const course = courses.find(value => value.id === assignment.courseId);
       if (course) {
         await saveAssignmentEvent(
           settings,
@@ -365,12 +365,12 @@ export const removeCalendars = async () => {
       ? await Calendar.getCalendarsAsync(Calendar.EntityTypes.REMINDER)
       : [];
 
-  const existingCalendars = [...calendars, ...reminders].filter((c) =>
+  const existingCalendars = [...calendars, ...reminders].filter(c =>
     c.title.includes('learnX'),
   );
 
   await Promise.all(
-    existingCalendars.map(async (c) => {
+    existingCalendars.map(async c => {
       await Calendar.deleteCalendarAsync(c.id).catch(() => {});
     }),
   );

@@ -88,7 +88,7 @@ const BackButton = () => {
   return (
     <IconButton
       onPress={() => navigation.goBack()}
-      icon={(props) => <MaterialIcons {...props} name="close" />}
+      icon={props => <MaterialIcons {...props} name="close" />}
     />
   );
 };
@@ -107,16 +107,16 @@ const getScreenOptions = (title: string) =>
       headerLeft: () => (
         <View style={Styles.flexRow}>
           <IconButton
-            icon={(props) => <MaterialIcons {...props} name="subject" />}
+            icon={props => <MaterialIcons {...props} name="subject" />}
           />
           <IconButton
             style={Styles.ml0}
-            icon={(props) => <MaterialIcons {...props} name="filter-list" />}
+            icon={props => <MaterialIcons {...props} name="filter-list" />}
           />
           {title === t('courses') && (
             <IconButton
               style={Styles.ml0}
-              icon={(props) => <MaterialIcons {...props} name="star" />}
+              icon={props => <MaterialIcons {...props} name="star" />}
             />
           )}
         </View>
@@ -126,12 +126,12 @@ const getScreenOptions = (title: string) =>
           {DeviceInfo.isMac() && (
             <IconButton
               style={Styles.mr0}
-              icon={(props) => <MaterialIcons {...props} name="refresh" />}
+              icon={props => <MaterialIcons {...props} name="refresh" />}
             />
           )}
           <IconButton
             onPress={() => navigation.navigate('Search')}
-            icon={(props) => <MaterialIcons {...props} name="search" />}
+            icon={props => <MaterialIcons {...props} name="search" />}
           />
         </View>
       ),
@@ -161,7 +161,7 @@ const getDetailScreenOptions = () =>
       headerTitle:
         route.name === 'CourseX'
           ? t('courseX')
-          : (props) =>
+          : props =>
               route.params ? (
                 <HeaderTitle
                   {...props}
@@ -191,15 +191,15 @@ const getDetailScreenOptions = () =>
             <View style={Styles.flexRow}>
               <IconButton
                 style={Styles.mr0}
-                icon={(props) => <MaterialIcons {...props} name="refresh" />}
+                icon={props => <MaterialIcons {...props} name="refresh" />}
               />
               <IconButton
                 style={DeviceInfo.isMac() ? Styles.mr0 : undefined}
-                icon={(props) => <MaterialIcons {...props} name="ios-share" />}
+                icon={props => <MaterialIcons {...props} name="ios-share" />}
               />
               {DeviceInfo.isMac() && (
                 <IconButton
-                  icon={(props) => (
+                  icon={props => (
                     <MaterialIcons {...props} name="open-in-new" />
                   )}
                 />
@@ -385,16 +385,16 @@ const MainTab = () => {
   const theme = useTheme();
 
   const dispatch = useDispatch();
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
-  const auth = useTypedSelector((state) => state.auth);
-  const currentSemester = useTypedSelector((state) => state.semesters.current);
-  const semesters = useTypedSelector((state) => state.semesters.items);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const auth = useTypedSelector(state => state.auth);
+  const currentSemester = useTypedSelector(state => state.semesters.current);
+  const semesters = useTypedSelector(state => state.semesters.items);
   const newChangelog = useTypedSelector(
-    (state) => state.settings.lastShowChangelogVersion !== packageJson.version,
+    state => state.settings.lastShowChangelogVersion !== packageJson.version,
   );
-  const newUpdate = useTypedSelector((state) => state.settings.newUpdate);
+  const newUpdate = useTypedSelector(state => state.settings.newUpdate);
   const courseInformationSharingBadgeShown = useTypedSelector(
-    (state) => state.settings.courseInformationSharingBadgeShown,
+    state => state.settings.courseInformationSharingBadgeShown,
   );
 
   const windowSize = useWindowDimensions();
@@ -653,10 +653,10 @@ const Container = () => {
   const toast = useToast();
 
   const dispatch = useDispatch();
-  const loggingIn = useTypedSelector((state) => state.auth.loggingIn);
-  const loggedIn = useTypedSelector((state) => state.auth.loggedIn);
-  const loginError = useTypedSelector((state) => state.auth.error);
-  const auth = useTypedSelector((state) => state.auth);
+  const loggingIn = useTypedSelector(state => state.auth.loggingIn);
+  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
+  const loginError = useTypedSelector(state => state.auth.error);
+  const auth = useTypedSelector(state => state.auth);
   const windowSize = useWindowDimensions();
 
   const [appState, setAppState] = useState(AppState.currentState);

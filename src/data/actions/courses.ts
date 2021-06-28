@@ -17,13 +17,13 @@ export const getCoursesForSemesterAction = createAsyncAction(
 )<undefined, Course[], ApiError>();
 
 export function getCoursesForSemester(semesterId: string): ThunkResult {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
     try {
       const results = await dataSource.getCourseList(semesterId);
       const courses = results
-        .map((course) => ({...course, semesterId}))
+        .map(course => ({...course, semesterId}))
         .sort((a, b) => a.id.localeCompare(b.id));
       dispatch(getCoursesForSemesterAction.success(courses));
     } catch (err) {

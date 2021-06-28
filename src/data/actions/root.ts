@@ -8,7 +8,7 @@ export const resetLoading = createAction(RESET_LOADING)();
 export const clearStoreAction = createAction(CLEAR_STORE)();
 
 export function clearStore(): ThunkResult {
-  return async (dispatch) => {
+  return async dispatch => {
     dispatch(clearStoreAction());
     await persistor.purge();
     persistor.persist();

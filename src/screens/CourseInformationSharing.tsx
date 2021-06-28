@@ -14,12 +14,12 @@ import {ScreenParams} from './types';
 
 const CourseInformationSharing: React.FC<
   StackScreenProps<ScreenParams, 'CourseInformationSharing'>
-> = (props) => {
+> = props => {
   const dispatch = useDispatch();
 
-  const courses = useTypedSelector((state) => state.courses.items);
+  const courses = useTypedSelector(state => state.courses.items);
   const courseInformationSharing = useTypedSelector(
-    (state) => state.settings.courseInformationSharing,
+    state => state.settings.courseInformationSharing,
   );
 
   const handleEnable = (enabled: boolean) => {

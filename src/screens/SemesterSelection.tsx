@@ -16,13 +16,11 @@ import {ScreenParams} from './types';
 
 const SemesterSelection: React.FC<
   StackScreenProps<ScreenParams, 'SemesterSelection'>
-> = (props) => {
+> = props => {
   const dispatch = useDispatch();
-  const semesters = useTypedSelector((state) => state.semesters.items);
-  const fetching = useTypedSelector((state) => state.semesters.fetching);
-  const currentSemesterId = useTypedSelector(
-    (state) => state.semesters.current,
-  );
+  const semesters = useTypedSelector(state => state.semesters.items);
+  const fetching = useTypedSelector(state => state.semesters.fetching);
+  const currentSemesterId = useTypedSelector(state => state.semesters.current);
 
   const handleSelect = (id: string) => {
     dispatch(setCurrentSemester(id));
@@ -52,7 +50,7 @@ const SemesterSelection: React.FC<
             onPress={() => handleSelect(item)}
           />
         )}
-        keyExtractor={(item) => item}
+        keyExtractor={item => item}
         refreshing={fetching}
         onRefresh={handleRefresh}
       />

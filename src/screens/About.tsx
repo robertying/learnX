@@ -10,7 +10,7 @@ import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
-const About: React.FC<StackScreenProps<ScreenParams, 'About'>> = (props) => {
+const About: React.FC<StackScreenProps<ScreenParams, 'About'>> = props => {
   useNavigationAnimation(props);
 
   return (
@@ -46,7 +46,7 @@ const About: React.FC<StackScreenProps<ScreenParams, 'About'>> = (props) => {
         </Text>
         <Text style={styles.text}>{t('yayuXiao')}</Text>
         <Title style={styles.marginTop}>{t('opensourceDependencies')}</Title>
-        {Object.keys(packageJson.dependencies).map((name) => (
+        {Object.keys(packageJson.dependencies).map(name => (
           <Text key={name} style={styles.text}>
             {name}
           </Text>

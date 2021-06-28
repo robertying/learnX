@@ -16,7 +16,7 @@ export const uploadCourses = async (courses: Course[]) => {
     return;
   }
 
-  const coursesToUpload = courses.map((c) => ({
+  const coursesToUpload = courses.map(c => ({
     id: c.id,
     name: c.name,
     teacher: {

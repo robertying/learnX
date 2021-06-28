@@ -87,7 +87,7 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
             <IconButton
               style={Styles.mr0}
               onPress={() => toggleMaster(!showMaster)}
-              icon={(props) => (
+              icon={props => (
                 <Icon
                   {...props}
                   name={showMaster ? 'fullscreen' : 'fullscreen-exit'}
@@ -99,19 +99,19 @@ const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
           <IconButton
             style={Styles.mr0}
             onPress={() => handleDownload(true)}
-            icon={(props) => <Icon {...props} name="refresh" />}
+            icon={props => <Icon {...props} name="refresh" />}
           />
           <IconButton
             style={DeviceInfo.isMac() ? Styles.mr0 : undefined}
             disabled={error || !path}
             onPress={handleShare}
-            icon={(props) => <Icon {...props} name="ios-share" />}
+            icon={props => <Icon {...props} name="ios-share" />}
           />
           {DeviceInfo.isMac() && (
             <IconButton
               disabled={error || !path}
               onPress={handleOpen}
-              icon={(props) => <Icon {...props} name="open-in-new" />}
+              icon={props => <Icon {...props} name="open-in-new" />}
             />
           )}
         </View>

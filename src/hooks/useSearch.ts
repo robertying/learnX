@@ -54,8 +54,8 @@ export default function useSearch(
   const fileFuse = useMemo(() => new Fuse(files, fileOptions), [files]);
 
   return [
-    noticeFuse.search(query).map((i) => i.item),
-    assignmentFuse.search(query).map((i) => i.item),
-    fileFuse.search(query).map((i) => i.item),
+    noticeFuse.search(query).map(i => i.item),
+    assignmentFuse.search(query).map(i => i.item),
+    fileFuse.search(query).map(i => i.item),
   ];
 }

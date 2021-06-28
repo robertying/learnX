@@ -6,7 +6,7 @@ import {
   WebViewNavigation,
 } from 'react-native-webview/lib/WebViewTypes';
 
-const AutoHeightWebView: React.FC<WebViewProps> = (props) => {
+const AutoHeightWebView: React.FC<WebViewProps> = props => {
   const [height, setHeight] = useState(0);
 
   const webViewRef = useRef<WebView>(null);

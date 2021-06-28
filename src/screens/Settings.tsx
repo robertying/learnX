@@ -22,17 +22,18 @@ const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useDispatch();
-  const userInfo = useTypedSelector((state) => state.user);
-  const username = useTypedSelector((state) => state.auth.username);
+  const userInfo = useTypedSelector(state => state.user);
+  const username = useTypedSelector(state => state.auth.username);
   const newChangelog = useTypedSelector(
-    (state) => state.settings.lastShowChangelogVersion !== packageJson.version,
+    state => state.settings.lastShowChangelogVersion !== packageJson.version,
   );
   const courseInformationSharingBadgeShown = useTypedSelector(
-    (state) => state.settings.courseInformationSharingBadgeShown,
+    state => state.settings.courseInformationSharingBadgeShown,
   );
 
-  const [update, setUpdate] =
-    useState<{version: string; url: string} | null>(null);
+  const [update, setUpdate] = useState<{version: string; url: string} | null>(
+    null,
+  );
 
   const handlePush = (name: keyof ScreenParams) => {
     if (detailNavigator) {

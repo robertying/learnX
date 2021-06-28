@@ -11,41 +11,38 @@ function useFilteredData<T extends Notice | Assignment | File>(
 ) {
   const _all = useMemo(() => {
     const all = data.filter(
-      (i) => !archived.includes(i.id) && !hidden.includes(i.courseId),
+      i => !archived.includes(i.id) && !hidden.includes(i.courseId),
     );
     return [
-      ...all.filter((i) => pinned.includes(i.id)),
-      ...all.filter((i) => !pinned.includes(i.id)),
+      ...all.filter(i => pinned.includes(i.id)),
+      ...all.filter(i => !pinned.includes(i.id)),
     ];
   }, [data, archived, hidden, pinned]);
 
   const _unread = useMemo(
-    () => _all.filter((i) => unread.includes(i.id)),
+    () => _all.filter(i => unread.includes(i.id)),
     [_all, unread],
   );
 
-  const _fav = useMemo(
-    () => _all.filter((i) => fav.includes(i.id)),
-    [_all, fav],
-  );
+  const _fav = useMemo(() => _all.filter(i => fav.includes(i.id)), [_all, fav]);
 
   const _hidden = useMemo(
-    () => data.filter((i) => hidden.includes(i.courseId)),
+    () => data.filter(i => hidden.includes(i.courseId)),
     [hidden, data],
   );
 
   const _archived = useMemo(
-    () => data.filter((i) => archived.includes(i.id)),
+    () => data.filter(i => archived.includes(i.id)),
     [data, archived],
   );
 
   const _unfinished = useMemo(
-    () => _all.filter((i) => !(i as Assignment).submitted),
+    () => _all.filter(i => !(i as Assignment).submitted),
     [_all],
   );
 
   const _finished = useMemo(
-    () => _all.filter((i) => (i as Assignment).submitted),
+    () => _all.filter(i => (i as Assignment).submitted),
     [_all],
   );
 
