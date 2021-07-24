@@ -150,6 +150,7 @@ const AssignmentDetail: React.FC<
                 size={17}
               />
               <TextButton
+                style={styles.textPaddingRight}
                 onPress={() => handleFileOpen(attachmentName, attachmentUrl)}>
                 {attachmentName}
               </TextButton>
@@ -169,7 +170,7 @@ const AssignmentDetail: React.FC<
               <View style={Styles.flex1}>
                 {submittedAttachmentName && (
                   <TextButton
-                    style={Styles.spacey1}
+                    style={[Styles.spacey1, styles.textPaddingRight]}
                     onPress={() =>
                       handleFileOpen(
                         submittedAttachmentName,
@@ -211,7 +212,7 @@ const AssignmentDetail: React.FC<
                 ) : null}
                 {gradeAttachmentName && (
                   <TextButton
-                    style={Styles.spacey1}
+                    style={[Styles.spacey1, styles.textPaddingRight]}
                     onPress={() =>
                       handleFileOpen(gradeAttachmentName, gradeAttachmentUrl)
                     }>
@@ -245,7 +246,7 @@ const AssignmentDetail: React.FC<
               <View style={Styles.flex1}>
                 {answerAttachmentName && (
                   <TextButton
-                    style={Styles.spacey1}
+                    style={[Styles.spacey1, styles.textPaddingRight]}
                     onPress={() =>
                       handleFileOpen(answerAttachmentName, answerAttachmentUrl)
                     }>
@@ -276,6 +277,9 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  textPaddingRight: {
+    paddingRight: 16,
   },
   icon: {
     marginRight: 8,

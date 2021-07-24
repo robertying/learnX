@@ -92,7 +92,11 @@ const NoticeDetail: React.FC<StackScreenProps<ScreenParams, 'NoticeDetail'>> =
                 color={theme.colors.primary}
                 size={17}
               />
-              <TextButton onPress={handleFileOpen}>{attachmentName}</TextButton>
+              <TextButton
+                style={styles.textPaddingRight}
+                onPress={handleFileOpen}>
+                {attachmentName}
+              </TextButton>
             </View>
           )}
           <Divider />
@@ -110,6 +114,9 @@ const styles = StyleSheet.create({
   section: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+  },
+  textPaddingRight: {
+    paddingRight: 16,
   },
   icon: {
     marginRight: 8,
