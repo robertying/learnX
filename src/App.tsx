@@ -665,14 +665,19 @@ const Container = () => {
   const detailNavigationContainerRef = useRef<NavigationContainerRef>(null);
 
   useEffect(() => {
-    const listener = (nextAppState: AppStateStatus) => {
-      if (appState.match(/inactive|background/) && nextAppState === 'active') {
-        dispatch(resetLoading());
-      }
-      setAppState(nextAppState);
-    };
-    AppState.addEventListener('change', listener);
-    return () => AppState.removeEventListener('change', listener);
+    const sub = AppState.addEventListener(
+      'change',
+      (nextAppState: AppStateStatus) => {
+        if (
+          appState.match(/inactive|background/) &&
+          nextAppState === 'active'
+        ) {
+          dispatch(resetLoading());
+        }
+        setAppState(nextAppState);
+      },
+    );
+    return () => (sub as any).remove();
   });
 
   useEffect(() => {
