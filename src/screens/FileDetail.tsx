@@ -7,8 +7,7 @@ import {
   useState,
 } from 'react';
 import {Linking, Platform, StyleSheet, View} from 'react-native';
-import {useTheme, Text, ProgressBar, IconButton} from 'react-native-paper';
-import {StackScreenProps} from '@react-navigation/stack';
+import {useTheme, Text, IconButton} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -34,7 +33,7 @@ const FileDetail: React.FC<NativeStackScreenProps<ScreenParams, 'FileDetail'>> =
     const webViewRef = useRef<WebView>(null);
 
     const [path, setPath] = useState('');
-  const [progress, setProgress] = useState(0);
+    const [_, setProgress] = useState(0);
     const [error, setError] = useState(false);
 
     const handleDownload = useCallback(
@@ -190,9 +189,9 @@ const FileDetail: React.FC<NativeStackScreenProps<ScreenParams, 'FileDetail'>> =
             <Skeleton />
           </SafeArea>
         )}
-      {progress ? (
+        {/* {progress ? (
           <ProgressBar style={styles.progressBar} progress={progress} />
-      ) : undefined}
+        ) : undefined} */}
       </SafeArea>
     );
   };
