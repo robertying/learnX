@@ -7,11 +7,9 @@ import {
   View,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
 import {Searchbar, Subheading, useTheme} from 'react-native-paper';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
-import useDetailNavigator from 'hooks/useDetailNavigator';
 import Styles from 'constants/Styles';
 import {useTypedSelector} from 'data/store';
 import {Notice, Assignment, File} from 'data/types/state';
@@ -31,8 +29,6 @@ const Search: React.FC<NativeStackScreenProps<ScreenParams, 'Search'>> = ({
 
   const safeAreaInsets = useSafeAreaInsets();
 
-  const detailNavigator = useDetailNavigator();
-
   const notices = useTypedSelector(state => state.notices.items);
   const assignments = useTypedSelector(state => state.assignments.items);
   const files = useTypedSelector(state => state.files.items);
@@ -47,16 +43,7 @@ const Search: React.FC<NativeStackScreenProps<ScreenParams, 'Search'>> = ({
   );
 
   const handlePush = (name: keyof ScreenParams, item: any) => {
-    if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace(name, {
-          ...item,
-          disableAnimation: true,
-        }),
-      );
-    } else {
-      navigation.push(name, item);
-    }
+    navigation.push(name, item);
   };
 
   return (
