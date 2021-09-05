@@ -26,7 +26,7 @@ export function getAllSemesters(): ThunkResult {
       const semesters = await dataSource.getSemesterIdList();
       dispatch(getAllSemestersAction.success(semesters.sort().reverse()));
     } catch (err) {
-      dispatch(getAllSemestersAction.failure(err));
+      dispatch(getAllSemestersAction.failure(err as ApiError));
     }
   };
 }
@@ -49,7 +49,7 @@ export function getCurrentSemester(): ThunkResult {
         dispatch(setCurrentSemester(semester.id));
       }
     } catch (err) {
-      dispatch(getCurrentSemesterAction.failure(err));
+      dispatch(getCurrentSemesterAction.failure(err as ApiError));
     }
   };
 }

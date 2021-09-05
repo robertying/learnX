@@ -46,7 +46,7 @@ export function getNoticesForCourse(courseId: string): ThunkResult {
         );
       dispatch(getNoticesForCourseAction.success({notices, courseId}));
     } catch (err) {
-      dispatch(getNoticesForCourseAction.failure(err));
+      dispatch(getNoticesForCourseAction.failure(err as ApiError));
     }
   };
 }
@@ -84,7 +84,7 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
         );
       dispatch(getAllNoticesForCoursesAction.success(notices));
     } catch (err) {
-      dispatch(getAllNoticesForCoursesAction.failure(err));
+      dispatch(getAllNoticesForCoursesAction.failure(err as ApiError));
     }
   };
 }

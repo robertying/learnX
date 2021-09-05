@@ -1,5 +1,5 @@
 import {createAsyncAction} from 'typesafe-actions';
-import {CourseType} from 'thu-learn-lib-no-native/lib/types';
+import {CourseType, ApiError} from 'thu-learn-lib-no-native/lib/types';
 import {
   GET_USER_INFO_FAILURE,
   GET_USER_INFO_REQUEST,
@@ -23,7 +23,7 @@ export function getUserInfo(): ThunkResult {
       const userInfo = await dataSource.getUserInfo(CourseType.STUDENT);
       dispatch(getUserInfoAction.success(userInfo));
     } catch (err) {
-      dispatch(getUserInfoAction.failure(err));
+      dispatch(getUserInfoAction.failure(err as Error));
     }
   };
 }

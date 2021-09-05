@@ -30,7 +30,7 @@ export function login(username?: string, password?: string): ThunkResult {
 
       dispatch(getUserInfo());
     } catch (err) {
-      dispatch(loginAction.failure(err));
+      dispatch(loginAction.failure(err as ApiError));
     }
   };
 }

@@ -50,7 +50,7 @@ export function getFilesForCourse(courseId: string): ThunkResult {
         );
       dispatch(getFilesForCourseAction.success({files, courseId}));
     } catch (err) {
-      dispatch(getFilesForCourseAction.failure(err));
+      dispatch(getFilesForCourseAction.failure(err as ApiError));
     }
   };
 }
@@ -88,7 +88,7 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
         );
       dispatch(getAllFilesForCoursesAction.success(files));
     } catch (err) {
-      dispatch(getAllFilesForCoursesAction.failure(err));
+      dispatch(getAllFilesForCoursesAction.failure(err as ApiError));
     }
   };
 }

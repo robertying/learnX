@@ -27,7 +27,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
         .sort((a, b) => a.id.localeCompare(b.id));
       dispatch(getCoursesForSemesterAction.success(courses));
     } catch (err) {
-      dispatch(getCoursesForSemesterAction.failure(err));
+      dispatch(getCoursesForSemesterAction.failure(err as ApiError));
     }
   };
 }

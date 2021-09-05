@@ -59,7 +59,7 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
         getAssignmentsForCourseAction.success({courseId, assignments: sorted}),
       );
     } catch (err) {
-      dispatch(getAssignmentsForCourseAction.failure(err));
+      dispatch(getAssignmentsForCourseAction.failure(err as ApiError));
     }
   };
 }
@@ -101,7 +101,7 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
       ];
       dispatch(getAllAssignmentsForCoursesAction.success(sorted));
     } catch (err) {
-      dispatch(getAllAssignmentsForCoursesAction.failure(err));
+      dispatch(getAllAssignmentsForCoursesAction.failure(err as ApiError));
     }
   };
 }
