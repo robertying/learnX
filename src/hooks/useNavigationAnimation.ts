@@ -1,17 +1,17 @@
 import {useLayoutEffect} from 'react';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {ScreenParams, ExtraParams} from 'screens/types';
 
 const useNavigationAnimation = <T extends keyof ScreenParams>({
   navigation,
   route,
-}: StackScreenProps<ScreenParams, T>) => {
+}: NativeStackScreenProps<ScreenParams, T>) => {
   const disableAnimation = (route.params as ExtraParams)?.disableAnimation;
 
   useLayoutEffect(() => {
     if (disableAnimation && navigation) {
       navigation.setOptions({
-        animationEnabled: false,
+        animation: 'none',
       });
     }
   }, [navigation, disableAnimation]);

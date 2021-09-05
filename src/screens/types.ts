@@ -32,6 +32,9 @@ export type ScreenParams = {
         id?: string;
       }
     | undefined;
+  SearchStack: undefined;
+  CourseXStack: undefined;
+  AssignmentSubmissionStack: undefined;
   Login: undefined;
   EmptyDetail: undefined;
 };

@@ -1,5 +1,5 @@
 import {Alert, ScrollView, StyleSheet} from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
 import {useDispatch} from 'react-redux';
 import {useTypedSelector} from 'data/store';
@@ -12,7 +12,7 @@ import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 
-const FileCache: React.FC<StackScreenProps<ScreenParams, 'FileCache'>> =
+const FileCache: React.FC<NativeStackScreenProps<ScreenParams, 'FileCache'>> =
   props => {
     const toast = useToast();
 

@@ -1,5 +1,5 @@
 import {Linking, ScrollView, StyleSheet} from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Title, Text} from 'react-native-paper';
 import DeviceInfo from 'react-native-device-info';
 import Colors from 'constants/Colors';
@@ -9,51 +9,52 @@ import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
-const About: React.FC<StackScreenProps<ScreenParams, 'About'>> = props => {
-  useNavigationAnimation(props);
+const About: React.FC<NativeStackScreenProps<ScreenParams, 'About'>> =
+  props => {
+    useNavigationAnimation(props);
 
-  return (
-    <SafeArea>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewPaddings}>
-        <Title>{t('versionInformation')}</Title>
-        <Text style={styles.text}>
-          {`v${packageJson.version} (build ${DeviceInfo.getBuildNumber()})`}
-        </Text>
-        <Text style={styles.text}>Copyright (c) 2021 Rui Ying</Text>
-        <Text style={styles.text}>
-          {t('opensourceAt')}{' '}
-          <Text
-            style={styles.link}
-            onPress={() =>
-              Linking.openURL('https://github.com/robertying/learnX')
-            }>
-            robertying/learnX
+    return (
+      <SafeArea>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollViewPaddings}>
+          <Title>{t('versionInformation')}</Title>
+          <Text style={styles.text}>
+            {`v${packageJson.version} (build ${DeviceInfo.getBuildNumber()})`}
           </Text>
-        </Text>
-        <Title style={styles.marginTop}>{t('specialThanks')}</Title>
-        <Text style={styles.text}>
-          {t('harryChen')}{' '}
-          <Text
-            style={styles.link}
-            onPress={() =>
-              Linking.openURL('https://github.com/Harry-Chen/thu-learn-lib')
-            }>
-            Harry-Chen/thu-learn-lib
+          <Text style={styles.text}>Copyright (c) 2021 Rui Ying</Text>
+          <Text style={styles.text}>
+            {t('opensourceAt')}{' '}
+            <Text
+              style={styles.link}
+              onPress={() =>
+                Linking.openURL('https://github.com/robertying/learnX')
+              }>
+              robertying/learnX
+            </Text>
           </Text>
-        </Text>
-        <Text style={styles.text}>{t('yayuXiao')}</Text>
-        <Title style={styles.marginTop}>{t('opensourceDependencies')}</Title>
-        {Object.keys(packageJson.dependencies).map(name => (
-          <Text key={name} style={styles.text}>
-            {name}
+          <Title style={styles.marginTop}>{t('specialThanks')}</Title>
+          <Text style={styles.text}>
+            {t('harryChen')}{' '}
+            <Text
+              style={styles.link}
+              onPress={() =>
+                Linking.openURL('https://github.com/Harry-Chen/thu-learn-lib')
+              }>
+              Harry-Chen/thu-learn-lib
+            </Text>
           </Text>
-        ))}
-      </ScrollView>
-    </SafeArea>
-  );
-};
+          <Text style={styles.text}>{t('yayuXiao')}</Text>
+          <Title style={styles.marginTop}>{t('opensourceDependencies')}</Title>
+          {Object.keys(packageJson.dependencies).map(name => (
+            <Text key={name} style={styles.text}>
+              {name}
+            </Text>
+          ))}
+        </ScrollView>
+      </SafeArea>
+    );
+  };
 
 const styles = StyleSheet.create({
   marginTop: {

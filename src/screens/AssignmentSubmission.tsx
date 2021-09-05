@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import DocumentPicker, {
   DocumentPickerResponse,
 } from 'react-native-document-picker';
@@ -34,7 +34,7 @@ import useToast from 'hooks/useToast';
 import {ScreenParams} from './types';
 
 const AssignmentSubmission: React.FC<
-  StackScreenProps<ScreenParams, 'AssignmentSubmission'>
+  NativeStackScreenProps<ScreenParams, 'AssignmentSubmission'>
 > = ({navigation, route}) => {
   const theme = useTheme();
   const toast = useToast();
@@ -67,12 +67,12 @@ const AssignmentSubmission: React.FC<
 
   const handleDocumentPick = async () => {
     try {
-      const result = await DocumentPicker.pick({
+      const result = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.allFiles],
       });
       setAttachmentResult(result);
     } catch (err) {
-      if (!DocumentPicker.isCancel(err)) {
+      if (!DocumentPicker.isCancel(err as Error)) {
         toast(t('filePickFailed'), 'error');
       }
     }
@@ -167,7 +167,6 @@ const AssignmentSubmission: React.FC<
             uploading || (!removeAttachment && !content && !attachmentResult)
           }
           style={{fontSize: 17, fontWeight: 'bold'}}
-          containerStyle={{marginRight: 16}}
           onPress={handleSubmitPress}>
           {t('submit')}
         </TextButton>

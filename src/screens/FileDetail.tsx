@@ -9,6 +9,7 @@ import {
 import {Linking, Platform, StyleSheet, View} from 'react-native';
 import {useTheme, Text, ProgressBar, IconButton} from 'react-native-paper';
 import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Styles from 'constants/Styles';
@@ -22,181 +23,179 @@ import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 import {SplitViewContext} from 'components/SplitView';
 
-const FileDetail: React.FC<StackScreenProps<ScreenParams, 'FileDetail'>> = ({
-  route,
-  navigation,
-}) => {
-  const {fileType, disableAnimation} = route.params;
+const FileDetail: React.FC<NativeStackScreenProps<ScreenParams, 'FileDetail'>> =
+  ({route, navigation}) => {
+    const {fileType, disableAnimation} = route.params;
 
-  const theme = useTheme();
-  const toast = useToast();
-  const {showDetail, showMaster, toggleMaster} = useContext(SplitViewContext);
+    const theme = useTheme();
+    const toast = useToast();
+    const {showDetail, showMaster, toggleMaster} = useContext(SplitViewContext);
 
-  const webViewRef = useRef<WebView>(null);
+    const webViewRef = useRef<WebView>(null);
 
-  const [path, setPath] = useState('');
+    const [path, setPath] = useState('');
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState(false);
+    const [error, setError] = useState(false);
 
-  const handleDownload = useCallback(
-    async (refresh: boolean) => {
-      setPath('');
-      setError(false);
+    const handleDownload = useCallback(
+      async (refresh: boolean) => {
+        setPath('');
+        setError(false);
+        try {
+          const path = await downloadFile(route.params, refresh, setProgress);
+          setPath(path);
+          setProgress(0);
+        } catch (e) {
+          setError(true);
+          toast(t('fileDownloadFailed'), 'error');
+        }
+      },
+      [route.params, toast],
+    );
+
+    const handleShare = useCallback(async () => {
+      await shareFile(route.params);
+    }, [route.params]);
+
+    const handleOpen = useCallback(async () => {
       try {
-        const path = await downloadFile(route.params, refresh, setProgress);
-        setPath(path);
-        setProgress(0);
-      } catch (e) {
-        setError(true);
-        toast(t('fileDownloadFailed'), 'error');
+        if (Platform.OS === 'android') {
+          await openFile(path, fileType);
+        } else {
+          await Linking.openURL(path);
+        }
+      } catch {
+        toast(t('openFileFailed'), 'error');
       }
-    },
-    [route.params, toast],
-  );
+    }, [fileType, path, toast]);
 
-  const handleShare = useCallback(async () => {
-    await shareFile(route.params);
-  }, [route.params]);
-
-  const handleOpen = useCallback(async () => {
-    try {
-      if (Platform.OS === 'android') {
-        await openFile(path, fileType);
-      } else {
-        await Linking.openURL(path);
+    useLayoutEffect(() => {
+      if (disableAnimation) {
+        navigation.setOptions({
+          animation: 'none',
+        });
       }
-    } catch {
-      toast(t('openFileFailed'), 'error');
-    }
-  }, [fileType, path, toast]);
+    }, [navigation, disableAnimation]);
 
-  useLayoutEffect(() => {
-    if (disableAnimation) {
+    useEffect(() => {
       navigation.setOptions({
-        animationEnabled: false,
-      });
-    }
-  }, [navigation, disableAnimation]);
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerBackTitle: t('back'),
-      headerRight: () => (
-        <View style={Styles.flexRow}>
-          {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
+        headerBackTitle: t('back'),
+        headerRight: () => (
+          <View style={Styles.flexRow}>
+            {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
+              <IconButton
+                style={Styles.mr0}
+                onPress={() => toggleMaster(!showMaster)}
+                icon={props => (
+                  <Icon
+                    {...props}
+                    name={showMaster ? 'fullscreen' : 'fullscreen-exit'}
+                  />
+                )}
+                disabled={!showDetail}
+              />
+            )}
             <IconButton
               style={Styles.mr0}
-              onPress={() => toggleMaster(!showMaster)}
-              icon={props => (
-                <Icon
-                  {...props}
-                  name={showMaster ? 'fullscreen' : 'fullscreen-exit'}
-                />
-              )}
-              disabled={!showDetail}
+              onPress={() => handleDownload(true)}
+              icon={props => <Icon {...props} name="refresh" />}
             />
-          )}
-          <IconButton
-            style={Styles.mr0}
-            onPress={() => handleDownload(true)}
-            icon={props => <Icon {...props} name="refresh" />}
-          />
-          <IconButton
-            style={DeviceInfo.isMac() ? Styles.mr0 : undefined}
-            disabled={error || !path}
-            onPress={handleShare}
-            icon={props => <Icon {...props} name="ios-share" />}
-          />
-          {DeviceInfo.isMac() && (
             <IconButton
+              style={DeviceInfo.isMac() ? Styles.mr0 : undefined}
               disabled={error || !path}
-              onPress={handleOpen}
-              icon={props => <Icon {...props} name="open-in-new" />}
+              onPress={handleShare}
+              icon={props => <Icon {...props} name="ios-share" />}
             />
-          )}
-        </View>
-      ),
-    });
-  }, [
-    error,
-    handleDownload,
-    handleOpen,
-    handleShare,
-    navigation,
-    path,
-    showDetail,
-    showMaster,
-    toggleMaster,
-  ]);
-
-  useEffect(() => {
-    handleDownload(false);
-  }, [handleDownload]);
-
-  return (
-    <SafeArea>
-      {error ? (
-        <View style={styles.errorRoot}>
-          <Icon
-            style={Styles.spacey1}
-            name="error"
-            color={theme.colors.placeholder}
-            size={56}
-          />
-          <Text style={[Styles.spacey1, {color: theme.colors.placeholder}]}>
-            {t('fileDownloadFailed')}
-          </Text>
-        </View>
-      ) : path ? (
-        (Platform.OS === 'ios' && !DeviceInfo.isMac()) ||
-        (Platform.OS === 'ios' &&
-          DeviceInfo.isMac() &&
-          canRenderInMacWebview(fileType)) ? (
-          <WebView
-            ref={webViewRef}
-            style={{
-              backgroundColor: needWhiteBackground(fileType)
-                ? 'white'
-                : 'transparent',
-            }}
-            source={{
-              uri: path,
-            }}
-            originWhitelist={['*']}
-            decelerationRate="normal"
-          />
-        ) : (
-          <View style={styles.actions}>
-            <View style={styles.colCenter}>
-              <IconButton icon="share" size={48} onPress={handleShare} />
-              <Text style={Styles.spacey1}>{t('share')}</Text>
-            </View>
-            <View style={styles.colCenter}>
-              <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
-              <Text style={Styles.spacey1}>{t('open')}</Text>
-            </View>
+            {DeviceInfo.isMac() && (
+              <IconButton
+                disabled={error || !path}
+                onPress={handleOpen}
+                icon={props => <Icon {...props} name="open-in-new" />}
+              />
+            )}
           </View>
-        )
-      ) : (
-        <SafeArea style={styles.skeletons}>
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-        </SafeArea>
-      )}
+        ),
+      });
+    }, [
+      error,
+      handleDownload,
+      handleOpen,
+      handleShare,
+      navigation,
+      path,
+      showDetail,
+      showMaster,
+      toggleMaster,
+    ]);
+
+    useEffect(() => {
+      handleDownload(false);
+    }, [handleDownload]);
+
+    return (
+      <SafeArea>
+        {error ? (
+          <View style={styles.errorRoot}>
+            <Icon
+              style={Styles.spacey1}
+              name="error"
+              color={theme.colors.placeholder}
+              size={56}
+            />
+            <Text style={[Styles.spacey1, {color: theme.colors.placeholder}]}>
+              {t('fileDownloadFailed')}
+            </Text>
+          </View>
+        ) : path ? (
+          (Platform.OS === 'ios' && !DeviceInfo.isMac()) ||
+          (Platform.OS === 'ios' &&
+            DeviceInfo.isMac() &&
+            canRenderInMacWebview(fileType)) ? (
+            <WebView
+              ref={webViewRef}
+              style={{
+                backgroundColor: needWhiteBackground(fileType)
+                  ? 'white'
+                  : 'transparent',
+              }}
+              source={{
+                uri: path,
+              }}
+              originWhitelist={['*']}
+              decelerationRate="normal"
+            />
+          ) : (
+            <View style={styles.actions}>
+              <View style={styles.colCenter}>
+                <IconButton icon="share" size={48} onPress={handleShare} />
+                <Text style={Styles.spacey1}>{t('share')}</Text>
+              </View>
+              <View style={styles.colCenter}>
+                <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
+                <Text style={Styles.spacey1}>{t('open')}</Text>
+              </View>
+            </View>
+          )
+        ) : (
+          <SafeArea style={styles.skeletons}>
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+            <Skeleton />
+          </SafeArea>
+        )}
       {progress ? (
-        <ProgressBar style={styles.progressBar} progress={progress} />
+          <ProgressBar style={styles.progressBar} progress={progress} />
       ) : undefined}
-    </SafeArea>
-  );
-};
+      </SafeArea>
+    );
+  };
 
 const styles = StyleSheet.create({
   progressBar: {

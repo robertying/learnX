@@ -1,5 +1,5 @@
 import {useCallback, useEffect} from 'react';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 import NoticeCard from 'components/NoticeCard';
@@ -12,7 +12,7 @@ import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from './types';
 
-const Notices: React.FC<StackScreenProps<ScreenParams, 'Notices'>> = ({
+const Notices: React.FC<NativeStackScreenProps<ScreenParams, 'Notices'>> = ({
   navigation,
 }) => {
   const detailNavigator = useDetailNavigator();

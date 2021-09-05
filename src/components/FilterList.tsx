@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {View, FlatList, RefreshControl} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {IconButton} from 'react-native-paper';
-import {StackNavigationProp} from '@react-navigation/stack';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -44,7 +44,7 @@ export interface FilterListProps<T> {
   archived?: T[];
   hidden: T[];
   itemComponent: React.FC<ItemComponentProps<T>>;
-  navigation: StackNavigationProp<
+  navigation: NativeStackNavigationProp<
     ScreenParams,
     'Notices' | 'Assignments' | 'Files' | 'Courses'
   >;
@@ -218,9 +218,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX'));
     } else {
-      navigation.navigate('CourseX', {
-        screen: 'CourseX',
-      } as any);
+      navigation.navigate('CourseXStack');
     }
   }, [detailNavigator, navigation]);
 
@@ -228,8 +226,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     if (selectionMode) {
       navigation.setOptions({
         headerLeft: () => (
-          <View style={Styles.flexRow}>
+          <>
             <IconButton
+              style={{marginLeft: -8}}
               onPress={handleSelect}
               icon={props => <MaterialIcons {...props} name="subject" />}
             />
@@ -238,10 +237,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               onPress={handleCheckAll}
               icon={props => <MaterialIcons {...props} name="done-all" />}
             />
-          </View>
+          </>
         ),
         headerRight: () => (
           <IconButton
+            style={{marginRight: -8}}
             onPress={() =>
               handleArchive(
                 filterSelected === 'archived',
@@ -267,20 +267,20 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           : `${
               Object.values(selection).filter(s => s === true).length
             } selected`,
-        headerTitleAlign: 'center',
       });
     } else {
       navigation.setOptions({
         headerLeft: () => (
-          <View style={Styles.flexRow}>
+          <>
             {selectionModeDisabled ? null : (
               <IconButton
+                style={{marginLeft: -8}}
                 onPress={handleSelect}
                 icon={props => <MaterialIcons {...props} name="subject" />}
               />
             )}
             <IconButton
-              style={selectionModeDisabled ? undefined : Styles.ml0}
+              style={selectionModeDisabled ? {marginLeft: -8} : Styles.ml0}
               onPress={handleFilter}
               icon={props => <MaterialIcons {...props} name="filter-list" />}
             />
@@ -291,10 +291,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                 onPress={handleNavigateCourseX}
               />
             )}
-          </View>
+          </>
         ),
         headerRight: () => (
-          <View style={Styles.flexRow}>
+          <>
             {DeviceInfo.isMac() && (
               <IconButton
                 style={Styles.mr0}
@@ -308,10 +308,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               />
             )}
             <IconButton
-              onPress={() => navigation.navigate('Search')}
+              style={{marginRight: -8}}
+              onPress={() => navigation.navigate('SearchStack')}
               icon={props => <MaterialIcons {...props} name="search" />}
             />
-          </View>
+          </>
         ),
         headerTitle: props => (
           <HeaderTitle

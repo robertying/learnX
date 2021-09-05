@@ -3,11 +3,11 @@ import {Linking, StyleSheet, View} from 'react-native';
 import {IconButton, ProgressBar, useTheme} from 'react-native-paper';
 import WebView, {WebViewNavigation} from 'react-native-webview';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 
-const CourseX: React.FC<StackScreenProps<ScreenParams, 'CourseX'>> = ({
+const CourseX: React.FC<NativeStackScreenProps<ScreenParams, 'CourseX'>> = ({
   route,
 }) => {
   const courseId = route.params?.id ?? '';

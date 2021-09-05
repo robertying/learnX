@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useMemo} from 'react';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import {useDispatch} from 'react-redux';
 import dayjs from 'dayjs';
@@ -16,9 +16,9 @@ import useToast from 'hooks/useToast';
 import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
 import {t} from 'helpers/i18n';
 
-const Assignments: React.FC<StackScreenProps<ScreenParams, 'Assignments'>> = ({
-  navigation,
-}) => {
+const Assignments: React.FC<
+  NativeStackScreenProps<ScreenParams, 'Assignments'>
+> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const toast = useToast();

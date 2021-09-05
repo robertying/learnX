@@ -16,7 +16,7 @@ import {
   useTheme,
   Text,
 } from 'react-native-paper';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useDispatch} from 'react-redux';
 import {FailReason} from 'thu-learn-lib-no-native/lib/types';
 import useToast from 'hooks/useToast';
@@ -30,7 +30,7 @@ import {ScreenParams} from './types';
 import env from 'helpers/env';
 import {t} from 'helpers/i18n';
 
-const Login: React.FC<StackScreenProps<ScreenParams, 'Login'>> = () => {
+const Login: React.FC<NativeStackScreenProps<ScreenParams, 'Login'>> = () => {
   const theme = useTheme();
 
   const toast = useToast();

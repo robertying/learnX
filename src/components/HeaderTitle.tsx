@@ -1,8 +1,7 @@
-import {StyleSheet, View} from 'react-native';
-import {StackHeaderTitleProps} from '@react-navigation/stack';
+import {Platform, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 
-export interface HeaderTitleProps extends StackHeaderTitleProps {
+export interface HeaderTitleProps {
   title: string;
   subtitle?: string;
 }
@@ -11,8 +10,7 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({title, subtitle}) => {
   return (
     <View
       style={{
-        marginHorizontal: '5%',
-        alignItems: 'center',
+        alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
       }}>
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="middle">
         {title}
@@ -28,8 +26,8 @@ const HeaderTitle: React.FC<HeaderTitleProps> = ({title, subtitle}) => {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: Platform.OS === 'ios' ? 17 : 20,
+    fontWeight: Platform.OS === 'ios' ? '600' : 'bold',
   },
   subtitle: {
     fontSize: 11,

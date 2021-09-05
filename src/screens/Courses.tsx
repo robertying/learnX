@@ -1,5 +1,5 @@
 import {useEffect, useMemo} from 'react';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
@@ -14,7 +14,7 @@ import {getSemesterTextFromId} from 'helpers/parse';
 import {uploadCourses} from 'helpers/coursex';
 import {ScreenParams} from './types';
 
-const Courses: React.FC<StackScreenProps<ScreenParams, 'Courses'>> = ({
+const Courses: React.FC<NativeStackScreenProps<ScreenParams, 'Courses'>> = ({
   navigation,
 }) => {
   const detailNavigator = useDetailNavigator();

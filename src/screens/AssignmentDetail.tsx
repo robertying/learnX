@@ -8,7 +8,7 @@ import {
   Text,
   IconButton,
 } from 'react-native-paper';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -25,7 +25,7 @@ import {getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 
 const AssignmentDetail: React.FC<
-  StackScreenProps<ScreenParams, 'AssignmentDetail'>
+  NativeStackScreenProps<ScreenParams, 'AssignmentDetail'>
 > = ({route, navigation}) => {
   const theme = useTheme();
 
@@ -87,7 +87,7 @@ const AssignmentDetail: React.FC<
         StackActions.push('AssignmentSubmission', route.params),
       );
     } else {
-      navigation.navigate('AssignmentSubmission', {
+      navigation.navigate('AssignmentSubmissionStack', {
         screen: 'AssignmentSubmission',
         params: route.params,
       } as any);
@@ -97,7 +97,7 @@ const AssignmentDetail: React.FC<
   useLayoutEffect(() => {
     if (disableAnimation) {
       navigation.setOptions({
-        animationEnabled: false,
+        animation: 'none',
       });
     }
   }, [navigation, disableAnimation]);
@@ -107,6 +107,7 @@ const AssignmentDetail: React.FC<
       navigation.setOptions({
         headerRight: () => (
           <IconButton
+            style={{marginRight: -8}}
             onPress={handleSubmit}
             icon={props => <MaterialIcons {...props} name="file-upload" />}
           />

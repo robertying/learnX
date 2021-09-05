@@ -4,7 +4,9 @@ import {Divider} from 'react-native-paper';
 import {NavigationContainerRef} from '@react-navigation/native';
 
 const SplitViewContext = createContext<{
-  detailNavigationContainerRef: React.RefObject<NavigationContainerRef> | null;
+  detailNavigationContainerRef: React.RefObject<
+    NavigationContainerRef<{}>
+  > | null;
   showDetail: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
@@ -17,7 +19,9 @@ const SplitViewContext = createContext<{
 
 export interface SplitViewProps {
   splitEnabled: boolean;
-  detailNavigationContainerRef: React.RefObject<NavigationContainerRef> | null;
+  detailNavigationContainerRef: React.RefObject<
+    NavigationContainerRef<{}>
+  > | null;
   showDetail: boolean;
 }
 

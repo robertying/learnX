@@ -1,5 +1,5 @@
 import {Linking, ScrollView, StyleSheet} from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Title, Text} from 'react-native-paper';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
@@ -7,7 +7,7 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 
-const Help: React.FC<StackScreenProps<ScreenParams, 'Help'>> = props => {
+const Help: React.FC<NativeStackScreenProps<ScreenParams, 'Help'>> = props => {
   useNavigationAnimation(props);
 
   return (

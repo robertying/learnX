@@ -6,7 +6,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import {Searchbar, Subheading, useTheme} from 'react-native-paper';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -23,7 +23,7 @@ import SafeArea from 'components/SafeArea';
 import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 
-const Search: React.FC<StackScreenProps<ScreenParams, 'Search'>> = ({
+const Search: React.FC<NativeStackScreenProps<ScreenParams, 'Search'>> = ({
   navigation,
   route,
 }) => {

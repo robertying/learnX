@@ -1,6 +1,6 @@
 import {useEffect, useRef} from 'react';
 import {Linking} from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import WebView, {WebViewNavigation} from 'react-native-webview';
 import {useDispatch} from 'react-redux';
 import SafeArea from 'components/SafeArea';
@@ -9,7 +9,7 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
-const Changelog: React.FC<StackScreenProps<ScreenParams, 'Changelog'>> =
+const Changelog: React.FC<NativeStackScreenProps<ScreenParams, 'Changelog'>> =
   props => {
     const dispatch = useDispatch();
 

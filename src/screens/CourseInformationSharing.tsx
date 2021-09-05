@@ -1,6 +1,6 @@
 import {useEffect} from 'react';
 import {Alert, Linking, ScrollView, StyleSheet} from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
 import {useDispatch} from 'react-redux';
 import {useTypedSelector} from 'data/store';
@@ -13,7 +13,7 @@ import {uploadCourses} from 'helpers/coursex';
 import {ScreenParams} from './types';
 
 const CourseInformationSharing: React.FC<
-  StackScreenProps<ScreenParams, 'CourseInformationSharing'>
+  NativeStackScreenProps<ScreenParams, 'CourseInformationSharing'>
 > = props => {
   const dispatch = useDispatch();
 

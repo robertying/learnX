@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Alert, Linking, Platform, ScrollView, StyleSheet} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
 import SafeArea from 'components/SafeArea';
 import TableCell from 'components/TableCell';
@@ -16,7 +16,7 @@ import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
-const Settings: React.FC<StackScreenProps<ScreenParams, 'Settings'>> = ({
+const Settings: React.FC<NativeStackScreenProps<ScreenParams, 'Settings'>> = ({
   navigation,
 }) => {
   const detailNavigator = useDetailNavigator();

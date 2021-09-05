@@ -1,6 +1,6 @@
 import {useCallback, useEffect} from 'react';
 import {FlatList, StyleSheet} from 'react-native';
-import {StackScreenProps} from '@react-navigation/stack';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useDispatch} from 'react-redux';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -15,7 +15,7 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {ScreenParams} from './types';
 
 const SemesterSelection: React.FC<
-  StackScreenProps<ScreenParams, 'SemesterSelection'>
+  NativeStackScreenProps<ScreenParams, 'SemesterSelection'>
 > = props => {
   const dispatch = useDispatch();
   const semesters = useTypedSelector(state => state.semesters.items);
