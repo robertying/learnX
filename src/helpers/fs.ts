@@ -27,10 +27,6 @@ export const downloadFile = async (
     file.fileType ? `.${file.fileType}` : ''
   }`;
 
-  if (Platform.OS === 'android') {
-    path = encodeURI(path);
-  }
-
   if (!refresh && (await fs.exists(path))) {
     return path;
   }
@@ -42,71 +38,35 @@ export const downloadFile = async (
     throw new Error('Invalid file url');
   }
 
-  if (Platform.OS === 'ios') {
-    const downloadPromise = fs.downloadFile({
-      fromUrl: file.downloadUrl,
-      toFile: path,
-      begin: () => {},
-      progress: result => {
-        onProgress?.(result.bytesWritten / result.contentLength);
-      },
-    });
+  const downloadPromise = fs.downloadFile({
+    fromUrl: file.downloadUrl,
+    toFile: path,
+    begin: () => {},
+    progress: result => {
+      onProgress?.(result.bytesWritten / result.contentLength);
+    },
+  });
 
-    const result = await downloadPromise.promise;
-    if (result.statusCode !== 200 || result.bytesWritten === 0) {
+  const result = await downloadPromise.promise;
+  if (result.statusCode !== 200 || result.bytesWritten === 0) {
+    try {
+      await fs.unlink(path);
+    } catch {}
+
+    throw new Error('File download failed');
+  }
+
+  if (result.bytesWritten < 100) {
+    const file = await fs.readFile(path);
+
+    if (file.includes('location.href')) {
       try {
         await fs.unlink(path);
       } catch {}
 
-      throw new Error('File download failed');
-    }
-
-    if (result.bytesWritten < 100) {
-      const file = await fs.readFile(path);
-
-      if (file.includes('location.href')) {
-        try {
-          await fs.unlink(path);
-        } catch {}
-
-        await dataSource.login();
-
-        throw new Error('File download failed');
-      }
-    }
-  } else {
-    const downloadResumable = ExpoFileSystem.createDownloadResumable(
-      file.downloadUrl,
-      path,
-      {},
-      result => {
-        onProgress?.(
-          result.totalBytesWritten / result.totalBytesExpectedToWrite,
-        );
-      },
-    );
-
-    const result = await downloadResumable.downloadAsync();
-    if (!result || result.status !== 200) {
-      try {
-        await fs.unlink(path);
-      } catch {}
+      await dataSource.login();
 
       throw new Error('File download failed');
-    }
-
-    const downloadedFile = await ExpoFileSystem.getInfoAsync(path);
-    if (downloadedFile.size && downloadedFile.size < 100) {
-      const file = await fs.readFile(path);
-      if (file.includes('location.href')) {
-        try {
-          await fs.unlink(path);
-        } catch {}
-
-        await dataSource.login();
-
-        throw new Error('File download failed');
-      }
     }
   }
 
