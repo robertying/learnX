@@ -100,13 +100,14 @@ const FileDetail: React.FC<NativeStackScreenProps<ScreenParams, 'FileDetail'>> =
               icon={props => <Icon {...props} name="refresh" />}
             />
             <IconButton
-              style={DeviceInfo.isMac() ? Styles.mr0 : undefined}
+              style={DeviceInfo.isMac() ? Styles.mr0 : {marginRight: -8}}
               disabled={error || !path}
               onPress={handleShare}
               icon={props => <Icon {...props} name="ios-share" />}
             />
             {DeviceInfo.isMac() && (
               <IconButton
+                style={{marginRight: -8}}
                 disabled={error || !path}
                 onPress={handleOpen}
                 icon={props => <Icon {...props} name="open-in-new" />}
