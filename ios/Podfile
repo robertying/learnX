@@ -48,5 +48,7 @@ post_install do |installer|
     end
   end
 
+  `sed -i -e  $'s/__IPHONE_10_0/__IPHONE_14_0/' Pods/RCT-Folly/folly/portability/Time.h`
+
   installer.configure_support_catalyst
 end
