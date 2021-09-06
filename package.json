@@ -49,7 +49,7 @@
     "expo-intent-launcher": "9.1.0",
     "expo-secure-store": "10.2.0",
     "fuse.js": "6.4.6",
-    "graphql": "15.5.2",
+    "graphql": "15.5.3",
     "graphql-request": "3.5.0",
     "jest": "27.1.0",
     "metro-react-native-babel-preset": "0.66.2",
