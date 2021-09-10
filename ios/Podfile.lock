@@ -385,16 +385,16 @@ PODS:
     - React-RCTVibration
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.6.0):
+  - RNScreens (3.7.0):
     - React-Core
     - React-RCTImage
-  - RNShare (7.0.2):
+  - RNShare (7.1.0):
     - React-Core
   - RNVectorIcons (8.1.0):
     - React-Core
   - SSZipArchive (2.2.3)
-  - UMCore (7.1.1)
-  - UMReactNativeAdapter (6.3.5):
+  - UMCore (7.1.2)
+  - UMReactNativeAdapter (6.3.7):
     - ExpoModulesCore
     - React-Core
     - UMCore
@@ -643,12 +643,12 @@ SPEC CHECKSUMS:
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNLocalize: 7f1e5792b65a839af55a9552d05b3558b66d017e
   RNReanimated: f89561404f0efaa5352b627dc35e5a97a845a2cd
-  RNScreens: eb0dfb2d6b21d2d7f980ad46b14eb306d2f1062e
-  RNShare: 3acd1ed34a4baba2fd8541ba409045c37e5f62ff
+  RNScreens: 2a71d74b4e530f051f5684c8111d7591176722cf
+  RNShare: 072f63d19c2b90da3742adac614396d805e7ae22
   RNVectorIcons: 0ac9c0eb01c7d5c761939d976dea6a1628fa0be1
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
-  UMCore: 912510bbff567298d738590f17788a8516f9d7f3
-  UMReactNativeAdapter: d18b9ea7f342d323fd9624970b8f327ebef81747
+  UMCore: 573e838e2a2d5dfcb23506fd7d7db6dcc07c2fb3
+  UMReactNativeAdapter: ef132f7165c0008492e786954e62c99195976a8a
   Yoga: aa0cb45287ebe1004c02a13f279c55a95f1572f4
 
 PODFILE CHECKSUM: 3b361ec984d005c6f909d05bd392b75d03d38de6
