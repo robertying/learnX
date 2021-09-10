@@ -45,7 +45,7 @@ const SemesterSelection: React.FC<
         renderItem={({item}) => (
           <TableCell
             iconName={currentSemesterId === item ? 'check' : undefined}
-            primaryText={getSemesterTextFromId(item)}
+            primaryText={item ? getSemesterTextFromId(item) : ''}
             type="none"
             onPress={() => handleSelect(item)}
           />
