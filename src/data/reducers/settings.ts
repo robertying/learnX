@@ -15,6 +15,7 @@ export default function settings(
     newUpdate: false,
     graduate: false,
     fileUseDocumentDir: false,
+    fileOmitCourseName: false,
     tabFilterSelections: {
       notice: 'all',
       assignment: 'unfinished',

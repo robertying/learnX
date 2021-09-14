@@ -13,8 +13,10 @@ export const downloadFile = async (
   refresh?: boolean,
   onProgress?: (progress: number) => void,
 ) => {
+  const settings = store.getState().settings;
+
   let dir = `${
-    store.getState().settings.fileUseDocumentDir
+    settings.fileUseDocumentDir
       ? ExpoFileSystem.documentDirectory
       : ExpoFileSystem.cacheDirectory
   }learnX-files/${file.courseName}/${file.id}`;
@@ -23,9 +25,11 @@ export const downloadFile = async (
   }
   await fs.mkdir(dir);
 
-  let path = `${dir}/${file.courseName}-${file.title}${
-    file.fileType ? `.${file.fileType}` : ''
-  }`;
+  let path = settings.fileOmitCourseName
+    ? `${dir}/${file.title}${file.fileType ? `.${file.fileType}` : ''}`
+    : `${dir}/${file.courseName}-${file.title}${
+        file.fileType ? `.${file.fileType}` : ''
+      }`;
 
   if (Platform.OS === 'android') {
     path = encodeURI(path);

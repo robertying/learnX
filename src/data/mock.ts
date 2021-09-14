@@ -27,6 +27,7 @@ const mockStore: PersistAppState = {
     newUpdate: false,
     graduate: false,
     fileUseDocumentDir: false,
+    fileOmitCourseName: false,
     courseInformationSharing: false,
     courseInformationSharingBadgeShown: false,
     tabFilterSelections: {

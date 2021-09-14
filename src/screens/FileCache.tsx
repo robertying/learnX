@@ -20,6 +20,9 @@ const FileCache: React.FC<NativeStackScreenProps<ScreenParams, 'FileCache'>> =
     const fileUseDocumentDir = useTypedSelector(
       state => state.settings.fileUseDocumentDir,
     );
+    const fileOmitCourseName = useTypedSelector(
+      state => state.settings.fileOmitCourseName,
+    );
 
     const handleClearCache = () => {
       Alert.alert(
@@ -71,6 +74,25 @@ const FileCache: React.FC<NativeStackScreenProps<ScreenParams, 'FileCache'>> =
               : fileUseDocumentDir
               ? 'Files are saved in App Document folder and will only be deleted along with the App.'
               : 'Files are saved in App Cache Folder and will be deleted by the system on demand.'}
+          </Caption>
+          <TableCell
+            style={styles.marginTop}
+            iconName="drive-file-rename-outline"
+            primaryText={t('fileOmitCourseName')}
+            switchValue={fileOmitCourseName}
+            onSwitchValueChange={value =>
+              dispatch(setSetting('fileOmitCourseName', value))
+            }
+            type="switch"
+          />
+          <Caption style={styles.caption}>
+            {getLocale().startsWith('zh')
+              ? fileOmitCourseName
+                ? '文件以“文件名”形式保存。'
+                : '文件以“课程名-文件名”形式保存。'
+              : fileOmitCourseName
+              ? 'Files are saved as "filename".'
+              : 'Files are saved as "coursename-filename".'}
           </Caption>
           <TableCell
             style={styles.marginTop}
