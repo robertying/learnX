@@ -45,7 +45,7 @@ export default {
   courseScheduleSyncNoReminderPermission:
     '课表同步失败：请给予 App 提醒事项访问权限',
   courseScheduleSyncRepetitiveError:
-    '课表同步失败：由于网络学堂日历 API 不稳定，请多次尝试，或明天再试；若三天内一直同步失败，请提交问题反馈',
+    '课表同步失败：请确保已连接校园网并重试；若连续三天同步失败，请提交问题反馈',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
   deleteSyncedCalendarsAndRemindersConfirmation:
     '确定删除已同步的日历与提醒事项？该操作不可撤销。',

@@ -47,7 +47,7 @@ export default {
   courseScheduleSyncNoReminderPermission:
     'Course Schedule Sync failed. Please grant the App access to reminders.',
   courseScheduleSyncRepetitiveError:
-    "Course Schedule Sync failed. Please try again or try tomorrow as Web Learning's API is quite unstable. If this issue persists for more than three days, file a feedback.",
+    'Course Schedule Sync failed. Make sure you are connected to campus networks and try again. If this issue persists for more than three days, file a feedback.',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
   deleteSyncedCalendarsAndRemindersConfirmation:
     'Do you want to delete synced calendars and reminders? This cannot be undone.',
