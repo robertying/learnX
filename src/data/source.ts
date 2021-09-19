@@ -1,4 +1,4 @@
-import {Learn2018Helper} from 'thu-learn-lib-no-native';
+import {Learn2018Helper, addCSRFTokenToUrl} from 'thu-learn-lib-no-native';
 import mime from 'mime-types';
 import axios from 'axios';
 
@@ -47,7 +47,9 @@ const submitAssignment = async (
   } catch {}
 
   try {
-    const res = await axios.post(submitAssignmentUrl, body, {
+    const csrfToken = dataSource.getCSRFToken();
+    const url = addCSRFTokenToUrl(submitAssignmentUrl, csrfToken);
+    const res = await axios.post(url, body, {
       onUploadProgress: e => onProgress?.(e.loaded / e.total),
     });
 
