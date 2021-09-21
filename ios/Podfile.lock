@@ -274,7 +274,7 @@ PODS:
   - React-jsinspector (0.65.1)
   - react-native-document-picker (6.0.4):
     - React-Core
-  - react-native-pager-view (5.4.1):
+  - react-native-pager-view (5.4.4):
     - React-Core
   - react-native-safe-area-context (3.3.2):
     - React-Core
@@ -344,11 +344,11 @@ PODS:
     - React-cxxreact (= 0.65.1)
     - React-jsi (= 0.65.1)
     - React-perflogger (= 0.65.1)
-  - RNCAsyncStorage (1.15.7):
+  - RNCAsyncStorage (1.15.8):
     - React-Core
   - RNCMaskedView (0.2.6):
     - React-Core
-  - RNDeviceInfo (8.3.1):
+  - RNDeviceInfo (8.3.3):
     - React-Core
   - RNFS (2.18.0):
     - React
@@ -385,7 +385,7 @@ PODS:
     - React-RCTVibration
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.7.0):
+  - RNScreens (3.7.2):
     - React-Core
     - React-RCTImage
   - RNShare (7.1.0):
@@ -621,7 +621,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 43f2542aed3c26e42175b339f8d37fe3dd683765
   React-jsinspector: 41e58e5b8e3e0bf061fdf725b03f2144014a8fb0
   react-native-document-picker: a7950caaee8587002c9acbc7fe497a342094d93a
-  react-native-pager-view: 43f51f45f37ec9715f6c188e4af46ccdf79872e8
+  react-native-pager-view: 5ab4d0b4b44d89f77310cb3eb8129745f274ce55
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
   react-native-webview: 133a6a5149f963259646e710b4545c67ef35d7c9
   React-perflogger: fd28ee1f2b5b150b00043f0301d96bd417fdc339
@@ -636,14 +636,14 @@ SPEC CHECKSUMS:
   React-RCTVibration: 92d41c2442e5328cc4d342cd7f78e5876b68bae5
   React-runtimeexecutor: 85187f19dd9c47a7c102f9994f9d14e4dc2110de
   ReactCommon: eafed38eec7b591c31751bfa7494801618460459
-  RNCAsyncStorage: 7102fe8985f889579a3ae148d957bbb3f308122b
+  RNCAsyncStorage: e8b8d6320a0dd90eb610fb0d0b1ef90596697c69
   RNCMaskedView: c298b644a10c0c142055b3ae24d83879ecb13ccd
-  RNDeviceInfo: 7b82d1467b87f7e74d1c7ba9439a9a57d0c68ee9
+  RNDeviceInfo: cc7de0772378f85d8f36ae439df20f05c590a651
   RNFS: 3ab21fa6c56d65566d1fb26c2228e2b6132e5e32
   RNGestureHandler: a479ebd5ed4221a810967000735517df0d2db211
   RNLocalize: 7f1e5792b65a839af55a9552d05b3558b66d017e
   RNReanimated: f89561404f0efaa5352b627dc35e5a97a845a2cd
-  RNScreens: 2a71d74b4e530f051f5684c8111d7591176722cf
+  RNScreens: 0591543e343c7444ea1756b6265d81a4295922c9
   RNShare: 072f63d19c2b90da3742adac614396d805e7ae22
   RNVectorIcons: 0ac9c0eb01c7d5c761939d976dea6a1628fa0be1
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
@@ -653,4 +653,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 3b361ec984d005c6f909d05bd392b75d03d38de6
 
-COCOAPODS: 1.11.0
+COCOAPODS: 1.11.2
