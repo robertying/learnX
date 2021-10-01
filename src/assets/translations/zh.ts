@@ -107,4 +107,6 @@ export default {
   courseX: '课程信息共享计划 courseX',
   courseInformation: '课程信息',
   courseReviews: '课程评价',
+  missingCalendarSource:
+    '不存在可写入的日历：请确保“日历”应用内存在 iCloud 日历目录或至少一个本地日历目录。',
 };

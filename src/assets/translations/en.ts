@@ -114,4 +114,6 @@ export default {
   courseX: 'courseX',
   courseInformation: 'Information',
   courseReviews: 'Reviews',
+  missingCalendarSource:
+    'Missing calendar source. Make sure you have an iCloud enabled calendar category or at least one local calendar category set up in the Calendar app.',
 };
