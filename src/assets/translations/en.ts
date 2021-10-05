@@ -33,6 +33,8 @@ export default {
   assignmentSubmittionFailed: 'Failed to submit the assignment',
   submitAssignment: 'Submit Assignment',
   submitAssignmentConfirmation: 'Do you want to submit the assignment?',
+  submitAssignmentConfirmationAndroid:
+    'Do you want to submit the assignment? Note: for Android users, any non-ascii characters in the filename will be stripped.',
   cancel: 'Cancel',
   ok: 'Ok',
   assignmentSubmittionContentPlaceholder: 'Enter assignment content here...',

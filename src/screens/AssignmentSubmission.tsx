@@ -144,7 +144,9 @@ const AssignmentSubmission: React.FC<
 
     Alert.alert(
       t('submitAssignment'),
-      t('submitAssignmentConfirmation'),
+      Platform.OS === 'android'
+        ? t('submitAssignmentConfirmationAndroid')
+        : t('submitAssignmentConfirmation'),
       [
         {
           text: t('cancel'),
