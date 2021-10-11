@@ -57,3 +57,8 @@
 
 -keepattributes SourceFile,LineNumberTable
 -keep public class * extends java.lang.Exception
+
+
+# reanimated
+
+-keep class com.swmansion.reanimated.** { *; }
