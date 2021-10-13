@@ -19,7 +19,7 @@ PODS:
     - AppCenter/Core (= 4.3.0)
   - Base64 (1.1.2)
   - boost (1.76.0)
-  - CodePush (7.0.3):
+  - CodePush (7.0.4):
     - Base64 (~> 1.1)
     - JWT (~> 3.0.0-beta.12)
     - React-Core
@@ -277,7 +277,7 @@ PODS:
     - glog
   - react-native-document-picker (7.1.0):
     - React-Core
-  - react-native-pager-view (5.4.6):
+  - react-native-pager-view (5.4.7):
     - React-Core
   - react-native-safe-area-context (3.3.2):
     - React-Core
@@ -602,7 +602,7 @@ SPEC CHECKSUMS:
   AppCenterReactNativeShared: a821c7287a296486889ef6339317b701febb0695
   Base64: cecfb41a004124895a7bcee567a89bae5a89d49b
   boost: a7c83b31436843459a1961bfd74b96033dc77234
-  CodePush: f509246638a5ebe5209b08351e48a95093d1f307
+  CodePush: b51b7ac64c07d4eacfc8cc5750a1dd28adbf2528
   DoubleConversion: 831926d9b8bf8166fd87886c4abab286c2422662
   EXCalendar: 949f962838e6297f7c810230407b1aa152f5d5b6
   EXFileSystem: 51bbd6efea7299a5c8bb31caab28907e43f1135f
@@ -631,7 +631,7 @@ SPEC CHECKSUMS:
   React-jsinspector: be95ad424ba9f7b817aff22732eb9b1b810a000a
   React-logger: 9a9cd87d4ea681ae929b32ef580638ff1b50fb24
   react-native-document-picker: bf12b9ca87790f9b723106ffde0eff239928e515
-  react-native-pager-view: b90963d848e777def6714ab7fd40d02fa797e930
+  react-native-pager-view: 741e7606ee2f6e399fc7da777f5519454a4b38c5
   react-native-safe-area-context: 584dc04881deb49474363f3be89e4ca0e854c057
   react-native-webview: d70bc760daaa0e2667dec569b93014882565819c
   React-perflogger: 1f554c2b684e2f484f9edcdfdaeedab039fbaca8
