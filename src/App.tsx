@@ -702,7 +702,7 @@ const Container = () => {
           <RootNavigator.Navigator
             screenOptions={{
               headerShown: false,
-              presentation: 'containedModal',
+              presentation: 'fullScreenModal',
             }}>
             {loggedIn ? (
               <>
