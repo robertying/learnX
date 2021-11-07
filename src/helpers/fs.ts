@@ -144,7 +144,7 @@ export const removeFileDir = async () => {
 
 export const openFile = async (uri: string, type?: string | null) => {
   const contentUri = await ExpoFileSystem.getContentUriAsync(uri);
-  IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
+  IntentLauncher.startActivityAsync('android.intent.action.VIEW' as any, {
     type: (type && mime.lookup(type)) || 'text/plain',
     data: contentUri,
     flags: 1,
