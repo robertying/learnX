@@ -1,9 +1,11 @@
 package io.robertying.learnx;
 
-import android.content.res.Configuration;
 import android.os.Bundle;
 
 import com.facebook.react.ReactActivity;
+import com.facebook.react.ReactActivityDelegate;
+
+import expo.modules.ReactActivityDelegateWrapper;
 
 public class MainActivity extends ReactActivity {
 
@@ -23,8 +25,9 @@ public class MainActivity extends ReactActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        getReactInstanceManager().onConfigurationChanged(this, newConfig);
+    protected ReactActivityDelegate createReactActivityDelegate() {
+        return new ReactActivityDelegateWrapper(this,
+                new ReactActivityDelegate(this, getMainComponentName())
+        );
     }
 }

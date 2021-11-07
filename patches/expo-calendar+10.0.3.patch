@@ -1,0 +1,72 @@
+diff --git a/node_modules/expo-calendar/android/build.gradle b/node_modules/expo-calendar/android/build.gradle
+index dd4fe44..0dc9f06 100644
+--- a/node_modules/expo-calendar/android/build.gradle
++++ b/node_modules/expo-calendar/android/build.gradle
+@@ -1,6 +1,6 @@
+ apply plugin: 'com.android.library'
+ apply plugin: 'kotlin-android'
+-apply plugin: 'maven'
++apply plugin: 'maven-publish'
+
+ group = 'host.exp.exponent'
+ version = '10.0.3'
+@@ -20,27 +20,16 @@ buildscript {
+   }
+ }
+
+-// Upload android library to maven with javadoc and android sources
+-configurations {
+-  deployerJars
+-}
+-
+ // Creating sources with comments
+ task androidSourcesJar(type: Jar) {
+-  classifier = 'sources'
++  archiveClassifier = 'sources'
+   from android.sourceSets.main.java.srcDirs
+ }
+
+-// Put the androidSources and javadoc to the artifacts
+-artifacts {
+-  archives androidSourcesJar
+-}
+-
+-uploadArchives {
+-  repositories {
+-    mavenDeployer {
+-      configuration = configurations.deployerJars
+-      repository(url: mavenLocal().url)
++publishing {
++  publications {
++    mavenLocal(MavenPublication) {
++      artifact androidSourcesJar
+     }
+   }
+ }
+diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
+index 7f9d86a..0ddaf85 100644
+--- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
++++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
+@@ -6,6 +6,7 @@ import android.content.ContentValues
+ import android.content.Context
+ import android.content.Intent
+ import android.database.Cursor
++import android.database.sqlite.SQLiteException
+ import android.os.Bundle
+ import android.provider.CalendarContract
+ import android.util.Log
+@@ -612,7 +613,13 @@ class CalendarModule(
+         reminderValues.put(CalendarContract.Reminders.EVENT_ID, eventID)
+         reminderValues.put(CalendarContract.Reminders.MINUTES, minutes)
+         reminderValues.put(CalendarContract.Reminders.METHOD, method)
+-        contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
++
++        try {
++          contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
++        }
++        catch (e: SQLiteException) {
++
++        }
+       }
+     }
+   }

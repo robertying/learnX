@@ -9,31 +9,30 @@
 /* Begin PBXBuildFile section */
 		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		596D1E3723A67FCC7754D2B4 /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 180668E376F5EDC4F2CD302E /* libPods-learnX.a */; };
+		67FD39BE72C53A340A20DF11 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2794F3851CF83FEB3142E7 /* ExpoModulesProvider.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		D40C629F25E8DE9B002C1255 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40C629E25E8DE9B002C1255 /* Assets.xcassets */; };
-		D40C62A225E8DEE7002C1255 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D40C62A125E8DEE7002C1255 /* AppCenter-Config.plist */; };
-		D40C638B25E8E761002C1255 /* Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40C638A25E8E761002C1255 /* Dummy.swift */; };
-		D435441F25F122D4004A5B82 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D435442125F122D4004A5B82 /* InfoPlist.strings */; };
+		B913A344AC10CE3FE89C23E9 /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 32CA5C0150CED9C7EC22EC28 /* libPods-learnX.a */; };
+		D4187085272ED24200A72A9A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4187084272ED24200A72A9A /* Assets.xcassets */; };
+		D4187088272ED26B00A72A9A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D4187086272ED26B00A72A9A /* InfoPlist.strings */; };
+		D418708B272ED28700A72A9A /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D418708A272ED28700A72A9A /* AppCenter-Config.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0C2794F3851CF83FEB3142E7 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* learnX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = learnX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = learnX/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = learnX/AppDelegate.m; sourceTree = "<group>"; };
+		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = learnX/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = learnX/main.m; sourceTree = "<group>"; };
-		180668E376F5EDC4F2CD302E /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		2206AC4DE3C921422625E65F /* Pods-learnX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.debug.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.debug.xcconfig"; sourceTree = "<group>"; };
+		32CA5C0150CED9C7EC22EC28 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		A330E849AA39569D6C329729 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
-		D40C629E25E8DE9B002C1255 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
-		D40C62A125E8DEE7002C1255 /* AppCenter-Config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
-		D40C62A425E8DF37002C1255 /* learnX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
-		D40C638A25E8E761002C1255 /* Dummy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = Dummy.swift; path = learnX/Dummy.swift; sourceTree = "<group>"; };
-		D40C638D25E8E791002C1255 /* learnX-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "learnX-Bridging-Header.h"; path = "learnX/learnX-Bridging-Header.h"; sourceTree = "<group>"; };
-		D435442025F122D4004A5B82 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		D435442325F122D9004A5B82 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		D435442525F1243E004A5B82 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = learnX/Info.plist; sourceTree = "<group>"; };
+		C68E7DAEBF52824A5948509D /* Pods-learnX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.debug.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.debug.xcconfig"; sourceTree = "<group>"; };
+		C8B9A821D25EF9891CB8FAE8 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
+		D4187084272ED24200A72A9A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
+		D4187087272ED26B00A72A9A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D4187089272ED27900A72A9A /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		D418708A272ED28700A72A9A /* AppCenter-Config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
+		D418708C272ED29700A72A9A /* learnX.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -41,7 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				596D1E3723A67FCC7754D2B4 /* libPods-learnX.a in Frameworks */,
+				B913A344AC10CE3FE89C23E9 /* libPods-learnX.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -51,28 +50,34 @@
 		13B07FAE1A68108700A75B9A /* learnX */ = {
 			isa = PBXGroup;
 			children = (
-				D40C638D25E8E791002C1255 /* learnX-Bridging-Header.h */,
-				D40C638A25E8E761002C1255 /* Dummy.swift */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
 				13B07FB01A68108700A75B9A /* AppDelegate.m */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				D40C629E25E8DE9B002C1255 /* Assets.xcassets */,
+				D4187084272ED24200A72A9A /* Assets.xcassets */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
-				D435442525F1243E004A5B82 /* Info.plist */,
-				D435442125F122D4004A5B82 /* InfoPlist.strings */,
-				D40C62A125E8DEE7002C1255 /* AppCenter-Config.plist */,
-				D40C62A425E8DF37002C1255 /* learnX.entitlements */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
+				D4187086272ED26B00A72A9A /* InfoPlist.strings */,
+				D418708A272ED28700A72A9A /* AppCenter-Config.plist */,
+				D418708C272ED29700A72A9A /* learnX.entitlements */,
 			);
 			name = learnX;
 			sourceTree = "<group>";
 		};
-		555F1B87ACF843FB836025C7 /* Pods */ = {
+		2CE420A0D83ECD160645B58C /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				2206AC4DE3C921422625E65F /* Pods-learnX.debug.xcconfig */,
-				A330E849AA39569D6C329729 /* Pods-learnX.release.xcconfig */,
+				C68E7DAEBF52824A5948509D /* Pods-learnX.debug.xcconfig */,
+				C8B9A821D25EF9891CB8FAE8 /* Pods-learnX.release.xcconfig */,
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				32CA5C0150CED9C7EC22EC28 /* libPods-learnX.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		83CBB9F61A601CBA00E9B192 = {
@@ -80,8 +85,9 @@
 			children = (
 				13B07FAE1A68108700A75B9A /* learnX */,
 				83CBBA001A601CBA00E9B192 /* Products */,
-				555F1B87ACF843FB836025C7 /* Pods */,
-				A14122280C4929B721772E72 /* Frameworks */,
+				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				2CE420A0D83ECD160645B58C /* Pods */,
+				8D742EB2C1497163AB9782A4 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -96,12 +102,20 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A14122280C4929B721772E72 /* Frameworks */ = {
+		8D742EB2C1497163AB9782A4 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				180668E376F5EDC4F2CD302E /* libPods-learnX.a */,
+				FEB6C5B8367A2EB7BE0999CE /* learnX */,
 			);
-			name = Frameworks;
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		FEB6C5B8367A2EB7BE0999CE /* learnX */ = {
+			isa = PBXGroup;
+			children = (
+				0C2794F3851CF83FEB3142E7 /* ExpoModulesProvider.swift */,
+			);
+			name = learnX;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -111,14 +125,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "learnX" */;
 			buildPhases = (
-				9D4C6140FBB16B66541AFC25 /* [CP] Check Pods Manifest.lock */,
+				8A0B5B7D20667C4FFD01849E /* [CP] Check Pods Manifest.lock */,
 				FD10A7F022414F080027D42C /* Start Packager */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				92DEA18AF3D629D4969888B1 /* [CP] Embed Pods Frameworks */,
-				BBA468CB6431DA579B6A40AB /* [CP] Copy Pods Resources */,
+				87785E19ACC0CAFEEACA722E /* [CP] Embed Pods Frameworks */,
+				CE850AB2608D48CA12699B48 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -135,10 +149,10 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1240;
+				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
-						LastSwiftMigration = 1240;
+						LastSwiftMigration = 1120;
 					};
 				};
 			};
@@ -147,8 +161,8 @@
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				Base,
 				en,
+				Base,
 				"zh-Hans",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
@@ -166,10 +180,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D40C629F25E8DE9B002C1255 /* Assets.xcassets in Resources */,
+				D4187085272ED24200A72A9A /* Assets.xcassets in Resources */,
+				D418708B272ED28700A72A9A /* AppCenter-Config.plist in Resources */,
+				D4187088272ED26B00A72A9A /* InfoPlist.strings in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				D435441F25F122D4004A5B82 /* InfoPlist.strings in Resources */,
-				D40C62A225E8DEE7002C1255 /* AppCenter-Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -188,9 +202,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nexport NVM_DIR=\"$([ -z \"${XDG_CONFIG_HOME-}\" ] && printf %s \"${HOME}/.nvm\" || printf %s \"${XDG_CONFIG_HOME}/nvm\")\"\n[ -s \"$NVM_DIR/nvm.sh\" ] && \\. \"$NVM_DIR/nvm.sh\" # This loads nvm\n\nexport NODE_BINARY=/opt/homebrew/bin/node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
+			shellScript = "set -e\n\nexport NVM_DIR=\"$HOME/.nvm\"\n[ -s \"$NVM_DIR/nvm.sh\" ] && \\. \"$NVM_DIR/nvm.sh\"  # This loads nvm\n[ -s \"$NVM_DIR/bash_completion\" ] && \\. \"$NVM_DIR/bash_completion\"  # This loads nvm bash_completion\n\nexport NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
 		};
-		92DEA18AF3D629D4969888B1 /* [CP] Embed Pods Frameworks */ = {
+		87785E19ACC0CAFEEACA722E /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -207,7 +221,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		9D4C6140FBB16B66541AFC25 /* [CP] Check Pods Manifest.lock */ = {
+		8A0B5B7D20667C4FFD01849E /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -229,7 +243,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		BBA468CB6431DA579B6A40AB /* [CP] Copy Pods Resources */ = {
+		CE850AB2608D48CA12699B48 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -272,23 +286,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D40C638B25E8E761002C1255 /* Dummy.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				67FD39BE72C53A340A20DF11 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D435442125F122D4004A5B82 /* InfoPlist.strings */ = {
+		D4187086272ED26B00A72A9A /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				D435442025F122D4004A5B82 /* en */,
-				D435442325F122D9004A5B82 /* zh-Hans */,
+				D4187087272ED26B00A72A9A /* en */,
+				D4187089272ED27900A72A9A /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
-			path = learnX;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -296,18 +309,14 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 2206AC4DE3C921422625E65F /* Pods-learnX.debug.xcconfig */;
+			baseConfigurationReference = C68E7DAEBF52824A5948509D /* Pods-learnX.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2220;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
-				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = learnX/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -321,10 +330,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX;
 				PRODUCT_NAME = learnX;
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "learnX/learnX-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -334,17 +340,13 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A330E849AA39569D6C329729 /* Pods-learnX.release.xcconfig */;
+			baseConfigurationReference = C8B9A821D25EF9891CB8FAE8 /* Pods-learnX.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
-				CODE_SIGN_IDENTITY = "Apple Development";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2220;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
-				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = learnX/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -358,10 +360,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX;
 				PRODUCT_NAME = learnX;
-				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "learnX/learnX-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -423,6 +422,7 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",
@@ -481,6 +481,7 @@
 					"$(inherited)",
 				);
 				LIBRARY_SEARCH_PATHS = (
+					"\"$(SDKROOT)/usr/lib/swift\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift/$(PLATFORM_NAME)\"",
 					"\"$(TOOLCHAIN_DIR)/usr/lib/swift-5.0/$(PLATFORM_NAME)\"",
 					"\"$(inherited)\"",

@@ -1,31 +1,31 @@
-diff --git a/node_modules/expo-modules-core/android/build.gradle b/node_modules/expo-modules-core/android/build.gradle
-index 582976f..a8e674e 100644
---- a/node_modules/expo-modules-core/android/build.gradle
-+++ b/node_modules/expo-modules-core/android/build.gradle
+diff --git a/node_modules/expo-intent-launcher/android/build.gradle b/node_modules/expo-intent-launcher/android/build.gradle
+index a464f3b..00ee934 100644
+--- a/node_modules/expo-intent-launcher/android/build.gradle
++++ b/node_modules/expo-intent-launcher/android/build.gradle
 @@ -1,6 +1,6 @@
  apply plugin: 'com.android.library'
  apply plugin: 'kotlin-android'
 -apply plugin: 'maven'
 +apply plugin: 'maven-publish'
- 
+
  group = 'host.exp.exponent'
- version = '0.2.0'
+ version = '10.0.3'
 @@ -20,27 +20,16 @@ buildscript {
    }
  }
- 
--//Upload android library to maven with javadoc and android sources
+
+-// Upload android library to maven with javadoc and android sources
 -configurations {
 -  deployerJars
 -}
 -
- //Creating sources with comments
+ // Creating sources with comments
  task androidSourcesJar(type: Jar) {
    classifier = 'sources'
    from android.sourceSets.main.java.srcDirs
  }
- 
--//Put the androidSources and javadoc to the artifacts
+
+-// Put the androidSources and javadoc to the artifacts
 -artifacts {
 -  archives androidSourcesJar
 -}

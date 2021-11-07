@@ -62,9 +62,6 @@ buck-out/
 # vscode
 .vscode/
 
-# Expo unimodules
-/android/app/src/main/java/io/robertying/learnx/generated/
-
 # secrets
 .env
 android/app/src/main/assets/appcenter-config.json

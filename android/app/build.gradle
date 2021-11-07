@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply from: '../../node_modules/react-native-unimodules/gradle.groovy'
 
 import com.android.build.OutputFile
 
@@ -226,23 +225,6 @@ dependencies {
     implementation 'com.facebook.react:react-native:+'  // From node_modules
 
     implementation 'com.google.android.material:material:1.4.0'
-
-    addUnimodulesDependencies([exclude: [
-            'expo-asset',
-            'expo-constants',
-            'expo-image-loader',
-            'expo-permissions',
-            'unimodules-app-loader',
-            'unimodules-barcode-scanner-interface',
-            'unimodules-camera-interface',
-            'unimodules-constants-interface',
-            'unimodules-font-interface',
-            'unimodules-permissions-interface',
-            'unimodules-face-detector-interface',
-            'unimodules-image-loader-interface',
-            'unimodules-sensors-interface',
-            'unimodules-task-manager-interface'
-    ]])
 
     if (enableHermes) {
         def hermesPath = '../../node_modules/hermes-engine/android/';

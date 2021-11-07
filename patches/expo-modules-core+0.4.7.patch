@@ -1,15 +1,15 @@
-diff --git a/node_modules/@unimodules/core/android/build.gradle b/node_modules/@unimodules/core/android/build.gradle
-index ea6dee1..659b331 100644
---- a/node_modules/@unimodules/core/android/build.gradle
-+++ b/node_modules/@unimodules/core/android/build.gradle
+diff --git a/node_modules/expo-modules-core/android/build.gradle b/node_modules/expo-modules-core/android/build.gradle
+index 582976f..a8e674e 100644
+--- a/node_modules/expo-modules-core/android/build.gradle
++++ b/node_modules/expo-modules-core/android/build.gradle
 @@ -1,6 +1,6 @@
  apply plugin: 'com.android.library'
  apply plugin: 'kotlin-android'
 -apply plugin: 'maven'
 +apply plugin: 'maven-publish'
 
- group = 'org.unimodules'
- version = '7.1.2'
+ group = 'host.exp.exponent'
+ version = '0.4.7'
 @@ -20,27 +20,16 @@ buildscript {
    }
  }

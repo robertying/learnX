@@ -7,6 +7,7 @@ buildscript {
         compileSdkVersion = 31
         targetSdkVersion = 31
         ndkVersion = '23.0.7599858'
+        kotlinVersion = "1.5.31"
     }
     repositories {
         google()
@@ -44,6 +45,7 @@ subprojects { subproject ->
                 buildToolsVersion '31.0.0'
                 compileSdkVersion 31
                 ndkVersion '23.0.7599858'
+                kotlinVersion = "1.5.31"
             }
         }
     }
