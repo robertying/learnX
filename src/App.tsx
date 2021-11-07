@@ -700,7 +700,10 @@ const Container = () => {
           }
           showDetail={showDetail}>
           <RootNavigator.Navigator
-            screenOptions={{headerShown: false, presentation: 'modal'}}>
+            screenOptions={{
+              headerShown: false,
+              presentation: 'containedModal',
+            }}>
             {loggedIn ? (
               <>
                 <RootNavigator.Screen name="MainTab" component={MainTab} />
