@@ -103,7 +103,7 @@ const Login: React.FC<NativeStackScreenProps<ScreenParams, 'Login'>> = () => {
             style={styles.textInput}
             label={t('usernameOrId')}
             textContentType="username"
-            autoCompleteType="username"
+            autoComplete="username"
             returnKeyType="next"
             keyboardType="ascii-capable"
             autoCapitalize="none"
@@ -118,7 +118,7 @@ const Login: React.FC<NativeStackScreenProps<ScreenParams, 'Login'>> = () => {
             style={styles.textInput}
             label={t('password')}
             textContentType="password"
-            autoCompleteType="password"
+            autoComplete="password"
             returnKeyType="done"
             secureTextEntry
             enablesReturnKeyAutomatically

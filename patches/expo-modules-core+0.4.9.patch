@@ -9,7 +9,7 @@ index 582976f..a8e674e 100644
 +apply plugin: 'maven-publish'
 
  group = 'host.exp.exponent'
- version = '0.4.7'
+ version = '0.4.9'
 @@ -20,27 +20,16 @@ buildscript {
    }
  }
