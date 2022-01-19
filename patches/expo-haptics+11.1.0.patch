@@ -1,7 +1,7 @@
-diff --git a/node_modules/expo-secure-store/android/build.gradle b/node_modules/expo-secure-store/android/build.gradle
-index c930bb8..7449655 100644
---- a/node_modules/expo-secure-store/android/build.gradle
-+++ b/node_modules/expo-secure-store/android/build.gradle
+diff --git a/node_modules/expo-haptics/android/build.gradle b/node_modules/expo-haptics/android/build.gradle
+index 9734539..952cbfa 100644
+--- a/node_modules/expo-haptics/android/build.gradle
++++ b/node_modules/expo-haptics/android/build.gradle
 @@ -1,6 +1,6 @@
  apply plugin: 'com.android.library'
  apply plugin: 'kotlin-android'
@@ -9,7 +9,7 @@ index c930bb8..7449655 100644
 +apply plugin: 'maven-publish'
 
  group = 'host.exp.exponent'
- version = '11.0.3'
+ version = '11.1.0'
 @@ -20,27 +20,16 @@ buildscript {
    }
  }
