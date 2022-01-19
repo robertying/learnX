@@ -9,52 +9,53 @@ import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
-const About: React.FC<NativeStackScreenProps<ScreenParams, 'About'>> =
-  props => {
-    useNavigationAnimation(props);
+const About: React.FC<
+  NativeStackScreenProps<ScreenParams, 'About'>
+> = props => {
+  useNavigationAnimation(props);
 
-    return (
-      <SafeArea>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollViewPaddings}>
-          <Title>{t('versionInformation')}</Title>
-          <Text style={styles.text}>
-            {`v${packageJson.version} (build ${DeviceInfo.getBuildNumber()})`}
+  return (
+    <SafeArea>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewPaddings}>
+        <Title>{t('versionInformation')}</Title>
+        <Text style={styles.text}>
+          {`v${packageJson.version} (build ${DeviceInfo.getBuildNumber()})`}
+        </Text>
+        <Text style={styles.text}>Copyright (c) 2021 Rui Ying</Text>
+        <Text style={styles.text}>
+          {t('opensourceAt')}{' '}
+          <Text
+            style={styles.link}
+            onPress={() =>
+              Linking.openURL('https://github.com/robertying/learnX')
+            }>
+            robertying/learnX
           </Text>
-          <Text style={styles.text}>Copyright (c) 2021 Rui Ying</Text>
-          <Text style={styles.text}>
-            {t('opensourceAt')}{' '}
-            <Text
-              style={styles.link}
-              onPress={() =>
-                Linking.openURL('https://github.com/robertying/learnX')
-              }>
-              robertying/learnX
-            </Text>
+        </Text>
+        <Title style={styles.marginTop}>{t('specialThanks')}</Title>
+        <Text style={styles.text}>
+          {t('harryChen')}{' '}
+          <Text
+            style={styles.link}
+            onPress={() =>
+              Linking.openURL('https://github.com/Harry-Chen/thu-learn-lib')
+            }>
+            Harry-Chen/thu-learn-lib
           </Text>
-          <Title style={styles.marginTop}>{t('specialThanks')}</Title>
-          <Text style={styles.text}>
-            {t('harryChen')}{' '}
-            <Text
-              style={styles.link}
-              onPress={() =>
-                Linking.openURL('https://github.com/Harry-Chen/thu-learn-lib')
-              }>
-              Harry-Chen/thu-learn-lib
-            </Text>
+        </Text>
+        <Text style={styles.text}>{t('yayuXiao')}</Text>
+        <Title style={styles.marginTop}>{t('opensourceDependencies')}</Title>
+        {Object.keys(packageJson.dependencies).map(name => (
+          <Text key={name} style={styles.text}>
+            {name}
           </Text>
-          <Text style={styles.text}>{t('yayuXiao')}</Text>
-          <Title style={styles.marginTop}>{t('opensourceDependencies')}</Title>
-          {Object.keys(packageJson.dependencies).map(name => (
-            <Text key={name} style={styles.text}>
-              {name}
-            </Text>
-          ))}
-        </ScrollView>
-      </SafeArea>
-    );
-  };
+        ))}
+      </ScrollView>
+    </SafeArea>
+  );
+};
 
 const styles = StyleSheet.create({
   marginTop: {
