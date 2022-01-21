@@ -23,7 +23,7 @@ const About: React.FC<
         <Text style={styles.text}>
           {`v${packageJson.version} (build ${DeviceInfo.getBuildNumber()})`}
         </Text>
-        <Text style={styles.text}>Copyright (c) 2021 Rui Ying</Text>
+        <Text style={styles.text}>Copyright (c) 2022 Rui Ying</Text>
         <Text style={styles.text}>
           {t('opensourceAt')}{' '}
           <Text
