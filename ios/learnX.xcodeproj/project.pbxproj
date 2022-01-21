@@ -317,7 +317,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2240;
+				CURRENT_PROJECT_VERSION = 2250;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = learnX/Info.plist;
@@ -325,7 +325,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 13.10.0;
+				MARKETING_VERSION = 13.11.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -353,14 +353,14 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2240;
+				CURRENT_PROJECT_VERSION = 2250;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 13.10.0;
+				MARKETING_VERSION = 13.11.0;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
