@@ -137,6 +137,10 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
+    lintOptions {
+        checkReleaseBuilds false
+    }
+
     defaultConfig {
         applicationId 'io.robertying.learnx'
         minSdkVersion rootProject.ext.minSdkVersion
