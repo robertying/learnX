@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useLayoutEffect, useState} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import DocumentPicker, {
   DocumentPickerResponse,
@@ -161,7 +161,7 @@ const AssignmentSubmission: React.FC<
     );
   }, [handleSubmit]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TextButton

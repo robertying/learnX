@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useLayoutEffect, useMemo} from 'react';
+import {useCallback, useLayoutEffect, useMemo} from 'react';
 import {ScrollView, StyleSheet, View} from 'react-native';
 import {
   Caption,
@@ -102,7 +102,7 @@ const AssignmentDetail: React.FC<
     }
   }, [navigation, disableAnimation]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (dayjs().isBefore(dayjs(deadline))) {
       navigation.setOptions({
         headerRight: () => (

@@ -77,7 +77,7 @@ const FileDetail: React.FC<
     }
   }, [navigation, disableAnimation]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     navigation.setOptions({
       headerBackTitle: t('back'),
       headerRight: () => (

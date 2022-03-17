@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useLayoutEffect, useState} from 'react';
 import {View, FlatList, RefreshControl} from 'react-native';
 import {useDispatch} from 'react-redux';
 import {IconButton} from 'react-native-paper';
@@ -222,7 +222,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   }, [detailNavigator, navigation]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (selectionMode) {
       navigation.setOptions({
         headerLeft: () => (
