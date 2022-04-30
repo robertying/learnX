@@ -2,17 +2,17 @@ import {useEffect, useRef} from 'react';
 import {Linking} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import WebView, {WebViewNavigation} from 'react-native-webview';
-import {useDispatch} from 'react-redux';
 import SafeArea from 'components/SafeArea';
 import {setSetting} from 'data/actions/settings';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
+import {useAppDispatch} from 'data/store';
 
 const Changelog: React.FC<
-  NativeStackScreenProps<ScreenParams, 'Changelog'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Changelog'>>
 > = props => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const webViewRef = useRef<WebView>(null);
 

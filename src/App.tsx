@@ -30,7 +30,7 @@ import {
   DarkTheme as PaperDarkTheme,
 } from 'react-native-paper';
 import codePush from 'react-native-code-push';
-import {Provider as StoreProvider, useDispatch} from 'react-redux';
+import {Provider as StoreProvider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import dayjs from 'dayjs';
@@ -71,7 +71,7 @@ import Styles from 'constants/Styles';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
 import {setSetting} from 'data/actions/settings';
-import {persistor, store, useTypedSelector} from 'data/store';
+import {persistor, store, useAppDispatch, useAppSelector} from 'data/store';
 import {Notice, Assignment, File, Course} from 'data/types/state';
 import {login} from 'data/actions/auth';
 import {getAllSemesters, getCurrentSemester} from 'data/actions/semesters';
@@ -370,16 +370,16 @@ const SettingStack = () => (
 const MainTab = () => {
   const theme = useTheme();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const auth = useTypedSelector(state => state.auth);
-  const currentSemester = useTypedSelector(state => state.semesters.current);
-  const semesters = useTypedSelector(state => state.semesters.items);
-  const newChangelog = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const auth = useAppSelector(state => state.auth);
+  const currentSemester = useAppSelector(state => state.semesters.current);
+  const semesters = useAppSelector(state => state.semesters.items);
+  const newChangelog = useAppSelector(
     state => state.settings.lastShowChangelogVersion !== packageJson.version,
   );
-  const newUpdate = useTypedSelector(state => state.settings.newUpdate);
-  const courseInformationSharingBadgeShown = useTypedSelector(
+  const newUpdate = useAppSelector(state => state.settings.newUpdate);
+  const courseInformationSharingBadgeShown = useAppSelector(
     state => state.settings.courseInformationSharingBadgeShown,
   );
 
@@ -638,11 +638,11 @@ const Container = () => {
   const colorScheme = useColorScheme();
   const toast = useToast();
 
-  const dispatch = useDispatch();
-  const loggingIn = useTypedSelector(state => state.auth.loggingIn);
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const loginError = useTypedSelector(state => state.auth.error);
-  const auth = useTypedSelector(state => state.auth);
+  const dispatch = useAppDispatch();
+  const loggingIn = useAppSelector(state => state.auth.loggingIn);
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const loginError = useAppSelector(state => state.auth.error);
+  const auth = useAppSelector(state => state.auth);
   const windowSize = useWindowDimensions();
 
   const [appState, setAppState] = useState(AppState.currentState);

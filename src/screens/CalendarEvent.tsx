@@ -2,11 +2,10 @@ import {useMemo, useState} from 'react';
 import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
-import {useDispatch} from 'react-redux';
 import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import {dataSource} from 'data/source';
 import {
@@ -21,21 +20,19 @@ import useFilteredData from 'hooks/useFilteredData';
 import {ScreenParams} from './types';
 
 const CalendarEvent: React.FC<
-  NativeStackScreenProps<ScreenParams, 'CalendarEvent'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CalendarEvent'>>
 > = props => {
   const toast = useToast();
 
-  const dispatch = useDispatch();
-  const assignmentSync = useTypedSelector(
-    state => state.settings.assignmentSync,
-  );
-  const syncAssignmentsToCalendar = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const assignmentSync = useAppSelector(state => state.settings.assignmentSync);
+  const syncAssignmentsToCalendar = useAppSelector(
     state => state.settings.syncAssignmentsToCalendar,
   );
-  const alarms = useTypedSelector(state => state.settings.alarms);
-  const graduate = useTypedSelector(state => state.settings.graduate);
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const assignmentState = useTypedSelector(state => state.assignments);
+  const alarms = useAppSelector(state => state.settings.alarms);
+  const graduate = useAppSelector(state => state.settings.graduate);
+  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const assignmentState = useAppSelector(state => state.assignments);
 
   const [all] = useFilteredData(
     assignmentState.items,

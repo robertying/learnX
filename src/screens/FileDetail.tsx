@@ -23,7 +23,7 @@ import {ScreenParams} from './types';
 import {SplitViewContext} from 'components/SplitView';
 
 const FileDetail: React.FC<
-  NativeStackScreenProps<ScreenParams, 'FileDetail'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileDetail'>>
 > = ({route, navigation}) => {
   const {fileType, disableAnimation} = route.params;
 

@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import Styles from 'constants/Styles';
 import {t} from 'helpers/i18n';
 
-const Empty: React.FC = () => {
+const Empty: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
 
   return (

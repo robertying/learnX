@@ -8,7 +8,7 @@ export interface TextButtonProps extends TextProps {
   onPress?: TouchableOpacityProps['onPress'];
 }
 
-const TextButton: React.FC<TextButtonProps> = ({
+const TextButton: React.FC<React.PropsWithChildren<TextButtonProps>> = ({
   containerStyle,
   onPress,
   style,

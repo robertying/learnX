@@ -19,7 +19,7 @@ export interface FileCardProps extends CardWrapperProps {
   hideCourseName?: boolean;
 }
 
-const FileCard: React.FC<FileCardProps> = ({
+const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   data: {
     title,
     description,

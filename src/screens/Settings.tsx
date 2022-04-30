@@ -1,6 +1,5 @@
 import {useEffect, useState} from 'react';
 import {Alert, Linking, Platform, ScrollView, StyleSheet} from 'react-native';
-import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
@@ -10,24 +9,24 @@ import Styles from 'constants/Styles';
 import {getLatestRelease} from 'helpers/update';
 import {setSetting} from 'data/actions/settings';
 import {clearStore} from 'data/actions/root';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
-const Settings: React.FC<NativeStackScreenProps<ScreenParams, 'Settings'>> = ({
-  navigation,
-}) => {
+const Settings: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Settings'>>
+> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useDispatch();
-  const userInfo = useTypedSelector(state => state.user);
-  const username = useTypedSelector(state => state.auth.username);
-  const newChangelog = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const userInfo = useAppSelector(state => state.user);
+  const username = useAppSelector(state => state.auth.username);
+  const newChangelog = useAppSelector(
     state => state.settings.lastShowChangelogVersion !== packageJson.version,
   );
-  const courseInformationSharingBadgeShown = useTypedSelector(
+  const courseInformationSharingBadgeShown = useAppSelector(
     state => state.settings.courseInformationSharingBadgeShown,
   );
 

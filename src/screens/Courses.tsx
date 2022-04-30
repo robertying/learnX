@@ -1,12 +1,11 @@
 import {useEffect, useMemo} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {useDispatch} from 'react-redux';
 import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {getCoursesForSemester} from 'data/actions/courses';
 import {Course} from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -14,24 +13,24 @@ import {getSemesterTextFromId} from 'helpers/parse';
 import {uploadCourses} from 'helpers/coursex';
 import {ScreenParams} from './types';
 
-const Courses: React.FC<NativeStackScreenProps<ScreenParams, 'Courses'>> = ({
-  navigation,
-}) => {
+const Courses: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Courses'>>
+> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const currentSemesterId = useTypedSelector(state => state.semesters.current);
-  const courseInformationSharing = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const currentSemesterId = useAppSelector(state => state.semesters.current);
+  const courseInformationSharing = useAppSelector(
     state => state.settings.courseInformationSharing,
   );
-  const courses = useTypedSelector(state => state.courses.items);
-  const hiddenIds = useTypedSelector(state => state.courses.hidden);
-  const fetching = useTypedSelector(state => state.courses.fetching);
+  const courses = useAppSelector(state => state.courses.items);
+  const hiddenIds = useAppSelector(state => state.courses.hidden);
+  const fetching = useAppSelector(state => state.courses.fetching);
 
-  const notices = useTypedSelector(state => state.notices.items);
-  const assignments = useTypedSelector(state => state.assignments.items);
-  const files = useTypedSelector(state => state.files.items);
+  const notices = useAppSelector(state => state.notices.items);
+  const assignments = useAppSelector(state => state.assignments.items);
+  const files = useAppSelector(state => state.files.items);
 
   const coursesWithCounts = useMemo(() => {
     return courses.map(course => ({

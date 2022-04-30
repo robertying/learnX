@@ -1,6 +1,5 @@
 import {useCallback, useLayoutEffect, useState} from 'react';
 import {View, FlatList, RefreshControl} from 'react-native';
-import {useDispatch} from 'react-redux';
 import {IconButton} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
@@ -15,7 +14,7 @@ import {
 import {setArchiveFiles, setFavFile} from 'data/actions/files';
 import {setHideCourse} from 'data/actions/courses';
 import {setSetting} from 'data/actions/settings';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from 'screens/types';
@@ -43,7 +42,7 @@ export interface FilterListProps<T> {
   fav?: T[];
   archived?: T[];
   hidden: T[];
-  itemComponent: React.FC<ItemComponentProps<T>>;
+  itemComponent: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
   navigation: NativeStackNavigationProp<
     ScreenParams,
     'Notices' | 'Assignments' | 'Files' | 'Courses'
@@ -71,16 +70,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   refreshing,
   onRefresh,
 }: FilterListProps<T>) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const toast = useToast();
 
   const detailNavigator = useDetailNavigator();
 
-  const tabFilterSelections = useTypedSelector(
+  const tabFilterSelections = useAppSelector(
     state => state.settings.tabFilterSelections,
   );
-  const filterSelected = useTypedSelector(
+  const filterSelected = useAppSelector(
     state =>
       state.settings.tabFilterSelections[type] ?? defaultSelected ?? 'all',
   );

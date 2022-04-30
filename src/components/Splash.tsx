@@ -1,6 +1,6 @@
 import {Image, StyleSheet, useColorScheme, View} from 'react-native';
 
-const Splash: React.FC = () => {
+const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
   const colorScheme = useColorScheme();
 
   return (

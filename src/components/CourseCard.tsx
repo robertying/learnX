@@ -14,7 +14,7 @@ export interface CourseCardProps extends CardWrapperProps {
   };
 }
 
-const CourseCard: React.FC<CourseCardProps> = ({
+const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
   data: {
     name,
     englishName,

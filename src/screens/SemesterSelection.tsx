@@ -1,10 +1,9 @@
 import {useCallback, useEffect} from 'react';
 import {FlatList, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {useDispatch} from 'react-redux';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {
   getAllSemesters,
   getCurrentSemester,
@@ -15,12 +14,14 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {ScreenParams} from './types';
 
 const SemesterSelection: React.FC<
-  NativeStackScreenProps<ScreenParams, 'SemesterSelection'>
+  React.PropsWithChildren<
+    NativeStackScreenProps<ScreenParams, 'SemesterSelection'>
+  >
 > = props => {
-  const dispatch = useDispatch();
-  const semesters = useTypedSelector(state => state.semesters.items);
-  const fetching = useTypedSelector(state => state.semesters.fetching);
-  const currentSemesterId = useTypedSelector(state => state.semesters.current);
+  const dispatch = useAppDispatch();
+  const semesters = useAppSelector(state => state.semesters.items);
+  const fetching = useAppSelector(state => state.semesters.fetching);
+  const currentSemesterId = useAppSelector(state => state.semesters.current);
 
   const handleSelect = (id: string) => {
     dispatch(setCurrentSemester(id));

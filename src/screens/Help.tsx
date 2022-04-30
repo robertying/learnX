@@ -7,7 +7,9 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 
-const Help: React.FC<NativeStackScreenProps<ScreenParams, 'Help'>> = props => {
+const Help: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Help'>>
+> = props => {
   useNavigationAnimation(props);
 
   return (

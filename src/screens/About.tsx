@@ -10,7 +10,7 @@ import {ScreenParams} from './types';
 import packageJson from '../../package.json';
 
 const About: React.FC<
-  NativeStackScreenProps<ScreenParams, 'About'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'About'>>
 > = props => {
   useNavigationAnimation(props);
 

@@ -19,7 +19,7 @@ export interface NoticeCardProps extends CardWrapperProps {
   hideCourseName?: boolean;
 }
 
-const NoticeCard: React.FC<NoticeCardProps> = ({
+const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
   data: {
     title,
     content,

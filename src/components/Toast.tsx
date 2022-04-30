@@ -15,7 +15,9 @@ const ToastContext = createContext<{
   toggleToast: () => {},
 });
 
-const ToastProvider: React.FC = ({children}) => {
+const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
+  children,
+}) => {
   const [toastText, setToastText] = useState('');
   const [toastDuration, setToastDuration] = useState(3000);
 

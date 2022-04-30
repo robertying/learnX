@@ -28,7 +28,7 @@ export interface TableCellProps extends ViewProps {
   badge?: boolean;
 }
 
-const TableCell: React.FC<TableCellProps> = ({
+const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
   type,
   onPress,
   primaryText,

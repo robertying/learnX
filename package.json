@@ -9,7 +9,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint . --ext .ts,.tsx",
-    "typecheck": "tsc --noUnusedLocals",
+    "typecheck": "tsc",
     "prettier": "prettier --write src/**/*",
     "release": "appcenter codepush release-react -a robertying/learnX-iOS && appcenter codepush release-react -a robertying/learnX-Android"
   },
@@ -67,7 +67,7 @@
     "path": "0.12.7",
     "postinstall-postinstall": "2.1.0",
     "prettier": "2.6.2",
-    "react": "18.1.0",
+    "react": "17.0.2",
     "react-native": "0.68.1",
     "react-native-code-push": "7.0.4",
     "react-native-device-info": "8.7.0",

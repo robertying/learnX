@@ -17,10 +17,9 @@ import {
   Text,
 } from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {useDispatch} from 'react-redux';
 import {FailReason} from 'thu-learn-lib-no-native/lib/types';
 import useToast from 'hooks/useToast';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {login} from 'data/actions/auth';
 import {setMockStore} from 'data/actions/root';
 import {setSetting} from 'data/actions/settings';
@@ -30,15 +29,17 @@ import {ScreenParams} from './types';
 import env from 'helpers/env';
 import {t} from 'helpers/i18n';
 
-const Login: React.FC<NativeStackScreenProps<ScreenParams, 'Login'>> = () => {
+const Login: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Login'>>
+> = () => {
   const theme = useTheme();
 
   const toast = useToast();
 
-  const dispatch = useDispatch();
-  const loggingIn = useTypedSelector(state => state.auth.loggingIn);
-  const error = useTypedSelector(state => state.auth.error);
-  const graduate = useTypedSelector(state => state.settings.graduate);
+  const dispatch = useAppDispatch();
+  const loggingIn = useAppSelector(state => state.auth.loggingIn);
+  const error = useAppSelector(state => state.auth.error);
+  const graduate = useAppSelector(state => state.settings.graduate);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');

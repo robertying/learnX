@@ -7,9 +7,9 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 
-const CourseX: React.FC<NativeStackScreenProps<ScreenParams, 'CourseX'>> = ({
-  route,
-}) => {
+const CourseX: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CourseX'>>
+> = ({route}) => {
   const courseId = route.params?.id ?? '';
 
   const theme = useTheme();

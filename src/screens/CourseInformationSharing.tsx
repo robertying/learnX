@@ -2,8 +2,7 @@ import {useEffect} from 'react';
 import {Alert, Linking, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
-import {useDispatch} from 'react-redux';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -13,12 +12,14 @@ import {uploadCourses} from 'helpers/coursex';
 import {ScreenParams} from './types';
 
 const CourseInformationSharing: React.FC<
-  NativeStackScreenProps<ScreenParams, 'CourseInformationSharing'>
+  React.PropsWithChildren<
+    NativeStackScreenProps<ScreenParams, 'CourseInformationSharing'>
+  >
 > = props => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
-  const courses = useTypedSelector(state => state.courses.items);
-  const courseInformationSharing = useTypedSelector(
+  const courses = useAppSelector(state => state.courses.items);
+  const courseInformationSharing = useAppSelector(
     state => state.settings.courseInformationSharing,
   );
 

@@ -11,7 +11,7 @@ import {Searchbar, Subheading, useTheme} from 'react-native-paper';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
 import Styles from 'constants/Styles';
-import {useTypedSelector} from 'data/store';
+import {useAppSelector} from 'data/store';
 import {Notice, Assignment, File} from 'data/types/state';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
@@ -21,17 +21,16 @@ import SafeArea from 'components/SafeArea';
 import {t} from 'helpers/i18n';
 import {ScreenParams} from './types';
 
-const Search: React.FC<NativeStackScreenProps<ScreenParams, 'Search'>> = ({
-  navigation,
-  route,
-}) => {
+const Search: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Search'>>
+> = ({navigation, route}) => {
   const theme = useTheme();
 
   const safeAreaInsets = useSafeAreaInsets();
 
-  const notices = useTypedSelector(state => state.notices.items);
-  const assignments = useTypedSelector(state => state.assignments.items);
-  const files = useTypedSelector(state => state.files.items);
+  const notices = useAppSelector(state => state.notices.items);
+  const assignments = useAppSelector(state => state.assignments.items);
+  const files = useAppSelector(state => state.files.items);
 
   const [searchQuery, setSearchQuery] = useState(route.params?.query ?? '');
 

@@ -1,14 +1,20 @@
-import {applyMiddleware, compose, createStore} from 'redux';
-import {TypedUseSelectorHook, useSelector} from 'react-redux';
-import {PersistConfig, persistReducer, persistStore} from 'redux-persist';
+import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+  PersistConfig,
+} from 'redux-persist';
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import thunk from 'redux-thunk';
+import {configureStore} from '@reduxjs/toolkit';
 import {rootReducer} from 'data/reducers/root';
 import {AppState, PersistAppState} from 'data/types/state';
-
-declare const window: any;
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
 const rootPersistConfig: PersistConfig<AppState> = {
   key: 'root',
@@ -17,12 +23,19 @@ const rootPersistConfig: PersistConfig<AppState> = {
   blacklist: ['auth', 'settings'],
 };
 
-const store = createStore(
-  persistReducer(rootPersistConfig, rootReducer),
-  composeEnhancers(applyMiddleware(thunk)),
-);
-const persistor = persistStore(store);
+export const store = configureStore<PersistAppState>({
+  reducer: persistReducer(rootPersistConfig, rootReducer),
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }) as any,
+});
+export const persistor = persistStore(store);
 
-const useTypedSelector: TypedUseSelectorHook<PersistAppState> = useSelector;
-
-export {store, persistor, useTypedSelector};
+export type AppDispatch = typeof store.dispatch;
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<
+  ReturnType<typeof store.getState>
+> = useSelector;

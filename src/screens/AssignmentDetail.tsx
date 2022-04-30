@@ -25,7 +25,9 @@ import {getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 
 const AssignmentDetail: React.FC<
-  NativeStackScreenProps<ScreenParams, 'AssignmentDetail'>
+  React.PropsWithChildren<
+    NativeStackScreenProps<ScreenParams, 'AssignmentDetail'>
+  >
 > = ({route, navigation}) => {
   const theme = useTheme();
 

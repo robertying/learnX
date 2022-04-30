@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import {Divider, Text, useTheme} from 'react-native-paper';
-import {useDispatch} from 'react-redux';
 import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
@@ -22,7 +21,7 @@ import {
 import {Scene} from 'react-native-tab-view/lib/typescript/types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Assignment, File, Notice} from 'data/types/state';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {getNoticesForCourse} from 'data/actions/notices';
 import {getAssignmentsForCourse} from 'data/actions/assignments';
 import {getFilesForCourse} from 'data/actions/files';
@@ -38,9 +37,9 @@ import {ScreenParams} from './types';
 const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
   const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const fetching = useTypedSelector(state => state.notices.fetching);
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const fetching = useAppSelector(state => state.notices.fetching);
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -80,9 +79,9 @@ const Assignments = ({
 }) => {
   const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const fetching = useTypedSelector(state => state.assignments.fetching);
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const fetching = useAppSelector(state => state.assignments.fetching);
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -116,9 +115,9 @@ const Assignments = ({
 const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
   const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const fetching = useTypedSelector(state => state.files.fetching);
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const fetching = useAppSelector(state => state.files.fetching);
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -150,7 +149,7 @@ const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
 };
 
 const CourseDetail: React.FC<
-  NativeStackScreenProps<ScreenParams, 'CourseDetail'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CourseDetail'>>
 > = ({
   navigation,
   route: {
@@ -163,9 +162,9 @@ const CourseDetail: React.FC<
 
   const detailNavigator = useDetailNavigator();
 
-  const notices = useTypedSelector(state => state.notices.items);
-  const assignments = useTypedSelector(state => state.assignments.items);
-  const files = useTypedSelector(state => state.files.items);
+  const notices = useAppSelector(state => state.notices.items);
+  const assignments = useAppSelector(state => state.assignments.items);
+  const files = useAppSelector(state => state.files.items);
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([

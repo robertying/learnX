@@ -1,31 +1,30 @@
 import {useCallback, useEffect} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
 import {getAllFilesForCourses} from 'data/actions/files';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {File} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from './types';
 
-const Files: React.FC<NativeStackScreenProps<ScreenParams, 'Files'>> = ({
-  navigation,
-}) => {
+const Files: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Files'>>
+> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const courseIds = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const courseIds = useAppSelector(
     state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const fileState = useTypedSelector(state => state.files);
-  const fetching = useTypedSelector(state => state.files.fetching);
+  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const fileState = useAppSelector(state => state.files);
+  const fetching = useAppSelector(state => state.files.fetching);
 
   const [all, unread, fav, archived, hidden] = useFilteredData(
     fileState.items,

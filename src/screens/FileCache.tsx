@@ -1,8 +1,7 @@
 import {Alert, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
-import {useDispatch} from 'react-redux';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import {removeFileDir} from 'helpers/fs';
 import {getLocale, t} from 'helpers/i18n';
@@ -13,15 +12,15 @@ import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 
 const FileCache: React.FC<
-  NativeStackScreenProps<ScreenParams, 'FileCache'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileCache'>>
 > = props => {
   const toast = useToast();
 
-  const dispatch = useDispatch();
-  const fileUseDocumentDir = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const fileUseDocumentDir = useAppSelector(
     state => state.settings.fileUseDocumentDir,
   );
-  const fileOmitCourseName = useTypedSelector(
+  const fileOmitCourseName = useAppSelector(
     state => state.settings.fileOmitCourseName,
   );
 

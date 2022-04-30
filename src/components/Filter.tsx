@@ -26,7 +26,7 @@ export interface FilterProps {
   unfinishedCount?: number;
 }
 
-const Filter: React.FC<FilterProps> = ({
+const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   visible,
   selected,
   onSelectionChange,
@@ -70,13 +70,15 @@ const Filter: React.FC<FilterProps> = ({
     }
   }, [visible, position]);
 
-  const ListItem: React.FC<{
-    name: FilterSelection;
-    text: string;
-    count?: number;
-    color?: string;
-    badgeColor?: string;
-  }> = ({name, text, count, color, badgeColor}) => (
+  const ListItem: React.FC<
+    React.PropsWithChildren<{
+      name: FilterSelection;
+      text: string;
+      count?: number;
+      color?: string;
+      badgeColor?: string;
+    }>
+  > = ({name, text, count, color, badgeColor}) => (
     <List.Item
       style={styles.listItem}
       titleStyle={styles.title}
@@ -124,7 +126,7 @@ const Filter: React.FC<FilterProps> = ({
 
   return (
     <Surface style={styles.root}>
-      <Animated.View style={{height}} />
+      <Animated.View style={{height: height as any}} />
       <Animated.View
         onLayout={handleLayout}
         style={[

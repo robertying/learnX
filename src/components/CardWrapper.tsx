@@ -21,7 +21,9 @@ export interface CardWrapperProps {
 
 const buttonWidth = 80;
 
-const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
+const CardWrapper: React.FC<
+  React.PropsWithChildren<PropsWithChildren<CardWrapperProps>>
+> = ({
   fav,
   onFav,
   archived,

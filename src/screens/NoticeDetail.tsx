@@ -15,7 +15,7 @@ import {stripExtension, getExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
 
 const NoticeDetail: React.FC<
-  NativeStackScreenProps<ScreenParams, 'NoticeDetail'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'NoticeDetail'>>
 > = ({route, navigation}) => {
   const theme = useTheme();
 

@@ -19,7 +19,6 @@ import {
   TextInput,
   useTheme,
 } from 'react-native-paper';
-import {useDispatch} from 'react-redux';
 import dayjs from 'dayjs';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
@@ -32,9 +31,12 @@ import {submitAssignment} from 'data/source';
 import {getAssignmentsForCourse} from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
 import {ScreenParams} from './types';
+import {useAppDispatch} from 'data/store';
 
 const AssignmentSubmission: React.FC<
-  NativeStackScreenProps<ScreenParams, 'AssignmentSubmission'>
+  React.PropsWithChildren<
+    NativeStackScreenProps<ScreenParams, 'AssignmentSubmission'>
+  >
 > = ({navigation, route}) => {
   const theme = useTheme();
   const toast = useToast();
@@ -50,7 +52,7 @@ const AssignmentSubmission: React.FC<
     submittedContent,
   } = route.params;
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),

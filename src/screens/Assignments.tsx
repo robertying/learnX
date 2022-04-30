@@ -1,13 +1,12 @@
 import {useCallback, useEffect, useMemo} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
 import dayjs from 'dayjs';
 import {ScreenParams} from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {getAllAssignmentsForCourses} from 'data/actions/assignments';
 import {Assignment} from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -17,24 +16,22 @@ import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
 import {t} from 'helpers/i18n';
 
 const Assignments: React.FC<
-  NativeStackScreenProps<ScreenParams, 'Assignments'>
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Assignments'>>
 > = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const toast = useToast();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const courseIds = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const courseIds = useAppSelector(
     state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const assignmentState = useTypedSelector(state => state.assignments);
-  const fetching = useTypedSelector(state => state.assignments.fetching);
-  const assignmentSync = useTypedSelector(
-    state => state.settings.assignmentSync,
-  );
+  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const assignmentState = useAppSelector(state => state.assignments);
+  const fetching = useAppSelector(state => state.assignments.fetching);
+  const assignmentSync = useAppSelector(state => state.settings.assignmentSync);
 
   const [all, _, fav, archived, hidden, unfinished, finished] = useFilteredData(
     assignmentState.items,

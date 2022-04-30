@@ -25,7 +25,7 @@ export interface SplitViewProps {
   showDetail: boolean;
 }
 
-const SplitViewProvider: React.FC<SplitViewProps> = ({
+const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   splitEnabled,
   detailNavigationContainerRef,
   showDetail,

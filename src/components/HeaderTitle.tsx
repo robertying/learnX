@@ -6,7 +6,10 @@ export interface HeaderTitleProps {
   subtitle?: string;
 }
 
-const HeaderTitle: React.FC<HeaderTitleProps> = ({title, subtitle}) => {
+const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
+  title,
+  subtitle,
+}) => {
   return (
     <View
       style={{

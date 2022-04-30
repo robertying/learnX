@@ -1,31 +1,30 @@
 import {useCallback, useEffect} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
-import {useDispatch} from 'react-redux';
 import NoticeCard from 'components/NoticeCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import {getAllNoticesForCourses} from 'data/actions/notices';
-import {useTypedSelector} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {Notice} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from './types';
 
-const Notices: React.FC<NativeStackScreenProps<ScreenParams, 'Notices'>> = ({
-  navigation,
-}) => {
+const Notices: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Notices'>>
+> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useDispatch();
-  const loggedIn = useTypedSelector(state => state.auth.loggedIn);
-  const courseIds = useTypedSelector(
+  const dispatch = useAppDispatch();
+  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const courseIds = useAppSelector(
     state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify(a) === JSON.stringify(b),
   );
-  const hiddenCourseIds = useTypedSelector(state => state.courses.hidden);
-  const noticeState = useTypedSelector(state => state.notices);
-  const fetching = useTypedSelector(state => state.notices.fetching);
+  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const noticeState = useAppSelector(state => state.notices);
+  const fetching = useAppSelector(state => state.notices.fetching);
 
   const [all, unread, fav, archived, hidden] = useFilteredData(
     noticeState.items,

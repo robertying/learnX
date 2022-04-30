@@ -2,7 +2,7 @@ import {useEffect, useCallback, useRef} from 'react';
 import {StyleSheet, View, Animated} from 'react-native';
 import {useTheme} from 'react-native-paper';
 
-const Skeleton: React.FC = () => {
+const Skeleton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
 
   const opacity = useRef(new Animated.Value(1));
