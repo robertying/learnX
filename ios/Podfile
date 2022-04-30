@@ -1,20 +1,31 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
-require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 
 platform :ios, '13.0'
+install! 'cocoapods', :deterministic_uuids => false
 
 target 'learnX' do
   use_expo_modules!
+  post_integrate do |installer|
+    begin
+      expo_patch_react_imports!(installer)
+    rescue => e
+      Pod::UI.warn e
+    end
+  end
   config = use_native_modules!
+
+  flags = get_default_flags()
 
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => true
+    :hermes_enabled => true,
+    :fabric_enabled => false,
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
-end
 
-post_install do |installer|
+  post_install do |installer|
     react_native_post_install(installer)
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
     `sed -i -e  $'s/__IPHONE_12_0/__IPHONE_14_0/' #{installer.sandbox.root}/RCT-Folly/folly/portability/Time.h`
@@ -26,4 +37,5 @@ post_install do |installer|
         end
       end
     end
+  end
 end

@@ -7,15 +7,16 @@ import com.facebook.react.PackageList;
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
-import com.facebook.react.bridge.JSIModulePackage;
+import com.facebook.react.config.ReactFeatureFlags;
 import com.facebook.soloader.SoLoader;
 import com.microsoft.codepush.react.CodePush;
-import com.swmansion.reanimated.ReanimatedJSIModulePackage;
 
 import java.util.List;
 
 import expo.modules.ApplicationLifecycleDispatcher;
 import expo.modules.ReactNativeHostWrapper;
+import io.robertying.learnx.BuildConfig;
+import io.robertying.learnx.newarchitecture.MainApplicationReactNativeHost;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -30,8 +31,6 @@ public class MainApplication extends Application implements ReactApplication {
                 protected List<ReactPackage> getPackages() {
                     @SuppressWarnings("UnnecessaryLocalVariable")
                     List<ReactPackage> packages = new PackageList(this).getPackages();
-                    // Packages that cannot be autolinked yet can be added manually here, for example:
-                    // packages.add(new MyReactNativePackage());
                     return packages;
                 }
 
@@ -41,25 +40,28 @@ public class MainApplication extends Application implements ReactApplication {
                 }
 
                 @Override
-                protected JSIModulePackage getJSIModulePackage() {
-                    return new ReanimatedJSIModulePackage(); // <- add
-                }
-
-                @Override
                 protected String getJSBundleFile() {
                     return CodePush.getJSBundleFile();
                 }
             });
 
+    private final ReactNativeHost mNewArchitectureNativeHost =
+            new ReactNativeHostWrapper(this, new MainApplicationReactNativeHost(this));
+
     @Override
     public ReactNativeHost getReactNativeHost() {
-        return mReactNativeHost;
+        if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+            return mNewArchitectureNativeHost;
+        } else {
+            return mReactNativeHost;
+        }
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        SoLoader.init(this, /* native exopackage */ false);
+        ReactFeatureFlags.useTurboModules = BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
+        SoLoader.init(this, false);
         ApplicationLifecycleDispatcher.onApplicationCreate(this);
     }
 
