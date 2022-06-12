@@ -1,4 +1,4 @@
-import {memo, useEffect, useRef, useState} from 'react';
+import {memo, useCallback, useEffect, useRef, useState} from 'react';
 import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
 import {Badge, Colors, Divider, List, Surface, Text} from 'react-native-paper';
 import Animated, {EasingNode} from 'react-native-reanimated';
@@ -78,50 +78,53 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
       color?: string;
       badgeColor?: string;
     }>
-  > = ({name, text, count, color, badgeColor}) => (
-    <List.Item
-      style={styles.listItem}
-      titleStyle={styles.title}
-      title={
-        <View style={styles.flexRow}>
-          <Text style={styles.text}>{text}</Text>
-          <Badge
-            visible
-            style={[
-              styles.badge,
-              {color: color ?? 'white', backgroundColor: badgeColor},
-            ]}>
-            {count}
-          </Badge>
-        </View>
-      }
-      left={props => (
-        <List.Icon
-          {...props}
-          icon={
-            name === 'all'
-              ? 'inbox'
-              : name === 'unread'
-              ? 'email-mark-as-unread'
-              : name === 'fav'
-              ? 'heart'
-              : name === 'archived'
-              ? 'archive'
-              : name === 'hidden'
-              ? p => <MaterialIcons name="visibility-off" {...p} />
-              : name === 'unfinished'
-              ? 'checkbox-blank-circle-outline'
-              : 'checkbox-marked-circle-outline'
-          }
-        />
-      )}
-      right={
-        selected === name
-          ? props => <List.Icon {...props} icon="check" />
-          : undefined
-      }
-      onPress={() => onSelectionChange(name)}
-    />
+  > = useCallback(
+    ({name, text, count, color, badgeColor}) => (
+      <List.Item
+        style={styles.listItem}
+        titleStyle={styles.title}
+        title={
+          <View style={styles.flexRow}>
+            <Text style={styles.text}>{text}</Text>
+            <Badge
+              visible
+              style={[
+                styles.badge,
+                {color: color ?? 'white', backgroundColor: badgeColor},
+              ]}>
+              {count}
+            </Badge>
+          </View>
+        }
+        left={props => (
+          <List.Icon
+            {...props}
+            icon={
+              name === 'all'
+                ? 'inbox'
+                : name === 'unread'
+                ? 'email-mark-as-unread'
+                : name === 'fav'
+                ? 'heart'
+                : name === 'archived'
+                ? 'archive'
+                : name === 'hidden'
+                ? p => <MaterialIcons name="visibility-off" {...p} />
+                : name === 'unfinished'
+                ? 'checkbox-blank-circle-outline'
+                : 'checkbox-marked-circle-outline'
+            }
+          />
+        )}
+        right={
+          selected === name
+            ? props => <List.Icon {...props} icon="check" />
+            : undefined
+        }
+        onPress={() => onSelectionChange(name)}
+      />
+    ),
+    [onSelectionChange, selected],
   );
 
   return (
