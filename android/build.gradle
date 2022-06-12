@@ -1,11 +1,11 @@
 buildscript {
     ext {
-        buildToolsVersion = "32.0.0"
+        buildToolsVersion = "33.0.0"
         minSdkVersion = 26
-        compileSdkVersion = 32
-        targetSdkVersion = 32
+        compileSdkVersion = 33
+        targetSdkVersion = 33
         ndkVersion = "24.0.8215888"
-        kotlinVersion = "1.6.21"
+        kotlinVersion = "1.7.0"
     }
     repositories {
         google()
@@ -14,7 +14,7 @@ buildscript {
     dependencies {
         classpath("com.android.tools.build:gradle:7.0.4")
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("de.undercouch:gradle-download-task:5.0.5")
+        classpath("de.undercouch:gradle-download-task:5.1.0")
     }
 }
 
@@ -40,8 +40,8 @@ subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
-                buildToolsVersion "32.0.0"
-                compileSdkVersion 32
+                buildToolsVersion "33.0.0"
+                compileSdkVersion 33
                 ndkVersion "24.0.8215888"
             }
         }
