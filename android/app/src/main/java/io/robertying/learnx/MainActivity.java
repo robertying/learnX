@@ -23,7 +23,7 @@ public class MainActivity extends ReactActivity {
 
     @Override
     protected ReactActivityDelegate createReactActivityDelegate() {
-        return new ReactActivityDelegateWrapper(this, new MainActivityDelegate(this, getMainComponentName()));
+        return new ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED, new MainActivityDelegate(this, getMainComponentName()));
     }
 
     public static class MainActivityDelegate extends ReactActivityDelegate {
@@ -36,6 +36,11 @@ public class MainActivity extends ReactActivity {
             ReactRootView reactRootView = new ReactRootView(getContext());
             reactRootView.setIsFabric(BuildConfig.IS_NEW_ARCHITECTURE_ENABLED);
             return reactRootView;
+        }
+
+        @Override
+        protected boolean isConcurrentRootEnabled() {
+            return BuildConfig.IS_NEW_ARCHITECTURE_ENABLED;
         }
     }
 }

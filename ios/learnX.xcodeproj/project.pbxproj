@@ -7,17 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		0C80B921A6F3F58F76C31292 /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5DCACB8F33CDC322A6C60F78 /* libPods-learnX.a */; };
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		34BA88D967D6607A8B9C48A2 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B53C8EC597F62B69A405F604 /* ExpoModulesProvider.swift */; };
+		4111FAEAF38E4D66B11E80AF /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 133C8BFB92F058EE0EDD57C9 /* ExpoModulesProvider.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		D4EB3F47281CCA3900BF145F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4EB3F43281CCA3900BF145F /* Assets.xcassets */; };
-		D4EB3F4A281CCA5400BF145F /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D4EB3F48281CCA5400BF145F /* InfoPlist.strings */; };
-		D4EB3F4D281CCA8600BF145F /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4EB3F4C281CCA8600BF145F /* AppCenter-Config.plist */; };
+		A851F91448D37251817E1608 /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B63ECFF578282DCE1714CE28 /* libPods-learnX.a */; };
+		D4BFC0EE2889160400146EC4 /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4BFC0ED2889160400146EC4 /* AppCenter-Config.plist */; };
+		D4BFC0F02889161200146EC4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4BFC0EF2889161200146EC4 /* Assets.xcassets */; };
+		D4BFC0F32889161D00146EC4 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D4BFC0F12889161D00146EC4 /* InfoPlist.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		133C8BFB92F058EE0EDD57C9 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* learnX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = learnX.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = learnX/AppDelegate.h; sourceTree = "<group>"; };
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = learnX/AppDelegate.mm; sourceTree = "<group>"; };
@@ -25,14 +26,13 @@
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = learnX/main.m; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-learnX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.debug.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
-		5DCACB8F33CDC322A6C60F78 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		B53C8EC597F62B69A405F604 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		D4EB3F43281CCA3900BF145F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
-		D4EB3F44281CCA3900BF145F /* learnX.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
-		D4EB3F49281CCA5400BF145F /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		D4EB3F4B281CCA6200BF145F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		D4EB3F4C281CCA8600BF145F /* AppCenter-Config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
+		B63ECFF578282DCE1714CE28 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4BFC0EC288915E200146EC4 /* learnX.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
+		D4BFC0ED2889160400146EC4 /* AppCenter-Config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
+		D4BFC0EF2889161200146EC4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
+		D4BFC0F22889161D00146EC4 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D4BFC0F42889162700146EC4 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -40,53 +40,61 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0C80B921A6F3F58F76C31292 /* libPods-learnX.a in Frameworks */,
+				A851F91448D37251817E1608 /* libPods-learnX.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* learnX */ = {
+		037DEE4656F51B8D84AAD356 /* learnX */ = {
 			isa = PBXGroup;
 			children = (
-				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
-				13B07FB71A68108700A75B9A /* main.m */,
-				D4EB3F43281CCA3900BF145F /* Assets.xcassets */,
-				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
-				D4EB3F48281CCA5400BF145F /* InfoPlist.strings */,
-				13B07FB61A68108700A75B9A /* Info.plist */,
-				D4EB3F44281CCA3900BF145F /* learnX.entitlements */,
-				D4EB3F4C281CCA8600BF145F /* AppCenter-Config.plist */,
+				133C8BFB92F058EE0EDD57C9 /* ExpoModulesProvider.swift */,
 			);
 			name = learnX;
 			sourceTree = "<group>";
 		};
-		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
+		0C1C536D0D4664C766E56AEE /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				5DCACB8F33CDC322A6C60F78 /* libPods-learnX.a */,
+				037DEE4656F51B8D84AAD356 /* learnX */,
 			);
-			name = Frameworks;
+			name = ExpoModulesProviders;
 			sourceTree = "<group>";
 		};
-		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
+		13B07FAE1A68108700A75B9A /* learnX */ = {
 			isa = PBXGroup;
 			children = (
+				13B07FB71A68108700A75B9A /* main.m */,
+				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
+				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
+				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
+				D4BFC0EF2889161200146EC4 /* Assets.xcassets */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
+				D4BFC0F12889161D00146EC4 /* InfoPlist.strings */,
+				D4BFC0EC288915E200146EC4 /* learnX.entitlements */,
+				D4BFC0ED2889160400146EC4 /* AppCenter-Config.plist */,
 			);
-			name = Libraries;
+			name = learnX;
+			sourceTree = "<group>";
+		};
+		443114FA82B5EBD11C89D915 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B63ECFF578282DCE1714CE28 /* libPods-learnX.a */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
 				13B07FAE1A68108700A75B9A /* learnX */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
+				0C1C536D0D4664C766E56AEE /* ExpoModulesProviders */,
+				443114FA82B5EBD11C89D915 /* Frameworks */,
 				83CBBA001A601CBA00E9B192 /* Products */,
-				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
-				89DE37063C081D6E5A94A43A /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -101,14 +109,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		89DE37063C081D6E5A94A43A /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				C8234767AEB1EA062E9C8DED /* learnX */,
-			);
-			name = ExpoModulesProviders;
-			sourceTree = "<group>";
-		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
@@ -116,14 +116,6 @@
 				5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */,
 			);
 			path = Pods;
-			sourceTree = "<group>";
-		};
-		C8234767AEB1EA062E9C8DED /* learnX */ = {
-			isa = PBXGroup;
-			children = (
-				B53C8EC597F62B69A405F604 /* ExpoModulesProvider.swift */,
-			);
-			name = learnX;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -157,7 +149,7 @@
 		83CBB9F71A601CBA00E9B192 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1210;
+				LastUpgradeCheck = 1340;
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1120;
@@ -170,6 +162,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 				"zh-Hans",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
@@ -187,10 +180,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D4EB3F47281CCA3900BF145F /* Assets.xcassets in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				D4EB3F4A281CCA5400BF145F /* InfoPlist.strings in Resources */,
-				D4EB3F4D281CCA8600BF145F /* AppCenter-Config.plist in Resources */,
+				D4BFC0F02889161200146EC4 /* Assets.xcassets in Resources */,
+				D4BFC0F32889161D00146EC4 /* InfoPlist.strings in Resources */,
+				D4BFC0EE2889160400146EC4 /* AppCenter-Config.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -203,13 +196,15 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/.xcode.env.local",
+				"$(SRCROOT)/.xcode.env",
 			);
 			name = "Bundle React Native code and images";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nexport NODE_BINARY=node\n../node_modules/react-native/scripts/react-native-xcode.sh\n";
+			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
 		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -295,18 +290,18 @@
 			files = (
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				34BA88D967D6607A8B9C48A2 /* ExpoModulesProvider.swift in Sources */,
+				4111FAEAF38E4D66B11E80AF /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		D4EB3F48281CCA5400BF145F /* InfoPlist.strings */ = {
+		D4BFC0F12889161D00146EC4 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
-				D4EB3F49281CCA5400BF145F /* en */,
-				D4EB3F4B281CCA6200BF145F /* zh-Hans */,
+				D4BFC0F22889161D00146EC4 /* en */,
+				D4BFC0F42889162700146EC4 /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -325,7 +320,7 @@
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = learnX/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -357,7 +352,7 @@
 				CURRENT_PROJECT_VERSION = 2310;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -427,7 +422,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -445,6 +440,7 @@
 					"-DFOLLY_MOBILE=1",
 					"-DFOLLY_USE_LIBCPP=1",
 				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -491,7 +487,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					/usr/lib/swift,
 					"$(inherited)",
@@ -508,7 +504,9 @@
 					"-DFOLLY_MOBILE=1",
 					"-DFOLLY_USE_LIBCPP=1",
 				);
+				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;

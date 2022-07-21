@@ -2,18 +2,17 @@ buildscript {
     ext {
         buildToolsVersion = "33.0.0"
         minSdkVersion = 26
-        compileSdkVersion = 32
+        compileSdkVersion = 33
         targetSdkVersion = 33
-        ndkVersion = "24.0.8215888"
-        kotlinVersion = "1.7.0"
+        ndkVersion = "25.0.8775105"
+        kotlinVersion = "1.7.10"
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.0.2")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath('com.android.tools.build:gradle:7.2.1')
         classpath("com.facebook.react:react-native-gradle-plugin")
         classpath("de.undercouch:gradle-download-task:5.1.0")
     }
@@ -38,21 +37,12 @@ allprojects {
 }
 
 subprojects { subproject ->
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-
-        kotlinOptions {
-            jvmTarget = 11
-        }
-    }
-
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
                 buildToolsVersion "33.0.0"
-                compileSdkVersion 32
-                ndkVersion "24.0.8215888"
+                compileSdkVersion 33
+                ndkVersion "25.0.8775105"
             }
         }
     }

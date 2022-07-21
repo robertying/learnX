@@ -2,8 +2,10 @@ require File.join(File.dirname(`node --print "require.resolve('expo/package.json
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '13.0'
+platform :ios, '14.0'
 install! 'cocoapods', :deterministic_uuids => false
+
+production = ENV["PRODUCTION"] == "1"
 
 target 'learnX' do
   use_expo_modules!
@@ -14,27 +16,33 @@ target 'learnX' do
       Pod::UI.warn e
     end
   end
+
   config = use_native_modules!
 
   flags = get_default_flags()
 
   use_react_native!(
     :path => config[:reactNativePath],
+    :production => production,
     :hermes_enabled => true,
     :fabric_enabled => false,
+    :flipper_configuration => false,
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   post_install do |installer|
     react_native_post_install(installer)
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
-    `sed -i -e  $'s/__IPHONE_12_0/__IPHONE_14_0/' #{installer.sandbox.root}/RCT-Folly/folly/portability/Time.h`
 
     installer.pods_project.targets.each do |target|
-      if target.respond_to?(:product_type) and target.product_type == 'com.apple.product-type.bundle'
-        target.build_configurations.each do |config|
-          config.build_settings['CODE_SIGN_IDENTITY[sdk=macosx*]'] = '-'
-        end
+      target.build_configurations.each do |config|
+        config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+      end
+    end
+
+    installer.pods_project.build_configurations.each do |config|
+      if config.name == 'Release'
+        config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
       end
     end
   end
