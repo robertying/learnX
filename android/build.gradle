@@ -5,6 +5,7 @@ buildscript {
         compileSdkVersion = 33
         targetSdkVersion = 33
         ndkVersion = "25.0.8775105"
+        cmakeVersion = "3.22.1"
         kotlinVersion = "1.7.10"
     }
     repositories {
@@ -43,6 +44,11 @@ subprojects { subproject ->
                 buildToolsVersion "33.0.0"
                 compileSdkVersion 33
                 ndkVersion "25.0.8775105"
+                externalNativeBuild {
+                    cmake {
+                        version "3.22.1"
+                    }
+                }
             }
         }
     }
