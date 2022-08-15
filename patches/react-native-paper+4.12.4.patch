@@ -1,0 +1,22 @@
+diff --git a/node_modules/react-native-paper/src/components/Typography/Caption.tsx b/node_modules/react-native-paper/src/components/Typography/Caption.tsx
+index 4e679d7..9e498a0 100644
+--- a/node_modules/react-native-paper/src/components/Typography/Caption.tsx
++++ b/node_modules/react-native-paper/src/components/Typography/Caption.tsx
+@@ -44,6 +44,5 @@ const styles = StyleSheet.create({
+     fontSize: 12,
+     lineHeight: 20,
+     marginVertical: 2,
+-    letterSpacing: 0.4,
+   },
+ });
+diff --git a/node_modules/react-native-paper/src/components/Typography/Paragraph.tsx b/node_modules/react-native-paper/src/components/Typography/Paragraph.tsx
+index dbd0324..8663291 100644
+--- a/node_modules/react-native-paper/src/components/Typography/Paragraph.tsx
++++ b/node_modules/react-native-paper/src/components/Typography/Paragraph.tsx
+@@ -43,6 +43,5 @@ const styles = StyleSheet.create({
+     fontSize: 14,
+     lineHeight: 20,
+     marginVertical: 2,
+-    letterSpacing: 0.25,
+   },
+ });
