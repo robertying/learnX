@@ -75,7 +75,7 @@ const Login: React.FC<
   useEffect(() => {
     (async () => {
       if (loading && error && !loggingIn) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve as any, 500));
         if (error?.reason === FailReason.BAD_CREDENTIAL) {
           toast(t('credentialError'), 'error');
         } else {

@@ -724,7 +724,7 @@ const Container = () => {
                 />
               </>
             ) : (
-              <RootNavigator.Screen name="Login" component={Login} />
+              <RootNavigator.Screen name="Login" component={Login as any} />
             )}
           </RootNavigator.Navigator>
           <NavigationContainer
