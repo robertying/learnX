@@ -39,4 +39,8 @@
             </intent-filter>
         </activity>
     </application>
+
+    <queries>
+        <provider android:authorities="com.android.calendar" />
+    </queries>
 </manifest>
