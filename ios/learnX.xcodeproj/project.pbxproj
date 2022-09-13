@@ -319,7 +319,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2340;
+				CURRENT_PROJECT_VERSION = 2341;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				ENABLE_BITCODE = NO;
@@ -368,7 +368,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2340;
+				CURRENT_PROJECT_VERSION = 2341;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = QX9PZ6H89F;
 				INFOPLIST_FILE = learnX/Info.plist;

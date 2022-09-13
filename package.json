@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "13.14.0",
+  "version": "13.15.0",
   "private": true,
   "scripts": {
     "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
@@ -34,6 +34,7 @@
     "@react-navigation/native-stack": "6.8.0",
     "@reduxjs/toolkit": "1.8.5",
     "@tsconfig/react-native": "2.0.2",
+    "@types/jest": "29.0.1",
     "@types/mime-types": "2.1.1",
     "@types/react-native": "0.70.0",
     "@types/react-native-share": "3.3.3",
