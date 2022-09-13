@@ -13,6 +13,8 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
   return (
     <View
       style={{
+        height: 40,
+        justifyContent: 'center',
         alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
       }}>
       <Text style={styles.title} numberOfLines={1} ellipsizeMode="middle">
