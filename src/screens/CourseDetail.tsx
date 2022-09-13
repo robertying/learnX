@@ -1,10 +1,5 @@
 import {useCallback, useLayoutEffect, useState} from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  useWindowDimensions,
-  TouchableOpacity,
-} from 'react-native';
+import {FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import {Divider, Text, useTheme} from 'react-native-paper';
 import {
   NativeStackNavigationProp,
@@ -158,8 +153,6 @@ const CourseDetail: React.FC<
 }) => {
   const theme = useTheme();
 
-  const layout = useWindowDimensions();
-
   const detailNavigator = useDetailNavigator();
 
   const notices = useAppSelector(state => state.notices.items);
@@ -274,7 +267,6 @@ const CourseDetail: React.FC<
         renderScene={renderScene}
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}
-        initialLayout={{width: layout.width}}
         tabBarPosition="top"
         lazy={false}
         renderLazyPlaceholder={() => null}
