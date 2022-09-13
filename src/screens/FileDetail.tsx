@@ -79,6 +79,7 @@ const FileDetail: React.FC<
 
   useLayoutEffect(() => {
     navigation.setOptions({
+      headerBackVisible: showMaster,
       headerBackTitle: t('back'),
       headerRight: () => (
         <View style={Styles.flexRow}>
