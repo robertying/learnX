@@ -4,7 +4,7 @@ buildscript {
         minSdkVersion = 28
         compileSdkVersion = 33
         targetSdkVersion = 33
-        ndkVersion = "25.0.8775105"
+        ndkVersion = "25.1.8937393"
         cmakeVersion = "3.22.1"
         kotlinVersion = "1.7.10"
     }
@@ -15,7 +15,7 @@ buildscript {
     dependencies {
         classpath('com.android.tools.build:gradle:7.2.2')
         classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("de.undercouch:gradle-download-task:5.1.1")
+        classpath("de.undercouch:gradle-download-task:5.1.2")
     }
 }
 
@@ -43,7 +43,7 @@ subprojects { subproject ->
             android {
                 buildToolsVersion "33.0.0"
                 compileSdkVersion 33
-                ndkVersion "25.0.8775105"
+                ndkVersion "25.1.8937393"
                 externalNativeBuild {
                     cmake {
                         version "3.22.1"

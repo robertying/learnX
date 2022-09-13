@@ -5,8 +5,6 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 platform :ios, '14.0'
 install! 'cocoapods', :deterministic_uuids => false
 
-production = ENV["PRODUCTION"] == "1"
-
 target 'learnX' do
   use_expo_modules!
   post_integrate do |installer|
@@ -23,15 +21,16 @@ target 'learnX' do
 
   use_react_native!(
     :path => config[:reactNativePath],
-    :production => production,
     :hermes_enabled => true,
-    :fabric_enabled => false,
-    :flipper_configuration => false,
+    :fabric_enabled => flags[:fabric_enabled],
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
   post_install do |installer|
-    react_native_post_install(installer)
+    react_native_post_install(
+      installer,
+      :mac_catalyst_enabled => true
+    )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     installer.pods_project.targets.each do |target|
@@ -40,7 +39,7 @@ target 'learnX' do
       end
       if target.respond_to?(:product_type) and target.product_type == 'com.apple.product-type.bundle'
         target.build_configurations.each do |config|
-          config.build_settings['CODE_SIGN_IDENTITY[sdk=macosx*]'] = '-'
+          config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
         end
       end
     end
@@ -48,6 +47,7 @@ target 'learnX' do
     installer.pods_project.build_configurations.each do |config|
       if config.name == 'Release'
         config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
+        config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
       end
     end
   end
