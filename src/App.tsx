@@ -199,7 +199,7 @@ const getDetailScreenOptions = () =>
             </>
           )
         : undefined,
-      headerTintColor: Colors.theme,
+      headerTintColor: Platform.OS === 'ios' ? Colors.theme : undefined,
     };
   };
 
