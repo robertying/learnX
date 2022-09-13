@@ -453,8 +453,8 @@ const MainTab = () => {
         inactiveTintColor: 'gray',
         adaptive: windowSize.width >= 750 ? false : true,
         tabBarLabelPosition: 'below-icon',
-        labelStyle: {
-          marginBottom: 4,
+        tabBarLabelStyle: {
+          marginBottom: 2,
         },
       })}>
       <MainNavigator.Screen
