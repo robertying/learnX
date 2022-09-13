@@ -79,7 +79,8 @@ const FileDetail: React.FC<
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerBackVisible: showMaster,
+      headerBackVisible:
+        DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
       headerBackTitle: t('back'),
       headerRight: () => (
         <View style={Styles.flexRow}>
