@@ -1,7 +1,12 @@
-import {memo, useCallback, useEffect, useRef, useState} from 'react';
+import {memo, useCallback, useEffect, useState} from 'react';
 import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
 import {Badge, Colors, Divider, List, Surface, Text} from 'react-native-paper';
-import Animated, {EasingNode} from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {t} from 'helpers/i18n';
 
@@ -37,17 +42,22 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   hiddenCount,
   unfinishedCount,
 }) => {
-  const position = useRef(new Animated.Value(visible ? 1 : 0));
+  const position = useSharedValue(visible ? 1 : 0);
   const [layout, setLayout] = useState({
     height: 0,
     measured: false,
   });
 
-  const height = Animated.multiply(position.current, layout.height);
-  const translateY = Animated.multiply(
-    Animated.add(position.current, -1),
-    layout.height,
-  );
+  const heightStyle = useAnimatedStyle(() => {
+    return {
+      height: position.value * layout.height,
+    };
+  }, [layout]);
+  const transformStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{translateY: (position.value - 1) * layout.height}],
+    };
+  }, [layout]);
 
   const handleLayout = ({nativeEvent}: LayoutChangeEvent) => {
     const {height} = nativeEvent.layout;
@@ -56,17 +66,15 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
 
   useEffect(() => {
     if (visible) {
-      Animated.timing(position.current, {
+      position.value = withTiming(1, {
         duration: 200,
-        toValue: 1,
-        easing: EasingNode.out(EasingNode.ease),
-      }).start();
+        easing: Easing.out(Easing.ease),
+      });
     } else {
-      Animated.timing(position.current, {
+      position.value = withTiming(0, {
         duration: 200,
-        toValue: 0,
-        easing: EasingNode.in(EasingNode.ease),
-      }).start();
+        easing: Easing.in(Easing.ease),
+      });
     }
   }, [visible, position]);
 
@@ -129,12 +137,12 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
 
   return (
     <Surface style={styles.root}>
-      <Animated.View style={{height: height as any}} />
+      <Animated.View style={heightStyle} />
       <Animated.View
         onLayout={handleLayout}
         style={[
           layout.measured || !visible
-            ? [styles.absolute, {transform: [{translateY}]}]
+            ? [styles.absolute, transformStyle]
             : null,
           !layout.measured && !visible ? {opacity: 0} : null,
         ]}>
