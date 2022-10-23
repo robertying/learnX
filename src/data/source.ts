@@ -50,6 +50,9 @@ const submitAssignment = async (
     const csrfToken = dataSource.getCSRFToken();
     const url = addCSRFTokenToUrl(submitAssignmentUrl, csrfToken);
     const res = await axios.post(url, body, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
       onUploadProgress: e => onProgress?.(e.loaded / e.total),
     });
 
