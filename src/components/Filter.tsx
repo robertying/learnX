@@ -72,7 +72,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
       });
     } else {
       position.value = withTiming(0, {
-        duration: 200,
+        duration: 100,
         easing: Easing.in(Easing.ease),
       });
     }
@@ -144,7 +144,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
           layout.measured || !visible
             ? [styles.absolute, transformStyle]
             : null,
-          !layout.measured && !visible ? {opacity: 0} : null,
+          !visible ? {opacity: 0} : null,
         ]}>
         {unfinishedCount !== undefined ? (
           <ListItem
@@ -211,6 +211,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1,
+    elevation: 2,
   },
   listItem: {
     paddingHorizontal: 16,
