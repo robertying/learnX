@@ -57,8 +57,9 @@ const AssignmentSubmission: React.FC<
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),
   );
-  const [attachmentResult, setAttachmentResult] =
-    useState<DocumentPickerResponse | null>(null);
+  const [attachmentResult, setAttachmentResult] = useState<
+    (DocumentPickerResponse & {name: string}) | null
+  >(null);
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -72,7 +73,11 @@ const AssignmentSubmission: React.FC<
       const result = await DocumentPicker.pickSingle({
         type: [DocumentPicker.types.allFiles],
       });
-      setAttachmentResult(result);
+      setAttachmentResult({
+        ...result,
+        name:
+          result.name ?? (getLocale().startsWith('zh') ? '附件' : 'attachment'),
+      });
     } catch (err) {
       if (!DocumentPicker.isCancel(err as Error)) {
         toast(t('filePickFailed'), 'error');

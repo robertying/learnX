@@ -213,7 +213,7 @@ const CourseXNavigator = createNativeStackNavigator<ScreenParams>();
 const SearchNavigator = createNativeStackNavigator<ScreenParams>();
 const AssignmentSubmissionNavigator =
   createNativeStackNavigator<ScreenParams>();
-const RootNavigator = createNativeStackNavigator();
+const RootNavigator = createNativeStackNavigator<ScreenParams>();
 const DetailNavigator = createNativeStackNavigator<ScreenParams>();
 
 const NoticeStack = () => (
@@ -663,7 +663,7 @@ const Container = () => {
         setAppState(nextAppState);
       },
     );
-    return () => (sub as any).remove();
+    return () => sub.remove();
   });
 
   useEffect(() => {
@@ -724,7 +724,7 @@ const Container = () => {
                 />
               </>
             ) : (
-              <RootNavigator.Screen name="Login" component={Login as any} />
+              <RootNavigator.Screen name="Login" component={Login} />
             )}
           </RootNavigator.Navigator>
           <NavigationContainer

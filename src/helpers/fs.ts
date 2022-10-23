@@ -127,7 +127,7 @@ export const shareFile = async (file: File) => {
     title: '分享文件',
     showAppsToView: true,
     failOnCancel: false,
-  } as any);
+  });
 };
 
 export const removeFileDir = async () => {
@@ -144,7 +144,7 @@ export const removeFileDir = async () => {
 
 export const openFile = async (uri: string, type?: string | null) => {
   const contentUri = await ExpoFileSystem.getContentUriAsync(uri);
-  await IntentLauncher.startActivityAsync('android.intent.action.VIEW' as any, {
+  await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
     type: (type && mime.lookup(type)) || 'text/plain',
     data: contentUri,
     flags: 1,

@@ -37,4 +37,5 @@ export type ScreenParams = {
   AssignmentSubmissionStack: undefined;
   Login: undefined;
   EmptyDetail: undefined;
+  MainTab: undefined;
 };
