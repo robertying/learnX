@@ -39,7 +39,6 @@ const CourseX: React.FC<
         }}
         originWhitelist={['https://']}
         decelerationRate="normal"
-        androidHardwareAccelerationDisabled={true}
         onLoadProgress={({nativeEvent}) => {
           setProgress(nativeEvent.progress);
         }}

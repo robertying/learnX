@@ -44,7 +44,6 @@ const Changelog: React.FC<
         onNavigationStateChange={onNavigationStateChange}
         onLoadProgress={({nativeEvent}) => setProgress(nativeEvent.progress)}
         decelerationRate="normal"
-        androidHardwareAccelerationDisabled={true}
         source={{
           uri: 'https://github.com/robertying/learnX/releases',
         }}
