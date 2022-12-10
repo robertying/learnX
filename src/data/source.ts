@@ -53,7 +53,7 @@ const submitAssignment = async (
       headers: {
         'Content-Type': 'multipart/form-data',
       },
-      onUploadProgress: e => onProgress?.(e.loaded / e.total),
+      onUploadProgress: e => onProgress?.(e.total ? e.loaded / e.total : 0),
     });
 
     if (res.status !== 200) {

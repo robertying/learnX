@@ -13,7 +13,7 @@ import {
   TabView,
   NavigationState,
 } from 'react-native-tab-view';
-import {Scene} from 'react-native-tab-view/lib/typescript/types';
+import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Assignment, File, Notice} from 'data/types/state';
 import {useAppDispatch, useAppSelector} from 'data/store';
