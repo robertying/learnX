@@ -215,7 +215,7 @@ const AssignmentSubmission: React.FC<
                 attachmentResult || removeAttachment
                   ? {
                       textDecorationLine: 'line-through',
-                      color: theme.colors.disabled,
+                      color: theme.colors.surfaceDisabled,
                     }
                   : undefined
               }

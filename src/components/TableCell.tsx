@@ -79,7 +79,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
               style={styles.icon}
               name={iconName}
               size={21}
-              color={theme.colors.text}
+              color={theme.colors.onSurface}
             />
             {badge && (
               <Badge
@@ -111,7 +111,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
         {type === 'input' ? (
           <TextInput
             keyboardType="number-pad"
-            style={[styles.input, {color: theme.colors.text}]}
+            style={[styles.input, {color: theme.colors.onSurface}]}
             value={inputValue}
             onChangeText={onInputValueChange}
           />

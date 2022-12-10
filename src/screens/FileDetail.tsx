@@ -142,10 +142,10 @@ const FileDetail: React.FC<
           <Icon
             style={Styles.spacey1}
             name="error"
-            color={theme.colors.placeholder}
+            color={theme.colors.outline}
             size={56}
           />
-          <Text style={[Styles.spacey1, {color: theme.colors.placeholder}]}>
+          <Text style={[Styles.spacey1, {color: theme.colors.outline}]}>
             {t('fileDownloadFailed')}
           </Text>
         </View>

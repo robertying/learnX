@@ -1,6 +1,6 @@
 import {memo, useCallback, useEffect, useState} from 'react';
 import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
-import {Badge, Colors, Divider, List, Surface, Text} from 'react-native-paper';
+import {Badge, Divider, List, Surface, Text} from 'react-native-paper';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,6 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {t} from 'helpers/i18n';
+import Colors from 'constants/Colors';
 
 export type FilterSelection =
   | 'all'

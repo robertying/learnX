@@ -49,7 +49,9 @@ const Search: React.FC<
     <SafeArea>
       <View style={Styles.flex1}>
         <Searchbar
-          style={styles.searchBar}
+          style={[styles.searchBar, {backgroundColor: theme.colors.surface}]}
+          elevation={0}
+          placeholderTextColor={theme.colors.outline}
           placeholder={t('searchPlaceholder')}
           onChangeText={setSearchQuery}
           value={searchQuery}
@@ -102,7 +104,7 @@ const Search: React.FC<
                   style={[
                     styles.header,
                     {
-                      color: theme.colors.placeholder,
+                      color: theme.colors.outline,
                       backgroundColor: theme.dark
                         ? 'black'
                         : theme.colors.background,

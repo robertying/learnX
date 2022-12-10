@@ -1,5 +1,5 @@
-import {TextProps, TouchableOpacity, TouchableOpacityProps} from 'react-native';
-import {Text, useTheme} from 'react-native-paper';
+import {TouchableOpacity, TouchableOpacityProps} from 'react-native';
+import {Text, TextProps, useTheme} from 'react-native-paper';
 import Styles from 'constants/Styles';
 
 export interface TextButtonProps extends TextProps {
@@ -26,7 +26,11 @@ const TextButton: React.FC<React.PropsWithChildren<TextButtonProps>> = ({
       disabled={disabled}>
       <Text
         style={[
-          {color: disabled ? theme.colors.disabled : theme.colors.primary},
+          {
+            color: disabled
+              ? theme.colors.surfaceDisabled
+              : theme.colors.primary,
+          },
           style,
         ]}
         numberOfLines={1}

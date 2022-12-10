@@ -36,17 +36,17 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
         </View>
         <View style={styles.countSections}>
           <View style={styles.section}>
-            <Icon name="notifications" color={theme.colors.placeholder} />
+            <Icon name="notifications" color={theme.colors.outline} />
             <Caption style={styles.sectionText}>{unreadNoticeCount}</Caption>
           </View>
           <View style={styles.section}>
-            <Icon name="event" color={theme.colors.placeholder} />
+            <Icon name="event" color={theme.colors.outline} />
             <Caption style={styles.sectionText}>
               {unfinishedAssignmentCount}
             </Caption>
           </View>
           <View style={styles.section}>
-            <Icon name="folder" color={theme.colors.placeholder} />
+            <Icon name="folder" color={theme.colors.outline} />
             <Caption style={styles.sectionText}>{unreadFileCount}</Caption>
           </View>
         </View>

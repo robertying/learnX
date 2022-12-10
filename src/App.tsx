@@ -27,7 +27,7 @@ import {
   useTheme,
   Provider as PaperProvider,
   DefaultTheme as PaperDefaultTheme,
-  DarkTheme as PaperDarkTheme,
+  MD3DarkTheme as PaperDarkTheme,
 } from 'react-native-paper';
 import codePush from 'react-native-code-push';
 import {Provider as StoreProvider} from 'react-redux';
@@ -607,7 +607,7 @@ const BrandPaperDefaultTheme: typeof PaperDefaultTheme = {
   colors: {
     ...PaperDefaultTheme.colors,
     primary: '#9c27b0',
-    accent: '#9c27b0',
+    surface: '#ffffff',
   },
 };
 const BrandPaperDarkTheme: typeof PaperDarkTheme = {
@@ -615,7 +615,6 @@ const BrandPaperDarkTheme: typeof PaperDarkTheme = {
   colors: {
     ...PaperDarkTheme.colors,
     primary: '#bb86fc',
-    accent: '#bb86fc',
   },
 };
 

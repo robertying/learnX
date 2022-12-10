@@ -1,9 +1,10 @@
 import {PropsWithChildren, useRef} from 'react';
 import {View, StyleSheet} from 'react-native';
-import {TouchableRipple, Colors, useTheme, Checkbox} from 'react-native-paper';
+import {TouchableRipple, useTheme, Checkbox} from 'react-native-paper';
 import Interactable from 'react-native-interactable';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Colors from 'constants/Colors';
 
 export interface CardWrapperProps {
   fav?: boolean;
