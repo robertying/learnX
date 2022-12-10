@@ -31,8 +31,6 @@ export default {
   assignmentSubmittionFailed: '作业提交失败',
   submitAssignment: '提交作业',
   submitAssignmentConfirmation: '确定提交作业？',
-  submitAssignmentConfirmationAndroid:
-    '确定提交作业？注意：Android 用户上传文件时，文件名中的中文字符会被移除。',
   cancel: '取消',
   ok: '确定',
   assignmentSubmittionContentPlaceholder: '可在此处填写作业内容……',
