@@ -41,14 +41,6 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
-#### iOS
-
-- [TestFlight 测试 Beta](https://testflight.apple.com/join/5SPCH86w)
-
-#### macOS
-
-- [GitHub Releases](https://github.com/robertying/learnX/releases)
-
 ## 功能 Features
 
 > 注意：本应用只适用于清华大学学生。
