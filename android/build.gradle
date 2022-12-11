@@ -1,12 +1,12 @@
 buildscript {
     ext {
-        buildToolsVersion = "33.0.0"
+        buildToolsVersion = "33.0.1"
         minSdkVersion = 28
         compileSdkVersion = 33
         targetSdkVersion = 33
         ndkVersion = "25.1.8937393"
         cmakeVersion = "3.22.1"
-        kotlinVersion = "1.7.20"
+        kotlinVersion = "1.7.21"
     }
     repositories {
         google()
@@ -41,7 +41,7 @@ subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
-                buildToolsVersion "33.0.0"
+                buildToolsVersion "33.0.1"
                 compileSdkVersion 33
                 ndkVersion "25.1.8937393"
                 externalNativeBuild {

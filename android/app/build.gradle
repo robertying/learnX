@@ -3,21 +3,15 @@ apply plugin: "com.android.application"
 import com.android.build.OutputFile
 
 project.ext.react = [
-        enableHermes: true,
+    enableHermes: true
 ]
 project.ext.vectoricons = [
-        iconFontNames: ["MaterialIcons.ttf", "MaterialCommunityIcons.ttf"]
+    iconFontNames: ["MaterialIcons.ttf", "MaterialCommunityIcons.ttf"]
 ]
 
 apply from: "../../node_modules/react-native/react.gradle"
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
 apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
-
-def enableSeparateBuildPerCPUArchitecture = true
-def enableProguardInReleaseBuilds = true
-
-def jscFlavor = "org.webkit:android-jsc:+"
-def enableHermes = project.ext.react.get("enableHermes", true);
 
 def reactNativeArchitectures() {
     def value = project.getProperties().get("reactNativeArchitectures")
@@ -42,8 +36,8 @@ android {
         applicationId "io.robertying.learnx"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9202351
-        versionName "13.16.0"
+        versionCode 9202360
+        versionName "13.17.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
@@ -101,11 +95,12 @@ android {
     splits {
         abi {
             reset()
-            enable enableSeparateBuildPerCPUArchitecture
+            enable true
             universalApk true
             include(*reactNativeArchitectures())
         }
     }
+
     signingConfigs {
         debug {
             storeFile file("debug.keystore")
@@ -126,13 +121,14 @@ android {
             keyPassword properties.getProperty("LEARNX_RELEASE_KEY_PASSWORD")
         }
     }
+
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
             signingConfig signingConfigs.release
-            minifyEnabled enableProguardInReleaseBuilds
+            minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
@@ -151,23 +147,17 @@ android {
 }
 
 dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-
     //noinspection GradleDynamicVersion
     implementation "com.facebook.react:react-native:+"
 
-    implementation "com.google.android.material:material:1.7.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.0"
-
-    if (enableHermes) {
-        //noinspection GradleDynamicVersion
-        implementation("com.facebook.react:hermes-engine:+") {
-            exclude group: "com.facebook.fbjni"
-        }
-    } else {
-        implementation jscFlavor
+    //noinspection GradleDynamicVersion
+    implementation("com.facebook.react:hermes-engine:+") {
+        exclude group: "com.facebook.fbjni"
     }
+
+    implementation "com.google.android.material:material:1.7.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
 }
 
 if (isNewArchitectureEnabled()) {
