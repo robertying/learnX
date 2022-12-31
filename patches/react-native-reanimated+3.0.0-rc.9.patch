@@ -1,0 +1,13 @@
+diff --git a/node_modules/react-native-reanimated/ios/native/NativeProxy.mm b/node_modules/react-native-reanimated/ios/native/NativeProxy.mm
+index 6a13661..cda43d8 100644
+--- a/node_modules/react-native-reanimated/ios/native/NativeProxy.mm
++++ b/node_modules/react-native-reanimated/ios/native/NativeProxy.mm
+@@ -393,7 +393,7 @@ std::shared_ptr<NativeReanimatedModule> createReanimatedModule(
+ 
+   [animationsManager setHasAnimationBlock:^(NSNumber *_Nonnull tag, NSString *_Nonnull type) {
+     return weakModule.lock()->layoutAnimationsManager().hasLayoutAnimation(
+-        [tag intValue], std::string([type UTF8String]));
++        [tag intValue], std::string([type UTF8String])) ? YES : NO;
+   }];
+ 
+   [animationsManager setAnimationRemovingBlock:^(NSNumber *_Nonnull tag) {
