@@ -50,7 +50,7 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
       }}>
       {children}
       <Snackbar
-        style={styles.snackbar}
+        wrapperStyle={styles.snackbar}
         visible={toastText ? true : false}
         duration={toastDuration}
         onDismiss={() => handleToast('', 'success')}>
