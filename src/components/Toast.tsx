@@ -62,7 +62,7 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
 
 const styles = StyleSheet.create({
   snackbar: {
-    marginBottom: 54,
+    marginBottom: 48,
   },
 });
 
