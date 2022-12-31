@@ -1,5 +1,5 @@
 import {useCallback, useLayoutEffect, useState} from 'react';
-import {View, FlatList, RefreshControl} from 'react-native';
+import {View, FlatList, RefreshControl, Platform} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
@@ -232,7 +232,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               icon={props => <MaterialIcons {...props} name="subject" />}
             />
             <IconButton
-              style={Styles.ml0}
+              style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
               onPress={handleCheckAll}
               icon={props => <MaterialIcons {...props} name="done-all" />}
             />
@@ -279,13 +279,21 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               />
             )}
             <IconButton
-              style={selectionModeDisabled ? {marginLeft: -8} : Styles.ml0}
+              style={
+                selectionModeDisabled
+                  ? {marginLeft: -8}
+                  : Platform.OS === 'android'
+                  ? {marginLeft: -8}
+                  : Styles.ml0
+              }
               onPress={handleFilter}
               icon={props => <MaterialIcons {...props} name="filter-list" />}
             />
             {type === 'course' && (
               <IconButton
-                style={Styles.ml0}
+                style={
+                  Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0
+                }
                 icon={props => <MaterialIcons {...props} name="star" />}
                 onPress={handleNavigateCourseX}
               />

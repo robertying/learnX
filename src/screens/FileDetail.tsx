@@ -98,16 +98,18 @@ const FileDetail: React.FC<
             />
           )}
           <IconButton
-            style={Styles.mr0}
+            style={Platform.OS === 'android' ? {marginRight: -8} : Styles.mr0}
             onPress={() => handleDownload(true)}
             icon={props => <Icon {...props} name="refresh" />}
           />
-          <IconButton
-            style={DeviceInfo.isMac() ? Styles.mr0 : {marginRight: -8}}
-            disabled={error || !path}
-            onPress={handleShare}
-            icon={props => <Icon {...props} name="ios-share" />}
-          />
+          {Platform.OS !== 'android' && (
+            <IconButton
+              style={DeviceInfo.isMac() ? Styles.mr0 : {marginRight: -8}}
+              disabled={error || !path}
+              onPress={handleShare}
+              icon={props => <Icon {...props} name="ios-share" />}
+            />
+          )}
           {DeviceInfo.isMac() && (
             <IconButton
               style={{marginRight: -8}}

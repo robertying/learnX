@@ -109,12 +109,12 @@ const getScreenOptions = (title: string) =>
             icon={props => <MaterialIcons {...props} name="subject" />}
           />
           <IconButton
-            style={Styles.ml0}
+            style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
             icon={props => <MaterialIcons {...props} name="filter-list" />}
           />
           {title === t('courses') && (
             <IconButton
-              style={Styles.ml0}
+              style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
               icon={props => <MaterialIcons {...props} name="star" />}
             />
           )}
@@ -181,13 +181,17 @@ const getDetailScreenOptions = () =>
         ? () => (
             <>
               <IconButton
-                style={Styles.mr0}
+                style={
+                  Platform.OS === 'android' ? {marginRight: -8} : Styles.mr0
+                }
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
-              <IconButton
-                style={DeviceInfo.isMac() ? Styles.mr0 : {marginRight: -8}}
-                icon={props => <MaterialIcons {...props} name="ios-share" />}
-              />
+              {Platform.OS !== 'android' && (
+                <IconButton
+                  style={DeviceInfo.isMac() ? Styles.mr0 : {marginRight: -8}}
+                  icon={props => <MaterialIcons {...props} name="ios-share" />}
+                />
+              )}
               {DeviceInfo.isMac() && (
                 <IconButton
                   style={{marginRight: -8}}
