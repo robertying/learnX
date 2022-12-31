@@ -23,7 +23,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
     publishTime,
     markedImportant,
     hasRead,
-    attachmentName,
+    attachment,
   },
   hideCourseName,
   ...restProps
@@ -39,7 +39,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
             <Title numberOfLines={1}>{title}</Title>
           </View>
           <View style={[Styles.flexRowCenter, styles.icons]}>
-            {attachmentName && (
+            {attachment && (
               <Icon
                 style={styles.icon}
                 name="attachment"

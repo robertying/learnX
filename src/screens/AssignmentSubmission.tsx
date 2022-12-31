@@ -20,6 +20,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import dayjs from 'dayjs';
+import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
@@ -47,8 +48,7 @@ const AssignmentSubmission: React.FC<
     courseName,
     studentHomeworkId,
     submitTime,
-    submittedAttachmentName,
-    submittedAttachmentUrl,
+    submittedAttachment,
     submittedContent,
   } = route.params;
 
@@ -85,14 +85,14 @@ const AssignmentSubmission: React.FC<
     }
   };
 
-  const handleFileOpen = (name?: string, url?: string) => {
-    if (name && url) {
+  const handleFileOpen = (attachment?: RemoteFile) => {
+    if (attachment) {
       navigation.push('FileDetail', {
         id,
         courseName,
-        title: stripExtension(name),
-        downloadUrl: url,
-        fileType: getExtension(name) ?? '',
+        title: stripExtension(attachment.name),
+        downloadUrl: attachment.downloadUrl,
+        fileType: getExtension(attachment.name) ?? '',
       } as File);
     }
   };
@@ -207,34 +207,38 @@ const AssignmentSubmission: React.FC<
           />
         </ScrollView>
         <View style={styles.submissionDetail}>
-          {submittedAttachmentName ? (
+          {submittedAttachment ? (
             <TextButton
               style={
                 attachmentResult || removeAttachment
                   ? {
                       textDecorationLine: 'line-through',
-                      color: theme.colors.surfaceDisabled,
+                      color: theme.colors.onSurfaceDisabled,
                     }
                   : undefined
               }
               containerStyle={[styles.attachmentButton, Styles.spacey1]}
-              onPress={() =>
-                handleFileOpen(submittedAttachmentName, submittedAttachmentUrl)
-              }>
-              {submittedAttachmentName}
+              onPress={() => handleFileOpen(submittedAttachment)}>
+              {submittedAttachment.name}
             </TextButton>
           ) : undefined}
           {!removeAttachment && attachmentResult ? (
             <TextButton
               containerStyle={[styles.attachmentButton, Styles.spacey1]}
               onPress={() =>
-                handleFileOpen(attachmentResult.name, attachmentResult.uri)
+                handleFileOpen({
+                  id: '0000',
+                  name: attachmentResult.name,
+                  downloadUrl: attachmentResult.uri,
+                  previewUrl: attachmentResult.uri,
+                  size: attachmentResult.size + 'B',
+                })
               }>
               {attachmentResult.name}
             </TextButton>
           ) : undefined}
           <View style={styles.attachmentActionButtons}>
-            {submittedAttachmentName ? (
+            {submittedAttachment ? (
               <Button
                 mode="contained"
                 style={[styles.submitButton, Styles.spacey1]}
@@ -251,7 +255,7 @@ const AssignmentSubmission: React.FC<
                 onPress={handleDocumentPick}>
                 {attachmentResult
                   ? t('reUploadAttachment')
-                  : submittedAttachmentName
+                  : submittedAttachment
                   ? t('overwriteAttachment')
                   : t('uploadAttachment')}
               </Button>

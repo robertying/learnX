@@ -13,6 +13,7 @@ import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
@@ -39,22 +40,18 @@ const AssignmentDetail: React.FC<
     title,
     deadline,
     description,
-    attachmentName,
-    attachmentUrl,
+    attachment,
     submitted,
     submitTime,
-    submittedAttachmentName,
-    submittedAttachmentUrl,
+    submittedAttachment,
     submittedContent,
     graded,
     gradeTime,
     grade,
     gradeLevel,
-    gradeAttachmentName,
-    gradeAttachmentUrl,
+    gradeAttachment,
     gradeContent,
-    answerAttachmentName,
-    answerAttachmentUrl,
+    answerAttachment,
     answerContent,
     disableAnimation,
   } = route.params;
@@ -69,14 +66,14 @@ const AssignmentDetail: React.FC<
     [description, theme],
   );
 
-  const handleFileOpen = (name?: string, url?: string) => {
-    if (name && url) {
+  const handleFileOpen = (attachment?: RemoteFile) => {
+    if (attachment) {
       const data = {
         id,
         courseName,
-        title: stripExtension(name),
-        downloadUrl: url,
-        fileType: getExtension(name) ?? '',
+        title: stripExtension(attachment.name),
+        downloadUrl: attachment.downloadUrl,
+        fileType: getExtension(attachment.name) ?? '',
       } as File;
 
       navigation.push('FileDetail', data);
@@ -143,7 +140,7 @@ const AssignmentDetail: React.FC<
           </View>
         </View>
         <Divider />
-        {attachmentName && (
+        {attachment && (
           <>
             <View style={[styles.section, styles.iconButton]}>
               <MaterialCommunityIcons
@@ -154,8 +151,8 @@ const AssignmentDetail: React.FC<
               />
               <TextButton
                 style={styles.textPaddingRight}
-                onPress={() => handleFileOpen(attachmentName, attachmentUrl)}>
-                {attachmentName}
+                onPress={() => handleFileOpen(attachment)}>
+                {attachment.name}
               </TextButton>
             </View>
             <Divider />
@@ -171,16 +168,11 @@ const AssignmentDetail: React.FC<
                 size={17}
               />
               <View style={Styles.flex1}>
-                {submittedAttachmentName && (
+                {submittedAttachment && (
                   <TextButton
                     style={[Styles.spacey1, styles.textPaddingRight]}
-                    onPress={() =>
-                      handleFileOpen(
-                        submittedAttachmentName,
-                        submittedAttachmentUrl,
-                      )
-                    }>
-                    {submittedAttachmentName}
+                    onPress={() => handleFileOpen(submittedAttachment)}>
+                    {submittedAttachment.name}
                   </TextButton>
                 )}
                 {removeTags(submittedContent) ? (
@@ -213,13 +205,11 @@ const AssignmentDetail: React.FC<
                 {gradeLevel || grade ? (
                   <Text style={Styles.spacey1}>{gradeLevel || grade}</Text>
                 ) : null}
-                {gradeAttachmentName && (
+                {gradeAttachment && (
                   <TextButton
                     style={[Styles.spacey1, styles.textPaddingRight]}
-                    onPress={() =>
-                      handleFileOpen(gradeAttachmentName, gradeAttachmentUrl)
-                    }>
-                    {gradeAttachmentName}
+                    onPress={() => handleFileOpen(gradeAttachment)}>
+                    {gradeAttachment.name}
                   </TextButton>
                 )}
                 {removeTags(gradeContent) ? (
@@ -237,7 +227,7 @@ const AssignmentDetail: React.FC<
             <Divider />
           </>
         )}
-        {(answerAttachmentName || answerContent) && (
+        {(answerAttachment || answerContent) && (
           <>
             <View style={[styles.section, styles.iconButton]}>
               <MaterialCommunityIcons
@@ -247,13 +237,11 @@ const AssignmentDetail: React.FC<
                 size={17}
               />
               <View style={Styles.flex1}>
-                {answerAttachmentName && (
+                {answerAttachment && (
                   <TextButton
                     style={[Styles.spacey1, styles.textPaddingRight]}
-                    onPress={() =>
-                      handleFileOpen(answerAttachmentName, answerAttachmentUrl)
-                    }>
-                    {answerAttachmentName}
+                    onPress={() => handleFileOpen(answerAttachment)}>
+                    {answerAttachment.name}
                   </TextButton>
                 )}
                 {removeTags(answerContent) ? (

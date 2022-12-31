@@ -1,5 +1,5 @@
 import {PersistState} from 'redux-persist';
-import {ApiError} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError, RemoteFile} from 'thu-learn-lib-no-native/lib/types';
 import {FilterSelection} from 'components/Filter';
 
 export interface Auth {
@@ -83,8 +83,7 @@ export interface Notice {
   markedImportant: boolean;
   content: string;
   hasRead: boolean;
-  attachmentName?: string;
-  attachmentUrl?: string;
+  attachment?: RemoteFile;
   url: string;
 }
 export interface NoticeState {
@@ -107,24 +106,20 @@ export interface Assignment {
   description?: string;
   deadline: string;
   url: string;
-  attachmentName?: string;
-  attachmentUrl?: string;
+  attachment?: RemoteFile;
   submitted: boolean;
   submitTime?: string;
   submittedContent?: string;
-  submittedAttachmentName?: string;
-  submittedAttachmentUrl?: string;
+  submittedAttachment?: RemoteFile;
   graded: boolean;
   grade?: number;
   gradeLevel?: string;
   gradeTime?: string;
   graderName?: string;
   gradeContent?: string;
-  gradeAttachmentName?: string;
-  gradeAttachmentUrl?: string;
+  gradeAttachment?: RemoteFile;
   answerContent?: string;
-  answerAttachmentName?: string;
-  answerAttachmentUrl?: string;
+  answerAttachment?: RemoteFile;
 }
 export interface AssignmentsState {
   fetching: boolean;

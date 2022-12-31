@@ -27,8 +27,7 @@ const NoticeDetail: React.FC<
     publisher,
     publishTime,
     content,
-    attachmentName,
-    attachmentUrl,
+    attachment,
     disableAnimation,
   } = route.params;
 
@@ -43,13 +42,13 @@ const NoticeDetail: React.FC<
   );
 
   const handleFileOpen = () => {
-    if (attachmentName && attachmentUrl) {
+    if (attachment) {
       const data = {
         id,
         courseName,
-        title: stripExtension(attachmentName),
-        downloadUrl: attachmentUrl,
-        fileType: getExtension(attachmentName) ?? '',
+        title: stripExtension(attachment.name),
+        downloadUrl: attachment.downloadUrl,
+        fileType: getExtension(attachment.name) ?? '',
       } as File;
 
       navigation.push('FileDetail', data);
@@ -85,7 +84,7 @@ const NoticeDetail: React.FC<
           </View>
         </View>
         <Divider />
-        {attachmentName && (
+        {attachment && (
           <View style={[styles.section, styles.iconButton]}>
             <Icon
               style={styles.icon}
@@ -96,7 +95,7 @@ const NoticeDetail: React.FC<
             <TextButton
               style={styles.textPaddingRight}
               onPress={handleFileOpen}>
-              {attachmentName}
+              {attachment.name}
             </TextButton>
           </View>
         )}

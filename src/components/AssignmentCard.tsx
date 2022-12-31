@@ -25,11 +25,11 @@ const AssignmentCard: React.FC<
     title,
     description,
     deadline,
-    attachmentName,
+    attachment,
     submitted,
     graded,
     answerContent,
-    answerAttachmentName,
+    answerAttachment,
   },
   hideCourseName,
   ...restProps
@@ -45,7 +45,7 @@ const AssignmentCard: React.FC<
             <Title numberOfLines={1}>{title}</Title>
           </View>
           <View style={[Styles.flexRowCenter, styles.icons]}>
-            {attachmentName && (
+            {attachment && (
               <MaterialCommunityIcons
                 name="attachment"
                 color={Colors.orange500}
@@ -68,7 +68,7 @@ const AssignmentCard: React.FC<
                 size={18}
               />
             )}
-            {(answerContent || answerAttachmentName) && (
+            {(answerContent || answerAttachment) && (
               <MaterialCommunityIcons
                 style={styles.icon}
                 name="key-variant"

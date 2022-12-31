@@ -264,10 +264,15 @@ const mockStore: PersistAppState = {
         publishTime: '2020-09-10 16:22',
         courseId: '2019-2020-1139283216',
         url: 'https://www.example.com',
-        attachmentName:
-          '附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件.xlsx',
-        attachmentUrl:
-          'https://file-examples-com.github.io/uploads/2017/02/file_example_XLSX_10.xlsx',
+        attachment: {
+          id: '1998990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+          name: '附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件.xlsx',
+          downloadUrl:
+            'https://file-examples-com.github.io/uploads/2017/02/file_example_XLSX_10.xlsx',
+          previewUrl:
+            'https://file-examples-com.github.io/uploads/2017/02/file_example_XLSX_10.xlsx',
+          size: '139.54KB',
+        },
         courseName: '基于数字信号处理器的系统设计',
         courseTeacherName: '窦维蓓',
       },
@@ -343,9 +348,15 @@ const mockStore: PersistAppState = {
         description: '<p>要求见课件</p>',
         submittedContent:
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        attachmentName: '附件1.rar',
-        attachmentUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        attachment: {
+          id: '1298990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+          name: '附件1.rar',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
         courseId: '2019-2020-1139283212',
         studentHomeworkId: '1',
         courseName: '通信与网络',
@@ -362,11 +373,24 @@ const mockStore: PersistAppState = {
         description: '<p>手写，下堂课随堂交。</p>',
         submittedContent:
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">hello world\r\n\t\t\t\t\t\t\t\t\t\thello world</span>',
-        submittedAttachmentName:
-          '作业1111111111111111111111111111111111111111111111111111111111111111111111.pdf',
-        attachmentName: '小作业1.pdf',
-        attachmentUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        submittedAttachment: {
+          id: '1238990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+          name: '作业1111111111111111111111111111111111111111111111111111111111111111111111.pdf',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
+        attachment: {
+          id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+          name: '小作业1.pdf',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
         courseId: '2019-2020-1139283212',
         studentHomeworkId: '1',
         courseName: '通信与网络',
@@ -376,8 +400,15 @@ const mockStore: PersistAppState = {
         grade: 80,
         gradeContent:
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">hello world\r\n\t\t\t\t\t\t\t\t\t\thello world</span>',
-        gradeAttachmentName:
-          '作业1111111111111111111111111111111111111111111111111111111111111111111111.pdf',
+        gradeAttachment: {
+          id: '123899018d_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+          name: '作业1111111111111111111111111111111111111111111111111111111111111111111111.pdf',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
         answerContent: '答案已上传',
       },
       {
@@ -385,14 +416,20 @@ const mockStore: PersistAppState = {
         title: 'AutoCAD绘图基础练习',
         deadline: new Date(1569772740000).toISOString(),
         submitTime: new Date(1569232469000).toISOString(),
-        submittedAttachmentUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         submitted: true,
         description:
           '<p>9月23日（周一）上课的时间，在李兆基A302集中上机，内容和要求如下：</p> \n  <p>1. 请参考上机指导书，完成并提交练习3。请在截至时间之前提交到网络学堂。</p> \n  <p>2. 需标注尺寸，并请按照原图中尺寸的方式标注。</p> \n  <p>3. 文件名可以自取，但请注意提交文件的后缀为 .dwg</p> \n  <p>注：如果同学们有时间，可以在完成练习3之后，尝试练习1和2（或者其中的部分功能，不用提交），以熟悉绘图模版是如何设置的。</p>',
         submittedContent:
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        submittedAttachmentName: '绘图-2016011097.dwg',
+        submittedAttachment: {
+          id: '1234990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+          name: '绘图-2016011097.dwg',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
         courseId: '2019-2020-1139282824',
         studentHomeworkId: '1',
         courseName: '通信与网络',
@@ -409,9 +446,15 @@ const mockStore: PersistAppState = {
           '<p>第一次大作业——利用灭点灭线估计建筑物高度。本次作业需要同学们分组完成，请仔细阅读说明文档并注意作业的截止时间。</p>',
         submittedContent:
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        attachmentName: '视听信息系统导论2019第一次大作业.rar',
-        attachmentUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        attachment: {
+          id: '1234990181_ZY_1604316692859211626215e-c233-4663-a567-a932bf4d4962',
+          name: '视听信息系统导论2019第一次大作业.rar',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
         courseId: '2019-2020-1139283216',
         studentHomeworkId: '1',
         courseName: '通信与网络',
@@ -428,9 +471,15 @@ const mockStore: PersistAppState = {
           '<p>请在网络学堂提交电子版。如果手写请保证扫描或拍照足够清晰。</p>',
         submittedContent:
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        attachmentName: '作业一.docx',
-        attachmentUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        attachment: {
+          id: '1234990181_ZY_1604313692859211626215e-c233-4663-a567-a932bf4d4962',
+          name: '作业一.docx',
+          downloadUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          previewUrl:
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+          size: '239.54KB',
+        },
         courseId: '2019-2020-1139283216',
         studentHomeworkId: '1',
         courseName: '通信与网络',
