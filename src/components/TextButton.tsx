@@ -28,7 +28,7 @@ const TextButton: React.FC<React.PropsWithChildren<TextButtonProps>> = ({
         style={[
           {
             color: disabled
-              ? theme.colors.surfaceDisabled
+              ? theme.colors.onSurfaceDisabled
               : theme.colors.primary,
           },
           style,
