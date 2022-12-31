@@ -1,6 +1,6 @@
 import {memo, useCallback, useEffect, useState} from 'react';
 import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
-import {Badge, Divider, List, Surface, Text} from 'react-native-paper';
+import {Badge, Divider, List, Text, useTheme} from 'react-native-paper';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -43,6 +43,8 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   hiddenCount,
   unfinishedCount,
 }) => {
+  const theme = useTheme();
+
   const position = useSharedValue(visible ? 1 : 0);
   const [layout, setLayout] = useState({
     height: 0,
@@ -137,7 +139,8 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   );
 
   return (
-    <Surface style={styles.root}>
+    <Animated.View
+      style={[styles.root, {backgroundColor: theme.colors.surface}]}>
       <Animated.View style={heightStyle} />
       <Animated.View
         onLayout={handleLayout}
@@ -201,7 +204,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         />
         <Divider />
       </Animated.View>
-    </Surface>
+    </Animated.View>
   );
 };
 
@@ -225,6 +228,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 16,
+    marginLeft: 4,
   },
   flexRow: {
     flexDirection: 'row',
