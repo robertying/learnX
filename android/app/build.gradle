@@ -36,8 +36,8 @@ android {
         applicationId "io.robertying.learnx"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9202370
-        versionName "13.18.0"
+        versionCode 9202400
+        versionName "14.0.0"
         buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
 
         if (isNewArchitectureEnabled()) {
