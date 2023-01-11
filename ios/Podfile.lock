@@ -25,19 +25,30 @@ PODS:
     - React-Core
     - SSZipArchive (~> 2.2.2)
   - DoubleConversion (1.1.6)
+  - EXApplication (5.0.1):
+    - ExpoModulesCore
+  - EXBackgroundFetch (11.0.1):
+    - ExpoModulesCore
   - EXCalendar (11.0.1):
+    - ExpoModulesCore
+  - EXConstants (14.0.2):
     - ExpoModulesCore
   - EXFileSystem (15.1.1):
     - ExpoModulesCore
-  - Expo (47.0.9):
+  - EXNotifications (0.17.0):
+    - ExpoModulesCore
+  - Expo (47.0.13):
     - ExpoModulesCore
   - ExpoHaptics (12.0.1):
     - ExpoModulesCore
-  - ExpoModulesCore (1.0.4):
+  - ExpoModulesCore (1.1.1):
     - React-Core
     - ReactCommon/turbomodule/core
   - EXSecureStore (12.0.0):
     - ExpoModulesCore
+  - EXTaskManager (11.0.1):
+    - ExpoModulesCore
+    - UMAppLoader
   - FBLazyVector (0.70.6)
   - FBReactNativeSpec (0.70.6):
     - RCT-Folly (= 2021.07.22.00)
@@ -360,6 +371,8 @@ PODS:
     - React-perflogger (= 0.70.6)
   - RNCAsyncStorage (1.17.11):
     - React-Core
+  - RNCClipboard (1.11.1):
+    - React-Core
   - RNDeviceInfo (10.3.0):
     - React-Core
   - RNFS (2.20.0):
@@ -396,11 +409,12 @@ PODS:
   - RNScreens (3.18.2):
     - React-Core
     - React-RCTImage
-  - RNShare (8.0.1):
+  - RNShare (8.1.0):
     - React-Core
   - RNVectorIcons (9.2.0):
     - React-Core
   - SSZipArchive (2.2.3)
+  - UMAppLoader (4.0.0)
   - Yoga (1.14.0)
 
 DEPENDENCIES:
@@ -410,12 +424,17 @@ DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
+  - EXApplication (from `../node_modules/expo-application/ios`)
+  - EXBackgroundFetch (from `../node_modules/expo-background-fetch/ios`)
   - EXCalendar (from `../node_modules/expo-calendar/ios`)
+  - EXConstants (from `../node_modules/expo-constants/ios`)
   - EXFileSystem (from `../node_modules/expo-file-system/ios`)
+  - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - EXSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - EXTaskManager (from `../node_modules/expo-task-manager/ios`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FBReactNativeSpec (from `../node_modules/react-native/React/FBReactNativeSpec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
@@ -455,6 +474,7 @@ DEPENDENCIES:
   - React-runtimeexecutor (from `../node_modules/react-native/ReactCommon/runtimeexecutor`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
+  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFS (from `../node_modules/react-native-fs`)
   - RNLocalize (from `../node_modules/react-native-localize`)
@@ -462,6 +482,7 @@ DEPENDENCIES:
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
+  - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -487,10 +508,18 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
+  EXApplication:
+    :path: "../node_modules/expo-application/ios"
+  EXBackgroundFetch:
+    :path: "../node_modules/expo-background-fetch/ios"
   EXCalendar:
     :path: "../node_modules/expo-calendar/ios"
+  EXConstants:
+    :path: "../node_modules/expo-constants/ios"
   EXFileSystem:
     :path: "../node_modules/expo-file-system/ios"
+  EXNotifications:
+    :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
   ExpoHaptics:
@@ -499,6 +528,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core"
   EXSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  EXTaskManager:
+    :path: "../node_modules/expo-task-manager/ios"
   FBLazyVector:
     :path: "../node_modules/react-native/Libraries/FBLazyVector"
   FBReactNativeSpec:
@@ -573,6 +604,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
+  RNCClipboard:
+    :path: "../node_modules/@react-native-clipboard/clipboard"
   RNDeviceInfo:
     :path: "../node_modules/react-native-device-info"
   RNFS:
@@ -587,6 +620,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-share"
   RNVectorIcons:
     :path: "../node_modules/react-native-vector-icons"
+  UMAppLoader:
+    :path: "../node_modules/unimodules-app-loader/ios"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -600,12 +635,17 @@ SPEC CHECKSUMS:
   boost: a7c83b31436843459a1961bfd74b96033dc77234
   CodePush: ef496b6fd053012e985e3d4a0ab9f9dbf2739eac
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
+  EXApplication: 034b1c40a8e9fe1bff76a1e511ee90dff64ad834
+  EXBackgroundFetch: 186248a00a38fc4d22d60ec30e4e751449e785ee
   EXCalendar: 1234457cffa88adfbfbe7f8937e21963f7b0f5b6
+  EXConstants: 3c86653c422dd77e40d10cbbabb3025003977415
   EXFileSystem: ed61548927905e157b95b3b49bd83a26ff24e1ce
-  Expo: 5523a4835730104a301caeac1e68dad095a9dfff
+  EXNotifications: 2bda232eb900aa6d602e40cad363879ae827d672
+  Expo: b9fa98bf260992312ee3c424400819fb9beadafe
   ExpoHaptics: 5a56d30a87ea213dd00b09566dc4b441a4dff97f
-  ExpoModulesCore: 8211c89bcc3ba86e2d02c54b1d31f1fa81acb6de
+  ExpoModulesCore: 485dff3a59b036a33b6050c0a5aea3cf1037fdd1
   EXSecureStore: daec0117c922a67c658cb229152a9e252e5c1750
+  EXTaskManager: 0afcc6fd813dec5dee98aa5ec4f22c2a840dd4a7
   FBLazyVector: 48289402952f4f7a4e235de70a9a590aa0b79ef4
   FBReactNativeSpec: dd1186fd05255e3457baa2f4ca65e94c2cd1e3ac
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
@@ -646,14 +686,16 @@ SPEC CHECKSUMS:
   React-runtimeexecutor: 15437b576139df27635400de0599d9844f1ab817
   ReactCommon: 349be31adeecffc7986a0de875d7fb0dcf4e251c
   RNCAsyncStorage: 8616bd5a58af409453ea4e1b246521bb76578d60
+  RNCClipboard: 2834e1c4af68697089cdd455ee4a4cdd198fa7dd
   RNDeviceInfo: 4701f0bf2a06b34654745053db0ce4cb0c53ada7
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNLocalize: 0df7970cfc60389f00eb62fd7c097dc75af3fb4f
   RNReanimated: 26051acc62d07b6d9d7374cd5e682ef2515bd04c
   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
-  RNShare: d93e00e906e6174657f6370b480437e4702bc86e
+  RNShare: 48b3113cd089a2be8ff0515c3ae7a46a4db8a76b
   RNVectorIcons: de9e5ca073ad6d56ad06e7b853b116e68288c032
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
+  UMAppLoader: 354d71d2d2ce8d6c19fb13d72b9c8209b18a8c56
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
 
 PODFILE CHECKSUM: c051bd4df9436fb2ece4e3ae4c5c333033a5205d

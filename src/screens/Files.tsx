@@ -1,6 +1,7 @@
 import {useCallback, useEffect} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
@@ -42,22 +43,39 @@ const Files: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(courseIds), dispatch, loggedIn]);
 
-  const handlePush = (item: File) => {
-    if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace('FileDetail', {
-          ...item,
-          disableAnimation: true,
-        }),
-      );
-    } else {
-      navigation.push('FileDetail', item);
-    }
-  };
+  const handlePush = useCallback(
+    (item: File) => {
+      if (detailNavigator) {
+        detailNavigator.dispatch(
+          StackActions.replace('FileDetail', {
+            ...item,
+            disableAnimation: true,
+          }),
+        );
+      } else {
+        navigation.push('FileDetail', item);
+      }
+    },
+    [detailNavigator, navigation],
+  );
 
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      response => {
+        const data = response.notification.request.content.data as unknown;
+        if ((data as File).fileType) {
+          const file = data as File;
+          navigation.navigate('Files');
+          handlePush(file);
+        }
+      },
+    );
+    return () => sub.remove();
+  }, [handlePush, navigation]);
 
   return (
     <SafeArea>

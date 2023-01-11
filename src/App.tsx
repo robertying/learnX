@@ -39,6 +39,7 @@ import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
 import {getLocale, t} from 'helpers/i18n';
+import {clearPushNotificationBadge} from 'helpers/notification';
 import {getLatestRelease} from 'helpers/update';
 import Notices from 'screens/Notices';
 import Search from 'screens/Search';
@@ -60,6 +61,7 @@ import Help from 'screens/Help';
 import About from 'screens/About';
 import Changelog from 'screens/Changelog';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
+import PushNotifications from 'screens/PushNotifications';
 import CourseX from 'screens/CourseX';
 import {ToastProvider} from 'components/Toast';
 import Splash from 'components/Splash';
@@ -308,6 +310,13 @@ const CourseStack = () => (
 const SettingDetails = (
   <>
     <SettingStackNavigator.Screen
+      name="PushNotifications"
+      component={PushNotifications}
+      options={{
+        title: t('pushNotifications'),
+      }}
+    />
+    <SettingStackNavigator.Screen
       name="CourseInformationSharing"
       component={CourseInformationSharing}
       options={{
@@ -385,6 +394,9 @@ const MainTab = () => {
   const newUpdate = useAppSelector(state => state.settings.newUpdate);
   const courseInformationSharingBadgeShown = useAppSelector(
     state => state.settings.courseInformationSharingBadgeShown,
+  );
+  const pushNotificationsBadgeShown = useAppSelector(
+    state => state.settings.pushNotificationsBadgeShown,
   );
 
   const windowSize = useWindowDimensions();
@@ -488,7 +500,10 @@ const MainTab = () => {
           title: t('settings'),
           headerShown: false,
           tabBarBadge:
-            newChangelog || newUpdate || !courseInformationSharingBadgeShown
+            newChangelog ||
+            newUpdate ||
+            !courseInformationSharingBadgeShown ||
+            !pushNotificationsBadgeShown
               ? ' '
               : undefined,
           tabBarBadgeStyle: {
@@ -611,6 +626,7 @@ const BrandPaperDefaultTheme: typeof PaperDefaultTheme = {
   colors: {
     ...PaperDefaultTheme.colors,
     primary: '#9c27b0',
+    onSurface: '#000000',
     surface: '#ffffff',
   },
 };
@@ -662,6 +678,7 @@ const Container = () => {
           nextAppState === 'active'
         ) {
           dispatch(resetLoading());
+          clearPushNotificationBadge();
         }
         setAppState(nextAppState);
       },

@@ -94,7 +94,7 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
   dispatch(getAllFilesForCoursesAction.success(files));
 };
 
-const FETCH_ALL_CONTENT_TASK = 'fetch-all-content';
+const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 
 TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const state = store.getState();

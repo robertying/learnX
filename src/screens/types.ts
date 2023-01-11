@@ -16,6 +16,7 @@ export type ScreenParams = {
   CourseDetail: Course & ExtraParams;
   Settings: undefined;
   CourseInformationSharing: ExtraParams;
+  PushNotifications: ExtraParams;
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;
   FileCache: ExtraParams;

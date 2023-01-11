@@ -1,12 +1,13 @@
 import {useCallback, useEffect} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
+import * as Notifications from 'expo-notifications';
 import NoticeCard from 'components/NoticeCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import {getAllNoticesForCourses} from 'data/actions/notices';
 import {useAppDispatch, useAppSelector} from 'data/store';
-import {Notice} from 'data/types/state';
+import {Assignment, File, Notice} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from './types';
@@ -42,22 +43,40 @@ const Notices: React.FC<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(courseIds), dispatch, loggedIn]);
 
-  const handlePush = (item: Notice) => {
-    if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace('NoticeDetail', {
-          ...item,
-          disableAnimation: true,
-        }),
-      );
-    } else {
-      navigation.push('NoticeDetail', item);
-    }
-  };
+  const handlePush = useCallback(
+    (item: Notice) => {
+      if (detailNavigator) {
+        detailNavigator.dispatch(
+          StackActions.replace('NoticeDetail', {
+            ...item,
+            disableAnimation: true,
+          }),
+        );
+      } else {
+        navigation.push('NoticeDetail', item);
+      }
+    },
+    [detailNavigator, navigation],
+  );
 
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
+
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(
+      response => {
+        const data = response.notification.request.content.data as unknown;
+        if ((data as Assignment).deadline || (data as File).fileType) {
+          return;
+        }
+        const notice = data as Notice;
+        navigation.navigate('Notices');
+        handlePush(notice);
+      },
+    );
+    return () => sub.remove();
+  }, [handlePush, navigation]);
 
   return (
     <SafeArea>
