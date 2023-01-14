@@ -379,7 +379,7 @@ PODS:
     - React-Core
   - RNLocalize (2.2.4):
     - React-Core
-  - RNReanimated (3.0.0-rc.9):
+  - RNReanimated (3.0.0-rc.10):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -638,7 +638,7 @@ SPEC CHECKSUMS:
   EXApplication: 034b1c40a8e9fe1bff76a1e511ee90dff64ad834
   EXBackgroundFetch: 186248a00a38fc4d22d60ec30e4e751449e785ee
   EXCalendar: 1234457cffa88adfbfbe7f8937e21963f7b0f5b6
-  EXConstants: 3c86653c422dd77e40d10cbbabb3025003977415
+  EXConstants: 196b45ec68c2ab6859d5200f520d9e32ea705fe0
   EXFileSystem: ed61548927905e157b95b3b49bd83a26ff24e1ce
   EXNotifications: 2bda232eb900aa6d602e40cad363879ae827d672
   Expo: b9fa98bf260992312ee3c424400819fb9beadafe
@@ -690,7 +690,7 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 4701f0bf2a06b34654745053db0ce4cb0c53ada7
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNLocalize: 0df7970cfc60389f00eb62fd7c097dc75af3fb4f
-  RNReanimated: 26051acc62d07b6d9d7374cd5e682ef2515bd04c
+  RNReanimated: 3eb05867410b44acaa81dd423945af3093305bd4
   RNScreens: 34cc502acf1b916c582c60003dc3089fa01dc66d
   RNShare: 48b3113cd089a2be8ff0515c3ae7a46a4db8a76b
   RNVectorIcons: de9e5ca073ad6d56ad06e7b853b116e68288c032
@@ -698,6 +698,6 @@ SPEC CHECKSUMS:
   UMAppLoader: 354d71d2d2ce8d6c19fb13d72b9c8209b18a8c56
   Yoga: 99caf8d5ab45e9d637ee6e0174ec16fbbb01bcfc
 
-PODFILE CHECKSUM: c051bd4df9436fb2ece4e3ae4c5c333033a5205d
+PODFILE CHECKSUM: 2b978a8fc25c1faa3f4a3b7f8f3582e14788066d
 
 COCOAPODS: 1.11.3

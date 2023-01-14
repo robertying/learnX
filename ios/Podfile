@@ -45,9 +45,9 @@ target 'learnX' do
     end
 
     installer.pods_project.build_configurations.each do |config|
+      config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
       if config.name == 'Release'
         config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
-        config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
       end
     end
   end
