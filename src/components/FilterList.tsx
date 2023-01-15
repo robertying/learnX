@@ -1,5 +1,5 @@
-import {useCallback, useLayoutEffect, useState} from 'react';
-import {View, FlatList, RefreshControl, Platform} from 'react-native';
+import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
+import {FlatList, RefreshControl, Platform} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
@@ -359,8 +359,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     type,
   ]);
 
+  const firstTimeFetching = useRef(true);
+
+  useEffect(() => {
+    if (refreshing && firstTimeFetching.current) {
+      firstTimeFetching.current = false;
+    }
+  }, [refreshing]);
+
   return (
-    <View style={Styles.flex1}>
+    <>
       <Filter
         visible={filterVisible}
         selected={filterSelected}
@@ -409,12 +417,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         )}
         keyExtractor={item => item.id}
         refreshControl={
-          !selectionMode ? (
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-          ) : undefined
+          <RefreshControl
+            enabled={!selectionMode}
+            refreshing={firstTimeFetching.current ? false : refreshing}
+            onRefresh={onRefresh}
+          />
         }
       />
-    </View>
+    </>
   );
 };
 

@@ -472,33 +472,33 @@ const MainTab = () => {
         tabBarLabelStyle: {
           marginBottom: 2,
         },
+        headerShown: false,
       })}>
       <MainNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
-        options={{title: t('notices'), headerShown: false}}
+        options={{title: t('notices')}}
       />
       <MainNavigator.Screen
         name="AssignmentStack"
         component={AssignmentStack}
-        options={{title: t('assignments'), headerShown: false}}
+        options={{title: t('assignments')}}
       />
       <MainNavigator.Screen
         name="FileStack"
         component={FileStack}
-        options={{title: t('files'), headerShown: false}}
+        options={{title: t('files')}}
       />
       <MainNavigator.Screen
         name="CourseStack"
         component={CourseStack}
-        options={{title: t('courses'), headerShown: false}}
+        options={{title: t('courses')}}
       />
       <MainNavigator.Screen
         name="SettingStack"
         component={SettingStack}
         options={{
           title: t('settings'),
-          headerShown: false,
           tabBarBadge:
             newChangelog ||
             newUpdate ||
