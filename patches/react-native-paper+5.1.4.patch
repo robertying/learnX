@@ -1,0 +1,130 @@
+diff --git a/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js b/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
+index 69bc754..b84796c 100644
+--- a/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
++++ b/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
+@@ -93,7 +93,7 @@ const IconButton = (0, _forwardRef.forwardRef)((_ref, ref) => {
+     customIconColor,
+     customContainerColor
+   });
+-  const buttonSize = isV3 ? size + 2 * PADDING : size * 1.5;
++  const buttonSize = size * 1.4;
+   const {
+     borderWidth = isV3 && mode === 'outlined' && !selected ? 1 : 0,
+     borderRadius = buttonSize / 2
+diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js
+index f29af6d..42b3df1 100644
+--- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js
++++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js
+@@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
+     fontSize: 12,
+     lineHeight: 20,
+     marginVertical: 2,
+-    letterSpacing: 0.4
+   }
+ });
+ //# sourceMappingURL=Caption.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js
+index 0add52c..32aaa27 100644
+--- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js
++++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js
+@@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
+     fontSize: 14,
+     lineHeight: 20,
+     marginVertical: 2,
+-    letterSpacing: 0.25
+   }
+ });
+ //# sourceMappingURL=Paragraph.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js
+index c986247..db8ff51 100644
+--- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js
++++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js
+@@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
+     fontSize: 16,
+     lineHeight: 24,
+     marginVertical: 2,
+-    letterSpacing: 0.5
+   }
+ });
+ //# sourceMappingURL=Subheading.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js
+index db9d734..e87a003 100644
+--- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js
++++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js
+@@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
+     fontSize: 20,
+     lineHeight: 30,
+     marginVertical: 2,
+-    letterSpacing: 0.15
+   }
+ });
+ //# sourceMappingURL=Title.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js b/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
+index 39bc7d3..1cfebca 100644
+--- a/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
++++ b/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
+@@ -84,7 +84,7 @@ const IconButton = forwardRef((_ref, ref) => {
+     customIconColor,
+     customContainerColor
+   });
+-  const buttonSize = isV3 ? size + 2 * PADDING : size * 1.5;
++  const buttonSize = size * 1.4;
+   const {
+     borderWidth = isV3 && mode === 'outlined' && !selected ? 1 : 0,
+     borderRadius = buttonSize / 2
+diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js
+index 633b8bf..1f3156a 100644
+--- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js
++++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js
+@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
+     fontSize: 12,
+     lineHeight: 20,
+     marginVertical: 2,
+-    letterSpacing: 0.4
+   }
+ });
+ //# sourceMappingURL=Caption.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js
+index f2869bf..d5c05c0 100644
+--- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js
++++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js
+@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
+     fontSize: 14,
+     lineHeight: 20,
+     marginVertical: 2,
+-    letterSpacing: 0.25
+   }
+ });
+ //# sourceMappingURL=Paragraph.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js
+index fe07ea3..b394157 100644
+--- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js
++++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js
+@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
+     fontSize: 16,
+     lineHeight: 24,
+     marginVertical: 2,
+-    letterSpacing: 0.5
+   }
+ });
+ //# sourceMappingURL=Subheading.js.map
+\ No newline at end of file
+diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js
+index f431515..e7d88d6 100644
+--- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js
++++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js
+@@ -34,7 +34,6 @@ const styles = StyleSheet.create({
+     fontSize: 20,
+     lineHeight: 30,
+     marginVertical: 2,
+-    letterSpacing: 0.15
+   }
+ });
+ //# sourceMappingURL=Title.js.map
+\ No newline at end of file
