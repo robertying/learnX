@@ -118,14 +118,16 @@ const Settings: React.FC<
           type="arrow"
           onPress={() => handlePush('FileCache')}
         />
-        <TableCell
-          style={styles.marginTop}
-          iconName="notifications"
-          badge={!pushNotificationsBadgeShown}
-          primaryText={t('pushNotifications')}
-          type="arrow"
-          onPress={() => handlePush('PushNotifications')}
-        />
+        {Platform.OS === 'ios' && (
+          <TableCell
+            style={styles.marginTop}
+            iconName="notifications"
+            badge={!pushNotificationsBadgeShown}
+            primaryText={t('pushNotifications')}
+            type="arrow"
+            onPress={() => handlePush('PushNotifications')}
+          />
+        )}
         <TableCell
           style={Platform.OS === 'android' ? styles.marginTop : undefined}
           iconName="grade"
