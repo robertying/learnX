@@ -109,7 +109,7 @@ export default {
   courseReviews: '课程评价',
   missingCalendarSource:
     '不存在可写入的日历：请确保“日历”应用内存在 iCloud 日历目录或至少一个本地日历目录。',
-  pushNotifications: '推送通知',
+  pushNotifications: '推送通知 (Beta)',
   copyPushNotificationToken: '复制设备标识符',
   pushNotificationTokenDescription:
     '使用此标识符，配合 learnX Companion 应用，您可以在此设备上接收推送通知。请勿分享此标识符给其他人。',
