@@ -73,6 +73,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 - 暗黑模式 Dark mode
 - 全局搜索 Global search
 - 切换学期 Switching among semesters
+- 推送通知（见 [learnX Companion](https://tsinghua.app/learnX-companion)）Push Notifications (See [learnX Companion](https://tsinghua.app/learnX-companion))
 
 ## 开源协议 License
 
