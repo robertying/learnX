@@ -503,7 +503,7 @@ const MainTab = () => {
             newChangelog ||
             newUpdate ||
             !courseInformationSharingBadgeShown ||
-            !pushNotificationsBadgeShown
+            (Platform.OS === 'ios' ? !pushNotificationsBadgeShown : false)
               ? ' '
               : undefined,
           tabBarBadgeStyle: {
