@@ -9,12 +9,23 @@ buildscript {
         kotlinVersion = "1.8.10"
     }
     repositories {
+        maven {
+            url("$rootDir/maven")
+        }
         google()
         mavenCentral()
     }
     dependencies {
         classpath("com.android.tools.build:gradle:7.4.1")
         classpath("com.facebook.react:react-native-gradle-plugin")
+    }
+}
+
+allprojects {
+    repositories {
+        maven {
+            url("$rootDir/maven")
+        }
     }
 }
 
