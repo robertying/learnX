@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        buildToolsVersion = "33.0.1"
+        buildToolsVersion = "33.0.2"
         minSdkVersion = 28
         compileSdkVersion = 33
         targetSdkVersion = 33
@@ -22,7 +22,7 @@ subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
-                buildToolsVersion "33.0.1"
+                buildToolsVersion "33.0.2"
                 compileSdkVersion 33
                 ndkVersion "25.2.9519653"
                 externalNativeBuild {

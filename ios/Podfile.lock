@@ -648,7 +648,7 @@ PODS:
     - glog
   - react-native-document-picker (8.1.3):
     - React-Core
-  - react-native-pager-view (6.1.2):
+  - react-native-pager-view (6.1.4):
     - React-Core
   - react-native-safe-area-context (4.5.0):
     - RCT-Folly
@@ -785,10 +785,10 @@ PODS:
     - React-RCTText
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNScreens (3.19.0):
+  - RNScreens (3.20.0):
     - React-Core
     - React-RCTImage
-  - RNShare (8.1.0):
+  - RNShare (8.2.0):
     - React-Core
   - RNVectorIcons (9.2.0):
     - React-Core
@@ -1063,7 +1063,7 @@ SPEC CHECKSUMS:
   React-jsinspector: ea8101acf525ec08b2d87ddf0637d45f8e3b4148
   React-logger: 97987f46779d8dd24656474ad0c43a5b459f31d6
   react-native-document-picker: 958e2bc82e128be69055be261aeac8d872c8d34c
-  react-native-pager-view: 54bed894cecebe28cede54c01038d9d1e122de43
+  react-native-pager-view: b58cb9e9f42f64e50cab3040815772c1d119a2e2
   react-native-safe-area-context: 39c2d8be3328df5d437ac1700f4f3a4f75716acc
   react-native-webview: 9f111dfbcfc826084d6c507f569e5e03342ee1c1
   React-perflogger: c7ccda3d1d1da837f7ff4e54e816022a6803ee87
@@ -1087,8 +1087,8 @@ SPEC CHECKSUMS:
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNLocalize: 0df7970cfc60389f00eb62fd7c097dc75af3fb4f
   RNReanimated: fbc356493970e3acddc15586b1bccb5eab3ff1ec
-  RNScreens: ea4cd3a853063cda19a4e3c28d2e52180c80f4eb
-  RNShare: 48b3113cd089a2be8ff0515c3ae7a46a4db8a76b
+  RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
+  RNShare: b089c33619bbfb0a32bc4069c858b9274e694187
   RNVectorIcons: de9e5ca073ad6d56ad06e7b853b116e68288c032
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   UMAppLoader: 354d71d2d2ce8d6c19fb13d72b9c8209b18a8c56
