@@ -56,6 +56,7 @@ const AutoHeightWebView: React.FC<
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
       originWhitelist={['*']}
+      sharedCookiesEnabled
       {...props}
       style={[
         {
