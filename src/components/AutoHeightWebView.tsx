@@ -1,15 +1,19 @@
-import {useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {Linking, Platform} from 'react-native';
 import WebView, {WebViewProps} from 'react-native-webview';
 import {
   WebViewMessageEvent,
   WebViewNavigation,
+  WebViewSource,
+  WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
+import CookieManager from '@react-native-cookies/cookies';
 
 const AutoHeightWebView: React.FC<
   React.PropsWithChildren<WebViewProps>
 > = props => {
   const [height, setHeight] = useState(0);
+  const [cookieString, setCookieString] = useState('');
 
   const webViewRef = useRef<WebView>(null);
 
@@ -45,6 +49,16 @@ const AutoHeightWebView: React.FC<
     true;
   `;
 
+  useEffect(() => {
+    CookieManager.get('https://learn.tsinghua.edu.cn').then(cookies => {
+      setCookieString(
+        Object.entries(cookies)
+          .map(([key, value]) => `${key}=${value.value}`)
+          .join('; '),
+      );
+    });
+  }, []);
+
   return (
     <WebView
       ref={webViewRef}
@@ -56,8 +70,18 @@ const AutoHeightWebView: React.FC<
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
       originWhitelist={['*']}
-      sharedCookiesEnabled
       {...props}
+      source={
+        {
+          baseUrl: (props.source as WebViewSourceHtml | undefined)?.html
+            ? 'https://learn.tsinghua.edu.cn'
+            : undefined,
+          headers: {
+            Cookie: cookieString,
+          },
+          ...props.source,
+        } as WebViewSource
+      }
       style={[
         {
           height,
