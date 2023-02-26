@@ -35,7 +35,6 @@ const AssignmentDetail: React.FC<
   const detailNavigator = useDetailNavigator();
 
   const {
-    id,
     courseName,
     title,
     deadline,
@@ -69,7 +68,7 @@ const AssignmentDetail: React.FC<
   const handleFileOpen = (attachment?: RemoteFile) => {
     if (attachment) {
       const data = {
-        id,
+        id: attachment.id,
         courseName,
         title: stripExtension(attachment.name),
         downloadUrl: attachment.downloadUrl,
