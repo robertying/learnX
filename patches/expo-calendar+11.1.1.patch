@@ -1,0 +1,101 @@
+diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
+index ca0d274..7bf993f 100644
+--- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
++++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
+@@ -6,6 +6,7 @@ import android.content.ContentValues
+ import android.content.Context
+ import android.content.Intent
+ import android.database.Cursor
++import android.database.sqlite.SQLiteException
+ import android.os.Bundle
+ import android.provider.CalendarContract
+ import android.util.Log
+@@ -612,7 +613,13 @@ class CalendarModule(
+         reminderValues.put(CalendarContract.Reminders.EVENT_ID, eventID)
+         reminderValues.put(CalendarContract.Reminders.MINUTES, minutes)
+         reminderValues.put(CalendarContract.Reminders.METHOD, method)
+-        contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
++
++        try {
++          contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
++        }
++        catch (e: SQLiteException) {
++
++        }
+       }
+     }
+   }
+@@ -625,9 +632,11 @@ class CalendarModule(
+         CalendarContract.Reminders._ID
+       )
+     )
+-    while (cursor.moveToNext()) {
+-      val reminderUri = ContentUris.withAppendedId(CalendarContract.Reminders.CONTENT_URI, cursor.getLong(0))
+-      contentResolver.delete(reminderUri, null, null)
++    if (cursor != null) {
++      while (cursor.moveToNext()) {
++        val reminderUri = ContentUris.withAppendedId(CalendarContract.Reminders.CONTENT_URI, cursor.getLong(0))
++        contentResolver.delete(reminderUri, null, null)
++      }
+     }
+   }
+ 
+@@ -652,8 +661,10 @@ class CalendarModule(
+ 
+   private fun serializeEvents(cursor: Cursor): List<Bundle> {
+     val results: MutableList<Bundle> = ArrayList()
+-    while (cursor.moveToNext()) {
+-      results.add(serializeEvent(cursor))
++    if (cursor != null) {
++      while (cursor.moveToNext()) {
++        results.add(serializeEvent(cursor))
++      }
+     }
+     return results
+   }
+@@ -749,20 +760,24 @@ class CalendarModule(
+         CalendarContract.Reminders.METHOD
+       )
+     )
+-    while (cursor.moveToNext()) {
+-      val thisAlarm = Bundle()
+-      thisAlarm.putInt("relativeOffset", -cursor.getInt(0))
+-      val method = cursor.getInt(1)
+-      thisAlarm.putString("method", reminderStringMatchingConstant(method))
+-      alarms.add(thisAlarm)
++    if (cursor != null) {
++      while (cursor.moveToNext()) {
++        val thisAlarm = Bundle()
++        thisAlarm.putInt("relativeOffset", -cursor.getInt(0))
++        val method = cursor.getInt(1)
++        thisAlarm.putString("method", reminderStringMatchingConstant(method))
++        alarms.add(thisAlarm)
++      }
+     }
+     return alarms
+   }
+ 
+   private fun serializeEventCalendars(cursor: Cursor): List<Bundle> {
+     val results: MutableList<Bundle> = ArrayList()
+-    while (cursor.moveToNext()) {
+-      results.add(serializeEventCalendar(cursor))
++    if (cursor != null) {
++      while (cursor.moveToNext()) {
++        results.add(serializeEventCalendar(cursor))
++      }
+     }
+     return results
+   }
+@@ -803,8 +818,10 @@ class CalendarModule(
+ 
+   private fun serializeAttendees(cursor: Cursor): List<Bundle> {
+     val results: MutableList<Bundle> = ArrayList()
+-    while (cursor.moveToNext()) {
+-      results.add(serializeAttendee(cursor))
++    if (cursor != null) {
++      while (cursor.moveToNext()) {
++        results.add(serializeAttendee(cursor))
++      }
+     }
+     return results
+   }
