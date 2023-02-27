@@ -100,6 +100,9 @@ export const downloadFile = async (
     }
 
     const downloadedFile = await ExpoFileSystem.getInfoAsync(path);
+    if (!downloadedFile.exists) {
+      throw new Error('File download failed');
+    }
     if (downloadedFile.size && downloadedFile.size < 100) {
       const file = await fs.readFile(path);
       if (file.includes('location.href')) {

@@ -80,7 +80,7 @@ export interface Notice {
   id: string;
   title: string;
   publisher: string;
-  publishTime: Date;
+  publishTime: string;
   markedImportant: boolean;
   content: string;
   hasRead: boolean;
@@ -105,17 +105,17 @@ export interface Assignment {
   studentHomeworkId: string;
   title: string;
   description?: string;
-  deadline: Date;
+  deadline: string;
   url: string;
   attachment?: RemoteFile;
   submitted: boolean;
-  submitTime?: Date;
+  submitTime?: string;
   submittedContent?: string;
   submittedAttachment?: RemoteFile;
   graded: boolean;
   grade?: number;
   gradeLevel?: string;
-  gradeTime?: Date;
+  gradeTime?: string;
   graderName?: string;
   gradeContent?: string;
   gradeAttachment?: RemoteFile;
@@ -143,7 +143,7 @@ export interface File {
   fileType?: string | null;
   markedImportant: boolean;
   isNew: boolean;
-  uploadTime: Date;
+  uploadTime: string;
   downloadUrl: string;
 }
 export interface FilesState {
