@@ -7,6 +7,7 @@ import {Assignment, File, Notice} from 'data/types/state';
 import {getAllFilesForCoursesAction} from 'data/actions/files';
 import {getAllAssignmentsForCoursesAction} from 'data/actions/assignments';
 import {getAllNoticesForCoursesAction} from 'data/actions/notices';
+import env from './env';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -31,7 +32,11 @@ export const registerForPushNotifications = async () => {
     return;
   }
 
-  const token = (await Notifications.getExpoPushTokenAsync()).data;
+  const token = (
+    await Notifications.getExpoPushTokenAsync({
+      projectId: env.EXPO_PROJECT_ID,
+    })
+  ).data;
   return token;
 };
 
