@@ -254,7 +254,7 @@ const FileDetail: React.FC<
               </View>
               <Divider />
               <Text style={styles.description}>
-                {file.description.repeat(20) || t('noFileDescription')}
+                {file.description || t('noFileDescription')}
               </Text>
             </ScrollView>
             {!canRender ? (
