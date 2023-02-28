@@ -183,8 +183,10 @@ const FileDetail: React.FC<
         return;
       }
 
-      webViewRef.current.reload();
-    }, []),
+      if (file.fileType === 'pdf') {
+        webViewRef.current.reload();
+      }
+    }, [file.fileType]),
   );
 
   return (
