@@ -117,4 +117,5 @@ export default {
   configurePushNotifications: '配置推送通知',
   noPushNotificationsPermission: '未授予推送通知权限',
   learnXCompanionUsageGuide: 'learnX Companion 使用指南',
+  noFileDescription: '无文件描述',
 };

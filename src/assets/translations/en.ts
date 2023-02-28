@@ -124,4 +124,5 @@ export default {
   configurePushNotifications: 'Configure Push Notifications',
   noPushNotificationsPermission: 'No Push Notifications Permission',
   learnXCompanionUsageGuide: 'learnX Companion Usage Guide',
+  noFileDescription: 'No file description',
 };

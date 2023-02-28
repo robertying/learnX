@@ -183,14 +183,12 @@ const getDetailScreenOptions = () =>
         ? () => (
             <>
               <IconButton
-                style={
-                  Platform.OS === 'android' ? {marginRight: -8} : Styles.mr0
-                }
+                style={{marginRight: -8}}
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
               {Platform.OS !== 'android' && (
                 <IconButton
-                  style={DeviceInfo.isMac() ? Styles.mr0 : {marginRight: -8}}
+                  style={{marginRight: -8}}
                   icon={props => <MaterialIcons {...props} name="ios-share" />}
                 />
               )}
