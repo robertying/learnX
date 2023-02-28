@@ -9,6 +9,7 @@ import {
 import {Linking, Platform, StyleSheet, View} from 'react-native';
 import {useTheme, Text, IconButton, ProgressBar} from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {useFocusEffect} from '@react-navigation/native';
 import WebView from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Styles from 'constants/Styles';
@@ -136,6 +137,16 @@ const FileDetail: React.FC<
   useEffect(() => {
     handleDownload(false);
   }, [handleDownload]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!webViewRef.current || Platform.OS !== 'ios') {
+        return;
+      }
+
+      webViewRef.current.reload();
+    }, []),
+  );
 
   return (
     <SafeArea>
