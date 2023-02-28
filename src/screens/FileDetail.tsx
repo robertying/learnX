@@ -23,7 +23,11 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import {canRenderInMacWebview, needWhiteBackground} from 'helpers/html';
+import {
+  canRenderInIosWebview,
+  canRenderInMacWebview,
+  needWhiteBackground,
+} from 'helpers/html';
 import {downloadFile, openFile, shareFile} from 'helpers/fs';
 import {getLocale, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
@@ -49,7 +53,9 @@ const FileDetail: React.FC<
   const [showInfo, setShowInfo] = useState(false);
 
   const canRender =
-    (Platform.OS === 'ios' && !DeviceInfo.isMac()) ||
+    (Platform.OS === 'ios' &&
+      !DeviceInfo.isMac() &&
+      canRenderInIosWebview(file.fileType)) ||
     (Platform.OS === 'ios' &&
       DeviceInfo.isMac() &&
       canRenderInMacWebview(file.fileType));
@@ -257,7 +263,7 @@ const FileDetail: React.FC<
                 {file.description || t('noFileDescription')}
               </Text>
             </ScrollView>
-            {!canRender ? (
+            {!canRender && !(Platform.OS === 'ios' && !DeviceInfo.isMac()) ? (
               <View
                 style={[
                   styles.actions,

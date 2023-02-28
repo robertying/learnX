@@ -69,6 +69,18 @@ export const canRenderInMacWebview = (ext?: string | null) => {
     : false;
 };
 
+export const canRenderInIosWebview = (ext?: string | null) => {
+  if (!ext) {
+    return false;
+  }
+
+  if (ext.toLowerCase() === 'zip' || ext.toLowerCase() === 'rar') {
+    return false;
+  }
+
+  return true;
+};
+
 export const removeTags = (html?: string) => {
   return html
     ? html
