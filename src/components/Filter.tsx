@@ -145,10 +145,8 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
       <Animated.View
         onLayout={handleLayout}
         style={[
-          layout.measured || !visible
-            ? [styles.absolute, transformStyle]
-            : null,
-          !visible ? {opacity: 0} : null,
+          layout.measured || !visible ? [styles.absolute, transformStyle] : [],
+          !visible ? {opacity: 0} : {opacity: 100},
         ]}>
         {unfinishedCount !== undefined ? (
           <ListItem

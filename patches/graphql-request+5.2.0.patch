@@ -1,0 +1,12 @@
+diff --git a/node_modules/graphql-request/package.json b/node_modules/graphql-request/package.json
+index d6c736c..319a310 100644
+--- a/node_modules/graphql-request/package.json
++++ b/node_modules/graphql-request/package.json
+@@ -2,6 +2,7 @@
+   "name": "graphql-request",
+   "version": "5.2.0",
+   "type": "module",
++  "main": "./build/esm/index.js",
+   "exports": {
+     ".": {
+       "require": {

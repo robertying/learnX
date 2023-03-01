@@ -3847,9 +3847,9 @@ ee-first@1.1.1:
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
 electron-to-chromium@^1.4.284:
-  version "1.4.314"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.314.tgz#33e4ad7a2ca2ddbe2e113874cc0c0e2a00cb46bf"
-  integrity sha512-+3RmNVx9hZLlc0gW//4yep0K5SYKmIvB5DXg1Yg6varsuAHlHwTeqeygfS8DWwLCsNOWrgj+p9qgM5WYjw1lXQ==
+  version "1.4.315"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.4.315.tgz#b60a6676b3a1db332cfc8919118344aa06b9ac99"
+  integrity sha512-ndBQYz3Eyy3rASjjQ9poMJGoAlsZ/aZnq6GBsGL4w/4sWIAwiUHVSsMuADbxa8WJw7pZ0oxLpGbtoDt4vRTdCg==
 
 emoji-regex@^8.0.0:
   version "8.0.0"
@@ -5083,10 +5083,10 @@ grapheme-splitter@^1.0.4:
   resolved "https://registry.yarnpkg.com/grapheme-splitter/-/grapheme-splitter-1.0.4.tgz#9cf3a665c6247479896834af35cf1dbb4400767e"
   integrity sha512-bzh50DW9kTPM00T8y4o8vQg89Di9oLJVLW/KaOGIXJWP/iqCN6WKYkbNOF04vFLJhwcpYUh9ydh/+5vpOqV4YQ==
 
-graphql-request@5.1.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/graphql-request/-/graphql-request-5.1.0.tgz#dbc8feee27d21b993cd5da2d3af67821827b240a"
-  integrity sha512-0OeRVYigVwIiXhNmqnPDt+JhMzsjinxHE7TVy3Lm6jUzav0guVcL0lfSbi6jVTRAxcbwgyr6yrZioSHxf9gHzw==
+graphql-request@5.2.0:
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/graphql-request/-/graphql-request-5.2.0.tgz#a05fb54a517d91bb2d7aefa17ade4523dc5ebdca"
+  integrity sha512-pLhKIvnMyBERL0dtFI3medKqWOz/RhHdcgbZ+hMMIb32mEPa5MJSzS4AuXxfI4sRAu6JVVk5tvXuGfCWl9JYWQ==
   dependencies:
     "@graphql-typed-document-node/core" "^3.1.1"
     cross-fetch "^3.1.5"
@@ -7992,10 +7992,10 @@ react-native-interactable@2.0.1:
   resolved "https://registry.yarnpkg.com/react-native-interactable/-/react-native-interactable-2.0.1.tgz#80a4608c4b6f19489b629926306afd980c73a309"
   integrity sha512-b5Mej8JnW9+q/hf+6bxWsKIX4E1rjILBgPnyYFIaEhJZGrZeu5jxENvw3+Q7t43ARp1wJIZZGfilVoFmwtgOdw==
 
-react-native-localize@2.2.4:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/react-native-localize/-/react-native-localize-2.2.4.tgz#3bc46ade48499ab9df61bf17a9b66633a5ba9bb9"
-  integrity sha512-gVmbyAEQQnBQ8vKlAQchFfIISeId3qT6Lc7LHmKF39nsYWX9KN4PHuG6Hk+7gduMI6IHKeZGKcLsOdh6wvN6cg==
+react-native-localize@2.2.5:
+  version "2.2.5"
+  resolved "https://registry.yarnpkg.com/react-native-localize/-/react-native-localize-2.2.5.tgz#5f59c9482f2264a16d2f08e2b9a79071349a70dc"
+  integrity sha512-w0bBZ4X/lkErNXb5T+cQfUKgEv2+28o7jZhK/vPesf91D4yQKUCtS7Uz0s1AnRXYKOyTm3TCUgFuRVqKzuWlMQ==
 
 react-native-pager-view@6.1.4:
   version "6.1.4"
@@ -8011,10 +8011,10 @@ react-native-paper@5.2.0:
     color "^3.1.2"
     use-event-callback "^0.1.0"
 
-react-native-reanimated@3.0.0-rc.10:
-  version "3.0.0-rc.10"
-  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.0.0-rc.10.tgz#40e5b628759aa81f94317fd0301231292b4eacf5"
-  integrity sha512-0P2jSO+dXHRxSzqSxNp08VaUy89nqeUIvqBS0wlI8lsli8CJcqulL3pjNqTGzBkxXjt13mGdIzJv4u9lSjHPzg==
+react-native-reanimated@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-reanimated/-/react-native-reanimated-3.0.0.tgz#03389efd8464b0ee1da18eb4e0bac28157c2b258"
+  integrity sha512-GPyUrLZHK+kou0I5PTMWNUkAaJ26ndk/MD2hcA1F8U69RSMmtzJuKUxK2C7uz3Y72W1eFunuDgsNCoLi0+W1vg==
   dependencies:
     "@babel/plugin-transform-object-assign" "^7.16.7"
     "@babel/preset-typescript" "^7.16.7"
@@ -8037,15 +8037,15 @@ react-native-screens@3.20.0:
     react-freeze "^1.0.0"
     warn-once "^0.1.0"
 
-react-native-share@8.2.0:
-  version "8.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-share/-/react-native-share-8.2.0.tgz#6ad15ca3bedca5b7d0ec2b65c78a167d712f1fc8"
-  integrity sha512-0RHeU/yntMzFsPmdSTJH7W7Y3+Fsw7qR3ufBMxodHJKzK8tBv5ZTEst8XMjTzrBUpamMaj23HCBYl9eYqntxpA==
+react-native-share@8.2.1:
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-share/-/react-native-share-8.2.1.tgz#f9933852de3ddd0f474ab63448e06c22cfecc9d4"
+  integrity sha512-dUIgrcdg4nOHrbKN1w+hs17RZ+51NeXd62CEezPAd4tEyj2Ki1qeAxWnJe8ZPRwvB5/6ml7YUR/2PJApxGHCAQ==
 
-react-native-tab-view@3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-3.4.1.tgz#50342777633b54822f0e905aaf5852bf5b256c81"
-  integrity sha512-pjhcm9bml91tbO7GkKQ5FGrwlHJXQqMzLcZtkXOSfFxoJ2XHJvbLxQSK0MpLyOjhbFdVbeeG4Zt083XQB1c1Lw==
+react-native-tab-view@3.5.1:
+  version "3.5.1"
+  resolved "https://registry.yarnpkg.com/react-native-tab-view/-/react-native-tab-view-3.5.1.tgz#2ad454afc0e186b43ea8b89053f39180d480d48b"
+  integrity sha512-qdrS5t+AEhfuKQyuCXkwHu4IVppkuTvzWWlkSZKrPaSkjjIa32xrsGxt1UW9YDdro2w4AMw5hKn1hFmg/5mvzA==
   dependencies:
     use-latest-callback "^0.1.5"
 

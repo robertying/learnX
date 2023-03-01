@@ -758,9 +758,9 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
-  - RNLocalize (2.2.4):
+  - RNLocalize (2.2.5):
     - React-Core
-  - RNReanimated (3.0.0-rc.10):
+  - RNReanimated (3.0.0):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -790,7 +790,7 @@ PODS:
   - RNScreens (3.20.0):
     - React-Core
     - React-RCTImage
-  - RNShare (8.2.0):
+  - RNShare (8.2.1):
     - React-Core
   - RNVectorIcons (9.2.0):
     - React-Core
@@ -1091,10 +1091,10 @@ SPEC CHECKSUMS:
   RNCClipboard: 3f0451a8100393908bea5c5c5b16f96d45f30bfc
   RNDeviceInfo: 749f2e049dcd79e2e44f134f66b73a06951b5066
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNLocalize: 0df7970cfc60389f00eb62fd7c097dc75af3fb4f
-  RNReanimated: fbc356493970e3acddc15586b1bccb5eab3ff1ec
+  RNLocalize: f0fbcea2a28981985dfe468129674f47847787b1
+  RNReanimated: a71e12c5fcf4f01bd7cfc286cb83467cab89e5c2
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
-  RNShare: b089c33619bbfb0a32bc4069c858b9274e694187
+  RNShare: eaee3dd5a06dad397c7d3b14762007035c5de405
   RNVectorIcons: de9e5ca073ad6d56ad06e7b853b116e68288c032
   SSZipArchive: 62d4947b08730e4cda640473b0066d209ff033c9
   UMAppLoader: 71aae6c6782cf2aef2356bb97f84321600b4b25c
