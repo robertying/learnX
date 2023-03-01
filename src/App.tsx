@@ -676,6 +676,7 @@ const Container = () => {
           nextAppState === 'active'
         ) {
           dispatch(resetLoading());
+          dispatch(login());
           clearPushNotificationBadge();
         }
         setAppState(nextAppState);
