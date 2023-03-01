@@ -676,14 +676,17 @@ const Container = () => {
           nextAppState === 'active'
         ) {
           dispatch(resetLoading());
-          dispatch(login());
           clearPushNotificationBadge();
+
+          if (auth.username && auth.password && !loggedIn) {
+            dispatch(login());
+          }
         }
         setAppState(nextAppState);
       },
     );
     return () => sub.remove();
-  });
+  }, [appState, auth.password, auth.username, dispatch, loggedIn]);
 
   useEffect(() => {
     dispatch(login());
