@@ -37,11 +37,11 @@ PODS:
     - ExpoModulesCore
   - EXNotifications (0.18.1):
     - ExpoModulesCore
-  - Expo (48.0.4):
+  - Expo (48.0.5):
     - ExpoModulesCore
   - ExpoHaptics (12.2.1):
     - ExpoModulesCore
-  - ExpoModulesCore (1.2.3):
+  - ExpoModulesCore (1.2.4):
     - React-Core
     - React-RCTAppDelegate
     - ReactCommon/turbomodule/core
@@ -760,7 +760,7 @@ PODS:
     - React-Core
   - RNLocalize (2.2.5):
     - React-Core
-  - RNReanimated (3.0.0):
+  - RNReanimated (3.0.1):
     - DoubleConversion
     - FBLazyVector
     - FBReactNativeSpec
@@ -1038,9 +1038,9 @@ SPEC CHECKSUMS:
   EXConstants: 74f06d219d6ada60f96131c56e1b423096c0fea9
   EXFileSystem: 844e86ca9b5375486ecc4ef06d3838d5597d895d
   EXNotifications: dd628737af60fc8cc62dccebacd326b0fbbc0dcb
-  Expo: aae5eb5ed076ff163eb909a003b2be1b85f832dd
+  Expo: ac2226798ad1f7db860107a4f309303e7a1b4434
   ExpoHaptics: 5156bc5160d8e04c170dd6e645a71154951a2ad9
-  ExpoModulesCore: f11d8a16e8d3f26c183da2541d75edc6aa9cf8eb
+  ExpoModulesCore: 1667335d4f4c9b7801990930e6f0eea42c916a21
   EXSecureStore: e8923258361cc406d0401af380f12bd05b2b720f
   EXTaskManager: f8257faa4c20acfc3f31e21ab82a62544d70db85
   FBLazyVector: 60195509584153283780abdac5569feffb8f08cc
@@ -1092,7 +1092,7 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 749f2e049dcd79e2e44f134f66b73a06951b5066
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNLocalize: f0fbcea2a28981985dfe468129674f47847787b1
-  RNReanimated: a71e12c5fcf4f01bd7cfc286cb83467cab89e5c2
+  RNReanimated: 42295301c43f974340a510ba18d5a2031c191c30
   RNScreens: 218801c16a2782546d30bd2026bb625c0302d70f
   RNShare: eaee3dd5a06dad397c7d3b14762007035c5de405
   RNVectorIcons: de9e5ca073ad6d56ad06e7b853b116e68288c032
