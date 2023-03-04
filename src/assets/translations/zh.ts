@@ -67,7 +67,7 @@ export default {
   clearFileCacheFailed: '清空文件缓存失败：',
   fileUseDocumentDir: '保存打开的文件到“文档”',
   fileOmitCourseName: '文件名不包含课程名',
-  fileDownloadFailed: '文件下载失败',
+  fileDownloadFailed: '文件下载失败，请重试。',
   openFileFailed:
     '文件打开失败。请重新下载文件或确保存在可打开此文件类型的应用。',
   share: '分享',

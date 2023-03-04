@@ -62,6 +62,8 @@ export const downloadFile = async (
         await fs.unlink(path);
       } catch {}
 
+      dataSource.login();
+
       throw new Error('File download failed');
     }
 
@@ -73,7 +75,7 @@ export const downloadFile = async (
           await fs.unlink(path);
         } catch {}
 
-        await dataSource.login();
+        dataSource.login();
 
         throw new Error('File download failed');
       }

@@ -72,7 +72,7 @@ export default {
   clearFileCacheFailed: 'Failed to clear file cache',
   fileUseDocumentDir: 'Save Downloaded Files to Documents',
   fileOmitCourseName: 'Omit Course Name in Filenames',
-  fileDownloadFailed: 'Failed to download the file',
+  fileDownloadFailed: 'Failed to download the file. Please retry.',
   openFileFailed:
     'Failed to open the file. Re-download the file or make sure there is some app on system that can handle the file type.',
   share: 'Share',
