@@ -138,6 +138,8 @@ const CardWrapper: React.FC<
         ]}
         dragEnabled={!selectionMode && dragEnabled}>
         <Touchable
+          type="highlight"
+          highlightColorOpacity={0.125}
           style={{backgroundColor: theme.colors.surface}}
           onPress={
             selectionMode
