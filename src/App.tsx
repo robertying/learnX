@@ -16,7 +16,7 @@ import {
   Theme as NavigationTheme,
 } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {
+import type {
   NativeStackNavigationOptions,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack/lib/typescript/src/types';

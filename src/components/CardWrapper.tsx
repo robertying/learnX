@@ -1,10 +1,11 @@
 import {PropsWithChildren, useRef} from 'react';
 import {View, StyleSheet} from 'react-native';
-import {TouchableRipple, useTheme, Checkbox} from 'react-native-paper';
+import {useTheme, Checkbox} from 'react-native-paper';
 import Interactable from 'react-native-interactable';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Colors from 'constants/Colors';
+import Touchable from './Touchable';
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -69,7 +70,8 @@ const CardWrapper: React.FC<
     <View>
       <View style={styles.drawer}>
         {onHide ? (
-          <TouchableRipple
+          <Touchable
+            type="opacity"
             style={[
               styles.button,
               {
@@ -82,11 +84,12 @@ const CardWrapper: React.FC<
               size={40}
               color={Colors.yellow500}
             />
-          </TouchableRipple>
+          </Touchable>
         ) : (
           <>
             {archived ? null : (
-              <TouchableRipple
+              <Touchable
+                type="opacity"
                 style={[
                   styles.button,
                   {
@@ -99,9 +102,10 @@ const CardWrapper: React.FC<
                   size={40}
                   color={Colors.red500}
                 />
-              </TouchableRipple>
+              </Touchable>
             )}
-            <TouchableRipple
+            <Touchable
+              type="opacity"
               style={[
                 styles.button,
                 {
@@ -114,7 +118,7 @@ const CardWrapper: React.FC<
                 size={40}
                 color={Colors.blue500}
               />
-            </TouchableRipple>
+            </Touchable>
           </>
         )}
       </View>
@@ -133,7 +137,7 @@ const CardWrapper: React.FC<
           {x: onHide ? -buttonWidth : -buttonWidth * (archived ? 1 : 2)},
         ]}
         dragEnabled={!selectionMode && dragEnabled}>
-        <TouchableRipple
+        <Touchable
           style={{backgroundColor: theme.colors.surface}}
           onPress={
             selectionMode
@@ -151,7 +155,7 @@ const CardWrapper: React.FC<
             )}
             {children}
           </View>
-        </TouchableRipple>
+        </Touchable>
       </Interactable.View>
     </View>
   );

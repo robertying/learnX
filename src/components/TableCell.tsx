@@ -2,7 +2,6 @@ import {StyleSheet, View, ViewProps, TextInput} from 'react-native';
 import {
   Avatar,
   Text,
-  TouchableRipple,
   useTheme,
   Switch,
   Badge,
@@ -10,6 +9,7 @@ import {
 } from 'react-native-paper';
 import {AvatarImageSource} from 'react-native-paper/lib/typescript/components/Avatar/AvatarImage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Touchable from './Touchable';
 
 export interface TableCellProps extends ViewProps {
   type: 'none' | 'switch' | 'arrow' | 'input';
@@ -48,7 +48,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
   const theme = useTheme();
 
   return (
-    <TouchableRipple
+    <Touchable
       style={[{backgroundColor: theme.colors.surface}, restProps.style]}
       onPress={onPress}>
       <View
@@ -118,7 +118,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
         ) : null}
         {loading ? <ActivityIndicator /> : null}
       </View>
-    </TouchableRipple>
+    </Touchable>
   );
 };
 
