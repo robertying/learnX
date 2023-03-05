@@ -17,8 +17,10 @@ const Touchable: React.FC<
     <TouchableOpacity activeOpacity={0.5} {...props} />
   ) : (
     <TouchableHighlight
-      activeOpacity={0.5}
-      underlayColor={theme.colors.surface}
+      activeOpacity={1}
+      underlayColor={
+        theme.dark ? 'rgba(255,255,255,0.125)' : 'rgba(0,0,0,0.125)'
+      }
       {...props}
     />
   );
