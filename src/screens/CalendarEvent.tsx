@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import {useAppDispatch, useAppSelector} from 'data/store';
-import {setSetting} from 'data/actions/settings';
+import {clearEventIds, setSetting} from 'data/actions/settings';
 import {dataSource} from 'data/source';
 import {
   removeCalendars,
@@ -101,6 +101,11 @@ const CalendarEvent: React.FC<
       }
     }
     dispatch(setSetting('assignmentSync', enabled));
+  };
+
+  const handleSyncTargetChange = (value: boolean) => {
+    dispatch(clearEventIds());
+    dispatch(setSetting('syncAssignmentsToCalendar', value));
   };
 
   const handleCalendarDelete = () => {
@@ -229,9 +234,7 @@ const CalendarEvent: React.FC<
             iconName="event-available"
             primaryText={t('syncAssignmentsToCalendar')}
             switchValue={syncAssignmentsToCalendar}
-            onSwitchValueChange={value =>
-              dispatch(setSetting('syncAssignmentsToCalendar', value))
-            }
+            onSwitchValueChange={handleSyncTargetChange}
             type="switch"
           />
         ) : null}
@@ -239,13 +242,13 @@ const CalendarEvent: React.FC<
           {getLocale().startsWith('zh')
             ? `${
                 Platform.OS === 'ios' && !syncAssignmentsToCalendar
-                  ? '每次刷新后，作业会自动同步到“提醒事项”；'
-                  : '每次刷新后，作业会自动同步到“日历”；'
+                  ? '启用后，每次刷新时，作业会自动同步到“提醒事项”；'
+                  : '启用后，每次刷新时，作业会自动同步到“日历”；'
               }已屏蔽课程的作业或已归档、已过期的作业不会被同步；请在更改提醒或同步设置后刷新作业以应用更改。`
             : `${
                 Platform.OS === 'ios' && !syncAssignmentsToCalendar
-                  ? 'Assignments will be synced to Reminders every time after refreshing. '
-                  : 'Assignments will be synced to Calendar every time after refreshing. '
+                  ? 'If enabled, assignments will be synced to Reminders every time after refreshing. '
+                  : 'If enabled, assignments will be synced to Calendar every time after refreshing. '
               }Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alarm or sync setting changes.`}
         </Caption>
         <TableCell
