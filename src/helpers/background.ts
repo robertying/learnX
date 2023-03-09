@@ -100,11 +100,19 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const state = store.getState();
   const dispatch = store.dispatch;
 
-  const {loggedIn} = state.auth;
+  const auth = state.auth;
   const courseIds = state.courses.items.map(i => i.id);
 
-  if (!loggedIn || courseIds.length === 0) {
+  if (!auth.username || !auth.password || courseIds.length === 0) {
     return BackgroundFetch.BackgroundFetchResult.NoData;
+  }
+
+  if (!auth.loggedIn) {
+    try {
+      await dataSource.login(auth.username, auth.password);
+    } catch {
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
   }
 
   const results = await allSettled([
