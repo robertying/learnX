@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "14.1.3",
+  "version": "14.1.4",
   "private": true,
   "scripts": {
     "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
