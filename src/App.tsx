@@ -656,7 +656,6 @@ const Container = () => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();
-  const loggingIn = useAppSelector(state => state.auth.loggingIn);
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
   const loginError = useAppSelector(state => state.auth.error);
   const auth = useAppSelector(state => state.auth);

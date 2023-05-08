@@ -6,8 +6,8 @@ import {
   Switch,
   Badge,
   ActivityIndicator,
+  AvatarImageProps,
 } from 'react-native-paper';
-import {AvatarImageSource} from 'react-native-paper/lib/typescript/components/Avatar/AvatarImage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Touchable from './Touchable';
 
@@ -17,7 +17,7 @@ export interface TableCellProps extends ViewProps {
   primaryText: string;
   secondaryText?: string;
   iconName?: string;
-  imageSrc?: AvatarImageSource;
+  imageSrc?: AvatarImageProps['source'];
   imageAlt?: string;
   switchDisabled?: boolean;
   switchValue?: boolean;

@@ -33,13 +33,13 @@ const submitAssignment = async (
   const body = new FormData();
   body.append('xszyid', studentHomeworkId);
   body.append('zynr', content || '');
-  body.append('isDeleted', remove ? 1 : 0);
+  body.append('isDeleted', remove ? '1' : '0');
   if (attachment) {
     body.append('fileupload', {
       uri: attachment.uri,
       name: attachment.name,
       type: mime.lookup(attachment.uri) || 'text/plain',
-    });
+    } as any);
   }
 
   try {

@@ -1,5 +1,5 @@
 import {PersistState} from 'redux-persist';
-import {ApiError, RemoteFile} from 'thu-learn-lib-no-native/lib/types';
+import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
 import {FilterSelection} from 'components/Filter';
 
 export interface Auth {
