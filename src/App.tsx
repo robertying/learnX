@@ -708,9 +708,7 @@ const Container = () => {
 
   const showDetail = loggedIn && windowSize.width >= 750;
 
-  return auth.username && auth.password && loggingIn ? (
-    <Splash />
-  ) : (
+  return (
     <SafeAreaProvider>
       <NavigationContainer
         ref={mainNavigationContainerRef}
@@ -726,7 +724,7 @@ const Container = () => {
               headerShown: false,
               presentation: 'fullScreenModal',
             }}>
-            {loggedIn ? (
+            {!loginError ? (
               <>
                 <RootNavigator.Screen name="MainTab" component={MainTab} />
                 <RootNavigator.Screen
