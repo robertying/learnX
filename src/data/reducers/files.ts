@@ -43,7 +43,7 @@ export default function files(
       return {
         ...state,
         fetching: false,
-        error: action.payload,
+        error: action.payload.reason,
       };
     case GET_FILES_FOR_COURSE_REQUEST:
       return {
@@ -75,7 +75,7 @@ export default function files(
       return {
         ...state,
         fetching: false,
-        error: action.payload,
+        error: action.payload.reason,
       };
     case SET_UNREAD_FILE:
       if (action.payload.flag) {

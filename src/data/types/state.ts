@@ -1,5 +1,5 @@
 import {PersistState} from 'redux-persist';
-import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
+import {FailReason, RemoteFile} from 'thu-learn-lib-no-native/lib/types';
 import {FilterSelection} from 'components/Filter';
 
 export interface Auth {
@@ -9,7 +9,7 @@ export interface Auth {
 export interface AuthState extends Auth {
   loggingIn: boolean;
   loggedIn: boolean;
-  error?: ApiError | null;
+  error?: FailReason | null;
 }
 
 export type Tab = 'notice' | 'assignment' | 'file' | 'course';
@@ -46,7 +46,7 @@ export interface SemestersState {
   fetching: boolean;
   items: string[];
   current: string | null;
-  error?: ApiError | null;
+  error?: FailReason | null;
 }
 
 export interface Course {
@@ -70,7 +70,7 @@ export interface CoursesState {
       teacherName: string;
     };
   };
-  error?: ApiError | null;
+  error?: FailReason | null;
 }
 
 export interface Notice {
@@ -94,7 +94,7 @@ export interface NoticeState {
   archived: string[];
   pinned: string[];
   items: Notice[];
-  error?: ApiError | null;
+  error?: FailReason | null;
 }
 
 export interface Assignment {
@@ -129,7 +129,7 @@ export interface AssignmentsState {
   archived: string[];
   pinned: string[];
   items: Assignment[];
-  error?: ApiError | null;
+  error?: FailReason | null;
 }
 
 export interface File {
@@ -153,7 +153,7 @@ export interface FilesState {
   archived: string[];
   pinned: string[];
   items: File[];
-  error?: ApiError | null;
+  error?: FailReason | null;
 }
 
 export interface User {

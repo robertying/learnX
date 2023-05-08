@@ -76,10 +76,10 @@ const Login: React.FC<
     (async () => {
       if (loading && error && !loggingIn) {
         await new Promise(resolve => setTimeout(resolve as any, 500));
-        if (error?.reason === FailReason.BAD_CREDENTIAL) {
+        if (error === FailReason.BAD_CREDENTIAL) {
           toast(t('credentialError'), 'error');
         } else {
-          toast(t('unknownError') + error?.reason, 'error');
+          toast(t('unknownError') + error, 'error');
         }
         setLoading(false);
       }

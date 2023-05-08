@@ -43,7 +43,7 @@ export default function notices(
       return {
         ...state,
         fetching: false,
-        error: action.payload,
+        error: action.payload.reason,
       };
     case GET_NOTICES_FOR_COURSE_REQUEST:
       return {
@@ -75,7 +75,7 @@ export default function notices(
       return {
         ...state,
         fetching: false,
-        error: action.payload,
+        error: action.payload.reason,
       };
     case SET_UNREAD_NOTICE:
       if (action.payload.flag) {

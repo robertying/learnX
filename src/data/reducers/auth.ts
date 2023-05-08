@@ -37,7 +37,7 @@ export default function auth(
         ...state,
         loggingIn: false,
         loggedIn: false,
-        error: action.payload,
+        error: action.payload.reason,
       };
     default:
       return state;
