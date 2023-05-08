@@ -45,7 +45,7 @@ export default function courses(
       return {
         ...state,
         fetching: false,
-        error: action.payload,
+        error: true,
       };
     case SET_HIDE_COURSE:
       if (action.payload.flag) {
