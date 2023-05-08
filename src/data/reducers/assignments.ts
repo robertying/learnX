@@ -42,7 +42,7 @@ export default function assignments(
       return {
         ...state,
         fetching: false,
-        error: true,
+        error: action.payload,
       };
     case GET_ASSIGNMENTS_FOR_COURSE_REQUEST:
       return {
@@ -66,7 +66,7 @@ export default function assignments(
       return {
         ...state,
         fetching: false,
-        error: true,
+        error: action.payload,
       };
     case SET_UNREAD_ASSIGNMENT:
       if (action.payload.flag) {

@@ -36,7 +36,7 @@ export default function semesters(
       return {
         ...state,
         fetching: false,
-        error: true,
+        error: action.payload,
       };
     case GET_CURRENT_SEMESTER_REQUEST:
       return {
@@ -54,7 +54,7 @@ export default function semesters(
       return {
         ...state,
         fetching: false,
-        error: true,
+        error: action.payload,
       };
     case SET_CURRENT_SEMESTER:
       return {
