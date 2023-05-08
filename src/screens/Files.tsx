@@ -40,8 +40,7 @@ const Files: React.FC<
     if (loggedIn && courseIds.length !== 0) {
       dispatch(getAllFilesForCourses(courseIds));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(courseIds), dispatch, loggedIn]);
+  }, [courseIds, dispatch, loggedIn]);
 
   const handlePush = useCallback(
     (item: File) => {
