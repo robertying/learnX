@@ -1,6 +1,9 @@
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
-require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
+require Pod::Executable.execute_command('node', ['-p',
+  'require.resolve(
+    "react-native/scripts/react_native_pods.rb",
+    {paths: [process.argv[1]]},
+  )', __dir__]).strip
 
 platform :ios, '15.0'
 prepare_react_native_project!
@@ -35,6 +38,7 @@ target 'learnX' do
   post_install do |installer|
     react_native_post_install(
       installer,
+      config[:reactNativePath],
       :mac_catalyst_enabled => true
     )
     __apply_Xcode_12_5_M1_post_install_workaround(installer)

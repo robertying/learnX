@@ -32,9 +32,4 @@
 #endif
 }
 
-- (BOOL)concurrentRootEnabled
-{
-  return true;
-}
-
 @end

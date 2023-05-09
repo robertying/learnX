@@ -10,4 +10,19 @@ index 4b716ee..d0764c7 100644
 +  s.resources      = "Fonts/MaterialCommunityIcons.ttf", "Fonts/MaterialIcons.ttf"
    s.preserve_paths = "**/*.js"
    s.dependency 'React-Core'
- 
+
+diff --git a/node_modules/react-native-vector-icons/fonts.gradle b/node_modules/react-native-vector-icons/fonts.gradle
+index 5485fac..40382cc 100644
+--- a/node_modules/react-native-vector-icons/fonts.gradle
++++ b/node_modules/react-native-vector-icons/fonts.gradle
+@@ -28,5 +28,10 @@ afterEvaluate {
+         def targetName = variant.name.capitalize()
+         def generateAssetsTask = tasks.findByName("generate${targetName}Assets")
+         generateAssetsTask.dependsOn(fontCopyTask)
++
++        def lintVitalAnalyzeTask = tasks.findByName("lintVitalAnalyzeRelease")
++        if (lintVitalAnalyzeTask != null) {
++            lintVitalAnalyzeTask.dependsOn(fontCopyTask)
++        }
+     }
+ }

@@ -27,8 +27,7 @@ public class MainActivity extends ReactActivity {
         return new ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED, new DefaultReactActivityDelegate(
                 this,
                 getMainComponentName(),
-                DefaultNewArchitectureEntryPoint.getFabricEnabled(),
-                DefaultNewArchitectureEntryPoint.getConcurrentReactEnabled()
+                DefaultNewArchitectureEntryPoint.getFabricEnabled()
         ));
     }
 }

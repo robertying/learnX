@@ -6,7 +6,8 @@ buildscript {
         targetSdkVersion = 33
         ndkVersion = "25.2.9519653"
         cmakeVersion = "3.22.1"
-        kotlinVersion = "1.8.20"
+        javaVersion = JavaVersion.VERSION_17
+        kotlinVersion = "1.8.21"
     }
     repositories {
         maven {
@@ -16,7 +17,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.4.2")
+        classpath("com.android.tools.build:gradle")
         classpath("com.facebook.react:react-native-gradle-plugin")
     }
 }
@@ -31,6 +32,10 @@ allprojects {
 
 subprojects { subproject ->
     afterEvaluate {
+        java {
+            sourceCompatibility = rootProject.ext.javaVersion
+            targetCompatibility = rootProject.ext.javaVersion
+        }
         if (subproject.hasProperty("android")) {
             android {
                 buildToolsVersion rootProject.ext.buildToolsVersion
@@ -41,13 +46,17 @@ subprojects { subproject ->
                         version rootProject.ext.cmakeVersion
                     }
                 }
+                defaultConfig {
+                    minSdkVersion rootProject.ext.minSdkVersion
+                    targetSdkVersion rootProject.ext.targetSdkVersion
+                }
                 compileOptions {
-                    sourceCompatibility = JavaVersion.VERSION_17
-                    targetCompatibility = JavaVersion.VERSION_17
+                    sourceCompatibility = rootProject.ext.javaVersion
+                    targetCompatibility = rootProject.ext.javaVersion
                 }
                 if (subproject.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
                     kotlinOptions {
-                        jvmTarget = "17"
+                        jvmTarget = rootProject.ext.javaVersion.toString()
                     }
                 }
             }
