@@ -723,7 +723,7 @@ const Container = () => {
               headerShown: false,
               presentation: 'fullScreenModal',
             }}>
-            {!loginError ? (
+            {!loginError && auth.username && auth.password ? (
               <>
                 <RootNavigator.Screen name="MainTab" component={MainTab} />
                 <RootNavigator.Screen
