@@ -1,10 +1,10 @@
 diff --git a/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js b/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
-index 69bc754..b84796c 100644
+index 527d845..2fe554a 100644
 --- a/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
 +++ b/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
-@@ -93,7 +93,7 @@ const IconButton = (0, _forwardRef.forwardRef)((_ref, ref) => {
-     customIconColor,
-     customContainerColor
+@@ -96,7 +96,7 @@ const IconButton = (0, _forwardRef.forwardRef)((_ref, ref) => {
+     customContainerColor,
+     customRippleColor
    });
 -  const buttonSize = isV3 ? size + 2 * PADDING : size * 1.5;
 +  const buttonSize = size * 1.4;
@@ -64,12 +64,12 @@ index db9d734..e87a003 100644
  //# sourceMappingURL=Title.js.map
 \ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js b/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
-index 39bc7d3..1cfebca 100644
+index bb66af2..10f7fc7 100644
 --- a/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
 +++ b/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
-@@ -84,7 +84,7 @@ const IconButton = forwardRef((_ref, ref) => {
-     customIconColor,
-     customContainerColor
+@@ -87,7 +87,7 @@ const IconButton = forwardRef((_ref, ref) => {
+     customContainerColor,
+     customRippleColor
    });
 -  const buttonSize = isV3 ? size + 2 * PADDING : size * 1.5;
 +  const buttonSize = size * 1.4;
@@ -129,11 +129,11 @@ index f431515..e7d88d6 100644
  //# sourceMappingURL=Title.js.map
 \ No newline at end of file
 diff --git a/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx b/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx
-index 21f8ace..202b9fd 100644
+index 6123a49..8756b23 100644
 --- a/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx
 +++ b/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx
-@@ -147,7 +147,7 @@ const IconButton = forwardRef<View, Props>(
-         customContainerColor,
+@@ -160,7 +160,7 @@ const IconButton = forwardRef<View, Props>(
+         customRippleColor,
        });
  
 -    const buttonSize = isV3 ? size + 2 * PADDING : size * 1.5;

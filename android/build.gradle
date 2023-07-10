@@ -1,13 +1,13 @@
 buildscript {
     ext {
-        buildToolsVersion = "33.0.2"
+        buildToolsVersion = "34.0.0"
         minSdkVersion = 28
-        compileSdkVersion = 33
+        compileSdkVersion = 34
         targetSdkVersion = 33
         ndkVersion = "25.2.9519653"
         cmakeVersion = "3.22.1"
-        javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "1.8.21"
+        javaVersion = JavaVersion.VERSION_11
+        kotlinVersion = "1.9.0"
     }
     repositories {
         maven {
@@ -32,10 +32,6 @@ allprojects {
 
 subprojects { subproject ->
     afterEvaluate {
-        java {
-            sourceCompatibility = rootProject.ext.javaVersion
-            targetCompatibility = rootProject.ext.javaVersion
-        }
         if (subproject.hasProperty("android")) {
             android {
                 buildToolsVersion rootProject.ext.buildToolsVersion
