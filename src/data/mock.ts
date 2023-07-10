@@ -5,8 +5,9 @@ const mockStore: PersistAppState = {
   auth: {
     loggingIn: false,
     loggedIn: true,
-    username: env.dummyUsername,
-    password: env.dummyPassword,
+    error: null,
+    username: env.DUMMY_USERNAME,
+    password: env.DUMMY_PASSWORD,
     _persist: {
       rehydrated: true,
       version: -1,

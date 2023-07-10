@@ -86,7 +86,7 @@ export function rootReducer(
     return mockStore;
   } else if (action.type === CLEAR_STORE) {
     state = undefined;
-  } else if (state && state.auth.username === env.dummyUsername) {
+  } else if (state && state.auth.username === env.DUMMY_USERNAME) {
     return state;
   }
   return appReducer(state, action);
