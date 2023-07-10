@@ -141,7 +141,6 @@ const Login: React.FC<
           </View>
           <Button
             style={styles.button}
-            textColor="white"
             mode="contained"
             loading={loading}
             disabled={loading}

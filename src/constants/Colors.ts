@@ -1,14 +1,14 @@
 import {DynamicColorIOS, Platform} from 'react-native';
 
-const plainTheme = '#9c27b0';
+const plainTheme = '#9A25AE';
 
 const theme =
   Platform.OS === 'ios'
     ? (DynamicColorIOS({
-        light: '#9c27b0',
-        dark: '#bb86fc',
+        light: '#9A25AE',
+        dark: '#F9ABFF',
       }) as unknown as string)
-    : '#9c27b0';
+    : '#9A25AE';
 
 export default {
   plainTheme,

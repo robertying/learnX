@@ -1,14 +1,16 @@
 import {Image, StyleSheet, useColorScheme, View} from 'react-native';
+import {useTheme} from 'react-native-paper';
 
 const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
   const colorScheme = useColorScheme();
+  const theme = useTheme();
 
   return (
     <View
       style={[
         styles.center,
         {
-          backgroundColor: colorScheme === 'dark' ? 'black' : 'white',
+          backgroundColor: theme.colors.surface,
         },
       ]}>
       <Image
