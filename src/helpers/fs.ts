@@ -20,9 +20,6 @@ export const downloadFile = async (
       ? ExpoFileSystem.documentDirectory
       : ExpoFileSystem.cacheDirectory
   }learnX-files/${file.courseName}/${file.id}`;
-  if (Platform.OS === 'android') {
-    dir = encodeURI(dir);
-  }
   await fs.mkdir(dir);
 
   let path = settings.fileOmitCourseName
@@ -30,10 +27,6 @@ export const downloadFile = async (
     : `${dir}/${file.courseName}-${file.title}${
         file.fileType ? `.${file.fileType}` : ''
       }`;
-
-  if (Platform.OS === 'android') {
-    path = encodeURI(path);
-  }
 
   if (!refresh && (await fs.exists(path))) {
     return path;
@@ -84,7 +77,9 @@ export const downloadFile = async (
     const downloadResumable = ExpoFileSystem.createDownloadResumable(
       file.downloadUrl,
       path,
-      {},
+      {
+        cache: !refresh,
+      },
       result => {
         onProgress?.(
           result.totalBytesWritten / result.totalBytesExpectedToWrite,
