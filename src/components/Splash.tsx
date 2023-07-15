@@ -1,4 +1,4 @@
-import {Image, StyleSheet, useColorScheme, View} from 'react-native';
+import {Image, Platform, StyleSheet, useColorScheme, View} from 'react-native';
 import {useTheme} from 'react-native-paper';
 
 const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
@@ -10,7 +10,12 @@ const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
       style={[
         styles.center,
         {
-          backgroundColor: theme.colors.surface,
+          backgroundColor:
+            Platform.OS === 'android'
+              ? theme.colors.surface
+              : colorScheme === 'dark'
+              ? 'black'
+              : 'white',
         },
       ]}>
       <Image
