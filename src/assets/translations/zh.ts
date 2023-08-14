@@ -106,7 +106,6 @@ export default {
     '确定加入课程信息共享计划？当前学期的课程信息将会被自动上传；上传内容不包含任何个人信息。',
   courseX: '课程信息共享计划 courseX',
   courseInformation: '课程信息',
-  courseReviews: '课程评价',
   missingCalendarSource:
     '不存在可写入的日历：请确保“日历”应用内存在 iCloud 日历目录或至少一个本地日历目录。',
   pushNotifications: '推送通知 (Beta)',

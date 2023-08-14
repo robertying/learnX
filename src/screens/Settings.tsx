@@ -130,7 +130,7 @@ const Settings: React.FC<
         )}
         <TableCell
           style={Platform.OS === 'android' ? styles.marginTop : undefined}
-          iconName="grade"
+          iconName="info"
           badge={!courseInformationSharingBadgeShown}
           primaryText={t('courseInformationSharing')}
           type="arrow"

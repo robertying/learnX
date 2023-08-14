@@ -113,7 +113,6 @@ export default {
     'Do you want to enable Course Information Sharing? Information of courses of the current semester will be uploaded. Personal information will never be uploaded or shared.',
   courseX: 'courseX',
   courseInformation: 'Information',
-  courseReviews: 'Reviews',
   missingCalendarSource:
     'Missing calendar source. Make sure you have an iCloud enabled calendar category or at least one local calendar category set up in the Calendar app.',
   pushNotifications: 'Push Notifications (Beta)',

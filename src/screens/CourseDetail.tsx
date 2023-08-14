@@ -252,14 +252,13 @@ const CourseDetail: React.FC<
           {backgroundColor: theme.colors.surface},
         ]}
         onPress={handleNavigateCourseX}>
-        <Text style={styles.textButton}>{t('courseInformation')}</Text>
         <Icon
           style={styles.icon}
-          name="star"
+          name="info"
           color={theme.colors.primary}
           size={18}
         />
-        <Text style={styles.textButton}>{t('courseReviews')}</Text>
+        <Text style={styles.textButton}>{t('courseInformation')}</Text>
       </TouchableOpacity>
       <Divider />
       <TabView
