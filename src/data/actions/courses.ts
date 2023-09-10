@@ -9,6 +9,7 @@ import {
   SET_HIDE_COURSE,
 } from 'data/types/constants';
 import {Course} from 'data/types/state';
+import {getLocale} from 'helpers/i18n';
 
 export const getCoursesForSemesterAction = createAsyncAction(
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -20,8 +21,14 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
   return async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
+    const lang = getLocale().startsWith('zh') ? 'zh' : 'en';
+
     try {
-      const results = await dataSource.getCourseList(semesterId);
+      const results = await dataSource.getCourseList(
+        semesterId,
+        undefined,
+        lang,
+      );
       const courses = results
         .map(course => ({...course, semesterId}))
         .sort((a, b) => a.id.localeCompare(b.id));
