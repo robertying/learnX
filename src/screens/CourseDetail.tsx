@@ -252,12 +252,7 @@ const CourseDetail: React.FC<
           {backgroundColor: theme.colors.surface},
         ]}
         onPress={handleNavigateCourseX}>
-        <Icon
-          style={styles.icon}
-          name="info"
-          color={theme.colors.primary}
-          size={18}
-        />
+        <Icon style={styles.icon} name="info-outline" size={20} />
         <Text style={styles.textButton}>{t('courseInformation')}</Text>
       </TouchableOpacity>
       <Divider />
@@ -284,7 +279,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   icon: {
-    marginHorizontal: 8,
+    marginHorizontal: 4,
   },
   textButton: {
     fontSize: 16,

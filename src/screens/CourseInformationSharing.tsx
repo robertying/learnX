@@ -60,7 +60,7 @@ const CourseInformationSharing: React.FC<
     <SafeArea>
       <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
         <TableCell
-          iconName="info"
+          iconName="info-outline"
           primaryText={t('courseInformationSharing')}
           switchValue={courseInformationSharing}
           onSwitchValueChange={handleEnable}

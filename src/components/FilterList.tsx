@@ -294,7 +294,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                 style={
                   Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0
                 }
-                icon={props => <MaterialIcons {...props} name="info" />}
+                icon={props => <MaterialIcons {...props} name="info-outline" />}
                 onPress={handleNavigateCourseX}
               />
             )}

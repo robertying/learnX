@@ -117,7 +117,7 @@ const getScreenOptions = (title: string) =>
           {title === t('courses') && (
             <IconButton
               style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
-              icon={props => <MaterialIcons {...props} name="info" />}
+              icon={props => <MaterialIcons {...props} name="info-outline" />}
             />
           )}
         </>
