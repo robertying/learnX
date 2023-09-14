@@ -20,8 +20,6 @@ def reactNativeArchitectures() {
 }
 
 android {
-    buildToolsVersion rootProject.ext.buildToolsVersion
-    compileSdkVersion rootProject.ext.compileSdkVersion
     ndkVersion rootProject.ext.ndkVersion
     externalNativeBuild {
         cmake {
@@ -39,8 +37,9 @@ android {
         applicationId "io.robertying.learnx"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 9202640
-        versionName "14.2.0"
+        compileSdk rootProject.ext.compileSdkVersion
+        versionCode 9202700
+        versionName "14.3.0"
     }
 
     splits {
@@ -101,8 +100,8 @@ dependencies {
     implementation("com.facebook.react:hermes-android")
 
     implementation "com.google.android.material:material:1.9.0"
-    implementation "androidx.lifecycle:lifecycle-viewmodel:2.6.1"
-    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:2.6.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)

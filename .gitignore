@@ -72,3 +72,6 @@ yarn-error.log
 .env
 android/app/src/main/assets/appcenter-config.json
 ios/AppCenter-Config.plist
+
+# local maven repository
+android/maven

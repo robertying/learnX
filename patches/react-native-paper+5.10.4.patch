@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js b/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
-index 527d845..2fe554a 100644
+index 2b5105c..9d680ab 100644
 --- a/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
 +++ b/node_modules/react-native-paper/lib/commonjs/components/IconButton/IconButton.js
-@@ -96,7 +96,7 @@ const IconButton = (0, _forwardRef.forwardRef)((_ref, ref) => {
+@@ -77,7 +77,7 @@ const IconButton = (0, _forwardRef.forwardRef)((_ref, ref) => {
      customContainerColor,
      customRippleColor
    });
@@ -12,7 +12,7 @@ index 527d845..2fe554a 100644
      borderWidth = isV3 && mode === 'outlined' && !selected ? 1 : 0,
      borderRadius = buttonSize / 2
 diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js
-index f29af6d..42b3df1 100644
+index f29af6d..e6a891c 100644
 --- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js
 +++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Caption.js
 @@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
@@ -23,9 +23,8 @@ index f29af6d..42b3df1 100644
    }
  });
  //# sourceMappingURL=Caption.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js
-index 0add52c..32aaa27 100644
+index 0add52c..e2f849d 100644
 --- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js
 +++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Paragraph.js
 @@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
@@ -36,9 +35,8 @@ index 0add52c..32aaa27 100644
    }
  });
  //# sourceMappingURL=Paragraph.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js
-index c986247..db8ff51 100644
+index c986247..5bdded9 100644
 --- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js
 +++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Subheading.js
 @@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
@@ -49,9 +47,8 @@ index c986247..db8ff51 100644
    }
  });
  //# sourceMappingURL=Subheading.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js
-index db9d734..e87a003 100644
+index db9d734..7b5e31b 100644
 --- a/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js
 +++ b/node_modules/react-native-paper/lib/commonjs/components/Typography/v2/Title.js
 @@ -44,7 +44,6 @@ const styles = _reactNative.StyleSheet.create({
@@ -62,12 +59,11 @@ index db9d734..e87a003 100644
    }
  });
  //# sourceMappingURL=Title.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js b/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
-index bb66af2..10f7fc7 100644
+index 09602ab..a764786 100644
 --- a/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
 +++ b/node_modules/react-native-paper/lib/module/components/IconButton/IconButton.js
-@@ -87,7 +87,7 @@ const IconButton = forwardRef((_ref, ref) => {
+@@ -68,7 +68,7 @@ const IconButton = forwardRef((_ref, ref) => {
      customContainerColor,
      customRippleColor
    });
@@ -77,7 +73,7 @@ index bb66af2..10f7fc7 100644
      borderWidth = isV3 && mode === 'outlined' && !selected ? 1 : 0,
      borderRadius = buttonSize / 2
 diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js
-index 633b8bf..1f3156a 100644
+index 633b8bf..019a51b 100644
 --- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js
 +++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Caption.js
 @@ -34,7 +34,6 @@ const styles = StyleSheet.create({
@@ -88,9 +84,8 @@ index 633b8bf..1f3156a 100644
    }
  });
  //# sourceMappingURL=Caption.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js
-index f2869bf..d5c05c0 100644
+index f2869bf..0e927b1 100644
 --- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js
 +++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Paragraph.js
 @@ -34,7 +34,6 @@ const styles = StyleSheet.create({
@@ -101,9 +96,8 @@ index f2869bf..d5c05c0 100644
    }
  });
  //# sourceMappingURL=Paragraph.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js
-index fe07ea3..b394157 100644
+index fe07ea3..5bc8a7f 100644
 --- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js
 +++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Subheading.js
 @@ -34,7 +34,6 @@ const styles = StyleSheet.create({
@@ -114,9 +108,8 @@ index fe07ea3..b394157 100644
    }
  });
  //# sourceMappingURL=Subheading.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js b/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js
-index f431515..e7d88d6 100644
+index f431515..50bf3d2 100644
 --- a/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js
 +++ b/node_modules/react-native-paper/lib/module/components/Typography/v2/Title.js
 @@ -34,7 +34,6 @@ const styles = StyleSheet.create({
@@ -127,12 +120,11 @@ index f431515..e7d88d6 100644
    }
  });
  //# sourceMappingURL=Title.js.map
-\ No newline at end of file
 diff --git a/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx b/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx
-index 6123a49..8756b23 100644
+index efcedd6..e74b050 100644
 --- a/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx
 +++ b/node_modules/react-native-paper/src/components/IconButton/IconButton.tsx
-@@ -160,7 +160,7 @@ const IconButton = forwardRef<View, Props>(
+@@ -141,7 +141,7 @@ const IconButton = forwardRef<View, Props>(
          customRippleColor,
        });
  

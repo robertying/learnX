@@ -3,11 +3,11 @@ buildscript {
         buildToolsVersion = "34.0.0"
         minSdkVersion = 28
         compileSdkVersion = 34
-        targetSdkVersion = 33
+        targetSdkVersion = 34
         ndkVersion = "25.2.9519653"
         cmakeVersion = "3.22.1"
-        javaVersion = JavaVersion.VERSION_11
-        kotlinVersion = "1.9.0"
+        javaVersion = JavaVersion.VERSION_17
+        kotlinVersion = "1.9.10"
     }
     repositories {
         maven {

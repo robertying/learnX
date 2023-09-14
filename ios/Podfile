@@ -46,6 +46,7 @@ target 'learnX' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
       end
       if target.respond_to?(:product_type) and target.product_type == 'com.apple.product-type.bundle'
         target.build_configurations.each do |config|
@@ -55,6 +56,7 @@ target 'learnX' do
     end
 
     installer.pods_project.build_configurations.each do |config|
+      config.build_settings['ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS'] = 'YES'
       config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
       config.build_settings.delete 'STRIP_INSTALLED_PRODUCT'
       config.build_settings.delete 'STRIP_STYLE'
