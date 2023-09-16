@@ -1,0 +1,31 @@
+diff --git a/node_modules/expo-intent-launcher/android/src/main/java/expo/modules/intentlauncher/IntentLauncherModule.kt b/node_modules/expo-intent-launcher/android/src/main/java/expo/modules/intentlauncher/IntentLauncherModule.kt
+index d9efec2..7638135 100644
+--- a/node_modules/expo-intent-launcher/android/src/main/java/expo/modules/intentlauncher/IntentLauncherModule.kt
++++ b/node_modules/expo-intent-launcher/android/src/main/java/expo/modules/intentlauncher/IntentLauncherModule.kt
+@@ -9,8 +9,10 @@ import androidx.core.os.bundleOf
+ import expo.modules.intentlauncher.exceptions.ActivityAlreadyStartedException
+ import expo.modules.kotlin.Promise
+ import expo.modules.kotlin.exception.Exceptions
++import expo.modules.kotlin.exception.toCodedException
+ import expo.modules.kotlin.modules.Module
+ import expo.modules.kotlin.modules.ModuleDefinition
++import expo.modules.kotlin.toBridgePromise
+
+ private const val REQUEST_CODE = 12
+ private const val ATTR_EXTRA = "extra"
+@@ -58,8 +60,13 @@ class IntentLauncherModule : Module() {
+       params.flags?.let { intent.addFlags(it) }
+       params.category?.let { intent.addCategory(it) }
+
+-      pendingPromise = promise
+-      currentActivity.startActivityForResult(intent, REQUEST_CODE)
++      try {
++        currentActivity.startActivityForResult(intent, REQUEST_CODE)
++        pendingPromise = promise
++      }
++      catch (e: Throwable) {
++        promise.reject(e.toCodedException())
++      }
+     }
+
+     OnActivityResult { _, payload ->
