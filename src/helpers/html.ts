@@ -60,11 +60,9 @@ export const needWhiteBackground = (ext?: string | null) => {
 
 export const canRenderInMacWebview = (ext?: string | null) => {
   return ext &&
-    ((semverGte(semverCoerce(getSystemVersion())!, semverCoerce('14.0')!) &&
-      ext === 'pdf') ||
-      (mime.lookup(ext) !== false &&
-        mime.lookup(ext).toString().includes('image/') &&
-        !mime.lookup(ext).toString().includes('vnd.')))
+    mime.lookup(ext) !== false &&
+    mime.lookup(ext).toString().includes('image/') &&
+    !mime.lookup(ext).toString().includes('vnd.')
     ? true
     : false;
 };
