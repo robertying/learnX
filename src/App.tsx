@@ -466,6 +466,9 @@ const MainTab = () => {
         activeTintColor: theme.colors.primary,
         inactiveTintColor: 'gray',
         adaptive: windowSize.width >= 750 ? false : true,
+        tabBarStyle: {
+          borderTopColor: theme.colors.outlineVariant,
+        },
         tabBarLabelPosition: 'below-icon',
         tabBarLabelStyle: {
           marginBottom: 2,
