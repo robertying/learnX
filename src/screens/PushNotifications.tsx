@@ -54,7 +54,7 @@ const PushNotifications: React.FC<
   const handlePush = (name: keyof ScreenParams) => {
     if (detailNavigator) {
       detailNavigator.dispatch(
-        StackActions.replace(name, {
+        StackActions.push(name, {
           disableAnimation: true,
         }),
       );
