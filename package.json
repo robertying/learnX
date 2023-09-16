@@ -16,7 +16,6 @@
   "expo": {
     "autolinking": {
       "exclude": [
-        "expo-application",
         "expo-font",
         "expo-keep-awake"
       ]
