@@ -25,21 +25,23 @@ PODS:
     - React-Core
     - SSZipArchive (~> 2.2.2)
   - DoubleConversion (1.1.6)
-  - EXBackgroundFetch (11.5.0):
+  - EXApplication (5.5.0):
     - ExpoModulesCore
   - EXCalendar (12.0.0):
     - ExpoModulesCore
-  - EXConstants (14.4.2):
+  - EXConstants (15.1.0):
     - ExpoModulesCore
-  - EXFileSystem (15.6.0):
+  - EXNotifications (0.24.1):
     - ExpoModulesCore
-  - EXNotifications (0.23.0):
+  - Expo (50.0.0-alpha.4):
     - ExpoModulesCore
-  - Expo (49.0.10):
+  - ExpoBackgroundFetch (11.6.0):
+    - ExpoModulesCore
+  - ExpoFileSystem (15.7.0):
     - ExpoModulesCore
   - ExpoHaptics (12.6.0):
     - ExpoModulesCore
-  - ExpoModulesCore (1.5.11):
+  - ExpoModulesCore (1.8.0):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
     - React-NativeModulesApple
@@ -498,7 +500,7 @@ PODS:
     - React-Core
   - RNLocalize (3.0.2):
     - React-Core
-  - RNReanimated (3.5.1):
+  - RNReanimated (3.5.2):
     - DoubleConversion
     - FBLazyVector
     - glog
@@ -546,12 +548,13 @@ DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
   - CodePush (from `../node_modules/react-native-code-push`)
   - DoubleConversion (from `../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec`)
-  - EXBackgroundFetch (from `../node_modules/expo-background-fetch/ios`)
+  - EXApplication (from `../node_modules/expo-application/ios`)
   - EXCalendar (from `../node_modules/expo-calendar/ios`)
   - EXConstants (from `../node_modules/expo-constants/ios`)
-  - EXFileSystem (from `../node_modules/expo-file-system/ios`)
   - EXNotifications (from `../node_modules/expo-notifications/ios`)
   - Expo (from `../node_modules/expo`)
+  - ExpoBackgroundFetch (from `../node_modules/expo-background-fetch/ios`)
+  - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
@@ -636,18 +639,20 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-code-push"
   DoubleConversion:
     :podspec: "../node_modules/react-native/third-party-podspecs/DoubleConversion.podspec"
-  EXBackgroundFetch:
-    :path: "../node_modules/expo-background-fetch/ios"
+  EXApplication:
+    :path: "../node_modules/expo-application/ios"
   EXCalendar:
     :path: "../node_modules/expo-calendar/ios"
   EXConstants:
     :path: "../node_modules/expo-constants/ios"
-  EXFileSystem:
-    :path: "../node_modules/expo-file-system/ios"
   EXNotifications:
     :path: "../node_modules/expo-notifications/ios"
   Expo:
     :path: "../node_modules/expo"
+  ExpoBackgroundFetch:
+    :path: "../node_modules/expo-background-fetch/ios"
+  ExpoFileSystem:
+    :path: "../node_modules/expo-file-system/ios"
   ExpoHaptics:
     :path: "../node_modules/expo-haptics/ios"
   ExpoModulesCore:
@@ -774,14 +779,15 @@ SPEC CHECKSUMS:
   boost: 57d2868c099736d80fcd648bf211b4431e51a558
   CodePush: 255d7607f428dcbec39085f81a206b170e01d012
   DoubleConversion: 5189b271737e1565bdce30deb4a08d647e3f5f54
-  EXBackgroundFetch: 1c3a6b4935ba2c401cfcdece8da10030c881952b
+  EXApplication: 07130d1c32736b1c28b795366331755f723577fa
   EXCalendar: f4dac0aa190d359f20652659707f5cc307656b6d
-  EXConstants: ce5bbea779da8031ac818c36bea41b10e14d04e1
-  EXFileSystem: aec89226b638b82cdd6d6c15d75a8b7f0696226d
-  EXNotifications: 40f334ce2b713e180e13beff9a16cab170a0c70c
-  Expo: 0ff83f0415a0e7a9368ce38bf25cad539b18a08c
+  EXConstants: 2a5b45fc0f6eccd4351349eadb0c022b735329ae
+  EXNotifications: 91905ba30c801a44a1c8c5531b2870d3bec0fb41
+  Expo: 0ccb4f7970a51de586683f48f2e738836f66aa94
+  ExpoBackgroundFetch: fed277fbbb3ed9765c7a74e17c0f7fb23efda936
+  ExpoFileSystem: 62cf8d5681581de1fb43b8af8ea6d7604eb786a6
   ExpoHaptics: 604aca02e942d1d43c139cae7cf397b26f85476f
-  ExpoModulesCore: 51cb2e7ab4c8da14be3f40b66d54c1781002e99d
+  ExpoModulesCore: d8437d39da4407d3c6e7001535b9b6c940c62c1b
   ExpoSecureStore: 5372610a4bbcf5e50fafbe6f38f8d9c22edf8253
   EXTaskManager: aae3b3c8144af1e0bfdbe8a3cc19fb116a01368d
   FBLazyVector: 5d4a3b7f411219a45a6d952f77d2c0a6c9989da5
@@ -834,7 +840,7 @@ SPEC CHECKSUMS:
   RNDeviceInfo: 02ea8b23e2280fa18e00a06d7e62804d74028579
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
   RNLocalize: dbea38dcb344bf80ff18a1757b1becf11f70cae4
-  RNReanimated: 99aa8c96151abbc2d7e737a56ec62aca709f0c92
+  RNReanimated: 2491645f0883526f4470d8b5c761308709ba31f8
   RNScreens: 85d3880b52d34db7b8eeebe2f1a0e807c05e69fa
   RNShare: 32e97adc8d8c97d4a26bcdd3c45516882184f8b6
   RNVectorIcons: d1a21f54ed554bab5d86d18c1d0377fbcef7a078
