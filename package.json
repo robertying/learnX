@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "14.3.1",
+  "version": "14.3.2",
   "private": true,
   "scripts": {
     "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
@@ -22,8 +22,8 @@
     }
   },
   "dependencies": {
-    "@babel/core": "7.22.19",
-    "@babel/preset-env": "7.22.15",
+    "@babel/core": "7.22.20",
+    "@babel/preset-env": "7.22.20",
     "@babel/runtime": "7.22.15",
     "@react-native-async-storage/async-storage": "1.19.3",
     "@react-native-clipboard/clipboard": "1.11.2",
