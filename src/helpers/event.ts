@@ -302,15 +302,15 @@ export const saveAssignmentsToReminderOrCalendar = async (
 ) => {
   const settings = store.getState().settings;
 
-  const {status} = await Calendar.requestCalendarPermissionsAsync();
-  if (status !== 'granted') {
-    throw new Error('Missing calendar permission');
-  }
-
   if (Platform.OS === 'ios' && !settings.syncAssignmentsToCalendar) {
     const {status} = await Calendar.requestRemindersPermissionsAsync();
     if (status !== 'granted') {
       throw new Error('Missing reminder permission');
+    }
+  } else {
+    const {status} = await Calendar.requestCalendarPermissionsAsync();
+    if (status !== 'granted') {
+      throw new Error('Missing calendar permission');
     }
   }
 
