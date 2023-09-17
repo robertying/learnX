@@ -305,13 +305,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             {DeviceInfo.isMac() && (
               <IconButton
                 style={Styles.mr0}
-                icon={props => (
-                  <MaterialIcons
-                    {...props}
-                    name="refresh"
-                    onPress={onRefresh}
-                  />
-                )}
+                onPress={onRefresh}
+                icon={props => <MaterialIcons {...props} name="refresh" />}
               />
             )}
             <IconButton
