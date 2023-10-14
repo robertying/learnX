@@ -117,4 +117,19 @@ export default {
   noPushNotificationsPermission: '未授予推送通知权限',
   learnXCompanionUsageGuide: 'learnX Companion 使用指南',
   noFileDescription: '无文件描述',
+  githubRecommended: 'GitHub（推荐）',
+  createNewGitHubIssue: '创建新的 GitHub Issue',
+  emailNotRecommended: '邮箱（不推荐）',
+  issueTemplate: '问题反馈与帮助',
+  issueTemplateDescription:
+    '如通过邮件提交问题反馈或寻求帮助，请务必使用以下模板：',
+  issueTemplateContent: `
+    - 问题描述
+    - 复现步骤
+    - 截图
+    - App 版本
+    - 设备型号
+    - 系统版本
+    - 其他补充信息
+  `,
 };

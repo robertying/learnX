@@ -124,4 +124,19 @@ export default {
   noPushNotificationsPermission: 'No Push Notifications Permission',
   learnXCompanionUsageGuide: 'learnX Companion Usage Guide',
   noFileDescription: 'No file description',
+  githubRecommended: 'GitHub (Recommended)',
+  createNewGitHubIssue: 'Create New GitHub Issue',
+  emailNotRecommended: 'Email (Not Recommended)',
+  issueTemplate: 'Issue Template',
+  issueTemplateDescription:
+    'If you are submitting an issue or asking for help via email, please use the following template:',
+  issueTemplateContent: `
+    - Issue Description
+    - Reproduction Steps
+    - Screenshots
+    - App Version
+    - Device Model
+    - OS Version
+    - Other Information
+  `,
 };

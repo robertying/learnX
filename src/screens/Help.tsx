@@ -17,20 +17,25 @@ const Help: React.FC<
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollViewPaddings}>
-        <Title>{t('email')}</Title>
+        <Title>{t('githubRecommended')}</Title>
+        <Text
+          style={[styles.text, styles.link]}
+          onPress={() =>
+            Linking.openURL(
+              'https://github.com/robertying/learnX/issues/new/choose',
+            )
+          }>
+          {t('createNewGitHubIssue')}
+        </Text>
+        <Title style={styles.marginTop}>{t('emailNotRecommended')}</Title>
         <Text
           style={[styles.text, styles.link]}
           onPress={() => Linking.openURL('mailto:yingrui205@gmail.com')}>
           yingrui205@gmail.com
         </Text>
-        <Title style={styles.marginTop}>GitHub</Title>
-        <Text
-          style={[styles.text, styles.link]}
-          onPress={() =>
-            Linking.openURL('https://github.com/robertying/learnX/issues')
-          }>
-          GitHub Issues
-        </Text>
+        <Title style={styles.marginTop}>{t('issueTemplate')}</Title>
+        <Text style={styles.text}>{t('issueTemplateDescription')}</Text>
+        <Text>{t('issueTemplateContent')}</Text>
       </ScrollView>
     </SafeArea>
   );
