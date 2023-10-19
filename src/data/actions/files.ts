@@ -21,6 +21,7 @@ import {
   SET_ARCHIVE_FILES,
 } from 'data/types/constants';
 import {File} from 'data/types/state';
+import {serializeError} from 'helpers/parse';
 
 export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_REQUEST,
@@ -50,7 +51,7 @@ export function getFilesForCourse(courseId: string): ThunkResult {
         );
       dispatch(getFilesForCourseAction.success({files, courseId}));
     } catch (err) {
-      dispatch(getFilesForCourseAction.failure(err as ApiError));
+      dispatch(getFilesForCourseAction.failure(serializeError(err)));
     }
   };
 }
@@ -88,7 +89,7 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
         );
       dispatch(getAllFilesForCoursesAction.success(files));
     } catch (err) {
-      dispatch(getAllFilesForCoursesAction.failure(err as ApiError));
+      dispatch(getAllFilesForCoursesAction.failure(serializeError(err)));
     }
   };
 }

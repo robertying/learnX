@@ -11,6 +11,7 @@ import {
   GET_CURRENT_SEMESTER_SUCCESS,
   SET_CURRENT_SEMESTER,
 } from 'data/types/constants';
+import {serializeError} from 'helpers/parse';
 
 export const getAllSemestersAction = createAsyncAction(
   GET_ALL_SEMESTERS_REQUEST,
@@ -26,7 +27,7 @@ export function getAllSemesters(): ThunkResult {
       const semesters = await dataSource.getSemesterIdList();
       dispatch(getAllSemestersAction.success(semesters.sort().reverse()));
     } catch (err) {
-      dispatch(getAllSemestersAction.failure(err as ApiError));
+      dispatch(getAllSemestersAction.failure(serializeError(err)));
     }
   };
 }
@@ -49,7 +50,7 @@ export function getCurrentSemester(): ThunkResult {
         dispatch(setCurrentSemester(semester.id));
       }
     } catch (err) {
-      dispatch(getCurrentSemesterAction.failure(err as ApiError));
+      dispatch(getCurrentSemesterAction.failure(serializeError(err)));
     }
   };
 }

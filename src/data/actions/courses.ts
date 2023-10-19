@@ -10,6 +10,7 @@ import {
 } from 'data/types/constants';
 import {Course} from 'data/types/state';
 import {getLocale} from 'helpers/i18n';
+import {serializeError} from 'helpers/parse';
 
 export const getCoursesForSemesterAction = createAsyncAction(
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -34,7 +35,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
         .sort((a, b) => a.id.localeCompare(b.id));
       dispatch(getCoursesForSemesterAction.success(courses));
     } catch (err) {
-      dispatch(getCoursesForSemesterAction.failure(err as ApiError));
+      dispatch(getCoursesForSemesterAction.failure(serializeError(err)));
     }
   };
 }

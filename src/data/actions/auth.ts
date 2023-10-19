@@ -9,6 +9,7 @@ import {
 } from 'data/types/constants';
 import {Auth} from 'data/types/state';
 import {getUserInfo} from './user';
+import {serializeError} from 'helpers/parse';
 
 export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
@@ -30,7 +31,7 @@ export function login(username?: string, password?: string): ThunkResult {
 
       dispatch(getUserInfo());
     } catch (err) {
-      dispatch(loginAction.failure(err as ApiError));
+      dispatch(loginAction.failure(serializeError(err)));
     }
   };
 }

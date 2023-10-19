@@ -20,6 +20,7 @@ import {
   SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
 import {Notice} from 'data/types/state';
+import {serializeError} from 'helpers/parse';
 
 export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_REQUEST,
@@ -46,7 +47,7 @@ export function getNoticesForCourse(courseId: string): ThunkResult {
         );
       dispatch(getNoticesForCourseAction.success({notices, courseId}));
     } catch (err) {
-      dispatch(getNoticesForCourseAction.failure(err as ApiError));
+      dispatch(getNoticesForCourseAction.failure(serializeError(err)));
     }
   };
 }
@@ -84,7 +85,7 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
         );
       dispatch(getAllNoticesForCoursesAction.success(notices));
     } catch (err) {
-      dispatch(getAllNoticesForCoursesAction.failure(err as ApiError));
+      dispatch(getAllNoticesForCoursesAction.failure(serializeError(err)));
     }
   };
 }

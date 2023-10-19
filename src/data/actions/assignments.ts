@@ -21,6 +21,7 @@ import {
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
 import {Assignment, AssignmentsState} from 'data/types/state';
+import {serializeError} from 'helpers/parse';
 
 export const getAssignmentsForCourseAction = createAsyncAction(
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
@@ -60,7 +61,7 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
         getAssignmentsForCourseAction.success({courseId, assignments: sorted}),
       );
     } catch (err) {
-      dispatch(getAssignmentsForCourseAction.failure(err as ApiError));
+      dispatch(getAssignmentsForCourseAction.failure(serializeError(err)));
     }
   };
 }
@@ -102,7 +103,7 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
       ];
       dispatch(getAllAssignmentsForCoursesAction.success(sorted));
     } catch (err) {
-      dispatch(getAllAssignmentsForCoursesAction.failure(err as ApiError));
+      dispatch(getAllAssignmentsForCoursesAction.failure(serializeError(err)));
     }
   };
 }
