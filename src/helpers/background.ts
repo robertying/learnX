@@ -34,7 +34,7 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
         courseTeacherName: courseName.teacherName,
       }));
     })
-    .reduce((a, b) => a.concat(b))
+    .reduce((a, b) => a.concat(b), [])
     .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix());
 
   dispatch(getAllNoticesForCoursesAction.success(notices));
@@ -62,7 +62,7 @@ const getAllAssignments = async (
         courseTeacherName: courseName.teacherName,
       }));
     })
-    .reduce((a, b) => a.concat(b))
+    .reduce((a, b) => a.concat(b), [])
     .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
   const sorted = [
     ...assignments.filter(a => dayjs(a.deadline).isAfter(dayjs())).reverse(),
@@ -88,7 +88,7 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
         courseTeacherName: courseName.teacherName,
       }));
     })
-    .reduce((a, b) => a.concat(b))
+    .reduce((a, b) => a.concat(b), [])
     .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
 
   dispatch(getAllFilesForCoursesAction.success(files));

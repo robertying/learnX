@@ -78,7 +78,7 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
             courseTeacherName: courseName.teacherName,
           }));
         })
-        .reduce((a, b) => a.concat(b))
+        .reduce((a, b) => a.concat(b), [])
         .sort(
           (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
         );

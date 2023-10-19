@@ -49,7 +49,7 @@ const Assignments: React.FC<
   );
 
   const handleRefresh = useCallback(() => {
-    if (loggedIn && courseIds.length !== 0) {
+    if (loggedIn) {
       dispatch(getAllAssignmentsForCourses(courseIds));
     }
   }, [courseIds, dispatch, loggedIn]);

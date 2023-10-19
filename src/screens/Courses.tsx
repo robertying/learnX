@@ -1,4 +1,4 @@
-import {useEffect, useMemo} from 'react';
+import {useCallback, useEffect, useMemo} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
@@ -53,11 +53,11 @@ const Courses: React.FC<
   const all = coursesWithCounts.filter(i => !hiddenIds.includes(i.id));
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     if (loggedIn && currentSemesterId) {
       dispatch(getCoursesForSemester(currentSemesterId));
     }
-  };
+  }, [currentSemesterId, dispatch, loggedIn]);
 
   const handlePush = (item: Course) => {
     if (detailNavigator) {
@@ -71,6 +71,10 @@ const Courses: React.FC<
       navigation.push('CourseDetail', item);
     }
   };
+
+  useEffect(() => {
+    handleRefresh();
+  }, [handleRefresh]);
 
   useEffect(() => {
     if (courseInformationSharing) {

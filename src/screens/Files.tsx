@@ -37,7 +37,7 @@ const Files: React.FC<
   );
 
   const handleRefresh = useCallback(() => {
-    if (loggedIn && courseIds.length !== 0) {
+    if (loggedIn) {
       dispatch(getAllFilesForCourses(courseIds));
     }
   }, [courseIds, dispatch, loggedIn]);

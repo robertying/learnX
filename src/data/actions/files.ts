@@ -82,7 +82,7 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
             courseTeacherName: courseName.teacherName,
           }));
         })
-        .reduce((a, b) => a.concat(b))
+        .reduce((a, b) => a.concat(b), [])
         .sort(
           (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix(),
         );
