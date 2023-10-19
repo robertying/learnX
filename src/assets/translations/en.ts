@@ -126,7 +126,7 @@ export default {
   noFileDescription: 'No file description',
   githubRecommended: 'GitHub (Recommended)',
   createNewGitHubIssue: 'Create New GitHub Issue',
-  emailNotRecommended: 'Email (Not Recommended)',
+  emailNotRecommended: 'Email',
   issueTemplate: 'Issue Template',
   issueTemplateDescription:
     'If you are submitting an issue or asking for help via email, please use the following template:',

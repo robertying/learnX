@@ -119,7 +119,7 @@ export default {
   noFileDescription: '无文件描述',
   githubRecommended: 'GitHub（推荐）',
   createNewGitHubIssue: '创建新的 GitHub Issue',
-  emailNotRecommended: '邮箱（不推荐）',
+  emailNotRecommended: '邮箱',
   issueTemplate: '问题反馈与帮助',
   issueTemplateDescription:
     '如通过邮件提交问题反馈或寻求帮助，请务必使用以下模板：',
