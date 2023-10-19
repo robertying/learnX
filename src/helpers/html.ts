@@ -1,7 +1,4 @@
 import mime from 'mime-types';
-import {getSystemVersion} from 'react-native-device-info';
-import semverGte from 'semver/functions/gte';
-import semverCoerce from 'semver/functions/coerce';
 
 declare const preval: any;
 
