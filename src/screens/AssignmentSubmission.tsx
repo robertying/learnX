@@ -1,8 +1,6 @@
-import {useCallback, useLayoutEffect, useState} from 'react';
+import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import DocumentPicker, {
-  DocumentPickerResponse,
-} from 'react-native-document-picker';
+import DocumentPicker from 'react-native-document-picker';
 import {
   Alert,
   Keyboard,
@@ -29,10 +27,13 @@ import {removeTags} from 'helpers/html';
 import {getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 import {submitAssignment} from 'data/source';
-import {getAssignmentsForCourse} from 'data/actions/assignments';
+import {
+  getAssignmentsForCourse,
+  setPendingAssignmentData,
+} from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
 import {ScreenParams} from './types';
-import {useAppDispatch} from 'data/store';
+import {useAppDispatch, useAppSelector} from 'data/store';
 
 const AssignmentSubmission: React.FC<
   React.PropsWithChildren<
@@ -47,6 +48,7 @@ const AssignmentSubmission: React.FC<
     courseId,
     courseName,
     studentHomeworkId,
+    title,
     submitTime,
     submittedAttachment,
     submittedContent,
@@ -54,12 +56,19 @@ const AssignmentSubmission: React.FC<
 
   const dispatch = useAppDispatch();
 
+  const pendingAssignmentData = useAppSelector(
+    state => state.assignments.pendingAssignmentData,
+  );
+
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),
   );
-  const [attachmentResult, setAttachmentResult] = useState<
-    (DocumentPickerResponse & {name: string}) | null
-  >(null);
+  const [attachmentResult, setAttachmentResult] = useState<{
+    uri: string;
+    type: string | null;
+    name: string;
+    size?: number | null;
+  } | null>(null);
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -126,6 +135,7 @@ const AssignmentSubmission: React.FC<
       setUploading(false);
       setProgress(0);
 
+      dispatch(setPendingAssignmentData(null));
       dispatch(getAssignmentsForCourse(courseId));
 
       toast(t('assignmentSubmittionSucceeded'), 'success');
@@ -188,6 +198,18 @@ const AssignmentSubmission: React.FC<
     uploading,
   ]);
 
+  useEffect(() => {
+    if (pendingAssignmentData) {
+      setAttachmentResult({
+        uri: pendingAssignmentData.data,
+        type: pendingAssignmentData.mimeType,
+        name: getLocale().startsWith('zh')
+          ? `${title}-提交`
+          : `${title} Submission`,
+      } as any);
+    }
+  }, [pendingAssignmentData, title]);
+
   return (
     <SafeArea>
       <KeyboardAvoidingView
@@ -231,10 +253,17 @@ const AssignmentSubmission: React.FC<
                   name: attachmentResult.name,
                   downloadUrl: attachmentResult.uri,
                   previewUrl: attachmentResult.uri,
-                  size: attachmentResult.size + 'B',
+                  size: attachmentResult.size
+                    ? attachmentResult.size + 'B'
+                    : '',
                 })
               }>
-              {attachmentResult.name}
+              {attachmentResult.name}{' '}
+              {pendingAssignmentData
+                ? getLocale().startsWith('zh')
+                  ? '（分享）'
+                  : '(Shared)'
+                : ''}
             </TextButton>
           ) : undefined}
           <View style={styles.attachmentActionButtons}>

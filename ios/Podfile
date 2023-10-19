@@ -47,6 +47,7 @@ target 'learnX' do
       target.build_configurations.each do |config|
         config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
         config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
+        config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
       end
       if target.respond_to?(:product_type) and target.product_type == 'com.apple.product-type.bundle'
         target.build_configurations.each do |config|
@@ -66,4 +67,19 @@ target 'learnX' do
       end
     end
   end
+end
+
+target 'ShareExtension' do
+  config = use_native_modules!
+
+  flags = get_default_flags()
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => flags[:hermes_enabled],
+    :fabric_enabled => flags[:fabric_enabled],
+    :app_path => "#{Pod::Config.instance.installation_root}/.."
+  )
+
+  pod 'RNShareMenu', :path => '../node_modules/react-native-share-menu'
 end

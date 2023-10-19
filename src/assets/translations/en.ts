@@ -139,4 +139,8 @@ export default {
     - OS Version
     - Other Information
   `,
+  shareReceived:
+    'The content you just shared has been received. It will be automatically chosen during the next assignment submission.',
+  sharedContentSelected:
+    'The previously shared content has been automatically chosen as the attachment.',
 };

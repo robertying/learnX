@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {
   AppState,
   AppStateStatus,
@@ -30,6 +30,7 @@ import {
   adaptNavigationTheme,
 } from 'react-native-paper';
 import codePush from 'react-native-code-push';
+import ShareMenu from 'react-native-share-menu';
 import {Provider as StoreProvider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -77,6 +78,7 @@ import {persistor, store, useAppDispatch, useAppSelector} from 'data/store';
 import {Notice, Assignment, File, Course} from 'data/types/state';
 import {login} from 'data/actions/auth';
 import {getAllSemesters, getCurrentSemester} from 'data/actions/semesters';
+import {setPendingAssignmentData} from 'data/actions/assignments';
 import {resetLoading} from 'data/actions/root';
 import {getCoursesForSemester} from 'data/actions/courses';
 import {setCredentials} from 'data/source';
@@ -758,6 +760,32 @@ const Container = () => {
     );
     return () => sub.remove();
   }, [appState, auth.password, auth.username, dispatch, loggedIn]);
+
+  const handleShare = useCallback(
+    (item: any) => {
+      if (!loggedIn) {
+        return;
+      }
+      if (!item) {
+        return;
+      }
+      if (!Array.isArray(item.data) || item.data.length === 0) {
+        return;
+      }
+      dispatch(setPendingAssignmentData(item.data[0]));
+      toast(t('shareReceived'), 'success', 5000);
+    },
+    [dispatch, loggedIn, toast],
+  );
+
+  useEffect(() => {
+    ShareMenu.getInitialShare(handleShare);
+  }, [handleShare]);
+
+  useEffect(() => {
+    const sub = ShareMenu.addNewShareListener(handleShare);
+    return () => sub.remove();
+  }, [handleShare]);
 
   useEffect(() => {
     dispatch(login());

@@ -18,8 +18,9 @@ import {
   SET_FAV_ASSIGNMENT,
   SET_UNREAD_ASSIGNMENT,
   SET_ARCHIVE_ASSIGNMENTS,
+  SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
-import {Assignment} from 'data/types/state';
+import {Assignment, AssignmentsState} from 'data/types/state';
 
 export const getAssignmentsForCourseAction = createAsyncAction(
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
@@ -136,4 +137,9 @@ export const setArchiveAssignments = createAction(
     assignmentIds,
     flag,
   }),
+)();
+
+export const setPendingAssignmentData = createAction(
+  SET_PENDING_ASSIGNMENT_DATA,
+  (data: AssignmentsState['pendingAssignmentData']) => data,
 )();

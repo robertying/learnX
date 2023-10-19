@@ -17,6 +17,7 @@ import {
   setFavAssignment,
   setUnreadAssignment,
   setArchiveAssignments,
+  setPendingAssignmentData,
 } from 'data/actions/assignments';
 import {
   getAllFilesForCoursesAction,
@@ -87,13 +88,17 @@ type SetPinAssignmentAction = ActionType<typeof setPinAssignment>;
 type SetFavAssignmentAction = ActionType<typeof setFavAssignment>;
 type SetUnreadAssignmentAction = ActionType<typeof setUnreadAssignment>;
 type SetArchiveAssignmentsAction = ActionType<typeof setArchiveAssignments>;
+type SetPendingAssignmentDataAction = ActionType<
+  typeof setPendingAssignmentData
+>;
 export type AssignmentsAction =
   | GetAssignmentsForCourseAction
   | GetAllAssignmentsForCoursesAction
   | SetPinAssignmentAction
   | SetFavAssignmentAction
   | SetUnreadAssignmentAction
-  | SetArchiveAssignmentsAction;
+  | SetArchiveAssignmentsAction
+  | SetPendingAssignmentDataAction;
 
 type GetFilesForCourseAction = ActionType<typeof getFilesForCourseAction>;
 type GetAllFilesForCoursesAction = ActionType<

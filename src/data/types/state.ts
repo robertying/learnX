@@ -130,6 +130,10 @@ export interface AssignmentsState {
   pinned: string[];
   items: Assignment[];
   error?: FailReason | null;
+  pendingAssignmentData?: {
+    data: string;
+    mimeType: string;
+  } | null;
 }
 
 export interface File {

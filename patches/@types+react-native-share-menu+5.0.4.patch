@@ -1,0 +1,12 @@
+diff --git a/node_modules/@types/react-native-share-menu/index.d.ts b/node_modules/@types/react-native-share-menu/index.d.ts
+index 3541f52..964ac9e 100644
+--- a/node_modules/@types/react-native-share-menu/index.d.ts
++++ b/node_modules/@types/react-native-share-menu/index.d.ts
+@@ -14,6 +14,7 @@ interface ShareMenu {
+     getSharedText(callback: ShareCallback): void;
+     getInitialShare(callback: ShareCallback): void;
+     addNewShareListener(callback: ShareCallback): ShareListener;
++    getSharedCacheDirectory(callback: (dir?: string | null) => void): void;
+     clearSharedText(): void;
+ }
+ 

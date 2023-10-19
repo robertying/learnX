@@ -10,6 +10,7 @@ import {
   SET_FAV_ASSIGNMENT,
   SET_UNREAD_ASSIGNMENT,
   SET_ARCHIVE_ASSIGNMENTS,
+  SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
 import {AssignmentsState} from 'data/types/state';
 
@@ -21,6 +22,7 @@ export default function assignments(
     favorites: [],
     archived: [],
     items: [],
+    pendingAssignmentData: null,
   },
   action: AssignmentsAction,
 ): AssignmentsState {
@@ -124,6 +126,11 @@ export default function assignments(
           ),
         };
       }
+    case SET_PENDING_ASSIGNMENT_DATA:
+      return {
+        ...state,
+        pendingAssignmentData: action.payload,
+      };
     default:
       return state;
   }

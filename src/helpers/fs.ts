@@ -1,18 +1,23 @@
+import {Platform} from 'react-native';
 import * as ExpoFileSystem from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import fs from 'react-native-fs';
 import Share from 'react-native-share';
+import ShareMenu from 'react-native-share-menu';
 import mime from 'mime-types';
 import {dataSource} from 'data/source';
 import {store} from 'data/store';
 import {File} from 'data/types/state';
-import {Platform} from 'react-native';
 
 export const downloadFile = async (
   file: File,
   refresh?: boolean,
   onProgress?: (progress: number) => void,
 ) => {
+  if (file.downloadUrl.startsWith('file://')) {
+    return file.downloadUrl;
+  }
+
   const settings = store.getState().settings;
 
   let dir = `${
@@ -140,6 +145,12 @@ export const removeFileDir = async () => {
   if (await fs.exists(dir)) {
     await fs.unlink(dir);
   }
+
+  ShareMenu.getSharedCacheDirectory(async dir => {
+    if (dir && (await fs.exists(dir))) {
+      await fs.unlink(dir);
+    }
+  });
 };
 
 export const openFile = async (uri: string, type?: string | null) => {
