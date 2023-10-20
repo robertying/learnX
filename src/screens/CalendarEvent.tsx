@@ -2,6 +2,11 @@ import {useMemo, useState} from 'react';
 import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
+import {DatePickerModal} from 'react-native-paper-dates';
+import type {
+  CalendarDate,
+  RangeChange,
+} from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -50,20 +55,48 @@ const CalendarEvent: React.FC<
 
   const [courseSyncing, setCourseSyncing] = useState(false);
   const [assignmentSyncing, setAssignmentSyncing] = useState(false);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [startDate, setStartDate] = useState<CalendarDate>(dayjs().toDate());
+  const [endDate, setEndDate] = useState<CalendarDate>(
+    dayjs().add(28, 'day').toDate(),
+  );
 
-  const handleCourseSync = async () => {
+  const handleDatePickerDismiss = () => {
+    setDatePickerOpen(false);
+  };
+
+  const handleDatePickerOpen = () => {
+    setDatePickerOpen(true);
+  };
+
+  const handleSyncRangeChange: RangeChange = ({startDate, endDate}) => {
+    setStartDate(startDate);
+    setEndDate(endDate);
+  };
+
+  const handleSyncRangeConfirm: RangeChange = ({startDate, endDate}) => {
+    handleDatePickerDismiss();
+    syncCourse(startDate, endDate);
+  };
+
+  const syncCourse = async (start?: Date, end?: Date) => {
+    if (!start || !end) {
+      return;
+    }
+
     setCourseSyncing(true);
 
-    const today = dayjs();
-    const monthFromToday = today.add(1, 'month');
+    const startDate = dayjs(start);
+    const endDate = dayjs(end);
 
     try {
       const events = await dataSource.getCalendar(
-        today.format('YYYYMMDD'),
-        monthFromToday.format('YYYYMMDD'),
+        startDate.format('YYYYMMDD'),
+        endDate.format('YYYYMMDD'),
         graduate,
       );
-      await saveCoursesToCalendar(events, today, monthFromToday);
+
+      await saveCoursesToCalendar(events, startDate, endDate);
       toast(t('courseScheduleSyncSucceeded'), 'success');
     } catch (err) {
       if ((err as Error).message === 'Missing calendar permission') {
@@ -157,7 +190,7 @@ const CalendarEvent: React.FC<
           iconName="event"
           primaryText={t('syncCourseSchedule')}
           type="none"
-          onPress={handleCourseSync}
+          onPress={handleDatePickerOpen}
           loading={courseSyncing}
         />
         <TableCell
@@ -187,10 +220,10 @@ const CalendarEvent: React.FC<
         )}
         <Caption style={styles.caption}>
           {getLocale().startsWith('zh')
-            ? `手动同步 30 天内的${
+            ? `手动同步${
                 graduate ? '研究生' : '本科生'
               }课表到日历；请在更改提醒设置后重新同步以应用更改。`
-            : `Manually sync 30-day ${
+            : `Manually sync ${
                 graduate ? 'graduate' : 'undergraduate'
               } course schedule to your calendar. Please re-sync after any alarm setting change.`}
         </Caption>
@@ -259,6 +292,20 @@ const CalendarEvent: React.FC<
           onPress={handleCalendarDelete}
         />
       </ScrollView>
+      <DatePickerModal
+        locale={getLocale().startsWith('zh') ? 'zh' : 'en'}
+        mode="range"
+        visible={datePickerOpen}
+        saveLabelDisabled={!startDate || !endDate}
+        startLabel={t('datePickerStartLabel')}
+        endLabel={t('datePickerEndLabel')}
+        label={t('datePickerLabel')}
+        onDismiss={handleDatePickerDismiss}
+        startDate={startDate}
+        endDate={endDate}
+        onChange={handleSyncRangeChange}
+        onConfirm={handleSyncRangeConfirm}
+      />
     </SafeArea>
   );
 };

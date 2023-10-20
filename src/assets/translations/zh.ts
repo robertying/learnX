@@ -41,16 +41,16 @@ export default {
   uploadAttachment: '上传附件',
   courseScheduleSyncSucceeded: '课表同步成功',
   courseScheduleSyncNoCalendarPermission:
-    '课表同步失败：请给予 App 日历访问权限',
+    '课表同步失败：请给予 App 日历的完全访问权限',
   courseScheduleSyncNoReminderPermission:
     '课表同步失败：请给予 App 提醒事项访问权限',
   courseScheduleSyncRepetitiveError:
-    '课表同步失败：请确保已连接校园网并重试；若连续三天同步失败，请提交问题反馈',
+    '课表同步失败：请确保已连接校园网并重试；尝试缩小或更改同步的日期范围',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
   deleteSyncedCalendarsAndRemindersConfirmation:
     '确定删除已同步的日历与提醒事项？该操作不可撤销。',
   deleteSucceeded: '删除成功',
-  deleteFailedNoCalendarPermission: '删除失败：请给予 App 日历访问权限',
+  deleteFailedNoCalendarPermission: '删除失败：请给予 App 日历的完全访问权限',
   deleteFailedNoReminderPermission: '删除失败：请给予 App 提醒事项访问权限',
   deleteFailed: '删除失败：',
   graduate: '研究生',
@@ -136,4 +136,7 @@ export default {
   shareReceived: '您刚分享的内容已被接收，将在下次作业提交时自动选中',
   sharedContentSelected: '您之前分享的内容已被自动选中作为作业附件',
   noFileSize: '未知文件大小',
+  datePickerStartLabel: '开始',
+  datePickerEndLabel: '结束',
+  datePickerLabel: '选择同步范围',
 };

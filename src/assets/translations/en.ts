@@ -43,17 +43,17 @@ export default {
   uploadAttachment: 'Upload attachment',
   courseScheduleSyncSucceeded: 'Successfully synced course schedule',
   courseScheduleSyncNoCalendarPermission:
-    'Course Schedule Sync failed. Please grant the App access to calendars.',
+    'Course Schedule Sync failed. Please grant the App full access to calendars.',
   courseScheduleSyncNoReminderPermission:
     'Course Schedule Sync failed. Please grant the App access to reminders.',
   courseScheduleSyncRepetitiveError:
-    'Course Schedule Sync failed. Make sure you are connected to campus networks and try again. If this issue persists for more than three days, file a feedback.',
+    'Course Schedule Sync failed. Make sure you are connected to the campus network and try again, or try narrowing down and change the sync date range.',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
   deleteSyncedCalendarsAndRemindersConfirmation:
     'Do you want to delete synced calendars and reminders? This cannot be undone.',
   deleteSucceeded: 'Successfully deleted',
   deleteFailedNoCalendarPermission:
-    'Failed to delete. Please grant the App access to calendars.',
+    'Failed to delete. Please grant the App full access to calendars.',
   deleteFailedNoReminderPermission:
     'Failed to delete. Please grant the App access to reminders.',
   deleteFailed: 'Failed to delete: ',
@@ -145,4 +145,7 @@ export default {
   sharedContentSelected:
     'The previously shared content has been automatically chosen as the attachment.',
   noFileSize: 'Unknown file size',
+  datePickerStartLabel: 'Start',
+  datePickerEndLabel: 'End',
+  datePickerLabel: 'Select Sync Range',
 };

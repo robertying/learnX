@@ -39,6 +39,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
+import {en, zh, registerTranslation} from 'react-native-paper-dates';
 import {getLocale, t} from 'helpers/i18n';
 import {clearPushNotificationBadge} from 'helpers/notification';
 import {getLatestRelease} from 'helpers/update';
@@ -84,6 +85,9 @@ import {getCoursesForSemester} from 'data/actions/courses';
 import {setCredentials} from 'data/source';
 import useToast from 'hooks/useToast';
 import packageJson from '../package.json';
+
+registerTranslation('en', en);
+registerTranslation('zh', zh);
 
 dayjs.extend(relativeTime);
 dayjs.locale(getLocale().startsWith('zh') ? 'zh-cn' : 'en');

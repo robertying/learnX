@@ -86,6 +86,7 @@
     "react-native-localize": "3.0.2",
     "react-native-pager-view": "6.2.2",
     "react-native-paper": "5.11.0",
+    "react-native-paper-dates": "0.20.1",
     "react-native-reanimated": "3.5.4",
     "react-native-safe-area-context": "4.7.3",
     "react-native-screens": "3.26.0",
