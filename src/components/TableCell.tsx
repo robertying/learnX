@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 2,
+    minHeight: 44,
   },
   icon: {
     marginRight: 8,
@@ -135,8 +136,6 @@ const styles = StyleSheet.create({
   primaryText: {
     fontSize: 17,
     flex: 1,
-    minHeight: 44,
-    lineHeight: 44,
     marginHorizontal: 8,
   },
   bigText: {
