@@ -133,6 +133,7 @@ export default {
   issueTemplateContent: `
     - Issue Description
     - Reproduction Steps
+    - Attempts to Fix
     - Screenshots
     - App Version
     - Device Model

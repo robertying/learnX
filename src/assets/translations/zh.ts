@@ -126,6 +126,7 @@ export default {
   issueTemplateContent: `
     - 问题描述
     - 复现步骤
+    - 已尝试的解决方案
     - 截图
     - App 版本
     - 设备型号
