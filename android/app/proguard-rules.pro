@@ -46,6 +46,25 @@
 -keep class expo.modules.** { *; }
 -keep class org.unimodules.** { *; }
 
+-keepclassmembers public class com.facebook.react.ReactActivityDelegate {
+  protected *;
+  private ReactDelegate mReactDelegate;
+}
+-keepclassmembers public class com.facebook.react.ReactActivity {
+  private final ReactActivityDelegate mDelegate;
+}
+
+-keepclassmembers public class com.facebook.react.ReactNativeHost {
+  protected *;
+}
+
+-keepclassmembers public class expo.modules.ExpoModulesPackageList {
+  public *;
+}
+
+-keepnames class * extends expo.modules.core.BasePackage
+-keepnames class * implements expo.modules.core.interfaces.Package
+
 
 # crash reports
 
