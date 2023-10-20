@@ -24,7 +24,7 @@ export default {
   opensourceDependencies: 'Opensource Dependencies',
   noAssignmentDescription: 'No assignment description',
   assignmentSyncNoCalendarPermission:
-    'Assignment Sync failed. Please grant the App access to calendars.',
+    'Assignment Sync failed. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   assignmentSyncNoReminderPermission:
     'Assignment Sync failed. Please grant the App access to reminders.',
   assignmentSyncFailed: 'Assignment Sync failed: ',
@@ -43,7 +43,7 @@ export default {
   uploadAttachment: 'Upload attachment',
   courseScheduleSyncSucceeded: 'Successfully synced course schedule',
   courseScheduleSyncNoCalendarPermission:
-    'Course Schedule Sync failed. Please grant the App full access to calendars.',
+    'Course Schedule Sync failed. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   courseScheduleSyncNoReminderPermission:
     'Course Schedule Sync failed. Please grant the App access to reminders.',
   courseScheduleSyncRepetitiveError:
@@ -53,7 +53,7 @@ export default {
     'Do you want to delete synced calendars and reminders? This cannot be undone.',
   deleteSucceeded: 'Successfully deleted',
   deleteFailedNoCalendarPermission:
-    'Failed to delete. Please grant the App full access to calendars.',
+    'Failed to delete. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   deleteFailedNoReminderPermission:
     'Failed to delete. Please grant the App access to reminders.',
   deleteFailed: 'Failed to delete: ',

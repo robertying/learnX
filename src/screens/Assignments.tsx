@@ -98,6 +98,11 @@ const Assignments: React.FC<
             toast(t('assignmentSyncNoCalendarPermission'), 'error');
           } else if ((err as Error).message === 'Missing reminder permission') {
             toast(t('assignmentSyncNoReminderPermission'), 'error');
+          } else if (
+            (err as Error).message ===
+            'CALENDAR permission is required to do this operation.'
+          ) {
+            toast(t('assignmentSyncNoCalendarPermission'), 'error');
           } else {
             toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
           }

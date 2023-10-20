@@ -22,7 +22,8 @@ export default {
   yayuXiao: 'Yayu Xiao 制作的 App icon',
   opensourceDependencies: '开源依赖',
   noAssignmentDescription: '无作业描述',
-  assignmentSyncNoCalendarPermission: '作业同步失败：请给予 App 日历访问权限',
+  assignmentSyncNoCalendarPermission:
+    '作业同步失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
   assignmentSyncNoReminderPermission:
     '作业同步失败：请给予 App 提醒事项访问权限',
   assignmentSyncFailed: '作业同步失败：',
@@ -41,7 +42,7 @@ export default {
   uploadAttachment: '上传附件',
   courseScheduleSyncSucceeded: '课表同步成功',
   courseScheduleSyncNoCalendarPermission:
-    '课表同步失败：请给予 App 日历的完全访问权限',
+    '课表同步失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
   courseScheduleSyncNoReminderPermission:
     '课表同步失败：请给予 App 提醒事项访问权限',
   courseScheduleSyncRepetitiveError:
@@ -50,7 +51,8 @@ export default {
   deleteSyncedCalendarsAndRemindersConfirmation:
     '确定删除已同步的日历与提醒事项？该操作不可撤销。',
   deleteSucceeded: '删除成功',
-  deleteFailedNoCalendarPermission: '删除失败：请给予 App 日历的完全访问权限',
+  deleteFailedNoCalendarPermission:
+    '删除失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
   deleteFailedNoReminderPermission: '删除失败：请给予 App 提醒事项访问权限',
   deleteFailed: '删除失败：',
   graduate: '研究生',
