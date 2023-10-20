@@ -16,6 +16,28 @@ import {removeTags} from './html';
 const courseCalendarName = 'learnX 课表';
 const assignmentCalendarReminderName = 'learnX 作业';
 
+export const getAndRequestPermission = async (
+  type: 'calendar' | 'reminder',
+) => {
+  if (type === 'calendar') {
+    const {status} = await Calendar.getCalendarPermissionsAsync();
+    if (status === 'granted') {
+      return true;
+    }
+    const {status: newStatus} =
+      await Calendar.requestCalendarPermissionsAsync();
+    return newStatus === 'granted';
+  } else {
+    const {status} = await Calendar.getRemindersPermissionsAsync();
+    if (status === 'granted') {
+      return true;
+    }
+    const {status: newStatus} =
+      await Calendar.requestRemindersPermissionsAsync();
+    return newStatus === 'granted';
+  }
+};
+
 const getDefaultCalendarSource = async (entityType: string) => {
   const calendars = await Calendar.getCalendarsAsync(entityType);
 
@@ -83,14 +105,12 @@ export const saveCoursesToCalendar = async (
 ) => {
   const settings = store.getState().settings;
 
-  const {status} = await Calendar.requestCalendarPermissionsAsync();
-  if (status !== 'granted') {
+  if (!(await getAndRequestPermission('calendar'))) {
     throw new Error('Missing calendar permission');
   }
 
   if (Platform.OS === 'ios') {
-    const {status} = await Calendar.requestRemindersPermissionsAsync();
-    if (status !== 'granted') {
+    if (!(await getAndRequestPermission('reminder'))) {
       throw new Error('Missing reminder permission');
     }
   }
@@ -303,13 +323,11 @@ export const saveAssignmentsToReminderOrCalendar = async (
   const settings = store.getState().settings;
 
   if (Platform.OS === 'ios' && !settings.syncAssignmentsToCalendar) {
-    const {status} = await Calendar.requestRemindersPermissionsAsync();
-    if (status !== 'granted') {
+    if (!(await getAndRequestPermission('reminder'))) {
       throw new Error('Missing reminder permission');
     }
   } else {
-    const {status} = await Calendar.requestCalendarPermissionsAsync();
-    if (status !== 'granted') {
+    if (!(await getAndRequestPermission('calendar'))) {
       throw new Error('Missing calendar permission');
     }
   }
@@ -347,14 +365,12 @@ export const saveAssignmentsToReminderOrCalendar = async (
 };
 
 export const removeCalendars = async () => {
-  const {status} = await Calendar.requestCalendarPermissionsAsync();
-  if (status !== 'granted') {
+  if (!(await getAndRequestPermission('calendar'))) {
     throw new Error('Missing calendar permission');
   }
 
   if (Platform.OS === 'ios') {
-    const {status} = await Calendar.requestRemindersPermissionsAsync();
-    if (status !== 'granted') {
+    if (!(await getAndRequestPermission('reminder'))) {
       throw new Error('Missing reminder permission');
     }
   }

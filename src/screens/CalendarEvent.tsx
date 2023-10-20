@@ -14,6 +14,7 @@ import {useAppDispatch, useAppSelector} from 'data/store';
 import {clearEventIds, setSetting} from 'data/actions/settings';
 import {dataSource} from 'data/source';
 import {
+  getAndRequestPermission,
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
@@ -136,9 +137,12 @@ const CalendarEvent: React.FC<
     dispatch(setSetting('assignmentSync', enabled));
   };
 
-  const handleSyncTargetChange = (value: boolean) => {
+  const handleSyncTargetChange = async (value: boolean) => {
     dispatch(clearEventIds());
     dispatch(setSetting('syncAssignmentsToCalendar', value));
+    if (value) {
+      await getAndRequestPermission('calendar');
+    }
   };
 
   const handleCalendarDelete = () => {
