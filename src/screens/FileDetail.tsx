@@ -258,7 +258,9 @@ const FileDetail: React.FC<
                   color={theme.colors.primary}
                   size={17}
                 />
-                <Text style={styles.textPaddingRight}>{file.size}</Text>
+                <Text style={styles.textPaddingRight}>
+                  {file.size ?? t('noFileSize')}
+                </Text>
               </View>
               <Divider />
               <Text style={styles.description}>

@@ -763,17 +763,24 @@ const Container = () => {
 
   const handleShare = useCallback(
     (item: any) => {
-      if (!loggedIn) {
+      if (!loggedIn || !item) {
         return;
       }
-      if (!item) {
-        return;
+
+      let data: any = null;
+      if (Platform.OS === 'ios') {
+        if (!Array.isArray(item.data) || item.data.length === 0) {
+          return;
+        }
+        data = item.data[0];
+      } else {
+        data = item;
       }
-      if (!Array.isArray(item.data) || item.data.length === 0) {
-        return;
+
+      if (data) {
+        dispatch(setPendingAssignmentData(data));
+        toast(t('shareReceived'), 'success', 5000);
       }
-      dispatch(setPendingAssignmentData(item.data[0]));
-      toast(t('shareReceived'), 'success', 5000);
     },
     [dispatch, loggedIn, toast],
   );

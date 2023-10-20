@@ -18,6 +18,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import dayjs from 'dayjs';
+import mimeTypes from 'mime-types';
 import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
@@ -85,8 +86,12 @@ const AssignmentSubmission: React.FC<
       setAttachmentResult({
         ...result,
         name:
-          result.name ?? (getLocale().startsWith('zh') ? '附件' : 'attachment'),
+          result.name ??
+          (getLocale().startsWith('zh')
+            ? `${title}-提交`
+            : `${title} Submission`),
       });
+      dispatch(setPendingAssignmentData(null));
     } catch (err) {
       if (!DocumentPicker.isCancel(err as Error)) {
         toast(t('filePickFailed'), 'error');
@@ -94,14 +99,17 @@ const AssignmentSubmission: React.FC<
     }
   };
 
-  const handleFileOpen = (attachment?: RemoteFile) => {
+  const handleFileOpen = (attachment?: RemoteFile & {type?: string | null}) => {
     if (attachment) {
       navigation.push('FileDetail', {
         id,
         courseName,
         title: stripExtension(attachment.name),
         downloadUrl: attachment.downloadUrl,
-        fileType: getExtension(attachment.name) ?? '',
+        fileType:
+          (attachment.type
+            ? mimeTypes.extension(attachment.type)
+            : getExtension(attachment.name)) ?? '',
       } as File);
     }
   };
@@ -256,13 +264,14 @@ const AssignmentSubmission: React.FC<
                   size: attachmentResult.size
                     ? attachmentResult.size + 'B'
                     : '',
+                  type: attachmentResult.type,
                 })
               }>
               {attachmentResult.name}{' '}
               {pendingAssignmentData
                 ? getLocale().startsWith('zh')
-                  ? '（分享）'
-                  : '(Shared)'
+                  ? '（之前分享的）'
+                  : '(previously shared)'
                 : ''}
             </TextButton>
           ) : undefined}

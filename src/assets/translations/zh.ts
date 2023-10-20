@@ -134,4 +134,5 @@ export default {
   `,
   shareReceived: '您刚分享的内容已被接收，将在下次作业提交时自动选中',
   sharedContentSelected: '您之前分享的内容已被自动选中作为作业附件',
+  noFileSize: '未知文件大小',
 };

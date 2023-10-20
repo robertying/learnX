@@ -14,7 +14,10 @@ export const downloadFile = async (
   refresh?: boolean,
   onProgress?: (progress: number) => void,
 ) => {
-  if (file.downloadUrl.startsWith('file://')) {
+  if (
+    file.downloadUrl.startsWith('file://') ||
+    file.downloadUrl.startsWith('content://')
+  ) {
     return file.downloadUrl;
   }
 
@@ -146,15 +149,19 @@ export const removeFileDir = async () => {
     await fs.unlink(dir);
   }
 
-  ShareMenu.getSharedCacheDirectory(async dir => {
-    if (dir && (await fs.exists(dir))) {
-      await fs.unlink(dir);
-    }
-  });
+  if (Platform.OS === 'ios') {
+    ShareMenu.getSharedCacheDirectory(async dir => {
+      if (dir && (await fs.exists(dir))) {
+        await fs.unlink(dir);
+      }
+    });
+  }
 };
 
 export const openFile = async (uri: string, type?: string | null) => {
-  const contentUri = await ExpoFileSystem.getContentUriAsync(uri);
+  const contentUri = uri.startsWith('content://')
+    ? uri
+    : await ExpoFileSystem.getContentUriAsync(uri);
   await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
     type: (type && mime.lookup(type)) || 'text/plain',
     data: contentUri,
