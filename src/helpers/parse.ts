@@ -1,4 +1,4 @@
-import {ApiError, FailReason} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError, FailReason} from 'thu-learn-lib';
 import {getLocale} from './i18n';
 
 export const getSemesterTextFromId = (semesterId: string) => {
@@ -18,7 +18,9 @@ export const getSemesterTextFromId = (semesterId: string) => {
 
 export const serializeError = (err: any) => {
   if ((err as ApiError).reason) {
-    return err as ApiError;
+    const returnedError = err as ApiError;
+    returnedError.extra = JSON.stringify(returnedError.extra);
+    return returnedError;
   } else {
     const returnedError: ApiError = {
       reason: FailReason.UNEXPECTED_STATUS,

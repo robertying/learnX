@@ -91,6 +91,8 @@ const CalendarEvent: React.FC<
     const endDate = dayjs(end);
 
     try {
+      await dataSource.login();
+
       const events = await dataSource.getCalendar(
         startDate.format('YYYYMMDD'),
         endDate.format('YYYYMMDD'),

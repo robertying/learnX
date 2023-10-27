@@ -1,22 +1,29 @@
-import {Learn2018Helper, addCSRFTokenToUrl} from 'thu-learn-lib-no-native';
+import {Learn2018Helper, addCSRFTokenToUrl} from 'thu-learn-lib';
 import mime from 'mime-types';
 import axios from 'axios';
+import {store} from 'data/store';
+import Urls from 'constants/Urls';
 
-let dataSource = new Learn2018Helper();
+export const dataSource = new Learn2018Helper({
+  provider: () => {
+    const state = store.getState();
+    return {
+      username: state.auth.username || undefined,
+      password: state.auth.password || undefined,
+    };
+  },
+});
 
-const setCredentials = (username: string, password: string) => {
-  dataSource = new Learn2018Helper({
-    provider: () => ({
-      username: username,
-      password: password,
-    }),
-  });
+export const addCSRF = (url: string) => {
+  if (new URL(url).hostname?.endsWith('tsinghua.edu.cn')) {
+    return addCSRFTokenToUrl(url, dataSource.getCSRFToken());
+  }
+  return url;
 };
 
-const submitAssignmentUrl =
-  'https://learn.tsinghua.edu.cn/b/wlxt/kczy/zy/student/tjzy';
+const submitAssignmentUrl = `${Urls.learn}/b/wlxt/kczy/zy/student/tjzy`;
 
-const submitAssignment = async (
+export const submitAssignment = async (
   studentHomeworkId: string,
   content?: string,
   attachment?: {
@@ -44,11 +51,8 @@ const submitAssignment = async (
 
   try {
     await dataSource.login();
-  } catch {}
 
-  try {
-    const csrfToken = dataSource.getCSRFToken();
-    const url = addCSRFTokenToUrl(submitAssignmentUrl, csrfToken);
+    const url = addCSRF(submitAssignmentUrl);
     const res = await axios.post(url, body, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -66,5 +70,3 @@ const submitAssignment = async (
     throw new Error('Failed to submit the assignment: unknown error');
   }
 };
-
-export {setCredentials, dataSource, submitAssignment};

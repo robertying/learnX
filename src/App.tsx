@@ -82,7 +82,6 @@ import {getAllSemesters, getCurrentSemester} from 'data/actions/semesters';
 import {setPendingAssignmentData} from 'data/actions/assignments';
 import {resetLoading} from 'data/actions/root';
 import {getCoursesForSemester} from 'data/actions/courses';
-import {setCredentials} from 'data/source';
 import useToast from 'hooks/useToast';
 import packageJson from '../package.json';
 
@@ -169,9 +168,7 @@ const getDetailScreenOptions = () =>
                   {...props}
                   title={
                     (route.params as Course).semesterId
-                      ? getLocale().startsWith('zh')
-                        ? (route.params as Course).name
-                        : (route.params as Course).englishName
+                      ? (route.params as Course).name
                       : (route.params as File).downloadUrl
                       ? (route.params as Notice | Assignment).title
                       : (route.params as Notice | Assignment).courseName
@@ -389,7 +386,6 @@ const MainTab = () => {
 
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const auth = useAppSelector(state => state.auth);
   const currentSemester = useAppSelector(state => state.semesters.current);
   const semesters = useAppSelector(state => state.semesters.items);
   const newChangelog = useAppSelector(
@@ -404,12 +400,6 @@ const MainTab = () => {
   );
 
   const windowSize = useWindowDimensions();
-
-  useEffect(() => {
-    if (loggedIn && auth.username && auth.password) {
-      setCredentials(auth.username, auth.password);
-    }
-  }, [auth.password, auth.username, loggedIn]);
 
   useEffect(() => {
     if (!loggedIn) {
@@ -799,12 +789,26 @@ const Container = () => {
   }, [handleShare]);
 
   useEffect(() => {
-    dispatch(login());
-  }, [dispatch]);
+    let timeout: NodeJS.Timeout | null = null;
+    const reLogin = () => {
+      if (!auth.username || !auth.password) {
+        return;
+      }
+      dispatch(login());
+      timeout = setTimeout(reLogin, 45 * 60 * 1000 /* 45 minutes */);
+    };
+    reLogin();
+
+    return () => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    };
+  }, [auth.password, auth.username, dispatch]);
 
   useEffect(() => {
     if (auth.username && auth.password && loginError) {
-      toast(t('loginFailed'), 'warning', 10 * 1000);
+      toast(t('loginFailed'), 'warning', 5 * 1000);
     }
   }, [auth.password, auth.username, loginError, toast]);
 
@@ -813,7 +817,9 @@ const Container = () => {
     fallback: <Splash />,
   };
 
-  const showDetail = loggedIn && windowSize.width >= 750;
+  const showMain = !loginError && !!auth.username && !!auth.password;
+
+  const showDetail = showMain && windowSize.width >= 750;
 
   return (
     <SafeAreaProvider>
@@ -831,7 +837,7 @@ const Container = () => {
               headerShown: false,
               presentation: 'fullScreenModal',
             }}>
-            {!loginError && auth.username && auth.password ? (
+            {showMain ? (
               <>
                 <RootNavigator.Screen name="MainTab" component={MainTab} />
                 <RootNavigator.Screen

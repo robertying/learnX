@@ -52,6 +52,7 @@
     "axios": "1.5.1",
     "babel-plugin-module-resolver": "5.0.0",
     "babel-plugin-preval": "5.1.0",
+    "cheerio": "1.0.0-rc.12",
     "darkreader": "4.9.67",
     "dayjs": "1.11.10",
     "dotenv": "16.3.1",
@@ -102,7 +103,7 @@
     "redux-persist-expo-securestore": "2.0.0",
     "redux-thunk": "2.4.2",
     "semver": "7.5.4",
-    "thu-learn-lib-no-native": "https://github.com/robertying/thu-learn-lib-no-native.git",
+    "thu-learn-lib": "https://github.com/robertying/thu-learn-lib",
     "typesafe-actions": "5.1.0",
     "typescript": "5.2.2"
   }

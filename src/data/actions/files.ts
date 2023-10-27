@@ -1,9 +1,4 @@
-import {
-  ContentType,
-  File as IFile,
-  CourseType,
-  ApiError,
-} from 'thu-learn-lib-no-native/lib/types';
+import {ContentType, CourseType, ApiError} from 'thu-learn-lib';
 import {createAction, createAsyncAction} from 'typesafe-actions';
 import dayjs from 'dayjs';
 import {dataSource} from 'data/source';
@@ -74,7 +69,7 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
       const courseNames = getState().courses.names;
       const files = Object.keys(results)
         .map(courseId => {
-          const filesForCourse = results[courseId] as IFile[];
+          const filesForCourse = results[courseId];
           const courseName = courseNames[courseId];
           return filesForCourse.map<File>(file => ({
             ...file,

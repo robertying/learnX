@@ -19,7 +19,7 @@ import {
 } from 'react-native-paper';
 import dayjs from 'dayjs';
 import mimeTypes from 'mime-types';
-import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
+import {RemoteFile} from 'thu-learn-lib';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';

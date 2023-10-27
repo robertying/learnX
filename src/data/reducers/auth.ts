@@ -24,14 +24,23 @@ export default function auth(
       };
     case LOGIN_SUCCESS:
       const payload = action.payload;
-      return {
-        ...state,
-        loggingIn: false,
-        loggedIn: true,
-        username: payload.username,
-        password: payload.password,
-        error: null,
-      };
+      if (payload) {
+        return {
+          ...state,
+          loggingIn: false,
+          loggedIn: true,
+          username: payload.username,
+          password: payload.password,
+          error: null,
+        };
+      } else {
+        return {
+          ...state,
+          loggingIn: false,
+          loggedIn: true,
+          error: null,
+        };
+      }
     case LOGIN_FAILURE:
       return {
         ...state,

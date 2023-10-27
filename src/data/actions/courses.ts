@@ -1,4 +1,4 @@
-import {ApiError} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError, CourseType, Language} from 'thu-learn-lib';
 import {createAction, createAsyncAction} from 'typesafe-actions';
 import {dataSource} from 'data/source';
 import {ThunkResult} from 'data/types/actions';
@@ -22,12 +22,16 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
   return async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
-    const lang = getLocale().startsWith('zh') ? 'zh' : 'en';
+    const lang = getLocale().startsWith('zh') ? Language.ZH : Language.EN;
+
+    try {
+      await dataSource.setLanguage(lang);
+    } catch (err) {}
 
     try {
       const results = await dataSource.getCourseList(
         semesterId,
-        undefined,
+        CourseType.STUDENT,
         lang,
       );
       const courses = results

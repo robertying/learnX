@@ -1,8 +1,4 @@
-import {
-  ApiError,
-  ContentType,
-  Notification,
-} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError, ContentType} from 'thu-learn-lib';
 import {createAction, createAsyncAction} from 'typesafe-actions';
 import dayjs from 'dayjs';
 import {dataSource} from 'data/source';
@@ -70,7 +66,7 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
       const courseNames = getState().courses.names;
       const notices = Object.keys(results)
         .map(courseId => {
-          const noticesForCourse = results[courseId] as Notification[];
+          const noticesForCourse = results[courseId];
           const courseName = courseNames[courseId];
           return noticesForCourse.map<Notice>(notice => ({
             ...notice,

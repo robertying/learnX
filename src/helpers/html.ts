@@ -1,4 +1,6 @@
 import mime from 'mime-types';
+import * as cheerio from 'cheerio';
+import {addCSRF} from 'data/source';
 
 declare const preval: any;
 
@@ -24,10 +26,16 @@ export const getWebViewTemplate = (
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
       <style>
         body {
           margin: 0px;
-          padding: 0px 16px 16px 16px;
+          padding: 16px;
+        }
+        #root {
+          height: 100%;
+          width: 100%;
+          overflow: auto;
         }
       </style>
       ${
@@ -46,10 +54,29 @@ export const getWebViewTemplate = (
       }
     </head>
     <body>
-      ${content}
+      <div id="root">
+        ${addCSRFToAllUrlsInHtml(content)}
+      </div>
     </body>
   </html>
 `;
+
+export const addCSRFToAllUrlsInHtml = (html: string) => {
+  const $ = cheerio.load(html, undefined, false);
+  $('[href]').each((i, element) => {
+    const url = $(element).attr('href');
+    if (url) {
+      $(element).attr('href', addCSRF(url));
+    }
+  });
+  $('[src]').each((i, element) => {
+    const url = $(element).attr('src');
+    if (url) {
+      $(element).attr('src', addCSRF(url));
+    }
+  });
+  return $.html();
+};
 
 export const needWhiteBackground = (ext?: string | null) => {
   return ext && ['doc', 'docx', 'xls', 'xlsx'].includes(ext) ? true : false;

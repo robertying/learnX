@@ -2,7 +2,9 @@ import {useEffect} from 'react';
 import {Alert, Linking, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
+import {CourseType, Language} from 'thu-learn-lib';
 import {useAppDispatch, useAppSelector} from 'data/store';
+import {dataSource} from 'data/source';
 import {setSetting} from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -18,10 +20,28 @@ const CourseInformationSharing: React.FC<
 > = props => {
   const dispatch = useAppDispatch();
 
-  const courses = useAppSelector(state => state.courses.items);
+  const currentSemesterId = useAppSelector(state => state.semesters.current);
   const courseInformationSharing = useAppSelector(
     state => state.settings.courseInformationSharing,
   );
+
+  const getCourses = async () => {
+    if (!currentSemesterId) {
+      return [];
+    }
+
+    const results = await dataSource.getCourseList(
+      currentSemesterId,
+      CourseType.STUDENT,
+      Language.ZH,
+    );
+    const courses = results.map(course => ({
+      ...course,
+      semesterId: currentSemesterId,
+    }));
+
+    return courses;
+  };
 
   const handleEnable = (enabled: boolean) => {
     if (enabled) {
@@ -38,6 +58,7 @@ const CourseInformationSharing: React.FC<
             onPress: async () => {
               dispatch(setSetting('courseInformationSharing', enabled));
               try {
+                const courses = await getCourses();
                 await uploadCourses(courses);
               } catch {}
             },

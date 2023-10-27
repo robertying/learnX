@@ -141,4 +141,11 @@ export default {
   datePickerStartLabel: '开始',
   datePickerEndLabel: '结束',
   datePickerLabel: '选择同步范围',
+  reviewed: '已阅',
+  good: '优秀',
+  exemptedCourse: '免课',
+  exempted: '免修',
+  pass: '通过',
+  fail: '不通过',
+  incomplete: '缓考',
 };

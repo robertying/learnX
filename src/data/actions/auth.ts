@@ -1,5 +1,5 @@
 import {createAsyncAction} from 'typesafe-actions';
-import {ApiError} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError} from 'thu-learn-lib';
 import {dataSource} from 'data/source';
 import {ThunkResult} from 'data/types/actions';
 import {
@@ -15,21 +15,26 @@ export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
-)<undefined, Auth, ApiError>();
+)<undefined, Auth | undefined, ApiError>();
 
 export function login(username?: string, password?: string): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(loginAction.request());
 
-    const auth = getState().auth;
-    const _username = username || auth.username || '';
-    const _password = password || auth.password || '';
-
     try {
-      await dataSource.login(_username, _password);
-      dispatch(loginAction.success({username: _username, password: _password}));
+      await dataSource.login(username, password);
 
-      dispatch(getUserInfo());
+      if (username && password) {
+        dispatch(
+          loginAction.success({
+            username,
+            password,
+          }),
+        );
+        dispatch(getUserInfo());
+      } else {
+        dispatch(loginAction.success(undefined));
+      }
     } catch (err) {
       dispatch(loginAction.failure(serializeError(err)));
     }

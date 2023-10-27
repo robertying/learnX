@@ -1,5 +1,12 @@
 import {PersistState} from 'redux-persist';
-import {FailReason, RemoteFile} from 'thu-learn-lib-no-native/lib/types';
+import type {
+  CourseInfo,
+  FailReason,
+  Homework,
+  Notification,
+  File as IFile,
+  UserInfo,
+} from 'thu-learn-lib';
 import {FilterSelection} from 'components/Filter';
 
 export interface Auth {
@@ -49,17 +56,18 @@ export interface SemestersState {
   error?: FailReason | null;
 }
 
-export interface Course {
+export type Course = Pick<
+  CourseInfo,
+  | 'id'
+  | 'name'
+  | 'teacherNumber'
+  | 'teacherName'
+  | 'timeAndLocation'
+  | 'courseNumber'
+  | 'courseIndex'
+> & {
   semesterId: string;
-  id: string;
-  name: string;
-  englishName: string;
-  teacherName: string;
-  timeAndLocation: string[];
-  teacherNumber: string;
-  courseNumber: string;
-  courseIndex: number;
-}
+};
 export interface CoursesState {
   fetching: boolean;
   hidden: string[];
@@ -73,20 +81,25 @@ export interface CoursesState {
   error?: FailReason | null;
 }
 
-export interface Notice {
+interface CourseExtraInfo {
   courseId: string;
   courseName: string;
   courseTeacherName: string;
-  id: string;
-  title: string;
-  publisher: string;
-  publishTime: string;
-  markedImportant: boolean;
-  content: string;
-  hasRead: boolean;
-  attachment?: RemoteFile;
-  url: string;
 }
+
+export type Notice = Pick<
+  Notification,
+  | 'id'
+  | 'title'
+  | 'publisher'
+  | 'publishTime'
+  | 'markedImportant'
+  | 'content'
+  | 'hasRead'
+  | 'attachment'
+  | 'url'
+> &
+  CourseExtraInfo;
 export interface NoticeState {
   fetching: boolean;
   unread: string[];
@@ -97,31 +110,29 @@ export interface NoticeState {
   error?: FailReason | null;
 }
 
-export interface Assignment {
-  courseId: string;
-  courseName: string;
-  courseTeacherName: string;
-  id: string;
-  studentHomeworkId: string;
-  title: string;
-  description?: string;
-  deadline: string;
-  url: string;
-  attachment?: RemoteFile;
-  submitted: boolean;
-  submitTime?: string;
-  submittedContent?: string;
-  submittedAttachment?: RemoteFile;
-  graded: boolean;
-  grade?: number;
-  gradeLevel?: string;
-  gradeTime?: string;
-  graderName?: string;
-  gradeContent?: string;
-  gradeAttachment?: RemoteFile;
-  answerContent?: string;
-  answerAttachment?: RemoteFile;
-}
+export type Assignment = Pick<
+  Homework,
+  | 'id'
+  | 'studentHomeworkId'
+  | 'title'
+  | 'description'
+  | 'deadline'
+  | 'attachment'
+  | 'submitted'
+  | 'submitTime'
+  | 'submittedContent'
+  | 'submittedAttachment'
+  | 'graded'
+  | 'grade'
+  | 'gradeLevel'
+  | 'gradeTime'
+  | 'gradeContent'
+  | 'gradeAttachment'
+  | 'answerContent'
+  | 'answerAttachment'
+  | 'url'
+> &
+  CourseExtraInfo;
 export interface AssignmentsState {
   fetching: boolean;
   unread: string[];
@@ -136,20 +147,19 @@ export interface AssignmentsState {
   } | null;
 }
 
-export interface File {
-  courseId: string;
-  courseName: string;
-  courseTeacherName: string;
-  id: string;
-  title: string;
-  description: string;
-  size: string;
-  fileType?: string | null;
-  markedImportant: boolean;
-  isNew: boolean;
-  uploadTime: string;
-  downloadUrl: string;
-}
+export type File = Pick<
+  IFile,
+  | 'id'
+  | 'title'
+  | 'description'
+  | 'size'
+  | 'fileType'
+  | 'markedImportant'
+  | 'isNew'
+  | 'uploadTime'
+  | 'downloadUrl'
+> &
+  CourseExtraInfo;
 export interface FilesState {
   fetching: boolean;
   unread: string[];
@@ -160,11 +170,9 @@ export interface FilesState {
   error?: FailReason | null;
 }
 
-export interface User {
-  name: string | null;
-  department: string | null;
-  avatarUrl?: string | null;
-}
+export type User = {
+  [key in keyof UserInfo]: UserInfo[key] | null;
+};
 export interface UserState extends User {}
 
 export interface PersistPartial {

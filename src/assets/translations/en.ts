@@ -148,4 +148,11 @@ export default {
   datePickerStartLabel: 'Start',
   datePickerEndLabel: 'End',
   datePickerLabel: 'Select Sync Range',
+  reviewed: 'Reviewed',
+  good: 'Good',
+  exemptedCourse: 'Exempted Course',
+  exempted: 'Exempted',
+  pass: 'Pass',
+  fail: 'Fail',
+  incomplete: 'Incomplete',
 };

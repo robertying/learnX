@@ -1,5 +1,5 @@
 import {createAction, createAsyncAction} from 'typesafe-actions';
-import {ApiError} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError} from 'thu-learn-lib';
 import {dataSource} from 'data/source';
 import {ThunkResult} from 'data/types/actions';
 import {

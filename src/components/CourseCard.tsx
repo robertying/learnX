@@ -3,7 +3,6 @@ import {StyleSheet, View} from 'react-native';
 import {Caption, Subheading, Title, useTheme} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Course} from 'data/types/state';
-import {getLocale} from 'helpers/i18n';
 import CardWrapper, {CardWrapperProps} from './CardWrapper';
 
 export interface CourseCardProps extends CardWrapperProps {
@@ -17,7 +16,6 @@ export interface CourseCardProps extends CardWrapperProps {
 const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
   data: {
     name,
-    englishName,
     teacherName,
     unreadNoticeCount,
     unfinishedAssignmentCount,
@@ -32,7 +30,7 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
       <View style={styles.root}>
         <View style={styles.contentSections}>
           <Subheading numberOfLines={1}>{teacherName}</Subheading>
-          <Title>{getLocale().startsWith('zh') ? name : englishName}</Title>
+          <Title>{name}</Title>
         </View>
         <View style={styles.countSections}>
           <View style={styles.section}>

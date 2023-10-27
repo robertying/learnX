@@ -17,7 +17,7 @@ import {
   Text,
 } from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {FailReason} from 'thu-learn-lib-no-native/lib/types';
+import {FailReason} from 'thu-learn-lib';
 import useToast from 'hooks/useToast';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import {login} from 'data/actions/auth';

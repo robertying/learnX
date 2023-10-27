@@ -1,7 +1,7 @@
 import {Platform} from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, {Dayjs} from 'dayjs';
-import {CalendarEvent} from 'thu-learn-lib-no-native/lib/types';
+import {CalendarEvent} from 'thu-learn-lib';
 import {
   clearEventIds,
   setEventIdForAssignment,

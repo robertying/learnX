@@ -13,7 +13,7 @@ import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {RemoteFile} from 'thu-learn-lib-no-native/lib/types';
+import {RemoteFile} from 'thu-learn-lib';
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
@@ -22,7 +22,7 @@ import {ScreenParams} from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
-import {getLocale, t} from 'helpers/i18n';
+import {getAssignmentGradeLevelDescription, getLocale, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 
 const AssignmentDetail: React.FC<
@@ -202,7 +202,11 @@ const AssignmentDetail: React.FC<
               />
               <View style={Styles.flex1}>
                 {gradeLevel || grade ? (
-                  <Text style={Styles.spacey1}>{gradeLevel || grade}</Text>
+                  <Text style={Styles.spacey1}>
+                    {gradeLevel
+                      ? getAssignmentGradeLevelDescription(gradeLevel)
+                      : grade}
+                  </Text>
                 ) : null}
                 {gradeAttachment && (
                   <TextButton

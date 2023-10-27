@@ -5,7 +5,7 @@ import fs from 'react-native-fs';
 import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import mime from 'mime-types';
-import {dataSource} from 'data/source';
+import {addCSRF, dataSource} from 'data/source';
 import {store} from 'data/store';
 import {File} from 'data/types/state';
 
@@ -47,6 +47,11 @@ export const downloadFile = async (
     throw new Error('Invalid file url');
   }
 
+  if (refresh) {
+    await dataSource.login();
+  }
+  file.downloadUrl = addCSRF(file.downloadUrl);
+
   if (Platform.OS === 'ios') {
     const downloadPromise = fs.downloadFile({
       fromUrl: file.downloadUrl,
@@ -63,8 +68,6 @@ export const downloadFile = async (
         await fs.unlink(path);
       } catch {}
 
-      dataSource.login();
-
       throw new Error('File download failed');
     }
 
@@ -75,8 +78,6 @@ export const downloadFile = async (
         try {
           await fs.unlink(path);
         } catch {}
-
-        dataSource.login();
 
         throw new Error('File download failed');
       }
@@ -114,8 +115,6 @@ export const downloadFile = async (
         try {
           await fs.unlink(path);
         } catch {}
-
-        await dataSource.login();
 
         throw new Error('File download failed');
       }

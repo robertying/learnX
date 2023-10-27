@@ -1,8 +1,4 @@
-import {
-  ApiError,
-  ContentType,
-  Homework,
-} from 'thu-learn-lib-no-native/lib/types';
+import {ApiError, ContentType} from 'thu-learn-lib';
 import {createAction, createAsyncAction} from 'typesafe-actions';
 import dayjs from 'dayjs';
 import {dataSource} from 'data/source';
@@ -84,7 +80,7 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
       const courseNames = getState().courses.names;
       const assignments = Object.keys(results)
         .map(courseId => {
-          const assignmentsForCourse = results[courseId] as Homework[];
+          const assignmentsForCourse = results[courseId];
           const courseName = courseNames[courseId];
           return assignmentsForCourse.map<Assignment>(assignment => ({
             ...assignment,

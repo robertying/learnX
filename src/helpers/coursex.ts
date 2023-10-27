@@ -27,7 +27,7 @@ export const uploadCourses = async (courses: Course[]) => {
     semester_id: c.semesterId,
     number: c.courseNumber,
     index: c.courseIndex,
-    englishName: c.englishName,
+    englishName: c.name,
   }));
 
   await graphQLClient.request(

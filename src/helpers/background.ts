@@ -1,11 +1,6 @@
 import * as BackgroundFetch from 'expo-background-fetch';
 import * as TaskManager from 'expo-task-manager';
-import {
-  ContentType,
-  File as IFile,
-  Homework,
-  Notification,
-} from 'thu-learn-lib-no-native/lib/types';
+import {ContentType} from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import allSettled from 'promise.allsettled';
 import {AppDispatch, store} from 'data/store';
@@ -25,7 +20,7 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
   const courseNames = courses.names;
   const notices = Object.keys(results)
     .map(courseId => {
-      const noticesForCourse = results[courseId] as Notification[];
+      const noticesForCourse = results[courseId];
       const courseName = courseNames[courseId];
       return noticesForCourse.map<Notice>(notice => ({
         ...notice,
@@ -53,7 +48,7 @@ const getAllAssignments = async (
   const courseNames = courses.names;
   const assignments = Object.keys(results)
     .map(courseId => {
-      const assignmentsForCourse = results[courseId] as Homework[];
+      const assignmentsForCourse = results[courseId];
       const courseName = courseNames[courseId];
       return assignmentsForCourse.map<Assignment>(assignment => ({
         ...assignment,
@@ -79,7 +74,7 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
   const courseNames = courses.names;
   const files = Object.keys(results)
     .map(courseId => {
-      const filesForCourse = results[courseId] as IFile[];
+      const filesForCourse = results[courseId];
       const courseName = courseNames[courseId];
       return filesForCourse.map<File>(file => ({
         ...file,
@@ -107,12 +102,10 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
     return BackgroundFetch.BackgroundFetchResult.NoData;
   }
 
-  if (!auth.loggedIn) {
-    try {
-      await dataSource.login(auth.username, auth.password);
-    } catch {
-      return BackgroundFetch.BackgroundFetchResult.NoData;
-    }
+  try {
+    await dataSource.login(auth.username, auth.password);
+  } catch {
+    return BackgroundFetch.BackgroundFetchResult.NoData;
   }
 
   const results = await allSettled([
