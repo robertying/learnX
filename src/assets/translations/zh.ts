@@ -46,7 +46,7 @@ export default {
   courseScheduleSyncNoReminderPermission:
     '课表同步失败：请给予 App 提醒事项访问权限',
   courseScheduleSyncRepetitiveError:
-    '课表同步失败：请确保已连接校园网并重试；尝试缩小或更改同步的日期范围',
+    '课表同步失败，请重试。请确保已连接至校园网；如果问题持续存在，请尝试缩小或更改同步的日期范围',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
   deleteSyncedCalendarsAndRemindersConfirmation:
     '确定删除已同步的日历与提醒事项？该操作不可撤销。',
@@ -81,7 +81,7 @@ export default {
   unknownError: '未知错误：',
   usernameOrId: '用户名 / 学号',
   password: '密码',
-  securityNote: '您的用户信息仅会被保存在本地，并经操作系统安全地加密',
+  securityNote: '您的用户信息仅会被保存在本地，并由操作系统安全地加密',
   login: '登录',
   noNoticeContent: '无通知内容',
   searchPlaceholder: '搜索通知、作业、文件……',
@@ -110,7 +110,7 @@ export default {
   courseInformation: '课程信息',
   missingCalendarSource:
     '不存在可写入的日历：请确保“日历”应用内存在 iCloud 日历目录或至少一个本地日历目录。',
-  pushNotifications: '推送通知 (Beta)',
+  pushNotifications: '推送通知',
   copyPushNotificationToken: '复制设备标识符',
   pushNotificationTokenDescription:
     '使用此标识符，配合 learnX Companion 应用，您可以在此设备上接收推送通知。请勿分享此标识符给其他人。',

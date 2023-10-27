@@ -47,7 +47,7 @@ export default {
   courseScheduleSyncNoReminderPermission:
     'Course Schedule Sync failed. Please grant the App access to reminders.',
   courseScheduleSyncRepetitiveError:
-    'Course Schedule Sync failed. Make sure you are connected to the campus network and try again, or try narrowing down and change the sync date range.',
+    'Course Schedule Sync failed. Please try again. Make sure you are connected to the campus network. Try narrowing down or change the sync date range if the issue persists.',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
   deleteSyncedCalendarsAndRemindersConfirmation:
     'Do you want to delete synced calendars and reminders? This cannot be undone.',
@@ -115,7 +115,7 @@ export default {
   courseInformation: 'Course Information',
   missingCalendarSource:
     'Missing calendar source. Make sure you have an iCloud enabled calendar category or at least one local calendar category set up in the Calendar app.',
-  pushNotifications: 'Push Notifications (Beta)',
+  pushNotifications: 'Push Notifications',
   copyPushNotificationToken: 'Copy Device Token',
   pushNotificationTokenDescription:
     "Use this token with the learnX Companion app to receive push notifications on this device. Don't share it with others.",
