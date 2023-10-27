@@ -8,6 +8,7 @@ import {
   WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
 import CookieManager from '@react-native-cookies/cookies';
+import Urls from 'constants/Urls';
 
 const AutoHeightWebView: React.FC<
   React.PropsWithChildren<WebViewProps>
@@ -45,18 +46,31 @@ const AutoHeightWebView: React.FC<
         );
       }
     }
+
+    // Wait for images and such to load and update the height again
+    window.addEventListener("load", waitForBridge);
+
+    // Update height as long as there's something
     waitForBridge();
+
     true;
   `;
 
   useEffect(() => {
-    CookieManager.get('https://learn.tsinghua.edu.cn').then(cookies => {
+    (async () => {
+      const cookies = await CookieManager.get(Urls.learn);
+      await Promise.all(
+        Object.entries(cookies).map(([, value]) =>
+          CookieManager.set(Urls.learn, value, true),
+        ),
+      );
+
       setCookieString(
         Object.entries(cookies)
           .map(([key, value]) => `${key}=${value.value}`)
           .join('; '),
       );
-    });
+    })();
   }, []);
 
   return (
@@ -70,11 +84,12 @@ const AutoHeightWebView: React.FC<
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
       originWhitelist={['*']}
+      sharedCookiesEnabled
       {...props}
       source={
         {
           baseUrl: (props.source as WebViewSourceHtml | undefined)?.html
-            ? 'https://learn.tsinghua.edu.cn'
+            ? Urls.learn
             : undefined,
           headers: {
             Cookie: cookieString,
