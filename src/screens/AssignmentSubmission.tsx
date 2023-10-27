@@ -206,10 +206,13 @@ const AssignmentSubmission: React.FC<
 
   useEffect(() => {
     if (pendingAssignmentData) {
+      const ext = mimeTypes.extension(pendingAssignmentData.mimeType);
       setAttachmentResult({
         uri: pendingAssignmentData.data,
         type: pendingAssignmentData.mimeType,
-        name: isLocaleChinese() ? `${title}-提交` : `${title} Submission`,
+        name: isLocaleChinese()
+          ? `${title}-提交.${ext}`
+          : `${title} Submission.${ext}`,
       } as any);
     }
   }, [pendingAssignmentData, title]);

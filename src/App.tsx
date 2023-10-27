@@ -757,7 +757,7 @@ const Container = () => {
 
   const handleShare = useCallback(
     (item: any) => {
-      if (!loggedIn || !item) {
+      if (!item) {
         return;
       }
 
@@ -773,10 +773,10 @@ const Container = () => {
 
       if (data) {
         dispatch(setPendingAssignmentData(data));
-        toast(t('shareReceived'), 'success', 5000);
+        toast(t('shareReceived'), 'success', 5 * 1000);
       }
     },
-    [dispatch, loggedIn, toast],
+    [dispatch, toast],
   );
 
   useEffect(() => {
