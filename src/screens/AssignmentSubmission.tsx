@@ -25,7 +25,7 @@ import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
 import {getExtension, stripExtension} from 'helpers/fs';
 import {removeTags} from 'helpers/html';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import {File} from 'data/types/state';
 import {submitAssignment} from 'data/source';
 import {
@@ -87,9 +87,7 @@ const AssignmentSubmission: React.FC<
         ...result,
         name:
           result.name ??
-          (getLocale().startsWith('zh')
-            ? `${title}-提交`
-            : `${title} Submission`),
+          (isLocaleChinese() ? `${title}-提交` : `${title} Submission`),
       });
       dispatch(setPendingAssignmentData(null));
     } catch (err) {
@@ -211,9 +209,7 @@ const AssignmentSubmission: React.FC<
       setAttachmentResult({
         uri: pendingAssignmentData.data,
         type: pendingAssignmentData.mimeType,
-        name: getLocale().startsWith('zh')
-          ? `${title}-提交`
-          : `${title} Submission`,
+        name: isLocaleChinese() ? `${title}-提交` : `${title} Submission`,
       } as any);
     }
   }, [pendingAssignmentData, title]);
@@ -269,7 +265,7 @@ const AssignmentSubmission: React.FC<
               }>
               {attachmentResult.name}{' '}
               {pendingAssignmentData
-                ? getLocale().startsWith('zh')
+                ? isLocaleChinese()
                   ? '（之前分享的）'
                   : '(previously shared)'
                 : ''}
@@ -302,7 +298,7 @@ const AssignmentSubmission: React.FC<
           {submitTime && (
             <Caption style={Styles.spacey1}>
               {dayjs(submitTime).format(
-                getLocale().startsWith('zh')
+                isLocaleChinese()
                   ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
                   : '[last submitted at] HH:mm, MMM D, YYYY',
               )}

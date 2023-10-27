@@ -10,7 +10,7 @@ import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
 import {ScreenParams} from 'screens/types';
 import {getWebViewTemplate} from 'helpers/html';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import {stripExtension, getExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
 
@@ -76,7 +76,7 @@ const NoticeDetail: React.FC<
             <Caption>{publisher}</Caption>
             <Caption>
               {dayjs(publishTime).format(
-                getLocale().startsWith('zh')
+                isLocaleChinese()
                   ? 'YYYY 年 M 月 D 日 dddd HH:mm'
                   : 'MMM D, YYYY HH:mm',
               )}

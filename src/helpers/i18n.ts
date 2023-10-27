@@ -8,16 +8,18 @@ export const getLocale = () => {
   return preferredLocales[0].languageTag;
 };
 
-type locale = typeof en | typeof zh;
+export const isLocaleChinese = () => getLocale().startsWith('zh');
 
-const translations = (getLocale().startsWith('zh') ? zh : en) as locale;
+type TranslationKey = typeof en | typeof zh;
 
-export function t<K extends keyof locale>(key: K): string {
+const translations = (isLocaleChinese() ? zh : en) as TranslationKey;
+
+export function t<K extends keyof TranslationKey>(key: K): string {
   return translations[key];
 }
 
 const assignmentGradeLevelDescriptionMap: Partial<{
-  [key in HomeworkGradeLevel]: keyof locale;
+  [key in HomeworkGradeLevel]: keyof TranslationKey;
 }> = {
   [HomeworkGradeLevel.CHECKED]: 'reviewed',
   [HomeworkGradeLevel.DISTINCTION]: 'good',

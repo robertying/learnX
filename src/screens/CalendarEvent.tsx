@@ -19,7 +19,7 @@ import {
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'helpers/event';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import useFilteredData from 'hooks/useFilteredData';
@@ -225,7 +225,7 @@ const CalendarEvent: React.FC<
           />
         )}
         <Caption style={styles.caption}>
-          {getLocale().startsWith('zh')
+          {isLocaleChinese()
             ? `手动同步${
                 graduate ? '研究生' : '本科生'
               }课表到日历；请在更改提醒设置后重新同步以应用更改。`
@@ -278,7 +278,7 @@ const CalendarEvent: React.FC<
           />
         ) : null}
         <Caption style={styles.caption}>
-          {getLocale().startsWith('zh')
+          {isLocaleChinese()
             ? `${
                 Platform.OS === 'ios' && !syncAssignmentsToCalendar
                   ? '启用后，每次刷新时，作业会自动同步到“提醒事项”；'
@@ -299,7 +299,7 @@ const CalendarEvent: React.FC<
         />
       </ScrollView>
       <DatePickerModal
-        locale={getLocale().startsWith('zh') ? 'zh' : 'en'}
+        locale={isLocaleChinese() ? 'zh' : 'en'}
         mode="range"
         visible={datePickerOpen}
         saveLabelDisabled={!startDate || !endDate}

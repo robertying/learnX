@@ -4,7 +4,7 @@ import {Caption} from 'react-native-paper';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import {removeFileDir} from 'helpers/fs';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import TableCell from 'components/TableCell';
@@ -64,7 +64,7 @@ const FileCache: React.FC<
           type="switch"
         />
         <Caption style={styles.caption}>
-          {getLocale().startsWith('zh')
+          {isLocaleChinese()
             ? fileUseDocumentDir
               ? '文件保存在 App 的“文档”中，只会随 App 卸载而被删除。'
               : '文件保存在 App 的“缓存”中，会在设备空间不足或其他系统预设情况下被自动清除以节约空间。'
@@ -83,7 +83,7 @@ const FileCache: React.FC<
           type="switch"
         />
         <Caption style={styles.caption}>
-          {getLocale().startsWith('zh')
+          {isLocaleChinese()
             ? fileOmitCourseName
               ? '文件以“文件名”形式保存。'
               : '文件以“课程名-文件名”形式保存。'

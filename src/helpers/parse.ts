@@ -1,9 +1,9 @@
 import {ApiError, FailReason} from 'thu-learn-lib';
-import {getLocale} from './i18n';
+import {isLocaleChinese} from './i18n';
 
 export const getSemesterTextFromId = (semesterId: string) => {
   const texts = semesterId.split('-');
-  return getLocale().startsWith('zh')
+  return isLocaleChinese()
     ? `${texts?.[0]}-${texts?.[1]} 学年${
         texts?.[2] === '1'
           ? '秋季学期'

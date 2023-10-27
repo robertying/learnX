@@ -9,7 +9,7 @@ import {
   SET_HIDE_COURSE,
 } from 'data/types/constants';
 import {Course} from 'data/types/state';
-import {getLocale} from 'helpers/i18n';
+import {isLocaleChinese} from 'helpers/i18n';
 import {serializeError} from 'helpers/parse';
 
 export const getCoursesForSemesterAction = createAsyncAction(
@@ -22,7 +22,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
   return async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
-    const lang = getLocale().startsWith('zh') ? Language.ZH : Language.EN;
+    const lang = isLocaleChinese() ? Language.ZH : Language.EN;
 
     try {
       await dataSource.setLanguage(lang);

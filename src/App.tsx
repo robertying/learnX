@@ -40,7 +40,7 @@ import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
 import {en, zh, registerTranslation} from 'react-native-paper-dates';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import {clearPushNotificationBadge} from 'helpers/notification';
 import {getLatestRelease} from 'helpers/update';
 import Notices from 'screens/Notices';
@@ -89,7 +89,7 @@ registerTranslation('en', en);
 registerTranslation('zh', zh);
 
 dayjs.extend(relativeTime);
-dayjs.locale(getLocale().startsWith('zh') ? 'zh-cn' : 'en');
+dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
 
 const BackButton = () => {
   const navigation = useNavigation();

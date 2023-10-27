@@ -22,7 +22,11 @@ import {ScreenParams} from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
-import {getAssignmentGradeLevelDescription, getLocale, t} from 'helpers/i18n';
+import {
+  getAssignmentGradeLevelDescription,
+  isLocaleChinese,
+  t,
+} from 'helpers/i18n';
 import {File} from 'data/types/state';
 
 const AssignmentDetail: React.FC<
@@ -121,7 +125,7 @@ const AssignmentDetail: React.FC<
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
             <Caption>
-              {getLocale().startsWith('zh')
+              {isLocaleChinese()
                 ? dayjs().isAfter(dayjs(deadline))
                   ? dayjs().to(dayjs(deadline)) + '截止'
                   : '还剩 ' + dayjs().to(dayjs(deadline), true)
@@ -131,7 +135,7 @@ const AssignmentDetail: React.FC<
             </Caption>
             <Caption>
               {dayjs(deadline).format(
-                getLocale().startsWith('zh')
+                isLocaleChinese()
                   ? 'YYYY 年 M 月 D 日 dddd HH:mm'
                   : 'ddd, MMM D, YYYY HH:mm',
               )}
@@ -181,7 +185,7 @@ const AssignmentDetail: React.FC<
                 ) : null}
                 <Caption>
                   {dayjs(submitTime).format(
-                    getLocale().startsWith('zh')
+                    isLocaleChinese()
                       ? 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
                       : '[submitted at] HH:mm, MMM D, YYYY',
                   )}
@@ -220,7 +224,7 @@ const AssignmentDetail: React.FC<
                 ) : null}
                 <Caption>
                   {dayjs(gradeTime).format(
-                    getLocale().startsWith('zh')
+                    isLocaleChinese()
                       ? 'YYYY 年 M 月 D 日 dddd HH:mm 批改'
                       : '[graded at] HH:mm, MMM D, YYYY',
                   )}

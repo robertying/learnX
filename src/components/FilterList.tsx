@@ -20,7 +20,7 @@ import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import Filter, {FilterSelection} from './Filter';
 import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
@@ -259,7 +259,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
           />
         ),
-        headerTitle: getLocale().startsWith('zh')
+        headerTitle: isLocaleChinese()
           ? `已选中 ${
               Object.values(selection).filter(s => s === true).length
             } 个`

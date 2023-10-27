@@ -29,7 +29,7 @@ import {
   needWhiteBackground,
 } from 'helpers/html';
 import {downloadFile, openFile, shareFile} from 'helpers/fs';
-import {getLocale, t} from 'helpers/i18n';
+import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
@@ -231,7 +231,7 @@ const FileDetail: React.FC<
                   <Caption>{file.courseTeacherName}</Caption>
                   <Caption>
                     {dayjs(file.uploadTime).format(
-                      getLocale().startsWith('zh')
+                      isLocaleChinese()
                         ? 'YYYY 年 M 月 D 日 dddd HH:mm'
                         : 'MMM D, YYYY HH:mm',
                     )}

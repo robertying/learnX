@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import {Assignment} from 'data/types/state';
 import {removeTags} from 'helpers/html';
-import {getLocale} from 'helpers/i18n';
+import {isLocaleChinese} from 'helpers/i18n';
 import CardWrapper, {CardWrapperProps} from 'components/CardWrapper';
 import Colors from 'constants/Colors';
 
@@ -84,7 +84,7 @@ const AssignmentCard: React.FC<
         <View style={Styles.flexRowCenter}>
           <Caption>{courseTeacherName}</Caption>
           <Caption>
-            {getLocale().startsWith('zh')
+            {isLocaleChinese()
               ? dayjs().isAfter(dayjs(deadline))
                 ? dayjs().to(dayjs(deadline)) + '截止'
                 : '还剩 ' + dayjs().to(dayjs(deadline), true)
