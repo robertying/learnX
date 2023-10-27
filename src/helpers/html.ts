@@ -37,6 +37,9 @@ export const getWebViewTemplate = (
           width: 100%;
           overflow: auto;
         }
+        #root > p:first-child {
+          margin-top: 0px;
+        }
       </style>
       ${
         darkMode
