@@ -1,8 +1,8 @@
 import {useMemo} from 'react';
-import Fuse from 'fuse.js';
+import Fuse, {IFuseOptions} from 'fuse.js';
 import {Assignment, File, Notice} from 'data/types/state';
 
-const noticeOptions: Fuse.IFuseOptions<Notice> = {
+const noticeOptions: IFuseOptions<Notice> = {
   keys: [
     'courseName',
     'courseTeacherName',
@@ -13,7 +13,7 @@ const noticeOptions: Fuse.IFuseOptions<Notice> = {
   ],
 };
 
-const assignmentOptions: Fuse.IFuseOptions<Assignment> = {
+const assignmentOptions: IFuseOptions<Assignment> = {
   keys: [
     'courseName',
     'courseTeacherName',
@@ -30,7 +30,7 @@ const assignmentOptions: Fuse.IFuseOptions<Assignment> = {
   ],
 };
 
-const fileOptions: Fuse.IFuseOptions<File> = {
+const fileOptions: IFuseOptions<File> = {
   keys: [
     'courseName',
     'courseTeacherName',
