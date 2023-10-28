@@ -13,6 +13,7 @@ export default {
   settings: 'Settings',
   search: 'Search',
   submit: 'Submit',
+  submitted: 'Submitted',
   assignmentSubmission: 'Assignment Submission',
   loginFailed:
     'Login failed. Please check your network connectivity and make sure the username and password are correct.',

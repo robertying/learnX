@@ -184,11 +184,13 @@ const AssignmentDetail: React.FC<
                   </Text>
                 ) : null}
                 <Caption>
-                  {dayjs(submitTime).format(
-                    isLocaleChinese()
-                      ? 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
-                      : '[submitted at] HH:mm, MMM D, YYYY',
-                  )}
+                  {submitTime
+                    ? dayjs(submitTime).format(
+                        isLocaleChinese()
+                          ? 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
+                          : '[submitted at] HH:mm, MMM D, YYYY',
+                      )
+                    : t('submitted')}
                 </Caption>
               </View>
             </View>

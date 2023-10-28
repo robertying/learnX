@@ -13,6 +13,7 @@ export default {
   settings: '设置',
   search: '搜索',
   submit: '提交',
+  submitted: '已提交',
   assignmentSubmission: '作业提交',
   loginFailed: '登录失败，请检查网络连接并确保输入的用户名与密码正确。',
   versionInformation: '版本信息',
