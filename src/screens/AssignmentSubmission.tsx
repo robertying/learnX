@@ -230,7 +230,7 @@ const AssignmentSubmission: React.FC<
           <TextInput
             style={Styles.flex1}
             multiline
-            placeholder={t('assignmentSubmittionContentPlaceholder')}
+            placeholder={t('assignmentSubmissionContentPlaceholder')}
             value={content}
             onChangeText={setContent}
           />

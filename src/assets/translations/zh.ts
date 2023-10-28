@@ -35,7 +35,7 @@ export default {
   submitAssignmentConfirmation: '确定提交作业？',
   cancel: '取消',
   ok: '确定',
-  assignmentSubmittionContentPlaceholder: '可在此处填写作业内容……',
+  assignmentSubmissionContentPlaceholder: '可在此处填写作业内容……',
   undoRemoveAttachment: '撤销移除已上传附件',
   removeAttachment: '移除已上传附件',
   reUploadAttachment: '重新上传附件',

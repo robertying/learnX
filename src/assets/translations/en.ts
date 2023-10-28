@@ -36,7 +36,7 @@ export default {
   submitAssignmentConfirmation: 'Do you want to submit the assignment?',
   cancel: 'Cancel',
   ok: 'Ok',
-  assignmentSubmittionContentPlaceholder: 'Enter assignment content here...',
+  assignmentSubmissionContentPlaceholder: 'Enter assignment content here...',
   undoRemoveAttachment: 'Undo attachment removal',
   removeAttachment: 'Remove uploaded attachment',
   reUploadAttachment: 'Re-upload attachment',
