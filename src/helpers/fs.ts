@@ -130,7 +130,9 @@ export const shareFile = async (file: File) => {
   await Share.open({
     filename: `${file.title}.${file.fileType}`,
     url: path,
-    type: (file.fileType && mime.lookup(file.fileType)) || 'text/plain',
+    type:
+      (file.fileType && mime.lookup(file.fileType)) ||
+      'application/octet-stream',
     title: '分享文件',
     showAppsToView: true,
     failOnCancel: false,
@@ -162,7 +164,7 @@ export const openFile = async (uri: string, type?: string | null) => {
     ? uri
     : await ExpoFileSystem.getContentUriAsync(uri);
   await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
-    type: (type && mime.lookup(type)) || 'text/plain',
+    type: (type && mime.lookup(type)) || 'application/octet-stream',
     data: contentUri,
     flags: 1,
   });

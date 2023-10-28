@@ -45,28 +45,28 @@ export const submitAssignment = async (
     body.append('fileupload', {
       uri: attachment.uri,
       name: attachment.name,
-      type: mime.lookup(attachment.uri) || 'text/plain',
+      type: mime.lookup(attachment.uri) || 'application/octet-stream',
     } as any);
   }
 
   try {
     await dataSource.login();
-
-    const url = addCSRF(submitAssignmentUrl);
-    const res = await axios.post(url, body, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: e => onProgress?.(e.total ? e.loaded / e.total : 0),
-    });
-
-    if (res.status !== 200) {
-      throw new Error('Failed to submit the assignment: invalid login session');
-    }
-    if (res.data?.result === 'error') {
-      throw new Error('Failed to submit the assignment: ' + res.data?.msg);
-    }
   } catch {
-    throw new Error('Failed to submit the assignment: unknown error');
+    throw new Error('Failed to submit the assignment: login failed');
+  }
+
+  const url = addCSRF(submitAssignmentUrl);
+  const res = await axios.post(url, body, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    onUploadProgress: e => onProgress?.(e.total ? e.loaded / e.total : 0),
+  });
+
+  if (res.status !== 200) {
+    throw new Error('Failed to submit the assignment: invalid login session');
+  }
+  if (res.data?.result === 'error') {
+    throw new Error('Failed to submit the assignment: ' + res.data?.msg);
   }
 };

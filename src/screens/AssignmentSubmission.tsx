@@ -14,12 +14,14 @@ import {
   Button,
   Caption,
   ProgressBar,
+  Snackbar,
   TextInput,
   useTheme,
 } from 'react-native-paper';
 import dayjs from 'dayjs';
 import mimeTypes from 'mime-types';
 import {RemoteFile} from 'thu-learn-lib';
+import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
@@ -35,6 +37,13 @@ import {
 import useToast from 'hooks/useToast';
 import {ScreenParams} from './types';
 import {useAppDispatch, useAppSelector} from 'data/store';
+
+interface AttachmentResult {
+  uri: string;
+  type: string | null;
+  name: string;
+  size?: number | null;
+}
 
 const AssignmentSubmission: React.FC<
   React.PropsWithChildren<
@@ -64,15 +73,27 @@ const AssignmentSubmission: React.FC<
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),
   );
-  const [attachmentResult, setAttachmentResult] = useState<{
-    uri: string;
-    type: string | null;
-    name: string;
-    size?: number | null;
-  } | null>(null);
+  const [customAttachmentName, setCustomAttachmentName] = useState('');
+  const [attachmentResult, setAttachmentResult] =
+    useState<AttachmentResult | null>(null);
   const [removeAttachment, setRemoveAttachment] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const getDefaultAttachmentName = useCallback(
+    (mimeType?: string | null) => {
+      const ext = mimeTypes.extension(mimeType ?? 'application/octet-stream');
+      return isLocaleChinese()
+        ? `${title}-提交.${ext}`
+        : `${title} Submission.${ext}`;
+    },
+    [title],
+  );
+
+  const handleCustomAttachmentNameChange = (text: string) => {
+    setCustomAttachmentName(text.replaceAll('.', ''));
+  };
 
   const handleAttachmentRemove = () => {
     setRemoveAttachment(!removeAttachment);
@@ -85,9 +106,7 @@ const AssignmentSubmission: React.FC<
       });
       setAttachmentResult({
         ...result,
-        name:
-          result.name ??
-          (isLocaleChinese() ? `${title}-提交` : `${title} Submission`),
+        name: result.name ?? getDefaultAttachmentName(result.type),
       });
       dispatch(setPendingAssignmentData(null));
     } catch (err) {
@@ -113,6 +132,7 @@ const AssignmentSubmission: React.FC<
   };
 
   const handleSubmit = useCallback(async () => {
+    setUploadError(false);
     setUploading(true);
 
     try {
@@ -125,13 +145,22 @@ const AssignmentSubmission: React.FC<
           true,
         );
       } else if (content || attachmentResult) {
+        const replaceName = (name: string) => {
+          const customName = customAttachmentName.trim();
+          if (!customName) {
+            return name;
+          }
+          const ext = getExtension(name);
+          return `${customName}.${ext}`;
+        };
+
         await submitAssignment(
           studentHomeworkId,
           content,
           attachmentResult
             ? {
                 uri: attachmentResult.uri,
-                name: attachmentResult.name,
+                name: replaceName(attachmentResult.name),
               }
             : undefined,
           setProgress,
@@ -144,17 +173,20 @@ const AssignmentSubmission: React.FC<
       dispatch(setPendingAssignmentData(null));
       dispatch(getAssignmentsForCourse(courseId));
 
-      toast(t('assignmentSubmittionSucceeded'), 'success');
+      toast(t('assignmentSubmissionSucceeded'), 'success');
       navigation.goBack();
     } catch {
       setUploading(false);
+      setUploadError(true);
       setProgress(0);
-      toast(t('assignmentSubmittionFailed'), 'error');
+
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
   }, [
     attachmentResult,
     content,
     courseId,
+    customAttachmentName,
     dispatch,
     navigation,
     removeAttachment,
@@ -206,38 +238,43 @@ const AssignmentSubmission: React.FC<
 
   useEffect(() => {
     if (pendingAssignmentData) {
-      const ext = mimeTypes.extension(pendingAssignmentData.mimeType);
       setAttachmentResult({
         uri: pendingAssignmentData.data,
         type: pendingAssignmentData.mimeType,
-        name: isLocaleChinese()
-          ? `${title}-提交.${ext}`
-          : `${title} Submission.${ext}`,
-      } as any);
+        name: getDefaultAttachmentName(pendingAssignmentData.mimeType),
+      });
     }
-  }, [pendingAssignmentData, title]);
+  }, [getDefaultAttachmentName, pendingAssignmentData]);
 
   return (
     <SafeArea>
       <KeyboardAvoidingView
         style={Styles.flex1}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        {progress ? <ProgressBar progress={progress} /> : undefined}
+        {progress ? <ProgressBar progress={progress} /> : null}
         <ScrollView
           contentContainerStyle={styles.scrollView}
           scrollEnabled={false}
           keyboardShouldPersistTaps="handled">
           <TextInput
             style={Styles.flex1}
+            disabled={removeAttachment || uploading}
             multiline
             placeholder={t('assignmentSubmissionContentPlaceholder')}
             value={content}
             onChangeText={setContent}
           />
+          <TextInput
+            disabled={removeAttachment || uploading}
+            placeholder={t('assignmentSubmissionFilenamePlaceholder')}
+            value={customAttachmentName}
+            onChangeText={handleCustomAttachmentNameChange}
+          />
         </ScrollView>
         <View style={styles.submissionDetail}>
           {submittedAttachment ? (
             <TextButton
+              disabled={uploading}
               style={
                 attachmentResult || removeAttachment
                   ? {
@@ -254,6 +291,7 @@ const AssignmentSubmission: React.FC<
           {!removeAttachment && attachmentResult ? (
             <TextButton
               containerStyle={[styles.attachmentButton, Styles.spacey1]}
+              disabled={uploading}
               onPress={() =>
                 handleFileOpen({
                   id: '0000',
@@ -277,6 +315,7 @@ const AssignmentSubmission: React.FC<
           <View style={styles.attachmentActionButtons}>
             {submittedAttachment ? (
               <Button
+                disabled={uploading}
                 mode="contained"
                 style={[styles.submitButton, Styles.spacey1]}
                 onPress={handleAttachmentRemove}>
@@ -287,6 +326,7 @@ const AssignmentSubmission: React.FC<
             ) : undefined}
             {!removeAttachment ? (
               <Button
+                disabled={uploading}
                 mode="contained"
                 style={[styles.submitButton, Styles.spacey1]}
                 onPress={handleDocumentPick}>
@@ -309,6 +349,12 @@ const AssignmentSubmission: React.FC<
           )}
         </View>
       </KeyboardAvoidingView>
+      <Snackbar
+        visible={uploadError}
+        duration={3000}
+        onDismiss={() => setUploadError(false)}>
+        {t('assignmentSubmissionFailed')}
+      </Snackbar>
     </SafeArea>
   );
 };
