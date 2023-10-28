@@ -1,13 +1,13 @@
 diff --git a/node_modules/react-native-vector-icons/RNVectorIcons.podspec b/node_modules/react-native-vector-icons/RNVectorIcons.podspec
-index 92652fd..2ff176b 100644
+index 5877f53..ec19a9c 100644
 --- a/node_modules/react-native-vector-icons/RNVectorIcons.podspec
 +++ b/node_modules/react-native-vector-icons/RNVectorIcons.podspec
-@@ -14,7 +14,7 @@ Pod::Spec.new do |s|
-   s.platforms      = { :ios => "9.0", :tvos => "9.0" }
-   s.source         = { :git => "https://github.com/oblador/react-native-vector-icons.git", :tag => "v#{s.version}" }
-   s.source_files   = 'RNVectorIconsManager/**/*.{h,m}'
+@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
+   s.source         = { :git => package["repository"]["url"], :tag => "v#{s.version}" }
+ 
+   s.source_files   = 'RNVectorIconsManager/**/*.{h,m,mm,swift}'
 -  s.resources      = "Fonts/*.ttf"
 +  s.resources      = "Fonts/MaterialCommunityIcons.ttf", "Fonts/MaterialIcons.ttf"
    s.preserve_paths = "**/*.js"
-   s.dependency 'React-Core'
- 
+   # React Native Core dependency
+   if defined? install_modules_dependencies

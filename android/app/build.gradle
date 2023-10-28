@@ -38,7 +38,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdk rootProject.ext.compileSdkVersion
-        versionCode 9202900
+        versionCode 9202910
         versionName "14.5.0"
     }
 
