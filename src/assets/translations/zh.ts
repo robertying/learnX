@@ -141,6 +141,7 @@ export default {
   noFileSize: '未知文件大小',
   datePickerStartLabel: '开始',
   datePickerEndLabel: '结束',
+  datePickerSaveLabel: '同步',
   datePickerLabel: '选择同步范围',
   reviewed: '已阅',
   good: '优秀',

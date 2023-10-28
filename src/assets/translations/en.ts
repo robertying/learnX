@@ -148,6 +148,7 @@ export default {
   noFileSize: 'Unknown file size',
   datePickerStartLabel: 'Start',
   datePickerEndLabel: 'End',
+  datePickerSaveLabel: 'Sync',
   datePickerLabel: 'Select Sync Range',
   reviewed: 'Reviewed',
   good: 'Good',

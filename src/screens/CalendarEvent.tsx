@@ -305,6 +305,7 @@ const CalendarEvent: React.FC<
         saveLabelDisabled={!startDate || !endDate}
         startLabel={t('datePickerStartLabel')}
         endLabel={t('datePickerEndLabel')}
+        saveLabel={t('datePickerSaveLabel')}
         label={t('datePickerLabel')}
         onDismiss={handleDatePickerDismiss}
         startDate={startDate}
