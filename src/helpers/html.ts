@@ -40,6 +40,9 @@ export const getWebViewTemplate = (
         #root > p:first-child {
           margin-top: 0px;
         }
+        #root > p:last-child {
+          margin-bottom: 0px;
+        }
       </style>
       ${
         darkMode
