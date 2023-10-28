@@ -7,7 +7,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
 import {Caption, Title} from 'react-native-paper';
 import Clipboard from '@react-native-clipboard/clipboard';
 import TableCell from 'components/TableCell';
@@ -19,15 +18,12 @@ import {registerForPushNotifications} from 'helpers/notification';
 import {useAppDispatch} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import {ScreenParams} from './types';
-import useDetailNavigator from 'hooks/useDetailNavigator';
 
 const PushNotifications: React.FC<
   React.PropsWithChildren<
     NativeStackScreenProps<ScreenParams, 'PushNotifications'>
   >
 > = props => {
-  const detailNavigator = useDetailNavigator();
-
   const toast = useToast();
   const dispatch = useAppDispatch();
 
@@ -48,18 +44,6 @@ const PushNotifications: React.FC<
       setToken(match ? match[1] : null);
     } else {
       setToken(null);
-    }
-  };
-
-  const handlePush = (name: keyof ScreenParams) => {
-    if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.push(name, {
-          disableAnimation: true,
-        }),
-      );
-    } else {
-      props.navigation.push(name);
     }
   };
 
@@ -126,12 +110,6 @@ const PushNotifications: React.FC<
           onPress={() =>
             Linking.openURL('https://tsinghua.app/learnX-companion')
           }
-        />
-        <TableCell
-          iconName="help"
-          primaryText={t('helpAndFeedback')}
-          type="arrow"
-          onPress={() => handlePush('Help')}
         />
       </ScrollView>
     </SafeArea>
