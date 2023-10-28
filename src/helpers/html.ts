@@ -110,11 +110,9 @@ export const canRenderInIosWebview = (ext?: string | null) => {
 };
 
 export const removeTags = (html?: string) => {
-  return html
-    ? html
-        .replace(/<!--(.*?)-->/g, '')
-        .replace(/<(?:.|\n)*?>/gm, '')
-        .replace(/\s\s+/g, ' ')
-        .trim()
-    : '';
+  if (!html) {
+    return '';
+  }
+  const $ = cheerio.load(html, undefined, false);
+  return $.text().replace(/\s\s+/g, ' ').trim();
 };
