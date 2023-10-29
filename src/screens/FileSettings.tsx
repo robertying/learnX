@@ -1,4 +1,4 @@
-import {Alert, ScrollView, StyleSheet} from 'react-native';
+import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
 import {useAppDispatch, useAppSelector} from 'data/store';
@@ -11,8 +11,8 @@ import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 
-const FileCache: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileCache'>>
+const FileSettings: React.FC<
+  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileSettings'>>
 > = props => {
   const toast = useToast();
 
@@ -22,6 +22,9 @@ const FileCache: React.FC<
   );
   const fileOmitCourseName = useAppSelector(
     state => state.settings.fileOmitCourseName,
+  );
+  const openFileAfterDownload = useAppSelector(
+    state => state.settings.openFileAfterDownload,
   );
 
   const handleClearCache = () => {
@@ -98,6 +101,18 @@ const FileCache: React.FC<
           type="none"
           onPress={handleClearCache}
         />
+        {Platform.OS === 'android' && (
+          <TableCell
+            style={styles.marginTop}
+            iconName="open-in-new"
+            primaryText={t('openFileAfterDownload')}
+            switchValue={openFileAfterDownload}
+            onSwitchValueChange={value =>
+              dispatch(setSetting('openFileAfterDownload', value))
+            }
+            type="switch"
+          />
+        )}
       </ScrollView>
     </SafeArea>
   );
@@ -116,4 +131,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FileCache;
+export default FileSettings;

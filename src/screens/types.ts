@@ -19,7 +19,7 @@ export type ScreenParams = {
   PushNotifications: ExtraParams;
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;
-  FileCache: ExtraParams;
+  FileSettings: ExtraParams;
   Help: ExtraParams;
   About: ExtraParams;
   Changelog: ExtraParams;

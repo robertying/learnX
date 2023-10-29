@@ -35,6 +35,7 @@ import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
 import {ScreenParams} from './types';
 import {SplitViewContext} from 'components/SplitView';
+import {useAppSelector} from 'data/store';
 
 const FileDetail: React.FC<
   React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileDetail'>>
@@ -44,6 +45,10 @@ const FileDetail: React.FC<
   const theme = useTheme();
   const toast = useToast();
   const {showDetail, showMaster, toggleMaster} = useContext(SplitViewContext);
+
+  const openFileAfterDownload = useAppSelector(
+    state => state.settings.openFileAfterDownload,
+  );
 
   const webViewRef = useRef<WebView>(null);
 
@@ -189,6 +194,12 @@ const FileDetail: React.FC<
       }
     }, [file.fileType]),
   );
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && openFileAfterDownload && path) {
+      handleOpen();
+    }
+  }, [handleOpen, openFileAfterDownload, path]);
 
   return (
     <SafeArea>

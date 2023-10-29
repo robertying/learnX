@@ -114,9 +114,9 @@ const Settings: React.FC<
         />
         <TableCell
           iconName="rule-folder"
-          primaryText={t('fileCache')}
+          primaryText={t('fileSettings')}
           type="arrow"
-          onPress={() => handlePush('FileCache')}
+          onPress={() => handlePush('FileSettings')}
         />
         {Platform.OS === 'ios' && (
           <TableCell

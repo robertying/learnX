@@ -6,7 +6,7 @@ export default {
   courses: '课程',
   calendarsAndReminders: '日历与提醒事项',
   semesterSelection: '学期切换',
-  fileCache: '文件缓存',
+  fileSettings: '文件',
   helpAndFeedback: '帮助与反馈',
   about: '关于',
   changelog: '更新日志',
@@ -151,4 +151,5 @@ export default {
   pass: '通过',
   fail: '不通过',
   incomplete: '缓考',
+  openFileAfterDownload: '自动打开已下载的文件',
 };

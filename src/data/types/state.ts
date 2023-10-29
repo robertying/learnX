@@ -47,6 +47,7 @@ export interface SettingsState {
   courseInformationSharingBadgeShown: boolean;
   pushNotificationsBadgeShown: boolean;
   lastShowChangelogVersion: string | null;
+  openFileAfterDownload: boolean;
 }
 
 export interface SemestersState {

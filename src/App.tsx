@@ -57,7 +57,7 @@ import Settings from 'screens/Settings';
 import Login from 'screens/Login';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
-import FileCache from 'screens/FileCache';
+import FileSettings from 'screens/FileSettings';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
 import Help from 'screens/Help';
 import About from 'screens/About';
@@ -339,10 +339,10 @@ const SettingDetails = (
       }}
     />
     <SettingStackNavigator.Screen
-      name="FileCache"
-      component={FileCache}
+      name="FileSettings"
+      component={FileSettings}
       options={{
-        title: t('fileCache'),
+        title: t('fileSettings'),
       }}
     />
     <SettingStackNavigator.Screen

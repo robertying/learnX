@@ -6,7 +6,7 @@ export default {
   courses: 'Courses',
   calendarsAndReminders: 'Calendars & Reminders',
   semesterSelection: 'Semester Selection',
-  fileCache: 'File Cache',
+  fileSettings: 'Files',
   helpAndFeedback: 'Help & Feedbacks',
   about: 'About',
   changelog: 'Changelog',
@@ -160,4 +160,5 @@ export default {
   pass: 'Pass',
   fail: 'Fail',
   incomplete: 'Incomplete',
+  openFileAfterDownload: 'Open downloaded files automatically',
 };

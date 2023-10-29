@@ -30,6 +30,7 @@ export default function settings(
     courseInformationSharingBadgeShown: false,
     pushNotificationsBadgeShown: false,
     lastShowChangelogVersion: null,
+    openFileAfterDownload: false,
   },
   action: SettingsAction,
 ): SettingsState {
