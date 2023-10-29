@@ -2,6 +2,7 @@ import {useMemo, useState} from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   ScrollView,
   StyleSheet,
@@ -144,6 +145,11 @@ const CalendarEvent: React.FC<
         } else if ((err as Error).message === 'Missing reminder permission') {
           toast(t('assignmentSyncNoReminderPermission'), 'error');
         } else if (
+          (err as Error).message ===
+          'CALENDAR permission is required to do this operation.'
+        ) {
+          toast(t('assignmentSyncNoCalendarPermission'), 'error');
+        } else if (
           (err as Error).message === 'Cannot find any calendar source'
         ) {
           toast(t('missingCalendarSource'), 'error');
@@ -205,7 +211,8 @@ const CalendarEvent: React.FC<
     <SafeArea>
       <KeyboardAvoidingView
         style={Styles.flex1}
-        behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={120}>
         <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
           <TableCell
             iconName="people"
@@ -255,7 +262,7 @@ const CalendarEvent: React.FC<
                 }课表到日历；请在更改提醒设置后重新同步以应用更改。`
               : `Manually sync ${
                   graduate ? 'graduate' : 'undergraduate'
-                } course schedule to your calendar. Please re-sync after any alarm setting change.`}
+                } course schedule to your calendar. Please re-sync after any alert setting change.`}
           </Caption>
           <TableCell
             style={styles.marginTop}
@@ -301,9 +308,47 @@ const CalendarEvent: React.FC<
               type="input"
             />
           )}
+          {alarms.assignmentCalendarAlarm && (
+            <TableCell
+              iconName="access-alarm"
+              primaryText={t('assignmentCalendarSecondAlarm')}
+              switchValue={alarms.assignmentCalendarSecondAlarm}
+              onSwitchValueChange={value =>
+                dispatch(
+                  setSetting('alarms', {
+                    ...alarms,
+                    assignmentCalendarSecondAlarm: value,
+                  }),
+                )
+              }
+              type="switch"
+              switchDisabled={!assignmentCalendarSync}
+            />
+          )}
+          {alarms.assignmentCalendarAlarm &&
+            alarms.assignmentCalendarSecondAlarm && (
+              <TableCell
+                primaryText={t('assignmentCalendarSecondAlarmOffset')}
+                inputValue={(
+                  alarms.assignmentCalendarSecondAlarmOffset ?? 30
+                ).toString()}
+                onInputValueChange={v =>
+                  parseInt(v, 10) &&
+                  dispatch(
+                    setSetting('alarms', {
+                      ...alarms,
+                      assignmentCalendarSecondAlarmOffset:
+                        parseInt(v, 10) || 30,
+                    }),
+                  )
+                }
+                type="input"
+              />
+            )}
           {Platform.OS === 'ios' ? (
             <>
               <TableCell
+                style={{marginTop: 16}}
                 iconName="event-available"
                 primaryText={t('assignmentReminderSync')}
                 switchValue={assignmentReminderSync}
@@ -358,6 +403,12 @@ const CalendarEvent: React.FC<
             primaryText={t('deleteSyncedCalendarsAndReminders')}
             type="none"
             onPress={handleCalendarDelete}
+          />
+          <TableCell
+            iconName="settings"
+            primaryText={t('configureCalendarAndReminder')}
+            type="none"
+            onPress={() => Linking.openSettings()}
           />
         </ScrollView>
       </KeyboardAvoidingView>

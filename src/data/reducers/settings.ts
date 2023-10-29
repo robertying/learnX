@@ -24,6 +24,7 @@ export default function settings(
       course: 'all',
     },
     alarms: {
+      assignmentCalendarSecondAlarm: false,
       assignmentCalendarAlarm: false,
       assignmentReminderAlarm: false,
       courseAlarm: false,

@@ -259,19 +259,14 @@ export const saveAssignmentEvent = async (
     const details: Calendar.Reminder = {
       title,
       startDate: startDate.toDate(),
-      dueDate: dueDate.toDate(),
+      dueDate: alarms.assignmentReminderAlarm
+        ? dueDate
+            .subtract(alarms.assignmentReminderAlarmOffset ?? 24 * 60, 'minute')
+            .toDate()
+        : dueDate.toDate(),
       completed,
       completionDate: completionDate?.toDate(),
       notes: note,
-      alarms: alarms.assignmentReminderAlarm
-        ? [
-            {
-              relativeOffset: -(
-                alarms.assignmentReminderAlarmOffset ?? 24 * 60
-              ),
-            },
-          ]
-        : [],
     };
     if (
       syncedAssignments &&
@@ -292,21 +287,30 @@ export const saveAssignmentEvent = async (
       );
     }
   } else {
+    const alerts = alarms.assignmentCalendarAlarm
+      ? [
+          {
+            relativeOffset: -(alarms.assignmentCalendarAlarmOffset ?? 24 * 60),
+            method: Calendar.AlarmMethod.DEFAULT,
+          },
+        ]
+      : [];
+    if (
+      alarms.assignmentCalendarAlarm &&
+      alarms.assignmentCalendarSecondAlarm
+    ) {
+      alerts.push({
+        relativeOffset: -(alarms.assignmentCalendarSecondAlarmOffset ?? 30),
+        method: Calendar.AlarmMethod.DEFAULT,
+      });
+    }
+
     const details: Partial<Calendar.Event> = {
       title: (completed ? '✅ ' : '') + title,
-      startDate: dueDate.subtract(1, 'hour').toDate(),
+      startDate: dueDate.subtract(30, 'minute').toDate(),
       endDate: dueDate.toDate(),
       notes: note,
-      alarms: alarms.assignmentCalendarAlarm
-        ? [
-            {
-              relativeOffset: -(
-                alarms.assignmentCalendarAlarmOffset ?? 24 * 60
-              ),
-              method: Calendar.AlarmMethod.DEFAULT,
-            },
-          ]
-        : [],
+      alarms: alerts,
     };
     if (
       syncedAssignments &&

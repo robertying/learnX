@@ -101,16 +101,16 @@ const Settings: React.FC<
         />
         <TableCell
           style={styles.marginTop}
-          iconName="date-range"
-          primaryText={t('calendarsAndReminders')}
-          type="arrow"
-          onPress={() => handlePush('CalendarEvent')}
-        />
-        <TableCell
           iconName="loop"
           primaryText={t('semesterSelection')}
           type="arrow"
           onPress={() => handlePush('SemesterSelection')}
+        />
+        <TableCell
+          iconName="date-range"
+          primaryText={t('calendarsAndReminders')}
+          type="arrow"
+          onPress={() => handlePush('CalendarEvent')}
         />
         <TableCell
           iconName="rule-folder"

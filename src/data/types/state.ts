@@ -23,6 +23,8 @@ export type Tab = 'notice' | 'assignment' | 'file' | 'course';
 export interface AlarmSettings {
   courseAlarm: boolean;
   courseAlarmOffset?: number;
+  assignmentCalendarSecondAlarm: boolean;
+  assignmentCalendarSecondAlarmOffset?: number;
   assignmentCalendarAlarm: boolean;
   assignmentCalendarAlarmOffset?: number;
   assignmentReminderAlarm: boolean;

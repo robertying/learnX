@@ -89,6 +89,10 @@ const Assignments: React.FC<
           'CALENDAR permission is required to do this operation.'
         ) {
           toast(t('assignmentSyncNoCalendarPermission'), 'error');
+        } else if (
+          (err as Error).message === 'Cannot find any calendar source'
+        ) {
+          toast(t('missingCalendarSource'), 'error');
         } else {
           toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
         }

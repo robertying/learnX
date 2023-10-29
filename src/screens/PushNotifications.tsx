@@ -104,7 +104,7 @@ const PushNotifications: React.FC<
         )}
         <TableCell
           style={styles.marginTop}
-          iconName="help"
+          iconName="open-in-new"
           primaryText={t('learnXCompanionUsageGuide')}
           type="none"
           onPress={() =>

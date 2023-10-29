@@ -52,6 +52,7 @@ export default {
     'Course Schedule Sync failed. Please grant the App access to reminders, or try restarting the App if you have already done so.',
   courseScheduleSyncRepetitiveError:
     'Course Schedule Sync failed. Please try again. Make sure you are connected to the campus network. Try narrowing down or change the sync date range if the issue persists.',
+  configureCalendarAndReminder: 'Calendars & Reminders Permission Settings',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
   deleteSyncedCalendarsAndRemindersConfirmation:
     'Do you want to delete synced calendars and reminders? This cannot be undone.',
@@ -63,16 +64,18 @@ export default {
   deleteFailed: 'Failed to delete: ',
   graduate: 'Graduate',
   syncCourseSchedule: 'Sync Course Schedule',
-  classAlarm: 'Class Alarm',
-  classAlarmBefore: 'Alarm Offset Before Class (in mins)',
+  classAlarm: 'Class Alert',
+  classAlarmBefore: 'Before Class (in mins)',
   assignmentCalendarSync: 'Assignment Calendar Sync',
-  assignmentCalendarAlarm: 'Assignment Calendar Alarm',
-  assignmentCalendarAlarmOffset: 'Alarm Offset Before Deadline (in mins)',
+  assignmentCalendarAlarm: 'Calendar Alert',
+  assignmentCalendarAlarmOffset: 'Alert Before Deadline (in mins)',
+  assignmentCalendarSecondAlarm: 'Second Calendar Alert',
+  assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (in mins)',
   assignmentReminderSync: 'Assignment Reminder Sync',
-  assignmentReminderAlarm: 'Assignment Reminder Alarm',
-  assignmentReminderAlarmOffset: 'Alarm Offset Before Deadline (in mins)',
+  assignmentReminderAlarm: 'Reminder Early Deadline',
+  assignmentReminderAlarmOffset: 'Move Deadline Forward (in mins)',
   assignmentSyncDescription:
-    'If enabled, assignments will be synced automatically when refreshed. Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alarm setting change.',
+    'If enabled, assignments will be synced automatically when refreshed. Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alert setting change.',
   clearFileCache: 'Clear File Cache',
   clearFileCacheConfirmation:
     'Do you want to clear file cache? This cannot be undone.',
@@ -99,7 +102,7 @@ export default {
   searchPlaceholder: 'Notices, assignments & files...',
   logout: 'Logout',
   logoutConfirmation:
-    'Do you want to logout? This will clear all of your settings.',
+    'Are you sure to logout? This will clear all of your settings.',
   foundNewVersion: 'Found New Version',
   unfinished: 'unfinished',
   finished: 'finished',
@@ -128,7 +131,7 @@ export default {
   pushNotificationTokenDescription:
     "Use this token with the learnX Companion app to receive push notifications on this device. Don't share it with others.",
   copied: 'Copied',
-  configurePushNotifications: 'Configure Push Notifications',
+  configurePushNotifications: 'Push Notifications Permission Settings',
   noPushNotificationsPermission: 'No Push Notifications Permission',
   learnXCompanionUsageGuide: 'learnX Companion Usage Guide',
   noFileDescription: 'No file description',
