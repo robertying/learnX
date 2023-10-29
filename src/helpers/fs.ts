@@ -14,11 +14,9 @@ export const downloadFile = async (
   refresh?: boolean,
   onProgress?: (progress: number) => void,
 ) => {
-  if (
-    file.downloadUrl.startsWith('file://') ||
-    file.downloadUrl.startsWith('content://')
-  ) {
-    return file.downloadUrl;
+  let url = file.downloadUrl;
+  if (url.startsWith('file://') || url.startsWith('content://')) {
+    return url;
   }
 
   const settings = store.getState().settings;
@@ -40,21 +38,18 @@ export const downloadFile = async (
     return path;
   }
 
-  if (
-    !file.downloadUrl.startsWith('http://') &&
-    !file.downloadUrl.startsWith('https://')
-  ) {
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
     throw new Error('Invalid file url');
   }
 
   if (refresh) {
     await dataSource.login();
   }
-  file.downloadUrl = addCSRF(file.downloadUrl);
+  url = addCSRF(url);
 
   if (Platform.OS === 'ios') {
     const downloadPromise = fs.downloadFile({
-      fromUrl: file.downloadUrl,
+      fromUrl: url,
       toFile: path,
       begin: () => {},
       progress: result => {
@@ -84,7 +79,7 @@ export const downloadFile = async (
     }
   } else {
     const downloadResumable = ExpoFileSystem.createDownloadResumable(
-      file.downloadUrl,
+      url,
       path,
       {
         cache: !refresh,
