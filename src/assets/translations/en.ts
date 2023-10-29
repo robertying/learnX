@@ -27,7 +27,7 @@ export default {
   assignmentSyncNoCalendarPermission:
     'Assignment Sync failed. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   assignmentSyncNoReminderPermission:
-    'Assignment Sync failed. Please grant the App access to reminders.',
+    'Assignment Sync failed. Please grant the App access to reminders, or try restarting the App if you have already done so.',
   assignmentSyncFailed: 'Assignment Sync failed: ',
   filePickFailed: 'Failed to pick the file',
   assignmentSubmissionSucceeded: 'Successfully submitted the assignment',
@@ -49,7 +49,7 @@ export default {
   courseScheduleSyncNoCalendarPermission:
     'Course Schedule Sync failed. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   courseScheduleSyncNoReminderPermission:
-    'Course Schedule Sync failed. Please grant the App access to reminders.',
+    'Course Schedule Sync failed. Please grant the App access to reminders, or try restarting the App if you have already done so.',
   courseScheduleSyncRepetitiveError:
     'Course Schedule Sync failed. Please try again. Make sure you are connected to the campus network. Try narrowing down or change the sync date range if the issue persists.',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
@@ -59,16 +59,20 @@ export default {
   deleteFailedNoCalendarPermission:
     'Failed to delete. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   deleteFailedNoReminderPermission:
-    'Failed to delete. Please grant the App access to reminders.',
+    'Failed to delete. Please grant the App access to reminders, or try restarting the App if you have already done so.',
   deleteFailed: 'Failed to delete: ',
   graduate: 'Graduate',
   syncCourseSchedule: 'Sync Course Schedule',
   classAlarm: 'Class Alarm',
   classAlarmBefore: 'Alarm Offset Before Class (in mins)',
-  assignmentAutoSync: 'Assignment Auto Sync',
-  assignmentAlarm: 'Assignment Alarm',
-  assignmentAlarmOffset: 'Alarm Offset Before Deadline (in mins)',
-  syncAssignmentsToCalendar: 'Sync Assignments to Calendar',
+  assignmentCalendarSync: 'Assignment Calendar Sync',
+  assignmentCalendarAlarm: 'Assignment Calendar Alarm',
+  assignmentCalendarAlarmOffset: 'Alarm Offset Before Deadline (in mins)',
+  assignmentReminderSync: 'Assignment Reminder Sync',
+  assignmentReminderAlarm: 'Assignment Reminder Alarm',
+  assignmentReminderAlarmOffset: 'Alarm Offset Before Deadline (in mins)',
+  assignmentSyncDescription:
+    'If enabled, assignments will be synced automatically when refreshed. Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alarm setting change.',
   clearFileCache: 'Clear File Cache',
   clearFileCacheConfirmation:
     'Do you want to clear file cache? This cannot be undone.',

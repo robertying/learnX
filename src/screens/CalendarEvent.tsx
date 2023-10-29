@@ -1,5 +1,11 @@
 import {useMemo, useState} from 'react';
-import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
 import {DatePickerModal} from 'react-native-paper-dates';
@@ -10,11 +16,11 @@ import type {
 import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import Styles from 'constants/Styles';
 import {useAppDispatch, useAppSelector} from 'data/store';
-import {clearEventIds, setSetting} from 'data/actions/settings';
+import {setSetting} from 'data/actions/settings';
 import {dataSource} from 'data/source';
 import {
-  getAndRequestPermission,
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
@@ -31,9 +37,11 @@ const CalendarEvent: React.FC<
   const toast = useToast();
 
   const dispatch = useAppDispatch();
-  const assignmentSync = useAppSelector(state => state.settings.assignmentSync);
-  const syncAssignmentsToCalendar = useAppSelector(
-    state => state.settings.syncAssignmentsToCalendar,
+  const assignmentCalendarSync = useAppSelector(
+    state => state.settings.assignmentCalendarSync,
+  );
+  const assignmentReminderSync = useAppSelector(
+    state => state.settings.assignmentReminderSync,
   );
   const alarms = useAppSelector(state => state.settings.alarms);
   const graduate = useAppSelector(state => state.settings.graduate);
@@ -55,7 +63,10 @@ const CalendarEvent: React.FC<
   );
 
   const [courseSyncing, setCourseSyncing] = useState(false);
-  const [assignmentSyncing, setAssignmentSyncing] = useState(false);
+  const [assignmentCalendarSyncing, setAssignmentCalendarSyncing] =
+    useState(false);
+  const [assignmentReminderSyncing, setAssignmentReminderSyncing] =
+    useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [startDate, setStartDate] = useState<CalendarDate>(dayjs().toDate());
   const [endDate, setEndDate] = useState<CalendarDate>(
@@ -114,12 +125,19 @@ const CalendarEvent: React.FC<
     }
   };
 
-  const handleAssignmentSync = async (enabled: boolean) => {
+  const handleAssignmentSync = async (
+    type: 'calendar' | 'reminder',
+    enabled: boolean,
+  ) => {
     if (enabled) {
-      setAssignmentSyncing(true);
+      if (type === 'calendar') {
+        setAssignmentCalendarSyncing(true);
+      } else {
+        setAssignmentReminderSyncing(true);
+      }
 
       try {
-        await saveAssignmentsToReminderOrCalendar(sync);
+        await saveAssignmentsToReminderOrCalendar(type, sync);
       } catch (err) {
         if ((err as Error).message === 'Missing calendar permission') {
           toast(t('assignmentSyncNoCalendarPermission'), 'error');
@@ -133,17 +151,18 @@ const CalendarEvent: React.FC<
           toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
         }
       } finally {
-        setAssignmentSyncing(false);
+        if (type === 'calendar') {
+          setAssignmentCalendarSyncing(false);
+        } else {
+          setAssignmentReminderSyncing(false);
+        }
       }
     }
-    dispatch(setSetting('assignmentSync', enabled));
-  };
 
-  const handleSyncTargetChange = async (value: boolean) => {
-    dispatch(clearEventIds());
-    dispatch(setSetting('syncAssignmentsToCalendar', value));
-    if (value) {
-      await getAndRequestPermission('calendar');
+    if (type === 'calendar') {
+      dispatch(setSetting('assignmentCalendarSync', enabled));
+    } else {
+      dispatch(setSetting('assignmentReminderSync', enabled));
     }
   };
 
@@ -184,120 +203,164 @@ const CalendarEvent: React.FC<
 
   return (
     <SafeArea>
-      <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-        <TableCell
-          iconName="people"
-          primaryText={t('graduate')}
-          switchValue={graduate}
-          onSwitchValueChange={value => dispatch(setSetting('graduate', value))}
-          type="switch"
-        />
-        <TableCell
-          iconName="event"
-          primaryText={t('syncCourseSchedule')}
-          type="none"
-          onPress={handleDatePickerOpen}
-          loading={courseSyncing}
-        />
-        <TableCell
-          iconName="access-alarm"
-          primaryText={t('classAlarm')}
-          switchValue={alarms.courseAlarm}
-          onSwitchValueChange={value =>
-            dispatch(setSetting('alarms', {...alarms, courseAlarm: value}))
-          }
-          type="switch"
-        />
-        {alarms.courseAlarm && (
+      <KeyboardAvoidingView
+        style={Styles.flex1}
+        behavior={Platform.OS === 'ios' ? 'position' : 'height'}>
+        <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
           <TableCell
-            primaryText={t('classAlarmBefore')}
-            inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
-            onInputValueChange={v =>
-              parseInt(v, 10) &&
-              dispatch(
-                setSetting('alarms', {
-                  ...alarms,
-                  courseAlarmOffset: parseInt(v, 10) || 15,
-                }),
-              )
+            iconName="people"
+            primaryText={t('graduate')}
+            switchValue={graduate}
+            onSwitchValueChange={value =>
+              dispatch(setSetting('graduate', value))
             }
-            type="input"
-          />
-        )}
-        <Caption style={styles.caption}>
-          {isLocaleChinese()
-            ? `手动同步${
-                graduate ? '研究生' : '本科生'
-              }课表到日历；请在更改提醒设置后重新同步以应用更改。`
-            : `Manually sync ${
-                graduate ? 'graduate' : 'undergraduate'
-              } course schedule to your calendar. Please re-sync after any alarm setting change.`}
-        </Caption>
-        <TableCell
-          style={styles.marginTop}
-          iconName="event-note"
-          primaryText={t('assignmentAutoSync')}
-          switchValue={assignmentSync}
-          onSwitchValueChange={handleAssignmentSync}
-          type="switch"
-          loading={assignmentSyncing}
-        />
-        <TableCell
-          iconName="access-alarm"
-          primaryText={t('assignmentAlarm')}
-          switchValue={alarms.assignmentAlarm}
-          onSwitchValueChange={value =>
-            dispatch(setSetting('alarms', {...alarms, assignmentAlarm: value}))
-          }
-          type="switch"
-          switchDisabled={!assignmentSync}
-        />
-        {alarms.assignmentAlarm && (
-          <TableCell
-            primaryText={t('assignmentAlarmOffset')}
-            inputValue={(alarms.assignmentAlarmOffset ?? 24 * 60).toString()}
-            onInputValueChange={v =>
-              parseInt(v, 10) &&
-              dispatch(
-                setSetting('alarms', {
-                  ...alarms,
-                  assignmentAlarmOffset: parseInt(v, 10) || 24 * 60,
-                }),
-              )
-            }
-            type="input"
-          />
-        )}
-        {Platform.OS === 'ios' ? (
-          <TableCell
-            iconName="event-available"
-            primaryText={t('syncAssignmentsToCalendar')}
-            switchValue={syncAssignmentsToCalendar}
-            onSwitchValueChange={handleSyncTargetChange}
             type="switch"
           />
-        ) : null}
-        <Caption style={styles.caption}>
-          {isLocaleChinese()
-            ? `${
-                Platform.OS === 'ios' && !syncAssignmentsToCalendar
-                  ? '启用后，每次刷新时，作业会自动同步到“提醒事项”；'
-                  : '启用后，每次刷新时，作业会自动同步到“日历”；'
-              }已屏蔽课程的作业或已归档、已过期的作业不会被同步；请在更改提醒或同步设置后刷新作业以应用更改。`
-            : `${
-                Platform.OS === 'ios' && !syncAssignmentsToCalendar
-                  ? 'If enabled, assignments will be synced to Reminders every time after refreshing. '
-                  : 'If enabled, assignments will be synced to Calendar every time after refreshing. '
-              }Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alarm or sync setting changes.`}
-        </Caption>
-        <TableCell
-          style={styles.marginTop}
-          iconName="event-busy"
-          primaryText={t('deleteSyncedCalendarsAndReminders')}
-          type="none"
-          onPress={handleCalendarDelete}
-        />
-      </ScrollView>
+          <TableCell
+            iconName="event"
+            primaryText={t('syncCourseSchedule')}
+            type="none"
+            onPress={handleDatePickerOpen}
+            loading={courseSyncing}
+          />
+          <TableCell
+            iconName="access-alarm"
+            primaryText={t('classAlarm')}
+            switchValue={alarms.courseAlarm}
+            onSwitchValueChange={value =>
+              dispatch(setSetting('alarms', {...alarms, courseAlarm: value}))
+            }
+            type="switch"
+          />
+          {alarms.courseAlarm && (
+            <TableCell
+              primaryText={t('classAlarmBefore')}
+              inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
+              onInputValueChange={v =>
+                parseInt(v, 10) &&
+                dispatch(
+                  setSetting('alarms', {
+                    ...alarms,
+                    courseAlarmOffset: parseInt(v, 10) || 15,
+                  }),
+                )
+              }
+              type="input"
+            />
+          )}
+          <Caption style={styles.caption}>
+            {isLocaleChinese()
+              ? `手动同步${
+                  graduate ? '研究生' : '本科生'
+                }课表到日历；请在更改提醒设置后重新同步以应用更改。`
+              : `Manually sync ${
+                  graduate ? 'graduate' : 'undergraduate'
+                } course schedule to your calendar. Please re-sync after any alarm setting change.`}
+          </Caption>
+          <TableCell
+            style={styles.marginTop}
+            iconName="event-note"
+            primaryText={t('assignmentCalendarSync')}
+            switchValue={assignmentCalendarSync}
+            onSwitchValueChange={enabled =>
+              handleAssignmentSync('calendar', enabled)
+            }
+            type="switch"
+            loading={assignmentCalendarSyncing}
+          />
+          <TableCell
+            iconName="access-alarm"
+            primaryText={t('assignmentCalendarAlarm')}
+            switchValue={alarms.assignmentCalendarAlarm}
+            onSwitchValueChange={value =>
+              dispatch(
+                setSetting('alarms', {
+                  ...alarms,
+                  assignmentCalendarAlarm: value,
+                }),
+              )
+            }
+            type="switch"
+            switchDisabled={!assignmentCalendarSync}
+          />
+          {alarms.assignmentCalendarAlarm && (
+            <TableCell
+              primaryText={t('assignmentCalendarAlarmOffset')}
+              inputValue={(
+                alarms.assignmentCalendarAlarmOffset ?? 24 * 60
+              ).toString()}
+              onInputValueChange={v =>
+                parseInt(v, 10) &&
+                dispatch(
+                  setSetting('alarms', {
+                    ...alarms,
+                    assignmentCalendarAlarmOffset: parseInt(v, 10) || 24 * 60,
+                  }),
+                )
+              }
+              type="input"
+            />
+          )}
+          {Platform.OS === 'ios' ? (
+            <>
+              <TableCell
+                iconName="event-available"
+                primaryText={t('assignmentReminderSync')}
+                switchValue={assignmentReminderSync}
+                onSwitchValueChange={enabled =>
+                  handleAssignmentSync('reminder', enabled)
+                }
+                type="switch"
+                loading={assignmentReminderSyncing}
+              />
+              <TableCell
+                iconName="access-alarm"
+                primaryText={t('assignmentReminderAlarm')}
+                switchValue={alarms.assignmentReminderAlarm}
+                onSwitchValueChange={value =>
+                  dispatch(
+                    setSetting('alarms', {
+                      ...alarms,
+                      assignmentReminderAlarm: value,
+                    }),
+                  )
+                }
+                type="switch"
+                switchDisabled={!assignmentReminderSync}
+              />
+              {alarms.assignmentReminderAlarm && (
+                <TableCell
+                  primaryText={t('assignmentReminderAlarmOffset')}
+                  inputValue={(
+                    alarms.assignmentReminderAlarmOffset ?? 24 * 60
+                  ).toString()}
+                  onInputValueChange={v =>
+                    parseInt(v, 10) &&
+                    dispatch(
+                      setSetting('alarms', {
+                        ...alarms,
+                        assignmentReminderAlarmOffset:
+                          parseInt(v, 10) || 24 * 60,
+                      }),
+                    )
+                  }
+                  type="input"
+                />
+              )}
+            </>
+          ) : null}
+          <Caption style={styles.caption}>
+            {t('assignmentSyncDescription')}
+          </Caption>
+          <TableCell
+            style={styles.marginTop}
+            iconName="event-busy"
+            primaryText={t('deleteSyncedCalendarsAndReminders')}
+            type="none"
+            onPress={handleCalendarDelete}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
       <DatePickerModal
         locale={isLocaleChinese() ? 'zh' : 'en'}
         mode="range"

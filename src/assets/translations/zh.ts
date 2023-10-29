@@ -1,4 +1,6 @@
-export default {
+import en from './en';
+
+const zh: typeof en = {
   back: '返回',
   notices: '通知',
   assignments: '作业',
@@ -26,7 +28,7 @@ export default {
   assignmentSyncNoCalendarPermission:
     '作业同步失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
   assignmentSyncNoReminderPermission:
-    '作业同步失败：请给予 App 提醒事项访问权限',
+    '作业同步失败：请给予 App 提醒事项访问权限；如果您已经授予该权限，请尝试重启 App',
   assignmentSyncFailed: '作业同步失败：',
   filePickFailed: '选取文件失败',
   assignmentSubmissionSucceeded: '作业提交成功',
@@ -46,7 +48,7 @@ export default {
   courseScheduleSyncNoCalendarPermission:
     '课表同步失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
   courseScheduleSyncNoReminderPermission:
-    '课表同步失败：请给予 App 提醒事项访问权限',
+    '课表同步失败：请给予 App 提醒事项访问权限；如果您已经授予该权限，请尝试重启 App',
   courseScheduleSyncRepetitiveError:
     '课表同步失败，请重试。请确保已连接至校园网；如果问题持续存在，请尝试缩小或更改同步的日期范围',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
@@ -55,16 +57,21 @@ export default {
   deleteSucceeded: '删除成功',
   deleteFailedNoCalendarPermission:
     '删除失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
-  deleteFailedNoReminderPermission: '删除失败：请给予 App 提醒事项访问权限',
+  deleteFailedNoReminderPermission:
+    '删除失败：请给予 App 提醒事项访问权限；如果您已经授予该权限，请尝试重启 App',
   deleteFailed: '删除失败：',
   graduate: '研究生',
   syncCourseSchedule: '同步课表',
   classAlarm: '上课提醒',
   classAlarmBefore: '上课多久前提醒（分钟）',
-  assignmentAutoSync: '作业自动同步',
-  assignmentAlarm: '作业提醒',
-  assignmentAlarmOffset: '截止时间多久前提醒（分钟）',
-  syncAssignmentsToCalendar: '同步作业到日历',
+  assignmentCalendarSync: '作业日历同步',
+  assignmentCalendarAlarm: '作业日历提醒',
+  assignmentCalendarAlarmOffset: '截止时间多久前提醒（分钟）',
+  assignmentReminderSync: '作业提醒事项同步',
+  assignmentReminderAlarm: '作业提醒事项提醒',
+  assignmentReminderAlarmOffset: '截止时间多久前提醒（分钟）',
+  assignmentSyncDescription:
+    '启用后，作业会在刷新时自动同步；已屏蔽课程的作业或已归档、已过期的作业不会被同步；请在更改提醒设置后刷新作业以应用更改。',
   clearFileCache: '清空文件缓存',
   clearFileCacheConfirmation: '确定清空文件缓存？该操作不可撤销。',
   clearFileCacheSucceeded: '清空文件缓存成功',
@@ -153,3 +160,5 @@ export default {
   incomplete: '缓考',
   openFileAfterDownload: '自动打开已下载的文件',
 };
+
+export default zh;

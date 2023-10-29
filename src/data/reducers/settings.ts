@@ -9,9 +9,10 @@ import {SettingsState} from 'data/types/state';
 
 export default function settings(
   state: SettingsState = {
-    assignmentSync: false,
-    syncAssignmentsToCalendar: false,
-    syncedAssignments: {},
+    assignmentCalendarSync: false,
+    assignmentReminderSync: false,
+    syncedCalendarAssignments: {},
+    syncedReminderAssignments: {},
     newUpdate: false,
     graduate: false,
     fileUseDocumentDir: false,
@@ -23,7 +24,8 @@ export default function settings(
       course: 'all',
     },
     alarms: {
-      assignmentAlarm: false,
+      assignmentCalendarAlarm: false,
+      assignmentReminderAlarm: false,
       courseAlarm: false,
     },
     courseInformationSharing: false,
@@ -53,25 +55,51 @@ export default function settings(
         };
       }
     case SET_EVENT_ID_FOR_ASSIGNMENT:
-      return {
-        ...state,
-        syncedAssignments: {
-          ...state.syncedAssignments,
-          ...action.payload,
-        },
-      };
+      if (action.payload.type === 'calendar') {
+        return {
+          ...state,
+          syncedCalendarAssignments: {
+            ...state.syncedCalendarAssignments,
+            [action.payload.assignmentId]: action.payload.eventId,
+          },
+        };
+      } else {
+        return {
+          ...state,
+          syncedReminderAssignments: {
+            ...state.syncedReminderAssignments,
+            [action.payload.assignmentId]: action.payload.eventId,
+          },
+        };
+      }
     case REMOVE_EVENT_ID_FOR_ASSIGNMENT:
-      const syncedAssignments = {...state.syncedAssignments};
-      delete syncedAssignments[action.payload];
-      return {
-        ...state,
-        syncedAssignments,
-      };
+      if (action.payload.type === 'calendar') {
+        const syncedCalendarAssignments = {...state.syncedCalendarAssignments};
+        delete syncedCalendarAssignments[action.payload.assignmentId];
+        return {
+          ...state,
+          syncedCalendarAssignments,
+        };
+      } else {
+        const syncedReminderAssignments = {...state.syncedReminderAssignments};
+        delete syncedReminderAssignments[action.payload.assignmentId];
+        return {
+          ...state,
+          syncedReminderAssignments,
+        };
+      }
     case CLEAR_EVENT_IDS:
-      return {
-        ...state,
-        syncedAssignments: {},
-      };
+      if (action.payload.type === 'calendar') {
+        return {
+          ...state,
+          syncedCalendarAssignments: {},
+        };
+      } else {
+        return {
+          ...state,
+          syncedReminderAssignments: {},
+        };
+      }
     default:
       return state;
   }

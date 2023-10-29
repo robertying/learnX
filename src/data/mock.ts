@@ -20,11 +20,13 @@ const mockStore: PersistAppState = {
   settings: {
     alarms: {
       courseAlarm: false,
-      assignmentAlarm: false,
+      assignmentCalendarAlarm: false,
+      assignmentReminderAlarm: false,
     },
-    assignmentSync: false,
-    syncAssignmentsToCalendar: false,
-    syncedAssignments: {},
+    assignmentCalendarSync: false,
+    assignmentReminderSync: false,
+    syncedCalendarAssignments: {},
+    syncedReminderAssignments: {},
     newUpdate: false,
     graduate: false,
     fileUseDocumentDir: false,

@@ -32,7 +32,12 @@ const Assignments: React.FC<
   const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
   const assignmentState = useAppSelector(state => state.assignments);
   const fetching = useAppSelector(state => state.assignments.fetching);
-  const assignmentSync = useAppSelector(state => state.settings.assignmentSync);
+  const assignmentCalendarSync = useAppSelector(
+    state => state.settings.assignmentCalendarSync,
+  );
+  const assignmentReminderSync = useAppSelector(
+    state => state.settings.assignmentReminderSync,
+  );
 
   const [all, _, fav, archived, hidden, unfinished, finished] = useFilteredData(
     assignmentState.items,
@@ -70,6 +75,28 @@ const Assignments: React.FC<
     [detailNavigator, navigation],
   );
 
+  const handleSync = useCallback(
+    async (type: 'calendar' | 'reminder') => {
+      try {
+        await saveAssignmentsToReminderOrCalendar(type, sync);
+      } catch (err) {
+        if ((err as Error).message === 'Missing calendar permission') {
+          toast(t('assignmentSyncNoCalendarPermission'), 'error');
+        } else if ((err as Error).message === 'Missing reminder permission') {
+          toast(t('assignmentSyncNoReminderPermission'), 'error');
+        } else if (
+          (err as Error).message ===
+          'CALENDAR permission is required to do this operation.'
+        ) {
+          toast(t('assignmentSyncNoCalendarPermission'), 'error');
+        } else {
+          toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
+        }
+      }
+    },
+    [sync, toast],
+  );
+
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
@@ -89,27 +116,16 @@ const Assignments: React.FC<
   }, [handlePush, navigation]);
 
   useEffect(() => {
-    if (assignmentSync) {
-      (async () => {
-        try {
-          await saveAssignmentsToReminderOrCalendar(sync);
-        } catch (err) {
-          if ((err as Error).message === 'Missing calendar permission') {
-            toast(t('assignmentSyncNoCalendarPermission'), 'error');
-          } else if ((err as Error).message === 'Missing reminder permission') {
-            toast(t('assignmentSyncNoReminderPermission'), 'error');
-          } else if (
-            (err as Error).message ===
-            'CALENDAR permission is required to do this operation.'
-          ) {
-            toast(t('assignmentSyncNoCalendarPermission'), 'error');
-          } else {
-            toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
-          }
-        }
-      })();
+    if (assignmentCalendarSync) {
+      handleSync('calendar');
     }
-  }, [sync, assignmentSync, toast]);
+  }, [assignmentCalendarSync, handleSync]);
+
+  useEffect(() => {
+    if (assignmentReminderSync) {
+      handleSync('reminder');
+    }
+  }, [assignmentReminderSync, handleSync]);
 
   return (
     <SafeArea>

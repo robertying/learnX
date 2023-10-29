@@ -23,12 +23,22 @@ export const setSetting: <T extends keyof SettingsState>(
 
 export const setEventIdForAssignment = createAction(
   SET_EVENT_ID_FOR_ASSIGNMENT,
-  (assignmentId: string, eventId: string) => ({[assignmentId]: eventId}),
+  (type: 'calendar' | 'reminder', assignmentId: string, eventId: string) => ({
+    type,
+    assignmentId,
+    eventId,
+  }),
 )();
 
 export const removeEventIdForAssignment = createAction(
   REMOVE_EVENT_ID_FOR_ASSIGNMENT,
-  (assignmentId: string) => assignmentId,
+  (type: 'calendar' | 'reminder', assignmentId: string) => ({
+    type,
+    assignmentId,
+  }),
 )();
 
-export const clearEventIds = createAction(CLEAR_EVENT_IDS)();
+export const clearEventIds = createAction(
+  CLEAR_EVENT_IDS,
+  (type: 'calendar' | 'reminder') => ({type}),
+)();

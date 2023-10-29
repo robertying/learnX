@@ -23,15 +23,20 @@ export type Tab = 'notice' | 'assignment' | 'file' | 'course';
 export interface AlarmSettings {
   courseAlarm: boolean;
   courseAlarmOffset?: number;
-  assignmentAlarm: boolean;
-  assignmentAlarmOffset?: number;
+  assignmentCalendarAlarm: boolean;
+  assignmentCalendarAlarmOffset?: number;
+  assignmentReminderAlarm: boolean;
+  assignmentReminderAlarmOffset?: number;
 }
 export interface SettingsState {
-  assignmentSync: boolean;
-  syncAssignmentsToCalendar: boolean;
-  assignmentReminderId?: string;
+  assignmentCalendarSync: boolean;
+  assignmentReminderSync: boolean;
   assignmentCalendarId?: string;
-  syncedAssignments: {
+  assignmentReminderId?: string;
+  syncedCalendarAssignments?: {
+    [assignmentId: string]: string;
+  };
+  syncedReminderAssignments?: {
     [assignmentId: string]: string;
   };
   courseCalendarId?: string;
