@@ -53,12 +53,13 @@ const FileDetail: React.FC<
   const [showInfo, setShowInfo] = useState(false);
 
   const canRender =
-    (Platform.OS === 'ios' &&
+    path &&
+    ((Platform.OS === 'ios' &&
       !DeviceInfo.isMac() &&
       canRenderInIosWebview(file.fileType)) ||
-    (Platform.OS === 'ios' &&
-      DeviceInfo.isMac() &&
-      canRenderInMacWebview(file.fileType));
+      (Platform.OS === 'ios' &&
+        DeviceInfo.isMac() &&
+        canRenderInMacWebview(file.fileType)));
 
   const handleDownload = useCallback(
     async (refresh: boolean) => {
@@ -203,93 +204,7 @@ const FileDetail: React.FC<
             {t('fileDownloadFailed')}
           </Text>
         </View>
-      ) : path ? (
-        !showInfo && canRender ? (
-          <WebView
-            ref={webViewRef}
-            style={{
-              backgroundColor: needWhiteBackground(file.fileType)
-                ? 'white'
-                : 'transparent',
-            }}
-            source={{
-              uri: path,
-            }}
-            originWhitelist={['*']}
-            decelerationRate="normal"
-          />
-        ) : (
-          <>
-            <ScrollView
-              contentContainerStyle={
-                !canRender ? {paddingBottom: 100} : undefined
-              }
-              style={{backgroundColor: theme.colors.surface}}>
-              <View style={styles.section}>
-                <Title>{file.title}</Title>
-                <View style={Styles.flexRowCenter}>
-                  <Caption>{file.courseTeacherName}</Caption>
-                  <Caption>
-                    {dayjs(file.uploadTime).format(
-                      isLocaleChinese()
-                        ? 'YYYY 年 M 月 D 日 dddd HH:mm'
-                        : 'MMM D, YYYY HH:mm',
-                    )}
-                  </Caption>
-                </View>
-              </View>
-              <Divider />
-              <View style={[styles.section, styles.iconButton]}>
-                <Icon
-                  style={styles.icon}
-                  name="insert-drive-file"
-                  color={theme.colors.primary}
-                  size={17}
-                />
-                <Text style={styles.textPaddingRight}>
-                  {file.fileType?.toUpperCase()}
-                </Text>
-              </View>
-              <Divider />
-              <View style={[styles.section, styles.iconButton]}>
-                <Icon
-                  style={styles.icon}
-                  name="file-download"
-                  color={theme.colors.primary}
-                  size={17}
-                />
-                <Text style={styles.textPaddingRight}>
-                  {file.size ?? t('noFileSize')}
-                </Text>
-              </View>
-              <Divider />
-              <Text style={styles.description}>
-                {file.description || t('noFileDescription')}
-              </Text>
-            </ScrollView>
-            {!canRender && !(Platform.OS === 'ios' && !DeviceInfo.isMac()) ? (
-              <View
-                style={[
-                  styles.actions,
-                  {backgroundColor: theme.colors.surface},
-                ]}>
-                <View style={styles.colCenter}>
-                  <IconButton icon="share" size={48} onPress={handleShare} />
-                  <Text>{t('share')}</Text>
-                </View>
-                <View style={styles.colCenter}>
-                  <IconButton
-                    icon="open-in-new"
-                    size={48}
-                    onPress={handleOpen}
-                  />
-                  <Text>{t('open')}</Text>
-                </View>
-              </View>
-            ) : null}
-          </>
-        )
-      ) : (
+      ) : !path ? (
         <SafeArea style={styles.skeletons}>
           <Skeleton />
           <Skeleton />
@@ -302,10 +217,87 @@ const FileDetail: React.FC<
           <Skeleton />
           <Skeleton />
         </SafeArea>
+      ) : !showInfo && canRender ? (
+        <WebView
+          ref={webViewRef}
+          style={{
+            backgroundColor: needWhiteBackground(file.fileType)
+              ? 'white'
+              : 'transparent',
+          }}
+          source={{
+            uri: path,
+          }}
+          originWhitelist={['*']}
+          decelerationRate="normal"
+        />
+      ) : (
+        <>
+          <ScrollView
+            contentContainerStyle={
+              !canRender ? {paddingBottom: 100} : undefined
+            }
+            style={{backgroundColor: theme.colors.surface}}>
+            <View style={styles.section}>
+              <Title>{file.title}</Title>
+              <View style={Styles.flexRowCenter}>
+                <Caption>{file.courseTeacherName}</Caption>
+                <Caption>
+                  {dayjs(file.uploadTime).format(
+                    isLocaleChinese()
+                      ? 'YYYY 年 M 月 D 日 dddd HH:mm'
+                      : 'MMM D, YYYY HH:mm',
+                  )}
+                </Caption>
+              </View>
+            </View>
+            <Divider />
+            <View style={[styles.section, styles.iconButton]}>
+              <Icon
+                style={styles.icon}
+                name="insert-drive-file"
+                color={theme.colors.primary}
+                size={17}
+              />
+              <Text style={styles.textPaddingRight}>
+                {file.fileType?.toUpperCase()}
+              </Text>
+            </View>
+            <Divider />
+            <View style={[styles.section, styles.iconButton]}>
+              <Icon
+                style={styles.icon}
+                name="file-download"
+                color={theme.colors.primary}
+                size={17}
+              />
+              <Text style={styles.textPaddingRight}>
+                {file.size ?? t('noFileSize')}
+              </Text>
+            </View>
+            <Divider />
+            <Text style={styles.description}>
+              {file.description || t('noFileDescription')}
+            </Text>
+          </ScrollView>
+          {!canRender && !(Platform.OS === 'ios' && !DeviceInfo.isMac()) ? (
+            <View
+              style={[styles.actions, {backgroundColor: theme.colors.surface}]}>
+              <View style={styles.colCenter}>
+                <IconButton icon="share" size={48} onPress={handleShare} />
+                <Text>{t('share')}</Text>
+              </View>
+              <View style={styles.colCenter}>
+                <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
+                <Text>{t('open')}</Text>
+              </View>
+            </View>
+          ) : null}
+        </>
       )}
       {progress ? (
         <ProgressBar style={styles.progressBar} progress={progress} />
-      ) : undefined}
+      ) : null}
     </SafeArea>
   );
 };

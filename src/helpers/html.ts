@@ -1,4 +1,4 @@
-import mime from 'mime-types';
+import mimeTypes from 'mime-types';
 import * as cheerio from 'cheerio';
 import {addCSRF} from 'data/source';
 
@@ -89,24 +89,54 @@ export const needWhiteBackground = (ext?: string | null) => {
 };
 
 export const canRenderInMacWebview = (ext?: string | null) => {
-  return ext &&
-    mime.lookup(ext) !== false &&
-    mime.lookup(ext).toString().includes('image/') &&
-    !mime.lookup(ext).toString().includes('vnd.')
-    ? true
-    : false;
+  if (!ext) {
+    return false;
+  }
+
+  const mime = mimeTypes.lookup(ext);
+  if (!mime) {
+    return false;
+  }
+
+  return (
+    mime === 'application/pdf' ||
+    mime.includes('image/') ||
+    mime.includes('audio/') ||
+    mime.includes('video/') ||
+    mime.includes('text/')
+  );
 };
+
+const iosSupportedMimeTypes = [
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.apple.pages',
+  'application/vnd.apple.keynote',
+  'application/vnd.apple.numbers',
+  'application/pdf',
+];
 
 export const canRenderInIosWebview = (ext?: string | null) => {
   if (!ext) {
     return false;
   }
 
-  if (ext.toLowerCase() === 'zip' || ext.toLowerCase() === 'rar') {
+  const mime = mimeTypes.lookup(ext);
+  if (!mime) {
     return false;
   }
 
-  return true;
+  return (
+    iosSupportedMimeTypes.includes(mime) ||
+    mime.includes('image/') ||
+    mime.includes('audio/') ||
+    mime.includes('video/') ||
+    mime.includes('text/')
+  );
 };
 
 export const removeTags = (html?: string) => {
