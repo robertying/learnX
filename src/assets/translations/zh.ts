@@ -66,6 +66,7 @@ const zh: typeof en = {
   classAlarm: '上课提醒',
   classAlarmBefore: '提前提醒（分钟）',
   assignmentCalendarSync: '作业日历同步',
+  calendarEventLength: '日程长度（分钟）',
   assignmentCalendarAlarm: '日历提醒',
   assignmentCalendarAlarmOffset: '提前提醒（分钟）',
   assignmentCalendarSecondAlarm: '日历第二次提醒',
@@ -74,7 +75,7 @@ const zh: typeof en = {
   assignmentReminderAlarm: '提醒事项截止时间提前',
   assignmentReminderAlarmOffset: '截止时间提前（分钟）',
   assignmentSyncDescription:
-    '启用后，作业会在刷新时自动同步；已屏蔽课程的作业或已归档、已过期的作业不会被同步；请在更改提醒设置后刷新作业以应用更改。',
+    '启用后，作业会在刷新时自动同步；已屏蔽课程的作业或已归档、已过期的作业不会被同步；请在更改设置后刷新作业以应用更改。',
   clearFileCache: '清空文件缓存',
   clearFileCacheConfirmation: '确定清空文件缓存？该操作不可撤销。',
   clearFileCacheSucceeded: '清空文件缓存成功',

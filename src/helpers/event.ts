@@ -307,7 +307,9 @@ export const saveAssignmentEvent = async (
 
     const details: Partial<Calendar.Event> = {
       title: (completed ? '✅ ' : '') + title,
-      startDate: dueDate.subtract(30, 'minute').toDate(),
+      startDate: dueDate
+        .subtract(settings.calendarEventLength ?? 30, 'minute')
+        .toDate(),
       endDate: dueDate.toDate(),
       notes: note,
       alarms: alerts,

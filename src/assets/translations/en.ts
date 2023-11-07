@@ -67,6 +67,7 @@ export default {
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Before Class (in mins)',
   assignmentCalendarSync: 'Assignment Calendar Sync',
+  calendarEventLength: 'Event Length (in mins)',
   assignmentCalendarAlarm: 'Calendar Alert',
   assignmentCalendarAlarmOffset: 'Alert Before Deadline (in mins)',
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',
@@ -75,7 +76,7 @@ export default {
   assignmentReminderAlarm: 'Reminder Early Deadline',
   assignmentReminderAlarmOffset: 'Move Deadline Forward (in mins)',
   assignmentSyncDescription:
-    'If enabled, assignments will be synced automatically when refreshed. Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any alert setting change.',
+    'If enabled, assignments will be synced automatically when refreshed. Assignments that are hidden, archived or have passed the due date will not be synced. Please refresh assignments after any setting change.',
   clearFileCache: 'Clear File Cache',
   clearFileCacheConfirmation:
     'Do you want to clear file cache? This cannot be undone.',

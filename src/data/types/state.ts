@@ -32,6 +32,7 @@ export interface AlarmSettings {
 }
 export interface SettingsState {
   assignmentCalendarSync: boolean;
+  calendarEventLength?: number;
   assignmentReminderSync: boolean;
   assignmentCalendarId?: string;
   assignmentReminderId?: string;

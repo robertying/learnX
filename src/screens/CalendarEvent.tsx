@@ -48,6 +48,9 @@ const CalendarEvent: React.FC<
   const graduate = useAppSelector(state => state.settings.graduate);
   const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
   const assignmentState = useAppSelector(state => state.assignments);
+  const calendarEventLength = useAppSelector(
+    state => state.settings.calendarEventLength,
+  );
 
   const [all] = useFilteredData(
     assignmentState.items,
@@ -275,6 +278,19 @@ const CalendarEvent: React.FC<
             type="switch"
             loading={assignmentCalendarSyncing}
           />
+          {assignmentCalendarSync && (
+            <TableCell
+              primaryText={t('calendarEventLength')}
+              inputValue={(calendarEventLength ?? 30).toString()}
+              onInputValueChange={v =>
+                parseInt(v, 10) &&
+                dispatch(
+                  setSetting('calendarEventLength', parseInt(v, 10) || 30),
+                )
+              }
+              type="input"
+            />
+          )}
           <TableCell
             iconName="access-alarm"
             primaryText={t('assignmentCalendarAlarm')}
