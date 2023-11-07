@@ -11,7 +11,7 @@
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "tsc",
     "prettier": "prettier --write src/**/*",
-    "release": "appcenter codepush release-react -a robertying/learnX-iOS && appcenter codepush release-react -a robertying/learnX-Android"
+    "release": "appcenter codepush release-react -a robertying/learnX-iOS --xcode-target-name learnX && appcenter codepush release-react -a robertying/learnX-Android"
   },
   "expo": {
     "autolinking": {
