@@ -30,7 +30,11 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
       }));
     })
     .reduce((a, b) => a.concat(b), [])
-    .sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix());
+    .sort(
+      (a, b) =>
+        dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
+        b.id.localeCompare(a.id),
+    );
 
   dispatch(getAllNoticesForCoursesAction.success(notices));
 };
@@ -58,7 +62,11 @@ const getAllAssignments = async (
       }));
     })
     .reduce((a, b) => a.concat(b), [])
-    .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+    .sort(
+      (a, b) =>
+        dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
+        b.id.localeCompare(a.id),
+    );
   const sorted = [
     ...assignments.filter(a => dayjs(a.deadline).isAfter(dayjs())).reverse(),
     ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
@@ -84,7 +92,11 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
       }));
     })
     .reduce((a, b) => a.concat(b), [])
-    .sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
+    .sort(
+      (a, b) =>
+        dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
+        b.id.localeCompare(a.id),
+    );
 
   dispatch(getAllFilesForCoursesAction.success(files));
 };

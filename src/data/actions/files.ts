@@ -42,7 +42,9 @@ export function getFilesForCourse(courseId: string): ThunkResult {
           courseTeacherName: courseName.teacherName,
         }))
         .sort(
-          (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix(),
+          (a, b) =>
+            dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
+            b.id.localeCompare(a.id),
         );
       dispatch(getFilesForCourseAction.success({files, courseId}));
     } catch (err) {
@@ -80,7 +82,9 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
         })
         .reduce((a, b) => a.concat(b), [])
         .sort(
-          (a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix(),
+          (a, b) =>
+            dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
+            b.id.localeCompare(a.id),
         );
       dispatch(getAllFilesForCoursesAction.success(files));
     } catch (err) {

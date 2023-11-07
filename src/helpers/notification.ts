@@ -54,21 +54,33 @@ const updateDataFromNotification = (data: any) => {
     const newFiles = [
       ...store.getState().files.items.filter(f => f.id !== file.id),
       file,
-    ].sort((a, b) => dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix());
+    ].sort(
+      (a, b) =>
+        dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
+        b.id.localeCompare(a.id),
+    );
     dispatch(getAllFilesForCoursesAction.success(newFiles));
   } else if ((data as Assignment).deadline) {
     const assignment = data as Assignment;
     const newAssignments = [
       ...store.getState().assignments.items.filter(a => a.id !== assignment.id),
       assignment,
-    ].sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+    ].sort(
+      (a, b) =>
+        dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
+        b.id.localeCompare(a.id),
+    );
     dispatch(getAllAssignmentsForCoursesAction.success(newAssignments));
   } else {
     const notice = data as Notice;
     const newNotices = [
       ...store.getState().notices.items.filter(n => n.id !== notice.id),
       notice,
-    ].sort((a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix());
+    ].sort(
+      (a, b) =>
+        dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
+        b.id.localeCompare(a.id),
+    );
     dispatch(getAllNoticesForCoursesAction.success(newNotices));
   }
 };

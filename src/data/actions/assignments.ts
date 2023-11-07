@@ -46,7 +46,11 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
           courseName: courseName.name,
           courseTeacherName: courseName.teacherName,
         }))
-        .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+        .sort(
+          (a, b) =>
+            dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
+            b.id.localeCompare(a.id),
+        );
       const sorted = [
         ...assignments
           .filter(a => dayjs(a.deadline).isAfter(dayjs()))
@@ -90,7 +94,11 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
           }));
         })
         .reduce((a, b) => a.concat(b), [])
-        .sort((a, b) => dayjs(b.deadline).unix() - dayjs(a.deadline).unix());
+        .sort(
+          (a, b) =>
+            dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
+            b.id.localeCompare(a.id),
+        );
       const sorted = [
         ...assignments
           .filter(a => dayjs(a.deadline).isAfter(dayjs()))

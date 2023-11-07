@@ -39,7 +39,9 @@ export function getNoticesForCourse(courseId: string): ThunkResult {
           courseTeacherName: courseName.teacherName,
         }))
         .sort(
-          (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
+          (a, b) =>
+            dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
+            b.id.localeCompare(a.id),
         );
       dispatch(getNoticesForCourseAction.success({notices, courseId}));
     } catch (err) {
@@ -77,7 +79,9 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
         })
         .reduce((a, b) => a.concat(b), [])
         .sort(
-          (a, b) => dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix(),
+          (a, b) =>
+            dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
+            b.id.localeCompare(a.id),
         );
       dispatch(getAllNoticesForCoursesAction.success(notices));
     } catch (err) {
