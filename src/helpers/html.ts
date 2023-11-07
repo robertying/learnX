@@ -1,5 +1,6 @@
 import mimeTypes from 'mime-types';
 import * as cheerio from 'cheerio';
+import he from 'he';
 import {coerce, gte} from 'semver';
 import {addCSRF} from 'data/source';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -70,20 +71,24 @@ export const getWebViewTemplate = (
 `;
 
 export const addCSRFToAllUrlsInHtml = (html: string) => {
-  const $ = cheerio.load(html, undefined, false);
-  $('[href]').each((i, element) => {
-    const url = $(element).attr('href');
-    if (url) {
-      $(element).attr('href', addCSRF(url));
-    }
-  });
-  $('[src]').each((i, element) => {
-    const url = $(element).attr('src');
-    if (url) {
-      $(element).attr('src', addCSRF(url));
-    }
-  });
-  return $.html();
+  try {
+    const $ = cheerio.load(html, undefined, false);
+    $('[href]').each((i, element) => {
+      const url = $(element).attr('href');
+      if (url) {
+        $(element).attr('href', addCSRF(url));
+      }
+    });
+    $('[src]').each((i, element) => {
+      const url = $(element).attr('src');
+      if (url) {
+        $(element).attr('src', addCSRF(url));
+      }
+    });
+    return $.html();
+  } catch {
+    return html;
+  }
 };
 
 export const needWhiteBackground = (ext?: string | null) => {
@@ -151,6 +156,14 @@ export const removeTags = (html?: string) => {
   if (!html) {
     return '';
   }
-  const $ = cheerio.load(html, undefined, false);
-  return $.text().replace(/\s\s+/g, ' ').trim();
+
+  try {
+    const $ = cheerio.load(html, undefined, false);
+    return $.text().replace(/\s\s+/g, ' ').trim();
+  } catch {
+    return he
+      .decode(html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''))
+      .replace(/\s\s+/g, ' ')
+      .trim();
+  }
 };
