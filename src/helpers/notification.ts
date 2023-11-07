@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
-import DeviceInfo from 'react-native-device-info';
+import DeviceInfo from 'constants/DeviceInfo';
 import {store} from 'data/store';
 import {Assignment, File, Notice} from 'data/types/state';
 import {getAllFilesForCoursesAction} from 'data/actions/files';

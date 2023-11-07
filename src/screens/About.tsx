@@ -1,7 +1,7 @@
 import {Linking, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Title, Text} from 'react-native-paper';
-import DeviceInfo from 'react-native-device-info';
+import DeviceInfo from 'constants/DeviceInfo';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
@@ -21,7 +21,7 @@ const About: React.FC<
         contentContainerStyle={styles.scrollViewPaddings}>
         <Title>{t('versionInformation')}</Title>
         <Text style={styles.text}>
-          {`v${packageJson.version} (build ${DeviceInfo.getBuildNumber()})`}
+          {`v${packageJson.version} (build ${DeviceInfo.buildNo()})`}
         </Text>
         <Text style={styles.text}>© 2023 Rui Ying</Text>
         <Text style={styles.text}>
