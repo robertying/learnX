@@ -1,6 +1,8 @@
 import mimeTypes from 'mime-types';
 import * as cheerio from 'cheerio';
+import {coerce, gte} from 'semver';
 import {addCSRF} from 'data/source';
+import DeviceInfo from 'constants/DeviceInfo';
 
 declare const preval: any;
 
@@ -89,6 +91,12 @@ export const needWhiteBackground = (ext?: string | null) => {
 };
 
 export const canRenderInMacWebview = (ext?: string | null) => {
+  const osVersion = DeviceInfo.systemVersion();
+  const coercedVersion = coerce(osVersion);
+  if (!coercedVersion || !gte(coercedVersion, '17.1.0')) {
+    return false;
+  }
+
   if (!ext) {
     return false;
   }
