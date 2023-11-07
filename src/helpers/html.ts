@@ -1,8 +1,7 @@
 import mimeTypes from 'mime-types';
-import * as cheerio from 'cheerio';
 import he from 'he';
 import {coerce, gte} from 'semver';
-import {addCSRF} from 'data/source';
+import {dataSource} from 'data/source';
 import DeviceInfo from 'constants/DeviceInfo';
 
 declare const preval: any;
@@ -47,6 +46,35 @@ export const getWebViewTemplate = (
           margin-bottom: 0px;
         }
       </style>
+      <script>
+        function addCSRFTokenToUrl(url, token) {
+          const newUrl = new URL(url);
+          if (newUrl.hostname?.endsWith('tsinghua.edu.cn')) {
+            newUrl.searchParams.set('_csrf', token);
+          }
+          return newUrl.toString();
+        }
+
+        const csrfToken = "${dataSource.getCSRFToken()}";
+        document.addEventListener('DOMContentLoaded', () => {
+          document.querySelectorAll('[href]').forEach((element) => {
+            const url = element.getAttribute('href');
+            if (!url) {
+              return;
+            }
+
+            element.setAttribute('href', addCSRFTokenToUrl(url, csrfToken));
+          });
+          document.querySelectorAll('[src]').forEach((element) => {
+            const url = element.getAttribute('src');
+            if (!url) {
+              return;
+            }
+
+            element.setAttribute('src', addCSRFTokenToUrl(url, csrfToken));
+          });
+        });
+      </script>
       ${
         darkMode
           ? `
@@ -64,32 +92,11 @@ export const getWebViewTemplate = (
     </head>
     <body>
       <div id="root">
-        ${addCSRFToAllUrlsInHtml(content)}
+        ${content}
       </div>
     </body>
   </html>
 `;
-
-export const addCSRFToAllUrlsInHtml = (html: string) => {
-  try {
-    const $ = cheerio.load(html, undefined, false);
-    $('[href]').each((i, element) => {
-      const url = $(element).attr('href');
-      if (url) {
-        $(element).attr('href', addCSRF(url));
-      }
-    });
-    $('[src]').each((i, element) => {
-      const url = $(element).attr('src');
-      if (url) {
-        $(element).attr('src', addCSRF(url));
-      }
-    });
-    return $.html();
-  } catch {
-    return html;
-  }
-};
 
 export const needWhiteBackground = (ext?: string | null) => {
   return ext && ['doc', 'docx', 'xls', 'xlsx'].includes(ext) ? true : false;
@@ -157,13 +164,8 @@ export const removeTags = (html?: string) => {
     return '';
   }
 
-  try {
-    const $ = cheerio.load(html, undefined, false);
-    return $.text().replace(/\s\s+/g, ' ').trim();
-  } catch {
-    return he
-      .decode(html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''))
-      .replace(/\s\s+/g, ' ')
-      .trim();
-  }
+  return he
+    .decode(html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''))
+    .replace(/\s\s+/g, ' ')
+    .trim();
 };
