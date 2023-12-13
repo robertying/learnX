@@ -1,4 +1,5 @@
 apply plugin: "com.android.application"
+apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 import com.android.build.OutputFile
@@ -7,17 +8,9 @@ react {
 
 }
 
-apply from: "../../node_modules/react-native-code-push/android/codepush.gradle"
-
 project.ext.vectoricons = [
         iconFontNames: ["MaterialIcons.ttf", "MaterialCommunityIcons.ttf"]
 ]
-apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
-
-def reactNativeArchitectures() {
-    def value = project.getProperties().get("reactNativeArchitectures")
-    return value ? value.split(",") : ["armeabi-v7a", "x86", "x86_64", "arm64-v8a"]
-}
 
 android {
     ndkVersion rootProject.ext.ndkVersion
@@ -30,6 +23,7 @@ android {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion
     }
+    compileSdk rootProject.ext.compileSdkVersion
 
     namespace "io.robertying.learnx"
 
@@ -47,7 +41,7 @@ android {
             reset()
             enable true
             universalApk true
-            include(*reactNativeArchitectures())
+            include "armeabi-v7a", "x86", "x86_64", "arm64-v8a"
         }
     }
 
@@ -63,8 +57,6 @@ android {
         properties.load(project.rootProject.file("local.properties").newDataInputStream())
 
         release {
-            enableV3Signing true
-            enableV4Signing true
             storeFile file("release.keystore")
             storePassword properties.getProperty("LEARNX_RELEASE_STORE_PASSWORD")
             keyAlias properties.getProperty("LEARNX_RELEASE_KEY_ALIAS")
@@ -102,4 +94,7 @@ dependencies {
     implementation "com.google.android.material:material:1.10.0"
 }
 
-apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
+apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
+apply from: file("../../node_modules/react-native-code-push/android/codepush.gradle");
+applyNativeModulesAppBuildGradle(project)

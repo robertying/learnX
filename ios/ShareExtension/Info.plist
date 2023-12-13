@@ -2,12 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>HostAppBundleIdentifier</key>
+	<string>io.robertying.learnX</string>
+	<key>HostAppURLScheme</key>
+	<string>learnx://</string>
 	<key>NSExtension</key>
 	<dict>
-		<key>NSExtensionMainStoryboard</key>
-		<string>MainInterface</string>
-		<key>NSExtensionPointIdentifier</key>
-		<string>com.apple.share-services</string>
 		<key>NSExtensionAttributes</key>
 		<dict>
 			<key>NSExtensionActivationRule</key>
@@ -24,10 +24,10 @@
 				<true/>
 			</dict>
 		</dict>
+		<key>NSExtensionMainStoryboard</key>
+		<string>MainInterface</string>
+		<key>NSExtensionPointIdentifier</key>
+		<string>com.apple.share-services</string>
 	</dict>
-	<key>HostAppBundleIdentifier</key>
-	<string>io.robertying.learnX</string>
-	<key>HostAppURLScheme</key>
-	<string>learnx://</string>
 </dict>
 </plist>

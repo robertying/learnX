@@ -1,10 +1,6 @@
 #import "AppDelegate.h"
 
 #import <React/RCTBundleURLProvider.h>
-#import <React/RCTRootView.h>
-#if RCT_NEW_ARCH_ENABLED
-#import <React/RCTFabricSurfaceHostingProxyRootView.h>
-#endif
 
 #import <AppCenterReactNative.h>
 #import <AppCenterReactNativeAnalytics.h>
@@ -25,27 +21,16 @@
 
   self.moduleName = @"learnX";
   self.initialProps = @{};
+
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
-- (UIView *)createRootViewWithBridge:(RCTBridge *)bridge
-                          moduleName:(NSString *)moduleName
-                           initProps:(NSDictionary *)initProps
+- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {
-  UIView * view = [super createRootViewWithBridge:bridge moduleName:moduleName initProps:initProps];
-
-#if RCT_NEW_ARCH_ENABLED
-  RCTFabricSurfaceHostingProxyRootView * rootView = (RCTFabricSurfaceHostingProxyRootView *)view;
-#else
-  RCTRootView * rootView = (RCTRootView *)view;
-#endif
-
-  rootView.backgroundColor = [UIColor systemBackgroundColor];
-
-  return rootView;
+  return [self getBundleURL];
 }
 
-- (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
+- (NSURL *)getBundleURL
 {
 #if DEBUG
   return [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"index"];

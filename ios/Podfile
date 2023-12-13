@@ -26,13 +26,10 @@ target 'learnX' do
 
   config = use_native_modules!
 
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    hermes_enabled: true
   )
 
   post_install do |installer|
@@ -41,18 +38,10 @@ target 'learnX' do
       config[:reactNativePath],
       :mac_catalyst_enabled => true
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
 
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
-        config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)', '_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION']
         config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
-      end
-      if target.respond_to?(:product_type) and target.product_type == 'com.apple.product-type.bundle'
-        target.build_configurations.each do |config|
-          config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-        end
       end
     end
 
@@ -62,9 +51,6 @@ target 'learnX' do
       config.build_settings.delete 'STRIP_INSTALLED_PRODUCT'
       config.build_settings.delete 'STRIP_STYLE'
       config.build_settings.delete 'STRIP_SWIFT_SYMBOLS'
-      if config.name == 'Release'
-        config.build_settings['SWIFT_COMPILATION_MODE'] = 'wholemodule'
-      end
     end
   end
 end
@@ -72,13 +58,10 @@ end
 target 'ShareExtension' do
   config = use_native_modules!
 
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    hermes_enabled: true
   )
 
   pod 'RNShareMenu', :path => '../node_modules/react-native-share-menu'
