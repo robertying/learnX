@@ -91,7 +91,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:hermes-android")
 
-    implementation "com.google.android.material:material:1.10.0"
+    implementation "com.google.android.material:material:1.11.0"
 }
 
 apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle");
