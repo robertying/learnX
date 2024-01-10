@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import createSecureStore from 'redux-persist-expo-securestore';
 import env from 'helpers/env';
 import mockStore from 'data/mock';
-import {AppActions} from 'data/types/actions';
+import {AppActions, StoreAction} from 'data/types/actions';
 import {CLEAR_STORE, SET_MOCK_STORE, RESET_LOADING} from 'data/types/constants';
 import {AppState, AuthState, SettingsState} from 'data/types/state';
 import assignments from './assignments';
@@ -89,5 +89,5 @@ export function rootReducer(
   } else if (state && state.auth.username === env.DUMMY_USERNAME) {
     return state;
   }
-  return appReducer(state, action);
+  return appReducer(state, action as Exclude<AppActions, StoreAction>);
 }

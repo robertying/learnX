@@ -15,6 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {configureStore} from '@reduxjs/toolkit';
 import {rootReducer} from 'data/reducers/root';
 import {AppState, PersistAppState} from 'data/types/state';
+import {AppActions} from 'data/types/actions';
 
 const rootPersistConfig: PersistConfig<AppState> = {
   key: 'root',
@@ -23,7 +24,7 @@ const rootPersistConfig: PersistConfig<AppState> = {
   blacklist: ['auth', 'settings'],
 };
 
-export const store = configureStore<PersistAppState>({
+export const store = configureStore<PersistAppState, AppActions>({
   reducer: persistReducer(rootPersistConfig, rootReducer),
   middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
