@@ -1,7 +1,6 @@
 {
   "extends": "@react-native/typescript-config/tsconfig.json",
   "compilerOptions": {
-    "skipLibCheck": true,
     "noUnusedLocals": true,
     "baseUrl": "./src"
   }

@@ -19,9 +19,9 @@ class MainApplication : Application(), ReactApplication {
 
     override val reactNativeHost: ReactNativeHost =
         ReactNativeHostWrapper(this, object : DefaultReactNativeHost(this) {
-            override fun getPackages(): List<ReactPackage> {
-                return PackageList(this).packages
-            }
+            override fun getPackages(): List<ReactPackage> =
+                PackageList(this).packages.apply {
+                }
 
             override fun getJSMainModuleName(): String = "index"
 
