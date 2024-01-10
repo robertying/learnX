@@ -164,8 +164,12 @@ export const removeTags = (html?: string) => {
     return '';
   }
 
-  return he
-    .decode(html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''))
-    .replace(/\s\s+/g, ' ')
-    .trim();
+  try {
+    return he
+      .decode(html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''))
+      .replace(/\s\s+/g, ' ')
+      .trim();
+  } catch {
+    return '';
+  }
 };
