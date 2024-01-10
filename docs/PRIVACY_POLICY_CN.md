@@ -17,8 +17,7 @@ Rui Ying 将 learnX 应用程序构建为免费应用程序。本服务由 Rui Y
 可能使用的第三方服务提供商的隐私政策：
 
 - [Google Play 服务](https://policies.google.com/privacy)
-- [Firebase](https://firebase.google.com/policies/analytics)
-- [Visual Studio App Center](https://docs.microsoft.com/zh-cn/appcenter/gdpr/data-from-your-end-users)
+- [Visual Studio App Center](https://learn.microsoft.com/zh-cn/appcenter/gdpr/data-from-your-end-users)
 
 ## 日志数据
 
@@ -48,4 +47,4 @@ Cookies 是包含少量数据的文件，通常用作匿名唯一标识符。这
 
 ## 联系我们
 
-如果您对本隐私政策有任何疑问或建议，请随时[与我联系](mailto:yingrui205@gmail.com)。
+如果您对本隐私政策有任何疑问或建议，请随时[与我联系](mailto:learnX@ruiying.io)。

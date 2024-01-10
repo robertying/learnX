@@ -17,8 +17,7 @@ The app does use third party services that may collect information used to ident
 Link to privacy policy of third party service providers that may be used by the app:
 
 - [Google Play Services](https://policies.google.com/privacy)
-- [Firebase](https://firebase.google.com/policies/analytics)
-- [Visual Studio App Center](https://docs.microsoft.com/zh-cn/appcenter/gdpr/data-from-your-end-users)
+- [Visual Studio App Center](https://learn.microsoft.com/en-us/appcenter/gdpr/data-from-your-end-users)
 
 ## Log Data
 
@@ -48,4 +47,4 @@ I may update our Privacy Policy from time to time. Thus, you are advised to revi
 
 ## Contact Us
 
-If you have any questions or suggestions about this Privacy Policy, do not hesitate to [contact me](mailto:yingrui205@gmail.com).
+If you have any questions or suggestions about this Privacy Policy, do not hesitate to [contact me](mailto:learnX@ruiying.io).

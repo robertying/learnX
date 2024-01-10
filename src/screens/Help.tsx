@@ -30,8 +30,8 @@ const Help: React.FC<
         <Title style={styles.marginTop}>{t('emailNotRecommended')}</Title>
         <Text
           style={[styles.text, styles.link]}
-          onPress={() => Linking.openURL('mailto:yingrui205@gmail.com')}>
-          yingrui205@gmail.com
+          onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}>
+          learnX@ruiying.io
         </Text>
         <Title style={styles.marginTop}>{t('issueTemplate')}</Title>
         <Text style={styles.text}>{t('issueTemplateDescription')}</Text>
