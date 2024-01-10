@@ -4,15 +4,20 @@ import axios from 'axios';
 import {store} from 'data/store';
 import Urls from 'constants/Urls';
 
-export const dataSource = new Learn2018Helper({
-  provider: () => {
-    const state = store.getState();
-    return {
-      username: state.auth.username || undefined,
-      password: state.auth.password || undefined,
-    };
-  },
-});
+export let dataSource: Learn2018Helper;
+
+export const resetDataSource = () => {
+  dataSource = new Learn2018Helper({
+    provider: () => {
+      const state = store.getState();
+      return {
+        username: state.auth.username || undefined,
+        password: state.auth.password || undefined,
+      };
+    },
+  });
+};
+resetDataSource();
 
 export const addCSRF = (url: string) => {
   if (new URL(url).hostname?.endsWith('tsinghua.edu.cn')) {

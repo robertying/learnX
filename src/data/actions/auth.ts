@@ -1,6 +1,6 @@
 import {createAsyncAction} from 'typesafe-actions';
 import {ApiError} from 'thu-learn-lib';
-import {dataSource} from 'data/source';
+import {dataSource, resetDataSource} from 'data/source';
 import {ThunkResult} from 'data/types/actions';
 import {
   LOGIN_FAILURE,
@@ -22,6 +22,10 @@ export function login(username?: string, password?: string): ThunkResult {
     dispatch(loginAction.request());
 
     try {
+      if (username && password) {
+        resetDataSource();
+      }
+
       await dataSource.login(username, password);
 
       if (username && password) {
