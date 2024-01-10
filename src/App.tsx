@@ -170,15 +170,16 @@ const getDetailScreenOptions = () =>
                     (route.params as Course).semesterId
                       ? (route.params as Course).name
                       : (route.params as File).downloadUrl
-                      ? (route.params as Notice | Assignment).title
-                      : (route.params as Notice | Assignment).courseName
+                        ? (route.params as Notice | Assignment).title
+                        : (route.params as Notice | Assignment).courseName
                   }
                   subtitle={
                     (route.params as Course).semesterId
                       ? (route.params as Course).teacherName
                       : (route.params as File).downloadUrl
-                      ? (route.params as Notice | Assignment).courseName
-                      : (route.params as Notice | Assignment).courseTeacherName
+                        ? (route.params as Notice | Assignment).courseName
+                        : (route.params as Notice | Assignment)
+                            .courseTeacherName
                   }
                 />
               ) : undefined,

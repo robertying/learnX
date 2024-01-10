@@ -333,8 +333,8 @@ const AssignmentSubmission: React.FC<
                 {attachmentResult
                   ? t('reUploadAttachment')
                   : submittedAttachment
-                  ? t('overwriteAttachment')
-                  : t('uploadAttachment')}
+                    ? t('overwriteAttachment')
+                    : t('uploadAttachment')}
               </Button>
             ) : undefined}
           </View>

@@ -130,8 +130,8 @@ const AssignmentDetail: React.FC<
                   ? dayjs().to(dayjs(deadline)) + '截止'
                   : '还剩 ' + dayjs().to(dayjs(deadline), true)
                 : dayjs().isAfter(dayjs(deadline))
-                ? 'closed ' + dayjs().to(dayjs(deadline))
-                : 'due in ' + dayjs().to(dayjs(deadline), true)}
+                  ? 'closed ' + dayjs().to(dayjs(deadline))
+                  : 'due in ' + dayjs().to(dayjs(deadline), true)}
             </Caption>
             <Caption>
               {dayjs(deadline).format(

@@ -90,16 +90,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     filterSelected === 'unfinished' && unfinished
       ? unfinished
       : filterSelected === 'finished' && finished
-      ? finished
-      : filterSelected === 'all'
-      ? all
-      : filterSelected === 'unread' && unread
-      ? unread
-      : filterSelected === 'fav'
-      ? fav
-      : filterSelected === 'archived'
-      ? archived
-      : hidden
+        ? finished
+        : filterSelected === 'all'
+          ? all
+          : filterSelected === 'unread' && unread
+            ? unread
+            : filterSelected === 'fav'
+              ? fav
+              : filterSelected === 'archived'
+                ? archived
+                : hidden
   )!;
 
   const favIds = fav?.map(i => i.id);
@@ -283,8 +283,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                 selectionModeDisabled
                   ? {marginLeft: -8}
                   : Platform.OS === 'android'
-                  ? {marginLeft: -8}
-                  : Styles.ml0
+                    ? {marginLeft: -8}
+                    : Styles.ml0
               }
               onPress={handleFilter}
               icon={props => <MaterialIcons {...props} name="filter-list" />}
@@ -324,16 +324,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               filterSelected === 'all'
                 ? defaultSubtitle
                 : filterSelected === 'unread'
-                ? t('unread')
-                : filterSelected === 'fav'
-                ? t('fav')
-                : filterSelected === 'archived'
-                ? t('archived')
-                : filterSelected === 'hidden'
-                ? t('hidden')
-                : filterSelected === 'unfinished'
-                ? t('unfinished')
-                : t('finished')
+                  ? t('unread')
+                  : filterSelected === 'fav'
+                    ? t('fav')
+                    : filterSelected === 'archived'
+                      ? t('archived')
+                      : filterSelected === 'hidden'
+                        ? t('hidden')
+                        : filterSelected === 'unfinished'
+                          ? t('unfinished')
+                          : t('finished')
             }
           />
         ),

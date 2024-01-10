@@ -33,8 +33,8 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
           type === 'success'
             ? Haptics.NotificationFeedbackType.Success
             : type === 'warning'
-            ? Haptics.NotificationFeedbackType.Warning
-            : Haptics.NotificationFeedbackType.Error,
+              ? Haptics.NotificationFeedbackType.Warning
+              : Haptics.NotificationFeedbackType.Error,
         );
       }
     },

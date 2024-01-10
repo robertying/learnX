@@ -14,8 +14,8 @@ const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
             Platform.OS === 'android'
               ? theme.colors.surface
               : colorScheme === 'dark'
-              ? 'black'
-              : 'white',
+                ? 'black'
+                : 'white',
         },
       ]}>
       <Image

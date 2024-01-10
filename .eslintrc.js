@@ -3,6 +3,7 @@ module.exports = {
   extends: '@react-native',
   overrides: [
     {
+      files: ['*.ts', '*.tsx'],
       rules: {
         'no-spaced-func': 'off',
         'no-shadow': 'off',

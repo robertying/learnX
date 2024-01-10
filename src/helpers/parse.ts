@@ -8,8 +8,8 @@ export const getSemesterTextFromId = (semesterId: string) => {
         texts?.[2] === '1'
           ? '秋季学期'
           : texts?.[2] === '2'
-          ? '春季学期'
-          : '夏季学期'
+            ? '春季学期'
+            : '夏季学期'
       }`
     : `${
         texts?.[2] === '1' ? 'Fall' : texts?.[2] === '2' ? 'Spring' : 'Summer'

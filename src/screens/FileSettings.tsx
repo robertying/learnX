@@ -72,8 +72,8 @@ const FileSettings: React.FC<
               ? '文件保存在 App 的“文档”中，只会随 App 卸载而被删除。'
               : '文件保存在 App 的“缓存”中，会在设备空间不足或其他系统预设情况下被自动清除以节约空间。'
             : fileUseDocumentDir
-            ? 'Files are saved in App Document folder and will only be deleted along with the App.'
-            : 'Files are saved in App Cache Folder and will be deleted by the system on demand.'}
+              ? 'Files are saved in App Document folder and will only be deleted along with the App.'
+              : 'Files are saved in App Cache Folder and will be deleted by the system on demand.'}
         </Caption>
         <TableCell
           style={styles.marginTop}
@@ -91,8 +91,8 @@ const FileSettings: React.FC<
               ? '文件以“文件名”形式保存。'
               : '文件以“课程名-文件名”形式保存。'
             : fileOmitCourseName
-            ? 'Files are saved as "filename".'
-            : 'Files are saved as "coursename-filename".'}
+              ? 'Files are saved as "filename".'
+              : 'Files are saved as "coursename-filename".'}
         </Caption>
         <TableCell
           style={styles.marginTop}
