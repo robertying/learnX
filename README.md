@@ -25,10 +25,10 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 ### iOS / iPadOS / macOS
 
-<a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone" target="_blank" rel="noopener noreferrer">
+<a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=iphone" target="_blank" rel="noopener noreferrer">
     <img align="center" height=40 alt="App Store 下载" src="docs/assets/Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917.svg" />
 </a>
-<a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac" target="_blank" rel="noopener noreferrer">
+<a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=mac" target="_blank" rel="noopener noreferrer">
     <img align="center" height=40 alt="Mac App Store 下载" src="docs/assets/Download_on_the_Mac_App_Store_Badge_CNSC_RGB_blk_092917.svg" />
 </a>
 
