@@ -747,7 +747,7 @@ const Container = () => {
           clearPushNotificationBadge();
 
           if (auth.username && auth.password && !loggedIn) {
-            dispatch(login());
+            dispatch(login(undefined, undefined, true));
           }
         }
         setAppState(nextAppState);
@@ -795,7 +795,7 @@ const Container = () => {
       if (!auth.username || !auth.password) {
         return;
       }
-      dispatch(login());
+      dispatch(login(undefined, undefined, true));
       timeout = setTimeout(reLogin, 45 * 60 * 1000 /* 45 minutes */);
     };
     reLogin();
