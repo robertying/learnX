@@ -37,7 +37,7 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 #### Android
 
-- **[TUNA 镜像（推荐） TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX)**
+- **[TUNA 镜像（推荐） TUNA Mirror (recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)**
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
