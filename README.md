@@ -26,16 +26,16 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 ### iOS / iPadOS / macOS
 
 <a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=iphone" target="_blank" rel="noopener noreferrer">
-    <img align="center" height=50 alt="App Store 下载" src="docs/assets/Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917.svg" />
+    <img align="center" height=40 alt="App Store 下载" src="docs/assets/Download_on_the_App_Store_Badge_CNSC_RGB_blk_092917.svg" />
 </a>
 <a href="https://apps.apple.com/cn/app/learnx/id1459073115#?platform=mac" target="_blank" rel="noopener noreferrer">
-    <img align="center" height=50 alt="Mac App Store 下载" src="docs/assets/Download_on_the_Mac_App_Store_Badge_CNSC_RGB_blk_092917.svg" />
+    <img align="center" height=40 alt="Mac App Store 下载" src="docs/assets/Download_on_the_Mac_App_Store_Badge_CNSC_RGB_blk_092917.svg" />
 </a>
 
 ### Android
 
-<a href="https://play.google.com/store/apps/details?id=io.robertying.learnx" target="_blank" rel="noopener noreferrer">
-      <img style="margin: -12px -12px 0px -12px;" align="center" height=72 alt="下载应用，请到 Google Play" src="docs/assets/google-play-badge.png" />
+- <a href="https://play.google.com/store/apps/details?id=io.robertying.learnx" target="_blank" rel="noopener noreferrer">
+      <img align="center" height=52 alt="下载应用，请到 Google Play" src="docs/assets/google-play-badge.png" />
   </a>
 
 - **[TUNA 镜像（推荐） TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)**
