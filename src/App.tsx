@@ -790,24 +790,6 @@ const Container = () => {
   }, [handleShare]);
 
   useEffect(() => {
-    let timeout: NodeJS.Timeout | null = null;
-    const reLogin = () => {
-      if (!auth.username || !auth.password) {
-        return;
-      }
-      dispatch(login(undefined, undefined, true));
-      timeout = setTimeout(reLogin, 45 * 60 * 1000 /* 45 minutes */);
-    };
-    reLogin();
-
-    return () => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-    };
-  }, [auth.password, auth.username, dispatch]);
-
-  useEffect(() => {
     if (auth.username && auth.password && loginError) {
       toast(t('loginFailed'), 'warning', 5 * 1000);
     }
