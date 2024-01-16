@@ -1,3 +1,4 @@
+import {Platform} from 'react-native';
 import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
@@ -9,16 +10,18 @@ import {getAllAssignmentsForCoursesAction} from 'data/actions/assignments';
 import {getAllNoticesForCoursesAction} from 'data/actions/notices';
 import env from './env';
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+if (Platform.OS === 'ios') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 export const registerForPushNotifications = async () => {
-  if (await DeviceInfo.isEmulator()) {
+  if (Platform.OS !== 'ios' || (await DeviceInfo.isEmulator())) {
     return;
   }
 
@@ -41,7 +44,9 @@ export const registerForPushNotifications = async () => {
 };
 
 export const clearPushNotificationBadge = () => {
-  Notifications.setBadgeCountAsync(0);
+  if (Platform.OS === 'ios') {
+    Notifications.setBadgeCountAsync(0);
+  }
 };
 
 registerForPushNotifications();
@@ -85,14 +90,16 @@ const updateDataFromNotification = (data: any) => {
   }
 };
 
-Notifications.addNotificationReceivedListener(notification => {
-  const payload = notification.request.content.data;
-  if (!payload) {
-    return;
-  }
+if (Platform.OS === 'ios') {
+  Notifications.addNotificationReceivedListener(notification => {
+    const payload = notification.request.content.data;
+    if (!payload) {
+      return;
+    }
 
-  updateDataFromNotification(payload);
-});
+    updateDataFromNotification(payload);
+  });
+}
 
 const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
 
@@ -108,4 +115,6 @@ TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({data, error}) => {
   updateDataFromNotification(payload);
 });
 
-Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+if (Platform.OS === 'ios') {
+  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+}

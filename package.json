@@ -18,7 +18,14 @@
       "exclude": [
         "expo-font",
         "expo-keep-awake"
-      ]
+      ],
+      "android": {
+        "exclude": [
+          "expo-font",
+          "expo-keep-awake",
+          "expo-notifications"
+        ]
+      }
     }
   },
   "dependencies": {

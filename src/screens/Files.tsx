@@ -1,4 +1,5 @@
 import {useCallback, useEffect} from 'react';
+import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
@@ -63,17 +64,19 @@ const Files: React.FC<
   }, [handleRefresh]);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      response => {
-        const data = response.notification.request.content.data as unknown;
-        if ((data as File).fileType) {
-          const file = data as File;
-          navigation.navigate('Files');
-          handlePush(file);
-        }
-      },
-    );
-    return () => sub.remove();
+    if (Platform.OS === 'ios') {
+      const sub = Notifications.addNotificationResponseReceivedListener(
+        response => {
+          const data = response.notification.request.content.data as unknown;
+          if ((data as File).fileType) {
+            const file = data as File;
+            navigation.navigate('Files');
+            handlePush(file);
+          }
+        },
+      );
+      return () => sub.remove();
+    }
   }, [handlePush, navigation]);
 
   return (

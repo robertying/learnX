@@ -1,4 +1,5 @@
 import {useCallback, useEffect} from 'react';
+import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
@@ -63,18 +64,20 @@ const Notices: React.FC<
   }, [handleRefresh]);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      response => {
-        const data = response.notification.request.content.data as unknown;
-        if ((data as Assignment).deadline || (data as File).fileType) {
-          return;
-        }
-        const notice = data as Notice;
-        navigation.navigate('Notices');
-        handlePush(notice);
-      },
-    );
-    return () => sub.remove();
+    if (Platform.OS === 'ios') {
+      const sub = Notifications.addNotificationResponseReceivedListener(
+        response => {
+          const data = response.notification.request.content.data as unknown;
+          if ((data as Assignment).deadline || (data as File).fileType) {
+            return;
+          }
+          const notice = data as Notice;
+          navigation.navigate('Notices');
+          handlePush(notice);
+        },
+      );
+      return () => sub.remove();
+    }
   }, [handlePush, navigation]);
 
   return (

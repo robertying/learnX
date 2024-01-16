@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useMemo} from 'react';
+import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import * as Notifications from 'expo-notifications';
@@ -106,17 +107,19 @@ const Assignments: React.FC<
   }, [handleRefresh]);
 
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(
-      response => {
-        const data = response.notification.request.content.data as unknown;
-        if ((data as Assignment).deadline) {
-          const assignment = data as Assignment;
-          navigation.navigate('Assignments');
-          handlePush(assignment);
-        }
-      },
-    );
-    return () => sub.remove();
+    if (Platform.OS === 'ios') {
+      const sub = Notifications.addNotificationResponseReceivedListener(
+        response => {
+          const data = response.notification.request.content.data as unknown;
+          if ((data as Assignment).deadline) {
+            const assignment = data as Assignment;
+            navigation.navigate('Assignments');
+            handlePush(assignment);
+          }
+        },
+      );
+      return () => sub.remove();
+    }
   }, [handlePush, navigation]);
 
   useEffect(() => {
