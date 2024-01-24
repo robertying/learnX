@@ -24,6 +24,11 @@ const About: React.FC<
           {`v${packageJson.version} (build ${DeviceInfo.buildNo()})`}
         </Text>
         <Text style={styles.text}>© 2024 Rui Ying</Text>
+        <Text
+          style={[styles.text, styles.link]}
+          onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}>
+          浙ICP备20024838号-2A
+        </Text>
         <Text style={styles.text}>
           {t('opensourceAt')}{' '}
           <Text
