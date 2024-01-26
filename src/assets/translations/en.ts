@@ -169,4 +169,5 @@ export default {
   fail: 'Fail',
   incomplete: 'Incomplete',
   openFileAfterDownload: 'Open downloaded files automatically',
+  loggingIn: 'Logging in...',
 };

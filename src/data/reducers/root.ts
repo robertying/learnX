@@ -52,7 +52,6 @@ export function rootReducer(
       auth: {
         ...state.auth,
         loggingIn: false,
-        error: null,
       },
       semesters: {
         ...state.semesters,

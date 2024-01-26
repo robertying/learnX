@@ -1,7 +1,6 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useRef} from 'react';
 import {
   AppState,
-  AppStateStatus,
   Platform,
   StatusBar,
   useColorScheme,
@@ -725,36 +724,53 @@ const Container = () => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
   const loginError = useAppSelector(state => state.auth.error);
   const auth = useAppSelector(state => state.auth);
   const windowSize = useWindowDimensions();
 
-  const [appState, setAppState] = useState(AppState.currentState);
-
   const mainNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
   const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
 
-  useEffect(() => {
-    const sub = AppState.addEventListener(
-      'change',
-      (nextAppState: AppStateStatus) => {
-        if (
-          appState.match(/inactive|background/) &&
-          nextAppState === 'active'
-        ) {
-          dispatch(resetLoading());
-          clearPushNotificationBadge();
+  const appState = useRef(AppState.currentState);
+  const lastActiveTime = useRef(dayjs(0));
 
-          if (auth.username && auth.password && !loggedIn) {
-            dispatch(login(undefined, undefined, true));
-          }
-        }
-        setAppState(nextAppState);
-      },
-    );
+  const handleReLogin = useCallback(() => {
+    const {auth} = store.getState();
+    if (
+      auth.username &&
+      auth.password &&
+      dayjs().diff(lastActiveTime.current, 'minute') >= 10
+    ) {
+      dispatch(login(undefined, undefined, true));
+      toast(t('loggingIn'), 'warning', 1 * 1000);
+    }
+  }, [dispatch, toast]);
+
+  useEffect(() => {
+    handleReLogin();
+  }, [handleReLogin]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', nextAppState => {
+      if (appState.current === 'active' && nextAppState !== 'active') {
+        lastActiveTime.current = dayjs();
+      }
+
+      if (
+        appState.current?.match(/inactive|background/) &&
+        nextAppState === 'active'
+      ) {
+        dispatch(resetLoading());
+        clearPushNotificationBadge();
+
+        handleReLogin();
+      }
+
+      appState.current = nextAppState;
+    });
+
     return () => sub.remove();
-  }, [appState, auth.password, auth.username, dispatch, loggedIn]);
+  }, [dispatch, handleReLogin]);
 
   const handleShare = useCallback(
     (item: any) => {
@@ -791,7 +807,7 @@ const Container = () => {
 
   useEffect(() => {
     if (auth.username && auth.password && loginError) {
-      toast(t('loginFailed'), 'warning', 5 * 1000);
+      toast(t('loginFailed'), 'error', 5 * 1000);
     }
   }, [auth.password, auth.username, loginError, toast]);
 

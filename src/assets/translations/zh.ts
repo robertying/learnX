@@ -163,6 +163,7 @@ const zh: typeof en = {
   fail: '不通过',
   incomplete: '缓考',
   openFileAfterDownload: '自动打开已下载的文件',
+  loggingIn: '登录中……',
 };
 
 export default zh;
