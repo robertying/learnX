@@ -742,7 +742,7 @@ const Container = () => {
       dayjs().diff(lastActiveTime.current, 'minute') >= 10
     ) {
       dispatch(login(undefined, undefined, true));
-      toast(t('loggingIn'), 'warning', 1 * 1000);
+      toast(t('loggingIn'), 'none', 1 * 1000);
     }
   }, [dispatch, toast]);
 

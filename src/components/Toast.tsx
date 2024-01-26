@@ -3,7 +3,7 @@ import {StyleSheet} from 'react-native';
 import {Snackbar} from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
 
-type ToastType = 'success' | 'warning' | 'error';
+type ToastType = 'success' | 'warning' | 'error' | 'none';
 
 const ToastContext = createContext<{
   text: string;
@@ -28,7 +28,7 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
           (type === 'success' ? 3000 : type === 'warning' ? 4000 : 5000),
       );
       setToastText(text);
-      if (text) {
+      if (text && type !== 'none') {
         Haptics.notificationAsync(
           type === 'success'
             ? Haptics.NotificationFeedbackType.Success
@@ -53,7 +53,7 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
         wrapperStyle={styles.snackbar}
         visible={toastText ? true : false}
         duration={toastDuration}
-        onDismiss={() => handleToast('', 'success')}>
+        onDismiss={() => handleToast('', 'none')}>
         {toastText}
       </Snackbar>
     </ToastContext.Provider>
