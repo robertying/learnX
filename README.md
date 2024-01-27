@@ -102,3 +102,7 @@ For those
 Any usage of code, without explicit authorizations from the author, from this project will be considered as infringement of copyright. The word "usage" may refer to making copies of, modifying, redistributing of the source code or any derivative of this project, for either commercial or non-commercial use.
 
 Open source code used in this project is subjected to their own licenses.
+
+## ICP 备案 ICP Filing
+
+[浙ICP备20024838号-2A](https://beian.miit.gov.cn/)
