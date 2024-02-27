@@ -4,7 +4,7 @@ buildscript {
         minSdkVersion = 28
         compileSdkVersion = 34
         targetSdkVersion = 34
-        ndkVersion = "26.1.10909125"
+        ndkVersion = "26.2.11394342"
         cmakeVersion = "3.22.1"
         javaVersion = JavaVersion.VERSION_17
         kotlinVersion = "1.9.22"
@@ -53,7 +53,7 @@ subprojects { subproject ->
                 }
                 if (subproject.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
                     kotlinOptions {
-                        jvmTarget = rootProject.ext.javaVersion.toString()
+                        jvmTarget = rootProject.ext.javaVersion.majorVersion
                     }
                 }
             }
