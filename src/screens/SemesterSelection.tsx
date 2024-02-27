@@ -1,8 +1,9 @@
-import {useCallback, useEffect} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {FlatList, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import {dataSource} from 'data/source';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import {
   getAllSemesters,
@@ -23,11 +24,19 @@ const SemesterSelection: React.FC<
   const fetching = useAppSelector(state => state.semesters.fetching);
   const currentSemesterId = useAppSelector(state => state.semesters.current);
 
+  const [latestSemester, setLatestSemester] = useState<string | null>(null);
+
+  const getLatestSemester = async () => {
+    const {id} = await dataSource.getCurrentSemester();
+    setLatestSemester(id);
+  };
+
   const handleSelect = (id: string) => {
     dispatch(setCurrentSemester(id));
   };
 
   const handleRefresh = useCallback(() => {
+    getLatestSemester();
     dispatch(getCurrentSemester());
     dispatch(getAllSemesters());
   }, [dispatch]);
@@ -43,6 +52,18 @@ const SemesterSelection: React.FC<
       <FlatList
         contentContainerStyle={styles.padding}
         data={semesters}
+        ListHeaderComponent={
+          latestSemester && !semesters.includes(latestSemester) ? (
+            <TableCell
+              iconName={
+                currentSemesterId === latestSemester ? 'check' : undefined
+              }
+              primaryText={getSemesterTextFromId(latestSemester)}
+              type="none"
+              onPress={() => handleSelect(latestSemester)}
+            />
+          ) : null
+        }
         renderItem={({item}) => (
           <TableCell
             iconName={currentSemesterId === item ? 'check' : undefined}
