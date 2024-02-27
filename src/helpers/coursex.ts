@@ -18,7 +18,7 @@ export const uploadCourses = async (courses: Course[]) => {
 
   const coursesToUpload = courses.map(c => ({
     id: c.id,
-    name: c.name,
+    name: c.chineseName,
     teacher: {
       data: {id: c.teacherNumber, name: c.teacherName},
       on_conflict: {constraint: 'teacher_pkey', update_columns: ['name']},
@@ -27,7 +27,7 @@ export const uploadCourses = async (courses: Course[]) => {
     semester_id: c.semesterId,
     number: c.courseNumber,
     index: c.courseIndex,
-    englishName: c.name,
+    englishName: c.englishName,
   }));
 
   await graphQLClient.request(
@@ -37,7 +37,7 @@ export const uploadCourses = async (courses: Course[]) => {
           objects: $objects
           on_conflict: {
             constraint: course_pkey
-            update_columns: [time_location]
+            update_columns: [time_location, name, englishName]
           }
         ) {
           affected_rows

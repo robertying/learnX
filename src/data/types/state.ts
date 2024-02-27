@@ -74,6 +74,8 @@ export type Course = Pick<
   | 'timeAndLocation'
   | 'courseNumber'
   | 'courseIndex'
+  | 'chineseName'
+  | 'englishName'
 > & {
   semesterId: string;
 };
