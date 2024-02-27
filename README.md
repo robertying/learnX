@@ -45,6 +45,12 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
+### Windows
+
+可以通过 Windows Subsystem for Android (WSA) 在 Windows 上运行 [Android](#android) 版应用。
+
+You can run the [Android](#android) version of the App on Windows using Windows Subsystem for Android (WSA).
+
 ## 功能 Features
 
 > 注意：本应用只适用于清华大学学生。
