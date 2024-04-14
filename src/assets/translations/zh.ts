@@ -168,6 +168,8 @@ const zh: typeof en = {
   restore: '恢复',
   reorder: '排序',
   dragToReorder: '长按并拖动以排序',
+  documents: '文件',
+  photos: '照片',
 };
 
 export default zh;

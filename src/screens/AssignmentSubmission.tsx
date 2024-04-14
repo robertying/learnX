@@ -1,6 +1,7 @@
 import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import DocumentPicker from 'react-native-document-picker';
+import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import {
   Alert,
   Keyboard,
@@ -13,6 +14,8 @@ import {
 import {
   Button,
   Caption,
+  Menu,
+  Portal,
   ProgressBar,
   Snackbar,
   TextInput,
@@ -80,6 +83,7 @@ const AssignmentSubmission: React.FC<
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [pickerMenuVisible, setPickerMenuVisible] = useState(false);
 
   const getDefaultAttachmentName = useCallback(
     (mimeType?: string | null) => {
@@ -99,20 +103,64 @@ const AssignmentSubmission: React.FC<
     setRemoveAttachment(!removeAttachment);
   };
 
+  const handlePickerMenuOpen = () => {
+    setPickerMenuVisible(true);
+  };
+
+  const handlePickerMenuClose = () => {
+    setPickerMenuVisible(false);
+  };
+
   const handleDocumentPick = async () => {
+    handlePickerMenuClose();
     try {
-      const result = await DocumentPicker.pickSingle({
-        type: [DocumentPicker.types.allFiles],
-      });
+      const result = await DocumentPicker.getDocumentAsync();
+      if (result.canceled) {
+        return;
+      }
+      const files = result.assets;
+      if (!files || files.length === 0) {
+        throw new Error('No file picked');
+      }
+
+      const file = files[0];
       setAttachmentResult({
-        ...result,
-        name: result.name ?? getDefaultAttachmentName(result.type),
+        uri: file.uri,
+        type: file.mimeType ?? null,
+        name: file.name ?? getDefaultAttachmentName(file.mimeType),
+        size: file.size,
       });
       dispatch(setPendingAssignmentData(null));
     } catch (err) {
-      if (!DocumentPicker.isCancel(err as Error)) {
-        toast(t('filePickFailed'), 'error');
+      toast(t('filePickFailed'), 'error');
+    }
+  };
+
+  const handlePhotoPick = async () => {
+    handlePickerMenuClose();
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        quality: 1,
+      });
+      if (result.canceled) {
+        return;
       }
+      const photos = result.assets;
+      if (!photos || photos.length === 0) {
+        throw new Error('No photo picked');
+      }
+
+      const photo = photos[0];
+      setAttachmentResult({
+        uri: photo.uri,
+        type: photo.mimeType ?? null,
+        name: getDefaultAttachmentName(photo.mimeType),
+        size: photo.fileSize,
+      });
+      dispatch(setPendingAssignmentData(null));
+    } catch (err) {
+      toast(t('filePickFailed'), 'error');
     }
   };
 
@@ -247,115 +295,130 @@ const AssignmentSubmission: React.FC<
   }, [getDefaultAttachmentName, pendingAssignmentData]);
 
   return (
-    <SafeArea>
-      <KeyboardAvoidingView
-        style={Styles.flex1}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-        {progress ? <ProgressBar progress={progress} /> : null}
-        <ScrollView
-          contentContainerStyle={styles.scrollView}
-          scrollEnabled={false}
-          keyboardShouldPersistTaps="handled">
-          <TextInput
-            style={Styles.flex1}
-            disabled={removeAttachment || uploading}
-            multiline
-            placeholder={t('assignmentSubmissionContentPlaceholder')}
-            value={content}
-            onChangeText={setContent}
-          />
-          <TextInput
-            disabled={removeAttachment || uploading}
-            placeholder={t('assignmentSubmissionFilenamePlaceholder')}
-            value={customAttachmentName}
-            onChangeText={handleCustomAttachmentNameChange}
-          />
-        </ScrollView>
-        <View style={styles.submissionDetail}>
-          {submittedAttachment ? (
-            <TextButton
-              disabled={uploading}
-              style={
-                attachmentResult || removeAttachment
-                  ? {
-                      textDecorationLine: 'line-through',
-                      color: theme.colors.onSurfaceDisabled,
-                    }
-                  : undefined
-              }
-              containerStyle={[styles.attachmentButton, Styles.spacey1]}
-              onPress={() => handleFileOpen(submittedAttachment)}>
-              {submittedAttachment.name}
-            </TextButton>
-          ) : undefined}
-          {!removeAttachment && attachmentResult ? (
-            <TextButton
-              containerStyle={[styles.attachmentButton, Styles.spacey1]}
-              disabled={uploading}
-              onPress={() =>
-                handleFileOpen({
-                  id: '0000',
-                  name: attachmentResult.name,
-                  downloadUrl: attachmentResult.uri,
-                  previewUrl: attachmentResult.uri,
-                  size: attachmentResult.size
-                    ? attachmentResult.size + 'B'
-                    : '',
-                  type: attachmentResult.type,
-                })
-              }>
-              {attachmentResult.name}{' '}
-              {pendingAssignmentData
-                ? isLocaleChinese()
-                  ? '（之前分享的）'
-                  : '(previously shared)'
-                : ''}
-            </TextButton>
-          ) : undefined}
-          <View style={styles.attachmentActionButtons}>
+    <Portal.Host>
+      <SafeArea>
+        <KeyboardAvoidingView
+          style={Styles.flex1}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          {progress ? <ProgressBar progress={progress} /> : null}
+          <ScrollView
+            contentContainerStyle={styles.scrollView}
+            scrollEnabled={false}
+            keyboardShouldPersistTaps="handled">
+            <TextInput
+              style={Styles.flex1}
+              disabled={removeAttachment || uploading}
+              multiline
+              placeholder={t('assignmentSubmissionContentPlaceholder')}
+              value={content}
+              onChangeText={setContent}
+            />
+            <TextInput
+              disabled={removeAttachment || uploading}
+              placeholder={t('assignmentSubmissionFilenamePlaceholder')}
+              value={customAttachmentName}
+              onChangeText={handleCustomAttachmentNameChange}
+            />
+          </ScrollView>
+          <View style={styles.submissionDetail}>
             {submittedAttachment ? (
-              <Button
+              <TextButton
                 disabled={uploading}
-                mode="contained"
-                style={[styles.submitButton, Styles.spacey1]}
-                onPress={handleAttachmentRemove}>
-                {removeAttachment
-                  ? t('undoRemoveAttachment')
-                  : t('removeAttachment')}
-              </Button>
+                style={
+                  attachmentResult || removeAttachment
+                    ? {
+                        textDecorationLine: 'line-through',
+                        color: theme.colors.onSurfaceDisabled,
+                      }
+                    : undefined
+                }
+                containerStyle={[styles.attachmentButton, Styles.spacey1]}
+                onPress={() => handleFileOpen(submittedAttachment)}>
+                {submittedAttachment.name}
+              </TextButton>
             ) : undefined}
-            {!removeAttachment ? (
-              <Button
+            {!removeAttachment && attachmentResult ? (
+              <TextButton
+                containerStyle={[styles.attachmentButton, Styles.spacey1]}
                 disabled={uploading}
-                mode="contained"
-                style={[styles.submitButton, Styles.spacey1]}
-                onPress={handleDocumentPick}>
-                {attachmentResult
-                  ? t('reUploadAttachment')
-                  : submittedAttachment
-                    ? t('overwriteAttachment')
-                    : t('uploadAttachment')}
-              </Button>
+                onPress={() =>
+                  handleFileOpen({
+                    id: '0000',
+                    name: attachmentResult.name,
+                    downloadUrl: attachmentResult.uri,
+                    previewUrl: attachmentResult.uri,
+                    size: attachmentResult.size
+                      ? attachmentResult.size + 'B'
+                      : '',
+                    type: attachmentResult.type,
+                  })
+                }>
+                {attachmentResult.name}{' '}
+                {pendingAssignmentData
+                  ? isLocaleChinese()
+                    ? '（之前分享的）'
+                    : '(previously shared)'
+                  : ''}
+              </TextButton>
             ) : undefined}
+            <View style={styles.attachmentActionButtons}>
+              {submittedAttachment ? (
+                <Button
+                  disabled={uploading}
+                  mode="contained"
+                  style={[styles.submitButton, Styles.spacey1]}
+                  onPress={handleAttachmentRemove}>
+                  {removeAttachment
+                    ? t('undoRemoveAttachment')
+                    : t('removeAttachment')}
+                </Button>
+              ) : undefined}
+              {!removeAttachment ? (
+                <Menu
+                  visible={pickerMenuVisible}
+                  onDismiss={handlePickerMenuClose}
+                  anchorPosition="top"
+                  style={{marginTop: -100}}
+                  anchor={
+                    <Button
+                      style={[styles.submitButton, Styles.spacey1]}
+                      disabled={uploading}
+                      mode="contained"
+                      onPress={handlePickerMenuOpen}>
+                      {attachmentResult
+                        ? t('reUploadAttachment')
+                        : submittedAttachment
+                          ? t('overwriteAttachment')
+                          : t('uploadAttachment')}
+                    </Button>
+                  }>
+                  <Menu.Item
+                    onPress={handleDocumentPick}
+                    title={t('documents')}
+                  />
+                  <Menu.Item onPress={handlePhotoPick} title={t('photos')} />
+                </Menu>
+              ) : undefined}
+            </View>
+            {submitTime && (
+              <Caption style={Styles.spacey1}>
+                {dayjs(submitTime).format(
+                  isLocaleChinese()
+                    ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
+                    : '[last submitted at] HH:mm, MMM D, YYYY',
+                )}
+              </Caption>
+            )}
           </View>
-          {submitTime && (
-            <Caption style={Styles.spacey1}>
-              {dayjs(submitTime).format(
-                isLocaleChinese()
-                  ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
-                  : '[last submitted at] HH:mm, MMM D, YYYY',
-              )}
-            </Caption>
-          )}
-        </View>
-      </KeyboardAvoidingView>
-      <Snackbar
-        visible={uploadError}
-        duration={3000}
-        onDismiss={() => setUploadError(false)}>
-        {t('assignmentSubmissionFailed')}
-      </Snackbar>
-    </SafeArea>
+        </KeyboardAvoidingView>
+        <Snackbar
+          visible={uploadError}
+          duration={3000}
+          onDismiss={() => setUploadError(false)}>
+          {t('assignmentSubmissionFailed')}
+        </Snackbar>
+      </SafeArea>
+    </Portal.Host>
   );
 };
 

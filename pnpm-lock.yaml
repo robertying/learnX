@@ -122,10 +122,16 @@ dependencies:
   expo-calendar:
     specifier: 0.0.1-canary-20240411-55a0085
     version: 0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085)
+  expo-document-picker:
+    specifier: 0.0.1-canary-20240411-55a0085
+    version: 0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085)
   expo-file-system:
     specifier: 0.0.1-canary-20240411-55a0085
     version: 0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085)
   expo-haptics:
+    specifier: 0.0.1-canary-20240411-55a0085
+    version: 0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085)
+  expo-image-picker:
     specifier: 0.0.1-canary-20240411-55a0085
     version: 0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085)
   expo-intent-launcher:
@@ -179,9 +185,6 @@ dependencies:
   react-native-device-info:
     specifier: 10.13.1
     version: 10.13.1(react-native@0.74.0-rc.8)
-  react-native-document-picker:
-    specifier: 9.1.1
-    version: 9.1.1(react-native-windows@0.73.11)(react-native@0.74.0-rc.8)(react@18.2.0)
   react-native-draggable-flatlist:
     specifier: 4.0.1
     version: 4.0.1(@babel/core@7.24.4)(react-native-gesture-handler@2.16.0)(react-native-reanimated@3.9.0-rc.0)(react-native@0.74.0-rc.8)
@@ -6110,6 +6113,14 @@ packages:
       - supports-color
     dev: false
 
+  /expo-document-picker@0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085):
+    resolution: {integrity: sha512-LGM+gXn55TPjjPfZUbCqw0h2jLVV6/MNzwV5HMBiYR+gJLJi+nyorUWEkjy9wyu4lLmxXe1Kxfaz2lzZKVU/bw==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.0-canary-20240411-55a0085(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+    dev: false
+
   /expo-file-system@0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085):
     resolution: {integrity: sha512-zWKsbb7pxs5AgpmCHv2pTDXUPfa3tVd5nMiQnvqWqXlpSTcsJ+E1x7zwJn2wSejK09+j30Yj54/CHqN+KJ49gA==}
     peerDependencies:
@@ -6133,6 +6144,23 @@ packages:
       expo: '*'
     dependencies:
       expo: 51.0.0-canary-20240411-55a0085(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+    dev: false
+
+  /expo-image-loader@0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085):
+    resolution: {integrity: sha512-r9tvhP/xHLt9OqFgW4lUaBvS9sYZIGE3obPDjmq2ZtZByMJBFMWwVAeLmscet0mAjWx5jORjPWRS3whx5U2jkw==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.0-canary-20240411-55a0085(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+    dev: false
+
+  /expo-image-picker@0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085):
+    resolution: {integrity: sha512-hTBxSVjpopgjslYDkfbGhBrsM7nv4BwG44QDd9n9zMLnjSnctdhqztepZUR62Nua9KVzVlB+pDRDp4FpynsAGg==}
+    peerDependencies:
+      expo: '*'
+    dependencies:
+      expo: 51.0.0-canary-20240411-55a0085(@babel/core@7.24.4)(@babel/preset-env@7.24.4)
+      expo-image-loader: 0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085)
     dev: false
 
   /expo-intent-launcher@0.0.1-canary-20240411-55a0085(expo@51.0.0-canary-20240411-55a0085):
@@ -9361,22 +9389,6 @@ packages:
       react-native: '*'
     dependencies:
       react-native: 0.74.0-rc.8(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.78)(react@18.2.0)
-    dev: false
-
-  /react-native-document-picker@9.1.1(react-native-windows@0.73.11)(react-native@0.74.0-rc.8)(react@18.2.0):
-    resolution: {integrity: sha512-BW+7DbsILuFThlBm7NUFVUmKKf6Awkcf9R0q8wiCU2DlGGtAKQTt2iHpO5+Dn/7WMPB+rqNv3X1HsmJQ0t5R3g==}
-    peerDependencies:
-      react: '*'
-      react-native: '*'
-      react-native-windows: '*'
-    peerDependenciesMeta:
-      react-native-windows:
-        optional: true
-    dependencies:
-      invariant: 2.2.4
-      react: 18.2.0
-      react-native: 0.74.0-rc.8(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(@types/react@18.2.78)(react@18.2.0)
-      react-native-windows: 0.73.11(@babel/core@7.24.4)(@babel/preset-env@7.24.4)(react-native@0.74.0-rc.8)(react@18.2.0)
     dev: false
 
   /react-native-draggable-flatlist@4.0.1(@babel/core@7.24.4)(react-native-gesture-handler@2.16.0)(react-native-reanimated@3.9.0-rc.0)(react-native@0.74.0-rc.8):

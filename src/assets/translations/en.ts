@@ -174,4 +174,6 @@ export default {
   restore: 'Restore',
   reorder: 'Reorder',
   dragToReorder: 'Long press and drag to reorder',
+  documents: 'Files',
+  photos: 'Photos',
 };
