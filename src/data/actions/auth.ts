@@ -10,6 +10,7 @@ import {
 import {Auth} from 'data/types/state';
 import {getUserInfo} from './user';
 import {serializeError} from 'helpers/parse';
+import {retry} from 'helpers/retry';
 
 export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
@@ -37,7 +38,9 @@ export function login(
         resetDataSource();
       }
 
-      await dataSource.login(username, password);
+      await retry(async () => {
+        await dataSource.login(username, password);
+      });
 
       if (username && password) {
         dispatch(
