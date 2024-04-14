@@ -23,14 +23,6 @@ buildscript {
     }
 }
 
-allprojects {
-    repositories {
-        maven {
-            url("$rootDir/maven")
-        }
-    }
-}
-
 subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
