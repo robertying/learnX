@@ -15,6 +15,7 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
     <View
       style={{
         height: 40,
+        paddingHorizontal: 8,
         maxWidth: DeviceInfo.isTablet() ? undefined : 250,
         justifyContent: 'center',
         alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
