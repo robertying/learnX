@@ -7,7 +7,7 @@ buildscript {
         ndkVersion = "26.2.11394342"
         cmakeVersion = "3.22.1"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "1.9.22"
+        kotlinVersion = "1.9.23"
     }
     repositories {
         maven {

@@ -13,6 +13,7 @@
 		22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */; };
 		3D6FE129A295572F8529C41D /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B99CEA89E2F505C6E96CAC43 /* libPods-learnX.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
 		D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F652B248AEB004BC08C /* Assets.xcassets */; };
 		D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F732B248C8E004BC08C /* MainInterface.storyboard */; };
 		D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -58,6 +59,7 @@
 		8257AB0E0F3BEAA229130429 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
 		B99CEA89E2F505C6E96CAC43 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = learnX/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D40B9F622B248AEB004BC08C /* learnX.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 		D40B9F652B248AEB004BC08C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
 		D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +105,7 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
+				D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */,
 			);
 			name = learnX;
 			sourceTree = "<group>";
@@ -271,6 +274,7 @@
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */,
 				D40B9F812B248EC2004BC08C /* AppCenter-Config.plist in Resources */,
+				D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */,
 				D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -300,7 +304,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"../node_modules/react-native/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"../node_modules/react-native/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
 		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -625,13 +629,17 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "$(inherited)  ";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
 					"-DFOLLY_MOBILE=1",
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
 				OTHER_LDFLAGS = "$(inherited)";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
@@ -705,13 +713,17 @@
 					"\"$(inherited)\"",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_CFLAGS = "$(inherited)  ";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
 					"-DFOLLY_MOBILE=1",
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
+					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
 				OTHER_LDFLAGS = "$(inherited)";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
