@@ -25,6 +25,12 @@ const Courses: React.FC<
     state => state.settings.courseInformationSharing,
   );
   const courses = useAppSelector(state => state.courses.items);
+  const coursesWithoutOrder = useAppSelector(
+    state => state.courses.items,
+    (a, b) =>
+      JSON.stringify(a.map(a => a.id).sort()) ===
+      JSON.stringify(b.map(b => b.id).sort()),
+  );
   const hiddenIds = useAppSelector(state => state.courses.hidden);
   const fetching = useAppSelector(state => state.courses.fetching);
 
@@ -80,17 +86,16 @@ const Courses: React.FC<
     if (courseInformationSharing) {
       (async () => {
         try {
-          await uploadCourses(courses);
+          await uploadCourses(coursesWithoutOrder);
         } catch {}
       })();
     }
-  }, [courseInformationSharing, courses]);
+  }, [courseInformationSharing, coursesWithoutOrder]);
 
   return (
     <SafeArea>
       <FilterList
         type="course"
-        selectionModeDisabled
         defaultSubtitle={
           currentSemesterId
             ? getSemesterTextFromId(currentSemesterId)

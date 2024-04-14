@@ -1,4 +1,4 @@
-import {PropsWithChildren, useRef} from 'react';
+import {PropsWithChildren, useRef, useEffect} from 'react';
 import {View, StyleSheet} from 'react-native';
 import {useTheme, Checkbox} from 'react-native-paper';
 import Interactable from 'react-native-interactable';
@@ -15,8 +15,9 @@ export interface CardWrapperProps {
   hidden?: boolean;
   onHide?: (hide: boolean) => void;
   onPress?: () => void;
-  dragEnabled?: boolean;
+  onLongPress?: () => void;
   selectionMode?: boolean;
+  reorderMode?: boolean;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
 }
@@ -33,9 +34,10 @@ const CardWrapper: React.FC<
   onHide,
   hidden,
   onPress,
-  dragEnabled,
+  onLongPress,
   children,
   selectionMode,
+  reorderMode,
   checked,
   onCheck,
 }) => {
@@ -66,62 +68,76 @@ const CardWrapper: React.FC<
     onCheck?.(!checked);
   };
 
+  useEffect(() => {
+    if (selectionMode) {
+      resetSnap();
+    }
+  }, [selectionMode]);
+
+  useEffect(() => {
+    if (reorderMode) {
+      resetSnap();
+    }
+  }, [reorderMode]);
+
   return (
     <View>
-      <View style={styles.drawer}>
-        {onHide ? (
-          <Touchable
-            type="opacity"
-            style={[
-              styles.button,
-              {
-                backgroundColor: 'rgba(255,204,0,0.2)',
-              },
-            ]}
-            onPress={handleHide}>
-            <MaterialIcons
-              name={hidden ? 'visibility' : 'visibility-off'}
-              size={40}
-              color={Colors.yellow500}
-            />
-          </Touchable>
-        ) : (
-          <>
-            {archived ? null : (
-              <Touchable
-                type="opacity"
-                style={[
-                  styles.button,
-                  {
-                    backgroundColor: 'rgba(255,59,48,0.2)',
-                  },
-                ]}
-                onPress={handleFav}>
-                <MaterialCommunityIcons
-                  name={fav ? 'heart-off' : 'heart'}
-                  size={40}
-                  color={Colors.red500}
-                />
-              </Touchable>
-            )}
+      {reorderMode ? null : (
+        <View style={styles.drawer}>
+          {onHide ? (
             <Touchable
               type="opacity"
               style={[
                 styles.button,
                 {
-                  backgroundColor: 'rgba(33,150,243,0.2)',
+                  backgroundColor: 'rgba(255,204,0,0.2)',
                 },
               ]}
-              onPress={handleArchive}>
-              <MaterialCommunityIcons
-                name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}
+              onPress={handleHide}>
+              <MaterialIcons
+                name={hidden ? 'visibility' : 'visibility-off'}
                 size={40}
-                color={Colors.blue500}
+                color={Colors.yellow500}
               />
             </Touchable>
-          </>
-        )}
-      </View>
+          ) : (
+            <>
+              {archived ? null : (
+                <Touchable
+                  type="opacity"
+                  style={[
+                    styles.button,
+                    {
+                      backgroundColor: 'rgba(255,59,48,0.2)',
+                    },
+                  ]}
+                  onPress={handleFav}>
+                  <MaterialCommunityIcons
+                    name={fav ? 'heart-off' : 'heart'}
+                    size={40}
+                    color={Colors.red500}
+                  />
+                </Touchable>
+              )}
+              <Touchable
+                type="opacity"
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor: 'rgba(33,150,243,0.2)',
+                  },
+                ]}
+                onPress={handleArchive}>
+                <MaterialCommunityIcons
+                  name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}
+                  size={40}
+                  color={Colors.blue500}
+                />
+              </Touchable>
+            </>
+          )}
+        </View>
+      )}
       <Interactable.View
         style={{backgroundColor: theme.colors.surface}}
         ref={snapRef}
@@ -136,24 +152,35 @@ const CardWrapper: React.FC<
           {x: 0},
           {x: onHide ? -buttonWidth : -buttonWidth * (archived ? 1 : 2)},
         ]}
-        dragEnabled={!selectionMode && dragEnabled}>
+        dragEnabled={!selectionMode && !reorderMode}>
         <Touchable
           type="highlight"
           highlightColorOpacity={0.125}
           style={{backgroundColor: theme.colors.surface}}
           onPress={
-            selectionMode
-              ? handleCheck
-              : () => {
-                  resetSnap();
-                  onPress?.();
-                }
-          }>
+            reorderMode
+              ? undefined
+              : selectionMode
+                ? handleCheck
+                : () => {
+                    resetSnap();
+                    onPress?.();
+                  }
+          }
+          onLongPress={onLongPress}>
           <View style={styles.root}>
             {selectionMode && (
               <View style={styles.checkbox}>
                 <Checkbox.Android status={checked ? 'checked' : 'unchecked'} />
               </View>
+            )}
+            {reorderMode && (
+              <MaterialIcons
+                style={styles.checkbox}
+                name="reorder"
+                size={20}
+                color={theme.colors.onSurface}
+              />
             )}
             {children}
           </View>

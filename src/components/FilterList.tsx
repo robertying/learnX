@@ -1,8 +1,11 @@
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {FlatList, RefreshControl, Platform} from 'react-native';
+import {FlatList, RefreshControl, Platform, View} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
+import DraggableFlatList, {
+  DraggableFlatListProps,
+} from 'react-native-draggable-flatlist';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Assignment, Course, File, Notice} from 'data/types/state';
@@ -12,7 +15,7 @@ import {
   setFavAssignment,
 } from 'data/actions/assignments';
 import {setArchiveFiles, setFavFile} from 'data/actions/files';
-import {setHideCourse} from 'data/actions/courses';
+import {setCourseOrder, setHideCourse} from 'data/actions/courses';
 import {setSetting} from 'data/actions/settings';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import useToast from 'hooks/useToast';
@@ -25,6 +28,7 @@ import Filter, {FilterSelection} from './Filter';
 import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
 import {CardWrapperProps} from './CardWrapper';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
   data: T;
@@ -34,7 +38,6 @@ export interface FilterListProps<T> {
   type: 'notice' | 'assignment' | 'file' | 'course';
   defaultSelected?: FilterSelection;
   defaultSubtitle?: string;
-  selectionModeDisabled?: boolean;
   unfinished?: T[];
   finished?: T[];
   all: T[];
@@ -65,7 +68,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   itemComponent: Component,
   navigation,
   onItemPress,
-  selectionModeDisabled,
   defaultSubtitle,
   refreshing,
   onRefresh,
@@ -101,11 +103,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                 ? archived
                 : hidden
   )!;
+  const isCourse = type === 'course';
 
   const favIds = fav?.map(i => i.id);
   const archivedIds = archived?.map(i => i.id);
   const hiddenIds = hidden.map(i => i.id);
 
+  const [reorderMode, setReorderMode] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
   const [selection, setSelection] = useState<Record<string, boolean>>(
     data.reduce(
@@ -129,6 +133,17 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       }),
     );
     setFilterVisible(false);
+  };
+
+  const handleReorder = () => {
+    setReorderMode(v => !v);
+  };
+
+  const handleReorderDone: DraggableFlatListProps<T>['onDragEnd'] = ({
+    data,
+  }) => {
+    const courseOrder = data.map(i => i.id);
+    dispatch(setCourseOrder(courseOrder));
   };
 
   const handleSelect = useCallback(() => {
@@ -222,17 +237,37 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   }, [detailNavigator, navigation]);
 
   useLayoutEffect(() => {
-    if (selectionMode) {
+    if (reorderMode) {
+      navigation.setOptions({
+        headerLeft: () => (
+          <IconButton
+            style={{marginLeft: -8}}
+            icon={props => <MaterialIcons {...props} name="sort" />}
+            onPress={handleReorder}
+            mode="contained"
+          />
+        ),
+        headerRight: () => <View />,
+        headerTitle: props => (
+          <HeaderTitle
+            {...props}
+            title={t('reorder')}
+            subtitle={t('dragToReorder')}
+          />
+        ),
+      });
+    } else if (selectionMode) {
       navigation.setOptions({
         headerLeft: () => (
           <>
             <IconButton
               style={{marginLeft: -8}}
               onPress={handleSelect}
-              icon={props => <MaterialIcons {...props} name="subject" />}
+              icon={props => <MaterialIcons {...props} name="list" />}
+              mode="contained"
             />
             <IconButton
-              style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
+              style={Styles.ml0}
               onPress={handleCheckAll}
               icon={props => <MaterialIcons {...props} name="done-all" />}
             />
@@ -259,41 +294,47 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
           />
         ),
-        headerTitle: isLocaleChinese()
-          ? `已选中 ${
-              Object.values(selection).filter(s => s === true).length
-            } 个`
-          : `${
-              Object.values(selection).filter(s => s === true).length
-            } selected`,
+        headerTitle: props => (
+          <HeaderTitle
+            {...props}
+            title={filterSelected === 'archived' ? t('restore') : t('archive')}
+            subtitle={
+              isLocaleChinese()
+                ? `已选中 ${
+                    Object.values(selection).filter(s => s === true).length
+                  } 个`
+                : `${
+                    Object.values(selection).filter(s => s === true).length
+                  } selected`
+            }
+          />
+        ),
       });
     } else {
       navigation.setOptions({
         headerLeft: () => (
           <>
-            {selectionModeDisabled ? null : (
+            {isCourse ? (
+              <IconButton
+                style={{marginLeft: -8}}
+                icon={props => <MaterialIcons {...props} name="sort" />}
+                onPress={handleReorder}
+              />
+            ) : (
               <IconButton
                 style={{marginLeft: -8}}
                 onPress={handleSelect}
-                icon={props => <MaterialIcons {...props} name="subject" />}
+                icon={props => <MaterialIcons {...props} name="list" />}
               />
             )}
             <IconButton
-              style={
-                selectionModeDisabled
-                  ? {marginLeft: -8}
-                  : Platform.OS === 'android'
-                    ? {marginLeft: -8}
-                    : Styles.ml0
-              }
+              style={Styles.ml0}
               onPress={handleFilter}
               icon={props => <MaterialIcons {...props} name="filter-list" />}
             />
-            {type === 'course' && (
+            {isCourse && (
               <IconButton
-                style={
-                  Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0
-                }
+                style={Styles.ml0}
                 icon={props => <MaterialIcons {...props} name="info-outline" />}
                 onPress={handleNavigateCourseX}
               />
@@ -346,12 +387,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     handleCheckAll,
     handleNavigateCourseX,
     handleSelect,
+    isCourse,
     navigation,
     onRefresh,
+    reorderMode,
     selection,
     selectionMode,
-    selectionModeDisabled,
-    type,
   ]);
 
   const firstTimeFetching = useRef(true);
@@ -362,8 +403,53 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   }, [refreshing]);
 
+  const List = isCourse ? DraggableFlatList : FlatList;
+
+  const renderItem: DraggableFlatListProps<T>['renderItem'] = ({
+    item,
+    drag,
+    isActive,
+  }) => {
+    return (
+      <View style={{opacity: isActive ? 0.5 : 1}}>
+        <Component
+          data={item}
+          selectionMode={selectionMode}
+          reorderMode={reorderMode}
+          checked={selection[item.id]}
+          onCheck={checked => setSelection({...selection, [item.id]: checked})}
+          onLongPress={() => {
+            if (reorderMode) {
+              drag();
+            }
+          }}
+          onPress={() => {
+            if (reorderMode) {
+              drag();
+            } else {
+              setFilterVisible(false);
+              onItemPress?.(item);
+            }
+          }}
+          fav={favIds?.includes(item.id)}
+          onFav={() => handleFav(favIds!.includes(item.id), item)}
+          archived={archivedIds?.includes(item.id)}
+          onArchive={() =>
+            handleArchive(archivedIds!.includes(item.id), [item.id])
+          }
+          hidden={hiddenIds.includes(item.id)}
+          onHide={
+            isCourse
+              ? () => handleHide(hiddenIds.includes(item.id), item.id)
+              : undefined
+          }
+        />
+      </View>
+    );
+  };
+
   return (
-    <>
+    <GestureHandlerRootView style={Styles.flex1}>
       <Filter
         visible={filterVisible}
         selected={filterSelected}
@@ -375,41 +461,26 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         archivedCount={archived?.length}
         hiddenCount={hidden.length}
       />
-      <FlatList<T>
-        style={Styles.flex1}
+      <List<T>
+        dragHitSlop={
+          reorderMode
+            ? undefined
+            : {
+                top: 0,
+                bottom: 0,
+                left: -Number.MAX_SAFE_INTEGER,
+                right: -Number.MAX_SAFE_INTEGER,
+              }
+        }
+        style={{height: '100%'}}
         contentContainerStyle={[
           {flexGrow: 1},
           data.length ? null : {justifyContent: 'center'},
         ]}
         data={data}
         ListEmptyComponent={<Empty />}
-        initialNumToRender={10}
-        renderItem={({item}) => (
-          <Component
-            data={item}
-            selectionMode={selectionMode}
-            checked={selection[item.id]}
-            onCheck={checked =>
-              setSelection({...selection, [item.id]: checked})
-            }
-            onPress={() => {
-              setFilterVisible(false);
-              onItemPress?.(item);
-            }}
-            fav={favIds?.includes(item.id)}
-            onFav={() => handleFav(favIds!.includes(item.id), item)}
-            archived={archivedIds?.includes(item.id)}
-            onArchive={() =>
-              handleArchive(archivedIds!.includes(item.id), [item.id])
-            }
-            hidden={hiddenIds.includes(item.id)}
-            onHide={
-              type === 'course'
-                ? () => handleHide(hiddenIds.includes(item.id), item.id)
-                : undefined
-            }
-          />
-        )}
+        onDragEnd={handleReorderDone}
+        renderItem={renderItem as any}
         keyExtractor={item => item.id}
         refreshControl={
           <RefreshControl
@@ -419,7 +490,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           />
         }
       />
-    </>
+    </GestureHandlerRootView>
   );
 };
 

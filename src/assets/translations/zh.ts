@@ -164,6 +164,10 @@ const zh: typeof en = {
   incomplete: '缓考',
   openFileAfterDownload: '自动打开已下载的文件',
   loggingIn: '登录中……',
+  archive: '归档',
+  restore: '恢复',
+  reorder: '排序',
+  dragToReorder: '长按并拖动以排序',
 };
 
 export default zh;

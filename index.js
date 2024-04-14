@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import 'react-native-url-polyfill/auto';
 import {AppRegistry, Platform, UIManager} from 'react-native';
 import {name as appName} from './app.json';

@@ -170,4 +170,8 @@ export default {
   incomplete: 'Incomplete',
   openFileAfterDownload: 'Open downloaded files automatically',
   loggingIn: 'Logging in...',
+  archive: 'Archive',
+  restore: 'Restore',
+  reorder: 'Reorder',
+  dragToReorder: 'Long press and drag to reorder',
 };

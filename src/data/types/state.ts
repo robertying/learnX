@@ -89,6 +89,7 @@ export interface CoursesState {
       teacherName: string;
     };
   };
+  order: string[];
   error?: FailReason | null;
 }
 

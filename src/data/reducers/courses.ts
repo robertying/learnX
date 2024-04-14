@@ -3,9 +3,11 @@ import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
   GET_COURSES_FOR_SEMESTER_SUCCESS,
+  SET_COURSE_ORDER,
   SET_HIDE_COURSE,
 } from 'data/types/constants';
 import {CoursesState} from 'data/types/state';
+import {sortByOrder} from 'helpers/reorder';
 
 export default function courses(
   state: CoursesState = {
@@ -13,6 +15,7 @@ export default function courses(
     hidden: [],
     items: [],
     names: {},
+    order: [],
   },
   action: CoursesAction,
 ): CoursesState {
@@ -23,12 +26,15 @@ export default function courses(
         fetching: true,
         error: null,
       };
-    case GET_COURSES_FOR_SEMESTER_SUCCESS:
+    case GET_COURSES_FOR_SEMESTER_SUCCESS: {
+      const courses = action.payload;
+      const courseOrder = state.order;
+      const orderedCourses = sortByOrder(courses, courseOrder);
       return {
         ...state,
         fetching: false,
-        items: action.payload,
-        names: action.payload.reduce(
+        items: orderedCourses,
+        names: orderedCourses.reduce(
           (prev, curr) => ({
             ...prev,
             [curr.id]: {
@@ -40,6 +46,7 @@ export default function courses(
         ),
         error: null,
       };
+    }
     case GET_COURSES_FOR_SEMESTER_FAILURE:
       return {
         ...state,
@@ -58,6 +65,16 @@ export default function courses(
           hidden: state.hidden.filter(item => item !== action.payload.courseId),
         };
       }
+    case SET_COURSE_ORDER: {
+      const courses = state.items;
+      const newOrder = action.payload;
+      const orderedCourses = sortByOrder(courses, newOrder);
+      return {
+        ...state,
+        order: newOrder,
+        items: orderedCourses,
+      };
+    }
     default:
       return state;
   }

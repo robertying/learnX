@@ -22,7 +22,7 @@ const Notices: React.FC<
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
   const courseIds = useAppSelector(
     state => state.courses.items.map(i => i.id),
-    (a, b) => JSON.stringify(a) === JSON.stringify(b),
+    (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort()),
   );
   const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
   const noticeState = useAppSelector(state => state.notices);
