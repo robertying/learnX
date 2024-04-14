@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@8.15.7+sha256.50783dd0fa303852de2dd1557cd4b9f07cb5b018154a6e76d0f40635d6cee019",
   "scripts": {
-    "postinstall": "patch-package",
+    "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
     "pod": "cd ios && pod install && pod update && cd ..",
     "start": "react-native start",
     "android": "react-native run-android",
