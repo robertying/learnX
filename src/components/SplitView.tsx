@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   master: {
-    width: 320,
+    width: 393,
     zIndex: 2,
   },
   detail: {
