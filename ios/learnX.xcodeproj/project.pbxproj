@@ -20,6 +20,7 @@
 		D40B9F7F2B248D30004BC08C /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B9F7E2B248D30004BC08C /* ShareViewController.swift */; };
 		D40B9F812B248EC2004BC08C /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F802B248EC2004BC08C /* AppCenter-Config.plist */; };
 		D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.strings */; };
+		D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -283,6 +284,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */,
 				D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
