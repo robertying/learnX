@@ -56,6 +56,7 @@ const mockStore: PersistAppState = {
   courses: {
     fetching: false,
     hidden: ['2019-2020-1139286494'],
+    order: [],
     items: [
       {
         semesterId: '2019-2020-1',

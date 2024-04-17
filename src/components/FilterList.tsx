@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {FlatList, RefreshControl, Platform, View} from 'react-native';
+import {FlatList, RefreshControl, View} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';

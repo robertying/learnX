@@ -20,6 +20,7 @@ export interface CardWrapperProps {
   reorderMode?: boolean;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
+  disableSwipe?: boolean;
 }
 
 const buttonWidth = 80;
@@ -40,6 +41,7 @@ const CardWrapper: React.FC<
   reorderMode,
   checked,
   onCheck,
+  disableSwipe,
 }) => {
   const theme = useTheme();
 
@@ -152,7 +154,7 @@ const CardWrapper: React.FC<
           {x: 0},
           {x: onHide ? -buttonWidth : -buttonWidth * (archived ? 1 : 2)},
         ]}
-        dragEnabled={!selectionMode && !reorderMode}>
+        dragEnabled={!disableSwipe && !selectionMode && !reorderMode}>
         <Touchable
           type="highlight"
           highlightColorOpacity={0.125}

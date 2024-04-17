@@ -48,7 +48,7 @@ const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
       renderItem={({item}) => (
         <NoticeCard
           data={item}
-          dragEnabled={false}
+          disableSwipe
           hideCourseName
           onPress={() => navigation.push('NoticeDetail', item)}
         />
@@ -90,7 +90,7 @@ const Assignments = ({
       renderItem={({item}) => (
         <AssignmentCard
           data={item}
-          dragEnabled={false}
+          disableSwipe
           hideCourseName
           onPress={() => navigation.push('AssignmentDetail', item)}
         />
@@ -126,7 +126,7 @@ const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
       renderItem={({item}) => (
         <FileCard
           data={item}
-          dragEnabled={false}
+          disableSwipe
           hideCourseName
           onPress={() => navigation.push('FileDetail', item)}
         />
