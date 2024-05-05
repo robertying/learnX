@@ -10,6 +10,7 @@ import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {isLocaleChinese, t} from 'helpers/i18n';
+import env from 'helpers/env';
 import {uploadCourses} from 'helpers/coursex';
 import {ScreenParams} from './types';
 
@@ -23,6 +24,9 @@ const CourseInformationSharing: React.FC<
   const currentSemesterId = useAppSelector(state => state.semesters.current);
   const courseInformationSharing = useAppSelector(
     state => state.settings.courseInformationSharing,
+  );
+  const isDummyUser = useAppSelector(
+    state => state.auth.username === env.DUMMY_USERNAME,
   );
 
   const getCourses = async () => {
@@ -57,6 +61,9 @@ const CourseInformationSharing: React.FC<
             text: t('ok'),
             onPress: async () => {
               dispatch(setSetting('courseInformationSharing', enabled));
+              if (isDummyUser) {
+                return;
+              }
               try {
                 const courses = await getCourses();
                 await uploadCourses(courses);

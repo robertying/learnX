@@ -5,7 +5,22 @@ import createSecureStore from 'redux-persist-expo-securestore';
 import env from 'helpers/env';
 import mockStore from 'data/mock';
 import {AppActions, StoreAction} from 'data/types/actions';
-import {CLEAR_STORE, SET_MOCK_STORE, RESET_LOADING} from 'data/types/constants';
+import {
+  CLEAR_STORE,
+  SET_MOCK_STORE,
+  RESET_LOADING,
+  SET_FAV_ASSIGNMENT,
+  SET_HIDE_COURSE,
+  SET_COURSE_ORDER,
+  SET_FAV_NOTICE,
+  SET_ARCHIVE_NOTICES,
+  SET_FAV_FILE,
+  SET_ARCHIVE_FILES,
+  SET_ARCHIVE_ASSIGNMENTS,
+  SET_PENDING_ASSIGNMENT_DATA,
+  SET_SETTING,
+  SET_CURRENT_SEMESTER,
+} from 'data/types/constants';
 import {AppState, AuthState, SettingsState} from 'data/types/state';
 import assignments from './assignments';
 import courses from './courses';
@@ -86,7 +101,23 @@ export function rootReducer(
   } else if (action.type === CLEAR_STORE) {
     state = undefined;
   } else if (state && state.auth.username === env.DUMMY_USERNAME) {
-    return state;
+    if (
+      ![
+        SET_FAV_NOTICE,
+        SET_ARCHIVE_NOTICES,
+        SET_FAV_FILE,
+        SET_ARCHIVE_FILES,
+        SET_FAV_ASSIGNMENT,
+        SET_ARCHIVE_ASSIGNMENTS,
+        SET_PENDING_ASSIGNMENT_DATA,
+        SET_HIDE_COURSE,
+        SET_COURSE_ORDER,
+        SET_CURRENT_SEMESTER,
+        SET_SETTING,
+      ].includes(action.type)
+    ) {
+      return state;
+    }
   }
   return appReducer(state, action as Exclude<AppActions, StoreAction>);
 }
