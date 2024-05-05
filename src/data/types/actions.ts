@@ -9,26 +9,20 @@ import {
 import {
   getAllNoticesForCoursesAction,
   getNoticesForCourseAction,
-  setPinNotice,
   setFavNotice,
-  setUnreadNotice,
   setArchiveNotices,
 } from 'data/actions/notices';
 import {
   getAllAssignmentsForCoursesAction,
   getAssignmentsForCourseAction,
-  setPinAssignment,
   setFavAssignment,
-  setUnreadAssignment,
   setArchiveAssignments,
   setPendingAssignmentData,
 } from 'data/actions/assignments';
 import {
   getAllFilesForCoursesAction,
   getFilesForCourseAction,
-  setPinFile,
   setFavFile,
-  setUnreadFile,
   setArchiveFiles,
 } from 'data/actions/files';
 import {clearStoreAction, setMockStore, resetLoading} from 'data/actions/root';
@@ -74,16 +68,12 @@ type GetNoticesForCourseAction = ActionType<typeof getNoticesForCourseAction>;
 type GetAllNoticesForCoursesAction = ActionType<
   typeof getAllNoticesForCoursesAction
 >;
-type SetPinNoticeAction = ActionType<typeof setPinNotice>;
 type SetFavNoticeAction = ActionType<typeof setFavNotice>;
-type SetUnreadNoticeAction = ActionType<typeof setUnreadNotice>;
 type SetArchiveNoticesAction = ActionType<typeof setArchiveNotices>;
 export type NoticesAction =
   | GetNoticesForCourseAction
   | GetAllNoticesForCoursesAction
-  | SetPinNoticeAction
   | SetFavNoticeAction
-  | SetUnreadNoticeAction
   | SetArchiveNoticesAction;
 
 type GetAssignmentsForCourseAction = ActionType<
@@ -92,9 +82,7 @@ type GetAssignmentsForCourseAction = ActionType<
 type GetAllAssignmentsForCoursesAction = ActionType<
   typeof getAllAssignmentsForCoursesAction
 >;
-type SetPinAssignmentAction = ActionType<typeof setPinAssignment>;
 type SetFavAssignmentAction = ActionType<typeof setFavAssignment>;
-type SetUnreadAssignmentAction = ActionType<typeof setUnreadAssignment>;
 type SetArchiveAssignmentsAction = ActionType<typeof setArchiveAssignments>;
 type SetPendingAssignmentDataAction = ActionType<
   typeof setPendingAssignmentData
@@ -102,9 +90,7 @@ type SetPendingAssignmentDataAction = ActionType<
 export type AssignmentsAction =
   | GetAssignmentsForCourseAction
   | GetAllAssignmentsForCoursesAction
-  | SetPinAssignmentAction
   | SetFavAssignmentAction
-  | SetUnreadAssignmentAction
   | SetArchiveAssignmentsAction
   | SetPendingAssignmentDataAction;
 
@@ -112,16 +98,12 @@ type GetFilesForCourseAction = ActionType<typeof getFilesForCourseAction>;
 type GetAllFilesForCoursesAction = ActionType<
   typeof getAllFilesForCoursesAction
 >;
-type SetPinFileAction = ActionType<typeof setPinFile>;
 type SetFavFileAction = ActionType<typeof setFavFile>;
-type SetUnreadFileAction = ActionType<typeof setUnreadFile>;
 type SetArchiveFilesAction = ActionType<typeof setArchiveFiles>;
 export type FilesAction =
   | GetFilesForCourseAction
   | GetAllFilesForCoursesAction
-  | SetPinFileAction
   | SetFavFileAction
-  | SetUnreadFileAction
   | SetArchiveFilesAction;
 
 type SetSettingAction = ActionType<typeof setSetting>;

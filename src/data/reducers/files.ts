@@ -6,9 +6,7 @@ import {
   GET_FILES_FOR_COURSE_FAILURE,
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
-  SET_PIN_FILE,
   SET_FAV_FILE,
-  SET_UNREAD_FILE,
   SET_ARCHIVE_FILES,
 } from 'data/types/constants';
 import {FilesState} from 'data/types/state';
@@ -16,8 +14,6 @@ import {FilesState} from 'data/types/state';
 export default function files(
   state: FilesState = {
     fetching: false,
-    unread: [],
-    pinned: [],
     favorites: [],
     archived: [],
     items: [],
@@ -35,7 +31,6 @@ export default function files(
       return {
         ...state,
         fetching: false,
-        unread: action.payload.filter(i => i.isNew).map(i => i.id),
         items: action.payload,
         error: null,
       };
@@ -55,14 +50,6 @@ export default function files(
       return {
         ...state,
         fetching: false,
-        unread: [
-          ...state.unread.filter(
-            id =>
-              state.items.find(i => i.id === id)?.courseId !==
-              action.payload.courseId,
-          ),
-          ...action.payload.files.filter(i => i.isNew).map(i => i.id),
-        ],
         items: [
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
@@ -77,30 +64,6 @@ export default function files(
         fetching: false,
         error: action.payload.reason,
       };
-    case SET_UNREAD_FILE:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          unread: [...state.unread, action.payload.fileId],
-        };
-      } else {
-        return {
-          ...state,
-          unread: state.unread.filter(item => item !== action.payload.fileId),
-        };
-      }
-    case SET_PIN_FILE:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          pinned: [...state.pinned, action.payload.fileId],
-        };
-      } else {
-        return {
-          ...state,
-          pinned: state.pinned.filter(item => item !== action.payload.fileId),
-        };
-      }
     case SET_FAV_FILE:
       if (action.payload.flag) {
         return {

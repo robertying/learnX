@@ -52,14 +52,12 @@ const CalendarEvent: React.FC<
     state => state.settings.calendarEventLength,
   );
 
-  const [all] = useFilteredData(
-    assignmentState.items,
-    assignmentState.unread,
-    assignmentState.favorites,
-    assignmentState.archived,
-    assignmentState.pinned,
-    hiddenCourseIds,
-  );
+  const {all} = useFilteredData({
+    data: assignmentState.items,
+    fav: assignmentState.favorites,
+    archived: assignmentState.archived,
+    hidden: hiddenCourseIds,
+  });
 
   const sync = useMemo(
     () => all.filter(assignment => dayjs(assignment.deadline).isAfter(dayjs())),

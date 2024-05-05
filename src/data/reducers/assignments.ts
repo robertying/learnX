@@ -6,9 +6,7 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
-  SET_PIN_ASSIGNMENT,
   SET_FAV_ASSIGNMENT,
-  SET_UNREAD_ASSIGNMENT,
   SET_ARCHIVE_ASSIGNMENTS,
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
@@ -17,8 +15,6 @@ import {AssignmentsState} from 'data/types/state';
 export default function assignments(
   state: AssignmentsState = {
     fetching: false,
-    unread: [],
-    pinned: [],
     favorites: [],
     archived: [],
     items: [],
@@ -70,34 +66,6 @@ export default function assignments(
         fetching: false,
         error: action.payload.reason,
       };
-    case SET_UNREAD_ASSIGNMENT:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          unread: [...state.unread, action.payload.assignmentId],
-        };
-      } else {
-        return {
-          ...state,
-          unread: state.unread.filter(
-            item => item !== action.payload.assignmentId,
-          ),
-        };
-      }
-    case SET_PIN_ASSIGNMENT:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          pinned: [...state.pinned, action.payload.assignmentId],
-        };
-      } else {
-        return {
-          ...state,
-          pinned: state.pinned.filter(
-            item => item !== action.payload.assignmentId,
-          ),
-        };
-      }
     case SET_FAV_ASSIGNMENT:
       if (action.payload.flag) {
         return {

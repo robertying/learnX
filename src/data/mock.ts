@@ -233,8 +233,6 @@ const mockStore: PersistAppState = {
   },
   notices: {
     fetching: false,
-    pinned: ['26ef84e86d60f069016dadb09dd673b2'],
-    unread: ['26ef84e76db3f55b016db4c4e8832da6'],
     favorites: [
       '26ef84e76d60efc1016d71b8f4c63bc1',
       '26ef84e76cc258ed016d3ea25a95157d',
@@ -352,8 +350,6 @@ const mockStore: PersistAppState = {
   },
   assignments: {
     fetching: false,
-    unread: [],
-    pinned: [],
     favorites: [],
     archived: [],
     items: [
@@ -508,8 +504,6 @@ const mockStore: PersistAppState = {
   },
   files: {
     fetching: false,
-    unread: [],
-    pinned: [],
     favorites: [
       '2016310500_KJ_157080064094130b5f1dcc2-f77a-4cca-be0f-95808af85d82',
       '2009990022_KJ_1570695522456476bc2332-2988-4497-9505-d12d41906be0',

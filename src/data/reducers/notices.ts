@@ -6,9 +6,7 @@ import {
   GET_NOTICES_FOR_COURSE_FAILURE,
   GET_NOTICES_FOR_COURSE_REQUEST,
   GET_NOTICES_FOR_COURSE_SUCCESS,
-  SET_PIN_NOTICE,
   SET_FAV_NOTICE,
-  SET_UNREAD_NOTICE,
   SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
 import {NoticeState} from 'data/types/state';
@@ -16,8 +14,6 @@ import {NoticeState} from 'data/types/state';
 export default function notices(
   state: NoticeState = {
     fetching: false,
-    unread: [],
-    pinned: [],
     favorites: [],
     archived: [],
     items: [],
@@ -35,7 +31,6 @@ export default function notices(
       return {
         ...state,
         fetching: false,
-        unread: action.payload.filter(i => !i.hasRead).map(i => i.id),
         items: action.payload,
         error: null,
       };
@@ -55,14 +50,6 @@ export default function notices(
       return {
         ...state,
         fetching: false,
-        unread: [
-          ...state.unread.filter(
-            id =>
-              state.items.find(i => i.id === id)?.courseId !==
-              action.payload.courseId,
-          ),
-          ...action.payload.notices.filter(i => !i.hasRead).map(i => i.id),
-        ],
         items: [
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
@@ -77,30 +64,6 @@ export default function notices(
         fetching: false,
         error: action.payload.reason,
       };
-    case SET_UNREAD_NOTICE:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          unread: [...state.unread, action.payload.noticeId],
-        };
-      } else {
-        return {
-          ...state,
-          unread: state.unread.filter(item => item !== action.payload.noticeId),
-        };
-      }
-    case SET_PIN_NOTICE:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          pinned: [...state.pinned, action.payload.noticeId],
-        };
-      } else {
-        return {
-          ...state,
-          pinned: state.pinned.filter(item => item !== action.payload.noticeId),
-        };
-      }
     case SET_FAV_NOTICE:
       if (action.payload.flag) {
         return {

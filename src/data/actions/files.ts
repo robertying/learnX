@@ -10,9 +10,7 @@ import {
   GET_FILES_FOR_COURSE_FAILURE,
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
-  SET_PIN_FILE,
   SET_FAV_FILE,
-  SET_UNREAD_FILE,
   SET_ARCHIVE_FILES,
 } from 'data/types/constants';
 import {File} from 'data/types/state';
@@ -93,24 +91,8 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
   };
 }
 
-export const setPinFile = createAction(
-  SET_PIN_FILE,
-  (fileId: string, flag: boolean) => ({
-    fileId,
-    flag,
-  }),
-)();
-
 export const setFavFile = createAction(
   SET_FAV_FILE,
-  (fileId: string, flag: boolean) => ({
-    fileId,
-    flag,
-  }),
-)();
-
-export const setUnreadFile = createAction(
-  SET_UNREAD_FILE,
   (fileId: string, flag: boolean) => ({
     fileId,
     flag,

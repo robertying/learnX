@@ -10,9 +10,7 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
-  SET_PIN_ASSIGNMENT,
   SET_FAV_ASSIGNMENT,
-  SET_UNREAD_ASSIGNMENT,
   SET_ARCHIVE_ASSIGNMENTS,
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
@@ -112,24 +110,8 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
   };
 }
 
-export const setPinAssignment = createAction(
-  SET_PIN_ASSIGNMENT,
-  (assignmentId: string, flag: boolean) => ({
-    assignmentId,
-    flag,
-  }),
-)();
-
 export const setFavAssignment = createAction(
   SET_FAV_ASSIGNMENT,
-  (assignmentId: string, flag: boolean) => ({
-    assignmentId,
-    flag,
-  }),
-)();
-
-export const setUnreadAssignment = createAction(
-  SET_UNREAD_ASSIGNMENT,
   (assignmentId: string, flag: boolean) => ({
     assignmentId,
     flag,

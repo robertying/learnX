@@ -28,14 +28,12 @@ const Notices: React.FC<
   const noticeState = useAppSelector(state => state.notices);
   const fetching = useAppSelector(state => state.notices.fetching);
 
-  const [all, unread, fav, archived, hidden] = useFilteredData(
-    noticeState.items,
-    noticeState.unread,
-    noticeState.favorites,
-    noticeState.archived,
-    noticeState.pinned,
-    hiddenCourseIds,
-  );
+  const {all, unread, fav, archived, hidden} = useFilteredData({
+    data: noticeState.items,
+    fav: noticeState.favorites,
+    archived: noticeState.archived,
+    hidden: hiddenCourseIds,
+  });
 
   const handleRefresh = useCallback(() => {
     if (loggedIn) {

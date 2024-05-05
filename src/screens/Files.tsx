@@ -28,14 +28,12 @@ const Files: React.FC<
   const fileState = useAppSelector(state => state.files);
   const fetching = useAppSelector(state => state.files.fetching);
 
-  const [all, unread, fav, archived, hidden] = useFilteredData(
-    fileState.items,
-    fileState.unread,
-    fileState.favorites,
-    fileState.archived,
-    fileState.pinned,
-    hiddenCourseIds,
-  );
+  const {all, unread, fav, archived, hidden} = useFilteredData({
+    data: fileState.items,
+    fav: fileState.favorites,
+    archived: fileState.archived,
+    hidden: hiddenCourseIds,
+  });
 
   const handleRefresh = useCallback(() => {
     if (loggedIn) {

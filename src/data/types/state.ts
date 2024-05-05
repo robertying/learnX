@@ -114,10 +114,8 @@ export type Notice = Pick<
   CourseExtraInfo;
 export interface NoticeState {
   fetching: boolean;
-  unread: string[];
   favorites: string[];
   archived: string[];
-  pinned: string[];
   items: Notice[];
   error?: FailReason | null;
 }
@@ -147,10 +145,8 @@ export type Assignment = Pick<
   CourseExtraInfo;
 export interface AssignmentsState {
   fetching: boolean;
-  unread: string[];
   favorites: string[];
   archived: string[];
-  pinned: string[];
   items: Assignment[];
   error?: FailReason | null;
   pendingAssignmentData?: {
@@ -174,10 +170,8 @@ export type File = Pick<
   CourseExtraInfo;
 export interface FilesState {
   fetching: boolean;
-  unread: string[];
   favorites: string[];
   archived: string[];
-  pinned: string[];
   items: File[];
   error?: FailReason | null;
 }

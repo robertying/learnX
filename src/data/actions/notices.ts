@@ -10,9 +10,7 @@ import {
   GET_NOTICES_FOR_COURSE_FAILURE,
   GET_NOTICES_FOR_COURSE_REQUEST,
   GET_NOTICES_FOR_COURSE_SUCCESS,
-  SET_PIN_NOTICE,
   SET_FAV_NOTICE,
-  SET_UNREAD_NOTICE,
   SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
 import {Notice} from 'data/types/state';
@@ -90,24 +88,8 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
   };
 }
 
-export const setPinNotice = createAction(
-  SET_PIN_NOTICE,
-  (noticeId: string, flag: boolean) => ({
-    noticeId,
-    flag,
-  }),
-)();
-
 export const setFavNotice = createAction(
   SET_FAV_NOTICE,
-  (noticeId: string, flag: boolean) => ({
-    noticeId,
-    flag,
-  }),
-)();
-
-export const setUnreadNotice = createAction(
-  SET_UNREAD_NOTICE,
   (noticeId: string, flag: boolean) => ({
     noticeId,
     flag,
