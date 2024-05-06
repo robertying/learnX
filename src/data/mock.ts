@@ -281,11 +281,11 @@ const mockStore: PersistAppState = {
         url: 'https://www.example.com',
         attachment: {
           id: '1998990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件.xlsx',
+          name: '附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件附件.pdf',
           downloadUrl:
-            'https://file-examples-com.github.io/uploads/2017/02/file_example_XLSX_10.xlsx',
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           previewUrl:
-            'https://file-examples-com.github.io/uploads/2017/02/file_example_XLSX_10.xlsx',
+            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           size: '139.54KB',
         },
         courseName: '基于数字信号处理器的系统设计',
@@ -363,7 +363,7 @@ const mockStore: PersistAppState = {
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
         attachment: {
           id: '1298990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '附件1.rar',
+          name: '附件1.pdf',
           downloadUrl:
             'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           previewUrl:
@@ -436,7 +436,7 @@ const mockStore: PersistAppState = {
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
         submittedAttachment: {
           id: '1234990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '绘图-2016011097.dwg',
+          name: '绘图-2016011097.pdf',
           downloadUrl:
             'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           previewUrl:
@@ -461,7 +461,7 @@ const mockStore: PersistAppState = {
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
         attachment: {
           id: '1234990181_ZY_1604316692859211626215e-c233-4663-a567-a932bf4d4962',
-          name: '视听信息系统导论2019第一次大作业.rar',
+          name: '视听信息系统导论2019第一次大作业.pdf',
           downloadUrl:
             'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           previewUrl:
@@ -486,7 +486,7 @@ const mockStore: PersistAppState = {
           '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
         attachment: {
           id: '1234990181_ZY_1604313692859211626215e-c233-4663-a567-a932bf4d4962',
-          name: '作业一.docx',
+          name: '作业一.pdf',
           downloadUrl:
             'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           previewUrl:
@@ -598,7 +598,7 @@ const mockStore: PersistAppState = {
           'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
         markedImportant: false,
         isNew: false,
-        fileType: 'zip',
+        fileType: 'pdf',
         courseId: '2019-2020-1139283219',
         courseName: '通信与网络',
         courseTeacherName: '周世东',
