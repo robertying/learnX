@@ -22,7 +22,10 @@ function useFilteredData<T extends Notice | Assignment | File>({
 
   const _unread = useMemo(
     () =>
-      _all.filter(i => (i as File).isNew || !((i as Notice).hasRead || true)),
+      _all.filter(
+        i =>
+          (i as File).isNew || ((i as Notice).hasRead === false ? true : false),
+      ),
     [_all],
   );
 
