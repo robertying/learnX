@@ -1,0 +1,11 @@
+name: Other Issue
+description: 其他问题
+title: "在此填写简短的问题描述作为标题……"
+
+body:
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: 问题描述
+    validations:
+      required: true
