@@ -1,0 +1,70 @@
+name: Bug Report
+description: 问题反馈与帮助
+title: "[Bug] "
+
+body:
+  - type: textarea
+    id: problem-description
+    attributes:
+      label: 问题描述
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 复现过程
+      value: |
+        1.
+        2.
+        3.
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted-solutions
+    attributes:
+      label: 已尝试的解决方案
+      value: |
+        1.
+        2.
+        3.
+        ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: 截图
+
+  - type: input
+    id: app-version
+    attributes:
+      label: App 版本
+      description: "设置 - 关于"
+      placeholder: "vX.Y.Z"
+    validations:
+      required: true
+
+  - type: input
+    id: device-model
+    attributes:
+      label: 设备型号
+      placeholder: "例如：iPhone 15 Pro，小米手机 12"
+    validations:
+      required: true
+
+  - type: input
+    id: system-version
+    attributes:
+      label: 系统版本
+      placeholder: "例如：iOS 17.4，macOS 14.4，Android 12"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-information
+    attributes:
+      label: 补充内容
