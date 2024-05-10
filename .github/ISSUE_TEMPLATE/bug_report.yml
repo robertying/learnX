@@ -1,6 +1,6 @@
 name: Bug Report
 description: 问题反馈与帮助
-title: "[Bug] "
+title: "[Bug] 在此填写简短的问题描述作为标题……"
 
 body:
   - type: textarea
