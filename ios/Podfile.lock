@@ -34,13 +34,13 @@ PODS:
     - React-Core
   - EXNotifications (0.28.1):
     - ExpoModulesCore
-  - Expo (51.0.0-preview.14):
+  - Expo (51.0.5):
     - ExpoModulesCore
   - ExpoAsset (10.0.6):
     - ExpoModulesCore
   - ExpoBackgroundFetch (12.0.1):
     - ExpoModulesCore
-  - ExpoCalendar (13.0.3):
+  - ExpoCalendar (13.0.4):
     - ExpoModulesCore
   - ExpoDocumentPicker (12.0.1):
     - ExpoModulesCore
@@ -50,7 +50,7 @@ PODS:
     - ExpoModulesCore
   - ExpoImagePicker (15.0.4):
     - ExpoModulesCore
-  - ExpoModulesCore (1.12.8):
+  - ExpoModulesCore (1.12.10):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1041,7 +1041,7 @@ PODS:
     - Yoga
   - react-native-safe-area-context (4.10.1):
     - React-Core
-  - react-native-webview (13.8.7):
+  - react-native-webview (13.10.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1299,7 +1299,7 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.16.1):
+  - RNGestureHandler (2.16.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1322,7 +1322,7 @@ PODS:
     - Yoga
   - RNLocalize (3.1.0):
     - React-Core
-  - RNReanimated (3.10.0):
+  - RNReanimated (3.11.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1695,15 +1695,15 @@ SPEC CHECKSUMS:
   EXConstants: 9a008dbf262550884e6280dea95b81b51f65ea6f
   EXImageLoader: ab589d67d6c5f2c33572afea9917304418566334
   EXNotifications: e99df3245625defab97f05b8cf333cdcbda2045d
-  Expo: 5c1516e626d56a32ef5a4363d0d8bae15c5f39e4
+  Expo: a3177f18e97260de9ec29802d28d29c130871e94
   ExpoAsset: 9b7433ecc5f1b608ccbb823492e062bde944abd2
   ExpoBackgroundFetch: a06c553ecaf0bade0acd691042d996b9ce926327
-  ExpoCalendar: 9793356dffe2e33d945309a30944b9a9c534e34d
+  ExpoCalendar: 74175c0350967329df09408fb235369dc03d2de9
   ExpoDocumentPicker: 326d1d098a574d621ed2cc05296c9895f10eea44
   ExpoFileSystem: 80bfe850b1f9922c16905822ecbf97acd711dc51
   ExpoHaptics: 5a3a88971af384255baf2504f38b41189cec6984
   ExpoImagePicker: f6d9da49201ce201645366afc6be12cef47f24d7
-  ExpoModulesCore: a67489aac5d81f9bf35ebd163af2388775f16c92
+  ExpoModulesCore: 4c5576eec261d09549d78b751ccd62d94d4506ac
   ExpoSecureStore: 5f6b712785986b54d95a92bd365aabb82a52088e
   EXTaskManager: 79eddd6874d41785e61b5d76652da36b991e4ad0
   FBLazyVector: 898d14d17bf19e2435cafd9ea2a1033efe445709
@@ -1739,7 +1739,7 @@ SPEC CHECKSUMS:
   react-native-cookies: f54fcded06bb0cda05c11d86788020b43528a26c
   react-native-pager-view: e2b7c31147cdc1750cb3867d37a145e487653c34
   react-native-safe-area-context: dcab599c527c2d7de2d76507a523d20a0b83823d
-  react-native-webview: 32ebb18b648c419b0c260416437831c402c0d7b4
+  react-native-webview: 2905d1455be11bcbd909ef33472d8fcdf7abcc41
   React-nativeconfig: b0073a590774e8b35192fead188a36d1dca23dec
   React-NativeModulesApple: df46ff3e3de5b842b30b4ca8a6caae6d7c8ab09f
   React-perflogger: 3d31e0d1e8ad891e43a09ac70b7b17a79773003a
@@ -1767,9 +1767,9 @@ SPEC CHECKSUMS:
   RNCClipboard: 0a720adef5ec193aa0e3de24c3977222c7e52a37
   RNDeviceInfo: 42aadf1282ffa0a88dc38a504a7be145eb010dfa
   RNFS: 4ac0f0ea233904cb798630b3c077808c06931688
-  RNGestureHandler: 2fb2c561d694d6a884850c8507c180a2cc2ed4e9
+  RNGestureHandler: 2282cfbcf86c360d29f44ace393203afd5c6cff7
   RNLocalize: e8694475db034bf601e17bd3dfa8986565e769eb
-  RNReanimated: daf22f7ef44083dd6aadc8550cae88e5d8d7190a
+  RNReanimated: 7ad0f08a845cb60955ee5d461d2156d7b9707118
   RNScreens: b32a9ff15bea7fcdbe5dff6477bc503f792b1208
   RNShare: 554a91f5cfbe4adac4cfe3654826ee8b299fe365
   RNShareMenu: cb9dac548c8bf147d06f0bf07296ad51ea9f5fc3
