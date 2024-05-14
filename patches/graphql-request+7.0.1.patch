@@ -1,0 +1,12 @@
+diff --git a/node_modules/graphql-request/package.json b/node_modules/graphql-request/package.json
+index 0b98944..7b02eed 100644
+--- a/node_modules/graphql-request/package.json
++++ b/node_modules/graphql-request/package.json
+@@ -6,6 +6,7 @@
+   "bin": {
+     "graffle": "./build/cli/generate.js"
+   },
++  "react-native": "./build/entrypoints/main.js",
+   "exports": {
+     ".": {
+       "import": {
