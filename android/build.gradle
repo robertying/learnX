@@ -1,13 +1,13 @@
 buildscript {
     ext {
-        buildToolsVersion = "34.0.0"
+        buildToolsVersion = "35.0.0"
         minSdkVersion = 28
-        compileSdkVersion = 34
-        targetSdkVersion = 34
+        compileSdkVersion = 35
+        targetSdkVersion = 35
         ndkVersion = "26.3.11579264"
         cmakeVersion = "3.22.1"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "1.9.23"
+        kotlinVersion = "2.0.0"
     }
     repositories {
         maven {
