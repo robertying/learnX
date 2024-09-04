@@ -52,6 +52,8 @@ export default {
     'Course Schedule Sync failed. Please grant the App access to reminders, or try restarting the App if you have already done so.',
   courseScheduleSyncRepetitiveError:
     'Course Schedule Sync failed. Please try again. Make sure you are connected to the campus network. Try narrowing down or change the sync date range if the issue persists.',
+  courseScheduleSyncNoCourse:
+    'No course schedule to sync. Check Web Learning to see if there exists any schedule in the selected range.',
   configureCalendarAndReminder: 'Calendars & Reminders Permission Settings',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
   deleteSyncedCalendarsAndRemindersConfirmation:

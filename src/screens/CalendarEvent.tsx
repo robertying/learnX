@@ -112,6 +112,11 @@ const CalendarEvent: React.FC<
         graduate,
       );
 
+      if (events.length === 0) {
+        toast(t('courseScheduleSyncNoCourse'), 'warning');
+        return;
+      }
+
       await saveCoursesToCalendar(events, startDate, endDate);
       toast(t('courseScheduleSyncSucceeded'), 'success');
     } catch (err) {

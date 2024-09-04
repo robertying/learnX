@@ -51,6 +51,8 @@ const zh: typeof en = {
     '课表同步失败：请给予 App 提醒事项访问权限；如果您已经授予该权限，请尝试重启 App',
   courseScheduleSyncRepetitiveError:
     '课表同步失败，请重试。请确保已连接至校园网；如果问题持续存在，请尝试缩小或更改同步的日期范围',
+  courseScheduleSyncNoCourse:
+    '无课表可供同步，请检查网络学堂网页版在此日期范围内是否存在上课日程',
   configureCalendarAndReminder: '日历与提醒事项权限设置',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
   deleteSyncedCalendarsAndRemindersConfirmation:
