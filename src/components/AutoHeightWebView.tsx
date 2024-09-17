@@ -79,7 +79,7 @@ const AutoHeightWebView: React.FC<
       injectedJavaScript={injectedScript}
       onMessage={onMessage}
       javaScriptEnabled
-      showsHorizontalScrollIndicator
+      showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate="normal"
