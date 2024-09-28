@@ -28,7 +28,7 @@ target 'learnX' do
     hermes_enabled: true
   )
 
-  pod 'FirebaseAnalytics'
+  pod 'FirebaseAnalytics/WithoutAdIdSupport'
   pod 'FirebaseCrashlytics'
 
   post_install do |installer|
