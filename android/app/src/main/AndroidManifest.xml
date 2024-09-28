@@ -5,6 +5,12 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+    <uses-permission
+        tools:node="remove"
+        android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission
+        tools:node="remove"
+        android:name="android.permission.READ_MEDIA_VIDEO" />
 
     <application
         android:name=".MainApplication"
