@@ -6,6 +6,8 @@
 #import <AppCenterReactNativeAnalytics.h>
 #import <AppCenterReactNativeCrashes.h>
 
+#import <FirebaseCore/FirebaseCore.h>
+
 #import <CodePush/CodePush.h>
 #import <RNShareMenu/ShareMenuManager.h>
 
@@ -16,6 +18,8 @@
   [AppCenterReactNative register];
   [AppCenterReactNativeAnalytics registerWithInitiallyEnabled:true];
   [AppCenterReactNativeCrashes registerWithAutomaticProcessing];
+
+  [FIRApp configure];
 
   [[UIView appearance] setTintColor:[UIColor colorNamed:@"ThemeColor"]];
 

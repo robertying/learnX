@@ -9,18 +9,12 @@ buildscript {
         javaVersion = JavaVersion.VERSION_17
         kotlinVersion = "2.0.20"
     }
-    repositories {
-        maven {
-            url("$rootDir/maven")
-        }
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath("com.android.tools.build:gradle")
-        classpath("com.facebook.react:react-native-gradle-plugin")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin")
-    }
+}
+
+plugins {
+    id "com.facebook.react.rootproject" apply false
+    id "com.google.gms.google-services" version "4.4.2" apply false
+    id "com.google.firebase.crashlytics" version "3.0.2" apply false
 }
 
 subprojects { subproject ->
@@ -52,5 +46,3 @@ subprojects { subproject ->
         }
     }
 }
-
-apply plugin: "com.facebook.react.rootproject"

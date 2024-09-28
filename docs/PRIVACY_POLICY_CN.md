@@ -18,6 +18,7 @@ Rui Ying 将 learnX 应用程序构建为免费应用程序。本服务由 Rui Y
 
 - [Google Play 服务](https://policies.google.com/privacy)
 - [Visual Studio App Center](https://learn.microsoft.com/zh-cn/appcenter/gdpr/data-from-your-end-users)
+- [Firebase](https://firebase.google.com/support/privacy)
 
 ## 日志数据
 

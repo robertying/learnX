@@ -22,7 +22,7 @@ index c859938..de49d75 100644
  
  @end
 diff --git a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
-index 74badda..d070c92 100644
+index 74badda..dfe7f8e 100644
 --- a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
 +++ b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
 @@ -1,6 +1,5 @@
@@ -35,7 +35,7 @@ index 74badda..d070c92 100644
 @@ -112,6 +111,18 @@ class ShareMenu: RCTEventEmitter {
          sharedData = []
      }
- 
+     
 +    @objc(getSharedCacheDirectory:)
 +    func getSharedCacheDirectory(callback: RCTResponseSenderBlock) {
 +        if let bundleId = Bundle.main.bundleIdentifier {
@@ -50,6 +50,19 @@ index 74badda..d070c92 100644
 +
      func dispatchEvent(with data: [[String:String]], and extraData: [String:Any]?) {
          guard hasListeners else { return }
+ 
+diff --git a/node_modules/react-native-share-menu/ios/ShareMenuManager.m b/node_modules/react-native-share-menu/ios/ShareMenuManager.m
+index 308ec99..aaa9026 100644
+--- a/node_modules/react-native-share-menu/ios/ShareMenuManager.m
++++ b/node_modules/react-native-share-menu/ios/ShareMenuManager.m
+@@ -6,7 +6,7 @@
+ //
+ 
+ #import "ShareMenuManager.h"
+-#import "RNShareMenu-Swift.h"
++#import "RNShareMenu/RNShareMenu-Swift.h"
+ 
+ #import <React/RCTLinkingManager.h>
  
 diff --git a/node_modules/react-native-share-menu/ios/ShareViewController.swift b/node_modules/react-native-share-menu/ios/ShareViewController.swift
 index 12d8c92..c15828a 100644

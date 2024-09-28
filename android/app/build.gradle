@@ -1,6 +1,10 @@
-apply plugin: "com.android.application"
-apply plugin: "org.jetbrains.kotlin.android"
-apply plugin: "com.facebook.react"
+plugins {
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+    id "com.facebook.react"
+    id "com.google.gms.google-services"
+    id "com.google.firebase.crashlytics"
+}
 
 import com.android.build.OutputFile
 
@@ -72,6 +76,9 @@ android {
             signingConfig signingConfigs.release
             minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            firebaseCrashlytics {
+                nativeSymbolUploadEnabled true
+            }
         }
     }
 
@@ -91,7 +98,12 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:hermes-android")
 
-    implementation "com.google.android.material:material:1.12.0"
+    implementation("com.google.android.material:material:1.12.0")
+
+    implementation platform("com.google.firebase:firebase-bom:33.3.0")
+    implementation("com.google.firebase:firebase-crashlytics")
+    implementation("com.google.firebase:firebase-crashlytics-ndk")
+    implementation("com.google.firebase:firebase-analytics")
 }
 
 apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")

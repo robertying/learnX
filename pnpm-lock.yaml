@@ -22,7 +22,7 @@ importers:
         version: 2.0.0(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))
       '@react-native-clipboard/clipboard':
         specifier: 1.14.2
-        version: 1.14.2(react-native-macos@0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native-windows@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
+        version: 1.14.2(react-native-macos@0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native-windows@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
       '@react-native-cookies/cookies':
         specifier: 6.2.1
         version: 6.2.1(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))
@@ -202,7 +202,7 @@ importers:
         version: 2.0.1(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
       react-native-localize:
         specifier: 3.2.1
-        version: 3.2.1(react-native-macos@0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
+        version: 3.2.1(react-native-macos@0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
       react-native-pager-view:
         specifier: 6.4.1
         version: 6.4.1(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
@@ -210,8 +210,8 @@ importers:
         specifier: 5.12.5
         version: 5.12.5(react-native-safe-area-context@4.11.0(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
       react-native-paper-dates:
-        specifier: 0.22.25
-        version: 0.22.25(react-native-paper@5.12.5(react-native-safe-area-context@4.11.0(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
+        specifier: 0.22.26
+        version: 0.22.26(react-native-paper@5.12.5(react-native-safe-area-context@4.11.0(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
       react-native-reanimated:
         specifier: 3.15.3
         version: 3.15.3(@babel/core@7.25.2)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)
@@ -4845,8 +4845,8 @@ packages:
       react-native-macos:
         optional: true
 
-  react-native-macos@0.75.5:
-    resolution: {integrity: sha512-3yCYfyNk0G2l+MkJsuc3+3N8wb/fxh09NNsTA3Pn+qe6wGnMPsz52oLSrhg9koSGU7anVnFiJfOxeHdRlU73Gg==}
+  react-native-macos@0.75.6:
+    resolution: {integrity: sha512-UXl4iKUYVazmbuKQeyKAzOZABriAcoBdZkBA2N9AxbuBLKo/Fk4opcCIwn+vQ4fsTeAyt/2GVBGFgeIDAsWFbQ==}
     engines: {node: '>=18'}
     hasBin: true
     peerDependencies:
@@ -4862,8 +4862,8 @@ packages:
       react: '*'
       react-native: '*'
 
-  react-native-paper-dates@0.22.25:
-    resolution: {integrity: sha512-fgV9UqC2IWAXfLa5Ff5fFdp0nLO9jHaJR0kWyY20+L7PA+DHfLku8DCcLC9E2zCdg5wj2yULs0RmmSW5ZMAsqg==}
+  react-native-paper-dates@0.22.26:
+    resolution: {integrity: sha512-48apD9bwFF2a/7VM4yXxe/e957cfeDVY0nLf+XRmu/qKIVPdSA7LJ2kD2GZEHa3Q9Qr0Vu6MH3aqLn48Ef8gjQ==}
     peerDependencies:
       react: '*'
       react-native: '*'
@@ -7624,12 +7624,12 @@ snapshots:
       merge-options: 3.0.4
       react-native: 0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2)
 
-  '@react-native-clipboard/clipboard@1.14.2(react-native-macos@0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native-windows@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)':
+  '@react-native-clipboard/clipboard@1.14.2(react-native-macos@0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native-windows@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)':
     dependencies:
       react: 18.3.1
       react-native: 0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2)
     optionalDependencies:
-      react-native-macos: 0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2)
+      react-native-macos: 0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2)
       react-native-windows: 0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2)
 
   '@react-native-community/cli-clean@14.0.0':
@@ -8419,7 +8419,9 @@ snapshots:
     transitivePeerDependencies:
       - '@babel/core'
       - '@babel/preset-env'
+      - bufferutil
       - supports-color
+      - utf-8-validate
 
   '@react-native/normalize-colors@0.74.85': {}
 
@@ -12205,14 +12207,14 @@ snapshots:
       react: 18.3.1
       react-native: 0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2)
 
-  react-native-localize@3.2.1(react-native-macos@0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1):
+  react-native-localize@3.2.1(react-native-macos@0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2))(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1):
     dependencies:
       react: 18.3.1
       react-native: 0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2)
     optionalDependencies:
-      react-native-macos: 0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2)
+      react-native-macos: 0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2)
 
-  react-native-macos@0.75.5(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2):
+  react-native-macos@0.75.6(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1)(typescript@5.6.2):
     dependencies:
       '@jest/create-cache-key-function': 29.7.0
       '@react-native-community/cli': 14.0.0(typescript@5.6.2)
@@ -12271,7 +12273,7 @@ snapshots:
       react: 18.3.1
       react-native: 0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2)
 
-  react-native-paper-dates@0.22.25(react-native-paper@5.12.5(react-native-safe-area-context@4.11.0(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1):
+  react-native-paper-dates@0.22.26(react-native-paper@5.12.5(react-native-safe-area-context@4.11.0(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1))(react-native-vector-icons@10.2.0)(react-native@0.75.3(@babel/core@7.25.2)(@babel/preset-env@7.25.4(@babel/core@7.25.2))(@types/react@18.3.10)(react@18.3.1)(typescript@5.6.2))(react@18.3.1):
     dependencies:
       color: 4.2.3
       react: 18.3.1

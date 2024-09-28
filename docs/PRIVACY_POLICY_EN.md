@@ -18,6 +18,7 @@ Link to privacy policy of third party service providers that may be used by the 
 
 - [Google Play Services](https://policies.google.com/privacy)
 - [Visual Studio App Center](https://learn.microsoft.com/en-us/appcenter/gdpr/data-from-your-end-users)
+- [Firebase](https://firebase.google.com/support/privacy)
 
 ## Log Data
 

@@ -9,10 +9,10 @@
 /* Begin PBXBuildFile section */
 		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		227B1441777498D0B11FD32E /* libPods-ShareExtension.a in Frameworks */ = {isa = PBXBuildFile; fileRef = EF2A4DC38393197DE74A19F7 /* libPods-ShareExtension.a */; };
 		22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */; };
-		3D6FE129A295572F8529C41D /* libPods-learnX.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B99CEA89E2F505C6E96CAC43 /* libPods-learnX.a */; };
+		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		8E3E7B937EFCF0B8FF04F8CB /* Pods_ShareExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 46A94B4E66EB79E2AC7994A8 /* Pods_ShareExtension.framework */; };
 		D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
 		D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F652B248AEB004BC08C /* Assets.xcassets */; };
 		D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F732B248C8E004BC08C /* MainInterface.storyboard */; };
@@ -21,6 +21,7 @@
 		D40B9F812B248EC2004BC08C /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F802B248EC2004BC08C /* AppCenter-Config.plist */; };
 		D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.strings */; };
 		D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
+		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,13 +54,14 @@
 		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = learnX/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = learnX/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = learnX/main.m; sourceTree = "<group>"; };
+		1DE528F5AED26E2F21053210 /* Pods_learnX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_learnX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3668944E61059227B1CB9C3E /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-learnX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.debug.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.debug.xcconfig"; sourceTree = "<group>"; };
+		46A94B4E66EB79E2AC7994A8 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8257AB0E0F3BEAA229130429 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
 		A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-learnX/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		B99CEA89E2F505C6E96CAC43 /* libPods-learnX.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-learnX.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = learnX/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		D40B9F622B248AEB004BC08C /* learnX.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; name = learnX.entitlements; path = learnX/learnX.entitlements; sourceTree = "<group>"; };
 		D40B9F652B248AEB004BC08C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = learnX/Assets.xcassets; sourceTree = "<group>"; };
@@ -71,7 +73,7 @@
 		D40B9F822B248ED5004BC08C /* ShareExtension.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		D40B9F842B248EF5004BC08C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D40B9F862B248EFD004BC08C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
-		EF2A4DC38393197DE74A19F7 /* libPods-ShareExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-ShareExtension.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,7 +81,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3D6FE129A295572F8529C41D /* libPods-learnX.a in Frameworks */,
+				66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,7 +89,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				227B1441777498D0B11FD32E /* libPods-ShareExtension.a in Frameworks */,
+				8E3E7B937EFCF0B8FF04F8CB /* Pods_ShareExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,6 +109,7 @@
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */,
+				D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */,
 			);
 			name = learnX;
 			sourceTree = "<group>";
@@ -114,8 +117,8 @@
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				EF2A4DC38393197DE74A19F7 /* libPods-ShareExtension.a */,
-				B99CEA89E2F505C6E96CAC43 /* libPods-learnX.a */,
+				46A94B4E66EB79E2AC7994A8 /* Pods_ShareExtension.framework */,
+				1DE528F5AED26E2F21053210 /* Pods_learnX.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -198,6 +201,7 @@
 				00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */,
 				E235C05ADACE081382539298 /* [CP] Copy Pods Resources */,
 				D40B9F7D2B248C8E004BC08C /* Embed Foundation Extensions */,
+				D4D920102CA8540F00790DF6 /* Upload dSYM files */,
 			);
 			buildRules = (
 			);
@@ -277,6 +281,7 @@
 				D40B9F812B248EC2004BC08C /* AppCenter-Config.plist in Resources */,
 				D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */,
 				D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */,
+				D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -404,6 +409,29 @@
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
+		};
+		D4D920102CA8540F00790DF6 /* Upload dSYM files */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			name = "Upload dSYM files";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
 		};
 		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;

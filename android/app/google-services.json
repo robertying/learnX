@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "858579386216",
+    "project_id": "learnx-5e172",
+    "storage_bucket": "learnx-5e172.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:858579386216:android:16394808c4c699e57f60dd",
+        "android_client_info": {
+          "package_name": "io.robertying.learnx"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeMhvGJQTUdq2SAp13amoRESkN3E7kfFo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

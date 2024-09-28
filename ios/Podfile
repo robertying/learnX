@@ -8,11 +8,7 @@ require Pod::Executable.execute_command('node', ['-p',
 platform :ios, '15.5'
 prepare_react_native_project!
 
-linkage = ENV['USE_FRAMEWORKS']
-if linkage != nil
-  Pod::UI.puts "Configuring Pod with #{linkage}ally linked Frameworks".green
-  use_frameworks! :linkage => linkage.to_sym
-end
+use_frameworks! :linkage => :static
 
 target 'learnX' do
   use_expo_modules!
@@ -31,6 +27,9 @@ target 'learnX' do
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     hermes_enabled: true
   )
+
+  pod 'FirebaseAnalytics'
+  pod 'FirebaseCrashlytics'
 
   post_install do |installer|
     react_native_post_install(
