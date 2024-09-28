@@ -81,7 +81,7 @@ index 12d8c92..f9074aa 100644
        print("Error: \(NO_INFO_PLIST_URL_SCHEME_ERROR)")
      }
 +    
-+    Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(self.didSelectPost), userInfo: nil, repeats: false)
++    Timer.scheduledTimer(timeInterval: 0.35, target: self, selector: #selector(self.didSelectPost), userInfo: nil, repeats: false)
    }
  
      override func isContentValid() -> Bool {
