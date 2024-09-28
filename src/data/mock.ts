@@ -22,6 +22,7 @@ const mockStore: PersistAppState = {
       courseAlarm: false,
       assignmentCalendarSecondAlarm: false,
       assignmentCalendarAlarm: false,
+      assignmentCalendarNoAlarmIfComplete: false,
       assignmentReminderAlarm: false,
     },
     assignmentCalendarSync: false,

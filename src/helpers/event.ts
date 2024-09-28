@@ -287,15 +287,22 @@ export const saveAssignmentEvent = async (
       );
     }
   } else {
-    const alerts = alarms.assignmentCalendarAlarm
-      ? [
-          {
-            relativeOffset: -(alarms.assignmentCalendarAlarmOffset ?? 24 * 60),
-            method: Calendar.AlarmMethod.DEFAULT,
-          },
-        ]
-      : [];
+    const shouldHaveAlarm = !(
+      alarms.assignmentCalendarNoAlarmIfComplete && completed
+    );
+    const alerts =
+      shouldHaveAlarm && alarms.assignmentCalendarAlarm
+        ? [
+            {
+              relativeOffset: -(
+                alarms.assignmentCalendarAlarmOffset ?? 24 * 60
+              ),
+              method: Calendar.AlarmMethod.DEFAULT,
+            },
+          ]
+        : [];
     if (
+      shouldHaveAlarm &&
       alarms.assignmentCalendarAlarm &&
       alarms.assignmentCalendarSecondAlarm
     ) {

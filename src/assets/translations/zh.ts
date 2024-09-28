@@ -73,6 +73,7 @@ const zh: typeof en = {
   assignmentCalendarAlarmOffset: '提前提醒（分钟）',
   assignmentCalendarSecondAlarm: '日历第二次提醒',
   assignmentCalendarSecondAlarmOffset: '第二次提前提醒（分钟）',
+  assignmentCalendarNoAlarmIfComplete: '已完成的作业不提醒',
   assignmentReminderSync: '作业提醒事项同步',
   assignmentReminderAlarm: '提醒事项截止时间提前',
   assignmentReminderAlarmOffset: '截止时间提前（分钟）',

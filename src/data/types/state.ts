@@ -27,6 +27,7 @@ export interface AlarmSettings {
   assignmentCalendarSecondAlarmOffset?: number;
   assignmentCalendarAlarm: boolean;
   assignmentCalendarAlarmOffset?: number;
+  assignmentCalendarNoAlarmIfComplete: boolean;
   assignmentReminderAlarm: boolean;
   assignmentReminderAlarmOffset?: number;
 }

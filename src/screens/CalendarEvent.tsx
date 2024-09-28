@@ -364,6 +364,23 @@ const CalendarEvent: React.FC<
                 type="input"
               />
             )}
+          {alarms.assignmentCalendarAlarm && (
+            <TableCell
+              iconName="check-circle-outline"
+              primaryText={t('assignmentCalendarNoAlarmIfComplete')}
+              switchValue={alarms.assignmentCalendarNoAlarmIfComplete}
+              onSwitchValueChange={value =>
+                dispatch(
+                  setSetting('alarms', {
+                    ...alarms,
+                    assignmentCalendarNoAlarmIfComplete: value,
+                  }),
+                )
+              }
+              type="switch"
+              switchDisabled={!assignmentCalendarSync}
+            />
+          )}
           {Platform.OS === 'ios' ? (
             <>
               <TableCell

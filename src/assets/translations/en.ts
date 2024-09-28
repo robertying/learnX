@@ -74,6 +74,8 @@ export default {
   assignmentCalendarAlarmOffset: 'Alert Before Deadline (in mins)',
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',
   assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (in mins)',
+  assignmentCalendarNoAlarmIfComplete:
+    'Disable Alerts for Completed Assignments',
   assignmentReminderSync: 'Assignment Reminder Sync',
   assignmentReminderAlarm: 'Reminder Early Deadline',
   assignmentReminderAlarmOffset: 'Move Deadline Forward (in mins)',
