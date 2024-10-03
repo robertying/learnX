@@ -8,6 +8,7 @@ import DraggableFlatList, {
 } from 'react-native-draggable-flatlist';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import * as Haptics from 'expo-haptics';
 import {Assignment, Course, File, Notice} from 'data/types/state';
 import {setArchiveNotices, setFavNotice} from 'data/actions/notices';
 import {
@@ -144,6 +145,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   }) => {
     const courseOrder = data.map(i => i.id);
     dispatch(setCourseOrder(courseOrder));
+  };
+
+  const handleDragChange = () => {
+    Haptics.selectionAsync();
   };
 
   const handleSelect = useCallback(() => {
@@ -479,6 +484,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ]}
         data={data}
         ListEmptyComponent={<Empty />}
+        onPlaceholderIndexChange={handleDragChange}
         onDragEnd={handleReorderDone}
         renderItem={renderItem as any}
         keyExtractor={item => item.id}
