@@ -65,7 +65,7 @@ index 308ec99..aaa9026 100644
  #import <React/RCTLinkingManager.h>
  
 diff --git a/node_modules/react-native-share-menu/ios/ShareViewController.swift b/node_modules/react-native-share-menu/ios/ShareViewController.swift
-index 12d8c92..f9074aa 100644
+index 12d8c92..7813c43 100644
 --- a/node_modules/react-native-share-menu/ios/ShareViewController.swift
 +++ b/node_modules/react-native-share-menu/ios/ShareViewController.swift
 @@ -14,6 +14,7 @@ import UIKit
