@@ -10,16 +10,6 @@ import {getAllAssignmentsForCoursesAction} from 'data/actions/assignments';
 import {getAllNoticesForCoursesAction} from 'data/actions/notices';
 import env from './env';
 
-if (Platform.OS === 'ios') {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-    }),
-  });
-}
-
 export const registerForPushNotifications = async () => {
   if (Platform.OS !== 'ios' || (await DeviceInfo.isEmulator())) {
     return;
@@ -48,8 +38,6 @@ export const clearPushNotificationBadge = () => {
     Notifications.setBadgeCountAsync(0);
   }
 };
-
-registerForPushNotifications();
 
 const updateDataFromNotification = (data: any) => {
   const dispatch = store.dispatch;
@@ -90,31 +78,44 @@ const updateDataFromNotification = (data: any) => {
   }
 };
 
-if (Platform.OS === 'ios') {
+const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
+
+export const setUpPushNotifications = async () => {
+  if (Platform.OS !== 'ios') {
+    return;
+  }
+  console.log('hi');
+  if (!(await registerForPushNotifications())) {
+    return;
+  }
+  console.log('hello');
+
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+
   Notifications.addNotificationReceivedListener(notification => {
     const payload = notification.request.content.data;
     if (!payload) {
       return;
     }
-
     updateDataFromNotification(payload);
   });
-}
 
-const BACKGROUND_NOTIFICATION_TASK = 'BACKGROUND_NOTIFICATION_TASK';
+  TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({data, error}) => {
+    if (!data || error) {
+      return;
+    }
+    const payload = (data as any).body;
+    if (!payload) {
+      return;
+    }
+    updateDataFromNotification(payload);
+  });
 
-TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({data, error}) => {
-  if (!data || error) {
-    return;
-  }
-  const payload = (data as any).body;
-  if (!payload) {
-    return;
-  }
-
-  updateDataFromNotification(payload);
-});
-
-if (Platform.OS === 'ios') {
-  Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
-}
+  await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
+};

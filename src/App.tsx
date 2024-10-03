@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef} from 'react';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import {
   AppState,
   Platform,
@@ -40,7 +41,10 @@ import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
 import {en, zh, registerTranslation} from 'react-native-paper-dates';
 import {isLocaleChinese, t} from 'helpers/i18n';
-import {clearPushNotificationBadge} from 'helpers/notification';
+import {
+  clearPushNotificationBadge,
+  setUpPushNotifications,
+} from 'helpers/notification';
 import {getLatestRelease} from 'helpers/update';
 import Notices from 'screens/Notices';
 import Search from 'screens/Search';
@@ -83,6 +87,7 @@ import {resetLoading} from 'data/actions/root';
 import {getCoursesForSemester} from 'data/actions/courses';
 import useToast from 'hooks/useToast';
 import packageJson from '../package.json';
+import {setUpBackgroundFetch} from 'helpers/background';
 
 registerTranslation('en', en);
 registerTranslation('zh', zh);
@@ -419,6 +424,13 @@ const MainTab = () => {
       dispatch(getCoursesForSemester(currentSemester));
     }
   }, [dispatch, currentSemester, loggedIn]);
+
+  useEffect(() => {
+    if (loggedIn) {
+      setUpBackgroundFetch();
+      setUpPushNotifications();
+    }
+  }, [loggedIn]);
 
   useEffect(() => {
     if (loggedIn && Platform.OS === 'android') {
@@ -875,25 +887,27 @@ const App = () => {
   const colorScheme = useColorScheme();
 
   return (
-    <PaperProvider
-      theme={colorScheme === 'dark' ? BrandDarkTheme : BrandDefaultTheme}>
-      <ToastProvider>
-        <StoreProvider store={store}>
-          <PersistGate loading={<Splash />} persistor={persistor}>
-            <Container />
-          </PersistGate>
-        </StoreProvider>
-      </ToastProvider>
-      <StatusBar
-        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={
-          colorScheme === 'dark'
-            ? BrandDarkTheme.colors.surface
-            : BrandDefaultTheme.colors.surface
-        }
-        animated
-      />
-    </PaperProvider>
+    <GestureHandlerRootView>
+      <PaperProvider
+        theme={colorScheme === 'dark' ? BrandDarkTheme : BrandDefaultTheme}>
+        <ToastProvider>
+          <StoreProvider store={store}>
+            <PersistGate loading={<Splash />} persistor={persistor}>
+              <Container />
+            </PersistGate>
+          </StoreProvider>
+        </ToastProvider>
+        <StatusBar
+          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+          backgroundColor={
+            colorScheme === 'dark'
+              ? BrandDarkTheme.colors.surface
+              : BrandDefaultTheme.colors.surface
+          }
+          animated
+        />
+      </PaperProvider>
+    </GestureHandlerRootView>
   );
 };
 

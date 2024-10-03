@@ -14,14 +14,6 @@
     "prettier": "prettier --write src/",
     "release": "appcenter codepush release-react -a robertying/learnX-iOS --xcode-target-name learnX && appcenter codepush release-react -a robertying/learnX-Android"
   },
-  "expo": {
-    "autolinking": {
-      "exclude": [
-        "expo-font",
-        "expo-keep-awake"
-      ]
-    }
-  },
   "dependencies": {
     "@babel/core": "7.25.2",
     "@babel/preset-env": "7.25.4",

@@ -103,34 +103,36 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
 
 const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 
-TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
-  const state = store.getState();
-  const dispatch = store.dispatch;
+export const setUpBackgroundFetch = async () => {
+  TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
+    const state = store.getState();
+    const dispatch = store.dispatch;
 
-  const auth = state.auth;
-  const courseIds = state.courses.items.map(i => i.id);
+    const auth = state.auth;
+    const courseIds = state.courses.items.map(i => i.id);
 
-  if (!auth.username || !auth.password || courseIds.length === 0) {
-    return BackgroundFetch.BackgroundFetchResult.NoData;
-  }
+    if (!auth.username || !auth.password || courseIds.length === 0) {
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
 
-  try {
-    await dataSource.login(auth.username, auth.password);
-  } catch {
-    return BackgroundFetch.BackgroundFetchResult.NoData;
-  }
+    try {
+      await dataSource.login(auth.username, auth.password);
+    } catch {
+      return BackgroundFetch.BackgroundFetchResult.NoData;
+    }
 
-  const results = await allSettled([
-    getAllNotices(dispatch, state.courses),
-    getAllAssignments(dispatch, state.courses),
-    getAllFiles(dispatch, state.courses),
-  ]);
+    const results = await allSettled([
+      getAllNotices(dispatch, state.courses),
+      getAllAssignments(dispatch, state.courses),
+      getAllFiles(dispatch, state.courses),
+    ]);
 
-  if (results.some(result => result.status === 'fulfilled')) {
-    return BackgroundFetch.BackgroundFetchResult.NewData;
-  } else {
-    return BackgroundFetch.BackgroundFetchResult.Failed;
-  }
-});
+    if (results.some(result => result.status === 'fulfilled')) {
+      return BackgroundFetch.BackgroundFetchResult.NewData;
+    } else {
+      return BackgroundFetch.BackgroundFetchResult.Failed;
+    }
+  });
 
-BackgroundFetch.registerTaskAsync(FETCH_ALL_CONTENT_TASK);
+  await BackgroundFetch.registerTaskAsync(FETCH_ALL_CONTENT_TASK);
+};
