@@ -18,7 +18,6 @@
 		D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F732B248C8E004BC08C /* MainInterface.storyboard */; };
 		D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D40B9F7F2B248D30004BC08C /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B9F7E2B248D30004BC08C /* ShareViewController.swift */; };
-		D40B9F812B248EC2004BC08C /* AppCenter-Config.plist in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F802B248EC2004BC08C /* AppCenter-Config.plist */; };
 		D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.strings */; };
 		D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
 		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
@@ -69,7 +68,6 @@
 		D40B9F742B248C8E004BC08C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
 		D40B9F762B248C8E004BC08C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D40B9F7E2B248D30004BC08C /* ShareViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShareViewController.swift; path = "../../node_modules/react-native-share-menu/ios/ShareViewController.swift"; sourceTree = "<group>"; };
-		D40B9F802B248EC2004BC08C /* AppCenter-Config.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "AppCenter-Config.plist"; sourceTree = "<group>"; };
 		D40B9F822B248ED5004BC08C /* ShareExtension.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		D40B9F842B248EF5004BC08C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D40B9F862B248EFD004BC08C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
@@ -100,7 +98,6 @@
 			isa = PBXGroup;
 			children = (
 				D40B9F832B248EF5004BC08C /* InfoPlist.strings */,
-				D40B9F802B248EC2004BC08C /* AppCenter-Config.plist */,
 				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
 				D40B9F622B248AEB004BC08C /* learnX.entitlements */,
 				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
@@ -278,7 +275,6 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */,
-				D40B9F812B248EC2004BC08C /* AppCenter-Config.plist in Resources */,
 				D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */,
 				D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */,
 				D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */,

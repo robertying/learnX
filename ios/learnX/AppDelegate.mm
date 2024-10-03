@@ -2,12 +2,7 @@
 
 #import <React/RCTBundleURLProvider.h>
 
-#import <AppCenterReactNative.h>
-#import <AppCenterReactNativeAnalytics.h>
-#import <AppCenterReactNativeCrashes.h>
-
 #import <FirebaseCore/FirebaseCore.h>
-
 #import <CodePush/CodePush.h>
 #import <RNShareMenu/ShareMenuManager.h>
 
@@ -15,10 +10,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-  [AppCenterReactNative register];
-  [AppCenterReactNativeAnalytics registerWithInitiallyEnabled:true];
-  [AppCenterReactNativeCrashes registerWithAutomaticProcessing];
-
   [FIRApp configure];
 
   [[UIView appearance] setTintColor:[UIColor colorNamed:@"ThemeColor"]];
