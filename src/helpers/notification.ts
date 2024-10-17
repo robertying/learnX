@@ -84,11 +84,10 @@ export const setUpPushNotifications = async () => {
   if (Platform.OS !== 'ios') {
     return;
   }
-  console.log('hi');
+
   if (!(await registerForPushNotifications())) {
     return;
   }
-  console.log('hello');
 
   Notifications.setNotificationHandler({
     handleNotification: async () => ({

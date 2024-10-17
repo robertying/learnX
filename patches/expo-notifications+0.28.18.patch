@@ -1,0 +1,28 @@
+diff --git a/node_modules/expo-notifications/build/getDevicePushTokenAsync.js b/node_modules/expo-notifications/build/getDevicePushTokenAsync.js
+index 5deaa81..2b1cf95 100644
+--- a/node_modules/expo-notifications/build/getDevicePushTokenAsync.js
++++ b/node_modules/expo-notifications/build/getDevicePushTokenAsync.js
+@@ -7,6 +7,9 @@ let nativeTokenPromise = null;
+  * @header fetch
+  */
+ export default async function getDevicePushTokenAsync() {
++    if (Platform.OS === 'android') {
++        throw new Error("Push notifications are not supported on Android.");
++    }
+     if (!PushTokenManager.getDevicePushTokenAsync) {
+         throw new UnavailabilityError('ExpoNotifications', 'getDevicePushTokenAsync');
+     }
+diff --git a/node_modules/expo-notifications/build/getExpoPushTokenAsync.js b/node_modules/expo-notifications/build/getExpoPushTokenAsync.js
+index b313f88..88578ad 100644
+--- a/node_modules/expo-notifications/build/getExpoPushTokenAsync.js
++++ b/node_modules/expo-notifications/build/getExpoPushTokenAsync.js
+@@ -43,6 +43,9 @@ const productionBaseUrl = 'https://exp.host/--/api/v2/';
+  * ```
+  */
+ export default async function getExpoPushTokenAsync(options = {}) {
++    if (Platform.OS === 'android') {
++        throw new Error("Push notifications are not supported on Android.");
++    }
+     const devicePushToken = options.devicePushToken || (await getDevicePushTokenAsync());
+     const deviceId = options.deviceId || (await getDeviceIdAsync());
+     const projectId = options.projectId || Constants.easConfig?.projectId;
