@@ -1,0 +1,39 @@
+diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
+index d501f11..3a29e91 100644
+--- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
++++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/CalendarModule.kt
+@@ -5,6 +5,7 @@ import android.content.ContentUris
+ import android.content.ContentValues
+ import android.content.Intent
+ import android.database.Cursor
++import android.database.sqlite.SQLiteException
+ import android.os.Bundle
+ import android.provider.CalendarContract
+ import android.util.Log
+@@ -394,7 +395,11 @@ class CalendarModule : Module() {
+       try {
+         when (startDate) {
+           is String -> {
+-            val parsedDate = sdf.parse(startDate)
++            val parsedDate = try {
++              sdf.parse(startDate)
++            } catch (e: Exception) {
++              null
++            }
+             if (parsedDate != null) {
+               startCal.time = parsedDate
+               calendarEventBuilder.put(CalendarContract.Events.DTSTART, startCal.timeInMillis)
+@@ -608,7 +613,12 @@ class CalendarModule : Module() {
+         reminderValues.put(CalendarContract.Reminders.EVENT_ID, eventID)
+         reminderValues.put(CalendarContract.Reminders.MINUTES, minutes)
+         reminderValues.put(CalendarContract.Reminders.METHOD, method)
+-        contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
++        try {
++          contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, reminderValues)
++        }
++        catch (e: SQLiteException) {
++
++        }
+       }
+     }
+   }
