@@ -114,7 +114,9 @@ const AssignmentSubmission: React.FC<
   const handleDocumentPick = async () => {
     handlePickerMenuClose();
     try {
-      const result = await DocumentPicker.getDocumentAsync();
+      const result = await DocumentPicker.getDocumentAsync({
+        copyToCacheDirectory: false,
+      });
       if (result.canceled) {
         return;
       }
