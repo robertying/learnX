@@ -1,6 +1,5 @@
 import {Platform} from 'react-native';
 import dayjs from 'dayjs';
-import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import DeviceInfo from 'constants/DeviceInfo';
 import {store} from 'data/store';
@@ -9,6 +8,14 @@ import {getAllFilesForCoursesAction} from 'data/actions/files';
 import {getAllAssignmentsForCoursesAction} from 'data/actions/assignments';
 import {getAllNoticesForCoursesAction} from 'data/actions/notices';
 import env from './env';
+
+let Notifications: typeof import('expo-notifications');
+
+if (Platform.OS === 'ios') {
+  Notifications = require('expo-notifications');
+}
+
+export {Notifications};
 
 export const registerForPushNotifications = async () => {
   if (Platform.OS !== 'ios' || (await DeviceInfo.isEmulator())) {

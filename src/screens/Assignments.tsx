@@ -2,7 +2,6 @@ import {useCallback, useEffect, useMemo} from 'react';
 import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
-import * as Notifications from 'expo-notifications';
 import dayjs from 'dayjs';
 import {ScreenParams} from 'screens/types';
 import FilterList from 'components/FilterList';
@@ -14,6 +13,7 @@ import {Assignment} from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilteredData from 'hooks/useFilteredData';
 import useToast from 'hooks/useToast';
+import {Notifications} from 'helpers/notification';
 import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
 import {t} from 'helpers/i18n';
 

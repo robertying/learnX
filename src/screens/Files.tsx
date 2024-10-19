@@ -2,7 +2,6 @@ import {useCallback, useEffect} from 'react';
 import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
-import * as Notifications from 'expo-notifications';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
@@ -11,6 +10,7 @@ import {useAppDispatch, useAppSelector} from 'data/store';
 import {File} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import {Notifications} from 'helpers/notification';
 import {ScreenParams} from './types';
 
 const Files: React.FC<
