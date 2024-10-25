@@ -142,7 +142,7 @@ const AssignmentSubmission: React.FC<
     handlePickerMenuClose();
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        mediaTypes: ['images', 'videos'],
         quality: 1,
       });
       if (result.canceled) {
