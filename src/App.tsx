@@ -29,7 +29,6 @@ import {
   MD3DarkTheme,
   adaptNavigationTheme,
 } from 'react-native-paper';
-import codePush from 'react-native-code-push';
 import ShareMenu from 'react-native-share-menu';
 import {Provider as StoreProvider} from 'react-redux';
 import {PersistGate} from 'redux-persist/integration/react';
@@ -911,6 +910,4 @@ const App = () => {
   );
 };
 
-const CodePushApp = codePush(App);
-
-export default CodePushApp;
+export default App;
