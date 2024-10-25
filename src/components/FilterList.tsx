@@ -416,45 +416,44 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     isActive,
   }) => {
     return (
-      <View style={{opacity: isActive ? 0.5 : 1}}>
-        <Component
-          data={item}
-          selectionMode={selectionMode}
-          reorderMode={reorderMode}
-          checked={selection[item.id]}
-          onCheck={checked => setSelection({...selection, [item.id]: checked})}
-          onLongPress={() => {
-            if (reorderMode) {
-              drag();
-            }
-          }}
-          onPress={() => {
-            if (reorderMode) {
-              drag();
-            } else {
-              setFilterVisible(false);
-              onItemPress?.(item);
-            }
-          }}
-          fav={favIds?.includes(item.id)}
-          onFav={() => handleFav(favIds!.includes(item.id), item)}
-          archived={archivedIds?.includes(item.id)}
-          onArchive={() =>
-            handleArchive(archivedIds!.includes(item.id), [item.id])
+      <Component
+        touchableContentStyle={{opacity: isActive ? 0.5 : 1}}
+        data={item}
+        selectionMode={selectionMode}
+        reorderMode={reorderMode}
+        checked={selection[item.id]}
+        onCheck={checked => setSelection({...selection, [item.id]: checked})}
+        onLongPress={() => {
+          if (reorderMode) {
+            drag();
           }
-          hidden={hiddenIds.includes(item.id)}
-          onHide={
-            isCourse
-              ? () => handleHide(hiddenIds.includes(item.id), item.id)
-              : undefined
+        }}
+        onPress={() => {
+          if (reorderMode) {
+            drag();
+          } else {
+            setFilterVisible(false);
+            onItemPress?.(item);
           }
-        />
-      </View>
+        }}
+        fav={favIds?.includes(item.id)}
+        onFav={() => handleFav(favIds!.includes(item.id), item)}
+        archived={archivedIds?.includes(item.id)}
+        onArchive={() =>
+          handleArchive(archivedIds!.includes(item.id), [item.id])
+        }
+        hidden={hiddenIds.includes(item.id)}
+        onHide={
+          isCourse
+            ? () => handleHide(hiddenIds.includes(item.id), item.id)
+            : undefined
+        }
+      />
     );
   };
 
   return (
-    <GestureHandlerRootView style={Styles.flex1}>
+    <View style={Styles.flex1}>
       <Filter
         visible={filterVisible}
         selected={filterSelected}
@@ -496,7 +495,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           />
         }
       />
-    </GestureHandlerRootView>
+    </View>
   );
 };
 

@@ -4,15 +4,14 @@
   "private": true,
   "packageManager": "pnpm@9.12.2+sha512.22721b3a11f81661ae1ec68ce1a7b879425a1ca5b991c975b074ac220b187ce56c708fe5db69f4c962c989452eee76c82877f4ee80f474cebd61ee13461b6228",
   "scripts": {
-    "postinstall": "patch-package && chmod +x scripts/fix_react_native_interactable.sh && ./scripts/fix_react_native_interactable.sh",
+    "postinstall": "patch-package",
     "pod": "cd ios && pod install && pod update && cd ..",
     "start": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "typecheck": "tsc",
-    "prettier": "prettier --write src/",
-    "release": "appcenter codepush release-react -a robertying/learnX-iOS --xcode-target-name learnX && appcenter codepush release-react -a robertying/learnX-Android"
+    "prettier": "prettier --write src/"
   },
   "dependencies": {
     "@babel/core": "7.26.0",
@@ -77,7 +76,6 @@
     "react-native-draggable-flatlist": "4.0.1",
     "react-native-fs": "2.20.0",
     "react-native-gesture-handler": "2.20.2",
-    "react-native-interactable": "2.0.1",
     "react-native-localize": "3.2.1",
     "react-native-pager-view": "6.4.1",
     "react-native-paper": "5.12.5",
