@@ -36,8 +36,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdk rootProject.ext.compileSdkVersion
-        versionCode 9203200
-        versionName "14.9.1"
+        versionCode 9203210
+        versionName "14.9.3"
     }
 
     splits {
@@ -100,7 +100,7 @@ dependencies {
 
     implementation("com.google.android.material:material:1.12.0")
 
-    implementation platform("com.google.firebase:firebase-bom:33.4.0")
+    implementation platform("com.google.firebase:firebase-bom:33.5.1")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-crashlytics-ndk")
     implementation("com.google.firebase:firebase-analytics")
