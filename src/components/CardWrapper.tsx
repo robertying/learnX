@@ -237,6 +237,7 @@ const CardWrapper: React.FC<
     <ReanimatedSwipeable
       ref={snapRef}
       containerStyle={{backgroundColor: theme.colors.surface}}
+      childrenContainerStyle={{backgroundColor: theme.colors.surface}}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       enableTrackpadTwoFingerGesture

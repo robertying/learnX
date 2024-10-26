@@ -29,7 +29,6 @@ import Filter, {FilterSelection} from './Filter';
 import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
 import {CardWrapperProps} from './CardWrapper';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
   data: T;
