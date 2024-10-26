@@ -31,6 +31,7 @@ import Styles from 'constants/Styles';
 import {getExtension, stripExtension} from 'helpers/fs';
 import {removeTags} from 'helpers/html';
 import {isLocaleChinese, t} from 'helpers/i18n';
+import {useAppDispatch, useAppSelector} from 'data/store';
 import {File} from 'data/types/state';
 import {submitAssignment} from 'data/source';
 import {
@@ -38,8 +39,9 @@ import {
   setPendingAssignmentData,
 } from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
+import useDetailNavigator from 'hooks/useDetailNavigator';
+import Numbers from 'constants/Numbers';
 import {ScreenParams} from './types';
-import {useAppDispatch, useAppSelector} from 'data/store';
 
 interface AttachmentResult {
   uri: string;
@@ -55,6 +57,7 @@ const AssignmentSubmission: React.FC<
 > = ({navigation, route}) => {
   const theme = useTheme();
   const toast = useToast();
+  const detailNavigator = useDetailNavigator();
 
   const {
     id,
@@ -380,7 +383,12 @@ const AssignmentSubmission: React.FC<
                   visible={pickerMenuVisible}
                   onDismiss={handlePickerMenuClose}
                   anchorPosition="top"
-                  style={{marginTop: -100}}
+                  style={{
+                    marginTop: -100,
+                    marginLeft: detailNavigator
+                      ? -Numbers.splitViewMasterWidth
+                      : 0,
+                  }}
                   anchor={
                     <Button
                       style={[styles.submitButton, Styles.spacey1]}

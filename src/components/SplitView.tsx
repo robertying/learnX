@@ -2,6 +2,7 @@ import {createContext, useState, Children} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Divider} from 'react-native-paper';
 import {NavigationContainerRef} from '@react-navigation/native';
+import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: React.RefObject<
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   master: {
-    width: 393,
+    width: Numbers.splitViewMasterWidth,
     zIndex: 2,
   },
   detail: {
