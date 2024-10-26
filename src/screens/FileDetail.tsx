@@ -240,7 +240,7 @@ const FileDetail: React.FC<
             uri: path,
           }}
           originWhitelist={['*']}
-          decelerationRate="normal"
+          decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
         />
       ) : (
         <>

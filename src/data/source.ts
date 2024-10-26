@@ -65,7 +65,10 @@ export const submitAssignment = async (
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    onUploadProgress: e => onProgress?.(e.total ? e.loaded / e.total : 0),
+    onUploadProgress: e => {
+      // New architecture doesn't like native floats
+      onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
+    },
   });
 
   if (res.status !== 200) {

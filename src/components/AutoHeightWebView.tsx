@@ -82,7 +82,7 @@ const AutoHeightWebView: React.FC<
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
       onNavigationStateChange={onNavigationStateChange}
-      decelerationRate="normal"
+      decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
       originWhitelist={['*']}
       sharedCookiesEnabled
       {...props}

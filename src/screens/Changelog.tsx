@@ -1,5 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
-import {Linking, StyleSheet} from 'react-native';
+import {Linking, Platform, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import WebView, {WebViewNavigation} from 'react-native-webview';
 import {ProgressBar} from 'react-native-paper';
@@ -42,8 +42,11 @@ const Changelog: React.FC<
         ref={webViewRef}
         originWhitelist={['https://github.com']}
         onNavigationStateChange={onNavigationStateChange}
-        onLoadProgress={({nativeEvent}) => setProgress(nativeEvent.progress)}
-        decelerationRate="normal"
+        onLoadProgress={({nativeEvent}) => {
+          // New architecture doesn't like native floats
+          setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
+        }}
+        decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
         source={{
           uri: 'https://github.com/robertying/learnX/releases',
         }}

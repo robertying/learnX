@@ -55,7 +55,10 @@ export const downloadFile = async (
       toFile: path,
       begin: () => {},
       progress: result => {
-        onProgress?.(result.bytesWritten / result.contentLength);
+        // New architecture doesn't like native floats
+        onProgress?.(
+          parseFloat((result.bytesWritten / result.contentLength).toFixed(2)),
+        );
       },
     });
 
@@ -96,8 +99,13 @@ export const downloadFile = async (
         },
       },
       result => {
+        // New architecture doesn't like native floats
         onProgress?.(
-          result.totalBytesWritten / result.totalBytesExpectedToWrite,
+          parseFloat(
+            (
+              result.totalBytesWritten / result.totalBytesExpectedToWrite
+            ).toFixed(2),
+          ),
         );
       },
     );

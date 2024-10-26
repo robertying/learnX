@@ -1,5 +1,5 @@
 import {useRef, useState} from 'react';
-import {Linking, StyleSheet, View} from 'react-native';
+import {Linking, Platform, StyleSheet, View} from 'react-native';
 import {IconButton, ProgressBar, useTheme} from 'react-native-paper';
 import WebView, {WebViewNavigation} from 'react-native-webview';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
@@ -38,9 +38,10 @@ const CourseX: React.FC<
             'https://tsinghua.app/courses' + (courseId ? `/${courseId}` : ''),
         }}
         originWhitelist={['https://']}
-        decelerationRate="normal"
+        decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
         onLoadProgress={({nativeEvent}) => {
-          setProgress(nativeEvent.progress);
+          // New architecture doesn't like native floats
+          setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
         }}
         onNavigationStateChange={handleNavigation}
       />
