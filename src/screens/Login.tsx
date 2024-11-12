@@ -121,6 +121,9 @@ const Login: React.FC<
             textContentType="password"
             autoComplete="password"
             returnKeyType="done"
+            keyboardType="ascii-capable"
+            autoCapitalize="none"
+            autoCorrect={false}
             secureTextEntry
             enablesReturnKeyAutomatically
             value={password}
