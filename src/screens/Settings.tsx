@@ -29,9 +29,6 @@ const Settings: React.FC<
   const courseInformationSharingBadgeShown = useAppSelector(
     state => state.settings.courseInformationSharingBadgeShown,
   );
-  const pushNotificationsBadgeShown = useAppSelector(
-    state => state.settings.pushNotificationsBadgeShown,
-  );
 
   const [update, setUpdate] = useState<{version: string; url: string} | null>(
     null,
@@ -122,7 +119,6 @@ const Settings: React.FC<
           <TableCell
             style={styles.marginTop}
             iconName="notifications"
-            badge={!pushNotificationsBadgeShown}
             primaryText={t('pushNotifications')}
             type="arrow"
             onPress={() => handlePush('PushNotifications')}
