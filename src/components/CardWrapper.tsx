@@ -240,7 +240,6 @@ const CardWrapper: React.FC<
       childrenContainerStyle={{backgroundColor: theme.colors.surface}}
       renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
-      enableTrackpadTwoFingerGesture
       overshootFriction={8}
       enabled={!disableSwipe && !selectionMode && !reorderMode}>
       <Touchable
