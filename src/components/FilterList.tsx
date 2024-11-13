@@ -429,11 +429,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         reorderMode={reorderMode}
         checked={selection[item.id]}
         onCheck={checked => setSelection({...selection, [item.id]: checked})}
-        onLongPress={() => {
-          if (reorderMode) {
-            drag();
-          }
-        }}
+        drag={drag}
         onPress={() => {
           if (reorderMode) {
             drag();

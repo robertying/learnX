@@ -133,7 +133,7 @@ export interface CardWrapperProps {
   hidden?: boolean;
   onHide?: (hide: boolean) => void;
   onPress?: () => void;
-  onLongPress?: () => void;
+  drag?: () => void;
   selectionMode?: boolean;
   reorderMode?: boolean;
   checked?: boolean;
@@ -152,7 +152,7 @@ const CardWrapper: React.FC<
   onHide,
   hidden,
   onPress,
-  onLongPress,
+  drag,
   children,
   selectionMode,
   reorderMode,
@@ -233,6 +233,17 @@ const CardWrapper: React.FC<
     [archived, fav, hidden, onArchive, onFav, onHide],
   );
 
+  const handlePress = () => {
+    resetSnap();
+    onPress?.();
+  };
+
+  const handleLongPress = () => {
+    if (reorderMode) {
+      drag?.();
+    }
+  };
+
   return (
     <ReanimatedSwipeable
       ref={snapRef}
@@ -247,16 +258,9 @@ const CardWrapper: React.FC<
         highlightColorOpacity={0.125}
         style={{backgroundColor: theme.colors.surface}}
         onPress={
-          reorderMode
-            ? undefined
-            : selectionMode
-              ? handleCheck
-              : () => {
-                  resetSnap();
-                  onPress?.();
-                }
+          reorderMode ? undefined : selectionMode ? handleCheck : handlePress
         }
-        onLongPress={onLongPress}>
+        onLongPress={handleLongPress}>
         <View style={[styles.root, touchableContentStyle]}>
           {selectionMode && (
             <View style={styles.checkbox}>
