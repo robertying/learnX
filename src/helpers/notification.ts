@@ -112,16 +112,19 @@ export const setUpPushNotifications = async () => {
     updateDataFromNotification(payload);
   });
 
-  TaskManager.defineTask(BACKGROUND_NOTIFICATION_TASK, ({data, error}) => {
-    if (!data || error) {
-      return;
-    }
-    const payload = (data as any).body;
-    if (!payload) {
-      return;
-    }
-    updateDataFromNotification(payload);
-  });
+  TaskManager.defineTask(
+    BACKGROUND_NOTIFICATION_TASK,
+    async ({data, error}) => {
+      if (!data || error) {
+        return;
+      }
+      const payload = (data as any).body;
+      if (!payload) {
+        return;
+      }
+      updateDataFromNotification(payload);
+    },
+  );
 
   await Notifications.registerTaskAsync(BACKGROUND_NOTIFICATION_TASK);
 };
