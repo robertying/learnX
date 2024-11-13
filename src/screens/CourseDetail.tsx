@@ -27,6 +27,7 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import {t} from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import Numbers from 'constants/Numbers';
 import {CourseStackParams} from './types';
 
 type NavigationProp = NativeStackNavigationProp<
@@ -279,7 +280,13 @@ const CourseDetail: React.FC<Props> = ({
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}
         tabBarPosition="top"
-        initialLayout={{width: Dimensions.get('window').width}}
+        initialLayout={{
+          width: detailNavigator
+            ? Dimensions.get('window').width -
+              Numbers.splitViewMasterWidth -
+              1 /* divider width */
+            : Dimensions.get('window').width,
+        }}
       />
     </SafeArea>
   );
