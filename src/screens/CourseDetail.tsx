@@ -1,5 +1,5 @@
-import {useCallback, useLayoutEffect, useState} from 'react';
-import {FlatList, StyleSheet, TouchableOpacity} from 'react-native';
+import {memo, useCallback, useLayoutEffect, useState} from 'react';
+import {Dimensions, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import {Divider, Text, useTheme} from 'react-native-paper';
 import {
   NativeStackNavigationProp,
@@ -12,8 +12,9 @@ import {
   TabBar,
   TabView,
   NavigationState,
+  TabDescriptor,
+  TabBarItem,
 } from 'react-native-tab-view';
-import {Scene} from 'react-native-tab-view/lib/typescript/src/types';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Assignment, File, Notice} from 'data/types/state';
 import {useAppDispatch, useAppSelector} from 'data/store';
@@ -29,7 +30,7 @@ import {t} from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {ScreenParams} from './types';
 
-const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
+const Notices = memo(({courseId, data}: {courseId: string; data: Notice[]}) => {
   const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
 
   const dispatch = useAppDispatch();
@@ -63,51 +64,47 @@ const Notices = ({courseId, data}: {courseId: string; data: Notice[]}) => {
       ListEmptyComponent={<Empty />}
     />
   );
-};
+});
 
-const Assignments = ({
-  courseId,
-  data,
-}: {
-  courseId: string;
-  data: Assignment[];
-}) => {
-  const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
+const Assignments = memo(
+  ({courseId, data}: {courseId: string; data: Assignment[]}) => {
+    const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const fetching = useAppSelector(state => state.assignments.fetching);
+    const dispatch = useAppDispatch();
+    const loggedIn = useAppSelector(state => state.auth.loggedIn);
+    const fetching = useAppSelector(state => state.assignments.fetching);
 
-  const handleRefresh = () => {
-    if (loggedIn) {
-      dispatch(getAssignmentsForCourse(courseId));
-    }
-  };
+    const handleRefresh = () => {
+      if (loggedIn) {
+        dispatch(getAssignmentsForCourse(courseId));
+      }
+    };
 
-  return (
-    <FlatList
-      data={data}
-      renderItem={({item}) => (
-        <AssignmentCard
-          data={item}
-          disableSwipe
-          hideCourseName
-          onPress={() => navigation.push('AssignmentDetail', item)}
-        />
-      )}
-      keyExtractor={item => item.id}
-      refreshing={fetching}
-      onRefresh={handleRefresh}
-      contentContainerStyle={[
-        {flexGrow: 1},
-        data.length ? null : {justifyContent: 'center'},
-      ]}
-      ListEmptyComponent={<Empty />}
-    />
-  );
-};
+    return (
+      <FlatList
+        data={data}
+        renderItem={({item}) => (
+          <AssignmentCard
+            data={item}
+            disableSwipe
+            hideCourseName
+            onPress={() => navigation.push('AssignmentDetail', item)}
+          />
+        )}
+        keyExtractor={item => item.id}
+        refreshing={fetching}
+        onRefresh={handleRefresh}
+        contentContainerStyle={[
+          {flexGrow: 1},
+          data.length ? null : {justifyContent: 'center'},
+        ]}
+        ListEmptyComponent={<Empty />}
+      />
+    );
+  },
+);
 
-const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
+const Files = memo(({courseId, data}: {courseId: string; data: File[]}) => {
   const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
 
   const dispatch = useAppDispatch();
@@ -141,7 +138,13 @@ const Files = ({courseId, data}: {courseId: string; data: File[]}) => {
       ListEmptyComponent={<Empty />}
     />
   );
-};
+});
+
+const routes = [
+  {key: 'notice', title: t('notices')},
+  {key: 'assignment', title: t('assignments')},
+  {key: 'file', title: t('files')},
+];
 
 const CourseDetail: React.FC<
   React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CourseDetail'>>
@@ -160,31 +163,36 @@ const CourseDetail: React.FC<
   const files = useAppSelector(state => state.files.items);
 
   const [index, setIndex] = useState(0);
-  const [routes] = useState([
-    {key: 'notice', title: t('notices')},
-    {key: 'assignment', title: t('assignments')},
-    {key: 'file', title: t('files')},
-  ]);
-
-  const renderLabel = ({
-    route,
-  }: Scene<Route> & {
-    focused: boolean;
-    color: string;
-  }) => <Text>{route.title}</Text>;
 
   const renderTabBar = (
     props: SceneRendererProps & {
-      navigationState: NavigationState<Route>;
+      navigationState: NavigationState<{
+        key: string;
+        title: string;
+      }>;
+      options:
+        | Record<
+            string,
+            TabDescriptor<{
+              key: string;
+              title: string;
+            }>
+          >
+        | undefined;
     },
   ) => (
     <TabBar
+      {...props}
       style={{backgroundColor: theme.colors.surface}}
       indicatorStyle={{
         backgroundColor: theme.colors.primary,
       }}
-      {...props}
-      renderLabel={renderLabel}
+      renderTabBarItem={itemProps => (
+        <TabBarItem
+          {...itemProps}
+          labelStyle={{color: theme.colors.onSurface}}
+        />
+      )}
     />
   );
 
@@ -267,9 +275,7 @@ const CourseDetail: React.FC<
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}
         tabBarPosition="top"
-        lazy={false}
-        renderLazyPlaceholder={() => null}
-        lazyPreloadDistance={0}
+        initialLayout={{width: Dimensions.get('window').width}}
       />
     </SafeArea>
   );
