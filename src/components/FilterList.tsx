@@ -143,6 +143,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const handleReorder = () => {
     setReorderMode(v => !v);
+    setFilterVisible(false);
   };
 
   const handleReorderDone: DraggableFlatListProps<T>['onDragEnd'] = ({
