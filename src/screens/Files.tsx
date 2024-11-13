@@ -11,11 +11,11 @@ import {File} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {Notifications} from 'helpers/notification';
-import {ScreenParams} from './types';
+import {FileStackParams} from './types';
 
-const Files: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Files'>>
-> = ({navigation}) => {
+type Props = NativeStackScreenProps<FileStackParams, 'Files'>;
+
+const Files: React.FC<Props> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();

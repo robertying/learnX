@@ -13,12 +13,14 @@ import {
   NavigationContainerRef,
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme,
+  NavigationIndependentTree,
+  ParamListBase,
 } from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import type {
   NativeStackNavigationOptions,
   NativeStackScreenProps,
-} from '@react-navigation/native-stack/lib/typescript/src/types';
+} from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {
@@ -48,7 +50,19 @@ import {getLatestRelease} from 'helpers/update';
 import Notices from 'screens/Notices';
 import Search from 'screens/Search';
 import NoticeDetail from 'screens/NoticeDetail';
-import {ScreenParams} from 'screens/types';
+import {
+  AssignmentStackParams,
+  AssignmentSubmissionStackParams,
+  CourseStackParams,
+  CourseXStackParams,
+  DetailStackParams,
+  FileStackParams,
+  MainTabParams,
+  NoticeStackParams,
+  RootStackParams,
+  SearchStackParams,
+  SettingsStackParams,
+} from 'screens/types';
 import Assignments from 'screens/Assignments';
 import AssignmentDetail from 'screens/AssignmentDetail';
 import Files from 'screens/Files';
@@ -106,10 +120,12 @@ const BackButton = () => {
   );
 };
 
-const getScreenOptions = (title: string) =>
+const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
+  title: string,
+) =>
   function ({
     navigation,
-  }: NativeStackScreenProps<ScreenParams>): NativeStackNavigationOptions {
+  }: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
     return {
       title,
       headerLeft: () => (
@@ -140,7 +156,7 @@ const getScreenOptions = (title: string) =>
           )}
           <IconButton
             style={{marginRight: -8}}
-            onPress={() => navigation.navigate('SearchStack')}
+            onPress={() => navigation.navigate('SearchStack' as any)}
             icon={props => <MaterialIcons {...props} name="search" />}
           />
         </>
@@ -148,18 +164,10 @@ const getScreenOptions = (title: string) =>
     };
   };
 
-const getDetailScreenOptions = () =>
+const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
   function ({
     route,
-  }: NativeStackScreenProps<
-    ScreenParams,
-    | 'NoticeDetail'
-    | 'AssignmentDetail'
-    | 'FileDetail'
-    | 'CourseDetail'
-    | 'AssignmentSubmission'
-    | 'CourseX'
-  >): NativeStackNavigationOptions {
+  }: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
     return {
       title: t('back'),
       headerTitle:
@@ -170,23 +178,25 @@ const getDetailScreenOptions = () =>
                 <HeaderTitle
                   {...props}
                   title={
-                    (route.params as Course).semesterId
-                      ? (route.params as Course).name
-                      : (route.params as File).downloadUrl
-                        ? (route.params as Notice | Assignment).title
-                        : (route.params as Notice | Assignment).courseName
+                    (route.params as unknown as Course).semesterId
+                      ? (route.params as unknown as Course).name
+                      : (route.params as unknown as File).downloadUrl
+                        ? (route.params as unknown as Notice | Assignment).title
+                        : (route.params as unknown as Notice | Assignment)
+                            .courseName
                   }
                   subtitle={
-                    (route.params as Course).semesterId
-                      ? (route.params as Course).teacherName
-                      : (route.params as File).downloadUrl
-                        ? (route.params as Notice | Assignment).courseName
-                        : (route.params as Notice | Assignment)
+                    (route.params as unknown as Course).semesterId
+                      ? (route.params as unknown as Course).teacherName
+                      : (route.params as unknown as File).downloadUrl
+                        ? (route.params as unknown as Notice | Assignment)
+                            .courseName
+                        : (route.params as unknown as Notice | Assignment)
                             .courseTeacherName
                   }
                 />
               ) : undefined,
-      headerRight: (route.params as File)?.downloadUrl
+      headerRight: (route.params as unknown as File)?.downloadUrl
         ? () => (
             <>
               <IconButton
@@ -214,18 +224,19 @@ const getDetailScreenOptions = () =>
     };
   };
 
-const NoticeStackNavigator = createNativeStackNavigator<ScreenParams>();
-const AssignmentStackNavigator = createNativeStackNavigator<ScreenParams>();
-const FileStackNavigator = createNativeStackNavigator<ScreenParams>();
-const CourseStackNavigator = createNativeStackNavigator<ScreenParams>();
-const SettingStackNavigator = createNativeStackNavigator<ScreenParams>();
-const MainNavigator = createBottomTabNavigator();
-const CourseXNavigator = createNativeStackNavigator<ScreenParams>();
-const SearchNavigator = createNativeStackNavigator<ScreenParams>();
+const NoticeStackNavigator = createNativeStackNavigator<NoticeStackParams>();
+const AssignmentStackNavigator =
+  createNativeStackNavigator<AssignmentStackParams>();
+const FileStackNavigator = createNativeStackNavigator<FileStackParams>();
+const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
+const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
+const MainNavigator = createBottomTabNavigator<MainTabParams>();
+const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
+const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
 const AssignmentSubmissionNavigator =
-  createNativeStackNavigator<ScreenParams>();
-const RootNavigator = createNativeStackNavigator<ScreenParams>();
-const DetailNavigator = createNativeStackNavigator<ScreenParams>();
+  createNativeStackNavigator<AssignmentSubmissionStackParams>();
+const RootNavigator = createNativeStackNavigator<RootStackParams>();
+const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
 
 const NoticeStack = () => (
   <NoticeStackNavigator.Navigator>
@@ -239,7 +250,7 @@ const NoticeStack = () => (
       component={NoticeDetail}
       options={getDetailScreenOptions()}
     />
-    <FileStackNavigator.Screen
+    <NoticeStackNavigator.Screen
       name="FileDetail"
       component={FileDetail}
       options={getDetailScreenOptions()}
@@ -259,7 +270,7 @@ const AssignmentStack = () => (
       component={AssignmentDetail}
       options={getDetailScreenOptions()}
     />
-    <FileStackNavigator.Screen
+    <AssignmentStackNavigator.Screen
       name="FileDetail"
       component={FileDetail}
       options={getDetailScreenOptions()}
@@ -633,101 +644,113 @@ const {LightTheme, DarkTheme} = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
   reactNavigationDark: NavigationDarkTheme,
 });
-const BrandDefaultTheme = {
-  ...MD3LightTheme,
-  ...LightTheme,
-  colors: {
-    ...MD3LightTheme.colors,
-    ...LightTheme.colors,
-    primary: 'rgb(154, 37, 174)',
-    onPrimary: 'rgb(255, 255, 255)',
-    primaryContainer: 'rgb(255, 214, 254)',
-    onPrimaryContainer: 'rgb(53, 0, 63)',
-    secondary: 'rgb(107, 88, 107)',
-    onSecondary: 'rgb(255, 255, 255)',
-    secondaryContainer: 'rgb(244, 219, 241)',
-    onSecondaryContainer: 'rgb(37, 22, 38)',
-    tertiary: 'rgb(130, 82, 74)',
-    onTertiary: 'rgb(255, 255, 255)',
-    tertiaryContainer: 'rgb(255, 218, 212)',
-    onTertiaryContainer: 'rgb(51, 17, 12)',
-    error: 'rgb(186, 26, 26)',
-    onError: 'rgb(255, 255, 255)',
-    errorContainer: 'rgb(255, 218, 214)',
-    onErrorContainer: 'rgb(65, 0, 2)',
-    background: 'rgb(255, 251, 255)',
-    onBackground: 'rgb(30, 26, 29)',
-    surface: 'rgb(255, 251, 255)',
-    onSurface: 'rgb(30, 26, 29)',
-    surfaceVariant: 'rgb(236, 223, 232)',
-    onSurfaceVariant: 'rgb(77, 68, 76)',
-    outline: 'rgb(127, 116, 125)',
-    outlineVariant: 'rgb(208, 195, 204)',
-    shadow: 'rgb(0, 0, 0)',
-    scrim: 'rgb(0, 0, 0)',
-    inverseSurface: 'rgb(51, 47, 50)',
-    inverseOnSurface: 'rgb(247, 238, 243)',
-    inversePrimary: 'rgb(249, 171, 255)',
-    elevation: {
-      level0: 'transparent',
-      level1: 'rgb(250, 240, 251)',
-      level2: 'rgb(247, 234, 249)',
-      level3: 'rgb(244, 228, 246)',
-      level4: 'rgb(243, 225, 245)',
-      level5: 'rgb(241, 221, 244)',
-    },
-    surfaceDisabled: 'rgba(30, 26, 29, 0.12)',
-    onSurfaceDisabled: 'rgba(30, 26, 29, 0.38)',
-    backdrop: 'rgba(54, 46, 53, 0.4)',
+
+const lightThemeColors = {
+  ...LightTheme.colors,
+  primary: 'rgb(154, 37, 174)',
+  onPrimary: 'rgb(255, 255, 255)',
+  primaryContainer: 'rgb(255, 214, 254)',
+  onPrimaryContainer: 'rgb(53, 0, 63)',
+  secondary: 'rgb(107, 88, 107)',
+  onSecondary: 'rgb(255, 255, 255)',
+  secondaryContainer: 'rgb(244, 219, 241)',
+  onSecondaryContainer: 'rgb(37, 22, 38)',
+  tertiary: 'rgb(130, 82, 74)',
+  onTertiary: 'rgb(255, 255, 255)',
+  tertiaryContainer: 'rgb(255, 218, 212)',
+  onTertiaryContainer: 'rgb(51, 17, 12)',
+  error: 'rgb(186, 26, 26)',
+  onError: 'rgb(255, 255, 255)',
+  errorContainer: 'rgb(255, 218, 214)',
+  onErrorContainer: 'rgb(65, 0, 2)',
+  background: 'rgb(255, 251, 255)',
+  onBackground: 'rgb(30, 26, 29)',
+  surface: 'rgb(255, 251, 255)',
+  onSurface: 'rgb(30, 26, 29)',
+  surfaceVariant: 'rgb(236, 223, 232)',
+  onSurfaceVariant: 'rgb(77, 68, 76)',
+  outline: 'rgb(127, 116, 125)',
+  outlineVariant: 'rgb(208, 195, 204)',
+  shadow: 'rgb(0, 0, 0)',
+  scrim: 'rgb(0, 0, 0)',
+  inverseSurface: 'rgb(51, 47, 50)',
+  inverseOnSurface: 'rgb(247, 238, 243)',
+  inversePrimary: 'rgb(249, 171, 255)',
+  elevation: {
+    level0: 'transparent',
+    level1: 'rgb(250, 240, 251)',
+    level2: 'rgb(247, 234, 249)',
+    level3: 'rgb(244, 228, 246)',
+    level4: 'rgb(243, 225, 245)',
+    level5: 'rgb(241, 221, 244)',
   },
+  surfaceDisabled: 'rgba(30, 26, 29, 0.12)',
+  onSurfaceDisabled: 'rgba(30, 26, 29, 0.38)',
+  backdrop: 'rgba(54, 46, 53, 0.4)',
 };
-const BrandDarkTheme = {
-  ...MD3DarkTheme,
-  ...DarkTheme,
-  colors: {
-    ...MD3DarkTheme.colors,
-    ...DarkTheme.colors,
-    primary: 'rgb(249, 171, 255)',
-    onPrimary: 'rgb(87, 0, 102)',
-    primaryContainer: 'rgb(123, 0, 143)',
-    onPrimaryContainer: 'rgb(255, 214, 254)',
-    secondary: 'rgb(215, 191, 213)',
-    onSecondary: 'rgb(59, 43, 60)',
-    secondaryContainer: 'rgb(83, 65, 83)',
-    onSecondaryContainer: 'rgb(244, 219, 241)',
-    tertiary: 'rgb(246, 184, 173)',
-    onTertiary: 'rgb(76, 37, 31)',
-    tertiaryContainer: 'rgb(103, 59, 52)',
-    onTertiaryContainer: 'rgb(255, 218, 212)',
-    error: 'rgb(255, 180, 171)',
-    onError: 'rgb(105, 0, 5)',
-    errorContainer: 'rgb(147, 0, 10)',
-    onErrorContainer: 'rgb(255, 180, 171)',
-    background: 'rgb(30, 26, 29)',
-    onBackground: 'rgb(233, 224, 228)',
-    surface: 'rgb(30, 26, 29)',
-    onSurface: 'rgb(233, 224, 228)',
-    surfaceVariant: 'rgb(77, 68, 76)',
-    onSurfaceVariant: 'rgb(208, 195, 204)',
-    outline: 'rgb(153, 141, 150)',
-    outlineVariant: 'rgb(77, 68, 76)',
-    shadow: 'rgb(0, 0, 0)',
-    scrim: 'rgb(0, 0, 0)',
-    inverseSurface: 'rgb(233, 224, 228)',
-    inverseOnSurface: 'rgb(51, 47, 50)',
-    inversePrimary: 'rgb(154, 37, 174)',
-    elevation: {
-      level0: 'transparent',
-      level1: 'rgb(41, 33, 40)',
-      level2: 'rgb(48, 38, 47)',
-      level3: 'rgb(54, 42, 54)',
-      level4: 'rgb(56, 43, 56)',
-      level5: 'rgb(61, 46, 61)',
-    },
-    surfaceDisabled: 'rgba(233, 224, 228, 0.12)',
-    onSurfaceDisabled: 'rgba(233, 224, 228, 0.38)',
-    backdrop: 'rgba(54, 46, 53, 0.4)',
+const darkThemeColors = {
+  ...DarkTheme.colors,
+  primary: 'rgb(249, 171, 255)',
+  onPrimary: 'rgb(87, 0, 102)',
+  primaryContainer: 'rgb(123, 0, 143)',
+  onPrimaryContainer: 'rgb(255, 214, 254)',
+  secondary: 'rgb(215, 191, 213)',
+  onSecondary: 'rgb(59, 43, 60)',
+  secondaryContainer: 'rgb(83, 65, 83)',
+  onSecondaryContainer: 'rgb(244, 219, 241)',
+  tertiary: 'rgb(246, 184, 173)',
+  onTertiary: 'rgb(76, 37, 31)',
+  tertiaryContainer: 'rgb(103, 59, 52)',
+  onTertiaryContainer: 'rgb(255, 218, 212)',
+  error: 'rgb(255, 180, 171)',
+  onError: 'rgb(105, 0, 5)',
+  errorContainer: 'rgb(147, 0, 10)',
+  onErrorContainer: 'rgb(255, 180, 171)',
+  background: 'rgb(30, 26, 29)',
+  onBackground: 'rgb(233, 224, 228)',
+  surface: 'rgb(30, 26, 29)',
+  onSurface: 'rgb(233, 224, 228)',
+  surfaceVariant: 'rgb(77, 68, 76)',
+  onSurfaceVariant: 'rgb(208, 195, 204)',
+  outline: 'rgb(153, 141, 150)',
+  outlineVariant: 'rgb(77, 68, 76)',
+  shadow: 'rgb(0, 0, 0)',
+  scrim: 'rgb(0, 0, 0)',
+  inverseSurface: 'rgb(233, 224, 228)',
+  inverseOnSurface: 'rgb(51, 47, 50)',
+  inversePrimary: 'rgb(154, 37, 174)',
+  elevation: {
+    level0: 'transparent',
+    level1: 'rgb(41, 33, 40)',
+    level2: 'rgb(48, 38, 47)',
+    level3: 'rgb(54, 42, 54)',
+    level4: 'rgb(56, 43, 56)',
+    level5: 'rgb(61, 46, 61)',
   },
+  surfaceDisabled: 'rgba(233, 224, 228, 0.12)',
+  onSurfaceDisabled: 'rgba(233, 224, 228, 0.38)',
+  backdrop: 'rgba(54, 46, 53, 0.4)',
+};
+
+const BrandLightPaperTheme = {
+  ...MD3LightTheme,
+  dark: false,
+  colors: lightThemeColors,
+  fonts: MD3LightTheme.fonts,
+};
+const BrandLightNavigationTheme = {
+  ...NavigationDefaultTheme,
+  colors: lightThemeColors,
+};
+const BrandDarkPaperTheme = {
+  ...MD3DarkTheme,
+  dark: true,
+  colors: darkThemeColors,
+  fonts: MD3DarkTheme.fonts,
+};
+const BrandDarkNavigationTheme = {
+  ...NavigationDarkTheme,
+  colors: darkThemeColors,
 };
 
 const Container = () => {
@@ -823,7 +846,10 @@ const Container = () => {
   }, [auth.password, auth.username, loginError, toast]);
 
   const navigationContainerProps = {
-    theme: colorScheme === 'dark' ? BrandDarkTheme : BrandDefaultTheme,
+    theme:
+      colorScheme === 'dark'
+        ? BrandDarkNavigationTheme
+        : BrandLightNavigationTheme,
     fallback: <Splash />,
   };
 
@@ -870,12 +896,13 @@ const Container = () => {
               <RootNavigator.Screen name="Login" component={Login} />
             )}
           </RootNavigator.Navigator>
-          <NavigationContainer
-            independent
-            ref={detailNavigationContainerRef}
-            {...navigationContainerProps}>
-            <DetailStack />
-          </NavigationContainer>
+          <NavigationIndependentTree>
+            <NavigationContainer
+              ref={detailNavigationContainerRef}
+              {...navigationContainerProps}>
+              <DetailStack />
+            </NavigationContainer>
+          </NavigationIndependentTree>
         </SplitViewProvider>
       </NavigationContainer>
     </SafeAreaProvider>
@@ -888,7 +915,9 @@ const App = () => {
   return (
     <GestureHandlerRootView>
       <PaperProvider
-        theme={colorScheme === 'dark' ? BrandDarkTheme : BrandDefaultTheme}>
+        theme={
+          colorScheme === 'dark' ? BrandDarkPaperTheme : BrandLightPaperTheme
+        }>
         <ToastProvider>
           <StoreProvider store={store}>
             <PersistGate loading={<Splash />} persistor={persistor}>
@@ -900,8 +929,8 @@ const App = () => {
           barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
           backgroundColor={
             colorScheme === 'dark'
-              ? BrandDarkTheme.colors.surface
-              : BrandDefaultTheme.colors.surface
+              ? BrandDarkPaperTheme.colors.surface
+              : BrandLightPaperTheme.colors.surface
           }
           animated
         />

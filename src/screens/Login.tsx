@@ -25,13 +25,13 @@ import {setMockStore} from 'data/actions/root';
 import {setSetting} from 'data/actions/settings';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
-import {ScreenParams} from './types';
+import {RootStackParams} from './types';
 import env from 'helpers/env';
 import {t} from 'helpers/i18n';
 
-const Login: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Login'>>
-> = () => {
+type Props = NativeStackScreenProps<RootStackParams, 'Login'>;
+
+const Login: React.FC<Props> = () => {
   const theme = useTheme();
 
   const toast = useToast();

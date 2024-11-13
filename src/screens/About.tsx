@@ -6,12 +6,12 @@ import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {t} from 'helpers/i18n';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 import packageJson from '../../package.json';
 
-const About: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'About'>>
-> = props => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'About'>;
+
+const About: React.FC<Props> = props => {
   useNavigationAnimation(props);
 
   return (

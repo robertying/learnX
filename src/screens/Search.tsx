@@ -19,11 +19,11 @@ import FileCard from 'components/FileCard';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import {t} from 'helpers/i18n';
-import {ScreenParams} from './types';
+import {SearchStackParams} from './types';
 
-const Search: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Search'>>
-> = ({navigation, route}) => {
+type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
+
+const Search: React.FC<Props> = ({navigation, route}) => {
   const theme = useTheme();
 
   const safeAreaInsets = useSafeAreaInsets();
@@ -41,7 +41,7 @@ const Search: React.FC<
     searchQuery,
   );
 
-  const handlePush = (name: keyof ScreenParams, item: any) => {
+  const handlePush = (name: keyof SearchStackParams, item: any) => {
     navigation.push(name, item);
   };
 

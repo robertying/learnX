@@ -7,7 +7,6 @@ import {
 } from '@react-navigation/native-stack';
 import {StackActions, useNavigation} from '@react-navigation/native';
 import {
-  Route,
   SceneRendererProps,
   TabBar,
   TabView,
@@ -28,10 +27,15 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import {t} from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {ScreenParams} from './types';
+import {CourseStackParams} from './types';
+
+type NavigationProp = NativeStackNavigationProp<
+  CourseStackParams,
+  'CourseDetail'
+>;
 
 const Notices = memo(({courseId, data}: {courseId: string; data: Notice[]}) => {
-  const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
+  const navigation = useNavigation<NavigationProp>();
 
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
@@ -68,7 +72,7 @@ const Notices = memo(({courseId, data}: {courseId: string; data: Notice[]}) => {
 
 const Assignments = memo(
   ({courseId, data}: {courseId: string; data: Assignment[]}) => {
-    const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
+    const navigation = useNavigation<NavigationProp>();
 
     const dispatch = useAppDispatch();
     const loggedIn = useAppSelector(state => state.auth.loggedIn);
@@ -105,7 +109,7 @@ const Assignments = memo(
 );
 
 const Files = memo(({courseId, data}: {courseId: string; data: File[]}) => {
-  const navigation = useNavigation<NativeStackNavigationProp<ScreenParams>>();
+  const navigation = useNavigation<NavigationProp>();
 
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
@@ -146,9 +150,9 @@ const routes = [
   {key: 'file', title: t('files')},
 ];
 
-const CourseDetail: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CourseDetail'>>
-> = ({
+type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
+
+const CourseDetail: React.FC<Props> = ({
   navigation,
   route: {
     params: {disableAnimation, ...course},

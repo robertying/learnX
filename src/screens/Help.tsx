@@ -5,11 +5,11 @@ import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {t} from 'helpers/i18n';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 
-const Help: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Help'>>
-> = props => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
+
+const Help: React.FC<Props> = props => {
   useNavigationAnimation(props);
 
   return (

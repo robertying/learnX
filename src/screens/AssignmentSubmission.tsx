@@ -41,7 +41,12 @@ import {
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import Numbers from 'constants/Numbers';
-import {ScreenParams} from './types';
+import {AssignmentSubmissionStackParams} from './types';
+
+type Props = NativeStackScreenProps<
+  AssignmentSubmissionStackParams,
+  'AssignmentSubmission'
+>;
 
 interface AttachmentResult {
   uri: string;
@@ -50,11 +55,7 @@ interface AttachmentResult {
   size?: number | null;
 }
 
-const AssignmentSubmission: React.FC<
-  React.PropsWithChildren<
-    NativeStackScreenProps<ScreenParams, 'AssignmentSubmission'>
-  >
-> = ({navigation, route}) => {
+const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
   const theme = useTheme();
   const toast = useToast();
   const detailNavigator = useDetailNavigator();

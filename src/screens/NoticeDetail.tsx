@@ -8,15 +8,15 @@ import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
-import {ScreenParams} from 'screens/types';
+import {NoticeStackParams} from 'screens/types';
 import {getWebViewTemplate} from 'helpers/html';
 import {isLocaleChinese, t} from 'helpers/i18n';
 import {stripExtension, getExtension} from 'helpers/fs';
 import {File} from 'data/types/state';
 
-const NoticeDetail: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'NoticeDetail'>>
-> = ({route, navigation}) => {
+type Props = NativeStackScreenProps<NoticeStackParams, 'NoticeDetail'>;
+
+const NoticeDetail: React.FC<Props> = ({route, navigation}) => {
   const theme = useTheme();
 
   const {

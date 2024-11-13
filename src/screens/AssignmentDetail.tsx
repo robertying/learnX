@@ -18,7 +18,7 @@ import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
-import {ScreenParams} from 'screens/types';
+import {AssignmentStackParams} from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {getWebViewTemplate, removeTags} from 'helpers/html';
 import {getExtension, stripExtension} from 'helpers/fs';
@@ -29,11 +29,9 @@ import {
 } from 'helpers/i18n';
 import {File} from 'data/types/state';
 
-const AssignmentDetail: React.FC<
-  React.PropsWithChildren<
-    NativeStackScreenProps<ScreenParams, 'AssignmentDetail'>
-  >
-> = ({route, navigation}) => {
+type Props = NativeStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
+
+const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();

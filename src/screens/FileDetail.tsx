@@ -33,13 +33,13 @@ import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
-import {ScreenParams} from './types';
+import {FileStackParams} from './types';
 import {SplitViewContext} from 'components/SplitView';
 import {useAppSelector} from 'data/store';
 
-const FileDetail: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileDetail'>>
-> = ({route, navigation}) => {
+type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
+
+const FileDetail: React.FC<Props> = ({route, navigation}) => {
   const {disableAnimation, ...file} = route.params;
 
   const theme = useTheme();

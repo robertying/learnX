@@ -12,12 +12,12 @@ import {clearStore} from 'data/actions/root';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {t} from 'helpers/i18n';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 import packageJson from '../../package.json';
 
-const Settings: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Settings'>>
-> = ({navigation}) => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'Settings'>;
+
+const Settings: React.FC<Props> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();
@@ -34,7 +34,7 @@ const Settings: React.FC<
     null,
   );
 
-  const handlePush = (name: keyof ScreenParams) => {
+  const handlePush = (name: keyof SettingsStackParams) => {
     if (detailNavigator) {
       detailNavigator.dispatch(
         StackActions.replace(name, {
@@ -42,7 +42,7 @@ const Settings: React.FC<
         }),
       );
     } else {
-      navigation.push(name);
+      navigation.push(name, undefined as any);
     }
   };
 

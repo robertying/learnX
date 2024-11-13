@@ -1,11 +1,12 @@
 import {useLayoutEffect} from 'react';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {ScreenParams, ExtraParams} from 'screens/types';
+import {ParamListBase} from '@react-navigation/native';
+import {ExtraParams} from 'screens/types';
 
-const useNavigationAnimation = <T extends keyof ScreenParams>({
+const useNavigationAnimation = <T extends keyof ParamListBase>({
   navigation,
   route,
-}: NativeStackScreenProps<ScreenParams, T>) => {
+}: NativeStackScreenProps<ParamListBase, T>) => {
   const disableAnimation = (route.params as ExtraParams)?.disableAnimation;
 
   useLayoutEffect(() => {

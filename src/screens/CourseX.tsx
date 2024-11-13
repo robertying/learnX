@@ -5,11 +5,11 @@ import WebView, {WebViewNavigation} from 'react-native-webview';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
-import {ScreenParams} from './types';
+import {CourseXStackParams} from './types';
 
-const CourseX: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CourseX'>>
-> = ({route}) => {
+type Props = NativeStackScreenProps<CourseXStackParams, 'CourseX'>;
+
+const CourseX: React.FC<Props> = ({route}) => {
   const courseId = route.params?.id ?? '';
 
   const theme = useTheme();

@@ -11,11 +11,11 @@ import {Assignment, File, Notice} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {Notifications} from 'helpers/notification';
-import {ScreenParams} from './types';
+import {NoticeStackParams} from './types';
 
-const Notices: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Notices'>>
-> = ({navigation}) => {
+type Props = NativeStackScreenProps<NoticeStackParams, 'Notices'>;
+
+const Notices: React.FC<Props> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();

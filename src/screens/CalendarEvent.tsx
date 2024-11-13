@@ -30,11 +30,11 @@ import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import useFilteredData from 'hooks/useFilteredData';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 
-const CalendarEvent: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'CalendarEvent'>>
-> = props => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
+
+const CalendarEvent: React.FC<Props> = props => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();

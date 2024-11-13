@@ -9,11 +9,11 @@ import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 
-const FileSettings: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'FileSettings'>>
-> = props => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
+
+const FileSettings: React.FC<Props> = props => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();

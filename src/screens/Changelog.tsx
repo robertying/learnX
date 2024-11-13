@@ -7,12 +7,12 @@ import SafeArea from 'components/SafeArea';
 import {useAppDispatch} from 'data/store';
 import {setSetting} from 'data/actions/settings';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 import packageJson from '../../package.json';
 
-const Changelog: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Changelog'>>
-> = props => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
+
+const Changelog: React.FC<Props> = props => {
   const dispatch = useAppDispatch();
 
   const webViewRef = useRef<WebView>(null);

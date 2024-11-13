@@ -3,7 +3,7 @@ import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
-import {ScreenParams} from 'screens/types';
+import {AssignmentStackParams} from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
@@ -17,9 +17,9 @@ import {Notifications} from 'helpers/notification';
 import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
 import {t} from 'helpers/i18n';
 
-const Assignments: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Assignments'>>
-> = ({navigation}) => {
+type Props = NativeStackScreenProps<AssignmentStackParams, 'Assignments'>;
+
+const Assignments: React.FC<Props> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const toast = useToast();

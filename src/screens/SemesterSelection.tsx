@@ -12,13 +12,11 @@ import {
 } from 'data/actions/semesters';
 import {getSemesterTextFromId} from 'helpers/parse';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 
-const SemesterSelection: React.FC<
-  React.PropsWithChildren<
-    NativeStackScreenProps<ScreenParams, 'SemesterSelection'>
-  >
-> = props => {
+type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
+
+const SemesterSelection: React.FC<Props> = props => {
   const dispatch = useAppDispatch();
   const semesters = useAppSelector(state => state.semesters.items);
   const fetching = useAppSelector(state => state.semesters.fetching);

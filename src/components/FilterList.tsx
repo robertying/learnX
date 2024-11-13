@@ -21,7 +21,12 @@ import {setSetting} from 'data/actions/settings';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {ScreenParams} from 'screens/types';
+import {
+  AssignmentStackParams,
+  CourseStackParams,
+  FileStackParams,
+  NoticeStackParams,
+} from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {isLocaleChinese, t} from 'helpers/i18n';
@@ -46,10 +51,11 @@ export interface FilterListProps<T> {
   archived?: T[];
   hidden: T[];
   itemComponent: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
-  navigation: NativeStackNavigationProp<
-    ScreenParams,
-    'Notices' | 'Assignments' | 'Files' | 'Courses'
-  >;
+  navigation:
+    | NativeStackNavigationProp<NoticeStackParams, 'Notices'>
+    | NativeStackNavigationProp<AssignmentStackParams, 'Assignments'>
+    | NativeStackNavigationProp<FileStackParams, 'Files'>
+    | NativeStackNavigationProp<CourseStackParams, 'Courses'>;
   onItemPress?: (item: T) => void;
   refreshing: boolean;
   onRefresh?: () => void;
@@ -236,7 +242,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX'));
     } else {
-      navigation.navigate('CourseXStack');
+      (navigation.navigate as any)('CourseXStack');
     }
   }, [detailNavigator, navigation]);
 
@@ -356,7 +362,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
             <IconButton
               style={{marginRight: -8}}
-              onPress={() => navigation.navigate('SearchStack')}
+              onPress={() => (navigation.navigate as any)('SearchStack' as any)}
               icon={props => <MaterialIcons {...props} name="search" />}
             />
           </>

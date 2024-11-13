@@ -11,11 +11,11 @@ import {Course} from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {getSemesterTextFromId} from 'helpers/parse';
 import {uploadCourses} from 'helpers/coursex';
-import {ScreenParams} from './types';
+import {CourseStackParams} from './types';
 
-const Courses: React.FC<
-  React.PropsWithChildren<NativeStackScreenProps<ScreenParams, 'Courses'>>
-> = ({navigation}) => {
+type Props = NativeStackScreenProps<CourseStackParams, 'Courses'>;
+
+const Courses: React.FC<Props> = ({navigation}) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();

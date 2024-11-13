@@ -12,13 +12,14 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import {isLocaleChinese, t} from 'helpers/i18n';
 import env from 'helpers/env';
 import {uploadCourses} from 'helpers/coursex';
-import {ScreenParams} from './types';
+import {SettingsStackParams} from './types';
 
-const CourseInformationSharing: React.FC<
-  React.PropsWithChildren<
-    NativeStackScreenProps<ScreenParams, 'CourseInformationSharing'>
-  >
-> = props => {
+type Props = NativeStackScreenProps<
+  SettingsStackParams,
+  'CourseInformationSharing'
+>;
+
+const CourseInformationSharing: React.FC<Props> = props => {
   const dispatch = useAppDispatch();
 
   const currentSemesterId = useAppSelector(state => state.semesters.current);
