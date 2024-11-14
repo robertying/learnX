@@ -19,7 +19,7 @@ const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
         },
       ]}>
       <Image
-        style={styles.logo}
+        style={Platform.OS === 'android' ? styles.logoAndroid : styles.logo}
         source={
           colorScheme === 'dark'
             ? require('../../ios/learnX/Assets.xcassets/MaskedAppIcon.imageset/Black.png')
@@ -39,6 +39,10 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 150,
+  },
+  logoAndroid: {
+    width: 192,
+    height: 192,
   },
 });
 
