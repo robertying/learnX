@@ -49,10 +49,10 @@ export function login(
             password,
           }),
         );
-        dispatch(getUserInfo());
       } else {
         dispatch(loginAction.success(undefined));
       }
+      dispatch(getUserInfo());
     } catch (err) {
       dispatch(loginAction.failure(serializeError(err)));
     }

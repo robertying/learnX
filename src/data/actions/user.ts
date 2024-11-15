@@ -28,6 +28,9 @@ export function getUserInfo(): ThunkResult {
 
     try {
       const userInfo = await dataSource.getUserInfo(CourseType.STUDENT);
+      if (userInfo?.department?.includes('(未译)')) {
+        userInfo.department = userInfo.department.replace('(未译)', '');
+      }
       dispatch(getUserInfoAction.success(userInfo));
     } catch (err) {
       dispatch(getUserInfoAction.failure(err as Error));
