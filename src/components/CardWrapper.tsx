@@ -241,6 +241,8 @@ const CardWrapper: React.FC<
   const handleLongPress = () => {
     if (reorderMode) {
       drag?.();
+    } else if (!disableSwipe && !selectionMode) {
+      snapRef.current?.openLeft();
     }
   };
 
