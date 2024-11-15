@@ -47,6 +47,7 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
     submittedAttachment,
     submittedContent,
     graded,
+    graderName,
     gradeTime,
     grade,
     gradeLevel,
@@ -225,8 +226,12 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                 <Caption>
                   {dayjs(gradeTime).format(
                     isLocaleChinese()
-                      ? 'YYYY 年 M 月 D 日 dddd HH:mm 批改'
-                      : '[graded at] HH:mm, MMM D, YYYY',
+                      ? graderName
+                        ? `YYYY 年 M 月 D 日 dddd HH:mm 由${graderName}批改`
+                        : 'YYYY 年 M 月 D 日 dddd HH:mm 批改'
+                      : graderName
+                        ? `[graded by ${graderName} at] HH:mm, MMM D, YYYY`
+                        : '[graded at] HH:mm, MMM D, YYYY',
                   )}
                 </Caption>
               </View>

@@ -136,6 +136,7 @@ export type Assignment = Pick<
   | 'graded'
   | 'grade'
   | 'gradeLevel'
+  | 'graderName'
   | 'gradeTime'
   | 'gradeContent'
   | 'gradeAttachment'
