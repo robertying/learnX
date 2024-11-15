@@ -106,6 +106,7 @@ export type Notice = Pick<
   | 'title'
   | 'publisher'
   | 'publishTime'
+  | 'expireTime'
   | 'markedImportant'
   | 'content'
   | 'hasRead'

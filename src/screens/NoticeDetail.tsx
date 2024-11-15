@@ -26,6 +26,7 @@ const NoticeDetail: React.FC<Props> = ({route, navigation}) => {
     title,
     publisher,
     publishTime,
+    expireTime,
     content,
     attachment,
     disableAnimation,
@@ -82,6 +83,15 @@ const NoticeDetail: React.FC<Props> = ({route, navigation}) => {
               )}
             </Caption>
           </View>
+          {expireTime && (
+            <Caption style={Styles.flexRowCenter}>
+              {dayjs(expireTime).format(
+                isLocaleChinese()
+                  ? 'YYYY 年 M 月 D 日 dddd HH:mm 过期'
+                  : '[expire at] MMM D, YYYY HH:mm',
+              )}
+            </Caption>
+          )}
         </View>
         <Divider />
         {attachment && (
