@@ -180,4 +180,8 @@ export default {
   dragToReorder: 'Long press and drag to reorder',
   documents: 'Files',
   photos: 'Photos',
+  assignmentIndividualCompletion: 'Complete Individually',
+  assignmentGroupCompletion: 'Complete as a Group',
+  assignmentOnlineSubmission: 'Submit Online',
+  assignmentOfflineSubmission: 'Submit Offline',
 };

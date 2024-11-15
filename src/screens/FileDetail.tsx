@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   categoryChip: {
-    marginBottom: 4,
+    marginBottom: 8,
   },
 });
 

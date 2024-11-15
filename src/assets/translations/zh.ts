@@ -173,6 +173,10 @@ const zh: typeof en = {
   dragToReorder: '长按并拖动以排序',
   documents: '文件',
   photos: '照片',
+  assignmentIndividualCompletion: '独立完成',
+  assignmentGroupCompletion: '小组完成',
+  assignmentOnlineSubmission: '在线提交',
+  assignmentOfflineSubmission: '线下提交',
 };
 
 export default zh;

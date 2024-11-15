@@ -7,13 +7,18 @@ import {
   useTheme,
   Text,
   IconButton,
+  Chip,
 } from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {RemoteFile} from 'thu-learn-lib';
+import {
+  HomeworkCompletionType,
+  HomeworkSubmissionType,
+  RemoteFile,
+} from 'thu-learn-lib';
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
@@ -41,6 +46,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
     title,
     deadline,
     description,
+    completionType,
+    submissionType,
     attachment,
     submitted,
     submitTime,
@@ -104,11 +111,12 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
   }, [navigation, disableAnimation]);
 
   useLayoutEffect(() => {
-    if (dayjs().isBefore(dayjs(deadline))) {
+    if (submissionType !== HomeworkSubmissionType.OFFLINE) {
       navigation.setOptions({
         headerRight: () => (
           <IconButton
             style={{marginRight: -8}}
+            disabled={dayjs().isAfter(dayjs(deadline))}
             onPress={handleSubmit}
             icon={props => <MaterialIcons {...props} name="file-upload" />}
           />
@@ -121,6 +129,18 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
     <SafeArea>
       <ScrollView style={{backgroundColor: theme.colors.surface}}>
         <View style={styles.section}>
+          <View style={Styles.flexRow}>
+            <Chip compact mode="outlined" style={styles.chip}>
+              {completionType === HomeworkCompletionType.GROUP
+                ? t('assignmentGroupCompletion')
+                : t('assignmentIndividualCompletion')}
+            </Chip>
+            <Chip compact mode="outlined" style={styles.chip}>
+              {submissionType === HomeworkSubmissionType.OFFLINE
+                ? t('assignmentOfflineSubmission')
+                : t('assignmentOnlineSubmission')}
+            </Chip>
+          </View>
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
             <Caption>
@@ -290,6 +310,10 @@ const styles = StyleSheet.create({
   iconButton: {
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  chip: {
+    marginBottom: 8,
+    marginRight: 8,
   },
 });
 

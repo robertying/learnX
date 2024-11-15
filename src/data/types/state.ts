@@ -128,6 +128,8 @@ export type Assignment = Pick<
   | 'title'
   | 'description'
   | 'deadline'
+  | 'completionType'
+  | 'submissionType'
   | 'attachment'
   | 'submitted'
   | 'submitTime'
