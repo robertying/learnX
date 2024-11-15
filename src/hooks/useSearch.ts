@@ -37,6 +37,7 @@ const fileOptions: IFuseOptions<File> = {
     {name: 'title', weight: 2},
     {name: 'description', weight: 2},
     {name: 'fileType', weight: 2},
+    {name: 'category.title', weight: 2},
   ],
 };
 

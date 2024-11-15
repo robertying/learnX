@@ -15,6 +15,7 @@ import {
   Title,
   Caption,
   Divider,
+  Chip,
 } from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {useFocusEffect} from '@react-navigation/native';
@@ -250,6 +251,13 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
             }
             style={{backgroundColor: theme.colors.surface}}>
             <View style={styles.section}>
+              <View style={Styles.flexRowCenter}>
+                {file.category?.title && (
+                  <Chip compact mode="outlined" style={styles.categoryChip}>
+                    {file.category?.title}
+                  </Chip>
+                )}
+              </View>
               <Title>{file.title}</Title>
               <View style={Styles.flexRowCenter}>
                 <Caption>{file.courseTeacherName}</Caption>
@@ -367,6 +375,9 @@ const styles = StyleSheet.create({
   description: {
     padding: 16,
     fontSize: 16,
+  },
+  categoryChip: {
+    marginBottom: 4,
   },
 });
 

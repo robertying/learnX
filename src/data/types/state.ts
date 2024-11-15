@@ -161,6 +161,7 @@ export type File = Pick<
   | 'id'
   | 'title'
   | 'description'
+  | 'category'
   | 'size'
   | 'fileType'
   | 'markedImportant'

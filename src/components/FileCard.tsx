@@ -24,6 +24,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
     markedImportant,
     isNew,
     uploadTime,
+    category,
   },
   hideCourseName,
   ...restProps
@@ -60,7 +61,9 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
           <Paragraph numberOfLines={2}>{removeTags(description)}</Paragraph>
         ) : null}
         <View style={Styles.flexRowCenter}>
-          <Caption>{`${fileType?.toUpperCase() ?? ''} ${size}`}</Caption>
+          <Caption>
+            {`${category?.title ?? ''} ${fileType?.toUpperCase() ?? ''} ${size}`.trim()}
+          </Caption>
           <Caption>{dayjs(uploadTime).fromNow()}</Caption>
         </View>
       </View>
