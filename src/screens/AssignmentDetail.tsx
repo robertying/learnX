@@ -45,11 +45,13 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
     courseName,
     title,
     deadline,
+    lateSubmissionDeadline,
     description,
     completionType,
     submissionType,
     attachment,
     submitted,
+    isLateSubmission,
     submitTime,
     submittedAttachment,
     submittedContent,
@@ -160,6 +162,15 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
               )}
             </Caption>
           </View>
+          {lateSubmissionDeadline && (
+            <Caption style={Styles.flexRowCenter}>
+              {dayjs(lateSubmissionDeadline).format(
+                isLocaleChinese()
+                  ? 'YYYY 年 M 月 D 日 dddd HH:mm 补交截止'
+                  : '[late submission due] ddd, MMM D, YYYY HH:mm',
+              )}
+            </Caption>
+          )}
         </View>
         <Divider />
         {attachment && (
@@ -206,8 +217,12 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                   {submitTime
                     ? dayjs(submitTime).format(
                         isLocaleChinese()
-                          ? 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
-                          : '[submitted at] HH:mm, MMM D, YYYY',
+                          ? isLateSubmission
+                            ? 'YYYY 年 M 月 D 日 dddd HH:mm 补交'
+                            : 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
+                          : isLateSubmission
+                            ? '[submitted late at] HH:mm, MMM D, YYYY'
+                            : '[submitted at] HH:mm, MMM D, YYYY',
                       )
                     : t('submitted')}
                 </Caption>
