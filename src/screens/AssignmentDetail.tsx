@@ -125,7 +125,7 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
         ),
       });
     }
-  }, [deadline, handleSubmit, navigation]);
+  }, [submissionType, deadline, handleSubmit, navigation]);
 
   return (
     <SafeArea>

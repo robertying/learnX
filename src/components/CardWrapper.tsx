@@ -185,30 +185,6 @@ const CardWrapper: React.FC<
     }
   }, [reorderMode]);
 
-  const renderLeftActions = useCallback(
-    (
-      progress: SharedValue<number>,
-      translation: SharedValue<number>,
-      swipeableMethods: SwipeableMethods,
-    ) => {
-      return (
-        <SwipeActions
-          position="left"
-          progress={progress}
-          translation={translation}
-          swipeableMethods={swipeableMethods}
-          fav={fav}
-          onFav={onFav}
-          archived={archived}
-          onArchive={onArchive}
-          hidden={hidden}
-          onHide={onHide}
-        />
-      );
-    },
-    [archived, fav, hidden, onArchive, onFav, onHide],
-  );
-
   const renderRightActions = useCallback(
     (
       progress: SharedValue<number>,

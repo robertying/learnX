@@ -47,7 +47,7 @@
     "darkreader": "4.9.96",
     "dayjs": "1.11.13",
     "dotenv": "16.4.5",
-    "eslint": "9.15.0",
+    "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
     "expo": "52.0.7",

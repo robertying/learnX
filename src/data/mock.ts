@@ -1,3 +1,4 @@
+import {HomeworkCompletionType, HomeworkSubmissionType} from 'thu-learn-lib';
 import env from 'helpers/env';
 import {PersistAppState} from 'data/types/state';
 
@@ -358,6 +359,9 @@ const mockStore: PersistAppState = {
         id: '26ef84e76db3f55b016db426e15c07b9',
         title: '大作业1',
         deadline: new Date(1609942740000).toISOString(),
+        completionType: HomeworkCompletionType.INDIVIDUAL,
+        submissionType: HomeworkSubmissionType.WEB_LEARNING,
+        isLateSubmission: false,
         submitted: false,
         description: '<p>要求见课件</p>',
         submittedContent:
@@ -383,6 +387,9 @@ const mockStore: PersistAppState = {
         id: '26ef84e76d60efc1016d6c459d717434',
         title: '小作业1111111111111111111111111111',
         deadline: new Date(1599753540000).toISOString(),
+        completionType: HomeworkCompletionType.GROUP,
+        submissionType: HomeworkSubmissionType.OFFLINE,
+        isLateSubmission: false,
         submitted: true,
         description: '<p>手写，下堂课随堂交。</p>',
         submittedContent:
@@ -429,6 +436,9 @@ const mockStore: PersistAppState = {
         id: '26ef84e86cc25980016d39e751d54d3f',
         title: 'AutoCAD绘图基础练习',
         deadline: new Date(1569772740000).toISOString(),
+        completionType: HomeworkCompletionType.INDIVIDUAL,
+        submissionType: HomeworkSubmissionType.WEB_LEARNING,
+        isLateSubmission: false,
         submitTime: new Date(1569232469000).toISOString(),
         submitted: true,
         description:
@@ -455,6 +465,9 @@ const mockStore: PersistAppState = {
         id: '26ef84e76db3f55b016db4c2dec22c79',
         title: '第一次大作业',
         deadline: new Date(1573401540000).toISOString(),
+        completionType: HomeworkCompletionType.INDIVIDUAL,
+        submissionType: HomeworkSubmissionType.WEB_LEARNING,
+        isLateSubmission: false,
         submitted: false,
         description:
           '<p>第一次大作业——利用灭点灭线估计建筑物高度。本次作业需要同学们分组完成，请仔细阅读说明文档并注意作业的截止时间。</p>',
@@ -480,6 +493,9 @@ const mockStore: PersistAppState = {
         id: '26ef84e76d60efc1016d7acd91310c35',
         title: '第一次书面作业',
         deadline: new Date(1571155140000).toISOString(),
+        completionType: HomeworkCompletionType.INDIVIDUAL,
+        submissionType: HomeworkSubmissionType.WEB_LEARNING,
+        isLateSubmission: false,
         submitted: false,
         description:
           '<p>请在网络学堂提交电子版。如果手写请保证扫描或拍照足够清晰。</p>',
