@@ -242,7 +242,7 @@ const CardWrapper: React.FC<
     if (reorderMode) {
       drag?.();
     } else if (!disableSwipe && !selectionMode) {
-      snapRef.current?.openLeft();
+      snapRef.current?.openRight();
     }
   };
 
@@ -251,7 +251,6 @@ const CardWrapper: React.FC<
       ref={snapRef}
       containerStyle={{backgroundColor: theme.colors.surface}}
       childrenContainerStyle={{backgroundColor: theme.colors.surface}}
-      renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
       overshootFriction={8}
       enabled={!disableSwipe && !selectionMode && !reorderMode}>
