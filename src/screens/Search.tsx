@@ -82,11 +82,13 @@ const Search: React.FC<Props> = ({navigation, route}) => {
               key === 'notice' ? (
                 <NoticeCard
                   data={item as Notice}
+                  disableSwipe
                   onPress={() => handlePush('NoticeDetail', item as Notice)}
                 />
               ) : key === 'assignment' ? (
                 <AssignmentCard
                   data={item as Assignment}
+                  disableSwipe
                   onPress={() =>
                     handlePush('AssignmentDetail', item as Assignment)
                   }
@@ -94,6 +96,7 @@ const Search: React.FC<Props> = ({navigation, route}) => {
               ) : (
                 <FileCard
                   data={item as File}
+                  disableSwipe
                   onPress={() => handlePush('FileDetail', item as File)}
                 />
               )
