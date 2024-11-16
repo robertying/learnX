@@ -1,5 +1,6 @@
 import {Platform, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
+import DeviceInfo from 'constants/DeviceInfo';
 
 export interface HeaderTitleProps {
   title: string;
@@ -13,6 +14,8 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
   return (
     <View
       style={{
+        height:
+          Platform.OS === 'android' ? (DeviceInfo.isTablet() ? 64 : 56) : 44,
         justifyContent: 'center',
         alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
       }}>

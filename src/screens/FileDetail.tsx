@@ -115,7 +115,6 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
     navigation.setOptions({
       headerBackVisible:
         DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
-      headerBackTitle: t('back'),
       headerRight: () => (
         <View style={Styles.flexRow}>
           {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (

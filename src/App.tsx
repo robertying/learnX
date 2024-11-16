@@ -120,6 +120,13 @@ const BackButton = () => {
   );
 };
 
+const getTitleOptions = (title: string, subtitle?: string) => {
+  return {
+    title,
+    headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+  };
+};
+
 const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
   title: string,
 ) =>
@@ -127,7 +134,7 @@ const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
     navigation,
   }: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
     return {
-      title,
+      ...getTitleOptions(title),
       headerLeft: () => (
         <>
           <IconButton
@@ -168,34 +175,25 @@ const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
   function ({
     route,
   }: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
+    const title =
+      route.name === 'CourseX'
+        ? t('courseX')
+        : route.params
+          ? (route.params as unknown as Course).semesterId
+            ? (route.params as unknown as Course).name
+            : (route.params as unknown as File).downloadUrl
+              ? (route.params as unknown as Notice | Assignment).title
+              : (route.params as unknown as Notice | Assignment).courseName
+          : '';
+    const subtitle = route.params
+      ? (route.params as unknown as Course).semesterId
+        ? (route.params as unknown as Course).teacherName
+        : (route.params as unknown as File).downloadUrl
+          ? (route.params as unknown as Notice | Assignment).courseName
+          : (route.params as unknown as Notice | Assignment).courseTeacherName
+      : '';
     return {
-      title: t('back'),
-      headerTitle:
-        route.name === 'CourseX'
-          ? t('courseX')
-          : props =>
-              route.params ? (
-                <HeaderTitle
-                  {...props}
-                  title={
-                    (route.params as unknown as Course).semesterId
-                      ? (route.params as unknown as Course).name
-                      : (route.params as unknown as File).downloadUrl
-                        ? (route.params as unknown as Notice | Assignment).title
-                        : (route.params as unknown as Notice | Assignment)
-                            .courseName
-                  }
-                  subtitle={
-                    (route.params as unknown as Course).semesterId
-                      ? (route.params as unknown as Course).teacherName
-                      : (route.params as unknown as File).downloadUrl
-                        ? (route.params as unknown as Notice | Assignment)
-                            .courseName
-                        : (route.params as unknown as Notice | Assignment)
-                            .courseTeacherName
-                  }
-                />
-              ) : undefined,
+      ...getTitleOptions(title, subtitle),
       headerRight: (route.params as unknown as File)?.downloadUrl
         ? () => (
             <>
@@ -328,58 +326,42 @@ const SettingDetails = (
     <SettingStackNavigator.Screen
       name="PushNotifications"
       component={PushNotifications}
-      options={{
-        title: t('pushNotifications'),
-      }}
+      options={getTitleOptions(t('pushNotifications'))}
     />
     <SettingStackNavigator.Screen
       name="CourseInformationSharing"
       component={CourseInformationSharing}
-      options={{
-        title: t('courseInformationSharing'),
-      }}
+      options={getTitleOptions(t('courseInformationSharing'))}
     />
     <SettingStackNavigator.Screen
       name="CalendarEvent"
       component={CalendarEvent}
-      options={{
-        title: t('calendarsAndReminders'),
-      }}
+      options={getTitleOptions(t('calendarsAndReminders'))}
     />
     <SettingStackNavigator.Screen
       name="SemesterSelection"
       component={SemesterSelection}
-      options={{
-        title: t('semesterSelection'),
-      }}
+      options={getTitleOptions(t('semesterSelection'))}
     />
     <SettingStackNavigator.Screen
       name="FileSettings"
       component={FileSettings}
-      options={{
-        title: t('fileSettings'),
-      }}
+      options={getTitleOptions(t('fileSettings'))}
     />
     <SettingStackNavigator.Screen
       name="Help"
       component={Help}
-      options={{
-        title: t('helpAndFeedback'),
-      }}
+      options={getTitleOptions(t('helpAndFeedback'))}
     />
     <SettingStackNavigator.Screen
       name="About"
       component={About}
-      options={{
-        title: t('about'),
-      }}
+      options={getTitleOptions(t('about'))}
     />
     <SettingStackNavigator.Screen
       name="Changelog"
       component={Changelog}
-      options={{
-        title: t('changelog'),
-      }}
+      options={getTitleOptions(t('changelog'))}
     />
   </>
 );
@@ -388,9 +370,7 @@ const SettingStack = () => (
     <SettingStackNavigator.Screen
       name="Settings"
       component={Settings}
-      options={{
-        title: t('settings'),
-      }}
+      options={getTitleOptions(t('settings'))}
     />
     {SettingDetails}
   </SettingStackNavigator.Navigator>
@@ -542,7 +522,7 @@ const CourseXStack = () => (
       component={CourseX}
       options={{
         headerLeft: () => <BackButton />,
-        title: t('courseX'),
+        ...getTitleOptions(t('courseX')),
       }}
     />
   </CourseXNavigator.Navigator>
@@ -555,7 +535,7 @@ const SearchStack = () => (
       component={Search}
       options={{
         headerLeft: () => <BackButton />,
-        title: t('search'),
+        ...getTitleOptions(t('search')),
       }}
     />
     <SearchNavigator.Screen
@@ -588,7 +568,7 @@ const AssignmentSubmissionStack = () => (
             {t('submit')}
           </TextButton>
         ),
-        title: t('assignmentSubmission'),
+        ...getTitleOptions(t('assignmentSubmission')),
       }}
     />
     <AssignmentSubmissionNavigator.Screen
@@ -604,7 +584,7 @@ const DetailStack = () => (
     <DetailNavigator.Screen
       name="EmptyDetail"
       component={Empty}
-      options={{title: ''}}
+      options={getTitleOptions('')}
     />
     <DetailNavigator.Screen
       name="NoticeDetail"
