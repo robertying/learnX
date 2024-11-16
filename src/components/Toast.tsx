@@ -41,6 +41,11 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
     [],
   );
 
+  const handleDismiss = () => {
+    setToastDuration(0);
+    setToastText('');
+  };
+
   return (
     <ToastContext.Provider
       value={{
@@ -53,7 +58,7 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
         wrapperStyle={styles.snackbar}
         visible={toastText ? true : false}
         duration={toastDuration}
-        onDismiss={() => handleToast('', 'none')}>
+        onDismiss={handleDismiss}>
         {toastText}
       </Snackbar>
     </ToastContext.Provider>
