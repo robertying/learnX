@@ -18,9 +18,9 @@ import {
   Chip,
 } from 'react-native-paper';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {useFocusEffect} from '@react-navigation/native';
 import WebView from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import Pdf from 'react-native-pdf';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -60,9 +60,10 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
 
   const canRender =
     path &&
-    ((Platform.OS === 'ios' &&
-      !DeviceInfo.isMac() &&
-      canRenderInIosWebview(file.fileType)) ||
+    (file.fileType === 'pdf' ||
+      (Platform.OS === 'ios' &&
+        !DeviceInfo.isMac() &&
+        canRenderInIosWebview(file.fileType)) ||
       (Platform.OS === 'ios' &&
         DeviceInfo.isMac() &&
         canRenderInMacWebview(file.fileType)));
@@ -183,18 +184,6 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
     handleDownload(false);
   }, [handleDownload]);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!webViewRef.current || Platform.OS !== 'ios') {
-        return;
-      }
-
-      if (file.fileType === 'pdf') {
-        webViewRef.current.reload();
-      }
-    }, [file.fileType]),
-  );
-
   useEffect(() => {
     if (Platform.OS === 'android' && openFileAfterDownload && path) {
       handleOpen();
@@ -229,19 +218,23 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
           <Skeleton />
         </SafeArea>
       ) : !showInfo && canRender ? (
-        <WebView
-          ref={webViewRef}
-          style={{
-            backgroundColor: needWhiteBackground(file.fileType)
-              ? 'white'
-              : 'transparent',
-          }}
-          source={{
-            uri: path,
-          }}
-          originWhitelist={['*']}
-          decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-        />
+        file.fileType === 'pdf' ? (
+          <Pdf style={Styles.flex1} source={{uri: path}} fitPolicy={0} />
+        ) : (
+          <WebView
+            ref={webViewRef}
+            style={{
+              backgroundColor: needWhiteBackground(file.fileType)
+                ? 'white'
+                : 'transparent',
+            }}
+            source={{
+              uri: path,
+            }}
+            originWhitelist={['*']}
+            decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+          />
+        )
       ) : (
         <>
           <ScrollView
