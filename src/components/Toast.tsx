@@ -42,7 +42,6 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
   );
 
   const handleDismiss = () => {
-    setToastDuration(0);
     setToastText('');
   };
 
@@ -55,6 +54,7 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
       }}>
       {children}
       <Snackbar
+        key={toastText}
         wrapperStyle={styles.snackbar}
         visible={toastText ? true : false}
         duration={toastDuration}
