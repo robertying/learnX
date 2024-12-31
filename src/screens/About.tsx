@@ -23,7 +23,7 @@ const About: React.FC<Props> = props => {
         <Text style={styles.text}>
           {`v${packageJson.version} (build ${DeviceInfo.buildNo()})`}
         </Text>
-        <Text style={styles.text}>© 2024 Rui Ying</Text>
+        <Text style={styles.text}>© 2025 Rui Ying</Text>
         <Text
           style={[styles.text, styles.link]}
           onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}>
