@@ -115,15 +115,6 @@ const Settings: React.FC<Props> = ({navigation}) => {
           type="arrow"
           onPress={() => handlePush('FileSettings')}
         />
-        {Platform.OS === 'ios' && (
-          <TableCell
-            style={styles.marginTop}
-            iconName="notifications"
-            primaryText={t('pushNotifications')}
-            type="arrow"
-            onPress={() => handlePush('PushNotifications')}
-          />
-        )}
         <TableCell
           style={Platform.OS === 'android' ? styles.marginTop : undefined}
           iconName="info"
