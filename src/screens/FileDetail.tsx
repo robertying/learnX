@@ -185,10 +185,15 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
   }, [handleDownload]);
 
   useEffect(() => {
-    if (Platform.OS === 'android' && openFileAfterDownload && path) {
+    if (
+      Platform.OS === 'android' &&
+      openFileAfterDownload &&
+      path &&
+      file.fileType !== 'pdf'
+    ) {
       handleOpen();
     }
-  }, [handleOpen, openFileAfterDownload, path]);
+  }, [handleOpen, openFileAfterDownload, path, file.fileType]);
 
   return (
     <SafeArea>
