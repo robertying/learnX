@@ -116,7 +116,7 @@ const Settings: React.FC<Props> = ({navigation}) => {
           onPress={() => handlePush('FileSettings')}
         />
         <TableCell
-          style={Platform.OS === 'android' ? styles.marginTop : undefined}
+          style={styles.marginTop}
           iconName="info"
           badge={!courseInformationSharingBadgeShown}
           primaryText={t('courseInformationSharing')}
