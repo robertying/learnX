@@ -150,6 +150,12 @@ const Settings: React.FC<Props> = ({navigation}) => {
           />
         )}
         <TableCell
+          iconName="logo-dev"
+          primaryText={t('becomeMaintainer')}
+          type="arrow"
+          onPress={() => handlePush('Maintainer')}
+        />
+        <TableCell
           iconName="help"
           primaryText={t('helpAndFeedback')}
           type="arrow"

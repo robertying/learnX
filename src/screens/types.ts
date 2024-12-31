@@ -40,6 +40,7 @@ export type SettingsStackParams = {
   Help: ExtraParams;
   About: ExtraParams;
   Changelog: ExtraParams;
+  Maintainer: ExtraParams;
 };
 
 export type MainTabParams = {

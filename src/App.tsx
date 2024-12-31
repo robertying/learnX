@@ -75,6 +75,7 @@ import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import FileSettings from 'screens/FileSettings';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
+import Maintainer from 'screens/Maintainer';
 import Help from 'screens/Help';
 import About from 'screens/About';
 import Changelog from 'screens/Changelog';
@@ -347,6 +348,11 @@ const SettingDetails = (
       name="FileSettings"
       component={FileSettings}
       options={getTitleOptions(t('fileSettings'))}
+    />
+    <SettingStackNavigator.Screen
+      name="Maintainer"
+      component={Maintainer}
+      options={getTitleOptions(t('becomeMaintainer'))}
     />
     <SettingStackNavigator.Screen
       name="Help"

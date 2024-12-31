@@ -177,6 +177,9 @@ const zh: typeof en = {
   assignmentGroupCompletion: '小组完成',
   assignmentOnlineSubmission: '在线提交',
   assignmentOfflineSubmission: '线下提交',
+  becomeMaintainer: '成为维护者',
+  maintainerDescription:
+    '你想成为 learnX 的维护者吗？让我们聊聊吧！要求有前端开发经验，最好是 React.js；有 React Native 经验者优先。请发送邮件至',
 };
 
 export default zh;
