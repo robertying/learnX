@@ -31,6 +31,7 @@ import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import useFilteredData from 'hooks/useFilteredData';
 import {SettingsStackParams} from './types';
+import DeviceInfo from 'constants/DeviceInfo';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 
@@ -444,7 +445,13 @@ const CalendarEvent: React.FC<Props> = props => {
             iconName="settings"
             primaryText={t('configureCalendarAndReminder')}
             type="none"
-            onPress={() => Linking.openSettings()}
+            onPress={() =>
+              DeviceInfo.isMac()
+                ? Linking.openURL(
+                    'x-apple.systempreferences:com.apple.preference.security',
+                  )
+                : Linking.openSettings()
+            }
           />
         </ScrollView>
       </KeyboardAvoidingView>
