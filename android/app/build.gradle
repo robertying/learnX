@@ -36,8 +36,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdk rootProject.ext.compileSdkVersion
-        versionCode 9203230
-        versionName "15.0.0"
+        versionCode 9203240
+        versionName "15.1.0"
     }
 
     splits {
