@@ -35,7 +35,7 @@
     "@types/jest": "29.5.14",
     "@types/mime-types": "2.1.4",
     "@types/promise.allsettled": "1.0.6",
-    "@types/react": "19.0.2",
+    "@types/react": "18.3.18",
     "@types/react-native-share-menu": "5.0.5",
     "@types/react-native-vector-icons": "6.4.18",
     "@types/semver": "7.5.8",
@@ -46,7 +46,7 @@
     "darkreader": "4.9.96",
     "dayjs": "1.11.13",
     "dotenv": "16.4.7",
-    "eslint": "9.17.0",
+    "eslint": "8.57.1",
     "eslint-config-prettier": "9.1.0",
     "eslint-plugin-prettier": "5.2.1",
     "expo": "52.0.23",
@@ -99,5 +99,10 @@
     "thu-learn-lib": "github:robertying/thu-learn-lib",
     "typesafe-actions": "5.1.0",
     "typescript": "5.7.2"
+  },
+  "pnpm": {
+    "overrides": {
+      "@types/react": "$@types/react"
+    }
   }
 }
