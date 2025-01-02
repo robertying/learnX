@@ -36,7 +36,6 @@ const mockStore: PersistAppState = {
     fileOmitCourseName: false,
     courseInformationSharing: false,
     courseInformationSharingBadgeShown: false,
-    pushNotificationsBadgeShown: false,
     tabFilterSelections: {
       notice: 'all',
       assignment: 'unfinished',

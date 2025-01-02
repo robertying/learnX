@@ -32,7 +32,6 @@ export default function settings(
     },
     courseInformationSharing: false,
     courseInformationSharingBadgeShown: false,
-    pushNotificationsBadgeShown: false,
     lastShowChangelogVersion: null,
     openFileAfterDownload: false,
   },

@@ -15,15 +15,12 @@ import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import useToast from 'hooks/useToast';
 import {t} from 'helpers/i18n';
 import {registerForPushNotifications} from 'helpers/notification';
-import {useAppDispatch} from 'data/store';
-import {setSetting} from 'data/actions/settings';
 import {SettingsStackParams} from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'PushNotifications'>;
 
 const PushNotifications: React.FC<Props> = props => {
   const toast = useToast();
-  const dispatch = useAppDispatch();
 
   const [token, setToken] = useState<string | null>(null);
   const [appState, setAppState] = useState(AppState.currentState);
@@ -46,10 +43,6 @@ const PushNotifications: React.FC<Props> = props => {
   };
 
   useNavigationAnimation(props);
-
-  useEffect(() => {
-    dispatch(setSetting('pushNotificationsBadgeShown', true));
-  }, [dispatch]);
 
   useEffect(() => {
     const sub = AppState.addEventListener(

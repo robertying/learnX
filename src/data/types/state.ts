@@ -54,7 +54,6 @@ export interface SettingsState {
   newUpdate: boolean;
   courseInformationSharing: boolean;
   courseInformationSharingBadgeShown: boolean;
-  pushNotificationsBadgeShown: boolean;
   lastShowChangelogVersion: string | null;
   openFileAfterDownload: boolean;
 }

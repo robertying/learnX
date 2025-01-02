@@ -396,9 +396,6 @@ const MainTab = () => {
   const courseInformationSharingBadgeShown = useAppSelector(
     state => state.settings.courseInformationSharingBadgeShown,
   );
-  const pushNotificationsBadgeShown = useAppSelector(
-    state => state.settings.pushNotificationsBadgeShown,
-  );
 
   const windowSize = useWindowDimensions();
 
@@ -505,10 +502,7 @@ const MainTab = () => {
         options={{
           title: t('settings'),
           tabBarBadge:
-            newChangelog ||
-            newUpdate ||
-            !courseInformationSharingBadgeShown ||
-            (Platform.OS === 'ios' ? !pushNotificationsBadgeShown : false)
+            newChangelog || newUpdate || !courseInformationSharingBadgeShown
               ? ' '
               : undefined,
           tabBarBadgeStyle: {
