@@ -136,15 +136,13 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
             onPress={() => handleDownload(true)}
             icon={props => <Icon {...props} name="refresh" />}
           />
-          {Platform.OS !== 'android' && (
-            <IconButton
-              style={styles.rightIcon}
-              disabled={error || !path}
-              onPress={handleShare}
-              icon={props => <Icon {...props} name="ios-share" />}
-            />
-          )}
-          {DeviceInfo.isMac() && (
+          <IconButton
+            style={styles.rightIcon}
+            disabled={error || !path}
+            onPress={handleShare}
+            icon={props => <Icon {...props} name="ios-share" />}
+          />
+          {(Platform.OS === 'android' || DeviceInfo.isMac()) && (
             <IconButton
               style={styles.rightIcon}
               disabled={error || !path}
@@ -296,19 +294,19 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
               {file.description || t('noFileDescription')}
             </Text>
           </ScrollView>
-          {!canRender && !(Platform.OS === 'ios' && !DeviceInfo.isMac()) ? (
-            <View
-              style={[styles.actions, {backgroundColor: theme.colors.surface}]}>
-              <View style={styles.colCenter}>
-                <IconButton icon="share" size={48} onPress={handleShare} />
-                <Text>{t('share')}</Text>
-              </View>
+          <View
+            style={[styles.actions, {backgroundColor: theme.colors.surface}]}>
+            <View style={styles.colCenter}>
+              <IconButton icon="share" size={48} onPress={handleShare} />
+              <Text>{t('share')}</Text>
+            </View>
+            {(Platform.OS === 'android' || DeviceInfo.isMac()) && (
               <View style={styles.colCenter}>
                 <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
                 <Text>{t('open')}</Text>
               </View>
-            </View>
-          ) : null}
+            )}
+          </View>
         </>
       )}
       {progress ? (
