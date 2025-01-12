@@ -147,6 +147,7 @@ export type Assignment = Pick<
   | 'answerContent'
   | 'answerAttachment'
   | 'url'
+  | 'excellentHomeworkList'
 > &
   CourseExtraInfo;
 export interface AssignmentsState {

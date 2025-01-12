@@ -30,6 +30,7 @@ const AssignmentCard: React.FC<
     graded,
     answerContent,
     answerAttachment,
+    excellentHomeworkList,
   },
   hideCourseName,
   ...restProps
@@ -73,6 +74,14 @@ const AssignmentCard: React.FC<
                 style={styles.icon}
                 name="key-variant"
                 color={Colors.blue500}
+                size={16}
+              />
+            )}
+            {excellentHomeworkList && (
+              <MaterialCommunityIcons
+                style={styles.icon}
+                name="medal"
+                color={Colors.yellow500}
                 size={16}
               />
             )}
