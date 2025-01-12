@@ -326,7 +326,7 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                     )}
                     <Caption>
                       {isLocaleChinese()
-                        ? `${excellentHomework.author.name} 的优秀作业`
+                        ? `${excellentHomework.author.name}的优秀作业`
                         : `excellent homework by ${excellentHomework.author.name}`}
                     </Caption>
                   </View>
