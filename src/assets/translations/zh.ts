@@ -180,6 +180,7 @@ const zh: typeof en = {
   becomeMaintainer: '成为维护者',
   maintainerDescription:
     '你想成为 learnX 的维护者吗？让我们聊聊吧！要求有前端开发经验，最好是 React.js；有 React Native 经验者优先。请发送邮件至',
+  anonymous: '匿名',
 };
 
 export default zh;

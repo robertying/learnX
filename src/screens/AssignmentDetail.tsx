@@ -307,6 +307,9 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
             const attachment =
               excellentHomework.gradeAttachment ||
               excellentHomework.submittedAttachment;
+            const authorName = excellentHomework.author.anonymous
+              ? t('anonymous')
+              : excellentHomework.author.name;
             return (
               <>
                 <View style={[styles.section, styles.iconButton]}>
@@ -326,8 +329,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                     )}
                     <Caption>
                       {isLocaleChinese()
-                        ? `${excellentHomework.author.name}的优秀作业`
-                        : `excellent homework by ${excellentHomework.author.name}`}
+                        ? `${authorName}的优秀作业`
+                        : `excellent homework by ${authorName}`}
                     </Caption>
                   </View>
                 </View>
