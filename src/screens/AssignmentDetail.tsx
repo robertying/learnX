@@ -65,6 +65,7 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
     answerAttachment,
     answerContent,
     disableAnimation,
+    excellentHomeworkList,
   } = route.params;
 
   const html = useMemo(
@@ -301,6 +302,42 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
             <Divider />
           </>
         )}
+        {excellentHomeworkList &&
+          excellentHomeworkList.map(excellentHomework => {
+            const attachment =
+              excellentHomework.gradeAttachment ||
+              excellentHomework.submittedAttachment;
+            const authorName = excellentHomework.author.anonymous
+              ? t('anonymous')
+              : excellentHomework.author.name;
+            return (
+              <>
+                <View style={[styles.section, styles.iconButton]}>
+                  <MaterialCommunityIcons
+                    style={styles.icon}
+                    name="medal"
+                    color={theme.colors.primary}
+                    size={17}
+                  />
+                  <View style={Styles.flex1}>
+                    {attachment && (
+                      <TextButton
+                        style={[Styles.spacey1, styles.textPaddingRight]}
+                        onPress={() => handleFileOpen(attachment)}>
+                        {attachment.name}
+                      </TextButton>
+                    )}
+                    <Caption>
+                      {isLocaleChinese()
+                        ? `${authorName}的优秀作业`
+                        : `excellent homework by ${authorName}`}
+                    </Caption>
+                  </View>
+                </View>
+                <Divider />
+              </>
+            );
+          })}
         <AutoHeightWebView
           source={{
             html,
