@@ -77,7 +77,7 @@ const AssignmentCard: React.FC<
                 size={16}
               />
             )}
-            {excellentHomeworkList && (
+            {(excellentHomeworkList ?? []).length > 0 && (
               <MaterialCommunityIcons
                 style={styles.icon}
                 name="medal"
