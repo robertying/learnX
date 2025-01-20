@@ -29,6 +29,17 @@ const About: React.FC<Props> = props => {
           onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}>
           浙ICP备20024838号-2A
         </Text>
+        <Title style={styles.marginTop}>{t('maintainers')}</Title>
+        <Text
+          style={[styles.text, styles.link]}
+          onPress={() => Linking.openURL('https://github.com/robertying')}>
+          Rui Ying (robertying)
+        </Text>
+        <Text
+          style={[styles.text, styles.link]}
+          onPress={() => Linking.openURL('https://github.com/hezicyan')}>
+          HeziCyan (hezicyan)
+        </Text>
         <Text style={styles.text}>
           {t('opensourceAt')}{' '}
           <Text
