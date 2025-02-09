@@ -119,7 +119,7 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
     handlePickerMenuClose();
     try {
       const result = await DocumentPicker.getDocumentAsync({
-        copyToCacheDirectory: false,
+        copyToCacheDirectory: true,
       });
       if (result.canceled) {
         return;

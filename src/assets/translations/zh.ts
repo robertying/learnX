@@ -152,6 +152,7 @@ const zh: typeof en = {
     - 其他补充信息
   `,
   shareReceived: '您刚分享的内容已被接收，将在下次作业提交时自动选中',
+  shareError: '分享的内容接收失败，文件可能过大',
   sharedContentSelected: '您之前分享的内容已被自动选中作为作业附件',
   noFileSize: '未知文件大小',
   datePickerStartLabel: '开始',

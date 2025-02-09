@@ -100,8 +100,9 @@ import {setPendingAssignmentData} from 'data/actions/assignments';
 import {resetLoading} from 'data/actions/root';
 import {getCoursesForSemester} from 'data/actions/courses';
 import useToast from 'hooks/useToast';
-import packageJson from '../package.json';
 import {setUpBackgroundFetch} from 'helpers/background';
+import {copyFileToCache} from 'helpers/fs';
+import packageJson from '../package.json';
 
 registerTranslation('en', en);
 registerTranslation('zh', zh);
@@ -787,7 +788,7 @@ const Container = () => {
   }, [dispatch, handleReLogin]);
 
   const handleShare = useCallback(
-    (item: any) => {
+    async (item: any) => {
       if (!item) {
         return;
       }
@@ -800,6 +801,12 @@ const Container = () => {
         data = item.data[0];
       } else {
         data = item;
+        try {
+          data.data = await copyFileToCache(data.data);
+        } catch {
+          toast(t('shareError'), 'error', 3 * 1000);
+          return;
+        }
       }
 
       if (data) {

@@ -184,6 +184,12 @@ export const openFile = async (uri: string, type?: string | null) => {
   });
 };
 
+export const copyFileToCache = async (uri: string) => {
+  const path = `${ExpoFileSystem.cacheDirectory}${uri.split('/').pop()}`;
+  await ExpoFileSystem.copyAsync({from: uri, to: path});
+  return path;
+};
+
 export const getExtension = (filename: string) => {
   return filename ? filename.split('.').pop() : '';
 };

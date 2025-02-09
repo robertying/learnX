@@ -158,6 +158,8 @@ export default {
   `,
   shareReceived:
     'The content you just shared has been received. It will be automatically chosen during the next assignment submission.',
+  shareError:
+    'Failed to receive the shared content. The file size may be too large.',
   sharedContentSelected:
     'The previously shared content has been automatically chosen as the attachment.',
   noFileSize: 'Unknown file size',
