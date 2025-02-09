@@ -3,12 +3,10 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.mm */; };
-		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -20,6 +18,7 @@
 		D40B9F7F2B248D30004BC08C /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B9F7E2B248D30004BC08C /* ShareViewController.swift */; };
 		D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.strings */; };
 		D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
+		D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49236392D408A2A00F625A8 /* AppDelegate.swift */; };
 		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
@@ -49,10 +48,7 @@
 
 /* Begin PBXFileReference section */
 		13B07F961A680F5B00A75B9A /* learnX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = learnX.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = learnX/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = AppDelegate.mm; path = learnX/AppDelegate.mm; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = learnX/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = learnX/main.m; sourceTree = "<group>"; };
 		1DE528F5AED26E2F21053210 /* Pods_learnX.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_learnX.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		3668944E61059227B1CB9C3E /* Pods-ShareExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.release.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.release.xcconfig"; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-learnX.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.debug.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.debug.xcconfig"; sourceTree = "<group>"; };
@@ -71,6 +67,7 @@
 		D40B9F822B248ED5004BC08C /* ShareExtension.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
 		D40B9F842B248EF5004BC08C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D40B9F862B248EFD004BC08C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
+		D49236392D408A2A00F625A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = learnX/AppDelegate.swift; sourceTree = "<group>"; };
 		D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -97,15 +94,13 @@
 		13B07FAE1A68108700A75B9A /* learnX */ = {
 			isa = PBXGroup;
 			children = (
-				D40B9F832B248EF5004BC08C /* InfoPlist.strings */,
-				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
-				D40B9F622B248AEB004BC08C /* learnX.entitlements */,
-				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.mm */,
-				13B07FB61A68108700A75B9A /* Info.plist */,
+				D49236392D408A2A00F625A8 /* AppDelegate.swift */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
-				13B07FB71A68108700A75B9A /* main.m */,
+				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
+				D40B9F832B248EF5004BC08C /* InfoPlist.strings */,
+				13B07FB61A68108700A75B9A /* Info.plist */,
 				D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */,
+				D40B9F622B248AEB004BC08C /* learnX.entitlements */,
 				D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */,
 			);
 			name = learnX;
@@ -174,10 +169,10 @@
 		D40B9F702B248C8E004BC08C /* ShareExtension */ = {
 			isa = PBXGroup;
 			children = (
-				D40B9F822B248ED5004BC08C /* ShareExtension.entitlements */,
 				D40B9F7E2B248D30004BC08C /* ShareViewController.swift */,
 				D40B9F732B248C8E004BC08C /* MainInterface.storyboard */,
 				D40B9F762B248C8E004BC08C /* Info.plist */,
+				D40B9F822B248ED5004BC08C /* ShareExtension.entitlements */,
 			);
 			path = ShareExtension;
 			sourceTree = "<group>";
@@ -249,7 +244,6 @@
 				};
 			};
 			buildConfigurationList = 83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "learnX" */;
-			compatibilityVersion = "Xcode 15.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -258,6 +252,7 @@
 				"zh-Hans",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -453,8 +448,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
-				13B07FC11A68108700A75B9A /* main.m in Sources */,
+				D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */,
 				22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -667,7 +661,10 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "$(inherited)  ";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -753,7 +750,10 @@
 					"\"$(inherited)\"",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_CFLAGS = "$(inherited)  ";
+				OTHER_CFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",

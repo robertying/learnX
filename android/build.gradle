@@ -1,20 +1,20 @@
 buildscript {
     ext {
-        buildToolsVersion = "35.0.0"
+        buildToolsVersion = "35.0.1"
         minSdkVersion = 28
         compileSdkVersion = 35
         targetSdkVersion = 35
-        ndkVersion = "27.2.12479018"
-        cmakeVersion = "3.31.1"
+        ndkVersion = "28.0.13004108"
+        cmakeVersion = "3.31.5"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "2.0.21"
+        kotlinVersion = "2.1.10"
     }
 }
 
 plugins {
     id "com.facebook.react.rootproject" apply false
     id "com.google.gms.google-services" version "4.4.2" apply false
-    id "com.google.firebase.crashlytics" version "3.0.2" apply false
+    id "com.google.firebase.crashlytics" version "3.0.3" apply false
 }
 
 subprojects { subproject ->
