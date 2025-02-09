@@ -19,7 +19,10 @@ const AutoHeightWebView: React.FC<
   const webViewRef = useRef<WebView>(null);
 
   const onMessage = (e: WebViewMessageEvent) => {
-    setHeight(parseInt(e.nativeEvent.data, 10));
+    try {
+      const measuredHeight = parseInt(e.nativeEvent.data, 10);
+      setHeight(measuredHeight);
+    } catch {}
   };
 
   const onNavigationStateChange = (e: WebViewNavigation) => {
@@ -42,7 +45,7 @@ const AutoHeightWebView: React.FC<
             document.documentElement.scrollHeight,
             document.body.clientHeight,
             document.body.scrollHeight
-          )
+          ).toString()
         );
       }
     }
@@ -76,7 +79,7 @@ const AutoHeightWebView: React.FC<
   return (
     <WebView
       ref={webViewRef}
-      injectedJavaScript={injectedScript}
+      injectedJavaScriptBeforeContentLoaded={injectedScript}
       onMessage={onMessage}
       javaScriptEnabled
       showsHorizontalScrollIndicator={false}
