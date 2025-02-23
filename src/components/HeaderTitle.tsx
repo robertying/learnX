@@ -14,6 +14,8 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
   return (
     <View
       style={{
+        maxWidth:
+          Platform.OS === 'android' && !DeviceInfo.isTablet() ? 250 : undefined,
         height:
           Platform.OS === 'android' ? (DeviceInfo.isTablet() ? 64 : 56) : 44,
         justifyContent: 'center',
