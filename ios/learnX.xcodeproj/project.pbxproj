@@ -501,7 +501,7 @@
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3260;
+				CURRENT_PROJECT_VERSION = 3270;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = G896QC26MC;
 				ENABLE_BITCODE = NO;
@@ -518,7 +518,7 @@
 					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
-				MARKETING_VERSION = 15.2.0;
+				MARKETING_VERSION = 15.2.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -548,7 +548,7 @@
 				CODE_SIGN_ENTITLEMENTS = learnX/learnX.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3260;
+				CURRENT_PROJECT_VERSION = 3270;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = G896QC26MC;
 				INFOPLIST_FILE = learnX/Info.plist;
@@ -564,7 +564,7 @@
 					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
 					"$(inherited)",
 				);
-				MARKETING_VERSION = 15.2.0;
+				MARKETING_VERSION = 15.2.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -661,10 +661,7 @@
 				);
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_CFLAGS = "$(inherited)  ";
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
@@ -750,10 +747,7 @@
 					"\"$(inherited)\"",
 				);
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_CFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_CFLAGS = "$(inherited)  ";
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DFOLLY_NO_CONFIG",
