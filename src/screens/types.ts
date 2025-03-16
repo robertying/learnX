@@ -32,7 +32,6 @@ export type CourseStackParams = {
 
 export type SettingsStackParams = {
   Settings: undefined;
-  PushNotifications: ExtraParams;
   CourseInformationSharing: ExtraParams;
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;
@@ -79,7 +78,6 @@ export type DetailStackParams = {
   CourseDetail: Course & ExtraParams;
   AssignmentSubmission: Assignment;
   CourseX: {id: string} | undefined;
-  PushNotifications: ExtraParams;
   CourseInformationSharing: ExtraParams;
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;

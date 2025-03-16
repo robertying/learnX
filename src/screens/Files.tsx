@@ -10,7 +10,6 @@ import {useAppDispatch, useAppSelector} from 'data/store';
 import {File} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {Notifications} from 'helpers/notification';
 import {FileStackParams} from './types';
 
 type Props = NativeStackScreenProps<FileStackParams, 'Files'>;
@@ -60,22 +59,6 @@ const Files: React.FC<Props> = ({navigation}) => {
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const sub = Notifications.addNotificationResponseReceivedListener(
-        response => {
-          const data = response.notification.request.content.data as unknown;
-          if ((data as File).fileType) {
-            const file = data as File;
-            navigation.navigate('Files');
-            handlePush(file);
-          }
-        },
-      );
-      return () => sub.remove();
-    }
-  }, [handlePush, navigation]);
 
   return (
     <SafeArea>

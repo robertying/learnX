@@ -10,7 +10,6 @@ import {useAppDispatch, useAppSelector} from 'data/store';
 import {Assignment, File, Notice} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {Notifications} from 'helpers/notification';
 import {NoticeStackParams} from './types';
 
 type Props = NativeStackScreenProps<NoticeStackParams, 'Notices'>;
@@ -60,23 +59,6 @@ const Notices: React.FC<Props> = ({navigation}) => {
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const sub = Notifications.addNotificationResponseReceivedListener(
-        response => {
-          const data = response.notification.request.content.data as unknown;
-          if ((data as Assignment).deadline || (data as File).fileType) {
-            return;
-          }
-          const notice = data as Notice;
-          navigation.navigate('Notices');
-          handlePush(notice);
-        },
-      );
-      return () => sub.remove();
-    }
-  }, [handlePush, navigation]);
 
   return (
     <SafeArea>

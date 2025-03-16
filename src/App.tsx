@@ -42,10 +42,6 @@ import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
 import {en, zh, registerTranslation} from 'react-native-paper-dates';
 import {isLocaleChinese, t} from 'helpers/i18n';
-import {
-  clearPushNotificationBadge,
-  setUpPushNotifications,
-} from 'helpers/notification';
 import {getLatestRelease} from 'helpers/update';
 import Notices from 'screens/Notices';
 import Search from 'screens/Search';
@@ -80,7 +76,6 @@ import Help from 'screens/Help';
 import About from 'screens/About';
 import Changelog from 'screens/Changelog';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
-import PushNotifications from 'screens/PushNotifications';
 import CourseX from 'screens/CourseX';
 import {ToastProvider} from 'components/Toast';
 import Splash from 'components/Splash';
@@ -326,11 +321,6 @@ const CourseStack = () => (
 const SettingDetails = (
   <>
     <SettingStackNavigator.Screen
-      name="PushNotifications"
-      component={PushNotifications}
-      options={getTitleOptions(t('pushNotifications'))}
-    />
-    <SettingStackNavigator.Screen
       name="CourseInformationSharing"
       component={CourseInformationSharing}
       options={getTitleOptions(t('courseInformationSharing'))}
@@ -422,7 +412,6 @@ const MainTab = () => {
   useEffect(() => {
     if (loggedIn) {
       setUpBackgroundFetch();
-      setUpPushNotifications();
     }
   }, [loggedIn]);
 
@@ -776,7 +765,6 @@ const Container = () => {
         nextAppState === 'active'
       ) {
         dispatch(resetLoading());
-        clearPushNotificationBadge();
 
         handleReLogin();
       }

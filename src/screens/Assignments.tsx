@@ -13,7 +13,6 @@ import {Assignment} from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilteredData from 'hooks/useFilteredData';
 import useToast from 'hooks/useToast';
-import {Notifications} from 'helpers/notification';
 import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
 import {t} from 'helpers/i18n';
 
@@ -103,22 +102,6 @@ const Assignments: React.FC<Props> = ({navigation}) => {
   useEffect(() => {
     handleRefresh();
   }, [handleRefresh]);
-
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      const sub = Notifications.addNotificationResponseReceivedListener(
-        response => {
-          const data = response.notification.request.content.data as unknown;
-          if ((data as Assignment).deadline) {
-            const assignment = data as Assignment;
-            navigation.navigate('Assignments');
-            handlePush(assignment);
-          }
-        },
-      );
-      return () => sub.remove();
-    }
-  }, [handlePush, navigation]);
 
   useEffect(() => {
     if (assignmentCalendarSync) {
