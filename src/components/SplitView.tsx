@@ -5,9 +5,7 @@ import {NavigationContainerRef} from '@react-navigation/native';
 import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
-  detailNavigationContainerRef: React.RefObject<
-    NavigationContainerRef<{}>
-  > | null;
+  detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null> | null;
   showDetail: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
@@ -20,9 +18,7 @@ const SplitViewContext = createContext<{
 
 export interface SplitViewProps {
   splitEnabled: boolean;
-  detailNavigationContainerRef: React.RefObject<
-    NavigationContainerRef<{}>
-  > | null;
+  detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null> | null;
   showDetail: boolean;
 }
 
