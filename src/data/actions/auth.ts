@@ -58,3 +58,9 @@ export function login(
     }
   };
 }
+
+export function loginWithOfflineMode(): ThunkResult {
+  return dispatch => {
+    dispatch(loginAction.success(undefined));
+  };
+}

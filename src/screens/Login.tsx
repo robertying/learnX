@@ -20,7 +20,7 @@ import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {FailReason} from 'thu-learn-lib';
 import useToast from 'hooks/useToast';
 import {useAppDispatch, useAppSelector} from 'data/store';
-import {login} from 'data/actions/auth';
+import {login, loginWithOfflineMode} from 'data/actions/auth';
 import {setMockStore} from 'data/actions/root';
 import {setSetting} from 'data/actions/settings';
 import Styles from 'constants/Styles';
@@ -40,11 +40,15 @@ const Login: React.FC<Props> = () => {
   const loggingIn = useAppSelector(state => state.auth.loggingIn);
   const error = useAppSelector(state => state.auth.error);
   const graduate = useAppSelector(state => state.settings.graduate);
+  const savedUsername = useAppSelector(state => state.auth.username);
+  const savedPassword = useAppSelector(state => state.auth.password);
 
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState(savedUsername ?? '');
+  const [password, setPassword] = useState(savedPassword ?? '');
   const [loading, setLoading] = useState(false);
   const passwordTextInputRef = useRef<any>(null);
+
+  const hasCredential = savedUsername && savedPassword;
 
   const handleNext = () => {
     passwordTextInputRef.current?.focus();
@@ -70,6 +74,10 @@ const Login: React.FC<Props> = () => {
     } else {
       dispatch(login(username, password));
     }
+  };
+
+  const handleLoginWithOfflineMode = () => {
+    dispatch(loginWithOfflineMode());
   };
 
   useEffect(() => {
@@ -150,6 +158,14 @@ const Login: React.FC<Props> = () => {
             onPress={handleLogin}>
             {t('login')}
           </Button>
+          {hasCredential && (
+            <Button
+              style={styles.button}
+              mode="text"
+              onPress={handleLoginWithOfflineMode}>
+              {t('offlineMode')}
+            </Button>
+          )}
         </KeyboardAvoidingView>
       </ScrollView>
     </SafeArea>
