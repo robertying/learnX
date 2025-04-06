@@ -8,6 +8,7 @@ import {useTheme, Checkbox} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Colors from 'constants/Colors';
+import DeviceInfo from 'constants/DeviceInfo';
 import Touchable from './Touchable';
 
 const buttonWidth = 80;
@@ -222,7 +223,37 @@ const CardWrapper: React.FC<
     }
   };
 
-  return (
+  const touchable = (
+    <Touchable
+      type="highlight"
+      highlightColorOpacity={0.125}
+      style={{backgroundColor: theme.colors.surface}}
+      onPress={
+        reorderMode ? undefined : selectionMode ? handleCheck : handlePress
+      }
+      onLongPress={handleLongPress}>
+      <View style={[styles.root, touchableContentStyle]}>
+        {selectionMode && (
+          <View style={styles.checkbox}>
+            <Checkbox.Android status={checked ? 'checked' : 'unchecked'} />
+          </View>
+        )}
+        {reorderMode && (
+          <MaterialIcons
+            style={styles.checkbox}
+            name="reorder"
+            size={20}
+            color={theme.colors.onSurface}
+          />
+        )}
+        {children}
+      </View>
+    </Touchable>
+  );
+
+  return DeviceInfo.isWSA() ? (
+    touchable
+  ) : (
     <ReanimatedSwipeable
       ref={snapRef}
       containerStyle={{backgroundColor: theme.colors.surface}}
@@ -230,31 +261,7 @@ const CardWrapper: React.FC<
       renderRightActions={renderRightActions}
       overshootFriction={8}
       enabled={!disableSwipe && !selectionMode && !reorderMode}>
-      <Touchable
-        type="highlight"
-        highlightColorOpacity={0.125}
-        style={{backgroundColor: theme.colors.surface}}
-        onPress={
-          reorderMode ? undefined : selectionMode ? handleCheck : handlePress
-        }
-        onLongPress={handleLongPress}>
-        <View style={[styles.root, touchableContentStyle]}>
-          {selectionMode && (
-            <View style={styles.checkbox}>
-              <Checkbox.Android status={checked ? 'checked' : 'unchecked'} />
-            </View>
-          )}
-          {reorderMode && (
-            <MaterialIcons
-              style={styles.checkbox}
-              name="reorder"
-              size={20}
-              color={theme.colors.onSurface}
-            />
-          )}
-          {children}
-        </View>
-      </Touchable>
+      {touchable}
     </ReanimatedSwipeable>
   );
 };

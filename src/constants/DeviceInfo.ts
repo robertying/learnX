@@ -7,6 +7,7 @@ const cached: {
   abi: string | null;
   systemVersion: string;
   isEmulator: boolean | null;
+  isWSA: boolean;
 } = {
   buildNo: Info.getBuildNumber(),
   isTablet: Info.isTablet(),
@@ -19,6 +20,7 @@ const cached: {
   abi: null,
   systemVersion: Info.getSystemVersion(),
   isEmulator: null,
+  isWSA: Info.getModel() === 'Subsystem for Android(TM)',
 };
 
 export default {
@@ -40,4 +42,5 @@ export default {
     cached.isEmulator = await Info.isEmulator();
     return cached.isEmulator;
   },
+  isWSA: () => cached.isWSA,
 };
