@@ -4,19 +4,13 @@ import {coerce, gte} from 'semver';
 import {dataSource} from 'data/source';
 import DeviceInfo from 'constants/DeviceInfo';
 
-declare const preval: any;
+const darkreader = require('./preval/darkreader.preval.js');
 
-export const darkreader = preval`
-    const fs = require('fs');
-    const path = require('path');
-    let str;
-    if (process.cwd().includes("ios")) {
-      str = fs.readFileSync(path.resolve(process.cwd(), '../node_modules/darkreader/darkreader.js'), 'utf8');
-    } else {
-      str = fs.readFileSync(path.resolve(process.cwd(), './node_modules/darkreader/darkreader.js'), 'utf8');
-    }
-    module.exports = str
-`;
+const katexStyles = require('./preval/katexStyles.preval.js');
+
+const katex = require('./preval/katex.preval.js');
+
+const katexMathtexScript = require('./preval/katexMathtexScript.preval.js');
 
 export const getWebViewTemplate = (
   content: string,
@@ -45,6 +39,9 @@ export const getWebViewTemplate = (
         #root > p:last-child {
           margin-bottom: 0px;
         }
+      </style>
+      <style>
+        ${katexStyles}
       </style>
       <script>
         function addCSRFTokenToUrl(url, token) {
@@ -89,11 +86,17 @@ export const getWebViewTemplate = (
       `
           : ''
       }
+      <script>
+        ${katex}
+      </script>
     </head>
     <body>
       <div id="root">
         ${content}
       </div>
+      <script>
+        ${katexMathtexScript}
+      </script>
     </body>
   </html>
 `;
