@@ -1,10 +1,10 @@
 import Expo
-import ReactAppDependencyProvider
 import FirebaseCore
 import RNShareMenu
+import React
 
-@main
-class AppDelegate: EXAppDelegateWrapper {
+@UIApplicationMain
+class AppDelegate: ExpoAppDelegate {
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication
@@ -15,15 +15,12 @@ class AppDelegate: EXAppDelegateWrapper {
     UIView.appearance().tintColor = .theme
 
     self.moduleName = "learnX"
-    self.dependencyProvider = RCTAppDependencyProvider()
     self.initialProps = [:]
 
     return super.application(
-      application, didFinishLaunchingWithOptions: launchOptions)
-  }
-
-  override func sourceURL(for bridge: RCTBridge) -> URL? {
-    self.bundleURL()
+      application,
+      didFinishLaunchingWithOptions: launchOptions
+    )
   }
 
   override func bundleURL() -> URL? {
@@ -35,7 +32,8 @@ class AppDelegate: EXAppDelegateWrapper {
   }
 
   override func application(
-    _ app: UIApplication, open inputURL: URL,
+    _ app: UIApplication,
+    open inputURL: URL,
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     return ShareMenuManager.application(app, open: inputURL, options: options)
