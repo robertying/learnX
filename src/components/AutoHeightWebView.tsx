@@ -21,6 +21,9 @@ const AutoHeightWebView: React.FC<
   const onMessage = (e: WebViewMessageEvent) => {
     try {
       const measuredHeight = parseInt(e.nativeEvent.data, 10);
+      if (isNaN(measuredHeight) || measuredHeight < 1) {
+        return;
+      }
       setHeight(measuredHeight);
     } catch {}
   };
@@ -41,10 +44,10 @@ const AutoHeightWebView: React.FC<
       } else {
         window.ReactNativeWebView.postMessage(
           Math.max(
-            document.documentElement.clientHeight,
-            document.documentElement.scrollHeight,
-            document.body.clientHeight,
-            document.body.scrollHeight
+            document.documentElement?.clientHeight ?? 0,
+            document.documentElement?.scrollHeight ?? 0,
+            document.body?.clientHeight ?? 0,
+            document.body?.scrollHeight ?? 0
           ).toString()
         );
       }
