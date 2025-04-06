@@ -192,4 +192,5 @@ export default {
   anonymous: 'Anonymous',
   maintainers: 'Maintainers',
   offlineMode: 'Offline Mode',
+  openFileDownloadDirectory: 'Open File Download Folder',
 };

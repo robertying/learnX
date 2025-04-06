@@ -11,6 +11,16 @@ import {store} from 'data/store';
 import {File} from 'data/types/state';
 import Urls from 'constants/Urls';
 
+export const getLearnXFilesDir = () => {
+  const settings = store.getState().settings;
+
+  return `${
+    settings.fileUseDocumentDir
+      ? ExpoFileSystem.documentDirectory
+      : ExpoFileSystem.cacheDirectory
+  }learnX-files`;
+};
+
 export const downloadFile = async (
   file: File,
   refresh?: boolean,
@@ -23,11 +33,7 @@ export const downloadFile = async (
 
   const settings = store.getState().settings;
 
-  let dir = `${
-    settings.fileUseDocumentDir
-      ? ExpoFileSystem.documentDirectory
-      : ExpoFileSystem.cacheDirectory
-  }learnX-files/${file.courseName}/${file.id}`;
+  const dir = `${getLearnXFilesDir()}/${file.courseName}/${file.id}`;
   await fs.mkdir(dir);
 
   let path = settings.fileOmitCourseName

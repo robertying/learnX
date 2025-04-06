@@ -184,6 +184,7 @@ const zh: typeof en = {
   anonymous: '匿名',
   maintainers: '维护者',
   offlineMode: '离线模式',
+  openFileDownloadDirectory: '打开文件下载文件夹',
 };
 
 export default zh;

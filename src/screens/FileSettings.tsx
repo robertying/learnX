@@ -1,14 +1,15 @@
-import {Alert, Platform, ScrollView, StyleSheet} from 'react-native';
+import {Alert, Linking, Platform, ScrollView, StyleSheet} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {Caption} from 'react-native-paper';
 import {useAppDispatch, useAppSelector} from 'data/store';
 import {setSetting} from 'data/actions/settings';
-import {removeFileDir} from 'helpers/fs';
+import {getLearnXFilesDir, removeFileDir} from 'helpers/fs';
 import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import DeviceInfo from 'constants/DeviceInfo';
 import {SettingsStackParams} from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
@@ -101,6 +102,17 @@ const FileSettings: React.FC<Props> = props => {
           type="none"
           onPress={handleClearCache}
         />
+        {DeviceInfo.isMac() && (
+          <TableCell
+            style={styles.marginTop}
+            iconName="open-in-new"
+            primaryText={t('openFileDownloadDirectory')}
+            type="none"
+            onPress={() => {
+              Linking.openURL(getLearnXFilesDir());
+            }}
+          />
+        )}
         {Platform.OS === 'android' && (
           <TableCell
             style={styles.marginTop}
