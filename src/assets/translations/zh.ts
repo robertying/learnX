@@ -184,7 +184,10 @@ const zh: typeof en = {
   anonymous: '匿名',
   maintainers: '维护者',
   offlineMode: '离线模式',
-  openFileDownloadDirectory: '打开文件下载文件夹',
+  openFileDownloadDirectory: '打开文件保存目录',
+  download: '下载',
+  downloadToDownloadsSucceeded: '成功下载文件到“下载”文件夹',
+  downloadToDownloadsFailed: '下载文件到“下载”文件夹失败',
 };
 
 export default zh;

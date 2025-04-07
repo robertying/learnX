@@ -29,7 +29,12 @@ import {
   canRenderInMacWebview,
   needWhiteBackground,
 } from 'helpers/html';
-import {downloadFile, openFile, shareFile} from 'helpers/fs';
+import {
+  copyFileToMacDownloads,
+  downloadFile,
+  openFile,
+  shareFile,
+} from 'helpers/fs';
 import {isLocaleChinese, t} from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
@@ -88,6 +93,15 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
     await shareFile(route.params);
   }, [route.params]);
 
+  const handleCopyToDownloadsFolder = useCallback(async () => {
+    try {
+      await copyFileToMacDownloads(file, path);
+      toast(t('downloadToDownloadsSucceeded'), 'success');
+    } catch (e) {
+      toast(t('downloadToDownloadsFailed'), 'error');
+    }
+  }, [path, file]);
+
   const handleOpen = useCallback(async () => {
     try {
       if (Platform.OS === 'android') {
@@ -142,7 +156,15 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
             onPress={handleShare}
             icon={props => <Icon {...props} name="ios-share" />}
           />
-          {(Platform.OS === 'android' || DeviceInfo.isMac()) && (
+          {DeviceInfo.isMac() && (
+            <IconButton
+              style={styles.rightIcon}
+              disabled={error || !path}
+              onPress={handleCopyToDownloadsFolder}
+              icon={props => <Icon {...props} name="download" />}
+            />
+          )}
+          {Platform.OS === 'android' && (
             <IconButton
               style={styles.rightIcon}
               disabled={error || !path}
@@ -300,7 +322,17 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
               <IconButton icon="share" size={48} onPress={handleShare} />
               <Text>{t('share')}</Text>
             </View>
-            {(Platform.OS === 'android' || DeviceInfo.isMac()) && (
+            {DeviceInfo.isMac() && (
+              <View style={styles.colCenter}>
+                <IconButton
+                  icon="download"
+                  size={48}
+                  onPress={handleCopyToDownloadsFolder}
+                />
+                <Text>{t('download')}</Text>
+              </View>
+            )}
+            {Platform.OS === 'android' && (
               <View style={styles.colCenter}>
                 <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
                 <Text>{t('open')}</Text>

@@ -192,5 +192,8 @@ export default {
   anonymous: 'Anonymous',
   maintainers: 'Maintainers',
   offlineMode: 'Offline Mode',
-  openFileDownloadDirectory: 'Open File Download Folder',
+  openFileDownloadDirectory: 'Open File Save Folder',
+  download: 'Download',
+  downloadToDownloadsSucceeded: 'Successfully downloaded the file to Downloads',
+  downloadToDownloadsFailed: 'Failed to download the file to Downloads',
 };

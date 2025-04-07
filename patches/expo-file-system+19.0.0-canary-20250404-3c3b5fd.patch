@@ -1,0 +1,18 @@
+diff --git a/node_modules/expo-file-system/ios/FileSystemHelpers.swift b/node_modules/expo-file-system/ios/FileSystemHelpers.swift
+index 11f1c7d..850afb4 100644
+--- a/node_modules/expo-file-system/ios/FileSystemHelpers.swift
++++ b/node_modules/expo-file-system/ios/FileSystemHelpers.swift
+@@ -63,6 +63,13 @@ internal func ensurePathPermission(_ appContext: AppContext?, path: String, flag
+   guard let permissionsManager: EXFilePermissionModuleInterface = appContext?.legacyModule(implementing: EXFilePermissionModuleInterface.self) else {
+     throw Exceptions.PermissionsModuleNotFound()
+   }
++
++  if let downloads = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first {
++    if path.hasPrefix(downloads.path) {
++      return
++    }
++  }
++    
+   guard permissionsManager.getPathPermissions(path).contains(flag) else {
+     throw flag == .read ? FileNotReadableException(path) : FileNotWritableException(path)
+   }

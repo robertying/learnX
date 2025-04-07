@@ -11,6 +11,20 @@ import {store} from 'data/store';
 import {File} from 'data/types/state';
 import Urls from 'constants/Urls';
 
+const macDownloadDirectory = ExpoFileSystem.documentDirectory?.replace(
+  'Documents',
+  'Downloads',
+)!;
+
+export const copyFileToMacDownloads = async (
+  {title, fileType}: {title: string; fileType: string},
+  fromPath: string,
+) => {
+  const toPath = `${macDownloadDirectory}${title}.${fileType}`;
+  await ExpoFileSystem.copyAsync({from: fromPath, to: toPath});
+  return toPath;
+};
+
 export const getLearnXFilesDir = () => {
   const settings = store.getState().settings;
 
