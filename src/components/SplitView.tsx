@@ -1,7 +1,8 @@
-import {createContext, useState, Children} from 'react';
+import {createContext, useState, Children, useEffect} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Divider} from 'react-native-paper';
 import {NavigationContainerRef} from '@react-navigation/native';
+import {BlurView} from 'expo-blur';
 import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
@@ -29,6 +30,14 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   children,
 }) => {
   const [showMaster, setShowMaster] = useState(true);
+  const [blur, setBlur] = useState(false);
+
+  useEffect(() => {
+    setBlur(true);
+    setTimeout(() => {
+      setBlur(false);
+    }, 500);
+  }, [showDetail, splitEnabled]);
 
   return (
     <SplitViewContext.Provider
@@ -43,7 +52,10 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
           <View
             style={[
               styles.master,
-              {flex: showDetail ? 0 : 1, display: showMaster ? 'flex' : 'none'},
+              {
+                flex: showDetail ? 0 : 1,
+                display: showMaster ? 'flex' : 'none',
+              },
             ]}>
             {Children.toArray(children)[0]}
           </View>
@@ -56,6 +68,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
       ) : (
         <>{Children.toArray(children)[0]}</>
       )}
+      {blur && <BlurView intensity={100} style={styles.blurView} />}
     </SplitViewContext.Provider>
   );
 };
@@ -76,6 +89,14 @@ const styles = StyleSheet.create({
   divider: {
     height: '100%',
     width: 1,
+  },
+  blurView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 99999,
   },
 });
 

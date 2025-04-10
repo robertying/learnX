@@ -52,6 +52,7 @@
     "eslint-plugin-prettier": "5.2.6",
     "expo": "53.0.0-canary-20250404-3c3b5fd",
     "expo-background-task": "0.0.2-canary-20250404-3c3b5fd",
+    "expo-blur": "14.0.3",
     "expo-calendar": "14.1.0-canary-20250404-3c3b5fd",
     "expo-document-picker": "13.0.4-canary-20250404-3c3b5fd",
     "expo-file-system": "19.0.0-canary-20250404-3c3b5fd",
