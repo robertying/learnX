@@ -239,12 +239,15 @@ const CourseDetail: React.FC<Props> = ({
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX', {id: course.id}));
     } else {
-      navigation.navigate('CourseXStack', {
-        screen: 'CourseX',
-        params: {
-          id: course.id,
-        },
-      } as any);
+      navigation.navigate(
+        'CourseXStack' as any,
+        {
+          screen: 'CourseX',
+          params: {
+            id: course.id,
+          },
+        } as any,
+      );
     }
   }, [course.id, detailNavigator, navigation]);
 

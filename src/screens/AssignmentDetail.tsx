@@ -98,10 +98,13 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
         StackActions.push('AssignmentSubmission', route.params),
       );
     } else {
-      navigation.navigate('AssignmentSubmissionStack', {
-        screen: 'AssignmentSubmission',
-        params: route.params,
-      } as any);
+      navigation.navigate(
+        'AssignmentSubmissionStack' as any,
+        {
+          screen: 'AssignmentSubmission',
+          params: route.params,
+        } as any,
+      );
     }
   }, [detailNavigator, navigation, route.params]);
 

@@ -31,7 +31,7 @@ export const store = configureStore<PersistAppState, AppActions>({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }) as any,
+    }),
 });
 export const persistor = persistStore(store);
 
