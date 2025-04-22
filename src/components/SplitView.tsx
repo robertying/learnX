@@ -1,4 +1,4 @@
-import {createContext, useState, Children, useEffect} from 'react';
+import {createContext, useState, Children, useEffect, useRef} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {Divider} from 'react-native-paper';
 import {NavigationContainerRef} from '@react-navigation/native';
@@ -29,14 +29,20 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   showDetail,
   children,
 }) => {
+  const rendered = useRef(false);
+
   const [showMaster, setShowMaster] = useState(true);
   const [blur, setBlur] = useState(false);
 
   useEffect(() => {
-    setBlur(true);
-    setTimeout(() => {
-      setBlur(false);
-    }, 500);
+    if (rendered.current) {
+      setBlur(true);
+      setTimeout(() => {
+        setBlur(false);
+      }, 500);
+    } else {
+      rendered.current = true;
+    }
   }, [showDetail, splitEnabled]);
 
   return (
