@@ -131,7 +131,7 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
       headerBackVisible:
         DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
       headerRight: () => (
-        <View style={Styles.flexRow}>
+        <View style={[Styles.flexRow, {justifyContent: 'flex-end'}]}>
           {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
             <IconButton
               style={styles.rightIcon}
