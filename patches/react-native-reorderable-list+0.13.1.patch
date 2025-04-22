@@ -1,0 +1,11 @@
+diff --git a/node_modules/react-native-reorderable-list/src/hooks/useContext.ts b/node_modules/react-native-reorderable-list/src/hooks/useContext.ts
+index 2658655..c26ac80 100644
+--- a/node_modules/react-native-reorderable-list/src/hooks/useContext.ts
++++ b/node_modules/react-native-reorderable-list/src/hooks/useContext.ts
+@@ -7,5 +7,5 @@ export const useContext = <T>(context: React.Context<T | undefined>) => {
+     return value;
+   }
+ 
+-  throw 'Please consume ReorderableList context within its provider.';
++  return {} as T;
+ };
