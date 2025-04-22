@@ -22,7 +22,10 @@ import type {
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {
+  SafeAreaProvider,
+  useSafeAreaFrame,
+} from 'react-native-safe-area-context';
 import {
   IconButton,
   useTheme,
@@ -731,7 +734,7 @@ const Container = () => {
   const dispatch = useAppDispatch();
   const loginError = useAppSelector(state => state.auth.error);
   const auth = useAppSelector(state => state.auth);
-  const windowSize = useWindowDimensions();
+  const frame = useSafeAreaFrame();
 
   const mainNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
   const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
@@ -831,7 +834,7 @@ const Container = () => {
 
   const showMain = !loginError && !!auth.username && !!auth.password;
 
-  const showDetail = showMain && windowSize.width >= 750;
+  const showDetail = showMain && frame.width >= 750;
 
   return (
     <SafeAreaProvider>
