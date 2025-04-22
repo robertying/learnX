@@ -497,7 +497,8 @@ const MainTab = () => {
               : undefined,
           tabBarBadgeStyle: {
             backgroundColor: 'red',
-            transform: [{scale: 0.5}],
+            maxWidth: 10,
+            maxHeight: 10,
           },
         }}
       />
