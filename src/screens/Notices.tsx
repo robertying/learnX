@@ -1,5 +1,4 @@
 import {useCallback, useEffect} from 'react';
-import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import NoticeCard from 'components/NoticeCard';
@@ -7,7 +6,7 @@ import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import {getAllNoticesForCourses} from 'data/actions/notices';
 import {useAppDispatch, useAppSelector} from 'data/store';
-import {Assignment, File, Notice} from 'data/types/state';
+import {Notice} from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {NoticeStackParams} from './types';

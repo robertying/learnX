@@ -100,7 +100,7 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
     } catch (e) {
       toast(t('downloadToDownloadsFailed'), 'error');
     }
-  }, [path, file]);
+  }, [path, file, toast]);
 
   const handleOpen = useCallback(async () => {
     try {
@@ -192,6 +192,7 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
     handleOpen,
     handleShare,
     handleShowInfo,
+    handleCopyToDownloadsFolder,
     navigation,
     path,
     showDetail,

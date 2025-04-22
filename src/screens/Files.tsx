@@ -1,5 +1,4 @@
 import {useCallback, useEffect} from 'react';
-import {Platform} from 'react-native';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
 import FileCard from 'components/FileCard';
