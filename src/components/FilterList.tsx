@@ -1,11 +1,14 @@
 import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {FlatList, RefreshControl, View} from 'react-native';
+import {RefreshControl, View} from 'react-native';
 import {IconButton} from 'react-native-paper';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {StackActions} from '@react-navigation/native';
-import DraggableFlatList, {
-  DraggableFlatListProps,
-} from 'react-native-draggable-flatlist';
+import {runOnJS} from 'react-native-reanimated';
+import ReorderableList, {
+  ReorderableListProps,
+  ReorderableListReorderEvent,
+  reorderItems,
+} from 'react-native-reorderable-list';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
@@ -146,15 +149,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     setFilterVisible(false);
   };
 
-  const handleReorderDone: DraggableFlatListProps<T>['onDragEnd'] = ({
-    data,
-  }) => {
-    const courseOrder = data.map(i => i.id);
-    dispatch(setCourseOrder(courseOrder));
+  const handleReorderDone = ({from, to}: ReorderableListReorderEvent) => {
+    const reorderedData = reorderItems(data, from, to);
+    dispatch(setCourseOrder(reorderedData.map(i => i.id)));
   };
 
   const handleDragChange = () => {
-    Haptics.selectionAsync();
+    'worklet';
+    runOnJS(Haptics.selectionAsync)();
   };
 
   const handleSelect = useCallback(() => {
@@ -414,29 +416,17 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   }, [refreshing]);
 
-  const List = isCourse ? DraggableFlatList : FlatList;
-
-  const renderItem: DraggableFlatListProps<T>['renderItem'] = ({
-    item,
-    drag,
-    isActive,
-  }) => {
+  const renderItem: ReorderableListProps<T>['renderItem'] = ({item}) => {
     return (
       <Component
-        touchableContentStyle={{opacity: isActive ? 0.5 : 1}}
         data={item}
         selectionMode={selectionMode}
         reorderMode={reorderMode}
         checked={selection[item.id]}
         onCheck={checked => setSelection({...selection, [item.id]: checked})}
-        drag={drag}
         onPress={() => {
-          if (reorderMode) {
-            drag();
-          } else {
-            setFilterVisible(false);
-            onItemPress?.(item);
-          }
+          setFilterVisible(false);
+          onItemPress?.(item);
         }}
         fav={favIds?.includes(item.id)}
         onFav={() => handleFav(favIds!.includes(item.id), item)}
@@ -467,17 +457,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         archivedCount={archived?.length}
         hiddenCount={hidden.length}
       />
-      <List<T>
-        dragHitSlop={
-          reorderMode
-            ? undefined
-            : {
-                top: 0,
-                bottom: 0,
-                left: -Number.MAX_SAFE_INTEGER,
-                right: -Number.MAX_SAFE_INTEGER,
-              }
-        }
+      <ReorderableList
         style={{height: '100%'}}
         contentContainerStyle={[
           {flexGrow: 1},
@@ -485,13 +465,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ]}
         data={data}
         ListEmptyComponent={<Empty />}
-        onPlaceholderIndexChange={handleDragChange}
-        onDragEnd={handleReorderDone}
-        renderItem={renderItem as any}
+        onReorder={handleReorderDone}
+        onIndexChange={handleDragChange}
+        renderItem={renderItem}
         keyExtractor={item => item.id}
         refreshControl={
           <RefreshControl
-            enabled={!selectionMode}
+            enabled={!selectionMode && !reorderMode}
             refreshing={firstTimeFetching.current ? false : refreshing}
             onRefresh={onRefresh}
           />

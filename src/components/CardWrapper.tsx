@@ -1,9 +1,10 @@
 import {PropsWithChildren, useRef, useEffect, useCallback} from 'react';
-import {View, StyleSheet, StyleProp, ViewStyle} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import Animated, {SharedValue, useAnimatedStyle} from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import {useReorderableDrag} from 'react-native-reorderable-list';
 import {useTheme, Checkbox} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -134,13 +135,11 @@ export interface CardWrapperProps {
   hidden?: boolean;
   onHide?: (hide: boolean) => void;
   onPress?: () => void;
-  drag?: () => void;
   selectionMode?: boolean;
   reorderMode?: boolean;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
   disableSwipe?: boolean;
-  touchableContentStyle?: StyleProp<ViewStyle>;
 }
 
 const CardWrapper: React.FC<
@@ -153,16 +152,16 @@ const CardWrapper: React.FC<
   onHide,
   hidden,
   onPress,
-  drag,
   children,
   selectionMode,
   reorderMode,
   checked,
   onCheck,
   disableSwipe,
-  touchableContentStyle,
 }) => {
   const theme = useTheme();
+
+  const drag = useReorderableDrag();
 
   const snapRef = useRef<SwipeableMethods>(null);
 
@@ -217,7 +216,7 @@ const CardWrapper: React.FC<
 
   const handleLongPress = () => {
     if (reorderMode) {
-      drag?.();
+      drag();
     } else if (!disableSwipe && !selectionMode) {
       snapRef.current?.openRight();
     }
@@ -232,7 +231,7 @@ const CardWrapper: React.FC<
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress
       }
       onLongPress={handleLongPress}>
-      <View style={[styles.root, touchableContentStyle]}>
+      <View style={styles.root}>
         {selectionMode && (
           <View style={styles.checkbox}>
             <Checkbox.Android status={checked ? 'checked' : 'unchecked'} />
