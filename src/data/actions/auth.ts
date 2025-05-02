@@ -16,7 +16,7 @@ export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
-)<undefined, Auth | undefined, ApiError>();
+)<{clearCredential?: boolean}, Auth | undefined, ApiError>();
 
 export function login(
   username?: string,
@@ -31,7 +31,7 @@ export function login(
       }
     }
 
-    dispatch(loginAction.request());
+    dispatch(loginAction.request({clearCredential: !!username && !!password}));
 
     try {
       if (reset) {

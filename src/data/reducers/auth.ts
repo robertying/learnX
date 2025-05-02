@@ -17,6 +17,15 @@ export default function auth(
 ): AuthState {
   switch (action.type) {
     case LOGIN_REQUEST:
+      if (action.payload.clearCredential) {
+        return {
+          ...state,
+          loggingIn: true,
+          error: null,
+          username: null,
+          password: null,
+        };
+      }
       return {
         ...state,
         loggingIn: true,
