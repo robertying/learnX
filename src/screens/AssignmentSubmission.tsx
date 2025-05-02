@@ -372,7 +372,7 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
                 <Button
                   disabled={uploading}
                   mode="contained"
-                  style={[styles.submitButton, Styles.spacey1]}
+                  style={styles.submitButton}
                   onPress={handleAttachmentRemove}>
                   {removeAttachment
                     ? t('undoRemoveAttachment')
@@ -392,7 +392,7 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
                   }}
                   anchor={
                     <Button
-                      style={[styles.submitButton, Styles.spacey1]}
+                      style={styles.submitButton}
                       disabled={uploading}
                       mode="contained"
                       onPress={handlePickerMenuOpen}>
@@ -453,6 +453,8 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    marginVertical: 8,
   },
 });
 
