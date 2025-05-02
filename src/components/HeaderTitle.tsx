@@ -41,6 +41,8 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 11,
     marginTop: 2,
+    width: '100%',
+    textAlign: Platform.OS === 'android' ? 'left' : 'center',
   },
 });
 
