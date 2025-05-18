@@ -6,17 +6,12 @@ import DeviceInfo from 'constants/DeviceInfo';
 
 const darkreader = require('./preval/darkreader.preval.js');
 
-const katexStyles = require('./preval/katexStyles.preval.js');
-
-const katex = require('./preval/katex.preval.js');
-
-const katexMathtexScript = require('./preval/katexMathtexScript.preval.js');
-
 export const getWebViewTemplate = (
   content: string,
   darkMode?: boolean,
   backgroundColor?: string,
-) => `
+) => {
+  return `
   <!DOCTYPE html>
   <html lang="zh-cmn-Hans">
     <head>
@@ -26,7 +21,7 @@ export const getWebViewTemplate = (
       <style>
         body {
           margin: 0px;
-          padding: 16px;
+          padding: 1rem;
         }
         #root {
           height: 100%;
@@ -39,9 +34,6 @@ export const getWebViewTemplate = (
         #root > p:last-child {
           margin-bottom: 0px;
         }
-      </style>
-      <style>
-        ${katexStyles}
       </style>
       <script>
         function addCSRFTokenToUrl(url, token) {
@@ -86,20 +78,15 @@ export const getWebViewTemplate = (
       `
           : ''
       }
-      <script>
-        ${katex}
-      </script>
     </head>
     <body>
       <div id="root">
         ${content}
       </div>
-      <script>
-        ${katexMathtexScript}
-      </script>
     </body>
   </html>
 `;
+};
 
 export const needWhiteBackground = (ext?: string | null) => {
   return ext && ['doc', 'docx', 'xls', 'xlsx'].includes(ext) ? true : false;
