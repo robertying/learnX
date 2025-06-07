@@ -260,7 +260,9 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                   </TextButton>
                 )}
                 {removeTags(gradeContent) ? (
-                  <Text style={Styles.spacey1}>{removeTags(gradeContent)}</Text>
+                  <Text style={Styles.spacey1} selectable>
+                    {removeTags(gradeContent)}
+                  </Text>
                 ) : null}
                 <Caption>
                   {dayjs(gradeTime).format(
