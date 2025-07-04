@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
-    <device id="retina5_9" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23727" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_3" orientation="portrait" appearance="dark"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,22 +14,22 @@
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="812"/>
+                        <rect key="frame" x="0.0" y="0.0" width="402" height="874"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="MaskedAppIcon" translatesAutoresizingMaskIntoConstraints="NO" id="qYY-SY-jID">
-                                <rect key="frame" x="112.66666666666669" y="331" width="150" height="150"/>
+                                <rect key="frame" x="121" y="357" width="160" height="160"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="150" id="8jB-H0-QC1"/>
-                                    <constraint firstAttribute="height" constant="150" id="JCq-qY-eKG"/>
+                                    <constraint firstAttribute="width" constant="160" id="8jB-H0-QC1"/>
+                                    <constraint firstAttribute="height" constant="160" id="JCq-qY-eKG"/>
                                 </constraints>
                             </imageView>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
-                            <constraint firstItem="qYY-SY-jID" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="PwC-3C-juV"/>
-                            <constraint firstItem="qYY-SY-jID" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="dnC-1I-t15"/>
+                            <constraint firstItem="qYY-SY-jID" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="MrM-Mn-k1W"/>
+                            <constraint firstItem="qYY-SY-jID" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="WM4-SZ-A8g"/>
                         </constraints>
                     </view>
                 </viewController>

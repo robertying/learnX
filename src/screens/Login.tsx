@@ -99,15 +99,9 @@ const Login: React.FC<Props> = () => {
       <ScrollView style={Styles.flex1} contentContainerStyle={styles.root}>
         <KeyboardAvoidingView
           style={styles.inputs}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-          <Image
-            style={styles.logo}
-            source={
-              theme.dark
-                ? require('../../ios/learnX/Assets.xcassets/MaskedAppIcon.imageset/Black.png')
-                : require('../../ios/learnX/Assets.xcassets/MaskedAppIcon.imageset/MaskedAppIcon.png')
-            }
-          />
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <Logo iosSize={120} />
           <TextInput
             style={styles.textInput}
             label={t('usernameOrId')}
@@ -183,11 +177,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '80%',
-  },
-  logo: {
-    width: 120,
-    height: 120,
-    marginVertical: 16,
   },
   textInput: {
     width: '100%',

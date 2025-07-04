@@ -1,5 +1,6 @@
-import {Image, Platform, StyleSheet, useColorScheme, View} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { useTheme } from 'react-native-paper';
+import Logo from 'components/Logo';
 
 const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
   const colorScheme = useColorScheme();
@@ -17,15 +18,9 @@ const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
                 ? 'black'
                 : 'white',
         },
-      ]}>
-      <Image
-        style={Platform.OS === 'android' ? styles.logoAndroid : styles.logo}
-        source={
-          colorScheme === 'dark'
-            ? require('../../ios/learnX/Assets.xcassets/MaskedAppIcon.imageset/Black.png')
-            : require('../../ios/learnX/Assets.xcassets/MaskedAppIcon.imageset/MaskedAppIcon.png')
-        }
-      />
+      ]}
+    >
+      <Logo iosSize={160} />
     </View>
   );
 };
@@ -35,14 +30,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  logo: {
-    width: 150,
-    height: 150,
-  },
-  logoAndroid: {
-    width: 192,
-    height: 192,
   },
 });
 
