@@ -17,7 +17,6 @@ The app does use third party services that may collect information used to ident
 Link to privacy policy of third party service providers that may be used by the app:
 
 - [Google Play Services](https://policies.google.com/privacy)
-- [Visual Studio App Center](https://learn.microsoft.com/en-us/appcenter/gdpr/data-from-your-end-users)
 - [Firebase](https://firebase.google.com/support/privacy)
 
 ## Log Data
