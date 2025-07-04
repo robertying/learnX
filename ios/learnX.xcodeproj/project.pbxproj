@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,7 +17,6 @@
 		D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D40B9F7F2B248D30004BC08C /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B9F7E2B248D30004BC08C /* ShareViewController.swift */; };
 		D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.strings */; };
-		D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */; };
 		D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49236392D408A2A00F625A8 /* AppDelegate.swift */; };
 		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
@@ -35,14 +34,12 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		D40B9F7D2B248C8E004BC08C /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
 			dstPath = "";
-			dstSubfolderSpec = 13;
+			dstSubfolder = PlugIns;
 			files = (
 				D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -68,25 +65,22 @@
 		D40B9F842B248EF5004BC08C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D40B9F862B248EFD004BC08C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		D49236392D408A2A00F625A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = learnX/AppDelegate.swift; sourceTree = "<group>"; };
+		D4A216712DFD265D00DC9CC1 /* learnX.icon */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = learnX.icon; path = learnX/learnX.icon; sourceTree = "<group>"; };
 		D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D40B9F6C2B248C8E004BC08C /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				8E3E7B937EFCF0B8FF04F8CB /* Pods_ShareExtension.framework in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -97,6 +91,7 @@
 				D49236392D408A2A00F625A8 /* AppDelegate.swift */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
+				D4A216712DFD265D00DC9CC1 /* learnX.icon */,
 				D40B9F832B248EF5004BC08C /* InfoPlist.strings */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */,
@@ -217,8 +212,6 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			name = ShareExtension;
 			productName = ShareExtension;
 			productReference = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */;
@@ -252,7 +245,7 @@
 				"zh-Hans",
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
-			preferredProjectObjectVersion = 77;
+			preferredProjectObjectVersion = 90;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -266,7 +259,6 @@
 /* Begin PBXResourcesBuildPhase section */
 		13B07F8E1A680F5B00A75B9A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */,
@@ -274,148 +266,127 @@
 				D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */,
 				D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D40B9F6D2B248C8E004BC08C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
-				D448E4772BCCCA1E00D40094 /* PrivacyInfo.xcprivacy in Resources */,
 				D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
 			inputPaths = (
 				"$(SRCROOT)/.xcode.env.local",
 				"$(SRCROOT)/.xcode.env",
 			);
 			name = "Bundle React Native code and images";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
+			shellScript = (
+				"set -e",
+				"",
+				"WITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"",
+				"REACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"",
+				"",
+				"/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"",
+				"",
+			);
 		};
 		00EEFC60759A1932668264C0 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-frameworks-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-frameworks.sh\"\n";
+			shellScript = (
+				"\"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-frameworks.sh\"",
+				"",
+			);
 			showEnvVarsInLog = 0;
 		};
 		01F61BBB2A0451DCDD5622E5 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
 				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-ShareExtension-checkManifestLockResult.txt",
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = (
+				"diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null",
+				"if [ $? != 0 ] ; then",
+				"    # print error to STDERR",
+				"    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2",
+				"    exit 1",
+				"fi",
+				"# This output is used by Xcode 'outputs' to avoid re-running this script phase.",
+				"echo \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"",
+				"",
+			);
 			showEnvVarsInLog = 0;
 		};
 		1CD9AD2FFD72D77A8EA12875 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
 			name = "[Expo] Configure project";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-learnX/expo-configure-project.sh\"\n";
+			shellScript = (
+				"# This script configures Expo modules and generates the modules provider file.",
+				"bash -l -c \"./Pods/Target\\ Support\\ Files/Pods-learnX/expo-configure-project.sh\"",
+				"",
+			);
 		};
 		B7C3E71CC907F8DD025AE4D9 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ShareExtension/Pods-ShareExtension-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-ShareExtension/Pods-ShareExtension-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShareExtension/Pods-ShareExtension-resources.sh\"\n";
+			shellScript = (
+				"\"${PODS_ROOT}/Target Support Files/Pods-ShareExtension/Pods-ShareExtension-resources.sh\"",
+				"",
+			);
 			showEnvVarsInLog = 0;
 		};
 		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
 				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-learnX-checkManifestLockResult.txt",
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			shellScript = (
+				"diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null",
+				"if [ $? != 0 ] ; then",
+				"    # print error to STDERR",
+				"    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2",
+				"    exit 1",
+				"fi",
+				"# This output is used by Xcode 'outputs' to avoid re-running this script phase.",
+				"echo \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"",
+				"",
+			);
 			showEnvVarsInLog = 0;
 		};
 		D4D920102CA8540F00790DF6 /* Upload dSYM files */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
 				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
@@ -424,33 +395,26 @@
 				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
 			);
 			name = "Upload dSYM files";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/FirebaseCrashlytics/run\"\n";
+			shellScript = (
+				"\"${PODS_ROOT}/FirebaseCrashlytics/run\"",
+				"",
+			);
 		};
 		E235C05ADACE081382539298 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-resources.sh\"\n";
+			shellScript = (
+				"\"${PODS_ROOT}/Target Support Files/Pods-learnX/Pods-learnX-resources.sh\"",
+				"",
+			);
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -458,20 +422,16 @@
 /* Begin PBXSourcesBuildPhase section */
 		13B07F871A680F5B00A75B9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */,
 				22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D40B9F6B2B248C8E004BC08C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 				D40B9F7F2B248D30004BC08C /* ShareViewController.swift in Sources */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -504,7 +464,7 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		13B07F941A680F5B00A75B9A /* Debug */ = {
+		13B07F941A680F5B00A75B9A /* Debug configuration for PBXNativeTarget "learnX" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-learnX.debug.xcconfig */;
 			buildSettings = {
@@ -551,7 +511,7 @@
 			};
 			name = Debug;
 		};
-		13B07F951A680F5B00A75B9A /* Release */ = {
+		13B07F951A680F5B00A75B9A /* Release configuration for PBXNativeTarget "learnX" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */;
 			buildSettings = {
@@ -596,7 +556,7 @@
 			};
 			name = Release;
 		};
-		83CBBA201A601CBA00E9B192 /* Debug */ = {
+		83CBBA201A601CBA00E9B192 /* Debug configuration for PBXProject "learnX" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -690,7 +650,7 @@
 			};
 			name = Debug;
 		};
-		83CBBA211A601CBA00E9B192 /* Release */ = {
+		83CBBA211A601CBA00E9B192 /* Release configuration for PBXProject "learnX" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -777,7 +737,7 @@
 			};
 			name = Release;
 		};
-		D40B9F7B2B248C8E004BC08C /* Debug */ = {
+		D40B9F7B2B248C8E004BC08C /* Debug configuration for PBXNativeTarget "ShareExtension" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 8257AB0E0F3BEAA229130429 /* Pods-ShareExtension.debug.xcconfig */;
 			buildSettings = {
@@ -831,7 +791,7 @@
 			};
 			name = Debug;
 		};
-		D40B9F7C2B248C8E004BC08C /* Release */ = {
+		D40B9F7C2B248C8E004BC08C /* Release configuration for PBXNativeTarget "ShareExtension" */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3668944E61059227B1CB9C3E /* Pods-ShareExtension.release.xcconfig */;
 			buildSettings = {
@@ -890,28 +850,25 @@
 		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "learnX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				13B07F941A680F5B00A75B9A /* Debug */,
-				13B07F951A680F5B00A75B9A /* Release */,
+				13B07F941A680F5B00A75B9A /* Debug configuration for PBXNativeTarget "learnX" */,
+				13B07F951A680F5B00A75B9A /* Release configuration for PBXNativeTarget "learnX" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "learnX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				83CBBA201A601CBA00E9B192 /* Debug */,
-				83CBBA211A601CBA00E9B192 /* Release */,
+				83CBBA201A601CBA00E9B192 /* Debug configuration for PBXProject "learnX" */,
+				83CBBA211A601CBA00E9B192 /* Release configuration for PBXProject "learnX" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		D40B9F7A2B248C8E004BC08C /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				D40B9F7B2B248C8E004BC08C /* Debug */,
-				D40B9F7C2B248C8E004BC08C /* Release */,
+				D40B9F7B2B248C8E004BC08C /* Debug configuration for PBXNativeTarget "ShareExtension" */,
+				D40B9F7C2B248C8E004BC08C /* Release configuration for PBXNativeTarget "ShareExtension" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
