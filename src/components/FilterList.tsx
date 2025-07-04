@@ -465,6 +465,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ]}
         data={data}
         ListEmptyComponent={<Empty />}
+        dragEnabled={reorderMode}
         panActivateAfterLongPress={520}
         onReorder={handleReorderDone}
         onIndexChange={handleDragChange}

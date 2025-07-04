@@ -97,6 +97,8 @@
 	<string>Allow learnX to sync assignments to your reminders</string>
 	<key>NSRemovableVolumesUsageDescription</key>
 	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>
