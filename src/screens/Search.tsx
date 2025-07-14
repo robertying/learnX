@@ -1,4 +1,4 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -6,24 +6,24 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Searchbar, Subheading, useTheme} from 'react-native-paper';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Searchbar, Subheading, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
 import Styles from 'constants/Styles';
-import {useAppSelector} from 'data/store';
-import {Notice, Assignment, File} from 'data/types/state';
+import { useAppSelector } from 'data/store';
+import { Notice, Assignment, File } from 'data/types/state';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
-import {t} from 'helpers/i18n';
-import {SearchStackParams} from './types';
+import { t } from 'helpers/i18n';
+import { SearchStackParams } from './types';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
-const Search: React.FC<Props> = ({navigation, route}) => {
+const Search: React.FC<Props> = ({ navigation, route }) => {
   const theme = useTheme();
 
   const safeAreaInsets = useSafeAreaInsets();
@@ -49,7 +49,7 @@ const Search: React.FC<Props> = ({navigation, route}) => {
     <SafeArea>
       <View style={Styles.flex1}>
         <Searchbar
-          style={[styles.searchBar, {backgroundColor: theme.colors.surface}]}
+          style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}
           elevation={0}
           placeholderTextColor={theme.colors.outline}
           placeholder={t('searchPlaceholder')}
@@ -62,23 +62,24 @@ const Search: React.FC<Props> = ({navigation, route}) => {
         fileResult.length === 0 ? (
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={Styles.flex1}>
+            style={Styles.flex1}
+          >
             <Empty />
           </KeyboardAvoidingView>
         ) : (
           <SectionList<Notice | Assignment | File>
-            contentContainerStyle={{paddingBottom: safeAreaInsets.bottom}}
+            contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
             sections={[
-              {key: 'notice', title: t('notices'), data: noticeResult},
+              { key: 'notice', title: t('notices'), data: noticeResult },
               {
                 key: 'assignment',
                 title: t('assignments'),
                 data: assignmentResult,
               },
-              {key: 'file', title: t('files'), data: fileResult},
+              { key: 'file', title: t('files'), data: fileResult },
             ]}
             keyExtractor={item => item.id}
-            renderItem={({item, section: {key}}) =>
+            renderItem={({ item, section: { key } }) =>
               key === 'notice' ? (
                 <NoticeCard
                   data={item as Notice}
@@ -101,7 +102,7 @@ const Search: React.FC<Props> = ({navigation, route}) => {
                 />
               )
             }
-            renderSectionHeader={({section: {title, data}}) =>
+            renderSectionHeader={({ section: { title, data } }) =>
               data.length ? (
                 <Subheading
                   style={[
@@ -112,7 +113,8 @@ const Search: React.FC<Props> = ({navigation, route}) => {
                         ? 'black'
                         : theme.colors.background,
                     },
-                  ]}>
+                  ]}
+                >
                   {title}
                 </Subheading>
               ) : null

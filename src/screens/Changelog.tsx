@@ -1,13 +1,13 @@
-import {useEffect, useRef, useState} from 'react';
-import {Linking, Platform, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import WebView, {WebViewNavigation} from 'react-native-webview';
-import {ProgressBar} from 'react-native-paper';
+import { useEffect, useRef, useState } from 'react';
+import { Linking, Platform, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import WebView, { WebViewNavigation } from 'react-native-webview';
+import { ProgressBar } from 'react-native-paper';
 import SafeArea from 'components/SafeArea';
-import {useAppDispatch} from 'data/store';
-import {setSetting} from 'data/actions/settings';
+import { useAppDispatch } from 'data/store';
+import { setSetting } from 'data/actions/settings';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {SettingsStackParams} from './types';
+import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
@@ -42,7 +42,7 @@ const Changelog: React.FC<Props> = props => {
         ref={webViewRef}
         originWhitelist={['https://github.com']}
         onNavigationStateChange={onNavigationStateChange}
-        onLoadProgress={({nativeEvent}) => {
+        onLoadProgress={({ nativeEvent }) => {
           // New architecture doesn't like native floats
           setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
         }}
@@ -50,7 +50,7 @@ const Changelog: React.FC<Props> = props => {
         source={{
           uri: 'https://github.com/robertying/learnX/releases',
         }}
-        style={{backgroundColor: 'transparent'}}
+        style={{ backgroundColor: 'transparent' }}
       />
     </SafeArea>
   );

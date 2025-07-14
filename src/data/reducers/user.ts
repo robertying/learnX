@@ -1,6 +1,6 @@
-import {UserAction} from 'data/types/actions';
-import {GET_USER_INFO_SUCCESS} from 'data/types/constants';
-import {UserState} from 'data/types/state';
+import { UserAction } from 'data/types/actions';
+import { GET_USER_INFO_SUCCESS } from 'data/types/constants';
+import { UserState } from 'data/types/state';
 
 export default function user(
   state: UserState = {

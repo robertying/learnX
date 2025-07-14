@@ -1,11 +1,16 @@
-import {memo, useCallback, useLayoutEffect, useState} from 'react';
-import {Dimensions, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
-import {Divider, Text, useTheme} from 'react-native-paper';
+import { memo, useCallback, useLayoutEffect, useState } from 'react';
+import {
+  Dimensions,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+import { Divider, Text, useTheme } from 'react-native-paper';
 import {
   NativeStackNavigationProp,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import {StackActions, useNavigation} from '@react-navigation/native';
+import { StackActions, useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
   TabBar,
@@ -15,64 +20,66 @@ import {
   TabBarItem,
 } from 'react-native-tab-view';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {Assignment, File, Notice} from 'data/types/state';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {getNoticesForCourse} from 'data/actions/notices';
-import {getAssignmentsForCourse} from 'data/actions/assignments';
-import {getFilesForCourse} from 'data/actions/files';
+import { Assignment, File, Notice } from 'data/types/state';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { getNoticesForCourse } from 'data/actions/notices';
+import { getAssignmentsForCourse } from 'data/actions/assignments';
+import { getFilesForCourse } from 'data/actions/files';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
-import {t} from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import Numbers from 'constants/Numbers';
-import {CourseStackParams} from './types';
+import { CourseStackParams } from './types';
 
 type NavigationProp = NativeStackNavigationProp<
   CourseStackParams,
   'CourseDetail'
 >;
 
-const Notices = memo(({courseId, data}: {courseId: string; data: Notice[]}) => {
-  const navigation = useNavigation<NavigationProp>();
+const Notices = memo(
+  ({ courseId, data }: { courseId: string; data: Notice[] }) => {
+    const navigation = useNavigation<NavigationProp>();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const fetching = useAppSelector(state => state.notices.fetching);
+    const dispatch = useAppDispatch();
+    const loggedIn = useAppSelector(state => state.auth.loggedIn);
+    const fetching = useAppSelector(state => state.notices.fetching);
 
-  const handleRefresh = () => {
-    if (loggedIn) {
-      dispatch(getNoticesForCourse(courseId));
-    }
-  };
+    const handleRefresh = () => {
+      if (loggedIn) {
+        dispatch(getNoticesForCourse(courseId));
+      }
+    };
 
-  return (
-    <FlatList
-      data={data}
-      renderItem={({item}) => (
-        <NoticeCard
-          data={item}
-          disableSwipe
-          hideCourseName
-          onPress={() => navigation.push('NoticeDetail', item)}
-        />
-      )}
-      keyExtractor={item => item.id}
-      refreshing={fetching}
-      onRefresh={handleRefresh}
-      contentContainerStyle={[
-        {flexGrow: 1},
-        data.length ? null : {justifyContent: 'center'},
-      ]}
-      ListEmptyComponent={<Empty />}
-    />
-  );
-});
+    return (
+      <FlatList
+        data={data}
+        renderItem={({ item }) => (
+          <NoticeCard
+            data={item}
+            disableSwipe
+            hideCourseName
+            onPress={() => navigation.push('NoticeDetail', item)}
+          />
+        )}
+        keyExtractor={item => item.id}
+        refreshing={fetching}
+        onRefresh={handleRefresh}
+        contentContainerStyle={[
+          { flexGrow: 1 },
+          data.length ? null : { justifyContent: 'center' },
+        ]}
+        ListEmptyComponent={<Empty />}
+      />
+    );
+  },
+);
 
 const Assignments = memo(
-  ({courseId, data}: {courseId: string; data: Assignment[]}) => {
+  ({ courseId, data }: { courseId: string; data: Assignment[] }) => {
     const navigation = useNavigation<NavigationProp>();
 
     const dispatch = useAppDispatch();
@@ -88,7 +95,7 @@ const Assignments = memo(
     return (
       <FlatList
         data={data}
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <AssignmentCard
             data={item}
             disableSwipe
@@ -100,8 +107,8 @@ const Assignments = memo(
         refreshing={fetching}
         onRefresh={handleRefresh}
         contentContainerStyle={[
-          {flexGrow: 1},
-          data.length ? null : {justifyContent: 'center'},
+          { flexGrow: 1 },
+          data.length ? null : { justifyContent: 'center' },
         ]}
         ListEmptyComponent={<Empty />}
       />
@@ -109,7 +116,7 @@ const Assignments = memo(
   },
 );
 
-const Files = memo(({courseId, data}: {courseId: string; data: File[]}) => {
+const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
   const navigation = useNavigation<NavigationProp>();
 
   const dispatch = useAppDispatch();
@@ -125,7 +132,7 @@ const Files = memo(({courseId, data}: {courseId: string; data: File[]}) => {
   return (
     <FlatList
       data={data}
-      renderItem={({item}) => (
+      renderItem={({ item }) => (
         <FileCard
           data={item}
           disableSwipe
@@ -137,8 +144,8 @@ const Files = memo(({courseId, data}: {courseId: string; data: File[]}) => {
       refreshing={fetching}
       onRefresh={handleRefresh}
       contentContainerStyle={[
-        {flexGrow: 1},
-        data.length ? null : {justifyContent: 'center'},
+        { flexGrow: 1 },
+        data.length ? null : { justifyContent: 'center' },
       ]}
       ListEmptyComponent={<Empty />}
     />
@@ -146,9 +153,9 @@ const Files = memo(({courseId, data}: {courseId: string; data: File[]}) => {
 });
 
 const routes = [
-  {key: 'notice', title: t('notices')},
-  {key: 'assignment', title: t('assignments')},
-  {key: 'file', title: t('files')},
+  { key: 'notice', title: t('notices') },
+  { key: 'assignment', title: t('assignments') },
+  { key: 'file', title: t('files') },
 ];
 
 type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
@@ -156,7 +163,7 @@ type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
 const CourseDetail: React.FC<Props> = ({
   navigation,
   route: {
-    params: {disableAnimation, ...course},
+    params: { disableAnimation, ...course },
   },
 }) => {
   const theme = useTheme();
@@ -188,14 +195,14 @@ const CourseDetail: React.FC<Props> = ({
   ) => (
     <TabBar
       {...props}
-      style={{backgroundColor: theme.colors.surface}}
+      style={{ backgroundColor: theme.colors.surface }}
       indicatorStyle={{
         backgroundColor: theme.colors.primary,
       }}
       renderTabBarItem={itemProps => (
         <TabBarItem
           {...itemProps}
-          labelStyle={{color: theme.colors.onSurface}}
+          labelStyle={{ color: theme.colors.onSurface }}
         />
       )}
     />
@@ -237,7 +244,7 @@ const CourseDetail: React.FC<Props> = ({
 
   const handleNavigateCourseX = useCallback(() => {
     if (detailNavigator) {
-      detailNavigator.dispatch(StackActions.push('CourseX', {id: course.id}));
+      detailNavigator.dispatch(StackActions.push('CourseX', { id: course.id }));
     } else {
       navigation.navigate(
         'CourseXStack' as any,
@@ -265,9 +272,10 @@ const CourseDetail: React.FC<Props> = ({
         activeOpacity={0.6}
         style={[
           styles.courseXContainer,
-          {backgroundColor: theme.colors.surface},
+          { backgroundColor: theme.colors.surface },
         ]}
-        onPress={handleNavigateCourseX}>
+        onPress={handleNavigateCourseX}
+      >
         <Icon
           style={styles.icon}
           color={theme.colors.onSurface}
@@ -278,7 +286,7 @@ const CourseDetail: React.FC<Props> = ({
       </TouchableOpacity>
       <Divider />
       <TabView
-        navigationState={{index, routes}}
+        navigationState={{ index, routes }}
         renderScene={renderScene}
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}

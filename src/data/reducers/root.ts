@@ -1,10 +1,10 @@
-import {combineReducers} from 'redux';
-import {PersistConfig, persistReducer} from 'redux-persist';
+import { combineReducers } from 'redux';
+import { PersistConfig, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createSecureStore from 'redux-persist-expo-securestore';
 import env from 'helpers/env';
 import mockStore from 'data/mock';
-import {AppActions, StoreAction} from 'data/types/actions';
+import { AppActions, StoreAction } from 'data/types/actions';
 import {
   CLEAR_STORE,
   SET_MOCK_STORE,
@@ -21,7 +21,7 @@ import {
   SET_SETTING,
   SET_CURRENT_SEMESTER,
 } from 'data/types/constants';
-import {AppState, AuthState, SettingsState} from 'data/types/state';
+import { AppState, AuthState, SettingsState } from 'data/types/state';
 import assignments from './assignments';
 import courses from './courses';
 import files from './files';

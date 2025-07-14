@@ -1,10 +1,10 @@
-import {AuthAction} from 'data/types/actions';
+import { AuthAction } from 'data/types/actions';
 import {
   LOGIN_FAILURE,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
 } from 'data/types/constants';
-import {AuthState} from 'data/types/state';
+import { AuthState } from 'data/types/state';
 
 export default function auth(
   state: AuthState = {

@@ -1,18 +1,18 @@
-import {useEffect} from 'react';
-import {Alert, Linking, ScrollView, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Caption} from 'react-native-paper';
-import {CourseType, Language} from 'thu-learn-lib';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {dataSource} from 'data/source';
-import {setSetting} from 'data/actions/settings';
+import { useEffect } from 'react';
+import { Alert, Linking, ScrollView, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Caption } from 'react-native-paper';
+import { CourseType, Language } from 'thu-learn-lib';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { dataSource } from 'data/source';
+import { setSetting } from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {isLocaleChinese, t} from 'helpers/i18n';
+import { isLocaleChinese, t } from 'helpers/i18n';
 import env from 'helpers/env';
-import {uploadCourses} from 'helpers/coursex';
-import {SettingsStackParams} from './types';
+import { uploadCourses } from 'helpers/coursex';
+import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -72,7 +72,7 @@ const CourseInformationSharing: React.FC<Props> = props => {
             },
           },
         ],
-        {cancelable: true},
+        { cancelable: true },
       );
     } else {
       dispatch(setSetting('courseInformationSharing', enabled));

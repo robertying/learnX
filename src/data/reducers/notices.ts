@@ -1,4 +1,4 @@
-import {NoticesAction} from 'data/types/actions';
+import { NoticesAction } from 'data/types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
   GET_ALL_NOTICES_FOR_COURSES_REQUEST,
@@ -9,7 +9,7 @@ import {
   SET_FAV_NOTICE,
   SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
-import {NoticeState} from 'data/types/state';
+import { NoticeState } from 'data/types/state';
 
 export default function notices(
   state: NoticeState = {

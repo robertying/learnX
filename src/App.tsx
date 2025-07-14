@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useRef} from 'react';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import { useCallback, useEffect, useRef } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   AppState,
   Platform,
@@ -16,12 +16,12 @@ import {
   NavigationIndependentTree,
   ParamListBase,
 } from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type {
   NativeStackNavigationOptions,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import {
   SafeAreaProvider,
   useSafeAreaFrame,
@@ -35,17 +35,17 @@ import {
   adaptNavigationTheme,
 } from 'react-native-paper';
 import ShareMenu from 'react-native-share-menu';
-import {Provider as StoreProvider} from 'react-redux';
-import {PersistGate} from 'redux-persist/integration/react';
+import { Provider as StoreProvider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import semverGt from 'semver/functions/gt';
-import {en, zh, registerTranslation} from 'react-native-paper-dates';
-import {isLocaleChinese, t} from 'helpers/i18n';
-import {getLatestRelease} from 'helpers/update';
+import { en, zh, registerTranslation } from 'react-native-paper-dates';
+import { isLocaleChinese, t } from 'helpers/i18n';
+import { getLatestRelease } from 'helpers/update';
 import Notices from 'screens/Notices';
 import Search from 'screens/Search';
 import NoticeDetail from 'screens/NoticeDetail';
@@ -80,26 +80,26 @@ import About from 'screens/About';
 import Changelog from 'screens/Changelog';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
-import {ToastProvider} from 'components/Toast';
+import { ToastProvider } from 'components/Toast';
 import Splash from 'components/Splash';
 import HeaderTitle from 'components/HeaderTitle';
 import Empty from 'components/Empty';
-import {SplitViewProvider} from 'components/SplitView';
+import { SplitViewProvider } from 'components/SplitView';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
-import {setSetting} from 'data/actions/settings';
-import {persistor, store, useAppDispatch, useAppSelector} from 'data/store';
-import {Notice, Assignment, File, Course} from 'data/types/state';
-import {login} from 'data/actions/auth';
-import {getAllSemesters, getCurrentSemester} from 'data/actions/semesters';
-import {setPendingAssignmentData} from 'data/actions/assignments';
-import {resetLoading} from 'data/actions/root';
-import {getCoursesForSemester} from 'data/actions/courses';
+import { setSetting } from 'data/actions/settings';
+import { persistor, store, useAppDispatch, useAppSelector } from 'data/store';
+import { Notice, Assignment, File, Course } from 'data/types/state';
+import { login } from 'data/actions/auth';
+import { getAllSemesters, getCurrentSemester } from 'data/actions/semesters';
+import { setPendingAssignmentData } from 'data/actions/assignments';
+import { resetLoading } from 'data/actions/root';
+import { getCoursesForSemester } from 'data/actions/courses';
 import useToast from 'hooks/useToast';
-import {setUpBackgroundFetch} from 'helpers/background';
-import {copyFileToCache} from 'helpers/fs';
+import { setUpBackgroundFetch } from 'helpers/background';
+import { copyFileToCache } from 'helpers/fs';
 import packageJson from '../package.json';
 
 registerTranslation('en', en);
@@ -113,7 +113,7 @@ const BackButton = () => {
 
   return (
     <IconButton
-      style={{marginLeft: -8}}
+      style={{ marginLeft: -8 }}
       onPress={() => navigation.goBack()}
       icon={props => <MaterialIcons {...props} name="close" />}
     />
@@ -138,16 +138,18 @@ const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
       headerLeft: () => (
         <>
           <IconButton
-            style={{marginLeft: -8}}
+            style={{ marginLeft: -8 }}
             icon={props => <MaterialIcons {...props} name="subject" />}
           />
           <IconButton
-            style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
+            style={Platform.OS === 'android' ? { marginLeft: -8 } : Styles.ml0}
             icon={props => <MaterialIcons {...props} name="filter-list" />}
           />
           {title === t('courses') && (
             <IconButton
-              style={Platform.OS === 'android' ? {marginLeft: -8} : Styles.ml0}
+              style={
+                Platform.OS === 'android' ? { marginLeft: -8 } : Styles.ml0
+              }
               icon={props => <MaterialIcons {...props} name="info-outline" />}
             />
           )}
@@ -162,7 +164,7 @@ const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
             />
           )}
           <IconButton
-            style={{marginRight: -8}}
+            style={{ marginRight: -8 }}
             onPress={() => navigation.navigate('SearchStack' as any)}
             icon={props => <MaterialIcons {...props} name="search" />}
           />
@@ -198,18 +200,18 @@ const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
         ? () => (
             <>
               <IconButton
-                style={{marginRight: -8}}
+                style={{ marginRight: -8 }}
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
               {Platform.OS !== 'android' && (
                 <IconButton
-                  style={{marginRight: -8}}
+                  style={{ marginRight: -8 }}
                   icon={props => <MaterialIcons {...props} name="ios-share" />}
                 />
               )}
               {DeviceInfo.isMac() && (
                 <IconButton
-                  style={{marginRight: -8}}
+                  style={{ marginRight: -8 }}
                   icon={props => (
                     <MaterialIcons {...props} name="open-in-new" />
                   )}
@@ -421,7 +423,7 @@ const MainTab = () => {
   useEffect(() => {
     if (loggedIn && Platform.OS === 'android') {
       (async () => {
-        const {version} = await getLatestRelease();
+        const { version } = await getLatestRelease();
         if (semverGt(version, packageJson.version)) {
           dispatch(setSetting('newUpdate', true));
         }
@@ -431,8 +433,8 @@ const MainTab = () => {
 
   return (
     <MainNavigator.Navigator
-      screenOptions={({route}) => ({
-        tabBarIcon: ({color, size}) => {
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
           let iconName: string;
 
           switch (route.name) {
@@ -468,26 +470,27 @@ const MainTab = () => {
           marginBottom: 2,
         },
         headerShown: false,
-      })}>
+      })}
+    >
       <MainNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
-        options={{title: t('notices')}}
+        options={{ title: t('notices') }}
       />
       <MainNavigator.Screen
         name="AssignmentStack"
         component={AssignmentStack}
-        options={{title: t('assignments')}}
+        options={{ title: t('assignments') }}
       />
       <MainNavigator.Screen
         name="FileStack"
         component={FileStack}
-        options={{title: t('files')}}
+        options={{ title: t('files') }}
       />
       <MainNavigator.Screen
         name="CourseStack"
         component={CourseStack}
-        options={{title: t('courses')}}
+        options={{ title: t('courses') }}
       />
       <MainNavigator.Screen
         name="SettingStack"
@@ -558,7 +561,7 @@ const AssignmentSubmissionStack = () => (
       options={{
         headerLeft: () => <BackButton />,
         headerRight: () => (
-          <TextButton style={{fontSize: 17, fontWeight: 'bold'}}>
+          <TextButton style={{ fontSize: 17, fontWeight: 'bold' }}>
             {t('submit')}
           </TextButton>
         ),
@@ -614,7 +617,7 @@ const DetailStack = () => (
   </DetailNavigator.Navigator>
 );
 
-const {LightTheme, DarkTheme} = adaptNavigationTheme({
+const { LightTheme, DarkTheme } = adaptNavigationTheme({
   reactNavigationLight: NavigationDefaultTheme,
   reactNavigationDark: NavigationDarkTheme,
 });
@@ -743,7 +746,7 @@ const Container = () => {
   const lastActiveTime = useRef(dayjs(0));
 
   const handleReLogin = useCallback(() => {
-    const {auth} = store.getState();
+    const { auth } = store.getState();
     if (
       auth.username &&
       auth.password &&
@@ -840,35 +843,38 @@ const Container = () => {
     <SafeAreaProvider>
       <NavigationContainer
         ref={mainNavigationContainerRef}
-        {...navigationContainerProps}>
+        {...navigationContainerProps}
+      >
         <SplitViewProvider
           splitEnabled={DeviceInfo.isMac() || DeviceInfo.isTablet()}
           detailNavigationContainerRef={
             showDetail ? detailNavigationContainerRef : null
           }
-          showDetail={showDetail}>
+          showDetail={showDetail}
+        >
           <RootNavigator.Navigator
             screenOptions={{
               headerShown: false,
               presentation: 'fullScreenModal',
-            }}>
+            }}
+          >
             {showMain ? (
               <>
                 <RootNavigator.Screen name="MainTab" component={MainTab} />
                 <RootNavigator.Screen
                   name="CourseXStack"
                   component={CourseXStack}
-                  options={{gestureEnabled: false}}
+                  options={{ gestureEnabled: false }}
                 />
                 <RootNavigator.Screen
                   name="SearchStack"
                   component={SearchStack}
-                  options={{gestureEnabled: false}}
+                  options={{ gestureEnabled: false }}
                 />
                 <RootNavigator.Screen
                   name="AssignmentSubmissionStack"
                   component={AssignmentSubmissionStack}
-                  options={{gestureEnabled: false}}
+                  options={{ gestureEnabled: false }}
                 />
               </>
             ) : (
@@ -878,7 +884,8 @@ const Container = () => {
           <NavigationIndependentTree>
             <NavigationContainer
               ref={detailNavigationContainerRef}
-              {...navigationContainerProps}>
+              {...navigationContainerProps}
+            >
               <DetailStack />
             </NavigationContainer>
           </NavigationIndependentTree>
@@ -896,7 +903,8 @@ const App = () => {
       <PaperProvider
         theme={
           colorScheme === 'dark' ? BrandDarkPaperTheme : BrandLightPaperTheme
-        }>
+        }
+      >
         <ToastProvider>
           <StoreProvider store={store}>
             <PersistGate loading={<Splash />} persistor={persistor}>

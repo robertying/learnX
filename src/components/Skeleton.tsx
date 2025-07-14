@@ -1,6 +1,6 @@
-import {useEffect, useCallback, useRef} from 'react';
-import {StyleSheet, View, Animated} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import { useEffect, useCallback, useRef } from 'react';
+import { StyleSheet, View, Animated } from 'react-native';
+import { useTheme } from 'react-native-paper';
 
 const Skeleton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
@@ -33,11 +33,11 @@ const Skeleton: React.FC<React.PropsWithChildren<unknown>> = () => {
   }, [fadeAnimation]);
 
   return (
-    <View style={[styles.root, {backgroundColor: theme.colors.surface}]}>
-      <Animated.View style={[styles.line1, {opacity: opacity.current}]} />
-      <Animated.View style={[styles.line2, {opacity: opacity.current}]} />
-      <Animated.View style={[styles.line3, {opacity: opacity.current}]} />
-      <Animated.View style={[styles.line4, {opacity: opacity.current}]} />
+    <View style={[styles.root, { backgroundColor: theme.colors.surface }]}>
+      <Animated.View style={[styles.line1, { opacity: opacity.current }]} />
+      <Animated.View style={[styles.line2, { opacity: opacity.current }]} />
+      <Animated.View style={[styles.line3, { opacity: opacity.current }]} />
+      <Animated.View style={[styles.line4, { opacity: opacity.current }]} />
     </View>
   );
 };

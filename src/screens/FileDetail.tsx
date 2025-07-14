@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import {Linking, Platform, ScrollView, StyleSheet, View} from 'react-native';
+import { Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import {
   useTheme,
   Text,
@@ -17,7 +17,7 @@ import {
   Divider,
   Chip,
 } from 'react-native-paper';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Pdf from 'react-native-pdf';
@@ -35,22 +35,22 @@ import {
   openFile,
   shareFile,
 } from 'helpers/fs';
-import {isLocaleChinese, t} from 'helpers/i18n';
+import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
-import {FileStackParams} from './types';
-import {SplitViewContext} from 'components/SplitView';
-import {useAppSelector} from 'data/store';
+import { FileStackParams } from './types';
+import { SplitViewContext } from 'components/SplitView';
+import { useAppSelector } from 'data/store';
 
 type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 
-const FileDetail: React.FC<Props> = ({route, navigation}) => {
-  const {disableAnimation, ...file} = route.params;
+const FileDetail: React.FC<Props> = ({ route, navigation }) => {
+  const { disableAnimation, ...file } = route.params;
 
   const theme = useTheme();
   const toast = useToast();
-  const {showDetail, showMaster, toggleMaster} = useContext(SplitViewContext);
+  const { showDetail, showMaster, toggleMaster } = useContext(SplitViewContext);
 
   const openFileAfterDownload = useAppSelector(
     state => state.settings.openFileAfterDownload,
@@ -131,7 +131,7 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
       headerBackVisible:
         DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
       headerRight: () => (
-        <View style={[Styles.flexRow, {justifyContent: 'flex-end'}]}>
+        <View style={[Styles.flexRow, { justifyContent: 'flex-end' }]}>
           {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
             <IconButton
               style={styles.rightIcon}
@@ -226,7 +226,7 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
             color={theme.colors.outline}
             size={56}
           />
-          <Text style={[Styles.spacey1, {color: theme.colors.outline}]}>
+          <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
             {t('fileDownloadFailed')}
           </Text>
         </View>
@@ -245,7 +245,7 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
         </SafeArea>
       ) : !showInfo && canRender ? (
         file.fileType === 'pdf' ? (
-          <Pdf style={Styles.flex1} source={{uri: path}} fitPolicy={0} />
+          <Pdf style={Styles.flex1} source={{ uri: path }} fitPolicy={0} />
         ) : (
           <WebView
             ref={webViewRef}
@@ -265,9 +265,10 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
         <>
           <ScrollView
             contentContainerStyle={
-              !canRender ? {paddingBottom: 100} : undefined
+              !canRender ? { paddingBottom: 100 } : undefined
             }
-            style={{backgroundColor: theme.colors.surface}}>
+            style={{ backgroundColor: theme.colors.surface }}
+          >
             <View style={styles.section}>
               <View style={Styles.flexRowCenter}>
                 {file.category?.title && (
@@ -318,7 +319,8 @@ const FileDetail: React.FC<Props> = ({route, navigation}) => {
             </Text>
           </ScrollView>
           <View
-            style={[styles.actions, {backgroundColor: theme.colors.surface}]}>
+            style={[styles.actions, { backgroundColor: theme.colors.surface }]}
+          >
             <View style={styles.colCenter}>
               <IconButton icon="share" size={48} onPress={handleShare} />
               <Text>{t('share')}</Text>

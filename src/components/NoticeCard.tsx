@@ -1,13 +1,13 @@
-import {memo} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Caption, Paragraph, Title, Subheading} from 'react-native-paper';
+import { memo } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import Colors from 'constants/Colors';
-import {Notice} from 'data/types/state';
-import {removeTags} from 'helpers/html';
-import CardWrapper, {CardWrapperProps} from './CardWrapper';
+import { Notice } from 'data/types/state';
+import { removeTags } from 'helpers/html';
+import CardWrapper, { CardWrapperProps } from './CardWrapper';
 
 export interface NoticeCardProps extends CardWrapperProps {
   data: Notice;

@@ -1,4 +1,4 @@
-import {StyleSheet, View, ViewProps, TextInput} from 'react-native';
+import { StyleSheet, View, ViewProps, TextInput } from 'react-native';
 import {
   Avatar,
   Text,
@@ -49,8 +49,9 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
 
   return (
     <Touchable
-      style={[{backgroundColor: theme.colors.surface}, restProps.style]}
-      onPress={onPress}>
+      style={[{ backgroundColor: theme.colors.surface }, restProps.style]}
+      onPress={onPress}
+    >
       <View
         {...restProps}
         style={[
@@ -58,7 +59,8 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           {
             paddingVertical: imageAlt ? 16 : 2,
           },
-        ]}>
+        ]}
+      >
         {imageAlt && imageSrc ? (
           <Avatar.Image
             size={48}
@@ -74,7 +76,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           />
         ) : null}
         {iconName ? (
-          <View style={{position: 'relative'}}>
+          <View style={{ position: 'relative' }}>
             <Icon
               style={styles.icon}
               name={iconName}
@@ -94,7 +96,8 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           </View>
         ) : null}
         <Text
-          style={[styles.primaryText, imageAlt ? styles.bigText : undefined]}>
+          style={[styles.primaryText, imageAlt ? styles.bigText : undefined]}
+        >
           {primaryText}
         </Text>
         <Text style={styles.secondaryText}>{secondaryText}</Text>
@@ -111,7 +114,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
         {type === 'input' ? (
           <TextInput
             keyboardType="number-pad"
-            style={[styles.input, {color: theme.colors.onSurface}]}
+            style={[styles.input, { color: theme.colors.onSurface }]}
             value={inputValue}
             onChangeText={onInputValueChange}
           />

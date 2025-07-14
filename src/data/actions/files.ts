@@ -1,8 +1,8 @@
-import {ContentType, CourseType, ApiError} from 'thu-learn-lib';
-import {createAction, createAsyncAction} from 'typesafe-actions';
+import { ContentType, CourseType, ApiError } from 'thu-learn-lib';
+import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
-import {dataSource} from 'data/source';
-import {ThunkResult} from 'data/types/actions';
+import { dataSource } from 'data/source';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
   GET_ALL_FILES_FOR_COURSES_REQUEST,
@@ -13,14 +13,14 @@ import {
   SET_FAV_FILE,
   SET_ARCHIVE_FILES,
 } from 'data/types/constants';
-import {File} from 'data/types/state';
-import {serializeError} from 'helpers/parse';
+import { File } from 'data/types/state';
+import { serializeError } from 'helpers/parse';
 
 export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
   GET_FILES_FOR_COURSE_FAILURE,
-)<undefined, {courseId: string; files: File[]}, ApiError>();
+)<undefined, { courseId: string; files: File[] }, ApiError>();
 
 export function getFilesForCourse(courseId: string): ThunkResult {
   return async (dispatch, getState) => {
@@ -44,7 +44,7 @@ export function getFilesForCourse(courseId: string): ThunkResult {
             dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
             b.id.localeCompare(a.id),
         );
-      dispatch(getFilesForCourseAction.success({files, courseId}));
+      dispatch(getFilesForCourseAction.success({ files, courseId }));
     } catch (err) {
       dispatch(getFilesForCourseAction.failure(serializeError(err)));
     }

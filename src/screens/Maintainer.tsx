@@ -1,11 +1,11 @@
-import {Linking, ScrollView, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Text} from 'react-native-paper';
+import { Linking, ScrollView, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Text } from 'react-native-paper';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {t} from 'helpers/i18n';
-import {SettingsStackParams} from './types';
+import { t } from 'helpers/i18n';
+import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Maintainer'>;
 
@@ -16,11 +16,13 @@ const Maintainer: React.FC<Props> = props => {
     <SafeArea>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewPaddings}>
+        contentContainerStyle={styles.scrollViewPaddings}
+      >
         <Text style={styles.text}>{t('maintainerDescription')}</Text>
         <Text
           style={[styles.text, styles.link]}
-          onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}>
+          onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
+        >
           learnX@ruiying.io
         </Text>
       </ScrollView>

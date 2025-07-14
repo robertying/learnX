@@ -1,14 +1,14 @@
-import {memo} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Caption, Paragraph, Title, Subheading} from 'react-native-paper';
+import { memo } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
-import {Assignment} from 'data/types/state';
-import {removeTags} from 'helpers/html';
-import {isLocaleChinese} from 'helpers/i18n';
-import CardWrapper, {CardWrapperProps} from 'components/CardWrapper';
+import { Assignment } from 'data/types/state';
+import { removeTags } from 'helpers/html';
+import { isLocaleChinese } from 'helpers/i18n';
+import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import Colors from 'constants/Colors';
 
 export interface AssignmentCardProps extends CardWrapperProps {

@@ -1,19 +1,19 @@
-import {useCallback, useEffect} from 'react';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
+import { useCallback, useEffect } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackActions } from '@react-navigation/native';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
-import {getAllFilesForCourses} from 'data/actions/files';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {File} from 'data/types/state';
+import { getAllFilesForCourses } from 'data/actions/files';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { File } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {FileStackParams} from './types';
+import { FileStackParams } from './types';
 
 type Props = NativeStackScreenProps<FileStackParams, 'Files'>;
 
-const Files: React.FC<Props> = ({navigation}) => {
+const Files: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();
@@ -26,7 +26,7 @@ const Files: React.FC<Props> = ({navigation}) => {
   const fileState = useAppSelector(state => state.files);
   const fetching = useAppSelector(state => state.files.fetching);
 
-  const {all, unread, fav, archived, hidden} = useFilteredData({
+  const { all, unread, fav, archived, hidden } = useFilteredData({
     data: fileState.items,
     fav: fileState.favorites,
     archived: fileState.archived,

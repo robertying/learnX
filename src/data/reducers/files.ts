@@ -1,4 +1,4 @@
-import {FilesAction} from 'data/types/actions';
+import { FilesAction } from 'data/types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
   GET_ALL_FILES_FOR_COURSES_REQUEST,
@@ -9,7 +9,7 @@ import {
   SET_FAV_FILE,
   SET_ARCHIVE_FILES,
 } from 'data/types/constants';
-import {FilesState} from 'data/types/state';
+import { FilesState } from 'data/types/state';
 
 export default function files(
   state: FilesState = {

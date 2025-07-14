@@ -1,7 +1,7 @@
-import {ApiError, CourseType, Language} from 'thu-learn-lib';
-import {createAction, createAsyncAction} from 'typesafe-actions';
-import {dataSource} from 'data/source';
-import {ThunkResult} from 'data/types/actions';
+import { ApiError, CourseType, Language } from 'thu-learn-lib';
+import { createAction, createAsyncAction } from 'typesafe-actions';
+import { dataSource } from 'data/source';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -9,9 +9,9 @@ import {
   SET_HIDE_COURSE,
   SET_COURSE_ORDER,
 } from 'data/types/constants';
-import {Course} from 'data/types/state';
-import {isLocaleChinese} from 'helpers/i18n';
-import {serializeError} from 'helpers/parse';
+import { Course } from 'data/types/state';
+import { isLocaleChinese } from 'helpers/i18n';
+import { serializeError } from 'helpers/parse';
 
 export const getCoursesForSemesterAction = createAsyncAction(
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -36,7 +36,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
         lang,
       );
       const courses = results
-        .map(course => ({...course, semesterId}))
+        .map(course => ({ ...course, semesterId }))
         .sort((a, b) => a.id.localeCompare(b.id));
       dispatch(getCoursesForSemesterAction.success(courses));
     } catch (err) {
@@ -47,7 +47,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
 
 export const setHideCourse = createAction(
   SET_HIDE_COURSE,
-  (courseId: string, flag: boolean) => ({courseId, flag}),
+  (courseId: string, flag: boolean) => ({ courseId, flag }),
 )();
 
 export const setCourseOrder = createAction(

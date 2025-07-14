@@ -1,17 +1,17 @@
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
-import dayjs, {Dayjs} from 'dayjs';
-import {CalendarEvent} from 'thu-learn-lib';
+import dayjs, { Dayjs } from 'dayjs';
+import { CalendarEvent } from 'thu-learn-lib';
 import {
   clearEventIds,
   setEventIdForAssignment,
   setSetting,
   removeEventIdForAssignment,
 } from 'data/actions/settings';
-import {store} from 'data/store';
-import {Assignment, SettingsState} from 'data/types/state';
+import { store } from 'data/store';
+import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
-import {removeTags} from './html';
+import { removeTags } from './html';
 
 const courseCalendarName = 'learnX 课表';
 const assignmentCalendarReminderName = 'learnX 作业';
@@ -20,19 +20,19 @@ export const getAndRequestPermission = async (
   type: 'calendar' | 'reminder',
 ) => {
   if (type === 'calendar') {
-    const {status} = await Calendar.getCalendarPermissionsAsync();
+    const { status } = await Calendar.getCalendarPermissionsAsync();
     if (status === 'granted') {
       return true;
     }
-    const {status: newStatus} =
+    const { status: newStatus } =
       await Calendar.requestCalendarPermissionsAsync();
     return newStatus === 'granted';
   } else {
-    const {status} = await Calendar.getRemindersPermissionsAsync();
+    const { status } = await Calendar.getRemindersPermissionsAsync();
     if (status === 'granted') {
       return true;
     }
-    const {status: newStatus} =
+    const { status: newStatus } =
       await Calendar.requestRemindersPermissionsAsync();
     return newStatus === 'granted';
   }
@@ -79,7 +79,7 @@ export const getCourseCalendarId = async () => {
   const defaultCalendarSource =
     Platform.OS === 'ios'
       ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
-      : ({name: 'learnX', isLocalAccount: true} as Calendar.Source);
+      : ({ name: 'learnX', isLocalAccount: true } as Calendar.Source);
 
   const newCalendarID = await Calendar.createCalendarAsync({
     title: courseCalendarName,
@@ -176,7 +176,7 @@ export const getAssignmentCalendarId = async () => {
   const defaultCalendarSource =
     Platform.OS === 'ios'
       ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
-      : ({name: 'learnX', isLocalAccount: true} as Calendar.Source);
+      : ({ name: 'learnX', isLocalAccount: true } as Calendar.Source);
 
   const newCalendarID = await Calendar.createCalendarAsync({
     title: assignmentCalendarReminderName,

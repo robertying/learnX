@@ -1,4 +1,4 @@
-export const sortByOrder = <T extends {id: string}>(
+export const sortByOrder = <T extends { id: string }>(
   items: T[],
   order: string[],
 ) => {

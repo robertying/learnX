@@ -1,4 +1,4 @@
-import {PersistState} from 'redux-persist';
+import { PersistState } from 'redux-persist';
 import type {
   CourseInfo,
   FailReason,
@@ -7,7 +7,7 @@ import type {
   File as IFile,
   UserInfo,
 } from 'thu-learn-lib';
-import {FilterSelection} from 'components/Filter';
+import { FilterSelection } from 'components/Filter';
 
 export interface Auth {
   username: string | null;

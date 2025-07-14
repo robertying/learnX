@@ -1,22 +1,22 @@
-import {useEffect, useLayoutEffect, useMemo} from 'react';
-import {ScrollView, StyleSheet, View} from 'react-native';
-import {Caption, Divider, Title, useTheme} from 'react-native-paper';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { useEffect, useLayoutEffect, useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Caption, Divider, Title, useTheme } from 'react-native-paper';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
-import {NoticeStackParams} from 'screens/types';
-import {getWebViewTemplate} from 'helpers/html';
-import {isLocaleChinese, t} from 'helpers/i18n';
-import {stripExtension, getExtension} from 'helpers/fs';
-import {File} from 'data/types/state';
+import { NoticeStackParams } from 'screens/types';
+import { getWebViewTemplate } from 'helpers/html';
+import { isLocaleChinese, t } from 'helpers/i18n';
+import { stripExtension, getExtension } from 'helpers/fs';
+import { File } from 'data/types/state';
 
 type Props = NativeStackScreenProps<NoticeStackParams, 'NoticeDetail'>;
 
-const NoticeDetail: React.FC<Props> = ({route, navigation}) => {
+const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
   const theme = useTheme();
 
   const {
@@ -70,7 +70,7 @@ const NoticeDetail: React.FC<Props> = ({route, navigation}) => {
 
   return (
     <SafeArea>
-      <ScrollView style={{backgroundColor: theme.colors.surface}}>
+      <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
@@ -104,7 +104,8 @@ const NoticeDetail: React.FC<Props> = ({route, navigation}) => {
             />
             <TextButton
               style={styles.textPaddingRight}
-              onPress={handleFileOpen}>
+              onPress={handleFileOpen}
+            >
               {attachment.name}
             </TextButton>
           </View>

@@ -1,21 +1,21 @@
-import {useCallback, useEffect, useMemo} from 'react';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
+import { useCallback, useEffect, useMemo } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {getCoursesForSemester} from 'data/actions/courses';
-import {Course} from 'data/types/state';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { getCoursesForSemester } from 'data/actions/courses';
+import { Course } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {getSemesterTextFromId} from 'helpers/parse';
-import {uploadCourses} from 'helpers/coursex';
-import {CourseStackParams} from './types';
+import { getSemesterTextFromId } from 'helpers/parse';
+import { uploadCourses } from 'helpers/coursex';
+import { CourseStackParams } from './types';
 
 type Props = NativeStackScreenProps<CourseStackParams, 'Courses'>;
 
-const Courses: React.FC<Props> = ({navigation}) => {
+const Courses: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();

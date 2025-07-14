@@ -1,4 +1,4 @@
-import {AssignmentsAction} from 'data/types/actions';
+import { AssignmentsAction } from 'data/types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
@@ -10,7 +10,7 @@ import {
   SET_ARCHIVE_ASSIGNMENTS,
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
-import {AssignmentsState} from 'data/types/state';
+import { AssignmentsState } from 'data/types/state';
 
 export default function assignments(
   state: AssignmentsState = {

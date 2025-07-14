@@ -1,9 +1,15 @@
-import {useCallback, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import {RefreshControl, View} from 'react-native';
-import {IconButton} from 'react-native-paper';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
-import {runOnJS} from 'react-native-reanimated';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
+import { RefreshControl, View } from 'react-native';
+import { IconButton } from 'react-native-paper';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { StackActions } from '@react-navigation/native';
+import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListProps,
   ReorderableListReorderEvent,
@@ -12,16 +18,16 @@ import ReorderableList, {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
-import {Assignment, Course, File, Notice} from 'data/types/state';
-import {setArchiveNotices, setFavNotice} from 'data/actions/notices';
+import { Assignment, Course, File, Notice } from 'data/types/state';
+import { setArchiveNotices, setFavNotice } from 'data/actions/notices';
 import {
   setArchiveAssignments,
   setFavAssignment,
 } from 'data/actions/assignments';
-import {setArchiveFiles, setFavFile} from 'data/actions/files';
-import {setCourseOrder, setHideCourse} from 'data/actions/courses';
-import {setSetting} from 'data/actions/settings';
-import {useAppDispatch, useAppSelector} from 'data/store';
+import { setArchiveFiles, setFavFile } from 'data/actions/files';
+import { setCourseOrder, setHideCourse } from 'data/actions/courses';
+import { setSetting } from 'data/actions/settings';
+import { useAppDispatch, useAppSelector } from 'data/store';
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {
@@ -32,11 +38,11 @@ import {
 } from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import {isLocaleChinese, t} from 'helpers/i18n';
-import Filter, {FilterSelection} from './Filter';
+import { isLocaleChinese, t } from 'helpers/i18n';
+import Filter, { FilterSelection } from './Filter';
 import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
-import {CardWrapperProps} from './CardWrapper';
+import { CardWrapperProps } from './CardWrapper';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
   data: T;
@@ -149,7 +155,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     setFilterVisible(false);
   };
 
-  const handleReorderDone = ({from, to}: ReorderableListReorderEvent) => {
+  const handleReorderDone = ({ from, to }: ReorderableListReorderEvent) => {
     const reorderedData = reorderItems(data, from, to);
     dispatch(setCourseOrder(reorderedData.map(i => i.id)));
   };
@@ -254,7 +260,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       navigation.setOptions({
         headerLeft: () => (
           <IconButton
-            style={{marginLeft: -8}}
+            style={{ marginLeft: -8 }}
             icon={props => <MaterialIcons {...props} name="sort" />}
             onPress={handleReorder}
             mode="contained"
@@ -274,7 +280,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         headerLeft: () => (
           <>
             <IconButton
-              style={{marginLeft: -8}}
+              style={{ marginLeft: -8 }}
               onPress={handleSelect}
               icon={props => <MaterialIcons {...props} name="list" />}
               mode="contained"
@@ -288,7 +294,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ),
         headerRight: () => (
           <IconButton
-            style={{marginRight: -8}}
+            style={{ marginRight: -8 }}
             onPress={() =>
               handleArchive(
                 filterSelected === 'archived',
@@ -329,13 +335,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <>
             {isCourse ? (
               <IconButton
-                style={{marginLeft: -8}}
+                style={{ marginLeft: -8 }}
                 icon={props => <MaterialIcons {...props} name="sort" />}
                 onPress={handleReorder}
               />
             ) : (
               <IconButton
-                style={{marginLeft: -8}}
+                style={{ marginLeft: -8 }}
                 onPress={handleSelect}
                 icon={props => <MaterialIcons {...props} name="list" />}
               />
@@ -364,7 +370,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               />
             )}
             <IconButton
-              style={{marginRight: -8}}
+              style={{ marginRight: -8 }}
               onPress={() => (navigation.navigate as any)('SearchStack' as any)}
               icon={props => <MaterialIcons {...props} name="search" />}
             />
@@ -416,14 +422,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   }, [refreshing]);
 
-  const renderItem: ReorderableListProps<T>['renderItem'] = ({item}) => {
+  const renderItem: ReorderableListProps<T>['renderItem'] = ({ item }) => {
     return (
       <Component
         data={item}
         selectionMode={selectionMode}
         reorderMode={reorderMode}
         checked={selection[item.id]}
-        onCheck={checked => setSelection({...selection, [item.id]: checked})}
+        onCheck={checked => setSelection({ ...selection, [item.id]: checked })}
         onPress={() => {
           setFilterVisible(false);
           onItemPress?.(item);
@@ -458,10 +464,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         hiddenCount={hidden.length}
       />
       <ReorderableList
-        style={{height: '100%'}}
+        style={{ height: '100%' }}
         contentContainerStyle={[
-          {flexGrow: 1},
-          data.length ? null : {justifyContent: 'center'},
+          { flexGrow: 1 },
+          data.length ? null : { justifyContent: 'center' },
         ]}
         data={data}
         ListEmptyComponent={<Empty />}

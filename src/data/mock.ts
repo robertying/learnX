@@ -1,6 +1,6 @@
-import {HomeworkCompletionType, HomeworkSubmissionType} from 'thu-learn-lib';
+import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
 import env from 'helpers/env';
-import {PersistAppState} from 'data/types/state';
+import { PersistAppState } from 'data/types/state';
 
 const mockStore: PersistAppState = {
   auth: {
@@ -564,13 +564,13 @@ const mockStore: PersistAppState = {
           size: '239.54KB',
         },
         answerContent: '答案已上传',
-        excellentHomeworkList: Array.from({length: 10}, (_, index) => ({
+        excellentHomeworkList: Array.from({ length: 10 }, (_, index) => ({
           id: '7f27d54daad54846a43796f5ed008e46',
           baseId: '26ef84e8937624450193ba443c9414bd',
           title: '第十三次作业',
           url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
           completionType: HomeworkCompletionType.INDIVIDUAL,
-          author: {id: '2024000000', name: `名字${index}`, anonymous: true},
+          author: { id: '2024000000', name: `名字${index}`, anonymous: true },
           submittedContent:
             '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
           attachment: {

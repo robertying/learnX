@@ -1,5 +1,5 @@
-import {ApiError, FailReason} from 'thu-learn-lib';
-import {isLocaleChinese} from './i18n';
+import { ApiError, FailReason } from 'thu-learn-lib';
+import { isLocaleChinese } from './i18n';
 
 export const getSemesterTextFromId = (semesterId: string) => {
   const texts = semesterId.split('-');

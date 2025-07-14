@@ -1,4 +1,4 @@
-import {CoursesAction} from 'data/types/actions';
+import { CoursesAction } from 'data/types/actions';
 import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -6,8 +6,8 @@ import {
   SET_COURSE_ORDER,
   SET_HIDE_COURSE,
 } from 'data/types/constants';
-import {CoursesState} from 'data/types/state';
-import {sortByOrder} from 'helpers/reorder';
+import { CoursesState } from 'data/types/state';
+import { sortByOrder } from 'helpers/reorder';
 
 export default function courses(
   state: CoursesState = {

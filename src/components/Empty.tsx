@@ -1,8 +1,8 @@
-import {StyleSheet, View} from 'react-native';
-import {Text, useTheme} from 'react-native-paper';
+import { StyleSheet, View } from 'react-native';
+import { Text, useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Styles from 'constants/Styles';
-import {t} from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 
 const Empty: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
@@ -15,7 +15,7 @@ const Empty: React.FC<React.PropsWithChildren<unknown>> = () => {
         color={theme.colors.outline}
         size={56}
       />
-      <Text style={[Styles.spacey1, {color: theme.colors.outline}]}>
+      <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
         {t('empty')}
       </Text>
     </View>

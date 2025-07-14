@@ -1,5 +1,5 @@
-import {NavigatorScreenParams} from '@react-navigation/native';
-import {Assignment, Course, File, Notice} from 'data/types/state';
+import { NavigatorScreenParams } from '@react-navigation/native';
+import { Assignment, Course, File, Notice } from 'data/types/state';
 
 export interface ExtraParams {
   disableAnimation?: boolean;
@@ -51,7 +51,7 @@ export type MainTabParams = {
 };
 
 export type CourseXStackParams = {
-  CourseX: {id: string} | undefined;
+  CourseX: { id: string } | undefined;
 };
 
 export type SearchStackParams = {
@@ -77,7 +77,7 @@ export type DetailStackParams = {
   FileDetail: File & ExtraParams;
   CourseDetail: Course & ExtraParams;
   AssignmentSubmission: Assignment;
-  CourseX: {id: string} | undefined;
+  CourseX: { id: string } | undefined;
   CourseInformationSharing: ExtraParams;
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;

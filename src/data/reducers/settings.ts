@@ -1,11 +1,11 @@
-import {SettingsAction} from 'data/types/actions';
+import { SettingsAction } from 'data/types/actions';
 import {
   CLEAR_EVENT_IDS,
   SET_EVENT_ID_FOR_ASSIGNMENT,
   REMOVE_EVENT_ID_FOR_ASSIGNMENT,
   SET_SETTING,
 } from 'data/types/constants';
-import {SettingsState} from 'data/types/state';
+import { SettingsState } from 'data/types/state';
 
 export default function settings(
   state: SettingsState = {
@@ -75,14 +75,18 @@ export default function settings(
       }
     case REMOVE_EVENT_ID_FOR_ASSIGNMENT:
       if (action.payload.type === 'calendar') {
-        const syncedCalendarAssignments = {...state.syncedCalendarAssignments};
+        const syncedCalendarAssignments = {
+          ...state.syncedCalendarAssignments,
+        };
         delete syncedCalendarAssignments[action.payload.assignmentId];
         return {
           ...state,
           syncedCalendarAssignments,
         };
       } else {
-        const syncedReminderAssignments = {...state.syncedReminderAssignments};
+        const syncedReminderAssignments = {
+          ...state.syncedReminderAssignments,
+        };
         delete syncedReminderAssignments[action.payload.assignmentId];
         return {
           ...state,

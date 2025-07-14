@@ -1,5 +1,5 @@
-import {TouchableOpacity, TouchableOpacityProps} from 'react-native';
-import {Text, TextProps, useTheme} from 'react-native-paper';
+import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import { Text, TextProps, useTheme } from 'react-native-paper';
 import Styles from 'constants/Styles';
 
 export interface TextButtonProps extends TextProps<'bodyMedium'> {
@@ -23,7 +23,8 @@ const TextButton: React.FC<React.PropsWithChildren<TextButtonProps>> = ({
       style={[Styles.flexRowCenter, containerStyle]}
       activeOpacity={0.6}
       onPress={onPress}
-      disabled={disabled}>
+      disabled={disabled}
+    >
       <Text
         style={[
           {

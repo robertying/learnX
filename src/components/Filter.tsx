@@ -1,6 +1,6 @@
-import {memo, useCallback, useEffect, useState} from 'react';
-import {LayoutChangeEvent, Platform, StyleSheet, View} from 'react-native';
-import {Badge, Divider, List, Text, useTheme} from 'react-native-paper';
+import { memo, useCallback, useEffect, useState } from 'react';
+import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
+import { Badge, Divider, List, Text, useTheme } from 'react-native-paper';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -8,7 +8,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {t} from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import Colors from 'constants/Colors';
 
 export type FilterSelection =
@@ -58,13 +58,13 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   }, [layout]);
   const transformStyle = useAnimatedStyle(() => {
     return {
-      transform: [{translateY: (position.value - 1) * layout.height}],
+      transform: [{ translateY: (position.value - 1) * layout.height }],
     };
   }, [layout]);
 
-  const handleLayout = ({nativeEvent}: LayoutChangeEvent) => {
-    const {height} = nativeEvent.layout;
-    setLayout({height, measured: true});
+  const handleLayout = ({ nativeEvent }: LayoutChangeEvent) => {
+    const { height } = nativeEvent.layout;
+    setLayout({ height, measured: true });
   };
 
   useEffect(() => {
@@ -90,7 +90,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
       badgeColor?: string;
     }>
   > = useCallback(
-    ({name, text, count, color, badgeColor}) => (
+    ({ name, text, count, color, badgeColor }) => (
       <List.Item
         style={styles.listItem}
         titleStyle={styles.title}
@@ -101,8 +101,9 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
               visible
               style={[
                 styles.badge,
-                {color: color ?? 'white', backgroundColor: badgeColor},
-              ]}>
+                { color: color ?? 'white', backgroundColor: badgeColor },
+              ]}
+            >
               {count}
             </Badge>
           </View>
@@ -140,14 +141,16 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
 
   return (
     <Animated.View
-      style={[styles.root, {backgroundColor: theme.colors.surface}]}>
+      style={[styles.root, { backgroundColor: theme.colors.surface }]}
+    >
       <Animated.View style={heightStyle} />
       <Animated.View
         onLayout={handleLayout}
         style={[
           layout.measured || !visible ? [styles.absolute, transformStyle] : [],
-          !visible ? {opacity: 0} : {opacity: 100},
-        ]}>
+          !visible ? { opacity: 0 } : { opacity: 100 },
+        ]}
+      >
         {unfinishedCount !== undefined ? (
           <ListItem
             name="unfinished"
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
   listItem: {
     paddingHorizontal: 16,
   },
-  title: {marginTop: Platform.OS === 'ios' ? 7 : undefined, marginLeft: -12},
+  title: { marginTop: Platform.OS === 'ios' ? 7 : undefined, marginLeft: -12 },
   absolute: {
     position: 'absolute',
     top: 0,

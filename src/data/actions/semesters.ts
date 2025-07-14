@@ -1,7 +1,7 @@
-import {createAction, createAsyncAction} from 'typesafe-actions';
-import {ApiError} from 'thu-learn-lib';
-import {dataSource} from 'data/source';
-import {ThunkResult} from 'data/types/actions';
+import { createAction, createAsyncAction } from 'typesafe-actions';
+import { ApiError } from 'thu-learn-lib';
+import { dataSource } from 'data/source';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_SEMESTERS_FAILURE,
   GET_ALL_SEMESTERS_REQUEST,
@@ -11,7 +11,7 @@ import {
   GET_CURRENT_SEMESTER_SUCCESS,
   SET_CURRENT_SEMESTER,
 } from 'data/types/constants';
-import {serializeError} from 'helpers/parse';
+import { serializeError } from 'helpers/parse';
 
 export const getAllSemestersAction = createAsyncAction(
   GET_ALL_SEMESTERS_REQUEST,

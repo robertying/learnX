@@ -1,8 +1,8 @@
-import {ApiError, ContentType} from 'thu-learn-lib';
-import {createAction, createAsyncAction} from 'typesafe-actions';
+import { ApiError, ContentType } from 'thu-learn-lib';
+import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
-import {dataSource} from 'data/source';
-import {ThunkResult} from 'data/types/actions';
+import { dataSource } from 'data/source';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
@@ -14,8 +14,8 @@ import {
   SET_ARCHIVE_ASSIGNMENTS,
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
-import {Assignment, AssignmentsState} from 'data/types/state';
-import {serializeError} from 'helpers/parse';
+import { Assignment, AssignmentsState } from 'data/types/state';
+import { serializeError } from 'helpers/parse';
 
 export const getAssignmentsForCourseAction = createAsyncAction(
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
@@ -56,7 +56,10 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
         ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
       ];
       dispatch(
-        getAssignmentsForCourseAction.success({courseId, assignments: sorted}),
+        getAssignmentsForCourseAction.success({
+          courseId,
+          assignments: sorted,
+        }),
       );
     } catch (err) {
       dispatch(getAssignmentsForCourseAction.failure(serializeError(err)));

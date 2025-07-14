@@ -1,6 +1,6 @@
-import {createContext, useCallback, useState} from 'react';
-import {StyleSheet} from 'react-native';
-import {Snackbar} from 'react-native-paper';
+import { createContext, useCallback, useState } from 'react';
+import { StyleSheet } from 'react-native';
+import { Snackbar } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
 
 type ToastType = 'success' | 'warning' | 'error' | 'none';
@@ -51,14 +51,16 @@ const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
         text: toastText,
         duration: toastDuration,
         toggleToast: handleToast,
-      }}>
+      }}
+    >
       {children}
       <Snackbar
         key={toastText}
         wrapperStyle={styles.snackbar}
         visible={toastText ? true : false}
         duration={toastDuration}
-        onDismiss={handleDismiss}>
+        onDismiss={handleDismiss}
+      >
         {toastText}
       </Snackbar>
     </ToastContext.Provider>
@@ -71,4 +73,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {ToastContext, ToastProvider};
+export { ToastContext, ToastProvider };

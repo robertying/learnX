@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import { useMemo, useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -7,9 +7,9 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Caption} from 'react-native-paper';
-import {DatePickerModal} from 'react-native-paper-dates';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Caption } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
 import type {
   CalendarDate,
   RangeChange,
@@ -18,19 +18,19 @@ import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {setSetting} from 'data/actions/settings';
-import {dataSource} from 'data/source';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { setSetting } from 'data/actions/settings';
+import { dataSource } from 'data/source';
 import {
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'helpers/event';
-import {isLocaleChinese, t} from 'helpers/i18n';
+import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import useFilteredData from 'hooks/useFilteredData';
-import {SettingsStackParams} from './types';
+import { SettingsStackParams } from './types';
 import DeviceInfo from 'constants/DeviceInfo';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
@@ -53,7 +53,7 @@ const CalendarEvent: React.FC<Props> = props => {
     state => state.settings.calendarEventLength,
   );
 
-  const {all} = useFilteredData({
+  const { all } = useFilteredData({
     data: assignmentState.items,
     fav: assignmentState.favorites,
     archived: assignmentState.archived,
@@ -84,12 +84,12 @@ const CalendarEvent: React.FC<Props> = props => {
     setDatePickerOpen(true);
   };
 
-  const handleSyncRangeChange: RangeChange = ({startDate, endDate}) => {
+  const handleSyncRangeChange: RangeChange = ({ startDate, endDate }) => {
     setStartDate(startDate);
     setEndDate(endDate);
   };
 
-  const handleSyncRangeConfirm: RangeChange = ({startDate, endDate}) => {
+  const handleSyncRangeConfirm: RangeChange = ({ startDate, endDate }) => {
     handleDatePickerDismiss();
     syncCourse(startDate, endDate);
   };
@@ -208,7 +208,7 @@ const CalendarEvent: React.FC<Props> = props => {
           },
         },
       ],
-      {cancelable: true},
+      { cancelable: true },
     );
   };
 
@@ -219,7 +219,8 @@ const CalendarEvent: React.FC<Props> = props => {
       <KeyboardAvoidingView
         style={Styles.flex1}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={120}>
+        keyboardVerticalOffset={120}
+      >
         <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
           <TableCell
             iconName="people"
@@ -242,7 +243,7 @@ const CalendarEvent: React.FC<Props> = props => {
             primaryText={t('classAlarm')}
             switchValue={alarms.courseAlarm}
             onSwitchValueChange={value =>
-              dispatch(setSetting('alarms', {...alarms, courseAlarm: value}))
+              dispatch(setSetting('alarms', { ...alarms, courseAlarm: value }))
             }
             type="switch"
           />
@@ -385,7 +386,7 @@ const CalendarEvent: React.FC<Props> = props => {
           {Platform.OS === 'ios' ? (
             <>
               <TableCell
-                style={{marginTop: 16}}
+                style={{ marginTop: 16 }}
                 iconName="event-available"
                 primaryText={t('assignmentReminderSync')}
                 switchValue={assignmentReminderSync}

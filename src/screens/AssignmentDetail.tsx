@@ -1,5 +1,5 @@
-import {useCallback, useLayoutEffect, useMemo} from 'react';
-import {ScrollView, StyleSheet, View} from 'react-native';
+import { useCallback, useLayoutEffect, useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import {
   Caption,
   Divider,
@@ -9,8 +9,8 @@ import {
   IconButton,
   Chip,
 } from 'react-native-paper';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -23,20 +23,20 @@ import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
-import {AssignmentStackParams} from 'screens/types';
+import { AssignmentStackParams } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {getWebViewTemplate, removeTags} from 'helpers/html';
-import {getExtension, stripExtension} from 'helpers/fs';
+import { getWebViewTemplate, removeTags } from 'helpers/html';
+import { getExtension, stripExtension } from 'helpers/fs';
 import {
   getAssignmentGradeLevelDescription,
   isLocaleChinese,
   t,
 } from 'helpers/i18n';
-import {File} from 'data/types/state';
+import { File } from 'data/types/state';
 
 type Props = NativeStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
 
-const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
+const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();
@@ -121,7 +121,7 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
       navigation.setOptions({
         headerRight: () => (
           <IconButton
-            style={{marginRight: -8}}
+            style={{ marginRight: -8 }}
             disabled={dayjs().isAfter(dayjs(deadline))}
             onPress={handleSubmit}
             icon={props => <MaterialIcons {...props} name="file-upload" />}
@@ -133,7 +133,7 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
 
   return (
     <SafeArea>
-      <ScrollView style={{backgroundColor: theme.colors.surface}}>
+      <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <View style={Styles.flexRow}>
             <Chip compact mode="outlined" style={styles.chip}>
@@ -188,7 +188,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
               />
               <TextButton
                 style={styles.textPaddingRight}
-                onPress={() => handleFileOpen(attachment)}>
+                onPress={() => handleFileOpen(attachment)}
+              >
                 {attachment.name}
               </TextButton>
             </View>
@@ -208,7 +209,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                 {submittedAttachment && (
                   <TextButton
                     style={[Styles.spacey1, styles.textPaddingRight]}
-                    onPress={() => handleFileOpen(submittedAttachment)}>
+                    onPress={() => handleFileOpen(submittedAttachment)}
+                  >
                     {submittedAttachment.name}
                   </TextButton>
                 )}
@@ -255,7 +257,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                 {gradeAttachment && (
                   <TextButton
                     style={[Styles.spacey1, styles.textPaddingRight]}
-                    onPress={() => handleFileOpen(gradeAttachment)}>
+                    onPress={() => handleFileOpen(gradeAttachment)}
+                  >
                     {gradeAttachment.name}
                   </TextButton>
                 )}
@@ -293,7 +296,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                 {answerAttachment && (
                   <TextButton
                     style={[Styles.spacey1, styles.textPaddingRight]}
-                    onPress={() => handleFileOpen(answerAttachment)}>
+                    onPress={() => handleFileOpen(answerAttachment)}
+                  >
                     {answerAttachment.name}
                   </TextButton>
                 )}
@@ -328,7 +332,8 @@ const AssignmentDetail: React.FC<Props> = ({route, navigation}) => {
                     {attachment && (
                       <TextButton
                         style={[Styles.spacey1, styles.textPaddingRight]}
-                        onPress={() => handleFileOpen(attachment)}>
+                        onPress={() => handleFileOpen(attachment)}
+                      >
                         {attachment.name}
                       </TextButton>
                     )}

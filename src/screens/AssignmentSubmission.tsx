@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useLayoutEffect, useState} from 'react';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
 import {
@@ -23,17 +23,17 @@ import {
 } from 'react-native-paper';
 import dayjs from 'dayjs';
 import mimeTypes from 'mime-types';
-import {RemoteFile} from 'thu-learn-lib';
+import { RemoteFile } from 'thu-learn-lib';
 import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
-import {getExtension, stripExtension} from 'helpers/fs';
-import {removeTags} from 'helpers/html';
-import {isLocaleChinese, t} from 'helpers/i18n';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {File} from 'data/types/state';
-import {submitAssignment} from 'data/source';
+import { getExtension, stripExtension } from 'helpers/fs';
+import { removeTags } from 'helpers/html';
+import { isLocaleChinese, t } from 'helpers/i18n';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { File } from 'data/types/state';
+import { submitAssignment } from 'data/source';
 import {
   getAssignmentsForCourse,
   setPendingAssignmentData,
@@ -41,7 +41,7 @@ import {
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import Numbers from 'constants/Numbers';
-import {AssignmentSubmissionStackParams} from './types';
+import { AssignmentSubmissionStackParams } from './types';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionStackParams,
@@ -55,7 +55,7 @@ interface AttachmentResult {
   size?: number | null;
 }
 
-const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
+const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   const theme = useTheme();
   const toast = useToast();
   const detailNavigator = useDetailNavigator();
@@ -170,7 +170,9 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
     }
   };
 
-  const handleFileOpen = (attachment?: RemoteFile & {type?: string | null}) => {
+  const handleFileOpen = (
+    attachment?: RemoteFile & { type?: string | null },
+  ) => {
     if (attachment) {
       navigation.push('FileDetail', {
         id,
@@ -264,7 +266,7 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
           onPress: handleSubmit,
         },
       ],
-      {cancelable: true},
+      { cancelable: true },
     );
   }, [handleSubmit]);
 
@@ -275,8 +277,9 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
           disabled={
             uploading || (!removeAttachment && !content && !attachmentResult)
           }
-          style={{fontSize: 17, fontWeight: 'bold'}}
-          onPress={handleSubmitPress}>
+          style={{ fontSize: 17, fontWeight: 'bold' }}
+          onPress={handleSubmitPress}
+        >
           {t('submit')}
         </TextButton>
       ),
@@ -305,12 +308,14 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
       <SafeArea>
         <KeyboardAvoidingView
           style={Styles.flex1}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
           {progress ? <ProgressBar progress={progress} /> : null}
           <ScrollView
             contentContainerStyle={styles.scrollView}
             scrollEnabled={false}
-            keyboardShouldPersistTaps="handled">
+            keyboardShouldPersistTaps="handled"
+          >
             <TextInput
               style={Styles.flex1}
               disabled={removeAttachment || uploading}
@@ -339,7 +344,8 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
                     : undefined
                 }
                 containerStyle={[styles.attachmentButton, Styles.spacey1]}
-                onPress={() => handleFileOpen(submittedAttachment)}>
+                onPress={() => handleFileOpen(submittedAttachment)}
+              >
                 {submittedAttachment.name}
               </TextButton>
             ) : undefined}
@@ -358,7 +364,8 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
                       : '',
                     type: attachmentResult.type,
                   })
-                }>
+                }
+              >
                 {attachmentResult.name}{' '}
                 {pendingAssignmentData
                   ? isLocaleChinese()
@@ -373,7 +380,8 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
                   disabled={uploading}
                   mode="contained"
                   style={styles.submitButton}
-                  onPress={handleAttachmentRemove}>
+                  onPress={handleAttachmentRemove}
+                >
                   {removeAttachment
                     ? t('undoRemoveAttachment')
                     : t('removeAttachment')}
@@ -395,14 +403,16 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
                       style={styles.submitButton}
                       disabled={uploading}
                       mode="contained"
-                      onPress={handlePickerMenuOpen}>
+                      onPress={handlePickerMenuOpen}
+                    >
                       {attachmentResult
                         ? t('reUploadAttachment')
                         : submittedAttachment
                           ? t('overwriteAttachment')
                           : t('uploadAttachment')}
                     </Button>
-                  }>
+                  }
+                >
                   <Menu.Item
                     onPress={handleDocumentPick}
                     title={t('documents')}
@@ -425,7 +435,8 @@ const AssignmentSubmission: React.FC<Props> = ({navigation, route}) => {
         <Snackbar
           visible={uploadError}
           duration={3000}
-          onDismiss={() => setUploadError(false)}>
+          onDismiss={() => setUploadError(false)}
+        >
           {t('assignmentSubmissionFailed')}
         </Snackbar>
       </SafeArea>

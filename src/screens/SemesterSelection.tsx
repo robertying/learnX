@@ -1,18 +1,18 @@
-import {useCallback, useEffect, useState} from 'react';
-import {FlatList, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { useCallback, useEffect, useState } from 'react';
+import { FlatList, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
-import {dataSource} from 'data/source';
-import {useAppDispatch, useAppSelector} from 'data/store';
+import { dataSource } from 'data/source';
+import { useAppDispatch, useAppSelector } from 'data/store';
 import {
   getAllSemesters,
   getCurrentSemester,
   setCurrentSemester,
 } from 'data/actions/semesters';
-import {getSemesterTextFromId} from 'helpers/parse';
+import { getSemesterTextFromId } from 'helpers/parse';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {SettingsStackParams} from './types';
+import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
 
@@ -25,7 +25,7 @@ const SemesterSelection: React.FC<Props> = props => {
   const [latestSemester, setLatestSemester] = useState<string | null>(null);
 
   const getLatestSemester = async () => {
-    const {id} = await dataSource.getCurrentSemester();
+    const { id } = await dataSource.getCurrentSemester();
     setLatestSemester(id);
   };
 
@@ -62,7 +62,7 @@ const SemesterSelection: React.FC<Props> = props => {
             />
           ) : null
         }
-        renderItem={({item}) => (
+        renderItem={({ item }) => (
           <TableCell
             iconName={currentSemesterId === item ? 'check' : undefined}
             primaryText={item ? getSemesterTextFromId(item) : ''}

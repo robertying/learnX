@@ -1,5 +1,5 @@
-import {useContext} from 'react';
-import {SplitViewContext} from 'components/SplitView';
+import { useContext } from 'react';
+import { SplitViewContext } from 'components/SplitView';
 
 const useDetailNavigator = () => {
   const context = useContext(SplitViewContext);

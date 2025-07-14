@@ -1,7 +1,7 @@
-import {useLayoutEffect} from 'react';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {ParamListBase} from '@react-navigation/native';
-import {ExtraParams} from 'screens/types';
+import { useLayoutEffect } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { ParamListBase } from '@react-navigation/native';
+import { ExtraParams } from 'screens/types';
 
 const useNavigationAnimation = <T extends keyof ParamListBase>({
   navigation,

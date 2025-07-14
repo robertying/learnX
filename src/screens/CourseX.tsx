@@ -1,15 +1,15 @@
-import {useRef, useState} from 'react';
-import {Linking, Platform, StyleSheet, View} from 'react-native';
-import {IconButton, ProgressBar, useTheme} from 'react-native-paper';
-import WebView, {WebViewNavigation} from 'react-native-webview';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { useRef, useState } from 'react';
+import { Linking, Platform, StyleSheet, View } from 'react-native';
+import { IconButton, ProgressBar, useTheme } from 'react-native-paper';
+import WebView, { WebViewNavigation } from 'react-native-webview';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
-import {CourseXStackParams} from './types';
+import { CourseXStackParams } from './types';
 
 type Props = NativeStackScreenProps<CourseXStackParams, 'CourseX'>;
 
-const CourseX: React.FC<Props> = ({route}) => {
+const CourseX: React.FC<Props> = ({ route }) => {
   const courseId = route.params?.id ?? '';
 
   const theme = useTheme();
@@ -39,7 +39,7 @@ const CourseX: React.FC<Props> = ({route}) => {
         }}
         originWhitelist={['https://']}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-        onLoadProgress={({nativeEvent}) => {
+        onLoadProgress={({ nativeEvent }) => {
           // New architecture doesn't like native floats
           setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
         }}
@@ -52,7 +52,8 @@ const CourseX: React.FC<Props> = ({route}) => {
             backgroundColor: theme.colors.surface,
             paddingBottom: safeAreaInsets.bottom,
           },
-        ]}>
+        ]}
+      >
         <IconButton
           icon="arrow-left"
           disabled={!canGoBack}

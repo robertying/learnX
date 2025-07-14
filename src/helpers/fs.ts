@@ -1,4 +1,4 @@
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import * as ExpoFileSystem from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
 import fs from 'react-native-fs';
@@ -6,9 +6,9 @@ import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@react-native-cookies/cookies';
 import mime from 'mime-types';
-import {addCSRF, dataSource} from 'data/source';
-import {store} from 'data/store';
-import {File} from 'data/types/state';
+import { addCSRF, dataSource } from 'data/source';
+import { store } from 'data/store';
+import { File } from 'data/types/state';
 import Urls from 'constants/Urls';
 
 const macDownloadDirectory = ExpoFileSystem.documentDirectory?.replace(
@@ -17,11 +17,11 @@ const macDownloadDirectory = ExpoFileSystem.documentDirectory?.replace(
 )!;
 
 export const copyFileToMacDownloads = async (
-  {title, fileType}: {title: string; fileType: string},
+  { title, fileType }: { title: string; fileType: string },
   fromPath: string,
 ) => {
   const toPath = `${macDownloadDirectory}${title}.${fileType}`;
-  await ExpoFileSystem.copyAsync({from: fromPath, to: toPath});
+  await ExpoFileSystem.copyAsync({ from: fromPath, to: toPath });
   return toPath;
 };
 
@@ -105,7 +105,7 @@ export const downloadFile = async (
   } else {
     const cookies = await CookieManager.get(Urls.learn);
     const cookiesString = Object.values(cookies).reduce(
-      (acc, {name, value}) => `${acc}${name}=${value}; `,
+      (acc, { name, value }) => `${acc}${name}=${value}; `,
       '',
     );
 
@@ -206,7 +206,7 @@ export const openFile = async (uri: string, type?: string | null) => {
 
 export const copyFileToCache = async (uri: string) => {
   const path = `${ExpoFileSystem.cacheDirectory}${uri.split('/').pop()}`;
-  await ExpoFileSystem.copyAsync({from: uri, to: path});
+  await ExpoFileSystem.copyAsync({ from: uri, to: path });
   return path;
 };
 

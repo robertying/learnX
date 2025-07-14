@@ -1,6 +1,6 @@
-import {useMemo} from 'react';
-import Fuse, {IFuseOptions} from 'fuse.js';
-import {Assignment, File, Notice} from 'data/types/state';
+import { useMemo } from 'react';
+import Fuse, { IFuseOptions } from 'fuse.js';
+import { Assignment, File, Notice } from 'data/types/state';
 
 const noticeOptions: IFuseOptions<Notice> = {
   keys: [
@@ -8,8 +8,8 @@ const noticeOptions: IFuseOptions<Notice> = {
     'courseTeacherName',
     'publisher',
     'attachmentName',
-    {name: 'title', weight: 2},
-    {name: 'content', weight: 2},
+    { name: 'title', weight: 2 },
+    { name: 'content', weight: 2 },
   ],
 };
 
@@ -25,8 +25,8 @@ const assignmentOptions: IFuseOptions<Assignment> = {
     'gradeAttachmentName',
     'answerContent',
     'answerAttachmentName',
-    {name: 'title', weight: 2},
-    {name: 'description', weight: 2},
+    { name: 'title', weight: 2 },
+    { name: 'description', weight: 2 },
   ],
 };
 
@@ -34,10 +34,10 @@ const fileOptions: IFuseOptions<File> = {
   keys: [
     'courseName',
     'courseTeacherName',
-    {name: 'title', weight: 2},
-    {name: 'description', weight: 2},
-    {name: 'fileType', weight: 2},
-    {name: 'category.title', weight: 2},
+    { name: 'title', weight: 2 },
+    { name: 'description', weight: 2 },
+    { name: 'fileType', weight: 2 },
+    { name: 'category.title', weight: 2 },
   ],
 };
 

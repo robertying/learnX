@@ -1,4 +1,4 @@
-import {Platform} from 'react-native';
+import { Platform } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 
 const tunaMirrorUrl =

@@ -1,8 +1,8 @@
-import {createContext, useState, Children, useEffect, useRef} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {Divider} from 'react-native-paper';
-import {NavigationContainerRef} from '@react-navigation/native';
-import {BlurView} from 'expo-blur';
+import { createContext, useState, Children, useEffect, useRef } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Divider } from 'react-native-paper';
+import { NavigationContainerRef } from '@react-navigation/native';
+import { BlurView } from 'expo-blur';
 import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
@@ -52,7 +52,8 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         showDetail,
         showMaster,
         toggleMaster: setShowMaster,
-      }}>
+      }}
+    >
       {splitEnabled ? (
         <View style={styles.root}>
           <View
@@ -62,12 +63,14 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
                 flex: showDetail ? 0 : 1,
                 display: showMaster ? 'flex' : 'none',
               },
-            ]}>
+            ]}
+          >
             {Children.toArray(children)[0]}
           </View>
           {showDetail && <Divider style={styles.divider} />}
           <View
-            style={[styles.detail, {display: showDetail ? 'flex' : 'none'}]}>
+            style={[styles.detail, { display: showDetail ? 'flex' : 'none' }]}
+          >
             {Children.toArray(children)[1]}
           </View>
         </View>
@@ -112,4 +115,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export {SplitViewContext, SplitViewProvider};
+export { SplitViewContext, SplitViewProvider };

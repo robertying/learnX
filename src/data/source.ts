@@ -1,7 +1,7 @@
-import {Learn2018Helper, addCSRFTokenToUrl} from 'thu-learn-lib';
+import { Learn2018Helper, addCSRFTokenToUrl } from 'thu-learn-lib';
 import mime from 'mime-types';
 import axios from 'axios';
-import {store} from 'data/store';
+import { store } from 'data/store';
 import Urls from 'constants/Urls';
 
 export let dataSource: Learn2018Helper;

@@ -1,23 +1,23 @@
-import {useEffect, useState} from 'react';
-import {Alert, Linking, Platform, ScrollView, StyleSheet} from 'react-native';
-import {StackActions} from '@react-navigation/native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import { useEffect, useState } from 'react';
+import { Alert, Linking, Platform, ScrollView, StyleSheet } from 'react-native';
+import { StackActions } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
 import SafeArea from 'components/SafeArea';
 import TableCell from 'components/TableCell';
 import Styles from 'constants/Styles';
-import {getLatestRelease} from 'helpers/update';
-import {setSetting} from 'data/actions/settings';
-import {clearStore} from 'data/actions/root';
-import {useAppDispatch, useAppSelector} from 'data/store';
+import { getLatestRelease } from 'helpers/update';
+import { setSetting } from 'data/actions/settings';
+import { clearStore } from 'data/actions/root';
+import { useAppDispatch, useAppSelector } from 'data/store';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {t} from 'helpers/i18n';
-import {SettingsStackParams} from './types';
+import { t } from 'helpers/i18n';
+import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Settings'>;
 
-const Settings: React.FC<Props> = ({navigation}) => {
+const Settings: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();
@@ -30,7 +30,7 @@ const Settings: React.FC<Props> = ({navigation}) => {
     state => state.settings.courseInformationSharingBadgeShown,
   );
 
-  const [update, setUpdate] = useState<{version: string; url: string} | null>(
+  const [update, setUpdate] = useState<{ version: string; url: string } | null>(
     null,
   );
 
@@ -62,14 +62,14 @@ const Settings: React.FC<Props> = ({navigation}) => {
           },
         },
       ],
-      {cancelable: true},
+      { cancelable: true },
     );
   };
 
   useEffect(() => {
     if (Platform.OS === 'android') {
       (async () => {
-        const {version, url} = await getLatestRelease();
+        const { version, url } = await getLatestRelease();
         if (semverGt(version, packageJson.version)) {
           setUpdate({
             version,

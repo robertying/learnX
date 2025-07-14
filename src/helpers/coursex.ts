@@ -1,6 +1,6 @@
 import axios from 'axios';
-import {gql, GraphQLClient} from 'graphql-request';
-import {Course} from 'data/types/state';
+import { gql, GraphQLClient } from 'graphql-request';
+import { Course } from 'data/types/state';
 import env from './env';
 
 const graphQLClient = new GraphQLClient('https://api.tsinghua.app/v1/graphql');
@@ -20,8 +20,8 @@ export const uploadCourses = async (courses: Course[]) => {
     id: c.id,
     name: c.chineseName,
     teacher: {
-      data: {id: c.teacherNumber, name: c.teacherName},
-      on_conflict: {constraint: 'teacher_pkey', update_columns: ['name']},
+      data: { id: c.teacherNumber, name: c.teacherName },
+      on_conflict: { constraint: 'teacher_pkey', update_columns: ['name'] },
     },
     time_location: JSON.stringify(c.timeAndLocation),
     semester_id: c.semesterId,

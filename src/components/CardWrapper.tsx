@@ -1,11 +1,14 @@
-import {PropsWithChildren, useRef, useEffect, useCallback} from 'react';
-import {View, StyleSheet} from 'react-native';
-import Animated, {SharedValue, useAnimatedStyle} from 'react-native-reanimated';
+import { PropsWithChildren, useRef, useEffect, useCallback } from 'react';
+import { View, StyleSheet } from 'react-native';
+import Animated, {
+  SharedValue,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import {useReorderableDrag} from 'react-native-reorderable-list';
-import {useTheme, Checkbox} from 'react-native-paper';
+import { useReorderableDrag } from 'react-native-reorderable-list';
+import { useTheme, Checkbox } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Colors from 'constants/Colors';
@@ -70,7 +73,8 @@ const SwipeActions: React.FC<{
 
   return (
     <Animated.View
-      style={[styles.drawer, {width: totalButtonWidth}, actionStyle]}>
+      style={[styles.drawer, { width: totalButtonWidth }, actionStyle]}
+    >
       {onHide ? (
         <Touchable
           type="opacity"
@@ -80,7 +84,8 @@ const SwipeActions: React.FC<{
               backgroundColor: 'rgba(255,204,0,0.2)',
             },
           ]}
-          onPress={handleHide}>
+          onPress={handleHide}
+        >
           <MaterialIcons
             name={hidden ? 'visibility' : 'visibility-off'}
             size={40}
@@ -98,7 +103,8 @@ const SwipeActions: React.FC<{
                   backgroundColor: 'rgba(255,59,48,0.2)',
                 },
               ]}
-              onPress={handleFav}>
+              onPress={handleFav}
+            >
               <MaterialCommunityIcons
                 name={fav ? 'heart-off' : 'heart'}
                 size={40}
@@ -114,7 +120,8 @@ const SwipeActions: React.FC<{
                 backgroundColor: 'rgba(33,150,243,0.2)',
               },
             ]}
-            onPress={handleArchive}>
+            onPress={handleArchive}
+          >
             <MaterialCommunityIcons
               name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}
               size={40}
@@ -226,11 +233,12 @@ const CardWrapper: React.FC<
     <Touchable
       type="highlight"
       highlightColorOpacity={0.125}
-      style={{backgroundColor: theme.colors.surface}}
+      style={{ backgroundColor: theme.colors.surface }}
       onPress={
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress
       }
-      onLongPress={handleLongPress}>
+      onLongPress={handleLongPress}
+    >
       <View style={styles.root}>
         {selectionMode && (
           <View style={styles.checkbox}>
@@ -255,11 +263,12 @@ const CardWrapper: React.FC<
   ) : (
     <ReanimatedSwipeable
       ref={snapRef}
-      containerStyle={{backgroundColor: theme.colors.surface}}
-      childrenContainerStyle={{backgroundColor: theme.colors.surface}}
+      containerStyle={{ backgroundColor: theme.colors.surface }}
+      childrenContainerStyle={{ backgroundColor: theme.colors.surface }}
       renderRightActions={renderRightActions}
       overshootFriction={8}
-      enabled={!disableSwipe && !selectionMode && !reorderMode}>
+      enabled={!disableSwipe && !selectionMode && !reorderMode}
+    >
       {touchable}
     </ReanimatedSwipeable>
   );

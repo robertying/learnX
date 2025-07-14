@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Image,
   Keyboard,
@@ -16,18 +16,18 @@ import {
   useTheme,
   Text,
 } from 'react-native-paper';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {FailReason} from 'thu-learn-lib';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { FailReason } from 'thu-learn-lib';
 import useToast from 'hooks/useToast';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {login, loginWithOfflineMode} from 'data/actions/auth';
-import {setMockStore} from 'data/actions/root';
-import {setSetting} from 'data/actions/settings';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { login, loginWithOfflineMode } from 'data/actions/auth';
+import { setMockStore } from 'data/actions/root';
+import { setSetting } from 'data/actions/settings';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
-import {RootStackParams} from './types';
+import { RootStackParams } from './types';
 import env from 'helpers/env';
-import {t} from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Login'>;
 
@@ -149,14 +149,16 @@ const Login: React.FC<Props> = () => {
             mode="contained"
             loading={loading}
             disabled={loading}
-            onPress={handleLogin}>
+            onPress={handleLogin}
+          >
             {t('login')}
           </Button>
           {hasCredential && (
             <Button
               style={styles.button}
               mode="text"
-              onPress={handleLoginWithOfflineMode}>
+              onPress={handleLoginWithOfflineMode}
+            >
               {t('offlineMode')}
             </Button>
           )}

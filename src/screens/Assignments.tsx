@@ -1,23 +1,23 @@
-import {useCallback, useEffect, useMemo} from 'react';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
+import { useCallback, useEffect, useMemo } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
-import {AssignmentStackParams} from 'screens/types';
+import { AssignmentStackParams } from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {getAllAssignmentsForCourses} from 'data/actions/assignments';
-import {Assignment} from 'data/types/state';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { getAllAssignmentsForCourses } from 'data/actions/assignments';
+import { Assignment } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilteredData from 'hooks/useFilteredData';
 import useToast from 'hooks/useToast';
-import {saveAssignmentsToReminderOrCalendar} from 'helpers/event';
-import {t} from 'helpers/i18n';
+import { saveAssignmentsToReminderOrCalendar } from 'helpers/event';
+import { t } from 'helpers/i18n';
 
 type Props = NativeStackScreenProps<AssignmentStackParams, 'Assignments'>;
 
-const Assignments: React.FC<Props> = ({navigation}) => {
+const Assignments: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
   const toast = useToast();
@@ -38,7 +38,7 @@ const Assignments: React.FC<Props> = ({navigation}) => {
     state => state.settings.assignmentReminderSync,
   );
 
-  const {all, fav, archived, hidden, unfinished, finished} = useFilteredData({
+  const { all, fav, archived, hidden, unfinished, finished } = useFilteredData({
     data: assignmentState.items,
     fav: assignmentState.favorites,
     archived: assignmentState.archived,

@@ -1,7 +1,11 @@
-import {createAction} from 'typesafe-actions';
-import {persistor} from 'data/store';
-import {ThunkResult} from 'data/types/actions';
-import {CLEAR_STORE, SET_MOCK_STORE, RESET_LOADING} from 'data/types/constants';
+import { createAction } from 'typesafe-actions';
+import { persistor } from 'data/store';
+import { ThunkResult } from 'data/types/actions';
+import {
+  CLEAR_STORE,
+  SET_MOCK_STORE,
+  RESET_LOADING,
+} from 'data/types/constants';
 
 export const resetLoading = createAction(RESET_LOADING)();
 

@@ -1,14 +1,14 @@
 import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
-import {ContentType} from 'thu-learn-lib';
+import { ContentType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import allSettled from 'promise.allsettled';
-import {AppDispatch, store} from 'data/store';
-import {dataSource} from 'data/source';
-import {Assignment, CoursesState, File, Notice} from 'data/types/state';
-import {getAllNoticesForCoursesAction} from 'data/actions/notices';
-import {getAllAssignmentsForCoursesAction} from 'data/actions/assignments';
-import {getAllFilesForCoursesAction} from 'data/actions/files';
+import { AppDispatch, store } from 'data/store';
+import { dataSource } from 'data/source';
+import { Assignment, CoursesState, File, Notice } from 'data/types/state';
+import { getAllNoticesForCoursesAction } from 'data/actions/notices';
+import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
+import { getAllFilesForCoursesAction } from 'data/actions/files';
 
 const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
   const courseIds = courses.items.map(i => i.id);

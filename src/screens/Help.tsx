@@ -1,11 +1,11 @@
-import {Linking, ScrollView, StyleSheet} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {Title, Text} from 'react-native-paper';
+import { Linking, ScrollView, StyleSheet } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { Title, Text } from 'react-native-paper';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
-import {t} from 'helpers/i18n';
-import {SettingsStackParams} from './types';
+import { t } from 'helpers/i18n';
+import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
 
@@ -16,7 +16,8 @@ const Help: React.FC<Props> = props => {
     <SafeArea>
       <ScrollView
         style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewPaddings}>
+        contentContainerStyle={styles.scrollViewPaddings}
+      >
         <Title>{t('githubRecommended')}</Title>
         <Text
           style={[styles.text, styles.link]}
@@ -24,13 +25,15 @@ const Help: React.FC<Props> = props => {
             Linking.openURL(
               'https://github.com/robertying/learnX/issues/new/choose',
             )
-          }>
+          }
+        >
           {t('createNewGitHubIssue')}
         </Text>
         <Title style={styles.marginTop}>{t('emailNotRecommended')}</Title>
         <Text
           style={[styles.text, styles.link]}
-          onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}>
+          onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
+        >
           learnX@ruiying.io
         </Text>
         <Title style={styles.marginTop}>{t('issueTemplate')}</Title>

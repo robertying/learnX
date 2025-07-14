@@ -1,4 +1,4 @@
-import {TypedUseSelectorHook, useDispatch, useSelector} from 'react-redux';
+import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import {
   persistStore,
   persistReducer,
@@ -12,10 +12,10 @@ import {
 } from 'redux-persist';
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {configureStore} from '@reduxjs/toolkit';
-import {rootReducer} from 'data/reducers/root';
-import {AppState, PersistAppState} from 'data/types/state';
-import {AppActions} from 'data/types/actions';
+import { configureStore } from '@reduxjs/toolkit';
+import { rootReducer } from 'data/reducers/root';
+import { AppState, PersistAppState } from 'data/types/state';
+import { AppActions } from 'data/types/actions';
 
 const rootPersistConfig: PersistConfig<AppState> = {
   key: 'root',

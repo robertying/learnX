@@ -1,19 +1,19 @@
-import {useCallback, useEffect} from 'react';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {StackActions} from '@react-navigation/native';
+import { useCallback, useEffect } from 'react';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { StackActions } from '@react-navigation/native';
 import NoticeCard from 'components/NoticeCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import {getAllNoticesForCourses} from 'data/actions/notices';
-import {useAppDispatch, useAppSelector} from 'data/store';
-import {Notice} from 'data/types/state';
+import { getAllNoticesForCourses } from 'data/actions/notices';
+import { useAppDispatch, useAppSelector } from 'data/store';
+import { Notice } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {NoticeStackParams} from './types';
+import { NoticeStackParams } from './types';
 
 type Props = NativeStackScreenProps<NoticeStackParams, 'Notices'>;
 
-const Notices: React.FC<Props> = ({navigation}) => {
+const Notices: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();
@@ -26,7 +26,7 @@ const Notices: React.FC<Props> = ({navigation}) => {
   const noticeState = useAppSelector(state => state.notices);
   const fetching = useAppSelector(state => state.notices.fetching);
 
-  const {all, unread, fav, archived, hidden} = useFilteredData({
+  const { all, unread, fav, archived, hidden } = useFilteredData({
     data: noticeState.items,
     fav: noticeState.favorites,
     archived: noticeState.archived,

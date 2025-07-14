@@ -1,4 +1,4 @@
-import {DynamicColorIOS, Platform} from 'react-native';
+import { DynamicColorIOS, Platform } from 'react-native';
 
 const plainTheme = '#9A25AE';
 

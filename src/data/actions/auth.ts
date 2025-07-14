@@ -1,22 +1,22 @@
-import {createAsyncAction} from 'typesafe-actions';
-import {ApiError} from 'thu-learn-lib';
-import {dataSource, resetDataSource} from 'data/source';
-import {ThunkResult} from 'data/types/actions';
+import { createAsyncAction } from 'typesafe-actions';
+import { ApiError } from 'thu-learn-lib';
+import { dataSource, resetDataSource } from 'data/source';
+import { ThunkResult } from 'data/types/actions';
 import {
   LOGIN_FAILURE,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
 } from 'data/types/constants';
-import {Auth} from 'data/types/state';
-import {getUserInfo} from './user';
-import {serializeError} from 'helpers/parse';
-import {retry} from 'helpers/retry';
+import { Auth } from 'data/types/state';
+import { getUserInfo } from './user';
+import { serializeError } from 'helpers/parse';
+import { retry } from 'helpers/retry';
 
 export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
-)<{clearCredential?: boolean}, Auth | undefined, ApiError>();
+)<{ clearCredential?: boolean }, Auth | undefined, ApiError>();
 
 export function login(
   username?: string,
@@ -25,13 +25,15 @@ export function login(
 ): ThunkResult {
   return async (dispatch, getState) => {
     if (!username || !password) {
-      const {auth} = getState();
+      const { auth } = getState();
       if (auth.loggingIn) {
         return;
       }
     }
 
-    dispatch(loginAction.request({clearCredential: !!username && !!password}));
+    dispatch(
+      loginAction.request({ clearCredential: !!username && !!password }),
+    );
 
     try {
       if (reset) {

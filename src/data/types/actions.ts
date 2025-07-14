@@ -1,6 +1,6 @@
-import {ThunkAction} from 'redux-thunk';
-import {ActionType} from 'typesafe-actions';
-import {loginAction} from 'data/actions/auth';
+import { ThunkAction } from 'redux-thunk';
+import { ActionType } from 'typesafe-actions';
+import { loginAction } from 'data/actions/auth';
 import {
   getCoursesForSemesterAction,
   setHideCourse,
@@ -25,7 +25,11 @@ import {
   setFavFile,
   setArchiveFiles,
 } from 'data/actions/files';
-import {clearStoreAction, setMockStore, resetLoading} from 'data/actions/root';
+import {
+  clearStoreAction,
+  setMockStore,
+  resetLoading,
+} from 'data/actions/root';
 import {
   getAllSemestersAction,
   getCurrentSemesterAction,
@@ -37,8 +41,8 @@ import {
   setSetting,
   removeEventIdForAssignment,
 } from 'data/actions/settings';
-import {getUserInfoAction} from 'data/actions/user';
-import {PersistAppState} from './state';
+import { getUserInfoAction } from 'data/actions/user';
+import { PersistAppState } from './state';
 
 type LoginAction = ActionType<typeof loginAction>;
 export type AuthAction = LoginAction;

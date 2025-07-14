@@ -1,7 +1,7 @@
 import mimeTypes from 'mime-types';
 import he from 'he';
-import {coerce, gte} from 'semver';
-import {dataSource} from 'data/source';
+import { coerce, gte } from 'semver';
+import { dataSource } from 'data/source';
 import DeviceInfo from 'constants/DeviceInfo';
 
 const darkreader = require('./preval/darkreader.preval.js');

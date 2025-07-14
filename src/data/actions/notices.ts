@@ -1,8 +1,8 @@
-import {ApiError, ContentType} from 'thu-learn-lib';
-import {createAction, createAsyncAction} from 'typesafe-actions';
+import { ApiError, ContentType } from 'thu-learn-lib';
+import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
-import {dataSource} from 'data/source';
-import {ThunkResult} from 'data/types/actions';
+import { dataSource } from 'data/source';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
   GET_ALL_NOTICES_FOR_COURSES_REQUEST,
@@ -13,14 +13,14 @@ import {
   SET_FAV_NOTICE,
   SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
-import {Notice} from 'data/types/state';
-import {serializeError} from 'helpers/parse';
+import { Notice } from 'data/types/state';
+import { serializeError } from 'helpers/parse';
 
 export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_REQUEST,
   GET_NOTICES_FOR_COURSE_SUCCESS,
   GET_NOTICES_FOR_COURSE_FAILURE,
-)<undefined, {courseId: string; notices: Notice[]}, ApiError>();
+)<undefined, { courseId: string; notices: Notice[] }, ApiError>();
 
 export function getNoticesForCourse(courseId: string): ThunkResult {
   return async (dispatch, getState) => {
@@ -41,7 +41,7 @@ export function getNoticesForCourse(courseId: string): ThunkResult {
             dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
             b.id.localeCompare(a.id),
         );
-      dispatch(getNoticesForCourseAction.success({notices, courseId}));
+      dispatch(getNoticesForCourseAction.success({ notices, courseId }));
     } catch (err) {
       dispatch(getNoticesForCourseAction.failure(serializeError(err)));
     }

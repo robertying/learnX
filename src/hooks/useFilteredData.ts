@@ -1,5 +1,5 @@
-import {useMemo} from 'react';
-import {Assignment, File, Notice} from 'data/types/state';
+import { useMemo } from 'react';
+import { Assignment, File, Notice } from 'data/types/state';
 
 function useFilteredData<T extends Notice | Assignment | File>({
   data,

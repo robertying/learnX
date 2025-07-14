@@ -1,11 +1,11 @@
-import {createAction, PayloadAction} from 'typesafe-actions';
+import { createAction, PayloadAction } from 'typesafe-actions';
 import {
   SET_SETTING,
   SET_EVENT_ID_FOR_ASSIGNMENT,
   CLEAR_EVENT_IDS,
   REMOVE_EVENT_ID_FOR_ASSIGNMENT,
 } from 'data/types/constants';
-import {SettingsState} from 'data/types/state';
+import { SettingsState } from 'data/types/state';
 
 export const setSetting: <T extends keyof SettingsState>(
   key: T,
@@ -40,5 +40,5 @@ export const removeEventIdForAssignment = createAction(
 
 export const clearEventIds = createAction(
   CLEAR_EVENT_IDS,
-  (type: 'calendar' | 'reminder') => ({type}),
+  (type: 'calendar' | 'reminder') => ({ type }),
 )();
