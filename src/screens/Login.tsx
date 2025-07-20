@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Image,
+  Alert,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -8,32 +8,24 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import {
-  Button,
-  Caption,
-  Switch,
-  TextInput,
-  useTheme,
-  Text,
-} from 'react-native-paper';
+import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { FailReason } from 'thu-learn-lib';
 import useToast from 'hooks/useToast';
 import { useAppDispatch, useAppSelector } from 'data/store';
-import { login, loginWithOfflineMode } from 'data/actions/auth';
+import { loginWithOfflineMode } from 'data/actions/auth';
 import { setMockStore } from 'data/actions/root';
 import { setSetting } from 'data/actions/settings';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
-import { RootStackParams } from './types';
+import Logo from 'components/Logo';
 import env from 'helpers/env';
 import { t } from 'helpers/i18n';
+import { LoginStackParams } from './types';
 
-type Props = NativeStackScreenProps<RootStackParams, 'Login'>;
+type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
 
-const Login: React.FC<Props> = () => {
-  const theme = useTheme();
-
+const Login: React.FC<Props> = ({ navigation }) => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();
@@ -45,7 +37,7 @@ const Login: React.FC<Props> = () => {
 
   const [username, setUsername] = useState(savedUsername ?? '');
   const [password, setPassword] = useState(savedPassword ?? '');
-  const [loading, setLoading] = useState(false);
+  const [loginInProgress, setLoginInProgress] = useState(false);
   const passwordTextInputRef = useRef<any>(null);
 
   const hasCredential = savedUsername && savedPassword;
@@ -67,13 +59,35 @@ const Login: React.FC<Props> = () => {
       return;
     }
 
-    setLoading(true);
-
     if (username === env.DUMMY_USERNAME && password === env.DUMMY_PASSWORD) {
       dispatch(setMockStore());
-    } else {
-      dispatch(login(username, password));
+      return;
     }
+
+    Alert.alert(
+      t('sso'),
+      t('ssoNote'),
+      [
+        {
+          text: t('cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('ok'),
+          onPress: () => {
+            setLoginInProgress(true);
+
+            (navigation.navigate as any)('SSO', {
+              username,
+              password,
+            });
+          },
+        },
+      ],
+      {
+        cancelable: true,
+      },
+    );
   };
 
   const handleLoginWithOfflineMode = () => {
@@ -82,17 +96,17 @@ const Login: React.FC<Props> = () => {
 
   useEffect(() => {
     (async () => {
-      if (loading && error && !loggingIn) {
+      if (loginInProgress && error && !loggingIn) {
         await new Promise(resolve => setTimeout(resolve as any, 500));
         if (error === FailReason.BAD_CREDENTIAL) {
           toast(t('credentialError'), 'error');
         } else {
           toast(t('unknownError') + error, 'error');
         }
-        setLoading(false);
+        setLoginInProgress(false);
       }
     })();
-  }, [error, loading, loggingIn, toast]);
+  }, [error, loginInProgress, loggingIn, toast]);
 
   return (
     <SafeArea>
@@ -101,7 +115,7 @@ const Login: React.FC<Props> = () => {
           style={styles.inputs}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <Logo iosSize={120} />
+          <Logo iosSize={120} style={styles.logo} />
           <TextInput
             style={styles.textInput}
             label={t('usernameOrId')}
@@ -147,8 +161,8 @@ const Login: React.FC<Props> = () => {
           <Button
             style={styles.button}
             mode="contained"
-            loading={loading}
-            disabled={loading}
+            loading={loggingIn}
+            disabled={loggingIn}
             onPress={handleLogin}
           >
             {t('login')}
@@ -173,6 +187,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logo: {
+    marginBottom: -10,
   },
   inputs: {
     flex: 1,

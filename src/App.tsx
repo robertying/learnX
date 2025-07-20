@@ -56,6 +56,7 @@ import {
   CourseXStackParams,
   DetailStackParams,
   FileStackParams,
+  LoginStackParams,
   MainTabParams,
   NoticeStackParams,
   RootStackParams,
@@ -73,6 +74,7 @@ import Login from 'screens/Login';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import FileSettings from 'screens/FileSettings';
+import SSO from 'screens/SSO';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
 import Maintainer from 'screens/Maintainer';
 import Help from 'screens/Help';
@@ -231,6 +233,7 @@ const FileStackNavigator = createNativeStackNavigator<FileStackParams>();
 const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
 const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
 const MainNavigator = createBottomTabNavigator<MainTabParams>();
+const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
 const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
 const AssignmentSubmissionNavigator =
@@ -512,6 +515,25 @@ const MainTab = () => {
   );
 };
 
+const LoginStack = () => (
+  <LoginNavigator.Navigator>
+    <LoginNavigator.Screen
+      name="Login"
+      component={Login}
+      options={{ headerShown: false }}
+    />
+    <LoginNavigator.Screen
+      name="SSO"
+      component={SSO}
+      options={{
+        headerLeft: () => <BackButton />,
+        ...getTitleOptions(t('sso')),
+        presentation: 'fullScreenModal',
+      }}
+    />
+  </LoginNavigator.Navigator>
+);
+
 const CourseXStack = () => (
   <CourseXNavigator.Navigator>
     <CourseXNavigator.Screen
@@ -750,9 +772,10 @@ const Container = () => {
     if (
       auth.username &&
       auth.password &&
+      auth.fingerPrint &&
       dayjs().diff(lastActiveTime.current, 'minute') >= 10
     ) {
-      dispatch(login(undefined, undefined, true));
+      dispatch(login({ reset: true }));
       toast(t('loggingIn'), 'none', 1 * 1000);
     }
   }, [dispatch, toast]);
@@ -822,10 +845,10 @@ const Container = () => {
   }, [handleShare]);
 
   useEffect(() => {
-    if (auth.username && auth.password && loginError) {
+    if (auth.username && auth.password && auth.fingerPrint && loginError) {
       toast(t('loginFailed'), 'error', 5 * 1000);
     }
-  }, [auth.password, auth.username, loginError, toast]);
+  }, [auth.password, auth.username, auth.fingerPrint, loginError, toast]);
 
   const navigationContainerProps = {
     theme:
@@ -835,7 +858,8 @@ const Container = () => {
     fallback: <Splash />,
   };
 
-  const showMain = !loginError && !!auth.username && !!auth.password;
+  const showMain =
+    !loginError && !!auth.username && !!auth.password && !!auth.fingerPrint;
 
   const showDetail = showMain && frame.width >= 750;
 
@@ -878,7 +902,7 @@ const Container = () => {
                 />
               </>
             ) : (
-              <RootNavigator.Screen name="Login" component={Login} />
+              <RootNavigator.Screen name="LoginStack" component={LoginStack} />
             )}
           </RootNavigator.Navigator>
           <NavigationIndependentTree>

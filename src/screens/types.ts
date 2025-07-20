@@ -50,6 +50,14 @@ export type MainTabParams = {
   SettingStack: NavigatorScreenParams<SettingsStackParams>;
 };
 
+export type LoginStackParams = {
+  Login: undefined;
+  SSO: {
+    username: string;
+    password: string;
+  };
+};
+
 export type CourseXStackParams = {
   CourseX: { id: string } | undefined;
 };
@@ -92,5 +100,5 @@ export type RootStackParams = {
   CourseXStack: NavigatorScreenParams<CourseXStackParams>;
   SearchStack: NavigatorScreenParams<SearchStackParams>;
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
-  Login: undefined;
+  LoginStack: NavigatorScreenParams<LoginStackParams>;
 };

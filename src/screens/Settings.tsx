@@ -10,6 +10,7 @@ import { getLatestRelease } from 'helpers/update';
 import { setSetting } from 'data/actions/settings';
 import { clearStore } from 'data/actions/root';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { clearLoginCookies } from 'data/source';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
@@ -58,6 +59,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         {
           text: t('ok'),
           onPress: () => {
+            clearLoginCookies();
             dispatch(clearStore());
           },
         },

@@ -1,10 +1,36 @@
 import { Learn2018Helper, addCSRFTokenToUrl } from 'thu-learn-lib';
 import mime from 'mime-types';
 import axios from 'axios';
+import CookieManager from '@react-native-cookies/cookies';
 import { store } from 'data/store';
 import Urls from 'constants/Urls';
 
 export let dataSource: Learn2018Helper;
+
+export const clearLoginCookies = async () => {
+  await CookieManager.set(Urls.id, {
+    httpOnly: true,
+    name: 'JSESSIONID',
+    value: '',
+  });
+};
+
+export const loginWithFingerPrint = async (
+  username?: string,
+  password?: string,
+  fingerPrint?: string,
+  fingerGenPrint?: string,
+  fingerGenPrint3?: string,
+) => {
+  await clearLoginCookies();
+  await dataSource.login(
+    username,
+    password,
+    fingerPrint,
+    fingerGenPrint,
+    fingerGenPrint3,
+  );
+};
 
 export const resetDataSource = () => {
   dataSource = new Learn2018Helper({
@@ -13,6 +39,9 @@ export const resetDataSource = () => {
       return {
         username: state.auth.username || undefined,
         password: state.auth.password || undefined,
+        fingerPrint: state.auth.fingerPrint || '',
+        fingerGenPrint: state.auth.fingerGenPrint || '',
+        fingerGenPrint3: state.auth.fingerGenPrint3 || '',
       };
     },
   });
@@ -55,7 +84,7 @@ export const submitAssignment = async (
   }
 
   try {
-    await dataSource.login();
+    await loginWithFingerPrint();
   } catch {
     throw new Error('Failed to submit the assignment: login failed');
   }

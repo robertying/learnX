@@ -9,6 +9,9 @@ const mockStore: PersistAppState = {
     error: null,
     username: env.DUMMY_USERNAME,
     password: env.DUMMY_PASSWORD,
+    fingerPrint: 'fingerPrint',
+    fingerGenPrint: null,
+    fingerGenPrint3: null,
     _persist: {
       rehydrated: true,
       version: -1,

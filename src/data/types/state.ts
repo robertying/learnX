@@ -12,6 +12,9 @@ import { FilterSelection } from 'components/Filter';
 export interface Auth {
   username: string | null;
   password: string | null;
+  fingerPrint: string | null;
+  fingerGenPrint: string | null;
+  fingerGenPrint3: string | null;
 }
 export interface AuthState extends Auth {
   loggingIn: boolean;

@@ -20,7 +20,7 @@ import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { setSetting } from 'data/actions/settings';
-import { dataSource } from 'data/source';
+import { dataSource, loginWithFingerPrint } from 'data/source';
 import {
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
@@ -105,7 +105,7 @@ const CalendarEvent: React.FC<Props> = props => {
     const endDate = dayjs(end);
 
     try {
-      await dataSource.login();
+      await loginWithFingerPrint();
 
       const events = await dataSource.getCalendar(
         startDate.format('YYYYMMDD'),

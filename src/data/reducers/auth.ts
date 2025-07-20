@@ -12,6 +12,9 @@ export default function auth(
     loggedIn: false,
     username: null,
     password: null,
+    fingerPrint: null,
+    fingerGenPrint: null,
+    fingerGenPrint3: null,
   },
   action: AuthAction,
 ): AuthState {
@@ -24,6 +27,9 @@ export default function auth(
           error: null,
           username: null,
           password: null,
+          fingerPrint: null,
+          fingerGenPrint: null,
+          fingerGenPrint3: null,
         };
       }
       return {
@@ -40,6 +46,9 @@ export default function auth(
           loggedIn: true,
           username: payload.username,
           password: payload.password,
+          fingerPrint: payload.fingerPrint,
+          fingerGenPrint: payload.fingerGenPrint,
+          fingerGenPrint3: payload.fingerGenPrint3,
           error: null,
         };
       } else {

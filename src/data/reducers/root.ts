@@ -43,7 +43,13 @@ export const mainReducers = {
 const authPersistConfig: PersistConfig<AuthState> = {
   key: 'auth',
   storage: createSecureStore(),
-  whitelist: ['username', 'password'],
+  whitelist: [
+    'username',
+    'password',
+    'fingerPrint',
+    'fingerGenPrint',
+    'fingerGenPrint3',
+  ],
 };
 const settingsPersistConfig: PersistConfig<SettingsState> = {
   key: 'settings',

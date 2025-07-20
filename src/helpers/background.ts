@@ -4,7 +4,7 @@ import { ContentType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import allSettled from 'promise.allsettled';
 import { AppDispatch, store } from 'data/store';
-import { dataSource } from 'data/source';
+import { dataSource, loginWithFingerPrint } from 'data/source';
 import { Assignment, CoursesState, File, Notice } from 'data/types/state';
 import { getAllNoticesForCoursesAction } from 'data/actions/notices';
 import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
@@ -110,12 +110,23 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const auth = state.auth;
   const courseIds = state.courses.items.map(i => i.id);
 
-  if (!auth.username || !auth.password || courseIds.length === 0) {
+  if (
+    !auth.username ||
+    !auth.password ||
+    !auth.fingerPrint ||
+    courseIds.length === 0
+  ) {
     return BackgroundTask.BackgroundTaskResult.Success;
   }
 
   try {
-    await dataSource.login(auth.username, auth.password);
+    await loginWithFingerPrint(
+      auth.username,
+      auth.password,
+      auth.fingerPrint,
+      auth.fingerGenPrint ?? '',
+      auth.fingerGenPrint3 ?? '',
+    );
   } catch {
     return BackgroundTask.BackgroundTaskResult.Success;
   }

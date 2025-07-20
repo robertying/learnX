@@ -188,6 +188,9 @@ const zh: typeof en = {
   download: '下载',
   downloadToDownloadsSucceeded: '成功下载文件到“下载”文件夹',
   downloadToDownloadsFailed: '下载文件到“下载”文件夹失败',
+  sso: '清华大学用户电子身份服务系统',
+  ssoNote:
+    '请在即将打开的网页中完成登录。如需更改网页中预填的账号或密码，请关闭网页，再在 learnX 登录界面重新输入正确的账号及密码。',
 };
 
 export default zh;

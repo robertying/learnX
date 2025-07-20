@@ -6,7 +6,7 @@ import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@react-native-cookies/cookies';
 import mime from 'mime-types';
-import { addCSRF, dataSource } from 'data/source';
+import { addCSRF, loginWithFingerPrint } from 'data/source';
 import { store } from 'data/store';
 import { File } from 'data/types/state';
 import Urls from 'constants/Urls';
@@ -65,7 +65,7 @@ export const downloadFile = async (
   }
 
   if (refresh) {
-    await dataSource.login();
+    await loginWithFingerPrint();
   }
   url = addCSRF(url);
 

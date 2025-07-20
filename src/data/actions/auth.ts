@@ -1,6 +1,6 @@
 import { createAsyncAction } from 'typesafe-actions';
 import { ApiError } from 'thu-learn-lib';
-import { dataSource, resetDataSource } from 'data/source';
+import { loginWithFingerPrint, resetDataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
 import {
   LOGIN_FAILURE,
@@ -18,13 +18,23 @@ export const loginAction = createAsyncAction(
   LOGIN_FAILURE,
 )<{ clearCredential?: boolean }, Auth | undefined, ApiError>();
 
-export function login(
-  username?: string,
-  password?: string,
-  reset?: boolean,
-): ThunkResult {
+export function login({
+  username,
+  password,
+  fingerPrint,
+  fingerGenPrint = '',
+  fingerGenPrint3 = '',
+  reset = false,
+}: {
+  username?: string;
+  password?: string;
+  fingerPrint?: string;
+  fingerGenPrint?: string;
+  fingerGenPrint3?: string;
+  reset?: boolean;
+}): ThunkResult {
   return async (dispatch, getState) => {
-    if (!username || !password) {
+    if (!username || !password || !fingerPrint) {
       const { auth } = getState();
       if (auth.loggingIn) {
         return;
@@ -32,7 +42,9 @@ export function login(
     }
 
     dispatch(
-      loginAction.request({ clearCredential: !!username && !!password }),
+      loginAction.request({
+        clearCredential: !!username && !!password && !fingerPrint,
+      }),
     );
 
     try {
@@ -41,14 +53,23 @@ export function login(
       }
 
       await retry(async () => {
-        await dataSource.login(username, password);
+        await loginWithFingerPrint(
+          username,
+          password,
+          fingerPrint,
+          fingerGenPrint,
+          fingerGenPrint3,
+        );
       });
 
-      if (username && password) {
+      if (username && password && fingerPrint) {
         dispatch(
           loginAction.success({
             username,
             password,
+            fingerPrint,
+            fingerGenPrint,
+            fingerGenPrint3,
           }),
         );
       } else {
