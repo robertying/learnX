@@ -5,6 +5,7 @@ import { PersistAppState } from 'data/types/state';
 const mockStore: PersistAppState = {
   auth: {
     loggingIn: false,
+    ssoInProgress: false,
     loggedIn: true,
     error: null,
     username: env.DUMMY_USERNAME,

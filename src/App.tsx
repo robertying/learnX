@@ -770,6 +770,7 @@ const Container = () => {
   const handleReLogin = useCallback(() => {
     const { auth } = store.getState();
     if (
+      !auth.ssoInProgress &&
       auth.username &&
       auth.password &&
       auth.fingerPrint &&
@@ -846,7 +847,7 @@ const Container = () => {
 
   useEffect(() => {
     if (auth.username && auth.password && auth.fingerPrint && loginError) {
-      toast(t('loginFailed'), 'error', 5 * 1000);
+      toast(t('loginFailed'), 'error', 8 * 1000);
     }
   }, [auth.password, auth.username, auth.fingerPrint, loginError, toast]);
 

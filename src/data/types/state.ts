@@ -18,6 +18,7 @@ export interface Auth {
 }
 export interface AuthState extends Auth {
   loggingIn: boolean;
+  ssoInProgress: boolean;
   loggedIn: boolean;
   error?: FailReason | null;
 }

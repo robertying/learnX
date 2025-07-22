@@ -1,6 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { ActionType } from 'typesafe-actions';
-import { loginAction } from 'data/actions/auth';
+import { loginAction, setSSOInProgress } from 'data/actions/auth';
 import {
   getCoursesForSemesterAction,
   setHideCourse,
@@ -45,7 +45,8 @@ import { getUserInfoAction } from 'data/actions/user';
 import { PersistAppState } from './state';
 
 type LoginAction = ActionType<typeof loginAction>;
-export type AuthAction = LoginAction;
+type SetSsoInProgressAction = ActionType<typeof setSSOInProgress>;
+export type AuthAction = LoginAction | SetSsoInProgressAction;
 
 type GetUserInfoAction = ActionType<typeof getUserInfoAction>;
 export type UserAction = GetUserInfoAction;

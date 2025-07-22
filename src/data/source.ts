@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { Learn2018Helper, addCSRFTokenToUrl } from 'thu-learn-lib';
 import mime from 'mime-types';
 import axios from 'axios';
@@ -8,11 +9,20 @@ import Urls from 'constants/Urls';
 export let dataSource: Learn2018Helper;
 
 export const clearLoginCookies = async () => {
-  await CookieManager.set(Urls.id, {
-    httpOnly: true,
-    name: 'JSESSIONID',
-    value: '',
-  });
+  if (Platform.OS === 'ios') {
+    await CookieManager.set(Urls.id, {
+      httpOnly: true,
+      name: 'JSESSIONID',
+      path: '/',
+      value: '',
+    });
+  } else {
+    await CookieManager.setFromResponse(
+      Urls.id,
+      'JSESSIONID=; path=/; HttpOnly',
+    );
+    await CookieManager.flush();
+  }
 };
 
 export const loginWithFingerPrint = async (

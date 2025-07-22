@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -10,12 +10,12 @@ import {
 } from 'react-native';
 import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { FailReason } from 'thu-learn-lib';
 import useToast from 'hooks/useToast';
 import { useAppDispatch, useAppSelector } from 'data/store';
-import { loginWithOfflineMode } from 'data/actions/auth';
+import { loginWithOfflineMode, setSSOInProgress } from 'data/actions/auth';
 import { setMockStore } from 'data/actions/root';
 import { setSetting } from 'data/actions/settings';
+import { clearLoginCookies } from 'data/source';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
@@ -30,14 +30,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useAppDispatch();
   const loggingIn = useAppSelector(state => state.auth.loggingIn);
-  const error = useAppSelector(state => state.auth.error);
   const graduate = useAppSelector(state => state.settings.graduate);
   const savedUsername = useAppSelector(state => state.auth.username);
   const savedPassword = useAppSelector(state => state.auth.password);
 
   const [username, setUsername] = useState(savedUsername ?? '');
   const [password, setPassword] = useState(savedPassword ?? '');
-  const [loginInProgress, setLoginInProgress] = useState(false);
   const passwordTextInputRef = useRef<any>(null);
 
   const hasCredential = savedUsername && savedPassword;
@@ -74,9 +72,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
         },
         {
           text: t('ok'),
-          onPress: () => {
-            setLoginInProgress(true);
+          onPress: async () => {
+            dispatch(setSSOInProgress(true));
 
+            await clearLoginCookies();
             (navigation.navigate as any)('SSO', {
               username,
               password,
@@ -93,20 +92,6 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const handleLoginWithOfflineMode = () => {
     dispatch(loginWithOfflineMode());
   };
-
-  useEffect(() => {
-    (async () => {
-      if (loginInProgress && error && !loggingIn) {
-        await new Promise(resolve => setTimeout(resolve as any, 500));
-        if (error === FailReason.BAD_CREDENTIAL) {
-          toast(t('credentialError'), 'error');
-        } else {
-          toast(t('unknownError') + error, 'error');
-        }
-        setLoginInProgress(false);
-      }
-    })();
-  }, [error, loginInProgress, loggingIn, toast]);
 
   return (
     <SafeArea>
@@ -189,7 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    marginBottom: -10,
+    marginBottom: Platform.OS === 'android' ? -16 : 16,
   },
   inputs: {
     flex: 1,
@@ -202,7 +187,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   button: {
-    marginVertical: 16,
+    marginTop: 16,
   },
   switchContainer: {
     flexDirection: 'row',

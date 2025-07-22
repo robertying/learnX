@@ -16,7 +16,7 @@ export default {
   submitted: 'Submitted',
   assignmentSubmission: 'Assignment Submission',
   loginFailed:
-    'Login failed. Please check your network connectivity and make sure the username and password are correct.',
+    'Login failed. Please check your network and ensure that the login to the Electronic ID Service System is still valid',
   versionInformation: 'Version',
   opensourceAt: 'Opensource at',
   specialThanks: 'Special Thanks',
@@ -96,7 +96,6 @@ export default {
   email: 'Email',
   missingUsername: 'Please enter your username or ID',
   missingPassword: 'Please enter your password',
-  credentialError: 'Bad credential',
   unknownError: 'Unknown error: ',
   usernameOrId: 'Username / ID',
   password: 'Password',

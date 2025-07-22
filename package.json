@@ -54,6 +54,7 @@
     "expo-background-task": "0.2.9-canary-20250713-8f814f8",
     "expo-blur": "14.1.6-canary-20250713-8f814f8",
     "expo-calendar": "14.1.5-canary-20250713-8f814f8",
+    "expo-crypto": "14.1.6-canary-20250713-8f814f8",
     "expo-document-picker": "14.0.0-canary-20250713-8f814f8",
     "expo-file-system": "18.2.0-canary-20250713-8f814f8",
     "expo-haptics": "14.1.5-canary-20250713-8f814f8",

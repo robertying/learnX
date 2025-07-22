@@ -3,12 +3,14 @@ import {
   LOGIN_FAILURE,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
+  SET_SSO_IN_PROGRESS,
 } from 'data/types/constants';
 import { AuthState } from 'data/types/state';
 
 export default function auth(
   state: AuthState = {
     loggingIn: false,
+    ssoInProgress: false,
     loggedIn: false,
     username: null,
     password: null,
@@ -65,6 +67,11 @@ export default function auth(
         loggingIn: false,
         loggedIn: false,
         error: action.payload.reason,
+      };
+    case SET_SSO_IN_PROGRESS:
+      return {
+        ...state,
+        ssoInProgress: action.payload.ssoInProgress,
       };
     default:
       return state;

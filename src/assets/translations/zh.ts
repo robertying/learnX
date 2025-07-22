@@ -17,7 +17,8 @@ const zh: typeof en = {
   submit: '提交',
   submitted: '已提交',
   assignmentSubmission: '作业提交',
-  loginFailed: '登录失败，请检查网络连接并确保输入的用户名与密码正确。',
+  loginFailed:
+    '登录失败，请检查网络连接并确保用户电子身份服务系统的登录依旧有效',
   versionInformation: '版本信息',
   opensourceAt: '本项目开源于',
   specialThanks: '特别感谢',
@@ -93,7 +94,6 @@ const zh: typeof en = {
   email: '邮件',
   missingUsername: '请输入用户名或学号',
   missingPassword: '请输入密码',
-  credentialError: '账号或密码错误',
   unknownError: '未知错误：',
   usernameOrId: '用户名 / 学号',
   password: '密码',

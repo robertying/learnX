@@ -1,4 +1,4 @@
-import { createAsyncAction } from 'typesafe-actions';
+import { createAction, createAsyncAction } from 'typesafe-actions';
 import { ApiError } from 'thu-learn-lib';
 import { loginWithFingerPrint, resetDataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
@@ -6,6 +6,7 @@ import {
   LOGIN_FAILURE,
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
+  SET_SSO_IN_PROGRESS,
 } from 'data/types/constants';
 import { Auth } from 'data/types/state';
 import { getUserInfo } from './user';
@@ -87,3 +88,10 @@ export function loginWithOfflineMode(): ThunkResult {
     dispatch(loginAction.success(undefined));
   };
 }
+
+export const setSSOInProgress = createAction(
+  SET_SSO_IN_PROGRESS,
+  (ssoInProgress: boolean) => ({
+    ssoInProgress,
+  }),
+)();
