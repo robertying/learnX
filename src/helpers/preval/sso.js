@@ -90,7 +90,7 @@
         const singleLoginField = formElement.querySelector(
           '[name="singleLogin"]',
         );
-        if (singleLoginField) {
+        if (singleLoginField && !singleLoginField.checked) {
           singleLoginField.click();
         }
 
