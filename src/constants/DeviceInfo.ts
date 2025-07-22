@@ -8,6 +8,7 @@ const cached: {
   systemVersion: string;
   isEmulator: boolean | null;
   isWSA: boolean;
+  model: string;
 } = {
   buildNo: Info.getBuildNumber(),
   isTablet: Info.isTablet(),
@@ -21,6 +22,7 @@ const cached: {
   systemVersion: Info.getSystemVersion(),
   isEmulator: null,
   isWSA: Info.getModel() === 'Subsystem for Android(TM)',
+  model: Info.getModel(),
 };
 
 export default {
@@ -43,4 +45,10 @@ export default {
     return cached.isEmulator;
   },
   isWSA: () => cached.isWSA,
+  model: () => {
+    if (cached.model === 'unknown') {
+      return cached.isMac ? 'Mac' : Info.getSystemName();
+    }
+    return cached.model;
+  },
 };

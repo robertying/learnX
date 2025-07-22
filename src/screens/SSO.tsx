@@ -3,9 +3,8 @@ import { Platform, StyleSheet } from 'react-native';
 import { ProgressBar } from 'react-native-paper';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
-
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import DeviceInfo from 'react-native-device-info';
+import DeviceInfo from 'constants/DeviceInfo';
 import SafeArea from 'components/SafeArea';
 import { useAppDispatch } from 'data/store';
 import { login, setSSOInProgress } from 'data/actions/auth';
@@ -45,7 +44,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
     .replaceAll('${password}', password)
     .replaceAll(
       '${deviceName}',
-      `${DeviceInfo.getModel()},learnX/${packageJson.version}`,
+      `${DeviceInfo.model()},learnX/${packageJson.version}`,
     )
     .replaceAll('${fingerPrint}', fingerPrint.current);
 
