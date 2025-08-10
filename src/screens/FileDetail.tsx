@@ -19,7 +19,7 @@ import {
 } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from '@react-native-vector-icons/material-icons';
 import Pdf from 'react-native-pdf';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';

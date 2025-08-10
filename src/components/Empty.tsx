@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from '@react-native-vector-icons/material-icons';
 import Styles from 'constants/Styles';
 import { t } from 'helpers/i18n';
 

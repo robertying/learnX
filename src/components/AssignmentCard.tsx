@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import { Assignment } from 'data/types/state';

@@ -19,7 +19,7 @@ import {
   TabDescriptor,
   TabBarItem,
 } from 'react-native-tab-view';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from '@react-native-vector-icons/material-icons';
 import { Assignment, File, Notice } from 'data/types/state';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { getNoticesForCourse } from 'data/actions/notices';

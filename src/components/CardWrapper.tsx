@@ -9,8 +9,8 @@ import ReanimatedSwipeable, {
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useReorderableDrag } from 'react-native-reorderable-list';
 import { useTheme, Checkbox } from 'react-native-paper';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import MaterialIcons from '@react-native-vector-icons/material-icons';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
 import Touchable from './Touchable';

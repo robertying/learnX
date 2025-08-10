@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Subheading, Title, useTheme } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from '@react-native-vector-icons/material-icons';
 import { Course } from 'data/types/state';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 
