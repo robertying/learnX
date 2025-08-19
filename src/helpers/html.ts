@@ -6,6 +6,10 @@ import DeviceInfo from 'constants/DeviceInfo';
 
 const darkreader = require('./preval/darkreader.preval.js');
 
+const katexStyles = require('./preval/katexStyles.preval.js');
+
+const katex = require('./preval/katex.preval.js');
+
 export const getWebViewTemplate = (
   content: string,
   darkMode?: boolean,
@@ -34,6 +38,9 @@ export const getWebViewTemplate = (
         #root > p:last-child {
           margin-bottom: 0px;
         }
+      </style>
+      <style>
+        ${katexStyles}
       </style>
       <script>
         function addCSRFTokenToUrl(url, token) {
@@ -78,11 +85,19 @@ export const getWebViewTemplate = (
       `
           : ''
       }
+      <script>
+        ${katex}
+      </script>
     </head>
     <body>
       <div id="root">
         ${content}
       </div>
+      <script>
+        renderMathInElement(document.querySelector("#root"), {
+          throwOnError: false
+        });
+      </script>
     </body>
   </html>
 `;

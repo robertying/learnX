@@ -68,6 +68,7 @@
     "graphql": "16.11.0",
     "graphql-request": "7.2.0",
     "he": "1.2.0",
+    "katex": "0.16.22",
     "mime-types": "3.0.1",
     "patch-package": "8.0.0",
     "path": "0.12.7",
