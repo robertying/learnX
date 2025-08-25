@@ -9,6 +9,8 @@ import SafeArea from 'components/SafeArea';
 import { useAppDispatch } from 'data/store';
 import { login, setSSOInProgress } from 'data/actions/auth';
 import { generateFingerprint } from 'helpers/fingerprint';
+import { t } from 'helpers/i18n';
+import useToast from 'hooks/useToast';
 import { LoginStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -23,6 +25,7 @@ type Props = NativeStackScreenProps<LoginStackParams, 'SSO'>;
 
 const SSO: React.FC<Props> = ({ route, navigation }) => {
   const dispatch = useAppDispatch();
+  const toast = useToast();
 
   const username = route.params.username;
   const password = route.params.password;
@@ -54,7 +57,13 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
         return true;
       }
 
-      dispatch(login(formData.current!));
+      if (!formData.current) {
+        // Something went wrong
+        toast(t('ssoFailed'), 'error');
+      } else {
+        dispatch(login(formData.current));
+      }
+
       dispatch(setSSOInProgress(false));
       navigation.goBack();
 

@@ -198,4 +198,5 @@ export default {
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
     'Please complete the login on the webpage that will open. If you need to change the pre-filled username or password, please close the webpage and re-enter the correct username and password on the learnX login screen.',
+  ssoFailed: 'Failed to complete the login process. Please try again.',
 };
