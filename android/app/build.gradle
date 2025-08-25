@@ -12,10 +12,6 @@ react {
     autolinkLibrariesWithApp()
 }
 
-project.ext.vectoricons = [
-        iconFontNames: ["MaterialIcons.ttf", "MaterialCommunityIcons.ttf"]
-]
-
 android {
     ndkVersion rootProject.ext.ndkVersion
     externalNativeBuild {
@@ -36,7 +32,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdk rootProject.ext.compileSdkVersion
-        versionCode 9204005
+        versionCode 9204007
         versionName "16.0.0"
     }
 
@@ -106,5 +102,3 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics-ndk")
     implementation("com.google.firebase:firebase-analytics")
 }
-
-apply from: file("../../node_modules/react-native-vector-icons/fonts.gradle")
