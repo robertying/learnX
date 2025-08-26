@@ -7,7 +7,7 @@ buildscript {
         ndkVersion = "28.2.13676358"
         cmakeVersion = "3.31.6"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "2.2.0"
+        kotlinVersion = "2.2.10"
     }
 }
 
@@ -15,7 +15,7 @@ plugins {
     id "com.facebook.react.rootproject" apply false
     id "expo-root-project" apply false
     id "com.google.gms.google-services" version "4.4.3" apply false
-    id "com.google.firebase.crashlytics" version "3.0.4" apply false
+    id "com.google.firebase.crashlytics" version "3.0.6" apply false
 }
 
 subprojects { subproject ->
