@@ -438,29 +438,21 @@ const MainTab = () => {
     <MainNavigator.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => {
-          let iconName: string;
+          const iconMap = {
+            NoticeStack: 'notifications',
+            AssignmentStack: 'event',
+            FileStack: 'folder',
+            CourseStack: 'apps',
+            SettingStack: 'settings',
+          } as const;
 
-          switch (route.name) {
-            case 'NoticeStack':
-              iconName = 'notifications';
-              break;
-            case 'AssignmentStack':
-              iconName = 'event';
-              break;
-            case 'FileStack':
-              iconName = 'folder';
-              break;
-            case 'CourseStack':
-              iconName = 'apps';
-              break;
-            case 'SettingStack':
-              iconName = 'settings';
-              break;
-            default:
-              break;
-          }
-
-          return <MaterialIcons name={iconName!} size={size} color={color} />;
+          return (
+            <MaterialIcons
+              name={iconMap[route.name as keyof typeof iconMap]}
+              size={size}
+              color={color}
+            />
+          );
         },
         activeTintColor: theme.colors.primary,
         inactiveTintColor: 'gray',

@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
   AvatarImageProps,
 } from 'react-native-paper';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon, {
+  MaterialIconsIconName,
+} from '@react-native-vector-icons/material-icons';
 import Touchable from './Touchable';
 
 export interface TableCellProps extends ViewProps {
@@ -16,7 +18,7 @@ export interface TableCellProps extends ViewProps {
   onPress?: () => void;
   primaryText: string;
   secondaryText?: string;
-  iconName?: string;
+  iconName?: MaterialIconsIconName;
   imageSrc?: AvatarImageProps['source'];
   imageAlt?: string;
   switchDisabled?: boolean;

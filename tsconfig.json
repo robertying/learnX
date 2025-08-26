@@ -3,6 +3,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules", "**/Pods"],
   "compilerOptions": {
+    "lib": ["esnext", "dom"],
     "noUnusedLocals": true,
     "baseUrl": "./src"
   }
