@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import * as ExpoFileSystem from 'expo-file-system';
+import * as ExpoFileSystem from 'expo-file-system/legacy';
 import * as IntentLauncher from 'expo-intent-launcher';
 import fs from 'react-native-fs';
 import Share from 'react-native-share';
