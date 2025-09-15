@@ -41,7 +41,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
 
   const injectedJs = ssoCustomScript
     .replaceAll('${username}', username)
-    .replaceAll('${password}', password)
+    .replaceAll("'${password}'", JSON.stringify(password)) // `password` may contain single quotes
     .replaceAll(
       '${deviceName}',
       `${DeviceInfo.model()},learnX/${packageJson.version}`,
