@@ -1,0 +1,35 @@
+diff --git a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/AndroidManifest.xml b/node_modules/expo-file-system/android/src/main/AndroidManifest.xml
+similarity index 100%
+rename from node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/AndroidManifest.xml
+rename to node_modules/expo-file-system/android/src/main/AndroidManifest.xml
+diff --git a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/legacy/FileSystemFileProvider.kt b/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/FileSystemFileProvider.kt
+similarity index 69%
+rename from node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/legacy/FileSystemFileProvider.kt
+rename to node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/FileSystemFileProvider.kt
+index 011863c..52efaeb 100644
+--- a/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/legacy/FileSystemFileProvider.kt
++++ b/node_modules/expo-file-system/android/src/main/java/expo/modules/filesystem/FileSystemFileProvider.kt
+@@ -1,4 +1,4 @@
+-package expo.modules.filesystem.legacy
++package expo.modules.filesystem
+ 
+ import androidx.core.content.FileProvider
+ 
+diff --git a/node_modules/expo-file-system/expo-module.config.json b/node_modules/expo-file-system/expo-module.config.json
+index 12c8757..61c6eb9 100644
+--- a/node_modules/expo-file-system/expo-module.config.json
++++ b/node_modules/expo-file-system/expo-module.config.json
+@@ -8,12 +8,6 @@
+     "modules": [
+       "expo.modules.filesystem.FileSystemModule",
+       "expo.modules.filesystem.legacy.FileSystemLegacyModule"
+-    ],
+-    "publication": {
+-      "groupId": "host.exp.exponent",
+-      "artifactId": "expo.modules.filesystem",
+-      "version": "19.0.14",
+-      "repository": "local-maven-repo"
+-    }
++    ]
+   }
+ }
