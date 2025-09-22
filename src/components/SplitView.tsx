@@ -81,7 +81,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         <BlurView
           intensity={100}
           style={styles.blurView}
-          experimentalBlurMethod="dimezisBlurView"
+          experimentalBlurMethod="none"
         />
       )}
     </SplitViewContext.Provider>
