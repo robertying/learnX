@@ -4,7 +4,6 @@ import {
   KeyboardAvoidingView,
   Linking,
   Platform,
-  ScrollView,
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -17,6 +16,7 @@ import type {
 import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { setSetting } from 'data/actions/settings';

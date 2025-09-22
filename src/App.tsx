@@ -21,13 +21,12 @@ import type {
   NativeStackNavigationOptions,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import {
   SafeAreaProvider,
   useSafeAreaFrame,
 } from 'react-native-safe-area-context';
 import {
-  IconButton,
   useTheme,
   Provider as PaperProvider,
   MD3LightTheme,
@@ -88,7 +87,7 @@ import HeaderTitle from 'components/HeaderTitle';
 import Empty from 'components/Empty';
 import { SplitViewProvider } from 'components/SplitView';
 import TextButton from 'components/TextButton';
-import Styles from 'constants/Styles';
+import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetting } from 'data/actions/settings';
@@ -115,7 +114,6 @@ const BackButton = () => {
 
   return (
     <IconButton
-      style={{ marginLeft: -8 }}
       onPress={() => navigation.goBack()}
       icon={props => <MaterialIcons {...props} name="close" />}
     />
@@ -140,18 +138,13 @@ const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
       headerLeft: () => (
         <>
           <IconButton
-            style={{ marginLeft: -8 }}
             icon={props => <MaterialIcons {...props} name="subject" />}
           />
           <IconButton
-            style={Platform.OS === 'android' ? { marginLeft: -8 } : Styles.ml0}
             icon={props => <MaterialIcons {...props} name="filter-list" />}
           />
           {title === t('courses') && (
             <IconButton
-              style={
-                Platform.OS === 'android' ? { marginLeft: -8 } : Styles.ml0
-              }
               icon={props => <MaterialIcons {...props} name="info-outline" />}
             />
           )}
@@ -161,12 +154,10 @@ const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
         <>
           {DeviceInfo.isMac() && (
             <IconButton
-              style={Styles.mr0}
               icon={props => <MaterialIcons {...props} name="refresh" />}
             />
           )}
           <IconButton
-            style={{ marginRight: -8 }}
             onPress={() => navigation.navigate('SearchStack' as any)}
             icon={props => <MaterialIcons {...props} name="search" />}
           />
@@ -202,18 +193,15 @@ const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
         ? () => (
             <>
               <IconButton
-                style={{ marginRight: -8 }}
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
               {Platform.OS !== 'android' && (
                 <IconButton
-                  style={{ marginRight: -8 }}
                   icon={props => <MaterialIcons {...props} name="ios-share" />}
                 />
               )}
               {DeviceInfo.isMac() && (
                 <IconButton
-                  style={{ marginRight: -8 }}
                   icon={props => (
                     <MaterialIcons {...props} name="open-in-new" />
                   )}
@@ -232,7 +220,7 @@ const AssignmentStackNavigator =
 const FileStackNavigator = createNativeStackNavigator<FileStackParams>();
 const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
 const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
-const MainNavigator = createBottomTabNavigator<MainTabParams>();
+const MainNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
 const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
@@ -435,72 +423,50 @@ const MainTab = () => {
   }, [dispatch, loggedIn]);
 
   return (
-    <MainNavigator.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
-          const iconMap = {
-            NoticeStack: 'notifications',
-            AssignmentStack: 'event',
-            FileStack: 'folder',
-            CourseStack: 'apps',
-            SettingStack: 'settings',
-          } as const;
-
-          return (
-            <MaterialIcons
-              name={iconMap[route.name as keyof typeof iconMap]}
-              size={size}
-              color={color}
-            />
-          );
-        },
-        activeTintColor: theme.colors.primary,
-        inactiveTintColor: 'gray',
-        adaptive: windowSize.width >= 750 ? false : true,
-        tabBarStyle: {
-          borderTopColor: theme.colors.outlineVariant,
-        },
-        tabBarLabelPosition: 'below-icon',
-        tabBarLabelStyle: {
-          marginBottom: 2,
-        },
-        headerShown: false,
-      })}
-    >
+    <MainNavigator.Navigator>
       <MainNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
-        options={{ title: t('notices') }}
+        options={{
+          title: t('notices'),
+          tabBarIcon: () =>
+            MaterialIcons.getImageSourceSync('notifications', 24)!,
+        }}
       />
       <MainNavigator.Screen
         name="AssignmentStack"
         component={AssignmentStack}
-        options={{ title: t('assignments') }}
+        options={{
+          title: t('assignments'),
+          tabBarIcon: () => MaterialIcons.getImageSourceSync('event', 24)!,
+        }}
       />
       <MainNavigator.Screen
         name="FileStack"
         component={FileStack}
-        options={{ title: t('files') }}
+        options={{
+          title: t('files'),
+          tabBarIcon: () => MaterialIcons.getImageSourceSync('folder', 24)!,
+        }}
       />
       <MainNavigator.Screen
         name="CourseStack"
         component={CourseStack}
-        options={{ title: t('courses') }}
+        options={{
+          title: t('courses'),
+          tabBarIcon: () => MaterialIcons.getImageSourceSync('apps', 24)!,
+        }}
       />
       <MainNavigator.Screen
         name="SettingStack"
         component={SettingStack}
         options={{
           title: t('settings'),
+          tabBarIcon: () => MaterialIcons.getImageSourceSync('settings', 24)!,
           tabBarBadge:
             newChangelog || newUpdate || !courseInformationSharingBadgeShown
               ? ' '
               : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: 'red',
-            maxWidth: 10,
-            maxHeight: 10,
-          },
         }}
       />
     </MainNavigator.Navigator>

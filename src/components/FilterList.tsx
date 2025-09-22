@@ -6,9 +6,10 @@ import {
   useState,
 } from 'react';
 import { RefreshControl, View } from 'react-native';
-import { IconButton } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
+import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListProps,
@@ -43,6 +44,7 @@ import Filter, { FilterSelection } from './Filter';
 import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
 import { CardWrapperProps } from './CardWrapper';
+import IconButton from './IconButton';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
   data: T;
@@ -90,6 +92,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const dispatch = useAppDispatch();
 
   const toast = useToast();
+
+  const safeAreaInsets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const detailNavigator = useDetailNavigator();
 
@@ -260,7 +265,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       navigation.setOptions({
         headerLeft: () => (
           <IconButton
-            style={{ marginLeft: -8 }}
             icon={props => <MaterialIcons {...props} name="sort" />}
             onPress={handleReorder}
             mode="contained"
@@ -280,13 +284,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         headerLeft: () => (
           <>
             <IconButton
-              style={{ marginLeft: -8 }}
               onPress={handleSelect}
               icon={props => <MaterialIcons {...props} name="list" />}
               mode="contained"
             />
             <IconButton
-              style={Styles.ml0}
               onPress={handleCheckAll}
               icon={props => <MaterialIcons {...props} name="done-all" />}
             />
@@ -294,7 +296,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ),
         headerRight: () => (
           <IconButton
-            style={{ marginRight: -8 }}
             onPress={() =>
               handleArchive(
                 filterSelected === 'archived',
@@ -335,25 +336,21 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <>
             {isCourse ? (
               <IconButton
-                style={{ marginLeft: -8 }}
                 icon={props => <MaterialIcons {...props} name="sort" />}
                 onPress={handleReorder}
               />
             ) : (
               <IconButton
-                style={{ marginLeft: -8 }}
                 onPress={handleSelect}
                 icon={props => <MaterialIcons {...props} name="list" />}
               />
             )}
             <IconButton
-              style={Styles.ml0}
               onPress={handleFilter}
               icon={props => <MaterialIcons {...props} name="filter-list" />}
             />
             {isCourse && (
               <IconButton
-                style={Styles.ml0}
                 icon={props => <MaterialIcons {...props} name="info-outline" />}
                 onPress={handleNavigateCourseX}
               />
@@ -364,13 +361,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <>
             {DeviceInfo.isMac() && (
               <IconButton
-                style={Styles.mr0}
                 onPress={onRefresh}
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
             )}
             <IconButton
-              style={{ marginRight: -8 }}
               onPress={() => (navigation.navigate as any)('SearchStack' as any)}
               icon={props => <MaterialIcons {...props} name="search" />}
             />
@@ -464,9 +459,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         hiddenCount={hidden.length}
       />
       <ReorderableList
-        style={{ height: '100%' }}
+        style={{
+          height: '100%',
+        }}
         contentContainerStyle={[
-          { flexGrow: 1 },
+          {
+            flexGrow: 1,
+            paddingBottom: Math.max(safeAreaInsets.bottom, tabBarHeight),
+          },
           data.length ? null : { justifyContent: 'center' },
         ]}
         data={data}

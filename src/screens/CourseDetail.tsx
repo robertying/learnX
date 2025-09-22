@@ -1,10 +1,5 @@
 import { memo, useCallback, useLayoutEffect, useState } from 'react';
-import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Text, useTheme } from 'react-native-paper';
 import {
   NativeStackNavigationProp,
@@ -30,6 +25,7 @@ import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
+import FlatList from 'components/FlatList';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import Numbers from 'constants/Numbers';

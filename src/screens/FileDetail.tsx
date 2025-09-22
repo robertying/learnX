@@ -6,11 +6,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Linking, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Linking, Platform, StyleSheet, View } from 'react-native';
 import {
   useTheme,
   Text,
-  IconButton,
   ProgressBar,
   Title,
   Caption,
@@ -39,6 +38,8 @@ import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
+import IconButton from 'components/IconButton';
+import ScrollView from 'components/ScrollView';
 import { FileStackParams } from './types';
 import { SplitViewContext } from 'components/SplitView';
 import { useAppSelector } from 'data/store';
@@ -134,7 +135,6 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         <View style={[Styles.flexRow, { justifyContent: 'flex-end' }]}>
           {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
             <IconButton
-              style={styles.rightIcon}
               onPress={() => toggleMaster(!showMaster)}
               icon={props => (
                 <Icon
@@ -146,19 +146,16 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
             />
           )}
           <IconButton
-            style={styles.rightIcon}
             onPress={() => handleDownload(true)}
             icon={props => <Icon {...props} name="refresh" />}
           />
           <IconButton
-            style={styles.rightIcon}
             disabled={error || !path}
             onPress={handleShare}
             icon={props => <Icon {...props} name="ios-share" />}
           />
           {DeviceInfo.isMac() && (
             <IconButton
-              style={styles.rightIcon}
               disabled={error || !path}
               onPress={handleCopyToDownloadsFolder}
               icon={props => <Icon {...props} name="download" />}
@@ -166,7 +163,6 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           )}
           {Platform.OS === 'android' && (
             <IconButton
-              style={styles.rightIcon}
               disabled={error || !path}
               onPress={handleOpen}
               icon={props => <Icon {...props} name="open-in-new" />}
@@ -174,7 +170,6 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           )}
           {canRender && (
             <IconButton
-              style={styles.rightIcon}
               disabled={error || !path}
               onPress={handleShowInfo}
               icon={props => (
@@ -384,9 +379,6 @@ const styles = StyleSheet.create({
   },
   colCenter: {
     alignItems: 'center',
-  },
-  rightIcon: {
-    marginRight: -8,
   },
   section: {
     paddingHorizontal: 16,

@@ -104,11 +104,13 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
         </Text>
         <Text style={styles.secondaryText}>{secondaryText}</Text>
         {type === 'switch' && !loading ? (
-          <Switch
-            disabled={switchDisabled}
-            value={switchValue}
-            onValueChange={onSwitchValueChange}
-          />
+          <View>
+            <Switch
+              disabled={switchDisabled}
+              value={switchValue}
+              onValueChange={onSwitchValueChange}
+            />
+          </View>
         ) : null}
         {type === 'arrow' ? (
           <Icon name="keyboard-arrow-right" size={21} color="grey" />
@@ -133,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 2,
-    minHeight: 44,
+    minHeight: 52,
   },
   icon: {
     marginRight: 8,

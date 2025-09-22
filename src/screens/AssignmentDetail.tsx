@@ -1,12 +1,11 @@
 import { useCallback, useLayoutEffect, useMemo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import {
   Caption,
   Divider,
   Title,
   useTheme,
   Text,
-  IconButton,
   Chip,
 } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -22,6 +21,8 @@ import {
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
+import IconButton from 'components/IconButton';
+import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { AssignmentStackParams } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -121,7 +122,6 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
       navigation.setOptions({
         headerRight: () => (
           <IconButton
-            style={{ marginRight: -8 }}
             disabled={dayjs().isAfter(dayjs(deadline))}
             onPress={handleSubmit}
             icon={props => <MaterialIcons {...props} name="file-upload" />}

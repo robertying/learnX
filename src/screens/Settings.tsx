@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
 import SafeArea from 'components/SafeArea';
 import TableCell from 'components/TableCell';
+import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { getLatestRelease } from 'helpers/update';
 import { setSetting } from 'data/actions/settings';

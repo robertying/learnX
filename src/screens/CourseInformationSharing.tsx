@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Alert, Linking, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Caption } from 'react-native-paper';
 import { CourseType, Language } from 'thu-learn-lib';
@@ -8,6 +8,7 @@ import { dataSource } from 'data/source';
 import { setSetting } from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import ScrollView from 'components/ScrollView';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import env from 'helpers/env';

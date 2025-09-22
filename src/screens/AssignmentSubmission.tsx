@@ -7,7 +7,6 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
   StyleSheet,
   View,
 } from 'react-native';
@@ -27,6 +26,7 @@ import { RemoteFile } from 'thu-learn-lib';
 import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
+import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { getExtension, stripExtension } from 'helpers/fs';
 import { removeTags } from 'helpers/html';

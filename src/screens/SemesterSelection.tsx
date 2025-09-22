@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import FlatList from 'components/FlatList';
 import { dataSource } from 'data/source';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import {

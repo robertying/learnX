@@ -1,4 +1,4 @@
-import { Alert, Linking, Platform, ScrollView, StyleSheet } from 'react-native';
+import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Caption } from 'react-native-paper';
 import { useAppDispatch, useAppSelector } from 'data/store';
@@ -9,6 +9,7 @@ import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import ScrollView from 'components/ScrollView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { SettingsStackParams } from './types';
 

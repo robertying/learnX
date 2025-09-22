@@ -1,8 +1,9 @@
-import { Linking, ScrollView, StyleSheet } from 'react-native';
+import { Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Text } from 'react-native-paper';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
+import ScrollView from 'components/ScrollView';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
