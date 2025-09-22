@@ -136,7 +136,6 @@ export const saveCoursesToCalendar = async (
           title: e.courseName,
           startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
           endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
-          location: e.location,
           notes: e.location,
           alarms: alarms.courseAlarm
             ? [
