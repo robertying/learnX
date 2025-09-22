@@ -197,6 +197,6 @@ export default {
   downloadToDownloadsFailed: 'Failed to download the file to Downloads',
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
-    'Please complete the login on the webpage that will open. If you need to change the pre-filled username or password, please close the webpage and re-enter the correct username and password on the learnX login screen.',
+    'Please complete the login on the webpage that will open. If you need to change the pre-filled username or password, please close the webpage and re-enter the correct username and password on the learnX login screen.\n\nIf seeing an error on trusted browser limit, please log in to https://id.tsinghua.edu.cn in your browser, go to Settings - Two-factor Authentication - Number of trusted device browsers - Manage, and delete other devices.',
   ssoFailed: 'Failed to complete the login process. Please try again.',
 };
