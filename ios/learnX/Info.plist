@@ -102,7 +102,7 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>
-		<string>MaterialCommunityIcons.ttf</string>
+		<string>MaterialDesignIcons.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
