@@ -465,7 +465,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         contentContainerStyle={[
           {
             flexGrow: 1,
-            paddingBottom: Math.max(safeAreaInsets.bottom, tabBarHeight),
           },
           data.length ? null : { justifyContent: 'center' },
         ]}

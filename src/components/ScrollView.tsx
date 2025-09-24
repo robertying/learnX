@@ -1,4 +1,8 @@
-import { ScrollView as RNScrollView, ScrollViewProps } from 'react-native';
+import {
+  Platform,
+  ScrollView as RNScrollView,
+  ScrollViewProps,
+} from 'react-native';
 import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
 
 const ScrollView: React.FC<ScrollViewProps> = props => {
@@ -7,7 +11,7 @@ const ScrollView: React.FC<ScrollViewProps> = props => {
     <RNScrollView
       {...props}
       contentContainerStyle={[
-        { paddingBottom: tabBarHeight + 16 },
+        { paddingBottom: Platform.OS === 'android' ? 16 : tabBarHeight + 16 },
         props.contentContainerStyle,
       ]}
     />

@@ -21,6 +21,7 @@ import type {
   NativeStackNavigationOptions,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import {
   SafeAreaProvider,
@@ -220,7 +221,8 @@ const AssignmentStackNavigator =
 const FileStackNavigator = createNativeStackNavigator<FileStackParams>();
 const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
 const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
-const MainNavigator = createNativeBottomTabNavigator<MainTabParams>();
+const MainNavigator = createBottomTabNavigator<MainTabParams>();
+const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
 const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
@@ -422,9 +424,80 @@ const MainTab = () => {
     }
   }, [dispatch, loggedIn]);
 
-  return (
-    <MainNavigator.Navigator>
+  return Platform.OS === 'ios' ? (
+    <MainNavigator.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ color, size }) => {
+          const iconMap = {
+            NoticeStack: 'notifications',
+            AssignmentStack: 'event',
+            FileStack: 'folder',
+            CourseStack: 'apps',
+            SettingStack: 'settings',
+          } as const;
+
+          return (
+            <MaterialIcons
+              name={iconMap[route.name as keyof typeof iconMap]}
+              size={size}
+              color={color}
+            />
+          );
+        },
+        activeTintColor: theme.colors.primary,
+        inactiveTintColor: 'gray',
+        adaptive: windowSize.width >= 750 ? false : true,
+        tabBarStyle: {
+          borderTopColor: theme.colors.outlineVariant,
+        },
+        tabBarLabelPosition: 'below-icon',
+        tabBarLabelStyle: {
+          marginBottom: 2,
+        },
+        headerShown: false,
+      })}
+    >
       <MainNavigator.Screen
+        name="NoticeStack"
+        component={NoticeStack}
+        options={{ title: t('notices') }}
+      />
+      <MainNavigator.Screen
+        name="AssignmentStack"
+        component={AssignmentStack}
+        options={{ title: t('assignments') }}
+      />
+      <MainNavigator.Screen
+        name="FileStack"
+        component={FileStack}
+        options={{ title: t('files') }}
+      />
+      <MainNavigator.Screen
+        name="CourseStack"
+        component={CourseStack}
+        options={{ title: t('courses') }}
+      />
+      <MainNavigator.Screen
+        name="SettingStack"
+        component={SettingStack}
+        options={{
+          title: t('settings'),
+
+          tabBarBadge:
+            newChangelog || newUpdate || !courseInformationSharingBadgeShown
+              ? ' '
+              : undefined,
+          tabBarBadgeStyle: {
+            backgroundColor: 'red',
+            maxWidth: 10,
+            maxHeight: 10,
+          },
+        }}
+      />
+    </MainNavigator.Navigator>
+  ) : (
+    <MainNativeNavigator.Navigator labeled>
+      <MainNativeNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
         options={{
@@ -433,7 +506,7 @@ const MainTab = () => {
             MaterialIcons.getImageSourceSync('notifications', 24)!,
         }}
       />
-      <MainNavigator.Screen
+      <MainNativeNavigator.Screen
         name="AssignmentStack"
         component={AssignmentStack}
         options={{
@@ -441,7 +514,7 @@ const MainTab = () => {
           tabBarIcon: () => MaterialIcons.getImageSourceSync('event', 24)!,
         }}
       />
-      <MainNavigator.Screen
+      <MainNativeNavigator.Screen
         name="FileStack"
         component={FileStack}
         options={{
@@ -449,7 +522,7 @@ const MainTab = () => {
           tabBarIcon: () => MaterialIcons.getImageSourceSync('folder', 24)!,
         }}
       />
-      <MainNavigator.Screen
+      <MainNativeNavigator.Screen
         name="CourseStack"
         component={CourseStack}
         options={{
@@ -457,7 +530,7 @@ const MainTab = () => {
           tabBarIcon: () => MaterialIcons.getImageSourceSync('apps', 24)!,
         }}
       />
-      <MainNavigator.Screen
+      <MainNativeNavigator.Screen
         name="SettingStack"
         component={SettingStack}
         options={{
@@ -469,7 +542,7 @@ const MainTab = () => {
               : undefined,
         }}
       />
-    </MainNavigator.Navigator>
+    </MainNativeNavigator.Navigator>
   );
 };
 

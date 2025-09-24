@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   listItem: {
     paddingHorizontal: 16,
   },
-  title: { marginTop: Platform.OS === 'ios' ? 7 : undefined, marginLeft: -12 },
+  title: { marginLeft: -12 },
   absolute: {
     position: 'absolute',
     top: 0,
