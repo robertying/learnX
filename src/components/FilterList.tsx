@@ -8,8 +8,6 @@ import {
 import { RefreshControl, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
-import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListProps,
@@ -92,9 +90,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const dispatch = useAppDispatch();
 
   const toast = useToast();
-
-  const safeAreaInsets = useSafeAreaInsets();
-  const tabBarHeight = useBottomTabBarHeight();
 
   const detailNavigator = useDetailNavigator();
 

@@ -12,11 +12,11 @@ index 3dfe1dc..b204ac1 100644
 +    implementation 'com.google.code.gson:gson:2.13.1'
  }
 diff --git a/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java b/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
-index 7b7a125..951b351 100644
+index 7b7a125..361924b 100644
 --- a/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
 +++ b/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
 @@ -12,6 +12,8 @@ import java.io.File;
- 
+
  import android.content.ContentResolver;
  import android.content.Context;
 +import android.os.Handler;
@@ -26,12 +26,12 @@ index 7b7a125..951b351 100644
  import android.view.ViewGroup;
 @@ -105,7 +107,7 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
          TopChangeEvent tce = new TopChangeEvent(surfaceId, getId(), event);
- 
+
          if (dispatcher != null) {
 -            dispatcher.dispatchEvent(tce);
 +            new Handler(Looper.getMainLooper()).postDelayed(() -> dispatcher.dispatchEvent(tce), 10);
          }
- 
+
  //        ReactContext reactContext = (ReactContext)this.getContext();
 diff --git a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm b/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
 index cddec76..15c9b05 100644
@@ -48,4 +48,20 @@ index cddec76..15c9b05 100644
 +            }
          }
      }
- 
+
+diff --git a/node_modules/react-native-pdf/package.json b/node_modules/react-native-pdf/package.json
+index 7fb18b7..a10358e 100644
+--- a/node_modules/react-native-pdf/package.json
++++ b/node_modules/react-native-pdf/package.json
+@@ -63,6 +63,11 @@
+         "jsSrcsDir": "./fabric",
+         "android": {
+           "javaPackageName": "org.wonday.pdf"
++        },
++        "ios": {
++            "componentProvider": {
++                "RNPDFPdfView": "RNPDFPdfView"
++            }
+         }
+       }
+ }
