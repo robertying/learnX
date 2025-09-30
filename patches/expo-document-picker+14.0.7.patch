@@ -1,8 +1,8 @@
 diff --git a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
-index 08cd420..ebb0b77 100644
+index 472a5ab..be200ee 100644
 --- a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
 +++ b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
-@@ -35,7 +35,7 @@ class DocumentPickerModule : Module() {
+@@ -34,7 +34,7 @@ class DocumentPickerModule : Module() {
        }
        pendingPromise = promise
        copyToCacheDirectory = options.copyToCacheDirectory
@@ -11,3 +11,21 @@ index 08cd420..ebb0b77 100644
          addCategory(Intent.CATEGORY_OPENABLE)
          putExtra(Intent.EXTRA_ALLOW_MULTIPLE, options.multiple)
          type = if (options.type.size > 1) {
+diff --git a/node_modules/expo-document-picker/expo-module.config.json b/node_modules/expo-document-picker/expo-module.config.json
+index 05e50dc..172c7e1 100644
+--- a/node_modules/expo-document-picker/expo-module.config.json
++++ b/node_modules/expo-document-picker/expo-module.config.json
+@@ -4,12 +4,6 @@
+     "modules": ["DocumentPickerModule"]
+   },
+   "android": {
+-    "modules": ["expo.modules.documentpicker.DocumentPickerModule"],
+-    "publication": {
+-      "groupId": "host.exp.exponent",
+-      "artifactId": "expo.modules.documentpicker",
+-      "version": "14.0.7",
+-      "repository": "local-maven-repo"
+-    }
++    "modules": ["expo.modules.documentpicker.DocumentPickerModule"]
+   }
+ }
