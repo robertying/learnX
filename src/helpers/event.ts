@@ -12,6 +12,7 @@ import { store } from 'data/store';
 import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
 import { removeTags } from './html';
+import locationMappings from '../assets/locationMappings.json';
 
 const courseCalendarName = 'learnX 课表';
 const assignmentCalendarReminderName = 'learnX 作业';
@@ -136,7 +137,9 @@ export const saveCoursesToCalendar = async (
           title: e.courseName,
           startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
           endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
-          location: settings.courseEventOmitLocation ? undefined : e.location,
+          location: settings.courseEventOmitLocation
+            ? undefined
+            : sanitizeLocation(e.location),
           notes: e.location,
           alarms: alarms.courseAlarm
             ? [
@@ -423,3 +426,16 @@ export const removeCalendars = async () => {
   store.dispatch(setSetting('syncedReminderAssignments', {}));
   store.dispatch(setSetting('courseCalendarId', undefined));
 };
+
+function sanitizeLocation(location: string): string {
+  location = location.trim();
+
+  // Match building (Chinese chars / letters) + unit
+  const match = location.match(/^([\u4e00-\u9fa5A-Za-z]+)(.*)$/);
+  if (!match) return location;
+
+  const rawBuilding = match[1];
+  const building = (locationMappings as any)[rawBuilding] || rawBuilding;
+
+  return building;
+}
