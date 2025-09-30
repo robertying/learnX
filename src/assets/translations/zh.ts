@@ -192,6 +192,7 @@ const zh: typeof en = {
   ssoNote:
     '请在即将打开的网页中完成登录。如需更改网页中预填的账号或密码，请关闭网页，再在 learnX 登录界面重新输入正确的账号及密码。\n\n如果提示“信任浏览器数量已达到上限”，请在浏览器登录 https://id.tsinghua.edu.cn，前往账号设置-多因子认证-信任浏览器数量-维护，选择并删除其他设备。',
   ssoFailed: '登录失败，请重试。',
+  courseEventOmitLocation: '不写入位置信息',
 };
 
 export default zh;

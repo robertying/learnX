@@ -60,6 +60,7 @@ export interface SettingsState {
   courseInformationSharingBadgeShown: boolean;
   lastShowChangelogVersion: string | null;
   openFileAfterDownload: boolean;
+  courseEventOmitLocation: boolean;
 }
 
 export interface SemestersState {

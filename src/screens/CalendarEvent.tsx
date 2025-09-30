@@ -52,6 +52,9 @@ const CalendarEvent: React.FC<Props> = props => {
   const calendarEventLength = useAppSelector(
     state => state.settings.calendarEventLength,
   );
+  const courseEventOmitLocation = useAppSelector(
+    state => state.settings.courseEventOmitLocation,
+  );
 
   const { all } = useFilteredData({
     data: assignmentState.items,
@@ -263,14 +266,23 @@ const CalendarEvent: React.FC<Props> = props => {
               type="input"
             />
           )}
+          <TableCell
+            iconName="location-off"
+            primaryText={t('courseEventOmitLocation')}
+            switchValue={courseEventOmitLocation}
+            onSwitchValueChange={value =>
+              dispatch(setSetting('courseEventOmitLocation', value))
+            }
+            type="switch"
+          />
           <Caption style={styles.caption}>
             {isLocaleChinese()
               ? `手动同步${
                   graduate ? '研究生' : '本科生'
-                }课表到日历；请在更改提醒设置后重新同步以应用更改。`
+                }课表到日历；请在更改设置后重新同步以应用更改。`
               : `Manually sync ${
                   graduate ? 'graduate' : 'undergraduate'
-                } course schedule to your calendar. Please re-sync after any alert setting change.`}
+                } course schedule to your calendar. Please re-sync after any setting change.`}
           </Caption>
           <TableCell
             style={styles.marginTop}

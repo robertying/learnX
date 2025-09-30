@@ -34,6 +34,7 @@ export default function settings(
     courseInformationSharingBadgeShown: false,
     lastShowChangelogVersion: null,
     openFileAfterDownload: false,
+    courseEventOmitLocation: false,
   },
   action: SettingsAction,
 ): SettingsState {
