@@ -32,8 +32,8 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdk rootProject.ext.compileSdkVersion
-        versionCode 9204012
-        versionName "16.1.0"
+        versionCode 9204020
+        versionName "16.2.0"
     }
 
     splits {
@@ -95,7 +95,7 @@ dependencies {
     implementation("com.facebook.react:hermes-android")
 
     implementation("androidx.core:core-splashscreen:1.2.0-rc01")
-    implementation("com.google.android.material:material:1.14.0-alpha04")
+    implementation("com.google.android.material:material:1.14.0-alpha05")
 
     implementation platform("com.google.firebase:firebase-bom:34.3.0")
     implementation("com.google.firebase:firebase-crashlytics")
