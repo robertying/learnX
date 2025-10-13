@@ -435,7 +435,10 @@ function sanitizeLocation(location: string): string {
   if (!match) return location;
 
   const rawBuilding = match[1];
-  const building = (locationMappings as any)[rawBuilding] || rawBuilding;
+  const fullName = (locationMappings as any)[rawBuilding];
+  if (fullName) {
+    return fullName + ' ' + location;
+  }
 
-  return building;
+  return location;
 }
