@@ -82,7 +82,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         const path = await downloadFile(route.params, refresh, setProgress);
         setPath(path);
         setProgress(0);
-      } catch (e) {
+      } catch {
         setError(true);
         toast(t('fileDownloadFailed'), 'error');
       }
@@ -98,7 +98,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     try {
       await copyFileToMacDownloads(file, path);
       toast(t('downloadToDownloadsSucceeded'), 'success');
-    } catch (e) {
+    } catch {
       toast(t('downloadToDownloadsFailed'), 'error');
     }
   }, [path, file, toast]);

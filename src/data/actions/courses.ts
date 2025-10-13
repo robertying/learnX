@@ -27,7 +27,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
 
     try {
       await dataSource.setLanguage(lang);
-    } catch (err) {}
+    } catch {}
 
     try {
       const results = await dataSource.getCourseList(

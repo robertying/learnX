@@ -137,7 +137,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
         size: file.size,
       });
       dispatch(setPendingAssignmentData(null));
-    } catch (err) {
+    } catch {
       toast(t('filePickFailed'), 'error');
     }
   };
@@ -165,7 +165,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
         size: photo.fileSize,
       });
       dispatch(setPendingAssignmentData(null));
-    } catch (err) {
+    } catch {
       toast(t('filePickFailed'), 'error');
     }
   };

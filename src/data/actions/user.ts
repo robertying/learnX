@@ -24,7 +24,7 @@ export function getUserInfo(): ThunkResult {
 
     try {
       await dataSource.setLanguage(lang);
-    } catch (err) {}
+    } catch {}
 
     try {
       const userInfo = await dataSource.getUserInfo(CourseType.STUDENT);
