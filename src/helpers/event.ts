@@ -16,6 +16,7 @@ import locationMappings from '../assets/locationMappings.json';
 
 const courseCalendarName = 'learnX 课表';
 const assignmentCalendarReminderName = 'learnX 作业';
+const TZ = 'Asia/Shanghai';
 
 export const getAndRequestPermission = async (
   type: 'calendar' | 'reminder',
@@ -137,6 +138,7 @@ export const saveCoursesToCalendar = async (
           title: e.courseName,
           startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
           endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
+          timeZone: TZ,
           location: settings.courseEventOmitLocation
             ? undefined
             : sanitizeLocation(e.location),
@@ -267,6 +269,7 @@ export const saveAssignmentEvent = async (
             .subtract(alarms.assignmentReminderAlarmOffset ?? 24 * 60, 'minute')
             .toDate()
         : dueDate.toDate(),
+      timeZone: TZ,
       completed,
       completionDate: completionDate?.toDate(),
       notes: note,
@@ -321,6 +324,7 @@ export const saveAssignmentEvent = async (
         .subtract(settings.calendarEventLength ?? 30, 'minute')
         .toDate(),
       endDate: dueDate.toDate(),
+      timeZone: TZ,
       notes: note,
       alarms: alerts,
     };
