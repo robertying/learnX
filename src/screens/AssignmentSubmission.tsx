@@ -103,8 +103,13 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
     setCustomAttachmentName(text.replaceAll('.', ''));
   };
 
-  const handleAttachmentRemove = () => {
+  const handleUploadedAttachmentRemove = () => {
     setRemoveAttachment(!removeAttachment);
+  };
+
+  const handlePickedAttachmentRemove = () => {
+    setAttachmentResult(null);
+    dispatch(setPendingAssignmentData(null));
   };
 
   const handlePickerMenuOpen = () => {
@@ -324,12 +329,14 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
               value={content}
               onChangeText={setContent}
             />
-            <TextInput
-              disabled={removeAttachment || uploading}
-              placeholder={t('assignmentSubmissionFilenamePlaceholder')}
-              value={customAttachmentName}
-              onChangeText={handleCustomAttachmentNameChange}
-            />
+            {attachmentResult && (
+              <TextInput
+                disabled={removeAttachment || uploading}
+                placeholder={t('assignmentSubmissionFilenamePlaceholder')}
+                value={customAttachmentName}
+                onChangeText={handleCustomAttachmentNameChange}
+              />
+            )}
           </ScrollView>
           <View style={styles.submissionDetail}>
             {submittedAttachment ? (
@@ -380,11 +387,21 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
                   disabled={uploading}
                   mode="contained"
                   style={styles.submitButton}
-                  onPress={handleAttachmentRemove}
+                  onPress={handleUploadedAttachmentRemove}
                 >
                   {removeAttachment
-                    ? t('undoRemoveAttachment')
-                    : t('removeAttachment')}
+                    ? t('undoRemoveUploadedAttachment')
+                    : t('removeUploadedAttachment')}
+                </Button>
+              ) : undefined}
+              {attachmentResult && !removeAttachment ? (
+                <Button
+                  disabled={uploading}
+                  mode="contained"
+                  style={styles.submitButton}
+                  onPress={handlePickedAttachmentRemove}
+                >
+                  {t('removePickedAttachment')}
                 </Button>
               ) : undefined}
               {!removeAttachment ? (
@@ -409,7 +426,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
                         ? t('reUploadAttachment')
                         : submittedAttachment
                           ? t('overwriteAttachment')
-                          : t('uploadAttachment')}
+                          : t('pickAttachment')}
                     </Button>
                   }
                 >

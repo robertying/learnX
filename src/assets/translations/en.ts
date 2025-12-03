@@ -40,11 +40,12 @@ export default {
     '(Optional) Change attachment name...',
   assignmentSubmissionContentPlaceholder:
     '(Optional) Enter assignment content...',
-  undoRemoveAttachment: 'Undo attachment removal',
-  removeAttachment: 'Remove uploaded attachment',
-  reUploadAttachment: 'Re-upload attachment',
+  undoRemoveUploadedAttachment: 'Undo removal',
+  removeUploadedAttachment: 'Remove uploaded attachment',
+  removePickedAttachment: 'Remove picked attachment',
+  reUploadAttachment: 'Pick new attachment',
   overwriteAttachment: 'Overwrite uploaded attachment',
-  uploadAttachment: 'Upload attachment',
+  pickAttachment: 'Pick attachment',
   courseScheduleSyncSucceeded: 'Successfully synced course schedule',
   courseScheduleSyncNoCalendarPermission:
     'Course Schedule Sync failed. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
