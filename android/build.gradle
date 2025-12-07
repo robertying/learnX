@@ -7,7 +7,7 @@ buildscript {
         ndkVersion = "29.0.14206865"
         cmakeVersion = "3.31.6"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "2.2.20"
+        kotlinVersion = "2.2.21"
     }
 }
 

@@ -23,7 +23,7 @@ index 05e50dc..172c7e1 100644
 -    "publication": {
 -      "groupId": "host.exp.exponent",
 -      "artifactId": "expo.modules.documentpicker",
--      "version": "14.0.7",
+-      "version": "14.0.8",
 -      "repository": "local-maven-repo"
 -    }
 +    "modules": ["expo.modules.documentpicker.DocumentPickerModule"]

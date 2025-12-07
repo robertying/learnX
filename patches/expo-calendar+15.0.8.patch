@@ -49,7 +49,7 @@ index d50f06d..35a0e69 100644
 -    "publication": {
 -      "groupId": "host.exp.exponent",
 -      "artifactId": "expo.modules.calendar",
--      "version": "15.0.7",
+-      "version": "15.0.8",
 -      "repository": "local-maven-repo"
 -    }
 +    "modules": ["expo.modules.calendar.CalendarModule"]

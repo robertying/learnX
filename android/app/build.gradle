@@ -94,10 +94,10 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation("com.facebook.react:hermes-android")
 
-    implementation("androidx.core:core-splashscreen:1.2.0-rc01")
-    implementation("com.google.android.material:material:1.14.0-alpha05")
+    implementation("androidx.core:core-splashscreen:1.2.0")
+    implementation("com.google.android.material:material:1.14.0-alpha07")
 
-    implementation platform("com.google.firebase:firebase-bom:34.4.0")
+    implementation platform("com.google.firebase:firebase-bom:34.6.0")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-crashlytics-ndk")
     implementation("com.google.firebase:firebase-analytics")
