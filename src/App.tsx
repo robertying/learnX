@@ -373,7 +373,6 @@ const MainTab = () => {
   return Platform.OS === 'ios' ? (
     <MainNavigator.Navigator
       screenOptions={({ route }) => ({
-        lazy: false,
         tabBarIcon: ({ color, size }) => {
           const iconMap = {
             NoticeStack: 'notifications',
@@ -443,7 +442,12 @@ const MainTab = () => {
       />
     </MainNavigator.Navigator>
   ) : (
-    <MainNativeNavigator.Navigator labeled screenOptions={{ lazy: false }}>
+    <MainNativeNavigator.Navigator
+      labeled
+      screenOptions={{
+        freezeOnBlur: true,
+      }}
+    >
       <MainNativeNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
