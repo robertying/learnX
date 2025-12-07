@@ -87,7 +87,6 @@ import Splash from 'components/Splash';
 import HeaderTitle from 'components/HeaderTitle';
 import Empty from 'components/Empty';
 import { SplitViewProvider } from 'components/SplitView';
-import TextButton from 'components/TextButton';
 import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -131,40 +130,8 @@ const getTitleOptions = (title: string, subtitle?: string) => {
 const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
   title: string,
 ) =>
-  function ({
-    navigation,
-  }: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
-    return {
-      ...getTitleOptions(title),
-      headerLeft: () => (
-        <>
-          <IconButton
-            icon={props => <MaterialIcons {...props} name="subject" />}
-          />
-          <IconButton
-            icon={props => <MaterialIcons {...props} name="filter-list" />}
-          />
-          {title === t('courses') && (
-            <IconButton
-              icon={props => <MaterialIcons {...props} name="info-outline" />}
-            />
-          )}
-        </>
-      ),
-      headerRight: () => (
-        <>
-          {DeviceInfo.isMac() && (
-            <IconButton
-              icon={props => <MaterialIcons {...props} name="refresh" />}
-            />
-          )}
-          <IconButton
-            onPress={() => navigation.navigate('SearchStack' as any)}
-            icon={props => <MaterialIcons {...props} name="search" />}
-          />
-        </>
-      ),
-    };
+  function ({}: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
+    return getTitleOptions(title);
   };
 
 const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
@@ -190,27 +157,6 @@ const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
       : '';
     return {
       ...getTitleOptions(title, subtitle),
-      headerRight: (route.params as unknown as File)?.downloadUrl
-        ? () => (
-            <>
-              <IconButton
-                icon={props => <MaterialIcons {...props} name="refresh" />}
-              />
-              {Platform.OS !== 'android' && (
-                <IconButton
-                  icon={props => <MaterialIcons {...props} name="ios-share" />}
-                />
-              )}
-              {DeviceInfo.isMac() && (
-                <IconButton
-                  icon={props => (
-                    <MaterialIcons {...props} name="open-in-new" />
-                  )}
-                />
-              )}
-            </>
-          )
-        : undefined,
       headerTintColor: Platform.OS === 'ios' ? Colors.theme : undefined,
     };
   };
@@ -427,6 +373,7 @@ const MainTab = () => {
   return Platform.OS === 'ios' ? (
     <MainNavigator.Navigator
       screenOptions={({ route }) => ({
+        lazy: false,
         tabBarIcon: ({ color, size }) => {
           const iconMap = {
             NoticeStack: 'notifications',
@@ -496,7 +443,7 @@ const MainTab = () => {
       />
     </MainNavigator.Navigator>
   ) : (
-    <MainNativeNavigator.Navigator labeled>
+    <MainNativeNavigator.Navigator labeled screenOptions={{ lazy: false }}>
       <MainNativeNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}
@@ -613,11 +560,6 @@ const AssignmentSubmissionStack = () => (
       component={AssignmentSubmission}
       options={{
         headerLeft: () => <BackButton />,
-        headerRight: () => (
-          <TextButton style={{ fontSize: 17, fontWeight: 'bold' }}>
-            {t('submit')}
-          </TextButton>
-        ),
         ...getTitleOptions(t('assignmentSubmission')),
       }}
     />

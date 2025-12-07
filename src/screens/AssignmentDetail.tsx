@@ -127,6 +127,19 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
             icon={props => <MaterialIcons {...props} name="file-upload" />}
           />
         ),
+        // unstable_headerRightItems: () => [
+        //   {
+        //     type: 'button',
+        //     identifier: 'submit',
+        //     label: t('submit'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name: 'arrow.up.circle',
+        //     },
+        //     disabled: dayjs().isAfter(dayjs(deadline)),
+        //     onPress: handleSubmit,
+        //   },
+        // ],
       });
     }
   }, [submissionType, deadline, handleSubmit, navigation]);

@@ -288,6 +288,20 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
           {t('submit')}
         </TextButton>
       ),
+      // unstable_headerRightItems: () => [
+      //   {
+      //     type: 'button',
+      //     identifier: 'submit',
+      //     label: t('submit'),
+      //     icon: {
+      //       type: 'sfSymbol',
+      //       name: 'arrow.up.circle',
+      //     },
+      //     disabled:
+      //       uploading || (!removeAttachment && !content && !attachmentResult),
+      //     onPress: handleSubmitPress,
+      //   },
+      // ],
     });
   }, [
     attachmentResult,

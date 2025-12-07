@@ -3,6 +3,7 @@ import Info from 'react-native-device-info';
 const cached: {
   buildNo: string;
   isTablet: boolean;
+  isIPad: boolean;
   isMac: boolean;
   abi: string | null;
   systemVersion: string;
@@ -12,6 +13,7 @@ const cached: {
 } = {
   buildNo: Info.getBuildNumber(),
   isTablet: Info.isTablet(),
+  isIPad: Info.getSystemName() === 'iPadOS',
   isMac:
     (Info.getSystemName() === 'iPhone OS' ||
       Info.getSystemName() === 'iOS' ||
@@ -28,6 +30,7 @@ const cached: {
 export default {
   buildNo: () => cached.buildNo,
   isTablet: () => cached.isTablet,
+  isIPad: () => cached.isIPad,
   isMac: () => cached.isMac,
   abi: async () => {
     if (cached.abi !== null) {

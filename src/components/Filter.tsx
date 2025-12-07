@@ -95,7 +95,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         style={styles.listItem}
         titleStyle={styles.title}
         title={
-          <View style={styles.flexRow}>
+          <View style={[styles.flexRow, { paddingTop: 8 }]}>
             <Text style={styles.text}>{text}</Text>
             <Badge
               visible
@@ -221,7 +221,9 @@ const styles = StyleSheet.create({
   listItem: {
     paddingHorizontal: 16,
   },
-  title: { marginLeft: -12 },
+  title: {
+    marginLeft: -12,
+  },
   absolute: {
     position: 'absolute',
     top: 0,

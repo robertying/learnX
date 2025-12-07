@@ -258,6 +258,20 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   useLayoutEffect(() => {
     if (reorderMode) {
       navigation.setOptions({
+        // unstable_headerLeftItems: () => [
+        //   {
+        //     type: 'button',
+        //     identifier: 'reorder',
+        //     label: t('reorder'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name: 'arrow.up.and.down',
+        //     },
+        //     onPress: handleReorder,
+        //   },
+        // ],
+        // unstable_headerRightItems: () => [],
+
         headerLeft: () => (
           <IconButton
             icon={props => <MaterialIcons {...props} name="sort" />}
@@ -276,6 +290,46 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       });
     } else if (selectionMode) {
       navigation.setOptions({
+        // unstable_headerLeftItems: () => [
+        //   {
+        //     type: 'button',
+        //     identifier: 'select',
+        //     label: t('select'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name: 'checklist',
+        //     },
+        //     onPress: handleSelect,
+        //   },
+        //   {
+        //     type: 'button',
+        //     identifier: 'checkAll',
+        //     label: t('checkAll'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name: 'checkmark.circle.fill',
+        //     },
+        //     onPress: handleCheckAll,
+        //   },
+        // ],
+        // unstable_headerRightItems: () => [
+        //   {
+        //     type: 'button',
+        //     identifier: 'archive',
+        //     label: filterSelected === 'archived' ? t('restore') : t('archive'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name:
+        //         filterSelected === 'archived' ? 'arrow.up.bin' : 'archivebox',
+        //     },
+        //     onPress: () =>
+        //       handleArchive(
+        //         filterSelected === 'archived',
+        //         Object.keys(selection).filter(id => selection[id] === true),
+        //       ),
+        //   },
+        // ],
+
         headerLeft: () => (
           <>
             <IconButton
@@ -327,6 +381,87 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       });
     } else {
       navigation.setOptions({
+        // unstable_headerLeftItems: () => [
+        //   ...((isCourse
+        //     ? [
+        //         {
+        //           type: 'button',
+        //           identifier: 'reorder',
+        //           label: t('reorder'),
+        //           icon: {
+        //             type: 'sfSymbol',
+        //             name: 'arrow.up.and.down',
+        //           },
+        //           onPress: handleReorder,
+        //         },
+        //       ]
+        //     : [
+        //         {
+        //           type: 'button',
+        //           identifier: 'select',
+        //           label: t('select'),
+        //           icon: {
+        //             type: 'sfSymbol',
+        //             name: 'checklist',
+        //           },
+        //           onPress: handleSelect,
+        //         },
+        //       ]) as any),
+        //   {
+        //     type: 'button',
+        //     identifier: 'filter',
+        //     label: t('filter'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name: 'line.3.horizontal.decrease.circle',
+        //     },
+        //     onPress: handleFilter,
+        //   },
+        //   ...(isCourse
+        //     ? [
+        //         {
+        //           type: 'button',
+        //           identifier: 'courseX',
+        //           title: t('courseX'),
+        //           icon: {
+        //             type: 'sfSymbol',
+        //             name: 'info.circle',
+        //           },
+        //           onPress: handleNavigateCourseX,
+        //         },
+        //       ]
+        //     : []),
+        // ],
+        // unstable_headerRightItems: () => [
+        //   ...(DeviceInfo.isMac()
+        //     ? [
+        //         {
+        //           type: 'button',
+        //           identifier: 'refresh',
+        //           label: t('refresh'),
+        //           icon: {
+        //             type: 'sfSymbol',
+        //             name: refreshing
+        //               ? 'arrow.trianglehead.2.clockwise.rotate.90'
+        //               : 'arrow.clockwise',
+        //           },
+        //           disabled: refreshing,
+        //           onPress: onRefresh,
+        //         },
+        //       ]
+        //     : ([] as any)),
+        //   {
+        //     type: 'button',
+        //     identifier: 'search',
+        //     label: t('search'),
+        //     icon: {
+        //       type: 'sfSymbol',
+        //       name: 'magnifyingglass',
+        //     },
+        //     onPress: () => (navigation.navigate as any)('SearchStack' as any),
+        //   },
+        // ],
+
         headerLeft: () => (
           <>
             {isCourse ? (
@@ -356,6 +491,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <>
             {DeviceInfo.isMac() && (
               <IconButton
+                disabled={refreshing}
                 onPress={onRefresh}
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
@@ -399,6 +535,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     isCourse,
     navigation,
     onRefresh,
+    refreshing,
     reorderMode,
     selection,
     selectionMode,

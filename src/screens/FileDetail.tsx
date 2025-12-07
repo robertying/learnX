@@ -179,6 +179,72 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           )}
         </View>
       ),
+      // unstable_headerRightItems: () => [
+      //   ...(DeviceInfo.isTablet() || DeviceInfo.isMac()
+      //     ? [
+      //         {
+      //           type: 'button',
+      //           identifier: 'toggleMaster',
+      //           icon: {
+      //             type: 'sfSymbol',
+      //             name: showMaster
+      //               ? 'arrow.up.left.and.arrow.down.right'
+      //               : 'arrow.down.right.and.arrow.up.left',
+      //           },
+      //           onPress: () => toggleMaster(!showMaster),
+      //           disabled: !showDetail,
+      //         },
+      //       ]
+      //     : ([] as any)),
+      //   {
+      //     type: 'button',
+      //     identifier: 'refresh',
+      //     icon: {
+      //       type: 'sfSymbol',
+      //       name: 'arrow.clockwise',
+      //     },
+      //     onPress: () => handleDownload(true),
+      //     disabled: !!progress,
+      //   },
+      //   {
+      //     type: 'button',
+      //     identifier: 'share',
+      //     icon: {
+      //       type: 'sfSymbol',
+      //       name: 'square.and.arrow.up',
+      //     },
+      //     onPress: () => handleShare(),
+      //     disabled: error || !path,
+      //   },
+      //   ...(DeviceInfo.isMac()
+      //     ? [
+      //         {
+      //           type: 'button',
+      //           identifier: 'download',
+      //           icon: {
+      //             type: 'sfSymbol',
+      //             name: 'arrow.down.to.line',
+      //           },
+      //           onPress: () => handleCopyToDownloadsFolder(),
+      //           disabled: error || !path,
+      //         },
+      //       ]
+      //     : []),
+      //   ...(canRender
+      //     ? [
+      //         {
+      //           type: 'button',
+      //           identifier: 'info',
+      //           icon: {
+      //             type: 'sfSymbol',
+      //             name: showInfo ? 'eye' : 'info.circle',
+      //           },
+      //           onPress: () => handleShowInfo(),
+      //           disabled: error || !path,
+      //         },
+      //       ]
+      //     : []),
+      // ],
     });
   }, [
     canRender,
