@@ -12,7 +12,11 @@ import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import useToast from 'hooks/useToast';
 import { useAppDispatch, useAppSelector } from 'data/store';
-import { loginWithOfflineMode, setSSOInProgress } from 'data/actions/auth';
+import {
+  login,
+  loginWithOfflineMode,
+  setSSOInProgress,
+} from 'data/actions/auth';
 import { setMockStore } from 'data/actions/root';
 import { setSetting } from 'data/actions/settings';
 import { clearLoginCookies } from 'data/source';
@@ -33,12 +37,13 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const graduate = useAppSelector(state => state.settings.graduate);
   const savedUsername = useAppSelector(state => state.auth.username);
   const savedPassword = useAppSelector(state => state.auth.password);
+  const savedFingerPrint = useAppSelector(state => state.auth.fingerPrint);
 
   const [username, setUsername] = useState(savedUsername ?? '');
   const [password, setPassword] = useState(savedPassword ?? '');
   const passwordTextInputRef = useRef<any>(null);
 
-  const hasCredential = savedUsername && savedPassword;
+  const hasCredential = savedUsername && savedPassword && savedFingerPrint;
 
   const handleNext = () => {
     passwordTextInputRef.current?.focus();
@@ -87,6 +92,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
         cancelable: true,
       },
     );
+  };
+
+  const handleRetryLogin = () => {
+    dispatch(login({ reset: true }));
   };
 
   const handleLoginWithOfflineMode = () => {
@@ -153,13 +162,18 @@ const Login: React.FC<Props> = ({ navigation }) => {
             {t('login')}
           </Button>
           {hasCredential && (
-            <Button
-              style={styles.button}
-              mode="text"
-              onPress={handleLoginWithOfflineMode}
-            >
-              {t('offlineMode')}
-            </Button>
+            <>
+              <Button
+                style={styles.button}
+                mode="text"
+                onPress={handleRetryLogin}
+              >
+                {t('retryLogin')}
+              </Button>
+              <Button mode="text" onPress={handleLoginWithOfflineMode}>
+                {t('offlineMode')}
+              </Button>
+            </>
           )}
         </KeyboardAvoidingView>
       </ScrollView>

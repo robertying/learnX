@@ -188,6 +188,7 @@ const zh: typeof en = {
     '你想成为 learnX 的维护者吗？让我们聊聊吧！要求有前端开发经验，最好是 React.js；有 React Native 经验者优先。请发送邮件至',
   anonymous: '匿名',
   maintainers: '维护者',
+  retryLogin: '重试登录当前账号',
   offlineMode: '离线模式',
   openFileDownloadDirectory: '打开文件保存目录',
   download: '下载',

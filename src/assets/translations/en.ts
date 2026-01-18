@@ -195,6 +195,7 @@ export default {
     "Do you want to become a maintainer of learnX? Let's talk! Experience in frontend development is required, preferably with React.js; experience with React Native is a plus. Send an email to",
   anonymous: 'Anonymous',
   maintainers: 'Maintainers',
+  retryLogin: 'Retry Login With Current Account',
   offlineMode: 'Offline Mode',
   openFileDownloadDirectory: 'Open File Save Folder',
   download: 'Download',
