@@ -65,7 +65,7 @@ index 308ec99..aaa9026 100644
  #import <React/RCTLinkingManager.h>
  
 diff --git a/node_modules/react-native-share-menu/ios/ShareViewController.swift b/node_modules/react-native-share-menu/ios/ShareViewController.swift
-index 12d8c92..7813c43 100644
+index 12d8c92..ca7aa89 100644
 --- a/node_modules/react-native-share-menu/ios/ShareViewController.swift
 +++ b/node_modules/react-native-share-menu/ios/ShareViewController.swift
 @@ -14,6 +14,7 @@ import UIKit
@@ -85,16 +85,105 @@ index 12d8c92..7813c43 100644
    }
  
      override func isContentValid() -> Bool {
-@@ -175,7 +178,7 @@ class ShareViewController: SLComposeServiceViewController {
-         return
-       }
-       guard let groupFileManagerContainer = FileManager.default
+@@ -161,44 +164,75 @@ class ShareViewController: SLComposeServiceViewController {
+   }
+   
+   func storeFile(withProvider provider: NSItemProvider, _ semaphore: DispatchSemaphore) {
+-    provider.loadItem(forTypeIdentifier: kUTTypeData as String, options: nil) { (data, error) in
+-      guard (error == nil) else {
+-        self.exit(withError: error.debugDescription)
+-        return
+-      }
+-      guard let url = data as? URL else {
+-        self.exit(withError: COULD_NOT_FIND_IMG_ERROR)
+-        return
+-      }
+-      guard let hostAppId = self.hostAppId else {
+-        self.exit(withError: NO_INFO_PLIST_INDENTIFIER_ERROR)
+-        return
+-      }
+-      guard let groupFileManagerContainer = FileManager.default
 -              .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppId)")
-+        .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppId)")?.appendingPathComponent("Library/Caches")
-       else {
-         self.exit(withError: NO_APP_GROUP_ERROR)
-         return
-@@ -199,6 +202,8 @@ class ShareViewController: SLComposeServiceViewController {
+-      else {
+-        self.exit(withError: NO_APP_GROUP_ERROR)
+-        return
+-      }
++      provider.loadItem(forTypeIdentifier: kUTTypeData as String, options: nil) { (data, error) in
++        guard (error == nil) else {
++          self.exit(withError: error.debugDescription)
++          return
++        }
+ 
+-      let mimeType = url.extractMimeType()
+-      let fileExtension = url.pathExtension
+-      let fileName = UUID().uuidString
+-      let filePath = groupFileManagerContainer
+-        .appendingPathComponent("\(fileName).\(fileExtension)")
++        // 1. Identify what this file actually is (e.g. "public.jpeg")
++        // We take the first registered type, which is usually the most specific one.
++        let typeIdentifier = provider.registeredTypeIdentifiers.first ?? (kUTTypeData as String)
++          
++        // 2. Get the correct MIME and Extension based on that identifier
++        let mimeType = self.getMimeType(from: typeIdentifier)
++        let fileExtension = self.getExtension(from: typeIdentifier)
++
++        // 3. Handle Raw Data vs URL
++        var sourceUrl: URL?
++        
++        if let url = data as? URL {
++          sourceUrl = url
++        } else if let rawData = data as? Data {
++          // Write raw data to a temp file with the CORRECT extension
++          let tempUrl = FileManager.default.temporaryDirectory
++              .appendingPathComponent(UUID().uuidString)
++              .appendingPathExtension(fileExtension) // <--- Important!
++            
++          do {
++              try rawData.write(to: tempUrl)
++              sourceUrl = tempUrl
++          } catch {
++              print("Error writing temp file: \(error)")
++          }
++        }
+ 
+-      guard self.moveFileToDisk(from: url, to: filePath) else {
+-        self.exit(withError: COULD_NOT_SAVE_FILE_ERROR)
+-        return
+-      }
++        guard let url = sourceUrl else {
++          self.exit(withError: COULD_NOT_FIND_IMG_ERROR)
++          return
++        }
+           
+-      self.sharedItems.append([DATA_KEY: filePath.absoluteString, MIME_TYPE_KEY: mimeType])
+-      semaphore.signal()
++        // 4. Proceed with saving to App Group
++        guard let hostAppId = self.hostAppId else {
++          self.exit(withError: NO_INFO_PLIST_INDENTIFIER_ERROR)
++          return
++        }
++        guard let groupFileManagerContainer = FileManager.default
++          .containerURL(forSecurityApplicationGroupIdentifier: "group.\(hostAppId)")?.appendingPathComponent("Library/Caches")
++        else {
++          self.exit(withError: NO_APP_GROUP_ERROR)
++          return
++        }
++        
++        let fileName = UUID().uuidString
++        let filePath = groupFileManagerContainer
++          .appendingPathComponent("\(fileName).\(fileExtension)")
++        
++        guard self.moveFileToDisk(from: url, to: filePath) else {
++          self.exit(withError: COULD_NOT_SAVE_FILE_ERROR)
++          return
++        }
++        
++        // 5. Save with the explicitly calculated mimeType
++        self.sharedItems.append([DATA_KEY: filePath.absoluteString, MIME_TYPE_KEY: mimeType])
++        semaphore.signal()
++      }
+     }
+-  }
  
    func moveFileToDisk(from srcUrl: URL, to destUrl: URL) -> Bool {
      do {
@@ -103,7 +192,7 @@ index 12d8c92..7813c43 100644
        if FileManager.default.fileExists(atPath: destUrl.path) {
          try FileManager.default.removeItem(at: destUrl)
        }
-@@ -222,23 +227,22 @@ class ShareViewController: SLComposeServiceViewController {
+@@ -222,27 +256,42 @@ class ShareViewController: SLComposeServiceViewController {
        return
      }
      
@@ -122,7 +211,9 @@ index 12d8c92..7813c43 100644
      }
      
 -    completeRequest()
-+    UIApplication.shared.open(url, options: [:], completionHandler: completeRequest)
++    UIApplication.shared.open(url, completionHandler: { success in
++      self.completeRequest(success: success)
++    })
    }
    
 -  func completeRequest() {
@@ -139,3 +230,21 @@ index 12d8c92..7813c43 100644
    }
    
    func cancelRequest() {
+     extensionContext!.cancelRequest(withError: NSError())
+   }
+ 
++  
++  func getMimeType(from typeIdentifier: String) -> String {
++    if let mime = UTTypeCopyPreferredTagWithClass(typeIdentifier as CFString, kUTTagClassMIMEType)?.takeRetainedValue() {
++      return mime as String
++    }
++    return "application/octet-stream"
++  }
++
++  func getExtension(from typeIdentifier: String) -> String {
++    if let ext = UTTypeCopyPreferredTagWithClass(typeIdentifier as CFString, kUTTagClassFilenameExtension)?.takeRetainedValue() {
++      return ext as String
++    }
++    return "data"
++  }
+ }
