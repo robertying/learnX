@@ -1,17 +1,7 @@
-import { FlatListProps, Platform, FlatList as RNFlatList } from 'react-native';
-import { useBottomTabBarHeight } from 'react-native-bottom-tabs';
+import { FlatListProps, FlatList as RNFlatList } from 'react-native';
 
 function FlatList<T>(props: FlatListProps<T>) {
-  const tabBarHeight = useBottomTabBarHeight();
-  return (
-    <RNFlatList
-      {...props}
-      contentContainerStyle={[
-        { paddingBottom: Platform.OS === 'android' ? 0 : tabBarHeight },
-        props.contentContainerStyle,
-      ]}
-    />
-  );
+  return <RNFlatList contentInsetAdjustmentBehavior="automatic" {...props} />;
 }
 
 export default FlatList;

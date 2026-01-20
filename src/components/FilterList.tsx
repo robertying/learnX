@@ -594,6 +594,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         style={{
           height: '100%',
         }}
+        contentInsetAdjustmentBehavior="automatic"
         contentContainerStyle={[
           {
             flexGrow: 1,
