@@ -61,10 +61,7 @@ target 'learnX' do
 end
 
 target 'ShareExtension' do
-  config = use_native_modules!(config_command)
-
   use_react_native!(
-    :path => config[:reactNativePath],
     :app_path => "#{Pod::Config.instance.installation_root}/..",
     hermes_enabled: true
   )
