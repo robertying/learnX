@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -275,7 +275,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
     );
   }, [handleSubmit]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TextButton
@@ -288,20 +288,20 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
           {t('submit')}
         </TextButton>
       ),
-      // unstable_headerRightItems: () => [
-      //   {
-      //     type: 'button',
-      //     identifier: 'submit',
-      //     label: t('submit'),
-      //     icon: {
-      //       type: 'sfSymbol',
-      //       name: 'arrow.up.circle',
-      //     },
-      //     disabled:
-      //       uploading || (!removeAttachment && !content && !attachmentResult),
-      //     onPress: handleSubmitPress,
-      //   },
-      // ],
+      unstable_headerRightItems: () => [
+        {
+          type: 'button',
+          identifier: 'submit',
+          label: t('submit'),
+          icon: {
+            type: 'sfSymbol',
+            name: 'arrow.up.circle',
+          },
+          disabled:
+            uploading || (!removeAttachment && !content && !attachmentResult),
+          onPress: handleSubmitPress,
+        },
+      ],
     });
   }, [
     attachmentResult,

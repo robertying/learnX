@@ -370,78 +370,7 @@ const MainTab = () => {
     }
   }, [dispatch, loggedIn]);
 
-  return Platform.OS === 'ios' ? (
-    <MainNavigator.Navigator
-      screenOptions={({ route }) => ({
-        tabBarIcon: ({ color, size }) => {
-          const iconMap = {
-            NoticeStack: 'notifications',
-            AssignmentStack: 'event',
-            FileStack: 'folder',
-            CourseStack: 'apps',
-            SettingStack: 'settings',
-          } as const;
-
-          return (
-            <MaterialIcons
-              name={iconMap[route.name as keyof typeof iconMap]}
-              size={size}
-              color={color}
-            />
-          );
-        },
-        activeTintColor: theme.colors.primary,
-        inactiveTintColor: 'gray',
-        adaptive: windowSize.width >= 750 ? false : true,
-        tabBarStyle: {
-          borderTopColor: theme.colors.outlineVariant,
-        },
-        tabBarLabelPosition: 'below-icon',
-        tabBarLabelStyle: {
-          marginBottom: 2,
-        },
-        headerShown: false,
-      })}
-    >
-      <MainNavigator.Screen
-        name="NoticeStack"
-        component={NoticeStack}
-        options={{ title: t('notices') }}
-      />
-      <MainNavigator.Screen
-        name="AssignmentStack"
-        component={AssignmentStack}
-        options={{ title: t('assignments') }}
-      />
-      <MainNavigator.Screen
-        name="FileStack"
-        component={FileStack}
-        options={{ title: t('files') }}
-      />
-      <MainNavigator.Screen
-        name="CourseStack"
-        component={CourseStack}
-        options={{ title: t('courses') }}
-      />
-      <MainNavigator.Screen
-        name="SettingStack"
-        component={SettingStack}
-        options={{
-          title: t('settings'),
-
-          tabBarBadge:
-            newChangelog || newUpdate || !courseInformationSharingBadgeShown
-              ? ' '
-              : undefined,
-          tabBarBadgeStyle: {
-            backgroundColor: 'red',
-            maxWidth: 10,
-            maxHeight: 10,
-          },
-        }}
-      />
-    </MainNavigator.Navigator>
-  ) : (
+  return (
     <MainNativeNavigator.Navigator
       labeled
       screenOptions={{

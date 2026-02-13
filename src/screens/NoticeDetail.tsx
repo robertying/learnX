@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Divider, Title, useTheme } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -57,7 +57,7 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
     }
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (disableAnimation) {
       navigation.setOptions({
         animation: 'none',

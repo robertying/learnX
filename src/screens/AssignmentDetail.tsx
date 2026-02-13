@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Caption,
@@ -109,7 +109,7 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
     }
   }, [detailNavigator, navigation, route.params]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (disableAnimation) {
       navigation.setOptions({
         animation: 'none',
@@ -117,7 +117,7 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
     }
   }, [navigation, disableAnimation]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (submissionType !== HomeworkSubmissionType.OFFLINE) {
       navigation.setOptions({
         headerRight: () => (
@@ -127,19 +127,19 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
             icon={props => <MaterialIcons {...props} name="file-upload" />}
           />
         ),
-        // unstable_headerRightItems: () => [
-        //   {
-        //     type: 'button',
-        //     identifier: 'submit',
-        //     label: t('submit'),
-        //     icon: {
-        //       type: 'sfSymbol',
-        //       name: 'arrow.up.circle',
-        //     },
-        //     disabled: dayjs().isAfter(dayjs(deadline)),
-        //     onPress: handleSubmit,
-        //   },
-        // ],
+        unstable_headerRightItems: () => [
+          {
+            type: 'button',
+            identifier: 'submit',
+            label: t('submit'),
+            icon: {
+              type: 'sfSymbol',
+              name: 'arrow.up.circle',
+            },
+            disabled: dayjs().isAfter(dayjs(deadline)),
+            onPress: handleSubmit,
+          },
+        ],
       });
     }
   }, [submissionType, deadline, handleSubmit, navigation]);

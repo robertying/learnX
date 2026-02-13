@@ -1,11 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { Linking, Platform, StyleSheet, View } from 'react-native';
 import {
   useTheme,
@@ -119,7 +112,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     setShowInfo(showInfo => !showInfo);
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (disableAnimation) {
       navigation.setOptions({
         animation: 'none',
@@ -127,7 +120,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     }
   }, [navigation, disableAnimation]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     navigation.setOptions({
       headerBackVisible:
         DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
@@ -179,72 +172,72 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           )}
         </View>
       ),
-      // unstable_headerRightItems: () => [
-      //   ...(DeviceInfo.isTablet() || DeviceInfo.isMac()
-      //     ? [
-      //         {
-      //           type: 'button',
-      //           identifier: 'toggleMaster',
-      //           icon: {
-      //             type: 'sfSymbol',
-      //             name: showMaster
-      //               ? 'arrow.up.left.and.arrow.down.right'
-      //               : 'arrow.down.right.and.arrow.up.left',
-      //           },
-      //           onPress: () => toggleMaster(!showMaster),
-      //           disabled: !showDetail,
-      //         },
-      //       ]
-      //     : ([] as any)),
-      //   {
-      //     type: 'button',
-      //     identifier: 'refresh',
-      //     icon: {
-      //       type: 'sfSymbol',
-      //       name: 'arrow.clockwise',
-      //     },
-      //     onPress: () => handleDownload(true),
-      //     disabled: !!progress,
-      //   },
-      //   {
-      //     type: 'button',
-      //     identifier: 'share',
-      //     icon: {
-      //       type: 'sfSymbol',
-      //       name: 'square.and.arrow.up',
-      //     },
-      //     onPress: () => handleShare(),
-      //     disabled: error || !path,
-      //   },
-      //   ...(DeviceInfo.isMac()
-      //     ? [
-      //         {
-      //           type: 'button',
-      //           identifier: 'download',
-      //           icon: {
-      //             type: 'sfSymbol',
-      //             name: 'arrow.down.to.line',
-      //           },
-      //           onPress: () => handleCopyToDownloadsFolder(),
-      //           disabled: error || !path,
-      //         },
-      //       ]
-      //     : []),
-      //   ...(canRender
-      //     ? [
-      //         {
-      //           type: 'button',
-      //           identifier: 'info',
-      //           icon: {
-      //             type: 'sfSymbol',
-      //             name: showInfo ? 'eye' : 'info.circle',
-      //           },
-      //           onPress: () => handleShowInfo(),
-      //           disabled: error || !path,
-      //         },
-      //       ]
-      //     : []),
-      // ],
+      unstable_headerRightItems: () => [
+        ...(DeviceInfo.isTablet() || DeviceInfo.isMac()
+          ? [
+              {
+                type: 'button',
+                identifier: 'toggleMaster',
+                icon: {
+                  type: 'sfSymbol',
+                  name: showMaster
+                    ? 'arrow.up.left.and.arrow.down.right'
+                    : 'arrow.down.right.and.arrow.up.left',
+                },
+                onPress: () => toggleMaster(!showMaster),
+                disabled: !showDetail,
+              },
+            ]
+          : ([] as any)),
+        {
+          type: 'button',
+          identifier: 'refresh',
+          icon: {
+            type: 'sfSymbol',
+            name: 'arrow.clockwise',
+          },
+          onPress: () => handleDownload(true),
+          disabled: !!progress,
+        },
+        {
+          type: 'button',
+          identifier: 'share',
+          icon: {
+            type: 'sfSymbol',
+            name: 'square.and.arrow.up',
+          },
+          onPress: () => handleShare(),
+          disabled: error || !path,
+        },
+        ...(DeviceInfo.isMac()
+          ? [
+              {
+                type: 'button',
+                identifier: 'download',
+                icon: {
+                  type: 'sfSymbol',
+                  name: 'arrow.down.to.line',
+                },
+                onPress: () => handleCopyToDownloadsFolder(),
+                disabled: error || !path,
+              },
+            ]
+          : []),
+        ...(canRender
+          ? [
+              {
+                type: 'button',
+                identifier: 'info',
+                icon: {
+                  type: 'sfSymbol',
+                  name: showInfo ? 'eye' : 'info.circle',
+                },
+                onPress: () => handleShowInfo(),
+                disabled: error || !path,
+              },
+            ]
+          : []),
+      ],
     });
   }, [
     canRender,
@@ -256,6 +249,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     handleCopyToDownloadsFolder,
     navigation,
     path,
+    progress,
     showDetail,
     showInfo,
     showMaster,
@@ -440,7 +434,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 16,
+    paddingBottom: !DeviceInfo.isMac() ? 96 : 32,
     opacity: 0.95,
   },
   colCenter: {

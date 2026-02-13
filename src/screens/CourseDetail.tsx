@@ -1,4 +1,4 @@
-import { memo, useCallback, useLayoutEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Text, useTheme } from 'react-native-paper';
 import {
@@ -254,7 +254,7 @@ const CourseDetail: React.FC<Props> = ({
     }
   }, [course.id, detailNavigator, navigation]);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (disableAnimation) {
       navigation.setOptions({
         animation: 'none',
