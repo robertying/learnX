@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import {
-  AppState,
-  Platform,
-  StatusBar,
-  useColorScheme,
-  useWindowDimensions,
-} from 'react-native';
+import { AppState, Platform, StatusBar, useColorScheme } from 'react-native';
 import {
   NavigationContainer,
   useNavigation,
@@ -21,14 +15,12 @@ import type {
   NativeStackNavigationOptions,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import {
   SafeAreaProvider,
   useSafeAreaFrame,
 } from 'react-native-safe-area-context';
 import {
-  useTheme,
   Provider as PaperProvider,
   MD3LightTheme,
   MD3DarkTheme,
@@ -115,7 +107,7 @@ const BackButton = () => {
   return (
     <IconButton
       onPress={() => navigation.goBack()}
-      icon={props => <MaterialIcons {...props} name="close" />}
+      icon={props => <MaterialIcons {...props} name="close" size={32} />}
     />
   );
 };
@@ -167,7 +159,6 @@ const AssignmentStackNavigator =
 const FileStackNavigator = createNativeStackNavigator<FileStackParams>();
 const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
 const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
-const MainNavigator = createBottomTabNavigator<MainTabParams>();
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
@@ -318,8 +309,6 @@ const SettingStack = () => (
 );
 
 const MainTab = () => {
-  const theme = useTheme();
-
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
   const currentSemester = useAppSelector(state => state.semesters.current);
@@ -331,8 +320,6 @@ const MainTab = () => {
   const courseInformationSharingBadgeShown = useAppSelector(
     state => state.settings.courseInformationSharingBadgeShown,
   );
-
-  const windowSize = useWindowDimensions();
 
   useEffect(() => {
     if (!loggedIn) {

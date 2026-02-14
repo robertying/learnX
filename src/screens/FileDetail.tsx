@@ -434,7 +434,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: !DeviceInfo.isMac() ? 96 : 32,
+    paddingBottom: Platform.OS === 'ios' && !DeviceInfo.isMac() ? 96 : 32,
     opacity: 0.95,
   },
   colCenter: {

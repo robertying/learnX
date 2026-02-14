@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import { Badge, Divider, List, Text, useTheme } from 'react-native-paper';
 import Animated, {
   Easing,
@@ -95,7 +95,12 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         style={styles.listItem}
         titleStyle={styles.title}
         title={
-          <View style={[styles.flexRow, { paddingTop: 8 }]}>
+          <View
+            style={[
+              styles.flexRow,
+              { paddingTop: Platform.OS === 'ios' ? 8 : 0 },
+            ]}
+          >
             <Text style={styles.text}>{text}</Text>
             <Badge
               visible
