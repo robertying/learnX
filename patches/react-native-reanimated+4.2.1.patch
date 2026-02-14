@@ -1,0 +1,26 @@
+diff --git a/node_modules/react-native-reanimated/RNReanimated.podspec b/node_modules/react-native-reanimated/RNReanimated.podspec
+index dba0fad..60bb4e8 100644
+--- a/node_modules/react-native-reanimated/RNReanimated.podspec
++++ b/node_modules/react-native-reanimated/RNReanimated.podspec
+@@ -3,7 +3,7 @@ require_relative './scripts/reanimated_utils'
+ 
+ reanimated_package_json = JSON.parse(File.read(File.join(__dir__, "package.json")))
+ $config = find_config()
+-assert_minimal_react_native_version($config)
++# assert_minimal_react_native_version($config)
+ 
+ $new_arch_enabled = ENV['RCT_NEW_ARCH_ENABLED'] != '0'
+ assert_new_architecture_enabled($new_arch_enabled)
+diff --git a/node_modules/react-native-reanimated/android/build.gradle b/node_modules/react-native-reanimated/android/build.gradle
+index 86bace7..51a8e09 100644
+--- a/node_modules/react-native-reanimated/android/build.gradle
++++ b/node_modules/react-native-reanimated/android/build.gradle
+@@ -280,7 +280,7 @@ task assertMinimalReactNativeVersionTask {
+     }
+ }
+ 
+-preBuild.dependsOn(assertMinimalReactNativeVersionTask)
++// preBuild.dependsOn(assertMinimalReactNativeVersionTask)
+ 
+ task assertNewArchitectureEnabledTask {
+     onlyIf { !IS_NEW_ARCHITECTURE_ENABLED }

@@ -7,7 +7,10 @@ buildscript {
         ndkVersion = "29.0.14206865"
         cmakeVersion = "3.31.6"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "2.3.0"
+        kotlinVersion = "2.3.10"
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 
