@@ -36,6 +36,11 @@ android {
         versionName "16.3.0"
     }
 
+    androidResources {
+        localeFilters += ["en", "en-rUS", "zh", "zh-rCN"]
+        generateLocaleConfig true
+    }
+
     splits {
         abi {
             reset()
