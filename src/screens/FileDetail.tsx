@@ -42,6 +42,8 @@ type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   const { disableAnimation, ...file } = route.params;
 
+  const isSearch = navigation.getState().routeNames.includes('Search' as any);
+
   const theme = useTheme();
   const toast = useToast();
   const { showDetail, showMaster, toggleMaster } = useContext(SplitViewContext);
@@ -126,7 +128,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
       headerRight: () => (
         <View style={[Styles.flexRow, { justifyContent: 'flex-end' }]}>
-          {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && (
+          {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && !isSearch && (
             <IconButton
               onPress={() => toggleMaster(!showMaster)}
               icon={props => (
@@ -173,7 +175,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         </View>
       ),
       unstable_headerRightItems: () => [
-        ...(DeviceInfo.isTablet() || DeviceInfo.isMac()
+        ...((DeviceInfo.isTablet() || DeviceInfo.isMac()) && !isSearch
           ? [
               {
                 type: 'button',
