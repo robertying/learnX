@@ -78,11 +78,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
         <>{Children.toArray(children)[0]}</>
       )}
       {blur && (
-        <BlurView
-          intensity={100}
-          style={styles.blurView}
-          experimentalBlurMethod="none"
-        />
+        <BlurView intensity={100} style={styles.blurView} blurMethod="none" />
       )}
     </SplitViewContext.Provider>
   );

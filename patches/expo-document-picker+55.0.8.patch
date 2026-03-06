@@ -1,9 +1,9 @@
 diff --git a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
-index 472a5ab..be200ee 100644
+index 6c2bff0..b8e9637 100644
 --- a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
 +++ b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
-@@ -34,7 +34,7 @@ class DocumentPickerModule : Module() {
-       }
+@@ -39,7 +39,7 @@ class DocumentPickerModule : Module() {
+ 
        pendingPromise = promise
        copyToCacheDirectory = options.copyToCacheDirectory
 -      val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -12,7 +12,7 @@ index 472a5ab..be200ee 100644
          putExtra(Intent.EXTRA_ALLOW_MULTIPLE, options.multiple)
          type = if (options.type.size > 1) {
 diff --git a/node_modules/expo-document-picker/expo-module.config.json b/node_modules/expo-document-picker/expo-module.config.json
-index 05e50dc..172c7e1 100644
+index 28d3e03..172c7e1 100644
 --- a/node_modules/expo-document-picker/expo-module.config.json
 +++ b/node_modules/expo-document-picker/expo-module.config.json
 @@ -4,12 +4,6 @@
@@ -23,7 +23,7 @@ index 05e50dc..172c7e1 100644
 -    "publication": {
 -      "groupId": "host.exp.exponent",
 -      "artifactId": "expo.modules.documentpicker",
--      "version": "14.0.8",
+-      "version": "55.0.8",
 -      "repository": "local-maven-repo"
 -    }
 +    "modules": ["expo.modules.documentpicker.DocumentPickerModule"]

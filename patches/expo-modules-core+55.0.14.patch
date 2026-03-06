@@ -5,59 +5,46 @@ index cc342ff..01a1baf 100644
 @@ -45,16 +45,16 @@ fun Promise.toBridgePromise(): com.facebook.react.bridge.Promise {
        resolveMethod(value)
      }
- 
+
 -    override fun reject(code: String, message: String?) {
 -      expoPromise.reject(code, message, null)
 +    override fun reject(code: String?, message: String?) {
 +      expoPromise.reject(code ?: unknownCode, message, null)
      }
- 
+
 -    override fun reject(code: String, throwable: Throwable?) {
 -      expoPromise.reject(code, null, throwable)
 +    override fun reject(code: String?, throwable: Throwable?) {
 +      expoPromise.reject(code ?: unknownCode, null, throwable)
      }
- 
+
 -    override fun reject(code: String, message: String?, throwable: Throwable?) {
 -      expoPromise.reject(code, message, throwable)
 +    override fun reject(code: String?, message: String?, throwable: Throwable?) {
 +      expoPromise.reject(code ?: unknownCode, message, throwable)
      }
- 
+
      override fun reject(throwable: Throwable) {
 @@ -65,16 +65,16 @@ fun Promise.toBridgePromise(): com.facebook.react.bridge.Promise {
        expoPromise.reject(unknownCode, null, throwable)
      }
- 
+
 -    override fun reject(code: String, userInfo: WritableMap) {
 -      expoPromise.reject(code, null, null)
 +    override fun reject(code: String?, userInfo: WritableMap) {
 +      expoPromise.reject(code ?: unknownCode, null, null)
      }
- 
+
 -    override fun reject(code: String, throwable: Throwable?, userInfo: WritableMap) {
 -      expoPromise.reject(code, null, throwable)
 +    override fun reject(code: String?, throwable: Throwable?, userInfo: WritableMap) {
 +      expoPromise.reject(code ?: unknownCode, null, throwable)
      }
- 
+
 -    override fun reject(code: String, message: String?, userInfo: WritableMap) {
 -      expoPromise.reject(code, message, null)
 +    override fun reject(code: String?, message: String?, userInfo: WritableMap) {
 +      expoPromise.reject(code ?: unknownCode, message, null)
      }
- 
+
      override fun reject(code: String?, message: String?, throwable: Throwable?, userInfo: WritableMap?) {
-diff --git a/node_modules/expo-modules-core/ios/JSI/EXJSIUtils.h b/node_modules/expo-modules-core/ios/JSI/EXJSIUtils.h
-index 407f57f..b901490 100644
---- a/node_modules/expo-modules-core/ios/JSI/EXJSIUtils.h
-+++ b/node_modules/expo-modules-core/ios/JSI/EXJSIUtils.h
-@@ -7,6 +7,8 @@
- #import <jsi/jsi.h>
- #import <React/RCTBridgeModule.h>
- #import <ReactCommon/TurboModuleUtils.h>
-+#import <ReactCommon/CallInvoker.h>
-+#import <react/bridging/CallbackWrapper.h>
- #import <ExpoModulesCore/ObjectDeallocator.h>
- 
- namespace jsi = facebook::jsi;
