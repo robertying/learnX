@@ -256,6 +256,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     showInfo,
     showMaster,
     toggleMaster,
+    isSearch,
   ]);
 
   useEffect(() => {
