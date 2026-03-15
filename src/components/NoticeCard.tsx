@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -28,6 +28,9 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
   hideCourseName,
   ...restProps
 }) => {
+  const strippedContent = useMemo(() => removeTags(content), [content]);
+  const timeAgo = useMemo(() => dayjs(publishTime).fromNow(), [publishTime]);
+
   return (
     <CardWrapper {...restProps}>
       <View style={Styles.flex1}>
@@ -64,12 +67,12 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
             )}
           </View>
         </View>
-        {removeTags(content) ? (
-          <Paragraph numberOfLines={2}>{removeTags(content)}</Paragraph>
+        {strippedContent ? (
+          <Paragraph numberOfLines={2}>{strippedContent}</Paragraph>
         ) : null}
         <View style={Styles.flexRowCenter}>
           <Caption>{publisher}</Caption>
-          <Caption>{dayjs(publishTime).fromNow()}</Caption>
+          <Caption>{timeAgo}</Caption>
         </View>
       </View>
     </CardWrapper>

@@ -2,7 +2,7 @@ import { ContentType, CourseType, ApiError } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
-import { ThunkResult } from 'data/types/actions';
+import { dataThunk } from 'data/types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
   GET_ALL_FILES_FOR_COURSES_REQUEST,
@@ -22,8 +22,8 @@ export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_FAILURE,
 )<undefined, { courseId: string; files: File[] }, ApiError>();
 
-export function getFilesForCourse(courseId: string): ThunkResult {
-  return async (dispatch, getState) => {
+export function getFilesForCourse(courseId: string) {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getFilesForCourseAction.request());
 
     try {
@@ -38,17 +38,20 @@ export function getFilesForCourse(courseId: string): ThunkResult {
           courseId,
           courseName: courseName.name,
           courseTeacherName: courseName.teacherName,
-        }))
-        .sort(
-          (a, b) =>
-            dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
-            b.id.localeCompare(a.id),
-        );
+        }));
+      const timestamps = new Map(
+        files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
+      );
+      files.sort(
+        (a, b) =>
+          timestamps.get(b.id)! - timestamps.get(a.id)! ||
+          b.id.localeCompare(a.id),
+      );
       dispatch(getFilesForCourseAction.success({ files, courseId }));
     } catch (err) {
       dispatch(getFilesForCourseAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const getAllFilesForCoursesAction = createAsyncAction(
@@ -57,8 +60,8 @@ export const getAllFilesForCoursesAction = createAsyncAction(
   GET_ALL_FILES_FOR_COURSES_FAILURE,
 )<undefined, File[], ApiError>();
 
-export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
-  return async (dispatch, getState) => {
+export function getAllFilesForCourses(courseIds: string[]) {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getAllFilesForCoursesAction.request());
 
     try {
@@ -68,7 +71,7 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
       );
       const courseNames = getState().courses.names;
       const files = Object.keys(results)
-        .map(courseId => {
+        .flatMap(courseId => {
           const filesForCourse = results[courseId];
           const courseName = courseNames[courseId];
           return filesForCourse.map<File>(file => ({
@@ -77,18 +80,20 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
             courseName: courseName.name,
             courseTeacherName: courseName.teacherName,
           }));
-        })
-        .reduce((a, b) => a.concat(b), [])
-        .sort(
-          (a, b) =>
-            dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
-            b.id.localeCompare(a.id),
-        );
+        });
+      const timestamps = new Map(
+        files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
+      );
+      files.sort(
+        (a, b) =>
+          timestamps.get(b.id)! - timestamps.get(a.id)! ||
+          b.id.localeCompare(a.id),
+      );
       dispatch(getAllFilesForCoursesAction.success(files));
     } catch (err) {
       dispatch(getAllFilesForCoursesAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const setFavFile = createAction(

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -29,6 +29,12 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   hideCourseName,
   ...restProps
 }) => {
+  const strippedDescription = useMemo(
+    () => removeTags(description),
+    [description],
+  );
+  const timeAgo = useMemo(() => dayjs(uploadTime).fromNow(), [uploadTime]);
+
   return (
     <CardWrapper {...restProps}>
       <View style={Styles.flex1}>
@@ -57,14 +63,14 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
             ) : null}
           </View>
         </View>
-        {removeTags(description) ? (
-          <Paragraph numberOfLines={2}>{removeTags(description)}</Paragraph>
+        {strippedDescription ? (
+          <Paragraph numberOfLines={2}>{strippedDescription}</Paragraph>
         ) : null}
         <View style={Styles.flexRowCenter}>
           <Caption>
             {`${category?.title ?? ''} ${fileType?.toUpperCase() ?? ''} ${size}`.trim()}
           </Caption>
-          <Caption>{dayjs(uploadTime).fromNow()}</Caption>
+          <Caption>{timeAgo}</Caption>
         </View>
       </View>
     </CardWrapper>

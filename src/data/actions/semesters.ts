@@ -1,7 +1,7 @@
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import { ApiError } from 'thu-learn-lib';
 import { dataSource } from 'data/source';
-import { ThunkResult } from 'data/types/actions';
+import { dataThunk } from 'data/types/actions';
 import {
   GET_ALL_SEMESTERS_FAILURE,
   GET_ALL_SEMESTERS_REQUEST,
@@ -19,8 +19,8 @@ export const getAllSemestersAction = createAsyncAction(
   GET_ALL_SEMESTERS_FAILURE,
 )<undefined, string[], ApiError>();
 
-export function getAllSemesters(): ThunkResult {
-  return async dispatch => {
+export function getAllSemesters() {
+  return dataThunk(async dispatch => {
     dispatch(getAllSemestersAction.request());
 
     try {
@@ -29,7 +29,7 @@ export function getAllSemesters(): ThunkResult {
     } catch (err) {
       dispatch(getAllSemestersAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const getCurrentSemesterAction = createAsyncAction(
@@ -38,8 +38,8 @@ export const getCurrentSemesterAction = createAsyncAction(
   GET_CURRENT_SEMESTER_FAILURE,
 )<undefined, undefined, ApiError>();
 
-export function getCurrentSemester(): ThunkResult {
-  return async (dispatch, getState) => {
+export function getCurrentSemester() {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getCurrentSemesterAction.request());
 
     try {
@@ -52,7 +52,7 @@ export function getCurrentSemester(): ThunkResult {
     } catch (err) {
       dispatch(getCurrentSemesterAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const setCurrentSemester = createAction(

@@ -2,7 +2,7 @@ import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
-import { ThunkResult } from 'data/types/actions';
+import { dataThunk } from 'data/types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
@@ -30,8 +30,8 @@ export const getAssignmentsForCourseAction = createAsyncAction(
   ApiError
 >();
 
-export function getAssignmentsForCourse(courseId: string): ThunkResult {
-  return async (dispatch, getState) => {
+export function getAssignmentsForCourse(courseId: string) {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getAssignmentsForCourseAction.request());
 
     try {
@@ -43,18 +43,27 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
           courseId,
           courseName: courseName.name,
           courseTeacherName: courseName.teacherName,
-        }))
-        .sort(
-          (a, b) =>
-            dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
-            b.id.localeCompare(a.id),
-        );
-      const sorted = [
-        ...assignments
-          .filter(a => dayjs(a.deadline).isAfter(dayjs()))
-          .reverse(),
-        ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
-      ];
+        }));
+      const deadlines = new Map(
+        assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
+      );
+      assignments.sort(
+        (a, b) =>
+          deadlines.get(b.id)! - deadlines.get(a.id)! ||
+          b.id.localeCompare(a.id),
+      );
+      const nowUnix = dayjs().unix();
+      const upcoming: Assignment[] = [];
+      const past: Assignment[] = [];
+      for (const a of assignments) {
+        if (deadlines.get(a.id)! > nowUnix) {
+          upcoming.push(a);
+        } else {
+          past.push(a);
+        }
+      }
+      upcoming.reverse();
+      const sorted = [...upcoming, ...past];
       dispatch(
         getAssignmentsForCourseAction.success({
           courseId,
@@ -64,7 +73,7 @@ export function getAssignmentsForCourse(courseId: string): ThunkResult {
     } catch (err) {
       dispatch(getAssignmentsForCourseAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const getAllAssignmentsForCoursesAction = createAsyncAction(
@@ -73,8 +82,8 @@ export const getAllAssignmentsForCoursesAction = createAsyncAction(
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
 )<undefined, Assignment[], ApiError>();
 
-export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
-  return async (dispatch, getState) => {
+export function getAllAssignmentsForCourses(courseIds: string[]) {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
     try {
@@ -84,7 +93,7 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
       );
       const courseNames = getState().courses.names;
       const assignments = Object.keys(results)
-        .map(courseId => {
+        .flatMap(courseId => {
           const assignmentsForCourse = results[courseId];
           const courseName = courseNames[courseId];
           return assignmentsForCourse.map<Assignment>(assignment => ({
@@ -93,24 +102,32 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
             courseName: courseName.name,
             courseTeacherName: courseName.teacherName,
           }));
-        })
-        .reduce((a, b) => a.concat(b), [])
-        .sort(
-          (a, b) =>
-            dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
-            b.id.localeCompare(a.id),
-        );
-      const sorted = [
-        ...assignments
-          .filter(a => dayjs(a.deadline).isAfter(dayjs()))
-          .reverse(),
-        ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
-      ];
+        });
+      const deadlines = new Map(
+        assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
+      );
+      assignments.sort(
+        (a, b) =>
+          deadlines.get(b.id)! - deadlines.get(a.id)! ||
+          b.id.localeCompare(a.id),
+      );
+      const nowUnix = dayjs().unix();
+      const upcoming: Assignment[] = [];
+      const past: Assignment[] = [];
+      for (const a of assignments) {
+        if (deadlines.get(a.id)! > nowUnix) {
+          upcoming.push(a);
+        } else {
+          past.push(a);
+        }
+      }
+      upcoming.reverse();
+      const sorted = [...upcoming, ...past];
       dispatch(getAllAssignmentsForCoursesAction.success(sorted));
     } catch (err) {
       dispatch(getAllAssignmentsForCoursesAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const setFavAssignment = createAction(

@@ -258,7 +258,7 @@ const CardWrapper: React.FC<
     </Touchable>
   );
 
-  return DeviceInfo.isWSA() ? (
+  return DeviceInfo.isWSA() || disableSwipe ? (
     touchable
   ) : (
     <ReanimatedSwipeable
@@ -267,7 +267,7 @@ const CardWrapper: React.FC<
       childrenContainerStyle={{ backgroundColor: theme.colors.surface }}
       renderRightActions={renderRightActions}
       overshootFriction={8}
-      enabled={!disableSwipe && !selectionMode && !reorderMode}
+      enabled={!selectionMode && !reorderMode}
     >
       {touchable}
     </ReanimatedSwipeable>

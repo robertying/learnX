@@ -1,7 +1,7 @@
-import { FlatListProps, FlatList as RNFlatList } from 'react-native';
+import { FlashList, FlashListProps } from '@shopify/flash-list';
 
-function FlatList<T>(props: FlatListProps<T>) {
-  return <RNFlatList contentInsetAdjustmentBehavior="automatic" {...props} />;
+function FlatList<T>(props: FlashListProps<T>) {
+  return <FlashList contentInsetAdjustmentBehavior="automatic" {...props} />;
 }
 
 export default FlatList;

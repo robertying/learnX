@@ -12,12 +12,16 @@ function useFilteredData<T extends Notice | Assignment | File>({
   archived: string[];
   hidden: string[];
 }) {
+  const archivedSet = useMemo(() => new Set(archived), [archived]);
+  const hiddenSet = useMemo(() => new Set(hidden), [hidden]);
+  const favSet = useMemo(() => new Set(fav), [fav]);
+
   const _all = useMemo(
     () =>
       data.filter(
-        i => !archived.includes(i.id) && !hidden.includes(i.courseId),
+        i => !archivedSet.has(i.id) && !hiddenSet.has(i.courseId),
       ),
-    [data, archived, hidden],
+    [data, archivedSet, hiddenSet],
   );
 
   const _unread = useMemo(
@@ -29,16 +33,16 @@ function useFilteredData<T extends Notice | Assignment | File>({
     [_all],
   );
 
-  const _fav = useMemo(() => _all.filter(i => fav.includes(i.id)), [_all, fav]);
+  const _fav = useMemo(() => _all.filter(i => favSet.has(i.id)), [_all, favSet]);
 
   const _hidden = useMemo(
-    () => data.filter(i => hidden.includes(i.courseId)),
-    [hidden, data],
+    () => data.filter(i => hiddenSet.has(i.courseId)),
+    [hiddenSet, data],
   );
 
   const _archived = useMemo(
-    () => data.filter(i => archived.includes(i.id)),
-    [data, archived],
+    () => data.filter(i => archivedSet.has(i.id)),
+    [data, archivedSet],
   );
 
   const _unfinished = useMemo(

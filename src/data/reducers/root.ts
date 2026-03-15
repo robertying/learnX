@@ -3,7 +3,6 @@ import { PersistConfig, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createSecureStore from 'redux-persist-expo-securestore';
 import env from 'helpers/env';
-import mockStore from 'data/mock';
 import { AppActions, StoreAction } from 'data/types/actions';
 import {
   CLEAR_STORE,
@@ -30,6 +29,8 @@ import semesters from './semesters';
 import auth from './auth';
 import user from './user';
 import settings from './settings';
+
+const getMockStore = () => require('data/mock').default;
 
 export const mainReducers = {
   user,
@@ -103,7 +104,7 @@ export function rootReducer(
   }
 
   if (action.type === SET_MOCK_STORE) {
-    return mockStore;
+    return getMockStore();
   } else if (action.type === CLEAR_STORE) {
     state = undefined;
   } else if (state && state.auth.username === env.DUMMY_USERNAME) {

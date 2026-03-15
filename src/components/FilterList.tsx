@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RefreshControl, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
-  ReorderableListProps,
   ReorderableListReorderEvent,
   reorderItems,
 } from 'react-native-reorderable-list';
@@ -37,6 +36,7 @@ import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
 import { CardWrapperProps } from './CardWrapper';
 import IconButton from './IconButton';
+import FlatList from './FlatList';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
   data: T;
@@ -96,6 +96,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const [filterVisible, setFilterVisible] = useState(false);
+  const [swipeReady, setSwipeReady] = useState(false);
 
   const data = (
     filterSelected === 'unfinished' && unfinished
@@ -114,20 +115,25 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   )!;
   const isCourse = type === 'course';
 
-  const favIds = fav?.map(i => i.id);
-  const archivedIds = archived?.map(i => i.id);
-  const hiddenIds = hidden.map(i => i.id);
+  const favIdSet = useMemo(() => new Set(fav?.map(i => i.id)), [fav]);
+  const archivedIdSet = useMemo(
+    () => new Set(archived?.map(i => i.id)),
+    [archived],
+  );
+  const hiddenIdSet = useMemo(() => new Set(hidden.map(i => i.id)), [hidden]);
 
   const [reorderMode, setReorderMode] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
-  const [selection, setSelection] = useState<Record<string, boolean>>(
-    data.reduce(
-      (prev, curr) => ({
-        ...prev,
-        [curr.id]: false,
-      }),
-      {},
-    ),
+  const [selection, setSelection] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(data.map(item => [item.id, false])),
+  );
+
+  const selectionRef = useRef(selection);
+  selectionRef.current = selection;
+
+  const selectedCount = useMemo(
+    () => Object.values(selection).filter(Boolean).length,
+    [selection],
   );
 
   const handleFilter = () => {
@@ -162,31 +168,17 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const handleSelect = useCallback(() => {
     setFilterVisible(false);
     if (selectionMode) {
-      setSelection(
-        data.reduce(
-          (prev, curr) => ({
-            ...prev,
-            [curr.id]: false,
-          }),
-          {},
-        ),
-      );
+      setSelection(Object.fromEntries(data.map(item => [item.id, false])));
     }
     setSelectionMode(!selectionMode);
   }, [data, selectionMode]);
 
   const handleCheckAll = useCallback(() => {
-    const allChecked = Object.values(selection).every(s => s === true);
-    setSelection(
-      data.reduce(
-        (prev, curr) => ({
-          ...prev,
-          [curr.id]: !allChecked,
-        }),
-        {},
-      ),
-    );
-  }, [data, selection]);
+    setSelection(prev => {
+      const allChecked = Object.values(prev).every(Boolean);
+      return Object.fromEntries(data.map(item => [item.id, !allChecked]));
+    });
+  }, [data]);
 
   const handleFav = (fav: boolean, item: T) => {
     if (type === 'notice') {
@@ -319,7 +311,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             onPress: () =>
               handleArchive(
                 filterSelected === 'archived',
-                Object.keys(selection).filter(id => selection[id] === true),
+                Object.keys(selectionRef.current).filter(
+                  id => selectionRef.current[id] === true,
+                ),
               ),
           },
         ],
@@ -342,7 +336,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             onPress={() =>
               handleArchive(
                 filterSelected === 'archived',
-                Object.keys(selection).filter(id => selection[id] === true),
+                Object.keys(selectionRef.current).filter(
+                  id => selectionRef.current[id] === true,
+                ),
               )
             }
             icon={props => (
@@ -363,12 +359,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             title={filterSelected === 'archived' ? t('restore') : t('archive')}
             subtitle={
               isLocaleChinese()
-                ? `已选中 ${
-                    Object.values(selection).filter(s => s === true).length
-                  } 个`
-                : `${
-                    Object.values(selection).filter(s => s === true).length
-                  } selected`
+                ? `已选中 ${selectedCount} 个`
+                : `${selectedCount} selected`
             }
           />
         ),
@@ -531,7 +523,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     onRefresh,
     refreshing,
     reorderMode,
-    selection,
+    selectedCount,
     selectionMode,
   ]);
 
@@ -543,32 +535,75 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   }, [refreshing]);
 
-  const renderItem: ReorderableListProps<T>['renderItem'] = ({ item }) => {
-    return (
-      <Component
-        data={item}
-        selectionMode={selectionMode}
-        reorderMode={reorderMode}
-        checked={selection[item.id]}
-        onCheck={checked => setSelection({ ...selection, [item.id]: checked })}
-        onPress={() => {
-          setFilterVisible(false);
-          onItemPress?.(item);
-        }}
-        fav={favIds?.includes(item.id)}
-        onFav={() => handleFav(favIds!.includes(item.id), item)}
-        archived={archivedIds?.includes(item.id)}
-        onArchive={() =>
-          handleArchive(archivedIds!.includes(item.id), [item.id])
-        }
-        hidden={hiddenIds.includes(item.id)}
-        onHide={
-          isCourse
-            ? () => handleHide(hiddenIds.includes(item.id), item.id)
-            : undefined
-        }
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setSwipeReady(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: T }) => {
+      return (
+        <Component
+          data={item}
+          selectionMode={selectionMode}
+          reorderMode={reorderMode}
+          disableSwipe={!swipeReady || selectionMode || reorderMode}
+          checked={selection[item.id]}
+          onCheck={checked =>
+            setSelection(prev => ({ ...prev, [item.id]: checked }))
+          }
+          onPress={() => {
+            setFilterVisible(false);
+            onItemPress?.(item);
+          }}
+          fav={favIdSet.has(item.id)}
+          onFav={() => handleFav(favIdSet.has(item.id), item)}
+          archived={archivedIdSet.has(item.id)}
+          onArchive={() => handleArchive(archivedIdSet.has(item.id), [item.id])}
+          hidden={hiddenIdSet.has(item.id)}
+          onHide={
+            isCourse
+              ? () => handleHide(hiddenIdSet.has(item.id), item.id)
+              : undefined
+          }
+        />
+      );
+    },
+    [
+      Component,
+      selectionMode,
+      reorderMode,
+      swipeReady,
+      selection,
+      favIdSet,
+      archivedIdSet,
+      hiddenIdSet,
+      isCourse,
+      onItemPress,
+      handleFav,
+      handleArchive,
+      handleHide,
+    ],
+  );
+
+  const listProps = {
+    style: { height: '100%' as const },
+    contentInsetAdjustmentBehavior: 'automatic' as const,
+    contentContainerStyle: [
+      { flexGrow: 1 },
+      data.length ? null : { justifyContent: 'center' as const },
+    ],
+    data,
+    ListEmptyComponent: <Empty />,
+    renderItem,
+    keyExtractor: (item: T) => item.id,
+    refreshControl: (
+      <RefreshControl
+        enabled={!selectionMode && !reorderMode}
+        refreshing={firstTimeFetching.current ? false : refreshing}
+        onRefresh={onRefresh}
       />
-    );
+    ),
   };
 
   return (
@@ -584,33 +619,17 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         archivedCount={archived?.length}
         hiddenCount={hidden.length}
       />
-      <ReorderableList
-        style={{
-          height: '100%',
-        }}
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={[
-          {
-            flexGrow: 1,
-          },
-          data.length ? null : { justifyContent: 'center' },
-        ]}
-        data={data}
-        ListEmptyComponent={<Empty />}
-        dragEnabled={reorderMode}
-        panActivateAfterLongPress={520}
-        onReorder={handleReorderDone}
-        onIndexChange={handleDragChange}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        refreshControl={
-          <RefreshControl
-            enabled={!selectionMode && !reorderMode}
-            refreshing={firstTimeFetching.current ? false : refreshing}
-            onRefresh={onRefresh}
-          />
-        }
-      />
+      {isCourse ? (
+        <ReorderableList
+          {...listProps}
+          dragEnabled={reorderMode}
+          panActivateAfterLongPress={520}
+          onReorder={handleReorderDone}
+          onIndexChange={handleDragChange}
+        />
+      ) : (
+        <FlatList {...listProps} />
+      )}
     </View>
   );
 };

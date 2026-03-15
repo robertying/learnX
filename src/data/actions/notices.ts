@@ -2,7 +2,7 @@ import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
-import { ThunkResult } from 'data/types/actions';
+import { dataThunk } from 'data/types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
   GET_ALL_NOTICES_FOR_COURSES_REQUEST,
@@ -22,8 +22,8 @@ export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_FAILURE,
 )<undefined, { courseId: string; notices: Notice[] }, ApiError>();
 
-export function getNoticesForCourse(courseId: string): ThunkResult {
-  return async (dispatch, getState) => {
+export function getNoticesForCourse(courseId: string) {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getNoticesForCourseAction.request());
 
     try {
@@ -35,17 +35,20 @@ export function getNoticesForCourse(courseId: string): ThunkResult {
           courseId,
           courseName: courseName.name,
           courseTeacherName: courseName.teacherName,
-        }))
-        .sort(
-          (a, b) =>
-            dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
-            b.id.localeCompare(a.id),
-        );
+        }));
+      const timestamps = new Map(
+        notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
+      );
+      notices.sort(
+        (a, b) =>
+          timestamps.get(b.id)! - timestamps.get(a.id)! ||
+          b.id.localeCompare(a.id),
+      );
       dispatch(getNoticesForCourseAction.success({ notices, courseId }));
     } catch (err) {
       dispatch(getNoticesForCourseAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const getAllNoticesForCoursesAction = createAsyncAction(
@@ -54,8 +57,8 @@ export const getAllNoticesForCoursesAction = createAsyncAction(
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
 )<undefined, Notice[], ApiError>();
 
-export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
-  return async (dispatch, getState) => {
+export function getAllNoticesForCourses(courseIds: string[]) {
+  return dataThunk(async (dispatch, getState) => {
     dispatch(getAllNoticesForCoursesAction.request());
 
     try {
@@ -65,7 +68,7 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
       );
       const courseNames = getState().courses.names;
       const notices = Object.keys(results)
-        .map(courseId => {
+        .flatMap(courseId => {
           const noticesForCourse = results[courseId];
           const courseName = courseNames[courseId];
           return noticesForCourse.map<Notice>(notice => ({
@@ -74,18 +77,20 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
             courseName: courseName.name,
             courseTeacherName: courseName.teacherName,
           }));
-        })
-        .reduce((a, b) => a.concat(b), [])
-        .sort(
-          (a, b) =>
-            dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
-            b.id.localeCompare(a.id),
-        );
+        });
+      const timestamps = new Map(
+        notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
+      );
+      notices.sort(
+        (a, b) =>
+          timestamps.get(b.id)! - timestamps.get(a.id)! ||
+          b.id.localeCompare(a.id),
+      );
       dispatch(getAllNoticesForCoursesAction.success(notices));
     } catch (err) {
       dispatch(getAllNoticesForCoursesAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const setFavNotice = createAction(

@@ -19,7 +19,7 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
   );
   const courseNames = courses.names;
   const notices = Object.keys(results)
-    .map(courseId => {
+    .flatMap(courseId => {
       const noticesForCourse = results[courseId];
       const courseName = courseNames[courseId];
       return noticesForCourse.map<Notice>(notice => ({
@@ -28,13 +28,15 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
         courseName: courseName.name,
         courseTeacherName: courseName.teacherName,
       }));
-    })
-    .reduce((a, b) => a.concat(b), [])
-    .sort(
-      (a, b) =>
-        dayjs(b.publishTime).unix() - dayjs(a.publishTime).unix() ||
-        b.id.localeCompare(a.id),
-    );
+    });
+  const noticeTimestamps = new Map(
+    notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
+  );
+  notices.sort(
+    (a, b) =>
+      noticeTimestamps.get(b.id)! - noticeTimestamps.get(a.id)! ||
+      b.id.localeCompare(a.id),
+  );
 
   dispatch(getAllNoticesForCoursesAction.success(notices));
 };
@@ -51,7 +53,7 @@ const getAllAssignments = async (
   );
   const courseNames = courses.names;
   const assignments = Object.keys(results)
-    .map(courseId => {
+    .flatMap(courseId => {
       const assignmentsForCourse = results[courseId];
       const courseName = courseNames[courseId];
       return assignmentsForCourse.map<Assignment>(assignment => ({
@@ -60,19 +62,28 @@ const getAllAssignments = async (
         courseName: courseName.name,
         courseTeacherName: courseName.teacherName,
       }));
-    })
-    .reduce((a, b) => a.concat(b), [])
-    .sort(
-      (a, b) =>
-        dayjs(b.deadline).unix() - dayjs(a.deadline).unix() ||
-        b.id.localeCompare(a.id),
-    );
-  const sorted = [
-    ...assignments.filter(a => dayjs(a.deadline).isAfter(dayjs())).reverse(),
-    ...assignments.filter(a => !dayjs(a.deadline).isAfter(dayjs())),
-  ];
+    });
+  const deadlines = new Map(
+    assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
+  );
+  assignments.sort(
+    (a, b) =>
+      deadlines.get(b.id)! - deadlines.get(a.id)! ||
+      b.id.localeCompare(a.id),
+  );
+  const nowUnix = dayjs().unix();
+  const upcoming: Assignment[] = [];
+  const past: Assignment[] = [];
+  for (const a of assignments) {
+    if (deadlines.get(a.id)! > nowUnix) {
+      upcoming.push(a);
+    } else {
+      past.push(a);
+    }
+  }
+  upcoming.reverse();
 
-  dispatch(getAllAssignmentsForCoursesAction.success(sorted));
+  dispatch(getAllAssignmentsForCoursesAction.success([...upcoming, ...past]));
 };
 
 const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
@@ -81,7 +92,7 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
   const results = await dataSource.getAllContents(courseIds, ContentType.FILE);
   const courseNames = courses.names;
   const files = Object.keys(results)
-    .map(courseId => {
+    .flatMap(courseId => {
       const filesForCourse = results[courseId];
       const courseName = courseNames[courseId];
       return filesForCourse.map<File>(file => ({
@@ -90,13 +101,15 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
         courseName: courseName.name,
         courseTeacherName: courseName.teacherName,
       }));
-    })
-    .reduce((a, b) => a.concat(b), [])
-    .sort(
-      (a, b) =>
-        dayjs(b.uploadTime).unix() - dayjs(a.uploadTime).unix() ||
-        b.id.localeCompare(a.id),
-    );
+    });
+  const fileTimestamps = new Map(
+    files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
+  );
+  files.sort(
+    (a, b) =>
+      fileTimestamps.get(b.id)! - fileTimestamps.get(a.id)! ||
+      b.id.localeCompare(a.id),
+  );
 
   dispatch(getAllFilesForCoursesAction.success(files));
 };

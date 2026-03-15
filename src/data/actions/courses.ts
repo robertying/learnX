@@ -1,7 +1,7 @@
 import { ApiError, CourseType, Language } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import { dataSource } from 'data/source';
-import { ThunkResult } from 'data/types/actions';
+import { dataThunk } from 'data/types/actions';
 import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
@@ -19,8 +19,8 @@ export const getCoursesForSemesterAction = createAsyncAction(
   GET_COURSES_FOR_SEMESTER_FAILURE,
 )<undefined, Course[], ApiError>();
 
-export function getCoursesForSemester(semesterId: string): ThunkResult {
-  return async dispatch => {
+export function getCoursesForSemester(semesterId: string) {
+  return dataThunk(async dispatch => {
     dispatch(getCoursesForSemesterAction.request());
 
     const lang = isLocaleChinese() ? Language.ZH : Language.EN;
@@ -42,7 +42,7 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
     } catch (err) {
       dispatch(getCoursesForSemesterAction.failure(serializeError(err)));
     }
-  };
+  });
 }
 
 export const setHideCourse = createAction(

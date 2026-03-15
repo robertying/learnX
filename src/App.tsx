@@ -358,12 +358,7 @@ const MainTab = () => {
   }, [dispatch, loggedIn]);
 
   return (
-    <MainNativeNavigator.Navigator
-      labeled
-      screenOptions={{
-        freezeOnBlur: true,
-      }}
-    >
+    <MainNativeNavigator.Navigator labeled>
       <MainNativeNavigator.Screen
         name="NoticeStack"
         component={NoticeStack}

@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -35,6 +35,24 @@ const AssignmentCard: React.FC<
   hideCourseName,
   ...restProps
 }) => {
+  const strippedDescription = useMemo(
+    () => removeTags(description),
+    [description],
+  );
+  const deadlineText = useMemo(() => {
+    const now = dayjs();
+    const dl = dayjs(deadline);
+    const isPast = now.isAfter(dl);
+    if (isLocaleChinese()) {
+      return isPast
+        ? now.to(dl) + '截止'
+        : '还剩 ' + now.to(dl, true);
+    }
+    return isPast
+      ? 'closed ' + now.to(dl)
+      : 'due in ' + now.to(dl, true);
+  }, [deadline]);
+
   return (
     <CardWrapper {...restProps}>
       <View style={Styles.flex1}>
@@ -87,20 +105,12 @@ const AssignmentCard: React.FC<
             )}
           </View>
         </View>
-        {removeTags(description) ? (
-          <Paragraph numberOfLines={2}>{removeTags(description)}</Paragraph>
+        {strippedDescription ? (
+          <Paragraph numberOfLines={2}>{strippedDescription}</Paragraph>
         ) : null}
         <View style={Styles.flexRowCenter}>
           <Caption>{courseTeacherName}</Caption>
-          <Caption>
-            {isLocaleChinese()
-              ? dayjs().isAfter(dayjs(deadline))
-                ? dayjs().to(dayjs(deadline)) + '截止'
-                : '还剩 ' + dayjs().to(dayjs(deadline), true)
-              : dayjs().isAfter(dayjs(deadline))
-                ? 'closed ' + dayjs().to(dayjs(deadline))
-                : 'due in ' + dayjs().to(dayjs(deadline), true)}
-          </Caption>
+          <Caption>{deadlineText}</Caption>
         </View>
       </View>
     </CardWrapper>

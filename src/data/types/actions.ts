@@ -1,5 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { ActionType } from 'typesafe-actions';
+import env from 'helpers/env';
 import { loginAction, setSSOInProgress } from 'data/actions/auth';
 import {
   getCoursesForSemesterAction,
@@ -148,3 +149,13 @@ export type ThunkResult = ThunkAction<
   undefined,
   AppActions
 >;
+
+/**
+ * Wraps a thunk to skip execution when using mock data.
+ */
+export function dataThunk(fn: ThunkResult): ThunkResult {
+  return (dispatch, getState, extra) => {
+    if (getState().auth.username === env.DUMMY_USERNAME) return;
+    return fn(dispatch, getState, extra);
+  };
+}

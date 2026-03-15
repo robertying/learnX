@@ -45,10 +45,10 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     hidden: hiddenCourseIds,
   });
 
-  const sync = useMemo(
-    () => all.filter(assignment => dayjs(assignment.deadline).isAfter(dayjs())),
-    [all],
-  );
+  const sync = useMemo(() => {
+    const now = dayjs();
+    return all.filter(assignment => dayjs(assignment.deadline).isAfter(now));
+  }, [all]);
 
   const handleRefresh = useCallback(() => {
     if (loggedIn) {
