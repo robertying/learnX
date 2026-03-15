@@ -91,7 +91,9 @@ export const getWebViewTemplate = (
     </head>
     <body>
       <div id="root">
-        ${content}
+        ${
+          content.replace(/\\mbox/g, '\\text') // katex doesn't support \mbox
+        }
       </div>
       <script>
         renderMathInElement(document.querySelector("#root"), {
