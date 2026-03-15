@@ -2,7 +2,7 @@ import { createContext, useState, Children, useEffect, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Divider } from 'react-native-paper';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { BlurView } from 'expo-blur';
+import { BlurTargetView, BlurView } from 'expo-blur';
 import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
@@ -30,6 +30,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   children,
 }) => {
   const rendered = useRef(false);
+  const blurTargetRef = useRef<View | null>(null);
 
   const [showMaster, setShowMaster] = useState(true);
   const [blur, setBlur] = useState(false);
@@ -55,7 +56,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
       }}
     >
       {splitEnabled ? (
-        <View style={styles.root}>
+        <BlurTargetView ref={blurTargetRef} style={styles.root}>
           <View
             style={[
               styles.master,
@@ -73,13 +74,14 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
           >
             {Children.toArray(children)[1]}
           </View>
-        </View>
+        </BlurTargetView>
       ) : (
         <>{Children.toArray(children)[0]}</>
       )}
       {blur && (
         <BlurView
-          intensity={100}
+          blurTarget={blurTargetRef}
+          intensity={25}
           style={styles.blurView}
           blurMethod="dimezisBlurViewSdk31Plus"
         />
