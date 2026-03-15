@@ -8,6 +8,7 @@ buildscript {
         cmakeVersion = "3.31.6"
         javaVersion = JavaVersion.VERSION_17
         kotlinVersion = "2.3.10"
+        kspVersion = "2.3.6"
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
@@ -21,12 +22,20 @@ plugins {
     id "com.google.firebase.crashlytics" version "3.0.6" apply false
 }
 
+allprojects {
+    repositories {
+        maven {
+            url = uri(project(":react-native-async-storage_async-storage").file("local_repo"))
+        }
+    }
+}
+
 subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
                 buildToolsVersion rootProject.ext.buildToolsVersion
-                compileSdkVersion rootProject.ext.compileSdkVersion
+                compileSdk rootProject.ext.compileSdkVersion
                 ndkVersion rootProject.ext.ndkVersion
                 externalNativeBuild {
                     cmake {
@@ -34,16 +43,18 @@ subprojects { subproject ->
                     }
                 }
                 defaultConfig {
-                    minSdkVersion rootProject.ext.minSdkVersion
-                    targetSdkVersion rootProject.ext.targetSdkVersion
+                    minSdk rootProject.ext.minSdkVersion
+                    targetSdk rootProject.ext.targetSdkVersion
                 }
                 compileOptions {
-                    sourceCompatibility = rootProject.ext.javaVersion
-                    targetCompatibility = rootProject.ext.javaVersion
+                    sourceCompatibility rootProject.ext.javaVersion
+                    targetCompatibility rootProject.ext.javaVersion
                 }
                 if (subproject.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
-                    kotlinOptions {
-                        jvmTarget = rootProject.ext.javaVersion.majorVersion
+                    kotlin {
+                        jvmToolchain {
+                            languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersion.majorVersion)
+                        }
                     }
                 }
             }

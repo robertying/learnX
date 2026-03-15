@@ -6,10 +6,14 @@ plugins {
     id "com.google.firebase.crashlytics"
 }
 
-import com.android.build.OutputFile
-
 react {
     autolinkLibrariesWithApp()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(rootProject.ext.javaVersion.majorVersion)
+    }
 }
 
 android {
@@ -23,16 +27,15 @@ android {
         sourceCompatibility rootProject.ext.javaVersion
         targetCompatibility rootProject.ext.javaVersion
     }
-    compileSdk rootProject.ext.compileSdkVersion
+    compileSdk = rootProject.ext.compileSdkVersion
 
     namespace "io.robertying.learnx"
 
     defaultConfig {
         applicationId "io.robertying.learnx"
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.targetSdkVersion
-        compileSdk rootProject.ext.compileSdkVersion
-        versionCode 9204300
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        versionCode 9204306
         versionName "16.3.0"
     }
 
@@ -82,14 +85,17 @@ android {
             }
         }
     }
+}
 
-    applicationVariants.all { variant ->
+androidComponents {
+    onVariants(selector().all()) { variant ->
         variant.outputs.each { output ->
             def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
-            def abi = output.getFilter(OutputFile.ABI)
+            def abi = output.filters.find { it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI }?.identifier
             if (abi != null) {
-                output.versionCodeOverride =
-                        defaultConfig.versionCode * 1000 + versionCodes.get(abi)
+                output.versionCode.set(output.versionCode.map { baseCode ->
+                    baseCode * 1000 + versionCodes.get(abi)
+                })
             }
         }
     }
@@ -100,9 +106,9 @@ dependencies {
     implementation("com.facebook.react:hermes-android")
 
     implementation("androidx.core:core-splashscreen:1.2.0")
-    implementation("com.google.android.material:material:1.14.0-alpha09")
+    implementation("com.google.android.material:material:1.14.0-alpha10")
 
-    implementation platform("com.google.firebase:firebase-bom:34.9.0")
+    implementation platform("com.google.firebase:firebase-bom:34.10.0")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-crashlytics-ndk")
     implementation("com.google.firebase:firebase-analytics")
