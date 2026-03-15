@@ -416,7 +416,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                 {
                   type: 'button',
                   identifier: 'courseX',
-                  title: t('courseX'),
+                  label: t('courseX'),
                   icon: {
                     type: 'sfSymbol',
                     name: 'info.circle',
