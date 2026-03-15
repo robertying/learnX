@@ -19,7 +19,7 @@
     "@babel/preset-env": "7.29.0",
     "@babel/runtime": "7.28.6",
     "@bottom-tabs/react-navigation": "1.1.0",
-    "@react-native-async-storage/async-storage": "3.0.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "1.16.3",
     "@react-native-community/cli": "20.1.2",
     "@react-native-community/cli-platform-android": "20.1.2",
