@@ -179,21 +179,24 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     });
   }, [data]);
 
-  const handleFav = (fav: boolean, item: T) => {
-    if (type === 'notice') {
-      dispatch(setFavNotice(item.id, !fav));
-    } else if (type === 'assignment') {
-      dispatch(setFavAssignment(item.id, !fav));
-    } else {
-      dispatch(setFavFile(item.id, !fav));
-    }
+  const handleFav = useCallback(
+    (fav: boolean, item: T) => {
+      if (type === 'notice') {
+        dispatch(setFavNotice(item.id, !fav));
+      } else if (type === 'assignment') {
+        dispatch(setFavAssignment(item.id, !fav));
+      } else {
+        dispatch(setFavFile(item.id, !fav));
+      }
 
-    if (fav) {
-      toast(t('removeFromFav'), 'success');
-    } else {
-      toast(t('addToFav'), 'success');
-    }
-  };
+      if (fav) {
+        toast(t('removeFromFav'), 'success');
+      } else {
+        toast(t('addToFav'), 'success');
+      }
+    },
+    [dispatch, toast, type],
+  );
 
   const handleArchive = useCallback(
     (archived: boolean, itemIds: string[]) => {
@@ -222,15 +225,18 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     [dispatch, handleSelect, selectionMode, toast, type],
   );
 
-  const handleHide = (hidden: boolean, id: string) => {
-    dispatch(setHideCourse(id, !hidden));
+  const handleHide = useCallback(
+    (hidden: boolean, id: string) => {
+      dispatch(setHideCourse(id, !hidden));
 
-    if (hidden) {
-      toast(t('undoHide'), 'success');
-    } else {
-      toast(t('hideSucceeded'), 'success');
-    }
-  };
+      if (hidden) {
+        toast(t('undoHide'), 'success');
+      } else {
+        toast(t('hideSucceeded'), 'success');
+      }
+    },
+    [dispatch, toast],
+  );
 
   const handleNavigateCourseX = useCallback(() => {
     if (detailNavigator) {
