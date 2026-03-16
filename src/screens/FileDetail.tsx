@@ -180,6 +180,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
               {
                 type: 'button',
                 identifier: 'toggleMaster',
+                label: showMaster ? t('fullscreen') : t('exitFullscreen'),
                 icon: {
                   type: 'sfSymbol',
                   name: showMaster
@@ -194,6 +195,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         {
           type: 'button',
           identifier: 'refresh',
+          label: t('refresh'),
           icon: {
             type: 'sfSymbol',
             name: 'arrow.clockwise',
@@ -204,6 +206,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         {
           type: 'button',
           identifier: 'share',
+          label: t('share'),
           icon: {
             type: 'sfSymbol',
             name: 'square.and.arrow.up',
@@ -216,6 +219,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
               {
                 type: 'button',
                 identifier: 'download',
+                label: t('download'),
                 icon: {
                   type: 'sfSymbol',
                   name: 'arrow.down.to.line',
@@ -230,6 +234,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
               {
                 type: 'button',
                 identifier: 'info',
+                label: showInfo ? t('preview') : t('info'),
                 icon: {
                   type: 'sfSymbol',
                   name: showInfo ? 'eye' : 'info.circle',
