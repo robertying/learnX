@@ -791,7 +791,11 @@ const Container = () => {
                 />
               </>
             ) : (
-              <RootNavigator.Screen name="LoginStack" component={LoginStack} />
+              <RootNavigator.Screen
+                name="LoginStack"
+                component={LoginStack}
+                options={{ gestureEnabled: false }}
+              />
             )}
           </RootNavigator.Navigator>
           <NavigationIndependentTree>

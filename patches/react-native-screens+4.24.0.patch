@@ -1,0 +1,139 @@
+diff --git a/node_modules/react-native-screens/ios/RNSScreenStack.mm b/node_modules/react-native-screens/ios/RNSScreenStack.mm
+index effc07f..b8c8f92 100644
+--- a/node_modules/react-native-screens/ios/RNSScreenStack.mm
++++ b/node_modules/react-native-screens/ios/RNSScreenStack.mm
+@@ -213,6 +213,10 @@ namespace react = facebook::react;
+   __weak RNSScreenStackManager *_manager;
+   BOOL _updateScheduled;
+   UIPanGestureRecognizer *_sinkEventsPanGestureRecognizer;
++#if TARGET_OS_MACCATALYST
++  BOOL _isolatedFromVCHierarchy;
++  CGSize _lastIsolatedBoundsSize;
++#endif
+ #ifdef RCT_NEW_ARCH_ENABLED
+   /// Screens that are subject of `ShadowViewMutation::Type::Delete` mutation
+   /// in current transaction. This vector should be populated when we receive notification via
+@@ -379,6 +383,9 @@ RNS_IGNORE_SUPER_CALL_END
+ - (void)maybeAddToParentAndUpdateContainer
+ {
+   BOOL wasScreenMounted = _controller.parentViewController != nil;
++#if TARGET_OS_MACCATALYST
++  wasScreenMounted = wasScreenMounted || _isolatedFromVCHierarchy;
++#endif
+   if (!self.window && !wasScreenMounted) {
+     // We wait with adding to parent controller until the stack is mounted.
+     // If we add it when window is not attached, some of the view transitions will be blocked (i.e.
+@@ -404,10 +411,74 @@ RNS_IGNORE_SUPER_CALL_END
+ 
+ - (void)reactAddControllerToClosestParent:(UIViewController *)controller
+ {
++#if TARGET_OS_MACCATALYST
++  if (_isolatedFromVCHierarchy) {
++    return;
++  }
++#endif
+   if (!controller.parentViewController) {
+     UIView *parentView = (UIView *)self.reactSuperview;
+     while (parentView) {
+       if (parentView.reactViewController) {
++#if TARGET_OS_MACCATALYST
++        // On Mac Catalyst "Optimized for Mac", prevent navigation controllers
++        // from integrating with the window's NSToolbar. When a UINavigationController
++        // is added to the VC hierarchy, it claims the NSToolbar and its bar button
++        // items may not render properly there. By NOT adding the nav controller to
++        // the VC hierarchy (only adding its view as a subview), the navigation bar
++        // renders inline with liquid glass styling.
++        //
++        // Detection — isolate when ANY of these is true:
++        //   - Inside detail split pane (rns-split-detail): always isolate
++        //   - Inside master split pane (rns-split-master) AND nested inside
++        //     another RNSScreenStack: isolate tab stacks but not the root
++        //     navigator (which needs to present modals)
++        //   - Inside a modally presented screen: always isolate (the presenter
++        //     handles modal lifecycle, so the inner stack doesn't need to be
++        //     in the VC hierarchy)
++        if (UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomMac) {
++          BOOL isInsideDetailPane = NO;
++          BOOL isInsideMasterPane = NO;
++          BOOL isNestedStack = NO;
++          BOOL isInsideModal = NO;
++          UIView *checkView = self.superview;
++          while (checkView) {
++            if ([checkView.accessibilityIdentifier isEqualToString:@"rns-split-detail"]) {
++              isInsideDetailPane = YES;
++              break;
++            }
++            if ([checkView.accessibilityIdentifier isEqualToString:@"rns-split-master"]) {
++              isInsideMasterPane = YES;
++              break;
++            }
++            if ([checkView isKindOfClass:[self class]] && checkView != self) {
++              isNestedStack = YES;
++            }
++            if ([checkView isKindOfClass:[RNSScreenView class]]) {
++              RNSScreenView *screenView = (RNSScreenView *)checkView;
++              if (screenView.controller.presentingViewController != nil) {
++                isInsideModal = YES;
++                break;
++              }
++            }
++            checkView = checkView.superview;
++          }
++          BOOL shouldIsolate = isInsideDetailPane || (isInsideMasterPane && isNestedStack) || isInsideModal;
++          if (shouldIsolate) {
++            [self addSubview:controller.view];
++            _controller.interactivePopGestureRecognizer.delegate = self;
++#if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
++            if (@available(iOS 26, *)) {
++              _controller.interactiveContentPopGestureRecognizer.delegate = self;
++            }
++#endif
++            _isolatedFromVCHierarchy = YES;
++            _lastIsolatedBoundsSize = self.bounds.size;
++            [self navigationController:_controller willShowViewController:_controller.topViewController animated:NO];
++            break;
++          }
++        }
++#endif
+         [parentView.reactViewController addChildViewController:controller];
+         [self addSubview:controller.view];
+ #if !TARGET_OS_TV
+@@ -432,6 +503,7 @@ RNS_IGNORE_SUPER_CALL_END
+   }
+ }
+ 
++
+ + (UIViewController *)findTopMostPresentedViewControllerFromViewController:(UIViewController *)controller
+ {
+   auto presentedVc = controller;
+@@ -801,6 +873,20 @@ RNS_IGNORE_SUPER_CALL_END
+ {
+   [super layoutSubviews];
+   _controller.view.frame = self.bounds;
++#if TARGET_OS_MACCATALYST
++  if (_isolatedFromVCHierarchy && !CGSizeEqualToSize(_lastIsolatedBoundsSize, self.bounds.size)) {
++    _lastIsolatedBoundsSize = self.bounds.size;
++    // The isolated nav controller is not in the VC hierarchy, so UIKit doesn't
++    // forward layout callbacks to it. Defer a layout pass to the next runloop
++    // iteration so that safe area insets are fully propagated before the nav
++    // bar recalculates its position (e.g. after master pane toggle).
++    dispatch_async(dispatch_get_main_queue(), ^{
++      self->_controller.view.frame = self.bounds;
++      [self->_controller.view setNeedsLayout];
++      [self->_controller.view layoutIfNeeded];
++    });
++  }
++#endif
+ 
+   // We need to update the bounds of the modal views here, since
+   // for contained modals they are not updated by modals themselves.
+@@ -1522,6 +1608,9 @@ RNS_IGNORE_SUPER_CALL_END
+ - (void)invalidate
+ {
+   _invalidated = YES;
++#if TARGET_OS_MACCATALYST
++  _isolatedFromVCHierarchy = NO;
++#endif
+   [self dismissAllRelatedModals];
+   [_controller willMoveToParentViewController:nil];
+   [_controller removeFromParentViewController];

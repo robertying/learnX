@@ -58,6 +58,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
       {splitEnabled ? (
         <BlurTargetView ref={blurTargetRef} style={styles.root}>
           <View
+            testID="rns-split-master"
             style={[
               styles.master,
               {
@@ -70,6 +71,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
           </View>
           {showDetail && <Divider style={styles.divider} />}
           <View
+            testID="rns-split-detail"
             style={[styles.detail, { display: showDetail ? 'flex' : 'none' }]}
           >
             {Children.toArray(children)[1]}

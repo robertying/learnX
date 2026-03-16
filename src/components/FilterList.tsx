@@ -626,6 +626,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
           onIndexChange={handleDragChange}
+          refreshControl={
+            DeviceInfo.isMac() ? undefined : listProps.refreshControl
+          }
         />
       ) : (
         <FlatList {...listProps} />
