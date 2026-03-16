@@ -18,9 +18,7 @@ function useFilteredData<T extends Notice | Assignment | File>({
 
   const _all = useMemo(
     () =>
-      data.filter(
-        i => !archivedSet.has(i.id) && !hiddenSet.has(i.courseId),
-      ),
+      data.filter(i => !archivedSet.has(i.id) && !hiddenSet.has(i.courseId)),
     [data, archivedSet, hiddenSet],
   );
 
@@ -33,7 +31,10 @@ function useFilteredData<T extends Notice | Assignment | File>({
     [_all],
   );
 
-  const _fav = useMemo(() => _all.filter(i => favSet.has(i.id)), [_all, favSet]);
+  const _fav = useMemo(
+    () => _all.filter(i => favSet.has(i.id)),
+    [_all, favSet],
+  );
 
   const _hidden = useMemo(
     () => data.filter(i => hiddenSet.has(i.courseId)),

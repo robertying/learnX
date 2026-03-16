@@ -32,13 +32,12 @@ export function getFilesForCourse(courseId: string) {
         CourseType.STUDENT,
       );
       const courseName = getState().courses.names[courseId];
-      const files = results
-        .map<File>(result => ({
-          ...result,
-          courseId,
-          courseName: courseName.name,
-          courseTeacherName: courseName.teacherName,
-        }));
+      const files = results.map<File>(result => ({
+        ...result,
+        courseId,
+        courseName: courseName.name,
+        courseTeacherName: courseName.teacherName,
+      }));
       const timestamps = new Map(
         files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
       );
@@ -70,17 +69,16 @@ export function getAllFilesForCourses(courseIds: string[]) {
         ContentType.FILE,
       );
       const courseNames = getState().courses.names;
-      const files = Object.keys(results)
-        .flatMap(courseId => {
-          const filesForCourse = results[courseId];
-          const courseName = courseNames[courseId];
-          return filesForCourse.map<File>(file => ({
-            ...file,
-            courseId,
-            courseName: courseName.name,
-            courseTeacherName: courseName.teacherName,
-          }));
-        });
+      const files = Object.keys(results).flatMap(courseId => {
+        const filesForCourse = results[courseId];
+        const courseName = courseNames[courseId];
+        return filesForCourse.map<File>(file => ({
+          ...file,
+          courseId,
+          courseName: courseName.name,
+          courseTeacherName: courseName.teacherName,
+        }));
+      });
       const timestamps = new Map(
         files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
       );

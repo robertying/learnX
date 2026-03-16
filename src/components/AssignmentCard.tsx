@@ -44,13 +44,9 @@ const AssignmentCard: React.FC<
     const dl = dayjs(deadline);
     const isPast = now.isAfter(dl);
     if (isLocaleChinese()) {
-      return isPast
-        ? now.to(dl) + '截止'
-        : '还剩 ' + now.to(dl, true);
+      return isPast ? now.to(dl) + '截止' : '还剩 ' + now.to(dl, true);
     }
-    return isPast
-      ? 'closed ' + now.to(dl)
-      : 'due in ' + now.to(dl, true);
+    return isPast ? 'closed ' + now.to(dl) : 'due in ' + now.to(dl, true);
   }, [deadline]);
 
   return (

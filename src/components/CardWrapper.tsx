@@ -1,4 +1,10 @@
-import { PropsWithChildren, useRef, useEffect, useCallback, useMemo } from 'react';
+import {
+  PropsWithChildren,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   SharedValue,
@@ -273,9 +279,7 @@ const CardWrapper: React.FC<
       enabled={!disableSwipe && !selectionMode && !reorderMode}
       blocksExternalGesture={nativeGesture}
     >
-      <GestureDetector gesture={nativeGesture}>
-        {touchable}
-      </GestureDetector>
+      <GestureDetector gesture={nativeGesture}>{touchable}</GestureDetector>
     </ReanimatedSwipeable>
   );
 };

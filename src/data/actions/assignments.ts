@@ -37,13 +37,12 @@ export function getAssignmentsForCourse(courseId: string) {
     try {
       const results = await dataSource.getHomeworkList(courseId);
       const courseName = getState().courses.names[courseId];
-      const assignments = results
-        .map<Assignment>(result => ({
-          ...result,
-          courseId,
-          courseName: courseName.name,
-          courseTeacherName: courseName.teacherName,
-        }));
+      const assignments = results.map<Assignment>(result => ({
+        ...result,
+        courseId,
+        courseName: courseName.name,
+        courseTeacherName: courseName.teacherName,
+      }));
       const deadlines = new Map(
         assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
       );
@@ -92,17 +91,16 @@ export function getAllAssignmentsForCourses(courseIds: string[]) {
         ContentType.HOMEWORK,
       );
       const courseNames = getState().courses.names;
-      const assignments = Object.keys(results)
-        .flatMap(courseId => {
-          const assignmentsForCourse = results[courseId];
-          const courseName = courseNames[courseId];
-          return assignmentsForCourse.map<Assignment>(assignment => ({
-            ...assignment,
-            courseId,
-            courseName: courseName.name,
-            courseTeacherName: courseName.teacherName,
-          }));
-        });
+      const assignments = Object.keys(results).flatMap(courseId => {
+        const assignmentsForCourse = results[courseId];
+        const courseName = courseNames[courseId];
+        return assignmentsForCourse.map<Assignment>(assignment => ({
+          ...assignment,
+          courseId,
+          courseName: courseName.name,
+          courseTeacherName: courseName.teacherName,
+        }));
+      });
       const deadlines = new Map(
         assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
       );

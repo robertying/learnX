@@ -39,7 +39,6 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
   </a>
 
 - **[TUNA 镜像（推荐） TUNA Mirror (Recommended)](https://mirrors.tuna.tsinghua.edu.cn/github-release/robertying/learnX/LatestRelease/)**
-
   - 默认下载 Download `learnX-arm64-v8a-vX.X.X.apk`
   - 若安装失败，请尝试 Download if there's an issue installing `learnX-universal-vX.X.X.apk`
 

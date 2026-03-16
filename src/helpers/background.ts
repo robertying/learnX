@@ -18,17 +18,16 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
     ContentType.NOTIFICATION,
   );
   const courseNames = courses.names;
-  const notices = Object.keys(results)
-    .flatMap(courseId => {
-      const noticesForCourse = results[courseId];
-      const courseName = courseNames[courseId];
-      return noticesForCourse.map<Notice>(notice => ({
-        ...notice,
-        courseId,
-        courseName: courseName.name,
-        courseTeacherName: courseName.teacherName,
-      }));
-    });
+  const notices = Object.keys(results).flatMap(courseId => {
+    const noticesForCourse = results[courseId];
+    const courseName = courseNames[courseId];
+    return noticesForCourse.map<Notice>(notice => ({
+      ...notice,
+      courseId,
+      courseName: courseName.name,
+      courseTeacherName: courseName.teacherName,
+    }));
+  });
   const noticeTimestamps = new Map(
     notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
   );
@@ -52,24 +51,22 @@ const getAllAssignments = async (
     ContentType.HOMEWORK,
   );
   const courseNames = courses.names;
-  const assignments = Object.keys(results)
-    .flatMap(courseId => {
-      const assignmentsForCourse = results[courseId];
-      const courseName = courseNames[courseId];
-      return assignmentsForCourse.map<Assignment>(assignment => ({
-        ...assignment,
-        courseId,
-        courseName: courseName.name,
-        courseTeacherName: courseName.teacherName,
-      }));
-    });
+  const assignments = Object.keys(results).flatMap(courseId => {
+    const assignmentsForCourse = results[courseId];
+    const courseName = courseNames[courseId];
+    return assignmentsForCourse.map<Assignment>(assignment => ({
+      ...assignment,
+      courseId,
+      courseName: courseName.name,
+      courseTeacherName: courseName.teacherName,
+    }));
+  });
   const deadlines = new Map(
     assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
   );
   assignments.sort(
     (a, b) =>
-      deadlines.get(b.id)! - deadlines.get(a.id)! ||
-      b.id.localeCompare(a.id),
+      deadlines.get(b.id)! - deadlines.get(a.id)! || b.id.localeCompare(a.id),
   );
   const nowUnix = dayjs().unix();
   const upcoming: Assignment[] = [];
@@ -91,17 +88,16 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
 
   const results = await dataSource.getAllContents(courseIds, ContentType.FILE);
   const courseNames = courses.names;
-  const files = Object.keys(results)
-    .flatMap(courseId => {
-      const filesForCourse = results[courseId];
-      const courseName = courseNames[courseId];
-      return filesForCourse.map<File>(file => ({
-        ...file,
-        courseId,
-        courseName: courseName.name,
-        courseTeacherName: courseName.teacherName,
-      }));
-    });
+  const files = Object.keys(results).flatMap(courseId => {
+    const filesForCourse = results[courseId];
+    const courseName = courseNames[courseId];
+    return filesForCourse.map<File>(file => ({
+      ...file,
+      courseId,
+      courseName: courseName.name,
+      courseTeacherName: courseName.teacherName,
+    }));
+  });
   const fileTimestamps = new Map(
     files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
   );

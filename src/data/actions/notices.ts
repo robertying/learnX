@@ -29,13 +29,12 @@ export function getNoticesForCourse(courseId: string) {
     try {
       const results = await dataSource.getNotificationList(courseId);
       const courseName = getState().courses.names[courseId];
-      const notices = results
-        .map<Notice>(result => ({
-          ...result,
-          courseId,
-          courseName: courseName.name,
-          courseTeacherName: courseName.teacherName,
-        }));
+      const notices = results.map<Notice>(result => ({
+        ...result,
+        courseId,
+        courseName: courseName.name,
+        courseTeacherName: courseName.teacherName,
+      }));
       const timestamps = new Map(
         notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
       );
@@ -67,17 +66,16 @@ export function getAllNoticesForCourses(courseIds: string[]) {
         ContentType.NOTIFICATION,
       );
       const courseNames = getState().courses.names;
-      const notices = Object.keys(results)
-        .flatMap(courseId => {
-          const noticesForCourse = results[courseId];
-          const courseName = courseNames[courseId];
-          return noticesForCourse.map<Notice>(notice => ({
-            ...notice,
-            courseId,
-            courseName: courseName.name,
-            courseTeacherName: courseName.teacherName,
-          }));
-        });
+      const notices = Object.keys(results).flatMap(courseId => {
+        const noticesForCourse = results[courseId];
+        const courseName = courseNames[courseId];
+        return noticesForCourse.map<Notice>(notice => ({
+          ...notice,
+          courseId,
+          courseName: courseName.name,
+          courseTeacherName: courseName.teacherName,
+        }));
+      });
       const timestamps = new Map(
         notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
       );
