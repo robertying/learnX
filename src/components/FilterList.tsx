@@ -96,7 +96,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const [filterVisible, setFilterVisible] = useState(false);
-  const [swipeReady, setSwipeReady] = useState(false);
 
   const data = (
     filterSelected === 'unfinished' && unfinished
@@ -535,11 +534,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   }, [refreshing]);
 
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setSwipeReady(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
-
   const renderItem = useCallback(
     ({ item }: { item: T }) => {
       return (
@@ -547,7 +541,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           data={item}
           selectionMode={selectionMode}
           reorderMode={reorderMode}
-          disableSwipe={!swipeReady || selectionMode || reorderMode}
+          disableSwipe={selectionMode || reorderMode}
           checked={selection[item.id]}
           onCheck={checked =>
             setSelection(prev => ({ ...prev, [item.id]: checked }))
@@ -573,7 +567,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       Component,
       selectionMode,
       reorderMode,
-      swipeReady,
       selection,
       favIdSet,
       archivedIdSet,
