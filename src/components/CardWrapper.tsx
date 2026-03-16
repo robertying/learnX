@@ -1,4 +1,4 @@
-import { PropsWithChildren, useRef, useEffect, useCallback } from 'react';
+import { PropsWithChildren, useRef, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import Animated, {
   SharedValue,
@@ -7,6 +7,7 @@ import Animated, {
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { useReorderableDrag } from 'react-native-reorderable-list';
 import { useTheme, Checkbox } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
@@ -229,6 +230,8 @@ const CardWrapper: React.FC<
     }
   };
 
+  const nativeGesture = useMemo(() => Gesture.Native(), []);
+
   const touchable = (
     <Touchable
       type="highlight"
@@ -258,7 +261,7 @@ const CardWrapper: React.FC<
     </Touchable>
   );
 
-  return DeviceInfo.isWSA() || disableSwipe ? (
+  return DeviceInfo.isWSA() ? (
     touchable
   ) : (
     <ReanimatedSwipeable
@@ -267,9 +270,12 @@ const CardWrapper: React.FC<
       childrenContainerStyle={{ backgroundColor: theme.colors.surface }}
       renderRightActions={renderRightActions}
       overshootFriction={8}
-      enabled={!selectionMode && !reorderMode}
+      enabled={!disableSwipe && !selectionMode && !reorderMode}
+      blocksExternalGesture={nativeGesture}
     >
-      {touchable}
+      <GestureDetector gesture={nativeGesture}>
+        {touchable}
+      </GestureDetector>
     </ReanimatedSwipeable>
   );
 };
