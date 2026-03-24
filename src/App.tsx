@@ -421,7 +421,6 @@ const LoginStack = () => (
       options={{
         headerLeft: () => <BackButton />,
         ...getTitleOptions(t('sso')),
-        presentation: 'fullScreenModal',
       }}
     />
   </LoginNavigator.Navigator>
