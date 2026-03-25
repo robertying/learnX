@@ -421,6 +421,7 @@ const LoginStack = () => (
       options={{
         headerLeft: () => <BackButton />,
         ...getTitleOptions(t('sso')),
+        presentation: DeviceInfo.isMac() ? undefined : 'fullScreenModal',
       }}
     />
   </LoginNavigator.Navigator>
