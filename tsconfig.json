@@ -5,6 +5,8 @@
   "compilerOptions": {
     "lib": ["esnext", "dom"],
     "noUnusedLocals": true,
-    "baseUrl": "./src"
+    "paths": {
+      "*": ["./src/*"]
+    }
   }
 }

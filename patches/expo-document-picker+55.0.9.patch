@@ -3,7 +3,7 @@ index 6c2bff0..b8e9637 100644
 --- a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
 +++ b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
 @@ -39,7 +39,7 @@ class DocumentPickerModule : Module() {
- 
+
        pendingPromise = promise
        copyToCacheDirectory = options.copyToCacheDirectory
 -      val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -23,7 +23,7 @@ index 28d3e03..172c7e1 100644
 -    "publication": {
 -      "groupId": "host.exp.exponent",
 -      "artifactId": "expo.modules.documentpicker",
--      "version": "55.0.8",
+-      "version": "55.0.9",
 -      "repository": "local-maven-repo"
 -    }
 +    "modules": ["expo.modules.documentpicker.DocumentPickerModule"]
