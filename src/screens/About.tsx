@@ -32,7 +32,7 @@ const About: React.FC<Props> = props => {
         >
           浙ICP备20024838号-2A
         </Text>
-        <Title style={styles.marginTop}>{t('maintainers')}</Title>
+        <Title style={styles.marginTop}>{t('contributors')}</Title>
         <Text
           style={[styles.text, styles.link]}
           onPress={() => Linking.openURL('https://github.com/robertying')}
@@ -44,6 +44,12 @@ const About: React.FC<Props> = props => {
           onPress={() => Linking.openURL('https://github.com/hezicyan')}
         >
           HeziCyan (hezicyan)
+        </Text>
+        <Text
+          style={[styles.text, styles.link]}
+          onPress={() => Linking.openURL('https://github.com/Brunch-Life')}
+        >
+          Yinuo Chen (Brunch-Life)
         </Text>
         <Text style={styles.text}>
           {t('opensourceAt')}{' '}
