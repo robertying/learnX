@@ -39,15 +39,16 @@ const AssignmentCard: React.FC<
     () => removeTags(description),
     [description],
   );
-  const deadlineText = useMemo(() => {
-    const now = dayjs();
-    const dl = dayjs(deadline);
-    const isPast = now.isAfter(dl);
-    if (isLocaleChinese()) {
-      return isPast ? now.to(dl) + '截止' : '还剩 ' + now.to(dl, true);
-    }
-    return isPast ? 'closed ' + now.to(dl) : 'due in ' + now.to(dl, true);
-  }, [deadline]);
+  const now = dayjs();
+  const dl = dayjs(deadline);
+  const isPast = now.isAfter(dl);
+  const deadlineText = isLocaleChinese()
+    ? isPast
+      ? now.to(dl) + '截止'
+      : '还剩 ' + now.to(dl, true)
+    : isPast
+      ? 'closed ' + now.to(dl)
+      : 'due in ' + now.to(dl, true);
 
   return (
     <CardWrapper {...restProps}>

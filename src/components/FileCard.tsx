@@ -33,7 +33,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
     () => removeTags(description),
     [description],
   );
-  const timeAgo = useMemo(() => dayjs(uploadTime).fromNow(), [uploadTime]);
+  const timeAgo = dayjs(uploadTime).fromNow();
 
   return (
     <CardWrapper {...restProps}>

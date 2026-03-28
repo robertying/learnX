@@ -29,7 +29,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
   ...restProps
 }) => {
   const strippedContent = useMemo(() => removeTags(content), [content]);
-  const timeAgo = useMemo(() => dayjs(publishTime).fromNow(), [publishTime]);
+  const timeAgo = dayjs(publishTime).fromNow();
 
   return (
     <CardWrapper {...restProps}>
