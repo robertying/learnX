@@ -11,10 +11,28 @@ index 2daec5d..df3fdfe 100644
  #else
  - (UIView *)superViewWithModuleName:(NSString *)moduleName
 diff --git a/node_modules/expo/ios/AppDelegates/EXReactRootViewFactory.mm b/node_modules/expo/ios/AppDelegates/EXReactRootViewFactory.mm
-index 6fecc8d..15c70c7 100644
+index 6fecc8d..7700901 100644
 --- a/node_modules/expo/ios/AppDelegates/EXReactRootViewFactory.mm
 +++ b/node_modules/expo/ios/AppDelegates/EXReactRootViewFactory.mm
-@@ -35,24 +35,37 @@
+@@ -2,16 +2,8 @@
+
+ #import <Expo/EXReactRootViewFactory.h>
+ #import <Expo/RCTAppDelegateUmbrella.h>
+-#import <Expo/Swift.h>
+ #import <React/RCTDevMenu.h>
+-
+-// When `use_frameworks!` is used, the generated Swift header is inside ExpoModulesCore module.
+-// Otherwise, it's available only locally with double-quoted imports.
+-#if __has_include(<ExpoModulesCore/ExpoModulesCore-Swift.h>)
+-#import <ExpoModulesCore/ExpoModulesCore-Swift.h>
+-#else
+-#import "ExpoModulesCore-Swift.h"
+-#endif
++#import <ExpoModulesCore/EXReactDelegateProtocol.h>
+
+ @interface RCTRootViewFactory ()
+
+@@ -35,24 +27,37 @@
  - (UIView *)viewWithModuleName:(NSString *)moduleName
               initialProperties:(nullable NSDictionary *)initialProperties
                   launchOptions:(nullable NSDictionary *)launchOptions
@@ -22,7 +40,8 @@ index 6fecc8d..15c70c7 100644
            devMenuConfiguration:(RCTDevMenuConfiguration *)devMenuConfiguration
  {
    if (self.reactDelegate != nil) {
-     return [self.reactDelegate createReactRootViewWithModuleName:moduleName initialProperties:initialProperties launchOptions:launchOptions];
+-    return [self.reactDelegate createReactRootViewWithModuleName:moduleName initialProperties:initialProperties launchOptions:launchOptions];
++    return [((id<EXReactDelegateProtocol>)self.reactDelegate) createReactRootViewWithModuleName:moduleName initialProperties:initialProperties launchOptions:launchOptions];
    }
 -  return [super viewWithModuleName:moduleName initialProperties:initialProperties launchOptions:launchOptions devMenuConfiguration:devMenuConfiguration];
 +  return [super viewWithModuleName:moduleName
@@ -31,7 +50,7 @@ index 6fecc8d..15c70c7 100644
 +               bundleConfiguration:bundleConfiguration
 +              devMenuConfiguration:devMenuConfiguration];
  }
- 
+
  - (UIView *)superViewWithModuleName:(NSString *)moduleName
                    initialProperties:(nullable NSDictionary *)initialProperties
                        launchOptions:(nullable NSDictionary *)launchOptions
@@ -45,7 +64,7 @@ index 6fecc8d..15c70c7 100644
    if (devMenuConfiguration == nil) {
      devMenuConfiguration = [RCTDevMenuConfiguration defaultConfiguration];
    }
- 
+
 -  return [super viewWithModuleName:moduleName initialProperties:initialProperties launchOptions:launchOptions devMenuConfiguration:devMenuConfiguration];
 +  return [super viewWithModuleName:moduleName
 +                 initialProperties:initialProperties
@@ -55,6 +74,78 @@ index 6fecc8d..15c70c7 100644
  }
  #else
  - (UIView *)viewWithModuleName:(NSString *)moduleName
+@@ -75,7 +80,7 @@
+
+ - (NSURL *)bundleURL
+ {
+-  return [self.reactDelegate bundleURL] ?: [super bundleURL];
++  return [((id<EXReactDelegateProtocol>)self.reactDelegate) bundleURL] ?: [super bundleURL];
+ }
+
+ @end
+diff --git a/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.h b/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.h
+index 1facfd9..ba11f01 100644
+--- a/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.h
++++ b/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.h
+@@ -7,6 +7,6 @@
+ @protocol RCTHostRuntimeDelegate;
+
+ NS_SWIFT_NAME(ExpoReactNativeFactoryObjC)
+-@interface EXReactNativeFactory : RCTReactNativeFactory <RCTHostDelegate, RCTHostRuntimeDelegate>
++@interface EXReactNativeFactory : RCTReactNativeFactory <RCTHostDelegate>
+
+ @end
+diff --git a/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.mm b/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.mm
+index a483ce1..c6734f3 100644
+--- a/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.mm
++++ b/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.mm
+@@ -1,8 +1,17 @@
+ // Copyright 2025-present 650 Industries. All rights reserved.
+
+ #import <Expo/ExpoReactNativeFactory.h>
++#import <ExpoModulesCore/EXHostWrapper.h>
++
++// When using xcframeworks, the generated Swift
++// header is inside ExpoModulesCore module. Otherwise, it's available only
++// locally with double-quoted imports.
++#if __has_include(<ExpoModulesCore/ExpoModulesCore-Swift.h>)
++#import <ExpoModulesCore/ExpoModulesCore-Swift.h>
++#elif __has_include("ExpoModulesCore-Swift.h")
++#import "ExpoModulesCore-Swift.h"
++#endif
+
+-#import <ExpoModulesCore/ExpoModulesCore.h>
+ #import <ExpoModulesCore/EXRuntime.h>
+ #if __has_include(<ExpoModulesCore/ExpoModulesCore-Swift.h>)
+ #import <ExpoModulesCore/ExpoModulesCore-Swift.h>
+@@ -17,19 +26,6 @@
+
+ #pragma mark - RCTHostDelegate
+
+-// [main thread]
+-- (void)hostDidStart:(nonnull RCTHost *)host
+-{
+-  // Setting the runtime delegate here doesn't feel right, but there is no other way
+-  // to capture the `host:didInitializeRuntime:` method call.
+-  // With the current API design we also depend that the runtime is initialized after the host started,
+-  // which isn't obvious, especially they are invoked on different threads.
+-  // Ideally if the current `RCTHostRuntimeDelegate` is part of `RCTHostDelegate`.
+-  host.runtimeDelegate = self;
+-}
+-
+-#pragma mark - RCTHostRuntimeDelegate
+-
+ // [JS thread]
+ - (void)host:(nonnull RCTHost *)host didInitializeRuntime:(jsi::Runtime &)runtime
+ {
+@@ -39,6 +35,7 @@
+   _appContext._runtime = [[EXRuntime alloc] initWithRuntime:runtime];
+   [_appContext setHostWrapper:[[EXHostWrapper alloc] initWithHost:host]];
+
++
+   [_appContext registerNativeModules];
+ }
+
 diff --git a/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.swift b/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.swift
 index 925e0f9..c881999 100644
 --- a/node_modules/expo/ios/AppDelegates/ExpoReactNativeFactory.swift

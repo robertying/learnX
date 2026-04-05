@@ -1,23 +1,19 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <meta-data
-        android:name="google_analytics_adid_collection_enabled"
-        android:value="false" />
-
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_CALENDAR" />
     <uses-permission android:name="android.permission.WRITE_CALENDAR" />
     <uses-permission
-        tools:node="remove"
-        android:name="android.permission.READ_MEDIA_IMAGES" />
+        android:name="android.permission.READ_MEDIA_IMAGES"
+        tools:node="remove" />
     <uses-permission
-        tools:node="remove"
-        android:name="android.permission.READ_MEDIA_VIDEO" />
+        android:name="android.permission.READ_MEDIA_VIDEO"
+        tools:node="remove" />
     <uses-permission
-        tools:node="remove"
-        android:name="com.google.android.gms.permission.AD_ID" />
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
 
     <application
         android:name=".MainApplication"
@@ -30,6 +26,11 @@
         android:theme="@style/SplashTheme"
         tools:replace="android:theme"
         tools:targetApi="s">
+
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"

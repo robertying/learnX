@@ -1,3 +1,5 @@
+import com.android.build.api.variant.FilterConfiguration
+
 plugins {
     id "com.android.application"
     id "org.jetbrains.kotlin.android"
@@ -79,7 +81,7 @@ android {
         release {
             signingConfig signingConfigs.release
             minifyEnabled true
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             firebaseCrashlytics {
                 nativeSymbolUploadEnabled true
             }
@@ -92,7 +94,7 @@ androidComponents {
         variant.outputs.each { output ->
             def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
             def abi = output.filters.find {
-                it.filterType == com.android.build.api.variant.FilterConfiguration.FilterType.ABI
+                it.filterType == FilterConfiguration.FilterType.ABI
             }?.identifier
             if (abi != null) {
                 def baseCode = android.defaultConfig.versionCode
@@ -110,7 +112,7 @@ dependencies {
     implementation("androidx.core:core-splashscreen:1.2.0")
     implementation("com.google.android.material:material:1.14.0-alpha10")
 
-    implementation platform("com.google.firebase:firebase-bom:34.10.0")
+    implementation platform("com.google.firebase:firebase-bom:34.11.0")
     implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-crashlytics-ndk")
     implementation("com.google.firebase:firebase-analytics")

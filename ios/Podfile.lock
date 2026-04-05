@@ -1,7 +1,7 @@
 PODS:
-  - EXConstants (55.0.9):
+  - EXConstants (55.0.11):
     - ExpoModulesCore
-  - Expo (55.0.8):
+  - Expo (55.0.11):
     - ExpoModulesCore
     - hermes-engine
     - RCTRequired
@@ -26,33 +26,31 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoAsset (55.0.10):
+  - ExpoAsset (55.0.12):
     - ExpoModulesCore
-  - ExpoBackgroundTask (55.0.10):
+  - ExpoBackgroundTask (55.0.12):
     - ExpoModulesCore
-  - ExpoBlur (55.0.10):
+  - ExpoBlur (55.0.12):
     - ExpoModulesCore
-  - ExpoCalendar (55.0.10):
+  - ExpoCalendar (55.0.12):
     - ExpoModulesCore
-  - ExpoCrypto (55.0.10):
+  - ExpoCrypto (55.0.12):
     - ExpoModulesCore
-  - ExpoDocumentPicker (55.0.9):
+  - ExpoDocumentPicker (55.0.11):
     - ExpoModulesCore
-  - ExpoDomWebView (55.0.3):
+  - ExpoFileSystem (55.0.14):
     - ExpoModulesCore
-  - ExpoFileSystem (55.0.11):
+  - ExpoFont (55.0.6):
     - ExpoModulesCore
-  - ExpoFont (55.0.4):
+  - ExpoHaptics (55.0.11):
     - ExpoModulesCore
-  - ExpoHaptics (55.0.9):
+  - ExpoImagePicker (55.0.16):
     - ExpoModulesCore
-  - ExpoImagePicker (55.0.13):
+  - ExpoKeepAwake (55.0.6):
     - ExpoModulesCore
-  - ExpoKeepAwake (55.0.4):
-    - ExpoModulesCore
-  - ExpoLogBox (55.0.7):
+  - ExpoLogBox (55.0.10):
     - React-Core
-  - ExpoModulesCore (55.0.17):
+  - ExpoModulesCore (55.0.20):
     - ExpoModulesJSI
     - hermes-engine
     - RCTRequired
@@ -77,14 +75,14 @@ PODS:
     - ReactNativeDependencies
     - RNWorklets
     - Yoga
-  - ExpoModulesJSI (55.0.17):
+  - ExpoModulesJSI (55.0.20):
     - hermes-engine
     - React-Core
     - React-runtimescheduler
     - ReactCommon
-  - ExpoSecureStore (55.0.9):
+  - ExpoSecureStore (55.0.11):
     - ExpoModulesCore
-  - ExpoTaskManager (55.0.10):
+  - ExpoTaskManager (55.0.12):
     - ExpoModulesCore
     - UMAppLoader
   - FBLazyVector (0.84.1)
@@ -1765,7 +1763,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-vector-icons (12.3.0):
+  - react-native-vector-icons (13.0.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1787,8 +1785,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-vector-icons-material-design-icons (12.5.0)
-  - react-native-vector-icons-material-icons (12.5.0)
+  - react-native-vector-icons-material-design-icons (13.0.0)
+  - react-native-vector-icons-material-icons (13.0.0)
   - react-native-webview (13.16.1):
     - hermes-engine
     - RCTRequired
@@ -2244,7 +2242,7 @@ PODS:
     - React-Core
   - RNFS (2.20.0):
     - React-Core
-  - RNGestureHandler (2.30.0):
+  - RNGestureHandler (2.31.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2289,7 +2287,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNReanimated (4.2.3):
+  - RNReanimated (4.3.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2311,10 +2309,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNReanimated/reanimated (= 4.2.3)
+    - RNReanimated/apple (= 4.3.0)
+    - RNReanimated/common (= 4.3.0)
     - RNWorklets
     - Yoga
-  - RNReanimated/reanimated (4.2.3):
+  - RNReanimated/apple (4.3.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2336,10 +2335,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNReanimated/reanimated/apple (= 4.2.3)
     - RNWorklets
     - Yoga
-  - RNReanimated/reanimated/apple (4.2.3):
+  - RNReanimated/common (4.3.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2506,7 +2504,7 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - SwiftUIIntrospect (1.3.0)
-  - UMAppLoader (55.0.2)
+  - UMAppLoader (55.0.4)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2518,7 +2516,6 @@ DEPENDENCIES:
   - ExpoCalendar (from `../node_modules/expo-calendar/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDocumentPicker (from `../node_modules/expo-document-picker/ios`)
-  - "ExpoDomWebView (from `../node_modules/@expo/dom-webview/ios`)"
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
@@ -2663,8 +2660,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-crypto/ios"
   ExpoDocumentPicker:
     :path: "../node_modules/expo-document-picker/ios"
-  ExpoDomWebView:
-    :path: "../node_modules/@expo/dom-webview/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo-file-system/ios"
   ExpoFont:
@@ -2878,25 +2873,24 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  EXConstants: 898c24a310046c0e68335619d0f379099a52e199
-  Expo: 4c511f65307a9c40b4d0beae00f6f71aeda5ece5
-  ExpoAsset: 4efd0227e808dfa84d286aa3663ded641ef73479
-  ExpoBackgroundTask: f041b1faf8ca62a2cbb8acbe2b30884c9c96a97e
-  ExpoBlur: 8508f5b62611b228eee65f242563ac70856eb4bd
-  ExpoCalendar: 6d1cfe4f08dd057a722b812b30ccdb296ad8d0d1
-  ExpoCrypto: 33a6c4fb9ccac7a4d784954d0db6c3ba292123e9
-  ExpoDocumentPicker: 27adca9e8272af64a4bc0d5460bffd64b406c878
-  ExpoDomWebView: f101fb3db4b6eec4163fca51f7507189b7e48661
-  ExpoFileSystem: ccbe192dde132e6e97bedcd51018a1642f4fa01c
-  ExpoFont: 1aa465cf9f8ac6b670405becba8b15473581b2dd
-  ExpoHaptics: bc44f72943e785c2fdb912738a3665142569472d
-  ExpoImagePicker: 4463c7e793d904553fb832f7568e306fd7544bc9
-  ExpoKeepAwake: 7f3b28c361c37389b18841bb52a58003b39fcb33
-  ExpoLogBox: 89b634d5a8a64c4a6a7caad8f9985a28463c7002
-  ExpoModulesCore: 2b55cd7d067affb724c69ce0060344beeb77bddb
-  ExpoModulesJSI: b300d73875edde6bfe2d990c9800ba75be33910f
-  ExpoSecureStore: 83d31183fecaae7a084e88e29d14d5a02d90882a
-  ExpoTaskManager: 8bd83cdc4b57aaa750806366385ef1781fa70dc3
+  EXConstants: 9813b8a316e5b7bb562731c7a45e236f54195185
+  Expo: 7944ad6f5cbd5c256ac2411e863189721a09dd9d
+  ExpoAsset: 63f22b029eb9aa68d5048f77ff9430f42c770d2c
+  ExpoBackgroundTask: d09031ed237a0a1e7d90f29b4afd8d679ac1fe36
+  ExpoBlur: 9f78729ced5ad7c2aa79fa5daceacfe5eb638903
+  ExpoCalendar: e22432711f525ed2b46c6a1f9b6c096a3eba3846
+  ExpoCrypto: 0367cba7af2bdf0a01550b48bd20e9537f20b980
+  ExpoDocumentPicker: 4adc0e1e21dc03c5468b334613e757a9f8f6609f
+  ExpoFileSystem: 05e8c679738bd90263f9ed32bfa221f7b52ebbe5
+  ExpoFont: cdd7a1d574a376fa003c713eff49e0a4df8672c7
+  ExpoHaptics: de693bae4eb861f25b6651d63c035f772ccab523
+  ExpoImagePicker: ca47c5ac15d1ccde2fbc765485e612c2a5a385d0
+  ExpoKeepAwake: a1baf9810a2dee1905aa9bdd336852598f7220e9
+  ExpoLogBox: a3de999775d423ac9cb85d24bd47628e5392761f
+  ExpoModulesCore: 6d296d9706ca466ce81b083482f6ea955da38b02
+  ExpoModulesJSI: c4d43b571e2dc2f3d269f30313a8684cf08f2c43
+  ExpoSecureStore: 2410bec85e98b0718e21b8b012d4c3721ba8c0ed
+  ExpoTaskManager: 31398a462fa90c3f09d49f81f7a05e9392b48996
   FBLazyVector: e97c19a5a442429d1988f182a1940fb08df514da
   FirebaseAnalytics: 6433dfd311ba78084fc93bdfc145e8cb75740eae
   FirebaseCore: efb3893e5b94f32b86e331e3bd6dadf18b66568e
@@ -2955,9 +2949,9 @@ SPEC CHECKSUMS:
   react-native-pager-view: 9ebb71ac08f26122d9838c3ed72dd5a61bdc2640
   react-native-pdf: a179884058649f77dd20b0a73f8044bb039468c3
   react-native-safe-area-context: 90476586077446d5eab1d41ac3e767b016ac41d6
-  react-native-vector-icons: f209ba216da631f55d82c4adb5b79cd2f0419ec8
-  react-native-vector-icons-material-design-icons: 95914f2f6b18e26e5c9563afe33184e110afe674
-  react-native-vector-icons-material-icons: 8717ed6d0adafdea7a20475dababba112992a372
+  react-native-vector-icons: bc6eef9a1d57d180f50303603b589d3fccb1de75
+  react-native-vector-icons-material-design-icons: 1955bd08457a8310e6a2d3c87c7f1ebaca159098
+  react-native-vector-icons-material-icons: e81230f19be5c8ada2ef4d9c2958c0fe74848177
   react-native-webview: b8dbc288f28a87766d7b1158ef185619768e3339
   React-NativeModulesApple: 5ba0903927f6b8d335a091700e9fda143980f819
   React-networking: ad2727500e93943a43da70d3b162454af151469c
@@ -2997,15 +2991,15 @@ SPEC CHECKSUMS:
   RNCClipboard: fc456104340b49bdf812f68bd00e764abf360361
   RNDeviceInfo: 4c852998208b60dc192ae3529e5867817719ad1e
   RNFS: 89de7d7f4c0f6bafa05343c578f61118c8282ed8
-  RNGestureHandler: d9e942967ed2a9a555c41591c4ee9dfeabee1f01
+  RNGestureHandler: 386dfc6830f0620bbed15b271479b672a3407750
   RNLocalize: 0da45ec541d1460051b1f23c3a1820a8caa0fe6b
-  RNReanimated: 928bb2679ee0c919cc7e19f8658cc3c8b8f127f3
+  RNReanimated: 46aa0432d0a44ce978333713d1db0cbe706d5c41
   RNScreens: ca829379d20b0d1ff41a0b87bc37bdc50276cef5
   RNShare: de24c244a3e35d82ab1f96e5315d0ba61df28e42
   RNShareMenu: e1cdfa3b9af89416afc75a80377cfd0de4f30ded
   RNWorklets: bc32c788b41ef5f9ee519d6bf3f495b73fb7741b
   SwiftUIIntrospect: fee9aa07293ee280373a591e1824e8ddc869ba5d
-  UMAppLoader: 71b50bcc31d86495e52c0b4cd17e2708bf297be3
+  UMAppLoader: 6f70977c93a7033f0dc7cf2f0de9b49ce006f7bd
   Yoga: 846fbe6f595136be802ad81d05688ff748839764
 
 PODFILE CHECKSUM: e28d6955562c6f48e1a8906ba55e0afff902e1d0
