@@ -210,4 +210,5 @@ export default {
   exitFullscreen: 'Exit Fullscreen',
   info: 'Info',
   preview: 'Preview',
+  unknownFileType: 'Unknown',
 };

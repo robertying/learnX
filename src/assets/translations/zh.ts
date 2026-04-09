@@ -203,6 +203,7 @@ const zh: typeof en = {
   exitFullscreen: '退出全屏',
   info: '详情',
   preview: '预览',
+  unknownFileType: '未知',
 };
 
 export default zh;

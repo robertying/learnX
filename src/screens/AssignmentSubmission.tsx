@@ -187,7 +187,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
         fileType:
           (attachment.type
             ? mimeTypes.extension(attachment.type)
-            : getExtension(attachment.name)) ?? '',
+            : getExtension(attachment.name)) || '',
       } as File);
     }
   };

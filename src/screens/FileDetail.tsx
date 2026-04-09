@@ -361,7 +361,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
                 size={17}
               />
               <Text style={styles.textPaddingRight}>
-                {file.fileType?.toUpperCase()}
+                {file.fileType?.toUpperCase?.() || t('unknownFileType')}
               </Text>
             </View>
             <Divider />
