@@ -36,14 +36,30 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   const [blur, setBlur] = useState(false);
 
   useEffect(() => {
-    if (rendered.current) {
-      setBlur(true);
-      setTimeout(() => {
-        setBlur(false);
-      }, 500);
-    } else {
+    if (!rendered.current) {
       rendered.current = true;
+      return;
     }
+
+    setBlur(true);
+
+    // Remove the blur once the new layout has actually painted rather than
+    // after a fixed delay. A setTimeout is a JS-thread timer, so during a
+    // heavy transition (e.g. mounting the whole main UI with offline data
+    // already in the store) the callback gets starved and the blur appears
+    // to hang. Two animation frames put us just past the next paint.
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setBlur(false));
+    });
+    // Safety net in case a frame never arrives.
+    const timeout = setTimeout(() => setBlur(false), 500);
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      clearTimeout(timeout);
+    };
   }, [showDetail, splitEnabled]);
 
   return (
