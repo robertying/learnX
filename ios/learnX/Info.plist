@@ -73,6 +73,8 @@
 	<true/>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Allow learnX to sync courses and assignments to your calendars</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Allow learnX to sync courses and assignments to your calendars</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow learnX to access your camera and use the photo for assignment submission</string>
 	<key>NSContactsUsageDescription</key>
@@ -94,6 +96,8 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow learnX to access your photos and use them for your assignment submission</string>
 	<key>NSRemindersUsageDescription</key>
+	<string>Allow learnX to sync assignments to your reminders</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
 	<string>Allow learnX to sync assignments to your reminders</string>
 	<key>NSRemovableVolumesUsageDescription</key>
 	<string>Allow learnX to access your files and use them for your assignment submission</string>
