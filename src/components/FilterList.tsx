@@ -622,6 +622,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         <ReorderableList
           {...listProps}
           dragEnabled={reorderMode}
+          panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
           onIndexChange={handleDragChange}
           refreshControl={
