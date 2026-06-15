@@ -46,25 +46,16 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   const theme = useTheme();
 
   const position = useSharedValue(visible ? 1 : 0);
-  const [layout, setLayout] = useState({
-    height: 0,
-    measured: false,
-  });
+  const [height, setHeight] = useState(0);
 
   const heightStyle = useAnimatedStyle(() => {
     return {
-      height: position.value * layout.height,
+      height: position.value * height,
     };
-  }, [layout]);
-  const transformStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateY: (position.value - 1) * layout.height }],
-    };
-  }, [layout]);
+  }, [height]);
 
   const handleLayout = ({ nativeEvent }: LayoutChangeEvent) => {
-    const { height } = nativeEvent.layout;
-    setLayout({ height, measured: true });
+    setHeight(nativeEvent.layout.height);
   };
 
   useEffect(() => {
@@ -146,16 +137,13 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
 
   return (
     <Animated.View
-      style={[styles.root, { backgroundColor: theme.colors.surface }]}
+      style={[
+        styles.root,
+        { backgroundColor: theme.colors.surface },
+        heightStyle,
+      ]}
     >
-      <Animated.View style={heightStyle} />
-      <Animated.View
-        onLayout={handleLayout}
-        style={[
-          layout.measured || !visible ? [styles.absolute, transformStyle] : [],
-          !visible ? { opacity: 0 } : { opacity: 100 },
-        ]}
-      >
+      <View style={styles.content} onLayout={handleLayout}>
         {unfinishedCount !== undefined ? (
           <ListItem
             name="unfinished"
@@ -209,7 +197,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
           badgeColor={Colors.grey500}
         />
         <Divider />
-      </Animated.View>
+      </View>
     </Animated.View>
   );
 };
@@ -222,17 +210,19 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 1,
     elevation: 2,
+    overflow: 'hidden',
+  },
+  content: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
   },
   listItem: {
     paddingHorizontal: 16,
   },
   title: {
     marginLeft: -12,
-  },
-  absolute: {
-    position: 'absolute',
-    top: 0,
-    width: '100%',
   },
   text: {
     fontSize: 16,
