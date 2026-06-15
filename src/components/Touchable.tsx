@@ -1,10 +1,10 @@
-import { Platform } from 'react-native';
 import {
+  Platform,
   Pressable,
   TouchableHighlight,
   TouchableHighlightProps,
   TouchableOpacity,
-} from 'react-native-gesture-handler';
+} from 'react-native';
 import { useTheme } from 'react-native-paper';
 
 const Touchable: React.FC<
