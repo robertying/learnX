@@ -22,26 +22,24 @@ export const getAndRequestPermission = async (
   type: 'calendar' | 'reminder',
 ) => {
   if (type === 'calendar') {
-    const { status } = await Calendar.getCalendarPermissionsAsync();
+    const { status } = await Calendar.getCalendarPermissions();
     if (status === 'granted') {
       return true;
     }
-    const { status: newStatus } =
-      await Calendar.requestCalendarPermissionsAsync();
+    const { status: newStatus } = await Calendar.requestCalendarPermissions();
     return newStatus === 'granted';
   } else {
-    const { status } = await Calendar.getRemindersPermissionsAsync();
+    const { status } = await Calendar.getRemindersPermissions();
     if (status === 'granted') {
       return true;
     }
-    const { status: newStatus } =
-      await Calendar.requestRemindersPermissionsAsync();
+    const { status: newStatus } = await Calendar.requestRemindersPermissions();
     return newStatus === 'granted';
   }
 };
 
-const getDefaultCalendarSource = async (entityType: string) => {
-  const calendars = await Calendar.getCalendarsAsync(entityType);
+const getDefaultCalendarSource = async (entityType: Calendar.EntityTypes) => {
+  const calendars = await Calendar.getCalendars(entityType);
 
   const iCloudCalendar = calendars.find(c => c.source.name === 'iCloud');
   if (iCloudCalendar) {
@@ -59,7 +57,7 @@ const getDefaultCalendarSource = async (entityType: string) => {
 };
 
 export const getCourseCalendarId = async () => {
-  const calendars = await Calendar.getCalendarsAsync();
+  const calendars = await Calendar.getCalendars();
 
   const settings = store.getState().settings;
 
@@ -83,7 +81,7 @@ export const getCourseCalendarId = async () => {
       ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
       : ({ name: 'learnX', isLocalAccount: true } as Calendar.Source);
 
-  const newCalendarID = await Calendar.createCalendarAsync({
+  const newCalendar = await Calendar.createCalendar({
     title: courseCalendarName,
     color: Colors.plainTheme,
     entityType: Calendar.EntityTypes.EVENT,
@@ -94,6 +92,7 @@ export const getCourseCalendarId = async () => {
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
 
+  const newCalendarID = newCalendar.id;
   if (newCalendarID) {
     store.dispatch(setSetting('courseCalendarId', newCalendarID));
   }
@@ -118,23 +117,21 @@ export const saveCoursesToCalendar = async (
   }
 
   const calendarId = await getCourseCalendarId();
+  const calendar = await Calendar.ExpoCalendar.get(calendarId);
 
-  const oldEvents = await Calendar.getEventsAsync(
-    [calendarId],
+  const oldEvents = await calendar.listEvents(
     startDate.toDate(),
     endDate.toDate(),
   );
 
-  await Promise.all(
-    oldEvents.map(async e => await Calendar.deleteEventAsync(e.id)),
-  );
+  await Promise.all(oldEvents.map(async e => await e.delete()));
 
   const alarms = settings.alarms;
 
   await Promise.all(
     events.map(
       async e =>
-        await Calendar.createEventAsync(calendarId, {
+        await calendar.createEvent({
           title: e.courseName,
           startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
           endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
@@ -156,9 +153,7 @@ export const saveCoursesToCalendar = async (
 };
 
 export const getAssignmentCalendarId = async () => {
-  const calendars = await Calendar.getCalendarsAsync(
-    Calendar.EntityTypes.EVENT,
-  );
+  const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
 
   const storedId = store.getState().settings.assignmentCalendarId;
 
@@ -183,7 +178,7 @@ export const getAssignmentCalendarId = async () => {
       ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
       : ({ name: 'learnX', isLocalAccount: true } as Calendar.Source);
 
-  const newCalendarID = await Calendar.createCalendarAsync({
+  const newCalendar = await Calendar.createCalendar({
     title: assignmentCalendarReminderName,
     color: Colors.plainTheme,
     entityType: Calendar.EntityTypes.EVENT,
@@ -194,6 +189,7 @@ export const getAssignmentCalendarId = async () => {
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
 
+  const newCalendarID = newCalendar.id;
   if (newCalendarID) {
     store.dispatch(setSetting('assignmentCalendarId', newCalendarID));
   }
@@ -201,9 +197,7 @@ export const getAssignmentCalendarId = async () => {
 };
 
 export const getAssignmentReminderId = async () => {
-  const reminders = await Calendar.getCalendarsAsync(
-    Calendar.EntityTypes.REMINDER,
-  );
+  const reminders = await Calendar.getCalendars(Calendar.EntityTypes.REMINDER);
 
   const storedId = store.getState().settings.assignmentReminderId;
   if (storedId) {
@@ -225,7 +219,7 @@ export const getAssignmentReminderId = async () => {
   const defaultCalendarSource = await getDefaultCalendarSource(
     Calendar.EntityTypes.REMINDER,
   );
-  const newReminderID = await Calendar.createCalendarAsync({
+  const newReminder = await Calendar.createCalendar({
     title: assignmentCalendarReminderName,
     color: Colors.plainTheme,
     entityType: Calendar.EntityTypes.REMINDER,
@@ -236,6 +230,7 @@ export const getAssignmentReminderId = async () => {
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
 
+  const newReminderID = newReminder.id;
   if (newReminderID) {
     store.dispatch(setSetting('assignmentReminderId', newReminderID));
   }
@@ -245,7 +240,7 @@ export const getAssignmentReminderId = async () => {
 export const saveAssignmentEvent = async (
   type: 'calendar' | 'reminder',
   settings: SettingsState,
-  calendarId: string,
+  calendar: Calendar.ExpoCalendar,
   assignmentId: string,
   title: string,
   note: string,
@@ -261,7 +256,7 @@ export const saveAssignmentEvent = async (
   const alarms = settings.alarms;
 
   if (Platform.OS === 'ios' && type === 'reminder') {
-    const details: Calendar.Reminder = {
+    const details: Partial<Calendar.ExpoCalendarReminder> = {
       title,
       startDate: startDate.toDate(),
       dueDate: alarms.assignmentReminderAlarm
@@ -279,17 +274,17 @@ export const saveAssignmentEvent = async (
       Object.keys(syncedAssignments).includes(assignmentId)
     ) {
       try {
-        await Calendar.updateReminderAsync(
+        const reminder = await Calendar.ExpoCalendarReminder.get(
           syncedAssignments[assignmentId],
-          details,
         );
+        await reminder.update(details);
       } catch {
         store.dispatch(removeEventIdForAssignment('reminder', assignmentId));
       }
     } else {
-      const eventId = await Calendar.createReminderAsync(calendarId, details);
+      const reminder = await calendar.createReminder(details);
       store.dispatch(
-        setEventIdForAssignment('reminder', assignmentId, eventId),
+        setEventIdForAssignment('reminder', assignmentId, reminder.id!),
       );
     }
   } else {
@@ -318,7 +313,7 @@ export const saveAssignmentEvent = async (
       });
     }
 
-    const details: Partial<Calendar.Event> = {
+    const details: Partial<Calendar.ExpoCalendarEvent> = {
       title: (completed ? '✅ ' : '') + title,
       startDate: dueDate
         .subtract(settings.calendarEventLength ?? 30, 'minute')
@@ -333,17 +328,17 @@ export const saveAssignmentEvent = async (
       Object.keys(syncedAssignments).includes(assignmentId)
     ) {
       try {
-        await Calendar.updateEventAsync(
+        const event = await Calendar.ExpoCalendarEvent.get(
           syncedAssignments[assignmentId],
-          details,
         );
+        await event.update(details);
       } catch {
         store.dispatch(removeEventIdForAssignment('calendar', assignmentId));
       }
     } else {
-      const eventId = await Calendar.createEventAsync(calendarId, details);
+      const event = await calendar.createEvent(details);
       store.dispatch(
-        setEventIdForAssignment('calendar', assignmentId, eventId),
+        setEventIdForAssignment('calendar', assignmentId, event.id),
       );
     }
   }
@@ -369,6 +364,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
     Platform.OS === 'ios' && type === 'reminder'
       ? await getAssignmentReminderId()
       : await getAssignmentCalendarId();
+  const calendar = await Calendar.ExpoCalendar.get(calendarId);
 
   const savingAssignments = [...assignments].filter(item =>
     dayjs(item.deadline).isAfter(dayjs()),
@@ -383,7 +379,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
         await saveAssignmentEvent(
           type,
           settings,
-          calendarId,
+          calendar,
           assignment.id,
           assignment.title + ' - ' + course.name,
           removeTags(assignment.description),
@@ -408,10 +404,10 @@ export const removeCalendars = async () => {
     }
   }
 
-  const calendars = await Calendar.getCalendarsAsync();
+  const calendars = await Calendar.getCalendars();
   const reminders =
     Platform.OS === 'ios'
-      ? await Calendar.getCalendarsAsync(Calendar.EntityTypes.REMINDER)
+      ? await Calendar.getCalendars(Calendar.EntityTypes.REMINDER)
       : [];
 
   const existingCalendars = [...calendars, ...reminders].filter(c =>
@@ -420,7 +416,7 @@ export const removeCalendars = async () => {
 
   await Promise.all(
     existingCalendars.map(async c => {
-      await Calendar.deleteCalendarAsync(c.id).catch(() => {});
+      await c.delete().catch(() => {});
     }),
   );
 
