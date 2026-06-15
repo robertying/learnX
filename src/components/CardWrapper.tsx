@@ -182,12 +182,23 @@ const CardWrapper: React.FC<
 
   const snapRef = useRef<SwipeableMethods>(null);
   const anchorRef = useRef<View>(null);
+  const swipeableOpenRef = useRef(false);
+  const swipeOpenedAtRef = useRef(0);
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
 
   const resetSnap = () => {
     snapRef.current?.close();
+  };
+
+  const handleSwipeableWillOpen = () => {
+    swipeableOpenRef.current = true;
+    swipeOpenedAtRef.current = Date.now();
+  };
+
+  const handleSwipeableWillClose = () => {
+    swipeableOpenRef.current = false;
   };
 
   const handleCheck = () => {
@@ -258,7 +269,15 @@ const CardWrapper: React.FC<
       closeMenu();
       return;
     }
-    resetSnap();
+    // Revealing the swipe actions emits a trailing press on iOS (the tail of
+    // the swipe gesture). Keep the actions open for that press, and let a
+    // deliberate tap on the card afterwards just close them.
+    if (swipeableOpenRef.current) {
+      if (Date.now() - swipeOpenedAtRef.current > 500) {
+        resetSnap();
+      }
+      return;
+    }
     onPress?.();
   };
 
@@ -365,6 +384,8 @@ const CardWrapper: React.FC<
       renderRightActions={renderRightActions}
       overshootFriction={8}
       enabled={!disableSwipe && !selectionMode && !reorderMode}
+      onSwipeableWillOpen={handleSwipeableWillOpen}
+      onSwipeableWillClose={handleSwipeableWillClose}
     >
       {touchable}
     </ReanimatedSwipeable>
