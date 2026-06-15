@@ -221,7 +221,7 @@ const CalendarEvent: React.FC<Props> = props => {
     <SafeArea>
       <KeyboardAvoidingView
         style={Styles.flex1}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior="padding"
         keyboardVerticalOffset={120}
       >
         <ScrollView contentContainerStyle={styles.scrollViewPaddings}>

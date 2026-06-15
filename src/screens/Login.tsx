@@ -105,10 +105,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
   return (
     <SafeArea>
       <ScrollView style={Styles.flex1} contentContainerStyle={styles.root}>
-        <KeyboardAvoidingView
-          style={styles.inputs}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <KeyboardAvoidingView style={styles.inputs} behavior="padding">
           <Logo iosSize={120} style={styles.logo} />
           <TextInput
             style={styles.textInput}
