@@ -1,10 +1,11 @@
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 
-platform :ios, '15.5'
+platform :ios, '16.6'
 prepare_react_native_project!
 
-use_frameworks! :linkage => :static
+ENV['USE_FRAMEWORKS'] = 'static'
+use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym
 
 if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
   config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
@@ -43,6 +44,7 @@ target 'learnX' do
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
+        config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
         config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
         config.build_settings.delete 'EMBEDDED_CONTENT_CONTAINS_SWIFT'
         config.build_settings.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'

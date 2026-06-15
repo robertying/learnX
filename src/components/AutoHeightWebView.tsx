@@ -7,7 +7,7 @@ import {
   WebViewSource,
   WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
-import CookieManager from '@react-native-cookies/cookies';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 import Urls from 'constants/Urls';
 
 const AutoHeightWebView: React.FC<

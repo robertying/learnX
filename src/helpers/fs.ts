@@ -4,7 +4,7 @@ import * as IntentLauncher from 'expo-intent-launcher';
 import fs from 'react-native-fs';
 import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
-import CookieManager from '@react-native-cookies/cookies';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 import mime from 'mime-types';
 import { addCSRF, loginWithFingerPrint } from 'data/source';
 import { store } from 'data/store';

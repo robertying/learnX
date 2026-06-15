@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-native-screens/ios/RNSScreenStack.mm b/node_modules/react-native-screens/ios/RNSScreenStack.mm
-index effc07f..b8c8f92 100644
+index 0000000..1111111 100644
 --- a/node_modules/react-native-screens/ios/RNSScreenStack.mm
 +++ b/node_modules/react-native-screens/ios/RNSScreenStack.mm
-@@ -213,6 +213,10 @@ namespace react = facebook::react;
+@@ -179,6 +179,10 @@
    __weak RNSScreenStackManager *_manager;
    BOOL _updateScheduled;
    UIPanGestureRecognizer *_sinkEventsPanGestureRecognizer;
@@ -10,10 +10,10 @@ index effc07f..b8c8f92 100644
 +  BOOL _isolatedFromVCHierarchy;
 +  CGSize _lastIsolatedBoundsSize;
 +#endif
- #ifdef RCT_NEW_ARCH_ENABLED
-   /// Screens that are subject of `ShadowViewMutation::Type::Delete` mutation
-   /// in current transaction. This vector should be populated when we receive notification via
-@@ -379,6 +383,9 @@ RNS_IGNORE_SUPER_CALL_END
+ }
+ 
+ - (instancetype)initWithFrame:(CGRect)frame
+@@ -299,6 +303,9 @@
  - (void)maybeAddToParentAndUpdateContainer
  {
    BOOL wasScreenMounted = _controller.parentViewController != nil;
@@ -23,7 +23,7 @@ index effc07f..b8c8f92 100644
    if (!self.window && !wasScreenMounted) {
      // We wait with adding to parent controller until the stack is mounted.
      // If we add it when window is not attached, some of the view transitions will be blocked (i.e.
-@@ -404,10 +411,74 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -324,10 +331,74 @@
  
  - (void)reactAddControllerToClosestParent:(UIViewController *)controller
  {
@@ -98,15 +98,7 @@ index effc07f..b8c8f92 100644
          [parentView.reactViewController addChildViewController:controller];
          [self addSubview:controller.view];
  #if !TARGET_OS_TV
-@@ -432,6 +503,7 @@ RNS_IGNORE_SUPER_CALL_END
-   }
- }
- 
-+
- + (UIViewController *)findTopMostPresentedViewControllerFromViewController:(UIViewController *)controller
- {
-   auto presentedVc = controller;
-@@ -801,6 +873,20 @@ RNS_IGNORE_SUPER_CALL_END
+@@ -741,6 +812,20 @@
  {
    [super layoutSubviews];
    _controller.view.frame = self.bounds;
@@ -127,13 +119,13 @@ index effc07f..b8c8f92 100644
  
    // We need to update the bounds of the modal views here, since
    // for contained modals they are not updated by modals themselves.
-@@ -1522,6 +1608,9 @@ RNS_IGNORE_SUPER_CALL_END
- - (void)invalidate
+@@ -1419,6 +1504,9 @@
+ - (void)prepareForRecycle
  {
-   _invalidated = YES;
+   [super prepareForRecycle];
 +#if TARGET_OS_MACCATALYST
 +  _isolatedFromVCHierarchy = NO;
 +#endif
-   [self dismissAllRelatedModals];
-   [_controller willMoveToParentViewController:nil];
-   [_controller removeFromParentViewController];
+   _reactSubviews = [NSMutableArray new];
+ 
+   for (UIViewController *controller in _presentedModals) {
