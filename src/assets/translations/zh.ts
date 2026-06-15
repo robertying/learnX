@@ -119,6 +119,10 @@ const zh: typeof en = {
   archiveSucceeded: '已归档',
   undoHide: '已撤销屏蔽',
   hideSucceeded: '已屏蔽',
+  favorite: '收藏',
+  unfavorite: '取消收藏',
+  hide: '屏蔽',
+  unhide: '取消屏蔽',
   courseInformationSharing: '课程信息共享计划',
   joinCourseInformationSharing: '加入课程信息共享计划',
   joinCourseInformationSharingConfirmation:

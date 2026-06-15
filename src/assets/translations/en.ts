@@ -123,6 +123,10 @@ export default {
   archiveSucceeded: 'Archived',
   undoHide: 'Undo hiding',
   hideSucceeded: 'Hidden',
+  favorite: 'Favorite',
+  unfavorite: 'Unfavorite',
+  hide: 'Hide',
+  unhide: 'Unhide',
   courseInformationSharing: 'Course Information Sharing',
   joinCourseInformationSharing: 'Enable Course Information Sharing',
   joinCourseInformationSharingConfirmation:

@@ -1,5 +1,11 @@
-import { PropsWithChildren, useRef, useEffect, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import {
+  PropsWithChildren,
+  useRef,
+  useEffect,
+  useCallback,
+  useState,
+} from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -8,12 +14,16 @@ import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useReorderableDrag } from 'react-native-reorderable-list';
-import { useTheme, Checkbox } from 'react-native-paper';
+import { useTheme, Checkbox, Menu } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
+import * as Haptics from 'expo-haptics';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
+import { t } from 'helpers/i18n';
 import Touchable from './Touchable';
+
+const swipeableNotSupported = DeviceInfo.isWSA() || Platform.OS === 'android';
 
 const buttonWidth = 80;
 
@@ -171,6 +181,10 @@ const CardWrapper: React.FC<
   const drag = useReorderableDrag();
 
   const snapRef = useRef<SwipeableMethods>(null);
+  const anchorRef = useRef<View>(null);
+
+  const [menuVisible, setMenuVisible] = useState(false);
+  const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
 
   const resetSnap = () => {
     snapRef.current?.close();
@@ -178,6 +192,23 @@ const CardWrapper: React.FC<
 
   const handleCheck = () => {
     onCheck?.(!checked);
+  };
+
+  const closeMenu = () => setMenuVisible(false);
+
+  const handleMenuFav = () => {
+    closeMenu();
+    onFav?.(!fav);
+  };
+
+  const handleMenuArchive = () => {
+    closeMenu();
+    onArchive?.(!archived);
+  };
+
+  const handleMenuHide = () => {
+    closeMenu();
+    onHide?.(!hidden);
   };
 
   useEffect(() => {
@@ -191,6 +222,12 @@ const CardWrapper: React.FC<
       resetSnap();
     }
   }, [reorderMode]);
+
+  useEffect(() => {
+    if (selectionMode || reorderMode) {
+      closeMenu();
+    }
+  }, [selectionMode, reorderMode]);
 
   const renderRightActions = useCallback(
     (
@@ -217,6 +254,10 @@ const CardWrapper: React.FC<
   );
 
   const handlePress = () => {
+    if (menuVisible) {
+      closeMenu();
+      return;
+    }
     resetSnap();
     onPress?.();
   };
@@ -225,7 +266,15 @@ const CardWrapper: React.FC<
     if (reorderMode) {
       drag();
     } else if (!disableSwipe && !selectionMode) {
-      snapRef.current?.openRight();
+      if (swipeableNotSupported) {
+        Haptics.selectionAsync();
+        anchorRef.current?.measureInWindow((x, y, width, height) => {
+          setMenuAnchor({ x: x + width, y: y + height });
+          setMenuVisible(true);
+        });
+      } else {
+        snapRef.current?.openRight();
+      }
     }
   };
 
@@ -258,9 +307,57 @@ const CardWrapper: React.FC<
     </Touchable>
   );
 
-  return DeviceInfo.isWSA() ? (
-    touchable
-  ) : (
+  if (swipeableNotSupported) {
+    return (
+      <View ref={anchorRef} collapsable={false}>
+        {touchable}
+        <Menu visible={menuVisible} onDismiss={closeMenu} anchor={menuAnchor}>
+          {onHide ? (
+            <Menu.Item
+              leadingIcon={({ size }) => (
+                <MaterialIcons
+                  name={hidden ? 'visibility' : 'visibility-off'}
+                  size={size}
+                  color={Colors.yellow500}
+                />
+              )}
+              onPress={handleMenuHide}
+              title={hidden ? t('unhide') : t('hide')}
+            />
+          ) : (
+            <>
+              {archived ? null : (
+                <Menu.Item
+                  leadingIcon={({ size }) => (
+                    <MaterialCommunityIcons
+                      name={fav ? 'heart-off' : 'heart'}
+                      size={size}
+                      color={Colors.red500}
+                    />
+                  )}
+                  onPress={handleMenuFav}
+                  title={fav ? t('unfavorite') : t('favorite')}
+                />
+              )}
+              <Menu.Item
+                leadingIcon={({ size }) => (
+                  <MaterialCommunityIcons
+                    name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}
+                    size={size}
+                    color={Colors.blue500}
+                  />
+                )}
+                onPress={handleMenuArchive}
+                title={archived ? t('restore') : t('archive')}
+              />
+            </>
+          )}
+        </Menu>
+      </View>
+    );
+  }
+
+  return (
     <ReanimatedSwipeable
       ref={snapRef}
       containerStyle={{ backgroundColor: theme.colors.surface }}
