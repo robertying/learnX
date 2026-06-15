@@ -195,8 +195,9 @@ const CourseDetail: React.FC<Props> = ({
       indicatorStyle={{
         backgroundColor: theme.colors.primary,
       }}
-      renderTabBarItem={itemProps => (
+      renderTabBarItem={({ key, ...itemProps }) => (
         <TabBarItem
+          key={key}
           {...itemProps}
           labelStyle={{ color: theme.colors.onSurface }}
         />
