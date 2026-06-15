@@ -1,10 +1,11 @@
+import { Platform } from 'react-native';
 import {
-  Platform,
+  Pressable,
   TouchableHighlight,
   TouchableHighlightProps,
   TouchableOpacity,
-} from 'react-native';
-import { TouchableRipple, useTheme } from 'react-native-paper';
+} from 'react-native-gesture-handler';
+import { useTheme } from 'react-native-paper';
 
 const Touchable: React.FC<
   TouchableHighlightProps & {
@@ -15,7 +16,7 @@ const Touchable: React.FC<
   const theme = useTheme();
 
   return Platform.OS === 'android' ? (
-    <TouchableRipple {...(props as any)} />
+    <Pressable android_ripple={{}} {...(props as any)} />
   ) : type === 'opacity' ? (
     <TouchableOpacity activeOpacity={0.5} {...props} />
   ) : (
