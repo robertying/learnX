@@ -10,12 +10,7 @@ export let dataSource: Learn2018Helper;
 
 export const clearLoginCookies = async () => {
   if (Platform.OS === 'ios') {
-    await CookieManager.set(Urls.id, {
-      httpOnly: true,
-      name: 'JSESSIONID',
-      path: '/',
-      value: '',
-    });
+    await CookieManager.clearByName(Urls.id, 'JSESSIONID');
   } else {
     await CookieManager.setFromResponse(
       Urls.id,

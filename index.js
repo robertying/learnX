@@ -1,3 +1,4 @@
+import './setupEnv';
 import './polyfills';
 
 import { AppRegistry, LogBox } from 'react-native';
