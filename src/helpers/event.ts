@@ -117,7 +117,11 @@ export const saveCoursesToCalendar = async (
   }
 
   const calendarId = await getCourseCalendarId();
-  const calendar = await Calendar.ExpoCalendar.get(calendarId);
+  const allCalendars = await Calendar.getCalendars();
+  const calendar = allCalendars.find(c => c.id === calendarId);
+  if (!calendar) {
+    throw new Error('Cannot find calendar');
+  }
 
   const oldEvents = await calendar.listEvents(
     startDate.toDate(),
@@ -364,7 +368,15 @@ export const saveAssignmentsToReminderOrCalendar = async (
     Platform.OS === 'ios' && type === 'reminder'
       ? await getAssignmentReminderId()
       : await getAssignmentCalendarId();
-  const calendar = await Calendar.ExpoCalendar.get(calendarId);
+  const entityType =
+    Platform.OS === 'ios' && type === 'reminder'
+      ? Calendar.EntityTypes.REMINDER
+      : Calendar.EntityTypes.EVENT;
+  const allCalendars = await Calendar.getCalendars(entityType);
+  const calendar = allCalendars.find(c => c.id === calendarId);
+  if (!calendar) {
+    throw new Error('Cannot find calendar');
+  }
 
   const savingAssignments = [...assignments].filter(item =>
     dayjs(item.deadline).isAfter(dayjs()),
