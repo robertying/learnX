@@ -1,0 +1,22 @@
+diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
+index 9ae054bc..89971f03 100644
+--- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
++++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
+@@ -29,9 +29,15 @@ class CalendarRepository(private val contentResolver: ContentResolver) {
+   }
+ 
+   suspend fun findById(id: CalendarId): CalendarEntity? = withContext(Dispatchers.IO) {
++    // Query the collection URI with an _ID filter instead of the item URI
++    // (ContentUris.withAppendedId). On some providers (e.g. HarmonyOS) the
++    // item URI does not expose the computed `isPrimary` column, causing an
++    // IllegalArgumentException, while the collection URI does.
+     contentResolver.safeQuery(
+-      uri = ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, id.value),
+-      projection = FULL_PROJECTION
++      uri = CalendarContract.Calendars.CONTENT_URI,
++      projection = FULL_PROJECTION,
++      selection = "${CalendarContract.Calendars._ID} = ?",
++      selectionArgs = arrayOf(id.value.toString())
+     ).use { cursor ->
+       cursor.takeIf { it.moveToFirst() }
+         ?.toCalendarEntity()
