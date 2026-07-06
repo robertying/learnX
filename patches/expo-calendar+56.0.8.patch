@@ -1,22 +1,35 @@
 diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
-index 9ae054bc..89971f03 100644
+index 9ae054bc..0163f14d 100644
 --- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
 +++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
-@@ -29,9 +29,15 @@ class CalendarRepository(private val contentResolver: ContentResolver) {
-   }
+@@ -130,7 +130,10 @@ class CalendarRepository(private val contentResolver: ContentResolver) {
+       CalendarContract.Calendars.CALENDAR_COLOR,
+       CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+       CalendarContract.Calendars.CALENDAR_TIME_ZONE,
+-      CalendarContract.Calendars.IS_PRIMARY,
++      // IS_PRIMARY is intentionally omitted from the projection: it is a
++      // synthetic column that some providers (e.g. HarmonyOS / Huawei) do not
++      // expose in their projection map, which makes the query itself throw
++      // IllegalArgumentException. `toCalendarEntity` reads it defensively.
+       CalendarContract.Calendars.NAME,
+       CalendarContract.Calendars.OWNER_ACCOUNT,
+       CalendarContract.Calendars.SYNC_EVENTS,
+diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
+index c570e729..869a6148 100644
+--- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
++++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
+@@ -16,7 +16,13 @@ internal fun Cursor.getOptionalLong(columnName: String): Long? {
+ }
  
-   suspend fun findById(id: CalendarId): CalendarEntity? = withContext(Dispatchers.IO) {
-+    // Query the collection URI with an _ID filter instead of the item URI
-+    // (ContentUris.withAppendedId). On some providers (e.g. HarmonyOS) the
-+    // item URI does not expose the computed `isPrimary` column, causing an
-+    // IllegalArgumentException, while the collection URI does.
-     contentResolver.safeQuery(
--      uri = ContentUris.withAppendedId(CalendarContract.Calendars.CONTENT_URI, id.value),
--      projection = FULL_PROJECTION
-+      uri = CalendarContract.Calendars.CONTENT_URI,
-+      projection = FULL_PROJECTION,
-+      selection = "${CalendarContract.Calendars._ID} = ?",
-+      selectionArgs = arrayOf(id.value.toString())
-     ).use { cursor ->
-       cursor.takeIf { it.moveToFirst() }
-         ?.toCalendarEntity()
+ internal fun Cursor.getOptionalInt(columnName: String): Int? {
+-  val index = getColumnIndexOrThrow(columnName)
++  // Use getColumnIndex (not getColumnIndexOrThrow) so a column that is absent
++  // from the projection/result set yields null instead of throwing. Some
++  // providers (e.g. HarmonyOS / Huawei) omit synthetic columns like isPrimary.
++  val index = getColumnIndex(columnName)
++  if (index == -1) {
++    return null
++  }
+   // getInt() returns 0 for null columns, but 0 is also the int value of AttendeeRole.NONE.
+   // isNull() lets us distinguish "not set in DB" from "explicitly set to NONE".
+   if (isNull(index)) {
