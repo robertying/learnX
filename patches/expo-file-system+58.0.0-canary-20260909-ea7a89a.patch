@@ -16,3 +16,31 @@ index 3e3d2b4..ac3ee1e 100644
    guard fileSystemManager.getPathPermissions(path).contains(flag) else {
      throw flag == .read ? FileNotReadableException(path) : FileNotWritableException(path)
    }
+diff --git a/node_modules/expo-file-system/ios/FileSystemModule.swift b/node_modules/expo-file-system/ios/FileSystemModule.swift
+index e9338f13..b5e662f2 100644
+--- a/node_modules/expo-file-system/ios/FileSystemModule.swift
++++ b/node_modules/expo-file-system/ios/FileSystemModule.swift
+@@ -72,9 +72,11 @@ public final class FileSystemModule: Module {
+       throw FilePreviewFileNotFoundException(file.url)
+     }
+     let item = FileSystemPreviewItem(url: file.url, title: options?.title)
++    #if !targetEnvironment(macCatalyst)
+     guard QLPreviewController.canPreview(item) else {
+       throw FilePreviewUnsupportedException(file.url)
+     }
++    #endif
+ 
+     let previewController = QLPreviewController()
+     let session = FileSystemPreviewSession(item: item, scopedAccess: scopedAccess) { [weak self] in
+@@ -292,7 +294,11 @@ public final class FileSystemModule: Module {
+           guard file.exists else {
+             return false
+           }
++          #if targetEnvironment(macCatalyst)
++          return true
++          #else
+           return QLPreviewController.canPreview(FileSystemPreviewItem(url: file.url, title: nil))
++          #endif
+         }
+         #else
+         throw FeatureNotAvailableOnPlatformException()
