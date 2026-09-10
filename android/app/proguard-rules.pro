@@ -125,6 +125,14 @@
 }
 
 
+# InputMerger
+
+-keep class * extends androidx.work.InputMerger
+-keepclassmembers class * extends androidx.work.InputMerger {
+    <init>();
+}
+
+
 # others
 
 -dontwarn javax.lang.model.element.Element
