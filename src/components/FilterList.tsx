@@ -620,6 +620,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       />
       {isCourse ? (
         <ReorderableList
+          key={filterSelected}
           {...listProps}
           dragEnabled={reorderMode}
           panActivateAfterLongPress={520}
@@ -630,7 +631,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           }
         />
       ) : (
-        <FlatList {...listProps} />
+        <FlatList key={filterSelected} {...listProps} />
       )}
     </View>
   );

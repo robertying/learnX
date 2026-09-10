@@ -6,6 +6,7 @@ function FlatList<T>(props: FlashListProps<T>) {
   return (
     <FlashList
       contentInsetAdjustmentBehavior="automatic"
+      maintainVisibleContentPosition={{ disabled: true }}
       {...props}
       refreshControl={isMac ? undefined : props.refreshControl}
       onRefresh={isMac ? undefined : props.onRefresh}
