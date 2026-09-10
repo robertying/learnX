@@ -1453,7 +1453,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-blob-util (0.24.10):
+  - react-native-blob-util (0.24.11):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2872,7 +2872,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 8c1898265f1ac21bd7e3c9afca8440ba2adb8753
   React-microtasksnativemodule: 04833b425e5e7381ef5ab1b15be3f74c05632448
   React-mutationobservernativemodule: eac010f6dcd8fa461aa3d75db3a8f2ec6bcb8fbd
-  react-native-blob-util: df652a6c82b0ba13c29a25d265f09304118cb506
+  react-native-blob-util: 622597dbe5cc9f2c67e7513bf126db2e556ff5e8
   react-native-bottom-tabs: eca9d02f968be5f9b2a9dfe62a79efcc02caee1a
   react-native-pager-view: 28d1f123be027146f807f0f273bd791836e9f259
   react-native-pdf: 903181d5efdd8fd3d062cf52f84c5eee75dc5e5a
