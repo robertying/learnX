@@ -109,6 +109,22 @@
 -keep class com.facebook.react.turbomodule.** { *; }
 
 
+# react-native-screens
+
+-keep,allowshrinking,allowobfuscation class com.swmansion.rnscreens.ScreenContainer
+-keepclassmembers,allowshrinking,allowobfuscation class com.swmansion.rnscreens.ScreenContainer {
+    *;
+}
+
+
+# RoomDatabase
+
+-keep class * extends androidx.room.RoomDatabase
+-keepclassmembers class * extends androidx.room.RoomDatabase {
+    <init>();
+}
+
+
 # others
 
 -dontwarn javax.lang.model.element.Element

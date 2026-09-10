@@ -5,11 +5,12 @@ import React
 import ReactAppDependencyProvider
 
 @UIApplicationMain
-class AppDelegate: ExpoAppDelegate {
+class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {
   var window: UIWindow?
 
   var reactNativeDelegate: ExpoReactNativeFactoryDelegate?
   var reactNativeFactory: RCTReactNativeFactory?
+  var reactNativeFactoryModuleName: String { "learnX" }
 
   public override func application(
     _ application: UIApplication,
@@ -24,13 +25,6 @@ class AppDelegate: ExpoAppDelegate {
 
     reactNativeDelegate = delegate
     reactNativeFactory = factory
-
-    window = UIWindow(frame: UIScreen.main.bounds)
-    factory.startReactNative(
-      withModuleName: "learnX",
-      in: window,
-      launchOptions: launchOptions
-    )
 
     return super.application(
       application,

@@ -2,18 +2,18 @@ diff --git a/node_modules/react-native-screens/ios/RNSScreenStack.mm b/node_modu
 index 0000000..1111111 100644
 --- a/node_modules/react-native-screens/ios/RNSScreenStack.mm
 +++ b/node_modules/react-native-screens/ios/RNSScreenStack.mm
-@@ -179,6 +179,10 @@
+@@ -175,6 +175,10 @@
+   RNSPercentDrivenInteractiveTransition *_interactionController;
    __weak RNSScreenStackManager *_manager;
    BOOL _updateScheduled;
-   UIPanGestureRecognizer *_sinkEventsPanGestureRecognizer;
 +#if TARGET_OS_MACCATALYST
 +  BOOL _isolatedFromVCHierarchy;
 +  CGSize _lastIsolatedBoundsSize;
 +#endif
  }
- 
+
  - (instancetype)initWithFrame:(CGRect)frame
-@@ -299,6 +303,9 @@
+@@ -288,6 +292,9 @@
  - (void)maybeAddToParentAndUpdateContainer
  {
    BOOL wasScreenMounted = _controller.parentViewController != nil;
@@ -23,8 +23,8 @@ index 0000000..1111111 100644
    if (!self.window && !wasScreenMounted) {
      // We wait with adding to parent controller until the stack is mounted.
      // If we add it when window is not attached, some of the view transitions will be blocked (i.e.
-@@ -324,10 +331,74 @@
- 
+@@ -313,10 +320,74 @@
+
  - (void)reactAddControllerToClosestParent:(UIViewController *)controller
  {
 +#if TARGET_OS_MACCATALYST
@@ -98,7 +98,7 @@ index 0000000..1111111 100644
          [parentView.reactViewController addChildViewController:controller];
          [self addSubview:controller.view];
  #if !TARGET_OS_TV
-@@ -741,6 +812,20 @@
+@@ -729,6 +800,20 @@
  {
    [super layoutSubviews];
    _controller.view.frame = self.bounds;
@@ -116,10 +116,10 @@ index 0000000..1111111 100644
 +    });
 +  }
 +#endif
- 
+
    // We need to update the bounds of the modal views here, since
    // for contained modals they are not updated by modals themselves.
-@@ -1419,6 +1504,9 @@
+@@ -1375,6 +1460,9 @@
  - (void)prepareForRecycle
  {
    [super prepareForRecycle];
@@ -127,5 +127,5 @@ index 0000000..1111111 100644
 +  _isolatedFromVCHierarchy = NO;
 +#endif
    _reactSubviews = [NSMutableArray new];
- 
+
    for (UIViewController *controller in _presentedModals) {

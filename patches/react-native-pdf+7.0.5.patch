@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-pdf/android/build.gradle b/node_modules/react-native-pdf/android/build.gradle
-index 34da324..7a70e6e 100644
+index 34da324..c712401 100644
 --- a/node_modules/react-native-pdf/android/build.gradle
 +++ b/node_modules/react-native-pdf/android/build.gradle
 @@ -143,6 +143,6 @@ dependencies {
@@ -7,6 +7,7 @@ index 34da324..7a70e6e 100644
      implementation 'com.github.zacharee:AndroidPdfViewer:4.0.1'
      // Depend on PdfiumAndroidKt directly so this can be updated independently of AndroidPdfViewer as updates are provided.
 -    implementation 'io.legere:pdfiumandroid:1.0.32'
+-    implementation 'com.google.code.gson:gson:2.13.2'
 +    implementation 'io.legere:pdfiumandroid:1.0.35'
-     implementation 'com.google.code.gson:gson:2.13.2'
++    implementation 'com.google.code.gson:gson:2.14.0'
  }

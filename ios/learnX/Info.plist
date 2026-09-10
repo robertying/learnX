@@ -71,9 +71,9 @@
 	</dict>
 	<key>NSApplicationCrashOnExceptions</key>
 	<true/>
-	<key>NSCalendarsUsageDescription</key>
-	<string>Allow learnX to sync courses and assignments to your calendars</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Allow learnX to sync courses and assignments to your calendars</string>
+	<key>NSCalendarsUsageDescription</key>
 	<string>Allow learnX to sync courses and assignments to your calendars</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Allow learnX to access your camera and use the photo for assignment submission</string>
@@ -95,14 +95,31 @@
 	<string>Allow learnX to access your photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow learnX to access your photos and use them for your assignment submission</string>
-	<key>NSRemindersUsageDescription</key>
-	<string>Allow learnX to sync assignments to your reminders</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Allow learnX to sync assignments to your reminders</string>
+	<key>NSRemindersUsageDescription</key>
 	<string>Allow learnX to sync assignments to your reminders</string>
 	<key>NSRemovableVolumesUsageDescription</key>
 	<string>Allow learnX to access your files and use them for your assignment submission</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+		<key>UISceneConfigurations</key>
+		<dict>
+			<key>UIWindowSceneSessionRoleApplication</key>
+			<array>
+				<dict>
+					<key>UISceneConfigurationName</key>
+					<string>Default Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+				</dict>
+			</array>
+		</dict>
+	</dict>
 	<key>UIAppFonts</key>
 	<array>
 		<string>MaterialIcons.ttf</string>
