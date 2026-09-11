@@ -29,7 +29,12 @@ import FlatList from 'components/FlatList';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import Numbers from 'constants/Numbers';
+import DeviceInfo from 'constants/DeviceInfo';
 import { CourseStackParams } from './types';
+
+const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
+  ? ('never' as const)
+  : ('automatic' as const);
 
 type NavigationProp = NativeStackNavigationProp<
   CourseStackParams,
@@ -64,6 +69,7 @@ const Notices = memo(
         keyExtractor={item => item.id}
         refreshing={fetching}
         onRefresh={handleRefresh}
+        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
         contentContainerStyle={[
           { flexGrow: 1 },
           data.length ? null : { justifyContent: 'center' },
@@ -102,6 +108,7 @@ const Assignments = memo(
         keyExtractor={item => item.id}
         refreshing={fetching}
         onRefresh={handleRefresh}
+        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
         contentContainerStyle={[
           { flexGrow: 1 },
           data.length ? null : { justifyContent: 'center' },
@@ -139,6 +146,7 @@ const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
       keyExtractor={item => item.id}
       refreshing={fetching}
       onRefresh={handleRefresh}
+      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
       contentContainerStyle={[
         { flexGrow: 1 },
         data.length ? null : { justifyContent: 'center' },
