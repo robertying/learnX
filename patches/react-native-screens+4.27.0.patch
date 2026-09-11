@@ -2,18 +2,50 @@ diff --git a/node_modules/react-native-screens/ios/RNSScreenStack.mm b/node_modu
 index 0000000..1111111 100644
 --- a/node_modules/react-native-screens/ios/RNSScreenStack.mm
 +++ b/node_modules/react-native-screens/ios/RNSScreenStack.mm
-@@ -175,6 +175,10 @@
+@@ -175,7 +175,42 @@
    RNSPercentDrivenInteractiveTransition *_interactionController;
    __weak RNSScreenStackManager *_manager;
    BOOL _updateScheduled;
 +#if TARGET_OS_MACCATALYST
 +  BOOL _isolatedFromVCHierarchy;
 +  CGSize _lastIsolatedBoundsSize;
++  // Once we've observed a real (non-zero) top safe-area inset for this isolated screen, we treat
++  // it as the permanent, correct value and pin the nav bar to it forever after — see
++  // -rns_pinTopSafeAreaInsetIfNeeded for why.
++  BOOL _hasStableTopSafeAreaInset;
++  CGFloat _stableTopSafeAreaInset;
 +#endif
++}
++
++#if TARGET_OS_MACCATALYST
++- (void)rns_pinTopSafeAreaInsetIfNeeded
++{
++  if (!_isolatedFromVCHierarchy) {
++    return;
++  }
++  CGFloat rawTopInset = self.safeAreaInsets.top;
++  if (!_hasStableTopSafeAreaInset && rawTopInset > 0) {
++    _hasStableTopSafeAreaInset = YES;
++    _stableTopSafeAreaInset = rawTopInset;
++  }
++  if (_hasStableTopSafeAreaInset) {
++    // Because this view isn't a real child VC, its nav controller doesn't get the normal
++    // appearance-transition plumbing a real child would, so anything that transiently reports a
++    // different top safe-area inset for it (e.g. right after isolation on cold launch, before the
++    // window has finished laying out; or a window resize / split-view master-pane toggle) can leave
++    // the nav bar visibly mispositioned. Pin it to the first real value we saw and cancel out any
++    // transient deviation from it.
++    _controller.additionalSafeAreaInsets = UIEdgeInsetsMake(MAX(0, _stableTopSafeAreaInset - rawTopInset), 0, 0, 0);
++  }
++  _controller.view.frame = self.bounds;
++  [_controller.view setNeedsLayout];
++  [_controller.view layoutIfNeeded];
  }
-
++#endif
+ 
  - (instancetype)initWithFrame:(CGRect)frame
-@@ -288,6 +292,9 @@
+ {
+@@ -288,6 +323,9 @@
  - (void)maybeAddToParentAndUpdateContainer
  {
    BOOL wasScreenMounted = _controller.parentViewController != nil;
@@ -23,8 +55,8 @@ index 0000000..1111111 100644
    if (!self.window && !wasScreenMounted) {
      // We wait with adding to parent controller until the stack is mounted.
      // If we add it when window is not attached, some of the view transitions will be blocked (i.e.
-@@ -313,10 +320,74 @@
-
+@@ -313,10 +351,81 @@
+ 
  - (void)reactAddControllerToClosestParent:(UIViewController *)controller
  {
 +#if TARGET_OS_MACCATALYST
@@ -91,6 +123,13 @@ index 0000000..1111111 100644
 +            _isolatedFromVCHierarchy = YES;
 +            _lastIsolatedBoundsSize = self.bounds.size;
 +            [self navigationController:_controller willShowViewController:_controller.topViewController animated:NO];
++            // Right at isolation time the safe-area insets usually aren't populated yet, so try
++            // now (best effort) and also once more shortly after, by which point they reliably
++            // are — see -rns_pinTopSafeAreaInsetIfNeeded.
++            [self rns_pinTopSafeAreaInsetIfNeeded];
++            dispatch_async(dispatch_get_main_queue(), ^{
++              [self rns_pinTopSafeAreaInsetIfNeeded];
++            });
 +            break;
 +          }
 +        }
@@ -98,34 +137,28 @@ index 0000000..1111111 100644
          [parentView.reactViewController addChildViewController:controller];
          [self addSubview:controller.view];
  #if !TARGET_OS_TV
-@@ -729,6 +800,20 @@
+@@ -729,6 +838,12 @@
  {
    [super layoutSubviews];
    _controller.view.frame = self.bounds;
 +#if TARGET_OS_MACCATALYST
-+  if (_isolatedFromVCHierarchy && !CGSizeEqualToSize(_lastIsolatedBoundsSize, self.bounds.size)) {
++  if (_isolatedFromVCHierarchy) {
 +    _lastIsolatedBoundsSize = self.bounds.size;
-+    // The isolated nav controller is not in the VC hierarchy, so UIKit doesn't
-+    // forward layout callbacks to it. Defer a layout pass to the next runloop
-+    // iteration so that safe area insets are fully propagated before the nav
-+    // bar recalculates its position (e.g. after master pane toggle).
-+    dispatch_async(dispatch_get_main_queue(), ^{
-+      self->_controller.view.frame = self.bounds;
-+      [self->_controller.view setNeedsLayout];
-+      [self->_controller.view layoutIfNeeded];
-+    });
++    [self rns_pinTopSafeAreaInsetIfNeeded];
 +  }
 +#endif
-
+ 
    // We need to update the bounds of the modal views here, since
    // for contained modals they are not updated by modals themselves.
-@@ -1375,6 +1460,9 @@
+@@ -1375,6 +1490,11 @@
  - (void)prepareForRecycle
  {
    [super prepareForRecycle];
 +#if TARGET_OS_MACCATALYST
 +  _isolatedFromVCHierarchy = NO;
++  _hasStableTopSafeAreaInset = NO;
++  _stableTopSafeAreaInset = 0;
 +#endif
    _reactSubviews = [NSMutableArray new];
-
+ 
    for (UIViewController *controller in _presentedModals) {

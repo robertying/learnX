@@ -11,3 +11,103 @@ index 09ab604b..93e9885f 100644
  #import <react/utils/ManagedObjectWrapper.h>
  
  #if TARGET_OS_OSX
+diff --git a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
+index 0000000..1111111 100644
+--- a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
++++ b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
+@@ -8,6 +8,8 @@
+ 
+ private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
+   var onClick: ((_ index: Int?, _ identifier: String?) -> Bool)?
++  var onSelectTab: ((_ index: Int?, _ identifier: String?) -> Void)?
++  private var tabReportedFromShouldSelect: String?
+ 
+   func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+     if #available(iOS 27.0, *) {
+@@ -62,10 +64,35 @@
+       tab.identifier
+     ) ?? false
+ 
++    if !isReselectingSameTab && !defaultPrevented {
++      tabReportedFromShouldSelect = tab.identifier
++    }
++
+     return isReselectingSameTab ? false : !defaultPrevented
+   }
+ 
+   @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
++  func tabBarController(_ tabBarController: UITabBarController, didSelectTab selectedTab: UITab, previousTab: UITab?) {
++    guard #available(iOS 27.0, *) else {
++      return
++    }
++
++    defer { tabReportedFromShouldSelect = nil }
++
++    if tabReportedFromShouldSelect == selectedTab.identifier {
++      return
++    }
++
++    // Mac Catalyst 27 hosts the tab bar in the window toolbar and switches tabs without consulting
++    // shouldSelectTab, so the selection has to be reported here. It can no longer be prevented at this point.
++    // Unlike shouldSelectTab, this is also called for programmatic selection changes.
++    onSelectTab?(
++      tabIndex(for: selectedTab, in: tabBarController),
++      selectedTab.identifier
++    )
++  }
++
++  @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
+   private func tabIndex(for tab: UITab, in tabBarController: UITabBarController) -> Int? {
+     tabBarController.tabs.firstIndex {
+       $0 === tab || $0.identifier == tab.identifier
+@@ -75,6 +102,7 @@
+ 
+ struct TabItemEventModifier: ViewModifier {
+   let onTabEvent: (_ index: Int?, _ identifier: String?, _ isLongPress: Bool) -> Bool
++  let onSelectTab: (_ index: Int?, _ identifier: String?) -> Void
+   private let delegate = TabBarDelegate()
+ 
+   func body(content: Content) -> some View {
+@@ -88,6 +116,7 @@
+     delegate.onClick = { index, identifier in
+       onTabEvent(index, identifier, false)
+     }
++    delegate.onSelectTab = onSelectTab
+     tabController.delegate = delegate
+ 
+     // Don't register gesutre recognizer more than one time
+@@ -154,9 +183,13 @@
+ extension View {
+   /**
+    Event for tab items. Returns true if should prevent default (switching tabs).
++   `onSelectTab` is called after the selected tab changed without a preceding tab item event.
+    */
+-  func onTabItemEvent(_ handler: @escaping (Int?, String?, Bool) -> Bool) -> some View {
+-    modifier(TabItemEventModifier(onTabEvent: handler))
++  func onTabItemEvent(
++    _ handler: @escaping (Int?, String?, Bool) -> Bool,
++    onSelectTab: @escaping (Int?, String?) -> Void
++  ) -> some View {
++    modifier(TabItemEventModifier(onTabEvent: handler, onSelectTab: onSelectTab))
+   }
+ }
+ 
+diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
+index 0000000..1111111 100644
+--- a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
++++ b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
+@@ -59,6 +59,14 @@
+             emitHapticFeedback()
+           }
+           return item?.preventsDefault ?? false
++        } onSelectTab: { index, identifier in
++          let item = identifier.flatMap { props.filteredItems.findByKey($0) }
++            ?? index.flatMap { props.filteredItems[safe: $0] }
++          // Selection changes driven by the `selectedPage` prop are already known to JS.
++          guard let key = item?.key, key != props.selectedPage else { return }
++
++          onSelect(key)
++          emitHapticFeedback()
+         }
+       #endif
+       .introspectTabView { tabController in
