@@ -67,7 +67,13 @@ const AutoHeightWebView: React.FC<
       const cookies = await CookieManager.get(Urls.learn);
       await Promise.all(
         Object.entries(cookies).map(([, value]) =>
-          CookieManager.set(Urls.learn, value, true),
+          CookieManager.set(
+            Urls.learn,
+            value.sameSite === 'none'
+              ? { ...value, secure: true }
+              : value,
+            true,
+          ),
         ),
       );
 
