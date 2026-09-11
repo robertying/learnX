@@ -202,6 +202,7 @@ export default {
   retryLogin: 'Retry Login With Current Account',
   offlineMode: 'Offline Mode',
   openFileDownloadDirectory: 'Open File Save Folder',
+  openFileDownloadDirectoryFailed: 'Failed to open file save folder: ',
   download: 'Download',
   downloadToDownloadsSucceeded: 'Successfully downloaded the file to Downloads',
   downloadToDownloadsFailed: 'Failed to download the file to Downloads',

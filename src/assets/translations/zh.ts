@@ -195,6 +195,7 @@ const zh: typeof en = {
   retryLogin: '重试登录当前账号',
   offlineMode: '离线模式',
   openFileDownloadDirectory: '打开文件保存目录',
+  openFileDownloadDirectoryFailed: '打开文件保存目录失败：',
   download: '下载',
   downloadToDownloadsSucceeded: '成功下载文件到“下载”文件夹',
   downloadToDownloadsFailed: '下载文件到“下载”文件夹失败',

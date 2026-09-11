@@ -35,6 +35,12 @@ export const getLearnXFilesDir = () => {
   }learnX-files`;
 };
 
+export const ensureLearnXFilesDir = async () => {
+  const dir = getLearnXFilesDir();
+  await fs.mkdir(dir);
+  return dir;
+};
+
 export const downloadFile = async (
   file: File,
   refresh?: boolean,
