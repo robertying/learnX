@@ -768,7 +768,7 @@ const Container = () => {
           <RootNavigator.Navigator
             screenOptions={{
               headerShown: false,
-              presentation: 'fullScreenModal',
+              presentation: 'transparentModal',
             }}
           >
             {showMain ? (
