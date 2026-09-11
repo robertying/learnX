@@ -62,6 +62,8 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
     };
   }, [showDetail, splitEnabled]);
 
+  const masterHidden = showDetail && !showMaster;
+
   return (
     <SplitViewContext.Provider
       value={{
@@ -77,11 +79,17 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
             testID="rns-split-master"
             style={[
               styles.master,
-              {
-                flex: showDetail ? 0 : 1,
-                display: showMaster ? 'flex' : 'none',
-              },
+              { flex: showDetail ? 0 : 1 },
+              // Not `display: 'none'`: Fabric doesn't mount the children of hidden views, so
+              // every toggle would destroy and recreate the whole master pane natively. On Mac
+              // Catalyst, the orphaned tab bar controller then keeps the window toolbar's tabs.
+              masterHidden && styles.masterHidden,
             ]}
+            pointerEvents={masterHidden ? 'none' : 'auto'}
+            accessibilityElementsHidden={masterHidden}
+            importantForAccessibility={
+              masterHidden ? 'no-hide-descendants' : 'auto'
+            }
           >
             {Children.toArray(children)[0]}
           </View>
@@ -116,6 +124,12 @@ const styles = StyleSheet.create({
   master: {
     width: Numbers.splitViewMasterWidth,
     zIndex: 2,
+  },
+  masterHidden: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: -Numbers.splitViewMasterWidth,
   },
   detail: {
     flex: 1,
