@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { RefreshControl, View } from 'react-native';
+import { Platform, RefreshControl, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
@@ -620,14 +620,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       />
       {isCourse ? (
         <ReorderableList
-          key={filterSelected}
+          key={`${filterSelected}-${reorderMode}`}
           {...listProps}
           dragEnabled={reorderMode}
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
           onIndexChange={handleDragChange}
           refreshControl={
-            DeviceInfo.isMac() ? undefined : listProps.refreshControl
+            DeviceInfo.isMac() || (Platform.OS === 'android' && reorderMode)
+              ? undefined
+              : listProps.refreshControl
           }
         />
       ) : (
