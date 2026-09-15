@@ -5,7 +5,7 @@ import {
   useCallback,
   useState,
 } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import { View, StyleSheet, Platform, ViewInstance } from 'react-native';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
@@ -55,10 +55,14 @@ const SwipeActions: React.FC<{
 
   const actionStyle = useAnimatedStyle(() => {
     return {
-      translateX:
-        position === 'right'
-          ? translation.get() + totalButtonWidth
-          : translation.get() - totalButtonWidth,
+      transform: [
+        {
+          translateX:
+            position === 'right'
+              ? translation.get() + totalButtonWidth
+              : translation.get() - totalButtonWidth,
+        },
+      ],
     };
   });
 
@@ -181,7 +185,7 @@ const CardWrapper: React.FC<
   const drag = useReorderableDrag();
 
   const snapRef = useRef<SwipeableMethods>(null);
-  const anchorRef = useRef<View>(null);
+  const anchorRef = useRef<ViewInstance>(null);
   const swipeableOpenRef = useRef(false);
   const swipeOpenedAtRef = useRef(0);
 

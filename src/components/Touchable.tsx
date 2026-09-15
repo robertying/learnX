@@ -1,6 +1,5 @@
 import {
   Platform,
-  Pressable,
   TouchableHighlight,
   TouchableHighlightProps,
   TouchableOpacity,

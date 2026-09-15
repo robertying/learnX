@@ -119,7 +119,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                 </Subheading>
               ) : null
             }
-            ItemSeparatorComponent={null}
           />
         )}
       </View>

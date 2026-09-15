@@ -847,11 +847,6 @@ const App = () => {
         </ToastProvider>
         <StatusBar
           barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
-          backgroundColor={
-            colorScheme === 'dark'
-              ? BrandDarkPaperTheme.colors.surface
-              : BrandLightPaperTheme.colors.surface
-          }
           animated
         />
       </PaperProvider>
