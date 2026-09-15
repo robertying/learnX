@@ -1,5 +1,6 @@
 export default {
   back: 'Back',
+  close: 'Close',
   notices: 'Notices',
   assignments: 'Assignments',
   files: 'Files',

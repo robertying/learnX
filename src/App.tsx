@@ -12,7 +12,9 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type {
+  NativeStackHeaderItem,
   NativeStackNavigationOptions,
+  NativeStackNavigationProp,
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
@@ -111,6 +113,16 @@ const BackButton = () => {
     />
   );
 };
+
+const getCloseHeaderItem = (
+  navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'goBack'>,
+): NativeStackHeaderItem => ({
+  type: 'button',
+  identifier: 'close',
+  label: t('close'),
+  icon: { type: 'sfSymbol', name: 'xmark' },
+  onPress: () => navigation.goBack(),
+});
 
 const getTitleOptions = (title: string, subtitle?: string) => {
   return {
@@ -418,11 +430,12 @@ const LoginStack = () => (
     <LoginNavigator.Screen
       name="SSO"
       component={SSO}
-      options={{
+      options={({ navigation }) => ({
         headerLeft: () => <BackButton />,
+        unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
         ...getTitleOptions(t('sso')),
         presentation: DeviceInfo.isMac() ? undefined : 'fullScreenModal',
-      }}
+      })}
     />
   </LoginNavigator.Navigator>
 );
@@ -432,10 +445,11 @@ const CourseXStack = () => (
     <CourseXNavigator.Screen
       name="CourseX"
       component={CourseX}
-      options={{
+      options={({ navigation }) => ({
         headerLeft: () => <BackButton />,
+        unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
         ...getTitleOptions(t('courseX')),
-      }}
+      })}
     />
   </CourseXNavigator.Navigator>
 );
@@ -445,10 +459,11 @@ const SearchStack = () => (
     <SearchNavigator.Screen
       name="Search"
       component={Search}
-      options={{
+      options={({ navigation }) => ({
         headerLeft: () => <BackButton />,
+        unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
         ...getTitleOptions(t('search')),
-      }}
+      })}
     />
     <SearchNavigator.Screen
       name="NoticeDetail"
@@ -473,10 +488,11 @@ const AssignmentSubmissionStack = () => (
     <AssignmentSubmissionNavigator.Screen
       name="AssignmentSubmission"
       component={AssignmentSubmission}
-      options={{
+      options={({ navigation }) => ({
         headerLeft: () => <BackButton />,
+        unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
         ...getTitleOptions(t('assignmentSubmission')),
-      }}
+      })}
     />
     <AssignmentSubmissionNavigator.Screen
       name="FileDetail"

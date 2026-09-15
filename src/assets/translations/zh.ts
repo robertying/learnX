@@ -2,6 +2,7 @@ import en from './en';
 
 const zh: typeof en = {
   back: '返回',
+  close: '关闭',
   notices: '通知',
   assignments: '作业',
   files: '文件',
