@@ -111,3 +111,53 @@ index 0000000..1111111 100644
          }
        #endif
        .introspectTabView { tabController in
+diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift b/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
+index 0000000..1111111 100644
+--- a/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
++++ b/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
+@@ -211,18 +211,41 @@
+   }
+ #endif
+ 
++#if targetEnvironment(macCatalyst)
++  override public func willMove(toWindow newWindow: UIWindow?) {
++    super.willMove(toWindow: newWindow)
++
++    // Mac Catalyst 27 hosts the tab bar in the window toolbar. UIKit only removes that toolbar in the
++    // tab bar controller's viewDidDisappear, and only if the controller can still reach the window.
++    // When this view leaves the window (e.g. the whole tab navigator unmounts), UIKit forwards the
++    // disappearance after the view is already detached, so the stale toolbar stays and blocks any
++    // later tab bar controller from installing its own. Disappear while the window is still reachable.
++    // UIKit skips its own forwarding since the controller has already disappeared, and forwards the
++    // appearance as usual if this view moves back into a window.
++    if newWindow == nil, window != nil, let hostingController {
++      hostingController.beginAppearanceTransition(false, animated: false)
++      hostingController.endAppearanceTransition()
++    }
++  }
++#endif
++
+   private func setupView() {
+     if self.hostingController != nil {
+       return
+     }
+ 
+-    self.hostingController = PlatformHostingController(rootView: TabViewImpl(props: props) { key in
++    // Capture self weakly: self retains the hosting controller, which retains these closures.
++    self.hostingController = PlatformHostingController(rootView: TabViewImpl(props: props) { [weak self] key in
++      guard let self else { return }
+       self.delegate?.onPageSelected(key: key, reactTag: self.reactTag)
+-    } onLongPress: { key in
++    } onLongPress: { [weak self] key in
++      guard let self else { return }
+       self.delegate?.onLongPress(key: key, reactTag: self.reactTag)
+-    } onLayout: { size  in
++    } onLayout: { [weak self] size  in
++      guard let self else { return }
+       self.delegate?.onLayout(size: size, reactTag: self.reactTag)
+-    } onTabBarMeasured: { height in
++    } onTabBarMeasured: { [weak self] height in
++      guard let self else { return }
+       self.delegate?.onTabBarMeasured(height: height, reactTag: self.reactTag)
+     })
+ 
