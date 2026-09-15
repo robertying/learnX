@@ -11,21 +11,3 @@ index 6c2bff0..b8e9637 100644
          addCategory(Intent.CATEGORY_OPENABLE)
          putExtra(Intent.EXTRA_ALLOW_MULTIPLE, options.multiple)
          type = if (options.type.size > 1) {
-diff --git a/node_modules/expo-document-picker/expo-module.config.json b/node_modules/expo-document-picker/expo-module.config.json
-index 28d3e03..172c7e1 100644
---- a/node_modules/expo-document-picker/expo-module.config.json
-+++ b/node_modules/expo-document-picker/expo-module.config.json
-@@ -4,12 +4,6 @@
-     "modules": ["DocumentPickerModule"]
-   },
-   "android": {
--    "modules": ["expo.modules.documentpicker.DocumentPickerModule"],
--    "publication": {
--      "groupId": "host.exp.exponent",
--      "artifactId": "expo.modules.documentpicker",
--      "version": "58.0.0-canary-20260909-ea7a89a",
--      "repository": "local-maven-repo"
--    }
-+    "modules": ["expo.modules.documentpicker.DocumentPickerModule"]
-   }
- }

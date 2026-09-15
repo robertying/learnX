@@ -113,7 +113,13 @@
     "autolinking": {
       "exclude": [
         "@expo/dom-webview"
+],
+      "android": {
+        "buildFromSource": [
+          "expo-calendar",
+          "expo-document-picker"
       ]
+}
     }
   }
 }
