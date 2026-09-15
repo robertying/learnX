@@ -49,24 +49,24 @@
     "babel-plugin-module-resolver": "5.0.3",
     "babel-plugin-preval": "5.1.0",
     "buffer": "6.0.3",
-    "darkreader": "4.9.130",
+    "darkreader": "4.9.131",
     "dayjs": "1.11.23",
     "dotenv": "17.4.2",
     "eslint": "8.57.1",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-prettier": "5.5.6",
-    "expo": "58.0.0-canary-20260909-ea7a89a",
-    "expo-background-task": "58.0.0-canary-20260909-ea7a89a",
-    "expo-blur": "58.0.0-canary-20260909-ea7a89a",
-    "expo-calendar": "58.0.0-canary-20260909-ea7a89a",
-    "expo-crypto": "58.0.0-canary-20260909-ea7a89a",
-    "expo-document-picker": "58.0.0-canary-20260909-ea7a89a",
-    "expo-file-system": "58.0.0-canary-20260909-ea7a89a",
-    "expo-haptics": "58.0.0-canary-20260909-ea7a89a",
-    "expo-image-picker": "58.0.0-canary-20260909-ea7a89a",
-    "expo-intent-launcher": "58.0.0-canary-20260909-ea7a89a",
-    "expo-secure-store": "58.0.0-canary-20260909-ea7a89a",
-    "expo-task-manager": "58.0.0-canary-20260909-ea7a89a",
+    "expo": "58.0.0-preview.1",
+    "expo-background-task": "58.0.1",
+    "expo-blur": "58.0.0",
+    "expo-calendar": "58.0.0",
+    "expo-crypto": "58.0.1",
+    "expo-document-picker": "58.0.0",
+    "expo-file-system": "58.0.0",
+    "expo-haptics": "58.0.1",
+    "expo-image-picker": "58.0.1",
+    "expo-intent-launcher": "58.0.0",
+    "expo-secure-store": "58.0.0",
+    "expo-task-manager": "58.0.2",
     "fuse.js": "7.5.0",
     "graphql": "17.0.2",
     "graphql-request": "7.4.0",
@@ -79,12 +79,12 @@
     "promise.allsettled": "1.0.7",
     "react": "19.3.0",
     "react-native": "0.87.1",
-    "react-native-blob-util": "0.24.11",
+    "react-native-blob-util": "0.25.0",
     "react-native-bottom-tabs": "1.4.0",
     "react-native-device-info": "15.0.2",
     "react-native-fs": "2.20.0",
-    "react-native-gesture-handler": "3.2.1",
-    "react-native-localize": "3.7.0",
+    "react-native-gesture-handler": "3.3.0",
+    "react-native-localize": "3.7.1",
     "react-native-pager-view": "9.0.4",
     "react-native-paper": "5.15.3",
     "react-native-paper-dates": "0.23.16",
@@ -92,7 +92,7 @@
     "react-native-reanimated": "4.6.0",
     "react-native-reorderable-list": "0.18.1",
     "react-native-safe-area-context": "5.9.1",
-    "react-native-screens": "4.27.0",
+    "react-native-screens": "4.28.0",
     "react-native-share": "12.3.1",
     "react-native-share-menu": "6.0.0",
     "react-native-tab-view": "4.3.2",
@@ -113,13 +113,13 @@
     "autolinking": {
       "exclude": [
         "@expo/dom-webview"
-],
+      ],
       "android": {
         "buildFromSource": [
           "expo-calendar",
           "expo-document-picker"
-      ]
-}
+        ]
+      }
     }
   }
 }
