@@ -36,6 +36,10 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
+          # Temporary: surface the underlying SDK error until the immediate
+          # is_error:true failures on the first turn are diagnosed.
+          show_full_output: true
+
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
