@@ -29,6 +29,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+          # Detached HEAD: claude-code-action fetches fork PRs into a local branch
+          # named after the PR head ref, which fails if that branch (e.g. `main`)
+          # is checked out.
+          ref: ${{ github.sha }}
 
       - name: Run Claude Code
         id: claude
