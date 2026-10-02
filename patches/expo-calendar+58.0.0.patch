@@ -33,3 +33,68 @@ index c570e729..869a6148 100644
    // getInt() returns 0 for null columns, but 0 is also the int value of AttendeeRole.NONE.
    // isNull() lets us distinguish "not set in DB" from "explicitly set to NONE".
    if (isNull(index)) {
+diff --git a/node_modules/expo-calendar/ios/CalendarUtils.swift b/node_modules/expo-calendar/ios/CalendarUtils.swift
+--- a/node_modules/expo-calendar/ios/CalendarUtils.swift
++++ b/node_modules/expo-calendar/ios/CalendarUtils.swift
+@@ -142,16 +142,24 @@
+   return calendarEventAlarm
+ }
+
+-func createDateComponents(for date: Date, allDay: Bool = false) -> DateComponents {
+-  let currentCalendar = Calendar.current
++func createDateComponents(for date: Date, allDay: Bool = false, timeZone: TimeZone? = nil) -> DateComponents {
++  var calendar = Calendar.current
++  if !allDay, let timeZone {
++    calendar.timeZone = timeZone
++  }
+   let dateComponents: Set<Calendar.Component> = allDay
+     ? [.year, .month, .day]
+     : [.year, .month, .day, .hour, .minute, .second]
+
+-  return currentCalendar.dateComponents(
++  var components = calendar.dateComponents(
+     dateComponents,
+     from: date
+   )
++  // iOS reminders need a component time zone to keep the same instant across devices.
++  if !allDay {
++    components.timeZone = timeZone
++  }
++  return components
+ }
+
+ func getAvailability(availability: String) -> EKEventAvailability {
+diff --git a/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift b/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift
+--- a/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift
++++ b/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift
+@@ -78,10 +78,14 @@
+     let dueDate = parse(date: reminderRecord.dueDate)
+     let completionDate = parse(date: reminderRecord.completionDate)
+
++    // EKReminder.timeZone can stay nil until its date components have been set.
++    var resolvedTimeZone = reminder.timeZone
+     if nullableSet.contains("timeZone") {
++      resolvedTimeZone = nil
+       reminder.timeZone = nil
+     } else if let timeZone = reminderRecord.timeZone {
+       if let eventTimeZone = TimeZone(identifier: timeZone) {
++        resolvedTimeZone = eventTimeZone
+         reminder.timeZone = eventTimeZone
+       } else {
+         throw InvalidTimeZoneException(timeZone)
+@@ -116,13 +120,13 @@
+     if nullableSet.contains("startDate") {
+       reminder.startDateComponents = nil
+     } else if let startDate {
+-      reminder.startDateComponents = createDateComponents(for: startDate, allDay: isAllDay)
++      reminder.startDateComponents = createDateComponents(for: startDate, allDay: isAllDay, timeZone: resolvedTimeZone)
+     }
+
+     if nullableSet.contains("dueDate") {
+       reminder.dueDateComponents = nil
+     } else if let dueDate {
+-      reminder.dueDateComponents = createDateComponents(for: dueDate, allDay: isAllDay)
++      reminder.dueDateComponents = createDateComponents(for: dueDate, allDay: isAllDay, timeZone: resolvedTimeZone)
+     }
+
+     if nullableSet.contains("completionDate") {

@@ -51,6 +51,12 @@ const About: React.FC<Props> = props => {
         >
           Yinuo Chen (Brunch-Life)
         </Text>
+        <Text
+          style={[styles.text, styles.link]}
+          onPress={() => Linking.openURL('https://github.com/lyrenius')}
+        >
+          Junbo Niu (lyrenius)
+        </Text>
         <Text style={styles.text}>
           {t('opensourceAt')}{' '}
           <Text
