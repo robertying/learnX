@@ -66,7 +66,7 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
   }, [navigation, disableAnimation]);
 
   useEffect(() => {
-    fetch(url);
+    fetch(url).catch(() => {});
   }, [url]);
 
   return (

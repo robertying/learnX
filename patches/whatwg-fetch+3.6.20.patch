@@ -1,0 +1,38 @@
+diff --git a/node_modules/whatwg-fetch/dist/fetch.umd.js b/node_modules/whatwg-fetch/dist/fetch.umd.js
+index 7a0d852..3640211 100644
+--- a/node_modules/whatwg-fetch/dist/fetch.umd.js
++++ b/node_modules/whatwg-fetch/dist/fetch.umd.js
+@@ -558,7 +558,13 @@
+         options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL');
+         var body = 'response' in xhr ? xhr.response : xhr.responseText;
+         setTimeout(function() {
+-          resolve(new Response(body, options));
++          // A status outside [200, 599] (e.g. 0) makes the Response constructor throw;
++          // reject instead of crashing with an uncaught error inside this timer
++          try {
++            resolve(new Response(body, options));
++          } catch (error) {
++            reject(new TypeError('Network request failed'));
++          }
+         }, 0);
+       };
+ 
+diff --git a/node_modules/whatwg-fetch/fetch.js b/node_modules/whatwg-fetch/fetch.js
+index f39a983..149743a 100644
+--- a/node_modules/whatwg-fetch/fetch.js
++++ b/node_modules/whatwg-fetch/fetch.js
+@@ -552,7 +552,13 @@ export function fetch(input, init) {
+       options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
+       var body = 'response' in xhr ? xhr.response : xhr.responseText
+       setTimeout(function() {
+-        resolve(new Response(body, options))
++        // A status outside [200, 599] (e.g. 0) makes the Response constructor throw;
++        // reject instead of crashing with an uncaught error inside this timer
++        try {
++          resolve(new Response(body, options))
++        } catch (error) {
++          reject(new TypeError('Network request failed'))
++        }
+       }, 0)
+     }
+ 
