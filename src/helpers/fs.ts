@@ -10,6 +10,7 @@ import { addCSRF, loginWithFingerPrint } from 'data/source';
 import { store } from 'data/store';
 import { File } from 'data/types/state';
 import Urls from 'constants/Urls';
+import DeviceInfo from 'constants/DeviceInfo';
 
 const macDownloadDirectory = ExpoFileSystem.documentDirectory?.replace(
   'Documents',
@@ -174,6 +175,31 @@ export const shareFile = async (file: File) => {
       (file.fileType && mime.lookup(file.fileType)) ||
       'application/octet-stream',
     title: '分享文件',
+    showAppsToView: true,
+    failOnCancel: false,
+  });
+};
+
+export const exportTextFile = async (
+  filename: string,
+  content: string,
+  type: string,
+) => {
+  if (DeviceInfo.isMac()) {
+    await ExpoFileSystem.writeAsStringAsync(
+      `${macDownloadDirectory}${filename}`,
+      content,
+    );
+    return;
+  }
+
+  const path = `${ExpoFileSystem.cacheDirectory}${filename}`;
+  await ExpoFileSystem.writeAsStringAsync(path, content);
+
+  await Share.open({
+    filename,
+    url: path,
+    type,
     showAppsToView: true,
     failOnCancel: false,
   });

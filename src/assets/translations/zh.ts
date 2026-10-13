@@ -66,6 +66,14 @@ const zh: typeof en = {
   deleteFailedNoReminderPermission:
     '删除失败：请给予 App 提醒事项访问权限；如果您已经授予该权限，请尝试重启 App',
   deleteFailed: '删除失败：',
+  exportSyncedCalendars: '导出已同步的日历（.ics）',
+  exportSyncedCalendarsDescription:
+    '将已同步到日历的课表与作业导出为 .ics 文件，可导入其他日历应用；不包含提醒事项。',
+  calendarExportSavedToDownloads: '已将 learnX.ics 导出到“下载”文件夹',
+  calendarExportNoCalendarPermission:
+    '导出失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
+  calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历',
+  calendarExportFailed: '导出失败：',
   graduate: '研究生',
   syncCourseSchedule: '同步课表',
   classAlarm: '上课提醒',

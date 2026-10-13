@@ -12,11 +12,13 @@ import { store } from 'data/store';
 import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
 import { removeTags } from './html';
+import { buildICS, ICSEvent } from './ics';
 import locationMappings from '../assets/locationMappings.json';
 
 const courseCalendarName = 'learnX 课表';
 const assignmentCalendarReminderName = 'learnX 作业';
 const TZ = 'Asia/Shanghai';
+const exportCalendarName = 'learnX';
 
 export const getAndRequestPermission = async (
   type: 'calendar' | 'reminder',
@@ -426,6 +428,78 @@ export const removeCalendars = async () => {
   store.dispatch(setSetting('syncedReminderAssignments', {}));
   store.dispatch(setSetting('courseCalendarId', undefined));
 };
+
+export const exportSyncedCalendarsToICS = async () => {
+  if (!(await getAndRequestPermission('calendar'))) {
+    throw new Error('Missing calendar permission');
+  }
+
+  const settings = store.getState().settings;
+
+  const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
+  const courseCalendars = calendars.filter(
+    c => c.id === settings.courseCalendarId || c.title === courseCalendarName,
+  );
+  const assignmentCalendars = calendars.filter(
+    c =>
+      c.id === settings.assignmentCalendarId ||
+      c.title === assignmentCalendarReminderName,
+  );
+
+  const startDate = dayjs().subtract(1, 'year').toDate();
+  const endDate = dayjs().add(1, 'year').toDate();
+
+  const events: ICSEvent[] = [];
+  const uids = new Set<string>();
+
+  await Promise.all(
+    [...courseCalendars, ...assignmentCalendars].map(async calendar => {
+      const isCourse = courseCalendars.includes(calendar);
+
+      for (const e of await calendar.listEvents(startDate, endDate)) {
+        const start = new Date(e.startDate);
+        // Course events are recreated on every sync so their ids are not stable
+        const uid = isCourse
+          ? `course-${start.getTime()}-${hash(e.title)}@learnx`
+          : `${e.id}@learnx`;
+        if (uids.has(uid)) {
+          continue;
+        }
+        uids.add(uid);
+
+        events.push({
+          uid,
+          title: e.title,
+          startDate: start,
+          endDate: new Date(e.endDate),
+          allDay: e.allDay,
+          location: e.location,
+          notes: e.notes,
+          url: e.url,
+          alarmOffsets: (e.alarms ?? [])
+            .map(alarm => alarm.relativeOffset)
+            .filter(offset => typeof offset === 'number'),
+        });
+      }
+    }),
+  );
+
+  if (events.length === 0) {
+    throw new Error('No synced events');
+  }
+
+  events.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
+  return buildICS(exportCalendarName, events);
+};
+
+function hash(text: string): string {
+  let result = 5381;
+  for (let i = 0; i < text.length; i++) {
+    result = (result * 33 + text.charCodeAt(i)) % 0x100000000;
+  }
+  return result.toString(16);
+}
 
 function sanitizeLocation(location: string): string {
   location = location.trim();

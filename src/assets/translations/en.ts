@@ -66,6 +66,16 @@ export default {
   deleteFailedNoReminderPermission:
     'Failed to delete. Please grant the App access to reminders, or try restarting the App if you have already done so.',
   deleteFailed: 'Failed to delete: ',
+  exportSyncedCalendars: 'Export Synced Calendars (.ics)',
+  exportSyncedCalendarsDescription:
+    'Export course schedule and assignments already synced to your calendar as an .ics file, which can be imported into other calendar apps. Reminders are not included.',
+  calendarExportSavedToDownloads:
+    'Successfully exported learnX.ics to Downloads',
+  calendarExportNoCalendarPermission:
+    'Failed to export. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
+  calendarExportNoEvent:
+    'Nothing to export. Please sync course schedule or assignments to your calendar first.',
+  calendarExportFailed: 'Failed to export: ',
   graduate: 'Graduate',
   syncCourseSchedule: 'Sync Course Schedule',
   classAlarm: 'Class Alert',

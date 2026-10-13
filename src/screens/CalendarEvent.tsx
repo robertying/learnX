@@ -22,10 +22,12 @@ import { useAppDispatch, useAppSelector } from 'data/store';
 import { setSetting } from 'data/actions/settings';
 import { dataSource, loginWithFingerPrint } from 'data/source';
 import {
+  exportSyncedCalendarsToICS,
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'helpers/event';
+import { exportTextFile } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
 import useNavigationAnimation from 'hooks/useNavigationAnimation';
@@ -73,6 +75,7 @@ const CalendarEvent: React.FC<Props> = props => {
     useState(false);
   const [assignmentReminderSyncing, setAssignmentReminderSyncing] =
     useState(false);
+  const [exporting, setExporting] = useState(false);
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [startDate, setStartDate] = useState<CalendarDate>(dayjs().toDate());
   const [endDate, setEndDate] = useState<CalendarDate>(
@@ -179,6 +182,28 @@ const CalendarEvent: React.FC<Props> = props => {
       dispatch(setSetting('assignmentCalendarSync', enabled));
     } else {
       dispatch(setSetting('assignmentReminderSync', enabled));
+    }
+  };
+
+  const handleCalendarExport = async () => {
+    setExporting(true);
+
+    try {
+      const ics = await exportSyncedCalendarsToICS();
+      await exportTextFile('learnX.ics', ics, 'text/calendar');
+      if (DeviceInfo.isMac()) {
+        toast(t('calendarExportSavedToDownloads'), 'success');
+      }
+    } catch (err) {
+      if ((err as Error).message === 'Missing calendar permission') {
+        toast(t('calendarExportNoCalendarPermission'), 'error');
+      } else if ((err as Error).message === 'No synced events') {
+        toast(t('calendarExportNoEvent'), 'warning');
+      } else {
+        toast(t('calendarExportFailed') + (err as Error).message, 'error');
+      }
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -446,6 +471,17 @@ const CalendarEvent: React.FC<Props> = props => {
           ) : null}
           <Caption style={styles.caption}>
             {t('assignmentSyncDescription')}
+          </Caption>
+          <TableCell
+            style={styles.marginTop}
+            iconName="ios-share"
+            primaryText={t('exportSyncedCalendars')}
+            type="none"
+            onPress={handleCalendarExport}
+            loading={exporting}
+          />
+          <Caption style={styles.caption}>
+            {t('exportSyncedCalendarsDescription')}
           </Caption>
           <TableCell
             style={styles.marginTop}
