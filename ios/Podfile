@@ -4,6 +4,10 @@ require File.join(File.dirname(`node --print "require.resolve('react-native/pack
 platform :ios, '16.6'
 prepare_react_native_project!
 
+# Build React Native core and its third-party deps (folly, etc.) from source.
+ENV['RCT_USE_RN_DEP'] = '0'
+ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
+
 ENV['USE_FRAMEWORKS'] = 'static'
 use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym
 
