@@ -33,7 +33,7 @@ export const getLearnXFilesDir = () => {
     settings.fileUseDocumentDir
       ? ExpoFileSystem.documentDirectory
       : ExpoFileSystem.cacheDirectory
-  }learnX-files`;
+  }`;
 };
 
 export const ensureLearnXFilesDir = async () => {
@@ -54,7 +54,7 @@ export const downloadFile = async (
 
   const settings = store.getState().settings;
 
-  const dir = `${getLearnXFilesDir()}/${file.courseName}/${file.id}`;
+  const dir = `${getLearnXFilesDir()}/${file.courseName}-${file.id}`;
   await fs.mkdir(dir);
 
   let path = settings.fileOmitCourseName
@@ -72,7 +72,9 @@ export const downloadFile = async (
   }
 
   if (refresh) {
-    await loginWithFingerPrint();
+    try {
+      await loginWithFingerPrint();
+    } catch {}
   }
   url = addCSRF(url);
 
@@ -210,7 +212,7 @@ export const removeFileDir = async () => {
     store.getState().settings.fileUseDocumentDir
       ? ExpoFileSystem.documentDirectory
       : ExpoFileSystem.cacheDirectory
-  }learnX-files`;
+  }`;
 
   if (await fs.exists(dir)) {
     await fs.unlink(dir);
