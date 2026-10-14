@@ -1,0 +1,58 @@
+diff --git a/node_modules/react-native-tab-view/lib/module/SceneView.js b/node_modules/react-native-tab-view/lib/module/SceneView.js
+index 4880e9b..cde5db9 100644
+--- a/node_modules/react-native-tab-view/lib/module/SceneView.js
++++ b/node_modules/react-native-tab-view/lib/module/SceneView.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ 
+ import * as React from 'react';
+-import { StyleSheet, View } from 'react-native';
++import { Platform, StyleSheet, View } from 'react-native';
+ import { jsx as _jsx } from "react/jsx-runtime";
+ export function SceneView({
+   children,
+@@ -51,9 +51,12 @@ export function SceneView({
+     style: [styles.route,
+     // If we don't have the layout yet, make the focused screen fill the container
+     // This avoids delay before we are able to render pages side by side
+-    layout.width ? {
++    layout.width ?
++    // The native pager sizes each page itself, in the same layout pass as it is resized. The width measured
++    // here would only catch up afterwards.
++    Platform.OS === 'web' ? {
+       width: layout.width
+-    } : focused ? StyleSheet.absoluteFill : null, style],
++    } : null : focused ? StyleSheet.absoluteFill : null, style],
+     children:
+     // Only render the route only if it's either focused or layout is available
+     // When layout is not available, we must not render unfocused routes
+diff --git a/node_modules/react-native-tab-view/src/SceneView.tsx b/node_modules/react-native-tab-view/src/SceneView.tsx
+index f03cc96..81875a0 100644
+--- a/node_modules/react-native-tab-view/src/SceneView.tsx
++++ b/node_modules/react-native-tab-view/src/SceneView.tsx
+@@ -1,5 +1,11 @@
+ import * as React from 'react';
+-import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';
++import {
++  Platform,
++  type StyleProp,
++  StyleSheet,
++  View,
++  type ViewStyle,
++} from 'react-native';
+ 
+ import type {
+   EventEmitterProps,
+@@ -81,7 +87,11 @@ export function SceneView<T extends Route>({
+         // If we don't have the layout yet, make the focused screen fill the container
+         // This avoids delay before we are able to render pages side by side
+         layout.width
+-          ? { width: layout.width }
++          ? // The native pager sizes each page itself, in the same layout pass as it is resized. The width measured
++            // here would only catch up afterwards.
++            Platform.OS === 'web'
++            ? { width: layout.width }
++            : null
+           : focused
+             ? StyleSheet.absoluteFill
+             : null,

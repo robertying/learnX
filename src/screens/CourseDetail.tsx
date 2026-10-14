@@ -1,5 +1,12 @@
 import { memo, useCallback, useContext, useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import {
+  Animated,
+  Dimensions,
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Divider, Text, useTheme } from 'react-native-paper';
 import {
   NativeStackNavigationProp,
@@ -8,11 +15,8 @@ import {
 import { StackActions, useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
-  TabBar,
   TabView,
   NavigationState,
-  TabDescriptor,
-  TabBarItem,
 } from 'react-native-tab-view';
 import Icon from '@react-native-vector-icons/material-icons';
 import { Assignment, File, Notice } from 'data/types/state';
@@ -176,40 +180,70 @@ const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
   const assignments = useAppSelector(state => state.assignments.items);
   const files = useAppSelector(state => state.files.items);
 
+
   const [index, setIndex] = useState(0);
 
-  const renderTabBar = (
-    props: SceneRendererProps & {
-      navigationState: NavigationState<{
-        key: string;
-        title: string;
-      }>;
-      options:
-        | Record<
-            string,
-            TabDescriptor<{
-              key: string;
-              title: string;
-            }>
+  // Laid out with flex and percentages rather than the measured width that
+  // TabBar goes by, so that it keeps up as the column is resized (e.g. while
+  // a sidebar slides in or out). Only the indicator's movement between tabs
+  // during a swipe is measured, and it is nothing once the pager comes to rest.
+  const renderTabBar = ({
+    navigationState,
+    position,
+    layout,
+    jumpTo,
+  }: SceneRendererProps & {
+    navigationState: NavigationState<{
+      key: string;
+      title: string;
+    }>;
+  }) => {
+    const tabCount = navigationState.routes.length;
+    const tabWidth = layout.width / tabCount;
+
+    return (
+      <View
+        style={[styles.tabBar, { backgroundColor: theme.colors.surface }]}
+        accessibilityRole="tablist"
+      >
+        {navigationState.routes.map((route, i) => (
+          <Pressable
+            key={route.key}
+            style={styles.tab}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: i === navigationState.index }}
+            android_ripple={{ color: theme.colors.surfaceVariant }}
+            onPress={() => jumpTo(route.key)}
           >
-        | undefined;
-    },
-  ) => (
-    <TabBar
-      {...props}
-      style={{ backgroundColor: theme.colors.surface }}
-      indicatorStyle={{
-        backgroundColor: theme.colors.primary,
-      }}
-      renderTabBarItem={({ key, ...itemProps }) => (
-        <TabBarItem
-          key={key}
-          {...itemProps}
-          labelStyle={{ color: theme.colors.onSurface }}
+            <Text style={[styles.tabLabel, { color: theme.colors.onSurface }]}>
+              {route.title}
+            </Text>
+          </Pressable>
+        ))}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            styles.tabIndicator,
+            {
+              backgroundColor: theme.colors.primary,
+              width: `${100 / tabCount}%`,
+              start: `${(100 / tabCount) * navigationState.index}%`,
+              transform: [
+                {
+                  translateX: tabWidth
+                    ? Animated.multiply(
+                        Animated.subtract(position, navigationState.index),
+                        tabWidth,
+                      )
+                    : 0,
+                },
+              ],
+            },
+          ]}
         />
-      )}
-    />
-  );
+      </View>
+    );
+  };
 
   const renderScene = ({
     route,
@@ -311,6 +345,26 @@ const styles = StyleSheet.create({
   },
   textButton: {
     fontSize: 16,
+  },
+  tabBar: {
+    flexDirection: 'row',
+  },
+  tab: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 10,
+    minHeight: 48,
+  },
+  tabLabel: {
+    margin: 4,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  tabIndicator: {
+    position: 'absolute',
+    bottom: 0,
+    height: 2,
   },
 });
 
