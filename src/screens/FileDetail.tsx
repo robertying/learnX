@@ -79,6 +79,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         setPath(path);
         setProgress(0);
       } catch {
+        setProgress(0);
         setError(true);
         toast(t('fileDownloadFailed'), 'error');
       }
@@ -274,9 +275,6 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeArea>
-      {progress ? (
-        <ProgressBar style={styles.progressBar} progress={progress} />
-      ) : null}
       {error ? (
         <View style={styles.errorRoot}>
           <Icon
@@ -290,7 +288,8 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           </Text>
         </View>
       ) : !path ? (
-        <SafeArea style={styles.skeletons}>
+        <View>
+          {progress ? <ProgressBar progress={progress} /> : null}
           <Skeleton />
           <Skeleton />
           <Skeleton />
@@ -301,7 +300,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           <Skeleton />
           <Skeleton />
           <Skeleton />
-        </SafeArea>
+        </View>
       ) : !showInfo && canRender ? (
         file.fileType === 'pdf' ? (
           <Pdf style={Styles.flex1} source={{ uri: path }} fitPolicy={0} />
@@ -405,12 +404,6 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  progressBar: {
-    alignSelf: 'stretch',
-  },
-  skeletons: {
-    alignSelf: 'stretch',
-  },
   errorRoot: {
     flex: 1,
     alignItems: 'center',
