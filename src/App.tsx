@@ -364,10 +364,7 @@ const getTabBarIcon = (
     ? { sfSymbol }
     : MaterialIcons.getImageSourceSync(materialIcon, 24)!;
 
-// iPhones don't show the detail column; the native split only left them with an
-// empty one on first display.
-const useNativeSplit =
-  Platform.OS === 'ios' && (DeviceInfo.isTablet() || DeviceInfo.isMac());
+const useNativeSplit = Platform.OS === 'ios';
 
 // The tabs as the sidebar of a single split, rather than a tab bar. On iPad, the
 // tab bar turns into a sidebar of its own.
