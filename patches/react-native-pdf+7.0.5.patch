@@ -11,3 +11,50 @@ index 34da324..c712401 100644
 +    implementation 'io.legere:pdfiumandroid:1.0.35'
 +    implementation 'com.google.code.gson:gson:2.14.0'
  }
+diff --git a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm b/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
+index 1bc263b..870fd96 100644
+--- a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
++++ b/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
+@@ -451,32 +451,30 @@ - (void)didSetProps:(NSArray<NSString *> *)changedProps
+                 pdfPageRect = CGRectMake(0, 0, pdfPageRect.size.height, pdfPageRect.size.width);
+             }
+ 
++            // Setting the limits or the scale factor posts a scale change, which rewrites _scale.
++            float scale = _scale;
++
+             if (_fitPolicy == 0) {
+                 _fixScaleFactor = self.frame.size.width/pdfPageRect.size.width;
+-                _pdfView.scaleFactor = _scale * _fixScaleFactor;
+-                _pdfView.minScaleFactor = _fixScaleFactor*_minScale;
+-                _pdfView.maxScaleFactor = _fixScaleFactor*_maxScale;
+             } else if (_fitPolicy == 1) {
+                 _fixScaleFactor = self.frame.size.height/pdfPageRect.size.height;
+-                _pdfView.scaleFactor = _scale * _fixScaleFactor;
+-                _pdfView.minScaleFactor = _fixScaleFactor*_minScale;
+-                _pdfView.maxScaleFactor = _fixScaleFactor*_maxScale;
+             } else {
+                 float pageAspect = pdfPageRect.size.width/pdfPageRect.size.height;
+                 float reactViewAspect = self.frame.size.width/self.frame.size.height;
+                 if (reactViewAspect>pageAspect) {
+                     _fixScaleFactor = self.frame.size.height/pdfPageRect.size.height;
+-                    _pdfView.scaleFactor = _scale * _fixScaleFactor;
+-                    _pdfView.minScaleFactor = _fixScaleFactor*_minScale;
+-                    _pdfView.maxScaleFactor = _fixScaleFactor*_maxScale;
+                 } else {
+                     _fixScaleFactor = self.frame.size.width/pdfPageRect.size.width;
+-                    _pdfView.scaleFactor = _scale * _fixScaleFactor;
+-                    _pdfView.minScaleFactor = _fixScaleFactor*_minScale;
+-                    _pdfView.maxScaleFactor = _fixScaleFactor*_maxScale;
+                 }
+             }
+ 
++            // The limits go first: PDFView clamps the scale factor to them, so when the view
++            // shrinks, the new scale factor would otherwise be held at the old minimum.
++            _pdfView.minScaleFactor = _fixScaleFactor*_minScale;
++            _pdfView.maxScaleFactor = _fixScaleFactor*_maxScale;
++            _pdfView.scaleFactor = scale * _fixScaleFactor;
++            _scale = scale;
++
+         }
+ 
+         if (_pdfDocument && ([changedProps containsObject:@"path"] || [changedProps containsObject:@"scale"])) {
