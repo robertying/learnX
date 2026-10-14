@@ -195,31 +195,31 @@ PODS:
   - GoogleDataTransport (10.1.1):
     - nanopb (~> 3.30910.0)
     - PromisesObjC (~> 2.4)
-  - GoogleUtilities/AppDelegateSwizzler (8.1.4):
+  - GoogleUtilities/AppDelegateSwizzler (8.1.5):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Environment (8.1.4):
+  - GoogleUtilities/Environment (8.1.5):
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Logger (8.1.4):
+  - GoogleUtilities/Logger (8.1.5):
     - GoogleUtilities/Environment
     - GoogleUtilities/Privacy
-  - GoogleUtilities/MethodSwizzler (8.1.4):
+  - GoogleUtilities/MethodSwizzler (8.1.5):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Network (8.1.4):
+  - GoogleUtilities/Network (8.1.5):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Privacy
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (8.1.4)":
+  - "GoogleUtilities/NSData+zlib (8.1.5)":
     - GoogleUtilities/Privacy
-  - GoogleUtilities/Privacy (8.1.4)
-  - GoogleUtilities/Reachability (8.1.4):
+  - GoogleUtilities/Privacy (8.1.5)
+  - GoogleUtilities/Reachability (8.1.5):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
-  - GoogleUtilities/UserDefaults (8.1.4):
+  - GoogleUtilities/UserDefaults (8.1.5):
     - GoogleUtilities/Logger
     - GoogleUtilities/Privacy
   - hermes-engine (250829098.0.17):
@@ -3486,6 +3486,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - Sidebar (1.0.0):
+    - ExpoModulesCore
   - SocketRocket (0.7.1)
   - SwiftUIIntrospect (1.3.0)
   - UMAppLoader (58.0.2)
@@ -3617,6 +3619,7 @@ DEPENDENCIES:
   - RNShare (from `../node_modules/react-native-share`)
   - RNShareMenu (from `../node_modules/react-native-share-menu`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
+  - Sidebar (from `../modules/sidebar/ios`)
   - SocketRocket (~> 0.7.1)
   - UMAppLoader (from `../node_modules/unimodules-app-loader/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -3886,6 +3889,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-share-menu"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
+  Sidebar:
+    :path: "../modules/sidebar/ios"
   UMAppLoader:
     :path: "../node_modules/unimodules-app-loader/ios"
   Yoga:
@@ -3929,7 +3934,7 @@ SPEC CHECKSUMS:
   glog: e56ede4028c4b7418e6b1195a36b1656bb35e225
   GoogleAppMeasurement: 700dce7541804bec33db590a5c496b663fbe2539
   GoogleDataTransport: a24e58982ab3ba2f64d79613e027fe7f57e88539
-  GoogleUtilities: db34c1c11c6f2eccb6fab2340cb8ceb1451299dc
+  GoogleUtilities: 7dc09b3fa9ecb5c2298b952313d14628b61b9da3
   hermes-engine: 63c5db7d529c36335fada6582fd293ae2a105d77
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
@@ -4028,11 +4033,12 @@ SPEC CHECKSUMS:
   RNShare: e5c1d730b40f38d761f222841659afe94784b86d
   RNShareMenu: e1cdfa3b9af89416afc75a80377cfd0de4f30ded
   RNWorklets: ddf7c7c56a25d36eb840d0c982f6a3a780228294
+  Sidebar: f5539b7b9e358136dcba19d04f65fbe4e239fc4c
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   SwiftUIIntrospect: fee9aa07293ee280373a591e1824e8ddc869ba5d
   UMAppLoader: 813e4d172a12484f5bb149d9e99b1e7c11ae0b0c
   Yoga: 0ae0debbb3f67b086f912c9d0c8faa2c7fb87c8a
 
-PODFILE CHECKSUM: d5fbaed5ded874f26faf5e5e04c6f8ce48f5322e
+PODFILE CHECKSUM: db532dd38903c7ad8e4a76d2b2f7fb2940939915
 
 COCOAPODS: 1.17.0
