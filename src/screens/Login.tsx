@@ -104,8 +104,16 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeArea>
-      <ScrollView style={Styles.flex1} contentContainerStyle={styles.root}>
-        <KeyboardAvoidingView style={styles.inputs} behavior="padding">
+      <ScrollView
+        style={Styles.flex1}
+        contentContainerStyle={styles.root}
+        automaticallyAdjustKeyboardInsets
+      >
+        <KeyboardAvoidingView
+          style={styles.inputs}
+          behavior="padding"
+          enabled={Platform.OS !== 'ios'}
+        >
           <Logo iosSize={120} style={styles.logo} />
           <TextInput
             style={styles.textInput}
@@ -117,6 +125,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             autoCapitalize="none"
             autoCorrect={false}
             enablesReturnKeyAutomatically
+            submitBehavior="submit"
             onSubmitEditing={handleNext}
             value={username}
             onChangeText={v => setUsername(v.trim())}
@@ -133,6 +142,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             autoCorrect={false}
             secureTextEntry
             enablesReturnKeyAutomatically
+            onSubmitEditing={handleLogin}
             value={password}
             onChangeText={v => setPassword(v.trim())}
           />
