@@ -102,6 +102,7 @@ import { SplitViewProvider } from 'components/SplitView';
 import NativeSplitViewProvider, {
   useSplitLaidOut,
 } from 'components/NativeSplitView';
+import createSidebarSplitNavigator from 'components/SidebarSplitNavigator';
 import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
 import Styles from 'constants/Styles';
@@ -205,6 +206,7 @@ const FileStackNavigator = createNativeStackNavigator<FileStackParams>();
 const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
 const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
+const MainSidebarNavigator = createSidebarSplitNavigator<MainTabParams>();
 const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
 const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
@@ -367,10 +369,14 @@ const getTabBarIcon = (
 const useNativeSplit =
   Platform.OS === 'ios' && (DeviceInfo.isTablet() || DeviceInfo.isMac());
 
+// The tabs as the sidebar of a single split, rather than a tab bar. On iPad, the
+// tab bar turns into a sidebar of its own.
+const useSidebarSplit = Platform.OS === 'ios' && DeviceInfo.isMac();
+
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
 // contains the split view, so each tab gets its own split.
 const withSplit = (Master: React.ComponentType) =>
-  useNativeSplit
+  useNativeSplit && !useSidebarSplit
     ? () => (
         <TabSplit>
           <Master />
@@ -457,10 +463,62 @@ const MainTab = () => {
     }
   }, [dispatch, loggedIn]);
 
+  const settingsBadge =
+    newChangelog || newUpdate || !courseInformationSharingBadgeShown;
+
+  if (useSidebarSplit) {
+    return (
+      <MainSidebarNavigator.Navigator renderDetail={renderDetailContainer}>
+        <MainSidebarNavigator.Screen
+          name="NoticeStack"
+          component={NoticeTab}
+          options={{ title: t('notices'), sfSymbol: 'bell.fill' }}
+        />
+        <MainSidebarNavigator.Screen
+          name="AssignmentStack"
+          component={AssignmentTab}
+          options={{
+            lazy: mountedTabCount <= 1,
+            title: t('assignments'),
+            sfSymbol: 'list.bullet.clipboard.fill',
+          }}
+        />
+        <MainSidebarNavigator.Screen
+          name="FileStack"
+          component={FileTab}
+          options={{
+            lazy: mountedTabCount <= 2,
+            title: t('files'),
+            sfSymbol: 'doc.fill',
+          }}
+        />
+        <MainSidebarNavigator.Screen
+          name="CourseStack"
+          component={CourseTab}
+          options={{
+            lazy: mountedTabCount <= 3,
+            title: t('courses'),
+            sfSymbol: 'square.grid.3x3.fill',
+          }}
+        />
+        <MainSidebarNavigator.Screen
+          name="SettingStack"
+          component={SettingTab}
+          options={{
+            lazy: mountedTabCount <= 4,
+            title: t('settings'),
+            sfSymbol: 'gearshape.fill',
+            badge: settingsBadge,
+          }}
+        />
+      </MainSidebarNavigator.Navigator>
+    );
+  }
+
   return (
     <MainNativeNavigator.Navigator
       labeled
-      sidebarAdaptable={DeviceInfo.isMac()}
+      sidebarAdaptable={DeviceInfo.isIPad()}
     >
       <MainNativeNavigator.Screen
         name="NoticeStack"
@@ -505,10 +563,7 @@ const MainTab = () => {
           lazy: mountedTabCount <= 4,
           title: t('settings'),
           tabBarIcon: () => getTabBarIcon('gearshape.fill', 'settings'),
-          tabBarBadge:
-            newChangelog || newUpdate || !courseInformationSharingBadgeShown
-              ? ' '
-              : undefined,
+          tabBarBadge: settingsBadge ? ' ' : undefined,
         }}
       />
     </MainNativeNavigator.Navigator>
@@ -769,8 +824,32 @@ const BrandDarkNavigationTheme = {
   colors: darkThemeColors,
 };
 
-const TabSplit: React.FC<React.PropsWithChildren> = ({ children }) => {
+const DetailContainer: React.FC<{
+  navigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null>;
+}> = ({ navigationContainerRef }) => {
   const colorScheme = useColorScheme();
+
+  return (
+    <NavigationIndependentTree>
+      <NavigationContainer
+        ref={navigationContainerRef}
+        theme={
+          colorScheme === 'dark'
+            ? BrandDarkNavigationTheme
+            : BrandLightNavigationTheme
+        }
+      >
+        <DetailStack />
+      </NavigationContainer>
+    </NavigationIndependentTree>
+  );
+};
+
+const renderDetailContainer = (
+  ref: React.RefObject<NavigationContainerRef<{}> | null>,
+) => <DetailContainer navigationContainerRef={ref} />;
+
+const TabSplit: React.FC<React.PropsWithChildren> = ({ children }) => {
   const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
 
   return (
@@ -779,18 +858,7 @@ const TabSplit: React.FC<React.PropsWithChildren> = ({ children }) => {
       detailNavigationContainerRef={detailNavigationContainerRef}
     >
       {children}
-      <NavigationIndependentTree>
-        <NavigationContainer
-          ref={detailNavigationContainerRef}
-          theme={
-            colorScheme === 'dark'
-              ? BrandDarkNavigationTheme
-              : BrandLightNavigationTheme
-          }
-        >
-          <DetailStack />
-        </NavigationContainer>
-      </NavigationIndependentTree>
+      <DetailContainer navigationContainerRef={detailNavigationContainerRef} />
     </NativeSplitViewProvider>
   );
 };

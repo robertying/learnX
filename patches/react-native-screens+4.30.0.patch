@@ -509,26 +509,42 @@ diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostContr
 index 0000000..1111111 100644
 --- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
 +++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
-@@ -469,14 +469,26 @@ - (void)splitViewController:(UISplitViewController *)svc willHideColumn:(UISplit
+@@ -130,6 +130,7 @@ - (void)updateChildViewControllers
+   }
+ 
+   self.viewControllers = currentViewControllers;
++  [self updateColumnChrome];
+ 
+ #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
+   if (@available(iOS 26.0, *)) {
+@@ -469,14 +470,34 @@ - (void)splitViewController:(UISplitViewController *)svc willHideColumn:(UISplit
  
  - (void)splitViewControllerDidCollapse:(UISplitViewController *)svc
  {
-+  [self updateColumnSeparators];
++  [self updateColumnChrome];
    [[self reactEventEmitter] emitOnCollapse];
  }
  
  - (void)splitViewControllerDidExpand:(UISplitViewController *)svc
  {
-+  [self updateColumnSeparators];
++  [self updateColumnChrome];
    [[self reactEventEmitter] emitOnExpand];
  }
  
-+// Collapsing doesn't necessarily lay the primary column out again.
-+- (void)updateColumnSeparators
++// Whether a column shows its bar and separator depends on which column it is and on the split, neither of which
++// necessarily lays the column out again when it changes: e.g. collapsing, or the split coming up with its sidebar
++// hidden, where the bar the system's toggle moves into would be left hidden.
++- (void)viewDidLayoutSubviews
++{
++  [super viewDidLayoutSubviews];
++  [self updateColumnChrome];
++}
++
++- (void)updateColumnChrome
 +{
 +  for (UIViewController *viewController in self.viewControllers) {
 +    if ([viewController isKindOfClass:RNSSplitNavigationController.class]) {
-+      [(RNSSplitNavigationController *)viewController updateSeparator];
++      [(RNSSplitNavigationController *)viewController updateColumnChrome];
 +    }
 +  }
 +}
@@ -546,9 +562,9 @@ index 0000000..1111111 100644
  
 +/**
 + * Shows or hides the separator the primary column draws against the secondary one, for whether the split is
-+ * collapsed.
++ * collapsed, and the bar of a sidebar.
 + */
-+- (void)updateSeparator;
++- (void)updateColumnChrome;
 +
  @end
  
@@ -565,7 +581,7 @@ index 0000000..1111111 100644
  }
  
  - (instancetype)initWithRootViewController:(UIViewController *)rootViewController
-@@ -28,12 +29,55 @@ - (void)viewDidLoad
+@@ -28,12 +29,68 @@ - (void)viewDidLoad
  {
    [super viewDidLoad];
  
@@ -592,10 +608,10 @@ index 0000000..1111111 100644
 +- (void)viewDidLayoutSubviews
 +{
 +  [super viewDidLayoutSubviews];
-+  [self updateSeparator];
++  [self updateColumnChrome];
 +}
 +
-+- (void)updateSeparator
++- (void)updateColumnChrome
 +{
 +  if (_separator == nil) {
 +    return;
@@ -604,7 +620,20 @@ index 0000000..1111111 100644
 +  UISplitViewController *splitViewController = self.splitViewController;
 +  BOOL isPrimary = splitViewController != nil &&
 +      [splitViewController viewControllerForColumn:UISplitViewControllerColumnPrimary] == self;
-+  _separator.hidden = !isPrimary || splitViewController.isCollapsed;
++  // With three columns, the primary one is a sidebar. The system's button to toggle it goes in its bar, and
++  // into the supplementary column's while it's hidden, so React leaves both of those bars to UIKit. On Mac they
++  // go in the window's title bar. Elsewhere the supplementary column's would sit above React's own, so there
++  // the sidebar is only brought back with a swipe. UIKit draws a separator of its own between the other two.
++  BOOL isTripleColumn = splitViewController.style == UISplitViewControllerStyleTripleColumn;
++  BOOL isSupplementary =
++      [splitViewController viewControllerForColumn:UISplitViewControllerColumnSupplementary] == self;
++  BOOL showsBar = isTripleColumn &&
++      (isPrimary || (isSupplementary && self.traitCollection.userInterfaceIdiom == UIUserInterfaceIdiomMac));
++  if (self.navigationBarHidden == showsBar) {
++    self.navigationBarHidden = !showsBar;
++  }
++
++  _separator.hidden = !isPrimary || isTripleColumn || splitViewController.isCollapsed;
 +  if (_separator.hidden) {
 +    return;
 +  }

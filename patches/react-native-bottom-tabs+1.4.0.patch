@@ -65,7 +65,7 @@ index dec5c0a..6a22852 100644
        weight: fontWeight,
        color: inactiveColor
 diff --git a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
-index 674e602..7cca275 100644
+index 674e602..efa0ace 100644
 --- a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
 +++ b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
 @@ -8,6 +8,8 @@ import UIKit
@@ -112,23 +112,57 @@ index 674e602..7cca275 100644
    @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
    private func tabIndex(for tab: UITab, in tabBarController: UITabBarController) -> Int? {
      tabBarController.tabs.firstIndex {
-@@ -75,6 +102,7 @@ private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
+@@ -73,8 +100,35 @@ private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
+   }
+ }
  
++#if os(iOS)
++@available(iOS 18.0, *)
++extension TabBarDelegate: UITabBarController.Sidebar.Delegate {
++  func tabBarController(
++    _ tabBarController: UITabBarController,
++    sidebarVisibilityWillChange sidebar: UITabBarController.Sidebar,
++    animator: any UITabBarController.Sidebar.Animating
++  ) {
++    // The tab bar moves between the top and the sidebar, and with it the safe area at the top. A tab bar controller
++    // hands that safe area to the columns of a split view inside the tab, but not again when it changes, so their
++    // bars stay where they were. A change to the tab's own safe area makes it hand it over again.
++    animator.addCompletion {
++      guard let viewController = tabBarController.selectedViewController else {
++        return
++      }
++      let insets = viewController.additionalSafeAreaInsets
++      viewController.additionalSafeAreaInsets =
++        UIEdgeInsets(top: insets.top + 1, left: insets.left, bottom: insets.bottom, right: insets.right)
++      viewController.view.layoutIfNeeded()
++      viewController.additionalSafeAreaInsets = insets
++      viewController.view.layoutIfNeeded()
++    }
++  }
++}
++#endif
++
  struct TabItemEventModifier: ViewModifier {
    let onTabEvent: (_ index: Int?, _ identifier: String?, _ isLongPress: Bool) -> Bool
 +  let onSelectTab: (_ index: Int?, _ identifier: String?) -> Void
    private let delegate = TabBarDelegate()
  
    func body(content: Content) -> some View {
-@@ -88,6 +116,7 @@ struct TabItemEventModifier: ViewModifier {
+@@ -88,7 +142,13 @@ struct TabItemEventModifier: ViewModifier {
      delegate.onClick = { index, identifier in
        onTabEvent(index, identifier, false)
      }
 +    delegate.onSelectTab = onSelectTab
      tabController.delegate = delegate
++#if os(iOS)
++    if #available(iOS 18.0, *) {
++      tabController.sidebar.delegate = delegate
++    }
++#endif
  
      // Don't register gesutre recognizer more than one time
-@@ -154,9 +183,13 @@ private class LongPressGestureHandler: NSObject {
+     if objc_getAssociatedObject(tabController.tabBar, &AssociatedKeys.gestureHandler) != nil {
+@@ -154,9 +214,13 @@ private class LongPressGestureHandler: NSObject {
  extension View {
    /**
     Event for tab items. Returns true if should prevent default (switching tabs).

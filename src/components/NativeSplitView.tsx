@@ -25,7 +25,24 @@ export interface NativeSplitViewProps {
   /** Without the split, only the first child is rendered. */
   enabled: boolean;
   detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null>;
+  /**
+   * Shown in a column of its own before the master one, which makes it the
+   * system's sidebar. The split then only collapses in compact width.
+   */
+  sidebar?: React.ReactNode;
 }
+
+// Indices into the column metrics, which don't follow the columns' order: the
+// sidebar comes first where there is one.
+const masterColumn = 0;
+const detailColumn = 1;
+const sidebarColumn = 2;
+
+const displayModesWithSidebar: SplitDisplayMode[] = [
+  'twoBesideSecondary',
+  'twoOverSecondary',
+  'twoDisplaceSecondary',
+];
 
 // UIKit only sizes the columns and reports their safe areas once the split is in
 // the window, which a tab that hasn't been opened yet isn't. All the splits are
@@ -69,7 +86,8 @@ const useColumnAppearance = () => {
 };
 
 // Whether a split has been on screen, for new ones to have its layout to go by.
-export const useSplitLaidOut = () => useReportedColumnMetrics(0) !== undefined;
+export const useSplitLaidOut = () =>
+  useReportedColumnMetrics(masterColumn) !== undefined;
 
 const ColumnSafeArea: React.FC<
   React.PropsWithChildren<{
@@ -108,7 +126,7 @@ const ColumnSafeArea: React.FC<
  */
 const NativeSplitViewProvider: React.FC<
   React.PropsWithChildren<NativeSplitViewProps>
-> = ({ enabled, detailNavigationContainerRef, children }) => {
+> = ({ enabled, detailNavigationContainerRef, sidebar, children }) => {
   const [master, detail] = Children.toArray(children);
 
   // UIKit reports the initial collapse, but not an initial expansion.
@@ -121,17 +139,40 @@ const NativeSplitViewProvider: React.FC<
   // What UIKit actually shows, for display only.
   const [displayMode, setDisplayMode] = useState<SplitDisplayMode>();
 
-  const masterWidth = useReportedColumnMetrics(0)?.frame.width;
-  const detailWidth = useReportedColumnMetrics(1)?.frame.width;
+  const masterWidth = useReportedColumnMetrics(masterColumn)?.frame.width;
+  const detailWidth = useReportedColumnMetrics(detailColumn)?.frame.width;
+  const sidebarWidth = useReportedColumnMetrics(sidebarColumn)?.frame.width;
   const masterAppearance = useColumnAppearance();
   const detailAppearance = useColumnAppearance();
+  const sidebarAppearance = useColumnAppearance();
 
+  const hasSidebar = sidebar !== undefined;
   const showDetail = enabled && expanded;
   const showMaster = displayMode !== 'secondaryOnly';
+  // Hidden with the system's button. Taken to be shown until UIKit reports a
+  // display mode.
+  const sidebarHidden =
+    hasSidebar &&
+    displayMode !== undefined &&
+    !displayModesWithSidebar.includes(displayMode);
 
-  const toggleMaster = useCallback((show: boolean) => {
-    setPreferredDisplayMode(show ? 'oneBesideSecondary' : 'secondaryOnly');
-  }, []);
+  // The master pane comes back with the sidebar as it was.
+  const sidebarHiddenBeforeMaster = useRef(false);
+  const toggleMaster = useCallback(
+    (show: boolean) => {
+      if (!show) {
+        sidebarHiddenBeforeMaster.current = sidebarHidden;
+      }
+      setPreferredDisplayMode(
+        show
+          ? hasSidebar && !sidebarHiddenBeforeMaster.current
+            ? 'twoBesideSecondary'
+            : 'oneBesideSecondary'
+          : 'secondaryOnly',
+      );
+    },
+    [hasSidebar, sidebarHidden],
+  );
 
   return (
     <SplitViewContext.Provider
@@ -150,11 +191,16 @@ const NativeSplitViewProvider: React.FC<
         <Split.Host
           preferredDisplayMode={preferredDisplayMode}
           preferredSplitBehavior="tile"
-          displayModeButtonVisibility="never"
-          topColumnForCollapsing="primary"
+          // In the sidebar's bar, which is in the window's title bar on Mac.
+          displayModeButtonVisibility={hasSidebar ? 'automatic' : 'never'}
+          primaryBackgroundStyle={hasSidebar ? 'sidebar' : undefined}
+          topColumnForCollapsing={hasSidebar ? 'supplementary' : 'primary'}
           // Compared with the split's bounds natively, so that it can't lag
           // behind a resize (or the hinge, which is handled natively too).
-          maxCollapsedWidth={Numbers.splitViewMaxCollapsedWidth}
+          // Collapsed, the sidebar would be out of reach.
+          maxCollapsedWidth={
+            hasSidebar ? undefined : Numbers.splitViewMaxCollapsedWidth
+          }
           onCollapse={() => setExpanded(false)}
           onExpand={() => setExpanded(true)}
           onDisplayModeWillChange={e =>
@@ -163,12 +209,30 @@ const NativeSplitViewProvider: React.FC<
         >
           {/* The secondary column extends underneath the primary one (and any
               vertical bar); UIKit reports both as safe area insets of the column. */}
+          {hasSidebar && (
+            <Split.Column
+              style={{ width: sidebarWidth }}
+              {...sidebarAppearance.handlers}
+            >
+              <SafeAreaProvider>
+                <ColumnSafeArea
+                  column={sidebarColumn}
+                  appearance={sidebarAppearance}
+                >
+                  {sidebar}
+                </ColumnSafeArea>
+              </SafeAreaProvider>
+            </Split.Column>
+          )}
           <Split.Column
             style={{ width: masterWidth }}
             {...masterAppearance.handlers}
           >
             <SafeAreaProvider>
-              <ColumnSafeArea column={0} appearance={masterAppearance}>
+              <ColumnSafeArea
+                column={masterColumn}
+                appearance={masterAppearance}
+              >
                 {master}
               </ColumnSafeArea>
             </SafeAreaProvider>
@@ -178,7 +242,10 @@ const NativeSplitViewProvider: React.FC<
             {...detailAppearance.handlers}
           >
             <SafeAreaProvider>
-              <ColumnSafeArea column={1} appearance={detailAppearance}>
+              <ColumnSafeArea
+                column={detailColumn}
+                appearance={detailAppearance}
+              >
                 {detail}
               </ColumnSafeArea>
             </SafeAreaProvider>
