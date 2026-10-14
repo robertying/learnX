@@ -7,7 +7,7 @@ buildscript {
         ndkVersion = "30.0.16248370"
         cmakeVersion = "4.1.2"
         javaVersion = JavaVersion.VERSION_17
-        kotlinVersion = "2.3.20"
+        kotlinVersion = "2.4.20"
         kspVersion = "2.3.12"
     }
     dependencies {
@@ -20,7 +20,7 @@ plugins {
     id "expo-root-project" apply false
     id "com.google.gms.google-services" version "4.5.0" apply false
     id "com.google.firebase.crashlytics" version "3.0.8" apply false
-    id 'com.android.application' version '9.4.0' apply false
+    id 'com.android.application' version '9.4.1' apply false
 }
 
 subprojects { subproject ->
