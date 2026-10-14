@@ -115,6 +115,16 @@ const Login: React.FC<Props> = ({ navigation }) => {
           enabled={Platform.OS !== 'ios'}
         >
           <Logo iosSize={120} style={styles.logo} />
+          <View style={styles.switchContainer}>
+            <Switch
+              style={Styles.spacex1}
+              value={graduate}
+              onValueChange={checked => {
+                dispatch(setSetting('graduate', checked));
+              }}
+            />
+            <Text style={Styles.spacex1}>{t('graduate')}</Text>
+          </View>
           <TextInput
             style={styles.textInput}
             label={t('usernameOrId')}
@@ -146,16 +156,6 @@ const Login: React.FC<Props> = ({ navigation }) => {
             value={password}
             onChangeText={v => setPassword(v.trim())}
           />
-          <View style={styles.switchContainer}>
-            <Switch
-              style={Styles.spacex1}
-              value={graduate}
-              onValueChange={checked => {
-                dispatch(setSetting('graduate', checked));
-              }}
-            />
-            <Text style={Styles.spacex1}>{t('graduate')}</Text>
-          </View>
           <View style={styles.noteContainer}>
             <Caption style={styles.note}>{t('securityNote')}</Caption>
           </View>
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   textInput: {
     width: '100%',
-    marginVertical: 16,
+    marginVertical: 12,
   },
   button: {
     marginTop: 16,
