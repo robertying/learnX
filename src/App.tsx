@@ -362,7 +362,10 @@ const getTabBarIcon = (
     ? { sfSymbol }
     : MaterialIcons.getImageSourceSync(materialIcon, 24)!;
 
-const useNativeSplit = Platform.OS === 'ios';
+// iPhones don't show the detail column; the native split only left them with an
+// empty one on first display.
+const useNativeSplit =
+  Platform.OS === 'ios' && (DeviceInfo.isTablet() || DeviceInfo.isMac());
 
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
 // contains the split view, so each tab gets its own split.
