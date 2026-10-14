@@ -274,6 +274,9 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeArea>
+      {progress ? (
+        <ProgressBar style={styles.progressBar} progress={progress} />
+      ) : null}
       {error ? (
         <View style={styles.errorRoot}>
           <Icon
@@ -320,10 +323,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
       ) : (
         <>
           <ScrollView
-            contentContainerStyle={
-              !canRender ? { paddingBottom: 100 } : undefined
-            }
-            style={{ backgroundColor: theme.colors.surface }}
+            style={[Styles.flex1, { backgroundColor: theme.colors.surface }]}
           >
             <View style={styles.section}>
               <View style={Styles.flexRowCenter}>
@@ -400,26 +400,16 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           </View>
         </>
       )}
-      {progress ? (
-        <ProgressBar style={styles.progressBar} progress={progress} />
-      ) : null}
     </SafeArea>
   );
 };
 
 const styles = StyleSheet.create({
   progressBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 99,
+    alignSelf: 'stretch',
   },
   skeletons: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
+    alignSelf: 'stretch',
   },
   errorRoot: {
     flex: 1,
@@ -427,16 +417,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actions: {
-    flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
+    paddingTop: 8,
     paddingBottom: Platform.OS === 'ios' && !DeviceInfo.isMac() ? 96 : 32,
-    opacity: 0.95,
   },
   colCenter: {
     alignItems: 'center',
