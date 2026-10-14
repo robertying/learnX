@@ -40,13 +40,14 @@ import { useAppSelector } from 'data/store';
 type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 
 const FileDetail: React.FC<Props> = ({ route, navigation }) => {
-  const { disableAnimation, ...file } = route.params;
+  const { disableAnimation: _disableAnimation, ...file } = route.params;
 
   const isSearch = navigation.getState().routeNames.includes('Search' as any);
 
   const theme = useTheme();
   const toast = useToast();
-  const { showDetail, showMaster, toggleMaster } = useContext(SplitViewContext);
+  const { splitEnabled, showDetail, showMaster, toggleMaster } =
+    useContext(SplitViewContext);
 
   const openFileAfterDownload = useAppSelector(
     state => state.settings.openFileAfterDownload,
@@ -115,20 +116,11 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   }, []);
 
   useEffect(() => {
-    if (disableAnimation) {
-      navigation.setOptions({
-        animation: 'none',
-      });
-    }
-  }, [navigation, disableAnimation]);
-
-  useEffect(() => {
     navigation.setOptions({
-      headerBackVisible:
-        DeviceInfo.isTablet() || DeviceInfo.isMac() ? showMaster : undefined,
+      headerBackVisible: splitEnabled ? showMaster : undefined,
       headerRight: () => (
         <View style={[Styles.flexRow, { justifyContent: 'flex-end' }]}>
-          {(DeviceInfo.isTablet() || DeviceInfo.isMac()) && !isSearch && (
+          {splitEnabled && !isSearch && (
             <IconButton
               onPress={() => toggleMaster(!showMaster)}
               icon={props => (
@@ -175,7 +167,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         </View>
       ),
       unstable_headerRightItems: () => [
-        ...((DeviceInfo.isTablet() || DeviceInfo.isMac()) && !isSearch
+        ...(splitEnabled && !isSearch
           ? [
               {
                 type: 'button',
@@ -260,6 +252,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     showDetail,
     showInfo,
     showMaster,
+    splitEnabled,
     toggleMaster,
     isSearch,
   ]);

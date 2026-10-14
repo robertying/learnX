@@ -197,6 +197,7 @@ export default {
   select: 'Select',
   checkAll: 'Check All Or None',
   filter: 'Filter',
+  more: 'More',
   refresh: 'Refresh',
   dragToReorder: 'Long press and drag to reorder',
   documents: 'Files',

@@ -65,7 +65,6 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
     gradeContent,
     answerAttachment,
     answerContent,
-    disableAnimation,
     excellentHomeworkList,
   } = route.params;
 
@@ -108,14 +107,6 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
       );
     }
   }, [detailNavigator, navigation, route.params]);
-
-  useEffect(() => {
-    if (disableAnimation) {
-      navigation.setOptions({
-        animation: 'none',
-      });
-    }
-  }, [navigation, disableAnimation]);
 
   useEffect(() => {
     if (submissionType !== HomeworkSubmissionType.OFFLINE) {

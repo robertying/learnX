@@ -1,6 +1,19 @@
-import { useCallback, useEffect, useRef } from 'react';
+import {
+  startTransition,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import type { ComponentProps } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { AppState, Platform, StatusBar, useColorScheme } from 'react-native';
+import {
+  AppState,
+  Platform,
+  StatusBar,
+  useColorScheme,
+  View,
+} from 'react-native';
 import {
   NavigationContainer,
   useNavigation,
@@ -9,6 +22,7 @@ import {
   DarkTheme as NavigationDarkTheme,
   NavigationIndependentTree,
   ParamListBase,
+  Theme,
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type {
@@ -18,6 +32,7 @@ import type {
   NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
+import type { AppleIcon } from 'react-native-bottom-tabs';
 import {
   SafeAreaProvider,
   useSafeAreaFrame,
@@ -49,6 +64,7 @@ import {
   CourseStackParams,
   CourseXStackParams,
   DetailStackParams,
+  ExtraParams,
   FileStackParams,
   LoginStackParams,
   MainTabParams,
@@ -56,6 +72,7 @@ import {
   RootStackParams,
   SearchStackParams,
   SettingsStackParams,
+  SplitRootStackParams,
 } from 'screens/types';
 import Assignments from 'screens/Assignments';
 import AssignmentDetail from 'screens/AssignmentDetail';
@@ -80,9 +97,14 @@ import { ToastProvider } from 'components/Toast';
 import Splash from 'components/Splash';
 import HeaderTitle from 'components/HeaderTitle';
 import Empty from 'components/Empty';
+import SafeArea from 'components/SafeArea';
 import { SplitViewProvider } from 'components/SplitView';
+import NativeSplitViewProvider, {
+  useSplitLaidOut,
+} from 'components/NativeSplitView';
 import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
+import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetting } from 'data/actions/settings';
 import { persistor, store, useAppDispatch, useAppSelector } from 'data/store';
@@ -124,11 +146,15 @@ const getCloseHeaderItem = (
   onPress: () => navigation.goBack(),
 });
 
+const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
+
 const getTitleOptions = (title: string, subtitle?: string) => {
-  return {
-    title,
-    headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
-  };
+  return supportsNativeSubtitle
+    ? { title, headerSubtitle: subtitle }
+    : {
+        title,
+        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+      };
 };
 
 const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
@@ -141,7 +167,10 @@ const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
 const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
   function ({
     route,
-  }: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
+    theme,
+  }: NativeStackScreenProps<P, N> & {
+    theme: Theme;
+  }): NativeStackNavigationOptions {
     const title =
       route.name === 'CourseX'
         ? t('courseX')
@@ -162,6 +191,10 @@ const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
     return {
       ...getTitleOptions(title, subtitle),
       headerTintColor: Platform.OS === 'ios' ? Colors.theme : undefined,
+      // A native title would otherwise take the tint color.
+      headerTitleStyle: supportsNativeSubtitle
+        ? { color: theme.colors.text }
+        : undefined,
     };
   };
 
@@ -179,6 +212,7 @@ const AssignmentSubmissionNavigator =
   createNativeStackNavigator<AssignmentSubmissionStackParams>();
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
 const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
+const SplitRootNavigator = createNativeStackNavigator<SplitRootStackParams>();
 
 const NoticeStack = () => (
   <NoticeStackNavigator.Navigator>
@@ -265,7 +299,7 @@ const CourseStack = () => (
   </CourseStackNavigator.Navigator>
 );
 
-const SettingDetails = (
+const renderSettingDetails = () => (
   <>
     <SettingStackNavigator.Screen
       name="CourseInformationSharing"
@@ -316,11 +350,62 @@ const SettingStack = () => (
       component={Settings}
       options={getTitleOptions(t('settings'))}
     />
-    {SettingDetails}
+    {renderSettingDetails()}
   </SettingStackNavigator.Navigator>
 );
 
+const getTabBarIcon = (
+  sfSymbol: AppleIcon['sfSymbol'],
+  materialIcon: ComponentProps<typeof MaterialIcons>['name'],
+) =>
+  Platform.OS === 'ios'
+    ? { sfSymbol }
+    : MaterialIcons.getImageSourceSync(materialIcon, 24)!;
+
+const useNativeSplit = Platform.OS === 'ios';
+
+// UIKit only moves the tab bar into the vertical bar when the tab bar controller
+// contains the split view, so each tab gets its own split.
+const withSplit = (Master: React.ComponentType) =>
+  useNativeSplit
+    ? () => (
+        <TabSplit>
+          <Master />
+        </TabSplit>
+      )
+    : Master;
+const NoticeTab = withSplit(NoticeStack);
+const AssignmentTab = withSplit(AssignmentStack);
+const FileTab = withSplit(FileStack);
+const CourseTab = withSplit(CourseStack);
+const SettingTab = withSplit(SettingStack);
+
+const mainTabCount = 5;
+
+// A tab that only mounts once it's selected shows up empty first. Mounting them
+// all with the first one would delay it, so the rest follow once it has settled,
+// one at a time while idle, in renders that give way to anything the user does.
+const useMountedTabCount = () => {
+  const [count, setCount] = useState(1);
+  const splitLaidOut = useSplitLaidOut();
+
+  useEffect(() => {
+    if (count >= mainTabCount || (useNativeSplit && !splitLaidOut)) {
+      return;
+    }
+
+    const handle = requestIdleCallback(
+      () => startTransition(() => setCount(c => c + 1)),
+      { timeout: 2000 },
+    );
+    return () => cancelIdleCallback(handle);
+  }, [count, splitLaidOut]);
+
+  return count;
+};
+
 const MainTab = () => {
+  const mountedTabCount = useMountedTabCount();
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
   const currentSemester = useAppSelector(state => state.semesters.current);
@@ -370,46 +455,53 @@ const MainTab = () => {
   }, [dispatch, loggedIn]);
 
   return (
-    <MainNativeNavigator.Navigator labeled>
+    <MainNativeNavigator.Navigator
+      labeled
+      sidebarAdaptable={DeviceInfo.isMac()}
+    >
       <MainNativeNavigator.Screen
         name="NoticeStack"
-        component={NoticeStack}
+        component={NoticeTab}
         options={{
           title: t('notices'),
-          tabBarIcon: () =>
-            MaterialIcons.getImageSourceSync('notifications', 24)!,
+          tabBarIcon: () => getTabBarIcon('bell.fill', 'notifications'),
         }}
       />
       <MainNativeNavigator.Screen
         name="AssignmentStack"
-        component={AssignmentStack}
+        component={AssignmentTab}
         options={{
+          lazy: mountedTabCount <= 1,
           title: t('assignments'),
-          tabBarIcon: () => MaterialIcons.getImageSourceSync('event', 24)!,
+          tabBarIcon: () =>
+            getTabBarIcon('list.bullet.clipboard.fill', 'event'),
         }}
       />
       <MainNativeNavigator.Screen
         name="FileStack"
-        component={FileStack}
+        component={FileTab}
         options={{
+          lazy: mountedTabCount <= 2,
           title: t('files'),
-          tabBarIcon: () => MaterialIcons.getImageSourceSync('folder', 24)!,
+          tabBarIcon: () => getTabBarIcon('doc.fill', 'folder'),
         }}
       />
       <MainNativeNavigator.Screen
         name="CourseStack"
-        component={CourseStack}
+        component={CourseTab}
         options={{
+          lazy: mountedTabCount <= 3,
           title: t('courses'),
-          tabBarIcon: () => MaterialIcons.getImageSourceSync('apps', 24)!,
+          tabBarIcon: () => getTabBarIcon('square.grid.3x3.fill', 'apps'),
         }}
       />
       <MainNativeNavigator.Screen
         name="SettingStack"
-        component={SettingStack}
+        component={SettingTab}
         options={{
+          lazy: mountedTabCount <= 4,
           title: t('settings'),
-          tabBarIcon: () => MaterialIcons.getImageSourceSync('settings', 24)!,
+          tabBarIcon: () => getTabBarIcon('gearshape.fill', 'settings'),
           tabBarBadge:
             newChangelog || newUpdate || !courseInformationSharingBadgeShown
               ? ' '
@@ -502,12 +594,30 @@ const AssignmentSubmissionStack = () => (
   </AssignmentSubmissionNavigator.Navigator>
 );
 
+// The detail column extends underneath the primary one.
+const EmptyDetail = () => (
+  <SafeArea>
+    <Empty />
+  </SafeArea>
+);
+
 const DetailStack = () => (
-  <DetailNavigator.Navigator>
+  <DetailNavigator.Navigator
+    // Has to be in place when the screen mounts; set from the screen itself, it
+    // races the native transition.
+    screenOptions={({ route }) => ({
+      animation: (route.params as ExtraParams | undefined)?.disableAnimation
+        ? 'none'
+        : undefined,
+    })}
+  >
     <DetailNavigator.Screen
       name="EmptyDetail"
-      component={Empty}
-      options={getTitleOptions('')}
+      component={EmptyDetail}
+      options={{
+        ...getTitleOptions(''),
+        headerShown: !useNativeSplit || DeviceInfo.isIPad(),
+      }}
     />
     <DetailNavigator.Screen
       name="NoticeDetail"
@@ -539,7 +649,7 @@ const DetailStack = () => (
       component={CourseX}
       options={getDetailScreenOptions()}
     />
-    {SettingDetails}
+    {renderSettingDetails()}
   </DetailNavigator.Navigator>
 );
 
@@ -656,6 +766,108 @@ const BrandDarkNavigationTheme = {
   colors: darkThemeColors,
 };
 
+const TabSplit: React.FC<React.PropsWithChildren> = ({ children }) => {
+  const colorScheme = useColorScheme();
+  const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
+
+  return (
+    <NativeSplitViewProvider
+      enabled
+      detailNavigationContainerRef={detailNavigationContainerRef}
+    >
+      {children}
+      <NavigationIndependentTree>
+        <NavigationContainer
+          ref={detailNavigationContainerRef}
+          theme={
+            colorScheme === 'dark'
+              ? BrandDarkNavigationTheme
+              : BrandLightNavigationTheme
+          }
+        >
+          <DetailStack />
+        </NavigationContainer>
+      </NavigationIndependentTree>
+    </NativeSplitViewProvider>
+  );
+};
+
+const renderMainScreens = () => (
+  <>
+    <RootNavigator.Screen name="MainTab" component={MainTab} />
+    <RootNavigator.Screen
+      name="CourseXStack"
+      component={CourseXStack}
+      options={{ gestureEnabled: false }}
+    />
+    <RootNavigator.Screen
+      name="SearchStack"
+      component={SearchStack}
+      options={{ gestureEnabled: false }}
+    />
+    <RootNavigator.Screen
+      name="AssignmentSubmissionStack"
+      component={AssignmentSubmissionStack}
+      options={{ gestureEnabled: false }}
+    />
+  </>
+);
+
+const SplitMain = () => {
+  const colorScheme = useColorScheme();
+  const frame = useSafeAreaFrame();
+  const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
+
+  // The master pane mounts along with the detail container, before the ref is
+  // set. Hand the ref out only once it is, so that its consumers render again.
+  const [detailReady, setDetailReady] = useState(false);
+
+  const showDetail = frame.width >= 750;
+
+  return (
+    <SplitViewProvider
+      splitEnabled={DeviceInfo.isMac() || DeviceInfo.isTablet()}
+      detailNavigationContainerRef={
+        showDetail && detailReady ? detailNavigationContainerRef : null
+      }
+      showDetail={showDetail}
+    >
+      <RootNavigator.Navigator
+        screenOptions={{
+          headerShown: false,
+          presentation: 'transparentModal',
+        }}
+      >
+        {renderMainScreens()}
+      </RootNavigator.Navigator>
+      <NavigationIndependentTree>
+        <NavigationContainer
+          ref={detailNavigationContainerRef}
+          theme={
+            colorScheme === 'dark'
+              ? BrandDarkNavigationTheme
+              : BrandLightNavigationTheme
+          }
+          fallback={<Splash />}
+          onReady={() => setDetailReady(true)}
+        >
+          <DetailStack />
+        </NavigationContainer>
+      </NavigationIndependentTree>
+    </SplitViewProvider>
+  );
+};
+
+// Login sits beside the split rather than in its master pane, so it always
+// covers the whole window and the panes never resize underneath it.
+const SplitLogin = () => (
+  // On Mac Catalyst, the native side keeps stacks under this identifier out of
+  // the view controller hierarchy, as it did when login was in the master pane.
+  <View testID="rns-split-detail" style={Styles.flex1}>
+    <LoginStack />
+  </View>
+);
+
 const Container = () => {
   const colorScheme = useColorScheme();
   const toast = useToast();
@@ -663,10 +875,8 @@ const Container = () => {
   const dispatch = useAppDispatch();
   const loginError = useAppSelector(state => state.auth.error);
   const auth = useAppSelector(state => state.auth);
-  const frame = useSafeAreaFrame();
 
   const mainNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
-  const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
 
   const appState = useRef(AppState.currentState);
   const lastActiveTime = useRef(dayjs(0));
@@ -766,21 +976,13 @@ const Container = () => {
   const showMain =
     !loginError && !!auth.username && !!auth.password && !!auth.fingerPrint;
 
-  const showDetail = showMain && frame.width >= 750;
-
   return (
     <SafeAreaProvider>
       <NavigationContainer
         ref={mainNavigationContainerRef}
         {...navigationContainerProps}
       >
-        <SplitViewProvider
-          splitEnabled={DeviceInfo.isMac() || DeviceInfo.isTablet()}
-          detailNavigationContainerRef={
-            showDetail ? detailNavigationContainerRef : null
-          }
-          showDetail={showDetail}
-        >
+        {useNativeSplit ? (
           <RootNavigator.Navigator
             screenOptions={{
               headerShown: false,
@@ -788,24 +990,7 @@ const Container = () => {
             }}
           >
             {showMain ? (
-              <>
-                <RootNavigator.Screen name="MainTab" component={MainTab} />
-                <RootNavigator.Screen
-                  name="CourseXStack"
-                  component={CourseXStack}
-                  options={{ gestureEnabled: false }}
-                />
-                <RootNavigator.Screen
-                  name="SearchStack"
-                  component={SearchStack}
-                  options={{ gestureEnabled: false }}
-                />
-                <RootNavigator.Screen
-                  name="AssignmentSubmissionStack"
-                  component={AssignmentSubmissionStack}
-                  options={{ gestureEnabled: false }}
-                />
-              </>
+              renderMainScreens()
             ) : (
               <RootNavigator.Screen
                 name="LoginStack"
@@ -814,15 +999,27 @@ const Container = () => {
               />
             )}
           </RootNavigator.Navigator>
-          <NavigationIndependentTree>
-            <NavigationContainer
-              ref={detailNavigationContainerRef}
-              {...navigationContainerProps}
-            >
-              <DetailStack />
-            </NavigationContainer>
-          </NavigationIndependentTree>
-        </SplitViewProvider>
+        ) : (
+          <SplitRootNavigator.Navigator screenOptions={{ headerShown: false }}>
+            {showMain ? (
+              <SplitRootNavigator.Screen
+                name="Main"
+                component={SplitMain}
+                // Login slides away to reveal the main UI.
+                options={{ animationTypeForReplace: 'pop' }}
+              />
+            ) : (
+              <SplitRootNavigator.Screen
+                name="LoginStack"
+                component={SplitLogin}
+                options={{
+                  animation: 'slide_from_bottom',
+                  gestureEnabled: false,
+                }}
+              />
+            )}
+          </SplitRootNavigator.Navigator>
+        )}
       </NavigationContainer>
     </SafeAreaProvider>
   );

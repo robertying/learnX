@@ -38,23 +38,54 @@ const AutoHeightWebView: React.FC<
   };
 
   const injectedScript = `
+    var lastHeight = 0;
+
+    // Measure the content itself rather than the viewport: the client/scroll
+    // height of the root element is never smaller than the web view, so it
+    // could not shrink once the content reflows into fewer lines.
+    function measure() {
+      return Math.ceil(
+        Math.max(
+          document.documentElement?.getBoundingClientRect().height ?? 0,
+          document.body?.getBoundingClientRect().height ?? 0,
+          document.body?.scrollHeight ?? 0
+        )
+      );
+    }
+
     function waitForBridge() {
-      if (!window.ReactNativeWebView.postMessage) {
+      if (!window.ReactNativeWebView?.postMessage) {
         setTimeout(waitForBridge, 200);
       } else {
-        window.ReactNativeWebView.postMessage(
-          Math.max(
-            document.documentElement?.clientHeight ?? 0,
-            document.documentElement?.scrollHeight ?? 0,
-            document.body?.clientHeight ?? 0,
-            document.body?.scrollHeight ?? 0
-          ).toString()
-        );
+        var height = measure();
+        if (height !== lastHeight) {
+          lastHeight = height;
+          window.ReactNativeWebView.postMessage(height.toString());
+        }
       }
     }
 
-    // Wait for images and such to load and update the height again
+    // Content reflows when the web view is resized (rotation, split view,
+    // window resizing) or when images and such finish loading
+    function observe() {
+      if (!window.ResizeObserver) {
+        return;
+      }
+      var observer = new ResizeObserver(waitForBridge);
+      if (document.documentElement) {
+        observer.observe(document.documentElement);
+      }
+      if (document.body) {
+        observer.observe(document.body);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      observe();
+      waitForBridge();
+    });
     window.addEventListener("load", waitForBridge);
+    window.addEventListener("resize", waitForBridge);
 
     // Update height as long as there's something
     waitForBridge();

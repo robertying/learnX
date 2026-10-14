@@ -12,12 +12,11 @@ import {
   setCurrentSemester,
 } from 'data/actions/semesters';
 import { getSemesterTextFromId } from 'helpers/parse';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
 
-const SemesterSelection: React.FC<Props> = props => {
+const SemesterSelection: React.FC<Props> = () => {
   const dispatch = useAppDispatch();
   const semesters = useAppSelector(state => state.semesters.items);
   const fetching = useAppSelector(state => state.semesters.fetching);
@@ -39,8 +38,6 @@ const SemesterSelection: React.FC<Props> = props => {
     dispatch(getCurrentSemester());
     dispatch(getAllSemesters());
   }, [dispatch]);
-
-  useNavigationAnimation(props);
 
   useEffect(() => {
     handleRefresh();

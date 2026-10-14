@@ -102,3 +102,8 @@ export type RootStackParams = {
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
 };
+
+export type SplitRootStackParams = {
+  Main: undefined;
+  LoginStack: NavigatorScreenParams<LoginStackParams>;
+};

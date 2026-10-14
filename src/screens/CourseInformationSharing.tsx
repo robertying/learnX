@@ -9,7 +9,6 @@ import { setSetting } from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import env from 'helpers/env';
 import { uploadCourses } from 'helpers/coursex';
@@ -20,7 +19,7 @@ type Props = NativeStackScreenProps<
   'CourseInformationSharing'
 >;
 
-const CourseInformationSharing: React.FC<Props> = props => {
+const CourseInformationSharing: React.FC<Props> = () => {
   const dispatch = useAppDispatch();
 
   const currentSemesterId = useAppSelector(state => state.semesters.current);
@@ -79,8 +78,6 @@ const CourseInformationSharing: React.FC<Props> = props => {
       dispatch(setSetting('courseInformationSharing', enabled));
     }
   };
-
-  useNavigationAnimation(props);
 
   useEffect(() => {
     dispatch(setSetting('courseInformationSharingBadgeShown', true));

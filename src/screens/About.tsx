@@ -5,16 +5,13 @@ import DeviceInfo from 'constants/DeviceInfo';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'About'>;
 
-const About: React.FC<Props> = props => {
-  useNavigationAnimation(props);
-
+const About: React.FC<Props> = () => {
   return (
     <SafeArea>
       <ScrollView

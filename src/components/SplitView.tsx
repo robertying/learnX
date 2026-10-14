@@ -7,14 +7,19 @@ import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null> | null;
+  splitEnabled: boolean;
   showDetail: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
+  /** Width of the master pane beside the detail one. */
+  masterWidth: number;
 }>({
   detailNavigationContainerRef: null,
+  splitEnabled: false,
   showDetail: false,
   showMaster: true,
   toggleMaster: () => {},
+  masterWidth: Numbers.splitViewMasterWidth,
 });
 
 export interface SplitViewProps {
@@ -68,9 +73,11 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
     <SplitViewContext.Provider
       value={{
         detailNavigationContainerRef,
+        splitEnabled,
         showDetail,
         showMaster,
         toggleMaster: setShowMaster,
+        masterWidth: Numbers.splitViewMasterWidth,
       }}
     >
       {splitEnabled ? (

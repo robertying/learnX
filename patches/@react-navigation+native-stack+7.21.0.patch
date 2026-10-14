@@ -1,0 +1,80 @@
+diff --git a/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js b/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js
+index 0000000..1111111 100644
+--- a/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js
++++ b/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js
+@@ -150,6 +150,7 @@
+   headerBlurEffect,
+   headerTintColor,
+   headerTitle,
++  headerSubtitle,
+   headerTitleAlign,
+   headerTitleStyle,
+   headerTransparent,
+@@ -357,6 +358,7 @@
+     largeTitleFontWeight,
+     largeTitleHideShadow: headerLargeTitleShadowVisible === false,
+     title: titleText,
++    subtitle: headerSubtitle,
+     titleColor,
+     titleFontFamily,
+     titleFontSize,
+diff --git a/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts b/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts
+index 0000000..1111111 100644
+--- a/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts
++++ b/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts
+@@ -322,6 +322,15 @@
+         tintColor?: string;
+     }) => React.ReactNode);
+     /**
++     * String to display below the header title.
++     * Only shown with a native title, i.e. when `headerTitle` is not a function.
++     *
++     * Only supported on iOS 26 or higher.
++     *
++     * @platform ios
++     */
++    headerSubtitle?: string;
++    /**
+      * How to align the the header title.
+      * Defaults to `left` on platforms other than iOS.
+      *
+diff --git a/node_modules/@react-navigation/native-stack/src/types.tsx b/node_modules/@react-navigation/native-stack/src/types.tsx
+index 0000000..1111111 100644
+--- a/node_modules/@react-navigation/native-stack/src/types.tsx
++++ b/node_modules/@react-navigation/native-stack/src/types.tsx
+@@ -372,6 +372,15 @@
+         tintColor?: string;
+       }) => React.ReactNode);
+   /**
++   * String to display below the header title.
++   * Only shown with a native title, i.e. when `headerTitle` is not a function.
++   *
++   * Only supported on iOS 26 or higher.
++   *
++   * @platform ios
++   */
++  headerSubtitle?: string;
++  /**
+    * How to align the the header title.
+    * Defaults to `left` on platforms other than iOS.
+    *
+diff --git a/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx b/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx
+index 0000000..1111111 100644
+--- a/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx
++++ b/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx
+@@ -211,6 +211,7 @@
+   headerBlurEffect,
+   headerTintColor,
+   headerTitle,
++  headerSubtitle,
+   headerTitleAlign,
+   headerTitleStyle,
+   headerTransparent,
+@@ -523,6 +524,7 @@
+     largeTitleFontWeight,
+     largeTitleHideShadow: headerLargeTitleShadowVisible === false,
+     title: titleText,
++    subtitle: headerSubtitle,
+     titleColor,
+     titleFontFamily,
+     titleFontSize,

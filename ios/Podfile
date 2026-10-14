@@ -8,6 +8,9 @@ prepare_react_native_project!
 ENV['RCT_USE_RN_DEP'] = '0'
 ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
 
+# Compile react-native-screens' experimental components (native split view).
+ENV['RNS_GAMMA_ENABLED'] = '1'
+
 ENV['USE_FRAMEWORKS'] = 'static'
 use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym
 

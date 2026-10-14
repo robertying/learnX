@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import Info from 'react-native-device-info';
 
 const cached: {
@@ -7,6 +8,7 @@ const cached: {
   isMac: boolean;
   abi: string | null;
   systemVersion: string;
+  supportsNativeSubtitle: boolean;
   isEmulator: boolean | null;
   isWSA: boolean;
   model: string;
@@ -22,6 +24,8 @@ const cached: {
     Info.getDeviceType() === 'Desktop',
   abi: null,
   systemVersion: Info.getSystemVersion(),
+  supportsNativeSubtitle:
+    Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 26,
   isEmulator: null,
   isWSA: Info.getModel() === 'Subsystem for Android(TM)',
   model: Info.getModel(),
@@ -40,6 +44,7 @@ export default {
     return cached.abi;
   },
   systemVersion: () => cached.systemVersion,
+  supportsNativeSubtitle: () => cached.supportsNativeSubtitle,
   isEmulator: async () => {
     if (cached.isEmulator !== null) {
       return cached.isEmulator;

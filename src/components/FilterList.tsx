@@ -64,6 +64,20 @@ export interface FilterListProps<T> {
   onRefresh?: () => void;
 }
 
+const TITLES = {
+  notice: 'notices',
+  assignment: 'assignments',
+  file: 'files',
+  course: 'courses',
+} as const;
+
+const getHeaderTitleOptions = (title: string, subtitle?: string) =>
+  DeviceInfo.supportsNativeSubtitle()
+    ? { title, headerSubtitle: subtitle }
+    : {
+        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+      };
+
 const FilterList = <T extends Notice | Assignment | File | Course>({
   type,
   defaultSelected,
@@ -271,13 +285,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           />
         ),
         headerRight: () => <View />,
-        headerTitle: props => (
-          <HeaderTitle
-            {...props}
-            title={t('reorder')}
-            subtitle={t('dragToReorder')}
-          />
-        ),
+        ...getHeaderTitleOptions(t('reorder'), t('dragToReorder')),
       });
     } else if (selectionMode) {
       navigation.setOptions({
@@ -358,32 +366,60 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
           />
         ),
-        headerTitle: props => (
-          <HeaderTitle
-            {...props}
-            title={filterSelected === 'archived' ? t('restore') : t('archive')}
-            subtitle={
-              isLocaleChinese()
-                ? `已选中 ${selectedCount} 个`
-                : `${selectedCount} selected`
-            }
-          />
+        ...getHeaderTitleOptions(
+          filterSelected === 'archived' ? t('restore') : t('archive'),
+          isLocaleChinese()
+            ? `已选中 ${selectedCount} 个`
+            : `${selectedCount} selected`,
         ),
       });
     } else {
       navigation.setOptions({
-        unstable_headerLeftItems: () => [
-          ...((isCourse
+        unstable_headerLeftItems: () =>
+          isCourse
             ? [
                 {
                   type: 'button',
-                  identifier: 'reorder',
-                  label: t('reorder'),
+                  identifier: 'filter',
+                  label: t('filter'),
                   icon: {
                     type: 'sfSymbol',
-                    name: 'arrow.up.and.down',
+                    name: 'line.3.horizontal.decrease.circle',
                   },
-                  onPress: handleReorder,
+                  onPress: handleFilter,
+                },
+                // A third button leaves the title no room beside a sidebar of
+                // the default width, so the rest go in a menu.
+                {
+                  type: 'menu',
+                  identifier: 'more',
+                  label: t('more'),
+                  icon: {
+                    type: 'sfSymbol',
+                    name: 'ellipsis.circle',
+                  },
+                  menu: {
+                    items: [
+                      {
+                        type: 'action',
+                        label: t('reorder'),
+                        icon: {
+                          type: 'sfSymbol',
+                          name: 'arrow.up.and.down',
+                        },
+                        onPress: handleReorder,
+                      },
+                      {
+                        type: 'action',
+                        label: t('courseX'),
+                        icon: {
+                          type: 'sfSymbol',
+                          name: 'info.circle',
+                        },
+                        onPress: handleNavigateCourseX,
+                      },
+                    ],
+                  },
                 },
               ]
             : [
@@ -397,32 +433,17 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                   },
                   onPress: handleSelect,
                 },
-              ]) as any),
-          {
-            type: 'button',
-            identifier: 'filter',
-            label: t('filter'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'line.3.horizontal.decrease.circle',
-            },
-            onPress: handleFilter,
-          },
-          ...(isCourse
-            ? [
                 {
                   type: 'button',
-                  identifier: 'courseX',
-                  label: t('courseX'),
+                  identifier: 'filter',
+                  label: t('filter'),
                   icon: {
                     type: 'sfSymbol',
-                    name: 'info.circle',
+                    name: 'line.3.horizontal.decrease.circle',
                   },
-                  onPress: handleNavigateCourseX,
+                  onPress: handleFilter,
                 },
-              ]
-            : []),
-        ],
+              ],
         unstable_headerRightItems: () => [
           ...(DeviceInfo.isMac()
             ? [
@@ -493,26 +514,21 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             />
           </>
         ),
-        headerTitle: props => (
-          <HeaderTitle
-            {...props}
-            title={props.children!}
-            subtitle={
-              filterSelected === 'all'
-                ? defaultSubtitle
-                : filterSelected === 'unread'
-                  ? t('unread')
-                  : filterSelected === 'fav'
-                    ? t('fav')
-                    : filterSelected === 'archived'
-                      ? t('archived')
-                      : filterSelected === 'hidden'
-                        ? t('hidden')
-                        : filterSelected === 'unfinished'
-                          ? t('unfinished')
-                          : t('finished')
-            }
-          />
+        ...getHeaderTitleOptions(
+          t(TITLES[type]),
+          filterSelected === 'all'
+            ? defaultSubtitle
+            : filterSelected === 'unread'
+              ? t('unread')
+              : filterSelected === 'fav'
+                ? t('fav')
+                : filterSelected === 'archived'
+                  ? t('archived')
+                  : filterSelected === 'hidden'
+                    ? t('hidden')
+                    : filterSelected === 'unfinished'
+                      ? t('unfinished')
+                      : t('finished'),
         ),
       });
     }
@@ -530,6 +546,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     reorderMode,
     selectedCount,
     selectionMode,
+    type,
   ]);
 
   const firstTimeFetching = useRef(true);

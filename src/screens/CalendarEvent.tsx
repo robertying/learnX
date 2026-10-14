@@ -30,14 +30,13 @@ import {
 import { exportTextFile } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import useFilteredData from 'hooks/useFilteredData';
 import { SettingsStackParams } from './types';
 import DeviceInfo from 'constants/DeviceInfo';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 
-const CalendarEvent: React.FC<Props> = props => {
+const CalendarEvent: React.FC<Props> = () => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();
@@ -239,8 +238,6 @@ const CalendarEvent: React.FC<Props> = props => {
       { cancelable: true },
     );
   };
-
-  useNavigationAnimation(props);
 
   return (
     <SafeArea>

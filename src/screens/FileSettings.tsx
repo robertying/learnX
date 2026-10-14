@@ -6,7 +6,6 @@ import { setSetting } from 'data/actions/settings';
 import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
@@ -15,7 +14,7 @@ import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
-const FileSettings: React.FC<Props> = props => {
+const FileSettings: React.FC<Props> = () => {
   const toast = useToast();
 
   const dispatch = useAppDispatch();
@@ -53,8 +52,6 @@ const FileSettings: React.FC<Props> = props => {
       { cancelable: true },
     );
   };
-
-  useNavigationAnimation(props);
 
   return (
     <SafeArea>

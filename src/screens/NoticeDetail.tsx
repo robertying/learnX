@@ -30,7 +30,6 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
     expireTime,
     content,
     attachment,
-    disableAnimation,
   } = route.params;
 
   const html = useMemo(
@@ -56,14 +55,6 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
       navigation.push('FileDetail', data);
     }
   };
-
-  useEffect(() => {
-    if (disableAnimation) {
-      navigation.setOptions({
-        animation: 'none',
-      });
-    }
-  }, [navigation, disableAnimation]);
 
   useEffect(() => {
     fetch(url).catch(() => {});

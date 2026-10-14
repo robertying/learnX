@@ -188,6 +188,7 @@ const zh: typeof en = {
   select: '选择',
   checkAll: '全选/取消全选',
   filter: '过滤',
+  more: '更多',
   refresh: '刷新',
   dragToReorder: '长按并拖动以排序',
   documents: '文件',

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useContext, useState } from 'react';
 import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { Divider, Text, useTheme } from 'react-native-paper';
 import {
@@ -28,7 +28,7 @@ import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import Numbers from 'constants/Numbers';
+import { SplitViewContext } from 'components/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { CourseStackParams } from './types';
 
@@ -164,15 +164,13 @@ const routes = [
 
 type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
 
-const CourseDetail: React.FC<Props> = ({
-  navigation,
-  route: {
-    params: { disableAnimation, ...course },
-  },
-}) => {
+const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
+  const { disableAnimation: _disableAnimation, ...course } = route.params;
+
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();
+  const { masterWidth } = useContext(SplitViewContext);
 
   const notices = useAppSelector(state => state.notices.items);
   const assignments = useAppSelector(state => state.assignments.items);
@@ -263,14 +261,6 @@ const CourseDetail: React.FC<Props> = ({
     }
   }, [course.id, detailNavigator, navigation]);
 
-  useEffect(() => {
-    if (disableAnimation) {
-      navigation.setOptions({
-        animation: 'none',
-      });
-    }
-  }, [navigation, disableAnimation]);
-
   return (
     <SafeArea>
       <TouchableOpacity
@@ -299,7 +289,7 @@ const CourseDetail: React.FC<Props> = ({
         initialLayout={{
           width: detailNavigator
             ? Dimensions.get('window').width -
-              Numbers.splitViewMasterWidth -
+              masterWidth -
               1 /* divider width */
             : Dimensions.get('window').width,
         }}

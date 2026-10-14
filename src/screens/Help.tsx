@@ -4,15 +4,12 @@ import { Title, Text } from 'react-native-paper';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
 
-const Help: React.FC<Props> = props => {
-  useNavigationAnimation(props);
-
+const Help: React.FC<Props> = () => {
   return (
     <SafeArea>
       <ScrollView

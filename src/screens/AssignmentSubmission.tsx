@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -40,7 +40,7 @@ import {
 } from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import Numbers from 'constants/Numbers';
+import { SplitViewContext } from 'components/SplitView';
 import { AssignmentSubmissionStackParams } from './types';
 
 type Props = NativeStackScreenProps<
@@ -59,6 +59,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   const theme = useTheme();
   const toast = useToast();
   const detailNavigator = useDetailNavigator();
+  const { masterWidth } = useContext(SplitViewContext);
 
   const {
     id,
@@ -425,9 +426,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
                   anchorPosition="top"
                   style={{
                     marginTop: -100,
-                    marginLeft: detailNavigator
-                      ? -Numbers.splitViewMasterWidth
-                      : 0,
+                    marginLeft: detailNavigator ? -masterWidth : 0,
                   }}
                   anchor={
                     <Button

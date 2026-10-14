@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-bottom-tabs/ios/RCTTabViewComponentView.mm b/node_modules/react-native-bottom-tabs/ios/RCTTabViewComponentView.mm
-index 09ab604b..93e9885f 100644
+index 09ab604..93e9885 100644
 --- a/node_modules/react-native-bottom-tabs/ios/RCTTabViewComponentView.mm
 +++ b/node_modules/react-native-bottom-tabs/ios/RCTTabViewComponentView.mm
 @@ -18,7 +18,7 @@
@@ -11,11 +11,64 @@ index 09ab604b..93e9885f 100644
  #import <react/utils/ManagedObjectWrapper.h>
  
  #if TARGET_OS_OSX
+diff --git a/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift b/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift
+index dec5c0a..6a22852 100644
+--- a/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift
++++ b/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift
+@@ -29,19 +29,21 @@ enum TabBarFontSize {
+   ///   - color: Optional text color
+   /// - Returns: Dictionary of NSAttributedString attributes
+   static func createFontAttributes(
+-    size: CGFloat,
++    size: CGFloat?,
+     family: String? = nil,
+     weight: String? = nil,
+     color: PlatformColor? = nil
+   ) -> [NSAttributedString.Key: Any] {
+     var attributes: [NSAttributedString.Key: Any] = [:]
+ 
+-    // Create font with React Native font handling if family or weight is specified
+-    if family != nil || weight != nil {
++    // Without an explicit size, family or weight, keep the system's own label font.
++    if size == nil && family == nil && weight == nil {
++      // No font attribute.
++    } else if family != nil || weight != nil {
+       attributes[.font] = RCTFont.update(
+         nil,
+         withFamily: family,
+-        size: NSNumber(value: size),
++        size: NSNumber(value: Double(size ?? defaultSize)),
+         weight: weight,
+         style: nil,
+         variant: nil,
+@@ -50,9 +52,9 @@ enum TabBarFontSize {
+     } else {
+       // Fallback to system font
+       #if os(macOS)
+-        attributes[.font] = NSFont.boldSystemFont(ofSize: size)
++        attributes[.font] = NSFont.boldSystemFont(ofSize: size ?? defaultSize)
+       #else
+-        attributes[.font] = UIFont.boldSystemFont(ofSize: size)
++        attributes[.font] = UIFont.boldSystemFont(ofSize: size ?? defaultSize)
+       #endif
+     }
+ 
+@@ -77,9 +79,8 @@ enum TabBarFontSize {
+     fontWeight: String? = nil,
+     inactiveColor: PlatformColor? = nil
+   ) -> [NSAttributedString.Key: Any] {
+-    let size = fontSize.map(CGFloat.init) ?? defaultSize
+     return createFontAttributes(
+-      size: size,
++      size: fontSize.map(CGFloat.init),
+       family: fontFamily,
+       weight: fontWeight,
+       color: inactiveColor
 diff --git a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
-index 0000000..1111111 100644
+index 674e602..7cca275 100644
 --- a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
 +++ b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
-@@ -8,6 +8,8 @@
+@@ -8,6 +8,8 @@ import UIKit
  
  private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
    var onClick: ((_ index: Int?, _ identifier: String?) -> Bool)?
@@ -24,7 +77,7 @@ index 0000000..1111111 100644
  
    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
      if #available(iOS 27.0, *) {
-@@ -62,10 +64,35 @@
+@@ -62,9 +64,34 @@ private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
        tab.identifier
      ) ?? false
  
@@ -35,7 +88,7 @@ index 0000000..1111111 100644
      return isReselectingSameTab ? false : !defaultPrevented
    }
  
-   @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
++  @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
 +  func tabBarController(_ tabBarController: UITabBarController, didSelectTab selectedTab: UITab, previousTab: UITab?) {
 +    guard #available(iOS 27.0, *) else {
 +      return
@@ -56,11 +109,10 @@ index 0000000..1111111 100644
 +    )
 +  }
 +
-+  @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
+   @available(iOS 18.0, tvOS 18.0, visionOS 2.0, *)
    private func tabIndex(for tab: UITab, in tabBarController: UITabBarController) -> Int? {
      tabBarController.tabs.firstIndex {
-       $0 === tab || $0.identifier == tab.identifier
-@@ -75,6 +102,7 @@
+@@ -75,6 +102,7 @@ private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
  
  struct TabItemEventModifier: ViewModifier {
    let onTabEvent: (_ index: Int?, _ identifier: String?, _ isLongPress: Bool) -> Bool
@@ -68,7 +120,7 @@ index 0000000..1111111 100644
    private let delegate = TabBarDelegate()
  
    func body(content: Content) -> some View {
-@@ -88,6 +116,7 @@
+@@ -88,6 +116,7 @@ struct TabItemEventModifier: ViewModifier {
      delegate.onClick = { index, identifier in
        onTabEvent(index, identifier, false)
      }
@@ -76,7 +128,7 @@ index 0000000..1111111 100644
      tabController.delegate = delegate
  
      // Don't register gesutre recognizer more than one time
-@@ -154,9 +183,13 @@
+@@ -154,9 +183,13 @@ private class LongPressGestureHandler: NSObject {
  extension View {
    /**
     Event for tab items. Returns true if should prevent default (switching tabs).
@@ -93,13 +145,21 @@ index 0000000..1111111 100644
  }
  
 diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
-index 0000000..1111111 100644
+index 68053e1..7bbdf6f 100644
 --- a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
 +++ b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
-@@ -59,6 +59,14 @@
+@@ -58,7 +58,21 @@ struct TabViewImpl: View {
+             onSelect(key)
              emitHapticFeedback()
            }
-           return item?.preventsDefault ?? false
+-          return item?.preventsDefault ?? false
++          let preventsDefault = item?.preventsDefault ?? false
++          if !isLongPress && !preventsDefault {
++            // UIKit switches tabs right away, but JS only confirms the selection once it has rendered
++            // the tab. Until then SwiftUI would reassert the previous selection on its next update.
++            props.selectedPage = key
++          }
++          return preventsDefault
 +        } onSelectTab: { index, identifier in
 +          let item = identifier.flatMap { props.filteredItems.findByKey($0) }
 +            ?? index.flatMap { props.filteredItems[safe: $0] }
@@ -111,19 +171,37 @@ index 0000000..1111111 100644
          }
        #endif
        .introspectTabView { tabController in
+@@ -279,7 +293,7 @@ struct TabViewImpl: View {
+ 
+       item.setTitleTextAttributes(
+         TabBarFontSize.createFontAttributes(
+-          size: props.fontSize.map(CGFloat.init) ?? TabBarFontSize.defaultSize,
++          size: props.fontSize.map(CGFloat.init),
+           family: props.fontFamily,
+           weight: props.fontWeight,
+           color: tabActiveColor
+@@ -318,7 +332,7 @@ struct TabViewImpl: View {
+ 
+   private func selectedAttributes(props: TabViewProps) -> [NSAttributedString.Key: Any] {
+     TabBarFontSize.createFontAttributes(
+-      size: props.fontSize.map(CGFloat.init) ?? TabBarFontSize.defaultSize,
++      size: props.fontSize.map(CGFloat.init),
+       family: props.fontFamily,
+       weight: props.fontWeight,
+       color: props.selectedActiveTintColor
 diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift b/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
-index 0000000..1111111 100644
+index e566345..ce1be79 100644
 --- a/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
 +++ b/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
-@@ -211,18 +211,41 @@
+@@ -211,18 +211,41 @@ public final class TabInfo: NSObject {
    }
  #endif
  
-+#if targetEnvironment(macCatalyst)
++#if os(iOS)
 +  override public func willMove(toWindow newWindow: UIWindow?) {
 +    super.willMove(toWindow: newWindow)
 +
-+    // Mac Catalyst 27 hosts the tab bar in the window toolbar. UIKit only removes that toolbar in the
++    // Mac Catalyst 27 hosts the tab bar in the window toolbar (and foldables in the vertical bar). UIKit only removes it in the
 +    // tab bar controller's viewDidDisappear, and only if the controller can still reach the window.
 +    // When this view leaves the window (e.g. the whole tab navigator unmounts), UIKit forwards the
 +    // disappearance after the view is already detached, so the stale toolbar stays and blocks any

@@ -6,13 +6,12 @@ import { ProgressBar } from 'react-native-paper';
 import SafeArea from 'components/SafeArea';
 import { useAppDispatch } from 'data/store';
 import { setSetting } from 'data/actions/settings';
-import useNavigationAnimation from 'hooks/useNavigationAnimation';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
 
-const Changelog: React.FC<Props> = props => {
+const Changelog: React.FC<Props> = () => {
   const dispatch = useAppDispatch();
 
   const webViewRef = useRef<WebView>(null);
@@ -26,8 +25,6 @@ const Changelog: React.FC<Props> = props => {
       Linking.openURL(e.url);
     }
   };
-
-  useNavigationAnimation(props);
 
   useEffect(() => {
     dispatch(setSetting('lastShowChangelogVersion', packageJson.version));
