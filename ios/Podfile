@@ -48,6 +48,12 @@ target 'learnX' do
       :mac_catalyst_enabled => true
     )
 
+    # pod install can drop hermes-engine/.last_build_configuration while leaving a
+    # Release binary from an earlier archive in place, so Debug builds fail to link.
+    # An unknown value makes the next build always extract the matching tarball.
+    hermes_dir = File.join(installer.sandbox.root.to_s, 'hermes-engine')
+    File.write(File.join(hermes_dir, '.last_build_configuration'), 'Unknown') if Dir.exist?(hermes_dir)
+
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
         config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
