@@ -758,7 +758,7 @@ const lightThemeColors = {
 };
 const darkThemeColors = {
   ...DarkTheme.colors,
-  primary: 'rgb(249, 171, 255)',
+  primary: 'rgb(208, 120, 220)',
   onPrimary: 'rgb(87, 0, 102)',
   primaryContainer: 'rgb(123, 0, 143)',
   onPrimaryContainer: 'rgb(255, 214, 254)',
