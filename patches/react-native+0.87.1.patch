@@ -14,3 +14,41 @@ index b237b45..fcc4f4b 100644
          }
          if (typeof value.type === 'string') {
            headers['content-type'] = value.type;
+diff --git a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
+index 0000000..1111111 100644
+--- a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
++++ b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
+@@ -388,8 +388,33 @@
+   _backedTextInputView.inputAccessoryView = nil;
+   _hasInputAccessoryView = false;
+   [_backedTextInputView resignFirstResponder];
++
++  // UIKit's AutoFill keeps the text fields it has grouped as username/password,
++  // so a recycled credential field would carry that role into an unrelated input.
++  if ([self _isCredentialTextInput]) {
++    [self _replaceBackedTextInputView];
++  }
+ }
+ 
++- (BOOL)_isCredentialTextInput
++{
++  UITextContentType textContentType = _backedTextInputView.textContentType;
++  return _backedTextInputView.secureTextEntry || [textContentType isEqualToString:UITextContentTypeUsername] ||
++      [textContentType isEqualToString:UITextContentTypePassword] ||
++      [textContentType isEqualToString:UITextContentTypeNewPassword];
++}
++
++- (void)_replaceBackedTextInputView
++{
++  UIView<RCTBackedTextInputViewProtocol> *oldTextInputView = _backedTextInputView;
++  [self _setMultiline:[oldTextInputView isKindOfClass:[RCTUITextView class]]];
++  // Props diffed in updateProps but not copied by RCTCopyBackedTextInput.
++  _backedTextInputView.returnKeyType = oldTextInputView.returnKeyType;
++  _backedTextInputView.tintColor = oldTextInputView.tintColor;
++  _backedTextInputView.inputView = oldTextInputView.inputView;
++  _backedTextInputView.dataDetectorTypes = oldTextInputView.dataDetectorTypes;
++}
++
+ #pragma mark - RCTBackedTextInputDelegate
+ 
+ - (BOOL)textInputShouldBeginEditing
