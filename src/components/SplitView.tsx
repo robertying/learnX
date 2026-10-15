@@ -1,8 +1,7 @@
-import { createContext, useState, Children, useEffect, useRef } from 'react';
+import { createContext, useState, Children } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Divider } from 'react-native-paper';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { BlurTargetView, BlurView } from 'expo-blur';
 import Numbers from 'constants/Numbers';
 
 const SplitViewContext = createContext<{
@@ -34,39 +33,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
   showDetail,
   children,
 }) => {
-  const rendered = useRef(false);
-  const blurTargetRef = useRef<View | null>(null);
-
   const [showMaster, setShowMaster] = useState(true);
-  const [blur, setBlur] = useState(false);
-
-  useEffect(() => {
-    if (!rendered.current) {
-      rendered.current = true;
-      return;
-    }
-
-    setBlur(true);
-
-    // Remove the blur once the new layout has actually painted rather than
-    // after a fixed delay. A setTimeout is a JS-thread timer, so during a
-    // heavy transition (e.g. mounting the whole main UI with offline data
-    // already in the store) the callback gets starved and the blur appears
-    // to hang. Two animation frames put us just past the next paint.
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      raf2 = requestAnimationFrame(() => setBlur(false));
-    });
-    // Safety net in case a frame never arrives.
-    const timeout = setTimeout(() => setBlur(false), 500);
-
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      clearTimeout(timeout);
-    };
-  }, [showDetail, splitEnabled]);
-
   const masterHidden = showDetail && !showMaster;
 
   return (
@@ -81,7 +48,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
       }}
     >
       {splitEnabled ? (
-        <BlurTargetView ref={blurTargetRef} style={styles.root}>
+        <View style={styles.root}>
           <View
             testID="rns-split-master"
             style={[
@@ -107,17 +74,9 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
           >
             {Children.toArray(children)[1]}
           </View>
-        </BlurTargetView>
+        </View>
       ) : (
         <>{Children.toArray(children)[0]}</>
-      )}
-      {blur && (
-        <BlurView
-          blurTarget={blurTargetRef}
-          intensity={25}
-          style={styles.blurView}
-          blurMethod="dimezisBlurViewSdk31Plus"
-        />
       )}
     </SplitViewContext.Provider>
   );
@@ -145,14 +104,6 @@ const styles = StyleSheet.create({
   divider: {
     height: '100%',
     width: 1,
-  },
-  blurView: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 99999,
   },
 });
 

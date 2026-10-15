@@ -29,7 +29,7 @@ PODS:
     - SocketRocket
     - Yoga
   - DoubleConversion (1.1.6)
-  - EXConstants (58.0.11):
+  - EXConstants (58.0.12):
     - ExpoModulesCore
   - Expo (58.0.9):
     - boost
@@ -63,13 +63,11 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - ExpoAsset (58.0.14):
+  - ExpoAsset (58.0.15):
     - ExpoModulesCore
   - ExpoBackgroundTask (58.0.10):
     - ExpoModulesCore
     - ExpoTaskManager
-  - ExpoBlur (58.0.3):
-    - ExpoModulesCore
   - ExpoCalendar (58.0.6):
     - ExpoModulesCore
   - ExpoCrypto (58.0.6):
@@ -88,7 +86,7 @@ PODS:
     - ExpoModulesCore
   - ExpoLogBox (58.0.12):
     - React-Core
-  - ExpoModulesCore (58.0.17):
+  - ExpoModulesCore (58.0.18):
     - boost
     - DoubleConversion
     - ExpoModulesJSI
@@ -118,13 +116,13 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - ExpoModulesJSI (58.0.12):
+  - ExpoModulesJSI (58.0.13):
     - React-Core
     - ReactCommon
-  - ExpoModulesWorklets (58.0.17):
+  - ExpoModulesWorklets (58.0.18):
     - ExpoModulesCore
     - ExpoModulesJSI
-  - ExpoModulesWorkletsAdapter (58.0.17):
+  - ExpoModulesWorkletsAdapter (58.0.18):
     - ExpoModulesCore
     - ExpoModulesJSI
     - ExpoModulesWorklets
@@ -3501,7 +3499,6 @@ DEPENDENCIES:
   - Expo (from `../node_modules/expo`)
   - ExpoAsset (from `../node_modules/expo-asset/ios`)
   - ExpoBackgroundTask (from `../node_modules/expo-background-task/ios`)
-  - ExpoBlur (from `../node_modules/expo-blur/ios`)
   - ExpoCalendar (from `../node_modules/expo-calendar/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
   - ExpoDocumentPicker (from `../node_modules/expo-document-picker/ios`)
@@ -3658,8 +3655,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-asset/ios"
   ExpoBackgroundTask:
     :path: "../node_modules/expo-background-task/ios"
-  ExpoBlur:
-    :path: "../node_modules/expo-blur/ios"
   ExpoCalendar:
     :path: "../node_modules/expo-calendar/ios"
   ExpoCrypto:
@@ -3900,11 +3895,10 @@ SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   CookieManager: b29b8a45680d09fb076d4116e698650300fb9e34
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
-  EXConstants: c92dd52f6d69691dcfb5e0d7164130a6df2511e5
+  EXConstants: ff5c226215048137ea31d39fa460027a6daeeadc
   Expo: e19eaf0f627cd3ccd3e2a4ff1a421bdab909f6ef
-  ExpoAsset: 81dd549840fe81ec0df681ae2f9985ff07c7ec6e
+  ExpoAsset: 6c3ed2115593bde988dfdd6ff5f37f1a29d23a3b
   ExpoBackgroundTask: 2da3e52aaaefdc85de4beee2155cfd4728816f1c
-  ExpoBlur: dd34eb431f3ac36903553b812176b0c640763a39
   ExpoCalendar: 47dcd767c17ecec01f449ee57140d8a29ae9eef7
   ExpoCrypto: 17d8715d985fa17a31b9ce9200d0c67d978ae63f
   ExpoDocumentPicker: af0917aa6f1b54ab3a0f47977935a1e20ffb1537
@@ -3914,10 +3908,10 @@ SPEC CHECKSUMS:
   ExpoImagePicker: a466134ec92fed0b38bbf9062c7eb5f3c8c49d94
   ExpoKeepAwake: fd18a5d233329013c578030ad399d8e10b252b5f
   ExpoLogBox: 14c42e5429c85e1e2acfb9316b4e821db8e40d42
-  ExpoModulesCore: 6413ee072930347e46cca1f62aadec0655f0a7ef
-  ExpoModulesJSI: 74bd5b7dd4eaef1600a549b4dac7114985da2793
-  ExpoModulesWorklets: ac40f2357232e0006e29cd7a3ed03aad140a8b57
-  ExpoModulesWorkletsAdapter: 20ee5c74e62669acd82d296f01fcf5938e156fbf
+  ExpoModulesCore: 977f8a30ad588feb0885f675e7539cd6b5a18ddf
+  ExpoModulesJSI: 392ef0e356ad1d4cb7a58d863914c24c9076a1bb
+  ExpoModulesWorklets: 74ffcbe74bfebb06e626e28d59d79e12f36781d8
+  ExpoModulesWorkletsAdapter: 9dc2bb421c587484943873a17441324e3ad06f32
   ExpoSecureStore: 64e1fe78b5b0a1edb61beff044bb2cad03084f9c
   ExpoTaskManager: 67eabcfa459b0cd9365fd9f6eb8fcaf00c3b5c3a
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
