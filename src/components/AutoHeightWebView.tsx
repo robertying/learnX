@@ -100,9 +100,7 @@ const AutoHeightWebView: React.FC<
         Object.entries(cookies).map(([, value]) =>
           CookieManager.set(
             Urls.learn,
-            value.sameSite === 'none'
-              ? { ...value, secure: true }
-              : value,
+            value.sameSite === 'none' ? { ...value, secure: true } : value,
             true,
           ),
         ),

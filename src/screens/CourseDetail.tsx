@@ -180,7 +180,6 @@ const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
   const assignments = useAppSelector(state => state.assignments.items);
   const files = useAppSelector(state => state.files.items);
 
-
   const [index, setIndex] = useState(0);
 
   // Laid out with flex and percentages rather than the measured width that

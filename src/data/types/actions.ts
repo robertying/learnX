@@ -56,9 +56,7 @@ type GetAllSemestersAction = ActionType<typeof getAllSemestersAction>;
 type GetCurrentSemesterAction = ActionType<typeof getCurrentSemesterAction>;
 type SetCurrentSemesterAction = ActionType<typeof setCurrentSemester>;
 export type SemestersAction =
-  | GetAllSemestersAction
-  | GetCurrentSemesterAction
-  | SetCurrentSemesterAction;
+  GetAllSemestersAction | GetCurrentSemesterAction | SetCurrentSemesterAction;
 
 type GetCoursesForSemesterAction = ActionType<
   typeof getCoursesForSemesterAction
@@ -66,9 +64,7 @@ type GetCoursesForSemesterAction = ActionType<
 type SetHideCourseAction = ActionType<typeof setHideCourse>;
 type SetCourseOrderAction = ActionType<typeof setCourseOrder>;
 export type CoursesAction =
-  | GetCoursesForSemesterAction
-  | SetHideCourseAction
-  | SetCourseOrderAction;
+  GetCoursesForSemesterAction | SetHideCourseAction | SetCourseOrderAction;
 
 type GetNoticesForCourseAction = ActionType<typeof getNoticesForCourseAction>;
 type GetAllNoticesForCoursesAction = ActionType<
@@ -128,9 +124,7 @@ export type ResetLoadingAction = ActionType<typeof resetLoading>;
 export type ClearStoreAction = ActionType<typeof clearStoreAction>;
 export type SetMockStoreAction = ActionType<typeof setMockStore>;
 export type StoreAction =
-  | ClearStoreAction
-  | SetMockStoreAction
-  | ResetLoadingAction;
+  ClearStoreAction | SetMockStoreAction | ResetLoadingAction;
 
 export type AppActions =
   | AuthAction
