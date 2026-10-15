@@ -408,7 +408,7 @@ index 0000000..1111111 100644
    _showInspector = false;
  
    _minimumPrimaryColumnWidth = -1.0;
-@@ -122,6 +137,7 @@ - (void)setupController
+@@ -122,14 +137,86 @@ - (void)setupController
  
  - (void)didMoveToWindow
  {
@@ -416,17 +416,20 @@ index 0000000..1111111 100644
    [self setupController];
    RCTAssert(_controller != nil, @"[RNScreens] Controller must not be nil while attaching to window");
    [self requestSplitHostControllerForAppearanceUpdate];
-@@ -130,6 +146,75 @@ - (void)didMoveToWindow
-                        toViewControllerManaging:self.reactSuperview
-                               withContainerView:self];
-   }
 +  // The controller is only created here. When the host joins the window after the transaction that
 +  // mounted its columns has finished (e.g. inside a tab), that transaction's update was sent to a
-+  // nil controller, so the columns have to be picked up now.
++  // nil controller, so the columns have to be picked up now. Before the controller joins the
++  // hierarchy: UIKit before iOS 26 only collapses a split in compact width as it appears, which
++  // given no columns yet it doesn't, leaving the secondary column on its own.
 +  if (!hadController && _reactSubviews.count > 0) {
 +    [_controller setNeedsUpdateOfChildViewControllers];
 +    [_controller reactMountingTransactionDidMount];
 +  }
+   if (self.window != nil && _controller.parentViewController == nil) {
+     [RNSContainerHelpers addChildViewController:_controller
+                        toViewControllerManaging:self.reactSuperview
+                               withContainerView:self];
+   }
 +  // A tab bar controller hands the safe area of its bar down to the columns of a split view inside
 +  // it, and takes back the one it gave the tab's own controller. When the split view joins once the
 +  // tab is already being shown, the columns can be left without theirs until the tab transition is
@@ -492,7 +495,7 @@ index 0000000..1111111 100644
  }
  
  RNS_IGNORE_SUPER_CALL_BEGIN
-@@ -230,6 +315,12 @@ - (void)updateProps:(const facebook::react::Props::Shared &)props
+@@ -230,6 +317,12 @@ - (void)updateProps:(const facebook::react::Props::Shared &)props
      _presentsWithGesture = newComponentProps.presentsWithGesture;
    }
  
