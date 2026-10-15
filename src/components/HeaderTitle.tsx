@@ -1,6 +1,7 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { Text } from 'react-native-paper';
 import DeviceInfo from 'constants/DeviceInfo';
+import Numbers from 'constants/Numbers';
 
 export interface HeaderTitleProps {
   title: string;
@@ -11,13 +12,16 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
   title,
   subtitle,
 }) => {
+  const { width } = useWindowDimensions();
+  // Wide windows (tablets, unfolded foldables) get the roomy header, like the split view.
+  const isWide =
+    DeviceInfo.isTablet() || width > Numbers.splitViewMaxCollapsedWidth;
+
   return (
     <View
       style={{
-        maxWidth:
-          Platform.OS === 'android' && !DeviceInfo.isTablet() ? 250 : undefined,
-        height:
-          Platform.OS === 'android' ? (DeviceInfo.isTablet() ? 64 : 56) : 44,
+        maxWidth: Platform.OS === 'android' && !isWide ? 250 : undefined,
+        height: Platform.OS === 'android' ? (isWide ? 64 : 56) : 44,
         justifyContent: 'center',
         alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
       }}

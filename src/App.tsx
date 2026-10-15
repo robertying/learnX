@@ -99,6 +99,7 @@ import HeaderTitle from 'components/HeaderTitle';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import { SplitViewProvider } from 'components/SplitView';
+import Numbers from 'constants/Numbers';
 import NativeSplitViewProvider, {
   useSplitLaidOut,
 } from 'components/NativeSplitView';
@@ -890,11 +891,13 @@ const SplitMain = () => {
   // set. Hand the ref out only once it is, so that its consumers render again.
   const [detailReady, setDetailReady] = useState(false);
 
-  const showDetail = frame.width >= 750;
+  const showDetail = frame.width > Numbers.splitViewMaxCollapsedWidth;
 
   return (
     <SplitViewProvider
-      splitEnabled={DeviceInfo.isMac() || DeviceInfo.isTablet()}
+      splitEnabled={
+        DeviceInfo.isMac() || DeviceInfo.isTablet() || Platform.OS === 'android'
+      }
       detailNavigationContainerRef={
         showDetail && detailReady ? detailNavigationContainerRef : null
       }
