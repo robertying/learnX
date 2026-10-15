@@ -1,5 +1,5 @@
 import mimeTypes from 'mime-types';
-import he from 'he';
+import { decode } from 'he';
 import { coerce, gte } from 'semver';
 import { dataSource } from 'data/source';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -172,8 +172,9 @@ export const removeTags = (html?: string) => {
   }
 
   try {
-    return he
-      .decode(html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''))
+    return decode(
+      html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''),
+    )
       .replace(/\s\s+/g, ' ')
       .trim();
   } catch {
