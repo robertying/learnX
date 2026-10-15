@@ -17,6 +17,7 @@ var ww: CGFloat, wh: CGFloat, wx: CGFloat, wy: CGFloat
 switch kind {
 case "screenshot": ww = w * 0.90; wh = ww / ar; wx = (w - ww) / 2; wy = (h - wh) / 2
 case "store": ww = w * 0.715; wh = ww / ar; wx = (w - ww) / 2; wy = (h - wh) / 2
+case "universal": let safeH = min(h, w * 9 / 21); wh = safeH * 0.92; ww = wh * ar; wx = (w - ww) / 2; wy = (h - wh) / 2   // 16:9 source for header + search crops, no icon
 case "header": wh = h * 0.80; ww = wh * ar; let isz0 = h * 0.42, gap0 = h * 0.12; wx = (w - (isz0 + gap0 + ww)) / 2 + isz0 + gap0; wy = (h - wh) / 2
 default: ww = w * 0.84; wh = ww / ar; wx = (w - ww) / 2; wy = (h - wh) / 2
 }

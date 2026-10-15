@@ -125,15 +125,16 @@ The gradient is the light store one in every script. Each output goes into its p
 
 ### iOS header and search results
 
-- `scripts/compose-iphone-bezel.swift <shot> <PhoneComposite.pdf> <icon> <out> <W> <H> header|search [tile]`, with `SHOT2=<second shot>` for the staggered second phone.
+- Header: `scripts/compose-header-wordmark.swift <out.png> 3840 1646 learnX 网络学堂新选择`. Use the same file for iOS and Mac. No icon.
+- Search results: build the 16:9 universal with `SHOT2=<08-courses-plain.png> compose-iphone-bezel <01-notices.png> <PhoneComposite.pdf> <icon.png> <universal.png> 5244 2950 universal`, then `scripts/crop-universal.sh <universal.png> <header.png> <search-results.png>` (3:2 crop → 3840x2560). Do not use the cropped header.
 - Bezels: `/Library/Developer/DeviceKit/Chrome/phone11.devicechrome` (18 Pro) or `phone12` (18 Pro Max), `Resources/PhoneComposite.pdf`.
-- Header = regular icon (`docs/assets/logo.webp` → png via `dwebp`) + phone 1 (`01-notices.png`, top) + phone 2 (`08-courses-plain.png`, no swiped row, bleeding off the top). Search results = the two phones only.
 
 ### Mac header and search results
 
-- `compose-mac <window.png> <icon.png> <out.png> <W> <H> <kind> [raw]`, built from `scripts/compose-mac.swift`.
-- Kinds: `store` (2880x1800 Mac App Store shot: window 71.5 % wide on the gradient), `header`, `search` (window 84 % wide), `screenshot` (window 90 % on black, no shadow).
-- `raw` draws the icon as is; default puts the glyph icon on a white tile. Output has no alpha.
+- Header: the same wordmark file as iOS.
+- Search results: `compose-mac <window.png> <icon.png> <universal.png> 5244 2950 universal`, then `scripts/crop-universal.sh <universal.png> <header.png> <search-results.png>`.
+- `compose-mac <window.png> <icon.png> <out.png> <W> <H> <kind>`, built from `scripts/compose-mac.swift`. Kinds: `store` (2880x1800 Mac App Store shot: window 71.5 % wide on the gradient), `universal`, `screenshot` (window 90 % on black, no shadow).
+- Output has no alpha.
 
 ### Play feature graphic
 

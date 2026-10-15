@@ -1,6 +1,8 @@
 import AppKit
 import ImageIO
-// usage: compose-iphone-bezel <screenshot.png> <PhoneComposite.pdf> <icon.png> <out.png> <W> <H> header|search [tile]
+// usage: compose-iphone-bezel <screenshot.png> <PhoneComposite.pdf> <icon.png> <out.png> <W> <H> header|search|universal [tile]
+// universal: 16:9 (5244x2950) source for BOTH placements. Content is sized to the safe 21:9 band and centred, so the 21:9 header crop and the
+// 3:2 search crop (see `crop-universal.sh`) never clip it. No icon (the App Store shows the app icon next to these assets).
 // env SHOT2=<screenshot.png>: add a second, staggered phone (bleeds off the top, shows the bottom half of the screen).
 // header = [icon] [phone 1 (bleeds off the bottom)] [phone 2 (bleeds off the top)], the group centred horizontally. search = the two phones only.
 // The icon is drawn as is (full-bleed regular app icon); pass "tile" to put the glyph icon on a white tile instead.
@@ -27,10 +29,13 @@ let w = CGFloat(W), h = CGFloat(H)
 NSGradient(starting: NSColor(red: 0.60, green: 0.31, blue: 0.79, alpha: 1), ending: NSColor(red: 0.29, green: 0.52, blue: 0.80, alpha: 1))!.draw(in: NSRect(x: 0, y: 0, width: w, height: h), angle: -35)
 
 let two = shot2 != nil
-let targetH = two ? (mode == "header" ? h * 1.45 : h * 1.35) : (mode == "header" ? h * 1.30 : h * 1.06)
+let universal = mode == "universal"
+let safeH = universal ? min(h, w * 9 / 21) : h   // height of the 21:9 band
+let baseY = (h - safeH) / 2
+let targetH = universal ? safeH * 1.45 : (two ? (mode == "header" ? h * 1.45 : h * 1.35) : (mode == "header" ? h * 1.30 : h * 1.06))
 let scale = targetH / devH
 let dw = devW * scale, dh = devH * scale
-let phoneGap = h * 0.03
+let phoneGap = safeH * 0.03
 let iconSize = h * 0.42, iconGap = h * 0.12
 let phonesW = two ? dw * 2 + phoneGap : dw
 let groupW = (mode == "header" ? iconSize + iconGap : 0) + phonesW
@@ -57,10 +62,10 @@ func drawDevice(_ img: NSImage, x: CGFloat, y: CGFloat) {   // x, y = bottom-lef
 }
 
 // phone 1: top near the top edge, bleeding off the bottom
-let topMargin = mode == "header" ? h * 0.10 : h * 0.07
-drawDevice(shot, x: phonesX, y: h - topMargin - dh)
+let topMargin = universal ? safeH * 0.10 : (mode == "header" ? h * 0.10 : h * 0.07)
+drawDevice(shot, x: phonesX, y: baseY + safeH - topMargin - dh)
 // phone 2: bottom near the bottom edge, bleeding off the top, so it shows the lower part of the screen
-if let s2 = shot2 { drawDevice(s2, x: phonesX + dw + phoneGap, y: h * 0.07) }
+if let s2 = shot2 { drawDevice(s2, x: phonesX + dw + phoneGap, y: baseY + safeH * 0.07) }
 
 if mode == "header" {
   let isz = iconSize, ix = groupX, iy = h * 0.5 - isz / 2
