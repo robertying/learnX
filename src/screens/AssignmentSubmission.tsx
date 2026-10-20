@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -6,14 +6,14 @@ import {
   Alert,
   Keyboard,
   KeyboardAvoidingView,
-  Platform,
   StyleSheet,
   View,
 } from 'react-native';
 import {
   Button,
   Caption,
-  Menu,
+  Dialog,
+  List,
   Portal,
   ProgressBar,
   Snackbar,
@@ -26,7 +26,6 @@ import { RemoteFile } from 'thu-learn-lib';
 import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
 import TextButton from 'components/TextButton';
-import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { getExtension, stripExtension } from 'helpers/fs';
 import { removeTags } from 'helpers/html';
@@ -39,8 +38,6 @@ import {
   setPendingAssignmentData,
 } from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
-import useDetailNavigator from 'hooks/useDetailNavigator';
-import { SplitViewContext } from 'components/SplitView';
 import { AssignmentSubmissionStackParams } from './types';
 
 type Props = NativeStackScreenProps<
@@ -58,8 +55,6 @@ interface AttachmentResult {
 const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   const theme = useTheme();
   const toast = useToast();
-  const detailNavigator = useDetailNavigator();
-  const { masterWidth } = useContext(SplitViewContext);
 
   const {
     id,
@@ -114,6 +109,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const handlePickerMenuOpen = () => {
+    Keyboard.dismiss();
     setPickerMenuVisible(true);
   };
 
@@ -326,18 +322,11 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   return (
     <Portal.Host>
       <SafeArea>
-        <KeyboardAvoidingView
-          style={Styles.flex1}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
+        <KeyboardAvoidingView style={Styles.flex1} behavior="height">
           {progress ? <ProgressBar progress={progress} /> : null}
-          <ScrollView
-            contentContainerStyle={styles.scrollView}
-            scrollEnabled={false}
-            keyboardShouldPersistTaps="handled"
-          >
+          <View style={styles.inputs}>
             <TextInput
-              style={Styles.flex1}
+              style={styles.contentInput}
               disabled={removeAttachment || uploading}
               multiline
               placeholder={t('assignmentSubmissionContentPlaceholder')}
@@ -352,7 +341,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
                 onChangeText={handleCustomAttachmentNameChange}
               />
             )}
-          </ScrollView>
+          </View>
           <View style={styles.submissionDetail}>
             {submittedAttachment ? (
               <TextButton
@@ -420,35 +409,45 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
                 </Button>
               ) : undefined}
               {!removeAttachment ? (
-                <Menu
-                  visible={pickerMenuVisible}
-                  onDismiss={handlePickerMenuClose}
-                  anchorPosition="top"
-                  style={{
-                    marginTop: -100,
-                    marginLeft: detailNavigator ? -masterWidth : 0,
-                  }}
-                  anchor={
-                    <Button
-                      style={styles.submitButton}
-                      disabled={uploading}
-                      mode="contained"
-                      onPress={handlePickerMenuOpen}
+                <>
+                  <Button
+                    style={styles.submitButton}
+                    disabled={uploading}
+                    mode="contained"
+                    onPress={handlePickerMenuOpen}
+                  >
+                    {attachmentResult
+                      ? t('reUploadAttachment')
+                      : submittedAttachment
+                        ? t('overwriteAttachment')
+                        : t('pickAttachment')}
+                  </Button>
+                  <Portal>
+                    <Dialog
+                      visible={pickerMenuVisible}
+                      onDismiss={handlePickerMenuClose}
                     >
-                      {attachmentResult
-                        ? t('reUploadAttachment')
-                        : submittedAttachment
-                          ? t('overwriteAttachment')
-                          : t('pickAttachment')}
-                    </Button>
-                  }
-                >
-                  <Menu.Item
-                    onPress={handleDocumentPick}
-                    title={t('documents')}
-                  />
-                  <Menu.Item onPress={handlePhotoPick} title={t('photos')} />
-                </Menu>
+                      <Dialog.Title>{t('pickAttachment')}</Dialog.Title>
+                      <Dialog.Content style={styles.pickerDialogContent}>
+                        <List.Item
+                          title={t('documents')}
+                          left={props => <List.Icon {...props} icon="file" />}
+                          onPress={handleDocumentPick}
+                        />
+                        <List.Item
+                          title={t('photos')}
+                          left={props => <List.Icon {...props} icon="image" />}
+                          onPress={handlePhotoPick}
+                        />
+                      </Dialog.Content>
+                      <Dialog.Actions>
+                        <Button onPress={handlePickerMenuClose}>
+                          {t('cancel')}
+                        </Button>
+                      </Dialog.Actions>
+                    </Dialog>
+                  </Portal>
+                </>
               ) : undefined}
             </View>
             {submitTime && (
@@ -475,8 +474,14 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flexGrow: 1,
+  pickerDialogContent: {
+    paddingHorizontal: 0,
+  },
+  inputs: {
+    flex: 1,
+  },
+  contentInput: {
+    flex: 1,
   },
   submissionDetail: {
     paddingHorizontal: 16,
@@ -495,7 +500,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginVertical: 8,
+    marginTop: 8,
+    marginBottom: 32,
   },
 });
 
