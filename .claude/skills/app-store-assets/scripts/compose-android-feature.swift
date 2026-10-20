@@ -20,7 +20,8 @@ let aspect = shot1.size.width / shot1.size.height
 let devH = h * 1.05, ring = h * 0.016
 let screenH = devH - 2 * ring, screenW = screenH * aspect
 let devW = screenW + 2 * ring
-let gap = w * 0.025, iconSize = h * 0.36, iconGap = w * 0.05
+// horizontal padding: full-height phones bleed off top and bottom, so the icon and gaps are sized to leave a margin on both sides
+let gap = w * 0.02, iconSize = h * 0.28, iconGap = w * 0.03
 let groupW = iconSize + iconGap + devW * 2 + gap
 var x = (w - groupW) / 2
 

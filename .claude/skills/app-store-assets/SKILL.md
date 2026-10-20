@@ -10,6 +10,7 @@ Reproduce the existing store screenshots with the current UI, from mock data onl
 - **Never write output into the repo**: save to `~/Downloads/learnX-app-store-assets/` for the user to review (layout in [Output](#output)). Never upload to App Store Connect (ASC) or Play Console unless asked.
 - Keep generated helper binaries in one scratch dir (`/tmp/store-tools`), built from `scripts/` with `swiftc -O`.
 - Shots are zh-Hans, light mode, mock data. Mock dates are relative to now, so rebuild first if the build is old.
+- **No red dots**: before capturing, temporarily edit `src/data/mock.ts` so no badge shows (Settings tab/sidebar entry and rows): `courseInformationSharingBadgeShown: true`, `lastShowChangelogVersion` = `version` from `package.json`, `newUpdate: false`. Reload or rebuild, check every shot, then `git checkout src/data/mock.ts` (never commit it).
 
 ## Requirements
 
@@ -138,7 +139,7 @@ The gradient is the light store one in every script. Each output goes into its p
 
 ### Play feature graphic
 
-- `scripts/compose-android-feature.swift <android/phone notices> <android/phone courses> <icon.png> <out> [1024 500]`, icon from `docs/assets/logo.webp`; rendered at 4x, no alpha.
+- `scripts/compose-android-feature.swift <android/phone notices> <android/phone courses> <icon.png> <out> [1024 500]`, icon from `docs/assets/logo.webp`; rendered at 4x, no alpha. Phones are full height (bleeding off top and bottom); the smaller icon and gaps leave ~11 % horizontal margin on both sides.
 - Output: `android/play-feature-graphic.png`.
 
 ## README screenshots
