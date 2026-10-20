@@ -11,6 +11,139 @@ index 34da324..c712401 100644
 +    implementation 'io.legere:pdfiumandroid:1.0.35'
 +    implementation 'com.google.code.gson:gson:2.14.0'
  }
+diff --git a/node_modules/react-native-pdf/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java b/node_modules/react-native-pdf/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
+new file mode 100644
+index 0000000..9baf55a
+--- /dev/null
++++ b/node_modules/react-native-pdf/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
+@@ -0,0 +1,92 @@
++package com.github.barteksc.pdfviewer;
++
++import android.os.Message;
++
++/**
++ * Keeps PDFView.recycle() from closing the document under an in-flight render.
++ *
++ * recycle() (also called from onDetachedFromWindow()) disposes the document on the main
++ * thread, but RenderingHandler may be rendering a page on the "PDF renderer" thread at that
++ * moment; stop() and removeMessages() only drop queued work. The render then hands the closed
++ * document to Pdfium and crashes. This class lives in the viewer's package to reach its
++ * package-private state, which the prebuilt AndroidPdfViewer AAR does not expose.
++ */
++public final class RecycleSafeRendering {
++
++    private RecycleSafeRendering() {
++    }
++
++    /**
++     * Replaces the view's rendering handler with one that drops tasks once the view is
++     * recycled. Call from the OnLoadCompleteListener, before any page is queued.
++     */
++    public static void install(PDFView view) {
++        RenderingHandler handler = view.renderingHandler;
++        if (handler == null || handler instanceof GuardedRenderingHandler) {
++            return;
++        }
++        handler.stop();
++        handler.removeMessages(RenderingHandler.MSG_RENDER_TASK);
++        GuardedRenderingHandler guarded = new GuardedRenderingHandler(handler, view);
++        guarded.start();
++        view.renderingHandler = guarded;
++    }
++
++    /**
++     * Runs PDFView.recycle() (passed as {@code superRecycle}) but disposes the document on the
++     * renderer thread, after any render already running there has finished.
++     */
++    public static void recycle(PDFView view, Runnable superRecycle) {
++        RenderingHandler handler = view.renderingHandler;
++        PdfFile pdfFile = view.pdfFile;
++        if (handler != null) {
++            handler.stop();
++            handler.removeMessages(RenderingHandler.MSG_RENDER_TASK);
++        }
++        // Hide the document from super.recycle(), which would dispose it right away.
++        view.pdfFile = null;
++        superRecycle.run();
++        // onDetachedFromWindow() quits the renderer thread with quitSafely(), which still runs
++        // this; post() only fails if the thread is already gone, and then nothing is rendering.
++        if (pdfFile != null && (handler == null || !handler.post(pdfFile::dispose))) {
++            pdfFile.dispose();
++        }
++    }
++
++    private static final class GuardedRenderingHandler extends RenderingHandler {
++
++        // Written on the main thread by start()/stop(), read on the renderer thread.
++        private volatile boolean running = false;
++
++        GuardedRenderingHandler(RenderingHandler handler, PDFView view) {
++            super(handler.getLooper(), view);
++        }
++
++        @Override
++        void start() {
++            running = true;
++            super.start();
++        }
++
++        @Override
++        void stop() {
++            running = false;
++            super.stop();
++        }
++
++        @Override
++        public void handleMessage(Message message) {
++            if (!running) {
++                return;
++            }
++            try {
++                super.handleMessage(message);
++            } catch (NullPointerException | IllegalStateException e) {
++                // A task picked up just as the view was recycled finds the document gone.
++                if (running) {
++                    throw e;
++                }
++            }
++        }
++    }
++}
+diff --git a/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java b/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
+index c3d3245..f992212 100644
+--- a/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
++++ b/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
+@@ -34,6 +34,7 @@ import io.legere.pdfiumandroid.DefaultLogger;
+ import com.facebook.react.uimanager.ThemedReactContext;
+ import com.facebook.react.uimanager.UIManagerHelper;
+ import com.github.barteksc.pdfviewer.PDFView;
++import com.github.barteksc.pdfviewer.RecycleSafeRendering;
+ import com.github.barteksc.pdfviewer.listener.OnPageChangeListener;
+ import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener;
+ import com.github.barteksc.pdfviewer.listener.OnErrorListener;
+@@ -159,6 +160,8 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
+ 
+     @Override
+     public void loadComplete(int numberOfPages) {
++        RecycleSafeRendering.install(this);
++
+         SizeF pageSize = getPageSize(0);
+         float width = pageSize.getWidth();
+         float height = pageSize.getHeight();
+@@ -314,6 +317,13 @@ public class PdfView extends PDFView implements OnPageChangeListener,OnLoadCompl
+             this.drawPdf();
+     }
+ 
++    // Leaving the screen while pages render would otherwise close the document under the
++    // renderer thread and crash in Pdfium.
++    @Override
++    public void recycle() {
++        RecycleSafeRendering.recycle(this, super::recycle);
++    }
++
+     // The base PDFView recycles the document (zoom, offset, render state) whenever
+     // the view leaves the window — e.g. while another screen is stacked over this
+     // one on Android. Snapshot the viewport before that happens; loadComplete
 diff --git a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm b/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
 index 1bc263b..870fd96 100644
 --- a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
