@@ -512,15 +512,52 @@ diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostContr
 index 0000000..1111111 100644
 --- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
 +++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
-@@ -130,6 +130,7 @@ - (void)updateChildViewControllers
-   }
+@@ -41,6 +41,11 @@ @implementation RNSSplitHostController {
+    * avoiding crashes when certain columns are collapsed or hidden.
+    */
+   NSMutableSet<NSNumber *> *_visibleColumns;
++
++  /**
++   * The column controllers last handed to UIKit, each wrapped in a navigation controller of its own.
++   */
++  NSArray<UIViewController *> *_columnControllers;
+ }
  
-   self.viewControllers = currentViewControllers;
+ - (instancetype)initWithSplitHostComponentView:(RNSSplitHostComponentView *)splitHostComponentView
+@@ -122,14 +127,27 @@ - (void)updateChildViewControllers
+   [self validateColumns:currentColumns];
+   [self validateInspectors:currentInspectors];
+ 
+-  NSMutableArray<RNSSplitNavigationController *> *currentViewControllers =
+-      [NSMutableArray arrayWithCapacity:currentColumns.count];
++  // Wrapping a column controller again takes it out of the navigation controller it's in. Collapsed
++  // before iOS 26, that one can be nested in the primary column's, and UIKit throws on it once it's
++  // empty. An update can come twice for the same columns: once as the host joins the window, and
++  // again when the transaction that mounted them is done (e.g. a tab selected before its content
++  // has mounted).
++  NSMutableArray<UIViewController *> *columnControllers = [NSMutableArray arrayWithCapacity:currentColumns.count];
+   for (RNSSplitScreenComponentView *column in currentColumns) {
+-    [currentViewControllers addObject:[[RNSSplitNavigationController alloc] initWithRootViewController:column.controller
+-                                                                             frameOriginChangeDelegate:self]];
++    [columnControllers addObject:column.controller];
+   }
++  if (![columnControllers isEqualToArray:_columnControllers]) {
++    NSMutableArray<RNSSplitNavigationController *> *currentViewControllers =
++        [NSMutableArray arrayWithCapacity:currentColumns.count];
++    for (UIViewController *columnController in columnControllers) {
++      [currentViewControllers addObject:[[RNSSplitNavigationController alloc] initWithRootViewController:columnController
++                                                                               frameOriginChangeDelegate:self]];
++    }
+ 
+-  self.viewControllers = currentViewControllers;
++    self.viewControllers = currentViewControllers;
++    _columnControllers = columnControllers;
++  }
 +  [self updateColumnChrome];
  
  #if RNS_IPHONE_OS_VERSION_AVAILABLE(26_0)
    if (@available(iOS 26.0, *)) {
-@@ -469,14 +470,34 @@ - (void)splitViewController:(UISplitViewController *)svc willHideColumn:(UISplit
+@@ -469,14 +487,34 @@ - (void)splitViewController:(UISplitViewController *)svc willHideColumn:(UISplit
  
  - (void)splitViewControllerDidCollapse:(UISplitViewController *)svc
  {
