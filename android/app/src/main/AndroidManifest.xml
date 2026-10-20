@@ -63,6 +63,16 @@
                 <data android:mimeType="text/*" />
             </intent-filter>
         </activity>
+
+        <!-- Image cropping (expo-image-picker allowsEditing) is unused. Remove the cropper
+             activities so they can't be launched without their extras. Restore them if
+             allowsEditing is ever used. -->
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            tools:node="remove" />
+        <activity
+            android:name="expo.modules.imagepicker.ExpoCropImageActivity"
+            tools:node="remove" />
     </application>
 
     <queries>
