@@ -135,6 +135,10 @@ PODS:
   - ExpoTaskManager (58.0.12):
     - ExpoModulesCore
     - UMAppLoader
+  - ExpoUI (58.0.21):
+    - ExpoModulesCore
+    - ExpoModulesWorklets
+    - React-RCTFabric
   - fast_float (8.0.0)
   - FBLazyVector (0.88.0)
   - FirebaseAnalytics/WithoutAdIdSupport (11.15.0):
@@ -3703,6 +3707,7 @@ DEPENDENCIES:
   - ExpoModulesWorkletsAdapter (from `../node_modules/expo-modules-core`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoTaskManager (from `../node_modules/expo-task-manager/ios`)
+  - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
   - FBLazyVector (from `../node_modules/react-native/Libraries/FBLazyVector`)
   - FirebaseAnalytics/WithoutAdIdSupport
@@ -3875,6 +3880,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-secure-store/ios"
   ExpoTaskManager:
     :path: "../node_modules/expo-task-manager/ios"
+  ExpoUI:
+    :path: "../node_modules/@expo/ui/ios"
   fast_float:
     :podspec: "../node_modules/react-native/third-party-podspecs/fast_float.podspec"
   FBLazyVector:
@@ -4106,6 +4113,7 @@ SPEC CHECKSUMS:
   ExpoModulesWorkletsAdapter: 1e4231bc1a15e5a6df7fa9debc6c7ca6d31f8ce6
   ExpoSecureStore: 64e1fe78b5b0a1edb61beff044bb2cad03084f9c
   ExpoTaskManager: a9a9c3ccecdf3e0b76d11c35893a5ee0989ccd7a
+  ExpoUI: 2dfa03387386304db67c1fb125c67beec0813ae6
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: 7f2e79a18f9e32521fffdda4a2e3375c969b6502
   FirebaseAnalytics: 6433dfd311ba78084fc93bdfc145e8cb75740eae

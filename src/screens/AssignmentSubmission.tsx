@@ -25,6 +25,7 @@ import mimeTypes from 'mime-types';
 import { RemoteFile } from 'thu-learn-lib';
 import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
+import ContainedButton from 'components/ContainedButton';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
 import { getExtension, stripExtension } from 'helpers/fs';
@@ -392,41 +393,39 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
               ) : undefined}
               <View style={styles.attachmentActionButtons}>
                 {submittedAttachment ? (
-                  <Button
-                    disabled={uploading}
-                    mode="contained"
+                  <ContainedButton
                     style={styles.submitButton}
+                    label={
+                      removeAttachment
+                        ? t('undoRemoveUploadedAttachment')
+                        : t('removeUploadedAttachment')
+                    }
+                    disabled={uploading}
                     onPress={handleUploadedAttachmentRemove}
-                  >
-                    {removeAttachment
-                      ? t('undoRemoveUploadedAttachment')
-                      : t('removeUploadedAttachment')}
-                  </Button>
+                  />
                 ) : undefined}
                 {attachmentResult && !removeAttachment ? (
-                  <Button
-                    disabled={uploading}
-                    mode="contained"
+                  <ContainedButton
                     style={styles.submitButton}
+                    label={t('removePickedAttachment')}
+                    disabled={uploading}
                     onPress={handlePickedAttachmentRemove}
-                  >
-                    {t('removePickedAttachment')}
-                  </Button>
+                  />
                 ) : undefined}
                 {!removeAttachment ? (
                   <>
-                    <Button
+                    <ContainedButton
                       style={styles.submitButton}
+                      label={
+                        attachmentResult
+                          ? t('reUploadAttachment')
+                          : submittedAttachment
+                            ? t('overwriteAttachment')
+                            : t('pickAttachment')
+                      }
                       disabled={uploading}
-                      mode="contained"
                       onPress={handlePickerMenuOpen}
-                    >
-                      {attachmentResult
-                        ? t('reUploadAttachment')
-                        : submittedAttachment
-                          ? t('overwriteAttachment')
-                          : t('pickAttachment')}
-                    </Button>
+                    />
                     <Portal>
                       <Dialog
                         // Paper sizes dialogs from the safe area insets, which

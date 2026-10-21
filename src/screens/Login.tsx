@@ -23,6 +23,7 @@ import { clearLoginCookies } from 'data/source';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
+import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
 import { t } from 'helpers/i18n';
 import { LoginStackParams } from './types';
@@ -168,15 +169,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
           <View style={styles.noteContainer}>
             <Caption style={styles.note}>{t('securityNote')}</Caption>
           </View>
-          <Button
+          <ContainedButton
             style={styles.button}
-            mode="contained"
-            loading={loggingIn}
+            label={t('login')}
             disabled={loggingIn}
             onPress={handleLogin}
-          >
-            {t('login')}
-          </Button>
+          />
           {hasCredential && (
             <>
               <Button
