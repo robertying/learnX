@@ -84,6 +84,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   const [uploadError, setUploadError] = useState(false);
   const [progress, setProgress] = useState(0);
   const [pickerMenuVisible, setPickerMenuVisible] = useState(false);
+  const [contentWidth, setContentWidth] = useState(0);
 
   const getDefaultAttachmentName = useCallback(
     (mimeType?: string | null) => {
@@ -320,160 +321,186 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   }, [getDefaultAttachmentName, pendingAssignmentData]);
 
   return (
-    <Portal.Host>
-      <SafeArea>
-        <KeyboardAvoidingView style={Styles.flex1} behavior="height">
-          {progress ? <ProgressBar progress={progress} /> : null}
-          <View style={styles.inputs}>
-            <TextInput
-              style={styles.contentInput}
-              disabled={removeAttachment || uploading}
-              multiline
-              placeholder={t('assignmentSubmissionContentPlaceholder')}
-              value={content}
-              onChangeText={setContent}
-            />
-            {attachmentResult && (
+    <SafeArea>
+      <View
+        style={Styles.flex1}
+        onLayout={e => setContentWidth(e.nativeEvent.layout.width)}
+      >
+        <Portal.Host>
+          <KeyboardAvoidingView style={Styles.flex1} behavior="height">
+            {progress ? <ProgressBar progress={progress} /> : null}
+            <View style={styles.inputs}>
               <TextInput
+                style={styles.contentInput}
                 disabled={removeAttachment || uploading}
-                placeholder={t('assignmentSubmissionFilenamePlaceholder')}
-                value={customAttachmentName}
-                onChangeText={handleCustomAttachmentNameChange}
+                multiline
+                placeholder={t('assignmentSubmissionContentPlaceholder')}
+                value={content}
+                onChangeText={setContent}
               />
-            )}
-          </View>
-          <View style={styles.submissionDetail}>
-            {submittedAttachment ? (
-              <TextButton
-                disabled={uploading}
-                style={
-                  attachmentResult || removeAttachment
-                    ? {
-                        textDecorationLine: 'line-through',
-                        color: theme.colors.onSurfaceDisabled,
-                      }
-                    : undefined
-                }
-                containerStyle={[styles.attachmentButton, Styles.spacey1]}
-                onPress={() => handleFileOpen(submittedAttachment)}
-              >
-                {submittedAttachment.name}
-              </TextButton>
-            ) : undefined}
-            {!removeAttachment && attachmentResult ? (
-              <TextButton
-                containerStyle={[styles.attachmentButton, Styles.spacey1]}
-                disabled={uploading}
-                onPress={() =>
-                  handleFileOpen({
-                    id: '0000',
-                    name: attachmentResult.name,
-                    downloadUrl: attachmentResult.uri,
-                    previewUrl: attachmentResult.uri,
-                    size: attachmentResult.size
-                      ? attachmentResult.size + 'B'
-                      : '',
-                    type: attachmentResult.type,
-                  })
-                }
-              >
-                {attachmentResult.name}{' '}
-                {pendingAssignmentData
-                  ? isLocaleChinese()
-                    ? '（之前分享的）'
-                    : '(previously shared)'
-                  : ''}
-              </TextButton>
-            ) : undefined}
-            <View style={styles.attachmentActionButtons}>
+              {attachmentResult && (
+                <TextInput
+                  disabled={removeAttachment || uploading}
+                  placeholder={t('assignmentSubmissionFilenamePlaceholder')}
+                  value={customAttachmentName}
+                  onChangeText={handleCustomAttachmentNameChange}
+                />
+              )}
+            </View>
+            <View style={styles.submissionDetail}>
               {submittedAttachment ? (
-                <Button
+                <TextButton
                   disabled={uploading}
-                  mode="contained"
-                  style={styles.submitButton}
-                  onPress={handleUploadedAttachmentRemove}
+                  style={
+                    attachmentResult || removeAttachment
+                      ? {
+                          textDecorationLine: 'line-through',
+                          color: theme.colors.onSurfaceDisabled,
+                        }
+                      : undefined
+                  }
+                  containerStyle={[styles.attachmentButton, Styles.spacey1]}
+                  onPress={() => handleFileOpen(submittedAttachment)}
                 >
-                  {removeAttachment
-                    ? t('undoRemoveUploadedAttachment')
-                    : t('removeUploadedAttachment')}
-                </Button>
+                  {submittedAttachment.name}
+                </TextButton>
               ) : undefined}
-              {attachmentResult && !removeAttachment ? (
-                <Button
+              {!removeAttachment && attachmentResult ? (
+                <TextButton
+                  containerStyle={[styles.attachmentButton, Styles.spacey1]}
                   disabled={uploading}
-                  mode="contained"
-                  style={styles.submitButton}
-                  onPress={handlePickedAttachmentRemove}
+                  onPress={() =>
+                    handleFileOpen({
+                      id: '0000',
+                      name: attachmentResult.name,
+                      downloadUrl: attachmentResult.uri,
+                      previewUrl: attachmentResult.uri,
+                      size: attachmentResult.size
+                        ? attachmentResult.size + 'B'
+                        : '',
+                      type: attachmentResult.type,
+                    })
+                  }
                 >
-                  {t('removePickedAttachment')}
-                </Button>
+                  {attachmentResult.name}{' '}
+                  {pendingAssignmentData
+                    ? isLocaleChinese()
+                      ? '（之前分享的）'
+                      : '(previously shared)'
+                    : ''}
+                </TextButton>
               ) : undefined}
-              {!removeAttachment ? (
-                <>
+              <View style={styles.attachmentActionButtons}>
+                {submittedAttachment ? (
                   <Button
-                    style={styles.submitButton}
                     disabled={uploading}
                     mode="contained"
-                    onPress={handlePickerMenuOpen}
+                    style={styles.submitButton}
+                    onPress={handleUploadedAttachmentRemove}
                   >
-                    {attachmentResult
-                      ? t('reUploadAttachment')
-                      : submittedAttachment
-                        ? t('overwriteAttachment')
-                        : t('pickAttachment')}
+                    {removeAttachment
+                      ? t('undoRemoveUploadedAttachment')
+                      : t('removeUploadedAttachment')}
                   </Button>
-                  <Portal>
-                    <Dialog
-                      visible={pickerMenuVisible}
-                      onDismiss={handlePickerMenuClose}
+                ) : undefined}
+                {attachmentResult && !removeAttachment ? (
+                  <Button
+                    disabled={uploading}
+                    mode="contained"
+                    style={styles.submitButton}
+                    onPress={handlePickedAttachmentRemove}
+                  >
+                    {t('removePickedAttachment')}
+                  </Button>
+                ) : undefined}
+                {!removeAttachment ? (
+                  <>
+                    <Button
+                      style={styles.submitButton}
+                      disabled={uploading}
+                      mode="contained"
+                      onPress={handlePickerMenuOpen}
                     >
-                      <Dialog.Title>{t('pickAttachment')}</Dialog.Title>
-                      <Dialog.Content style={styles.pickerDialogContent}>
-                        <List.Item
-                          title={t('documents')}
-                          left={props => <List.Icon {...props} icon="file" />}
-                          onPress={handleDocumentPick}
-                        />
-                        <List.Item
-                          title={t('photos')}
-                          left={props => <List.Icon {...props} icon="image" />}
-                          onPress={handlePhotoPick}
-                        />
-                      </Dialog.Content>
-                      <Dialog.Actions>
-                        <Button onPress={handlePickerMenuClose}>
-                          {t('cancel')}
-                        </Button>
-                      </Dialog.Actions>
-                    </Dialog>
-                  </Portal>
-                </>
-              ) : undefined}
+                      {attachmentResult
+                        ? t('reUploadAttachment')
+                        : submittedAttachment
+                          ? t('overwriteAttachment')
+                          : t('pickAttachment')}
+                    </Button>
+                    <Portal>
+                      <Dialog
+                        // Paper sizes dialogs from the safe area insets, which
+                        // include a split view's sidebar on iPad. The host is
+                        // already inside the safe area, so size it from that.
+                        style={[
+                          styles.pickerDialog,
+                          {
+                            width: Math.min(
+                              pickerDialogMaxWidth,
+                              contentWidth - pickerDialogMargin * 2,
+                            ),
+                          },
+                        ]}
+                        visible={pickerMenuVisible}
+                        onDismiss={handlePickerMenuClose}
+                      >
+                        <Dialog.Title>{t('pickAttachment')}</Dialog.Title>
+                        <Dialog.Content style={styles.pickerDialogContent}>
+                          <List.Item
+                            title={t('documents')}
+                            left={props => <List.Icon {...props} icon="file" />}
+                            onPress={handleDocumentPick}
+                          />
+                          <List.Item
+                            title={t('photos')}
+                            left={props => (
+                              <List.Icon {...props} icon="image" />
+                            )}
+                            onPress={handlePhotoPick}
+                          />
+                        </Dialog.Content>
+                        <Dialog.Actions>
+                          <Button onPress={handlePickerMenuClose}>
+                            {t('cancel')}
+                          </Button>
+                        </Dialog.Actions>
+                      </Dialog>
+                    </Portal>
+                  </>
+                ) : undefined}
+              </View>
+              {submitTime && (
+                <Caption style={Styles.spacey1}>
+                  {dayjs(submitTime).format(
+                    isLocaleChinese()
+                      ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
+                      : '[last submitted at] HH:mm, MMM D, YYYY',
+                  )}
+                </Caption>
+              )}
             </View>
-            {submitTime && (
-              <Caption style={Styles.spacey1}>
-                {dayjs(submitTime).format(
-                  isLocaleChinese()
-                    ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
-                    : '[last submitted at] HH:mm, MMM D, YYYY',
-                )}
-              </Caption>
-            )}
-          </View>
-        </KeyboardAvoidingView>
-        <Snackbar
-          visible={uploadError}
-          duration={3000}
-          onDismiss={() => setUploadError(false)}
-        >
-          {t('assignmentSubmissionFailed')}
-        </Snackbar>
-      </SafeArea>
-    </Portal.Host>
+          </KeyboardAvoidingView>
+          <Snackbar
+            visible={uploadError}
+            duration={3000}
+            onDismiss={() => setUploadError(false)}
+          >
+            {t('assignmentSubmissionFailed')}
+          </Snackbar>
+        </Portal.Host>
+      </View>
+    </SafeArea>
   );
 };
 
+const pickerDialogMargin = 26;
+const pickerDialogMaxWidth = 560;
+
 const styles = StyleSheet.create({
+  pickerDialog: {
+    alignSelf: 'center',
+    marginHorizontal: 0,
+  },
   pickerDialogContent: {
     paddingHorizontal: 0,
   },
@@ -501,7 +528,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginTop: 8,
-    marginBottom: 32,
+    marginBottom: 60,
   },
 });
 
