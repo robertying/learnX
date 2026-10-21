@@ -1,8 +1,9 @@
 #!/bin/bash
 # Usage: scripts/publish_android_release.sh <version>   e.g. 18.0.0 (a leading "v" is optional)
 #
-# Copies the release APKs to the release folder under their learnX names, then refreshes
-# latest.json with the new version, filenames and sha256 sums.
+# Removes APKs of older versions from the release folder, copies the new release APKs there
+# under their learnX names, then refreshes latest.json with the new version, filenames and
+# sha256 sums.
 
 set -euo pipefail
 
@@ -31,14 +32,29 @@ fi
 
 mkdir -p "$DEST"
 
-FILE_ARGS=()
 for abi in "${ABIS[@]}"; do
   src="${APK_DIR}/app-${abi}-release.apk"
-  name="learnX-${abi}-${VERSION_TAG}.apk"
   if [ ! -f "$src" ]; then
     echo "Missing release APK: $src" >&2
     exit 1
   fi
+done
+
+shopt -s nullglob
+for abi in "${ABIS[@]}"; do
+  for old in "${DEST}/learnX-${abi}-v"*.apk; do
+    if [ "$(basename "$old")" != "learnX-${abi}-${VERSION_TAG}.apk" ]; then
+      rm "$old"
+      echo "Removed old APK: $(basename "$old")"
+    fi
+  done
+done
+shopt -u nullglob
+
+FILE_ARGS=()
+for abi in "${ABIS[@]}"; do
+  src="${APK_DIR}/app-${abi}-release.apk"
+  name="learnX-${abi}-${VERSION_TAG}.apk"
   cp "$src" "${DEST}/${name}"
   sha="$(shasum -a 256 "${DEST}/${name}" | awk '{print $1}')"
   echo "${name}  ${sha}"
