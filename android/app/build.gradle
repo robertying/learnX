@@ -37,8 +37,8 @@ android {
         applicationId "io.robertying.learnx"
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
-        versionCode 9204501
-        versionName "18.0.0"
+        versionCode 9204510
+        versionName "18.0.1"
     }
 
     androidResources {
