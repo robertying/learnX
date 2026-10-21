@@ -7,6 +7,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
+import { AppState } from 'react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
 import {
   SafeAreaFrameContext,
@@ -134,8 +135,13 @@ const NativeSplitViewProvider: React.FC<
   // Only ever set by the user. UIKit passes through other display modes on its
   // own, e.g. while expanding; were those fed back as the preferred one, the
   // master pane could be left hidden for good.
+  // It starts as what UIKit saved with the scene, which it restores without
+  // reporting it. Without a sidebar there's no system button to bring a hidden
+  // master pane back, so that split starts with it shown instead.
   const [preferredDisplayMode, setPreferredDisplayMode] =
-    useState<SplitDisplayMode>('automatic');
+    useState<SplitDisplayMode>(
+      sidebar === undefined ? 'oneBesideSecondary' : 'automatic',
+    );
   // What UIKit actually shows, for display only.
   const [displayMode, setDisplayMode] = useState<SplitDisplayMode>();
 
@@ -173,6 +179,26 @@ const NativeSplitViewProvider: React.FC<
     },
     [hasSidebar, sidebarHidden],
   );
+
+  // A master pane hidden for full screen would be saved with the scene and come
+  // back hidden on the next launch, with nothing open to undo it. It's shown
+  // while in the background and hidden again on return, which is in time for
+  // the save when quitting on Mac (on iPad the save comes first, but that split
+  // starts with the master pane shown anyway).
+  const fullScreen = preferredDisplayMode === 'secondaryOnly';
+  const fullScreenInBackground = useRef(false);
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'background' && fullScreen) {
+        fullScreenInBackground.current = true;
+        toggleMaster(true);
+      } else if (state === 'active' && fullScreenInBackground.current) {
+        fullScreenInBackground.current = false;
+        toggleMaster(false);
+      }
+    });
+    return () => subscription.remove();
+  }, [fullScreen, toggleMaster]);
 
   return (
     <SplitViewContext.Provider
