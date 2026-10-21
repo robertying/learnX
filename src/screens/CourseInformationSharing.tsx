@@ -10,7 +10,7 @@ import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import env from 'helpers/env';
+import { isMockUser } from 'helpers/mock';
 import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
 
@@ -26,9 +26,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
   const courseInformationSharing = useAppSelector(
     state => state.settings.courseInformationSharing,
   );
-  const isDummyUser = useAppSelector(
-    state => state.auth.username === env.DUMMY_USERNAME,
-  );
+  const isDummyUser = useAppSelector(state => isMockUser(state.auth.username));
 
   const getCourses = async () => {
     if (!currentSemesterId) {

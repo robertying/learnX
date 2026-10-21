@@ -14,7 +14,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 - These two values are not real credentials: reading them from `.env` and typing them into the UI is fine, even in tool calls. Do not print or commit any other value in `.env` (tokens, project IDs).
 - In mock mode network sync and some features (e.g. course information sharing) are skipped or disabled.
-- The mock login is not persisted: every relaunch needs the login again.
+- The default mock login is not persisted: every relaunch needs the login again. To keep the mock data and session across relaunches, log in with `DUMMY_PERSIST_USERNAME` / `DUMMY_PERSIST_PASSWORD` from `.env` instead (same data; relaunch skips the network login).
 
 ### Mock data
 

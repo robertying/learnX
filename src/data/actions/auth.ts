@@ -12,6 +12,7 @@ import { Auth } from 'data/types/state';
 import { getUserInfo } from './user';
 import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
+import { isPersistentMockUser } from 'helpers/mock';
 
 export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
@@ -35,6 +36,11 @@ export function login({
   reset?: boolean;
 }): ThunkResult {
   return async (dispatch, getState) => {
+    if (isPersistentMockUser(getState().auth.username)) {
+      dispatch(loginAction.success(undefined));
+      return;
+    }
+
     if (!username || !password || !fingerPrint) {
       const { auth } = getState();
       if (auth.loggingIn) {

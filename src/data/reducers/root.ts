@@ -3,9 +3,11 @@ import { PersistConfig, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createSecureStore from 'redux-persist-expo-securestore';
 import env from 'helpers/env';
+import { isMockUser, isPersistentMockUser } from 'helpers/mock';
 import { AppActions, StoreAction } from 'data/types/actions';
 import {
   CLEAR_STORE,
+  LOGIN_SUCCESS,
   SET_MOCK_STORE,
   RESET_LOADING,
   SET_FAV_ASSIGNMENT,
@@ -104,12 +106,26 @@ export function rootReducer(
   }
 
   if (action.type === SET_MOCK_STORE) {
-    return getMockStore();
+    const mockStore: AppState = getMockStore();
+    return {
+      ...mockStore,
+      auth: {
+        ...mockStore.auth,
+        username: action.payload.username,
+        password:
+          action.payload.username === env.DUMMY_PERSIST_USERNAME
+            ? env.DUMMY_PERSIST_PASSWORD
+            : env.DUMMY_PASSWORD,
+      },
+    };
   } else if (action.type === CLEAR_STORE) {
     state = undefined;
-  } else if (state && state.auth.username === env.DUMMY_USERNAME) {
+  } else if (state && isMockUser(state.auth.username)) {
     if (
       ![
+        // The persistent mock user is logged out on relaunch and must be able
+        // to log back in without hitting the network.
+        ...(isPersistentMockUser(state.auth.username) ? [LOGIN_SUCCESS] : []),
         SET_FAV_NOTICE,
         SET_ARCHIVE_NOTICES,
         SET_FAV_FILE,

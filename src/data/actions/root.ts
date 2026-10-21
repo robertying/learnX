@@ -19,4 +19,9 @@ export function clearStore(): ThunkResult {
   };
 }
 
-export const setMockStore = createAction(SET_MOCK_STORE)();
+export const setMockStore = createAction(
+  SET_MOCK_STORE,
+  (username: string) => ({
+    username,
+  }),
+)();

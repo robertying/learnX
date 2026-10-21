@@ -62,8 +62,17 @@ const Login: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    if (username === env.DUMMY_USERNAME && password === env.DUMMY_PASSWORD) {
-      dispatch(setMockStore());
+    if (
+      (username === env.DUMMY_USERNAME && password === env.DUMMY_PASSWORD) ||
+      (username === env.DUMMY_PERSIST_USERNAME &&
+        password === env.DUMMY_PERSIST_PASSWORD)
+    ) {
+      dispatch(setMockStore(username));
+      if (username === env.DUMMY_PERSIST_USERNAME) {
+        // setMockStore bypasses the auth persist layer; this goes through it
+        // so the credentials are saved and survive relaunch.
+        dispatch(login({}));
+      }
       return;
     }
 
