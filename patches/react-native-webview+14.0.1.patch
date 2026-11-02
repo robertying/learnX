@@ -1,11 +1,95 @@
+diff --git a/node_modules/react-native-webview/apple/RNCWebViewImpl.m b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+index 3890426..a84c336 100644
+--- a/node_modules/react-native-webview/apple/RNCWebViewImpl.m
++++ b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+@@ -1216,11 +1216,16 @@ - (void)                    webView:(WKWebView *)webView
+ - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler
+ {
+ #if !TARGET_OS_OSX
++  UIViewController *presenter = [self alertPresenter];
++  if (!presenter) {
++    completionHandler();
++    return;
++  }
+   UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:message preferredStyle:UIAlertControllerStyleAlert];
+   [alert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action) {
+     completionHandler();
+   }]];
+-  [[self topViewController] presentViewController:alert animated:YES completion:NULL];
++  [presenter presentViewController:alert animated:YES completion:NULL];
+ #else
+   NSAlert *alert = [[NSAlert alloc] init];
+   [alert setMessageText:message];
+@@ -1235,6 +1240,11 @@ - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSStrin
+  */
+ - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(BOOL))completionHandler{
+ #if !TARGET_OS_OSX
++  UIViewController *presenter = [self alertPresenter];
++  if (!presenter) {
++    completionHandler(NO);
++    return;
++  }
+   UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:message preferredStyle:UIAlertControllerStyleAlert];
+   [alert addAction:[UIAlertAction actionWithTitle:@"Ok" style:UIAlertActionStyleDefault handler:^(__unused UIAlertAction *action) {
+     completionHandler(YES);
+@@ -1242,7 +1252,7 @@ - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSStr
+   [alert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(__unused UIAlertAction *action) {
+     completionHandler(NO);
+   }]];
+-  [[self topViewController] presentViewController:alert animated:YES completion:NULL];
++  [presenter presentViewController:alert animated:YES completion:NULL];
+ #else
+   NSAlert *alert = [[NSAlert alloc] init];
+   [alert setMessageText:message];
+@@ -1260,6 +1270,11 @@ - (void)webView:(WKWebView *)webView runJavaScriptConfirmPanelWithMessage:(NSStr
+  */
+ - (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(NSString *))completionHandler{
+ #if !TARGET_OS_OSX
++  UIViewController *presenter = [self alertPresenter];
++  if (!presenter) {
++    completionHandler(nil);
++    return;
++  }
+   UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"" message:prompt preferredStyle:UIAlertControllerStyleAlert];
+   [alert addTextFieldWithConfigurationHandler:^(UITextField *textField) {
+     textField.text = defaultText;
+@@ -1273,7 +1288,7 @@ - (void)webView:(WKWebView *)webView runJavaScriptTextInputPanelWithPrompt:(NSSt
+   }];
+   [alert addAction:cancelAction];
+   alert.preferredAction = okAction;
+-  [[self topViewController] presentViewController:alert animated:YES completion:NULL];
++  [presenter presentViewController:alert animated:YES completion:NULL];
+ #else
+   NSAlert *alert = [[NSAlert alloc] init];
+   [alert setMessageText:prompt];
+@@ -1333,6 +1348,19 @@ -(UIViewController *)topViewController{
+   return RCTPresentedViewController();
+ }
+ 
++/**
++ * The view controller to present a JS panel from, or nil if it can't be presented.
++ * WebKit throws if a panel's completion handler is released without being called,
++ * which is what happens when presentViewController: silently fails.
++ */
++-(UIViewController *)alertPresenter{
++  UIViewController *presenter = [self topViewController];
++  if (!presenter || !presenter.viewIfLoaded.window || presenter.isBeingPresented || presenter.isBeingDismissed || presenter.presentedViewController || !self.window) {
++    return nil;
++  }
++  return presenter;
++}
++
+ #endif // !TARGET_OS_OSX
+ 
+ /**
 diff --git a/node_modules/react-native-webview/index.d.ts b/node_modules/react-native-webview/index.d.ts
 index 10b9c14..f3268db 100644
 --- a/node_modules/react-native-webview/index.d.ts
 +++ b/node_modules/react-native-webview/index.d.ts
 @@ -5,7 +5,9 @@ export { FileDownload, WebViewMessageEvent, WebViewNavigation } from './lib/WebV
-
+ 
  export type WebViewProps = IOSWebViewProps & AndroidWebViewProps & WindowsWebViewProps;
-
+ 
 -declare class WebView<P = undefined> extends Component<WebViewProps & P> {
 +// `{}` is the identity for intersections: `WebViewProps & undefined` would
 +// collapse the props to `never` (https://github.com/react-native-webview/react-native-webview/issues/3977).
