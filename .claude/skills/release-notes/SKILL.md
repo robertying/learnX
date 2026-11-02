@@ -13,6 +13,6 @@ description: Write learnX release notes since the last tag, as separate texts fo
 ## Format
 
 - **GitHub Releases** (full list, all platforms; say "on Android" etc. for platform-specific items): Chinese block first, `---`, then English block. Each starts with the maintainers banner as in the previous release (`> learnX 诚邀维护者！…` / `> learnX is looking for maintainers! …`), then `# 功能` / `# 修复` and `# Features` / `# Fixes`.
-- **Google Play** (Android items only), **App Store (iOS)** and **Mac App Store (macOS)** (only items affecting that platform): **English (en-US) first, then Chinese** (zh-CN for Play, zh-Hans for the stores). No banner. Each language block still has a `# Fixes` / `# 修复` and/or `# Features` / `# 功能` heading; omit a heading with no items.
+- **Google Play** (Android items only), **App Store (iOS)** and **Mac App Store (macOS)** (only items affecting that platform): **English (en-US) first, then Chinese** (zh-CN for Play, zh-Hans for the stores). No banner. All platforms ship under the same tag, so when a store has no items of its own, still write a generic `# Fixes` / `# 修复` entry ("Fix minor issues." / "修复若干小问题。") instead of leaving it empty. Each language block still has a `# Fixes` / `# 修复` and/or `# Features` / `# 功能` heading; omit a heading with no items.
 - Chinese text uses full-width punctuation (，。) only.
 - Bullets are short, start with "Fix"/"Add"/"Improve" (修复/新增/改进), one change each.
