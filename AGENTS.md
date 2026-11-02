@@ -25,6 +25,8 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 ### iOS simulators
 
+- Other sessions may be driving the stock simulators with other apps. Use a dedicated one: `xcrun simctl create "learnX <device>" <device type> <runtime>` (`simctl list devicetypes` / `runtimes`), or reuse an existing `learnX …` device from `simctl list devices`.
+- Read the app's defaults with `xcrun simctl spawn <udid> defaults read <data container>/Library/Preferences/io.robertying.learnX <key>`; the plist file on disk is written lazily and can be stale.
 - Build with `xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug -destination 'id=<udid>'` (Mac Catalyst: `-destination 'platform=macOS,variant=Mac Catalyst'`); the app lands in `~/Library/Developer/Xcode/DerivedData/learnX-*/Build/Products/`.
 - Open in Chinese: `xcrun simctl launch <udid> io.robertying.learnX -AppleLanguages '(zh-Hans)' -AppleLocale zh_CN`.
 - Type the mock credentials with the simulator control tool's `text` action (tap the field first); use `pbcopy` + `xcrun simctl pbsync host <udid>` only for text it can't type. iPad and iPhone Duo can't be rotated/folded from the shell.
