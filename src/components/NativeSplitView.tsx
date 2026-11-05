@@ -186,6 +186,17 @@ const NativeSplitViewProvider: React.FC<
   // the save when quitting on Mac (on iPad the save comes first, but that split
   // starts with the master pane shown anyway).
   const fullScreen = preferredDisplayMode === 'secondaryOnly';
+  // That save can still happen without it (e.g. the app is killed, or it was
+  // saved by an older version), and the master pane comes back hidden without
+  // the screen that hid it. UIKit reports the restored display mode once laid
+  // out; show the master pane again unless it was hidden in this session.
+  useEffect(() => {
+    if (displayMode === 'secondaryOnly' && !fullScreen) {
+      setPreferredDisplayMode(
+        hasSidebar ? 'twoBesideSecondary' : 'oneBesideSecondary',
+      );
+    }
+  }, [displayMode, fullScreen, hasSidebar]);
   const fullScreenInBackground = useRef(false);
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state => {
