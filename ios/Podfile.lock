@@ -30,9 +30,9 @@ PODS:
     - SocketRocket
     - Yoga
   - DoubleConversion (1.1.6)
-  - EXConstants (58.0.14):
+  - EXConstants (58.0.15):
     - ExpoModulesCore
-  - Expo (58.0.22):
+  - Expo (58.0.23):
     - boost
     - DoubleConversion
     - ExpoModulesCore
@@ -65,7 +65,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - ExpoAsset (58.0.19):
+  - ExpoAsset (58.0.20):
     - ExpoModulesCore
   - ExpoBackgroundTask (58.0.12):
     - ExpoModulesCore
@@ -86,9 +86,9 @@ PODS:
     - ExpoModulesCore
   - ExpoKeepAwake (58.0.3):
     - ExpoModulesCore
-  - ExpoLogBox (58.0.14):
+  - ExpoLogBox (58.0.15):
     - React-Core
-  - ExpoModulesCore (58.0.29):
+  - ExpoModulesCore (58.0.30):
     - boost
     - DoubleConversion
     - ExpoModulesJSI
@@ -119,13 +119,13 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - ExpoModulesJSI (58.0.21):
+  - ExpoModulesJSI (58.0.22):
     - React-Core
     - ReactCommon
-  - ExpoModulesWorklets (58.0.29):
+  - ExpoModulesWorklets (58.0.30):
     - ExpoModulesCore
     - ExpoModulesJSI
-  - ExpoModulesWorkletsAdapter (58.0.29):
+  - ExpoModulesWorkletsAdapter (58.0.30):
     - ExpoModulesCore
     - ExpoModulesJSI
     - ExpoModulesWorklets
@@ -135,7 +135,7 @@ PODS:
   - ExpoTaskManager (58.0.13):
     - ExpoModulesCore
     - UMAppLoader
-  - ExpoUI (58.0.26):
+  - ExpoUI (58.0.27):
     - ExpoModulesCore
     - ExpoModulesWorklets
     - React-RCTFabric
@@ -2414,7 +2414,7 @@ PODS:
     - SocketRocket
     - SwiftUIIntrospect (~> 1.0)
     - Yoga
-  - react-native-pager-view (9.0.11):
+  - react-native-pager-view (10.0.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2473,7 +2473,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context (5.11.0):
+  - react-native-safe-area-context (5.11.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2493,8 +2493,8 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.11.0)
-    - react-native-safe-area-context/fabric (= 5.11.0)
+    - react-native-safe-area-context/common (= 5.11.1)
+    - react-native-safe-area-context/fabric (= 5.11.1)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -2504,7 +2504,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/common (5.11.0):
+  - react-native-safe-area-context/common (5.11.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2533,7 +2533,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-safe-area-context/fabric (5.11.0):
+  - react-native-safe-area-context/fabric (5.11.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -4094,9 +4094,9 @@ SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   CookieManager: 45d46eaed845ef06748085340cc4f2939745f00c
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
-  EXConstants: 0f47f210481f0a4eae5f0c82d3031ebb7fa1302e
-  Expo: cfa3e3f3cca8082ba700bfd1c7233c56ac8f3616
-  ExpoAsset: 9c966d4d2c67a13de7d449561558f782df1c1787
+  EXConstants: c1eb9dab7494834d85aa347165da9718cdfc21a6
+  Expo: 0dd71f8618a394c75125523dda455aeb5959374b
+  ExpoAsset: c080026976ef8f00dca12c4958c658b2ebd4d4e0
   ExpoBackgroundTask: 5884fc3eeabd6c50e1e518c1890110092608147b
   ExpoCalendar: 47dcd767c17ecec01f449ee57140d8a29ae9eef7
   ExpoCrypto: 33ede543a3747abbef071c3bd747135ccc4e4fd5
@@ -4106,14 +4106,14 @@ SPEC CHECKSUMS:
   ExpoHaptics: c95d1e2162895e710b68dd912eec619900ebdf33
   ExpoImagePicker: a466134ec92fed0b38bbf9062c7eb5f3c8c49d94
   ExpoKeepAwake: fd18a5d233329013c578030ad399d8e10b252b5f
-  ExpoLogBox: ba4cb945593f38ea8b8d0a01bcb24f4ea458918f
-  ExpoModulesCore: 2c4da1a3b3723fe6f75f6cac3c9e1ff20f768a6b
-  ExpoModulesJSI: cde3d94ff303a13645439ee8637a445650ebc676
-  ExpoModulesWorklets: 8908bee33c6f95479b209bc05ea24346da9ff606
-  ExpoModulesWorkletsAdapter: 0ce5b924ef8b77205b388606d2fcf046542e3895
+  ExpoLogBox: 9bfba7bb99c806b678703e6c62323f3c4785e706
+  ExpoModulesCore: 69b79053c40b86ff64f6dfe34fdb580ea127ae7f
+  ExpoModulesJSI: 68a068c5214c88982f236bb26dd44fa004f10f35
+  ExpoModulesWorklets: 25684e76e7b886dd31bf4538c3fd657bf07a694b
+  ExpoModulesWorkletsAdapter: 39a95a62785e53476830a21d21444404ebb74659
   ExpoSecureStore: 64e1fe78b5b0a1edb61beff044bb2cad03084f9c
   ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
-  ExpoUI: 4858de8884f87c37ff0630b2b903eff83707bd65
+  ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: d2917ee70e37e91475560bf7ab916b0f60b8c14f
   FirebaseAnalytics: 6433dfd311ba78084fc93bdfc145e8cb75740eae
@@ -4174,9 +4174,9 @@ SPEC CHECKSUMS:
   React-mutationobservernativemodule: 66a7c574f8f5757f990f37ab54acea859714c0cc
   react-native-blob-util: 23fecbb55cf52dba03159559af44dfa0f27cfc56
   react-native-bottom-tabs: 30bcbad66f4fb9cbed23a26db7faab7a8f43e921
-  react-native-pager-view: 9082e2e04d19adba6b051e9518056f0229adb682
+  react-native-pager-view: c3cb3585b2a6289907a7a5a6f93ae4bdb5b0d130
   react-native-pdf: 6504985f75d4e3a0426638d298495405b64d28d4
-  react-native-safe-area-context: c1ad13ebf43fc74cbf010385478806ab28a948ed
+  react-native-safe-area-context: bf2730548c1fc428170a180c6084360ff9d72ac1
   react-native-vector-icons: 279d73aea8547e8991e3943c9c03a2494b3942a9
   react-native-vector-icons-material-design-icons: 811f6c4447a60d8a66394644093dcffdc546772f
   react-native-vector-icons-material-icons: c62c72e4fa041a49e2cab6c760e4cb5c1343acb3
