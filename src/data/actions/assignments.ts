@@ -1,6 +1,5 @@
 import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
-import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
 import { dataThunk } from 'data/types/actions';
 import {
@@ -15,6 +14,7 @@ import {
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
 import { Assignment, AssignmentsState } from 'data/types/state';
+import { sortAssignments } from 'helpers/assignments';
 import { serializeError } from 'helpers/parse';
 
 export const getAssignmentsForCourseAction = createAsyncAction(
@@ -43,30 +43,10 @@ export function getAssignmentsForCourse(courseId: string) {
         courseName: courseName.name,
         courseTeacherName: courseName.teacherName,
       }));
-      const deadlines = new Map(
-        assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
-      );
-      assignments.sort(
-        (a, b) =>
-          deadlines.get(b.id)! - deadlines.get(a.id)! ||
-          b.id.localeCompare(a.id),
-      );
-      const nowUnix = dayjs().unix();
-      const upcoming: Assignment[] = [];
-      const past: Assignment[] = [];
-      for (const a of assignments) {
-        if (deadlines.get(a.id)! > nowUnix) {
-          upcoming.push(a);
-        } else {
-          past.push(a);
-        }
-      }
-      upcoming.reverse();
-      const sorted = [...upcoming, ...past];
       dispatch(
         getAssignmentsForCourseAction.success({
           courseId,
-          assignments: sorted,
+          assignments,
         }),
       );
     } catch (err) {
@@ -101,27 +81,9 @@ export function getAllAssignmentsForCourses(courseIds: string[]) {
           courseTeacherName: courseName.teacherName,
         }));
       });
-      const deadlines = new Map(
-        assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
+      dispatch(
+        getAllAssignmentsForCoursesAction.success(sortAssignments(assignments)),
       );
-      assignments.sort(
-        (a, b) =>
-          deadlines.get(b.id)! - deadlines.get(a.id)! ||
-          b.id.localeCompare(a.id),
-      );
-      const nowUnix = dayjs().unix();
-      const upcoming: Assignment[] = [];
-      const past: Assignment[] = [];
-      for (const a of assignments) {
-        if (deadlines.get(a.id)! > nowUnix) {
-          upcoming.push(a);
-        } else {
-          past.push(a);
-        }
-      }
-      upcoming.reverse();
-      const sorted = [...upcoming, ...past];
-      dispatch(getAllAssignmentsForCoursesAction.success(sorted));
     } catch (err) {
       dispatch(getAllAssignmentsForCoursesAction.failure(serializeError(err)));
     }

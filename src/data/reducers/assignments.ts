@@ -11,6 +11,7 @@ import {
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
 import { AssignmentsState } from 'data/types/state';
+import { sortAssignments } from 'helpers/assignments';
 
 export default function assignments(
   state: AssignmentsState = {
@@ -52,12 +53,12 @@ export default function assignments(
       return {
         ...state,
         fetching: false,
-        items: [
+        items: sortAssignments([
           ...state.items.filter(
             item => item.courseId !== action.payload.courseId,
           ),
           ...action.payload.assignments,
-        ],
+        ]),
         error: null,
       };
     case GET_ASSIGNMENTS_FOR_COURSE_FAILURE:

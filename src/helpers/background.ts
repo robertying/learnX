@@ -9,6 +9,7 @@ import { Assignment, CoursesState, File, Notice } from 'data/types/state';
 import { getAllNoticesForCoursesAction } from 'data/actions/notices';
 import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
 import { getAllFilesForCoursesAction } from 'data/actions/files';
+import { sortAssignments } from 'helpers/assignments';
 
 const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
   const courseIds = courses.items.map(i => i.id);
@@ -61,26 +62,10 @@ const getAllAssignments = async (
       courseTeacherName: courseName.teacherName,
     }));
   });
-  const deadlines = new Map(
-    assignments.map(a => [a.id, dayjs(a.deadline).unix()]),
-  );
-  assignments.sort(
-    (a, b) =>
-      deadlines.get(b.id)! - deadlines.get(a.id)! || b.id.localeCompare(a.id),
-  );
-  const nowUnix = dayjs().unix();
-  const upcoming: Assignment[] = [];
-  const past: Assignment[] = [];
-  for (const a of assignments) {
-    if (deadlines.get(a.id)! > nowUnix) {
-      upcoming.push(a);
-    } else {
-      past.push(a);
-    }
-  }
-  upcoming.reverse();
 
-  dispatch(getAllAssignmentsForCoursesAction.success([...upcoming, ...past]));
+  dispatch(
+    getAllAssignmentsForCoursesAction.success(sortAssignments(assignments)),
+  );
 };
 
 const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
