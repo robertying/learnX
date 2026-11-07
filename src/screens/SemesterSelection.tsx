@@ -24,10 +24,8 @@ const SemesterSelection: React.FC<Props> = () => {
 
   const [latestSemester, setLatestSemester] = useState<string | null>(null);
 
-  const getLatestSemester = async () => {
-    const { id } = await dataSource.getCurrentSemester();
-    setLatestSemester(id);
-  };
+  const getLatestSemester = () =>
+    dataSource.getCurrentSemester().then(({ id }) => setLatestSemester(id));
 
   const handleSelect = (id: string) => {
     dispatch(setCurrentSemester(id));
@@ -40,7 +38,6 @@ const SemesterSelection: React.FC<Props> = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    // oxlint-disable-next-line react/set-state-in-effect -- getLatestSemester sets state only after awaiting the request
     handleRefresh();
   }, [handleRefresh]);
 

@@ -79,21 +79,18 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   }
 
   const download = useCallback(
-    async (refresh: boolean) => {
-      try {
-        const downloadedPath = await downloadFile(
-          route.params,
-          refresh,
-          setProgress,
-        );
-        setPath(downloadedPath);
-        setProgress(0);
-      } catch {
-        setProgress(0);
-        setError(true);
-        toast(t('fileDownloadFailed'), 'error');
-      }
-    },
+    (refresh: boolean) =>
+      downloadFile(route.params, refresh, setProgress).then(
+        downloadedPath => {
+          setPath(downloadedPath);
+          setProgress(0);
+        },
+        () => {
+          setProgress(0);
+          setError(true);
+          toast(t('fileDownloadFailed'), 'error');
+        },
+      ),
     [route.params, toast],
   );
 
@@ -278,7 +275,6 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   ]);
 
   useEffect(() => {
-    // oxlint-disable-next-line react/set-state-in-effect -- download sets state only after awaiting the file
     download(false);
   }, [download]);
 

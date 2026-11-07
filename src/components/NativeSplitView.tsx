@@ -67,23 +67,17 @@ const useReportedColumnMetrics = (column: number) =>
 // Off screen, a column's safe area provider still reports, with insets that
 // aren't the column's.
 const useColumnAppearance = () => {
-  const onScreen = useRef(false);
-  const [appearances, setAppearances] = useState(0);
+  const [onScreen, setOnScreen] = useState(false);
 
   const handlers = useMemo(
     () => ({
-      onWillAppear: () => {
-        onScreen.current = true;
-      },
-      onDidAppear: () => setAppearances(count => count + 1),
-      onDidDisappear: () => {
-        onScreen.current = false;
-      },
+      onDidAppear: () => setOnScreen(true),
+      onDidDisappear: () => setOnScreen(false),
     }),
     [],
   );
 
-  return { onScreen, appearances, handlers };
+  return { onScreen, handlers };
 };
 
 // Whether a split has been on screen, for new ones to have its layout to go by.
@@ -95,21 +89,22 @@ const ColumnSafeArea: React.FC<
     column: number;
     appearance: ReturnType<typeof useColumnAppearance>;
   }>
-> = ({ column, appearance: { onScreen, appearances }, children }) => {
+> = ({ column, appearance: { onScreen }, children }) => {
   const insets = useSafeAreaInsets();
   const frame = useSafeAreaFrame();
-  const [reported, setReported] = useState<Metrics>();
   const shared = useReportedColumnMetrics(column);
 
+  const [reported, setReported] = useState<Metrics>();
+  if (onScreen && (reported?.insets !== insets || reported?.frame !== frame)) {
+    setReported({ insets, frame });
+  }
+
   useEffect(() => {
-    if (onScreen.current) {
-      const metrics = { insets, frame };
-      // oxlint-disable-next-line react/set-state-in-effect -- only known on screen, which is a native event tracked in a ref
-      setReported(metrics);
-      reportedColumnMetrics[column] = metrics;
+    if (onScreen) {
+      reportedColumnMetrics[column] = { insets, frame };
       columnMetricsListeners.forEach(listener => listener());
     }
-  }, [column, onScreen, appearances, insets, frame]);
+  }, [column, onScreen, insets, frame]);
 
   const metrics = reported ?? shared ?? { insets, frame };
 
