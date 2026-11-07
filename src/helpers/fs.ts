@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
-import * as ExpoFileSystem from 'expo-file-system/legacy';
+import { Directory, DownloadTask, File, Paths } from 'expo-file-system';
 import * as IntentLauncher from 'expo-intent-launcher';
-import fs from 'react-native-fs';
 import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@preeternal/react-native-cookie-manager';
@@ -16,34 +15,71 @@ import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
 
-const macDownloadDirectory = (ExpoFileSystem.documentDirectory ?? '').replace(
-  'Documents',
-  'Downloads',
-);
+/**
+ * The Mac app's Downloads folder, next to its Documents folder in the app
+ * container. The sandbox links it to the user's ~/Downloads.
+ */
+const getMacDownloadDirectory = () =>
+  new Directory(Paths.document.parentDirectory, 'Downloads');
 
 export const copyFileToMacDownloads = async (
   { title, fileType }: { title: string; fileType: string },
   fromPath: string,
 ) => {
-  const toPath = `${macDownloadDirectory}${title}.${fileType}`;
-  await ExpoFileSystem.copyAsync({ from: fromPath, to: toPath });
-  return toPath;
+  const to = new File(getMacDownloadDirectory(), `${title}.${fileType}`);
+  await new File(fromPath).copy(to, { overwrite: true });
+  return to.uri;
 };
 
-export const getLearnXFilesDir = () => {
-  const settings = getSettings();
+/**
+ * Where downloaded files live: the app's Documents or Caches folder, by the
+ * `fileUseDocumentDir` setting. Each file sits in a `<courseName>-<id>`
+ * folder right under it, the layout react-native-fs used, so files
+ * downloaded by earlier versions are found again.
+ */
+const getLearnXFilesDirectory = () =>
+  getSettings().fileUseDocumentDir ? Paths.document : Paths.cache;
 
-  return `${
-    settings.fileUseDocumentDir
-      ? ExpoFileSystem.documentDirectory
-      : ExpoFileSystem.cacheDirectory
-  }`;
-};
+/**
+ * Folders in the files directory that are not downloaded files. expo-sqlite
+ * keeps its databases (settings, user data, query cache) in `SQLite` under
+ * Documents.
+ */
+const keptEntries = new Set(['SQLite']);
 
 export const ensureLearnXFilesDir = async () => {
-  const dir = getLearnXFilesDir();
-  await fs.mkdir(dir);
-  return dir;
+  const dir = getLearnXFilesDirectory();
+  dir.create({ intermediates: true, idempotent: true });
+  return dir.uri;
+};
+
+/**
+ * The server answers an expired session with a tiny HTML page that redirects
+ * to the login page instead of an error status.
+ */
+const isLoginRedirect = async (file: File) =>
+  file.size < 100 && (await file.text()).includes('location.href');
+
+const deleteQuietly = (file: File) => {
+  try {
+    if (file.exists) {
+      file.delete();
+    }
+  } catch {}
+};
+
+export const getDownloadedFile = (file: DownloadableFile) => {
+  const settings = getSettings();
+  const extension = file.fileType ? `.${file.fileType}` : '';
+  const name = settings.fileOmitCourseName
+    ? `${file.title}${extension}`
+    : `${file.courseName}-${file.title}${extension}`;
+
+  return new File(
+    getLearnXFilesDirectory(),
+    `${file.courseName}-${file.id}`,
+    name,
+  );
 };
 
 export const downloadFile = async (
@@ -56,19 +92,9 @@ export const downloadFile = async (
     return url;
   }
 
-  const settings = getSettings();
-
-  const dir = `${getLearnXFilesDir()}/${file.courseName}-${file.id}`;
-  await fs.mkdir(dir);
-
-  let path = settings.fileOmitCourseName
-    ? `${dir}/${file.title}${file.fileType ? `.${file.fileType}` : ''}`
-    : `${dir}/${file.courseName}-${file.title}${
-        file.fileType ? `.${file.fileType}` : ''
-      }`;
-
-  if (!refresh && (await fs.exists(path))) {
-    return path;
+  const target = getDownloadedFile(file);
+  if (!refresh && target.exists) {
+    return target.uri;
   }
 
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -84,93 +110,54 @@ export const downloadFile = async (
   await emulateFileDownload();
   url = addCSRF(url);
 
-  if (Platform.OS === 'ios') {
-    const downloadPromise = fs.downloadFile({
-      fromUrl: url,
-      toFile: path,
-      begin: () => {},
-      progress: result => {
-        // New architecture doesn't like native floats
-        onProgress?.(
-          parseFloat((result.bytesWritten / result.contentLength).toFixed(2)),
-        );
-      },
-    });
+  target.parentDirectory.create({ intermediates: true, idempotent: true });
 
-    const result = await downloadPromise.promise;
-    if (result.statusCode !== 200 || result.bytesWritten === 0) {
-      try {
-        await fs.unlink(path);
-      } catch {}
-
-      throw new Error('File download failed');
-    }
-
-    if (result.bytesWritten < 100) {
-      const content = await fs.readFile(path);
-
-      if (content.includes('location.href')) {
-        try {
-          await fs.unlink(path);
-        } catch {}
-
-        throw new Error('File download failed');
-      }
-    }
-  } else {
+  // iOS sends the login cookies from the shared cookie store by itself;
+  // Android's download client has no cookie jar, so they go in a header.
+  let headers: Record<string, string> | undefined;
+  if (Platform.OS === 'android') {
     const cookies = await CookieManager.get(Urls.learn);
-    const cookiesString = Object.values(cookies).reduce(
-      (acc, { name, value }) => `${acc}${name}=${value}; `,
-      '',
-    );
-
-    const downloadResumable = ExpoFileSystem.createDownloadResumable(
-      url,
-      path,
-      {
-        cache: !refresh,
-        headers: {
-          Cookie: cookiesString,
-        },
-      },
-      result => {
-        // New architecture doesn't like native floats
-        onProgress?.(
-          parseFloat(
-            (
-              result.totalBytesWritten / result.totalBytesExpectedToWrite
-            ).toFixed(2),
-          ),
-        );
-      },
-    );
-
-    const result = await downloadResumable.downloadAsync();
-    if (!result || result.status !== 200) {
-      try {
-        await fs.unlink(path);
-      } catch {}
-
-      throw new Error('File download failed');
-    }
-
-    const downloadedFile = await ExpoFileSystem.getInfoAsync(path);
-    if (!downloadedFile.exists) {
-      throw new Error('File download failed');
-    }
-    if (downloadedFile.size && downloadedFile.size < 100) {
-      const content = await fs.readFile(path);
-      if (content.includes('location.href')) {
-        try {
-          await fs.unlink(path);
-        } catch {}
-
-        throw new Error('File download failed');
-      }
-    }
+    headers = {
+      Cookie: Object.values(cookies).reduce(
+        (acc, { name, value }) => `${acc}${name}=${value}; `,
+        '',
+      ),
+    };
   }
 
-  return path;
+  const task = new DownloadTask(url, target, {
+    headers,
+    // A background session would not share the app's cookies reliably and
+    // outlives the screen that shows the progress.
+    sessionType: 'foreground',
+    onProgress: ({ bytesWritten, totalBytes }) => {
+      if (totalBytes > 0) {
+        // New architecture doesn't like native floats
+        onProgress?.(parseFloat((bytesWritten / totalBytes).toFixed(2)));
+      }
+    },
+  });
+
+  let downloaded: File | null;
+  try {
+    downloaded = await task.downloadAsync();
+  } catch {
+    deleteQuietly(target);
+    throw new Error('File download failed');
+  } finally {
+    task.release();
+  }
+
+  if (
+    !downloaded?.exists ||
+    downloaded.size === 0 ||
+    (await isLoginRedirect(downloaded))
+  ) {
+    deleteQuietly(target);
+    throw new Error('File download failed');
+  }
+
+  return downloaded.uri;
 };
 
 export const shareFile = async (file: DownloadableFile) => {
@@ -194,41 +181,58 @@ export const exportTextFile = async (
   type: string,
 ) => {
   if (DeviceInfo.isMac()) {
-    await ExpoFileSystem.writeAsStringAsync(
-      `${macDownloadDirectory}${filename}`,
-      content,
-    );
+    new File(getMacDownloadDirectory(), filename).write(content);
     return;
   }
 
-  const path = `${ExpoFileSystem.cacheDirectory}${filename}`;
-  await ExpoFileSystem.writeAsStringAsync(path, content);
+  const file = new File(Paths.cache, filename);
+  file.write(content);
 
   await Share.open({
     filename,
-    url: path,
+    url: file.uri,
     type,
     showAppsToView: true,
     failOnCancel: false,
   });
 };
 
-export const removeFileDir = async () => {
-  const dir = `${
-    getSettings().fileUseDocumentDir
-      ? ExpoFileSystem.documentDirectory
-      : ExpoFileSystem.cacheDirectory
-  }`;
+const toDirectory = (path: string) =>
+  new Directory(path.includes('://') ? path : `file://${path}`);
 
-  if (await fs.exists(dir)) {
-    await fs.unlink(dir);
+/** Deletes downloaded files and files shared into the app. */
+export const removeFileDir = async () => {
+  const dir = getLearnXFilesDirectory();
+  if (dir.exists) {
+    const failed = dir
+      .list()
+      .filter(entry => !keptEntries.has(entry.name))
+      .filter(entry => {
+        try {
+          entry.delete();
+          return false;
+        } catch {
+          return true;
+        }
+      });
+    if (failed.length > 0) {
+      throw new Error(failed.map(entry => entry.name).join(', '));
+    }
   }
 
   if (Platform.OS === 'ios') {
-    ShareMenu.getSharedCacheDirectory(async sharedDir => {
-      if (sharedDir && (await fs.exists(sharedDir))) {
-        await fs.unlink(sharedDir);
-      }
+    await new Promise<void>(resolve => {
+      ShareMenu.getSharedCacheDirectory(sharedDir => {
+        try {
+          if (sharedDir) {
+            const shared = toDirectory(sharedDir);
+            if (shared.exists) {
+              shared.delete();
+            }
+          }
+        } catch {}
+        resolve();
+      });
     });
   }
 };
@@ -236,7 +240,7 @@ export const removeFileDir = async () => {
 export const openFile = async (uri: string, type?: string | null) => {
   const contentUri = uri.startsWith('content://')
     ? uri
-    : await ExpoFileSystem.getContentUriAsync(uri);
+    : new File(uri).contentUri;
   await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
     type: (type && mime.getType(type)) || 'application/octet-stream',
     data: contentUri,
@@ -244,10 +248,12 @@ export const openFile = async (uri: string, type?: string | null) => {
   });
 };
 
+/** Copies a file shared into the app to a place the app can read later. */
 export const copyFileToCache = async (uri: string) => {
-  const path = `${ExpoFileSystem.cacheDirectory}${uri.split('/').pop()}`;
-  await ExpoFileSystem.copyAsync({ from: uri, to: path });
-  return path;
+  const from = new File(uri);
+  const to = new File(Paths.cache, from.name);
+  await from.copy(to, { overwrite: true });
+  return to.uri;
 };
 
 export const getExtension = (filename: string) => {
