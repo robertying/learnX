@@ -19,7 +19,7 @@ import {
   NavigationState,
 } from 'react-native-tab-view';
 import Icon from '@react-native-vector-icons/material-icons';
-import { Assignment, File, Notice } from 'data/types/state';
+import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { getNoticesForCourse } from 'data/actions/notices';
 import { getAssignmentsForCourse } from 'data/actions/assignments';
@@ -34,6 +34,8 @@ import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { SplitViewContext } from 'components/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
+import NotFound from 'components/NotFound';
+import useHeaderTitle from 'hooks/useHeaderTitle';
 import { CourseStackParams } from './types';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
@@ -67,7 +69,7 @@ const Notices = memo(
             data={item}
             disableSwipe
             hideCourseName
-            onPress={() => navigation.push('NoticeDetail', item)}
+            onPress={() => navigation.push('NoticeDetail', { id: item.id })}
           />
         )}
         keyExtractor={item => item.id}
@@ -106,7 +108,7 @@ const Assignments = memo(
             data={item}
             disableSwipe
             hideCourseName
-            onPress={() => navigation.push('AssignmentDetail', item)}
+            onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
           />
         )}
         keyExtractor={item => item.id}
@@ -144,7 +146,7 @@ const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
           data={item}
           disableSwipe
           hideCourseName
-          onPress={() => navigation.push('FileDetail', item)}
+          onPress={() => navigation.push('FileDetail', { id: item.id })}
         />
       )}
       keyExtractor={item => item.id}
@@ -169,8 +171,23 @@ const routes = [
 type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
 
 const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
-  const { disableAnimation: _disableAnimation, ...course } = route.params;
+  const course = useAppSelector(state =>
+    state.courses.items.find(item => item.id === route.params.id),
+  );
 
+  useHeaderTitle(navigation, course?.name, course?.teacherName);
+
+  if (!course) {
+    return <NotFound />;
+  }
+
+  return <CourseDetailContent course={course} navigation={navigation} />;
+};
+
+const CourseDetailContent: React.FC<{
+  course: Course;
+  navigation: Props['navigation'];
+}> = ({ course, navigation }) => {
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();

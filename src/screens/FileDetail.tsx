@@ -1,4 +1,11 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Linking, Platform, StyleSheet, View } from 'react-native';
 import {
   useTheme,
@@ -36,12 +43,34 @@ import ScrollView from 'components/ScrollView';
 import { FileStackParams } from './types';
 import { SplitViewContext } from 'components/SplitView';
 import { useAppSelector } from 'data/store';
+import { DownloadableFile, File } from 'data/types/state';
+import NotFound from 'components/NotFound';
+import useHeaderTitle from 'hooks/useHeaderTitle';
 
 type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 
 const FileDetail: React.FC<Props> = ({ route, navigation }) => {
-  const file = route.params;
+  const { params } = route;
+  const storeFile = useAppSelector(state =>
+    'id' in params
+      ? state.files.items.find(item => item.id === params.id)
+      : undefined,
+  );
+  const file = 'attachment' in params ? params.attachment : storeFile;
 
+  useHeaderTitle(navigation, file?.title, file?.courseName);
+
+  if (!file) {
+    return <NotFound />;
+  }
+
+  return <FileDetailContent file={file} navigation={navigation} />;
+};
+
+const FileDetailContent: React.FC<{
+  file: DownloadableFile & Partial<File>;
+  navigation: Props['navigation'];
+}> = ({ file, navigation }) => {
   const isSearch = navigation.getState().routeNames.includes('Search' as any);
 
   const theme = useTheme();
@@ -70,17 +99,25 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         DeviceInfo.isMac() &&
         canRenderInMacWebview(file.fileType)));
 
+  // Only what the download depends on, so that a refresh of the store that
+  // leaves the file as it was keeps the downloaded one on screen.
+  const { id, courseName, title, fileType, downloadUrl } = file;
+  const downloadable = useMemo<DownloadableFile>(
+    () => ({ id, courseName, title, fileType, downloadUrl }),
+    [id, courseName, title, fileType, downloadUrl],
+  );
+
   // A new file shown in this screen starts over, like a refresh.
-  const [downloadParams, setDownloadParams] = useState(route.params);
-  if (downloadParams !== route.params) {
-    setDownloadParams(route.params);
+  const [shownFile, setShownFile] = useState(downloadable);
+  if (shownFile !== downloadable) {
+    setShownFile(downloadable);
     setPath('');
     setError(false);
   }
 
   const download = useCallback(
     (refresh: boolean) =>
-      downloadFile(route.params, refresh, setProgress).then(
+      downloadFile(downloadable, refresh, setProgress).then(
         downloadedPath => {
           setPath(downloadedPath);
           setProgress(0);
@@ -91,7 +128,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
           toast(t('fileDownloadFailed'), 'error');
         },
       ),
-    [route.params, toast],
+    [downloadable, toast],
   );
 
   const handleDownload = useCallback(
@@ -104,17 +141,17 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   );
 
   const handleShare = useCallback(async () => {
-    await shareFile(route.params);
-  }, [route.params]);
+    await shareFile(downloadable);
+  }, [downloadable]);
 
   const handleCopyToDownloadsFolder = useCallback(async () => {
     try {
-      await copyFileToMacDownloads(file, path);
+      await copyFileToMacDownloads(downloadable, path);
       toast(t('downloadToDownloadsSucceeded'), 'success');
     } catch {
       toast(t('downloadToDownloadsFailed'), 'error');
     }
-  }, [path, file, toast]);
+  }, [path, downloadable, toast]);
 
   const handleOpen = useCallback(async () => {
     try {

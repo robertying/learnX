@@ -29,7 +29,6 @@ import type {
   NativeStackHeaderItem,
   NativeStackNavigationOptions,
   NativeStackNavigationProp,
-  NativeStackScreenProps,
 } from '@react-navigation/native-stack';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import type { AppleIcon } from 'react-native-bottom-tabs';
@@ -95,7 +94,7 @@ import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
 import { ToastProvider } from 'components/Toast';
 import Splash from 'components/Splash';
-import HeaderTitle from 'components/HeaderTitle';
+import { getTitleOptions } from 'components/HeaderTitle';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import { SplitViewProvider } from 'components/SplitView';
@@ -110,7 +109,6 @@ import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetting } from 'data/actions/settings';
 import { persistor, store, useAppDispatch, useAppSelector } from 'data/store';
-import { Notice, Assignment, File, Course } from 'data/types/state';
 import { login } from 'data/actions/auth';
 import { getAllSemesters, getCurrentSemester } from 'data/actions/semesters';
 import { setPendingAssignmentData } from 'data/actions/assignments';
@@ -151,44 +149,14 @@ const getCloseHeaderItem = (
 
 const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
 
-const getTitleOptions = (title: string, subtitle?: string) => {
-  return supportsNativeSubtitle
-    ? { title, headerSubtitle: subtitle }
-    : {
-        title,
-        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
-      };
-};
-
 const getScreenOptions = (title: string) => (): NativeStackNavigationOptions =>
   getTitleOptions(title);
 
-const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
-  function ({
-    route,
-    theme,
-  }: NativeStackScreenProps<P, N> & {
-    theme: Theme;
-  }): NativeStackNavigationOptions {
-    const title =
-      route.name === 'CourseX'
-        ? t('courseX')
-        : route.params
-          ? (route.params as unknown as Course).semesterId
-            ? (route.params as unknown as Course).name
-            : (route.params as unknown as File).downloadUrl
-              ? (route.params as unknown as Notice | Assignment).title
-              : (route.params as unknown as Notice | Assignment).courseName
-          : '';
-    const subtitle = route.params
-      ? (route.params as unknown as Course).semesterId
-        ? (route.params as unknown as Course).teacherName
-        : (route.params as unknown as File).downloadUrl
-          ? (route.params as unknown as Notice | Assignment).courseName
-          : (route.params as unknown as Notice | Assignment).courseTeacherName
-      : '';
+// Detail screens set their own title from the item they show.
+const getDetailScreenOptions = (title = '') =>
+  function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {
     return {
-      ...getTitleOptions(title, subtitle),
+      ...getTitleOptions(title),
       headerTintColor: Platform.OS === 'ios' ? Colors.theme : undefined,
       // A native title would otherwise take the tint color.
       headerTitleStyle: supportsNativeSubtitle
@@ -705,7 +673,7 @@ const DetailStack = () => (
     <DetailNavigator.Screen
       name="CourseX"
       component={CourseX}
-      options={getDetailScreenOptions()}
+      options={getDetailScreenOptions(t('courseX'))}
     />
     {renderSettingDetails()}
   </DetailNavigator.Navigator>

@@ -181,6 +181,11 @@ export type File = Pick<
   | 'downloadUrl'
 > &
   CourseExtraInfo;
+/** What it takes to download and share a file. */
+export type DownloadableFile = Pick<
+  File,
+  'id' | 'courseName' | 'title' | 'fileType' | 'downloadUrl'
+>;
 export interface FilesState {
   fetching: boolean;
   favorites: string[];

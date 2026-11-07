@@ -33,16 +33,43 @@ import {
   isLocaleChinese,
   t,
 } from 'helpers/i18n';
-import { File } from 'data/types/state';
+import { Assignment } from 'data/types/state';
+import { useAppSelector } from 'data/store';
+import NotFound from 'components/NotFound';
+import useHeaderTitle from 'hooks/useHeaderTitle';
 
 type Props = NativeStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
 
 const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
+  const assignment = useAppSelector(state =>
+    state.assignments.items.find(item => item.id === route.params.id),
+  );
+
+  useHeaderTitle(
+    navigation,
+    assignment?.courseName,
+    assignment?.courseTeacherName,
+  );
+
+  if (!assignment) {
+    return <NotFound />;
+  }
+
+  return (
+    <AssignmentDetailContent assignment={assignment} navigation={navigation} />
+  );
+};
+
+const AssignmentDetailContent: React.FC<{
+  assignment: Assignment;
+  navigation: Props['navigation'];
+}> = ({ assignment, navigation }) => {
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();
 
   const {
+    id,
     courseName,
     title,
     deadline,
@@ -66,7 +93,7 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
     answerAttachment,
     answerContent,
     excellentHomeworkList,
-  } = route.params;
+  } = assignment;
 
   const html = useMemo(
     () =>
@@ -80,33 +107,33 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
 
   const handleFileOpen = (remoteFile?: RemoteFile) => {
     if (remoteFile) {
-      const data = {
-        id: remoteFile.id,
-        courseName,
-        title: stripExtension(remoteFile.name),
-        downloadUrl: remoteFile.downloadUrl,
-        fileType: getExtension(remoteFile.name) ?? '',
-      } as File;
-
-      navigation.push('FileDetail', data);
+      navigation.push('FileDetail', {
+        attachment: {
+          id: remoteFile.id,
+          courseName,
+          title: stripExtension(remoteFile.name),
+          downloadUrl: remoteFile.downloadUrl,
+          fileType: getExtension(remoteFile.name) ?? '',
+        },
+      });
     }
   };
 
   const handleSubmit = useCallback(() => {
     if (detailNavigator) {
       detailNavigator.dispatch(
-        StackActions.push('AssignmentSubmission', route.params),
+        StackActions.push('AssignmentSubmission', { id }),
       );
     } else {
       navigation.navigate(
         'AssignmentSubmissionStack' as any,
         {
           screen: 'AssignmentSubmission',
-          params: route.params,
+          params: { id },
         } as any,
       );
     }
-  }, [detailNavigator, navigation, route.params]);
+  }, [detailNavigator, id, navigation]);
 
   useEffect(() => {
     if (submissionType !== HomeworkSubmissionType.OFFLINE) {

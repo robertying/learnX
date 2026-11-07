@@ -115,6 +115,7 @@ export default {
     'Your credential will only be stored locally and secured by the system',
   login: 'Login',
   noNoticeContent: 'No notice content',
+  itemNotFound: 'This item is no longer available',
   searchPlaceholder: 'Notices, assignments & files...',
   logout: 'Logout',
   logoutConfirmation:

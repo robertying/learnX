@@ -110,6 +110,7 @@ const zh: typeof en = {
   securityNote: '您的用户信息仅会被保存在本地，并由操作系统安全地加密',
   login: '登录',
   noNoticeContent: '无通知内容',
+  itemNotFound: '该内容已不存在',
   searchPlaceholder: '搜索通知、作业、文件……',
   logout: '退出登录',
   logoutConfirmation: '确定退出登录？该操作会清除你当前的所有设置。',
