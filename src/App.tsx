@@ -343,16 +343,16 @@ const getTabBarIcon = (
     ? { sfSymbol }
     : MaterialIcons.getImageSourceSync(materialIcon, 24)!;
 
-const useNativeSplit = Platform.OS === 'ios';
+const nativeSplit = Platform.OS === 'ios';
 
 // The tabs as the sidebar of a single split, rather than a tab bar. On iPad, the
 // tab bar turns into a sidebar of its own.
-const useSidebarSplit = Platform.OS === 'ios' && DeviceInfo.isMac();
+const sidebarSplit = Platform.OS === 'ios' && DeviceInfo.isMac();
 
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
 // contains the split view, so each tab gets its own split.
 const withSplit = (Master: React.ComponentType) =>
-  useNativeSplit && !useSidebarSplit
+  nativeSplit && !sidebarSplit
     ? () => (
         <TabSplit>
           <Master />
@@ -375,7 +375,7 @@ const useMountedTabCount = () => {
   const splitLaidOut = useSplitLaidOut();
 
   useEffect(() => {
-    if (count >= mainTabCount || (useNativeSplit && !splitLaidOut)) {
+    if (count >= mainTabCount || (nativeSplit && !splitLaidOut)) {
       return;
     }
 
@@ -442,7 +442,7 @@ const MainTab = () => {
   const settingsBadge =
     newChangelog || newUpdate || !courseInformationSharingBadgeShown;
 
-  if (useSidebarSplit) {
+  if (sidebarSplit) {
     return (
       <MainSidebarNavigator.Navigator renderDetail={renderDetailContainer}>
         <MainSidebarNavigator.Screen
@@ -660,7 +660,7 @@ const DetailStack = () => (
       component={EmptyDetail}
       options={{
         ...getTitleOptions(''),
-        headerShown: !useNativeSplit || DeviceInfo.isIPad(),
+        headerShown: !nativeSplit || DeviceInfo.isIPad(),
       }}
     />
     <DetailNavigator.Screen
@@ -1043,7 +1043,7 @@ const Container = () => {
         ref={mainNavigationContainerRef}
         {...navigationContainerProps}
       >
-        {useNativeSplit ? (
+        {nativeSplit ? (
           <RootNavigator.Navigator
             screenOptions={{
               headerShown: false,

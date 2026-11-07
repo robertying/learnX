@@ -6,6 +6,11 @@
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing.
 - Debug builds load JS from Metro; only native changes need a rebuild.
 
+## React Compiler
+
+- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so new code doesn't need `useMemo`, `useCallback` or `React.memo`. The existing ones are removed in separate PRs.
+- The compiler silently skips a function it can't handle and leaves it unmemoized. In 1.0 that includes `try` blocks with `finally`, `throw`, or conditional / logical / optional-chaining expressions (`?:`, `&&`, `||`, `??`, `?.`): compute values before the `try` and keep only the awaited calls inside it. Constants named `use…` are taken for hooks, so don't use that prefix for non-hooks.
+
 ## Navigation
 
 - Detail screens (notice, assignment, file, course, assignment submission) take `{ id }` params and read the item from the store, so they stay current after a refresh: pass the id, never the item. They show `components/NotFound` when the item is gone and set their header title with `hooks/useHeaderTitle`. Notice and assignment attachments are not in the store and open `FileDetail` with `{ attachment }`.

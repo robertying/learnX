@@ -19,13 +19,11 @@ const AutoHeightWebView: React.FC<
   const webViewRef = useRef<WebView>(null);
 
   const onMessage = (e: WebViewMessageEvent) => {
-    try {
-      const measuredHeight = parseInt(e.nativeEvent.data, 10);
-      if (isNaN(measuredHeight) || measuredHeight < 1) {
-        return;
-      }
-      setHeight(measuredHeight);
-    } catch {}
+    const measuredHeight = parseInt(e.nativeEvent.data, 10);
+    if (isNaN(measuredHeight) || measuredHeight < 1) {
+      return;
+    }
+    setHeight(measuredHeight);
   };
 
   const onNavigationStateChange = (e: WebViewNavigation) => {
