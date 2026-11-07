@@ -16,7 +16,10 @@ import {
   Divider,
   Chip,
 } from 'react-native-paper';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type {
+  NativeStackHeaderItem,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from '@react-native-vector-icons/material-icons';
 import Pdf from 'react-native-pdf';
@@ -81,7 +84,9 @@ const FileDetailContent: React.FC<{
   file: DownloadableFile & Partial<File>;
   navigation: Props['navigation'];
 }> = ({ file, navigation }) => {
-  const isSearch = navigation.getState().routeNames.includes('Search' as any);
+  // Shared by several stacks; only the search stack has a Search screen.
+  const routeNames: readonly string[] = navigation.getState().routeNames;
+  const isSearch = routeNames.includes('Search');
 
   const theme = useTheme();
   const { splitEnabled, showDetail, showMaster, toggleMaster } =
@@ -224,7 +229,7 @@ const FileDetailContent: React.FC<{
       ),
       unstable_headerRightItems: () => [
         ...(splitEnabled && !isSearch
-          ? [
+          ? ([
               {
                 type: 'button',
                 identifier: 'toggleMaster',
@@ -238,8 +243,8 @@ const FileDetailContent: React.FC<{
                 onPress: () => toggleMaster(!showMaster),
                 disabled: !showDetail,
               },
-            ]
-          : ([] as any)),
+            ] satisfies NativeStackHeaderItem[])
+          : []),
         {
           type: 'button',
           identifier: 'refresh',
@@ -263,7 +268,7 @@ const FileDetailContent: React.FC<{
           disabled: error || !path,
         },
         ...(DeviceInfo.isMac()
-          ? [
+          ? ([
               {
                 type: 'button',
                 identifier: 'download',
@@ -275,10 +280,10 @@ const FileDetailContent: React.FC<{
                 onPress: () => handleCopyToDownloadsFolder(),
                 disabled: error || !path,
               },
-            ]
+            ] satisfies NativeStackHeaderItem[])
           : []),
         ...(canRender
-          ? [
+          ? ([
               {
                 type: 'button',
                 identifier: 'info',
@@ -290,7 +295,7 @@ const FileDetailContent: React.FC<{
                 onPress: () => handleShowInfo(),
                 disabled: error || !path,
               },
-            ]
+            ] satisfies NativeStackHeaderItem[])
           : []),
       ],
     });

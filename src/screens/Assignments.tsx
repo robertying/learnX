@@ -1,8 +1,7 @@
 import { useEffect, useEffectEvent } from 'react';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
-import { AssignmentStackParams } from 'screens/types';
+import { AssignmentStackParams, MainStackScreenProps } from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
@@ -18,7 +17,7 @@ import { toast } from 'components/Toast';
 import { saveAssignmentsToReminderOrCalendar } from 'helpers/event';
 import { t } from 'helpers/i18n';
 
-type Props = NativeStackScreenProps<AssignmentStackParams, 'Assignments'>;
+type Props = MainStackScreenProps<AssignmentStackParams, 'Assignments'>;
 
 const Assignments: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();

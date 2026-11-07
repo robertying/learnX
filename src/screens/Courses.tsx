@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
@@ -15,9 +14,9 @@ import useDetailNavigator from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/parse';
 import { uploadCourses } from 'helpers/coursex';
 import { sortByOrder } from 'helpers/reorder';
-import { CourseStackParams } from './types';
+import { CourseStackParams, MainStackScreenProps } from './types';
 
-type Props = NativeStackScreenProps<CourseStackParams, 'Courses'>;
+type Props = MainStackScreenProps<CourseStackParams, 'Courses'>;
 
 const Courses: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();

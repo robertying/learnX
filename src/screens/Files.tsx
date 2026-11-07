@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent } from 'react';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
@@ -11,9 +10,9 @@ import { useCourseIds } from 'data/queries';
 import { File } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import { FileStackParams } from './types';
+import { FileStackParams, MainStackScreenProps } from './types';
 
-type Props = NativeStackScreenProps<FileStackParams, 'Files'>;
+type Props = MainStackScreenProps<FileStackParams, 'Files'>;
 
 const Files: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();

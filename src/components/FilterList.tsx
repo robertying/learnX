@@ -6,8 +6,11 @@ import {
   useState,
 } from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { StackActions } from '@react-navigation/native';
+import type {
+  NativeStackHeaderItem,
+  NativeStackNavigationProp,
+} from '@react-navigation/native-stack';
+import { ParamListBase, StackActions } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
@@ -26,12 +29,7 @@ import {
 } from 'data/userData';
 import { toast } from 'components/Toast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import {
-  AssignmentStackParams,
-  CourseStackParams,
-  FileStackParams,
-  NoticeStackParams,
-} from 'screens/types';
+import { RootStackParams } from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { isLocaleChinese, t } from 'helpers/i18n';
@@ -58,11 +56,9 @@ export interface FilterListProps<T> {
   archived?: T[];
   hidden: T[];
   itemComponent: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
-  navigation:
-    | NativeStackNavigationProp<NoticeStackParams, 'Notices'>
-    | NativeStackNavigationProp<AssignmentStackParams, 'Assignments'>
-    | NativeStackNavigationProp<FileStackParams, 'Files'>
-    | NativeStackNavigationProp<CourseStackParams, 'Courses'>;
+  /** The list screen's navigation, for its header and to open root stacks. */
+  navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'setOptions'> &
+    Pick<NativeStackNavigationProp<RootStackParams>, 'navigate'>;
   onItemPress?: (item: T) => void;
   refreshing: boolean;
   onRefresh?: () => void;
@@ -235,7 +231,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX'));
     } else {
-      (navigation.navigate as any)('CourseXStack');
+      navigation.navigate('CourseXStack');
     }
   }, [detailNavigator, navigation]);
 
@@ -431,7 +427,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               ],
         unstable_headerRightItems: () => [
           ...(DeviceInfo.isMac()
-            ? [
+            ? ([
                 {
                   type: 'button',
                   identifier: 'refresh',
@@ -443,10 +439,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
                       : 'arrow.clockwise',
                   },
                   disabled: refreshing,
-                  onPress: onRefresh,
+                  onPress: () => onRefresh?.(),
                 },
-              ]
-            : ([] as any)),
+              ] satisfies NativeStackHeaderItem[])
+            : []),
           {
             type: 'button',
             identifier: 'search',
@@ -455,7 +451,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
               type: 'sfSymbol',
               name: 'magnifyingglass',
             },
-            onPress: () => (navigation.navigate as any)('SearchStack' as any),
+            onPress: () => navigation.navigate('SearchStack'),
           },
         ],
 
@@ -500,7 +496,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
             )}
             <IconButton
               accessibilityLabel={t('search')}
-              onPress={() => (navigation.navigate as any)('SearchStack' as any)}
+              onPress={() => navigation.navigate('SearchStack')}
               icon={props => <MaterialIcons {...props} name="search" />}
             />
           </>

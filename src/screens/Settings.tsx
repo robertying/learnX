@@ -40,7 +40,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     null,
   );
 
-  const handlePush = (name: keyof SettingsStackParams) => {
+  const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) => {
     if (detailNavigator) {
       detailNavigator.dispatch(
         StackActions.replace(name, {
@@ -48,7 +48,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         }),
       );
     } else {
-      navigation.push(name, undefined as any);
+      navigation.push(name);
     }
   };
 

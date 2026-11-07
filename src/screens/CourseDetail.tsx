@@ -8,10 +8,6 @@ import {
   View,
 } from 'react-native';
 import { Divider, Text, useTheme } from 'react-native-paper';
-import {
-  NativeStackNavigationProp,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
 import { StackActions, useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
@@ -42,13 +38,17 @@ import { SplitViewContext } from 'components/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
-import { CourseStackParams } from './types';
+import {
+  CourseStackParams,
+  MainStackNavigationProp,
+  MainStackScreenProps,
+} from './types';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
   ? ('never' as const)
   : ('automatic' as const);
 
-type NavigationProp = NativeStackNavigationProp<
+type NavigationProp = MainStackNavigationProp<
   CourseStackParams,
   'CourseDetail'
 >;
@@ -176,7 +176,7 @@ const routes = [
   { key: 'file', title: t('files') },
 ];
 
-type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
+type Props = MainStackScreenProps<CourseStackParams, 'CourseDetail'>;
 
 const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
   const course = useCourse(route.params.id);
@@ -305,15 +305,12 @@ const CourseDetailContent: React.FC<{
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX', { id: course.id }));
     } else {
-      navigation.navigate(
-        'CourseXStack' as any,
-        {
-          screen: 'CourseX',
-          params: {
-            id: course.id,
-          },
-        } as any,
-      );
+      navigation.navigate('CourseXStack', {
+        screen: 'CourseX',
+        params: {
+          id: course.id,
+        },
+      });
     }
   };
 
