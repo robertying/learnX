@@ -1,43 +1,38 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View, Animated } from 'react-native';
 import { useTheme } from 'react-native-paper';
 
 const Skeleton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();
 
-  const opacity = useRef(new Animated.Value(1));
-
-  const fadeAnimation = useCallback(() => {
-    const newValue = 0.5;
-    const oldValue = 1;
-    const duration = 500;
-
-    Animated.sequence([
-      Animated.timing(opacity.current, {
-        toValue: newValue,
-        duration,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity.current, {
-        toValue: oldValue,
-        duration,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      fadeAnimation();
-    });
-  }, []);
+  const [opacity] = useState(() => new Animated.Value(1));
 
   useEffect(() => {
-    fadeAnimation();
-  }, [fadeAnimation]);
+    const duration = 500;
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.5,
+          duration,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration,
+          useNativeDriver: true,
+        }),
+      ]),
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [opacity]);
 
   return (
     <View style={[styles.root, { backgroundColor: theme.colors.surface }]}>
-      <Animated.View style={[styles.line1, { opacity: opacity.current }]} />
-      <Animated.View style={[styles.line2, { opacity: opacity.current }]} />
-      <Animated.View style={[styles.line3, { opacity: opacity.current }]} />
-      <Animated.View style={[styles.line4, { opacity: opacity.current }]} />
+      <Animated.View style={[styles.line1, { opacity }]} />
+      <Animated.View style={[styles.line2, { opacity }]} />
+      <Animated.View style={[styles.line3, { opacity }]} />
+      <Animated.View style={[styles.line4, { opacity }]} />
     </View>
   );
 };

@@ -40,6 +40,7 @@ const SemesterSelection: React.FC<Props> = () => {
   }, [dispatch]);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- getLatestSemester sets state only after awaiting the request
     handleRefresh();
   }, [handleRefresh]);
 

@@ -160,12 +160,8 @@ const getTitleOptions = (title: string, subtitle?: string) => {
       };
 };
 
-const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
-  title: string,
-) =>
-  function ({}: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
-    return getTitleOptions(title);
-  };
+const getScreenOptions = (title: string) => (): NativeStackNavigationOptions =>
+  getTitleOptions(title);
 
 const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
   function ({

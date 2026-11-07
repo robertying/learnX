@@ -311,7 +311,11 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
     uploading,
   ]);
 
-  useEffect(() => {
+  // A file shared to the app becomes the attachment.
+  const [sharedAssignmentData, setSharedAssignmentData] =
+    useState<typeof pendingAssignmentData>(null);
+  if (pendingAssignmentData !== sharedAssignmentData) {
+    setSharedAssignmentData(pendingAssignmentData);
     if (pendingAssignmentData) {
       setAttachmentResult({
         uri: pendingAssignmentData.data,
@@ -319,7 +323,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
         name: getDefaultAttachmentName(pendingAssignmentData.mimeType),
       });
     }
-  }, [getDefaultAttachmentName, pendingAssignmentData]);
+  }
 
   return (
     <SafeArea>

@@ -104,6 +104,7 @@ const ColumnSafeArea: React.FC<
   useEffect(() => {
     if (onScreen.current) {
       const metrics = { insets, frame };
+      // oxlint-disable-next-line react/set-state-in-effect -- only known on screen, which is a native event tracked in a ref
       setReported(metrics);
       reportedColumnMetrics[column] = metrics;
       columnMetricsListeners.forEach(listener => listener());
@@ -190,13 +191,14 @@ const NativeSplitViewProvider: React.FC<
   // saved by an older version), and the master pane comes back hidden without
   // the screen that hid it. UIKit reports the restored display mode once laid
   // out; show the master pane again unless it was hidden in this session.
-  useEffect(() => {
-    if (displayMode === 'secondaryOnly' && !fullScreen) {
+  const handleDisplayModeWillChange = (nextDisplayMode: SplitDisplayMode) => {
+    setDisplayMode(nextDisplayMode);
+    if (nextDisplayMode === 'secondaryOnly' && !fullScreen) {
       setPreferredDisplayMode(
         hasSidebar ? 'twoBesideSecondary' : 'oneBesideSecondary',
       );
     }
-  }, [displayMode, fullScreen, hasSidebar]);
+  };
   const fullScreenInBackground = useRef(false);
   useEffect(() => {
     const subscription = AppState.addEventListener('change', state => {
@@ -241,7 +243,9 @@ const NativeSplitViewProvider: React.FC<
           onCollapse={() => setExpanded(false)}
           onExpand={() => setExpanded(true)}
           onDisplayModeWillChange={e =>
-            setDisplayMode(e.nativeEvent.nextDisplayMode as SplitDisplayMode)
+            handleDisplayModeWillChange(
+              e.nativeEvent.nextDisplayMode as SplitDisplayMode,
+            )
           }
         >
           {/* The secondary column extends underneath the primary one (and any

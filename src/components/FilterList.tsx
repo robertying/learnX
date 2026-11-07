@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
@@ -142,7 +149,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const selectionRef = useRef(selection);
-  selectionRef.current = selection;
+  useLayoutEffect(() => {
+    selectionRef.current = selection;
+  }, [selection]);
 
   const selectedCount = useMemo(
     () => Object.values(selection).filter(Boolean).length,
@@ -561,13 +570,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     type,
   ]);
 
-  const firstTimeFetching = useRef(true);
-
-  useEffect(() => {
-    if (refreshing && firstTimeFetching.current) {
-      firstTimeFetching.current = false;
-    }
-  }, [refreshing]);
+  // Hide the refresh spinner during the initial fetch.
+  const [firstFetch, setFirstFetch] = useState<'pending' | 'running' | 'done'>(
+    'pending',
+  );
+  if (firstFetch === 'pending' && refreshing) {
+    setFirstFetch('running');
+  } else if (firstFetch === 'running' && !refreshing) {
+    setFirstFetch('done');
+  }
 
   const renderItem = useCallback(
     ({ item }: { item: T }) => {
@@ -628,7 +639,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     refreshControl: (
       <RefreshControl
         enabled={!selectionMode && !reorderMode}
-        refreshing={firstTimeFetching.current ? false : refreshing}
+        refreshing={firstFetch === 'done' ? refreshing : false}
         onRefresh={onRefresh}
       />
     ),

@@ -12,10 +12,10 @@ import { File } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
 
-const macDownloadDirectory = ExpoFileSystem.documentDirectory?.replace(
+const macDownloadDirectory = (ExpoFileSystem.documentDirectory ?? '').replace(
   'Documents',
   'Downloads',
-)!;
+);
 
 export const copyFileToMacDownloads = async (
   { title, fileType }: { title: string; fileType: string },
