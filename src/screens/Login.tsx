@@ -95,7 +95,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             setSSOInProgress(true);
 
             await clearLoginCookies();
-            (navigation.navigate as any)('SSO', {
+            navigation.navigate('SSO', {
               username,
               password,
             });

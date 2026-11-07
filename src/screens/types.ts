@@ -1,4 +1,13 @@
-import { NavigatorScreenParams } from '@react-navigation/native';
+import type {
+  CompositeNavigationProp,
+  CompositeScreenProps,
+  NavigatorScreenParams,
+  ParamListBase,
+} from '@react-navigation/native';
+import type {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
 import { DownloadableFile, File } from 'data/types/state';
 
 export interface ExtraParams {
@@ -46,17 +55,21 @@ export type CourseStackParams = {
   FileDetail: FileDetailParams;
 };
 
+/**
+ * Settings details are pushed without params in a stack, and replace the
+ * detail pane without animation in a split.
+ */
 export type SettingsStackParams = {
   Settings: undefined;
-  CourseInformationSharing: ExtraParams;
-  CalendarEvent: ExtraParams;
-  SemesterSelection: ExtraParams;
-  FileSettings: ExtraParams;
-  Help: ExtraParams;
-  About: ExtraParams;
-  Changelog: ExtraParams;
-  Maintainer: ExtraParams;
-  MockNetwork: ExtraParams;
+  CourseInformationSharing: ExtraParams | undefined;
+  CalendarEvent: ExtraParams | undefined;
+  SemesterSelection: ExtraParams | undefined;
+  FileSettings: ExtraParams | undefined;
+  Help: ExtraParams | undefined;
+  About: ExtraParams | undefined;
+  Changelog: ExtraParams | undefined;
+  Maintainer: ExtraParams | undefined;
+  MockNetwork: ExtraParams | undefined;
 };
 
 export type MainTabParams = {
@@ -116,8 +129,8 @@ export type DetailStackParams = {
 
 export type RootStackParams = {
   MainTab: NavigatorScreenParams<MainTabParams>;
-  CourseXStack: NavigatorScreenParams<CourseXStackParams>;
-  SearchStack: NavigatorScreenParams<SearchStackParams>;
+  CourseXStack: NavigatorScreenParams<CourseXStackParams> | undefined;
+  SearchStack: NavigatorScreenParams<SearchStackParams> | undefined;
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
 };
@@ -126,3 +139,30 @@ export type SplitRootStackParams = {
   Main: undefined;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
 };
+
+/**
+ * Navigation for a screen in one of the main tabs' stacks. Besides its own
+ * stack, it can open the root stacks (search, CourseX, submission), which
+ * `navigate` reaches by bubbling up through the tabs.
+ */
+export type MainStackNavigationProp<
+  ParamList extends ParamListBase,
+  RouteName extends keyof ParamList & string = keyof ParamList & string,
+> = CompositeNavigationProp<
+  NativeStackNavigationProp<ParamList, RouteName>,
+  NativeStackNavigationProp<RootStackParams>
+>;
+
+export type MainStackScreenProps<
+  ParamList extends ParamListBase,
+  RouteName extends keyof ParamList & string = keyof ParamList & string,
+> = CompositeScreenProps<
+  NativeStackScreenProps<ParamList, RouteName>,
+  NativeStackScreenProps<RootStackParams>
+>;
+
+declare global {
+  namespace ReactNavigation {
+    interface RootParamList extends RootStackParams {}
+  }
+}

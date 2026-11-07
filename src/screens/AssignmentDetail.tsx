@@ -8,7 +8,6 @@ import {
   Text,
   Chip,
 } from 'react-native-paper';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -24,7 +23,7 @@ import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
-import { AssignmentStackParams } from 'screens/types';
+import { AssignmentStackParams, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { getWebViewTemplate, removeTags } from 'helpers/html';
 import { getExtension, stripExtension } from 'helpers/fs';
@@ -38,7 +37,7 @@ import { useAssignment } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 
-type Props = NativeStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
+type Props = MainStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
 
 const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
   const assignment = useAssignment(route.params.id);
@@ -119,13 +118,10 @@ const AssignmentDetailContent: React.FC<{
         StackActions.push('AssignmentSubmission', { id }),
       );
     } else {
-      navigation.navigate(
-        'AssignmentSubmissionStack' as any,
-        {
-          screen: 'AssignmentSubmission',
-          params: { id },
-        } as any,
-      );
+      navigation.navigate('AssignmentSubmissionStack', {
+        screen: 'AssignmentSubmission',
+        params: { id },
+      });
     }
   }, [detailNavigator, id, navigation]);
 
