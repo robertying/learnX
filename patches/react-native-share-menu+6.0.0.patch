@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-share-menu/index.js b/node_modules/react-native-share-menu/index.js
-index e8e1b73..7634c9c 100644
+index e8e1b73a..7634c9ca
 --- a/node_modules/react-native-share-menu/index.js
 +++ b/node_modules/react-native-share-menu/index.js
 @@ -39,4 +39,7 @@ export default {
@@ -11,7 +11,7 @@ index e8e1b73..7634c9c 100644
 +  }
  };
 diff --git a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.m b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.m
-index c859938..de49d75 100644
+index c8599382..de49d757
 --- a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.m
 +++ b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.m
 @@ -4,5 +4,6 @@
@@ -22,7 +22,7 @@ index c859938..de49d75 100644
  
  @end
 diff --git a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
-index 74badda..dfe7f8e 100644
+index 74badda6..dfe7f8e4
 --- a/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
 +++ b/node_modules/react-native-share-menu/ios/Modules/ShareMenu.swift
 @@ -1,6 +1,5 @@
@@ -52,7 +52,7 @@ index 74badda..dfe7f8e 100644
          guard hasListeners else { return }
  
 diff --git a/node_modules/react-native-share-menu/ios/ShareMenuManager.m b/node_modules/react-native-share-menu/ios/ShareMenuManager.m
-index 308ec99..aaa9026 100644
+index 308ec994..aaa90267
 --- a/node_modules/react-native-share-menu/ios/ShareMenuManager.m
 +++ b/node_modules/react-native-share-menu/ios/ShareMenuManager.m
 @@ -6,7 +6,7 @@
@@ -65,7 +65,7 @@ index 308ec99..aaa9026 100644
  #import <React/RCTLinkingManager.h>
  
 diff --git a/node_modules/react-native-share-menu/ios/ShareViewController.swift b/node_modules/react-native-share-menu/ios/ShareViewController.swift
-index 12d8c92..ca7aa89 100644
+index 12d8c92d..b13d4cd5
 --- a/node_modules/react-native-share-menu/ios/ShareViewController.swift
 +++ b/node_modules/react-native-share-menu/ios/ShareViewController.swift
 @@ -14,6 +14,7 @@ import UIKit
@@ -113,7 +113,7 @@ index 12d8c92..ca7aa89 100644
 +          self.exit(withError: error.debugDescription)
 +          return
 +        }
- 
+       
 -      let mimeType = url.extractMimeType()
 -      let fileExtension = url.pathExtension
 -      let fileName = UUID().uuidString
@@ -145,7 +145,7 @@ index 12d8c92..ca7aa89 100644
 +              print("Error writing temp file: \(error)")
 +          }
 +        }
- 
+       
 -      guard self.moveFileToDisk(from: url, to: filePath) else {
 -        self.exit(withError: COULD_NOT_SAVE_FILE_ERROR)
 -        return
@@ -154,7 +154,7 @@ index 12d8c92..ca7aa89 100644
 +          self.exit(withError: COULD_NOT_FIND_IMG_ERROR)
 +          return
 +        }
-           
+       
 -      self.sharedItems.append([DATA_KEY: filePath.absoluteString, MIME_TYPE_KEY: mimeType])
 -      semaphore.signal()
 +        // 4. Proceed with saving to App Group
@@ -192,7 +192,23 @@ index 12d8c92..ca7aa89 100644
        if FileManager.default.fileExists(atPath: destUrl.path) {
          try FileManager.default.removeItem(at: destUrl)
        }
-@@ -222,27 +256,42 @@ class ShareViewController: SLComposeServiceViewController {
+@@ -213,36 +247,52 @@ class ShareViewController: SLComposeServiceViewController {
+   
+   func exit(withError error: String) {
+     print("Error: \(error)")
+-    cancelRequest()
++    // The compose sheet is never shown, so cancelling here would only flash
++    // the extension and close it. Open the app anyway: it gets no shared item
++    // (the app group stays as the app last read it), but the user lands in it.
++    openHostApp()
+   }
+   
+   internal func openHostApp() {
+-    guard let urlScheme = self.hostAppUrlScheme else {
+-      exit(withError: NO_INFO_PLIST_URL_SCHEME_ERROR)
++    guard let urlScheme = self.hostAppUrlScheme, let url = URL(string: urlScheme) else {
++      print("Error: \(NO_INFO_PLIST_URL_SCHEME_ERROR)")
++      cancelRequest()
        return
      }
      
@@ -205,15 +221,13 @@ index 12d8c92..ca7aa89 100644
 -        responder?.perform(selectorOpenURL, with: url)
 -      }
 -      responder = responder!.next
-+    guard let url = URL(string: urlScheme) else {
-+      exit(withError: NO_INFO_PLIST_URL_SCHEME_ERROR)
-+      return
++    DispatchQueue.main.async {
++      UIApplication.shared.open(url, completionHandler: { success in
++        self.completeRequest(success: success)
++      })
      }
-     
+-    
 -    completeRequest()
-+    UIApplication.shared.open(url, completionHandler: { success in
-+      self.completeRequest(success: success)
-+    })
    }
    
 -  func completeRequest() {
@@ -230,7 +244,8 @@ index 12d8c92..ca7aa89 100644
    }
    
    func cancelRequest() {
-     extensionContext!.cancelRequest(withError: NSError())
+-    extensionContext!.cancelRequest(withError: NSError())
++    extensionContext!.cancelRequest(withError: NSError(domain: NSCocoaErrorDomain, code: NSUserCancelledError))
    }
  
 +  
