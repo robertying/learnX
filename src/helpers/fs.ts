@@ -130,7 +130,11 @@ export const downloadFile = async (
     // A background session would not share the app's cookies reliably and
     // outlives the screen that shows the progress.
     sessionType: 'foreground',
-    onProgress: ({ bytesWritten, totalBytes }) => {
+    onProgress: event => {
+      // iOS reports the byte counts as BigInt, which can't be divided by a
+      // number or formatted with toFixed.
+      const bytesWritten = Number(event.bytesWritten);
+      const totalBytes = Number(event.totalBytes);
       if (totalBytes > 0) {
         // New architecture doesn't like native floats
         onProgress?.(parseFloat((bytesWritten / totalBytes).toFixed(2)));
