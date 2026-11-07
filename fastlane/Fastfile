@@ -257,6 +257,9 @@ def upload_android(notes, track)
       skip_upload_changelogs: notes.nil?,
     }
     options[:mapping] = mapping if File.exist?(mapping)
+    # supply reads SUPPLY_JSON_KEY itself; also take the name used in fastlane/.env.
+    json_key = ENV["GOOGLE_PLAY_CONSOLE_JSON_KEY"].to_s
+    options[:json_key] = File.expand_path(json_key) unless json_key.empty?
     upload_to_play_store(options)
   end
 end
