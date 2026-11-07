@@ -21,8 +21,8 @@ import {
 import Icon from '@react-native-vector-icons/material-icons';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useAppDispatch, useAppSelector } from 'data/store';
-import { useCourse } from 'data/queries';
-import { getNoticesForCourse } from 'data/actions/notices';
+import { useCourse, useLoggedIn } from 'data/queries';
+import { useNotices, useRefreshCourseNotices } from 'data/content';
 import { getAssignmentsForCourse } from 'data/actions/assignments';
 import { getFilesForCourse } from 'data/actions/files';
 import NoticeCard from 'components/NoticeCard';
@@ -52,13 +52,13 @@ const Notices = memo(
   ({ courseId, data }: { courseId: string; data: Notice[] }) => {
     const navigation = useNavigation<NavigationProp>();
 
-    const dispatch = useAppDispatch();
-    const loggedIn = useAppSelector(state => state.auth.loggedIn);
-    const fetching = useAppSelector(state => state.notices.fetching);
+    const loggedIn = useLoggedIn();
+    const refresh = useRefreshCourseNotices(courseId);
+    const fetching = refresh.isPending;
 
     const handleRefresh = () => {
       if (loggedIn) {
-        dispatch(getNoticesForCourse(courseId));
+        refresh.mutate();
       }
     };
 
@@ -192,7 +192,7 @@ const CourseDetailContent: React.FC<{
   const detailNavigator = useDetailNavigator();
   const { masterWidth } = useContext(SplitViewContext);
 
-  const notices = useAppSelector(state => state.notices.items);
+  const { notices } = useNotices();
   const assignments = useAppSelector(state => state.assignments.items);
   const files = useAppSelector(state => state.files.items);
 

@@ -1,35 +1,16 @@
 import { FailReason } from 'thu-learn-lib';
 import assignments from 'data/reducers/assignments';
 import files from 'data/reducers/files';
-import notices from 'data/reducers/notices';
 import * as C from 'data/types/constants';
 import { action, INIT } from '../../../../jest/actions';
 
 type Item = { id: string; courseId: string; deadline?: string };
 
 /**
- * notices, files and assignments handle the same kinds of actions under
+ * files and assignments handle the same kinds of actions under
  * different names; this describes each one so they share one set of tests.
  */
 const cases = [
-  {
-    name: 'notices',
-    reducer: notices as (state: any, a: never) => any,
-    all: [
-      C.GET_ALL_NOTICES_FOR_COURSES_REQUEST,
-      C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS,
-      C.GET_ALL_NOTICES_FOR_COURSES_FAILURE,
-    ],
-    course: [
-      C.GET_NOTICES_FOR_COURSE_REQUEST,
-      C.GET_NOTICES_FOR_COURSE_SUCCESS,
-      C.GET_NOTICES_FOR_COURSE_FAILURE,
-    ],
-    coursePayload: (courseId: string, items: Item[]) => ({
-      courseId,
-      notices: items,
-    }),
-  },
   {
     name: 'files',
     reducer: files as (state: any, a: never) => any,

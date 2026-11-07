@@ -94,7 +94,7 @@ describe('persisted root state', () => {
     const { getState } = await launch();
     const state = getState();
 
-    for (const key of ['notices', 'assignments', 'files'] as const) {
+    for (const key of ['assignments', 'files'] as const) {
       expect(state[key].fetching).toBe(false);
       expect(state[key].error ?? null).toBeNull();
     }
@@ -102,20 +102,21 @@ describe('persisted root state', () => {
     expect(state).not.toHaveProperty('semesters');
     expect(state).not.toHaveProperty('courses');
     expect(state).not.toHaveProperty('user');
+    expect(state).not.toHaveProperty('notices');
     expect(state._persist.version).toBe(PERSIST_VERSION);
   });
 
   it('does not write loading or error flags to storage', async () => {
     const { getState, dispatch, persistor } = await launch();
-    dispatch({ type: 'GET_ALL_NOTICES_FOR_COURSES_REQUEST' } as never);
-    expect(getState().notices.fetching).toBe(true);
+    dispatch({ type: 'GET_ALL_FILES_FOR_COURSES_REQUEST' } as never);
+    expect(getState().files.fetching).toBe(true);
 
     await persistor.flush();
     const stored = await readStored();
 
-    expect(stored.notices).not.toHaveProperty('fetching');
-    expect(stored.notices).not.toHaveProperty('error');
-    expect(stored.notices).toHaveProperty('items');
+    expect(stored.files).not.toHaveProperty('fetching');
+    expect(stored.files).not.toHaveProperty('error');
+    expect(stored.files).toHaveProperty('items');
     expect(stored._persist.version).toBe(PERSIST_VERSION);
   });
 
