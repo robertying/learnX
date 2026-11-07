@@ -1,4 +1,3 @@
-import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -35,10 +34,7 @@ const AssignmentCard: React.FC<
   hideCourseName,
   ...restProps
 }) => {
-  const strippedDescription = useMemo(
-    () => removeTags(description),
-    [description],
-  );
+  const strippedDescription = removeTags(description);
   const now = dayjs();
   const dl = dayjs(deadline);
   const isPast = now.isAfter(dl);
@@ -127,4 +123,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(AssignmentCard);
+export default AssignmentCard;

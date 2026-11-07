@@ -4,7 +4,7 @@ import { Caption } from 'react-native-paper';
 import { setSetting, useSettings } from 'data/settings';
 import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
@@ -14,8 +14,6 @@ import { SettingsStackParams } from './types';
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
 const FileSettings: React.FC<Props> = () => {
-  const toast = useToast();
-
   const fileUseDocumentDir = useSettings(
     settings => settings.fileUseDocumentDir,
   );

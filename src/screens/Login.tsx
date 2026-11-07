@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { setSetting, useSettings } from 'data/settings';
 import {
@@ -33,8 +33,6 @@ import { LoginStackParams } from './types';
 type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
 
 const Login: React.FC<Props> = ({ navigation }) => {
-  const toast = useToast();
-
   const dispatch = useAppDispatch();
   const loggingIn = useAppSelector(state => state.auth.loggingIn);
   const graduate = useSettings(settings => settings.graduate);

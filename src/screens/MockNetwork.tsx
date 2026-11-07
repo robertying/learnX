@@ -13,7 +13,7 @@ import {
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
 
 // A dev-only tool for the mock accounts, so it is not translated.
@@ -32,7 +32,6 @@ const failures: [MockFailure, string][] = [
 ];
 
 const MockNetwork: React.FC = () => {
-  const toast = useToast();
   const dispatch = useAppDispatch();
   const config = useSyncExternalStore(
     subscribeMockNetworkConfig,

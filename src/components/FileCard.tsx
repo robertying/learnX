@@ -1,4 +1,3 @@
-import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -29,10 +28,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   hideCourseName,
   ...restProps
 }) => {
-  const strippedDescription = useMemo(
-    () => removeTags(description),
-    [description],
-  );
+  const strippedDescription = removeTags(description);
   const timeAgo = dayjs(uploadTime).fromNow();
 
   return (
@@ -90,4 +86,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(FileCard);
+export default FileCard;

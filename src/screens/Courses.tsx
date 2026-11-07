@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
@@ -32,33 +32,28 @@ const Courses: React.FC<Props> = ({ navigation }) => {
     refetch,
   } = useCourses();
   const courseOrder = useUserData(data => data.courseOrder);
-  const courses = useMemo(
-    () => sortByOrder(fetchedCourses, courseOrder),
-    [fetchedCourses, courseOrder],
-  );
+  const courses = sortByOrder(fetchedCourses, courseOrder);
   const hiddenIds = useUserData(data => data.hiddenCourses);
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();
   const files = useAppSelector(state => state.files.items);
 
-  const coursesWithCounts = useMemo(() => {
-    return courses.map(course => ({
-      ...course,
-      unreadNoticeCount: notices.filter(
-        notice => notice.courseId === course.id && !notice.hasRead,
-      ).length,
-      unfinishedAssignmentCount: assignments.filter(
-        assignment =>
-          assignment.courseId === course.id &&
-          !assignment.submitted &&
-          dayjs(assignment.deadline).isAfter(dayjs()),
-      ).length,
-      unreadFileCount: files.filter(
-        file => file.courseId === course.id && file.isNew,
-      ).length,
-    }));
-  }, [assignments, courses, files, notices]);
+  const coursesWithCounts = courses.map(course => ({
+    ...course,
+    unreadNoticeCount: notices.filter(
+      notice => notice.courseId === course.id && !notice.hasRead,
+    ).length,
+    unfinishedAssignmentCount: assignments.filter(
+      assignment =>
+        assignment.courseId === course.id &&
+        !assignment.submitted &&
+        dayjs(assignment.deadline).isAfter(dayjs()),
+    ).length,
+    unreadFileCount: files.filter(
+      file => file.courseId === course.id && file.isNew,
+    ).length,
+  }));
 
   const all = coursesWithCounts.filter(i => !hiddenIds.includes(i.id));
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));

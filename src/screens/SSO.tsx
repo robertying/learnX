@@ -10,7 +10,7 @@ import { useAppDispatch } from 'data/store';
 import { login, setSSOInProgress } from 'data/actions/auth';
 import { generateFingerprint } from 'helpers/fingerprint';
 import { t } from 'helpers/i18n';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import { LoginStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -25,7 +25,6 @@ type Props = NativeStackScreenProps<LoginStackParams, 'SSO'>;
 
 const SSO: React.FC<Props> = ({ route, navigation }) => {
   const dispatch = useAppDispatch();
-  const toast = useToast();
 
   const username = route.params.username;
   const password = route.params.password;

@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import Fuse, { IFuseOptions } from 'fuse.js';
 import { Assignment, File, Notice } from 'data/types/state';
 
@@ -47,12 +46,9 @@ export default function useSearch(
   files: File[],
   query: string,
 ) {
-  const noticeFuse = useMemo(() => new Fuse(notices, noticeOptions), [notices]);
-  const assignmentFuse = useMemo(
-    () => new Fuse(assignments, assignmentOptions),
-    [assignments],
-  );
-  const fileFuse = useMemo(() => new Fuse(files, fileOptions), [files]);
+  const noticeFuse = new Fuse(notices, noticeOptions);
+  const assignmentFuse = new Fuse(assignments, assignmentOptions);
+  const fileFuse = new Fuse(files, fileOptions);
 
   return query
     ? [
