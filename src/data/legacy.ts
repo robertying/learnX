@@ -147,8 +147,25 @@ export const legacyUserData = (root: Json): Partial<UserData> => {
   return result;
 };
 
+/**
+ * Builds from before the semester being shown moved to the user data imported
+ * the rest without it, and it stays in the root only until the Redux store
+ * migrates that. Takes it from there if it is still missing.
+ */
+const importLegacySemester = async () => {
+  if (useUserDataStore.getState().currentSemester) {
+    return;
+  }
+  const root = parseLegacyPersist(await AsyncStorage.getItem(LEGACY_ROOT_KEY));
+  const currentSemester = root && legacyUserData(root).currentSemester;
+  if (currentSemester) {
+    useUserDataStore.setState({ currentSemester });
+  }
+};
+
 const importLegacy = async () => {
   if (kvStorage.getItem(LEGACY_IMPORTED_KEY)) {
+    await importLegacySemester();
     return;
   }
 
