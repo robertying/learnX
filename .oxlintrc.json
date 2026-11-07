@@ -143,9 +143,12 @@
               "Subheading",
               "Paragraph",
               "Caption",
-              "Divider"
+              "Divider",
+              "Switch",
+              "Checkbox",
+              "Searchbar"
             ],
-            "message": "Use useTheme from theme, the text components from components/Text and components/Divider."
+            "message": "Use useTheme from theme, the text components from components/Text, components/Divider and components/Switch. Search goes in the native header (headerSearchBarOptions)."
           }
         ],
         "patterns": [

@@ -4,7 +4,8 @@ import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { Checkbox, Menu } from 'react-native-paper';
+import { Menu } from 'react-native-paper';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -146,7 +147,14 @@ const CardWrapper: React.FC<
       <View style={styles.root}>
         {selectionMode && (
           <View style={styles.checkbox}>
-            <Checkbox.Android status={checked ? 'checked' : 'unchecked'} />
+            <MaterialCommunityIcons
+              style={styles.checkboxIcon}
+              name={checked ? 'checkbox-marked' : 'checkbox-blank-outline'}
+              size={24}
+              color={
+                checked ? theme.colors.primary : theme.colors.onSurfaceVariant
+              }
+            />
           </View>
         )}
         {reorderMode && (
@@ -208,6 +216,10 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     marginRight: 8,
+  },
+  // The selection mark is display only: the whole card toggles it.
+  checkboxIcon: {
+    padding: 6,
   },
 });
 

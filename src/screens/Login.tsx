@@ -8,7 +8,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Button, Switch, TextInput } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
+import Switch from 'components/Switch';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';

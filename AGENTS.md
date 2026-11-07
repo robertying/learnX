@@ -24,7 +24,8 @@
 
 - Colors come from `useTheme()` in `src/theme` (`theme.colors`, `theme.dark`), not Paper's `useTheme`. `onSurfaceHigh` and `onSurfaceMedium` are the title/body and caption text colors.
 - Text uses `Text`, `Title`, `Subheading`, `Paragraph` and `Caption` from `components/Text` (the type scale the app had with Paper), and separators use `components/Divider`. Oxlint blocks importing these from `react-native-paper`.
-- React Native Paper is still used for the remaining controls (Switch, Menu, TextInput, Searchbar, Checkbox, Snackbar, Chip, ProgressBar, List, Dialog and others), which `PaperProvider` in `App.tsx` themes with `usePaperTheme`. Plan 4.1 moves them to `@expo/ui` one at a time.
+- Switches use `components/Switch` (`@expo/ui`'s `Switch` in a `Host` tinted with the primary color). The search screen uses the native header search bar (`headerSearchBarOptions`), and a selected card shows a checkbox icon (the card itself takes the tap).
+- React Native Paper is still used for the remaining controls (Menu, TextInput, Snackbar, Chip, ProgressBar, List, Dialog and others), which `PaperProvider` in `App.tsx` themes with `usePaperTheme`. Plan 4.1 moves them off Paper a few at a time.
 
 ## Data
 
