@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Typecheck, lint, format
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # Version comes from the `packageManager` field in package.json.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # src/helpers/env.ts inlines .env at build time via babel preval.
+      # CI only needs placeholder values so anything that runs Babel can load it.
+      - name: Write stub .env
+        run: |
+          cat > .env <<'ENV'
+          DUMMY_USERNAME=ci-dummy-username
+          DUMMY_PASSWORD=ci-dummy-password
+          DUMMY_PERSIST_USERNAME=ci-dummy-persist-username
+          DUMMY_PERSIST_PASSWORD=ci-dummy-persist-password
+          COURSEX_REFRESH_TOKEN=ci-dummy-token
+          ENV
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Prettier
+        run: pnpm exec prettier --check src/
+
+      # Tests: a `pnpm test` step goes here once Jest is set up.
