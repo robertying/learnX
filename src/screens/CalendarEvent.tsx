@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   KeyboardAvoidingView,
@@ -30,7 +30,7 @@ import {
 } from 'helpers/event';
 import { exportTextFile } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import useFilteredData from 'hooks/useFilteredData';
 import { SettingsStackParams } from './types';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -38,8 +38,6 @@ import DeviceInfo from 'constants/DeviceInfo';
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 
 const CalendarEvent: React.FC<Props> = () => {
-  const toast = useToast();
-
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );
@@ -66,9 +64,8 @@ const CalendarEvent: React.FC<Props> = () => {
     hidden: hiddenCourseIds,
   });
 
-  const sync = useMemo(
-    () => all.filter(assignment => dayjs(assignment.deadline).isAfter(dayjs())),
-    [all],
+  const sync = all.filter(assignment =>
+    dayjs(assignment.deadline).isAfter(dayjs()),
   );
 
   const [courseSyncing, setCourseSyncing] = useState(false);

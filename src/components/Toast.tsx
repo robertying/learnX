@@ -1,69 +1,59 @@
-import { createContext, useCallback, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { Snackbar } from 'react-native-paper';
 import * as Haptics from 'expo-haptics';
+import { create } from 'zustand';
 
-type ToastType = 'success' | 'warning' | 'error' | 'none';
+export type ToastType = 'success' | 'warning' | 'error' | 'none';
 
-const ToastContext = createContext<{
-  text: string;
-  duration: number;
-  toggleToast: (text: string, type: ToastType, duration?: number) => void;
-}>({
+const useToastStore = create<{ text: string; duration: number }>(() => ({
   text: '',
   duration: 3000,
-  toggleToast: () => {},
-});
+}));
 
-const ToastProvider: React.FC<React.PropsWithChildren<unknown>> = ({
-  children,
-}) => {
-  const [toastText, setToastText] = useState('');
-  const [toastDuration, setToastDuration] = useState(3000);
+const defaultDurations: Record<ToastType, number> = {
+  success: 3000,
+  warning: 4000,
+  error: 5000,
+  none: 5000,
+};
 
-  const handleToast = useCallback(
-    (text: string, type: ToastType, duration?: number) => {
-      setToastDuration(
-        duration ??
-          (type === 'success' ? 3000 : type === 'warning' ? 4000 : 5000),
-      );
-      setToastText(text);
-      if (text && type !== 'none') {
-        Haptics.notificationAsync(
-          type === 'success'
-            ? Haptics.NotificationFeedbackType.Success
-            : type === 'warning'
-              ? Haptics.NotificationFeedbackType.Warning
-              : Haptics.NotificationFeedbackType.Error,
-        );
-      }
-    },
-    [],
-  );
+const haptics: Partial<Record<ToastType, Haptics.NotificationFeedbackType>> = {
+  success: Haptics.NotificationFeedbackType.Success,
+  warning: Haptics.NotificationFeedbackType.Warning,
+  error: Haptics.NotificationFeedbackType.Error,
+};
 
-  const handleDismiss = () => {
-    setToastText('');
-  };
+/** Shows a snackbar. A plain function, so it is safe to call from anywhere. */
+export const toast = (text: string, type: ToastType, duration?: number) => {
+  useToastStore.setState({
+    text,
+    duration: duration ?? defaultDurations[type],
+  });
+  const feedback = haptics[type];
+  if (text && feedback !== undefined) {
+    Haptics.notificationAsync(feedback);
+  }
+};
+
+const dismiss = () => {
+  useToastStore.setState({ text: '' });
+};
+
+/** Renders the current toast. Mount once, above the navigation container. */
+export const Toast: React.FC = () => {
+  const text = useToastStore(state => state.text);
+  const duration = useToastStore(state => state.duration);
 
   return (
-    <ToastContext.Provider
-      value={{
-        text: toastText,
-        duration: toastDuration,
-        toggleToast: handleToast,
-      }}
+    <Snackbar
+      key={text}
+      wrapperStyle={styles.snackbar}
+      visible={!!text}
+      duration={duration}
+      onDismiss={dismiss}
     >
-      {children}
-      <Snackbar
-        key={toastText}
-        wrapperStyle={styles.snackbar}
-        visible={toastText ? true : false}
-        duration={toastDuration}
-        onDismiss={handleDismiss}
-      >
-        {toastText}
-      </Snackbar>
-    </ToastContext.Provider>
+      {text}
+    </Snackbar>
   );
 };
 
@@ -72,5 +62,3 @@ const styles = StyleSheet.create({
     marginBottom: Platform.OS === 'android' ? 80 : 48,
   },
 });
-
-export { ToastContext, ToastProvider };

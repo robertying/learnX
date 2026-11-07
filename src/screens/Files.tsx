@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import FileCard from 'components/FileCard';
@@ -34,31 +34,31 @@ const Files: React.FC<Props> = ({ navigation }) => {
     hidden: hiddenCourseIds,
   });
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     if (loggedIn) {
       dispatch(getAllFilesForCourses(courseIds));
     }
-  }, [courseIds, dispatch, loggedIn]);
+  };
 
-  const handlePush = useCallback(
-    (item: File) => {
-      if (detailNavigator) {
-        detailNavigator.dispatch(
-          StackActions.replace('FileDetail', {
-            id: item.id,
-            disableAnimation: true,
-          }),
-        );
-      } else {
-        navigation.push('FileDetail', { id: item.id });
-      }
-    },
-    [detailNavigator, navigation],
-  );
+  const refresh = useEffectEvent(handleRefresh);
 
+  const handlePush = (item: File) => {
+    if (detailNavigator) {
+      detailNavigator.dispatch(
+        StackActions.replace('FileDetail', {
+          id: item.id,
+          disableAnimation: true,
+        }),
+      );
+    } else {
+      navigation.push('FileDetail', { id: item.id });
+    }
+  };
+
+  // Fetch on mount and again when the user signs in or the courses change.
   useEffect(() => {
-    handleRefresh();
-  }, [handleRefresh]);
+    refresh();
+  }, [courseIds, loggedIn]);
 
   return (
     <SafeArea>

@@ -2,7 +2,6 @@ import {
   Children,
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -69,13 +68,10 @@ const useReportedColumnMetrics = (column: number) =>
 const useColumnAppearance = () => {
   const [onScreen, setOnScreen] = useState(false);
 
-  const handlers = useMemo(
-    () => ({
-      onDidAppear: () => setOnScreen(true),
-      onDidDisappear: () => setOnScreen(false),
-    }),
-    [],
-  );
+  const handlers = {
+    onDidAppear: () => setOnScreen(true),
+    onDidDisappear: () => setOnScreen(false),
+  };
 
   return { onScreen, handlers };
 };

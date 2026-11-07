@@ -8,7 +8,10 @@
 
 ## React Compiler
 
-- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so new code doesn't need `useMemo`, `useCallback` or `React.memo`. The existing ones are removed in separate PRs.
+- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so don't add `useMemo`, `useCallback` or `React.memo` for performance.
+- Don't make an effect depend on a function. A function that an effect only calls goes in `useEffectEvent`, and the effect lists the data it reacts to (e.g. `refresh` in `Notices`: `useEffect(() => refresh(), [courseIds, loggedIn])`). The compiler's memoization is an optimization, not a guarantee, so an effect shouldn't rerun just because a function fell out of compilation. `react-hooks/exhaustive-deps` flags the direct cases.
+- `useCallback` / `useMemo` are still right where a value has to keep its identity and can't be an effect event: handlers handed to `navigation.setOptions` from an effect, functions and values in a context provider (the split views), and hook outputs that callers use as effect deps (`useFilteredData`).
+- Show toasts with the module-level `toast()` from `components/Toast`, not through props or context.
 - The compiler silently skips a function it can't handle and leaves it unmemoized. In 1.0 that includes `try` blocks with `finally`, `throw`, or conditional / logical / optional-chaining expressions (`?:`, `&&`, `||`, `??`, `?.`): compute values before the `try` and keep only the awaited calls inside it. Constants named `use…` are taken for hooks, so don't use that prefix for non-hooks.
 
 ## Navigation
