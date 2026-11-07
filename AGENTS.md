@@ -3,6 +3,7 @@
 ## Commands
 
 - `pnpm start` runs Metro; `pnpm ios` / `pnpm android` build and launch the app.
+- `pnpm pod` runs `pod install` and `pod update` through Bundler, with the CocoaPods version locked in `Gemfile.lock` (run `bundle install` once first).
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing.
 - Debug builds load JS from Metro; only native changes need a rebuild.
 
@@ -78,7 +79,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 ## Releases
 
-- [fastlane](https://docs.fastlane.tools) (`fastlane/Fastfile`) builds and uploads releases on a Mac. Install it with `bundle install` (Ruby 3.2+; `.bundle/config` keeps the gems in `vendor/bundle`), and run `pnpm install` and `pod install` (`pnpm pod`) first.
+- [fastlane](https://docs.fastlane.tools) (`fastlane/Fastfile`) builds and uploads releases on a Mac. It and CocoaPods are in the `Gemfile`: run `bundle install` once (Ruby 3.2+; `.bundle/config` keeps the gems in `vendor/bundle`), then `pnpm install` and `pnpm pod` (`bundle exec pod install`, so everyone uses the locked CocoaPods) before building.
 - `bundle exec fastlane bump version:x.y.z` sets the version in `package.json`, the Xcode project and `android/app/build.gradle`. The build number goes to the next multiple of 10 (18.0.3 is 4530), or up by 1 for a rebuild of the same version (no `version:`); the Android versionCode is 9200000 + the build number.
 - `bundle exec fastlane <ios|mac|android> build` builds into `build/release/v<version>/` without uploading anything: the .ipa, the Mac Catalyst .pkg, the AAB, the APKs renamed `learnX-<abi>-v<version>.apk` with `latest.json` (what the in-app updater reads from the TUNA mirror), and the JS source map of each build in `sourcemaps/`. Crashlytics doesn't symbolicate JS, so keep these maps for `metro-symbolicate`. The Android build also uploads native symbols to Crashlytics.
 - `<platform> release` builds and uploads; `bundle exec fastlane release notes:<file>` builds all three, then uploads to App Store Connect (not submitted for review), to Google Play as a draft on `track:` (default `production`), and creates a draft GitHub release `v<version>` at HEAD with the APKs, `latest.json` and a zip of the source maps. Release lanes need a clean git tree. Notes come from the release-notes skill.
