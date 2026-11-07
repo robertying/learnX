@@ -78,7 +78,7 @@ const MockNetwork: React.FC = () => {
         <Caption style={styles.caption}>
           Applies to every request, login and file downloads included. A file
           already downloaded opens without a request; refresh it to download it
-          again.
+          again. A refresh logs in first, so it takes about twice the latency.
         </Caption>
         <Caption style={styles.header}>Login</Caption>
         <TableCell
