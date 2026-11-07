@@ -50,10 +50,10 @@ jobs:
         run: pnpm typecheck
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm lint --deny-warnings
 
-      - name: Prettier
-        run: pnpm exec prettier --check src/
+      - name: Format
+        run: pnpm format --check
 
       - name: Test
         run: pnpm test

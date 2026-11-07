@@ -3,7 +3,7 @@
 ## Commands
 
 - `pnpm start` runs Metro; `pnpm ios` / `pnpm android` build and launch the app.
-- Run prettier after changing files; `pnpm typecheck` and `pnpm lint` must pass before committing.
+- Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing.
 - Debug builds load JS from Metro; only native changes need a rebuild.
 
 ## Mocks
