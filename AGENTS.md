@@ -8,20 +8,23 @@
 
 ## React Compiler
 
-- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so new code doesn't need `useMemo`, `useCallback` or `React.memo`. The existing ones are removed in separate PRs.
+- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so don't add `useMemo`, `useCallback` or `React.memo` for performance.
+- Don't make an effect depend on a function. A function that an effect only calls goes in `useEffectEvent`, and the effect lists the data it reacts to (e.g. `refresh` in `Notices`: `useEffect(() => refresh(), [courseIds, loggedIn])`). The compiler's memoization is an optimization, not a guarantee, so an effect shouldn't rerun just because a function fell out of compilation. `react-hooks/exhaustive-deps` flags the direct cases.
+- `useCallback` / `useMemo` are still right where a value has to keep its identity and can't be an effect event: handlers handed to `navigation.setOptions` from an effect, functions and values in a context provider (the split views), and hook outputs that callers use as effect deps (`useFilteredData`).
+- Show toasts with the module-level `toast()` from `components/Toast`, not through props or context.
 - The compiler silently skips a function it can't handle and leaves it unmemoized. In 1.0 that includes `try` blocks with `finally`, `throw`, or conditional / logical / optional-chaining expressions (`?:`, `&&`, `||`, `??`, `?.`): compute values before the `try` and keep only the awaited calls inside it. Constants named `use…` are taken for hooks, so don't use that prefix for non-hooks.
 
 ## Navigation
 
-- Detail screens (notice, assignment, file, course, assignment submission) take `{ id }` params and read the item from the store, so they stay current after a refresh: pass the id, never the item. They show `components/NotFound` when the item is gone and set their header title with `hooks/useHeaderTitle`. Notice and assignment attachments are not in the store and open `FileDetail` with `{ attachment }`.
+- Detail screens (notice, assignment, file, course, assignment submission) take `{ id }` params and read the item from the query cache, so they stay current after a refresh: pass the id, never the item. They show `components/NotFound` when the item is gone and set their header title with `hooks/useHeaderTitle`. Notice and assignment attachments are not in the cache and open `FileDetail` with `{ attachment }`.
 
 ## Data
 
 - Settings (`src/data/settings.ts`) and the user's own data (`src/data/userData.ts`: favorites, archives, hidden courses, course order) are Zustand stores persisted to `expo-sqlite/kv-store`. Storage is synchronous, so the stores hold their saved state as soon as they are imported (also in the background task). Read them with `useSettings` / `useUserData` in components and `getSettings` / `getUserData` elsewhere; change them through the exported functions, not `setState` from screens.
 - When the persisted shape of a store changes, bump its `version` and add a `migrate`. Keep `merge` filling in defaults for keys added later.
-- `src/data/legacy.ts` imports what 18.0.x saved in AsyncStorage (`persist:settings`, and the user data inside the slices of `persist:root`) once, before the UI shows. Don't remove it while users can still upgrade from 18.0.x.
-- Server data is moving to TanStack Query (`src/data/queries.ts`, client in `src/data/queryClient.ts`). Semesters, courses and the user are queries (`data/queries.ts`), and so are notices and assignments (`data/content.ts`, which also refreshes one course's items for CourseDetail); the semester being shown is `currentSemester` in `data/userData`. Each response is saved to its own SQLite database (`queryCache`) by the per-query persister and loaded back into memory before the UI shows (`restoreQueryCache`), so lists show cached data before the login finishes and offline. Queries run only while logged in (`enabled: loggedIn`). Bump `QUERY_CACHE_VERSION` when a response's shape changes. A file shared to learnX that is waiting to be attached to a submission lives in `data/pendingAssignment` (not persisted).
-- Assignments and files are still in Redux under `persist:root`; credentials are in `src/data/credentials.ts`.
+- `src/data/legacy.ts` imports what 18.0.x saved in AsyncStorage (`persist:settings`, and the user data inside the slices of `persist:root`) once, before the UI shows, then deletes both keys. Don't remove it while users can still upgrade from 18.0.x.
+- Server data is in TanStack Query (client in `src/data/queryClient.ts`). Semesters, courses and the user are queries (`data/queries.ts`), and so are notices, assignments and files (`data/content.ts`, which also refreshes one course's items for CourseDetail); the semester being shown is `currentSemester` in `data/userData`. Each response is saved to its own SQLite database (`queryCache`) by the per-query persister and loaded back into memory before the UI shows (`restoreQueryCache`), so lists show cached data before the login finishes and offline. Queries run only while logged in (`enabled: loggedIn`). Bump `QUERY_CACHE_VERSION` when a response's shape changes. A file shared to learnX that is waiting to be attached to a submission lives in `data/pendingAssignment` (not persisted).
+- Login progress (`loggedIn`, `loggingIn`, the last error) is a Zustand store in `src/data/auth.ts` that isn't persisted; `src/data/login.ts` logs in, out and into the mock account. The credentials are in `src/data/credentials.ts`. There is no Redux.
 
 ## Mocks
 

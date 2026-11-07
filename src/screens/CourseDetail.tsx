@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -20,15 +20,16 @@ import {
 } from 'react-native-tab-view';
 import Icon from '@react-native-vector-icons/material-icons';
 import { Assignment, Course, File, Notice } from 'data/types/state';
-import { useAppDispatch, useAppSelector } from 'data/store';
-import { useCourse, useLoggedIn } from 'data/queries';
+import { useCourse } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import {
   useAssignments,
+  useFiles,
   useNotices,
   useRefreshCourseAssignments,
+  useRefreshCourseFiles,
   useRefreshCourseNotices,
 } from 'data/content';
-import { getFilesForCourse } from 'data/actions/files';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
@@ -52,94 +53,96 @@ type NavigationProp = NativeStackNavigationProp<
   'CourseDetail'
 >;
 
-const Notices = memo(
-  ({ courseId, data }: { courseId: string; data: Notice[] }) => {
-    const navigation = useNavigation<NavigationProp>();
-
-    const loggedIn = useLoggedIn();
-    const refresh = useRefreshCourseNotices(courseId);
-    const fetching = refresh.isPending;
-
-    const handleRefresh = () => {
-      if (loggedIn) {
-        refresh.mutate();
-      }
-    };
-
-    return (
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <NoticeCard
-            data={item}
-            disableSwipe
-            hideCourseName
-            onPress={() => navigation.push('NoticeDetail', { id: item.id })}
-          />
-        )}
-        keyExtractor={item => item.id}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
-        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-        contentContainerStyle={[
-          { flexGrow: 1 },
-          data.length ? null : { justifyContent: 'center' },
-        ]}
-        ListEmptyComponent={<Empty />}
-      />
-    );
-  },
-);
-
-const Assignments = memo(
-  ({ courseId, data }: { courseId: string; data: Assignment[] }) => {
-    const navigation = useNavigation<NavigationProp>();
-
-    const loggedIn = useLoggedIn();
-    const refresh = useRefreshCourseAssignments(courseId);
-    const fetching = refresh.isPending;
-
-    const handleRefresh = () => {
-      if (loggedIn) {
-        refresh.mutate();
-      }
-    };
-
-    return (
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <AssignmentCard
-            data={item}
-            disableSwipe
-            hideCourseName
-            onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
-          />
-        )}
-        keyExtractor={item => item.id}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
-        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-        contentContainerStyle={[
-          { flexGrow: 1 },
-          data.length ? null : { justifyContent: 'center' },
-        ]}
-        ListEmptyComponent={<Empty />}
-      />
-    );
-  },
-);
-
-const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
+const Notices = ({ courseId, data }: { courseId: string; data: Notice[] }) => {
   const navigation = useNavigation<NavigationProp>();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const fetching = useAppSelector(state => state.files.fetching);
+  const loggedIn = useLoggedIn();
+  const refresh = useRefreshCourseNotices(courseId);
+  const fetching = refresh.isPending;
 
   const handleRefresh = () => {
     if (loggedIn) {
-      dispatch(getFilesForCourse(courseId));
+      refresh.mutate();
+    }
+  };
+
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => (
+        <NoticeCard
+          data={item}
+          disableSwipe
+          hideCourseName
+          onPress={() => navigation.push('NoticeDetail', { id: item.id })}
+        />
+      )}
+      keyExtractor={item => item.id}
+      refreshing={fetching}
+      onRefresh={handleRefresh}
+      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+      contentContainerStyle={[
+        { flexGrow: 1 },
+        data.length ? null : { justifyContent: 'center' },
+      ]}
+      ListEmptyComponent={<Empty />}
+    />
+  );
+};
+
+const Assignments = ({
+  courseId,
+  data,
+}: {
+  courseId: string;
+  data: Assignment[];
+}) => {
+  const navigation = useNavigation<NavigationProp>();
+
+  const loggedIn = useLoggedIn();
+  const refresh = useRefreshCourseAssignments(courseId);
+  const fetching = refresh.isPending;
+
+  const handleRefresh = () => {
+    if (loggedIn) {
+      refresh.mutate();
+    }
+  };
+
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => (
+        <AssignmentCard
+          data={item}
+          disableSwipe
+          hideCourseName
+          onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
+        />
+      )}
+      keyExtractor={item => item.id}
+      refreshing={fetching}
+      onRefresh={handleRefresh}
+      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+      contentContainerStyle={[
+        { flexGrow: 1 },
+        data.length ? null : { justifyContent: 'center' },
+      ]}
+      ListEmptyComponent={<Empty />}
+    />
+  );
+};
+
+const Files = ({ courseId, data }: { courseId: string; data: File[] }) => {
+  const navigation = useNavigation<NavigationProp>();
+
+  const loggedIn = useLoggedIn();
+  const refresh = useRefreshCourseFiles(courseId);
+  const fetching = refresh.isPending;
+
+  const handleRefresh = () => {
+    if (loggedIn) {
+      refresh.mutate();
     }
   };
 
@@ -165,7 +168,7 @@ const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
       ListEmptyComponent={<Empty />}
     />
   );
-});
+};
 
 const routes = [
   { key: 'notice', title: t('notices') },
@@ -198,7 +201,7 @@ const CourseDetailContent: React.FC<{
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();
-  const files = useAppSelector(state => state.files.items);
+  const { files } = useFiles();
 
   const [index, setIndex] = useState(0);
 
@@ -298,7 +301,7 @@ const CourseDetailContent: React.FC<{
     }
   };
 
-  const handleNavigateCourseX = useCallback(() => {
+  const handleNavigateCourseX = () => {
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX', { id: course.id }));
     } else {
@@ -312,7 +315,7 @@ const CourseDetailContent: React.FC<{
         } as any,
       );
     }
-  }, [course.id, detailNavigator, navigation]);
+  };
 
   return (
     <SafeArea>

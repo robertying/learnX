@@ -1,10 +1,11 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
-import { ContentType } from 'thu-learn-lib';
+import { ContentType, CourseType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import { queryClient, queryPersister } from 'data/queryClient';
-import { coursesQuery, getCourseNames, useLoggedIn } from 'data/queries';
+import { coursesQuery, getCourseNames } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
-import { Assignment, Notice } from 'data/types/state';
+import { Assignment, File, Notice } from 'data/types/state';
 import { useCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 
@@ -124,4 +125,20 @@ export const useRefreshCourseAssignments = assignments.useRefreshCourse;
 export const useAssignments = () => {
   const { items, ...result } = assignments.useList();
   return { ...result, assignments: items };
+};
+
+const files = createContent<File>({
+  name: 'files',
+  type: ContentType.FILE,
+  fetchCourse: courseId => dataSource.getFileList(courseId, CourseType.STUDENT),
+  sort: byNewest(file => file.uploadTime),
+});
+
+export const filesQuery = files.query;
+export const refreshCourseFiles = files.refreshCourse;
+export const useFile = files.useItem;
+export const useRefreshCourseFiles = files.useRefreshCourse;
+export const useFiles = () => {
+  const { items, ...result } = files.useList();
+  return { ...result, files: items };
 };

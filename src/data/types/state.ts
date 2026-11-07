@@ -1,21 +1,11 @@
-import { PersistState } from 'redux-persist';
 import type {
   CourseInfo,
-  FailReason,
   Homework,
   Notification,
   File as IFile,
   UserInfo,
 } from 'thu-learn-lib';
 import { FilterSelection } from 'components/Filter';
-
-/** Login progress. The credentials themselves live in data/credentials. */
-export interface AuthState {
-  loggingIn: boolean;
-  ssoInProgress: boolean;
-  loggedIn: boolean;
-  error?: FailReason | null;
-}
 
 export type Tab = 'notice' | 'assignment' | 'file' | 'course';
 export interface AlarmSettings {
@@ -141,22 +131,6 @@ export type DownloadableFile = Pick<
   File,
   'id' | 'courseName' | 'title' | 'fileType' | 'downloadUrl'
 >;
-export interface FilesState {
-  fetching: boolean;
-  items: File[];
-  error?: FailReason | null;
-}
-
 export type User = {
   [key in keyof UserInfo]: UserInfo[key] | null;
 };
-
-export interface PersistPartial {
-  _persist: PersistState;
-}
-
-export interface AppState {
-  auth: AuthState;
-  files: FilesState;
-}
-export type PersistAppState = AppState & PersistPartial;

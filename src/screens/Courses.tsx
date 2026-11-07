@@ -1,13 +1,13 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import { useAppSelector } from 'data/store';
-import { useAssignments, useNotices } from 'data/content';
-import { useCourses, useLoggedIn } from 'data/queries';
+import { useAssignments, useNotices, useFiles } from 'data/content';
+import { useCourses } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import { useSettings } from 'data/settings';
 import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
@@ -32,33 +32,28 @@ const Courses: React.FC<Props> = ({ navigation }) => {
     refetch,
   } = useCourses();
   const courseOrder = useUserData(data => data.courseOrder);
-  const courses = useMemo(
-    () => sortByOrder(fetchedCourses, courseOrder),
-    [fetchedCourses, courseOrder],
-  );
+  const courses = sortByOrder(fetchedCourses, courseOrder);
   const hiddenIds = useUserData(data => data.hiddenCourses);
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();
-  const files = useAppSelector(state => state.files.items);
+  const { files } = useFiles();
 
-  const coursesWithCounts = useMemo(() => {
-    return courses.map(course => ({
-      ...course,
-      unreadNoticeCount: notices.filter(
-        notice => notice.courseId === course.id && !notice.hasRead,
-      ).length,
-      unfinishedAssignmentCount: assignments.filter(
-        assignment =>
-          assignment.courseId === course.id &&
-          !assignment.submitted &&
-          dayjs(assignment.deadline).isAfter(dayjs()),
-      ).length,
-      unreadFileCount: files.filter(
-        file => file.courseId === course.id && file.isNew,
-      ).length,
-    }));
-  }, [assignments, courses, files, notices]);
+  const coursesWithCounts = courses.map(course => ({
+    ...course,
+    unreadNoticeCount: notices.filter(
+      notice => notice.courseId === course.id && !notice.hasRead,
+    ).length,
+    unfinishedAssignmentCount: assignments.filter(
+      assignment =>
+        assignment.courseId === course.id &&
+        !assignment.submitted &&
+        dayjs(assignment.deadline).isAfter(dayjs()),
+    ).length,
+    unreadFileCount: files.filter(
+      file => file.courseId === course.id && file.isNew,
+    ).length,
+  }));
 
   const all = coursesWithCounts.filter(i => !hiddenIds.includes(i.id));
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));

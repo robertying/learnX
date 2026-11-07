@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import NoticeCard from 'components/NoticeCard';
@@ -6,7 +6,8 @@ import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { useNotices } from 'data/content';
 import { useUserData } from 'data/userData';
-import { useCourseIds, useLoggedIn } from 'data/queries';
+import { useCourseIds } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import { Notice } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -31,34 +32,33 @@ const Notices: React.FC<Props> = ({ navigation }) => {
     hidden: hiddenCourseIds,
   });
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     if (loggedIn) {
       refetch({ cancelRefetch: false });
     }
-  }, [loggedIn, refetch]);
+  };
 
-  const handlePush = useCallback(
-    (item: Notice) => {
-      if (detailNavigator) {
-        detailNavigator.dispatch(
-          StackActions.replace('NoticeDetail', {
-            id: item.id,
-            disableAnimation: true,
-          }),
-        );
-      } else {
-        navigation.push('NoticeDetail', { id: item.id });
-      }
-    },
-    [detailNavigator, navigation],
-  );
+  const refresh = useEffectEvent(handleRefresh);
 
-  // Refreshes on mount and when the semester's courses change.
+  const handlePush = (item: Notice) => {
+    if (detailNavigator) {
+      detailNavigator.dispatch(
+        StackActions.replace('NoticeDetail', {
+          id: item.id,
+          disableAnimation: true,
+        }),
+      );
+    } else {
+      navigation.push('NoticeDetail', { id: item.id });
+    }
+  };
+
+  // Refreshes on mount, on sign-in and when the semester's courses change.
   useEffect(() => {
     if (courseIds.length > 0) {
-      handleRefresh();
+      refresh();
     }
-  }, [courseIds, handleRefresh]);
+  }, [courseIds, loggedIn]);
 
   return (
     <SafeArea>

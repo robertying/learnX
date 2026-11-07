@@ -1,11 +1,11 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
-import { getAllFilesForCourses } from 'data/actions/files';
-import { useAppDispatch, useAppSelector } from 'data/store';
+import { useFiles } from 'data/content';
+import { useLoggedIn } from 'data/auth';
 import { useUserData } from 'data/userData';
 import { useCourseIds } from 'data/queries';
 import { File } from 'data/types/state';
@@ -18,47 +18,45 @@ type Props = NativeStackScreenProps<FileStackParams, 'Files'>;
 const Files: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.file);
   const archivedIds = useUserData(data => data.archived.file);
-  const fileState = useAppSelector(state => state.files);
-  const fetching = useAppSelector(state => state.files.fetching);
+  const { files, isFetching: fetching, refetch } = useFiles();
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
-    data: fileState.items,
+    data: files,
     fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
   });
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     if (loggedIn) {
-      dispatch(getAllFilesForCourses(courseIds));
+      refetch({ cancelRefetch: false });
     }
-  }, [courseIds, dispatch, loggedIn]);
+  };
 
-  const handlePush = useCallback(
-    (item: File) => {
-      if (detailNavigator) {
-        detailNavigator.dispatch(
-          StackActions.replace('FileDetail', {
-            id: item.id,
-            disableAnimation: true,
-          }),
-        );
-      } else {
-        navigation.push('FileDetail', { id: item.id });
-      }
-    },
-    [detailNavigator, navigation],
-  );
+  const refresh = useEffectEvent(handleRefresh);
 
+  const handlePush = (item: File) => {
+    if (detailNavigator) {
+      detailNavigator.dispatch(
+        StackActions.replace('FileDetail', {
+          id: item.id,
+          disableAnimation: true,
+        }),
+      );
+    } else {
+      navigation.push('FileDetail', { id: item.id });
+    }
+  };
+
+  // Fetch on mount and again when the user signs in or the courses change.
   useEffect(() => {
-    handleRefresh();
-  }, [handleRefresh]);
+    refresh();
+  }, [courseIds, loggedIn]);
 
   return (
     <SafeArea>

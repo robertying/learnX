@@ -1,12 +1,6 @@
 import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
-import {
-  Assignment,
-  Course,
-  Notice,
-  PersistAppState,
-  User,
-} from 'data/types/state';
+import { Assignment, Course, File, Notice, User } from 'data/types/state';
 import type { UserData } from 'data/userData';
 
 // All dates are relative to the current time so the mock data always looks
@@ -485,113 +479,98 @@ export const mockAssignments: Assignment[] = [
   },
 ];
 
-const mockStore: PersistAppState = {
-  auth: {
-    loggingIn: false,
-    ssoInProgress: false,
-    loggedIn: true,
-    error: null,
+export const mockFiles: File[] = [
+  {
+    id: '2016310500_KJ_15698450108902028208ddc-e7b5-4674-a7cd-d52e857cc18a',
+    title: '深度学习框架',
+    description: '',
+    size: '1.0M',
+    uploadTime: dateTime(-3, 21, 31),
+    downloadUrl:
+      'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    isNew: true,
+    markedImportant: true,
+    fileType: 'pdf',
+    courseId: '2019-2020-1139283217',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
   },
-  files: {
-    fetching: false,
-    items: [
-      {
-        id: '2016310500_KJ_15698450108902028208ddc-e7b5-4674-a7cd-d52e857cc18a',
-        title: '深度学习框架',
-        description: '',
-        size: '1.0M',
-        uploadTime: dateTime(-3, 21, 31),
-        downloadUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        isNew: true,
-        markedImportant: true,
-        fileType: 'pdf',
-        courseId: '2019-2020-1139283217',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '2016310500_KJ_157080064094130b5f1dcc2-f77a-4cca-be0f-95808af85d82',
-        title: '神经网络典型结构及应用',
-        description: '',
-        size: '1.0M',
-        uploadTime: dateTime(-3, 21, 31),
-        downloadUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        markedImportant: false,
-        isNew: false,
-        fileType: 'pdf',
-        courseId: '2019-2020-1139283217',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '2001990202_KJ_15707817678040948955152-a653-49b7-9ee9-9dde1a651fd9',
-        title: '量子7（测量几率、不确定关系）',
-        description: '24-26 页有关于不确定度的补充解释（紫色字体）',
-        size: '2.0M',
-        uploadTime: dateTime(-3, 16, 16),
-        downloadUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        markedImportant: false,
-        isNew: false,
-        fileType: 'pdf',
-        courseId: '2019-2020-1139282934',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '2009990022_KJ_1570695522456476bc2332-2988-4497-9505-d12d41906be0',
-        title: '人类视觉系统',
-        description: '',
-        size: '8.0M',
-        uploadTime: dateTime(-4, 16, 18),
-        downloadUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        isNew: true,
-        markedImportant: false,
-        fileType: 'pdf',
-        courseId: '2019-2020-1139283216',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '2007990068_KJ_15706828497885105646d90-7cfa-4b19-acdf-dc721de009bb',
-        title: '第四讲',
-        description: '',
-        size: '771K',
-        uploadTime: dateTime(-4, 12, 47),
-        downloadUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        isNew: true,
-        markedImportant: false,
-        fileType: 'pdf',
-        courseId: '2019-2020-1139283212',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5',
-        title: '第四次实验用音频信号',
-        description: 'DTMF',
-        size: '1.0M',
-        uploadTime: dateTime(-5, 20, 18),
-        downloadUrl:
-          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        markedImportant: false,
-        isNew: false,
-        fileType: 'pdf',
-        courseId: '2019-2020-1139283219',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-    ],
+  {
+    id: '2016310500_KJ_157080064094130b5f1dcc2-f77a-4cca-be0f-95808af85d82',
+    title: '神经网络典型结构及应用',
+    description: '',
+    size: '1.0M',
+    uploadTime: dateTime(-3, 21, 31),
+    downloadUrl:
+      'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    markedImportant: false,
+    isNew: false,
+    fileType: 'pdf',
+    courseId: '2019-2020-1139283217',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
   },
-  _persist: {
-    rehydrated: true,
-    version: -1,
+  {
+    id: '2001990202_KJ_15707817678040948955152-a653-49b7-9ee9-9dde1a651fd9',
+    title: '量子7（测量几率、不确定关系）',
+    description: '24-26 页有关于不确定度的补充解释（紫色字体）',
+    size: '2.0M',
+    uploadTime: dateTime(-3, 16, 16),
+    downloadUrl:
+      'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    markedImportant: false,
+    isNew: false,
+    fileType: 'pdf',
+    courseId: '2019-2020-1139282934',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
   },
-};
+  {
+    id: '2009990022_KJ_1570695522456476bc2332-2988-4497-9505-d12d41906be0',
+    title: '人类视觉系统',
+    description: '',
+    size: '8.0M',
+    uploadTime: dateTime(-4, 16, 18),
+    downloadUrl:
+      'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    isNew: true,
+    markedImportant: false,
+    fileType: 'pdf',
+    courseId: '2019-2020-1139283216',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+  },
+  {
+    id: '2007990068_KJ_15706828497885105646d90-7cfa-4b19-acdf-dc721de009bb',
+    title: '第四讲',
+    description: '',
+    size: '771K',
+    uploadTime: dateTime(-4, 12, 47),
+    downloadUrl:
+      'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    isNew: true,
+    markedImportant: false,
+    fileType: 'pdf',
+    courseId: '2019-2020-1139283212',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+  },
+  {
+    id: '1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5',
+    title: '第四次实验用音频信号',
+    description: 'DTMF',
+    size: '1.0M',
+    uploadTime: dateTime(-5, 20, 18),
+    downloadUrl:
+      'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    markedImportant: false,
+    isNew: false,
+    fileType: 'pdf',
+    courseId: '2019-2020-1139283219',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+  },
+];
 
 export const mockUserData: UserData = {
   favorites: {
@@ -616,5 +595,3 @@ export const mockUserData: UserData = {
   // Fetched from the emulated server, like a real account.
   currentSemester: null,
 };
-
-export default mockStore;

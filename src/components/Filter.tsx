@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import { Badge, Divider, List, Text, useTheme } from 'react-native-paper';
 import Animated, {
@@ -252,4 +252,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(Filter);
+export default Filter;

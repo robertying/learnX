@@ -13,7 +13,6 @@ import {
   userQuery,
 } from 'data/queries';
 
-jest.mock('data/store', () => ({}));
 // The emulated server, as when a mock account is logged in.
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
