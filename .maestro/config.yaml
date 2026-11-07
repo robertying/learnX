@@ -1,0 +1,4 @@
+# Maestro workspace config: https://docs.maestro.dev/api-reference/configuration/workspace-configuration
+# Only the top-level flows run; subflows/ is reached through runFlow.
+flows:
+  - '*'

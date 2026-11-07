@@ -279,6 +279,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
         headerLeft: () => (
           <IconButton
+            accessibilityLabel={t('reorder')}
             icon={props => <MaterialIcons {...props} name="sort" />}
             onPress={handleReorder}
             mode="contained"
@@ -334,11 +335,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         headerLeft: () => (
           <>
             <IconButton
+              accessibilityLabel={t('select')}
               onPress={handleSelect}
               icon={props => <MaterialIcons {...props} name="list" />}
               mode="contained"
             />
             <IconButton
+              accessibilityLabel={t('checkAll')}
               onPress={handleCheckAll}
               icon={props => <MaterialIcons {...props} name="done-all" />}
             />
@@ -346,6 +349,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         ),
         headerRight: () => (
           <IconButton
+            accessibilityLabel={
+              filterSelected === 'archived' ? t('restore') : t('archive')
+            }
             onPress={() =>
               handleArchive(
                 filterSelected === 'archived',
@@ -478,21 +484,25 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <>
             {isCourse ? (
               <IconButton
+                accessibilityLabel={t('reorder')}
                 icon={props => <MaterialIcons {...props} name="sort" />}
                 onPress={handleReorder}
               />
             ) : (
               <IconButton
+                accessibilityLabel={t('select')}
                 onPress={handleSelect}
                 icon={props => <MaterialIcons {...props} name="list" />}
               />
             )}
             <IconButton
+              accessibilityLabel={t('filter')}
               onPress={handleFilter}
               icon={props => <MaterialIcons {...props} name="filter-list" />}
             />
             {isCourse && (
               <IconButton
+                accessibilityLabel={t('courseX')}
                 icon={props => <MaterialIcons {...props} name="info-outline" />}
                 onPress={handleNavigateCourseX}
               />
@@ -503,12 +513,14 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           <>
             {DeviceInfo.isMac() && (
               <IconButton
+                accessibilityLabel={t('refresh')}
                 disabled={refreshing}
                 onPress={onRefresh}
                 icon={props => <MaterialIcons {...props} name="refresh" />}
               />
             )}
             <IconButton
+              accessibilityLabel={t('search')}
               onPress={() => (navigation.navigate as any)('SearchStack' as any)}
               icon={props => <MaterialIcons {...props} name="search" />}
             />

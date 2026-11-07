@@ -1,0 +1,22 @@
+# Leave a pushed detail screen. Skipped while LIST (a label on the list
+# screen) is still visible, i.e. when the detail opened beside the list in a
+# split view (iPad) instead of being pushed over it.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: Android
+      notVisible: ${LIST}
+    commands:
+      - back
+- runFlow:
+    when:
+      platform: iOS
+      notVisible: ${LIST}
+    commands:
+      # Interactive pop from the left edge; there's no system back on iOS.
+      - swipe:
+          start: 1%, 50%
+          end: 80%, 50%
+          duration: 400
+- waitForAnimationToEnd

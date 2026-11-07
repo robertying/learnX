@@ -61,7 +61,7 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
   }, [url]);
 
   return (
-    <SafeArea>
+    <SafeArea testID="notice-detail" collapsable={false}>
       <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <Title>{title}</Title>

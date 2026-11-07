@@ -91,6 +91,8 @@ const SwipeActions: React.FC<{
     >
       {onHide ? (
         <Touchable
+          testID="card-hide"
+          accessibilityLabel={hidden ? t('unhide') : t('hide')}
           type="opacity"
           style={[
             styles.button,
@@ -110,6 +112,8 @@ const SwipeActions: React.FC<{
         <>
           {archived ? null : (
             <Touchable
+              testID="card-fav"
+              accessibilityLabel={fav ? t('unfavorite') : t('favorite')}
               type="opacity"
               style={[
                 styles.button,
@@ -127,6 +131,8 @@ const SwipeActions: React.FC<{
             </Touchable>
           )}
           <Touchable
+            testID="card-archive"
+            accessibilityLabel={archived ? t('restore') : t('archive')}
             type="opacity"
             style={[
               styles.button,
@@ -337,6 +343,7 @@ const CardWrapper: React.FC<
         <Menu visible={menuVisible} onDismiss={closeMenu} anchor={menuAnchor}>
           {onHide ? (
             <Menu.Item
+              testID="card-hide"
               leadingIcon={({ size }) => (
                 <MaterialIcons
                   name={hidden ? 'visibility' : 'visibility-off'}
@@ -351,6 +358,7 @@ const CardWrapper: React.FC<
             <>
               {archived ? null : (
                 <Menu.Item
+                  testID="card-fav"
                   leadingIcon={({ size }) => (
                     <MaterialCommunityIcons
                       name={fav ? 'heart-off' : 'heart'}
@@ -363,6 +371,7 @@ const CardWrapper: React.FC<
                 />
               )}
               <Menu.Item
+                testID="card-archive"
                 leadingIcon={({ size }) => (
                   <MaterialCommunityIcons
                     name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}

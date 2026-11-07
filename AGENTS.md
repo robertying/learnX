@@ -39,6 +39,22 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - Chinese UI: `adb shell cmd locale set-app-locales io.robertying.learnx --locales zh-Hans`; light mode: `adb shell cmd uimode night no`.
 - Odd resolutions: `adb shell wm size WxH; wm density D` (`wm size reset; wm density reset` afterwards); wait ~15 s for re-layout.
 
+### End-to-end tests (Maestro)
+
+- `.maestro/` holds [Maestro](https://docs.maestro.dev) flows driven by the mock login: log in and visit every tab, open a notice / assignment / file, favorite and archive, search, settings pages and logout. `.maestro/subflows/` is only reached through `runFlow`.
+- Install the CLI with `brew install mobile-dev-inc/tap/maestro`; it runs on the JDK in `JAVA_HOME` (17+). Build and install a debug app, start Metro, and boot exactly one simulator or emulator (or set `MAESTRO_DEVICE=<udid or serial>`).
+- `pnpm e2e:ios` / `pnpm e2e:android` run every flow; append a path to run one, e.g. `pnpm e2e:android .maestro/03_favorite_archive.yaml`. `scripts/e2e.sh` passes `APP_ID` (the bundle ids differ in case: `io.robertying.learnX` vs `io.robertying.learnx`) and the two mock values from `.env` with `-e`; never hard-code them in a flow.
+- Each flow starts from `clearState` and logs in with the ephemeral mock account, so flows are independent and can run in any order.
+- Select by `testID` (`id:`) first; otherwise match the visible text or accessibility label as a regex covering both languages (`'Search|搜索'`), so the flows pass in English and Chinese. Regexes must match the whole label, and iOS merges a card's texts into one label (`'课程, 标题, …'`), so match content as `'.*标题.*'`.
+- iOS quirks: after a `clearState` launch the native tab bar buttons lose their identifiers in Maestro's snapshot, so tabs are matched as `'tab-files|doc(ument)?\.fill'` (testID or SF Symbol); the login subflow dismisses the "Save Password?" sheet; `hideKeyboard` is flaky, so tap something inert instead. iOS header buttons are native bar items and only expose their label. Text input is ASCII only: Maestro can't type CJK on Android, so search for ASCII mock content.
+- Swipe actions are iOS only; Android opens the same actions from a long-press menu (`subflows/card_actions.yaml` handles both). iOS has no system back, so `subflows/back.yaml` swipes from the left edge, and skips it when the list is still on screen (iPad split view).
+- The flows pass on iPhone, iPad, iPhone Duo (folded) and Android (folded and unfolded); Mac Catalyst isn't supported by Maestro.
+- iPad: set the simulator to Settings › Multitasking & Gestures › Full Screen Apps; with Windowed Apps Maestro only sees SpringBoard. The tabs sit in a paged top bar (`subflows/tab.yaml` turns the page) and details open beside the list.
+- Postures: fold / unfold the Android foldable with `adb emu fold` / `adb emu unfold` (`adb shell cmd device_state state` shows the current one). The iPhone Duo hinge can only be changed by hand in the Simulator window.
+- iPhone Duo screenshots need the display: `xcrun simctl io <udid> screenshot --display 1|3 <out.png>` (1 = outer, 3 = inner), or `.claude/skills/app-store-assets/scripts/duo-capture.sh`, since the command can hang.
+- TODO: iPhone Duo partially open and fully unfolded. Maestro on iOS only drives the outer display (display 1) and has no display option: with the app on the inner display (3) its screenshots are black, XCTest reports the app's frames offset into the outer display's coordinates, and taps (even at corrected points) don't reach the app.
+- TODO: iPad in landscape. Only portrait has been run. The simulator can't be rotated from the shell, so rotate it by hand in the Simulator window (Device › Rotate) and run the flows; landscape shows the tabs and split view differently.
+
 ## App Store assets
 
 - Follow `.claude/skills/app-store-assets/SKILL.md` (App Store, Mac App Store, Google Play). Keep the skill and its `scripts/` up to date when the capture workflow changes.

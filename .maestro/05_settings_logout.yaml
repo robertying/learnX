@@ -1,0 +1,31 @@
+appId: ${APP_ID}
+name: Open settings pages and log out
+---
+- runFlow: subflows/login.yaml
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-settings|gearshape\.fill'
+# Changelog first: on iPad the page it opens beside the list is a web view,
+# which keeps the logout alert out of Maestro's snapshot.
+- tapOn: '.*(Changelog|更新日志).*'
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '.*(Logout|退出登录).*'
+- tapOn: '.*(About|关于).*'
+- assertVisible: '.*© \d+ Rui Ying.*'
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: '.*(Logout|退出登录).*'
+
+- tapOn:
+    id: settings-logout
+- tapOn: '(?i)ok|确定'
+- extendedWaitUntil:
+    visible:
+      # After a logout iOS may drop the field's own identifier from the
+      # snapshot; Paper's label keeps a derived one.
+      id: 'login-username(-label-.*)?'
+    timeout: 10000

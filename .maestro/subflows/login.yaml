@@ -1,0 +1,36 @@
+# Fresh install state, then log in with the mock account (see AGENTS.md, Mock login).
+# USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- extendedWaitUntil:
+    visible:
+      id: login-username
+    timeout: 60000
+- tapOn:
+    id: login-username
+- inputText: ${USERNAME}
+- tapOn:
+    id: login-password
+- inputText: ${PASSWORD}
+# The password field submits the login on return.
+- pressKey: Enter
+# iOS offers to save the password to the keychain after a login; the alert
+# hides the app's accessibility tree until dismissed.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: 'Save Password\??|存储密码？?|要存储密码吗？?'
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: 'Not Now|现在不|以后'
+          optional: true
+- extendedWaitUntil:
+    visible:
+      id: 'tab-notices|bell\.fill'
+    timeout: 30000

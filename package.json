@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "typecheck": "tsc",
     "prettier": "prettier --write src/",
-    "test": "jest"
+    "test": "jest",
+    "e2e:ios": "scripts/e2e.sh ios",
+    "e2e:android": "scripts/e2e.sh android"
   },
   "dependencies": {
     "@babel/core": "7.29.7",

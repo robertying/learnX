@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+name: Search and open a result
+---
+- runFlow: subflows/login.yaml
+- tapOn: 'Search|搜索'
+# The search bar is focused on open. ASCII only: Android can't type CJK.
+- inputText: 'AutoCAD'
+- extendedWaitUntil:
+    visible: '.*AutoCAD绘图基础练习.*'
+    timeout: 5000
+# While the search bar has focus, the results list spends the first tap on
+# blurring it (keyboardShouldPersistTaps="never"), so tap again if needed.
+- tapOn: '.*AutoCAD绘图基础练习.*'
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: assignment-detail
+    commands:
+      - tapOn: '.*AutoCAD绘图基础练习.*'
+- extendedWaitUntil:
+    visible:
+      id: assignment-detail
+    timeout: 10000

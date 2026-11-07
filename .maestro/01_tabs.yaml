@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+name: Log in and visit every tab
+tags:
+  - smoke
+---
+- runFlow: subflows/login.yaml
+- assertVisible: '.*请按照助教的安排交作业.*'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- assertVisible: '.*大作业1.*'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-files|doc(ument)?\.fill'
+- assertVisible: '.*深度学习框架.*'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-courses|square\.grid\.3x3\.fill'
+- assertVisible: '.*量子与统计.*'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-settings|gearshape\.fill'
+- assertVisible:
+    id: settings-logout
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'
+- assertVisible: '.*请按照助教的安排交作业.*'
