@@ -1,4 +1,7 @@
 allowBuilds:
+  # Its install script only builds when building from source; prebuilt
+  # binaries come from platform packages
+  '@parcel/watcher': false
   msgpackr-extract: true
 nodeLinker: hoisted
 minimumReleaseAge: 0
