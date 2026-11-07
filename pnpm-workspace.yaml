@@ -1,4 +1,5 @@
 allowBuilds:
+  '@parcel/watcher': true
   msgpackr-extract: true
 nodeLinker: hoisted
 minimumReleaseAge: 0

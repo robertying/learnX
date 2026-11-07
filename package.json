@@ -12,6 +12,7 @@
     "lint": "eslint .",
     "typecheck": "tsc",
     "prettier": "prettier --write src/",
+    "test": "jest",
     "e2e:ios": "scripts/e2e.sh ios",
     "e2e:android": "scripts/e2e.sh android"
   },
@@ -33,6 +34,7 @@
     "@react-native-vector-icons/material-icons": "14.0.0",
     "@react-native/babel-preset": "0.88.1",
     "@react-native/eslint-config": "0.88.1",
+    "@react-native/jest-preset": "0.88.1",
     "@react-native/metro-config": "0.88.1",
     "@react-native/typescript-config": "0.88.1",
     "@react-navigation/bottom-tabs": "7.21.0",
@@ -73,6 +75,7 @@
     "graphql": "17.1.0",
     "graphql-request": "7.4.0",
     "he": "2.0.0",
+    "jest": "30.5.2",
     "katex": "0.19.1",
     "mime-types": "3.0.2",
     "patch-package": "8.0.1",
