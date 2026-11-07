@@ -2,6 +2,7 @@ import { ContentType, FailReason } from 'thu-learn-lib';
 import {
   defaultMockNetworkConfig,
   MOCK_TIMEOUT_MS,
+  mockDownloadFile,
   mockSource,
   mockSubmitAssignment,
   setMockNetworkConfig,
@@ -119,5 +120,15 @@ describe('mockSource', () => {
     const progress: number[] = [];
     await mockSubmitAssignment(p => progress.push(p));
     expect(progress).toEqual([0.25, 0.5, 0.75, 1]);
+  });
+
+  it('applies the emulation to file downloads', async () => {
+    await expect(mockDownloadFile()).resolves.toBeUndefined();
+    setMockNetworkConfig({ failure: 'offline' });
+    await expect(mockDownloadFile()).rejects.toThrow('Network request failed');
+    setMockNetworkConfig({ failure: 'serverError' });
+    await expect(mockDownloadFile()).rejects.toEqual({
+      reason: FailReason.UNEXPECTED_STATUS,
+    });
   });
 });
