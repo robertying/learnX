@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Divider, Text, useTheme } from 'react-native-paper';
 import { StackActions, useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
@@ -43,6 +42,9 @@ import {
   MainStackNavigationProp,
   MainStackScreenProps,
 } from './types';
+import { Text } from 'components/Text';
+import Divider from 'components/Divider';
+import { useTheme } from 'theme';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
   ? ('never' as const)

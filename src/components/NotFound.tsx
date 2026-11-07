@@ -1,9 +1,10 @@
 import { StyleSheet, View } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-icons';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
 import { t } from 'helpers/i18n';
+import { Text } from 'components/Text';
+import { useTheme } from 'theme';
 
 /**
  * Shown by a detail screen whose item is no longer in the store, e.g. after

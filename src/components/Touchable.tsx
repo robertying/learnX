@@ -4,7 +4,8 @@ import {
   TouchableHighlightProps,
   TouchableOpacity,
 } from 'react-native';
-import { useTheme, TouchableRipple } from 'react-native-paper';
+import { TouchableRipple } from 'react-native-paper';
+import { useTheme } from 'theme';
 
 const Touchable: React.FC<
   TouchableHighlightProps & {

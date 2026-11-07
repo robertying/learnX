@@ -20,6 +20,12 @@
 - `App.tsx` only sets up the providers and picks login or main UI. The navigators are in `src/navigation/` (`stacks.tsx` for the tab and modal stacks, `DetailStack.tsx` for the split view's detail pane, `MainTab.tsx`, and `index.tsx` for the root), with shared header options in `navigation/options.tsx`. The colors and Paper / navigation themes are in `src/theme/`. Startup work lives in hooks: `useStoresLoaded`, `useReLogin`, `useShareHandler` and `useMainStartup` (semester, courses, background fetch and update check once logged in).
 - Detail screens (notice, assignment, file, course, assignment submission) take `{ id }` params and read the item from the query cache, so they stay current after a refresh: pass the id, never the item. They show `components/NotFound` when the item is gone and set their header title with `hooks/useHeaderTitle`. Notice and assignment attachments are not in the cache and open `FileDetail` with `{ attachment }`.
 
+## UI components
+
+- Colors come from `useTheme()` in `src/theme` (`theme.colors`, `theme.dark`), not Paper's `useTheme`. `onSurfaceHigh` and `onSurfaceMedium` are the title/body and caption text colors.
+- Text uses `Text`, `Title`, `Subheading`, `Paragraph` and `Caption` from `components/Text` (the type scale the app had with Paper), and separators use `components/Divider`. Oxlint blocks importing these from `react-native-paper`.
+- React Native Paper is still used for the remaining controls (Switch, Menu, TextInput, Searchbar, Checkbox, Snackbar, Chip, ProgressBar, List, Dialog and others), which `PaperProvider` in `App.tsx` themes with `usePaperTheme`. Plan 4.1 moves them to `@expo/ui` one at a time.
+
 ## Data
 
 - Settings (`src/data/settings.ts`) and the user's own data (`src/data/userData.ts`: favorites, archives, hidden courses, course order) are Zustand stores persisted to `expo-sqlite/kv-store`. Storage is synchronous, so the stores hold their saved state as soon as they are imported (also in the background task). Read them with `useSettings` / `useUserData` in components and `getSettings` / `getUserData` elsewhere; change them through the exported functions, not `setState` from screens.

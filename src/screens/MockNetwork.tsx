@@ -1,6 +1,5 @@
 import { useSyncExternalStore } from 'react';
 import { StyleSheet } from 'react-native';
-import { Caption } from 'react-native-paper';
 import { login } from 'data/login';
 import {
   getMockNetworkConfig,
@@ -14,6 +13,7 @@ import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
+import { Caption } from 'components/Text';
 
 // A dev-only tool for the mock accounts, so it is not translated.
 

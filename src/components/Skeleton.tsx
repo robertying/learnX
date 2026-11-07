@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View, Animated } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import { useTheme } from 'theme';
 
 const Skeleton: React.FC<React.PropsWithChildren<unknown>> = () => {
   const theme = useTheme();

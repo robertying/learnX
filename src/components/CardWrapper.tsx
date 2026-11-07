@@ -8,7 +8,7 @@ import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useReorderableDrag } from 'react-native-reorderable-list';
-import { useTheme, Checkbox, Menu } from 'react-native-paper';
+import { Checkbox, Menu } from 'react-native-paper';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import * as Haptics from 'expo-haptics';
@@ -16,6 +16,7 @@ import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import Touchable from './Touchable';
+import { useTheme } from 'theme';
 
 const swipeableNotSupported = DeviceInfo.isWSA() || Platform.OS === 'android';
 

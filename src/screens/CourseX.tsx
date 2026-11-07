@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
 import { Linking, Platform, StyleSheet, View } from 'react-native';
-import { ProgressBar, useTheme } from 'react-native-paper';
+import { ProgressBar } from 'react-native-paper';
 import WebView, { WebViewNavigation } from 'react-native-webview';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
 import { CourseXStackParams } from './types';
+import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<CourseXStackParams, 'CourseX'>;
 

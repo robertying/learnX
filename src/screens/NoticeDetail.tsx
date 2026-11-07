@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Caption, Divider, Title, useTheme } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -17,6 +16,9 @@ import { Notice } from 'data/types/state';
 import { useNotice } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
+import { Caption, Title } from 'components/Text';
+import Divider from 'components/Divider';
+import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<NoticeStackParams, 'NoticeDetail'>;
 

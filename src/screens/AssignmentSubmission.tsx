@@ -11,14 +11,12 @@ import {
 } from 'react-native';
 import {
   Button,
-  Caption,
   Dialog,
   List,
   Portal,
   ProgressBar,
   Snackbar,
   TextInput,
-  useTheme,
 } from 'react-native-paper';
 import dayjs from 'dayjs';
 import mime from 'mime';
@@ -43,6 +41,8 @@ import { toast } from 'components/Toast';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import { AssignmentSubmissionStackParams } from './types';
+import { Caption } from 'components/Text';
+import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionStackParams,

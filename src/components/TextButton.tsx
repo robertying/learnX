@@ -1,8 +1,9 @@
 import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
-import { Text, TextProps, useTheme } from 'react-native-paper';
 import Styles from 'constants/Styles';
+import { Text, type TextProps } from 'components/Text';
+import { useTheme } from 'theme';
 
-export interface TextButtonProps extends Omit<TextProps<'bodyMedium'>, 'ref'> {
+export interface TextButtonProps extends TextProps {
   disabled?: boolean;
   containerStyle?: TouchableOpacityProps['style'];
   onPress?: TouchableOpacityProps['onPress'];

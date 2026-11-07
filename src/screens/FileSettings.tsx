@@ -1,6 +1,5 @@
 import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Caption } from 'react-native-paper';
 import { setSetting, useSettings } from 'data/settings';
 import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
@@ -10,6 +9,7 @@ import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { SettingsStackParams } from './types';
+import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 

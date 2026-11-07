@@ -5,7 +5,6 @@ import {
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Caption } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -22,6 +21,7 @@ import {
 } from 'hooks/useCalendarSync';
 import { SettingsStackParams } from './types';
 import DeviceInfo from 'constants/DeviceInfo';
+import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 

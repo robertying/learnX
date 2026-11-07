@@ -133,6 +133,21 @@
     "no-restricted-imports": [
       "warn",
       {
+        "paths": [
+          {
+            "name": "react-native-paper",
+            "importNames": [
+              "useTheme",
+              "Text",
+              "Title",
+              "Subheading",
+              "Paragraph",
+              "Caption",
+              "Divider"
+            ],
+            "message": "Use useTheme from theme, the text components from components/Text and components/Divider."
+          }
+        ],
         "patterns": [
           {
             "group": ["react-native/**"],
