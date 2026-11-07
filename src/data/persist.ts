@@ -74,6 +74,9 @@ export const rootPersistConfig: PersistConfig<AppState> = {
   stateReconciler: autoMergeLevel2,
   migrate: createMigrate(migrations),
   transforms: [omitTransientTransform],
-  // auth and settings persist under their own keys (see reducers/root)
-  blacklist: ['auth', 'settings'],
+  // Credentials, settings and the user's own data (favorites, archives,
+  // hidden courses, course order) live in data/credentials, data/settings and
+  // data/userData. Stored roots from 18.0.x still hold the user data in their
+  // slices; data/legacy reads it once and the reducers ignore it.
+  blacklist: ['auth'],
 };

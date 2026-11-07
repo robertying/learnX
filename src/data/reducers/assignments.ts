@@ -6,8 +6,6 @@ import {
   GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
   GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
   GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
-  SET_FAV_ASSIGNMENT,
-  SET_ARCHIVE_ASSIGNMENTS,
   SET_PENDING_ASSIGNMENT_DATA,
 } from 'data/types/constants';
 import { AssignmentsState } from 'data/types/state';
@@ -16,8 +14,6 @@ import { sortAssignments } from 'helpers/assignments';
 export default function assignments(
   state: AssignmentsState = {
     fetching: false,
-    favorites: [],
-    archived: [],
     items: [],
     pendingAssignmentData: null,
   },
@@ -67,34 +63,6 @@ export default function assignments(
         fetching: false,
         error: action.payload.reason,
       };
-    case SET_FAV_ASSIGNMENT:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          favorites: [...state.favorites, action.payload.assignmentId],
-        };
-      } else {
-        return {
-          ...state,
-          favorites: state.favorites.filter(
-            item => item !== action.payload.assignmentId,
-          ),
-        };
-      }
-    case SET_ARCHIVE_ASSIGNMENTS:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          archived: [...state.archived, ...action.payload.assignmentIds],
-        };
-      } else {
-        return {
-          ...state,
-          archived: state.archived.filter(
-            i => !action.payload.assignmentIds.includes(i),
-          ),
-        };
-      }
     case SET_PENDING_ASSIGNMENT_DATA:
       return {
         ...state,

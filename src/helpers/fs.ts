@@ -7,7 +7,7 @@ import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import mime from 'mime';
 import { addCSRF, loginWithFingerPrint } from 'data/source';
-import { store } from 'data/store';
+import { getSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -27,7 +27,7 @@ export const copyFileToMacDownloads = async (
 };
 
 export const getLearnXFilesDir = () => {
-  const settings = store.getState().settings;
+  const settings = getSettings();
 
   return `${
     settings.fileUseDocumentDir
@@ -52,7 +52,7 @@ export const downloadFile = async (
     return url;
   }
 
-  const settings = store.getState().settings;
+  const settings = getSettings();
 
   const dir = `${getLearnXFilesDir()}/${file.courseName}-${file.id}`;
   await fs.mkdir(dir);
@@ -209,7 +209,7 @@ export const exportTextFile = async (
 
 export const removeFileDir = async () => {
   const dir = `${
-    store.getState().settings.fileUseDocumentDir
+    getSettings().fileUseDocumentDir
       ? ExpoFileSystem.documentDirectory
       : ExpoFileSystem.cacheDirectory
   }`;

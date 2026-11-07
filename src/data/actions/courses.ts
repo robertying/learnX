@@ -1,13 +1,11 @@
 import { ApiError, CourseType, Language } from 'thu-learn-lib';
-import { createAction, createAsyncAction } from 'typesafe-actions';
+import { createAsyncAction } from 'typesafe-actions';
 import { dataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
 import {
   GET_COURSES_FOR_SEMESTER_FAILURE,
   GET_COURSES_FOR_SEMESTER_REQUEST,
   GET_COURSES_FOR_SEMESTER_SUCCESS,
-  SET_HIDE_COURSE,
-  SET_COURSE_ORDER,
 } from 'data/types/constants';
 import { Course } from 'data/types/state';
 import { isLocaleChinese } from 'helpers/i18n';
@@ -44,13 +42,3 @@ export function getCoursesForSemester(semesterId: string): ThunkResult {
     }
   };
 }
-
-export const setHideCourse = createAction(
-  SET_HIDE_COURSE,
-  (courseId: string, flag: boolean) => ({ courseId, flag }),
-)();
-
-export const setCourseOrder = createAction(
-  SET_COURSE_ORDER,
-  (courseIds: string[]) => courseIds,
-)();

@@ -15,6 +15,13 @@
 
 - Detail screens (notice, assignment, file, course, assignment submission) take `{ id }` params and read the item from the store, so they stay current after a refresh: pass the id, never the item. They show `components/NotFound` when the item is gone and set their header title with `hooks/useHeaderTitle`. Notice and assignment attachments are not in the store and open `FileDetail` with `{ attachment }`.
 
+## Data
+
+- Settings (`src/data/settings.ts`) and the user's own data (`src/data/userData.ts`: favorites, archives, hidden courses, course order) are Zustand stores persisted to `expo-sqlite/kv-store`. Storage is synchronous, so the stores hold their saved state as soon as they are imported (also in the background task). Read them with `useSettings` / `useUserData` in components and `getSettings` / `getUserData` elsewhere; change them through the exported functions, not `setState` from screens.
+- When the persisted shape of a store changes, bump its `version` and add a `migrate`. Keep `merge` filling in defaults for keys added later.
+- `src/data/legacy.ts` imports what 18.0.x saved in AsyncStorage (`persist:settings`, and the user data inside the slices of `persist:root`) once, before the UI shows. Don't remove it while users can still upgrade from 18.0.x.
+- Server data (semesters, courses, notices, assignments, files, user info) is still in Redux under `persist:root`; credentials are in `src/data/credentials.ts`.
+
 ## Mocks
 
 ### Mock login

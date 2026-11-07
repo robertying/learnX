@@ -8,9 +8,9 @@ import TableCell from 'components/TableCell';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { getLatestRelease } from 'helpers/update';
-import { setSetting } from 'data/actions/settings';
 import { clearStore } from 'data/actions/root';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { setSetting, useSettings } from 'data/settings';
 import { clearLoginCookies, dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -27,11 +27,11 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector(state => state.user);
   const username = useCredentialsStore(state => state.credentials?.username);
-  const newChangelog = useAppSelector(
-    state => state.settings.lastShowChangelogVersion !== packageJson.version,
+  const newChangelog = useSettings(
+    settings => settings.lastShowChangelogVersion !== packageJson.version,
   );
-  const courseInformationSharingBadgeShown = useAppSelector(
-    state => state.settings.courseInformationSharingBadgeShown,
+  const courseInformationSharingBadgeShown = useSettings(
+    settings => settings.courseInformationSharingBadgeShown,
   );
 
   const [update, setUpdate] = useState<{ version: string; url: string } | null>(
@@ -81,11 +81,11 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             version,
             url,
           });
-          dispatch(setSetting('newUpdate', true));
+          setSetting('newUpdate', true);
         }
       })();
     }
-  }, [dispatch]);
+  }, []);
 
   return (
     <SafeArea>

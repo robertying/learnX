@@ -132,6 +132,8 @@ PODS:
     - RNWorklets
   - ExpoSecureStore (58.0.2):
     - ExpoModulesCore
+  - ExpoSQLite (58.0.15):
+    - ExpoModulesCore
   - ExpoTaskManager (58.0.13):
     - ExpoModulesCore
     - UMAppLoader
@@ -3706,6 +3708,7 @@ DEPENDENCIES:
   - ExpoModulesWorklets (from `../node_modules/expo-modules-core`)
   - ExpoModulesWorkletsAdapter (from `../node_modules/expo-modules-core`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
+  - ExpoSQLite (from `../node_modules/expo-sqlite/ios`)
   - ExpoTaskManager (from `../node_modules/expo-task-manager/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
   - fast_float (from `../node_modules/react-native/third-party-podspecs/fast_float.podspec`)
@@ -3878,6 +3881,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-modules-core"
   ExpoSecureStore:
     :path: "../node_modules/expo-secure-store/ios"
+  ExpoSQLite:
+    :path: "../node_modules/expo-sqlite/ios"
   ExpoTaskManager:
     :path: "../node_modules/expo-task-manager/ios"
   ExpoUI:
@@ -4112,6 +4117,7 @@ SPEC CHECKSUMS:
   ExpoModulesWorklets: 25684e76e7b886dd31bf4538c3fd657bf07a694b
   ExpoModulesWorkletsAdapter: 39a95a62785e53476830a21d21444404ebb74659
   ExpoSecureStore: 64e1fe78b5b0a1edb61beff044bb2cad03084f9c
+  ExpoSQLite: 580284867126f45f25a5a70a06a84df9664d3786
   ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
   ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6

@@ -1,5 +1,5 @@
 import { ApiError, ContentType } from 'thu-learn-lib';
-import { createAction, createAsyncAction } from 'typesafe-actions';
+import { createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
@@ -10,8 +10,6 @@ import {
   GET_NOTICES_FOR_COURSE_FAILURE,
   GET_NOTICES_FOR_COURSE_REQUEST,
   GET_NOTICES_FOR_COURSE_SUCCESS,
-  SET_FAV_NOTICE,
-  SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
 import { Notice } from 'data/types/state';
 import { serializeError } from 'helpers/parse';
@@ -90,19 +88,3 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
     }
   };
 }
-
-export const setFavNotice = createAction(
-  SET_FAV_NOTICE,
-  (noticeId: string, flag: boolean) => ({
-    noticeId,
-    flag,
-  }),
-)();
-
-export const setArchiveNotices = createAction(
-  SET_ARCHIVE_NOTICES,
-  (noticeIds: string[], flag: boolean) => ({
-    noticeIds,
-    flag,
-  }),
-)();

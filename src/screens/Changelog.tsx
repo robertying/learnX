@@ -4,16 +4,13 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView, { WebViewNavigation } from 'react-native-webview';
 import { ProgressBar } from 'react-native-paper';
 import SafeArea from 'components/SafeArea';
-import { useAppDispatch } from 'data/store';
-import { setSetting } from 'data/actions/settings';
+import { setSetting } from 'data/settings';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
 
 const Changelog: React.FC<Props> = () => {
-  const dispatch = useAppDispatch();
-
   const webViewRef = useRef<WebView>(null);
   const [progress, setProgress] = useState(0);
 
@@ -27,8 +24,8 @@ const Changelog: React.FC<Props> = () => {
   };
 
   useEffect(() => {
-    dispatch(setSetting('lastShowChangelogVersion', packageJson.version));
-  }, [dispatch]);
+    setSetting('lastShowChangelogVersion', packageJson.version);
+  }, []);
 
   return (
     <SafeArea>

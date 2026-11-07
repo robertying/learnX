@@ -105,8 +105,6 @@ describe('persisted root state', () => {
       expect(state[key].error ?? null).toBeNull();
     }
     expect(state.semesters.current).toBe('2025-2026-1');
-    expect(state.courses.hidden).toEqual(['c1']);
-    expect(state.notices.favorites).toEqual(['id-1']);
     expect(state.user.name).toBe('Student');
     expect(state._persist.version).toBe(PERSIST_VERSION);
   });

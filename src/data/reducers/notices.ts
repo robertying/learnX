@@ -6,16 +6,12 @@ import {
   GET_NOTICES_FOR_COURSE_FAILURE,
   GET_NOTICES_FOR_COURSE_REQUEST,
   GET_NOTICES_FOR_COURSE_SUCCESS,
-  SET_FAV_NOTICE,
-  SET_ARCHIVE_NOTICES,
 } from 'data/types/constants';
 import { NoticeState } from 'data/types/state';
 
 export default function notices(
   state: NoticeState = {
     fetching: false,
-    favorites: [],
-    archived: [],
     items: [],
   },
   action: NoticesAction,
@@ -64,34 +60,6 @@ export default function notices(
         fetching: false,
         error: action.payload.reason,
       };
-    case SET_FAV_NOTICE:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          favorites: [...state.favorites, action.payload.noticeId],
-        };
-      } else {
-        return {
-          ...state,
-          favorites: state.favorites.filter(
-            item => item !== action.payload.noticeId,
-          ),
-        };
-      }
-    case SET_ARCHIVE_NOTICES:
-      if (action.payload.flag) {
-        return {
-          ...state,
-          archived: [...state.archived, ...action.payload.noticeIds],
-        };
-      } else {
-        return {
-          ...state,
-          archived: state.archived.filter(
-            i => !action.payload.noticeIds.includes(i),
-          ),
-        };
-      }
     default:
       return state;
   }

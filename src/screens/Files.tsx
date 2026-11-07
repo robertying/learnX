@@ -6,6 +6,7 @@ import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
 import { getAllFilesForCourses } from 'data/actions/files';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { useUserData } from 'data/userData';
 import { File } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -22,14 +23,16 @@ const Files: React.FC<Props> = ({ navigation }) => {
     state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort()),
   );
-  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
+  const favoriteIds = useUserData(data => data.favorites.file);
+  const archivedIds = useUserData(data => data.archived.file);
   const fileState = useAppSelector(state => state.files);
   const fetching = useAppSelector(state => state.files.fetching);
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: fileState.items,
-    fav: fileState.favorites,
-    archived: fileState.archived,
+    fav: favoriteIds,
+    archived: archivedIds,
     hidden: hiddenCourseIds,
   });
 

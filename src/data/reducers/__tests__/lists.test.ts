@@ -29,10 +29,6 @@ const cases = [
       courseId,
       notices: items,
     }),
-    fav: (id: string, flag: boolean) =>
-      action(C.SET_FAV_NOTICE, { noticeId: id, flag }),
-    archive: (ids: string[], flag: boolean) =>
-      action(C.SET_ARCHIVE_NOTICES, { noticeIds: ids, flag }),
   },
   {
     name: 'files',
@@ -51,10 +47,6 @@ const cases = [
       courseId,
       files: items,
     }),
-    fav: (id: string, flag: boolean) =>
-      action(C.SET_FAV_FILE, { fileId: id, flag }),
-    archive: (ids: string[], flag: boolean) =>
-      action(C.SET_ARCHIVE_FILES, { fileIds: ids, flag }),
   },
   {
     name: 'assignments',
@@ -73,10 +65,6 @@ const cases = [
       courseId,
       assignments: items,
     }),
-    fav: (id: string, flag: boolean) =>
-      action(C.SET_FAV_ASSIGNMENT, { assignmentId: id, flag }),
-    archive: (ids: string[], flag: boolean) =>
-      action(C.SET_ARCHIVE_ASSIGNMENTS, { assignmentIds: ids, flag }),
   },
 ];
 
@@ -93,8 +81,6 @@ describe.each(cases)('$name reducer', c => {
   it('has an empty initial state', () => {
     expect(initial).toMatchObject({
       fetching: false,
-      favorites: [],
-      archived: [],
       items: [],
     });
   });
@@ -173,32 +159,6 @@ describe.each(cases)('$name reducer', c => {
         ),
       ).toMatchObject({ fetching: false, error: FailReason.OPERATION_FAILED });
     });
-  });
-
-  it('adds and removes favorites', () => {
-    let state = c.reducer(initial, c.fav('x', true));
-    state = c.reducer(state, c.fav('y', true));
-    expect(state.favorites).toEqual(['x', 'y']);
-    expect(c.reducer(state, c.fav('x', false)).favorites).toEqual(['y']);
-  });
-
-  it('archives and unarchives several items at once', () => {
-    let state = c.reducer(initial, c.archive(['x', 'y'], true));
-    state = c.reducer(state, c.archive(['z'], true));
-    expect(state.archived).toEqual(['x', 'y', 'z']);
-    expect(c.reducer(state, c.archive(['x', 'z'], false)).archived).toEqual([
-      'y',
-    ]);
-  });
-
-  // Current behavior, kept so a change to it is deliberate
-  it('does not deduplicate favorites or archived ids', () => {
-    let state = c.reducer(initial, c.fav('x', true));
-    state = c.reducer(state, c.fav('x', true));
-    state = c.reducer(state, c.archive(['x'], true));
-    state = c.reducer(state, c.archive(['x'], true));
-    expect(state.favorites).toEqual(['x', 'x']);
-    expect(state.archived).toEqual(['x', 'x']);
   });
 });
 

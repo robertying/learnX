@@ -43,6 +43,7 @@ import ScrollView from 'components/ScrollView';
 import { FileStackParams } from './types';
 import { SplitViewContext } from 'components/SplitView';
 import { useAppSelector } from 'data/store';
+import { useSettings } from 'data/settings';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -78,8 +79,8 @@ const FileDetailContent: React.FC<{
   const { splitEnabled, showDetail, showMaster, toggleMaster } =
     useContext(SplitViewContext);
 
-  const openFileAfterDownload = useAppSelector(
-    state => state.settings.openFileAfterDownload,
+  const openFileAfterDownload = useSettings(
+    settings => settings.openFileAfterDownload,
   );
 
   const webViewRef = useRef<WebView>(null);
