@@ -76,6 +76,14 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - TODO: iPhone Duo partially open and fully unfolded. Maestro on iOS only drives the outer display (display 1) and has no display option: with the app on the inner display (3) its screenshots are black, XCTest reports the app's frames offset into the outer display's coordinates, and taps (even at corrected points) don't reach the app.
 - TODO: iPad in landscape. Only portrait has been run. The simulator can't be rotated from the shell, so rotate it by hand in the Simulator window (Device › Rotate) and run the flows; landscape shows the tabs and split view differently.
 
+## Releases
+
+- [fastlane](https://docs.fastlane.tools) (`fastlane/Fastfile`) builds and uploads releases on a Mac. Install it with `bundle install` (Ruby 3.2+; `.bundle/config` keeps the gems in `vendor/bundle`), and run `pnpm install` and `pod install` (`pnpm pod`) first.
+- `bundle exec fastlane bump version:x.y.z` sets the version in `package.json`, the Xcode project and `android/app/build.gradle`. The build number goes to the next multiple of 10 (18.0.3 is 4530), or up by 1 for a rebuild of the same version (no `version:`); the Android versionCode is 9200000 + the build number.
+- `bundle exec fastlane <ios|mac|android> build` builds into `build/release/v<version>/` without uploading anything: the .ipa, the Mac Catalyst .pkg, the AAB, the APKs renamed `learnX-<abi>-v<version>.apk` with `latest.json` (what the in-app updater reads from the TUNA mirror), and the JS source map of each build in `sourcemaps/`. Crashlytics doesn't symbolicate JS, so keep these maps for `metro-symbolicate`. The Android build also uploads native symbols to Crashlytics.
+- `<platform> release` builds and uploads; `bundle exec fastlane release notes:<file>` builds all three, then uploads to App Store Connect (not submitted for review), to Google Play as a draft on `track:` (default `production`), and creates a draft GitHub release `v<version>` at HEAD with the APKs, `latest.json` and a zip of the source maps. Release lanes need a clean git tree. Notes come from the release-notes skill.
+- Secrets go in `fastlane/.env` (git-ignored; fastlane loads it): `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_KEY_FILEPATH` (.p8) for App Store Connect and Xcode signing (without them fastlane asks for an Apple ID), `SUPPLY_JSON_KEY` (Play service account JSON), and optionally `GITHUB_TOKEN` (otherwise `gh auth token`). Android signing reads `LEARNX_RELEASE_*` from `android/local.properties` and `android/app/release.keystore`.
+
 ## App Store assets
 
 - Follow `.claude/skills/app-store-assets/SKILL.md` (App Store, Mac App Store, Google Play). Keep the skill and its `scripts/` up to date when the capture workflow changes.

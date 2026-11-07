@@ -57,3 +57,27 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  fastlane:
+    name: Fastlane lanes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler-cache: true
+
+      # Loads the Fastfile and lists its lanes, so a broken Fastfile fails here
+      # rather than in the middle of a release.
+      - name: List lanes
+        run: bundle exec fastlane lanes
+        env:
+          FASTLANE_SKIP_UPDATE_CHECK: '1'
+          FASTLANE_OPT_OUT_USAGE: '1'
+          LC_ALL: C.UTF-8
+          LANG: C.UTF-8
