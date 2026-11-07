@@ -52,46 +52,31 @@ describe('rootReducer', () => {
   });
 
   describe('mock users', () => {
-    const allowed: [string, unknown][] = [
-      [C.SET_FAV_NOTICE, { noticeId: 'n', flag: true }],
-      [C.SET_ARCHIVE_NOTICES, { noticeIds: ['n'], flag: true }],
-      [C.SET_FAV_FILE, { fileId: 'f', flag: true }],
-      [C.SET_ARCHIVE_FILES, { fileIds: ['f'], flag: true }],
-      [C.SET_FAV_ASSIGNMENT, { assignmentId: 'a', flag: true }],
-      [C.SET_ARCHIVE_ASSIGNMENTS, { assignmentIds: ['a'], flag: true }],
-      [C.SET_PENDING_ASSIGNMENT_DATA, { assignmentId: 'a' }],
-      [C.SET_HIDE_COURSE, { courseId: 'c', flag: true }],
-      [C.SET_COURSE_ORDER, ['c']],
-      [C.SET_CURRENT_SEMESTER, '2000-2001-1'],
-      [C.SET_SETTING, { key: 'graduate', value: true }],
-    ];
-
-    const blocked: [string, unknown][] = [
-      [C.LOGIN_REQUEST, {}],
-      [C.GET_USER_INFO_SUCCESS, { name: 'Real' }],
+    // Fetches go through the emulated server (data/mockSource), so their
+    // results land like a real account's.
+    const fetched: [string, unknown][] = [
+      [C.GET_USER_INFO_SUCCESS, { name: 'Mock', department: 'Mock' }],
       [C.GET_ALL_SEMESTERS_SUCCESS, []],
       [C.GET_COURSES_FOR_SEMESTER_SUCCESS, []],
       [C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_FILES_FOR_COURSES_SUCCESS, []],
-      [
-        C.SET_EVENT_ID_FOR_ASSIGNMENT,
-        { type: 'calendar', assignmentId: 'a', eventId: 'e' },
-      ],
+      [C.SET_FAV_NOTICE, { noticeId: 'n', flag: true }],
+      [C.SET_SETTING, { key: 'graduate', value: true }],
+    ];
+    const auth: [string, unknown][] = [
+      [C.LOGIN_REQUEST, {}],
+      [C.LOGIN_SUCCESS, undefined],
+      [C.LOGIN_FAILURE, { reason: 'bad credential' }],
     ];
 
     describe.each([
       ['ephemeral', () => env.DUMMY_USERNAME],
       ['persistent', () => env.DUMMY_PERSIST_USERNAME],
     ])('%s mock user', (_, username) => {
-      it.each(allowed)('applies %s', (type, payload) => {
+      it.each(fetched)('applies %s', (type, payload) => {
         const state = mockStoreFor(username());
         expect(rootReducer(state, action(type, payload))).not.toBe(state);
-      });
-
-      it.each(blocked)('ignores %s', (type, payload) => {
-        const state = mockStoreFor(username());
-        expect(rootReducer(state, action(type, payload))).toBe(state);
       });
 
       it('still handles CLEAR_STORE', () => {
@@ -100,18 +85,27 @@ describe('rootReducer', () => {
       });
     });
 
-    it('lets only the persistent mock user log back in offline', () => {
-      const login = action(C.LOGIN_SUCCESS);
+    it.each(auth)(
+      'ignores %s for the ephemeral mock user, whose login must not persist',
+      (type, payload) => {
+        const state = mockStoreFor(env.DUMMY_USERNAME);
+        expect(rootReducer(state, action(type, payload))).toBe(state);
+      },
+    );
 
-      const ephemeral = mockStoreFor(env.DUMMY_USERNAME);
-      expect(rootReducer(ephemeral, login)).toBe(ephemeral);
-
+    it('lets a login fail and recover for the persistent mock user', () => {
       const persistent = mockStoreFor(env.DUMMY_PERSIST_USERNAME);
-      const loggedOut = {
-        ...persistent,
-        auth: { ...persistent.auth, loggedIn: false },
-      };
-      expect(rootReducer(loggedOut, login).auth.loggedIn).toBe(true);
+      const failed = rootReducer(
+        persistent,
+        action(C.LOGIN_FAILURE, { reason: 'bad credential' }),
+      );
+      expect(failed.auth.loggedIn).toBe(false);
+      expect(failed.auth.error).toBe('bad credential');
+      expect(failed.auth.username).toBe(env.DUMMY_PERSIST_USERNAME);
+
+      const recovered = rootReducer(failed, action(C.LOGIN_SUCCESS));
+      expect(recovered.auth.loggedIn).toBe(true);
+      expect(recovered.auth.error).toBeNull();
     });
   });
 

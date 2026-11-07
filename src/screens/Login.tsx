@@ -25,6 +25,7 @@ import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
 import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
+import { isMockUser } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { LoginStackParams } from './types';
 
@@ -190,6 +191,15 @@ const Login: React.FC<Props> = ({ navigation }) => {
                 {t('offlineMode')}
               </Button>
             </>
+          )}
+          {__DEV__ && isMockUser(savedUsername) && (
+            <Button
+              testID="login-mock-network"
+              mode="text"
+              onPress={() => navigation.navigate('MockNetwork')}
+            >
+              Network emulation
+            </Button>
           )}
         </KeyboardAvoidingView>
       </ScrollView>

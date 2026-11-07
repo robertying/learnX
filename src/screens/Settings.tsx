@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from 'data/store';
 import { clearLoginCookies, dataSource } from 'data/source';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
+import { isMockUser } from 'helpers/mock';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -163,6 +164,16 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           type="arrow"
           onPress={() => handlePush('About')}
         />
+        {__DEV__ && isMockUser(username) && (
+          <TableCell
+            testID="settings-mock-network"
+            style={styles.marginTop}
+            iconName="network-check"
+            primaryText="Network emulation"
+            type="arrow"
+            onPress={() => handlePush('MockNetwork')}
+          />
+        )}
       </ScrollView>
     </SafeArea>
   );

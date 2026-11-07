@@ -1,7 +1,7 @@
 import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import { dataSource } from 'data/source';
-import { dataThunk } from 'data/types/actions';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
   GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
@@ -30,8 +30,8 @@ export const getAssignmentsForCourseAction = createAsyncAction(
   ApiError
 >();
 
-export function getAssignmentsForCourse(courseId: string) {
-  return dataThunk(async (dispatch, getState) => {
+export function getAssignmentsForCourse(courseId: string): ThunkResult {
+  return async (dispatch, getState) => {
     dispatch(getAssignmentsForCourseAction.request());
 
     try {
@@ -52,7 +52,7 @@ export function getAssignmentsForCourse(courseId: string) {
     } catch (err) {
       dispatch(getAssignmentsForCourseAction.failure(serializeError(err)));
     }
-  });
+  };
 }
 
 export const getAllAssignmentsForCoursesAction = createAsyncAction(
@@ -61,8 +61,8 @@ export const getAllAssignmentsForCoursesAction = createAsyncAction(
   GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
 )<undefined, Assignment[], ApiError>();
 
-export function getAllAssignmentsForCourses(courseIds: string[]) {
-  return dataThunk(async (dispatch, getState) => {
+export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
+  return async (dispatch, getState) => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
     try {
@@ -87,7 +87,7 @@ export function getAllAssignmentsForCourses(courseIds: string[]) {
     } catch (err) {
       dispatch(getAllAssignmentsForCoursesAction.failure(serializeError(err)));
     }
-  });
+  };
 }
 
 export const setFavAssignment = createAction(

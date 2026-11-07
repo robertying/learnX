@@ -3,23 +3,14 @@ import { PersistConfig, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import createSecureStore from 'redux-persist-expo-securestore';
 import env from 'helpers/env';
-import { isMockUser, isPersistentMockUser } from 'helpers/mock';
+import { isEphemeralMockUser } from 'helpers/mock';
 import { AppActions, StoreAction } from 'data/types/actions';
 import {
   CLEAR_STORE,
+  LOGIN_FAILURE,
+  LOGIN_REQUEST,
   LOGIN_SUCCESS,
   SET_MOCK_STORE,
-  SET_FAV_ASSIGNMENT,
-  SET_HIDE_COURSE,
-  SET_COURSE_ORDER,
-  SET_FAV_NOTICE,
-  SET_ARCHIVE_NOTICES,
-  SET_FAV_FILE,
-  SET_ARCHIVE_FILES,
-  SET_ARCHIVE_ASSIGNMENTS,
-  SET_PENDING_ASSIGNMENT_DATA,
-  SET_SETTING,
-  SET_CURRENT_SEMESTER,
 } from 'data/types/constants';
 import { AppState, AuthState, SettingsState } from 'data/types/state';
 import assignments from './assignments';
@@ -32,6 +23,8 @@ import user from './user';
 import settings from './settings';
 
 const getMockStore = () => require('data/mock').default;
+
+const authActions: string[] = [LOGIN_REQUEST, LOGIN_SUCCESS, LOGIN_FAILURE];
 
 export const mainReducers = {
   user,
@@ -84,27 +77,15 @@ export function rootReducer(
     };
   } else if (action.type === CLEAR_STORE) {
     state = undefined;
-  } else if (state && isMockUser(state.auth.username)) {
-    if (
-      ![
-        // The persistent mock user is logged out on relaunch and must be able
-        // to log back in without hitting the network.
-        ...(isPersistentMockUser(state.auth.username) ? [LOGIN_SUCCESS] : []),
-        SET_FAV_NOTICE,
-        SET_ARCHIVE_NOTICES,
-        SET_FAV_FILE,
-        SET_ARCHIVE_FILES,
-        SET_FAV_ASSIGNMENT,
-        SET_ARCHIVE_ASSIGNMENTS,
-        SET_PENDING_ASSIGNMENT_DATA,
-        SET_HIDE_COURSE,
-        SET_COURSE_ORDER,
-        SET_CURRENT_SEMESTER,
-        SET_SETTING,
-      ].includes(action.type)
-    ) {
-      return state;
-    }
+  } else if (
+    state &&
+    isEphemeralMockUser(state.auth.username) &&
+    authActions.includes(action.type)
+  ) {
+    // Auth persists on every change, which would keep the ephemeral mock
+    // login across relaunches. Its login calls still go through the emulated
+    // network (data/mockSource); only their results are dropped.
+    return state;
   }
   return appReducer(state, action as Exclude<AppActions, StoreAction>);
 }

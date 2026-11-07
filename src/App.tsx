@@ -84,6 +84,7 @@ import Login from 'screens/Login';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import FileSettings from 'screens/FileSettings';
+import MockNetwork from 'screens/MockNetwork';
 import SSO from 'screens/SSO';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
 import Maintainer from 'screens/Maintainer';
@@ -266,6 +267,9 @@ const CourseStack = () => (
   </CourseStackNavigator.Navigator>
 );
 
+// Dev-only screen for the mock accounts; not translated.
+const mockNetworkTitle = 'Network emulation';
+
 const renderSettingDetails = () => (
   <>
     <SettingStackNavigator.Screen
@@ -307,6 +311,11 @@ const renderSettingDetails = () => (
       name="Changelog"
       component={Changelog}
       options={getTitleOptions(t('changelog'))}
+    />
+    <SettingStackNavigator.Screen
+      name="MockNetwork"
+      component={MockNetwork}
+      options={getTitleOptions(mockNetworkTitle)}
     />
   </>
 );
@@ -553,6 +562,11 @@ const LoginStack = () => (
         ...getTitleOptions(t('sso')),
         presentation: DeviceInfo.isMac() ? undefined : 'fullScreenModal',
       })}
+    />
+    <LoginNavigator.Screen
+      name="MockNetwork"
+      component={MockNetwork}
+      options={getTitleOptions(mockNetworkTitle)}
     />
   </LoginNavigator.Navigator>
 );
