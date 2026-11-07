@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import { Badge, Divider, List, Text, useTheme } from 'react-native-paper';
 import Animated, {
@@ -25,6 +25,75 @@ export interface FilterProps {
   hiddenCount: number;
   unfinishedCount?: number;
 }
+
+// Defined outside Filter so that its identity is stable: a component created
+// per render remounts every row whenever the parent re-renders (e.g. when a
+// toast is dismissed), which drops a tap that is in progress.
+const ListItem: React.FC<{
+  name: FilterSelection;
+  text: string;
+  count?: number;
+  color?: string;
+  badgeColor?: string;
+  selected: FilterSelection;
+  onSelectionChange: (selected: FilterSelection) => void;
+}> = ({
+  name,
+  text,
+  count,
+  color,
+  badgeColor,
+  selected,
+  onSelectionChange,
+}) => (
+  <List.Item
+    testID={`filter-${name}`}
+    style={styles.listItem}
+    titleStyle={styles.title}
+    title={
+      <View
+        style={[styles.flexRow, { paddingTop: Platform.OS === 'ios' ? 8 : 0 }]}
+      >
+        <Text style={styles.text}>{text}</Text>
+        <Badge
+          visible
+          style={[
+            styles.badge,
+            { color: color ?? 'white', backgroundColor: badgeColor },
+          ]}
+        >
+          {count}
+        </Badge>
+      </View>
+    }
+    left={props => (
+      <List.Icon
+        {...props}
+        icon={
+          name === 'all'
+            ? 'inbox'
+            : name === 'unread'
+              ? 'email-mark-as-unread'
+              : name === 'fav'
+                ? 'heart'
+                : name === 'archived'
+                  ? 'archive'
+                  : name === 'hidden'
+                    ? p => <MaterialIcons name="visibility-off" {...p} />
+                    : name === 'unfinished'
+                      ? 'checkbox-blank-circle-outline'
+                      : 'checkbox-marked-circle-outline'
+        }
+      />
+    )}
+    right={
+      selected === name
+        ? props => <List.Icon {...props} icon="check" />
+        : undefined
+    }
+    onPress={() => onSelectionChange(name)}
+  />
+);
 
 const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   visible,
@@ -66,69 +135,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
     }
   }, [visible, position]);
 
-  const ListItem: React.FC<
-    React.PropsWithChildren<{
-      name: FilterSelection;
-      text: string;
-      count?: number;
-      color?: string;
-      badgeColor?: string;
-    }>
-  > = useCallback(
-    ({ name, text, count, color, badgeColor }) => (
-      <List.Item
-        testID={`filter-${name}`}
-        style={styles.listItem}
-        titleStyle={styles.title}
-        title={
-          <View
-            style={[
-              styles.flexRow,
-              { paddingTop: Platform.OS === 'ios' ? 8 : 0 },
-            ]}
-          >
-            <Text style={styles.text}>{text}</Text>
-            <Badge
-              visible
-              style={[
-                styles.badge,
-                { color: color ?? 'white', backgroundColor: badgeColor },
-              ]}
-            >
-              {count}
-            </Badge>
-          </View>
-        }
-        left={props => (
-          <List.Icon
-            {...props}
-            icon={
-              name === 'all'
-                ? 'inbox'
-                : name === 'unread'
-                  ? 'email-mark-as-unread'
-                  : name === 'fav'
-                    ? 'heart'
-                    : name === 'archived'
-                      ? 'archive'
-                      : name === 'hidden'
-                        ? p => <MaterialIcons name="visibility-off" {...p} />
-                        : name === 'unfinished'
-                          ? 'checkbox-blank-circle-outline'
-                          : 'checkbox-marked-circle-outline'
-            }
-          />
-        )}
-        right={
-          selected === name
-            ? props => <List.Icon {...props} icon="check" />
-            : undefined
-        }
-        onPress={() => onSelectionChange(name)}
-      />
-    ),
-    [onSelectionChange, selected],
-  );
+  const itemProps = { selected, onSelectionChange };
 
   return (
     <Animated.View
@@ -141,6 +148,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
       <View style={styles.content} onLayout={handleLayout}>
         {unfinishedCount !== undefined ? (
           <ListItem
+            {...itemProps}
             name="unfinished"
             text={t('unfinished')}
             count={unfinishedCount}
@@ -149,6 +157,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         ) : null}
         {unfinishedCount !== undefined ? (
           <ListItem
+            {...itemProps}
             name="finished"
             text={t('finished')}
             count={allCount - unfinishedCount}
@@ -156,6 +165,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
           />
         ) : null}
         <ListItem
+          {...itemProps}
           name="all"
           text={t('all')}
           count={allCount}
@@ -163,6 +173,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         />
         {unreadCount !== undefined ? (
           <ListItem
+            {...itemProps}
             name="unread"
             text={t('unread')}
             count={unreadCount}
@@ -171,6 +182,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         ) : null}
         {favCount !== undefined ? (
           <ListItem
+            {...itemProps}
             name="fav"
             text={t('fav')}
             count={favCount}
@@ -179,6 +191,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
         ) : null}
         {archivedCount !== undefined ? (
           <ListItem
+            {...itemProps}
             name="archived"
             text={t('archived')}
             count={archivedCount}
@@ -186,6 +199,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
           />
         ) : null}
         <ListItem
+          {...itemProps}
           name="hidden"
           text={t('hidden')}
           count={hiddenCount}
