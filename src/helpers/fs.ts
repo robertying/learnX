@@ -260,10 +260,4 @@ export const copyFileToCache = async (uri: string) => {
   return to.uri;
 };
 
-export const getExtension = (filename: string) => {
-  return filename ? filename.split('.').pop() : '';
-};
-
-export const stripExtension = (filename: string) => {
-  return filename ? filename.replace(/\.[^/.]+$/, '') : '';
-};
+export { getExtension, stripExtension } from './filename';

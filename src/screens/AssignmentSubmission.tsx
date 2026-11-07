@@ -1,14 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import * as DocumentPicker from 'expo-document-picker';
-import * as ImagePicker from 'expo-image-picker';
-import {
-  Alert,
-  Keyboard,
-  KeyboardAvoidingView,
-  StyleSheet,
-  View,
-} from 'react-native';
+import { KeyboardAvoidingView, StyleSheet, View } from 'react-native';
 import {
   Button,
   Dialog,
@@ -19,27 +11,27 @@ import {
   TextInput,
 } from 'react-native-paper';
 import dayjs from 'dayjs';
-import mime from 'mime';
 import { RemoteFile } from 'thu-learn-lib';
-import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
 import ContainedButton from 'components/ContainedButton';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
-import { getExtension, stripExtension } from 'helpers/fs';
-import { removeTags } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import { Assignment } from 'data/types/state';
-import { submitAssignment } from 'data/source';
-import { refreshCourseAssignments, useAssignment } from 'data/content';
 import {
-  setPendingAssignmentData,
-  usePendingAssignmentData,
-} from 'data/pendingAssignment';
-import { getUserData } from 'data/userData';
-import { toast } from 'components/Toast';
+  attachmentForFileDetail,
+  canSubmit,
+  initialSubmissionContent,
+  pickedAsRemoteFile,
+  sanitizeCustomAttachmentName,
+} from 'helpers/submission';
+import { Assignment } from 'data/types/state';
+import { useAssignment } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
+import {
+  useAttachmentPicker,
+  useSubmitAssignment,
+} from 'hooks/useAssignmentSubmission';
 import { AssignmentSubmissionStackParams } from './types';
 import { Caption } from 'components/Text';
 import { useTheme } from 'theme';
@@ -48,13 +40,6 @@ type Props = NativeStackScreenProps<
   AssignmentSubmissionStackParams,
   'AssignmentSubmission'
 >;
-
-interface AttachmentResult {
-  uri: string;
-  type: string | null;
-  name: string;
-  size?: number | null;
-}
 
 const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   const assignment = useAssignment(route.params.id);
@@ -79,106 +64,50 @@ const AssignmentSubmissionContent: React.FC<{
 }> = ({ assignment, navigation }) => {
   const theme = useTheme();
 
-  const {
-    id,
-    courseId,
-    courseName,
-    studentHomeworkId,
-    title,
-    submitTime,
-    submittedAttachment,
-    submittedContent,
-  } = assignment;
-
-  const pendingAssignmentData = usePendingAssignmentData();
+  const { title, submitTime, submittedAttachment, submittedContent } =
+    assignment;
 
   const [content, setContent] = useState(
-    (removeTags(submittedContent || '') ?? '').replace('-->', ''),
+    initialSubmissionContent(submittedContent),
   );
   const [customAttachmentName, setCustomAttachmentName] = useState('');
-  const [attachmentResult, setAttachmentResult] =
-    useState<AttachmentResult | null>(null);
   const [removeAttachment, setRemoveAttachment] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [pickerMenuVisible, setPickerMenuVisible] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
 
-  const getDefaultAttachmentName = (mimeType?: string | null) => {
-    const ext = mime.getExtension(mimeType ?? 'application/octet-stream');
-    return isLocaleChinese()
-      ? `${title}-提交.${ext}`
-      : `${title} Submission.${ext}`;
-  };
+  const {
+    picked: attachmentResult,
+    isShared,
+    menuVisible: pickerMenuVisible,
+    openMenu: handlePickerMenuOpen,
+    closeMenu: handlePickerMenuClose,
+    pickDocument: handleDocumentPick,
+    pickPhoto: handlePhotoPick,
+    removePicked: handlePickedAttachmentRemove,
+  } = useAttachmentPicker(title);
+
+  const {
+    uploading,
+    uploadError,
+    dismissUploadError,
+    progress,
+    confirmSubmit,
+  } = useSubmitAssignment(
+    assignment,
+    {
+      content,
+      picked: attachmentResult,
+      customAttachmentName,
+      removeAttachment,
+    },
+    () => navigation.goBack(),
+  );
 
   const handleCustomAttachmentNameChange = (text: string) => {
-    setCustomAttachmentName(text.replaceAll('.', ''));
+    setCustomAttachmentName(sanitizeCustomAttachmentName(text));
   };
 
   const handleUploadedAttachmentRemove = () => {
     setRemoveAttachment(!removeAttachment);
-  };
-
-  const handlePickedAttachmentRemove = () => {
-    setAttachmentResult(null);
-    setPendingAssignmentData(null);
-  };
-
-  const handlePickerMenuOpen = () => {
-    Keyboard.dismiss();
-    setPickerMenuVisible(true);
-  };
-
-  const handlePickerMenuClose = () => {
-    setPickerMenuVisible(false);
-  };
-
-  const handleDocumentPick = async () => {
-    handlePickerMenuClose();
-    const result = await DocumentPicker.getDocumentAsync({
-      copyToCacheDirectory: true,
-    }).catch(() => null);
-    if (result?.canceled) {
-      return;
-    }
-    const file = result?.assets?.[0];
-    if (!file) {
-      toast(t('filePickFailed'), 'error');
-      return;
-    }
-
-    setAttachmentResult({
-      uri: file.uri,
-      type: file.mimeType ?? null,
-      name: file.name ?? getDefaultAttachmentName(file.mimeType),
-      size: file.size,
-    });
-    setPendingAssignmentData(null);
-  };
-
-  const handlePhotoPick = async () => {
-    handlePickerMenuClose();
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images', 'videos'],
-      quality: 1,
-    }).catch(() => null);
-    if (result?.canceled) {
-      return;
-    }
-    const photo = result?.assets?.[0];
-    if (!photo) {
-      toast(t('filePickFailed'), 'error');
-      return;
-    }
-
-    setAttachmentResult({
-      uri: photo.uri,
-      type: photo.mimeType ?? null,
-      name: getDefaultAttachmentName(photo.mimeType),
-      size: photo.fileSize,
-    });
-    setPendingAssignmentData(null);
   };
 
   const handleFileOpen = (
@@ -186,113 +115,25 @@ const AssignmentSubmissionContent: React.FC<{
   ) => {
     if (attachment) {
       navigation.push('FileDetail', {
-        attachment: {
-          id,
-          courseName,
-          title: stripExtension(attachment.name),
-          downloadUrl: attachment.downloadUrl,
-          fileType:
-            (attachment.type
-              ? mime.getExtension(attachment.type)
-              : getExtension(attachment.name)) || '',
-        },
+        attachment: attachmentForFileDetail(assignment, attachment),
       });
     }
   };
 
-  const handleSubmit = useCallback(async () => {
-    setUploadError(false);
-    setUploading(true);
-
-    const customName = customAttachmentName.trim();
-    const attachment = attachmentResult
-      ? {
-          uri: attachmentResult.uri,
-          name: customName
-            ? `${customName}.${getExtension(attachmentResult.name)}`
-            : attachmentResult.name,
-        }
-      : undefined;
-    const hasSubmission = Boolean(content || attachment);
-
-    // React Compiler can't compile conditional expressions inside try blocks,
-    // so the arguments are prepared above.
-    try {
-      if (removeAttachment) {
-        await submitAssignment(
-          studentHomeworkId,
-          '',
-          undefined,
-          setProgress,
-          true,
-        );
-      } else if (hasSubmission) {
-        await submitAssignment(
-          studentHomeworkId,
-          content,
-          attachment,
-          setProgress,
-        );
-      }
-    } catch {
-      setUploading(false);
-      setUploadError(true);
-      setProgress(0);
-
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      return;
-    }
-
-    setUploading(false);
-    setProgress(0);
-
-    setPendingAssignmentData(null);
-    const semesterId = getUserData().currentSemester;
-    if (semesterId) {
-      refreshCourseAssignments(semesterId, courseId).catch(() => {});
-    }
-
-    toast(t('assignmentSubmissionSucceeded'), 'success');
-    navigation.goBack();
-  }, [
-    attachmentResult,
-    content,
-    courseId,
-    customAttachmentName,
-    navigation,
+  const submitDisabled = !canSubmit({
+    uploading,
     removeAttachment,
-    studentHomeworkId,
-  ]);
-
-  const handleSubmitPress = useCallback(() => {
-    Keyboard.dismiss();
-
-    Alert.alert(
-      t('submitAssignment'),
-      t('submitAssignmentConfirmation'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('ok'),
-          onPress: handleSubmit,
-        },
-      ],
-      { cancelable: true },
-    );
-  }, [handleSubmit]);
+    content,
+    picked: attachmentResult,
+  });
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <TextButton
-          disabled={
-            uploading || (!removeAttachment && !content && !attachmentResult)
-          }
+          disabled={submitDisabled}
           style={{ fontSize: 17, fontWeight: 'bold' }}
-          onPress={handleSubmitPress}
+          onPress={confirmSubmit}
         >
           {t('submit')}
         </TextButton>
@@ -306,34 +147,12 @@ const AssignmentSubmissionContent: React.FC<{
             type: 'sfSymbol',
             name: 'arrow.up.circle',
           },
-          disabled:
-            uploading || (!removeAttachment && !content && !attachmentResult),
-          onPress: handleSubmitPress,
+          disabled: submitDisabled,
+          onPress: confirmSubmit,
         },
       ],
     });
-  }, [
-    attachmentResult,
-    content,
-    handleSubmitPress,
-    navigation,
-    removeAttachment,
-    uploading,
-  ]);
-
-  // A file shared to the app becomes the attachment.
-  const [sharedAssignmentData, setSharedAssignmentData] =
-    useState<typeof pendingAssignmentData>(null);
-  if (pendingAssignmentData !== sharedAssignmentData) {
-    setSharedAssignmentData(pendingAssignmentData);
-    if (pendingAssignmentData) {
-      setAttachmentResult({
-        uri: pendingAssignmentData.data,
-        type: pendingAssignmentData.mimeType,
-        name: getDefaultAttachmentName(pendingAssignmentData.mimeType),
-      });
-    }
-  }
+  }, [confirmSubmit, navigation, submitDisabled]);
 
   return (
     <SafeArea>
@@ -385,20 +204,11 @@ const AssignmentSubmissionContent: React.FC<{
                   containerStyle={[styles.attachmentButton, Styles.spacey1]}
                   disabled={uploading}
                   onPress={() =>
-                    handleFileOpen({
-                      id: '0000',
-                      name: attachmentResult.name,
-                      downloadUrl: attachmentResult.uri,
-                      previewUrl: attachmentResult.uri,
-                      size: attachmentResult.size
-                        ? attachmentResult.size + 'B'
-                        : '',
-                      type: attachmentResult.type,
-                    })
+                    handleFileOpen(pickedAsRemoteFile(attachmentResult))
                   }
                 >
                   {attachmentResult.name}{' '}
-                  {pendingAssignmentData
+                  {isShared
                     ? isLocaleChinese()
                       ? '（之前分享的）'
                       : '(previously shared)'
@@ -496,7 +306,7 @@ const AssignmentSubmissionContent: React.FC<{
           <Snackbar
             visible={uploadError}
             duration={3000}
-            onDismiss={() => setUploadError(false)}
+            onDismiss={dismissUploadError}
           >
             {t('assignmentSubmissionFailed')}
           </Snackbar>
