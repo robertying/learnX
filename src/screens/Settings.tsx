@@ -12,6 +12,7 @@ import { setSetting } from 'data/actions/settings';
 import { clearStore } from 'data/actions/root';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { clearLoginCookies, dataSource } from 'data/source';
+import { useCredentialsStore } from 'data/credentials';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
@@ -25,7 +26,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useAppDispatch();
   const userInfo = useAppSelector(state => state.user);
-  const username = useAppSelector(state => state.auth.username);
+  const username = useCredentialsStore(state => state.credentials?.username);
   const newChangelog = useAppSelector(
     state => state.settings.lastShowChangelogVersion !== packageJson.version,
   );

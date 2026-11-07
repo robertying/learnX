@@ -18,6 +18,7 @@ import {
   setSSOInProgress,
 } from 'data/actions/auth';
 import { setMockStore } from 'data/actions/root';
+import { saveCredentials, useCredentials } from 'data/credentials';
 import { setSetting } from 'data/actions/settings';
 import { clearLoginCookies } from 'data/source';
 import Styles from 'constants/Styles';
@@ -25,7 +26,7 @@ import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
 import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
-import { isMockUser } from 'helpers/mock';
+import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { LoginStackParams } from './types';
 
@@ -37,9 +38,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const dispatch = useAppDispatch();
   const loggingIn = useAppSelector(state => state.auth.loggingIn);
   const graduate = useAppSelector(state => state.settings.graduate);
-  const savedUsername = useAppSelector(state => state.auth.username);
-  const savedPassword = useAppSelector(state => state.auth.password);
-  const savedFingerPrint = useAppSelector(state => state.auth.fingerPrint);
+  const savedCredentials = useCredentials();
+  const savedUsername = savedCredentials?.username;
+  const savedPassword = savedCredentials?.password;
+  const savedFingerPrint = savedCredentials?.fingerPrint;
 
   const [username, setUsername] = useState(savedUsername ?? '');
   const [password, setPassword] = useState(savedPassword ?? '');
@@ -69,11 +71,20 @@ const Login: React.FC<Props> = ({ navigation }) => {
       (username === env.DUMMY_PERSIST_USERNAME &&
         password === env.DUMMY_PERSIST_PASSWORD)
     ) {
-      dispatch(setMockStore(username));
+      dispatch(setMockStore());
       if (username === env.DUMMY_PERSIST_USERNAME) {
-        // setMockStore bypasses the auth persist layer; this goes through it
-        // so the credentials are saved and survive relaunch.
-        dispatch(login({}));
+        // Goes through the emulated server and saves the login, so it
+        // survives relaunch.
+        dispatch(login({ username, password, fingerPrint: MOCK_FINGER_PRINT }));
+      } else {
+        // The ephemeral account skips the login and is kept in memory only.
+        await saveCredentials({
+          username,
+          password,
+          fingerPrint: MOCK_FINGER_PRINT,
+          fingerGenPrint: '',
+          fingerGenPrint3: '',
+        }).catch(() => undefined);
       }
       return;
     }

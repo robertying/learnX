@@ -110,6 +110,11 @@ import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetting } from 'data/actions/settings';
 import { persistor, store, useAppDispatch, useAppSelector } from 'data/store';
+import {
+  getCredentials,
+  loadCredentials,
+  useCredentials,
+} from 'data/credentials';
 import { login } from 'data/actions/auth';
 import { getAllSemesters, getCurrentSemester } from 'data/actions/semesters';
 import { setPendingAssignmentData } from 'data/actions/assignments';
@@ -928,7 +933,11 @@ const Container = () => {
 
   const dispatch = useAppDispatch();
   const loginError = useAppSelector(state => state.auth.error);
-  const auth = useAppSelector(state => state.auth);
+  const credentials = useCredentials();
+  const hasCredentials =
+    !!credentials?.username &&
+    !!credentials.password &&
+    !!credentials.fingerPrint;
 
   const mainNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
 
@@ -937,11 +946,12 @@ const Container = () => {
 
   const handleReLogin = useCallback(() => {
     const currentAuth = store.getState().auth;
+    const currentCredentials = getCredentials();
     if (
       !currentAuth.ssoInProgress &&
-      currentAuth.username &&
-      currentAuth.password &&
-      currentAuth.fingerPrint &&
+      currentCredentials?.username &&
+      currentCredentials.password &&
+      currentCredentials.fingerPrint &&
       dayjs().diff(lastActiveTime.current, 'minute') >= 10
     ) {
       dispatch(login({ reset: true }));
@@ -1012,10 +1022,10 @@ const Container = () => {
   }, [handleShare]);
 
   useEffect(() => {
-    if (auth.username && auth.password && auth.fingerPrint && loginError) {
+    if (hasCredentials && loginError) {
       toast(t('loginFailed'), 'error', 8 * 1000);
     }
-  }, [auth.password, auth.username, auth.fingerPrint, loginError, toast]);
+  }, [hasCredentials, loginError, toast]);
 
   const navigationContainerProps = {
     theme:
@@ -1025,8 +1035,7 @@ const Container = () => {
     fallback: <Splash />,
   };
 
-  const showMain =
-    !loginError && !!auth.username && !!auth.password && !!auth.fingerPrint;
+  const showMain = !loginError && hasCredentials;
 
   return (
     <SafeAreaProvider>
@@ -1089,7 +1098,13 @@ const App = () => {
       >
         <ToastProvider>
           <StoreProvider store={store}>
-            <PersistGate loading={<Splash />} persistor={persistor}>
+            <PersistGate
+              loading={<Splash />}
+              persistor={persistor}
+              onBeforeLift={async () => {
+                await loadCredentials();
+              }}
+            >
               <Container />
             </PersistGate>
           </StoreProvider>

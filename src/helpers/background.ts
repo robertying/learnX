@@ -4,6 +4,7 @@ import { ContentType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import { AppDispatch, store } from 'data/store';
 import { dataSource, loginWithFingerPrint } from 'data/source';
+import { loadCredentials } from 'data/credentials';
 import { Assignment, CoursesState, File, Notice } from 'data/types/state';
 import { getAllNoticesForCoursesAction } from 'data/actions/notices';
 import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
@@ -100,13 +101,14 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const state = store.getState();
   const dispatch = store.dispatch;
 
-  const auth = state.auth;
+  // The task can run before the app UI has loaded them.
+  const credentials = await loadCredentials();
   const courseIds = state.courses.items.map(i => i.id);
 
   if (
-    !auth.username ||
-    !auth.password ||
-    !auth.fingerPrint ||
+    !credentials?.username ||
+    !credentials.password ||
+    !credentials.fingerPrint ||
     courseIds.length === 0
   ) {
     return BackgroundTask.BackgroundTaskResult.Success;
@@ -114,11 +116,11 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
 
   try {
     await loginWithFingerPrint(
-      auth.username,
-      auth.password,
-      auth.fingerPrint,
-      auth.fingerGenPrint ?? '',
-      auth.fingerGenPrint3 ?? '',
+      credentials.username,
+      credentials.password,
+      credentials.fingerPrint,
+      credentials.fingerGenPrint,
+      credentials.fingerGenPrint3,
     );
   } catch {
     return BackgroundTask.BackgroundTaskResult.Success;

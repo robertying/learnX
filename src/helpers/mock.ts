@@ -10,3 +10,6 @@ export const isPersistentMockUser = (username?: string | null) =>
 
 export const isMockUser = (username?: string | null) =>
   isEphemeralMockUser(username) || isPersistentMockUser(username);
+
+/** Stands in for the SSO device fingerprint of the mock accounts. */
+export const MOCK_FINGER_PRINT = 'fingerPrint';

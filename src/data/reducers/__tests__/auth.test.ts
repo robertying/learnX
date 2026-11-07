@@ -13,77 +13,28 @@ const loggedIn: AuthState = {
   loggingIn: false,
   ssoInProgress: false,
   loggedIn: true,
-  username: 'user',
-  password: 'pass',
-  fingerPrint: 'fp',
-  fingerGenPrint: 'fgp',
-  fingerGenPrint3: 'fgp3',
   error: null,
 };
 
 describe('auth reducer', () => {
-  it('starts logged out with no credentials', () => {
+  it('starts logged out', () => {
     expect(auth(undefined, INIT)).toEqual({
       loggingIn: false,
       ssoInProgress: false,
       loggedIn: false,
-      username: null,
-      password: null,
-      fingerPrint: null,
-      fingerGenPrint: null,
-      fingerGenPrint3: null,
     });
   });
 
-  it('keeps credentials on a plain login request', () => {
+  it('clears the last error on a login request', () => {
     expect(
       auth(
         { ...loggedIn, error: FailReason.BAD_CREDENTIAL },
-        action(LOGIN_REQUEST, {}),
+        action(LOGIN_REQUEST),
       ),
     ).toEqual({ ...loggedIn, loggingIn: true, error: null });
   });
 
-  it('clears credentials on a login request with clearCredential', () => {
-    expect(
-      auth(loggedIn, action(LOGIN_REQUEST, { clearCredential: true })),
-    ).toEqual({
-      ...loggedIn,
-      loggingIn: true,
-      error: null,
-      username: null,
-      password: null,
-      fingerPrint: null,
-      fingerGenPrint: null,
-      fingerGenPrint3: null,
-    });
-  });
-
-  it('stores the credentials of a successful login', () => {
-    const state = auth(
-      undefined,
-      action(LOGIN_SUCCESS, {
-        username: 'u',
-        password: 'p',
-        fingerPrint: 'a',
-        fingerGenPrint: 'b',
-        fingerGenPrint3: 'c',
-      }),
-    );
-    expect(state).toEqual({
-      loggingIn: false,
-      ssoInProgress: false,
-      loggedIn: true,
-      username: 'u',
-      password: 'p',
-      fingerPrint: 'a',
-      fingerGenPrint: 'b',
-      fingerGenPrint3: 'c',
-      error: null,
-    });
-  });
-
-  it('keeps existing credentials on a successful login without payload', () => {
+  it('marks a successful login', () => {
     expect(
       auth(
         { ...loggedIn, loggedIn: false, loggingIn: true },
