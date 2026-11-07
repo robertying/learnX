@@ -26,11 +26,7 @@ import {
   setFavFile,
   setArchiveFiles,
 } from 'data/actions/files';
-import {
-  clearStoreAction,
-  setMockStore,
-  resetLoading,
-} from 'data/actions/root';
+import { clearStoreAction, setMockStore } from 'data/actions/root';
 import {
   getAllSemestersAction,
   getCurrentSemesterAction,
@@ -124,13 +120,9 @@ export type SettingsAction =
   | RemoveEventIdForAssignmentAction
   | ClearEventIdsAction;
 
-export type ResetLoadingAction = ActionType<typeof resetLoading>;
 export type ClearStoreAction = ActionType<typeof clearStoreAction>;
 export type SetMockStoreAction = ActionType<typeof setMockStore>;
-export type StoreAction =
-  | ClearStoreAction
-  | SetMockStoreAction
-  | ResetLoadingAction;
+export type StoreAction = ClearStoreAction | SetMockStoreAction;
 
 export type AppActions =
   | AuthAction

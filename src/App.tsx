@@ -114,7 +114,6 @@ import { Notice, Assignment, File, Course } from 'data/types/state';
 import { login } from 'data/actions/auth';
 import { getAllSemesters, getCurrentSemester } from 'data/actions/semesters';
 import { setPendingAssignmentData } from 'data/actions/assignments';
-import { resetLoading } from 'data/actions/root';
 import { getCoursesForSemester } from 'data/actions/courses';
 import useToast from 'hooks/useToast';
 import { setUpBackgroundFetch } from 'helpers/background';
@@ -982,8 +981,6 @@ const Container = () => {
         appState.current?.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        dispatch(resetLoading());
-
         handleReLogin();
       }
 

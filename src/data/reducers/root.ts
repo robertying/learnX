@@ -9,7 +9,6 @@ import {
   CLEAR_STORE,
   LOGIN_SUCCESS,
   SET_MOCK_STORE,
-  RESET_LOADING,
   SET_FAV_ASSIGNMENT,
   SET_HIDE_COURSE,
   SET_COURSE_ORDER,
@@ -70,41 +69,6 @@ export function rootReducer(
   state: AppState | undefined,
   action: AppActions,
 ): AppState {
-  if (state && action.type === RESET_LOADING) {
-    return {
-      ...state,
-      auth: {
-        ...state.auth,
-        loggingIn: false,
-      },
-      semesters: {
-        ...state.semesters,
-        fetching: false,
-        error: null,
-      },
-      courses: {
-        ...state.courses,
-        fetching: false,
-        error: null,
-      },
-      notices: {
-        ...state.notices,
-        fetching: false,
-        error: null,
-      },
-      files: {
-        ...state.files,
-        fetching: false,
-        error: null,
-      },
-      assignments: {
-        ...state.assignments,
-        fetching: false,
-        error: null,
-      },
-    };
-  }
-
   if (action.type === SET_MOCK_STORE) {
     const mockStore: AppState = getMockStore();
     return {
