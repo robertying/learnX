@@ -55,4 +55,5 @@ jobs:
       - name: Prettier
         run: pnpm exec prettier --check src/
 
-      # Tests: a `pnpm test` step goes here once Jest is set up.
+      - name: Test
+        run: pnpm test
