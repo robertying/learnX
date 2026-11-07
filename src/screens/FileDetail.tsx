@@ -341,7 +341,10 @@ const FileDetailContent: React.FC<{
   return (
     <SafeArea testID="file-detail" collapsable={false}>
       {error ? (
-        <View style={styles.errorRoot}>
+        // A key of its own: React would otherwise reuse the skeleton list's
+        // View below, which keeps its taller height on iOS and pushes the
+        // centered icon down behind the tab bar.
+        <View key="error" style={styles.errorRoot}>
           <Icon
             style={Styles.spacey1}
             name="error"
