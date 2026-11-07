@@ -1,18 +1,8 @@
-# Reveal the favorite / archive actions of the list card titled CARD:
-# swipe actions on iOS, a long-press menu on Android.
+# Reveal the favorite / archive actions of the list card titled CARD. A long
+# press opens the swipe actions on iOS and a menu on Android; a swipe would
+# also work on iOS, but on iPad Maestro's element swipe is too short and
+# lands as a tap.
 appId: ${APP_ID}
 ---
-- runFlow:
-    when:
-      platform: iOS
-    commands:
-      - swipe:
-          from:
-            text: ${CARD}
-          direction: LEFT
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - longPressOn: ${CARD}
+- longPressOn: ${CARD}
 - waitForAnimationToEnd

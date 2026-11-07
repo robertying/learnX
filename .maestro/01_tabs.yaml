@@ -5,19 +5,29 @@ tags:
 ---
 - runFlow: subflows/login.yaml
 - assertVisible: '.*请按照助教的安排交作业.*'
-- tapOn:
-    id: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
 - assertVisible: '.*大作业1.*'
-- tapOn:
-    id: 'tab-files|doc(ument)?\.fill'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-files|doc(ument)?\.fill'
 - assertVisible: '.*深度学习框架.*'
-- tapOn:
-    id: 'tab-courses|square\.grid\.3x3\.fill'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-courses|square\.grid\.3x3\.fill'
 - assertVisible: '.*量子与统计.*'
-- tapOn:
-    id: 'tab-settings|gearshape\.fill'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-settings|gearshape\.fill'
 - assertVisible:
     id: settings-logout
-- tapOn:
-    id: 'tab-notices|bell\.fill'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'
 - assertVisible: '.*请按照助教的安排交作业.*'

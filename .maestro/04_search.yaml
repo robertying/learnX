@@ -8,10 +8,16 @@ name: Search and open a result
 - extendedWaitUntil:
     visible: '.*AutoCAD绘图基础练习.*'
     timeout: 5000
-# The results list spends the first tap on dismissing the keyboard, so spend
-# it on the section header (hideKeyboard is flaky on iOS).
-- tapOn: 'Assignments|作业'
+# While the search bar has focus, the results list spends the first tap on
+# blurring it (keyboardShouldPersistTaps="never"), so tap again if needed.
 - tapOn: '.*AutoCAD绘图基础练习.*'
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      notVisible:
+        id: assignment-detail
+    commands:
+      - tapOn: '.*AutoCAD绘图基础练习.*'
 - extendedWaitUntil:
     visible:
       id: assignment-detail

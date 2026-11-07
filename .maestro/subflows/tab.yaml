@@ -1,0 +1,31 @@
+# Switch to the tab whose id matches TAB, e.g. 'tab-files|doc(ument)?\.fill'
+# (the SF Symbol covers iOS tab bar buttons that lose their identifier in
+# Maestro's snapshot after a clearState launch).
+appId: ${APP_ID}
+---
+- tapOn:
+    id: ${TAB}
+    # Absent from the snapshot while it's on the other page of the iPad bar.
+    optional: true
+# On iPad the tabs sit in a paged top bar, and a tab on the other page is
+# laid out outside it: turn the page and tap again.
+- runFlow:
+    when:
+      visible: 'Next Page|下一页'
+      notVisible:
+        id: ${TAB}
+        selected: true
+    commands:
+      - tapOn: 'Next Page|下一页'
+      - tapOn:
+          id: ${TAB}
+- runFlow:
+    when:
+      visible: 'Previous Page|上一页'
+      notVisible:
+        id: ${TAB}
+        selected: true
+    commands:
+      - tapOn: 'Previous Page|上一页'
+      - tapOn:
+          id: ${TAB}
