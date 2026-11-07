@@ -104,7 +104,7 @@ const upgraded = {
 };
 
 describe('importing user data saved by 18.0.x', () => {
-  it('moves settings, favorites, archives, hidden courses and order', async () => {
+  it('moves settings, favorites, archives, hidden courses, order and semester', async () => {
     const m = await launch({ asyncStorage: upgraded });
     await m.legacy.importLegacyUserData();
 
@@ -142,6 +142,7 @@ describe('importing user data saved by 18.0.x', () => {
       archived: { notice: ['n2'], assignment: [], file: ['f1'] },
       hiddenCourses: ['c3'],
       courseOrder: ['c2', 'c1'],
+      currentSemester: '2025-2026-1',
     });
   });
 
@@ -160,6 +161,42 @@ describe('importing user data saved by 18.0.x', () => {
     // Saved state is there before the import runs.
     expect(next.settings.getSettings().graduate).toBe(true);
     expect(next.userData.getUserData().hiddenCourses).toEqual(['c3']);
+  });
+
+  it('takes the semester from a root that an earlier build already imported', async () => {
+    // That build imported everything but the semester being shown.
+    const first = await launch({ asyncStorage: upgraded });
+    await first.legacy.importLegacyUserData();
+    first.userData.setFavorite('notice', 'n1', false);
+    first.kv.set(
+      'userData',
+      first.kv
+        .get('userData')!
+        .replace('"currentSemester":"2025-2026-1"', '"currentSemester":null'),
+    );
+
+    const next = await launch({
+      kv: Object.fromEntries(first.kv),
+      asyncStorage: { 'persist:root': legacyRoot },
+    });
+    expect(next.userData.getUserData().currentSemester).toBeNull();
+    await next.legacy.importLegacyUserData();
+    expect(next.userData.getUserData().currentSemester).toBe('2025-2026-1');
+    // The rest isn't imported again.
+    expect(next.userData.getUserData().favorites.notice).toEqual(['n2']);
+  });
+
+  it('keeps a semester chosen since', async () => {
+    const first = await launch({ asyncStorage: upgraded });
+    await first.legacy.importLegacyUserData();
+    first.userData.setCurrentSemester('2026-2027-1');
+
+    const next = await launch({
+      kv: Object.fromEntries(first.kv),
+      asyncStorage: { 'persist:root': legacyRoot },
+    });
+    await next.legacy.importLegacyUserData();
+    expect(next.userData.getUserData().currentSemester).toBe('2026-2027-1');
   });
 
   it('runs only once, so later changes are not overwritten', async () => {

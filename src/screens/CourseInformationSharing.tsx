@@ -3,7 +3,7 @@ import { Alert, Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Caption } from 'react-native-paper';
 import { CourseType, Language } from 'thu-learn-lib';
-import { useAppSelector } from 'data/store';
+import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
@@ -21,7 +21,7 @@ type Props = NativeStackScreenProps<
 >;
 
 const CourseInformationSharing: React.FC<Props> = () => {
-  const currentSemesterId = useAppSelector(state => state.semesters.current);
+  const currentSemesterId = useCurrentSemester();
   const courseInformationSharing = useSettings(
     settings => settings.courseInformationSharing,
   );

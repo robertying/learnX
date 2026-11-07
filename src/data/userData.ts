@@ -20,6 +20,11 @@ export interface UserData {
   hiddenCourses: string[];
   /** Course ids in the order the user dragged them into. */
   courseOrder: string[];
+  /**
+   * The semester the app shows. Starts as the school's current semester and
+   * can be changed in Settings.
+   */
+  currentSemester: string | null;
 }
 
 export const emptyUserData = (): UserData => ({
@@ -27,6 +32,7 @@ export const emptyUserData = (): UserData => ({
   archived: { notice: [], assignment: [], file: [] },
   hiddenCourses: [],
   courseOrder: [],
+  currentSemester: null,
 });
 
 /** Lays saved user data over the current, keeping lists that are missing. */
@@ -100,3 +106,10 @@ export const setCourseHidden = (courseId: string, flag: boolean) => {
 export const setCourseOrder = (courseIds: string[]) => {
   useUserDataStore.setState({ courseOrder: courseIds });
 };
+
+export const setCurrentSemester = (semesterId: string) => {
+  useUserDataStore.setState({ currentSemester: semesterId });
+};
+
+export const useCurrentSemester = () =>
+  useUserDataStore(data => data.currentSemester);

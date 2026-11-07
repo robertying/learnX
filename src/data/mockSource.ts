@@ -9,6 +9,8 @@ import {
 import type { DataSource } from 'data/source';
 import type { PersistAppState } from 'data/types/state';
 
+const mock = (): typeof import('data/mock') => require('data/mock');
+
 /**
  * Stands in for learn.tsinghua.edu.cn when a mock account is logged in.
  *
@@ -175,15 +177,15 @@ export const mockSource: DataSource = {
   logout: () => Promise.resolve(),
   getCSRFToken: () => 'mock-csrf-token',
   setLanguage: () => request(() => undefined),
-  getUserInfo: () => request(() => mockData().user as any),
-  getSemesterIdList: () => request(() => mockData().semesters.items),
+  getUserInfo: () => request(() => mock().mockUser as any),
+  getSemesterIdList: () => request(() => mock().mockSemesters),
   getCurrentSemester: () =>
-    request(() => semesterInfo(mockData().semesters.current!)),
+    request(() => semesterInfo(mock().mockCurrentSemester)),
   getCourseList: semesterId =>
     request(
       () =>
-        mockData()
-          .courses.items.filter(course => course.semesterId === semesterId)
+        mock()
+          .mockCourses.filter(course => course.semesterId === semesterId)
           .map(course => omit(course, ['semesterId'])) as any,
     ),
   getNotificationList: courseId =>

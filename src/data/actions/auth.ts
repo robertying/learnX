@@ -9,7 +9,8 @@ import {
   SET_SSO_IN_PROGRESS,
 } from 'data/types/constants';
 import { clearCredentials, saveCredentials } from 'data/credentials';
-import { getUserInfo } from './user';
+import { queryClient } from 'data/queryClient';
+import { userQuery } from 'data/queries';
 import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 
@@ -74,7 +75,7 @@ export function login({
         }).catch(() => undefined);
       }
       dispatch(loginAction.success());
-      dispatch(getUserInfo());
+      queryClient.prefetchQuery(userQuery);
     } catch (err) {
       dispatch(loginAction.failure(serializeError(err)));
     }

@@ -9,7 +9,7 @@ import {
   setSetting,
   removeEventIdForAssignment,
 } from 'data/settings';
-import { store } from 'data/store';
+import { getCachedCourses } from 'data/queries';
 import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
 import { removeTags } from './html';
@@ -369,7 +369,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
     dayjs(item.deadline).isAfter(dayjs()),
   );
 
-  const courses = store.getState().courses.items;
+  const courses = getCachedCourses();
 
   await Promise.all(
     savingAssignments.map(async assignment => {

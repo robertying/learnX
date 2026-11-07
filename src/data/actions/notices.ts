@@ -1,6 +1,7 @@
 import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
+import { getCourseNames } from 'data/queries';
 import { dataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
 import {
@@ -21,17 +22,15 @@ export const getNoticesForCourseAction = createAsyncAction(
 )<undefined, { courseId: string; notices: Notice[] }, ApiError>();
 
 export function getNoticesForCourse(courseId: string): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getNoticesForCourseAction.request());
 
     try {
       const results = await dataSource.getNotificationList(courseId);
-      const courseName = getState().courses.names[courseId];
       const notices = results.map<Notice>(result => ({
         ...result,
         courseId,
-        courseName: courseName.name,
-        courseTeacherName: courseName.teacherName,
+        ...getCourseNames(courseId),
       }));
       const timestamps = new Map(
         notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
@@ -55,7 +54,7 @@ export const getAllNoticesForCoursesAction = createAsyncAction(
 )<undefined, Notice[], ApiError>();
 
 export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAllNoticesForCoursesAction.request());
 
     try {
@@ -63,15 +62,12 @@ export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
         courseIds,
         ContentType.NOTIFICATION,
       );
-      const courseNames = getState().courses.names;
       const notices = Object.keys(results).flatMap(courseId => {
         const noticesForCourse = results[courseId];
-        const courseName = courseNames[courseId];
         return noticesForCourse.map<Notice>(notice => ({
           ...notice,
           courseId,
-          courseName: courseName.name,
-          courseTeacherName: courseName.teacherName,
+          ...getCourseNames(courseId),
         }));
       });
       const timestamps = new Map(

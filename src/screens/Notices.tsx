@@ -7,6 +7,7 @@ import SafeArea from 'components/SafeArea';
 import { getAllNoticesForCourses } from 'data/actions/notices';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { useUserData } from 'data/userData';
+import { useCourseIds } from 'data/queries';
 import { Notice } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -19,10 +20,7 @@ const Notices: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const courseIds = useAppSelector(
-    state => state.courses.items.map(i => i.id),
-    (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort()),
-  );
+  const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.notice);
   const archivedIds = useUserData(data => data.archived.notice);

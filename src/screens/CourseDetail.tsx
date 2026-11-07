@@ -21,6 +21,7 @@ import {
 import Icon from '@react-native-vector-icons/material-icons';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { useCourse } from 'data/queries';
 import { getNoticesForCourse } from 'data/actions/notices';
 import { getAssignmentsForCourse } from 'data/actions/assignments';
 import { getFilesForCourse } from 'data/actions/files';
@@ -171,9 +172,7 @@ const routes = [
 type Props = NativeStackScreenProps<CourseStackParams, 'CourseDetail'>;
 
 const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
-  const course = useAppSelector(state =>
-    state.courses.items.find(item => item.id === route.params.id),
-  );
+  const course = useCourse(route.params.id);
 
   useHeaderTitle(navigation, course?.name, course?.teacherName);
 

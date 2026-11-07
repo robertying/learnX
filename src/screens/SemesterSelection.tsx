@@ -1,45 +1,33 @@
-import { useCallback, useEffect, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useQuery } from '@tanstack/react-query';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
-import { dataSource } from 'data/source';
-import { useAppDispatch, useAppSelector } from 'data/store';
-import {
-  getAllSemesters,
-  getCurrentSemester,
-  setCurrentSemester,
-} from 'data/actions/semesters';
+import { latestSemesterQuery, semestersQuery, useLoggedIn } from 'data/queries';
+import { setCurrentSemester, useCurrentSemester } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/parse';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
 
+const noSemesters: string[] = [];
+
 const SemesterSelection: React.FC<Props> = () => {
-  const dispatch = useAppDispatch();
-  const semesters = useAppSelector(state => state.semesters.items);
-  const fetching = useAppSelector(state => state.semesters.fetching);
-  const currentSemesterId = useAppSelector(state => state.semesters.current);
+  const loggedIn = useLoggedIn();
+  const currentSemesterId = useCurrentSemester();
+  const semestersResult = useQuery({ ...semestersQuery, enabled: loggedIn });
+  const latestResult = useQuery({ ...latestSemesterQuery, enabled: loggedIn });
 
-  const [latestSemester, setLatestSemester] = useState<string | null>(null);
+  const semesters = semestersResult.data ?? noSemesters;
+  const latestSemester = latestResult.data;
 
-  const getLatestSemester = () =>
-    dataSource.getCurrentSemester().then(({ id }) => setLatestSemester(id));
-
-  const handleSelect = (id: string) => {
-    dispatch(setCurrentSemester(id));
+  const handleRefresh = () => {
+    if (loggedIn) {
+      semestersResult.refetch();
+      latestResult.refetch();
+    }
   };
-
-  const handleRefresh = useCallback(() => {
-    getLatestSemester();
-    dispatch(getCurrentSemester());
-    dispatch(getAllSemesters());
-  }, [dispatch]);
-
-  useEffect(() => {
-    handleRefresh();
-  }, [handleRefresh]);
 
   return (
     <SafeArea>
@@ -54,7 +42,7 @@ const SemesterSelection: React.FC<Props> = () => {
               }
               primaryText={getSemesterTextFromId(latestSemester)}
               type="none"
-              onPress={() => handleSelect(latestSemester)}
+              onPress={() => setCurrentSemester(latestSemester)}
             />
           ) : null
         }
@@ -63,11 +51,11 @@ const SemesterSelection: React.FC<Props> = () => {
             iconName={currentSemesterId === item ? 'check' : undefined}
             primaryText={item ? getSemesterTextFromId(item) : ''}
             type="none"
-            onPress={() => handleSelect(item)}
+            onPress={() => setCurrentSemester(item)}
           />
         )}
         keyExtractor={item => item}
-        refreshing={fetching}
+        refreshing={semestersResult.isFetching || latestResult.isFetching}
         onRefresh={handleRefresh}
       />
     </SafeArea>

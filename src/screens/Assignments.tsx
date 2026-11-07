@@ -9,6 +9,7 @@ import SafeArea from 'components/SafeArea';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { useSettings } from 'data/settings';
 import { useUserData } from 'data/userData';
+import { useCourseIds } from 'data/queries';
 import { getAllAssignmentsForCourses } from 'data/actions/assignments';
 import { Assignment } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -26,10 +27,7 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const courseIds = useAppSelector(
-    state => state.courses.items.map(i => i.id),
-    (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort()),
-  );
+  const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.assignment);
   const archivedIds = useUserData(data => data.archived.assignment);

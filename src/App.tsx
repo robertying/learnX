@@ -1,3 +1,4 @@
+import { QueryClientProvider, useQuery } from '@tanstack/react-query';
 import {
   startTransition,
   useCallback,
@@ -117,9 +118,10 @@ import {
   useCredentials,
 } from 'data/credentials';
 import { login } from 'data/actions/auth';
-import { getAllSemesters, getCurrentSemester } from 'data/actions/semesters';
 import { setPendingAssignmentData } from 'data/actions/assignments';
-import { getCoursesForSemester } from 'data/actions/courses';
+import { queryClient, restoreQueryCache } from 'data/queryClient';
+import { latestSemesterQuery, useCourses } from 'data/queries';
+import { setCurrentSemester, useCurrentSemester } from 'data/userData';
 import useToast from 'hooks/useToast';
 import { setUpBackgroundFetch } from 'helpers/background';
 import { copyFileToCache } from 'helpers/fs';
@@ -392,10 +394,8 @@ const useMountedTabCount = () => {
 
 const MainTab = () => {
   const mountedTabCount = useMountedTabCount();
-  const dispatch = useAppDispatch();
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const currentSemester = useAppSelector(state => state.semesters.current);
-  const semesters = useAppSelector(state => state.semesters.items);
+  const currentSemester = useCurrentSemester();
   const newChangelog = useSettings(
     settings => settings.lastShowChangelogVersion !== packageJson.version,
   );
@@ -404,24 +404,19 @@ const MainTab = () => {
     settings => settings.courseInformationSharingBadgeShown,
   );
 
+  // Shows the school's current semester until the user picks another.
+  const { data: latestSemester } = useQuery({
+    ...latestSemesterQuery,
+    enabled: loggedIn && !currentSemester,
+  });
   useEffect(() => {
-    if (!loggedIn) {
-      return;
+    if (!currentSemester && latestSemester) {
+      setCurrentSemester(latestSemester);
     }
+  }, [currentSemester, latestSemester]);
 
-    if (semesters.length === 0) {
-      dispatch(getAllSemesters());
-    }
-    if (!currentSemester) {
-      dispatch(getCurrentSemester());
-    }
-  }, [dispatch, currentSemester, loggedIn, semesters.length]);
-
-  useEffect(() => {
-    if (loggedIn && currentSemester) {
-      dispatch(getCoursesForSemester(currentSemester));
-    }
-  }, [dispatch, currentSemester, loggedIn]);
+  // Keeps the semester's courses fetched for every tab.
+  useCourses();
 
   useEffect(() => {
     if (loggedIn) {
@@ -1098,17 +1093,23 @@ const App = () => {
         }
       >
         <ToastProvider>
-          <StoreProvider store={store}>
-            <PersistGate
-              loading={<Splash />}
-              persistor={persistor}
-              onBeforeLift={async () => {
-                await Promise.all([loadCredentials(), importLegacyUserData()]);
-              }}
-            >
-              <Container />
-            </PersistGate>
-          </StoreProvider>
+          <QueryClientProvider client={queryClient}>
+            <StoreProvider store={store}>
+              <PersistGate
+                loading={<Splash />}
+                persistor={persistor}
+                onBeforeLift={async () => {
+                  await Promise.all([
+                    loadCredentials(),
+                    importLegacyUserData(),
+                    restoreQueryCache(),
+                  ]);
+                }}
+              >
+                <Container />
+              </PersistGate>
+            </StoreProvider>
+          </QueryClientProvider>
         </ToastProvider>
         <StatusBar
           barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}

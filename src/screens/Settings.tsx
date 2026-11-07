@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { StackActions } from '@react-navigation/native';
@@ -9,7 +10,8 @@ import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { getLatestRelease } from 'helpers/update';
 import { clearStore } from 'data/actions/root';
-import { useAppDispatch, useAppSelector } from 'data/store';
+import { useAppDispatch } from 'data/store';
+import { useLoggedIn, userQuery } from 'data/queries';
 import { setSetting, useSettings } from 'data/settings';
 import { clearLoginCookies, dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
@@ -25,7 +27,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
   const dispatch = useAppDispatch();
-  const userInfo = useAppSelector(state => state.user);
+  const loggedIn = useLoggedIn();
+  const { data: userInfo } = useQuery({ ...userQuery, enabled: loggedIn });
   const username = useCredentialsStore(state => state.credentials?.username);
   const newChangelog = useSettings(
     settings => settings.lastShowChangelogVersion !== packageJson.version,
@@ -91,9 +94,9 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     <SafeArea>
       <ScrollView style={Styles.flex1}>
         <TableCell
-          imageAlt={userInfo.name ?? username ?? 'learnX'}
-          primaryText={userInfo.name ?? username ?? 'learnX'}
-          secondaryText={userInfo.department ?? undefined}
+          imageAlt={userInfo?.name ?? username ?? 'learnX'}
+          primaryText={userInfo?.name ?? username ?? 'learnX'}
+          secondaryText={userInfo?.department ?? undefined}
           type="none"
         />
         <TableCell

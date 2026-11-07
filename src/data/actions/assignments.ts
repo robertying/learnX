@@ -1,5 +1,6 @@
 import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
+import { getCourseNames } from 'data/queries';
 import { dataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
 import {
@@ -29,17 +30,15 @@ export const getAssignmentsForCourseAction = createAsyncAction(
 >();
 
 export function getAssignmentsForCourse(courseId: string): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAssignmentsForCourseAction.request());
 
     try {
       const results = await dataSource.getHomeworkList(courseId);
-      const courseName = getState().courses.names[courseId];
       const assignments = results.map<Assignment>(result => ({
         ...result,
         courseId,
-        courseName: courseName.name,
-        courseTeacherName: courseName.teacherName,
+        ...getCourseNames(courseId),
       }));
       dispatch(
         getAssignmentsForCourseAction.success({
@@ -60,7 +59,7 @@ export const getAllAssignmentsForCoursesAction = createAsyncAction(
 )<undefined, Assignment[], ApiError>();
 
 export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAllAssignmentsForCoursesAction.request());
 
     try {
@@ -68,15 +67,12 @@ export function getAllAssignmentsForCourses(courseIds: string[]): ThunkResult {
         courseIds,
         ContentType.HOMEWORK,
       );
-      const courseNames = getState().courses.names;
       const assignments = Object.keys(results).flatMap(courseId => {
         const assignmentsForCourse = results[courseId];
-        const courseName = courseNames[courseId];
         return assignmentsForCourse.map<Assignment>(assignment => ({
           ...assignment,
           courseId,
-          courseName: courseName.name,
-          courseTeacherName: courseName.teacherName,
+          ...getCourseNames(courseId),
         }));
       });
       dispatch(

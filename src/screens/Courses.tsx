@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import { useAppDispatch, useAppSelector } from 'data/store';
-import { getCoursesForSemester } from 'data/actions/courses';
+import { useAppSelector } from 'data/store';
+import { useCourses, useLoggedIn } from 'data/queries';
 import { useSettings } from 'data/settings';
-import { useUserData } from 'data/userData';
+import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/parse';
@@ -21,26 +21,21 @@ type Props = NativeStackScreenProps<CourseStackParams, 'Courses'>;
 const Courses: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const currentSemesterId = useAppSelector(state => state.semesters.current);
+  const currentSemesterId = useCurrentSemester();
   const courseInformationSharing = useSettings(
     settings => settings.courseInformationSharing,
   );
-  const fetchedCourses = useAppSelector(state => state.courses.items);
+  const {
+    courses: fetchedCourses,
+    isFetching: fetching,
+    refetch,
+  } = useCourses();
   const courseOrder = useUserData(data => data.courseOrder);
   const courses = useMemo(
     () => sortByOrder(fetchedCourses, courseOrder),
     [fetchedCourses, courseOrder],
   );
-  const coursesWithoutOrder = useAppSelector(
-    state => state.courses.items,
-    (a, b) =>
-      JSON.stringify(a.map(course => course.id).sort()) ===
-      JSON.stringify(b.map(course => course.id).sort()),
-  );
   const hiddenIds = useUserData(data => data.hiddenCourses);
-  const fetching = useAppSelector(state => state.courses.fetching);
 
   const notices = useAppSelector(state => state.notices.items);
   const assignments = useAppSelector(state => state.assignments.items);
@@ -67,11 +62,12 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const all = coursesWithCounts.filter(i => !hiddenIds.includes(i.id));
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));
 
-  const handleRefresh = useCallback(() => {
+  const loggedIn = useLoggedIn();
+  const handleRefresh = () => {
     if (loggedIn && currentSemesterId) {
-      dispatch(getCoursesForSemester(currentSemesterId));
+      refetch();
     }
-  }, [currentSemesterId, dispatch, loggedIn]);
+  };
 
   const handlePush = (item: Course) => {
     if (detailNavigator) {
@@ -87,18 +83,14 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    handleRefresh();
-  }, [handleRefresh]);
-
-  useEffect(() => {
     if (courseInformationSharing) {
       (async () => {
         try {
-          await uploadCourses(coursesWithoutOrder);
+          await uploadCourses(fetchedCourses);
         } catch {}
       })();
     }
-  }, [courseInformationSharing, coursesWithoutOrder]);
+  }, [courseInformationSharing, fetchedCourses]);
 
   return (
     <SafeArea>

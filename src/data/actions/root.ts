@@ -5,6 +5,7 @@ import { clearCredentials } from 'data/credentials';
 import { LEGACY_SETTINGS_KEY } from 'data/legacy';
 import { resetSettings } from 'data/settings';
 import { resetUserData } from 'data/userData';
+import { clearQueryCache } from 'data/queryClient';
 import { ThunkResult } from 'data/types/actions';
 import { CLEAR_STORE, SET_MOCK_STORE } from 'data/types/constants';
 
@@ -16,6 +17,7 @@ export function clearStore(): ThunkResult {
     dispatch(clearStoreAction());
     resetSettings();
     resetUserData();
+    clearQueryCache();
     await Promise.all([
       clearCredentials(),
       persistor.purge(),
@@ -35,6 +37,7 @@ export function setMockStore(): ThunkResult {
     const { mockUserData } = require('data/mock') as typeof import('data/mock');
     resetSettings();
     resetUserData(mockUserData);
+    clearQueryCache();
     dispatch(setMockStoreAction());
   };
 }

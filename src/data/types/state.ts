@@ -57,13 +57,6 @@ export interface SettingsState {
   courseEventOmitLocation: boolean;
 }
 
-export interface SemestersState {
-  fetching: boolean;
-  items: string[];
-  current: string | null;
-  error?: FailReason | null;
-}
-
 export type Course = Pick<
   CourseInfo,
   | 'id'
@@ -78,18 +71,6 @@ export type Course = Pick<
 > & {
   semesterId: string;
 };
-export interface CoursesState {
-  fetching: boolean;
-  items: Course[];
-  names: {
-    [id: string]: {
-      name: string;
-      teacherName: string;
-    };
-  };
-  error?: FailReason | null;
-}
-
 interface CourseExtraInfo {
   courseId: string;
   courseName: string;
@@ -183,7 +164,6 @@ export interface FilesState {
 export type User = {
   [key in keyof UserInfo]: UserInfo[key] | null;
 };
-export interface UserState extends User {}
 
 export interface PersistPartial {
   _persist: PersistState;
@@ -191,11 +171,8 @@ export interface PersistPartial {
 
 export interface AppState {
   auth: AuthState;
-  semesters: SemestersState;
-  courses: CoursesState;
   notices: NoticeState;
   assignments: AssignmentsState;
   files: FilesState;
-  user: UserState;
 }
 export type PersistAppState = AppState & PersistPartial;

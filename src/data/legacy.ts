@@ -18,7 +18,7 @@ import {
 /**
  * Up to 18.0.x redux-persist kept user data in AsyncStorage: settings under
  * their own key, and favorites, archives, hidden courses and the course order
- * inside the slices of the root key.
+ * inside the slices of the root key, with the semester being shown.
  */
 export const LEGACY_ROOT_KEY = 'persist:root';
 export const LEGACY_SETTINGS_KEY = 'persist:settings';
@@ -109,6 +109,11 @@ export const legacySettings = (saved: Json): Partial<SettingsState> => {
 export const legacyUserData = (root: Json): Partial<UserData> => {
   const result: Partial<UserData> = {};
 
+  const semesters = root.semesters;
+  if (isObject(semesters) && typeof semesters.current === 'string') {
+    result.currentSemester = semesters.current;
+  }
+
   const courses = root.courses;
   if (isObject(courses)) {
     if (isStringArray(courses.hidden)) {
@@ -142,8 +147,25 @@ export const legacyUserData = (root: Json): Partial<UserData> => {
   return result;
 };
 
+/**
+ * Builds from before the semester being shown moved to the user data imported
+ * the rest without it, and it stays in the root only until the Redux store
+ * migrates that. Takes it from there if it is still missing.
+ */
+const importLegacySemester = async () => {
+  if (useUserDataStore.getState().currentSemester) {
+    return;
+  }
+  const root = parseLegacyPersist(await AsyncStorage.getItem(LEGACY_ROOT_KEY));
+  const currentSemester = root && legacyUserData(root).currentSemester;
+  if (currentSemester) {
+    useUserDataStore.setState({ currentSemester });
+  }
+};
+
 const importLegacy = async () => {
   if (kvStorage.getItem(LEGACY_IMPORTED_KEY)) {
+    await importLegacySemester();
     return;
   }
 
