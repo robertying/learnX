@@ -2,7 +2,6 @@ import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import { ContentType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
-import allSettled from 'promise.allsettled';
 import { AppDispatch, store } from 'data/store';
 import { dataSource, loginWithFingerPrint } from 'data/source';
 import { Assignment, CoursesState, File, Notice } from 'data/types/state';
@@ -125,7 +124,7 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
     return BackgroundTask.BackgroundTaskResult.Success;
   }
 
-  const results = await allSettled([
+  const results = await Promise.allSettled([
     getAllNotices(dispatch, state.courses),
     getAllAssignments(dispatch, state.courses),
     getAllFiles(dispatch, state.courses),

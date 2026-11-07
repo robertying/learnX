@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { Learn2018Helper, addCSRFTokenToUrl } from 'thu-learn-lib';
-import mime from 'mime-types';
+import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { store } from 'data/store';
@@ -84,7 +84,7 @@ export const submitAssignment = async (
     body.append('fileupload', {
       uri: attachment.uri,
       name: attachment.name,
-      type: mime.lookup(attachment.uri) || 'application/octet-stream',
+      type: mime.getType(attachment.uri) || 'application/octet-stream',
     } as any);
   }
 
