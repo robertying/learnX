@@ -120,11 +120,10 @@ const CalendarEvent: React.FC<Props> = () => {
 
       if (events.length === 0) {
         toast(t('courseScheduleSyncNoCourse'), 'warning');
-        return;
+      } else {
+        await saveCoursesToCalendar(events, startDay, endDay);
+        toast(t('courseScheduleSyncSucceeded'), 'success');
       }
-
-      await saveCoursesToCalendar(events, startDay, endDay);
-      toast(t('courseScheduleSyncSucceeded'), 'success');
     } catch (err) {
       if ((err as Error).message === 'Missing calendar permission') {
         toast(t('courseScheduleSyncNoCalendarPermission'), 'error');
@@ -133,9 +132,8 @@ const CalendarEvent: React.FC<Props> = () => {
       } else {
         toast(t('courseScheduleSyncRepetitiveError'), 'error');
       }
-    } finally {
-      setCourseSyncing(false);
     }
+    setCourseSyncing(false);
   };
 
   const handleAssignmentSync = async (
@@ -168,12 +166,11 @@ const CalendarEvent: React.FC<Props> = () => {
         } else {
           toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
         }
-      } finally {
-        if (type === 'calendar') {
-          setAssignmentCalendarSyncing(false);
-        } else {
-          setAssignmentReminderSyncing(false);
-        }
+      }
+      if (type === 'calendar') {
+        setAssignmentCalendarSyncing(false);
+      } else {
+        setAssignmentReminderSyncing(false);
       }
     }
 
@@ -201,9 +198,8 @@ const CalendarEvent: React.FC<Props> = () => {
       } else {
         toast(t('calendarExportFailed') + (err as Error).message, 'error');
       }
-    } finally {
-      setExporting(false);
     }
+    setExporting(false);
   };
 
   const handleCalendarDelete = () => {

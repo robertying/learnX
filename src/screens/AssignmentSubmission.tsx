@@ -145,57 +145,49 @@ const AssignmentSubmissionContent: React.FC<{
 
   const handleDocumentPick = async () => {
     handlePickerMenuClose();
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        copyToCacheDirectory: true,
-      });
-      if (result.canceled) {
-        return;
-      }
-      const files = result.assets;
-      if (!files || files.length === 0) {
-        throw new Error('No file picked');
-      }
-
-      const file = files[0];
-      setAttachmentResult({
-        uri: file.uri,
-        type: file.mimeType ?? null,
-        name: file.name ?? getDefaultAttachmentName(file.mimeType),
-        size: file.size,
-      });
-      dispatch(setPendingAssignmentData(null));
-    } catch {
-      toast(t('filePickFailed'), 'error');
+    const result = await DocumentPicker.getDocumentAsync({
+      copyToCacheDirectory: true,
+    }).catch(() => null);
+    if (result?.canceled) {
+      return;
     }
+    const file = result?.assets?.[0];
+    if (!file) {
+      toast(t('filePickFailed'), 'error');
+      return;
+    }
+
+    setAttachmentResult({
+      uri: file.uri,
+      type: file.mimeType ?? null,
+      name: file.name ?? getDefaultAttachmentName(file.mimeType),
+      size: file.size,
+    });
+    dispatch(setPendingAssignmentData(null));
   };
 
   const handlePhotoPick = async () => {
     handlePickerMenuClose();
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images', 'videos'],
-        quality: 1,
-      });
-      if (result.canceled) {
-        return;
-      }
-      const photos = result.assets;
-      if (!photos || photos.length === 0) {
-        throw new Error('No photo picked');
-      }
-
-      const photo = photos[0];
-      setAttachmentResult({
-        uri: photo.uri,
-        type: photo.mimeType ?? null,
-        name: getDefaultAttachmentName(photo.mimeType),
-        size: photo.fileSize,
-      });
-      dispatch(setPendingAssignmentData(null));
-    } catch {
-      toast(t('filePickFailed'), 'error');
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images', 'videos'],
+      quality: 1,
+    }).catch(() => null);
+    if (result?.canceled) {
+      return;
     }
+    const photo = result?.assets?.[0];
+    if (!photo) {
+      toast(t('filePickFailed'), 'error');
+      return;
+    }
+
+    setAttachmentResult({
+      uri: photo.uri,
+      type: photo.mimeType ?? null,
+      name: getDefaultAttachmentName(photo.mimeType),
+      size: photo.fileSize,
+    });
+    dispatch(setPendingAssignmentData(null));
   };
 
   const handleFileOpen = (
@@ -221,6 +213,19 @@ const AssignmentSubmissionContent: React.FC<{
     setUploadError(false);
     setUploading(true);
 
+    const customName = customAttachmentName.trim();
+    const attachment = attachmentResult
+      ? {
+          uri: attachmentResult.uri,
+          name: customName
+            ? `${customName}.${getExtension(attachmentResult.name)}`
+            : attachmentResult.name,
+        }
+      : undefined;
+    const hasSubmission = Boolean(content || attachment);
+
+    // React Compiler can't compile conditional expressions inside try blocks,
+    // so the arguments are prepared above.
     try {
       if (removeAttachment) {
         await submitAssignment(
@@ -230,44 +235,31 @@ const AssignmentSubmissionContent: React.FC<{
           setProgress,
           true,
         );
-      } else if (content || attachmentResult) {
-        const replaceName = (name: string) => {
-          const customName = customAttachmentName.trim();
-          if (!customName) {
-            return name;
-          }
-          const ext = getExtension(name);
-          return `${customName}.${ext}`;
-        };
-
+      } else if (hasSubmission) {
         await submitAssignment(
           studentHomeworkId,
           content,
-          attachmentResult
-            ? {
-                uri: attachmentResult.uri,
-                name: replaceName(attachmentResult.name),
-              }
-            : undefined,
+          attachment,
           setProgress,
         );
       }
-
-      setUploading(false);
-      setProgress(0);
-
-      dispatch(setPendingAssignmentData(null));
-      dispatch(getAssignmentsForCourse(courseId));
-
-      toast(t('assignmentSubmissionSucceeded'), 'success');
-      navigation.goBack();
     } catch {
       setUploading(false);
       setUploadError(true);
       setProgress(0);
 
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
     }
+
+    setUploading(false);
+    setProgress(0);
+
+    dispatch(setPendingAssignmentData(null));
+    dispatch(getAssignmentsForCourse(courseId));
+
+    toast(t('assignmentSubmissionSucceeded'), 'success');
+    navigation.goBack();
   }, [
     attachmentResult,
     content,

@@ -265,6 +265,9 @@ importers:
       babel-plugin-preval:
         specifier: 5.1.0
         version: 5.1.0
+      babel-plugin-react-compiler:
+        specifier: 1.0.0
+        version: 1.0.0
       buffer:
         specifier: 6.0.3
         version: 6.0.3
