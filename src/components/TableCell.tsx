@@ -1,8 +1,6 @@
 import { StyleSheet, View, ViewProps, TextInput } from 'react-native';
 import {
   Avatar,
-  Text,
-  useTheme,
   Switch,
   Badge,
   ActivityIndicator,
@@ -12,6 +10,8 @@ import Icon, {
   MaterialIconsIconName,
 } from '@react-native-vector-icons/material-icons';
 import Touchable from './Touchable';
+import { Text } from 'components/Text';
+import { useTheme } from 'theme';
 
 export interface TableCellProps extends ViewProps {
   type: 'none' | 'switch' | 'arrow' | 'input';

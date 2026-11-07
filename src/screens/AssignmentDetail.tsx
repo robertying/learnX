@@ -1,13 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import {
-  Caption,
-  Divider,
-  Title,
-  useTheme,
-  Text,
-  Chip,
-} from 'react-native-paper';
+import { Chip } from 'react-native-paper';
 import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
@@ -36,6 +29,9 @@ import { Assignment } from 'data/types/state';
 import { useAssignment } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
+import { Caption, Text, Title } from 'components/Text';
+import Divider from 'components/Divider';
+import { useTheme } from 'theme';
 
 type Props = MainStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
 

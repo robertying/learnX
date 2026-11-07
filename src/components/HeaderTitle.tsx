@@ -1,7 +1,7 @@
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { Text } from 'react-native-paper';
 import DeviceInfo from 'constants/DeviceInfo';
 import Numbers from 'constants/Numbers';
+import { Text } from 'components/Text';
 
 export interface HeaderTitleProps {
   title: string;

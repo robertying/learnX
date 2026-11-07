@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
@@ -7,6 +6,7 @@ import Colors from 'constants/Colors';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/html';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
+import { Caption, Paragraph, Subheading, Title } from 'components/Text';
 
 export interface FileCardProps extends CardWrapperProps {
   data: File;

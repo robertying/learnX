@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
@@ -9,6 +8,7 @@ import { removeTags } from 'helpers/html';
 import { isLocaleChinese } from 'helpers/i18n';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import Colors from 'constants/Colors';
+import { Caption, Paragraph, Subheading, Title } from 'components/Text';
 
 export interface AssignmentCardProps extends CardWrapperProps {
   data: Assignment;

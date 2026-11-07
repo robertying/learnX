@@ -100,10 +100,39 @@ const darkThemeColors = {
   onSurfaceDisabled: 'rgba(233, 224, 228, 0.38)',
   backdrop: 'rgba(54, 46, 53, 0.4)',
 };
+/** Adds an alpha channel to an `rgb(r, g, b)` color. */
+const withAlpha = (rgb: string, alpha: number) =>
+  rgb.replace(/^rgb\((.*)\)$/, `rgba($1, ${alpha})`);
+
+/**
+ * Text colors on top of `onSurface`: `onSurfaceHigh` for titles and body
+ * text, `onSurfaceMedium` for captions.
+ */
+const textColors = (colors: typeof lightThemeColors) => ({
+  onSurfaceHigh: withAlpha(colors.onSurface, 0.87),
+  onSurfaceMedium: withAlpha(colors.onSurface, 0.54),
+});
+
+export type ThemeColors = typeof lightThemeColors &
+  ReturnType<typeof textColors>;
+
+export interface Theme {
+  dark: boolean;
+  colors: ThemeColors;
+}
+
+export const BrandLightTheme: Theme = {
+  dark: false,
+  colors: { ...lightThemeColors, ...textColors(lightThemeColors) },
+};
+export const BrandDarkTheme: Theme = {
+  dark: true,
+  colors: { ...darkThemeColors, ...textColors(darkThemeColors) },
+};
+
 export const BrandLightPaperTheme = {
   ...MD3LightTheme,
-  dark: false,
-  colors: lightThemeColors,
+  ...BrandLightTheme,
   fonts: MD3LightTheme.fonts,
 };
 export const BrandLightNavigationTheme = {
@@ -112,8 +141,7 @@ export const BrandLightNavigationTheme = {
 };
 export const BrandDarkPaperTheme = {
   ...MD3DarkTheme,
-  dark: true,
-  colors: darkThemeColors,
+  ...BrandDarkTheme,
   fonts: MD3DarkTheme.fonts,
 };
 export const BrandDarkNavigationTheme = {
@@ -121,7 +149,11 @@ export const BrandDarkNavigationTheme = {
   colors: darkThemeColors,
 };
 
-/** The Paper theme for the system appearance. */
+/** The app's colors for the system appearance. Use this in components. */
+export const useTheme = (): Theme =>
+  useColorScheme() === 'dark' ? BrandDarkTheme : BrandLightTheme;
+
+/** The Paper theme for the system appearance, for the remaining Paper controls. */
 export const usePaperTheme = () =>
   useColorScheme() === 'dark' ? BrandDarkPaperTheme : BrandLightPaperTheme;
 

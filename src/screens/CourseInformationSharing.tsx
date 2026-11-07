@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { Alert, Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Caption } from 'react-native-paper';
 import { CourseType, Language } from 'thu-learn-lib';
 import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
@@ -14,6 +13,7 @@ import { isLocaleChinese, t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
+import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,

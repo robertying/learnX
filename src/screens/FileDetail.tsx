@@ -7,15 +7,7 @@ import {
   useEffectEvent,
 } from 'react';
 import { Linking, Platform, StyleSheet, View } from 'react-native';
-import {
-  useTheme,
-  Text,
-  ProgressBar,
-  Title,
-  Caption,
-  Divider,
-  Chip,
-} from 'react-native-paper';
+import { ProgressBar, Chip } from 'react-native-paper';
 import type {
   NativeStackHeaderItem,
   NativeStackScreenProps,
@@ -50,6 +42,9 @@ import { useSettings } from 'data/settings';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
+import { Caption, Text, Title } from 'components/Text';
+import Divider from 'components/Divider';
+import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 

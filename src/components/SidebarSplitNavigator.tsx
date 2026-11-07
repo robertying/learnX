@@ -1,6 +1,5 @@
 import { createRef, useContext, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { useTheme } from 'react-native-paper';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import {
   createNavigatorFactory,
@@ -21,6 +20,7 @@ import {
 import { SidebarView } from '../../modules/sidebar';
 import NativeSplitViewProvider from './NativeSplitView';
 import { SplitViewContext } from './SplitView';
+import { useTheme } from 'theme';
 
 export interface SidebarSplitNavigationOptions {
   title: string;

@@ -1,7 +1,7 @@
 import { Platform, StyleProp, ViewStyle } from 'react-native';
-import { useTheme } from 'react-native-paper';
 import { Button, Host } from '@expo/ui';
 import { buttonStyle } from '@expo/ui/swift-ui/modifiers';
+import { useTheme } from 'theme';
 
 export interface ContainedButtonProps {
   label: string;

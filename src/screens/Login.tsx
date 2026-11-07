@@ -8,7 +8,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
+import { Button, Switch, TextInput } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
@@ -24,6 +24,7 @@ import env from 'helpers/env';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { LoginStackParams } from './types';
+import { Caption, Text } from 'components/Text';
 
 type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
 

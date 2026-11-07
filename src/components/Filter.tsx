@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
-import { Badge, Divider, List, Text, useTheme } from 'react-native-paper';
+import { Badge, List } from 'react-native-paper';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -10,6 +10,9 @@ import Animated, {
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { t } from 'helpers/i18n';
 import Colors from 'constants/Colors';
+import { Text } from 'components/Text';
+import Divider from 'components/Divider';
+import { useTheme } from 'theme';
 
 export type FilterSelection =
   | 'all'

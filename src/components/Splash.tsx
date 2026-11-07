@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
-import { useTheme } from 'react-native-paper';
 import Logo from 'components/Logo';
+import { useTheme } from 'theme';
 
 const Splash: React.FC<React.PropsWithChildren<unknown>> = () => {
   const colorScheme = useColorScheme();

@@ -1,8 +1,8 @@
 import { createContext, useState, Children } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Divider } from 'react-native-paper';
 import { NavigationContainerRef } from '@react-navigation/native';
 import Numbers from 'constants/Numbers';
+import Divider from 'components/Divider';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null> | null;

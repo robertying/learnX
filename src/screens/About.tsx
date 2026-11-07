@@ -1,6 +1,5 @@
 import { Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Title, Text } from 'react-native-paper';
 import DeviceInfo from 'constants/DeviceInfo';
 import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
@@ -8,6 +7,7 @@ import ScrollView from 'components/ScrollView';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
+import { Text, Title } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'About'>;
 

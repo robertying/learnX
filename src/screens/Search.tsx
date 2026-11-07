@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Searchbar, Subheading, useTheme } from 'react-native-paper';
+import { Searchbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
 import Styles from 'constants/Styles';
@@ -20,6 +20,8 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from './types';
+import { Subheading } from 'components/Text';
+import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
 
