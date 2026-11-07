@@ -44,12 +44,12 @@ const Notices: React.FC<Props> = ({ navigation }) => {
       if (detailNavigator) {
         detailNavigator.dispatch(
           StackActions.replace('NoticeDetail', {
-            ...item,
+            id: item.id,
             disableAnimation: true,
           }),
         );
       } else {
-        navigation.push('NoticeDetail', item);
+        navigation.push('NoticeDetail', { id: item.id });
       }
     },
     [detailNavigator, navigation],

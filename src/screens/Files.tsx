@@ -44,12 +44,12 @@ const Files: React.FC<Props> = ({ navigation }) => {
       if (detailNavigator) {
         detailNavigator.dispatch(
           StackActions.replace('FileDetail', {
-            ...item,
+            id: item.id,
             disableAnimation: true,
           }),
         );
       } else {
-        navigation.push('FileDetail', item);
+        navigation.push('FileDetail', { id: item.id });
       }
     },
     [detailNavigator, navigation],

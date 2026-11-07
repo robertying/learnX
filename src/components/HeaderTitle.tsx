@@ -51,4 +51,15 @@ const styles = StyleSheet.create({
   },
 });
 
+const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
+
+export const getTitleOptions = (title: string, subtitle?: string) => {
+  return supportsNativeSubtitle
+    ? { title, headerSubtitle: subtitle }
+    : {
+        title,
+        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+      };
+};
+
 export default HeaderTitle;

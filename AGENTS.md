@@ -6,6 +6,10 @@
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing.
 - Debug builds load JS from Metro; only native changes need a rebuild.
 
+## Navigation
+
+- Detail screens (notice, assignment, file, course, assignment submission) take `{ id }` params and read the item from the store, so they stay current after a refresh: pass the id, never the item. They show `components/NotFound` when the item is gone and set their header title with `hooks/useHeaderTitle`. Notice and assignment attachments are not in the store and open `FileDetail` with `{ attachment }`.
+
 ## Mocks
 
 ### Mock login

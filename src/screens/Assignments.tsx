@@ -61,12 +61,12 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
       if (detailNavigator) {
         detailNavigator.dispatch(
           StackActions.replace('AssignmentDetail', {
-            ...item,
+            id: item.id,
             disableAnimation: true,
           }),
         );
       } else {
-        navigation.push('AssignmentDetail', item);
+        navigation.push('AssignmentDetail', { id: item.id });
       }
     },
     [detailNavigator, navigation],

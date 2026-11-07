@@ -41,8 +41,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     searchQuery,
   );
 
-  const handlePush = (name: keyof SearchStackParams, item: any) => {
-    navigation.push(name, item);
+  const handlePush = (
+    name: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail',
+    id: string,
+  ) => {
+    navigation.push(name, { id });
   };
 
   return (
@@ -84,21 +87,19 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                 <NoticeCard
                   data={item as Notice}
                   disableSwipe
-                  onPress={() => handlePush('NoticeDetail', item as Notice)}
+                  onPress={() => handlePush('NoticeDetail', item.id)}
                 />
               ) : key === 'assignment' ? (
                 <AssignmentCard
                   data={item as Assignment}
                   disableSwipe
-                  onPress={() =>
-                    handlePush('AssignmentDetail', item as Assignment)
-                  }
+                  onPress={() => handlePush('AssignmentDetail', item.id)}
                 />
               ) : (
                 <FileCard
                   data={item as File}
                   disableSwipe
-                  onPress={() => handlePush('FileDetail', item as File)}
+                  onPress={() => handlePush('FileDetail', item.id)}
                 />
               )
             }

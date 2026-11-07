@@ -1,33 +1,49 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
-import { Assignment, Course, File, Notice } from 'data/types/state';
+import { DownloadableFile, File } from 'data/types/state';
 
 export interface ExtraParams {
   disableAnimation?: boolean;
 }
 
+/**
+ * Detail screens take the item's id and read the item from the store, so
+ * they show the latest data after a refresh.
+ */
+export type DetailParams = { id: string } & ExtraParams;
+
+/**
+ * A file in the store by id, or a notice or assignment attachment that is
+ * only known to the screen that opens it.
+ */
+export type FileDetailParams = (
+  | { id: string }
+  | { attachment: DownloadableFile & Partial<File> }
+) &
+  ExtraParams;
+
 export type NoticeStackParams = {
   Notices: undefined;
-  NoticeDetail: Notice & ExtraParams;
-  FileDetail: File & ExtraParams;
+  NoticeDetail: DetailParams;
+  FileDetail: FileDetailParams;
 };
 
 export type AssignmentStackParams = {
   Assignments: undefined;
-  AssignmentDetail: Assignment & ExtraParams;
-  FileDetail: File & ExtraParams;
+  AssignmentDetail: DetailParams;
+  FileDetail: FileDetailParams;
 };
 
 export type FileStackParams = {
   Files: undefined;
-  FileDetail: File & ExtraParams;
+  FileDetail: FileDetailParams;
 };
 
 export type CourseStackParams = {
   Courses: undefined;
-  CourseDetail: Course & ExtraParams;
-  NoticeDetail: Notice & ExtraParams;
-  AssignmentDetail: Assignment & ExtraParams;
-  FileDetail: File & ExtraParams;
+  CourseDetail: DetailParams;
+  NoticeDetail: DetailParams;
+  AssignmentDetail: DetailParams;
+  FileDetail: FileDetailParams;
 };
 
 export type SettingsStackParams = {
@@ -68,23 +84,23 @@ export type SearchStackParams = {
         query: string;
       }
     | undefined;
-  NoticeDetail: Notice & ExtraParams;
-  AssignmentDetail: Assignment & ExtraParams;
-  FileDetail: File & ExtraParams;
+  NoticeDetail: DetailParams;
+  AssignmentDetail: DetailParams;
+  FileDetail: FileDetailParams;
 };
 
 export type AssignmentSubmissionStackParams = {
-  AssignmentSubmission: Assignment;
-  FileDetail: File & ExtraParams;
+  AssignmentSubmission: { id: string };
+  FileDetail: FileDetailParams;
 };
 
 export type DetailStackParams = {
   EmptyDetail: undefined;
-  NoticeDetail: Notice & ExtraParams;
-  AssignmentDetail: Assignment & ExtraParams;
-  FileDetail: File & ExtraParams;
-  CourseDetail: Course & ExtraParams;
-  AssignmentSubmission: Assignment;
+  NoticeDetail: DetailParams;
+  AssignmentDetail: DetailParams;
+  FileDetail: FileDetailParams;
+  CourseDetail: DetailParams;
+  AssignmentSubmission: { id: string };
   CourseX: { id: string } | undefined;
   CourseInformationSharing: ExtraParams;
   CalendarEvent: ExtraParams;

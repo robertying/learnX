@@ -8,7 +8,7 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import mime from 'mime';
 import { addCSRF, loginWithFingerPrint } from 'data/source';
 import { store } from 'data/store';
-import { File } from 'data/types/state';
+import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
 
@@ -43,7 +43,7 @@ export const ensureLearnXFilesDir = async () => {
 };
 
 export const downloadFile = async (
-  file: File,
+  file: DownloadableFile,
   refresh?: boolean,
   onProgress?: (progress: number) => void,
 ) => {
@@ -167,7 +167,7 @@ export const downloadFile = async (
   return path;
 };
 
-export const shareFile = async (file: File) => {
+export const shareFile = async (file: DownloadableFile) => {
   const path = await downloadFile(file, false);
 
   await Share.open({

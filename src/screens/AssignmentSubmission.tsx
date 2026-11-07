@@ -32,13 +32,15 @@ import { getExtension, stripExtension } from 'helpers/fs';
 import { removeTags } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import { useAppDispatch, useAppSelector } from 'data/store';
-import { File } from 'data/types/state';
+import { Assignment } from 'data/types/state';
 import { submitAssignment } from 'data/source';
 import {
   getAssignmentsForCourse,
   setPendingAssignmentData,
 } from 'data/actions/assignments';
 import useToast from 'hooks/useToast';
+import NotFound from 'components/NotFound';
+import useHeaderTitle from 'hooks/useHeaderTitle';
 import { AssignmentSubmissionStackParams } from './types';
 
 type Props = NativeStackScreenProps<
@@ -54,6 +56,28 @@ interface AttachmentResult {
 }
 
 const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
+  const assignment = useAppSelector(state =>
+    state.assignments.items.find(item => item.id === route.params.id),
+  );
+
+  useHeaderTitle(navigation, t('assignmentSubmission'), assignment?.courseName);
+
+  if (!assignment) {
+    return <NotFound />;
+  }
+
+  return (
+    <AssignmentSubmissionContent
+      assignment={assignment}
+      navigation={navigation}
+    />
+  );
+};
+
+const AssignmentSubmissionContent: React.FC<{
+  assignment: Assignment;
+  navigation: Props['navigation'];
+}> = ({ assignment, navigation }) => {
   const theme = useTheme();
   const toast = useToast();
 
@@ -66,7 +90,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
     submitTime,
     submittedAttachment,
     submittedContent,
-  } = route.params;
+  } = assignment;
 
   const dispatch = useAppDispatch();
 
@@ -179,15 +203,17 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
   ) => {
     if (attachment) {
       navigation.push('FileDetail', {
-        id,
-        courseName,
-        title: stripExtension(attachment.name),
-        downloadUrl: attachment.downloadUrl,
-        fileType:
-          (attachment.type
-            ? mime.getExtension(attachment.type)
-            : getExtension(attachment.name)) || '',
-      } as File);
+        attachment: {
+          id,
+          courseName,
+          title: stripExtension(attachment.name),
+          downloadUrl: attachment.downloadUrl,
+          fileType:
+            (attachment.type
+              ? mime.getExtension(attachment.type)
+              : getExtension(attachment.name)) || '',
+        },
+      });
     }
   };
 

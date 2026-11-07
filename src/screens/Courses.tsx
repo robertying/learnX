@@ -69,12 +69,12 @@ const Courses: React.FC<Props> = ({ navigation }) => {
     if (detailNavigator) {
       detailNavigator.dispatch(
         StackActions.replace('CourseDetail', {
-          ...item,
+          id: item.id,
           disableAnimation: true,
         }),
       );
     } else {
-      navigation.push('CourseDetail', item);
+      navigation.push('CourseDetail', { id: item.id });
     }
   };
 

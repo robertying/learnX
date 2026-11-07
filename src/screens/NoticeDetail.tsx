@@ -13,11 +13,31 @@ import { NoticeStackParams } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import { stripExtension, getExtension } from 'helpers/fs';
-import { File } from 'data/types/state';
+import { Notice } from 'data/types/state';
+import { useAppSelector } from 'data/store';
+import NotFound from 'components/NotFound';
+import useHeaderTitle from 'hooks/useHeaderTitle';
 
 type Props = NativeStackScreenProps<NoticeStackParams, 'NoticeDetail'>;
 
 const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
+  const notice = useAppSelector(state =>
+    state.notices.items.find(item => item.id === route.params.id),
+  );
+
+  useHeaderTitle(navigation, notice?.courseName, notice?.courseTeacherName);
+
+  if (!notice) {
+    return <NotFound />;
+  }
+
+  return <NoticeDetailContent notice={notice} navigation={navigation} />;
+};
+
+const NoticeDetailContent: React.FC<{
+  notice: Notice;
+  navigation: Props['navigation'];
+}> = ({ notice, navigation }) => {
   const theme = useTheme();
 
   const {
@@ -30,7 +50,7 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
     expireTime,
     content,
     attachment,
-  } = route.params;
+  } = notice;
 
   const html = useMemo(
     () =>
@@ -44,15 +64,15 @@ const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
 
   const handleFileOpen = () => {
     if (attachment) {
-      const data = {
-        id,
-        courseName,
-        title: stripExtension(attachment.name),
-        downloadUrl: attachment.downloadUrl,
-        fileType: getExtension(attachment.name) ?? '',
-      } as File;
-
-      navigation.push('FileDetail', data);
+      navigation.push('FileDetail', {
+        attachment: {
+          id,
+          courseName,
+          title: stripExtension(attachment.name),
+          downloadUrl: attachment.downloadUrl,
+          fileType: getExtension(attachment.name) ?? '',
+        },
+      });
     }
   };
 
