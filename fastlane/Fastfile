@@ -73,6 +73,19 @@ end
 # Four sections split by `====` lines: GitHub, Google Play, App Store (iOS),
 # Mac App Store. Each store section is English, a `---` line, then Chinese.
 
+def default_notes_path
+  File.join(out_dir, "release-notes.md")
+end
+
+# notes:<file> if given, else what `fastlane notes` wrote for this version.
+def notes_path(options)
+  return options[:notes] unless options[:notes].to_s.empty?
+  return nil unless File.exist?(default_notes_path)
+
+  UI.message("Using release notes from #{default_notes_path}")
+  default_notes_path
+end
+
 def release_notes(path)
   return nil if path.nil? || path.empty?
 
@@ -310,12 +323,41 @@ lane :bump do |options|
   UI.success("#{current} (#{build}) -> #{version} (#{new_build}, Android #{new_code})")
 end
 
+desc "Write the release notes with Claude Code (`claude -p` and the release-notes skill) for review."
+desc "Saves build/release/v<version>/release-notes.md, which the release lanes use when no notes: is given."
+desc "Usage: bundle exec fastlane notes   (run `bump` first, so the version is the new one)"
+lane :notes do
+  version = app_version
+  path = default_notes_path
+  FileUtils.mkdir_p(File.dirname(path))
+  FileUtils.rm_f(path)
+
+  prompt = <<~PROMPT
+    Use the release-notes skill to write the release notes for learnX v#{version}.
+    Save the file to #{path} instead of the scratchpad. Don't publish or upload anything.
+  PROMPT
+  # Read-only git and gh, plus writing the notes file.
+  allowed = [
+    "Skill", "Read", "Grep", "Glob", "Write", "Edit",
+    "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
+    "Bash(gh release list:*)", "Bash(gh release view:*)",
+  ]
+  Dir.chdir(ROOT) do
+    sh("claude", "-p", prompt, "--allowedTools", allowed.join(","))
+  end
+
+  UI.user_error!("Claude Code wrote no notes to #{path}") unless File.exist?(path)
+  release_notes(path)
+  UI.success("Release notes: #{path}")
+  UI.important("Review and edit it, then run a release lane; it picks the file up without notes:.")
+end
+
 desc "Build and upload everything: iOS, Mac, Android (Play draft) and a draft GitHub release."
 desc "Builds all platforms before uploading anything. Nothing is submitted for review or rolled out."
-desc "Usage: bundle exec fastlane release notes:/path/to/notes.md [track:production]"
+desc "Usage: bundle exec fastlane release [notes:/path/to/notes.md] [track:production]"
 lane :release do |options|
   ensure_git_status_clean
-  notes = release_notes(options[:notes])
+  notes = release_notes(notes_path(options))
   ipa = build_apple("ios")
   pkg = build_apple("macos")
   build_android
@@ -326,9 +368,9 @@ lane :release do |options|
 end
 
 desc "Create a draft GitHub release with the APKs, latest.json and source maps from `android build`."
-desc "Usage: bundle exec fastlane github_release notes:/path/to/notes.md"
+desc "Usage: bundle exec fastlane github_release [notes:/path/to/notes.md]"
 lane :github_release do |options|
-  publish_github(release_notes(options[:notes]))
+  publish_github(release_notes(notes_path(options)))
 end
 
 platform :ios do
@@ -341,7 +383,7 @@ platform :ios do
   desc "Usage: bundle exec fastlane ios release [notes:/path/to/notes.md]"
   lane :release do |options|
     ensure_git_status_clean
-    notes = release_notes(options[:notes])
+    notes = release_notes(notes_path(options))
     upload_apple("ios", build_apple("ios"), notes && notes[:ios])
   end
 end
@@ -356,7 +398,7 @@ platform :mac do
   desc "Usage: bundle exec fastlane mac release [notes:/path/to/notes.md]"
   lane :release do |options|
     ensure_git_status_clean
-    notes = release_notes(options[:notes])
+    notes = release_notes(notes_path(options))
     upload_apple("macos", build_apple("macos"), notes && notes[:mac])
   end
 end
@@ -371,7 +413,7 @@ platform :android do
   desc "Usage: bundle exec fastlane android release [notes:/path/to/notes.md] [track:production]"
   lane :release do |options|
     ensure_git_status_clean
-    notes = release_notes(options[:notes])
+    notes = release_notes(notes_path(options))
     build_android
     upload_android(notes && notes[:play], options[:track] || "production")
   end
