@@ -60,6 +60,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - Read the app's defaults with `xcrun simctl spawn <udid> defaults read <data container>/Library/Preferences/io.robertying.learnX <key>`; the plist file on disk is written lazily and can be stale.
 - Build with `xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug -destination 'id=<udid>'` (Mac Catalyst: `-destination 'platform=macOS,variant=Mac Catalyst'`); the app lands in `~/Library/Developer/Xcode/DerivedData/learnX-*/Build/Products/`.
 - Open in Chinese: `xcrun simctl launch <udid> io.robertying.learnX -AppleLanguages '(zh-Hans)' -AppleLocale zh_CN`.
+- Sharing a file to learnX (Files or Photos › Share › learnX) needs a signed build: the share extension (`ShareViewController` in the `react-native-share-menu` patch) copies the file into the `group.io.robertying.learnX` app group, which an unsigned build (`CODE_SIGNING_ALLOWED=NO`) isn't entitled to. Without it, learnX still opens but receives nothing. To get something to share, copy a file into `File Provider Storage` of the app group container whose metadata says `group.com.apple.FileProvider.LocalStorage` (Files › On My iPhone), or add a photo with `xcrun simctl addmedia`.
 - Type the mock credentials with the simulator control tool's `text` action (tap the field first); use `pbcopy` + `xcrun simctl pbsync host <udid>` only for text it can't type. iPad and iPhone Duo can't be rotated/folded from the shell.
 
 ### Android emulators
