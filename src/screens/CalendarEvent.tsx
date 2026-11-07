@@ -9,6 +9,7 @@ import { Caption } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
+import WindowSafeArea from 'components/WindowSafeArea';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { setSetting, useSettings } from 'data/settings';
@@ -271,21 +272,24 @@ const CalendarEvent: React.FC<Props> = () => {
           />
         </ScrollView>
       </KeyboardAvoidingView>
-      <DatePickerModal
-        locale={isLocaleChinese() ? 'zh' : 'en'}
-        mode="range"
-        visible={picker.open}
-        saveLabelDisabled={!picker.startDate || !picker.endDate}
-        startLabel={t('datePickerStartLabel')}
-        endLabel={t('datePickerEndLabel')}
-        saveLabel={t('datePickerSaveLabel')}
-        label={t('datePickerLabel')}
-        onDismiss={picker.closePicker}
-        startDate={picker.startDate}
-        endDate={picker.endDate}
-        onChange={picker.onRangeChange}
-        onConfirm={picker.onRangeConfirm}
-      />
+      {/* Opened from a split view column, but covers the whole window. */}
+      <WindowSafeArea>
+        <DatePickerModal
+          locale={isLocaleChinese() ? 'zh' : 'en'}
+          mode="range"
+          visible={picker.open}
+          saveLabelDisabled={!picker.startDate || !picker.endDate}
+          startLabel={t('datePickerStartLabel')}
+          endLabel={t('datePickerEndLabel')}
+          saveLabel={t('datePickerSaveLabel')}
+          label={t('datePickerLabel')}
+          onDismiss={picker.closePicker}
+          startDate={picker.startDate}
+          endDate={picker.endDate}
+          onChange={picker.onRangeChange}
+          onConfirm={picker.onRangeConfirm}
+        />
+      </WindowSafeArea>
     </SafeArea>
   );
 };
