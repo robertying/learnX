@@ -15,7 +15,6 @@ describe('rootReducer', () => {
       'files',
       'notices',
       'semesters',
-      'settings',
       'user',
     ]);
   });
@@ -50,8 +49,6 @@ describe('rootReducer', () => {
       [C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_FILES_FOR_COURSES_SUCCESS, []],
-      [C.SET_FAV_NOTICE, { noticeId: 'n', flag: true }],
-      [C.SET_SETTING, { key: 'graduate', value: true }],
     ];
 
     it.each(fetched)('applies %s', (type, payload) => {

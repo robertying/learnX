@@ -3,10 +3,10 @@ import { Alert, Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Caption } from 'react-native-paper';
 import { CourseType, Language } from 'thu-learn-lib';
-import { useAppDispatch, useAppSelector } from 'data/store';
+import { useAppSelector } from 'data/store';
+import { setSetting, useSettings } from 'data/settings';
 import { dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
-import { setSetting } from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
@@ -21,11 +21,9 @@ type Props = NativeStackScreenProps<
 >;
 
 const CourseInformationSharing: React.FC<Props> = () => {
-  const dispatch = useAppDispatch();
-
   const currentSemesterId = useAppSelector(state => state.semesters.current);
-  const courseInformationSharing = useAppSelector(
-    state => state.settings.courseInformationSharing,
+  const courseInformationSharing = useSettings(
+    settings => settings.courseInformationSharing,
   );
   const isDummyUser = useCredentialsStore(state =>
     isMockUser(state.credentials?.username),
@@ -62,7 +60,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
           {
             text: t('ok'),
             onPress: async () => {
-              dispatch(setSetting('courseInformationSharing', enabled));
+              setSetting('courseInformationSharing', enabled);
               if (isDummyUser) {
                 return;
               }
@@ -76,13 +74,13 @@ const CourseInformationSharing: React.FC<Props> = () => {
         { cancelable: true },
       );
     } else {
-      dispatch(setSetting('courseInformationSharing', enabled));
+      setSetting('courseInformationSharing', enabled);
     }
   };
 
   useEffect(() => {
-    dispatch(setSetting('courseInformationSharingBadgeShown', true));
-  }, [dispatch]);
+    setSetting('courseInformationSharingBadgeShown', true);
+  }, []);
 
   return (
     <SafeArea>

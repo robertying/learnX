@@ -18,8 +18,9 @@ import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
-import { useAppDispatch, useAppSelector } from 'data/store';
-import { setSetting } from 'data/actions/settings';
+import { useAppSelector } from 'data/store';
+import { setSetting, useSettings } from 'data/settings';
+import { useUserData } from 'data/userData';
 import { dataSource, loginWithFingerPrint } from 'data/source';
 import {
   exportSyncedCalendarsToICS,
@@ -39,28 +40,29 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 const CalendarEvent: React.FC<Props> = () => {
   const toast = useToast();
 
-  const dispatch = useAppDispatch();
-  const assignmentCalendarSync = useAppSelector(
-    state => state.settings.assignmentCalendarSync,
+  const assignmentCalendarSync = useSettings(
+    settings => settings.assignmentCalendarSync,
   );
-  const assignmentReminderSync = useAppSelector(
-    state => state.settings.assignmentReminderSync,
+  const assignmentReminderSync = useSettings(
+    settings => settings.assignmentReminderSync,
   );
-  const alarms = useAppSelector(state => state.settings.alarms);
-  const graduate = useAppSelector(state => state.settings.graduate);
-  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const alarms = useSettings(settings => settings.alarms);
+  const graduate = useSettings(settings => settings.graduate);
+  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
+  const favoriteIds = useUserData(data => data.favorites.assignment);
+  const archivedIds = useUserData(data => data.archived.assignment);
   const assignmentState = useAppSelector(state => state.assignments);
-  const calendarEventLength = useAppSelector(
-    state => state.settings.calendarEventLength,
+  const calendarEventLength = useSettings(
+    settings => settings.calendarEventLength,
   );
-  const courseEventOmitLocation = useAppSelector(
-    state => state.settings.courseEventOmitLocation,
+  const courseEventOmitLocation = useSettings(
+    settings => settings.courseEventOmitLocation,
   );
 
   const { all } = useFilteredData({
     data: assignmentState.items,
-    fav: assignmentState.favorites,
-    archived: assignmentState.archived,
+    fav: favoriteIds,
+    archived: archivedIds,
     hidden: hiddenCourseIds,
   });
 
@@ -175,9 +177,9 @@ const CalendarEvent: React.FC<Props> = () => {
     }
 
     if (type === 'calendar') {
-      dispatch(setSetting('assignmentCalendarSync', enabled));
+      setSetting('assignmentCalendarSync', enabled);
     } else {
-      dispatch(setSetting('assignmentReminderSync', enabled));
+      setSetting('assignmentReminderSync', enabled);
     }
   };
 
@@ -247,9 +249,7 @@ const CalendarEvent: React.FC<Props> = () => {
             iconName="people"
             primaryText={t('graduate')}
             switchValue={graduate}
-            onSwitchValueChange={value =>
-              dispatch(setSetting('graduate', value))
-            }
+            onSwitchValueChange={value => setSetting('graduate', value)}
             type="switch"
           />
           <TableCell
@@ -264,7 +264,7 @@ const CalendarEvent: React.FC<Props> = () => {
             primaryText={t('classAlarm')}
             switchValue={alarms.courseAlarm}
             onSwitchValueChange={value =>
-              dispatch(setSetting('alarms', { ...alarms, courseAlarm: value }))
+              setSetting('alarms', { ...alarms, courseAlarm: value })
             }
             type="switch"
           />
@@ -274,12 +274,10 @@ const CalendarEvent: React.FC<Props> = () => {
               inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
               onInputValueChange={v =>
                 parseInt(v, 10) &&
-                dispatch(
-                  setSetting('alarms', {
-                    ...alarms,
-                    courseAlarmOffset: parseInt(v, 10) || 15,
-                  }),
-                )
+                setSetting('alarms', {
+                  ...alarms,
+                  courseAlarmOffset: parseInt(v, 10) || 15,
+                })
               }
               type="input"
             />
@@ -289,7 +287,7 @@ const CalendarEvent: React.FC<Props> = () => {
             primaryText={t('courseEventOmitLocation')}
             switchValue={courseEventOmitLocation}
             onSwitchValueChange={value =>
-              dispatch(setSetting('courseEventOmitLocation', value))
+              setSetting('courseEventOmitLocation', value)
             }
             type="switch"
           />
@@ -319,9 +317,7 @@ const CalendarEvent: React.FC<Props> = () => {
               inputValue={(calendarEventLength ?? 30).toString()}
               onInputValueChange={v =>
                 parseInt(v, 10) &&
-                dispatch(
-                  setSetting('calendarEventLength', parseInt(v, 10) || 30),
-                )
+                setSetting('calendarEventLength', parseInt(v, 10) || 30)
               }
               type="input"
             />
@@ -331,12 +327,10 @@ const CalendarEvent: React.FC<Props> = () => {
             primaryText={t('assignmentCalendarAlarm')}
             switchValue={alarms.assignmentCalendarAlarm}
             onSwitchValueChange={value =>
-              dispatch(
-                setSetting('alarms', {
-                  ...alarms,
-                  assignmentCalendarAlarm: value,
-                }),
-              )
+              setSetting('alarms', {
+                ...alarms,
+                assignmentCalendarAlarm: value,
+              })
             }
             type="switch"
             switchDisabled={!assignmentCalendarSync}
@@ -349,12 +343,10 @@ const CalendarEvent: React.FC<Props> = () => {
               ).toString()}
               onInputValueChange={v =>
                 parseInt(v, 10) &&
-                dispatch(
-                  setSetting('alarms', {
-                    ...alarms,
-                    assignmentCalendarAlarmOffset: parseInt(v, 10) || 24 * 60,
-                  }),
-                )
+                setSetting('alarms', {
+                  ...alarms,
+                  assignmentCalendarAlarmOffset: parseInt(v, 10) || 24 * 60,
+                })
               }
               type="input"
             />
@@ -365,12 +357,10 @@ const CalendarEvent: React.FC<Props> = () => {
               primaryText={t('assignmentCalendarSecondAlarm')}
               switchValue={alarms.assignmentCalendarSecondAlarm}
               onSwitchValueChange={value =>
-                dispatch(
-                  setSetting('alarms', {
-                    ...alarms,
-                    assignmentCalendarSecondAlarm: value,
-                  }),
-                )
+                setSetting('alarms', {
+                  ...alarms,
+                  assignmentCalendarSecondAlarm: value,
+                })
               }
               type="switch"
               switchDisabled={!assignmentCalendarSync}
@@ -385,13 +375,10 @@ const CalendarEvent: React.FC<Props> = () => {
                 ).toString()}
                 onInputValueChange={v =>
                   parseInt(v, 10) &&
-                  dispatch(
-                    setSetting('alarms', {
-                      ...alarms,
-                      assignmentCalendarSecondAlarmOffset:
-                        parseInt(v, 10) || 30,
-                    }),
-                  )
+                  setSetting('alarms', {
+                    ...alarms,
+                    assignmentCalendarSecondAlarmOffset: parseInt(v, 10) || 30,
+                  })
                 }
                 type="input"
               />
@@ -402,12 +389,10 @@ const CalendarEvent: React.FC<Props> = () => {
               primaryText={t('assignmentCalendarNoAlarmIfComplete')}
               switchValue={alarms.assignmentCalendarNoAlarmIfComplete}
               onSwitchValueChange={value =>
-                dispatch(
-                  setSetting('alarms', {
-                    ...alarms,
-                    assignmentCalendarNoAlarmIfComplete: value,
-                  }),
-                )
+                setSetting('alarms', {
+                  ...alarms,
+                  assignmentCalendarNoAlarmIfComplete: value,
+                })
               }
               type="switch"
               switchDisabled={!assignmentCalendarSync}
@@ -431,12 +416,10 @@ const CalendarEvent: React.FC<Props> = () => {
                 primaryText={t('assignmentReminderAlarm')}
                 switchValue={alarms.assignmentReminderAlarm}
                 onSwitchValueChange={value =>
-                  dispatch(
-                    setSetting('alarms', {
-                      ...alarms,
-                      assignmentReminderAlarm: value,
-                    }),
-                  )
+                  setSetting('alarms', {
+                    ...alarms,
+                    assignmentReminderAlarm: value,
+                  })
                 }
                 type="switch"
                 switchDisabled={!assignmentReminderSync}
@@ -449,13 +432,10 @@ const CalendarEvent: React.FC<Props> = () => {
                   ).toString()}
                   onInputValueChange={v =>
                     parseInt(v, 10) &&
-                    dispatch(
-                      setSetting('alarms', {
-                        ...alarms,
-                        assignmentReminderAlarmOffset:
-                          parseInt(v, 10) || 24 * 60,
-                      }),
-                    )
+                    setSetting('alarms', {
+                      ...alarms,
+                      assignmentReminderAlarmOffset: parseInt(v, 10) || 24 * 60,
+                    })
                   }
                   type="input"
                 />

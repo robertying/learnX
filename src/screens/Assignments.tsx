@@ -7,6 +7,8 @@ import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { useSettings } from 'data/settings';
+import { useUserData } from 'data/userData';
 import { getAllAssignmentsForCourses } from 'data/actions/assignments';
 import { Assignment } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -28,20 +30,22 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort()),
   );
-  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
+  const favoriteIds = useUserData(data => data.favorites.assignment);
+  const archivedIds = useUserData(data => data.archived.assignment);
   const assignmentState = useAppSelector(state => state.assignments);
   const fetching = useAppSelector(state => state.assignments.fetching);
-  const assignmentCalendarSync = useAppSelector(
-    state => state.settings.assignmentCalendarSync,
+  const assignmentCalendarSync = useSettings(
+    settings => settings.assignmentCalendarSync,
   );
-  const assignmentReminderSync = useAppSelector(
-    state => state.settings.assignmentReminderSync,
+  const assignmentReminderSync = useSettings(
+    settings => settings.assignmentReminderSync,
   );
 
   const { all, fav, archived, hidden, unfinished, finished } = useFilteredData({
     data: assignmentState.items,
-    fav: assignmentState.favorites,
-    archived: assignmentState.archived,
+    fav: favoriteIds,
+    archived: archivedIds,
     hidden: hiddenCourseIds,
   });
 

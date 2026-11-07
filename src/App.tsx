@@ -108,8 +108,9 @@ import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { setSetting } from 'data/actions/settings';
 import { persistor, store, useAppDispatch, useAppSelector } from 'data/store';
+import { setSetting, useSettings } from 'data/settings';
+import { importLegacyUserData } from 'data/legacy';
 import {
   getCredentials,
   loadCredentials,
@@ -395,12 +396,12 @@ const MainTab = () => {
   const loggedIn = useAppSelector(state => state.auth.loggedIn);
   const currentSemester = useAppSelector(state => state.semesters.current);
   const semesters = useAppSelector(state => state.semesters.items);
-  const newChangelog = useAppSelector(
-    state => state.settings.lastShowChangelogVersion !== packageJson.version,
+  const newChangelog = useSettings(
+    settings => settings.lastShowChangelogVersion !== packageJson.version,
   );
-  const newUpdate = useAppSelector(state => state.settings.newUpdate);
-  const courseInformationSharingBadgeShown = useAppSelector(
-    state => state.settings.courseInformationSharingBadgeShown,
+  const newUpdate = useSettings(settings => settings.newUpdate);
+  const courseInformationSharingBadgeShown = useSettings(
+    settings => settings.courseInformationSharingBadgeShown,
   );
 
   useEffect(() => {
@@ -433,11 +434,11 @@ const MainTab = () => {
       (async () => {
         const { version } = await getLatestRelease();
         if (semverGt(version, packageJson.version)) {
-          dispatch(setSetting('newUpdate', true));
+          setSetting('newUpdate', true);
         }
       })();
     }
-  }, [dispatch, loggedIn]);
+  }, [loggedIn]);
 
   const settingsBadge =
     newChangelog || newUpdate || !courseInformationSharingBadgeShown;
@@ -1102,7 +1103,7 @@ const App = () => {
               loading={<Splash />}
               persistor={persistor}
               onBeforeLift={async () => {
-                await loadCredentials();
+                await Promise.all([loadCredentials(), importLegacyUserData()]);
               }}
             >
               <Container />

@@ -1,5 +1,5 @@
 import { ContentType, CourseType, ApiError } from 'thu-learn-lib';
-import { createAction, createAsyncAction } from 'typesafe-actions';
+import { createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
@@ -10,8 +10,6 @@ import {
   GET_FILES_FOR_COURSE_FAILURE,
   GET_FILES_FOR_COURSE_REQUEST,
   GET_FILES_FOR_COURSE_SUCCESS,
-  SET_FAV_FILE,
-  SET_ARCHIVE_FILES,
 } from 'data/types/constants';
 import { File } from 'data/types/state';
 import { serializeError } from 'helpers/parse';
@@ -93,19 +91,3 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
     }
   };
 }
-
-export const setFavFile = createAction(
-  SET_FAV_FILE,
-  (fileId: string, flag: boolean) => ({
-    fileId,
-    flag,
-  }),
-)();
-
-export const setArchiveFiles = createAction(
-  SET_ARCHIVE_FILES,
-  (fileIds: string[], flag: boolean) => ({
-    fileIds,
-    flag,
-  }),
-)();

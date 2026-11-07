@@ -6,6 +6,7 @@ import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { getAllNoticesForCourses } from 'data/actions/notices';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { useUserData } from 'data/userData';
 import { Notice } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -22,14 +23,16 @@ const Notices: React.FC<Props> = ({ navigation }) => {
     state => state.courses.items.map(i => i.id),
     (a, b) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort()),
   );
-  const hiddenCourseIds = useAppSelector(state => state.courses.hidden);
+  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
+  const favoriteIds = useUserData(data => data.favorites.notice);
+  const archivedIds = useUserData(data => data.archived.notice);
   const noticeState = useAppSelector(state => state.notices);
   const fetching = useAppSelector(state => state.notices.fetching);
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: noticeState.items,
-    fav: noticeState.favorites,
-    archived: noticeState.archived,
+    fav: favoriteIds,
+    archived: archivedIds,
     hidden: hiddenCourseIds,
   });
 

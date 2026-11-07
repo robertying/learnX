@@ -12,6 +12,7 @@ import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import useToast from 'hooks/useToast';
 import { useAppDispatch, useAppSelector } from 'data/store';
+import { setSetting, useSettings } from 'data/settings';
 import {
   login,
   loginWithOfflineMode,
@@ -19,7 +20,6 @@ import {
 } from 'data/actions/auth';
 import { setMockStore } from 'data/actions/root';
 import { saveCredentials, useCredentials } from 'data/credentials';
-import { setSetting } from 'data/actions/settings';
 import { clearLoginCookies } from 'data/source';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
@@ -37,7 +37,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
   const dispatch = useAppDispatch();
   const loggingIn = useAppSelector(state => state.auth.loggingIn);
-  const graduate = useAppSelector(state => state.settings.graduate);
+  const graduate = useSettings(settings => settings.graduate);
   const savedCredentials = useCredentials();
   const savedUsername = savedCredentials?.username;
   const savedPassword = savedCredentials?.password;
@@ -142,7 +142,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
               style={Styles.spacex1}
               value={graduate}
               onValueChange={checked => {
-                dispatch(setSetting('graduate', checked));
+                setSetting('graduate', checked);
               }}
             />
             <Text style={Styles.spacex1}>{t('graduate')}</Text>

@@ -1,6 +1,7 @@
 import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import { PersistAppState } from 'data/types/state';
+import type { UserData } from 'data/userData';
 
 // All dates are relative to the current time so the mock data always looks
 // recent: some assignments are due soon, some are past due, etc.
@@ -26,38 +27,6 @@ const mockStore: PersistAppState = {
     name: '测试学生',
     department: '电子系',
   },
-  settings: {
-    alarms: {
-      courseAlarm: false,
-      assignmentCalendarSecondAlarm: false,
-      assignmentCalendarAlarm: false,
-      assignmentCalendarNoAlarmIfComplete: false,
-      assignmentReminderAlarm: false,
-    },
-    assignmentCalendarSync: false,
-    assignmentReminderSync: false,
-    syncedCalendarAssignments: {},
-    syncedReminderAssignments: {},
-    newUpdate: false,
-    graduate: false,
-    fileUseDocumentDir: false,
-    fileOmitCourseName: false,
-    courseInformationSharing: false,
-    courseInformationSharingBadgeShown: false,
-    tabFilterSelections: {
-      notice: 'all',
-      assignment: 'unfinished',
-      file: 'all',
-      course: 'all',
-    },
-    lastShowChangelogVersion: null,
-    openFileAfterDownload: false,
-    courseEventOmitLocation: false,
-    _persist: {
-      rehydrated: true,
-      version: -1,
-    },
-  },
   semesters: {
     fetching: false,
     items: ['2026-2027-1', '2025-2026-2', '2025-2026-1'],
@@ -65,8 +34,6 @@ const mockStore: PersistAppState = {
   },
   courses: {
     fetching: false,
-    hidden: ['2019-2020-1139286494'],
-    order: [],
     items: [
       {
         semesterId: '2026-2027-1',
@@ -243,11 +210,6 @@ const mockStore: PersistAppState = {
   },
   notices: {
     fetching: false,
-    favorites: [
-      '26ef84e76d60efc1016d71b8f4c63bc1',
-      '26ef84e76cc258ed016d3ea25a95157d',
-    ],
-    archived: ['26ef84e76cc258ed016d3ea25a95157d'],
     items: [
       {
         id: '26ef84e86d60f069016dadb09dd673b2',
@@ -364,8 +326,6 @@ const mockStore: PersistAppState = {
   },
   assignments: {
     fetching: false,
-    favorites: [],
-    archived: [],
     items: [
       {
         id: '26ef84e76db3f55b016db426e15c07b9',
@@ -572,14 +532,6 @@ const mockStore: PersistAppState = {
   },
   files: {
     fetching: false,
-    favorites: [
-      '2016310500_KJ_157080064094130b5f1dcc2-f77a-4cca-be0f-95808af85d82',
-      '2009990022_KJ_1570695522456476bc2332-2988-4497-9505-d12d41906be0',
-      '1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5',
-    ],
-    archived: [
-      '1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5',
-    ],
     items: [
       {
         id: '2016310500_KJ_15698450108902028208ddc-e7b5-4674-a7cd-d52e857cc18a',
@@ -677,6 +629,28 @@ const mockStore: PersistAppState = {
     rehydrated: true,
     version: -1,
   },
+};
+
+export const mockUserData: UserData = {
+  favorites: {
+    notice: [
+      '26ef84e76d60efc1016d71b8f4c63bc1',
+      '26ef84e76cc258ed016d3ea25a95157d',
+    ],
+    assignment: [],
+    file: [
+      '2016310500_KJ_157080064094130b5f1dcc2-f77a-4cca-be0f-95808af85d82',
+      '2009990022_KJ_1570695522456476bc2332-2988-4497-9505-d12d41906be0',
+      '1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5',
+    ],
+  },
+  archived: {
+    notice: ['26ef84e76cc258ed016d3ea25a95157d'],
+    assignment: [],
+    file: ['1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5'],
+  },
+  hiddenCourses: ['2019-2020-1139286494'],
+  courseOrder: [],
 };
 
 export default mockStore;

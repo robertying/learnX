@@ -35,3 +35,18 @@ jest.mock('expo-secure-store', () => {
     }),
   };
 });
+
+// An in-memory SQLite key-value store. Tests can read it through the mocked
+// module's `__store` and clear it between cases.
+jest.mock('expo-sqlite/kv-store', () => {
+  const store = new Map<string, string>();
+  const storage = {
+    __store: store,
+    getItemSync: jest.fn((key: string) => store.get(key) ?? null),
+    setItemSync: jest.fn((key: string, value: string) => {
+      store.set(key, value);
+    }),
+    removeItemSync: jest.fn((key: string) => store.delete(key)),
+  };
+  return { __esModule: true, default: storage, Storage: storage };
+});

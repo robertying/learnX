@@ -80,7 +80,6 @@ export type Course = Pick<
 };
 export interface CoursesState {
   fetching: boolean;
-  hidden: string[];
   items: Course[];
   names: {
     [id: string]: {
@@ -88,7 +87,6 @@ export interface CoursesState {
       teacherName: string;
     };
   };
-  order: string[];
   error?: FailReason | null;
 }
 
@@ -114,8 +112,6 @@ export type Notice = Pick<
   CourseExtraInfo;
 export interface NoticeState {
   fetching: boolean;
-  favorites: string[];
-  archived: string[];
   items: Notice[];
   error?: FailReason | null;
 }
@@ -151,8 +147,6 @@ export type Assignment = Pick<
   CourseExtraInfo;
 export interface AssignmentsState {
   fetching: boolean;
-  favorites: string[];
-  archived: string[];
   items: Assignment[];
   error?: FailReason | null;
   pendingAssignmentData?: {
@@ -182,8 +176,6 @@ export type DownloadableFile = Pick<
 >;
 export interface FilesState {
   fetching: boolean;
-  favorites: string[];
-  archived: string[];
   items: File[];
   error?: FailReason | null;
 }
@@ -199,7 +191,6 @@ export interface PersistPartial {
 
 export interface AppState {
   auth: AuthState;
-  settings: SettingsState & PersistPartial;
   semesters: SemestersState;
   courses: CoursesState;
   notices: NoticeState;

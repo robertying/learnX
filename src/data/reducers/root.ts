@@ -1,9 +1,7 @@
 import { combineReducers } from 'redux';
-import { PersistConfig, persistReducer } from 'redux-persist';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppActions, StoreAction } from 'data/types/actions';
 import { CLEAR_STORE, SET_MOCK_STORE } from 'data/types/constants';
-import { AppState, SettingsState } from 'data/types/state';
+import { AppState } from 'data/types/state';
 import assignments from './assignments';
 import courses from './courses';
 import files from './files';
@@ -11,7 +9,6 @@ import notices from './notices';
 import semesters from './semesters';
 import auth from './auth';
 import user from './user';
-import settings from './settings';
 
 const getMockStore = () => require('data/mock').default;
 
@@ -24,17 +21,10 @@ export const mainReducers = {
   files,
 };
 
-const settingsPersistConfig: PersistConfig<SettingsState> = {
-  key: 'settings',
-  storage: AsyncStorage,
-  blacklist: ['newUpdate'],
-};
-
 const appReducer = combineReducers({
   // Not persisted: login progress only means something while the app runs.
   // The credentials are saved by data/credentials.
   auth,
-  settings: persistReducer(settingsPersistConfig, settings),
   ...mainReducers,
 });
 

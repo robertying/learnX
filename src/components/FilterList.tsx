@@ -18,15 +18,13 @@ import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
-import { setArchiveNotices, setFavNotice } from 'data/actions/notices';
+import { setSetting, useSettings } from 'data/settings';
 import {
-  setArchiveAssignments,
-  setFavAssignment,
-} from 'data/actions/assignments';
-import { setArchiveFiles, setFavFile } from 'data/actions/files';
-import { setCourseOrder, setHideCourse } from 'data/actions/courses';
-import { setSetting } from 'data/actions/settings';
-import { useAppDispatch, useAppSelector } from 'data/store';
+  setArchived,
+  setCourseHidden,
+  setCourseOrder,
+  setFavorite,
+} from 'data/userData';
 import useToast from 'hooks/useToast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {
@@ -102,18 +100,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   refreshing,
   onRefresh,
 }: FilterListProps<T>) => {
-  const dispatch = useAppDispatch();
-
   const toast = useToast();
 
   const detailNavigator = useDetailNavigator();
 
-  const tabFilterSelections = useAppSelector(
-    state => state.settings.tabFilterSelections,
+  const tabFilterSelections = useSettings(
+    settings => settings.tabFilterSelections,
   );
-  const filterSelected = useAppSelector(
-    state =>
-      state.settings.tabFilterSelections[type] ?? defaultSelected ?? 'all',
+  const filterSelected = useSettings(
+    settings => settings.tabFilterSelections[type] ?? defaultSelected ?? 'all',
   );
 
   const [filterVisible, setFilterVisible] = useState(false);
@@ -163,12 +158,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   };
 
   const handleFilterSelect = (selected: FilterSelection) => {
-    dispatch(
-      setSetting('tabFilterSelections', {
-        ...tabFilterSelections,
-        [type]: selected,
-      }),
-    );
+    setSetting('tabFilterSelections', {
+      ...tabFilterSelections,
+      [type]: selected,
+    });
     setFilterVisible(false);
   };
 
@@ -179,7 +172,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const handleReorderDone = ({ from, to }: ReorderableListReorderEvent) => {
     const reorderedData = reorderItems(data, from, to);
-    dispatch(setCourseOrder(reorderedData.map(i => i.id)));
+    setCourseOrder(reorderedData.map(i => i.id));
   };
 
   const handleDragChange = () => {
@@ -204,12 +197,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const handleFav = useCallback(
     (isFav: boolean, item: T) => {
-      if (type === 'notice') {
-        dispatch(setFavNotice(item.id, !isFav));
-      } else if (type === 'assignment') {
-        dispatch(setFavAssignment(item.id, !isFav));
-      } else {
-        dispatch(setFavFile(item.id, !isFav));
+      if (type !== 'course') {
+        setFavorite(type, item.id, !isFav);
       }
 
       if (isFav) {
@@ -218,7 +207,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         toast(t('addToFav'), 'success');
       }
     },
-    [dispatch, toast, type],
+    [toast, type],
   );
 
   const handleArchive = useCallback(
@@ -227,12 +216,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         return;
       }
 
-      if (type === 'notice') {
-        dispatch(setArchiveNotices(itemIds, !isArchived));
-      } else if (type === 'assignment') {
-        dispatch(setArchiveAssignments(itemIds, !isArchived));
-      } else {
-        dispatch(setArchiveFiles(itemIds, !isArchived));
+      if (type !== 'course') {
+        setArchived(type, itemIds, !isArchived);
       }
 
       if (isArchived) {
@@ -245,12 +230,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         handleSelect();
       }
     },
-    [dispatch, handleSelect, selectionMode, toast, type],
+    [handleSelect, selectionMode, toast, type],
   );
 
   const handleHide = useCallback(
     (isHidden: boolean, id: string) => {
-      dispatch(setHideCourse(id, !isHidden));
+      setCourseHidden(id, !isHidden);
 
       if (isHidden) {
         toast(t('undoHide'), 'success');
@@ -258,7 +243,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         toast(t('hideSucceeded'), 'success');
       }
     },
-    [dispatch, toast],
+    [toast],
   );
 
   const handleNavigateCourseX = useCallback(() => {

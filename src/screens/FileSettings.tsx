@@ -1,8 +1,7 @@
 import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Caption } from 'react-native-paper';
-import { useAppDispatch, useAppSelector } from 'data/store';
-import { setSetting } from 'data/actions/settings';
+import { setSetting, useSettings } from 'data/settings';
 import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
@@ -17,15 +16,14 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 const FileSettings: React.FC<Props> = () => {
   const toast = useToast();
 
-  const dispatch = useAppDispatch();
-  const fileUseDocumentDir = useAppSelector(
-    state => state.settings.fileUseDocumentDir,
+  const fileUseDocumentDir = useSettings(
+    settings => settings.fileUseDocumentDir,
   );
-  const fileOmitCourseName = useAppSelector(
-    state => state.settings.fileOmitCourseName,
+  const fileOmitCourseName = useSettings(
+    settings => settings.fileOmitCourseName,
   );
-  const openFileAfterDownload = useAppSelector(
-    state => state.settings.openFileAfterDownload,
+  const openFileAfterDownload = useSettings(
+    settings => settings.openFileAfterDownload,
   );
 
   const handleClearCache = () => {
@@ -60,9 +58,7 @@ const FileSettings: React.FC<Props> = () => {
           iconName="cached"
           primaryText={t('fileUseDocumentDir')}
           switchValue={fileUseDocumentDir}
-          onSwitchValueChange={value =>
-            dispatch(setSetting('fileUseDocumentDir', value))
-          }
+          onSwitchValueChange={value => setSetting('fileUseDocumentDir', value)}
           type="switch"
         />
         <Caption style={styles.caption}>
@@ -79,9 +75,7 @@ const FileSettings: React.FC<Props> = () => {
           iconName="drive-file-rename-outline"
           primaryText={t('fileOmitCourseName')}
           switchValue={fileOmitCourseName}
-          onSwitchValueChange={value =>
-            dispatch(setSetting('fileOmitCourseName', value))
-          }
+          onSwitchValueChange={value => setSetting('fileOmitCourseName', value)}
           type="switch"
         />
         <Caption style={styles.caption}>
@@ -126,7 +120,7 @@ const FileSettings: React.FC<Props> = () => {
             primaryText={t('openFileAfterDownload')}
             switchValue={openFileAfterDownload}
             onSwitchValueChange={value =>
-              dispatch(setSetting('openFileAfterDownload', value))
+              setSetting('openFileAfterDownload', value)
             }
             type="switch"
           />

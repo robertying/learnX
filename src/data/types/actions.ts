@@ -1,42 +1,26 @@
 import { ThunkAction } from 'redux-thunk';
 import { ActionType } from 'typesafe-actions';
 import { loginAction, setSSOInProgress } from 'data/actions/auth';
-import {
-  getCoursesForSemesterAction,
-  setHideCourse,
-  setCourseOrder,
-} from 'data/actions/courses';
+import { getCoursesForSemesterAction } from 'data/actions/courses';
 import {
   getAllNoticesForCoursesAction,
   getNoticesForCourseAction,
-  setFavNotice,
-  setArchiveNotices,
 } from 'data/actions/notices';
 import {
   getAllAssignmentsForCoursesAction,
   getAssignmentsForCourseAction,
-  setFavAssignment,
-  setArchiveAssignments,
   setPendingAssignmentData,
 } from 'data/actions/assignments';
 import {
   getAllFilesForCoursesAction,
   getFilesForCourseAction,
-  setFavFile,
-  setArchiveFiles,
 } from 'data/actions/files';
-import { clearStoreAction, setMockStore } from 'data/actions/root';
+import { clearStoreAction, setMockStoreAction } from 'data/actions/root';
 import {
   getAllSemestersAction,
   getCurrentSemesterAction,
   setCurrentSemester,
 } from 'data/actions/semesters';
-import {
-  clearEventIds,
-  setEventIdForAssignment,
-  setSetting,
-  removeEventIdForAssignment,
-} from 'data/actions/settings';
 import { getUserInfoAction } from 'data/actions/user';
 import { PersistAppState } from './state';
 
@@ -58,24 +42,15 @@ export type SemestersAction =
 type GetCoursesForSemesterAction = ActionType<
   typeof getCoursesForSemesterAction
 >;
-type SetHideCourseAction = ActionType<typeof setHideCourse>;
-type SetCourseOrderAction = ActionType<typeof setCourseOrder>;
-export type CoursesAction =
-  | GetCoursesForSemesterAction
-  | SetHideCourseAction
-  | SetCourseOrderAction;
+export type CoursesAction = GetCoursesForSemesterAction;
 
 type GetNoticesForCourseAction = ActionType<typeof getNoticesForCourseAction>;
 type GetAllNoticesForCoursesAction = ActionType<
   typeof getAllNoticesForCoursesAction
 >;
-type SetFavNoticeAction = ActionType<typeof setFavNotice>;
-type SetArchiveNoticesAction = ActionType<typeof setArchiveNotices>;
 export type NoticesAction =
   | GetNoticesForCourseAction
-  | GetAllNoticesForCoursesAction
-  | SetFavNoticeAction
-  | SetArchiveNoticesAction;
+  | GetAllNoticesForCoursesAction;
 
 type GetAssignmentsForCourseAction = ActionType<
   typeof getAssignmentsForCourseAction
@@ -83,44 +58,22 @@ type GetAssignmentsForCourseAction = ActionType<
 type GetAllAssignmentsForCoursesAction = ActionType<
   typeof getAllAssignmentsForCoursesAction
 >;
-type SetFavAssignmentAction = ActionType<typeof setFavAssignment>;
-type SetArchiveAssignmentsAction = ActionType<typeof setArchiveAssignments>;
 type SetPendingAssignmentDataAction = ActionType<
   typeof setPendingAssignmentData
 >;
 export type AssignmentsAction =
   | GetAssignmentsForCourseAction
   | GetAllAssignmentsForCoursesAction
-  | SetFavAssignmentAction
-  | SetArchiveAssignmentsAction
   | SetPendingAssignmentDataAction;
 
 type GetFilesForCourseAction = ActionType<typeof getFilesForCourseAction>;
 type GetAllFilesForCoursesAction = ActionType<
   typeof getAllFilesForCoursesAction
 >;
-type SetFavFileAction = ActionType<typeof setFavFile>;
-type SetArchiveFilesAction = ActionType<typeof setArchiveFiles>;
-export type FilesAction =
-  | GetFilesForCourseAction
-  | GetAllFilesForCoursesAction
-  | SetFavFileAction
-  | SetArchiveFilesAction;
-
-type SetSettingAction = ActionType<typeof setSetting>;
-type SetEventIdForAssignmentAction = ActionType<typeof setEventIdForAssignment>;
-type RemoveEventIdForAssignmentAction = ActionType<
-  typeof removeEventIdForAssignment
->;
-type ClearEventIdsAction = ActionType<typeof clearEventIds>;
-export type SettingsAction =
-  | SetSettingAction
-  | SetEventIdForAssignmentAction
-  | RemoveEventIdForAssignmentAction
-  | ClearEventIdsAction;
+export type FilesAction = GetFilesForCourseAction | GetAllFilesForCoursesAction;
 
 export type ClearStoreAction = ActionType<typeof clearStoreAction>;
-export type SetMockStoreAction = ActionType<typeof setMockStore>;
+export type SetMockStoreAction = ActionType<typeof setMockStoreAction>;
 export type StoreAction = ClearStoreAction | SetMockStoreAction;
 
 export type AppActions =
@@ -131,7 +84,6 @@ export type AppActions =
   | NoticesAction
   | AssignmentsAction
   | FilesAction
-  | SettingsAction
   | StoreAction;
 
 export type ThunkResult = ThunkAction<

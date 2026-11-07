@@ -65,6 +65,7 @@
     "expo-image-picker": "58.0.10",
     "expo-intent-launcher": "58.0.3",
     "expo-secure-store": "58.0.2",
+    "expo-sqlite": "58.0.15",
     "expo-task-manager": "58.0.13",
     "fuse.js": "7.5.0",
     "graphql": "17.1.0",

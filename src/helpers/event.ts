@@ -4,10 +4,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { CalendarEvent } from 'thu-learn-lib';
 import {
   clearEventIds,
+  getSettings,
   setEventIdForAssignment,
   setSetting,
   removeEventIdForAssignment,
-} from 'data/actions/settings';
+} from 'data/settings';
 import { store } from 'data/store';
 import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
@@ -61,7 +62,7 @@ const getDefaultCalendarSource = async (entityType: Calendar.EntityTypes) => {
 export const getCourseCalendarId = async () => {
   const calendars = await Calendar.getCalendars();
 
-  const settings = store.getState().settings;
+  const settings = getSettings();
 
   const storedId = settings.courseCalendarId;
   if (storedId) {
@@ -74,7 +75,7 @@ export const getCourseCalendarId = async () => {
     value => value.title === courseCalendarName,
   );
   if (existingCalendar) {
-    store.dispatch(setSetting('courseCalendarId', existingCalendar.id));
+    setSetting('courseCalendarId', existingCalendar.id);
     return existingCalendar.id;
   }
 
@@ -96,7 +97,7 @@ export const getCourseCalendarId = async () => {
 
   const newCalendarID = newCalendar.id;
   if (newCalendarID) {
-    store.dispatch(setSetting('courseCalendarId', newCalendarID));
+    setSetting('courseCalendarId', newCalendarID);
   }
   return newCalendarID;
 };
@@ -106,7 +107,7 @@ export const saveCoursesToCalendar = async (
   startDate: Dayjs,
   endDate: Dayjs,
 ) => {
-  const settings = store.getState().settings;
+  const settings = getSettings();
 
   if (!(await getAndRequestPermission('calendar'))) {
     throw new Error('Missing calendar permission');
@@ -157,7 +158,7 @@ export const saveCoursesToCalendar = async (
 export const getAssignmentCalendarId = async () => {
   const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
 
-  const storedId = store.getState().settings.assignmentCalendarId;
+  const storedId = getSettings().assignmentCalendarId;
 
   if (storedId) {
     if (calendars.some(value => value.id === storedId)) {
@@ -169,11 +170,11 @@ export const getAssignmentCalendarId = async () => {
     value => value.title === assignmentCalendarReminderName,
   );
   if (existingCalendar) {
-    store.dispatch(setSetting('assignmentCalendarId', existingCalendar.id));
+    setSetting('assignmentCalendarId', existingCalendar.id);
     return existingCalendar.id;
   }
 
-  store.dispatch(clearEventIds('calendar'));
+  clearEventIds('calendar');
 
   const defaultCalendarSource =
     Platform.OS === 'ios'
@@ -193,7 +194,7 @@ export const getAssignmentCalendarId = async () => {
 
   const newCalendarID = newCalendar.id;
   if (newCalendarID) {
-    store.dispatch(setSetting('assignmentCalendarId', newCalendarID));
+    setSetting('assignmentCalendarId', newCalendarID);
   }
   return newCalendarID;
 };
@@ -201,7 +202,7 @@ export const getAssignmentCalendarId = async () => {
 export const getAssignmentReminderId = async () => {
   const reminders = await Calendar.getCalendars(Calendar.EntityTypes.REMINDER);
 
-  const storedId = store.getState().settings.assignmentReminderId;
+  const storedId = getSettings().assignmentReminderId;
   if (storedId) {
     if (reminders.some(value => value.id === storedId)) {
       return storedId;
@@ -212,11 +213,11 @@ export const getAssignmentReminderId = async () => {
     value => value.title === assignmentCalendarReminderName,
   );
   if (existingReminder) {
-    store.dispatch(setSetting('assignmentReminderId', existingReminder.id));
+    setSetting('assignmentReminderId', existingReminder.id);
     return existingReminder.id;
   }
 
-  store.dispatch(clearEventIds('reminder'));
+  clearEventIds('reminder');
 
   const defaultCalendarSource = await getDefaultCalendarSource(
     Calendar.EntityTypes.REMINDER,
@@ -234,7 +235,7 @@ export const getAssignmentReminderId = async () => {
 
   const newReminderID = newReminder.id;
   if (newReminderID) {
-    store.dispatch(setSetting('assignmentReminderId', newReminderID));
+    setSetting('assignmentReminderId', newReminderID);
   }
   return newReminderID;
 };
@@ -281,13 +282,11 @@ export const saveAssignmentEvent = async (
         );
         await reminder.update(details);
       } catch {
-        store.dispatch(removeEventIdForAssignment('reminder', assignmentId));
+        removeEventIdForAssignment('reminder', assignmentId);
       }
     } else {
       const reminder = await calendar.createReminder(details);
-      store.dispatch(
-        setEventIdForAssignment('reminder', assignmentId, reminder.id!),
-      );
+      setEventIdForAssignment('reminder', assignmentId, reminder.id!);
     }
   } else {
     const shouldHaveAlarm = !(
@@ -335,13 +334,11 @@ export const saveAssignmentEvent = async (
         );
         await event.update(details);
       } catch {
-        store.dispatch(removeEventIdForAssignment('calendar', assignmentId));
+        removeEventIdForAssignment('calendar', assignmentId);
       }
     } else {
       const event = await calendar.createEvent(details);
-      store.dispatch(
-        setEventIdForAssignment('calendar', assignmentId, event.id),
-      );
+      setEventIdForAssignment('calendar', assignmentId, event.id);
     }
   }
 };
@@ -350,7 +347,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
   type: 'calendar' | 'reminder',
   assignments: Assignment[],
 ) => {
-  const settings = store.getState().settings;
+  const settings = getSettings();
 
   if (Platform.OS === 'ios' && type === 'reminder') {
     if (!(await getAndRequestPermission('reminder'))) {
@@ -422,11 +419,11 @@ export const removeCalendars = async () => {
     }),
   );
 
-  store.dispatch(setSetting('assignmentReminderId', undefined));
-  store.dispatch(setSetting('assignmentCalendarId', undefined));
-  store.dispatch(setSetting('syncedCalendarAssignments', {}));
-  store.dispatch(setSetting('syncedReminderAssignments', {}));
-  store.dispatch(setSetting('courseCalendarId', undefined));
+  setSetting('assignmentReminderId', undefined);
+  setSetting('assignmentCalendarId', undefined);
+  setSetting('syncedCalendarAssignments', {});
+  setSetting('syncedReminderAssignments', {});
+  setSetting('courseCalendarId', undefined);
 };
 
 export const exportSyncedCalendarsToICS = async () => {
@@ -434,7 +431,7 @@ export const exportSyncedCalendarsToICS = async () => {
     throw new Error('Missing calendar permission');
   }
 
-  const settings = store.getState().settings;
+  const settings = getSettings();
 
   const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
   const courseCalendars = calendars.filter(
