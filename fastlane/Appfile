@@ -1,0 +1,6 @@
+app_identifier("io.robertying.learnX")
+team_id("G896QC26MC")
+
+for_platform :android do
+  package_name("io.robertying.learnx")
+end

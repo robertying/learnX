@@ -1,0 +1,428 @@
+require "digest"
+require "fileutils"
+require "json"
+require "shellwords"
+require "tmpdir"
+
+# Actions run from the repo root, but `sh` and Dir.pwd run from ./fastlane,
+# so every path below is absolute.
+ROOT = File.expand_path("..", FastlaneCore::FastlaneFolder.path)
+PACKAGE_JSON = File.join(ROOT, "package.json")
+PBXPROJ = File.join(ROOT, "ios/learnX.xcodeproj/project.pbxproj")
+GRADLE = File.join(ROOT, "android/app/build.gradle")
+ANDROID_APP = File.join(ROOT, "android/app")
+
+GITHUB_REPO = "robertying/learnX"
+# The Android versionCode is this plus the iOS build number (18.0.3: 4530 -> 9204530).
+ANDROID_VERSION_CODE_BASE = 9_200_000
+APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a x86 universal].freeze
+
+skip_docs
+
+# ---------------------------------------------------------------------------
+# Versions
+
+def app_version
+  JSON.parse(File.read(PACKAGE_JSON))["version"]
+end
+
+# The app target's CURRENT_PROJECT_VERSION. The share extension keeps its own (1).
+def build_number
+  File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i).max
+end
+
+def android_version_code
+  ANDROID_VERSION_CODE_BASE + build_number
+end
+
+def verify_versions!
+  version = app_version
+  pbxproj = File.read(PBXPROJ)
+  gradle = File.read(GRADLE)
+  problems = []
+  problems << "ios MARKETING_VERSION" unless pbxproj.scan(/MARKETING_VERSION = #{Regexp.escape(version)};/).size == 2
+  problems << "android versionName" unless gradle.include?(%(versionName "#{version}"))
+  problems << "android versionCode" unless gradle.include?("versionCode #{android_version_code}")
+  return if problems.empty?
+
+  UI.user_error!("#{problems.join(', ')} out of sync with package.json #{version} (build #{build_number}). Run `bundle exec fastlane bump`.")
+end
+
+def replace_in_file!(path, from, to, count:)
+  text = File.read(path)
+  found = text.scan(from).size
+  UI.user_error!("Expected #{count} × #{from.inspect} in #{path}, found #{found}") unless found == count
+  File.write(path, text.gsub(from, to))
+end
+
+# ---------------------------------------------------------------------------
+# Paths
+
+def out_dir
+  File.join(ROOT, "build/release/v#{app_version}")
+end
+
+def sourcemap_path(platform)
+  build = platform == "android" ? android_version_code : build_number
+  File.join(out_dir, "sourcemaps", "learnX-#{platform}-v#{app_version}-#{build}.map")
+end
+
+# ---------------------------------------------------------------------------
+# Release notes (written by the release-notes skill)
+#
+# Four sections split by `====` lines: GitHub, Google Play, App Store (iOS),
+# Mac App Store. Each store section is English, a `---` line, then Chinese.
+
+def default_notes_path
+  File.join(out_dir, "release-notes.md")
+end
+
+# notes:<file> if given, else what `fastlane notes` wrote for this version.
+def notes_path(options)
+  return options[:notes] unless options[:notes].to_s.empty?
+  return nil unless File.exist?(default_notes_path)
+
+  UI.message("Using release notes from #{default_notes_path}")
+  default_notes_path
+end
+
+def release_notes(path)
+  return nil if path.nil? || path.empty?
+
+  file = File.expand_path(path, ROOT)
+  UI.user_error!("Release notes not found: #{file}") unless File.exist?(file)
+  sections = File.read(file).split(/^={4,}[ \t]*$/).map(&:strip)
+  UI.user_error!("#{file} needs 4 sections split by `====` lines, found #{sections.size}") unless sections.size == 4
+
+  github, play, ios, mac = sections
+  notes = {
+    github: github,
+    play: split_languages(play, "Google Play"),
+    ios: split_languages(ios, "App Store"),
+    mac: split_languages(mac, "Mac App Store"),
+  }
+  notes[:play].each do |lang, text|
+    UI.user_error!("Google Play notes (#{lang}) are #{text.length} characters; the limit is 500") if text.length > 500
+  end
+  notes
+end
+
+def split_languages(section, name)
+  en, zh, *rest = section.split(/^---[ \t]*$/).map(&:strip)
+  if rest.any? || en.to_s.empty? || zh.to_s.empty?
+    UI.user_error!("#{name} notes need English, a `---` line, then Chinese")
+  end
+  { en: en, zh: zh }
+end
+
+# ---------------------------------------------------------------------------
+# App Store Connect
+
+# Uses an App Store Connect API key when APP_STORE_CONNECT_API_KEY_KEY_ID,
+# _ISSUER_ID and _KEY_FILEPATH are set (fastlane/.env); otherwise fastlane
+# signs in with an Apple ID and Xcode uses the account in its settings.
+def asc_api_key?
+  !ENV["APP_STORE_CONNECT_API_KEY_KEY_ID"].to_s.empty?
+end
+
+def xcode_auth_args
+  return [] unless asc_api_key?
+
+  [
+    "-authenticationKeyPath", File.expand_path(ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_FILEPATH")),
+    "-authenticationKeyID", ENV.fetch("APP_STORE_CONNECT_API_KEY_KEY_ID"),
+    "-authenticationKeyIssuerID", ENV.fetch("APP_STORE_CONNECT_API_KEY_ISSUER_ID"),
+  ]
+end
+
+# platform: "ios" or "macos" (Mac Catalyst). Returns the .ipa / .pkg path.
+def build_apple(platform)
+  verify_versions!
+  map = sourcemap_path(platform)
+  FileUtils.mkdir_p(File.dirname(map))
+  FileUtils.rm_f(map)
+
+  # react-native-xcode.sh writes the composed Hermes source map to SOURCEMAP_FILE.
+  # gym passes xcargs to the export too, so the auth args must not also go in export_xcargs.
+  xcargs = ["-allowProvisioningUpdates", *xcode_auth_args, "SOURCEMAP_FILE=#{map}"]
+  options = {
+    workspace: File.join(ROOT, "ios/learnX.xcworkspace"),
+    scheme: "learnX",
+    configuration: "Release",
+    clean: true,
+    export_method: "app-store",
+    export_options: { signingStyle: "automatic" },
+    xcargs: xcargs.shelljoin,
+    output_directory: File.join(out_dir, platform),
+    output_name: "learnX",
+  }
+  options[:catalyst_platform] = "macos" if platform == "macos"
+  path = build_app(options)
+
+  UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
+  UI.success("Source map: #{map}")
+  path
+end
+
+def upload_apple(platform, path, notes)
+  app_store_connect_api_key if asc_api_key?
+  Dir.mktmpdir do |metadata|
+    options = {
+      app_version: app_version,
+      platform: platform == "macos" ? "osx" : "ios",
+      metadata_path: metadata,
+      skip_screenshots: true,
+      skip_metadata: notes.nil?,
+      submit_for_review: false,
+      run_precheck_before_submit: false,
+      force: true,
+    }
+    options[platform == "macos" ? :pkg : :ipa] = path
+    options[:release_notes] = { "en-US" => notes[:en], "zh-Hans" => notes[:zh] } if notes
+    upload_to_app_store(options)
+  end
+end
+
+# ---------------------------------------------------------------------------
+# Android
+
+def android_out_dir
+  File.join(out_dir, "android")
+end
+
+def aab_path
+  File.join(android_out_dir, "learnX-v#{app_version}.aab")
+end
+
+def apk_paths
+  APK_ABIS.map { |abi| File.join(android_out_dir, "learnX-#{abi}-v#{app_version}.apk") }
+end
+
+def latest_json_path
+  File.join(android_out_dir, "latest.json")
+end
+
+def build_android
+  verify_versions!
+  # The release config reads LEARNX_RELEASE_* from android/local.properties and
+  # signs with android/app/release.keystore.
+  gradle(
+    project_dir: File.join(ROOT, "android"),
+    tasks: ["app:bundleRelease", "app:assembleRelease", "app:uploadCrashlyticsSymbolFileRelease"],
+  )
+
+  FileUtils.rm_rf(android_out_dir)
+  FileUtils.mkdir_p(android_out_dir)
+  FileUtils.cp(File.join(ANDROID_APP, "build/outputs/bundle/release/app-release.aab"), aab_path)
+
+  # APKs for GitHub Releases and the TUNA mirror. The app's updater reads
+  # latest.json from the mirror and downloads learnX-<abi>-v<version>.apk.
+  files = APK_ABIS.zip(apk_paths).map do |abi, dest|
+    FileUtils.cp(File.join(ANDROID_APP, "build/outputs/apk/release/app-#{abi}-release.apk"), dest)
+    { name: File.basename(dest), sha256: Digest::SHA256.file(dest).hexdigest }
+  end
+  File.write(latest_json_path, "#{JSON.pretty_generate({ version: app_version, files: files })}\n")
+
+  map = sourcemap_path("android")
+  FileUtils.mkdir_p(File.dirname(map))
+  FileUtils.cp(File.join(ANDROID_APP, "build/generated/sourcemaps/react/release/index.android.bundle.map"), map)
+
+  UI.success("Android release files: #{android_out_dir}")
+  UI.success("Source map: #{map}")
+end
+
+def upload_android(notes, track)
+  UI.user_error!("No AAB at #{aab_path}. Run `bundle exec fastlane android build` first.") unless File.exist?(aab_path)
+
+  Dir.mktmpdir do |metadata|
+    if notes
+      { "en-US" => notes[:en], "zh-CN" => notes[:zh] }.each do |locale, text|
+        dir = File.join(metadata, locale, "changelogs")
+        FileUtils.mkdir_p(dir)
+        File.write(File.join(dir, "#{android_version_code}.txt"), text)
+      end
+    end
+
+    mapping = File.join(ANDROID_APP, "build/outputs/mapping/release/mapping.txt")
+    options = {
+      aab: aab_path,
+      track: track,
+      # A draft release: review and roll it out in Play Console.
+      release_status: "draft",
+      metadata_path: metadata,
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      skip_upload_changelogs: notes.nil?,
+    }
+    options[:mapping] = mapping if File.exist?(mapping)
+    # supply reads SUPPLY_JSON_KEY itself; also take the name used in fastlane/.env.
+    json_key = ENV["GOOGLE_PLAY_CONSOLE_JSON_KEY"].to_s
+    options[:json_key] = File.expand_path(json_key) unless json_key.empty?
+    upload_to_play_store(options)
+  end
+end
+
+# ---------------------------------------------------------------------------
+# GitHub Releases
+
+def github_token
+  token = ENV["GITHUB_TOKEN"].to_s
+  token = sh("gh", "auth", "token", log: false).strip if token.empty?
+  token
+end
+
+def publish_github(notes)
+  version = app_version
+  missing = [*apk_paths, latest_json_path].reject { |f| File.exist?(f) }
+  UI.user_error!("Missing #{missing.map { |f| File.basename(f) }.join(', ')} in #{android_out_dir}. Run `bundle exec fastlane android build` first.") unless missing.empty?
+
+  assets = [latest_json_path, *apk_paths]
+  maps = Dir[File.join(out_dir, "sourcemaps", "*.map")].sort
+  unless maps.empty?
+    zip = File.join(out_dir, "learnX-sourcemaps-v#{version}.zip")
+    FileUtils.rm_f(zip)
+    sh("zip", "-j", "-q", zip, *maps)
+    assets << zip
+  end
+
+  # A draft: check it and publish it on GitHub. The TUNA mirror and the
+  # in-app updater only see published releases.
+  set_github_release(
+    repository_name: GITHUB_REPO,
+    api_token: github_token,
+    name: "v#{version}",
+    tag_name: "v#{version}",
+    commitish: last_git_commit[:commit_hash],
+    description: notes ? notes[:github] : "",
+    is_draft: true,
+    upload_assets: assets,
+  )
+end
+
+# ---------------------------------------------------------------------------
+# Lanes
+
+desc "Set the app version everywhere and bump the build number."
+desc "A new version moves the build number to the next multiple of 10; the same version adds 1 (a rebuild)."
+desc "Usage: bundle exec fastlane bump version:18.1.0   (no version: rebuild of the current one)"
+lane :bump do |options|
+  current = app_version
+  build = build_number
+  version = (options[:version] || current).to_s.delete_prefix("v")
+  UI.user_error!("Invalid version '#{version}': expected x.y.z") unless version.match?(/\A\d+\.\d+\.\d+\z/)
+  verify_versions!
+
+  new_build = version == current ? build + 1 : (build / 10 + 1) * 10
+  new_code = ANDROID_VERSION_CODE_BASE + new_build
+
+  replace_in_file!(PACKAGE_JSON, %("version": "#{current}"), %("version": "#{version}"), count: 1)
+  replace_in_file!(PBXPROJ, "MARKETING_VERSION = #{current};", "MARKETING_VERSION = #{version};", count: 2)
+  replace_in_file!(PBXPROJ, "CURRENT_PROJECT_VERSION = #{build};", "CURRENT_PROJECT_VERSION = #{new_build};", count: 2)
+  replace_in_file!(GRADLE, %(versionName "#{current}"), %(versionName "#{version}"), count: 1)
+  replace_in_file!(GRADLE, "versionCode #{ANDROID_VERSION_CODE_BASE + build}", "versionCode #{new_code}", count: 1)
+
+  UI.success("#{current} (#{build}) -> #{version} (#{new_build}, Android #{new_code})")
+end
+
+desc "Write the release notes with Claude Code (`claude -p` and the release-notes skill) for review."
+desc "Saves build/release/v<version>/release-notes.md, which the release lanes use when no notes: is given."
+desc "Usage: bundle exec fastlane notes   (run `bump` first, so the version is the new one)"
+lane :notes do
+  version = app_version
+  path = default_notes_path
+  FileUtils.mkdir_p(File.dirname(path))
+  FileUtils.rm_f(path)
+
+  prompt = <<~PROMPT
+    Use the release-notes skill to write the release notes for learnX v#{version}.
+    Save the file to #{path} instead of the scratchpad. Don't publish or upload anything.
+  PROMPT
+  # Read-only git and gh, plus writing the notes file.
+  allowed = [
+    "Skill", "Read", "Grep", "Glob", "Write", "Edit",
+    "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
+    "Bash(gh release list:*)", "Bash(gh release view:*)",
+  ]
+  unless system("command -v claude > /dev/null")
+    UI.user_error!("The `claude` CLI isn't on PATH. Install Claude Code (https://code.claude.com) and log in with `claude` once.")
+  end
+  # claude -p waits for stdin when it isn't a terminal, so give it none.
+  command = ["claude", "-p", prompt, "--allowedTools", allowed.join(",")].shelljoin
+  Dir.chdir(ROOT) do
+    sh("#{command} < /dev/null")
+  end
+
+  UI.user_error!("Claude Code wrote no notes to #{path}") unless File.exist?(path)
+  release_notes(path)
+  UI.success("Release notes: #{path}")
+  UI.important("Review and edit it, then run a release lane; it picks the file up without notes:.")
+end
+
+desc "Build and upload everything: iOS, Mac, Android (Play draft) and a draft GitHub release."
+desc "Builds all platforms before uploading anything. Nothing is submitted for review or rolled out."
+desc "Usage: bundle exec fastlane release [notes:/path/to/notes.md] [track:production]"
+lane :release do |options|
+  ensure_git_status_clean
+  notes = release_notes(notes_path(options))
+  ipa = build_apple("ios")
+  pkg = build_apple("macos")
+  build_android
+  upload_apple("ios", ipa, notes && notes[:ios])
+  upload_apple("macos", pkg, notes && notes[:mac])
+  upload_android(notes && notes[:play], options[:track] || "production")
+  publish_github(notes)
+end
+
+desc "Create a draft GitHub release with the APKs, latest.json and source maps from `android build`."
+desc "Usage: bundle exec fastlane github_release [notes:/path/to/notes.md]"
+lane :github_release do |options|
+  publish_github(release_notes(notes_path(options)))
+end
+
+platform :ios do
+  desc "Archive and export the App Store build and its source map to build/release/<version>/."
+  lane :build do
+    build_apple("ios")
+  end
+
+  desc "Build and upload to App Store Connect (not submitted for review)."
+  desc "Usage: bundle exec fastlane ios release [notes:/path/to/notes.md]"
+  lane :release do |options|
+    ensure_git_status_clean
+    notes = release_notes(notes_path(options))
+    upload_apple("ios", build_apple("ios"), notes && notes[:ios])
+  end
+end
+
+platform :mac do
+  desc "Archive and export the Mac Catalyst build and its source map to build/release/<version>/."
+  lane :build do
+    build_apple("macos")
+  end
+
+  desc "Build and upload the Mac Catalyst app to App Store Connect (not submitted for review)."
+  desc "Usage: bundle exec fastlane mac release [notes:/path/to/notes.md]"
+  lane :release do |options|
+    ensure_git_status_clean
+    notes = release_notes(notes_path(options))
+    upload_apple("macos", build_apple("macos"), notes && notes[:mac])
+  end
+end
+
+platform :android do
+  desc "Build the AAB, the APKs and latest.json, upload native symbols to Crashlytics, keep the source map."
+  lane :build do
+    build_android
+  end
+
+  desc "Build and upload the AAB to Google Play as a draft release."
+  desc "Usage: bundle exec fastlane android release [notes:/path/to/notes.md] [track:production]"
+  lane :release do |options|
+    ensure_git_status_clean
+    notes = release_notes(notes_path(options))
+    build_android
+    upload_android(notes && notes[:play], options[:track] || "production")
+  end
+end

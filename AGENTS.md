@@ -3,6 +3,7 @@
 ## Commands
 
 - `pnpm start` runs Metro; `pnpm ios` / `pnpm android` build and launch the app.
+- `pnpm pod` runs `pod install` and `pod update` through Bundler, with the CocoaPods version locked in `Gemfile.lock` (run `bundle install` once first).
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing.
 - Debug builds load JS from Metro; only native changes need a rebuild.
 
@@ -77,6 +78,14 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - iPhone Duo screenshots need the display: `xcrun simctl io <udid> screenshot --display 1|3 <out.png>` (1 = outer, 3 = inner), or `.claude/skills/app-store-assets/scripts/duo-capture.sh`, since the command can hang.
 - TODO: iPhone Duo partially open and fully unfolded. Maestro on iOS only drives the outer display (display 1) and has no display option: with the app on the inner display (3) its screenshots are black, XCTest reports the app's frames offset into the outer display's coordinates, and taps (even at corrected points) don't reach the app.
 - TODO: iPad in landscape. Only portrait has been run. The simulator can't be rotated from the shell, so rotate it by hand in the Simulator window (Device › Rotate) and run the flows; landscape shows the tabs and split view differently.
+
+## Releases
+
+- [fastlane](https://docs.fastlane.tools) (`fastlane/Fastfile`) builds and uploads releases on a Mac. It and CocoaPods are in the `Gemfile`: run `bundle install` once (Ruby 3.2+; `.bundle/config` keeps the gems in `vendor/bundle`), then `pnpm install` and `pnpm pod` (`bundle exec pod install`, so everyone uses the locked CocoaPods) before building.
+- `bundle exec fastlane bump version:x.y.z` sets the version in `package.json`, the Xcode project and `android/app/build.gradle`. The build number goes to the next multiple of 10 (18.0.3 is 4530), or up by 1 for a rebuild of the same version (no `version:`); the Android versionCode is 9200000 + the build number.
+- `bundle exec fastlane <ios|mac|android> build` builds into `build/release/v<version>/` without uploading anything: the .ipa, the Mac Catalyst .pkg, the AAB, the APKs renamed `learnX-<abi>-v<version>.apk` with `latest.json` (what the in-app updater reads from the TUNA mirror), and the JS source map of each build in `sourcemaps/`. Crashlytics doesn't symbolicate JS, so keep these maps for `metro-symbolicate`. The Android build also uploads native symbols to Crashlytics.
+- `<platform> release` builds and uploads; `bundle exec fastlane release notes:<file>` builds all three, then uploads to App Store Connect (not submitted for review), to Google Play as a draft on `track:` (default `production`), and creates a draft GitHub release `v<version>` at HEAD with the APKs, `latest.json` and a zip of the source maps. Release lanes need a clean git tree. Notes come from the release-notes skill: `bundle exec fastlane notes` (after `bump`) runs it through `claude -p` with read-only git/gh tools and saves `build/release/v<version>/release-notes.md`, which the release lanes use when no `notes:` is given, so review and edit it first.
+- Secrets go in `fastlane/.env` (git-ignored; fastlane loads it): `APP_STORE_CONNECT_API_KEY_KEY_ID`, `APP_STORE_CONNECT_API_KEY_ISSUER_ID`, `APP_STORE_CONNECT_API_KEY_KEY_FILEPATH` (.p8) for App Store Connect and Xcode signing (without them fastlane asks for an Apple ID), `GOOGLE_PLAY_CONSOLE_JSON_KEY` (path to the Play service account JSON; `SUPPLY_JSON_KEY` works too), and optionally `GITHUB_TOKEN` (otherwise `gh auth token`). Android signing reads `LEARNX_RELEASE_*` from `android/local.properties` and `android/app/release.keystore`.
 
 ## App Store assets
 
