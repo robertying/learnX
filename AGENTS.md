@@ -54,6 +54,12 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 ## Testing and debugging
 
+### Unit tests (Jest)
+
+- Pure logic lives in `src/helpers` and is tested in `src/helpers/__tests__`. Hooks are tested in `src/hooks/__tests__` with `renderHook` from `@testing-library/react-native` (v14: `renderHook`, `rerender` and `act` are async, so await them).
+- Mock native modules and the data layer per test file (`jest.mock('helpers/fs', …)`, `components/Toast`, pickers, `data/source`); use the real Zustand stores (`setSetting`, `setPendingAssignmentData`, `resetUserData`) instead of mocking them. `helpers/html` and `helpers/fs` can't load in Jest. Shared mocks are in `jest/setup.ts`.
+- Test hooks that hold real logic (state, ordering, error paths), not thin wrappers around one call.
+
 ### iOS simulators
 
 - Other sessions may be driving the stock simulators with other apps, so use the shared `learnX …` pool instead: `learnX iPhone 18 Pro`, `learnX iPhone 18 Pro 2`, `learnX iPad Pro 11` and `learnX iPhone Duo` (`simctl list devices | grep learnX`). Take one that is shut down; a booted one is probably another session's. Only when every device of the type you need is booted, create the next number (`xcrun simctl create "learnX iPhone 18 Pro 3" <device type> <runtime>`), and delete it (`xcrun simctl delete <udid>`) when you're done. Don't create per-task devices, and shut your device down when you finish.
