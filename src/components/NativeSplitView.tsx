@@ -225,6 +225,14 @@ const NativeSplitViewProvider: React.FC<
         <Split.Host
           preferredDisplayMode={preferredDisplayMode}
           preferredSplitBehavior="tile"
+          // Tiled, UIKit shows the detail pane alone when it can't fit beside
+          // the list, and on Mac that leaves no button to bring the list back.
+          // The window can't be made narrower than the list beside this.
+          columnMetrics={
+            hasSidebar
+              ? { minimumSecondaryColumnWidth: Numbers.splitViewMinDetailWidth }
+              : undefined
+          }
           // In the sidebar's bar, which is in the window's title bar on Mac.
           displayModeButtonVisibility={hasSidebar ? 'automatic' : 'never'}
           primaryBackgroundStyle={hasSidebar ? 'sidebar' : undefined}
