@@ -145,7 +145,7 @@ const itemsOf = (type: ContentType) => {
     case ContentType.NOTIFICATION:
       return mock().mockNotices;
     case ContentType.HOMEWORK:
-      return data.assignments.items;
+      return mock().mockAssignments;
     case ContentType.FILE:
       return data.files.items;
     default:
@@ -195,10 +195,7 @@ export const mockSource: DataSource = {
     ),
   getHomeworkList: courseId =>
     request(
-      () =>
-        groupByCourse(mockData().assignments.items, [courseId])[
-          courseId
-        ] as any,
+      () => groupByCourse(mock().mockAssignments, [courseId])[courseId] as any,
     ),
   getFileList: courseId =>
     request(

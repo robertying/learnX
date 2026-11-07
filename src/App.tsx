@@ -118,7 +118,7 @@ import {
   useCredentials,
 } from 'data/credentials';
 import { login } from 'data/actions/auth';
-import { setPendingAssignmentData } from 'data/actions/assignments';
+import { setPendingAssignmentData } from 'data/pendingAssignment';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { latestSemesterQuery, useCourses } from 'data/queries';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
@@ -1001,11 +1001,11 @@ const Container = () => {
       }
 
       if (data) {
-        dispatch(setPendingAssignmentData(data));
+        setPendingAssignmentData(data);
         toast(t('shareReceived'), 'success', 5 * 1000);
       }
     },
-    [dispatch, toast],
+    [toast],
   );
 
   useEffect(() => {

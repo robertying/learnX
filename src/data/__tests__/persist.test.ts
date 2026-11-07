@@ -94,15 +94,14 @@ describe('persisted root state', () => {
     const { getState } = await launch();
     const state = getState();
 
-    for (const key of ['assignments', 'files'] as const) {
-      expect(state[key].fetching).toBe(false);
-      expect(state[key].error ?? null).toBeNull();
-    }
+    expect(state.files.fetching).toBe(false);
+    expect(state.files.error ?? null).toBeNull();
     // Moved to the query cache and data/userData.
     expect(state).not.toHaveProperty('semesters');
     expect(state).not.toHaveProperty('courses');
     expect(state).not.toHaveProperty('user');
     expect(state).not.toHaveProperty('notices');
+    expect(state).not.toHaveProperty('assignments');
     expect(state._persist.version).toBe(PERSIST_VERSION);
   });
 

@@ -7,7 +7,8 @@ import {
   mockSubmitAssignment,
   setMockNetworkConfig,
 } from 'data/mockSource';
-import mock, {
+import {
+  mockAssignments,
   mockCourses,
   mockCurrentSemester,
   mockNotices,
@@ -52,10 +53,10 @@ describe('mockSource', () => {
   });
 
   it('answers per course', async () => {
-    const courseId = mock.assignments.items[0].courseId;
+    const courseId = mockAssignments[0].courseId;
     const assignments = await mockSource.getHomeworkList(courseId);
     expect(assignments.length).toBe(
-      mock.assignments.items.filter(a => a.courseId === courseId).length,
+      mockAssignments.filter(a => a.courseId === courseId).length,
     );
   });
 

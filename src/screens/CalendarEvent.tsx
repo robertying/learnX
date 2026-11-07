@@ -18,7 +18,7 @@ import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
-import { useAppSelector } from 'data/store';
+import { useAssignments } from 'data/content';
 import { setSetting, useSettings } from 'data/settings';
 import { useUserData } from 'data/userData';
 import { dataSource, loginWithFingerPrint } from 'data/source';
@@ -51,7 +51,7 @@ const CalendarEvent: React.FC<Props> = () => {
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.assignment);
   const archivedIds = useUserData(data => data.archived.assignment);
-  const assignmentState = useAppSelector(state => state.assignments);
+  const { assignments } = useAssignments();
   const calendarEventLength = useSettings(
     settings => settings.calendarEventLength,
   );
@@ -60,7 +60,7 @@ const CalendarEvent: React.FC<Props> = () => {
   );
 
   const { all } = useFilteredData({
-    data: assignmentState.items,
+    data: assignments,
     fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
