@@ -12,7 +12,13 @@ import { t } from 'helpers/i18n';
 import Colors from 'constants/Colors';
 
 export type FilterSelection =
-  'all' | 'unread' | 'fav' | 'archived' | 'hidden' | 'unfinished' | 'finished';
+  | 'all'
+  | 'unread'
+  | 'fav'
+  | 'archived'
+  | 'hidden'
+  | 'unfinished'
+  | 'finished';
 
 export interface FilterProps {
   visible: boolean;
