@@ -345,8 +345,13 @@ lane :notes do
     "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
     "Bash(gh release list:*)", "Bash(gh release view:*)",
   ]
+  unless system("command -v claude > /dev/null")
+    UI.user_error!("The `claude` CLI isn't on PATH. Install Claude Code (https://code.claude.com) and log in with `claude` once.")
+  end
+  # claude -p waits for stdin when it isn't a terminal, so give it none.
+  command = ["claude", "-p", prompt, "--allowedTools", allowed.join(",")].shelljoin
   Dir.chdir(ROOT) do
-    sh("claude", "-p", prompt, "--allowedTools", allowed.join(","))
+    sh("#{command} < /dev/null")
   end
 
   UI.user_error!("Claude Code wrote no notes to #{path}") unless File.exist?(path)
