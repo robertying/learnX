@@ -28,6 +28,7 @@ describe('user data', () => {
       archived: { notice: [], assignment: [], file: [] },
       hiddenCourses: [],
       courseOrder: [],
+      currentSemester: null,
     });
   });
 

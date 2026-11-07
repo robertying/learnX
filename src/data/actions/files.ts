@@ -1,6 +1,7 @@
 import { ContentType, CourseType, ApiError } from 'thu-learn-lib';
 import { createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
+import { getCourseNames } from 'data/queries';
 import { dataSource } from 'data/source';
 import { ThunkResult } from 'data/types/actions';
 import {
@@ -21,7 +22,7 @@ export const getFilesForCourseAction = createAsyncAction(
 )<undefined, { courseId: string; files: File[] }, ApiError>();
 
 export function getFilesForCourse(courseId: string): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getFilesForCourseAction.request());
 
     try {
@@ -29,12 +30,10 @@ export function getFilesForCourse(courseId: string): ThunkResult {
         courseId,
         CourseType.STUDENT,
       );
-      const courseName = getState().courses.names[courseId];
       const files = results.map<File>(result => ({
         ...result,
         courseId,
-        courseName: courseName.name,
-        courseTeacherName: courseName.teacherName,
+        ...getCourseNames(courseId),
       }));
       const timestamps = new Map(
         files.map(f => [f.id, dayjs(f.uploadTime).unix()]),
@@ -58,7 +57,7 @@ export const getAllFilesForCoursesAction = createAsyncAction(
 )<undefined, File[], ApiError>();
 
 export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     dispatch(getAllFilesForCoursesAction.request());
 
     try {
@@ -66,15 +65,12 @@ export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
         courseIds,
         ContentType.FILE,
       );
-      const courseNames = getState().courses.names;
       const files = Object.keys(results).flatMap(courseId => {
         const filesForCourse = results[courseId];
-        const courseName = courseNames[courseId];
         return filesForCourse.map<File>(file => ({
           ...file,
           courseId,
-          courseName: courseName.name,
-          courseTeacherName: courseName.teacherName,
+          ...getCourseNames(courseId),
         }));
       });
       const timestamps = new Map(

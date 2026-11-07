@@ -5,28 +5,26 @@ import dayjs from 'dayjs';
 import { AppDispatch, store } from 'data/store';
 import { dataSource, loginWithFingerPrint } from 'data/source';
 import { loadCredentials } from 'data/credentials';
-import { Assignment, CoursesState, File, Notice } from 'data/types/state';
+import { Assignment, File, Notice } from 'data/types/state';
+import { coursesQuery, getCourseNames } from 'data/queries';
+import { queryClient, restoreQueryCache } from 'data/queryClient';
+import { getUserData } from 'data/userData';
 import { getAllNoticesForCoursesAction } from 'data/actions/notices';
 import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
 import { getAllFilesForCoursesAction } from 'data/actions/files';
 import { sortAssignments } from 'helpers/assignments';
 
-const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
-  const courseIds = courses.items.map(i => i.id);
-
+const getAllNotices = async (dispatch: AppDispatch, courseIds: string[]) => {
   const results = await dataSource.getAllContents(
     courseIds,
     ContentType.NOTIFICATION,
   );
-  const courseNames = courses.names;
   const notices = Object.keys(results).flatMap(courseId => {
     const noticesForCourse = results[courseId];
-    const courseName = courseNames[courseId];
     return noticesForCourse.map<Notice>(notice => ({
       ...notice,
       courseId,
-      courseName: courseName.name,
-      courseTeacherName: courseName.teacherName,
+      ...getCourseNames(courseId),
     }));
   });
   const noticeTimestamps = new Map(
@@ -43,23 +41,18 @@ const getAllNotices = async (dispatch: AppDispatch, courses: CoursesState) => {
 
 const getAllAssignments = async (
   dispatch: AppDispatch,
-  courses: CoursesState,
+  courseIds: string[],
 ) => {
-  const courseIds = courses.items.map(i => i.id);
-
   const results = await dataSource.getAllContents(
     courseIds,
     ContentType.HOMEWORK,
   );
-  const courseNames = courses.names;
   const assignments = Object.keys(results).flatMap(courseId => {
     const assignmentsForCourse = results[courseId];
-    const courseName = courseNames[courseId];
     return assignmentsForCourse.map<Assignment>(assignment => ({
       ...assignment,
       courseId,
-      courseName: courseName.name,
-      courseTeacherName: courseName.teacherName,
+      ...getCourseNames(courseId),
     }));
   });
 
@@ -68,19 +61,14 @@ const getAllAssignments = async (
   );
 };
 
-const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
-  const courseIds = courses.items.map(i => i.id);
-
+const getAllFiles = async (dispatch: AppDispatch, courseIds: string[]) => {
   const results = await dataSource.getAllContents(courseIds, ContentType.FILE);
-  const courseNames = courses.names;
   const files = Object.keys(results).flatMap(courseId => {
     const filesForCourse = results[courseId];
-    const courseName = courseNames[courseId];
     return filesForCourse.map<File>(file => ({
       ...file,
       courseId,
-      courseName: courseName.name,
-      courseTeacherName: courseName.teacherName,
+      ...getCourseNames(courseId),
     }));
   });
   const fileTimestamps = new Map(
@@ -98,12 +86,19 @@ const getAllFiles = async (dispatch: AppDispatch, courses: CoursesState) => {
 const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 
 TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
-  const state = store.getState();
   const dispatch = store.dispatch;
 
   // The task can run before the app UI has loaded them.
-  const credentials = await loadCredentials();
-  const courseIds = state.courses.items.map(i => i.id);
+  const [credentials] = await Promise.all([
+    loadCredentials(),
+    restoreQueryCache(),
+  ]);
+  const semesterId = getUserData().currentSemester;
+  const courseIds = (
+    (semesterId &&
+      queryClient.getQueryData(coursesQuery(semesterId).queryKey)) ||
+    []
+  ).map(course => course.id);
 
   if (
     !credentials?.username ||
@@ -127,9 +122,9 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   }
 
   const results = await Promise.allSettled([
-    getAllNotices(dispatch, state.courses),
-    getAllAssignments(dispatch, state.courses),
-    getAllFiles(dispatch, state.courses),
+    getAllNotices(dispatch, courseIds),
+    getAllAssignments(dispatch, courseIds),
+    getAllFiles(dispatch, courseIds),
   ]);
 
   if (results.some(result => result.status === 'fulfilled')) {

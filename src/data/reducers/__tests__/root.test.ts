@@ -11,11 +11,8 @@ describe('rootReducer', () => {
     expect(Object.keys(initial()).sort()).toEqual([
       'assignments',
       'auth',
-      'courses',
       'files',
       'notices',
-      'semesters',
-      'user',
     ]);
   });
 
@@ -25,7 +22,7 @@ describe('rootReducer', () => {
       {
         ...base,
         auth: { ...base.auth, loggedIn: true },
-        semesters: { ...base.semesters, current: '2025-2026-1' },
+        notices: { ...base.notices, items: [{ id: 'n' } as never] },
       },
       action(C.CLEAR_STORE),
     );
@@ -35,7 +32,7 @@ describe('rootReducer', () => {
   it('loads the mock data on SET_MOCK_STORE', () => {
     const state = mockStore();
     expect(state.auth.loggedIn).toBe(true);
-    expect(state.courses.items.length).toBeGreaterThan(0);
+    expect(state.notices.items.length).toBeGreaterThan(0);
     expect(state.assignments.items.length).toBeGreaterThan(0);
   });
 
@@ -43,9 +40,6 @@ describe('rootReducer', () => {
     // Fetches go through the emulated server (data/mockSource), so their
     // results land like a real account's.
     const fetched: [string, unknown][] = [
-      [C.GET_USER_INFO_SUCCESS, { name: 'Mock', department: 'Mock' }],
-      [C.GET_ALL_SEMESTERS_SUCCESS, []],
-      [C.GET_COURSES_FOR_SEMESTER_SUCCESS, []],
       [C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_FILES_FOR_COURSES_SUCCESS, []],
@@ -80,8 +74,8 @@ describe('rootReducer', () => {
     const base = initial();
     const state = rootReducer(
       base,
-      action(C.GET_ALL_SEMESTERS_SUCCESS, ['2025-2026-1']),
+      action(C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS, [{ id: 'n' }]),
     );
-    expect(state.semesters.items).toEqual(['2025-2026-1']);
+    expect(state.notices.items).toEqual([{ id: 'n' }]);
   });
 });

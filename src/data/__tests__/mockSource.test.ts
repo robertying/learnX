@@ -6,9 +6,13 @@ import {
   mockSubmitAssignment,
   setMockNetworkConfig,
 } from 'data/mockSource';
-import mock from 'data/mock';
+import mock, {
+  mockCourses,
+  mockCurrentSemester,
+  mockSemesters,
+} from 'data/mock';
 
-const courseIds = mock.courses.items.map(c => c.id);
+const courseIds = mockCourses.map(c => c.id);
 
 beforeEach(() => {
   setMockNetworkConfig({ ...defaultMockNetworkConfig, latency: 'none' });
@@ -34,10 +38,10 @@ describe('mockSource', () => {
   });
 
   it('returns a fresh copy for every response', async () => {
-    const [course] = await mockSource.getCourseList(mock.semesters.current!);
+    const [course] = await mockSource.getCourseList(mockCurrentSemester);
     expect(course).not.toHaveProperty('semesterId');
     course.name = 'changed';
-    const [again] = await mockSource.getCourseList(mock.semesters.current!);
+    const [again] = await mockSource.getCourseList(mockCurrentSemester);
     expect(again.name).not.toBe('changed');
   });
 
@@ -55,7 +59,7 @@ describe('mockSource', () => {
 
   it('describes the current semester', async () => {
     const semester = await mockSource.getCurrentSemester();
-    expect(semester.id).toBe(mock.semesters.current);
+    expect(semester.id).toBe(mockCurrentSemester);
   });
 
   it('waits like a network round trip', async () => {
@@ -106,7 +110,7 @@ describe('mockSource', () => {
       reason: FailReason.BAD_CREDENTIAL,
     });
     await expect(mockSource.getSemesterIdList()).resolves.toEqual(
-      mock.semesters.items,
+      mockSemesters,
     );
   });
 

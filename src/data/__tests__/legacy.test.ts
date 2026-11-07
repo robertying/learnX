@@ -104,7 +104,7 @@ const upgraded = {
 };
 
 describe('importing user data saved by 18.0.x', () => {
-  it('moves settings, favorites, archives, hidden courses and order', async () => {
+  it('moves settings, favorites, archives, hidden courses, order and semester', async () => {
     const m = await launch({ asyncStorage: upgraded });
     await m.legacy.importLegacyUserData();
 
@@ -142,6 +142,7 @@ describe('importing user data saved by 18.0.x', () => {
       archived: { notice: ['n2'], assignment: [], file: ['f1'] },
       hiddenCourses: ['c3'],
       courseOrder: ['c2', 'c1'],
+      currentSemester: '2025-2026-1',
     });
   });
 

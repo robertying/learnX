@@ -1,7 +1,6 @@
 import { ThunkAction } from 'redux-thunk';
 import { ActionType } from 'typesafe-actions';
 import { loginAction, setSSOInProgress } from 'data/actions/auth';
-import { getCoursesForSemesterAction } from 'data/actions/courses';
 import {
   getAllNoticesForCoursesAction,
   getNoticesForCourseAction,
@@ -16,33 +15,11 @@ import {
   getFilesForCourseAction,
 } from 'data/actions/files';
 import { clearStoreAction, setMockStoreAction } from 'data/actions/root';
-import {
-  getAllSemestersAction,
-  getCurrentSemesterAction,
-  setCurrentSemester,
-} from 'data/actions/semesters';
-import { getUserInfoAction } from 'data/actions/user';
 import { PersistAppState } from './state';
 
 type LoginAction = ActionType<typeof loginAction>;
 type SetSsoInProgressAction = ActionType<typeof setSSOInProgress>;
 export type AuthAction = LoginAction | SetSsoInProgressAction;
-
-type GetUserInfoAction = ActionType<typeof getUserInfoAction>;
-export type UserAction = GetUserInfoAction;
-
-type GetAllSemestersAction = ActionType<typeof getAllSemestersAction>;
-type GetCurrentSemesterAction = ActionType<typeof getCurrentSemesterAction>;
-type SetCurrentSemesterAction = ActionType<typeof setCurrentSemester>;
-export type SemestersAction =
-  | GetAllSemestersAction
-  | GetCurrentSemesterAction
-  | SetCurrentSemesterAction;
-
-type GetCoursesForSemesterAction = ActionType<
-  typeof getCoursesForSemesterAction
->;
-export type CoursesAction = GetCoursesForSemesterAction;
 
 type GetNoticesForCourseAction = ActionType<typeof getNoticesForCourseAction>;
 type GetAllNoticesForCoursesAction = ActionType<
@@ -78,9 +55,6 @@ export type StoreAction = ClearStoreAction | SetMockStoreAction;
 
 export type AppActions =
   | AuthAction
-  | UserAction
-  | SemestersAction
-  | CoursesAction
   | NoticesAction
   | AssignmentsAction
   | FilesAction

@@ -18,7 +18,7 @@ import {
 /**
  * Up to 18.0.x redux-persist kept user data in AsyncStorage: settings under
  * their own key, and favorites, archives, hidden courses and the course order
- * inside the slices of the root key.
+ * inside the slices of the root key, with the semester being shown.
  */
 export const LEGACY_ROOT_KEY = 'persist:root';
 export const LEGACY_SETTINGS_KEY = 'persist:settings';
@@ -108,6 +108,11 @@ export const legacySettings = (saved: Json): Partial<SettingsState> => {
 /** Picks the user's own data out of the slices of the legacy root. */
 export const legacyUserData = (root: Json): Partial<UserData> => {
   const result: Partial<UserData> = {};
+
+  const semesters = root.semesters;
+  if (isObject(semesters) && typeof semesters.current === 'string') {
+    result.currentSemester = semesters.current;
+  }
 
   const courses = root.courses;
   if (isObject(courses)) {

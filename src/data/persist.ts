@@ -13,12 +13,10 @@ import { AppState } from 'data/types/state';
  * persisted root state changes. Stored state without a version is -1, so every
  * migration runs for installs that predate versioning.
  */
-export const PERSIST_VERSION = 1;
+export const PERSIST_VERSION = 2;
 
 /** Slices that track a request in flight next to the data they persist. */
 export const slicesWithRequestState = [
-  'semesters',
-  'courses',
   'notices',
   'assignments',
   'files',
@@ -57,12 +55,26 @@ export const migrations: MigrationManifest = {
       return state;
     }
     const next: StoredState = { ...state };
-    for (const key of slicesWithRequestState) {
+    for (const key of [...slicesWithRequestState, 'semesters', 'courses']) {
       const slice = next[key];
       if (slice && typeof slice === 'object') {
         next[key] = omitTransient(slice);
       }
     }
+    return next as typeof state;
+  },
+  // v2: semesters, courses and the user moved to the query cache, and the
+  // semester being shown to data/userData, which read it before this ran.
+  2: state => {
+    if (!state) {
+      return state;
+    }
+    const {
+      semesters: _s,
+      courses: _c,
+      user: _u,
+      ...next
+    } = state as StoredState;
     return next as typeof state;
   },
 };
@@ -77,6 +89,7 @@ export const rootPersistConfig: PersistConfig<AppState> = {
   // Credentials, settings and the user's own data (favorites, archives,
   // hidden courses, course order) live in data/credentials, data/settings and
   // data/userData. Stored roots from 18.0.x still hold the user data in their
-  // slices; data/legacy reads it once and the reducers ignore it.
+  // slices; data/legacy reads it once, before this store rehydrates, and the
+  // reducers ignore it.
   blacklist: ['auth'],
 };
