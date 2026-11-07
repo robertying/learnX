@@ -147,7 +147,6 @@
       "files": ["**/*.ts", "**/*.tsx"],
       "plugins": ["typescript"],
       "rules": {
-        "no-shadow": "off",
         "no-undef": "off",
         "no-unused-vars": [
           "warn",
@@ -170,6 +169,12 @@
       ],
       "env": {
         "jest": true
+      }
+    },
+    {
+      "files": ["src/helpers/preval/sso.js"],
+      "env": {
+        "browser": true
       }
     }
   ],

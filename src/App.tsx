@@ -955,12 +955,12 @@ const Container = () => {
   const lastActiveTime = useRef(dayjs(0));
 
   const handleReLogin = useCallback(() => {
-    const { auth } = store.getState();
+    const currentAuth = store.getState().auth;
     if (
-      !auth.ssoInProgress &&
-      auth.username &&
-      auth.password &&
-      auth.fingerPrint &&
+      !currentAuth.ssoInProgress &&
+      currentAuth.username &&
+      currentAuth.password &&
+      currentAuth.fingerPrint &&
       dayjs().diff(lastActiveTime.current, 'minute') >= 10
     ) {
       dispatch(login({ reset: true }));

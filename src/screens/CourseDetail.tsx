@@ -205,17 +205,17 @@ const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
         style={[styles.tabBar, { backgroundColor: theme.colors.surface }]}
         accessibilityRole="tablist"
       >
-        {navigationState.routes.map((route, i) => (
+        {navigationState.routes.map((tabRoute, i) => (
           <Pressable
-            key={route.key}
+            key={tabRoute.key}
             style={styles.tab}
             accessibilityRole="tab"
             accessibilityState={{ selected: i === navigationState.index }}
             android_ripple={{ color: theme.colors.surfaceVariant }}
-            onPress={() => jumpTo(route.key)}
+            onPress={() => jumpTo(tabRoute.key)}
           >
             <Text style={[styles.tabLabel, { color: theme.colors.onSurface }]}>
-              {route.title}
+              {tabRoute.title}
             </Text>
           </Pressable>
         ))}
@@ -245,13 +245,13 @@ const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
   };
 
   const renderScene = ({
-    route,
+    route: sceneRoute,
   }: {
     route: {
       key: string;
     };
   }) => {
-    switch (route.key) {
+    switch (sceneRoute.key) {
       case 'notice':
         return (
           <Notices
