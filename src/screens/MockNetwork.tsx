@@ -78,7 +78,9 @@ const MockNetwork: React.FC = () => {
           />
         ))}
         <Caption style={styles.caption}>
-          Applies to every request, login included.
+          Applies to every request, login and file downloads included. A file
+          already downloaded opens without a request; refresh it to download it
+          again.
         </Caption>
         <Caption style={styles.header}>Login</Caption>
         <TableCell

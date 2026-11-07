@@ -4,7 +4,11 @@ import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { getCredentials } from 'data/credentials';
-import { mockSource, mockSubmitAssignment } from 'data/mockSource';
+import {
+  mockDownloadFile,
+  mockSource,
+  mockSubmitAssignment,
+} from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isMockUser } from 'helpers/mock';
 
@@ -97,6 +101,16 @@ export const addCSRF = (url: string) => {
     return addCSRFTokenToUrl(url, dataSource.getCSRFToken());
   }
   return url;
+};
+
+/**
+ * Applies Settings › Network emulation to a file download while a mock
+ * account is logged in; does nothing otherwise.
+ */
+export const emulateFileDownload = async () => {
+  if (isMockSession()) {
+    await mockDownloadFile();
+  }
 };
 
 const submitAssignmentUrl = `${Urls.learn}/b/wlxt/kczy/zy/student/tjzy`;

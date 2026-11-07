@@ -18,7 +18,8 @@ const mock = (): typeof import('data/mock') => require('data/mock');
  * delay, and can be made to fail the way the real server and network do, so
  * refreshes, spinners, errors and the re-login flow can be exercised without a
  * real account. Dev builds change the behavior from Settings › Network
- * emulation (`screens/MockNetwork.tsx`).
+ * emulation (`screens/MockNetwork.tsx`), which also applies to file downloads
+ * (`helpers/fs.ts`).
  */
 
 export type MockLatency = 'none' | 'normal' | 'slow';
@@ -211,6 +212,14 @@ export const mockSource: DataSource = {
   // The mock courses have no timetable.
   getCalendar: () => request(() => []),
 };
+
+/**
+ * Emulates the file server's round trip before a download starts: waits like
+ * the time to the first byte, then fails if a failure is switched on. The
+ * bytes still come from the mock file's real URL afterwards, so the file can
+ * be shown.
+ */
+export const mockDownloadFile = () => roundTrip();
 
 /** Emulates the assignment upload, reporting progress along the way. */
 export const mockSubmitAssignment = async (

@@ -6,7 +6,11 @@ import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import mime from 'mime';
-import { addCSRF, loginWithFingerPrint } from 'data/source';
+import {
+  addCSRF,
+  emulateFileDownload,
+  loginWithFingerPrint,
+} from 'data/source';
 import { getSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
@@ -76,6 +80,8 @@ export const downloadFile = async (
       await loginWithFingerPrint();
     } catch {}
   }
+  // Only a real download is emulated; a file already on the device is not.
+  await emulateFileDownload();
   url = addCSRF(url);
 
   if (Platform.OS === 'ios') {
