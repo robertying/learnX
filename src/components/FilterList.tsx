@@ -1,23 +1,12 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
+import { useState } from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
-import type {
-  NativeStackHeaderItem,
-  NativeStackNavigationProp,
-} from '@react-navigation/native-stack';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, StackActions } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
   reorderItems,
 } from 'react-native-reorderable-list';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { setSetting, useSettings } from 'data/settings';
@@ -29,15 +18,17 @@ import {
 } from 'data/userData';
 import { toast } from 'components/Toast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import useFilterListHeader from 'hooks/useFilterListHeader';
+import useInitialRefreshHidden from 'hooks/useInitialRefreshHidden';
+import useListSelection from 'hooks/useListSelection';
 import { RootStackParams } from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { checkedIds, listForFilter } from 'helpers/filterList';
+import { t } from 'helpers/i18n';
 import Filter, { FilterSelection } from './Filter';
-import HeaderTitle from './HeaderTitle';
 import Empty from './Empty';
 import { CardWrapperProps } from './CardWrapper';
-import IconButton from './IconButton';
 import FlatList from './FlatList';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {
@@ -63,20 +54,6 @@ export interface FilterListProps<T> {
   refreshing: boolean;
   onRefresh?: () => void;
 }
-
-const TITLES = {
-  notice: 'notices',
-  assignment: 'assignments',
-  file: 'files',
-  course: 'courses',
-} as const;
-
-const getHeaderTitleOptions = (title: string, subtitle?: string) =>
-  DeviceInfo.supportsNativeSubtitle()
-    ? { title, headerSubtitle: subtitle }
-    : {
-        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
-      };
 
 const FilterList = <T extends Notice | Assignment | File | Course>({
   type,
@@ -106,21 +83,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const [filterVisible, setFilterVisible] = useState(false);
 
-  const data = (
-    filterSelected === 'unfinished' && unfinished
-      ? unfinished
-      : filterSelected === 'finished' && finished
-        ? finished
-        : filterSelected === 'all'
-          ? all
-          : filterSelected === 'unread' && unread
-            ? unread
-            : filterSelected === 'fav'
-              ? fav
-              : filterSelected === 'archived'
-                ? archived
-                : hidden
-  )!;
+  const data = listForFilter(filterSelected, {
+    all,
+    unread,
+    unfinished,
+    finished,
+    fav,
+    archived,
+    hidden,
+  });
   const isCourse = type === 'course';
 
   const favIdSet = new Set(fav?.map(i => i.id));
@@ -128,17 +99,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const hiddenIdSet = new Set(hidden.map(i => i.id));
 
   const [reorderMode, setReorderMode] = useState(false);
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selection, setSelection] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(data.map(item => [item.id, false])),
-  );
-
-  const selectionRef = useRef(selection);
-  useLayoutEffect(() => {
-    selectionRef.current = selection;
-  }, [selection]);
-
-  const selectedCount = Object.values(selection).filter(Boolean).length;
+  const {
+    selectionMode,
+    selection,
+    selectionRef,
+    selectedCount,
+    toggleSelectionMode,
+    checkAll,
+    setChecked,
+  } = useListSelection(data);
 
   const handleFilter = () => {
     setFilterVisible(v => !v);
@@ -167,20 +136,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     runOnJS(Haptics.selectionAsync)();
   };
 
-  const handleSelect = useCallback(() => {
+  const handleSelect = () => {
     setFilterVisible(false);
-    if (selectionMode) {
-      setSelection(Object.fromEntries(data.map(item => [item.id, false])));
-    }
-    setSelectionMode(!selectionMode);
-  }, [data, selectionMode]);
-
-  const handleCheckAll = useCallback(() => {
-    setSelection(prev => {
-      const allChecked = Object.values(prev).every(Boolean);
-      return Object.fromEntries(data.map(item => [item.id, !allChecked]));
-    });
-  }, [data]);
+    toggleSelectionMode();
+  };
 
   const handleFav = (isFav: boolean, item: T) => {
     if (type !== 'course') {
@@ -194,28 +153,31 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   };
 
-  const handleArchive = useCallback(
-    (isArchived: boolean, itemIds: string[]) => {
-      if (itemIds.length === 0) {
-        return;
-      }
+  const handleArchive = (isArchived: boolean, itemIds: string[]) => {
+    if (itemIds.length === 0) {
+      return;
+    }
 
-      if (type !== 'course') {
-        setArchived(type, itemIds, !isArchived);
-      }
+    if (type !== 'course') {
+      setArchived(type, itemIds, !isArchived);
+    }
 
-      if (isArchived) {
-        toast(t('undoArchive'), 'success');
-      } else {
-        toast(t('archiveSucceeded'), 'success');
-      }
+    if (isArchived) {
+      toast(t('undoArchive'), 'success');
+    } else {
+      toast(t('archiveSucceeded'), 'success');
+    }
 
-      if (selectionMode) {
-        handleSelect();
-      }
-    },
-    [handleSelect, selectionMode, type],
-  );
+    if (selectionMode) {
+      handleSelect();
+    }
+  };
+
+  const handleArchiveSelected = () =>
+    handleArchive(
+      filterSelected === 'archived',
+      checkedIds(selectionRef.current),
+    );
 
   const handleHide = (isHidden: boolean, id: string) => {
     setCourseHidden(id, !isHidden);
@@ -227,324 +189,33 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     }
   };
 
-  const handleNavigateCourseX = useCallback(() => {
+  const handleNavigateCourseX = () => {
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX'));
     } else {
       navigation.navigate('CourseXStack');
     }
-  }, [detailNavigator, navigation]);
+  };
 
-  useEffect(() => {
-    if (reorderMode) {
-      navigation.setOptions({
-        unstable_headerLeftItems: () => [
-          {
-            type: 'button',
-            identifier: 'reorder',
-            label: t('reorder'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'arrow.up.and.down',
-            },
-            onPress: handleReorder,
-          },
-        ],
-        unstable_headerRightItems: () => [],
-
-        headerLeft: () => (
-          <IconButton
-            accessibilityLabel={t('reorder')}
-            icon={props => <MaterialIcons {...props} name="sort" />}
-            onPress={handleReorder}
-            mode="contained"
-          />
-        ),
-        headerRight: () => <View />,
-        ...getHeaderTitleOptions(t('reorder'), t('dragToReorder')),
-      });
-    } else if (selectionMode) {
-      navigation.setOptions({
-        unstable_headerLeftItems: () => [
-          {
-            type: 'button',
-            identifier: 'select',
-            label: t('select'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'checklist',
-            },
-            onPress: handleSelect,
-          },
-          {
-            type: 'button',
-            identifier: 'checkAll',
-            label: t('checkAll'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'checkmark.circle.fill',
-            },
-            onPress: handleCheckAll,
-          },
-        ],
-        unstable_headerRightItems: () => [
-          {
-            type: 'button',
-            identifier: 'archive',
-            label: filterSelected === 'archived' ? t('restore') : t('archive'),
-            icon: {
-              type: 'sfSymbol',
-              name:
-                filterSelected === 'archived' ? 'arrow.up.bin' : 'archivebox',
-            },
-            onPress: () =>
-              handleArchive(
-                filterSelected === 'archived',
-                Object.keys(selectionRef.current).filter(
-                  id => selectionRef.current[id] === true,
-                ),
-              ),
-          },
-        ],
-
-        headerLeft: () => (
-          <>
-            <IconButton
-              accessibilityLabel={t('select')}
-              onPress={handleSelect}
-              icon={props => <MaterialIcons {...props} name="list" />}
-              mode="contained"
-            />
-            <IconButton
-              accessibilityLabel={t('checkAll')}
-              onPress={handleCheckAll}
-              icon={props => <MaterialIcons {...props} name="done-all" />}
-            />
-          </>
-        ),
-        headerRight: () => (
-          <IconButton
-            accessibilityLabel={
-              filterSelected === 'archived' ? t('restore') : t('archive')
-            }
-            onPress={() =>
-              handleArchive(
-                filterSelected === 'archived',
-                Object.keys(selectionRef.current).filter(
-                  id => selectionRef.current[id] === true,
-                ),
-              )
-            }
-            icon={props => (
-              <MaterialCommunityIcons
-                {...props}
-                name={
-                  filterSelected === 'archived'
-                    ? 'archive-arrow-up'
-                    : 'archive-arrow-down'
-                }
-              />
-            )}
-          />
-        ),
-        ...getHeaderTitleOptions(
-          filterSelected === 'archived' ? t('restore') : t('archive'),
-          isLocaleChinese()
-            ? `已选中 ${selectedCount} 个`
-            : `${selectedCount} selected`,
-        ),
-      });
-    } else {
-      navigation.setOptions({
-        unstable_headerLeftItems: () =>
-          isCourse
-            ? [
-                {
-                  type: 'button',
-                  identifier: 'filter',
-                  label: t('filter'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'line.3.horizontal.decrease.circle',
-                  },
-                  onPress: handleFilter,
-                },
-                // A third button leaves the title no room beside a sidebar of
-                // the default width, so the rest go in a menu.
-                {
-                  type: 'menu',
-                  identifier: 'more',
-                  label: t('more'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'ellipsis.circle',
-                  },
-                  menu: {
-                    items: [
-                      {
-                        type: 'action',
-                        label: t('reorder'),
-                        icon: {
-                          type: 'sfSymbol',
-                          name: 'arrow.up.and.down',
-                        },
-                        onPress: handleReorder,
-                      },
-                      {
-                        type: 'action',
-                        label: t('courseX'),
-                        icon: {
-                          type: 'sfSymbol',
-                          name: 'info.circle',
-                        },
-                        onPress: handleNavigateCourseX,
-                      },
-                    ],
-                  },
-                },
-              ]
-            : [
-                {
-                  type: 'button',
-                  identifier: 'select',
-                  label: t('select'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'checklist',
-                  },
-                  onPress: handleSelect,
-                },
-                {
-                  type: 'button',
-                  identifier: 'filter',
-                  label: t('filter'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'line.3.horizontal.decrease.circle',
-                  },
-                  onPress: handleFilter,
-                },
-              ],
-        unstable_headerRightItems: () => [
-          ...(DeviceInfo.isMac()
-            ? ([
-                {
-                  type: 'button',
-                  identifier: 'refresh',
-                  label: t('refresh'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: refreshing
-                      ? 'arrow.trianglehead.2.clockwise.rotate.90'
-                      : 'arrow.clockwise',
-                  },
-                  disabled: refreshing,
-                  onPress: () => onRefresh?.(),
-                },
-              ] satisfies NativeStackHeaderItem[])
-            : []),
-          {
-            type: 'button',
-            identifier: 'search',
-            label: t('search'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'magnifyingglass',
-            },
-            onPress: () => navigation.navigate('SearchStack'),
-          },
-        ],
-
-        headerLeft: () => (
-          <>
-            {isCourse ? (
-              <IconButton
-                accessibilityLabel={t('reorder')}
-                icon={props => <MaterialIcons {...props} name="sort" />}
-                onPress={handleReorder}
-              />
-            ) : (
-              <IconButton
-                accessibilityLabel={t('select')}
-                onPress={handleSelect}
-                icon={props => <MaterialIcons {...props} name="list" />}
-              />
-            )}
-            <IconButton
-              accessibilityLabel={t('filter')}
-              onPress={handleFilter}
-              icon={props => <MaterialIcons {...props} name="filter-list" />}
-            />
-            {isCourse && (
-              <IconButton
-                accessibilityLabel={t('courseX')}
-                icon={props => <MaterialIcons {...props} name="info-outline" />}
-                onPress={handleNavigateCourseX}
-              />
-            )}
-          </>
-        ),
-        headerRight: () => (
-          <>
-            {DeviceInfo.isMac() && (
-              <IconButton
-                accessibilityLabel={t('refresh')}
-                disabled={refreshing}
-                onPress={onRefresh}
-                icon={props => <MaterialIcons {...props} name="refresh" />}
-              />
-            )}
-            <IconButton
-              accessibilityLabel={t('search')}
-              onPress={() => navigation.navigate('SearchStack')}
-              icon={props => <MaterialIcons {...props} name="search" />}
-            />
-          </>
-        ),
-        ...getHeaderTitleOptions(
-          t(TITLES[type]),
-          filterSelected === 'all'
-            ? defaultSubtitle
-            : filterSelected === 'unread'
-              ? t('unread')
-              : filterSelected === 'fav'
-                ? t('fav')
-                : filterSelected === 'archived'
-                  ? t('archived')
-                  : filterSelected === 'hidden'
-                    ? t('hidden')
-                    : filterSelected === 'unfinished'
-                      ? t('unfinished')
-                      : t('finished'),
-        ),
-      });
-    }
-  }, [
+  useFilterListHeader({
+    navigation,
+    type,
     defaultSubtitle,
     filterSelected,
-    handleArchive,
-    handleCheckAll,
-    handleNavigateCourseX,
-    handleSelect,
-    isCourse,
-    navigation,
-    onRefresh,
-    refreshing,
     reorderMode,
-    selectedCount,
     selectionMode,
-    type,
-  ]);
+    selectedCount,
+    refreshing,
+    onRefresh,
+    onFilter: handleFilter,
+    onReorder: handleReorder,
+    onSelect: handleSelect,
+    onCheckAll: checkAll,
+    onArchiveSelected: handleArchiveSelected,
+    onCourseX: handleNavigateCourseX,
+  });
 
-  // Hide the refresh spinner during the initial fetch.
-  const [firstFetch, setFirstFetch] = useState<'pending' | 'running' | 'done'>(
-    'pending',
-  );
-  if (firstFetch === 'pending' && refreshing) {
-    setFirstFetch('running');
-  } else if (firstFetch === 'running' && !refreshing) {
-    setFirstFetch('done');
-  }
+  const refreshControlRefreshing = useInitialRefreshHidden(refreshing);
 
   const renderItem = ({ item }: { item: T }) => {
     return (
@@ -554,9 +225,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         reorderMode={reorderMode}
         disableSwipe={selectionMode || reorderMode}
         checked={selection[item.id]}
-        onCheck={checked =>
-          setSelection(prev => ({ ...prev, [item.id]: checked }))
-        }
+        onCheck={checked => setChecked(item.id, checked)}
         onPress={() => {
           setFilterVisible(false);
           onItemPress?.(item);
@@ -589,7 +258,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     refreshControl: (
       <RefreshControl
         enabled={!selectionMode && !reorderMode}
-        refreshing={firstFetch === 'done' ? refreshing : false}
+        refreshing={refreshControlRefreshing}
         onRefresh={onRefresh}
       />
     ),
