@@ -56,6 +56,7 @@ export type SettingsStackParams = {
   About: ExtraParams;
   Changelog: ExtraParams;
   Maintainer: ExtraParams;
+  MockNetwork: ExtraParams;
 };
 
 export type MainTabParams = {
@@ -72,6 +73,7 @@ export type LoginStackParams = {
     username: string;
     password: string;
   };
+  MockNetwork: undefined;
 };
 
 export type CourseXStackParams = {
@@ -109,6 +111,7 @@ export type DetailStackParams = {
   Help: ExtraParams;
   About: ExtraParams;
   Changelog: ExtraParams;
+  MockNetwork: ExtraParams;
 };
 
 export type RootStackParams = {

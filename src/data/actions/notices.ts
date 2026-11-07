@@ -2,7 +2,7 @@ import { ApiError, ContentType } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
-import { dataThunk } from 'data/types/actions';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
   GET_ALL_NOTICES_FOR_COURSES_REQUEST,
@@ -22,8 +22,8 @@ export const getNoticesForCourseAction = createAsyncAction(
   GET_NOTICES_FOR_COURSE_FAILURE,
 )<undefined, { courseId: string; notices: Notice[] }, ApiError>();
 
-export function getNoticesForCourse(courseId: string) {
-  return dataThunk(async (dispatch, getState) => {
+export function getNoticesForCourse(courseId: string): ThunkResult {
+  return async (dispatch, getState) => {
     dispatch(getNoticesForCourseAction.request());
 
     try {
@@ -47,7 +47,7 @@ export function getNoticesForCourse(courseId: string) {
     } catch (err) {
       dispatch(getNoticesForCourseAction.failure(serializeError(err)));
     }
-  });
+  };
 }
 
 export const getAllNoticesForCoursesAction = createAsyncAction(
@@ -56,8 +56,8 @@ export const getAllNoticesForCoursesAction = createAsyncAction(
   GET_ALL_NOTICES_FOR_COURSES_FAILURE,
 )<undefined, Notice[], ApiError>();
 
-export function getAllNoticesForCourses(courseIds: string[]) {
-  return dataThunk(async (dispatch, getState) => {
+export function getAllNoticesForCourses(courseIds: string[]): ThunkResult {
+  return async (dispatch, getState) => {
     dispatch(getAllNoticesForCoursesAction.request());
 
     try {
@@ -88,7 +88,7 @@ export function getAllNoticesForCourses(courseIds: string[]) {
     } catch (err) {
       dispatch(getAllNoticesForCoursesAction.failure(serializeError(err)));
     }
-  });
+  };
 }
 
 export const setFavNotice = createAction(

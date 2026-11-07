@@ -4,9 +4,44 @@ import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { store } from 'data/store';
+import { mockSource, mockSubmitAssignment } from 'data/mockSource';
 import Urls from 'constants/Urls';
+import { isMockUser } from 'helpers/mock';
 
-export let dataSource: Learn2018Helper;
+/** The part of thu-learn-lib the app calls. */
+export type DataSource = Pick<
+  Learn2018Helper,
+  | 'login'
+  | 'logout'
+  | 'getCSRFToken'
+  | 'setLanguage'
+  | 'getUserInfo'
+  | 'getSemesterIdList'
+  | 'getCurrentSemester'
+  | 'getCourseList'
+  | 'getNotificationList'
+  | 'getHomeworkList'
+  | 'getFileList'
+  | 'getAllContents'
+  | 'getCalendar'
+>;
+
+let helper: Learn2018Helper;
+
+const isMockSession = () => isMockUser(store.getState().auth.username);
+
+/**
+ * Talks to learn.tsinghua.edu.cn, or to the emulated server in
+ * `data/mockSource` while a mock account is logged in. Picked per call, so
+ * logging in or out switches it.
+ */
+export const dataSource = new Proxy({} as DataSource, {
+  get: (_, key: keyof DataSource) => {
+    const source: DataSource = isMockSession() ? mockSource : helper;
+    const value = source[key];
+    return typeof value === 'function' ? value.bind(source) : value;
+  },
+});
 
 export const clearLoginCookies = async () => {
   if (Platform.OS === 'ios') {
@@ -27,8 +62,12 @@ export const loginWithFingerPrint = async (
   fingerGenPrint?: string,
   fingerGenPrint3?: string,
 ) => {
-  await clearLoginCookies();
-  await dataSource.login(
+  // A new login names its account; it may differ from the stored one.
+  const isMock = isMockUser(username ?? store.getState().auth.username);
+  if (!isMock) {
+    await clearLoginCookies();
+  }
+  await (isMock ? mockSource : helper).login(
     username,
     password,
     fingerPrint,
@@ -38,7 +77,7 @@ export const loginWithFingerPrint = async (
 };
 
 export const resetDataSource = () => {
-  dataSource = new Learn2018Helper({
+  helper = new Learn2018Helper({
     provider: () => {
       const state = store.getState();
       return {
@@ -73,6 +112,11 @@ export const submitAssignment = async (
   remove: boolean = false,
 ) => {
   if (!content && !attachment && !remove) {
+    return;
+  }
+
+  if (isMockSession()) {
+    await mockSubmitAssignment(onProgress);
     return;
   }
 

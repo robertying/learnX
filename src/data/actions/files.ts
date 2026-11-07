@@ -2,7 +2,7 @@ import { ContentType, CourseType, ApiError } from 'thu-learn-lib';
 import { createAction, createAsyncAction } from 'typesafe-actions';
 import dayjs from 'dayjs';
 import { dataSource } from 'data/source';
-import { dataThunk } from 'data/types/actions';
+import { ThunkResult } from 'data/types/actions';
 import {
   GET_ALL_FILES_FOR_COURSES_FAILURE,
   GET_ALL_FILES_FOR_COURSES_REQUEST,
@@ -22,8 +22,8 @@ export const getFilesForCourseAction = createAsyncAction(
   GET_FILES_FOR_COURSE_FAILURE,
 )<undefined, { courseId: string; files: File[] }, ApiError>();
 
-export function getFilesForCourse(courseId: string) {
-  return dataThunk(async (dispatch, getState) => {
+export function getFilesForCourse(courseId: string): ThunkResult {
+  return async (dispatch, getState) => {
     dispatch(getFilesForCourseAction.request());
 
     try {
@@ -50,7 +50,7 @@ export function getFilesForCourse(courseId: string) {
     } catch (err) {
       dispatch(getFilesForCourseAction.failure(serializeError(err)));
     }
-  });
+  };
 }
 
 export const getAllFilesForCoursesAction = createAsyncAction(
@@ -59,8 +59,8 @@ export const getAllFilesForCoursesAction = createAsyncAction(
   GET_ALL_FILES_FOR_COURSES_FAILURE,
 )<undefined, File[], ApiError>();
 
-export function getAllFilesForCourses(courseIds: string[]) {
-  return dataThunk(async (dispatch, getState) => {
+export function getAllFilesForCourses(courseIds: string[]): ThunkResult {
+  return async (dispatch, getState) => {
     dispatch(getAllFilesForCoursesAction.request());
 
     try {
@@ -91,7 +91,7 @@ export function getAllFilesForCourses(courseIds: string[]) {
     } catch (err) {
       dispatch(getAllFilesForCoursesAction.failure(serializeError(err)));
     }
-  });
+  };
 }
 
 export const setFavFile = createAction(
