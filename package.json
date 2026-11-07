@@ -83,7 +83,6 @@
     "react-native-blob-util": "0.25.1",
     "react-native-bottom-tabs": "1.5.0",
     "react-native-device-info": "15.0.2",
-    "react-native-fs": "2.20.0",
     "react-native-gesture-handler": "3.4.0",
     "react-native-localize": "3.7.2",
     "react-native-pager-view": "10.0.0",
