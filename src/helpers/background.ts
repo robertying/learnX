@@ -6,30 +6,39 @@ import { coursesQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { getUserData } from 'data/userData';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
+import { ContentDiff, diffContent } from 'data/contentDiff';
 
-const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
+export type SyncResult =
+  /** Not logged in, no courses cached yet, or the login failed. */
+  | { status: 'skipped' }
+  /** Every list failed to fetch. */
+  | { status: 'failed' }
+  /** At least one list was fetched; `diff` is what changed in those. */
+  | { status: 'synced'; diff: ContentDiff };
 
-TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
+/**
+ * Logs in and refetches the current semester's notices, assignments and files
+ * with the queries the screens use, so the app shows them at its next launch
+ * and the persisted cache is up to date. Returns what changed.
+ */
+export const syncContent = async (): Promise<SyncResult> => {
   // The task can run before the app UI has loaded them.
   const [credentials] = await Promise.all([
     loadCredentials(),
     restoreQueryCache(),
   ]);
   const semesterId = getUserData().currentSemester;
-  const courseIds = (
-    (semesterId &&
-      queryClient.getQueryData(coursesQuery(semesterId).queryKey)) ||
-    []
-  ).map(course => course.id);
+  const courses =
+    semesterId && queryClient.getQueryData(coursesQuery(semesterId).queryKey);
 
   if (
     !semesterId ||
     !credentials?.username ||
     !credentials.password ||
     !credentials.fingerPrint ||
-    courseIds.length === 0
+    !courses?.length
   ) {
-    return BackgroundTask.BackgroundTaskResult.Success;
+    return { status: 'skipped' };
   }
 
   try {
@@ -41,21 +50,47 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
       credentials.fingerGenPrint3,
     );
   } catch {
-    return BackgroundTask.BackgroundTaskResult.Success;
+    return { status: 'skipped' };
   }
+
+  const queries = {
+    notices: noticesQuery(semesterId),
+    assignments: assignmentsQuery(semesterId),
+    files: filesQuery(semesterId),
+  };
+  const before = {
+    notices: queryClient.getQueryData(queries.notices.queryKey),
+    assignments: queryClient.getQueryData(queries.assignments.queryKey),
+    files: queryClient.getQueryData(queries.files.queryKey),
+  };
 
   // Fetched afresh even when the cached lists are recent.
-  const results = await Promise.allSettled([
-    queryClient.fetchQuery({ ...noticesQuery(semesterId), staleTime: 0 }),
-    queryClient.fetchQuery({ ...assignmentsQuery(semesterId), staleTime: 0 }),
-    queryClient.fetchQuery({ ...filesQuery(semesterId), staleTime: 0 }),
+  const [notices, assignments, files] = await Promise.allSettled([
+    queryClient.fetchQuery({ ...queries.notices, staleTime: 0 }),
+    queryClient.fetchQuery({ ...queries.assignments, staleTime: 0 }),
+    queryClient.fetchQuery({ ...queries.files, staleTime: 0 }),
   ]);
+  const value = <T>(result: PromiseSettledResult<T>) =>
+    result.status === 'fulfilled' ? result.value : undefined;
+  const after = {
+    notices: value(notices),
+    assignments: value(assignments),
+    files: value(files),
+  };
 
-  if (results.some(result => result.status === 'fulfilled')) {
-    return BackgroundTask.BackgroundTaskResult.Success;
-  } else {
-    return BackgroundTask.BackgroundTaskResult.Failed;
+  if (!after.notices && !after.assignments && !after.files) {
+    return { status: 'failed' };
   }
+  return { status: 'synced', diff: diffContent(before, after) };
+};
+
+const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
+
+TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
+  const result = await syncContent();
+  return result.status === 'failed'
+    ? BackgroundTask.BackgroundTaskResult.Failed
+    : BackgroundTask.BackgroundTaskResult.Success;
 });
 
 export const setUpBackgroundFetch = async () => {
