@@ -1,13 +1,13 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
 import { useFiles } from 'data/content';
+import { useLoggedIn } from 'data/auth';
 import { useUserData } from 'data/userData';
 import { useCourseIds } from 'data/queries';
-import { useLoggedIn } from 'data/auth';
 import { File } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -32,34 +32,31 @@ const Files: React.FC<Props> = ({ navigation }) => {
     hidden: hiddenCourseIds,
   });
 
-  const handleRefresh = useCallback(() => {
+  const handleRefresh = () => {
     if (loggedIn) {
       refetch({ cancelRefetch: false });
     }
-  }, [loggedIn, refetch]);
+  };
 
-  const handlePush = useCallback(
-    (item: File) => {
-      if (detailNavigator) {
-        detailNavigator.dispatch(
-          StackActions.replace('FileDetail', {
-            id: item.id,
-            disableAnimation: true,
-          }),
-        );
-      } else {
-        navigation.push('FileDetail', { id: item.id });
-      }
-    },
-    [detailNavigator, navigation],
-  );
+  const refresh = useEffectEvent(handleRefresh);
 
-  // Refreshes on mount and when the semester's courses change.
-  useEffect(() => {
-    if (courseIds.length > 0) {
-      handleRefresh();
+  const handlePush = (item: File) => {
+    if (detailNavigator) {
+      detailNavigator.dispatch(
+        StackActions.replace('FileDetail', {
+          id: item.id,
+          disableAnimation: true,
+        }),
+      );
+    } else {
+      navigation.push('FileDetail', { id: item.id });
     }
-  }, [courseIds, handleRefresh]);
+  };
+
+  // Fetch on mount and again when the user signs in or the courses change.
+  useEffect(() => {
+    refresh();
+  }, [courseIds, loggedIn]);
 
   return (
     <SafeArea>

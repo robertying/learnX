@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import {
   Caption,
@@ -93,14 +93,10 @@ const AssignmentDetailContent: React.FC<{
     excellentHomeworkList,
   } = assignment;
 
-  const html = useMemo(
-    () =>
-      getWebViewTemplate(
-        description || `<p>${t('noAssignmentDescription')}</p>`,
-        theme.dark,
-        theme.colors.surface,
-      ),
-    [description, theme],
+  const html = getWebViewTemplate(
+    description || `<p>${t('noAssignmentDescription')}</p>`,
+    theme.dark,
+    theme.colors.surface,
   );
 
   const handleFileOpen = (remoteFile?: RemoteFile) => {

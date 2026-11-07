@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -53,85 +53,87 @@ type NavigationProp = NativeStackNavigationProp<
   'CourseDetail'
 >;
 
-const Notices = memo(
-  ({ courseId, data }: { courseId: string; data: Notice[] }) => {
-    const navigation = useNavigation<NavigationProp>();
+const Notices = ({ courseId, data }: { courseId: string; data: Notice[] }) => {
+  const navigation = useNavigation<NavigationProp>();
 
-    const loggedIn = useLoggedIn();
-    const refresh = useRefreshCourseNotices(courseId);
-    const fetching = refresh.isPending;
+  const loggedIn = useLoggedIn();
+  const refresh = useRefreshCourseNotices(courseId);
+  const fetching = refresh.isPending;
 
-    const handleRefresh = () => {
-      if (loggedIn) {
-        refresh.mutate();
-      }
-    };
+  const handleRefresh = () => {
+    if (loggedIn) {
+      refresh.mutate();
+    }
+  };
 
-    return (
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <NoticeCard
-            data={item}
-            disableSwipe
-            hideCourseName
-            onPress={() => navigation.push('NoticeDetail', { id: item.id })}
-          />
-        )}
-        keyExtractor={item => item.id}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
-        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-        contentContainerStyle={[
-          { flexGrow: 1 },
-          data.length ? null : { justifyContent: 'center' },
-        ]}
-        ListEmptyComponent={<Empty />}
-      />
-    );
-  },
-);
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => (
+        <NoticeCard
+          data={item}
+          disableSwipe
+          hideCourseName
+          onPress={() => navigation.push('NoticeDetail', { id: item.id })}
+        />
+      )}
+      keyExtractor={item => item.id}
+      refreshing={fetching}
+      onRefresh={handleRefresh}
+      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+      contentContainerStyle={[
+        { flexGrow: 1 },
+        data.length ? null : { justifyContent: 'center' },
+      ]}
+      ListEmptyComponent={<Empty />}
+    />
+  );
+};
 
-const Assignments = memo(
-  ({ courseId, data }: { courseId: string; data: Assignment[] }) => {
-    const navigation = useNavigation<NavigationProp>();
+const Assignments = ({
+  courseId,
+  data,
+}: {
+  courseId: string;
+  data: Assignment[];
+}) => {
+  const navigation = useNavigation<NavigationProp>();
 
-    const loggedIn = useLoggedIn();
-    const refresh = useRefreshCourseAssignments(courseId);
-    const fetching = refresh.isPending;
+  const loggedIn = useLoggedIn();
+  const refresh = useRefreshCourseAssignments(courseId);
+  const fetching = refresh.isPending;
 
-    const handleRefresh = () => {
-      if (loggedIn) {
-        refresh.mutate();
-      }
-    };
+  const handleRefresh = () => {
+    if (loggedIn) {
+      refresh.mutate();
+    }
+  };
 
-    return (
-      <FlatList
-        data={data}
-        renderItem={({ item }) => (
-          <AssignmentCard
-            data={item}
-            disableSwipe
-            hideCourseName
-            onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
-          />
-        )}
-        keyExtractor={item => item.id}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
-        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-        contentContainerStyle={[
-          { flexGrow: 1 },
-          data.length ? null : { justifyContent: 'center' },
-        ]}
-        ListEmptyComponent={<Empty />}
-      />
-    );
-  },
-);
+  return (
+    <FlatList
+      data={data}
+      renderItem={({ item }) => (
+        <AssignmentCard
+          data={item}
+          disableSwipe
+          hideCourseName
+          onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
+        />
+      )}
+      keyExtractor={item => item.id}
+      refreshing={fetching}
+      onRefresh={handleRefresh}
+      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+      contentContainerStyle={[
+        { flexGrow: 1 },
+        data.length ? null : { justifyContent: 'center' },
+      ]}
+      ListEmptyComponent={<Empty />}
+    />
+  );
+};
 
-const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
+const Files = ({ courseId, data }: { courseId: string; data: File[] }) => {
   const navigation = useNavigation<NavigationProp>();
 
   const loggedIn = useLoggedIn();
@@ -166,7 +168,7 @@ const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
       ListEmptyComponent={<Empty />}
     />
   );
-});
+};
 
 const routes = [
   { key: 'notice', title: t('notices') },
@@ -299,7 +301,7 @@ const CourseDetailContent: React.FC<{
     }
   };
 
-  const handleNavigateCourseX = useCallback(() => {
+  const handleNavigateCourseX = () => {
     if (detailNavigator) {
       detailNavigator.dispatch(StackActions.push('CourseX', { id: course.id }));
     } else {
@@ -313,7 +315,7 @@ const CourseDetailContent: React.FC<{
         } as any,
       );
     }
-  }, [course.id, detailNavigator, navigation]);
+  };
 
   return (
     <SafeArea>

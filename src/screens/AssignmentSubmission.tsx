@@ -39,7 +39,7 @@ import {
   usePendingAssignmentData,
 } from 'data/pendingAssignment';
 import { getUserData } from 'data/userData';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import { AssignmentSubmissionStackParams } from './types';
@@ -78,7 +78,6 @@ const AssignmentSubmissionContent: React.FC<{
   navigation: Props['navigation'];
 }> = ({ assignment, navigation }) => {
   const theme = useTheme();
-  const toast = useToast();
 
   const {
     id,
@@ -106,15 +105,12 @@ const AssignmentSubmissionContent: React.FC<{
   const [pickerMenuVisible, setPickerMenuVisible] = useState(false);
   const [contentWidth, setContentWidth] = useState(0);
 
-  const getDefaultAttachmentName = useCallback(
-    (mimeType?: string | null) => {
-      const ext = mime.getExtension(mimeType ?? 'application/octet-stream');
-      return isLocaleChinese()
-        ? `${title}-提交.${ext}`
-        : `${title} Submission.${ext}`;
-    },
-    [title],
-  );
+  const getDefaultAttachmentName = (mimeType?: string | null) => {
+    const ext = mime.getExtension(mimeType ?? 'application/octet-stream');
+    return isLocaleChinese()
+      ? `${title}-提交.${ext}`
+      : `${title} Submission.${ext}`;
+  };
 
   const handleCustomAttachmentNameChange = (text: string) => {
     setCustomAttachmentName(text.replaceAll('.', ''));
@@ -266,7 +262,6 @@ const AssignmentSubmissionContent: React.FC<{
     navigation,
     removeAttachment,
     studentHomeworkId,
-    toast,
   ]);
 
   const handleSubmitPress = useCallback(() => {

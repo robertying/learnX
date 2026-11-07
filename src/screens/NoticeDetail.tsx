@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Divider, Title, useTheme } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -50,14 +50,10 @@ const NoticeDetailContent: React.FC<{
     attachment,
   } = notice;
 
-  const html = useMemo(
-    () =>
-      getWebViewTemplate(
-        content || `<p>${t('noNoticeContent')}</p>`,
-        theme.dark,
-        theme.colors.surface,
-      ),
-    [content, theme],
+  const html = getWebViewTemplate(
+    content || `<p>${t('noNoticeContent')}</p>`,
+    theme.dark,
+    theme.colors.surface,
   );
 
   const handleFileOpen = () => {

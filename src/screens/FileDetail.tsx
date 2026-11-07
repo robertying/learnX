@@ -2,9 +2,9 @@ import {
   useCallback,
   useContext,
   useEffect,
-  useMemo,
   useRef,
   useState,
+  useEffectEvent,
 } from 'react';
 import { Linking, Platform, StyleSheet, View } from 'react-native';
 import {
@@ -35,7 +35,7 @@ import {
   shareFile,
 } from 'helpers/fs';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
@@ -61,7 +61,20 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
     return <NotFound />;
   }
 
-  return <FileDetailContent file={file} navigation={navigation} />;
+  // Only what the download depends on: a store refresh that leaves these as
+  // they were keeps the downloaded file on screen, and a new file shown in
+  // this screen starts over, like a refresh.
+  const downloadKey = [
+    file.id,
+    file.courseName,
+    file.title,
+    file.fileType,
+    file.downloadUrl,
+  ].join('\n');
+
+  return (
+    <FileDetailContent key={downloadKey} file={file} navigation={navigation} />
+  );
 };
 
 const FileDetailContent: React.FC<{
@@ -71,7 +84,6 @@ const FileDetailContent: React.FC<{
   const isSearch = navigation.getState().routeNames.includes('Search' as any);
 
   const theme = useTheme();
-  const toast = useToast();
   const { splitEnabled, showDetail, showMaster, toggleMaster } =
     useContext(SplitViewContext);
 
@@ -96,21 +108,14 @@ const FileDetailContent: React.FC<{
         DeviceInfo.isMac() &&
         canRenderInMacWebview(file.fileType)));
 
-  // Only what the download depends on, so that a refresh of the store that
-  // leaves the file as it was keeps the downloaded one on screen.
-  const { id, courseName, title, fileType, downloadUrl } = file;
-  const downloadable = useMemo<DownloadableFile>(
-    () => ({ id, courseName, title, fileType, downloadUrl }),
-    [id, courseName, title, fileType, downloadUrl],
-  );
-
-  // A new file shown in this screen starts over, like a refresh.
-  const [shownFile, setShownFile] = useState(downloadable);
-  if (shownFile !== downloadable) {
-    setShownFile(downloadable);
-    setPath('');
-    setError(false);
-  }
+  // FileDetail remounts this screen when any of these change.
+  const [downloadable] = useState<DownloadableFile>(() => ({
+    id: file.id,
+    courseName: file.courseName,
+    title: file.title,
+    fileType: file.fileType,
+    downloadUrl: file.downloadUrl,
+  }));
 
   const download = useCallback(
     (refresh: boolean) =>
@@ -125,7 +130,7 @@ const FileDetailContent: React.FC<{
           toast(t('fileDownloadFailed'), 'error');
         },
       ),
-    [downloadable, toast],
+    [downloadable],
   );
 
   const handleDownload = useCallback(
@@ -148,7 +153,7 @@ const FileDetailContent: React.FC<{
     } catch {
       toast(t('downloadToDownloadsFailed'), 'error');
     }
-  }, [path, downloadable, toast]);
+  }, [path, downloadable]);
 
   const handleOpen = useCallback(async () => {
     try {
@@ -160,7 +165,7 @@ const FileDetailContent: React.FC<{
     } catch {
       toast(t('openFileFailed'), 'error');
     }
-  }, [file.fileType, path, toast]);
+  }, [file.fileType, path]);
 
   const handleShowInfo = useCallback(() => {
     setShowInfo(shown => !shown);
@@ -312,16 +317,21 @@ const FileDetailContent: React.FC<{
     download(false);
   }, [download]);
 
-  useEffect(() => {
+  const openAfterDownload = useEffectEvent(() => {
     if (
       Platform.OS === 'android' &&
       openFileAfterDownload &&
-      path &&
       file.fileType !== 'pdf'
     ) {
       handleOpen();
     }
-  }, [handleOpen, openFileAfterDownload, path, file.fileType]);
+  });
+
+  useEffect(() => {
+    if (path) {
+      openAfterDownload();
+    }
+  }, [path]);
 
   return (
     <SafeArea testID="file-detail" collapsable={false}>

@@ -1,10 +1,10 @@
 import { QueryClientProvider, useQuery } from '@tanstack/react-query';
 import {
   startTransition,
-  useCallback,
   useEffect,
   useRef,
   useState,
+  useEffectEvent,
 } from 'react';
 import type { ComponentProps } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -92,7 +92,7 @@ import About from 'screens/About';
 import Changelog from 'screens/Changelog';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
-import { ToastProvider } from 'components/Toast';
+import { Toast, toast } from 'components/Toast';
 import Splash from 'components/Splash';
 import { getTitleOptions } from 'components/HeaderTitle';
 import Empty from 'components/Empty';
@@ -120,7 +120,6 @@ import { setPendingAssignmentData } from 'data/pendingAssignment';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { latestSemesterQuery, useCourses } from 'data/queries';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
-import useToast from 'hooks/useToast';
 import { setUpBackgroundFetch } from 'helpers/background';
 import { copyFileToCache } from 'helpers/fs';
 import packageJson from '../package.json';
@@ -923,7 +922,6 @@ const SplitLogin = () => (
 
 const Container = () => {
   const colorScheme = useColorScheme();
-  const toast = useToast();
 
   const loginError = useLoginError();
   const credentials = useCredentials();
@@ -937,7 +935,7 @@ const Container = () => {
   const appState = useRef(AppState.currentState);
   const lastActiveTime = useRef(dayjs(0));
 
-  const handleReLogin = useCallback(() => {
+  const handleReLogin = useEffectEvent(() => {
     const currentAuth = getAuth();
     const currentCredentials = getCredentials();
     if (
@@ -950,13 +948,11 @@ const Container = () => {
       login({ reset: true });
       toast(t('loggingIn'), 'none', 1 * 1000);
     }
-  }, [toast]);
+  });
 
   useEffect(() => {
     handleReLogin();
-  }, [handleReLogin]);
 
-  useEffect(() => {
     const sub = AppState.addEventListener('change', nextAppState => {
       if (appState.current === 'active' && nextAppState !== 'active') {
         lastActiveTime.current = dayjs();
@@ -973,52 +969,46 @@ const Container = () => {
     });
 
     return () => sub.remove();
-  }, [handleReLogin]);
+  }, []);
 
-  const handleShare = useCallback(
-    async (item: any) => {
-      if (!item) {
+  const handleShare = useEffectEvent(async (item: any) => {
+    if (!item) {
+      return;
+    }
+
+    let data: any = null;
+    if (Platform.OS === 'ios') {
+      if (!Array.isArray(item.data) || item.data.length === 0) {
         return;
       }
-
-      let data: any = null;
-      if (Platform.OS === 'ios') {
-        if (!Array.isArray(item.data) || item.data.length === 0) {
-          return;
-        }
-        data = item.data[0];
-      } else {
-        data = item;
-        try {
-          data.data = await copyFileToCache(data.data);
-        } catch {
-          toast(t('shareError'), 'error', 3 * 1000);
-          return;
-        }
+      data = item.data[0];
+    } else {
+      data = item;
+      try {
+        data.data = await copyFileToCache(data.data);
+      } catch {
+        toast(t('shareError'), 'error', 3 * 1000);
+        return;
       }
+    }
 
-      if (data) {
-        setPendingAssignmentData(data);
-        toast(t('shareReceived'), 'success', 5 * 1000);
-      }
-    },
-    [toast],
-  );
+    if (data) {
+      setPendingAssignmentData(data);
+      toast(t('shareReceived'), 'success', 5 * 1000);
+    }
+  });
 
   useEffect(() => {
-    ShareMenu.getInitialShare(handleShare);
-  }, [handleShare]);
-
-  useEffect(() => {
-    const sub = ShareMenu.addNewShareListener(handleShare);
+    ShareMenu.getInitialShare(item => handleShare(item));
+    const sub = ShareMenu.addNewShareListener(item => handleShare(item));
     return () => sub.remove();
-  }, [handleShare]);
+  }, []);
 
   useEffect(() => {
     if (hasCredentials && loginError) {
       toast(t('loginFailed'), 'error', 8 * 1000);
     }
-  }, [hasCredentials, loginError, toast]);
+  }, [hasCredentials, loginError]);
 
   const navigationContainerProps = {
     theme:
@@ -1105,11 +1095,10 @@ const App = () => {
           colorScheme === 'dark' ? BrandDarkPaperTheme : BrandLightPaperTheme
         }
       >
-        <ToastProvider>
-          <QueryClientProvider client={queryClient}>
-            {loaded ? <Container /> : <Splash />}
-          </QueryClientProvider>
-        </ToastProvider>
+        <QueryClientProvider client={queryClient}>
+          {loaded ? <Container /> : <Splash />}
+        </QueryClientProvider>
+        <Toast />
         <StatusBar
           barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
           animated

@@ -10,7 +10,7 @@ import { setSSOInProgress } from 'data/auth';
 import { login } from 'data/login';
 import { generateFingerprint } from 'helpers/fingerprint';
 import { t } from 'helpers/i18n';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import { LoginStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -24,8 +24,6 @@ const LEARN_ROAMING_URL =
 type Props = NativeStackScreenProps<LoginStackParams, 'SSO'>;
 
 const SSO: React.FC<Props> = ({ route, navigation }) => {
-  const toast = useToast();
-
   const username = route.params.username;
   const password = route.params.password;
 

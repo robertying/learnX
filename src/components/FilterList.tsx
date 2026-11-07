@@ -2,7 +2,6 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -25,7 +24,7 @@ import {
   setCourseOrder,
   setFavorite,
 } from 'data/userData';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import {
   AssignmentStackParams,
@@ -100,8 +99,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   refreshing,
   onRefresh,
 }: FilterListProps<T>) => {
-  const toast = useToast();
-
   const detailNavigator = useDetailNavigator();
 
   const tabFilterSelections = useSettings(
@@ -130,12 +127,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   )!;
   const isCourse = type === 'course';
 
-  const favIdSet = useMemo(() => new Set(fav?.map(i => i.id)), [fav]);
-  const archivedIdSet = useMemo(
-    () => new Set(archived?.map(i => i.id)),
-    [archived],
-  );
-  const hiddenIdSet = useMemo(() => new Set(hidden.map(i => i.id)), [hidden]);
+  const favIdSet = new Set(fav?.map(i => i.id));
+  const archivedIdSet = new Set(archived?.map(i => i.id));
+  const hiddenIdSet = new Set(hidden.map(i => i.id));
 
   const [reorderMode, setReorderMode] = useState(false);
   const [selectionMode, setSelectionMode] = useState(false);
@@ -148,10 +142,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     selectionRef.current = selection;
   }, [selection]);
 
-  const selectedCount = useMemo(
-    () => Object.values(selection).filter(Boolean).length,
-    [selection],
-  );
+  const selectedCount = Object.values(selection).filter(Boolean).length;
 
   const handleFilter = () => {
     setFilterVisible(v => !v);
@@ -195,20 +186,17 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     });
   }, [data]);
 
-  const handleFav = useCallback(
-    (isFav: boolean, item: T) => {
-      if (type !== 'course') {
-        setFavorite(type, item.id, !isFav);
-      }
+  const handleFav = (isFav: boolean, item: T) => {
+    if (type !== 'course') {
+      setFavorite(type, item.id, !isFav);
+    }
 
-      if (isFav) {
-        toast(t('removeFromFav'), 'success');
-      } else {
-        toast(t('addToFav'), 'success');
-      }
-    },
-    [toast, type],
-  );
+    if (isFav) {
+      toast(t('removeFromFav'), 'success');
+    } else {
+      toast(t('addToFav'), 'success');
+    }
+  };
 
   const handleArchive = useCallback(
     (isArchived: boolean, itemIds: string[]) => {
@@ -230,21 +218,18 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
         handleSelect();
       }
     },
-    [handleSelect, selectionMode, toast, type],
+    [handleSelect, selectionMode, type],
   );
 
-  const handleHide = useCallback(
-    (isHidden: boolean, id: string) => {
-      setCourseHidden(id, !isHidden);
+  const handleHide = (isHidden: boolean, id: string) => {
+    setCourseHidden(id, !isHidden);
 
-      if (isHidden) {
-        toast(t('undoHide'), 'success');
-      } else {
-        toast(t('hideSucceeded'), 'success');
-      }
-    },
-    [toast],
-  );
+    if (isHidden) {
+      toast(t('undoHide'), 'success');
+    } else {
+      toast(t('hideSucceeded'), 'success');
+    }
+  };
 
   const handleNavigateCourseX = useCallback(() => {
     if (detailNavigator) {
@@ -565,50 +550,34 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     setFirstFetch('done');
   }
 
-  const renderItem = useCallback(
-    ({ item }: { item: T }) => {
-      return (
-        <Component
-          data={item}
-          selectionMode={selectionMode}
-          reorderMode={reorderMode}
-          disableSwipe={selectionMode || reorderMode}
-          checked={selection[item.id]}
-          onCheck={checked =>
-            setSelection(prev => ({ ...prev, [item.id]: checked }))
-          }
-          onPress={() => {
-            setFilterVisible(false);
-            onItemPress?.(item);
-          }}
-          fav={favIdSet.has(item.id)}
-          onFav={() => handleFav(favIdSet.has(item.id), item)}
-          archived={archivedIdSet.has(item.id)}
-          onArchive={() => handleArchive(archivedIdSet.has(item.id), [item.id])}
-          hidden={hiddenIdSet.has(item.id)}
-          onHide={
-            isCourse
-              ? () => handleHide(hiddenIdSet.has(item.id), item.id)
-              : undefined
-          }
-        />
-      );
-    },
-    [
-      Component,
-      selectionMode,
-      reorderMode,
-      selection,
-      favIdSet,
-      archivedIdSet,
-      hiddenIdSet,
-      isCourse,
-      onItemPress,
-      handleFav,
-      handleArchive,
-      handleHide,
-    ],
-  );
+  const renderItem = ({ item }: { item: T }) => {
+    return (
+      <Component
+        data={item}
+        selectionMode={selectionMode}
+        reorderMode={reorderMode}
+        disableSwipe={selectionMode || reorderMode}
+        checked={selection[item.id]}
+        onCheck={checked =>
+          setSelection(prev => ({ ...prev, [item.id]: checked }))
+        }
+        onPress={() => {
+          setFilterVisible(false);
+          onItemPress?.(item);
+        }}
+        fav={favIdSet.has(item.id)}
+        onFav={() => handleFav(favIdSet.has(item.id), item)}
+        archived={archivedIdSet.has(item.id)}
+        onArchive={() => handleArchive(archivedIdSet.has(item.id), [item.id])}
+        hidden={hiddenIdSet.has(item.id)}
+        onHide={
+          isCourse
+            ? () => handleHide(hiddenIdSet.has(item.id), item.id)
+            : undefined
+        }
+      />
+    );
+  };
 
   const listProps = {
     style: { height: '100%' as const },

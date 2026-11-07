@@ -1,10 +1,4 @@
-import {
-  PropsWithChildren,
-  useRef,
-  useEffect,
-  useCallback,
-  useState,
-} from 'react';
+import { PropsWithChildren, useRef, useEffect, useState } from 'react';
 import { View, StyleSheet, Platform, ViewInstance } from 'react-native';
 import Animated, {
   SharedValue,
@@ -248,29 +242,26 @@ const CardWrapper: React.FC<
     setMenuVisible(false);
   }
 
-  const renderRightActions = useCallback(
-    (
-      progress: SharedValue<number>,
-      translation: SharedValue<number>,
-      swipeableMethods: SwipeableMethods,
-    ) => {
-      return (
-        <SwipeActions
-          position="right"
-          progress={progress}
-          translation={translation}
-          swipeableMethods={swipeableMethods}
-          fav={fav}
-          onFav={onFav}
-          archived={archived}
-          onArchive={onArchive}
-          hidden={hidden}
-          onHide={onHide}
-        />
-      );
-    },
-    [archived, fav, hidden, onArchive, onFav, onHide],
-  );
+  const renderRightActions = (
+    progress: SharedValue<number>,
+    translation: SharedValue<number>,
+    swipeableMethods: SwipeableMethods,
+  ) => {
+    return (
+      <SwipeActions
+        position="right"
+        progress={progress}
+        translation={translation}
+        swipeableMethods={swipeableMethods}
+        fav={fav}
+        onFav={onFav}
+        archived={archived}
+        onArchive={onArchive}
+        hidden={hidden}
+        onHide={onHide}
+      />
+    );
+  };
 
   const handlePress = () => {
     if (menuVisible) {

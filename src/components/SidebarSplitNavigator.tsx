@@ -111,19 +111,15 @@ const Sidebar: React.FC<{
 }> = ({ state, descriptors, onSelect }) => {
   const theme = useTheme();
 
-  const items = useMemo(
-    () =>
-      state.routes.map(route => {
-        const { title, sfSymbol, badge } = descriptors[route.key].options;
-        return {
-          key: route.name,
-          title,
-          systemImage: sfSymbol,
-          badge: !!badge,
-        };
-      }),
-    [state.routes, descriptors],
-  );
+  const items = state.routes.map(route => {
+    const { title, sfSymbol, badge } = descriptors[route.key].options;
+    return {
+      key: route.name,
+      title,
+      systemImage: sfSymbol,
+      badge: !!badge,
+    };
+  });
 
   return (
     <SidebarView

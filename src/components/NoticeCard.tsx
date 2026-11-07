@@ -1,4 +1,3 @@
-import { memo, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Caption, Paragraph, Title, Subheading } from 'react-native-paper';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -28,7 +27,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
   hideCourseName,
   ...restProps
 }) => {
-  const strippedContent = useMemo(() => removeTags(content), [content]);
+  const strippedContent = removeTags(content);
   const timeAgo = dayjs(publishTime).fromNow();
 
   return (
@@ -92,4 +91,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default memo(NoticeCard);
+export default NoticeCard;

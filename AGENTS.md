@@ -8,7 +8,10 @@
 
 ## React Compiler
 
-- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so new code doesn't need `useMemo`, `useCallback` or `React.memo`. The existing ones are removed in separate PRs.
+- `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so don't add `useMemo`, `useCallback` or `React.memo` for performance.
+- Don't make an effect depend on a function. A function that an effect only calls goes in `useEffectEvent`, and the effect lists the data it reacts to (e.g. `refresh` in `Notices`: `useEffect(() => refresh(), [courseIds, loggedIn])`). The compiler's memoization is an optimization, not a guarantee, so an effect shouldn't rerun just because a function fell out of compilation. `react-hooks/exhaustive-deps` flags the direct cases.
+- `useCallback` / `useMemo` are still right where a value has to keep its identity and can't be an effect event: handlers handed to `navigation.setOptions` from an effect, functions and values in a context provider (the split views), and hook outputs that callers use as effect deps (`useFilteredData`).
+- Show toasts with the module-level `toast()` from `components/Toast`, not through props or context.
 - The compiler silently skips a function it can't handle and leaves it unmemoized. In 1.0 that includes `try` blocks with `finally`, `throw`, or conditional / logical / optional-chaining expressions (`?:`, `&&`, `||`, `??`, `?.`): compute values before the `try` and keep only the awaited calls inside it. Constants named `use…` are taken for hooks, so don't use that prefix for non-hooks.
 
 ## Navigation
@@ -30,8 +33,8 @@
 The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `DUMMY_PASSWORD` from the repo-root `.env` on the login screen and it loads `src/data/mock.ts` instead of calling learn.tsinghua.edu.cn (see `src/screens/Login.tsx`). Use it for UI verification, screenshots and manual testing.
 
 - These two values are not real credentials: reading them from `.env` and typing them into the UI is fine, even in tool calls. Do not print or commit any other value in `.env` (tokens, project IDs).
-- In mock mode the app talks to an emulated server instead of learn.tsinghua.edu.cn: `src/data/mockSource.ts` answers every `dataSource` call (and assignment submission) with the mock data after a network-like delay, so refreshes, spinners and errors behave like a real account. Some features (e.g. course information sharing, file downloads) still don't work offline.
-- Debug builds show Settings › Network emulation (also linked from the login screen when a mock account is saved) to change the latency, make requests fail (offline, server error, 20 s timeout), reject logins, and log in again as the app does after 10 minutes in the background. The choices reset when the JS reloads.
+- In mock mode the app talks to an emulated server instead of learn.tsinghua.edu.cn: `src/data/mockSource.ts` answers every `dataSource` call (and assignment submission) with the mock data after a network-like delay, so refreshes, spinners and errors behave like a real account. File downloads go through the emulation too, then fetch the mock file's real URL. Some features (e.g. course information sharing) still don't work offline.
+- Debug builds show Settings › Network emulation (also linked from the login screen when a mock account is saved) to change the latency, make requests and file downloads fail (offline, server error, 20 s timeout), reject logins, and log in again as the app does after 10 minutes in the background. The choices reset when the JS reloads.
 - The default mock login is not persisted: every relaunch needs the login again, and its login results are ignored. To keep the mock data and session across relaunches, or to test failed logins and logging in again, log in with `DUMMY_PERSIST_USERNAME` / `DUMMY_PERSIST_PASSWORD` from `.env` instead (same data; relaunch logs in through the emulated server).
 
 ### Mock data

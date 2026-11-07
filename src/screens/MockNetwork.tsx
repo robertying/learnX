@@ -12,7 +12,7 @@ import {
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
-import useToast from 'hooks/useToast';
+import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
 
 // A dev-only tool for the mock accounts, so it is not translated.
@@ -31,7 +31,6 @@ const failures: [MockFailure, string][] = [
 ];
 
 const MockNetwork: React.FC = () => {
-  const toast = useToast();
   const config = useSyncExternalStore(
     subscribeMockNetworkConfig,
     getMockNetworkConfig,
@@ -77,7 +76,9 @@ const MockNetwork: React.FC = () => {
           />
         ))}
         <Caption style={styles.caption}>
-          Applies to every request, login included.
+          Applies to every request, login and file downloads included. A file
+          already downloaded opens without a request; refresh it to download it
+          again.
         </Caption>
         <Caption style={styles.header}>Login</Caption>
         <TableCell

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import {} from 'react';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { CourseType, Language } from 'thu-learn-lib';
 import { queryClient } from 'data/queryClient';
@@ -84,7 +84,7 @@ export const useCourseIds = () => {
     .map(course => course.id)
     .sort()
     .join(',');
-  return useMemo(() => (key ? key.split(',') : []), [key]);
+  return key ? key.split(',') : [];
 };
 
 export const useCourse = (courseId: string) =>
