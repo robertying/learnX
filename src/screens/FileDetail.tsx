@@ -1,46 +1,25 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  useEffectEvent,
-} from 'react';
-import { Linking, Platform, StyleSheet, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import { ProgressBar, Chip } from 'react-native-paper';
-import type {
-  NativeStackHeaderItem,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from '@react-native-vector-icons/material-icons';
 import Pdf from 'react-native-pdf';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import {
-  canRenderInIosWebview,
-  canRenderInMacWebview,
-  needWhiteBackground,
-} from 'helpers/html';
-import {
-  copyFileToMacDownloads,
-  downloadFile,
-  openFile,
-  shareFile,
-} from 'helpers/fs';
+import { canPreviewInline, needWhiteBackground } from 'helpers/filePreview';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import { toast } from 'components/Toast';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
 import ScrollView from 'components/ScrollView';
 import { FileStackParams } from './types';
-import { SplitViewContext } from 'components/SplitView';
 import { useFile } from 'data/content';
-import { useSettings } from 'data/settings';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
+import useFileDetailHeader from 'hooks/useFileDetailHeader';
+import useFileDownload from 'hooks/useFileDownload';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import { Caption, Text, Title } from 'components/Text';
 import Divider from 'components/Divider';
@@ -79,259 +58,33 @@ const FileDetailContent: React.FC<{
   file: DownloadableFile & Partial<File>;
   navigation: Props['navigation'];
 }> = ({ file, navigation }) => {
-  // Shared by several stacks; only the search stack has a Search screen.
-  const routeNames: readonly string[] = navigation.getState().routeNames;
-  const isSearch = routeNames.includes('Search');
-
   const theme = useTheme();
-  const { splitEnabled, showDetail, showMaster, toggleMaster } =
-    useContext(SplitViewContext);
-
-  const openFileAfterDownload = useSettings(
-    settings => settings.openFileAfterDownload,
-  );
 
   const webViewRef = useRef<WebView>(null);
 
-  const [path, setPath] = useState('');
-  const [progress, setProgress] = useState(0);
-  const [error, setError] = useState(false);
+  const { path, progress, error, redownload, share, copyToDownloads, open } =
+    useFileDownload(file);
   const [showInfo, setShowInfo] = useState(false);
 
-  const canRender =
-    path &&
-    (file.fileType === 'pdf' ||
-      (Platform.OS === 'ios' &&
-        !DeviceInfo.isMac() &&
-        canRenderInIosWebview(file.fileType)) ||
-      (Platform.OS === 'ios' &&
-        DeviceInfo.isMac() &&
-        canRenderInMacWebview(file.fileType)));
-
-  // FileDetail remounts this screen when any of these change.
-  const [downloadable] = useState<DownloadableFile>(() => ({
-    id: file.id,
-    courseName: file.courseName,
-    title: file.title,
-    fileType: file.fileType,
-    downloadUrl: file.downloadUrl,
-  }));
-
-  const download = useCallback(
-    (refresh: boolean) =>
-      downloadFile(downloadable, refresh, setProgress).then(
-        downloadedPath => {
-          setPath(downloadedPath);
-          setProgress(0);
-        },
-        () => {
-          setProgress(0);
-          setError(true);
-          toast(t('fileDownloadFailed'), 'error');
-        },
-      ),
-    [downloadable],
-  );
-
-  const handleDownload = useCallback(
-    (refresh: boolean) => {
-      setPath('');
-      setError(false);
-      download(refresh);
-    },
-    [download],
-  );
-
-  const handleShare = useCallback(async () => {
-    await shareFile(downloadable);
-  }, [downloadable]);
-
-  const handleCopyToDownloadsFolder = useCallback(async () => {
-    try {
-      await copyFileToMacDownloads(downloadable, path);
-      toast(t('downloadToDownloadsSucceeded'), 'success');
-    } catch {
-      toast(t('downloadToDownloadsFailed'), 'error');
-    }
-  }, [path, downloadable]);
-
-  const handleOpen = useCallback(async () => {
-    try {
-      if (Platform.OS === 'android') {
-        await openFile(path, file.fileType);
-      } else {
-        await Linking.openURL(path);
-      }
-    } catch {
-      toast(t('openFileFailed'), 'error');
-    }
-  }, [file.fileType, path]);
+  const canRender = !!path && canPreviewInline(file.fileType);
 
   const handleShowInfo = useCallback(() => {
     setShowInfo(shown => !shown);
   }, []);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerBackVisible: splitEnabled ? showMaster : undefined,
-      headerRight: () => (
-        <View style={[Styles.flexRow, { justifyContent: 'flex-end' }]}>
-          {splitEnabled && !isSearch && (
-            <IconButton
-              onPress={() => toggleMaster(!showMaster)}
-              icon={props => (
-                <Icon
-                  {...props}
-                  name={showMaster ? 'fullscreen' : 'fullscreen-exit'}
-                />
-              )}
-              disabled={!showDetail}
-            />
-          )}
-          <IconButton
-            onPress={() => handleDownload(true)}
-            icon={props => <Icon {...props} name="refresh" />}
-          />
-          <IconButton
-            disabled={error || !path}
-            onPress={handleShare}
-            icon={props => <Icon {...props} name="ios-share" />}
-          />
-          {DeviceInfo.isMac() && (
-            <IconButton
-              disabled={error || !path}
-              onPress={handleCopyToDownloadsFolder}
-              icon={props => <Icon {...props} name="download" />}
-            />
-          )}
-          {Platform.OS === 'android' && (
-            <IconButton
-              disabled={error || !path}
-              onPress={handleOpen}
-              icon={props => <Icon {...props} name="open-in-new" />}
-            />
-          )}
-          {canRender && (
-            <IconButton
-              disabled={error || !path}
-              onPress={handleShowInfo}
-              icon={props => (
-                <Icon {...props} name={showInfo ? 'preview' : 'info-outline'} />
-              )}
-            />
-          )}
-        </View>
-      ),
-      unstable_headerRightItems: () => [
-        ...(splitEnabled && !isSearch
-          ? ([
-              {
-                type: 'button',
-                identifier: 'toggleMaster',
-                label: showMaster ? t('fullscreen') : t('exitFullscreen'),
-                icon: {
-                  type: 'sfSymbol',
-                  name: showMaster
-                    ? 'arrow.up.left.and.arrow.down.right'
-                    : 'arrow.down.right.and.arrow.up.left',
-                },
-                onPress: () => toggleMaster(!showMaster),
-                disabled: !showDetail,
-              },
-            ] satisfies NativeStackHeaderItem[])
-          : []),
-        {
-          type: 'button',
-          identifier: 'refresh',
-          label: t('refresh'),
-          icon: {
-            type: 'sfSymbol',
-            name: 'arrow.clockwise',
-          },
-          onPress: () => handleDownload(true),
-          disabled: !!progress,
-        },
-        {
-          type: 'button',
-          identifier: 'share',
-          label: t('share'),
-          icon: {
-            type: 'sfSymbol',
-            name: 'square.and.arrow.up',
-          },
-          onPress: () => handleShare(),
-          disabled: error || !path,
-        },
-        ...(DeviceInfo.isMac()
-          ? ([
-              {
-                type: 'button',
-                identifier: 'download',
-                label: t('download'),
-                icon: {
-                  type: 'sfSymbol',
-                  name: 'arrow.down.to.line',
-                },
-                onPress: () => handleCopyToDownloadsFolder(),
-                disabled: error || !path,
-              },
-            ] satisfies NativeStackHeaderItem[])
-          : []),
-        ...(canRender
-          ? ([
-              {
-                type: 'button',
-                identifier: 'info',
-                label: showInfo ? t('preview') : t('info'),
-                icon: {
-                  type: 'sfSymbol',
-                  name: showInfo ? 'eye' : 'info.circle',
-                },
-                onPress: () => handleShowInfo(),
-                disabled: error || !path,
-              },
-            ] satisfies NativeStackHeaderItem[])
-          : []),
-      ],
-    });
-  }, [
-    canRender,
-    error,
-    handleDownload,
-    handleOpen,
-    handleShare,
-    handleShowInfo,
-    handleCopyToDownloadsFolder,
+  useFileDetailHeader({
     navigation,
     path,
     progress,
-    showDetail,
+    error,
+    canRender,
     showInfo,
-    showMaster,
-    splitEnabled,
-    toggleMaster,
-    isSearch,
-  ]);
-
-  useEffect(() => {
-    download(false);
-  }, [download]);
-
-  const openAfterDownload = useEffectEvent(() => {
-    if (
-      Platform.OS === 'android' &&
-      openFileAfterDownload &&
-      file.fileType !== 'pdf'
-    ) {
-      handleOpen();
-    }
+    onRefresh: redownload,
+    onShare: share,
+    onCopyToDownloads: copyToDownloads,
+    onOpen: open,
+    onToggleInfo: handleShowInfo,
   });
-
-  useEffect(() => {
-    if (path) {
-      openAfterDownload();
-    }
-  }, [path]);
 
   return (
     <SafeArea testID="file-detail" collapsable={false}>
@@ -440,7 +193,7 @@ const FileDetailContent: React.FC<{
             style={[styles.actions, { backgroundColor: theme.colors.surface }]}
           >
             <View style={styles.colCenter}>
-              <IconButton icon="share" size={48} onPress={handleShare} />
+              <IconButton icon="share" size={48} onPress={share} />
               <Text>{t('share')}</Text>
             </View>
             {DeviceInfo.isMac() && (
@@ -448,14 +201,14 @@ const FileDetailContent: React.FC<{
                 <IconButton
                   icon="download"
                   size={48}
-                  onPress={handleCopyToDownloadsFolder}
+                  onPress={copyToDownloads}
                 />
                 <Text>{t('download')}</Text>
               </View>
             )}
             {Platform.OS === 'android' && (
               <View style={styles.colCenter}>
-                <IconButton icon="open-in-new" size={48} onPress={handleOpen} />
+                <IconButton icon="open-in-new" size={48} onPress={open} />
                 <Text>{t('open')}</Text>
               </View>
             )}
