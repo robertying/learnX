@@ -1,6 +1,5 @@
 import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
-import env from 'helpers/env';
 import { PersistAppState } from 'data/types/state';
 
 // All dates are relative to the current time so the mock data always looks
@@ -22,15 +21,6 @@ const mockStore: PersistAppState = {
     ssoInProgress: false,
     loggedIn: true,
     error: null,
-    username: env.DUMMY_USERNAME,
-    password: env.DUMMY_PASSWORD,
-    fingerPrint: 'fingerPrint',
-    fingerGenPrint: null,
-    fingerGenPrint3: null,
-    _persist: {
-      rehydrated: true,
-      version: -1,
-    },
   },
   user: {
     name: '测试学生',

@@ -12,55 +12,23 @@ export default function auth(
     loggingIn: false,
     ssoInProgress: false,
     loggedIn: false,
-    username: null,
-    password: null,
-    fingerPrint: null,
-    fingerGenPrint: null,
-    fingerGenPrint3: null,
   },
   action: AuthAction,
 ): AuthState {
   switch (action.type) {
     case LOGIN_REQUEST:
-      if (action.payload.clearCredential) {
-        return {
-          ...state,
-          loggingIn: true,
-          error: null,
-          username: null,
-          password: null,
-          fingerPrint: null,
-          fingerGenPrint: null,
-          fingerGenPrint3: null,
-        };
-      }
       return {
         ...state,
         loggingIn: true,
         error: null,
       };
     case LOGIN_SUCCESS:
-      const payload = action.payload;
-      if (payload) {
-        return {
-          ...state,
-          loggingIn: false,
-          loggedIn: true,
-          username: payload.username,
-          password: payload.password,
-          fingerPrint: payload.fingerPrint,
-          fingerGenPrint: payload.fingerGenPrint,
-          fingerGenPrint3: payload.fingerGenPrint3,
-          error: null,
-        };
-      } else {
-        return {
-          ...state,
-          loggingIn: false,
-          loggedIn: true,
-          error: null,
-        };
-      }
+      return {
+        ...state,
+        loggingIn: false,
+        loggedIn: true,
+        error: null,
+      };
     case LOGIN_FAILURE:
       return {
         ...state,

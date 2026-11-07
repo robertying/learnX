@@ -5,6 +5,7 @@ import { Caption } from 'react-native-paper';
 import { CourseType, Language } from 'thu-learn-lib';
 import { useAppDispatch, useAppSelector } from 'data/store';
 import { dataSource } from 'data/source';
+import { useCredentialsStore } from 'data/credentials';
 import { setSetting } from 'data/actions/settings';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -26,7 +27,9 @@ const CourseInformationSharing: React.FC<Props> = () => {
   const courseInformationSharing = useAppSelector(
     state => state.settings.courseInformationSharing,
   );
-  const isDummyUser = useAppSelector(state => isMockUser(state.auth.username));
+  const isDummyUser = useCredentialsStore(state =>
+    isMockUser(state.credentials?.username),
+  );
 
   const getCourses = async () => {
     if (!currentSemesterId) {

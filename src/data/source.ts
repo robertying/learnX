@@ -3,7 +3,7 @@ import { Learn2018Helper, addCSRFTokenToUrl } from 'thu-learn-lib';
 import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import { store } from 'data/store';
+import { getCredentials } from 'data/credentials';
 import { mockSource, mockSubmitAssignment } from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isMockUser } from 'helpers/mock';
@@ -28,7 +28,7 @@ export type DataSource = Pick<
 
 let helper: Learn2018Helper;
 
-const isMockSession = () => isMockUser(store.getState().auth.username);
+const isMockSession = () => isMockUser(getCredentials()?.username);
 
 /**
  * Talks to learn.tsinghua.edu.cn, or to the emulated server in
@@ -63,7 +63,7 @@ export const loginWithFingerPrint = async (
   fingerGenPrint3?: string,
 ) => {
   // A new login names its account; it may differ from the stored one.
-  const isMock = isMockUser(username ?? store.getState().auth.username);
+  const isMock = isMockUser(username ?? getCredentials()?.username);
   if (!isMock) {
     await clearLoginCookies();
   }
@@ -79,13 +79,13 @@ export const loginWithFingerPrint = async (
 export const resetDataSource = () => {
   helper = new Learn2018Helper({
     provider: () => {
-      const state = store.getState();
+      const credentials = getCredentials();
       return {
-        username: state.auth.username || undefined,
-        password: state.auth.password || undefined,
-        fingerPrint: state.auth.fingerPrint || '',
-        fingerGenPrint: state.auth.fingerGenPrint || '',
-        fingerGenPrint3: state.auth.fingerGenPrint3 || '',
+        username: credentials?.username || undefined,
+        password: credentials?.password || undefined,
+        fingerPrint: credentials?.fingerPrint ?? '',
+        fingerGenPrint: credentials?.fingerGenPrint ?? '',
+        fingerGenPrint3: credentials?.fingerGenPrint3 ?? '',
       };
     },
   });

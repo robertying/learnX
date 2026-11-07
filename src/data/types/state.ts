@@ -9,14 +9,8 @@ import type {
 } from 'thu-learn-lib';
 import { FilterSelection } from 'components/Filter';
 
-export interface Auth {
-  username: string | null;
-  password: string | null;
-  fingerPrint: string | null;
-  fingerGenPrint: string | null;
-  fingerGenPrint3: string | null;
-}
-export interface AuthState extends Auth {
+/** Login progress. The credentials themselves live in data/credentials. */
+export interface AuthState {
   loggingIn: boolean;
   ssoInProgress: boolean;
   loggedIn: boolean;
@@ -204,7 +198,7 @@ export interface PersistPartial {
 }
 
 export interface AppState {
-  auth: AuthState & PersistPartial;
+  auth: AuthState;
   settings: SettingsState & PersistPartial;
   semesters: SemestersState;
   courses: CoursesState;

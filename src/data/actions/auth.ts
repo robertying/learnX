@@ -8,7 +8,7 @@ import {
   LOGIN_SUCCESS,
   SET_SSO_IN_PROGRESS,
 } from 'data/types/constants';
-import { Auth } from 'data/types/state';
+import { clearCredentials, saveCredentials } from 'data/credentials';
 import { getUserInfo } from './user';
 import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
@@ -17,7 +17,7 @@ export const loginAction = createAsyncAction(
   LOGIN_REQUEST,
   LOGIN_SUCCESS,
   LOGIN_FAILURE,
-)<{ clearCredential?: boolean }, Auth | undefined, ApiError>();
+)<undefined, undefined, ApiError>();
 
 export function login({
   username,
@@ -42,11 +42,10 @@ export function login({
       }
     }
 
-    dispatch(
-      loginAction.request({
-        clearCredential: !!username && !!password && !fingerPrint,
-      }),
-    );
+    dispatch(loginAction.request());
+    if (username && password && !fingerPrint) {
+      await clearCredentials().catch(() => undefined);
+    }
 
     try {
       if (reset) {
@@ -64,18 +63,17 @@ export function login({
       });
 
       if (username && password && fingerPrint) {
-        dispatch(
-          loginAction.success({
-            username,
-            password,
-            fingerPrint,
-            fingerGenPrint,
-            fingerGenPrint3,
-          }),
-        );
-      } else {
-        dispatch(loginAction.success(undefined));
+        // Like redux-persist before it, a failed write keeps the login for
+        // this session only.
+        await saveCredentials({
+          username,
+          password,
+          fingerPrint,
+          fingerGenPrint,
+          fingerGenPrint3,
+        }).catch(() => undefined);
       }
+      dispatch(loginAction.success());
       dispatch(getUserInfo());
     } catch (err) {
       dispatch(loginAction.failure(serializeError(err)));
@@ -85,7 +83,7 @@ export function login({
 
 export function loginWithOfflineMode(): ThunkResult {
   return dispatch => {
-    dispatch(loginAction.success(undefined));
+    dispatch(loginAction.success());
   };
 }
 

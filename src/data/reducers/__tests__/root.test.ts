@@ -1,12 +1,10 @@
 import { rootReducer } from 'data/reducers/root';
 import * as C from 'data/types/constants';
-import env from 'helpers/env';
 import { action, INIT } from '../../../../jest/actions';
 
 const initial = () => rootReducer(undefined, INIT);
 
-const mockStoreFor = (username: string) =>
-  rootReducer(undefined, action(C.SET_MOCK_STORE, { username }));
+const mockStore = () => rootReducer(undefined, action(C.SET_MOCK_STORE));
 
 describe('rootReducer', () => {
   it('combines every slice', () => {
@@ -27,7 +25,7 @@ describe('rootReducer', () => {
     const state = rootReducer(
       {
         ...base,
-        auth: { ...base.auth, loggedIn: true, username: 'user' },
+        auth: { ...base.auth, loggedIn: true },
         semesters: { ...base.semesters, current: '2025-2026-1' },
       },
       action(C.CLEAR_STORE),
@@ -35,23 +33,14 @@ describe('rootReducer', () => {
     expect(state).toEqual(initial());
   });
 
-  describe('SET_MOCK_STORE', () => {
-    it('loads the mock data with the ephemeral mock password', () => {
-      const state = mockStoreFor(env.DUMMY_USERNAME);
-      expect(state.auth.username).toBe(env.DUMMY_USERNAME);
-      expect(state.auth.password).toBe(env.DUMMY_PASSWORD);
-      expect(state.courses.items.length).toBeGreaterThan(0);
-      expect(state.assignments.items.length).toBeGreaterThan(0);
-    });
-
-    it('uses the persistent mock password for the persistent mock user', () => {
-      const state = mockStoreFor(env.DUMMY_PERSIST_USERNAME);
-      expect(state.auth.username).toBe(env.DUMMY_PERSIST_USERNAME);
-      expect(state.auth.password).toBe(env.DUMMY_PERSIST_PASSWORD);
-    });
+  it('loads the mock data on SET_MOCK_STORE', () => {
+    const state = mockStore();
+    expect(state.auth.loggedIn).toBe(true);
+    expect(state.courses.items.length).toBeGreaterThan(0);
+    expect(state.assignments.items.length).toBeGreaterThan(0);
   });
 
-  describe('mock users', () => {
+  describe('mock data', () => {
     // Fetches go through the emulated server (data/mockSource), so their
     // results land like a real account's.
     const fetched: [string, unknown][] = [
@@ -64,44 +53,25 @@ describe('rootReducer', () => {
       [C.SET_FAV_NOTICE, { noticeId: 'n', flag: true }],
       [C.SET_SETTING, { key: 'graduate', value: true }],
     ];
-    const auth: [string, unknown][] = [
-      [C.LOGIN_REQUEST, {}],
-      [C.LOGIN_SUCCESS, undefined],
-      [C.LOGIN_FAILURE, { reason: 'bad credential' }],
-    ];
 
-    describe.each([
-      ['ephemeral', () => env.DUMMY_USERNAME],
-      ['persistent', () => env.DUMMY_PERSIST_USERNAME],
-    ])('%s mock user', (_, username) => {
-      it.each(fetched)('applies %s', (type, payload) => {
-        const state = mockStoreFor(username());
-        expect(rootReducer(state, action(type, payload))).not.toBe(state);
-      });
-
-      it('still handles CLEAR_STORE', () => {
-        const state = mockStoreFor(username());
-        expect(rootReducer(state, action(C.CLEAR_STORE))).toEqual(initial());
-      });
+    it.each(fetched)('applies %s', (type, payload) => {
+      const state = mockStore();
+      expect(rootReducer(state, action(type, payload))).not.toBe(state);
     });
 
-    it.each(auth)(
-      'ignores %s for the ephemeral mock user, whose login must not persist',
-      (type, payload) => {
-        const state = mockStoreFor(env.DUMMY_USERNAME);
-        expect(rootReducer(state, action(type, payload))).toBe(state);
-      },
-    );
+    it('still handles CLEAR_STORE', () => {
+      expect(rootReducer(mockStore(), action(C.CLEAR_STORE))).toEqual(
+        initial(),
+      );
+    });
 
-    it('lets a login fail and recover for the persistent mock user', () => {
-      const persistent = mockStoreFor(env.DUMMY_PERSIST_USERNAME);
+    it('lets a login fail and recover', () => {
       const failed = rootReducer(
-        persistent,
+        mockStore(),
         action(C.LOGIN_FAILURE, { reason: 'bad credential' }),
       );
       expect(failed.auth.loggedIn).toBe(false);
       expect(failed.auth.error).toBe('bad credential');
-      expect(failed.auth.username).toBe(env.DUMMY_PERSIST_USERNAME);
 
       const recovered = rootReducer(failed, action(C.LOGIN_SUCCESS));
       expect(recovered.auth.loggedIn).toBe(true);
@@ -109,10 +79,10 @@ describe('rootReducer', () => {
     });
   });
 
-  it('passes every action through for real users', () => {
+  it('passes other actions to the slices', () => {
     const base = initial();
     const state = rootReducer(
-      { ...base, auth: { ...base.auth, username: 'real-user' } },
+      base,
       action(C.GET_ALL_SEMESTERS_SUCCESS, ['2025-2026-1']),
     );
     expect(state.semesters.items).toEqual(['2025-2026-1']);
