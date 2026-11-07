@@ -90,7 +90,7 @@ File names follow one pattern everywhere:
 
 ### iPhone Duo
 
-- Simulator "iPhone Duo". Two displays: outer 1398x2034 (`--display 1`, folded), inner 2007x2853 (`--display 3`, 2853x2007 when open). `simctl io ... screenshot --display N` can hang: use `scripts/duo-capture.sh <display> <out.png>`.
+- Simulator "iPhone Duo". Two displays: outer 1398x2034 (`--display 1`, folded), inner 2007x2853 (`--display 3`, 2853x2007 when open). `simctl io ... screenshot --display N` can hang: use `scripts/duo-capture.sh <display> <out.png> [udid]` (defaults to `$DUO_UDID`, else the one booted Duo).
 - Fold state is only changeable in Device Hub (`/Applications/Xcode.app/Contents/Applications/DeviceHub.app`): three icons at the bottom: folded, half-folded, open.
 - Clicks might get rejected sometimes; what works is posting CGEvents from the shell (`scripts/mouse.swift press x y 0.12`) at screen points. Needs Accessibility for the shell host. Screenshots are 1512 px wide for a 1920 pt display: multiply by 1920/1512.
 - Half-folded/open show a split view: select a row before each capture. Tabs are the icon column at the right edge. Paste: click the field twice.
