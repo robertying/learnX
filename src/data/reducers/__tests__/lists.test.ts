@@ -1,15 +1,11 @@
 import { FailReason } from 'thu-learn-lib';
-import assignments from 'data/reducers/assignments';
 import files from 'data/reducers/files';
 import * as C from 'data/types/constants';
 import { action, INIT } from '../../../../jest/actions';
 
 type Item = { id: string; courseId: string; deadline?: string };
 
-/**
- * files and assignments handle the same kinds of actions under
- * different names; this describes each one so they share one set of tests.
- */
+/** The actions the files reducer handles, described so the tests read generically. */
 const cases = [
   {
     name: 'files',
@@ -29,27 +25,8 @@ const cases = [
       files: items,
     }),
   },
-  {
-    name: 'assignments',
-    reducer: assignments as (state: any, a: never) => any,
-    all: [
-      C.GET_ALL_ASSIGNMENTS_FOR_COURSES_REQUEST,
-      C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS,
-      C.GET_ALL_ASSIGNMENTS_FOR_COURSES_FAILURE,
-    ],
-    course: [
-      C.GET_ASSIGNMENTS_FOR_COURSE_REQUEST,
-      C.GET_ASSIGNMENTS_FOR_COURSE_SUCCESS,
-      C.GET_ASSIGNMENTS_FOR_COURSE_FAILURE,
-    ],
-    coursePayload: (courseId: string, items: Item[]) => ({
-      courseId,
-      assignments: items,
-    }),
-  },
 ];
 
-// Deadlines far in the future keep assignment order independent of today
 const item = (id: string, courseId: string): Item => ({
   id,
   courseId,
@@ -140,77 +117,5 @@ describe.each(cases)('$name reducer', c => {
         ),
       ).toMatchObject({ fetching: false, error: FailReason.OPERATION_FAILED });
     });
-  });
-});
-
-describe('assignments reducer', () => {
-  beforeEach(() => {
-    jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
-  const assignment = (id: string, courseId: string, deadline: string) => ({
-    id,
-    courseId,
-    deadline,
-  });
-
-  it('starts with no pending assignment data', () => {
-    expect(assignments(undefined, INIT).pendingAssignmentData).toBeNull();
-  });
-
-  it('keeps the server order when fetching all courses', () => {
-    const items = [
-      assignment('late', 'a', '2026-04-01T00:00:00Z'),
-      assignment('soon', 'b', '2026-03-16T00:00:00Z'),
-    ];
-    const state = assignments(
-      undefined,
-      action(C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, items),
-    );
-    expect(state.items.map(i => i.id)).toEqual(['late', 'soon']);
-  });
-
-  it('re-sorts all items after fetching one course', () => {
-    let state = assignments(
-      undefined,
-      action(C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, [
-        assignment('a-old', 'a', '2026-03-20T00:00:00Z'),
-        assignment('b1', 'b', '2026-03-18T00:00:00Z'),
-        assignment('b-past', 'b', '2026-03-01T00:00:00Z'),
-      ]),
-    );
-    state = assignments(
-      state,
-      action(C.GET_ASSIGNMENTS_FOR_COURSE_SUCCESS, {
-        courseId: 'a',
-        assignments: [
-          assignment('a-new', 'a', '2026-03-16T00:00:00Z'),
-          assignment('a-past', 'a', '2026-03-10T00:00:00Z'),
-        ],
-      }),
-    );
-    expect(state.items.map(i => i.id)).toEqual([
-      'a-new',
-      'b1',
-      'a-past',
-      'b-past',
-    ]);
-  });
-
-  it('stores pending assignment data', () => {
-    const data = { assignmentId: 'x', content: 'draft' };
-    const state = assignments(
-      undefined,
-      action(C.SET_PENDING_ASSIGNMENT_DATA, data),
-    );
-    expect(state.pendingAssignmentData).toBe(data);
-    expect(
-      assignments(state, action(C.SET_PENDING_ASSIGNMENT_DATA, null))
-        .pendingAssignmentData,
-    ).toBeNull();
   });
 });

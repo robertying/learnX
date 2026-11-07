@@ -12,7 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
 import Styles from 'constants/Styles';
 import { useAppSelector } from 'data/store';
-import { useNotices } from 'data/content';
+import { useAssignments, useNotices } from 'data/content';
 import { Notice, Assignment, File } from 'data/types/state';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
@@ -30,7 +30,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const safeAreaInsets = useSafeAreaInsets();
 
   const { notices } = useNotices();
-  const assignments = useAppSelector(state => state.assignments.items);
+  const { assignments } = useAssignments();
   const files = useAppSelector(state => state.files.items);
 
   const [searchQuery, setSearchQuery] = useState(route.params?.query ?? '');

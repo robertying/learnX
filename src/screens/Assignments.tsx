@@ -6,11 +6,10 @@ import { AssignmentStackParams } from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
-import { useAppDispatch, useAppSelector } from 'data/store';
 import { useSettings } from 'data/settings';
 import { useUserData } from 'data/userData';
-import { useCourseIds } from 'data/queries';
-import { getAllAssignmentsForCourses } from 'data/actions/assignments';
+import { useCourseIds, useLoggedIn } from 'data/queries';
+import { useAssignments } from 'data/content';
 import { Assignment } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilteredData from 'hooks/useFilteredData';
@@ -25,14 +24,12 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
 
   const toast = useToast();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.assignment);
   const archivedIds = useUserData(data => data.archived.assignment);
-  const assignmentState = useAppSelector(state => state.assignments);
-  const fetching = useAppSelector(state => state.assignments.fetching);
+  const { assignments, isFetching: fetching, refetch } = useAssignments();
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );
@@ -41,7 +38,7 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
   );
 
   const { all, fav, archived, hidden, unfinished, finished } = useFilteredData({
-    data: assignmentState.items,
+    data: assignments,
     fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
@@ -54,9 +51,9 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
 
   const handleRefresh = useCallback(() => {
     if (loggedIn) {
-      dispatch(getAllAssignmentsForCourses(courseIds));
+      refetch({ cancelRefetch: false });
     }
-  }, [courseIds, dispatch, loggedIn]);
+  }, [loggedIn, refetch]);
 
   const handlePush = useCallback(
     (item: Assignment) => {
@@ -100,9 +97,12 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     [sync, toast],
   );
 
+  // Refreshes on mount and when the semester's courses change.
   useEffect(() => {
-    handleRefresh();
-  }, [handleRefresh]);
+    if (courseIds.length > 0) {
+      handleRefresh();
+    }
+  }, [courseIds, handleRefresh]);
 
   useEffect(() => {
     if (assignmentCalendarSync) {

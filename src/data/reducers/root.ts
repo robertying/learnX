@@ -2,14 +2,12 @@ import { combineReducers } from 'redux';
 import { AppActions, StoreAction } from 'data/types/actions';
 import { CLEAR_STORE, SET_MOCK_STORE } from 'data/types/constants';
 import { AppState } from 'data/types/state';
-import assignments from './assignments';
 import files from './files';
 import auth from './auth';
 
 const getMockStore = () => require('data/mock').default;
 
 export const mainReducers = {
-  assignments,
   files,
 };
 

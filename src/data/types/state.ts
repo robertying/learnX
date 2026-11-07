@@ -121,15 +121,6 @@ export type Assignment = Pick<
   | 'excellentHomeworkList'
 > &
   CourseExtraInfo;
-export interface AssignmentsState {
-  fetching: boolean;
-  items: Assignment[];
-  error?: FailReason | null;
-  pendingAssignmentData?: {
-    data: string;
-    mimeType: string;
-  } | null;
-}
 
 export type File = Pick<
   IFile,
@@ -166,7 +157,6 @@ export interface PersistPartial {
 
 export interface AppState {
   auth: AuthState;
-  assignments: AssignmentsState;
   files: FilesState;
 }
 export type PersistAppState = AppState & PersistPartial;

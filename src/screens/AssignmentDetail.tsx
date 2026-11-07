@@ -34,16 +34,14 @@ import {
   t,
 } from 'helpers/i18n';
 import { Assignment } from 'data/types/state';
-import { useAppSelector } from 'data/store';
+import { useAssignment } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 
 type Props = NativeStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
 
 const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
-  const assignment = useAppSelector(state =>
-    state.assignments.items.find(item => item.id === route.params.id),
-  );
+  const assignment = useAssignment(route.params.id);
 
   useHeaderTitle(
     navigation,

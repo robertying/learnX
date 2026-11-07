@@ -5,36 +5,12 @@ import dayjs from 'dayjs';
 import { AppDispatch, store } from 'data/store';
 import { dataSource, loginWithFingerPrint } from 'data/source';
 import { loadCredentials } from 'data/credentials';
-import { Assignment, File } from 'data/types/state';
+import { File } from 'data/types/state';
 import { coursesQuery, getCourseNames } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { getUserData } from 'data/userData';
-import { noticesQuery } from 'data/content';
-import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
+import { assignmentsQuery, noticesQuery } from 'data/content';
 import { getAllFilesForCoursesAction } from 'data/actions/files';
-import { sortAssignments } from 'helpers/assignments';
-
-const getAllAssignments = async (
-  dispatch: AppDispatch,
-  courseIds: string[],
-) => {
-  const results = await dataSource.getAllContents(
-    courseIds,
-    ContentType.HOMEWORK,
-  );
-  const assignments = Object.keys(results).flatMap(courseId => {
-    const assignmentsForCourse = results[courseId];
-    return assignmentsForCourse.map<Assignment>(assignment => ({
-      ...assignment,
-      courseId,
-      ...getCourseNames(courseId),
-    }));
-  });
-
-  dispatch(
-    getAllAssignmentsForCoursesAction.success(sortAssignments(assignments)),
-  );
-};
 
 const getAllFiles = async (dispatch: AppDispatch, courseIds: string[]) => {
   const results = await dataSource.getAllContents(courseIds, ContentType.FILE);
@@ -99,7 +75,8 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const results = await Promise.allSettled([
     semesterId &&
       queryClient.fetchQuery({ ...noticesQuery(semesterId), staleTime: 0 }),
-    getAllAssignments(dispatch, courseIds),
+    semesterId &&
+      queryClient.fetchQuery({ ...assignmentsQuery(semesterId), staleTime: 0 }),
     getAllFiles(dispatch, courseIds),
   ]);
 

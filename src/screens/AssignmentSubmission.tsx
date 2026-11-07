@@ -31,13 +31,14 @@ import Styles from 'constants/Styles';
 import { getExtension, stripExtension } from 'helpers/fs';
 import { removeTags } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import { useAppDispatch, useAppSelector } from 'data/store';
 import { Assignment } from 'data/types/state';
 import { submitAssignment } from 'data/source';
+import { refreshCourseAssignments, useAssignment } from 'data/content';
 import {
-  getAssignmentsForCourse,
   setPendingAssignmentData,
-} from 'data/actions/assignments';
+  usePendingAssignmentData,
+} from 'data/pendingAssignment';
+import { getUserData } from 'data/userData';
 import useToast from 'hooks/useToast';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -56,9 +57,7 @@ interface AttachmentResult {
 }
 
 const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
-  const assignment = useAppSelector(state =>
-    state.assignments.items.find(item => item.id === route.params.id),
-  );
+  const assignment = useAssignment(route.params.id);
 
   useHeaderTitle(navigation, t('assignmentSubmission'), assignment?.courseName);
 
@@ -92,11 +91,7 @@ const AssignmentSubmissionContent: React.FC<{
     submittedContent,
   } = assignment;
 
-  const dispatch = useAppDispatch();
-
-  const pendingAssignmentData = useAppSelector(
-    state => state.assignments.pendingAssignmentData,
-  );
+  const pendingAssignmentData = usePendingAssignmentData();
 
   const [content, setContent] = useState(
     (removeTags(submittedContent || '') ?? '').replace('-->', ''),
@@ -131,7 +126,7 @@ const AssignmentSubmissionContent: React.FC<{
 
   const handlePickedAttachmentRemove = () => {
     setAttachmentResult(null);
-    dispatch(setPendingAssignmentData(null));
+    setPendingAssignmentData(null);
   };
 
   const handlePickerMenuOpen = () => {
@@ -163,7 +158,7 @@ const AssignmentSubmissionContent: React.FC<{
       name: file.name ?? getDefaultAttachmentName(file.mimeType),
       size: file.size,
     });
-    dispatch(setPendingAssignmentData(null));
+    setPendingAssignmentData(null);
   };
 
   const handlePhotoPick = async () => {
@@ -187,7 +182,7 @@ const AssignmentSubmissionContent: React.FC<{
       name: getDefaultAttachmentName(photo.mimeType),
       size: photo.fileSize,
     });
-    dispatch(setPendingAssignmentData(null));
+    setPendingAssignmentData(null);
   };
 
   const handleFileOpen = (
@@ -255,8 +250,11 @@ const AssignmentSubmissionContent: React.FC<{
     setUploading(false);
     setProgress(0);
 
-    dispatch(setPendingAssignmentData(null));
-    dispatch(getAssignmentsForCourse(courseId));
+    setPendingAssignmentData(null);
+    const semesterId = getUserData().currentSemester;
+    if (semesterId) {
+      refreshCourseAssignments(semesterId, courseId).catch(() => {});
+    }
 
     toast(t('assignmentSubmissionSucceeded'), 'success');
     navigation.goBack();
@@ -265,7 +263,6 @@ const AssignmentSubmissionContent: React.FC<{
     content,
     courseId,
     customAttachmentName,
-    dispatch,
     navigation,
     removeAttachment,
     studentHomeworkId,
