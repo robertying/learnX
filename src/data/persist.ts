@@ -13,11 +13,10 @@ import { AppState } from 'data/types/state';
  * persisted root state changes. Stored state without a version is -1, so every
  * migration runs for installs that predate versioning.
  */
-export const PERSIST_VERSION = 2;
+export const PERSIST_VERSION = 3;
 
 /** Slices that track a request in flight next to the data they persist. */
 export const slicesWithRequestState = [
-  'notices',
   'assignments',
   'files',
 ] as const satisfies readonly (keyof AppState)[];
@@ -55,7 +54,12 @@ export const migrations: MigrationManifest = {
       return state;
     }
     const next: StoredState = { ...state };
-    for (const key of [...slicesWithRequestState, 'semesters', 'courses']) {
+    for (const key of [
+      ...slicesWithRequestState,
+      'semesters',
+      'courses',
+      'notices',
+    ]) {
       const slice = next[key];
       if (slice && typeof slice === 'object') {
         next[key] = omitTransient(slice);
@@ -75,6 +79,14 @@ export const migrations: MigrationManifest = {
       user: _u,
       ...next
     } = state as StoredState;
+    return next as typeof state;
+  },
+  // v3: notices moved to the query cache.
+  3: state => {
+    if (!state) {
+      return state;
+    }
+    const { notices: _n, ...next } = state as StoredState;
     return next as typeof state;
   },
 };

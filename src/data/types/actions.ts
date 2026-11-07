@@ -2,10 +2,6 @@ import { ThunkAction } from 'redux-thunk';
 import { ActionType } from 'typesafe-actions';
 import { loginAction, setSSOInProgress } from 'data/actions/auth';
 import {
-  getAllNoticesForCoursesAction,
-  getNoticesForCourseAction,
-} from 'data/actions/notices';
-import {
   getAllAssignmentsForCoursesAction,
   getAssignmentsForCourseAction,
   setPendingAssignmentData,
@@ -20,14 +16,6 @@ import { PersistAppState } from './state';
 type LoginAction = ActionType<typeof loginAction>;
 type SetSsoInProgressAction = ActionType<typeof setSSOInProgress>;
 export type AuthAction = LoginAction | SetSsoInProgressAction;
-
-type GetNoticesForCourseAction = ActionType<typeof getNoticesForCourseAction>;
-type GetAllNoticesForCoursesAction = ActionType<
-  typeof getAllNoticesForCoursesAction
->;
-export type NoticesAction =
-  | GetNoticesForCourseAction
-  | GetAllNoticesForCoursesAction;
 
 type GetAssignmentsForCourseAction = ActionType<
   typeof getAssignmentsForCourseAction
@@ -55,7 +43,6 @@ export type StoreAction = ClearStoreAction | SetMockStoreAction;
 
 export type AppActions =
   | AuthAction
-  | NoticesAction
   | AssignmentsAction
   | FilesAction
   | StoreAction;

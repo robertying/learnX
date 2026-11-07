@@ -12,7 +12,6 @@ describe('rootReducer', () => {
       'assignments',
       'auth',
       'files',
-      'notices',
     ]);
   });
 
@@ -22,7 +21,7 @@ describe('rootReducer', () => {
       {
         ...base,
         auth: { ...base.auth, loggedIn: true },
-        notices: { ...base.notices, items: [{ id: 'n' } as never] },
+        files: { ...base.files, items: [{ id: 'f' } as never] },
       },
       action(C.CLEAR_STORE),
     );
@@ -32,7 +31,7 @@ describe('rootReducer', () => {
   it('loads the mock data on SET_MOCK_STORE', () => {
     const state = mockStore();
     expect(state.auth.loggedIn).toBe(true);
-    expect(state.notices.items.length).toBeGreaterThan(0);
+    expect(state.files.items.length).toBeGreaterThan(0);
     expect(state.assignments.items.length).toBeGreaterThan(0);
   });
 
@@ -40,7 +39,6 @@ describe('rootReducer', () => {
     // Fetches go through the emulated server (data/mockSource), so their
     // results land like a real account's.
     const fetched: [string, unknown][] = [
-      [C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_FILES_FOR_COURSES_SUCCESS, []],
     ];
@@ -74,8 +72,8 @@ describe('rootReducer', () => {
     const base = initial();
     const state = rootReducer(
       base,
-      action(C.GET_ALL_NOTICES_FOR_COURSES_SUCCESS, [{ id: 'n' }]),
+      action(C.GET_ALL_FILES_FOR_COURSES_SUCCESS, [{ id: 'f' }]),
     );
-    expect(state.notices.items).toEqual([{ id: 'n' }]);
+    expect(state.files.items).toEqual([{ id: 'f' }]);
   });
 });

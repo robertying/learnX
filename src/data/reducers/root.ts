@@ -4,13 +4,11 @@ import { CLEAR_STORE, SET_MOCK_STORE } from 'data/types/constants';
 import { AppState } from 'data/types/state';
 import assignments from './assignments';
 import files from './files';
-import notices from './notices';
 import auth from './auth';
 
 const getMockStore = () => require('data/mock').default;
 
 export const mainReducers = {
-  notices,
   assignments,
   files,
 };

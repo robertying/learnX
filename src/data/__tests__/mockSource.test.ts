@@ -9,6 +9,7 @@ import {
 import mock, {
   mockCourses,
   mockCurrentSemester,
+  mockNotices,
   mockSemesters,
 } from 'data/mock';
 
@@ -31,7 +32,7 @@ describe('mockSource', () => {
     expect(Object.keys(notices).sort()).toEqual([...courseIds].sort());
     const all = Object.values(notices).flat();
     expect(all.map(n => n.id).sort()).toEqual(
-      mock.notices.items.map(n => n.id).sort(),
+      mockNotices.map(n => n.id).sort(),
     );
     expect(all[0]).not.toHaveProperty('courseId');
     expect(all[0]).not.toHaveProperty('courseName');

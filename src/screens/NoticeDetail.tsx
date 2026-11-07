@@ -14,16 +14,14 @@ import { getWebViewTemplate } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import { stripExtension, getExtension } from 'helpers/fs';
 import { Notice } from 'data/types/state';
-import { useAppSelector } from 'data/store';
+import { useNotice } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 
 type Props = NativeStackScreenProps<NoticeStackParams, 'NoticeDetail'>;
 
 const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
-  const notice = useAppSelector(state =>
-    state.notices.items.find(item => item.id === route.params.id),
-  );
+  const notice = useNotice(route.params.id);
 
   useHeaderTitle(navigation, notice?.courseName, notice?.courseTeacherName);
 

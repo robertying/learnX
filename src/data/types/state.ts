@@ -91,11 +91,6 @@ export type Notice = Pick<
   | 'url'
 > &
   CourseExtraInfo;
-export interface NoticeState {
-  fetching: boolean;
-  items: Notice[];
-  error?: FailReason | null;
-}
 
 export type Assignment = Pick<
   Homework,
@@ -171,7 +166,6 @@ export interface PersistPartial {
 
 export interface AppState {
   auth: AuthState;
-  notices: NoticeState;
   assignments: AssignmentsState;
   files: FilesState;
 }

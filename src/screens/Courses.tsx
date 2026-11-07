@@ -6,6 +6,7 @@ import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { useAppSelector } from 'data/store';
+import { useNotices } from 'data/content';
 import { useCourses, useLoggedIn } from 'data/queries';
 import { useSettings } from 'data/settings';
 import { useCurrentSemester, useUserData } from 'data/userData';
@@ -37,7 +38,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   );
   const hiddenIds = useUserData(data => data.hiddenCourses);
 
-  const notices = useAppSelector(state => state.notices.items);
+  const { notices } = useNotices();
   const assignments = useAppSelector(state => state.assignments.items);
   const files = useAppSelector(state => state.files.items);
 

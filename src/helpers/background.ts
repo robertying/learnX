@@ -5,39 +5,14 @@ import dayjs from 'dayjs';
 import { AppDispatch, store } from 'data/store';
 import { dataSource, loginWithFingerPrint } from 'data/source';
 import { loadCredentials } from 'data/credentials';
-import { Assignment, File, Notice } from 'data/types/state';
+import { Assignment, File } from 'data/types/state';
 import { coursesQuery, getCourseNames } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { getUserData } from 'data/userData';
-import { getAllNoticesForCoursesAction } from 'data/actions/notices';
+import { noticesQuery } from 'data/content';
 import { getAllAssignmentsForCoursesAction } from 'data/actions/assignments';
 import { getAllFilesForCoursesAction } from 'data/actions/files';
 import { sortAssignments } from 'helpers/assignments';
-
-const getAllNotices = async (dispatch: AppDispatch, courseIds: string[]) => {
-  const results = await dataSource.getAllContents(
-    courseIds,
-    ContentType.NOTIFICATION,
-  );
-  const notices = Object.keys(results).flatMap(courseId => {
-    const noticesForCourse = results[courseId];
-    return noticesForCourse.map<Notice>(notice => ({
-      ...notice,
-      courseId,
-      ...getCourseNames(courseId),
-    }));
-  });
-  const noticeTimestamps = new Map(
-    notices.map(n => [n.id, dayjs(n.publishTime).unix()]),
-  );
-  notices.sort(
-    (a, b) =>
-      noticeTimestamps.get(b.id)! - noticeTimestamps.get(a.id)! ||
-      b.id.localeCompare(a.id),
-  );
-
-  dispatch(getAllNoticesForCoursesAction.success(notices));
-};
 
 const getAllAssignments = async (
   dispatch: AppDispatch,
@@ -122,7 +97,8 @@ TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   }
 
   const results = await Promise.allSettled([
-    getAllNotices(dispatch, courseIds),
+    semesterId &&
+      queryClient.fetchQuery({ ...noticesQuery(semesterId), staleTime: 0 }),
     getAllAssignments(dispatch, courseIds),
     getAllFiles(dispatch, courseIds),
   ]);

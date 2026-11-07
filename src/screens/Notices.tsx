@@ -4,10 +4,9 @@ import { StackActions } from '@react-navigation/native';
 import NoticeCard from 'components/NoticeCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import { getAllNoticesForCourses } from 'data/actions/notices';
-import { useAppDispatch, useAppSelector } from 'data/store';
+import { useNotices } from 'data/content';
 import { useUserData } from 'data/userData';
-import { useCourseIds } from 'data/queries';
+import { useCourseIds, useLoggedIn } from 'data/queries';
 import { Notice } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
@@ -18,17 +17,15 @@ type Props = NativeStackScreenProps<NoticeStackParams, 'Notices'>;
 const Notices: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.notice);
   const archivedIds = useUserData(data => data.archived.notice);
-  const noticeState = useAppSelector(state => state.notices);
-  const fetching = useAppSelector(state => state.notices.fetching);
+  const { notices, isFetching: fetching, refetch } = useNotices();
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
-    data: noticeState.items,
+    data: notices,
     fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
@@ -36,9 +33,9 @@ const Notices: React.FC<Props> = ({ navigation }) => {
 
   const handleRefresh = useCallback(() => {
     if (loggedIn) {
-      dispatch(getAllNoticesForCourses(courseIds));
+      refetch({ cancelRefetch: false });
     }
-  }, [courseIds, dispatch, loggedIn]);
+  }, [loggedIn, refetch]);
 
   const handlePush = useCallback(
     (item: Notice) => {
@@ -56,9 +53,12 @@ const Notices: React.FC<Props> = ({ navigation }) => {
     [detailNavigator, navigation],
   );
 
+  // Refreshes on mount and when the semester's courses change.
   useEffect(() => {
-    handleRefresh();
-  }, [handleRefresh]);
+    if (courseIds.length > 0) {
+      handleRefresh();
+    }
+  }, [courseIds, handleRefresh]);
 
   return (
     <SafeArea>

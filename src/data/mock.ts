@@ -1,6 +1,6 @@
 import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
-import { Course, PersistAppState, User } from 'data/types/state';
+import { Course, Notice, PersistAppState, User } from 'data/types/state';
 import type { UserData } from 'data/userData';
 
 // All dates are relative to the current time so the mock data always looks
@@ -162,128 +162,125 @@ export const mockCourses: Course[] = [
   },
 ];
 
+export const mockNotices: Notice[] = [
+  {
+    id: '26ef84e86d60f069016dadb09dd673b2',
+    content:
+      '\n \n \n  <p>助教已安排好了交作业方式，请不要再交到理科楼的作业箱，以免造成丢失或延误批改。</p> \n \n',
+    title: '请按照助教的安排交作业（不要再放到原来的作业箱，以免丢失或延误）',
+    publisher: '杜春光',
+    hasRead: true,
+    markedImportant: false,
+    publishTime: dateTime(-1, 7, 21),
+    courseId: '2019-2020-1139282934',
+    url: 'https://www.example.com',
+    courseName: '量子与统计',
+    courseTeacherName: '杜春光',
+  },
+  {
+    id: '26ef84e76d60efc1016d71b8f4c63bc1',
+    content:
+      '\n \n \n  <p>根据学校放假调课安排，' +
+      sundayText +
+      '改上周五课，量子与统计课为早上8：00.</p> \n \n',
+    title: '调课提醒：' + sundayText + '8：00有课（改上周五课）',
+    publisher: '杜春光',
+    hasRead: false,
+    markedImportant: true,
+    publishTime: dateTime(-2, 15, 52),
+    courseId: '2019-2020-1139282934',
+    url: 'https://www.example.com',
+    courseName: '量子与统计',
+    courseTeacherName: '杜春光',
+  },
+  {
+    id: '26ef84e76db3f55b016db4c4e8832da6',
+    content:
+      '\n \n \n  <p>第一次大作业已布置，请同学们仔细阅读作业说明文档，注意作业截止日期，合理安排时间。</p> \n \n',
+    title: '第一次大作业',
+    publisher: '薛有泽',
+    hasRead: true,
+    markedImportant: false,
+    publishTime: dateTime(-4, 16, 22),
+    courseId: '2019-2020-1139283216',
+    url: 'https://www.example.com',
+    attachment: {
+      id: '1998990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '第一次大作业.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '139.54KB',
+    },
+    courseName: '基于数字信号处理器的系统设计',
+    courseTeacherName: '窦维蓓',
+  },
+  {
+    id: '26ef84e76d60efc1016daba2cc3451fc',
+    content:
+      '\n \n \n  <p>各位同学：</p> \n  <p>为方便同学们实验，' +
+      meetingDay +
+      '课程地点改为<span style="color:#c0392b"><span style="font-size:16px">中央主楼916机房</span></span>，时间还是原上课时间（13:30开始），请各位同学相互转告~</p> \n  <p> </p> \n  <p>祝 好！</p> \n \n',
+    title: meetingDay + '课程地点',
+    publisher: '孙文钰',
+    hasRead: true,
+    markedImportant: false,
+    publishTime: dateTime(-5, 21, 46),
+    courseId: '2019-2020-1139283217',
+    url: 'https://www.example.com',
+    courseName: '数字系统设计',
+    courseTeacherName: '刘勇攀',
+  },
+  {
+    id: '26ef84e76d60efc1016d7fdd00382858',
+    content:
+      '\n \n \n  <p>统一作业为四个班都要求的作业，<strong>全部计入课程成绩</strong>；除了统一作业之外，其它是本班专属作业，建议尽量按时完成，期末根据整体完成情况，<strong>酌情加分</strong>。</p> \n \n',
+    title: '作业相关说明',
+    publisher: '马赫',
+    hasRead: false,
+    markedImportant: false,
+    publishTime: dateTime(-8, 9, 49),
+    courseId: '2019-2020-1139283221',
+    url: 'https://www.example.com',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+  },
+  {
+    id: '26ef84e76cc258ed016d3fa2f27d5f10',
+    content: '\n \n \n  <p>可跟贴讨论。</p> \n \n',
+    title: '课程讨论区里，发了一条关于第1讲作业的提示',
+    publisher: '周世东',
+    hasRead: true,
+    markedImportant: false,
+    publishTime: dateTime(-12, 22, 30),
+    courseId: '2019-2020-1139283221',
+    url: 'https://www.example.com',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+  },
+  {
+    id: '26ef84e76cc258ed016d3ea25a95157d',
+    content:
+      '\n \n \n  <p><span style="font-size:xx-large"><span style="color:black">原：固定事件个数</span><span style="color:black"><em>M</em></span><span style="color:black">的离散信源，均匀分布熵最大，</span><span style="color:black">为</span><span style="color:black">1/</span><span style="color:black"><em>M</em></span></span></p> \n  <p><span style="font-size:24pt"><span style="color:black">更正为：固定事件个数</span></span><span style="font-size:24pt"><span style="color:black"><em>M</em></span></span><span style="font-size:24pt"><span style="color:black">的离散信源，均匀分布熵最大，</span></span><span style="font-size:24pt"><span style="color:black">为</span></span><span style="font-size:24pt"><span style="color:black">log</span></span><span style="font-size:24pt"><span style="color:black"><em>M</em></span></span></p> \n \n',
+    title: '信源的信息度量课件第19页更正',
+    publisher: '周世东',
+    hasRead: true,
+    markedImportant: false,
+    publishTime: dateTime(-13, 17, 50),
+    courseId: '2019-2020-1139283221',
+    url: 'https://www.example.com',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+  },
+];
+
 const mockStore: PersistAppState = {
   auth: {
     loggingIn: false,
     ssoInProgress: false,
     loggedIn: true,
     error: null,
-  },
-  notices: {
-    fetching: false,
-    items: [
-      {
-        id: '26ef84e86d60f069016dadb09dd673b2',
-        content:
-          '\n \n \n  <p>助教已安排好了交作业方式，请不要再交到理科楼的作业箱，以免造成丢失或延误批改。</p> \n \n',
-        title:
-          '请按照助教的安排交作业（不要再放到原来的作业箱，以免丢失或延误）',
-        publisher: '杜春光',
-        hasRead: true,
-        markedImportant: false,
-        publishTime: dateTime(-1, 7, 21),
-        courseId: '2019-2020-1139282934',
-        url: 'https://www.example.com',
-        courseName: '量子与统计',
-        courseTeacherName: '杜春光',
-      },
-      {
-        id: '26ef84e76d60efc1016d71b8f4c63bc1',
-        content:
-          '\n \n \n  <p>根据学校放假调课安排，' +
-          sundayText +
-          '改上周五课，量子与统计课为早上8：00.</p> \n \n',
-        title: '调课提醒：' + sundayText + '8：00有课（改上周五课）',
-        publisher: '杜春光',
-        hasRead: false,
-        markedImportant: true,
-        publishTime: dateTime(-2, 15, 52),
-        courseId: '2019-2020-1139282934',
-        url: 'https://www.example.com',
-        courseName: '量子与统计',
-        courseTeacherName: '杜春光',
-      },
-      {
-        id: '26ef84e76db3f55b016db4c4e8832da6',
-        content:
-          '\n \n \n  <p>第一次大作业已布置，请同学们仔细阅读作业说明文档，注意作业截止日期，合理安排时间。</p> \n \n',
-        title: '第一次大作业',
-        publisher: '薛有泽',
-        hasRead: true,
-        markedImportant: false,
-        publishTime: dateTime(-4, 16, 22),
-        courseId: '2019-2020-1139283216',
-        url: 'https://www.example.com',
-        attachment: {
-          id: '1998990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '第一次大作业.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '139.54KB',
-        },
-        courseName: '基于数字信号处理器的系统设计',
-        courseTeacherName: '窦维蓓',
-      },
-      {
-        id: '26ef84e76d60efc1016daba2cc3451fc',
-        content:
-          '\n \n \n  <p>各位同学：</p> \n  <p>为方便同学们实验，' +
-          meetingDay +
-          '课程地点改为<span style="color:#c0392b"><span style="font-size:16px">中央主楼916机房</span></span>，时间还是原上课时间（13:30开始），请各位同学相互转告~</p> \n  <p> </p> \n  <p>祝 好！</p> \n \n',
-        title: meetingDay + '课程地点',
-        publisher: '孙文钰',
-        hasRead: true,
-        markedImportant: false,
-        publishTime: dateTime(-5, 21, 46),
-        courseId: '2019-2020-1139283217',
-        url: 'https://www.example.com',
-        courseName: '数字系统设计',
-        courseTeacherName: '刘勇攀',
-      },
-      {
-        id: '26ef84e76d60efc1016d7fdd00382858',
-        content:
-          '\n \n \n  <p>统一作业为四个班都要求的作业，<strong>全部计入课程成绩</strong>；除了统一作业之外，其它是本班专属作业，建议尽量按时完成，期末根据整体完成情况，<strong>酌情加分</strong>。</p> \n \n',
-        title: '作业相关说明',
-        publisher: '马赫',
-        hasRead: false,
-        markedImportant: false,
-        publishTime: dateTime(-8, 9, 49),
-        courseId: '2019-2020-1139283221',
-        url: 'https://www.example.com',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '26ef84e76cc258ed016d3fa2f27d5f10',
-        content: '\n \n \n  <p>可跟贴讨论。</p> \n \n',
-        title: '课程讨论区里，发了一条关于第1讲作业的提示',
-        publisher: '周世东',
-        hasRead: true,
-        markedImportant: false,
-        publishTime: dateTime(-12, 22, 30),
-        courseId: '2019-2020-1139283221',
-        url: 'https://www.example.com',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-      {
-        id: '26ef84e76cc258ed016d3ea25a95157d',
-        content:
-          '\n \n \n  <p><span style="font-size:xx-large"><span style="color:black">原：固定事件个数</span><span style="color:black"><em>M</em></span><span style="color:black">的离散信源，均匀分布熵最大，</span><span style="color:black">为</span><span style="color:black">1/</span><span style="color:black"><em>M</em></span></span></p> \n  <p><span style="font-size:24pt"><span style="color:black">更正为：固定事件个数</span></span><span style="font-size:24pt"><span style="color:black"><em>M</em></span></span><span style="font-size:24pt"><span style="color:black">的离散信源，均匀分布熵最大，</span></span><span style="font-size:24pt"><span style="color:black">为</span></span><span style="font-size:24pt"><span style="color:black">log</span></span><span style="font-size:24pt"><span style="color:black"><em>M</em></span></span></p> \n \n',
-        title: '信源的信息度量课件第19页更正',
-        publisher: '周世东',
-        hasRead: true,
-        markedImportant: false,
-        publishTime: dateTime(-13, 17, 50),
-        courseId: '2019-2020-1139283221',
-        url: 'https://www.example.com',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-      },
-    ],
   },
   assignments: {
     fetching: false,
