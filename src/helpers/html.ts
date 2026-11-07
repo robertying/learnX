@@ -1,8 +1,9 @@
 import mime from 'mime';
-import { decode } from 'he';
 import { coerce, gte } from 'semver';
 import { dataSource } from 'data/source';
 import DeviceInfo from 'constants/DeviceInfo';
+
+export { removeTags } from './text';
 
 const darkreader = require('./preval/darkreader.preval.js');
 
@@ -164,20 +165,4 @@ export const canRenderInIosWebview = (ext?: string | null) => {
     mimeType.includes('video/') ||
     mimeType.includes('text/')
   );
-};
-
-export const removeTags = (html?: string) => {
-  if (!html) {
-    return '';
-  }
-
-  try {
-    return decode(
-      html.replace(/<!--(.*?)-->/g, '').replace(/<(?:.|\n)*?>/gm, ''),
-    )
-      .replace(/\s\s+/g, ' ')
-      .trim();
-  } catch {
-    return '';
-  }
 };

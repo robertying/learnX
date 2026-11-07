@@ -12,14 +12,20 @@ import {
 import { getCachedCourses } from 'data/queries';
 import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
-import { removeTags } from './html';
-import { buildICS, ICSEvent } from './ics';
-import locationMappings from '../assets/locationMappings.json';
-
-const courseCalendarName = 'learnX 课表';
-const assignmentCalendarReminderName = 'learnX 作业';
-const TZ = 'Asia/Shanghai';
-const exportCalendarName = 'learnX';
+import {
+  AssignmentEventInput,
+  assignmentCalendarReminderName,
+  buildAssignmentEventDetails,
+  buildAssignmentEventInputs,
+  buildAssignmentReminderDetails,
+  buildCourseEventDetails,
+  courseCalendarName,
+  dedupeAndSortICSEvents,
+  exportCalendarName,
+  findSyncedCalendars,
+  toICSEvent,
+} from './eventDetails';
+import { buildICS } from './ics';
 
 export const getAndRequestPermission = async (
   type: 'calendar' | 'reminder',
@@ -41,6 +47,12 @@ export const getAndRequestPermission = async (
   }
 };
 
+const requirePermission = async (type: 'calendar' | 'reminder') => {
+  if (!(await getAndRequestPermission(type))) {
+    throw new Error(`Missing ${type} permission`);
+  }
+};
+
 const getDefaultCalendarSource = async (entityType: Calendar.EntityTypes) => {
   const calendars = await Calendar.getCalendars(entityType);
 
@@ -59,48 +71,86 @@ const getDefaultCalendarSource = async (entityType: Calendar.EntityTypes) => {
   }
 };
 
-export const getCourseCalendarId = async () => {
-  const calendars = await Calendar.getCalendars();
+const androidCalendarSource = {
+  name: 'learnX',
+  isLocalAccount: true,
+} as Calendar.Source;
 
-  const settings = getSettings();
+type CalendarIdSetting =
+  | 'courseCalendarId'
+  | 'assignmentCalendarId'
+  | 'assignmentReminderId';
 
-  const storedId = settings.courseCalendarId;
+/**
+ * Returns the stored calendar if it still exists, else adopts one with the
+ * same title, else creates it. The id is saved under `setting`.
+ */
+const getOrCreateCalendar = async ({
+  setting,
+  title,
+  name,
+  entityType,
+  listEntityType,
+  onCreate,
+}: {
+  setting: CalendarIdSetting;
+  title: string;
+  name: string;
+  entityType: Calendar.EntityTypes;
+  /** Entity type passed to getCalendars; all types when undefined */
+  listEntityType?: Calendar.EntityTypes;
+  /** Runs before a new calendar is created */
+  onCreate?: () => void;
+}) => {
+  const calendars = listEntityType
+    ? await Calendar.getCalendars(listEntityType)
+    : await Calendar.getCalendars();
+
+  const storedId = getSettings()[setting];
   if (storedId) {
     if (calendars.some(value => value.id === storedId)) {
       return storedId;
     }
   }
 
-  const existingCalendar = calendars.find(
-    value => value.title === courseCalendarName,
-  );
+  const existingCalendar = calendars.find(value => value.title === title);
   if (existingCalendar) {
-    setSetting('courseCalendarId', existingCalendar.id);
+    setSetting(setting, existingCalendar.id);
     return existingCalendar.id;
   }
 
+  onCreate?.();
+
   const defaultCalendarSource =
-    Platform.OS === 'ios'
-      ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
-      : ({ name: 'learnX', isLocalAccount: true } as Calendar.Source);
+    Platform.OS === 'ios' || entityType === Calendar.EntityTypes.REMINDER
+      ? await getDefaultCalendarSource(entityType)
+      : androidCalendarSource;
 
   const newCalendar = await Calendar.createCalendar({
-    title: courseCalendarName,
+    title,
     color: Colors.plainTheme,
-    entityType: Calendar.EntityTypes.EVENT,
+    entityType,
     sourceId: defaultCalendarSource.id,
     source: defaultCalendarSource,
-    name: courseCalendarName,
+    name,
     ownerAccount: 'learnX',
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
 
   const newCalendarID = newCalendar.id;
   if (newCalendarID) {
-    setSetting('courseCalendarId', newCalendarID);
+    setSetting(setting, newCalendarID);
   }
   return newCalendarID;
 };
+
+export const getCourseCalendarId = () =>
+  getOrCreateCalendar({
+    setting: 'courseCalendarId',
+    title: courseCalendarName,
+    name: courseCalendarName,
+    entityType: Calendar.EntityTypes.EVENT,
+  });
 
 export const saveCoursesToCalendar = async (
   events: CalendarEvent[],
@@ -109,14 +159,10 @@ export const saveCoursesToCalendar = async (
 ) => {
   const settings = getSettings();
 
-  if (!(await getAndRequestPermission('calendar'))) {
-    throw new Error('Missing calendar permission');
-  }
+  await requirePermission('calendar');
 
   if (Platform.OS === 'ios') {
-    if (!(await getAndRequestPermission('reminder'))) {
-      throw new Error('Missing reminder permission');
-    }
+    await requirePermission('reminder');
   }
 
   const calendarId = await getCourseCalendarId();
@@ -129,149 +175,49 @@ export const saveCoursesToCalendar = async (
 
   await Promise.all(oldEvents.map(async e => await e.delete()));
 
-  const alarms = settings.alarms;
-
   await Promise.all(
     events.map(
       async e =>
-        await calendar.createEvent({
-          title: e.courseName,
-          startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
-          endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
-          timeZone: TZ,
-          location: settings.courseEventOmitLocation
-            ? undefined
-            : sanitizeLocation(e.location),
-          notes: e.location,
-          alarms: alarms.courseAlarm
-            ? [
-                {
-                  relativeOffset: -(alarms.courseAlarmOffset ?? 15),
-                },
-              ]
-            : [],
-        }),
+        await calendar.createEvent(buildCourseEventDetails(e, settings)),
     ),
   );
 };
 
-export const getAssignmentCalendarId = async () => {
-  const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
-
-  const storedId = getSettings().assignmentCalendarId;
-
-  if (storedId) {
-    if (calendars.some(value => value.id === storedId)) {
-      return storedId;
-    }
-  }
-
-  const existingCalendar = calendars.find(
-    value => value.title === assignmentCalendarReminderName,
-  );
-  if (existingCalendar) {
-    setSetting('assignmentCalendarId', existingCalendar.id);
-    return existingCalendar.id;
-  }
-
-  clearEventIds('calendar');
-
-  const defaultCalendarSource =
-    Platform.OS === 'ios'
-      ? await getDefaultCalendarSource(Calendar.EntityTypes.EVENT)
-      : ({ name: 'learnX', isLocalAccount: true } as Calendar.Source);
-
-  const newCalendar = await Calendar.createCalendar({
+export const getAssignmentCalendarId = () =>
+  getOrCreateCalendar({
+    setting: 'assignmentCalendarId',
     title: assignmentCalendarReminderName,
-    color: Colors.plainTheme,
-    entityType: Calendar.EntityTypes.EVENT,
-    sourceId: defaultCalendarSource.id,
-    source: defaultCalendarSource,
+    // Not a typo: this calendar has always used the course calendar's name
     name: courseCalendarName,
-    ownerAccount: 'learnX',
-    accessLevel: Calendar.CalendarAccessLevel.OWNER,
+    entityType: Calendar.EntityTypes.EVENT,
+    listEntityType: Calendar.EntityTypes.EVENT,
+    onCreate: () => clearEventIds('calendar'),
   });
 
-  const newCalendarID = newCalendar.id;
-  if (newCalendarID) {
-    setSetting('assignmentCalendarId', newCalendarID);
-  }
-  return newCalendarID;
-};
-
-export const getAssignmentReminderId = async () => {
-  const reminders = await Calendar.getCalendars(Calendar.EntityTypes.REMINDER);
-
-  const storedId = getSettings().assignmentReminderId;
-  if (storedId) {
-    if (reminders.some(value => value.id === storedId)) {
-      return storedId;
-    }
-  }
-
-  const existingReminder = reminders.find(
-    value => value.title === assignmentCalendarReminderName,
-  );
-  if (existingReminder) {
-    setSetting('assignmentReminderId', existingReminder.id);
-    return existingReminder.id;
-  }
-
-  clearEventIds('reminder');
-
-  const defaultCalendarSource = await getDefaultCalendarSource(
-    Calendar.EntityTypes.REMINDER,
-  );
-  const newReminder = await Calendar.createCalendar({
+export const getAssignmentReminderId = () =>
+  getOrCreateCalendar({
+    setting: 'assignmentReminderId',
     title: assignmentCalendarReminderName,
-    color: Colors.plainTheme,
-    entityType: Calendar.EntityTypes.REMINDER,
-    sourceId: defaultCalendarSource.id,
-    source: defaultCalendarSource,
     name: assignmentCalendarReminderName,
-    ownerAccount: 'learnX',
-    accessLevel: Calendar.CalendarAccessLevel.OWNER,
+    entityType: Calendar.EntityTypes.REMINDER,
+    listEntityType: Calendar.EntityTypes.REMINDER,
+    onCreate: () => clearEventIds('reminder'),
   });
-
-  const newReminderID = newReminder.id;
-  if (newReminderID) {
-    setSetting('assignmentReminderId', newReminderID);
-  }
-  return newReminderID;
-};
 
 export const saveAssignmentEvent = async (
   type: 'calendar' | 'reminder',
   settings: SettingsState,
   calendar: Calendar.ExpoCalendar,
-  assignmentId: string,
-  title: string,
-  note: string,
-  startDate: Dayjs,
-  dueDate: Dayjs,
-  completed: boolean,
-  completionDate?: Dayjs,
+  input: AssignmentEventInput,
 ) => {
+  const { assignmentId } = input;
   const syncedAssignments =
     type === 'calendar'
       ? settings.syncedCalendarAssignments
       : settings.syncedReminderAssignments;
-  const alarms = settings.alarms;
 
   if (Platform.OS === 'ios' && type === 'reminder') {
-    const details: Partial<Calendar.ExpoCalendarReminder> = {
-      title,
-      startDate: startDate.toDate(),
-      dueDate: alarms.assignmentReminderAlarm
-        ? dueDate
-            .subtract(alarms.assignmentReminderAlarmOffset ?? 24 * 60, 'minute')
-            .toDate()
-        : dueDate.toDate(),
-      timeZone: TZ,
-      completed,
-      completionDate: completionDate?.toDate(),
-      notes: note,
-    };
+    const details = buildAssignmentReminderDetails(settings, input);
     if (
       syncedAssignments &&
       Object.keys(syncedAssignments).includes(assignmentId)
@@ -289,41 +235,7 @@ export const saveAssignmentEvent = async (
       setEventIdForAssignment('reminder', assignmentId, reminder.id!);
     }
   } else {
-    const shouldHaveAlarm = !(
-      alarms.assignmentCalendarNoAlarmIfComplete && completed
-    );
-    const alerts =
-      shouldHaveAlarm && alarms.assignmentCalendarAlarm
-        ? [
-            {
-              relativeOffset: -(
-                alarms.assignmentCalendarAlarmOffset ?? 24 * 60
-              ),
-              method: Calendar.AlarmMethod.DEFAULT,
-            },
-          ]
-        : [];
-    if (
-      shouldHaveAlarm &&
-      alarms.assignmentCalendarAlarm &&
-      alarms.assignmentCalendarSecondAlarm
-    ) {
-      alerts.push({
-        relativeOffset: -(alarms.assignmentCalendarSecondAlarmOffset ?? 30),
-        method: Calendar.AlarmMethod.DEFAULT,
-      });
-    }
-
-    const details: Partial<Calendar.ExpoCalendarEvent> = {
-      title: (completed ? '✅ ' : '') + title,
-      startDate: dueDate
-        .subtract(settings.calendarEventLength ?? 30, 'minute')
-        .toDate(),
-      endDate: dueDate.toDate(),
-      timeZone: TZ,
-      notes: note,
-      alarms: alerts,
-    };
+    const details = buildAssignmentEventDetails(settings, input);
     if (
       syncedAssignments &&
       Object.keys(syncedAssignments).includes(assignmentId)
@@ -350,13 +262,9 @@ export const saveAssignmentsToReminderOrCalendar = async (
   const settings = getSettings();
 
   if (Platform.OS === 'ios' && type === 'reminder') {
-    if (!(await getAndRequestPermission('reminder'))) {
-      throw new Error('Missing reminder permission');
-    }
+    await requirePermission('reminder');
   } else {
-    if (!(await getAndRequestPermission('calendar'))) {
-      throw new Error('Missing calendar permission');
-    }
+    await requirePermission('calendar');
   }
 
   const calendarId =
@@ -365,42 +273,20 @@ export const saveAssignmentsToReminderOrCalendar = async (
       : await getAssignmentCalendarId();
   const calendar = await Calendar.ExpoCalendar.get(calendarId);
 
-  const savingAssignments = [...assignments].filter(item =>
-    dayjs(item.deadline).isAfter(dayjs()),
-  );
-
-  const courses = getCachedCourses();
+  const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
 
   await Promise.all(
-    savingAssignments.map(async assignment => {
-      const course = courses.find(value => value.id === assignment.courseId);
-      if (course) {
-        await saveAssignmentEvent(
-          type,
-          settings,
-          calendar,
-          assignment.id,
-          assignment.title + ' - ' + course.name,
-          removeTags(assignment.description),
-          dayjs(),
-          dayjs(assignment.deadline),
-          assignment.submitted,
-          assignment.submitTime ? dayjs(assignment.submitTime) : undefined,
-        );
-      }
-    }),
+    inputs.map(
+      async input => await saveAssignmentEvent(type, settings, calendar, input),
+    ),
   );
 };
 
 export const removeCalendars = async () => {
-  if (!(await getAndRequestPermission('calendar'))) {
-    throw new Error('Missing calendar permission');
-  }
+  await requirePermission('calendar');
 
   if (Platform.OS === 'ios') {
-    if (!(await getAndRequestPermission('reminder'))) {
-      throw new Error('Missing reminder permission');
-    }
+    await requirePermission('reminder');
   }
 
   const calendars = await Calendar.getCalendars();
@@ -427,89 +313,33 @@ export const removeCalendars = async () => {
 };
 
 export const exportSyncedCalendarsToICS = async () => {
-  if (!(await getAndRequestPermission('calendar'))) {
-    throw new Error('Missing calendar permission');
-  }
+  await requirePermission('calendar');
 
   const settings = getSettings();
 
   const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
-  const courseCalendars = calendars.filter(
-    c => c.id === settings.courseCalendarId || c.title === courseCalendarName,
-  );
-  const assignmentCalendars = calendars.filter(
-    c =>
-      c.id === settings.assignmentCalendarId ||
-      c.title === assignmentCalendarReminderName,
+  const { courseCalendars, assignmentCalendars } = findSyncedCalendars(
+    calendars,
+    settings,
   );
 
   const startDate = dayjs().subtract(1, 'year').toDate();
   const endDate = dayjs().add(1, 'year').toDate();
 
-  const events: ICSEvent[] = [];
-  const uids = new Set<string>();
-
-  await Promise.all(
-    [...courseCalendars, ...assignmentCalendars].map(async calendar => {
-      const isCourse = courseCalendars.includes(calendar);
-
-      for (const e of await calendar.listEvents(startDate, endDate)) {
-        const start = new Date(e.startDate);
-        // Course events are recreated on every sync so their ids are not stable
-        const uid = isCourse
-          ? `course-${start.getTime()}-${hash(e.title)}@learnx`
-          : `${e.id}@learnx`;
-        if (uids.has(uid)) {
-          continue;
-        }
-        uids.add(uid);
-
-        events.push({
-          uid,
-          title: e.title,
-          startDate: start,
-          endDate: new Date(e.endDate),
-          allDay: e.allDay,
-          location: e.location,
-          notes: e.notes,
-          url: e.url,
-          alarmOffsets: (e.alarms ?? [])
-            .map(alarm => alarm.relativeOffset)
-            .filter(offset => typeof offset === 'number'),
-        });
-      }
-    }),
-  );
+  const events = (
+    await Promise.all(
+      [...courseCalendars, ...assignmentCalendars].map(async calendar => {
+        const isCourse = courseCalendars.includes(calendar);
+        return (await calendar.listEvents(startDate, endDate)).map(e =>
+          toICSEvent(e, isCourse),
+        );
+      }),
+    )
+  ).flat();
 
   if (events.length === 0) {
     throw new Error('No synced events');
   }
 
-  events.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
-  return buildICS(exportCalendarName, events);
+  return buildICS(exportCalendarName, dedupeAndSortICSEvents(events));
 };
-
-function hash(text: string): string {
-  let result = 5381;
-  for (let i = 0; i < text.length; i++) {
-    result = (result * 33 + text.charCodeAt(i)) % 0x100000000;
-  }
-  return result.toString(16);
-}
-
-function sanitizeLocation(location: string): string {
-  location = location.trim();
-
-  // Match building (Chinese chars / letters) + unit
-  const match = location.match(/^([\u4e00-\u9fa5A-Za-z]+)(.*)$/);
-  if (!match) return location;
-
-  const rawBuilding = match[1];
-  const fullName = (locationMappings as any)[rawBuilding];
-  if (fullName) {
-    return fullName + ' ' + location;
-  }
-
-  return location;
-}

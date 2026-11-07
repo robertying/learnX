@@ -60,3 +60,5 @@ jest.mock('expo-sqlite/kv-store', () => {
     SQLiteStorage,
   };
 });
+
+jest.mock('expo-calendar', () => require('./expoCalendar'));
