@@ -22,7 +22,7 @@ esac
 cd "$(dirname "$0")/.."
 
 if ! command -v maestro >/dev/null; then
-  echo "maestro not found: curl -fsSL https://get.maestro.mobile.dev | bash" >&2
+  echo "maestro not found: brew install mobile-dev-inc/tap/maestro" >&2
   exit 1
 fi
 
@@ -42,8 +42,16 @@ if [ -n "${MAESTRO_DEVICE:-}" ]; then
   device_args=(--device "$MAESTRO_DEVICE")
 fi
 
-if [ "$#" -eq 0 ]; then
-  set -- .maestro
+# Run every flow unless a flow file or folder was passed (options alone, e.g.
+# --test-output-dir <dir>, still run them all).
+has_flow=false
+for arg in "$@"; do
+  case "$arg" in
+  *.yaml | *.yml | .maestro | .maestro/*) has_flow=true ;;
+  esac
+done
+if [ "$has_flow" = false ]; then
+  set -- "$@" .maestro
 fi
 
 exec maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \

@@ -3,7 +3,7 @@ name: Open a notice, an assignment and a file
 ---
 - runFlow: subflows/login.yaml
 
-- tapOn: '请按照助教的安排交作业.*'
+- tapOn: '.*请按照助教的安排交作业.*'
 - extendedWaitUntil:
     visible:
       id: notice-detail
@@ -14,21 +14,21 @@ name: Open a notice, an assignment and a file
       LIST: 'Filter|过滤'
 
 - tapOn:
-    id: tab-assignments
-- tapOn: '大作业1'
+    id: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- tapOn: '.*大作业1.*'
 - extendedWaitUntil:
     visible:
       id: assignment-detail
     timeout: 10000
-- assertVisible: '附件1.*'
+- assertVisible: '.*附件1.*'
 - runFlow:
     file: subflows/back.yaml
     env:
       LIST: 'Filter|过滤'
 
 - tapOn:
-    id: tab-files
-- tapOn: '深度学习框架'
+    id: 'tab-files|doc(ument)?\.fill'
+- tapOn: '.*深度学习框架.*'
 # The screen shows right away; the file itself downloads in the background.
 - extendedWaitUntil:
     visible:

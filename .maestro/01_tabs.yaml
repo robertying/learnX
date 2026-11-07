@@ -4,20 +4,20 @@ tags:
   - smoke
 ---
 - runFlow: subflows/login.yaml
-- assertVisible: '请按照助教的安排交作业.*'
+- assertVisible: '.*请按照助教的安排交作业.*'
 - tapOn:
-    id: tab-assignments
-- assertVisible: '大作业1'
+    id: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- assertVisible: '.*大作业1.*'
 - tapOn:
-    id: tab-files
-- assertVisible: '深度学习框架'
+    id: 'tab-files|doc(ument)?\.fill'
+- assertVisible: '.*深度学习框架.*'
 - tapOn:
-    id: tab-courses
-- assertVisible: '量子与统计'
+    id: 'tab-courses|square\.grid\.3x3\.fill'
+- assertVisible: '.*量子与统计.*'
 - tapOn:
-    id: tab-settings
+    id: 'tab-settings|gearshape\.fill'
 - assertVisible:
     id: settings-logout
 - tapOn:
-    id: tab-notices
-- assertVisible: '请按照助教的安排交作业.*'
+    id: 'tab-notices|bell\.fill'
+- assertVisible: '.*请按照助教的安排交作业.*'

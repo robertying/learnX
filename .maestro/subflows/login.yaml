@@ -17,7 +17,20 @@ appId: ${APP_ID}
 - inputText: ${PASSWORD}
 # The password field submits the login on return.
 - pressKey: Enter
+# iOS offers to save the password to the keychain after a login; the alert
+# hides the app's accessibility tree until dismissed.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: 'Save Password\??|存储密码？?|要存储密码吗？?'
+          timeout: 10000
+          optional: true
+      - tapOn:
+          text: 'Not Now|现在不|以后'
+          optional: true
 - extendedWaitUntil:
     visible:
-      id: tab-notices
+      id: 'tab-notices|bell\.fill'
     timeout: 30000

@@ -2,6 +2,8 @@
 appId: ${APP_ID}
 ---
 - tapOn: 'Filter|过滤'
+# A tap while the panel is still sliding in can miss the item.
+- waitForAnimationToEnd
 - tapOn:
     id: filter-${FILTER}
 - waitForAnimationToEnd
