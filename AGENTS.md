@@ -30,7 +30,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 ### iOS simulators
 
-- Other sessions may be driving the stock simulators with other apps. Use a dedicated one: `xcrun simctl create "learnX <device>" <device type> <runtime>` (`simctl list devicetypes` / `runtimes`), or reuse an existing `learnX …` device from `simctl list devices`.
+- Other sessions may be driving the stock simulators with other apps, so use the shared `learnX …` pool instead: `learnX iPhone 18 Pro`, `learnX iPhone 18 Pro 2`, `learnX iPad Pro 11` and `learnX iPhone Duo` (`simctl list devices | grep learnX`). Take one that is shut down; a booted one is probably another session's. Only when every device of the type you need is booted, create the next number (`xcrun simctl create "learnX iPhone 18 Pro 3" <device type> <runtime>`), and delete it (`xcrun simctl delete <udid>`) when you're done. Don't create per-task devices, and shut your device down when you finish.
 - Read the app's defaults with `xcrun simctl spawn <udid> defaults read <data container>/Library/Preferences/io.robertying.learnX <key>`; the plist file on disk is written lazily and can be stale.
 - Build with `xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug -destination 'id=<udid>'` (Mac Catalyst: `-destination 'platform=macOS,variant=Mac Catalyst'`); the app lands in `~/Library/Developer/Xcode/DerivedData/learnX-*/Build/Products/`.
 - Open in Chinese: `xcrun simctl launch <udid> io.robertying.learnX -AppleLanguages '(zh-Hans)' -AppleLocale zh_CN`.
