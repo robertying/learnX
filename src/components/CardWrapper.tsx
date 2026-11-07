@@ -1,153 +1,22 @@
-import { PropsWithChildren, useRef, useEffect, useState } from 'react';
+import { PropsWithChildren, useRef, useState } from 'react';
 import { View, StyleSheet, Platform, ViewInstance } from 'react-native';
-import Animated, {
-  SharedValue,
-  useAnimatedStyle,
-} from 'react-native-reanimated';
+import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useReorderableDrag } from 'react-native-reorderable-list';
 import { Checkbox, Menu } from 'react-native-paper';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import * as Haptics from 'expo-haptics';
-import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
-import { t } from 'helpers/i18n';
+import { CardAction, cardActions } from 'helpers/cardActions';
+import useCardSwipe from 'hooks/useCardSwipe';
+import CardActionIcon from './CardActionIcon';
+import CardSwipeActions from './CardSwipeActions';
 import Touchable from './Touchable';
 import { useTheme } from 'theme';
 
 const swipeableNotSupported = DeviceInfo.isWSA() || Platform.OS === 'android';
-
-const buttonWidth = 80;
-
-const SwipeActions: React.FC<{
-  position: 'left' | 'right';
-  progress: SharedValue<number>;
-  translation: SharedValue<number>;
-  swipeableMethods: SwipeableMethods;
-  fav?: boolean;
-  onFav?: (fav: boolean) => void;
-  archived?: boolean;
-  onArchive?: (archived: boolean) => void;
-  hidden?: boolean;
-  onHide?: (hide: boolean) => void;
-}> = ({
-  position,
-  translation,
-  swipeableMethods,
-  onHide,
-  hidden,
-  onArchive,
-  archived,
-  onFav,
-  fav,
-}) => {
-  const totalButtonWidth = onHide
-    ? buttonWidth
-    : buttonWidth * (archived ? 1 : 2);
-
-  const actionStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX:
-            position === 'right'
-              ? translation.get() + totalButtonWidth
-              : translation.get() - totalButtonWidth,
-        },
-      ],
-    };
-  });
-
-  const resetSnap = () => {
-    swipeableMethods.close();
-  };
-
-  const handleFav = () => {
-    onFav?.(!fav);
-    resetSnap();
-  };
-
-  const handleArchive = () => {
-    onArchive?.(!archived);
-    resetSnap();
-  };
-
-  const handleHide = () => {
-    onHide?.(!hidden);
-    resetSnap();
-  };
-
-  return (
-    <Animated.View
-      style={[styles.drawer, { width: totalButtonWidth }, actionStyle]}
-    >
-      {onHide ? (
-        <Touchable
-          testID="card-hide"
-          accessibilityLabel={hidden ? t('unhide') : t('hide')}
-          type="opacity"
-          style={[
-            styles.button,
-            {
-              backgroundColor: 'rgba(255,204,0,0.2)',
-            },
-          ]}
-          onPress={handleHide}
-        >
-          <MaterialIcons
-            name={hidden ? 'visibility' : 'visibility-off'}
-            size={40}
-            color={Colors.yellow500}
-          />
-        </Touchable>
-      ) : (
-        <>
-          {archived ? null : (
-            <Touchable
-              testID="card-fav"
-              accessibilityLabel={fav ? t('unfavorite') : t('favorite')}
-              type="opacity"
-              style={[
-                styles.button,
-                {
-                  backgroundColor: 'rgba(255,59,48,0.2)',
-                },
-              ]}
-              onPress={handleFav}
-            >
-              <MaterialCommunityIcons
-                name={fav ? 'heart-off' : 'heart'}
-                size={40}
-                color={Colors.red500}
-              />
-            </Touchable>
-          )}
-          <Touchable
-            testID="card-archive"
-            accessibilityLabel={archived ? t('restore') : t('archive')}
-            type="opacity"
-            style={[
-              styles.button,
-              {
-                backgroundColor: 'rgba(33,150,243,0.2)',
-              },
-            ]}
-            onPress={handleArchive}
-          >
-            <MaterialCommunityIcons
-              name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}
-              size={40}
-              color={Colors.blue500}
-            />
-          </Touchable>
-        </>
-      )}
-    </Animated.View>
-  );
-};
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -185,25 +54,27 @@ const CardWrapper: React.FC<
 
   const drag = useReorderableDrag();
 
-  const snapRef = useRef<SwipeableMethods>(null);
+  const { snapRef, openActions, onWillOpen, onWillClose, interceptPress } =
+    useCardSwipe({ selectionMode, reorderMode });
   const anchorRef = useRef<ViewInstance>(null);
-  const swipeableOpenRef = useRef(false);
-  const swipeOpenedAtRef = useRef(0);
 
   const [menuVisible, setMenuVisible] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
 
-  const resetSnap = () => {
-    snapRef.current?.close();
-  };
+  const actions = cardActions({ fav, archived, hidden, canHide: !!onHide });
 
-  const handleSwipeableWillOpen = () => {
-    swipeableOpenRef.current = true;
-    swipeOpenedAtRef.current = Date.now();
-  };
-
-  const handleSwipeableWillClose = () => {
-    swipeableOpenRef.current = false;
+  const runAction = (action: CardAction) => {
+    switch (action.key) {
+      case 'fav':
+        onFav?.(!fav);
+        break;
+      case 'archive':
+        onArchive?.(!archived);
+        break;
+      case 'hide':
+        onHide?.(!hidden);
+        break;
+    }
   };
 
   const handleCheck = () => {
@@ -212,70 +83,35 @@ const CardWrapper: React.FC<
 
   const closeMenu = () => setMenuVisible(false);
 
-  const handleMenuFav = () => {
+  const handleMenuAction = (action: CardAction) => {
     closeMenu();
-    onFav?.(!fav);
+    runAction(action);
   };
-
-  const handleMenuArchive = () => {
-    closeMenu();
-    onArchive?.(!archived);
-  };
-
-  const handleMenuHide = () => {
-    closeMenu();
-    onHide?.(!hidden);
-  };
-
-  useEffect(() => {
-    if (selectionMode) {
-      resetSnap();
-    }
-  }, [selectionMode]);
-
-  useEffect(() => {
-    if (reorderMode) {
-      resetSnap();
-    }
-  }, [reorderMode]);
 
   if ((selectionMode || reorderMode) && menuVisible) {
     setMenuVisible(false);
   }
 
   const renderRightActions = (
-    progress: SharedValue<number>,
+    _progress: SharedValue<number>,
     translation: SharedValue<number>,
     swipeableMethods: SwipeableMethods,
-  ) => {
-    return (
-      <SwipeActions
-        position="right"
-        progress={progress}
-        translation={translation}
-        swipeableMethods={swipeableMethods}
-        fav={fav}
-        onFav={onFav}
-        archived={archived}
-        onArchive={onArchive}
-        hidden={hidden}
-        onHide={onHide}
-      />
-    );
-  };
+  ) => (
+    <CardSwipeActions
+      position="right"
+      translation={translation}
+      swipeableMethods={swipeableMethods}
+      actions={actions}
+      onAction={runAction}
+    />
+  );
 
   const handlePress = () => {
     if (menuVisible) {
       closeMenu();
       return;
     }
-    // Revealing the swipe actions emits a trailing press on iOS (the tail of
-    // the swipe gesture). Keep the actions open for that press, and let a
-    // deliberate tap on the card afterwards just close them.
-    if (swipeableOpenRef.current) {
-      if (Date.now() - swipeOpenedAtRef.current > 500) {
-        resetSnap();
-      }
+    if (interceptPress()) {
       return;
     }
     onPress?.();
@@ -292,7 +128,7 @@ const CardWrapper: React.FC<
           setMenuVisible(true);
         });
       } else {
-        snapRef.current?.openRight();
+        openActions();
       }
     }
   };
@@ -331,49 +167,17 @@ const CardWrapper: React.FC<
       <View ref={anchorRef} collapsable={false}>
         {touchable}
         <Menu visible={menuVisible} onDismiss={closeMenu} anchor={menuAnchor}>
-          {onHide ? (
+          {actions.map(action => (
             <Menu.Item
-              testID="card-hide"
+              key={action.key}
+              testID={action.testID}
               leadingIcon={({ size }) => (
-                <MaterialIcons
-                  name={hidden ? 'visibility' : 'visibility-off'}
-                  size={size}
-                  color={Colors.yellow500}
-                />
+                <CardActionIcon action={action} size={size} />
               )}
-              onPress={handleMenuHide}
-              title={hidden ? t('unhide') : t('hide')}
+              onPress={() => handleMenuAction(action)}
+              title={action.label}
             />
-          ) : (
-            <>
-              {archived ? null : (
-                <Menu.Item
-                  testID="card-fav"
-                  leadingIcon={({ size }) => (
-                    <MaterialCommunityIcons
-                      name={fav ? 'heart-off' : 'heart'}
-                      size={size}
-                      color={Colors.red500}
-                    />
-                  )}
-                  onPress={handleMenuFav}
-                  title={fav ? t('unfavorite') : t('favorite')}
-                />
-              )}
-              <Menu.Item
-                testID="card-archive"
-                leadingIcon={({ size }) => (
-                  <MaterialCommunityIcons
-                    name={archived ? 'archive-arrow-up' : 'archive-arrow-down'}
-                    size={size}
-                    color={Colors.blue500}
-                  />
-                )}
-                onPress={handleMenuArchive}
-                title={archived ? t('restore') : t('archive')}
-              />
-            </>
-          )}
+          ))}
         </Menu>
       </View>
     );
@@ -387,8 +191,8 @@ const CardWrapper: React.FC<
       renderRightActions={renderRightActions}
       overshootFriction={8}
       enabled={!disableSwipe && !selectionMode && !reorderMode}
-      onSwipeableWillOpen={handleSwipeableWillOpen}
-      onSwipeableWillClose={handleSwipeableWillClose}
+      onSwipeableWillOpen={onWillOpen}
+      onSwipeableWillClose={onWillClose}
     >
       {touchable}
     </ReanimatedSwipeable>
@@ -396,17 +200,6 @@ const CardWrapper: React.FC<
 };
 
 const styles = StyleSheet.create({
-  drawer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  button: {
-    height: '100%',
-    width: buttonWidth,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   root: {
     paddingHorizontal: 16,
     paddingVertical: 12,
