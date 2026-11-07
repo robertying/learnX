@@ -98,6 +98,14 @@ const legacyRoot = serialize({
   _persist: { version: 1, rehydrated: true },
 });
 
+/** data/login, talking to the emulated server instead of the real one. */
+const loginModule = (): typeof import('data/login') => {
+  jest.doMock('data/source', () => ({
+    dataSource: require('data/mockSource').mockSource,
+  }));
+  return require('data/login');
+};
+
 const upgraded = {
   'persist:root': legacyRoot,
   'persist:settings': legacySettings,
@@ -146,13 +154,13 @@ describe('importing user data saved by 18.0.x', () => {
     });
   });
 
-  it('survives the next launch and leaves the legacy settings behind', async () => {
+  it('survives the next launch and deletes the legacy data', async () => {
     const first = await launch({ asyncStorage: upgraded });
     await first.legacy.importLegacyUserData();
 
     expect(await first.AsyncStorage.getItem('persist:settings')).toBeNull();
-    // Still holds the server data, which the Redux store reads.
-    expect(await first.AsyncStorage.getItem('persist:root')).toBe(legacyRoot);
+    // Its server data is fetched again into the query cache.
+    expect(await first.AsyncStorage.getItem('persist:root')).toBeNull();
 
     const next = await launch({
       kv: Object.fromEntries(first.kv),
@@ -184,6 +192,7 @@ describe('importing user data saved by 18.0.x', () => {
     expect(next.userData.getUserData().currentSemester).toBe('2025-2026-1');
     // The rest isn't imported again.
     expect(next.userData.getUserData().favorites.notice).toEqual(['n2']);
+    expect(await next.AsyncStorage.getItem('persist:root')).toBeNull();
   });
 
   it('keeps a semester chosen since', async () => {
@@ -278,18 +287,13 @@ describe('importing user data saved by 18.0.x', () => {
       .mockRejectedValueOnce(new Error('disk'));
     await m.legacy.importLegacyUserData();
 
-    const persistor = { purge: jest.fn(async () => {}), persist: jest.fn() };
-    jest.doMock('data/store', () => ({ persistor }));
-    const { clearStore } = require('data/actions/root');
+    const { logout } = loginModule();
     m.userData.setFavorite('file', 'f9', true);
     m.settings.setSetting('graduate', true);
-    const dispatch = jest.fn();
-    await clearStore()(dispatch, jest.fn(), undefined);
-
-    expect(dispatch).toHaveBeenCalledWith({ type: 'CLEAR_STORE' });
-    expect(persistor.purge).toHaveBeenCalled();
+    await logout();
 
     expect(await m.AsyncStorage.getItem('persist:settings')).toBeNull();
+    expect(await m.AsyncStorage.getItem('persist:root')).toBeNull();
     expect(m.userData.getUserData()).toEqual(m.userData.emptyUserData());
     expect(m.settings.getSettings()).toEqual(m.settings.defaultSettings);
   });
@@ -301,13 +305,11 @@ describe('the mock account', () => {
     m.userData.setFavorite('notice', 'mine', true);
     m.settings.setSetting('graduate', true);
 
-    jest.doMock('data/store', () => ({}));
-    const { setMockStore } = require('data/actions/root');
+    const { loginWithMockAccount } = loginModule();
     const { mockUserData } = require('data/mock');
-    const dispatch = jest.fn();
-    setMockStore()(dispatch, jest.fn(), undefined);
+    loginWithMockAccount();
 
-    expect(dispatch).toHaveBeenCalledWith({ type: 'SET_MOCK_STORE' });
+    expect(require('data/auth').getAuth().loggedIn).toBe(true);
     expect(m.userData.getUserData()).toEqual(mockUserData);
     expect(m.settings.getSettings()).toEqual(m.settings.defaultSettings);
   });

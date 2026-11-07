@@ -149,8 +149,8 @@ export const legacyUserData = (root: Json): Partial<UserData> => {
 
 /**
  * Builds from before the semester being shown moved to the user data imported
- * the rest without it, and it stays in the root only until the Redux store
- * migrates that. Takes it from there if it is still missing.
+ * the rest without it and kept the root. Takes it from there if it is still
+ * missing.
  */
 const importLegacySemester = async () => {
   if (useUserDataStore.getState().currentSemester) {
@@ -166,6 +166,8 @@ const importLegacySemester = async () => {
 const importLegacy = async () => {
   if (kvStorage.getItem(LEGACY_IMPORTED_KEY)) {
     await importLegacySemester();
+    // Those builds also left the root behind; nothing reads it after this.
+    await AsyncStorage.removeItem(LEGACY_ROOT_KEY);
     return;
   }
 
@@ -188,11 +190,11 @@ const importLegacy = async () => {
     );
   }
 
-  // The stores wrote synchronously above, so the import is done. The root
-  // key stays: it still holds the server data until that moves too.
+  // The stores wrote synchronously above, so the import is done. The server
+  // data in the root key is fetched again into the query cache.
   kvStorage.setItem(LEGACY_IMPORTED_KEY, '1');
-  if (rawSettings) {
-    await AsyncStorage.removeItem(LEGACY_SETTINGS_KEY);
+  if (rawRoot || rawSettings) {
+    await AsyncStorage.multiRemove([LEGACY_ROOT_KEY, LEGACY_SETTINGS_KEY]);
   }
 };
 

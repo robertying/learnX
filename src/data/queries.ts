@@ -3,7 +3,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 import { CourseType, Language } from 'thu-learn-lib';
 import { queryClient } from 'data/queryClient';
 import { dataSource } from 'data/source';
-import { useAppSelector } from 'data/store';
+import { useLoggedIn } from 'data/auth';
 import { Course, User } from 'data/types/state';
 import { useCurrentSemester } from 'data/userData';
 import { isLocaleChinese } from 'helpers/i18n';
@@ -63,9 +63,6 @@ export const coursesQuery = (semesterId: string) =>
         .sort((a, b) => a.id.localeCompare(b.id));
     },
   });
-
-/** Queries run only while logged in; their cached data shows meanwhile. */
-export const useLoggedIn = () => useAppSelector(state => state.auth.loggedIn);
 
 const noCourses: Course[] = [];
 

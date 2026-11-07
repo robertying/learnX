@@ -44,8 +44,6 @@ import {
   adaptNavigationTheme,
 } from 'react-native-paper';
 import ShareMenu from 'react-native-share-menu';
-import { Provider as StoreProvider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
@@ -109,7 +107,6 @@ import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { persistor, store, useAppDispatch, useAppSelector } from 'data/store';
 import { setSetting, useSettings } from 'data/settings';
 import { importLegacyUserData } from 'data/legacy';
 import {
@@ -117,7 +114,8 @@ import {
   loadCredentials,
   useCredentials,
 } from 'data/credentials';
-import { login } from 'data/actions/auth';
+import { getAuth, useLoggedIn, useLoginError } from 'data/auth';
+import { login } from 'data/login';
 import { setPendingAssignmentData } from 'data/pendingAssignment';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { latestSemesterQuery, useCourses } from 'data/queries';
@@ -393,7 +391,7 @@ const useMountedTabCount = () => {
 
 const MainTab = () => {
   const mountedTabCount = useMountedTabCount();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
+  const loggedIn = useLoggedIn();
   const currentSemester = useCurrentSemester();
   const newChangelog = useSettings(
     settings => settings.lastShowChangelogVersion !== packageJson.version,
@@ -925,8 +923,7 @@ const SplitLogin = () => (
 const Container = () => {
   const colorScheme = useColorScheme();
 
-  const dispatch = useAppDispatch();
-  const loginError = useAppSelector(state => state.auth.error);
+  const loginError = useLoginError();
   const credentials = useCredentials();
   const hasCredentials =
     !!credentials?.username &&
@@ -939,7 +936,7 @@ const Container = () => {
   const lastActiveTime = useRef(dayjs(0));
 
   const handleReLogin = useEffectEvent(() => {
-    const currentAuth = store.getState().auth;
+    const currentAuth = getAuth();
     const currentCredentials = getCredentials();
     if (
       !currentAuth.ssoInProgress &&
@@ -948,7 +945,7 @@ const Container = () => {
       currentCredentials.fingerPrint &&
       dayjs().diff(lastActiveTime.current, 'minute') >= 10
     ) {
-      dispatch(login({ reset: true }));
+      login({ reset: true });
       toast(t('loggingIn'), 'none', 1 * 1000);
     }
   });
@@ -1072,8 +1069,24 @@ const Container = () => {
   );
 };
 
+/**
+ * Loads what the first screen needs: the saved login, the user data saved by
+ * 18.0.x, and the cached server data.
+ */
+const loadStores = () =>
+  Promise.all([loadCredentials(), importLegacyUserData(), restoreQueryCache()]);
+
+const useStoresLoaded = () => {
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    loadStores().finally(() => setLoaded(true));
+  }, []);
+  return loaded;
+};
+
 const App = () => {
   const colorScheme = useColorScheme();
+  const loaded = useStoresLoaded();
 
   return (
     <GestureHandlerRootView>
@@ -1083,21 +1096,7 @@ const App = () => {
         }
       >
         <QueryClientProvider client={queryClient}>
-          <StoreProvider store={store}>
-            <PersistGate
-              loading={<Splash />}
-              persistor={persistor}
-              onBeforeLift={async () => {
-                await Promise.all([
-                  loadCredentials(),
-                  importLegacyUserData(),
-                  restoreQueryCache(),
-                ]);
-              }}
-            >
-              <Container />
-            </PersistGate>
-          </StoreProvider>
+          {loaded ? <Container /> : <Splash />}
         </QueryClientProvider>
         <Toast />
         <StatusBar

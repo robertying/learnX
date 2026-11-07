@@ -9,9 +9,9 @@ import TableCell from 'components/TableCell';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { getLatestRelease } from 'helpers/update';
-import { clearStore } from 'data/actions/root';
-import { useAppDispatch } from 'data/store';
-import { useLoggedIn, userQuery } from 'data/queries';
+import { logout } from 'data/login';
+import { userQuery } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import { setSetting, useSettings } from 'data/settings';
 import { clearLoginCookies, dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
@@ -26,7 +26,6 @@ type Props = NativeStackScreenProps<SettingsStackParams, 'Settings'>;
 const Settings: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
 
-  const dispatch = useAppDispatch();
   const loggedIn = useLoggedIn();
   const { data: userInfo } = useQuery({ ...userQuery, enabled: loggedIn });
   const username = useCredentialsStore(state => state.credentials?.username);
@@ -67,7 +66,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           onPress: () => {
             dataSource.logout();
             clearLoginCookies();
-            dispatch(clearStore());
+            logout();
           },
         },
       ],

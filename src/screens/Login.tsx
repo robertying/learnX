@@ -11,14 +11,9 @@ import {
 import { Button, Caption, Switch, TextInput, Text } from 'react-native-paper';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
-import { useAppDispatch, useAppSelector } from 'data/store';
 import { setSetting, useSettings } from 'data/settings';
-import {
-  login,
-  loginWithOfflineMode,
-  setSSOInProgress,
-} from 'data/actions/auth';
-import { setMockStore } from 'data/actions/root';
+import { setSSOInProgress, useLoggingIn } from 'data/auth';
+import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
 import { saveCredentials, useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
 import Styles from 'constants/Styles';
@@ -33,8 +28,7 @@ import { LoginStackParams } from './types';
 type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
 
 const Login: React.FC<Props> = ({ navigation }) => {
-  const dispatch = useAppDispatch();
-  const loggingIn = useAppSelector(state => state.auth.loggingIn);
+  const loggingIn = useLoggingIn();
   const graduate = useSettings(settings => settings.graduate);
   const savedCredentials = useCredentials();
   const savedUsername = savedCredentials?.username;
@@ -69,11 +63,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
       (username === env.DUMMY_PERSIST_USERNAME &&
         password === env.DUMMY_PERSIST_PASSWORD)
     ) {
-      dispatch(setMockStore());
+      loginWithMockAccount();
       if (username === env.DUMMY_PERSIST_USERNAME) {
         // Goes through the emulated server and saves the login, so it
         // survives relaunch.
-        dispatch(login({ username, password, fingerPrint: MOCK_FINGER_PRINT }));
+        login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
       } else {
         // The ephemeral account skips the login and is kept in memory only.
         await saveCredentials({
@@ -98,7 +92,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
         {
           text: t('ok'),
           onPress: async () => {
-            dispatch(setSSOInProgress(true));
+            setSSOInProgress(true);
 
             await clearLoginCookies();
             (navigation.navigate as any)('SSO', {
@@ -115,11 +109,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleRetryLogin = () => {
-    dispatch(login({ reset: true }));
+    login({ reset: true });
   };
 
   const handleLoginWithOfflineMode = () => {
-    dispatch(loginWithOfflineMode());
+    loginWithOfflineMode();
   };
 
   return (
