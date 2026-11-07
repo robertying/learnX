@@ -53,6 +53,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - Postures: fold / unfold the Android foldable with `adb emu fold` / `adb emu unfold` (`adb shell cmd device_state state` shows the current one). The iPhone Duo hinge can only be changed by hand in the Simulator window.
 - iPhone Duo screenshots need the display: `xcrun simctl io <udid> screenshot --display 1|3 <out.png>` (1 = outer, 3 = inner), or `.claude/skills/app-store-assets/scripts/duo-capture.sh`, since the command can hang.
 - TODO: iPhone Duo partially open and fully unfolded. Maestro on iOS only drives the outer display (display 1) and has no display option: with the app on the inner display (3) its screenshots are black, XCTest reports the app's frames offset into the outer display's coordinates, and taps (even at corrected points) don't reach the app.
+- TODO: iPad in landscape. Only portrait has been run. The simulator can't be rotated from the shell, so rotate it by hand in the Simulator window (Device › Rotate) and run the flows; landscape shows the tabs and split view differently.
 
 ## App Store assets
 
