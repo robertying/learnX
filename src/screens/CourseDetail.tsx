@@ -20,15 +20,16 @@ import {
 } from 'react-native-tab-view';
 import Icon from '@react-native-vector-icons/material-icons';
 import { Assignment, Course, File, Notice } from 'data/types/state';
-import { useAppDispatch, useAppSelector } from 'data/store';
-import { useCourse, useLoggedIn } from 'data/queries';
+import { useCourse } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import {
   useAssignments,
+  useFiles,
   useNotices,
   useRefreshCourseAssignments,
+  useRefreshCourseFiles,
   useRefreshCourseNotices,
 } from 'data/content';
-import { getFilesForCourse } from 'data/actions/files';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
@@ -133,13 +134,13 @@ const Assignments = memo(
 const Files = memo(({ courseId, data }: { courseId: string; data: File[] }) => {
   const navigation = useNavigation<NavigationProp>();
 
-  const dispatch = useAppDispatch();
-  const loggedIn = useAppSelector(state => state.auth.loggedIn);
-  const fetching = useAppSelector(state => state.files.fetching);
+  const loggedIn = useLoggedIn();
+  const refresh = useRefreshCourseFiles(courseId);
+  const fetching = refresh.isPending;
 
   const handleRefresh = () => {
     if (loggedIn) {
-      dispatch(getFilesForCourse(courseId));
+      refresh.mutate();
     }
   };
 
@@ -198,7 +199,7 @@ const CourseDetailContent: React.FC<{
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();
-  const files = useAppSelector(state => state.files.items);
+  const { files } = useFiles();
 
   const [index, setIndex] = useState(0);
 

@@ -1,14 +1,17 @@
 import dayjs from 'dayjs';
 import {
   assignmentsQuery,
+  filesQuery,
   noticesQuery,
   refreshCourseAssignments,
+  refreshCourseFiles,
   refreshCourseNotices,
 } from 'data/content';
 import {
   mockAssignments,
   mockCourses,
   mockCurrentSemester,
+  mockFiles,
   mockNotices,
 } from 'data/mock';
 import {
@@ -19,7 +22,6 @@ import { clearQueryCache, queryClient, queryPersister } from 'data/queryClient';
 import { Notice } from 'data/types/state';
 import { sortAssignments } from 'helpers/assignments';
 
-jest.mock('data/store', () => ({}));
 // The emulated server, as when a mock account is logged in.
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
@@ -109,5 +111,28 @@ describe('assignments', () => {
     const refreshed = queryClient.getQueryData(key)!;
     expect(ids(refreshed).sort()).toEqual(ids(assignments).sort());
     expect(ids(refreshed)).toEqual(ids(sortAssignments(refreshed)));
+  });
+});
+
+describe('files', () => {
+  it("lists the semester's files newest first and refreshes one course", async () => {
+    const key = filesQuery(semesterId).queryKey;
+    const files = await queryClient.fetchQuery(filesQuery(semesterId));
+    const expected = mockFiles.filter(f => courseIds.has(f.courseId));
+    expect(files.map(f => f.id).sort()).toEqual(expected.map(f => f.id).sort());
+    const newestFirst = files.every(
+      (f, i) =>
+        i === 0 ||
+        dayjs(files[i - 1].uploadTime).unix() >= dayjs(f.uploadTime).unix(),
+    );
+    expect(newestFirst).toBe(true);
+
+    const courseId = files[0].courseId;
+    queryClient.setQueryData(
+      key,
+      files.filter(f => f.courseId !== courseId),
+    );
+    await refreshCourseFiles(semesterId, courseId);
+    expect(queryClient.getQueryData(key)).toEqual(files);
   });
 });

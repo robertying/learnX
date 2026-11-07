@@ -1,8 +1,7 @@
 import { useSyncExternalStore } from 'react';
 import { StyleSheet } from 'react-native';
 import { Caption } from 'react-native-paper';
-import { useAppDispatch } from 'data/store';
-import { login } from 'data/actions/auth';
+import { login } from 'data/login';
 import {
   getMockNetworkConfig,
   MockFailure,
@@ -33,7 +32,6 @@ const failures: [MockFailure, string][] = [
 
 const MockNetwork: React.FC = () => {
   const toast = useToast();
-  const dispatch = useAppDispatch();
   const config = useSyncExternalStore(
     subscribeMockNetworkConfig,
     getMockNetworkConfig,
@@ -41,7 +39,7 @@ const MockNetwork: React.FC = () => {
 
   const handleReLogin = () => {
     // What the app does when it comes back after 10 minutes.
-    dispatch(login({ reset: true }));
+    login({ reset: true });
     toast(t('loggingIn'), 'none', 1 * 1000);
   };
 

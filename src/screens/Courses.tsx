@@ -5,9 +5,9 @@ import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
-import { useAppSelector } from 'data/store';
-import { useAssignments, useNotices } from 'data/content';
-import { useCourses, useLoggedIn } from 'data/queries';
+import { useAssignments, useNotices, useFiles } from 'data/content';
+import { useCourses } from 'data/queries';
+import { useLoggedIn } from 'data/auth';
 import { useSettings } from 'data/settings';
 import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
@@ -40,7 +40,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();
-  const files = useAppSelector(state => state.files.items);
+  const { files } = useFiles();
 
   const coursesWithCounts = useMemo(() => {
     return courses.map(course => ({

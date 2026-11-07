@@ -6,8 +6,8 @@ import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebV
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DeviceInfo from 'constants/DeviceInfo';
 import SafeArea from 'components/SafeArea';
-import { useAppDispatch } from 'data/store';
-import { login, setSSOInProgress } from 'data/actions/auth';
+import { setSSOInProgress } from 'data/auth';
+import { login } from 'data/login';
 import { generateFingerprint } from 'helpers/fingerprint';
 import { t } from 'helpers/i18n';
 import useToast from 'hooks/useToast';
@@ -24,7 +24,6 @@ const LEARN_ROAMING_URL =
 type Props = NativeStackScreenProps<LoginStackParams, 'SSO'>;
 
 const SSO: React.FC<Props> = ({ route, navigation }) => {
-  const dispatch = useAppDispatch();
   const toast = useToast();
 
   const username = route.params.username;
@@ -61,10 +60,10 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
         // Something went wrong
         toast(t('ssoFailed'), 'error');
       } else {
-        dispatch(login(formData.current));
+        login(formData.current);
       }
 
-      dispatch(setSSOInProgress(false));
+      setSSOInProgress(false);
       navigation.goBack();
 
       return false;

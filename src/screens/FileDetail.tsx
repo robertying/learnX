@@ -42,7 +42,7 @@ import IconButton from 'components/IconButton';
 import ScrollView from 'components/ScrollView';
 import { FileStackParams } from './types';
 import { SplitViewContext } from 'components/SplitView';
-import { useAppSelector } from 'data/store';
+import { useFile } from 'data/content';
 import { useSettings } from 'data/settings';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
@@ -52,11 +52,7 @@ type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 
 const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   const { params } = route;
-  const storeFile = useAppSelector(state =>
-    'id' in params
-      ? state.files.items.find(item => item.id === params.id)
-      : undefined,
-  );
+  const storeFile = useFile('id' in params ? params.id : '');
   const file = 'attachment' in params ? params.attachment : storeFile;
 
   useHeaderTitle(navigation, file?.title, file?.courseName);

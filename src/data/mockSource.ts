@@ -7,7 +7,6 @@ import {
   SemesterType,
 } from 'thu-learn-lib';
 import type { DataSource } from 'data/source';
-import type { PersistAppState } from 'data/types/state';
 
 const mock = (): typeof import('data/mock') => require('data/mock');
 
@@ -115,8 +114,6 @@ const request = async <T>(getResult: () => T): Promise<T> => {
   return result === undefined ? result : JSON.parse(JSON.stringify(result));
 };
 
-const mockData = (): PersistAppState => require('data/mock').default;
-
 const omit = (item: object, keys: string[]) => {
   const copy = { ...item } as Record<string, unknown>;
   keys.forEach(key => delete copy[key]);
@@ -139,14 +136,13 @@ const groupByCourse = <T extends { courseId: string }>(
   );
 
 const itemsOf = (type: ContentType) => {
-  const data = mockData();
   switch (type) {
     case ContentType.NOTIFICATION:
       return mock().mockNotices;
     case ContentType.HOMEWORK:
       return mock().mockAssignments;
     case ContentType.FILE:
-      return data.files.items;
+      return mock().mockFiles;
     default:
       return [];
   }
@@ -197,9 +193,7 @@ export const mockSource: DataSource = {
       () => groupByCourse(mock().mockAssignments, [courseId])[courseId] as any,
     ),
   getFileList: courseId =>
-    request(
-      () => groupByCourse(mockData().files.items, [courseId])[courseId] as any,
-    ),
+    request(() => groupByCourse(mock().mockFiles, [courseId])[courseId] as any),
   getAllContents: <T extends ContentType>(courseIds: string[], type: T) =>
     request(
       () =>
