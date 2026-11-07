@@ -1,4 +1,4 @@
-import mimeTypes from 'mime-types';
+import mime from 'mime';
 import { decode } from 'he';
 import { coerce, gte } from 'semver';
 import { dataSource } from 'data/source';
@@ -120,17 +120,17 @@ export const canRenderInMacWebview = (ext?: string | null) => {
     return false;
   }
 
-  const mime = mimeTypes.lookup(ext);
-  if (!mime) {
+  const mimeType = mime.getType(ext);
+  if (!mimeType) {
     return false;
   }
 
   return (
-    mime === 'application/pdf' ||
-    mime.includes('image/') ||
-    mime.includes('audio/') ||
-    mime.includes('video/') ||
-    mime.includes('text/')
+    mimeType === 'application/pdf' ||
+    mimeType.includes('image/') ||
+    mimeType.includes('audio/') ||
+    mimeType.includes('video/') ||
+    mimeType.includes('text/')
   );
 };
 
@@ -152,17 +152,17 @@ export const canRenderInIosWebview = (ext?: string | null) => {
     return false;
   }
 
-  const mime = mimeTypes.lookup(ext);
-  if (!mime) {
+  const mimeType = mime.getType(ext);
+  if (!mimeType) {
     return false;
   }
 
   return (
-    iosSupportedMimeTypes.includes(mime) ||
-    mime.includes('image/') ||
-    mime.includes('audio/') ||
-    mime.includes('video/') ||
-    mime.includes('text/')
+    iosSupportedMimeTypes.includes(mimeType) ||
+    mimeType.includes('image/') ||
+    mimeType.includes('audio/') ||
+    mimeType.includes('video/') ||
+    mimeType.includes('text/')
   );
 };
 

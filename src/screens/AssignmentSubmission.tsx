@@ -21,7 +21,7 @@ import {
   useTheme,
 } from 'react-native-paper';
 import dayjs from 'dayjs';
-import mimeTypes from 'mime-types';
+import mime from 'mime';
 import { RemoteFile } from 'thu-learn-lib';
 import * as Haptics from 'expo-haptics';
 import SafeArea from 'components/SafeArea';
@@ -89,7 +89,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
 
   const getDefaultAttachmentName = useCallback(
     (mimeType?: string | null) => {
-      const ext = mimeTypes.extension(mimeType ?? 'application/octet-stream');
+      const ext = mime.getExtension(mimeType ?? 'application/octet-stream');
       return isLocaleChinese()
         ? `${title}-提交.${ext}`
         : `${title} Submission.${ext}`;
@@ -185,7 +185,7 @@ const AssignmentSubmission: React.FC<Props> = ({ navigation, route }) => {
         downloadUrl: attachment.downloadUrl,
         fileType:
           (attachment.type
-            ? mimeTypes.extension(attachment.type)
+            ? mime.getExtension(attachment.type)
             : getExtension(attachment.name)) || '',
       } as File);
     }

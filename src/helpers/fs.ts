@@ -5,7 +5,7 @@ import fs from 'react-native-fs';
 import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import mime from 'mime-types';
+import mime from 'mime';
 import { addCSRF, loginWithFingerPrint } from 'data/source';
 import { store } from 'data/store';
 import { File } from 'data/types/state';
@@ -174,7 +174,7 @@ export const shareFile = async (file: File) => {
     filename: `${file.title}.${file.fileType}`,
     url: path,
     type:
-      (file.fileType && mime.lookup(file.fileType)) ||
+      (file.fileType && mime.getType(file.fileType)) ||
       'application/octet-stream',
     title: '分享文件',
     showAppsToView: true,
@@ -232,7 +232,7 @@ export const openFile = async (uri: string, type?: string | null) => {
     ? uri
     : await ExpoFileSystem.getContentUriAsync(uri);
   await IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
-    type: (type && mime.lookup(type)) || 'application/octet-stream',
+    type: (type && mime.getType(type)) || 'application/octet-stream',
     data: contentUri,
     flags: 1,
   });
