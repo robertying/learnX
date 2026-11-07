@@ -32,7 +32,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
 
   const [progress, setProgress] = useState(0);
 
-  const fingerPrint = useRef(generateFingerprint());
+  const [fingerPrint] = useState(generateFingerprint);
   const formData = useRef<{
     username: string;
     password: string;
@@ -49,7 +49,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
       '${deviceName}',
       `${DeviceInfo.model()},learnX/${packageJson.version}`,
     )
-    .replaceAll('${fingerPrint}', fingerPrint.current);
+    .replaceAll('${fingerPrint}', fingerPrint);
 
   const handleShouldStartLoadWithRequest: OnShouldStartLoadWithRequest =
     event => {

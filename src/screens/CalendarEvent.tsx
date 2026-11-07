@@ -89,14 +89,14 @@ const CalendarEvent: React.FC<Props> = () => {
     setDatePickerOpen(true);
   };
 
-  const handleSyncRangeChange: RangeChange = ({ startDate, endDate }) => {
-    setStartDate(startDate);
-    setEndDate(endDate);
+  const handleSyncRangeChange: RangeChange = range => {
+    setStartDate(range.startDate);
+    setEndDate(range.endDate);
   };
 
-  const handleSyncRangeConfirm: RangeChange = ({ startDate, endDate }) => {
+  const handleSyncRangeConfirm: RangeChange = range => {
     handleDatePickerDismiss();
-    syncCourse(startDate, endDate);
+    syncCourse(range.startDate, range.endDate);
   };
 
   const syncCourse = async (start?: Date, end?: Date) => {
@@ -106,15 +106,15 @@ const CalendarEvent: React.FC<Props> = () => {
 
     setCourseSyncing(true);
 
-    const startDate = dayjs(start);
-    const endDate = dayjs(end);
+    const startDay = dayjs(start);
+    const endDay = dayjs(end);
 
     try {
       await loginWithFingerPrint();
 
       const events = await dataSource.getCalendar(
-        startDate.format('YYYYMMDD'),
-        endDate.format('YYYYMMDD'),
+        startDay.format('YYYYMMDD'),
+        endDay.format('YYYYMMDD'),
         graduate,
       );
 
@@ -123,7 +123,7 @@ const CalendarEvent: React.FC<Props> = () => {
         return;
       }
 
-      await saveCoursesToCalendar(events, startDate, endDate);
+      await saveCoursesToCalendar(events, startDay, endDay);
       toast(t('courseScheduleSyncSucceeded'), 'success');
     } catch (err) {
       if ((err as Error).message === 'Missing calendar permission') {

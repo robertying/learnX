@@ -28,8 +28,8 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const coursesWithoutOrder = useAppSelector(
     state => state.courses.items,
     (a, b) =>
-      JSON.stringify(a.map(a => a.id).sort()) ===
-      JSON.stringify(b.map(b => b.id).sort()),
+      JSON.stringify(a.map(course => course.id).sort()) ===
+      JSON.stringify(b.map(course => course.id).sort()),
   );
   const hiddenIds = useAppSelector(state => state.courses.hidden);
   const fetching = useAppSelector(state => state.courses.fetching);

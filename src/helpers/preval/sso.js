@@ -125,7 +125,6 @@
   };
 
   // Run the custom script on page change.
-  // eslint-disable-next-line no-undef
   const observer = new MutationObserver(() => {
     observer.disconnect();
     runAllTasks();

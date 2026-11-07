@@ -12,10 +12,10 @@ import { File } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
 
-const macDownloadDirectory = ExpoFileSystem.documentDirectory?.replace(
+const macDownloadDirectory = (ExpoFileSystem.documentDirectory ?? '').replace(
   'Documents',
   'Downloads',
-)!;
+);
 
 export const copyFileToMacDownloads = async (
   { title, fileType }: { title: string; fileType: string },
@@ -101,9 +101,9 @@ export const downloadFile = async (
     }
 
     if (result.bytesWritten < 100) {
-      const file = await fs.readFile(path);
+      const content = await fs.readFile(path);
 
-      if (file.includes('location.href')) {
+      if (content.includes('location.href')) {
         try {
           await fs.unlink(path);
         } catch {}
@@ -153,8 +153,8 @@ export const downloadFile = async (
       throw new Error('File download failed');
     }
     if (downloadedFile.size && downloadedFile.size < 100) {
-      const file = await fs.readFile(path);
-      if (file.includes('location.href')) {
+      const content = await fs.readFile(path);
+      if (content.includes('location.href')) {
         try {
           await fs.unlink(path);
         } catch {}
@@ -219,9 +219,9 @@ export const removeFileDir = async () => {
   }
 
   if (Platform.OS === 'ios') {
-    ShareMenu.getSharedCacheDirectory(async dir => {
-      if (dir && (await fs.exists(dir))) {
-        await fs.unlink(dir);
+    ShareMenu.getSharedCacheDirectory(async sharedDir => {
+      if (sharedDir && (await fs.exists(sharedDir))) {
+        await fs.unlink(sharedDir);
       }
     });
   }

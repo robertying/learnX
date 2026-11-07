@@ -27,9 +27,7 @@ export default function courses(
         error: null,
       };
     case GET_COURSES_FOR_SEMESTER_SUCCESS: {
-      const courses = action.payload;
-      const courseOrder = state.order;
-      const orderedCourses = sortByOrder(courses, courseOrder);
+      const orderedCourses = sortByOrder(action.payload, state.order);
       return {
         ...state,
         fetching: false,
@@ -66,12 +64,10 @@ export default function courses(
         };
       }
     case SET_COURSE_ORDER: {
-      const courses = state.items;
-      const newOrder = action.payload;
-      const orderedCourses = sortByOrder(courses, newOrder);
+      const orderedCourses = sortByOrder(state.items, action.payload);
       return {
         ...state,
-        order: newOrder,
+        order: action.payload,
         items: orderedCourses,
       };
     }

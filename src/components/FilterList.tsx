@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
@@ -142,7 +149,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const selectionRef = useRef(selection);
-  selectionRef.current = selection;
+  useLayoutEffect(() => {
+    selectionRef.current = selection;
+  }, [selection]);
 
   const selectedCount = useMemo(
     () => Object.values(selection).filter(Boolean).length,
@@ -194,16 +203,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   }, [data]);
 
   const handleFav = useCallback(
-    (fav: boolean, item: T) => {
+    (isFav: boolean, item: T) => {
       if (type === 'notice') {
-        dispatch(setFavNotice(item.id, !fav));
+        dispatch(setFavNotice(item.id, !isFav));
       } else if (type === 'assignment') {
-        dispatch(setFavAssignment(item.id, !fav));
+        dispatch(setFavAssignment(item.id, !isFav));
       } else {
-        dispatch(setFavFile(item.id, !fav));
+        dispatch(setFavFile(item.id, !isFav));
       }
 
-      if (fav) {
+      if (isFav) {
         toast(t('removeFromFav'), 'success');
       } else {
         toast(t('addToFav'), 'success');
@@ -213,20 +222,20 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const handleArchive = useCallback(
-    (archived: boolean, itemIds: string[]) => {
+    (isArchived: boolean, itemIds: string[]) => {
       if (itemIds.length === 0) {
         return;
       }
 
       if (type === 'notice') {
-        dispatch(setArchiveNotices(itemIds, !archived));
+        dispatch(setArchiveNotices(itemIds, !isArchived));
       } else if (type === 'assignment') {
-        dispatch(setArchiveAssignments(itemIds, !archived));
+        dispatch(setArchiveAssignments(itemIds, !isArchived));
       } else {
-        dispatch(setArchiveFiles(itemIds, !archived));
+        dispatch(setArchiveFiles(itemIds, !isArchived));
       }
 
-      if (archived) {
+      if (isArchived) {
         toast(t('undoArchive'), 'success');
       } else {
         toast(t('archiveSucceeded'), 'success');
@@ -240,10 +249,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   );
 
   const handleHide = useCallback(
-    (hidden: boolean, id: string) => {
-      dispatch(setHideCourse(id, !hidden));
+    (isHidden: boolean, id: string) => {
+      dispatch(setHideCourse(id, !isHidden));
 
-      if (hidden) {
+      if (isHidden) {
         toast(t('undoHide'), 'success');
       } else {
         toast(t('hideSucceeded'), 'success');
@@ -561,13 +570,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     type,
   ]);
 
-  const firstTimeFetching = useRef(true);
-
-  useEffect(() => {
-    if (refreshing && firstTimeFetching.current) {
-      firstTimeFetching.current = false;
-    }
-  }, [refreshing]);
+  // Hide the refresh spinner during the initial fetch.
+  const [firstFetch, setFirstFetch] = useState<'pending' | 'running' | 'done'>(
+    'pending',
+  );
+  if (firstFetch === 'pending' && refreshing) {
+    setFirstFetch('running');
+  } else if (firstFetch === 'running' && !refreshing) {
+    setFirstFetch('done');
+  }
 
   const renderItem = useCallback(
     ({ item }: { item: T }) => {
@@ -628,7 +639,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     refreshControl: (
       <RefreshControl
         enabled={!selectionMode && !reorderMode}
-        refreshing={firstTimeFetching.current ? false : refreshing}
+        refreshing={firstFetch === 'done' ? refreshing : false}
         onRefresh={onRefresh}
       />
     ),

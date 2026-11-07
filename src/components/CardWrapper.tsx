@@ -244,11 +244,9 @@ const CardWrapper: React.FC<
     }
   }, [reorderMode]);
 
-  useEffect(() => {
-    if (selectionMode || reorderMode) {
-      closeMenu();
-    }
-  }, [selectionMode, reorderMode]);
+  if ((selectionMode || reorderMode) && menuVisible) {
+    setMenuVisible(false);
+  }
 
   const renderRightActions = useCallback(
     (

@@ -24,10 +24,8 @@ const SemesterSelection: React.FC<Props> = () => {
 
   const [latestSemester, setLatestSemester] = useState<string | null>(null);
 
-  const getLatestSemester = async () => {
-    const { id } = await dataSource.getCurrentSemester();
-    setLatestSemester(id);
-  };
+  const getLatestSemester = () =>
+    dataSource.getCurrentSemester().then(({ id }) => setLatestSemester(id));
 
   const handleSelect = (id: string) => {
     dispatch(setCurrentSemester(id));

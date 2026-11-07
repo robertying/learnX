@@ -40,7 +40,7 @@ import { useAppSelector } from 'data/store';
 type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
 
 const FileDetail: React.FC<Props> = ({ route, navigation }) => {
-  const { disableAnimation: _disableAnimation, ...file } = route.params;
+  const file = route.params;
 
   const isSearch = navigation.getState().routeNames.includes('Search' as any);
 
@@ -70,21 +70,37 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
         DeviceInfo.isMac() &&
         canRenderInMacWebview(file.fileType)));
 
+  // A new file shown in this screen starts over, like a refresh.
+  const [downloadParams, setDownloadParams] = useState(route.params);
+  if (downloadParams !== route.params) {
+    setDownloadParams(route.params);
+    setPath('');
+    setError(false);
+  }
+
+  const download = useCallback(
+    (refresh: boolean) =>
+      downloadFile(route.params, refresh, setProgress).then(
+        downloadedPath => {
+          setPath(downloadedPath);
+          setProgress(0);
+        },
+        () => {
+          setProgress(0);
+          setError(true);
+          toast(t('fileDownloadFailed'), 'error');
+        },
+      ),
+    [route.params, toast],
+  );
+
   const handleDownload = useCallback(
-    async (refresh: boolean) => {
+    (refresh: boolean) => {
       setPath('');
       setError(false);
-      try {
-        const path = await downloadFile(route.params, refresh, setProgress);
-        setPath(path);
-        setProgress(0);
-      } catch {
-        setProgress(0);
-        setError(true);
-        toast(t('fileDownloadFailed'), 'error');
-      }
+      download(refresh);
     },
-    [route.params, toast],
+    [download],
   );
 
   const handleShare = useCallback(async () => {
@@ -113,7 +129,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   }, [file.fileType, path, toast]);
 
   const handleShowInfo = useCallback(() => {
-    setShowInfo(showInfo => !showInfo);
+    setShowInfo(shown => !shown);
   }, []);
 
   useEffect(() => {
@@ -259,8 +275,8 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   ]);
 
   useEffect(() => {
-    handleDownload(false);
-  }, [handleDownload]);
+    download(false);
+  }, [download]);
 
   useEffect(() => {
     if (

@@ -78,14 +78,14 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
     [description, theme],
   );
 
-  const handleFileOpen = (attachment?: RemoteFile) => {
-    if (attachment) {
+  const handleFileOpen = (remoteFile?: RemoteFile) => {
+    if (remoteFile) {
       const data = {
-        id: attachment.id,
+        id: remoteFile.id,
         courseName,
-        title: stripExtension(attachment.name),
-        downloadUrl: attachment.downloadUrl,
-        fileType: getExtension(attachment.name) ?? '',
+        title: stripExtension(remoteFile.name),
+        downloadUrl: remoteFile.downloadUrl,
+        fileType: getExtension(remoteFile.name) ?? '',
       } as File;
 
       navigation.push('FileDetail', data);
@@ -317,7 +317,7 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
         )}
         {excellentHomeworkList &&
           excellentHomeworkList.map(excellentHomework => {
-            const attachment =
+            const homeworkAttachment =
               excellentHomework.gradeAttachment ||
               excellentHomework.submittedAttachment;
             const authorName = excellentHomework.author.anonymous
@@ -333,12 +333,12 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
                     size={17}
                   />
                   <View style={Styles.flex1}>
-                    {attachment && (
+                    {homeworkAttachment && (
                       <TextButton
                         style={[Styles.spacey1, styles.textPaddingRight]}
-                        onPress={() => handleFileOpen(attachment)}
+                        onPress={() => handleFileOpen(homeworkAttachment)}
                       >
-                        {attachment.name}
+                        {homeworkAttachment.name}
                       </TextButton>
                     )}
                     <Caption>

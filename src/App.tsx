@@ -160,12 +160,8 @@ const getTitleOptions = (title: string, subtitle?: string) => {
       };
 };
 
-const getScreenOptions = <P extends ParamListBase, N extends keyof P>(
-  title: string,
-) =>
-  function ({}: NativeStackScreenProps<P, N>): NativeStackNavigationOptions {
-    return getTitleOptions(title);
-  };
+const getScreenOptions = (title: string) => (): NativeStackNavigationOptions =>
+  getTitleOptions(title);
 
 const getDetailScreenOptions = <P extends ParamListBase, N extends keyof P>() =>
   function ({
@@ -959,12 +955,12 @@ const Container = () => {
   const lastActiveTime = useRef(dayjs(0));
 
   const handleReLogin = useCallback(() => {
-    const { auth } = store.getState();
+    const currentAuth = store.getState().auth;
     if (
-      !auth.ssoInProgress &&
-      auth.username &&
-      auth.password &&
-      auth.fingerPrint &&
+      !currentAuth.ssoInProgress &&
+      currentAuth.username &&
+      currentAuth.password &&
+      currentAuth.fingerPrint &&
       dayjs().diff(lastActiveTime.current, 'minute') >= 10
     ) {
       dispatch(login({ reset: true }));

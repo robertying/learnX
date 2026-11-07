@@ -1,4 +1,4 @@
-import { createRef, useContext, useMemo, useRef, useState } from 'react';
+import { createRef, useContext, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import type { SFSymbol } from 'sf-symbols-typescript';
@@ -180,15 +180,26 @@ function SidebarSplitNavigator({
     setLoaded([...loaded, selectedKey]);
   }
 
-  const detailRefs = useRef(new Map<string, DetailNavigationContainerRef>());
-  const getDetailRef = (key: string) => {
-    let ref = detailRefs.current.get(key);
-    if (!ref) {
-      ref = createRef<NavigationContainerRef<{}>>();
-      detailRefs.current.set(key, ref);
-    }
-    return ref;
-  };
+  // One detail navigation container ref per tab, created as tabs appear.
+  const [detailRefs, setDetailRefs] = useState(
+    () => new Map<string, DetailNavigationContainerRef>(),
+  );
+  const missingKeys = state.routes
+    .map(route => route.key)
+    .filter(key => !detailRefs.has(key));
+  const currentDetailRefs =
+    missingKeys.length > 0
+      ? new Map([
+          ...detailRefs,
+          ...missingKeys.map(
+            key => [key, createRef<NavigationContainerRef<{}>>()] as const,
+          ),
+        ])
+      : detailRefs;
+  if (currentDetailRefs !== detailRefs) {
+    setDetailRefs(currentDetailRefs);
+  }
+  const getDetailRef = (key: string) => currentDetailRefs.get(key)!;
 
   const mountedRoutes = state.routes.filter(
     route => loaded.includes(route.key) || !descriptors[route.key].options.lazy,
