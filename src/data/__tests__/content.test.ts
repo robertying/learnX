@@ -1,12 +1,23 @@
 import dayjs from 'dayjs';
-import { noticesQuery, refreshCourseNotices } from 'data/content';
-import { mockCourses, mockCurrentSemester, mockNotices } from 'data/mock';
+import {
+  assignmentsQuery,
+  noticesQuery,
+  refreshCourseAssignments,
+  refreshCourseNotices,
+} from 'data/content';
+import {
+  mockAssignments,
+  mockCourses,
+  mockCurrentSemester,
+  mockNotices,
+} from 'data/mock';
 import {
   defaultMockNetworkConfig,
   setMockNetworkConfig,
 } from 'data/mockSource';
 import { clearQueryCache, queryClient, queryPersister } from 'data/queryClient';
 import { Notice } from 'data/types/state';
+import { sortAssignments } from 'helpers/assignments';
 
 jest.mock('data/store', () => ({}));
 // The emulated server, as when a mock account is logged in.
@@ -65,5 +76,38 @@ describe('notices', () => {
     queryClient.clear();
     await queryPersister.restoreQueries(queryClient);
     expect(queryClient.getQueryData(key)).toEqual(refreshed);
+  });
+});
+
+describe('assignments', () => {
+  const ids = (items: { id: string }[]) => items.map(i => i.id);
+
+  it("lists the semester's assignments in the app's order", async () => {
+    const assignments = await queryClient.fetchQuery(
+      assignmentsQuery(semesterId),
+    );
+    const expected = mockAssignments.filter(a => courseIds.has(a.courseId));
+    expect(ids(assignments).sort()).toEqual(ids(expected).sort());
+    expect(ids(assignments)).toEqual(ids(sortAssignments(assignments)));
+    const course = mockCourses.find(c => c.id === assignments[0].courseId)!;
+    expect(assignments[0].courseName).toBe(course.name);
+  });
+
+  it("refreshes one course's assignments and keeps the order", async () => {
+    const key = assignmentsQuery(semesterId).queryKey;
+    const assignments = await queryClient.fetchQuery(
+      assignmentsQuery(semesterId),
+    );
+    const courseId = assignments[0].courseId;
+
+    queryClient.setQueryData(
+      key,
+      assignments.filter(a => a.courseId !== courseId),
+    );
+    await refreshCourseAssignments(semesterId, courseId);
+
+    const refreshed = queryClient.getQueryData(key)!;
+    expect(ids(refreshed).sort()).toEqual(ids(assignments).sort());
+    expect(ids(refreshed)).toEqual(ids(sortAssignments(refreshed)));
   });
 });

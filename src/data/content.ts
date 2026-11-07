@@ -4,8 +4,9 @@ import dayjs from 'dayjs';
 import { queryClient, queryPersister } from 'data/queryClient';
 import { coursesQuery, getCourseNames, useLoggedIn } from 'data/queries';
 import { dataSource } from 'data/source';
-import { Notice } from 'data/types/state';
+import { Assignment, Notice } from 'data/types/state';
 import { useCurrentSemester } from 'data/userData';
+import { sortAssignments } from 'helpers/assignments';
 
 /** Adds the course's id and names to each item the server lists for it. */
 const tag = <T>(courseId: string, items: object[]) =>
@@ -107,4 +108,20 @@ export const useRefreshCourseNotices = notices.useRefreshCourse;
 export const useNotices = () => {
   const { items, ...result } = notices.useList();
   return { ...result, notices: items };
+};
+
+const assignments = createContent<Assignment>({
+  name: 'assignments',
+  type: ContentType.HOMEWORK,
+  fetchCourse: courseId => dataSource.getHomeworkList(courseId),
+  sort: sortAssignments,
+});
+
+export const assignmentsQuery = assignments.query;
+export const refreshCourseAssignments = assignments.refreshCourse;
+export const useAssignment = assignments.useItem;
+export const useRefreshCourseAssignments = assignments.useRefreshCourse;
+export const useAssignments = () => {
+  const { items, ...result } = assignments.useList();
+  return { ...result, assignments: items };
 };

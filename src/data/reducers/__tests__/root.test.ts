@@ -8,11 +8,7 @@ const mockStore = () => rootReducer(undefined, action(C.SET_MOCK_STORE));
 
 describe('rootReducer', () => {
   it('combines every slice', () => {
-    expect(Object.keys(initial()).sort()).toEqual([
-      'assignments',
-      'auth',
-      'files',
-    ]);
+    expect(Object.keys(initial()).sort()).toEqual(['auth', 'files']);
   });
 
   it('resets to the initial state on CLEAR_STORE', () => {
@@ -32,14 +28,12 @@ describe('rootReducer', () => {
     const state = mockStore();
     expect(state.auth.loggedIn).toBe(true);
     expect(state.files.items.length).toBeGreaterThan(0);
-    expect(state.assignments.items.length).toBeGreaterThan(0);
   });
 
   describe('mock data', () => {
     // Fetches go through the emulated server (data/mockSource), so their
     // results land like a real account's.
     const fetched: [string, unknown][] = [
-      [C.GET_ALL_ASSIGNMENTS_FOR_COURSES_SUCCESS, []],
       [C.GET_ALL_FILES_FOR_COURSES_SUCCESS, []],
     ];
 

@@ -1,6 +1,12 @@
 import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
-import { Course, Notice, PersistAppState, User } from 'data/types/state';
+import {
+  Assignment,
+  Course,
+  Notice,
+  PersistAppState,
+  User,
+} from 'data/types/state';
 import type { UserData } from 'data/userData';
 
 // All dates are relative to the current time so the mock data always looks
@@ -275,218 +281,216 @@ export const mockNotices: Notice[] = [
   },
 ];
 
+export const mockAssignments: Assignment[] = [
+  {
+    id: '26ef84e76db3f55b016db426e15c07b9',
+    title: '大作业1',
+    deadline: iso(5, 23, 59),
+    completionType: HomeworkCompletionType.INDIVIDUAL,
+    submissionType: HomeworkSubmissionType.WEB_LEARNING,
+    isLateSubmission: false,
+    submitted: false,
+    description: '<p>要求见课件</p>',
+    submittedContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
+    attachment: {
+      id: '1298990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '附件1.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    courseId: '2019-2020-1139283212',
+    studentHomeworkId: '1',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+    url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    graded: false,
+    answerContent: '答案已上传',
+  },
+  {
+    id: '26ef84e76d60efc1016d6c459d717434',
+    title: '小作业1',
+    deadline: iso(-14, 23, 59),
+    completionType: HomeworkCompletionType.GROUP,
+    submissionType: HomeworkSubmissionType.OFFLINE,
+    isLateSubmission: false,
+    submitted: true,
+    description: '<p>手写，下堂课随堂交。</p>',
+    submittedContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">hello world\r\n\t\t\t\t\t\t\t\t\t\thello world</span>',
+    submittedAttachment: {
+      id: '1238990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '小作业1-提交.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    attachment: {
+      id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '小作业1.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    courseId: '2019-2020-1139283212',
+    studentHomeworkId: '1',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+    url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    graded: true,
+    grade: 80,
+    gradeContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">hello world\r\n\t\t\t\t\t\t\t\t\t\thello world</span>',
+    gradeAttachment: {
+      id: '123899018d_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '小作业1-提交.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    answerContent: '答案已上传',
+    excellentHomeworkList: Array.from({ length: 3 }, (_, index) => ({
+      id: '7f27d54daad54846a43796f5ed008e46',
+      baseId: '26ef84e76d60efc1016d6c459d717434',
+      title: '第十三次作业',
+      url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      completionType: HomeworkCompletionType.INDIVIDUAL,
+      author: { id: '2024000000', name: `名字${index}`, anonymous: true },
+      submittedContent:
+        '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
+      attachment: {
+        id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+        name: `优秀作业${index}.pdf`,
+        downloadUrl:
+          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        previewUrl:
+          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        size: '239.54KB',
+      },
+      submittedAttachment: {
+        id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+        name: `优秀作业${index}.pdf`,
+        downloadUrl:
+          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        previewUrl:
+          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        size: '239.54KB',
+      },
+      gradeAttachment: {
+        id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+        name: `优秀作业${index}.pdf`,
+        downloadUrl:
+          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        previewUrl:
+          'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+        size: '239.54KB',
+      },
+    })),
+  },
+  {
+    id: '26ef84e86cc25980016d39e751d54d3f',
+    title: 'AutoCAD绘图基础练习',
+    deadline: iso(-3, 23, 59),
+    completionType: HomeworkCompletionType.INDIVIDUAL,
+    submissionType: HomeworkSubmissionType.WEB_LEARNING,
+    isLateSubmission: false,
+    submitTime: iso(-7, 20, 14),
+    submitted: true,
+    description:
+      '<p>' +
+      lastMonday +
+      '上课的时间，在李兆基A302集中上机，内容和要求如下：</p> \n  <p>1. 请参考上机指导书，完成并提交练习3。请在截至时间之前提交到网络学堂。</p> \n  <p>2. 需标注尺寸，并请按照原图中尺寸的方式标注。</p> \n  <p>3. 文件名可以自取，但请注意提交文件的后缀为 .dwg</p> \n  <p>注：如果同学们有时间，可以在完成练习3之后，尝试练习1和2（或者其中的部分功能，不用提交），以熟悉绘图模版是如何设置的。</p>',
+    submittedContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
+    submittedAttachment: {
+      id: '1234990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '绘图作业.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    courseId: '2019-2020-1139282824',
+    studentHomeworkId: '1',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+    url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    graded: false,
+  },
+  {
+    id: '26ef84e76db3f55b016db4c2dec22c79',
+    title: '第一次大作业',
+    deadline: iso(12, 23, 59),
+    completionType: HomeworkCompletionType.INDIVIDUAL,
+    submissionType: HomeworkSubmissionType.WEB_LEARNING,
+    isLateSubmission: false,
+    submitted: false,
+    description:
+      '<p>第一次大作业——利用灭点灭线估计建筑物高度。本次作业需要同学们分组完成，请仔细阅读说明文档并注意作业的截止时间。</p>',
+    submittedContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
+    attachment: {
+      id: '1234990181_ZY_1604316692859211626215e-c233-4663-a567-a932bf4d4962',
+      name: '第一次大作业说明.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    courseId: '2019-2020-1139283216',
+    studentHomeworkId: '1',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+    url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    graded: false,
+  },
+  {
+    id: '26ef84e76d60efc1016d7acd91310c35',
+    title: '第一次书面作业',
+    deadline: iso(-2, 23, 59),
+    completionType: HomeworkCompletionType.INDIVIDUAL,
+    submissionType: HomeworkSubmissionType.WEB_LEARNING,
+    isLateSubmission: false,
+    submitted: false,
+    description:
+      '<p>请在网络学堂提交电子版。如果手写请保证扫描或拍照足够清晰。</p>',
+    submittedContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
+    attachment: {
+      id: '1234990181_ZY_1604313692859211626215e-c233-4663-a567-a932bf4d4962',
+      name: '作业一.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    courseId: '2019-2020-1139283216',
+    studentHomeworkId: '1',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+    url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    graded: false,
+  },
+];
+
 const mockStore: PersistAppState = {
   auth: {
     loggingIn: false,
     ssoInProgress: false,
     loggedIn: true,
     error: null,
-  },
-  assignments: {
-    fetching: false,
-    items: [
-      {
-        id: '26ef84e76db3f55b016db426e15c07b9',
-        title: '大作业1',
-        deadline: iso(5, 23, 59),
-        completionType: HomeworkCompletionType.INDIVIDUAL,
-        submissionType: HomeworkSubmissionType.WEB_LEARNING,
-        isLateSubmission: false,
-        submitted: false,
-        description: '<p>要求见课件</p>',
-        submittedContent:
-          '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        attachment: {
-          id: '1298990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '附件1.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        courseId: '2019-2020-1139283212',
-        studentHomeworkId: '1',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        graded: false,
-        answerContent: '答案已上传',
-      },
-      {
-        id: '26ef84e76d60efc1016d6c459d717434',
-        title: '小作业1',
-        deadline: iso(-14, 23, 59),
-        completionType: HomeworkCompletionType.GROUP,
-        submissionType: HomeworkSubmissionType.OFFLINE,
-        isLateSubmission: false,
-        submitted: true,
-        description: '<p>手写，下堂课随堂交。</p>',
-        submittedContent:
-          '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">hello world\r\n\t\t\t\t\t\t\t\t\t\thello world</span>',
-        submittedAttachment: {
-          id: '1238990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '小作业1-提交.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        attachment: {
-          id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '小作业1.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        courseId: '2019-2020-1139283212',
-        studentHomeworkId: '1',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        graded: true,
-        grade: 80,
-        gradeContent:
-          '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">hello world\r\n\t\t\t\t\t\t\t\t\t\thello world</span>',
-        gradeAttachment: {
-          id: '123899018d_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '小作业1-提交.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        answerContent: '答案已上传',
-        excellentHomeworkList: Array.from({ length: 3 }, (_, index) => ({
-          id: '7f27d54daad54846a43796f5ed008e46',
-          baseId: '26ef84e76d60efc1016d6c459d717434',
-          title: '第十三次作业',
-          url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          completionType: HomeworkCompletionType.INDIVIDUAL,
-          author: { id: '2024000000', name: `名字${index}`, anonymous: true },
-          submittedContent:
-            '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-          attachment: {
-            id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-            name: `优秀作业${index}.pdf`,
-            downloadUrl:
-              'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-            previewUrl:
-              'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-            size: '239.54KB',
-          },
-          submittedAttachment: {
-            id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-            name: `优秀作业${index}.pdf`,
-            downloadUrl:
-              'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-            previewUrl:
-              'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-            size: '239.54KB',
-          },
-          gradeAttachment: {
-            id: '1238990183_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-            name: `优秀作业${index}.pdf`,
-            downloadUrl:
-              'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-            previewUrl:
-              'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-            size: '239.54KB',
-          },
-        })),
-      },
-      {
-        id: '26ef84e86cc25980016d39e751d54d3f',
-        title: 'AutoCAD绘图基础练习',
-        deadline: iso(-3, 23, 59),
-        completionType: HomeworkCompletionType.INDIVIDUAL,
-        submissionType: HomeworkSubmissionType.WEB_LEARNING,
-        isLateSubmission: false,
-        submitTime: iso(-7, 20, 14),
-        submitted: true,
-        description:
-          '<p>' +
-          lastMonday +
-          '上课的时间，在李兆基A302集中上机，内容和要求如下：</p> \n  <p>1. 请参考上机指导书，完成并提交练习3。请在截至时间之前提交到网络学堂。</p> \n  <p>2. 需标注尺寸，并请按照原图中尺寸的方式标注。</p> \n  <p>3. 文件名可以自取，但请注意提交文件的后缀为 .dwg</p> \n  <p>注：如果同学们有时间，可以在完成练习3之后，尝试练习1和2（或者其中的部分功能，不用提交），以熟悉绘图模版是如何设置的。</p>',
-        submittedContent:
-          '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        submittedAttachment: {
-          id: '1234990181_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
-          name: '绘图作业.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        courseId: '2019-2020-1139282824',
-        studentHomeworkId: '1',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        graded: false,
-      },
-      {
-        id: '26ef84e76db3f55b016db4c2dec22c79',
-        title: '第一次大作业',
-        deadline: iso(12, 23, 59),
-        completionType: HomeworkCompletionType.INDIVIDUAL,
-        submissionType: HomeworkSubmissionType.WEB_LEARNING,
-        isLateSubmission: false,
-        submitted: false,
-        description:
-          '<p>第一次大作业——利用灭点灭线估计建筑物高度。本次作业需要同学们分组完成，请仔细阅读说明文档并注意作业的截止时间。</p>',
-        submittedContent:
-          '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        attachment: {
-          id: '1234990181_ZY_1604316692859211626215e-c233-4663-a567-a932bf4d4962',
-          name: '第一次大作业说明.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        courseId: '2019-2020-1139283216',
-        studentHomeworkId: '1',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        graded: false,
-      },
-      {
-        id: '26ef84e76d60efc1016d7acd91310c35',
-        title: '第一次书面作业',
-        deadline: iso(-2, 23, 59),
-        completionType: HomeworkCompletionType.INDIVIDUAL,
-        submissionType: HomeworkSubmissionType.WEB_LEARNING,
-        isLateSubmission: false,
-        submitted: false,
-        description:
-          '<p>请在网络学堂提交电子版。如果手写请保证扫描或拍照足够清晰。</p>',
-        submittedContent:
-          '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>',
-        attachment: {
-          id: '1234990181_ZY_1604313692859211626215e-c233-4663-a567-a932bf4d4962',
-          name: '作业一.pdf',
-          downloadUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          previewUrl:
-            'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-          size: '239.54KB',
-        },
-        courseId: '2019-2020-1139283216',
-        studentHomeworkId: '1',
-        courseName: '通信与网络',
-        courseTeacherName: '周世东',
-        url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
-        graded: false,
-      },
-    ],
   },
   files: {
     fetching: false,
