@@ -79,6 +79,14 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - TODO: iPhone Duo partially open and fully unfolded. Maestro on iOS only drives the outer display (display 1) and has no display option: with the app on the inner display (3) its screenshots are black, XCTest reports the app's frames offset into the outer display's coordinates, and taps (even at corrected points) don't reach the app.
 - TODO: iPad in landscape. Only portrait has been run. The simulator can't be rotated from the shell, so rotate it by hand in the Simulator window (Device › Rotate) and run the flows; landscape shows the tabs and split view differently.
 
+### Worktrees and disk space
+
+- Several sessions work in worktrees under `.claude/worktrees/` at once. A new worktree's `node_modules` is an APFS clone of the main checkout's and costs almost nothing until something is built. What takes real space is what each worktree builds: Xcode DerivedData (one folder per workspace path, 4 to 20 GB, plus `ios/build` when built with `-derivedDataPath ios/build`), `android/app/{build,.cxx}`, and the Gradle outputs that native modules write inside `node_modules/*/android/{build,.cxx}` (about 5 GB).
+- Reuse a worktree that already has the build you need (e.g. one for Android upgrade checks) instead of building in a new one, and don't build both platforms unless the task needs both.
+- When you're done with a worktree's builds, stop the Metro, Gradle daemon and emulator you started, then run `scripts/clean-worktrees.sh --apply builds` in it. The script skips worktrees that a build tool (Metro, Gradle, Xcode, fastlane, Maestro) still uses, and it never touches `node_modules` itself, `ios/Pods` or the release outputs in `build/`. Run it without `--apply` first to see what it would delete.
+- `scripts/clean-worktrees.sh stale` removes worktrees whose HEAD is in `origin/main` with nothing uncommitted and no build tool running, and `derived-data` deletes the DerivedData of learnX workspaces that no longer exist (`all` runs both). Ask Rui before running these with `--apply`, since another session may still own a worktree.
+- Leave the shared caches alone: `~/.gradle`, the pnpm store, `~/Library/Caches/CocoaPods`, DerivedData's `ModuleCache.noindex` and the simulator pool.
+
 ## Releases
 
 - [fastlane](https://docs.fastlane.tools) (`fastlane/Fastfile`) builds and uploads releases on a Mac. It and CocoaPods are in the `Gemfile`: run `bundle install` once (Ruby 3.2+; `.bundle/config` keeps the gems in `vendor/bundle`), then `pnpm install` and `pnpm pod` (`bundle exec pod install`, so everyone uses the locked CocoaPods) before building.
