@@ -143,6 +143,7 @@ def build_apple(platform)
   FileUtils.rm_f(map)
 
   # react-native-xcode.sh writes the composed Hermes source map to SOURCEMAP_FILE.
+  # gym passes xcargs to the export too, so the auth args must not also go in export_xcargs.
   xcargs = ["-allowProvisioningUpdates", *xcode_auth_args, "SOURCEMAP_FILE=#{map}"]
   options = {
     workspace: File.join(ROOT, "ios/learnX.xcworkspace"),
@@ -151,7 +152,6 @@ def build_apple(platform)
     clean: true,
     export_method: "app-store",
     export_options: { signingStyle: "automatic" },
-    export_xcargs: ["-allowProvisioningUpdates", *xcode_auth_args].shelljoin,
     xcargs: xcargs.shelljoin,
     output_directory: File.join(out_dir, platform),
     output_name: "learnX",
