@@ -132,6 +132,7 @@ const BackButton = () => {
 
   return (
     <IconButton
+      accessibilityLabel={t('close')}
       onPress={() => navigation.goBack()}
       icon={props => <MaterialIcons {...props} name="close" size={32} />}
     />
@@ -523,6 +524,7 @@ const MainTab = () => {
         component={NoticeTab}
         options={{
           title: t('notices'),
+          tabBarButtonTestID: 'tab-notices',
           tabBarIcon: () => getTabBarIcon('bell.fill', 'notifications'),
         }}
       />
@@ -532,6 +534,7 @@ const MainTab = () => {
         options={{
           lazy: mountedTabCount <= 1,
           title: t('assignments'),
+          tabBarButtonTestID: 'tab-assignments',
           tabBarIcon: () =>
             getTabBarIcon('list.bullet.clipboard.fill', 'event'),
         }}
@@ -542,6 +545,7 @@ const MainTab = () => {
         options={{
           lazy: mountedTabCount <= 2,
           title: t('files'),
+          tabBarButtonTestID: 'tab-files',
           tabBarIcon: () => getTabBarIcon('doc.fill', 'folder'),
         }}
       />
@@ -551,6 +555,7 @@ const MainTab = () => {
         options={{
           lazy: mountedTabCount <= 3,
           title: t('courses'),
+          tabBarButtonTestID: 'tab-courses',
           tabBarIcon: () => getTabBarIcon('square.grid.3x3.fill', 'apps'),
         }}
       />
@@ -560,6 +565,7 @@ const MainTab = () => {
         options={{
           lazy: mountedTabCount <= 4,
           title: t('settings'),
+          tabBarButtonTestID: 'tab-settings',
           tabBarIcon: () => getTabBarIcon('gearshape.fill', 'settings'),
           tabBarBadge: settingsBadge ? ' ' : undefined,
         }}

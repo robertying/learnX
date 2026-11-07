@@ -274,7 +274,7 @@ const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   }, [handleOpen, openFileAfterDownload, path, file.fileType]);
 
   return (
-    <SafeArea>
+    <SafeArea testID="file-detail" collapsable={false}>
       {error ? (
         <View style={styles.errorRoot}>
           <Icon

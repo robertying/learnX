@@ -1,0 +1,25 @@
+appId: ${APP_ID}
+name: Open settings pages and log out
+---
+- runFlow: subflows/login.yaml
+- tapOn:
+    id: tab-settings
+- tapOn: 'About|关于'
+- assertVisible: '© \d+ Rui Ying'
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: 'Logout|退出登录'
+- tapOn: 'Changelog|更新日志'
+- runFlow:
+    file: subflows/back.yaml
+    env:
+      LIST: 'Logout|退出登录'
+
+- tapOn:
+    id: settings-logout
+- tapOn: '(?i)ok|确定'
+- extendedWaitUntil:
+    visible:
+      id: login-username
+    timeout: 10000

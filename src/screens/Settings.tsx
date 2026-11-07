@@ -95,6 +95,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           type="none"
         />
         <TableCell
+          testID="settings-logout"
           iconName="person-remove"
           primaryText={t('logout')}
           type="none"

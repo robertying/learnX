@@ -1,0 +1,7 @@
+# Switch the current list's filter to FILTER (all, unread, fav, archived, ...).
+appId: ${APP_ID}
+---
+- tapOn: 'Filter|过滤'
+- tapOn:
+    id: filter-${FILTER}
+- waitForAnimationToEnd

@@ -1,0 +1,18 @@
+# Reveal the favorite / archive actions of the list card titled CARD:
+# swipe actions on iOS, a long-press menu on Android.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          from:
+            text: ${CARD}
+          direction: LEFT
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - longPressOn: ${CARD}
+- waitForAnimationToEnd

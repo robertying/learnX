@@ -39,6 +39,16 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - Chinese UI: `adb shell cmd locale set-app-locales io.robertying.learnx --locales zh-Hans`; light mode: `adb shell cmd uimode night no`.
 - Odd resolutions: `adb shell wm size WxH; wm density D` (`wm size reset; wm density reset` afterwards); wait ~15 s for re-layout.
 
+### End-to-end tests (Maestro)
+
+- `.maestro/` holds [Maestro](https://docs.maestro.dev) flows driven by the mock login: log in and visit every tab, open a notice / assignment / file, favorite and archive, search, settings pages and logout. `.maestro/subflows/` is only reached through `runFlow`.
+- Install the CLI with `curl -fsSL https://get.maestro.mobile.dev | bash` (needs Java 17+). Build and install a debug app, start Metro, and boot exactly one simulator or emulator (or set `MAESTRO_DEVICE=<udid or serial>`).
+- `pnpm e2e:ios` / `pnpm e2e:android` run every flow; append a path to run one, e.g. `pnpm e2e:android .maestro/03_favorite_archive.yaml`. `scripts/e2e.sh` passes `APP_ID` (the bundle ids differ in case: `io.robertying.learnX` vs `io.robertying.learnx`) and the two mock values from `.env` with `-e`; never hard-code them in a flow.
+- Each flow starts from `clearState` and logs in with the ephemeral mock account, so flows are independent and can run in any order.
+- Select by `testID` (`id:`) first; otherwise match the visible text or accessibility label as a regex covering both languages (`'Search|搜索'`), so the flows pass in English and Chinese. iOS header buttons are native bar items and only expose their label. Text input is ASCII only: Maestro can't type CJK on Android, so search for ASCII mock content.
+- Swipe actions are iOS only; Android opens the same actions from a long-press menu (`subflows/card_actions.yaml` handles both). iOS has no system back, so `subflows/back.yaml` swipes from the left edge, and skips it when the list is still on screen (iPad split view).
+- iPhone and Android are the supported targets; iPad runs the same flows. Mac Catalyst isn't supported by Maestro.
+
 ## App Store assets
 
 - Follow `.claude/skills/app-store-assets/SKILL.md` (App Store, Mac App Store, Google Play). Keep the skill and its `scripts/` up to date when the capture workflow changes.

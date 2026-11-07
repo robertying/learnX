@@ -1,0 +1,23 @@
+# Fresh install state, then log in with the mock account (see AGENTS.md, Mock login).
+# USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- extendedWaitUntil:
+    visible:
+      id: login-username
+    timeout: 60000
+- tapOn:
+    id: login-username
+- inputText: ${USERNAME}
+- tapOn:
+    id: login-password
+- inputText: ${PASSWORD}
+# The password field submits the login on return.
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: tab-notices
+    timeout: 30000

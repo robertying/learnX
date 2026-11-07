@@ -136,6 +136,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             <Text style={Styles.spacex1}>{t('graduate')}</Text>
           </View>
           <TextInput
+            testID="login-username"
             style={styles.textInput}
             label={t('usernameOrId')}
             textContentType="username"
@@ -152,6 +153,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
           />
           <TextInput
             ref={passwordTextInputRef}
+            testID="login-password"
             style={styles.textInput}
             label={t('password')}
             textContentType="password"

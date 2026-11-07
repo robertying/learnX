@@ -77,6 +77,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   > = useCallback(
     ({ name, text, count, color, badgeColor }) => (
       <List.Item
+        testID={`filter-${name}`}
         style={styles.listItem}
         titleStyle={styles.title}
         title={

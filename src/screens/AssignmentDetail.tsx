@@ -136,7 +136,7 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
   }, [submissionType, deadline, handleSubmit, navigation]);
 
   return (
-    <SafeArea>
+    <SafeArea testID="assignment-detail" collapsable={false}>
       <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <View style={Styles.flexRow}>

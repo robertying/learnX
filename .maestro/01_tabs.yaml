@@ -1,0 +1,23 @@
+appId: ${APP_ID}
+name: Log in and visit every tab
+tags:
+  - smoke
+---
+- runFlow: subflows/login.yaml
+- assertVisible: '请按照助教的安排交作业.*'
+- tapOn:
+    id: tab-assignments
+- assertVisible: '大作业1'
+- tapOn:
+    id: tab-files
+- assertVisible: '深度学习框架'
+- tapOn:
+    id: tab-courses
+- assertVisible: '量子与统计'
+- tapOn:
+    id: tab-settings
+- assertVisible:
+    id: settings-logout
+- tapOn:
+    id: tab-notices
+- assertVisible: '请按照助教的安排交作业.*'
