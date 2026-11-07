@@ -1,7 +1,5 @@
-import { FailReason } from 'thu-learn-lib';
 import { rootReducer } from 'data/reducers/root';
 import * as C from 'data/types/constants';
-import { AppState } from 'data/types/state';
 import env from 'helpers/env';
 import { action, INIT } from '../../../../jest/actions';
 
@@ -22,70 +20,6 @@ describe('rootReducer', () => {
       'settings',
       'user',
     ]);
-  });
-
-  describe('RESET_LOADING', () => {
-    it('clears loading flags and errors in every slice and keeps the data', () => {
-      const base = initial();
-      const loading: AppState = {
-        ...base,
-        auth: { ...base.auth, loggingIn: true, username: 'user' },
-        semesters: {
-          ...base.semesters,
-          fetching: true,
-          error: FailReason.NOT_LOGGED_IN,
-          items: ['2025-2026-1'],
-        },
-        courses: {
-          ...base.courses,
-          fetching: true,
-          error: FailReason.NOT_LOGGED_IN,
-        },
-        notices: {
-          ...base.notices,
-          fetching: true,
-          error: FailReason.NOT_LOGGED_IN,
-        },
-        files: {
-          ...base.files,
-          fetching: true,
-          error: FailReason.NOT_LOGGED_IN,
-        },
-        assignments: {
-          ...base.assignments,
-          fetching: true,
-          error: FailReason.NOT_LOGGED_IN,
-          favorites: ['a1'],
-        },
-      };
-
-      const state = rootReducer(loading, action(C.RESET_LOADING));
-
-      expect(state.auth).toEqual({ ...loading.auth, loggingIn: false });
-      for (const key of [
-        'semesters',
-        'courses',
-        'notices',
-        'files',
-        'assignments',
-      ] as const) {
-        expect(state[key]).toEqual({
-          ...loading[key],
-          fetching: false,
-          error: null,
-        });
-      }
-      expect(state.semesters.items).toEqual(['2025-2026-1']);
-      expect(state.assignments.favorites).toEqual(['a1']);
-      expect(state.settings).toBe(loading.settings);
-      expect(state.user).toBe(loading.user);
-    });
-
-    it('builds the initial state when there is no state yet', () => {
-      expect(rootReducer(undefined, action(C.RESET_LOADING))).toEqual(
-        initial(),
-      );
-    });
   });
 
   it('resets to the initial state on CLEAR_STORE', () => {
@@ -160,9 +94,8 @@ describe('rootReducer', () => {
         expect(rootReducer(state, action(type, payload))).toBe(state);
       });
 
-      it('still handles RESET_LOADING and CLEAR_STORE', () => {
+      it('still handles CLEAR_STORE', () => {
         const state = mockStoreFor(username());
-        expect(rootReducer(state, action(C.RESET_LOADING))).not.toBe(state);
         expect(rootReducer(state, action(C.CLEAR_STORE))).toEqual(initial());
       });
     });
