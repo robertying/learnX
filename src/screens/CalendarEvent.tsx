@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -9,33 +7,31 @@ import {
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Caption } from 'react-native-paper';
 import { DatePickerModal } from 'react-native-paper-dates';
-import type {
-  CalendarDate,
-  RangeChange,
-} from 'react-native-paper-dates/lib/typescript/Date/Calendar';
-import dayjs from 'dayjs';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
-import { useAssignments } from 'data/content';
 import { setSetting, useSettings } from 'data/settings';
-import { useUserData } from 'data/userData';
-import { dataSource, loginWithFingerPrint } from 'data/source';
-import {
-  exportSyncedCalendarsToICS,
-  removeCalendars,
-  saveAssignmentsToReminderOrCalendar,
-  saveCoursesToCalendar,
-} from 'helpers/event';
-import { exportTextFile } from 'helpers/fs';
+import { AlarmSettings } from 'data/types/state';
 import { isLocaleChinese, t } from 'helpers/i18n';
-import { toast } from 'components/Toast';
-import useFilteredData from 'hooks/useFilteredData';
+import {
+  confirmDeleteCalendars,
+  useAssignmentSync,
+  useCalendarExport,
+  useCourseScheduleSync,
+} from 'hooks/useCalendarSync';
 import { SettingsStackParams } from './types';
 import DeviceInfo from 'constants/DeviceInfo';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
+
+/** Input handler that applies positive whole numbers and ignores the rest */
+const onNumberInput = (apply: (value: number) => void) => (v: string) => {
+  const value = parseInt(v, 10);
+  if (value) {
+    apply(value);
+  }
+};
 
 const CalendarEvent: React.FC<Props> = () => {
   const assignmentCalendarSync = useSettings(
@@ -46,10 +42,6 @@ const CalendarEvent: React.FC<Props> = () => {
   );
   const alarms = useSettings(settings => settings.alarms);
   const graduate = useSettings(settings => settings.graduate);
-  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const favoriteIds = useUserData(data => data.favorites.assignment);
-  const archivedIds = useUserData(data => data.archived.assignment);
-  const { assignments } = useAssignments();
   const calendarEventLength = useSettings(
     settings => settings.calendarEventLength,
   );
@@ -57,182 +49,18 @@ const CalendarEvent: React.FC<Props> = () => {
     settings => settings.courseEventOmitLocation,
   );
 
-  const { all } = useFilteredData({
-    data: assignments,
-    fav: favoriteIds,
-    archived: archivedIds,
-    hidden: hiddenCourseIds,
-  });
+  const { syncing: courseSyncing, picker } = useCourseScheduleSync();
+  const {
+    calendarSyncing: assignmentCalendarSyncing,
+    reminderSyncing: assignmentReminderSyncing,
+    setSyncEnabled: handleAssignmentSync,
+  } = useAssignmentSync();
+  const { exporting, exportToICS } = useCalendarExport();
 
-  const sync = all.filter(assignment =>
-    dayjs(assignment.deadline).isAfter(dayjs()),
-  );
-
-  const [courseSyncing, setCourseSyncing] = useState(false);
-  const [assignmentCalendarSyncing, setAssignmentCalendarSyncing] =
-    useState(false);
-  const [assignmentReminderSyncing, setAssignmentReminderSyncing] =
-    useState(false);
-  const [exporting, setExporting] = useState(false);
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
-  const [startDate, setStartDate] = useState<CalendarDate>(dayjs().toDate());
-  const [endDate, setEndDate] = useState<CalendarDate>(
-    dayjs().add(28, 'day').toDate(),
-  );
-
-  const handleDatePickerDismiss = () => {
-    setDatePickerOpen(false);
-  };
-
-  const handleDatePickerOpen = () => {
-    setDatePickerOpen(true);
-  };
-
-  const handleSyncRangeChange: RangeChange = range => {
-    setStartDate(range.startDate);
-    setEndDate(range.endDate);
-  };
-
-  const handleSyncRangeConfirm: RangeChange = range => {
-    handleDatePickerDismiss();
-    syncCourse(range.startDate, range.endDate);
-  };
-
-  const syncCourse = async (start?: Date, end?: Date) => {
-    if (!start || !end) {
-      return;
-    }
-
-    setCourseSyncing(true);
-
-    const startDay = dayjs(start);
-    const endDay = dayjs(end);
-
-    try {
-      await loginWithFingerPrint();
-
-      const events = await dataSource.getCalendar(
-        startDay.format('YYYYMMDD'),
-        endDay.format('YYYYMMDD'),
-        graduate,
-      );
-
-      if (events.length === 0) {
-        toast(t('courseScheduleSyncNoCourse'), 'warning');
-      } else {
-        await saveCoursesToCalendar(events, startDay, endDay);
-        toast(t('courseScheduleSyncSucceeded'), 'success');
-      }
-    } catch (err) {
-      if ((err as Error).message === 'Missing calendar permission') {
-        toast(t('courseScheduleSyncNoCalendarPermission'), 'error');
-      } else if ((err as Error).message === 'Missing reminder permission') {
-        toast(t('courseScheduleSyncNoReminderPermission'), 'error');
-      } else {
-        toast(t('courseScheduleSyncRepetitiveError'), 'error');
-      }
-    }
-    setCourseSyncing(false);
-  };
-
-  const handleAssignmentSync = async (
-    type: 'calendar' | 'reminder',
-    enabled: boolean,
-  ) => {
-    if (enabled) {
-      if (type === 'calendar') {
-        setAssignmentCalendarSyncing(true);
-      } else {
-        setAssignmentReminderSyncing(true);
-      }
-
-      try {
-        await saveAssignmentsToReminderOrCalendar(type, sync);
-      } catch (err) {
-        if ((err as Error).message === 'Missing calendar permission') {
-          toast(t('assignmentSyncNoCalendarPermission'), 'error');
-        } else if ((err as Error).message === 'Missing reminder permission') {
-          toast(t('assignmentSyncNoReminderPermission'), 'error');
-        } else if (
-          (err as Error).message ===
-          'CALENDAR permission is required to do this operation.'
-        ) {
-          toast(t('assignmentSyncNoCalendarPermission'), 'error');
-        } else if (
-          (err as Error).message === 'Cannot find any calendar source'
-        ) {
-          toast(t('missingCalendarSource'), 'error');
-        } else {
-          toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
-        }
-      }
-      if (type === 'calendar') {
-        setAssignmentCalendarSyncing(false);
-      } else {
-        setAssignmentReminderSyncing(false);
-      }
-    }
-
-    if (type === 'calendar') {
-      setSetting('assignmentCalendarSync', enabled);
-    } else {
-      setSetting('assignmentReminderSync', enabled);
-    }
-  };
-
-  const handleCalendarExport = async () => {
-    setExporting(true);
-
-    try {
-      const ics = await exportSyncedCalendarsToICS();
-      await exportTextFile('learnX.ics', ics, 'text/calendar');
-      if (DeviceInfo.isMac()) {
-        toast(t('calendarExportSavedToDownloads'), 'success');
-      }
-    } catch (err) {
-      if ((err as Error).message === 'Missing calendar permission') {
-        toast(t('calendarExportNoCalendarPermission'), 'error');
-      } else if ((err as Error).message === 'No synced events') {
-        toast(t('calendarExportNoEvent'), 'warning');
-      } else {
-        toast(t('calendarExportFailed') + (err as Error).message, 'error');
-      }
-    }
-    setExporting(false);
-  };
-
-  const handleCalendarDelete = () => {
-    Alert.alert(
-      t('deleteSyncedCalendarsAndReminders'),
-      t('deleteSyncedCalendarsAndRemindersConfirmation'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('ok'),
-          onPress: async () => {
-            try {
-              await removeCalendars();
-              toast(t('deleteSucceeded'), 'success');
-            } catch (err) {
-              if ((err as Error).message === 'Missing calendar permission') {
-                toast(t('deleteFailedNoCalendarPermission'), 'error');
-              } else if (
-                (err as Error).message === 'Missing reminder permission'
-              ) {
-                toast(t('deleteFailedNoReminderPermission'), 'error');
-              } else {
-                toast(t('deleteFailed') + (err as Error).message, 'error');
-              }
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  };
+  const setAlarm = <K extends keyof AlarmSettings>(
+    key: K,
+    value: AlarmSettings[K],
+  ) => setSetting('alarms', { ...alarms, [key]: value });
 
   return (
     <SafeArea>
@@ -253,29 +81,23 @@ const CalendarEvent: React.FC<Props> = () => {
             iconName="event"
             primaryText={t('syncCourseSchedule')}
             type="none"
-            onPress={handleDatePickerOpen}
+            onPress={picker.openPicker}
             loading={courseSyncing}
           />
           <TableCell
             iconName="access-alarm"
             primaryText={t('classAlarm')}
             switchValue={alarms.courseAlarm}
-            onSwitchValueChange={value =>
-              setSetting('alarms', { ...alarms, courseAlarm: value })
-            }
+            onSwitchValueChange={value => setAlarm('courseAlarm', value)}
             type="switch"
           />
           {alarms.courseAlarm && (
             <TableCell
               primaryText={t('classAlarmBefore')}
               inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
-              onInputValueChange={v =>
-                parseInt(v, 10) &&
-                setSetting('alarms', {
-                  ...alarms,
-                  courseAlarmOffset: parseInt(v, 10) || 15,
-                })
-              }
+              onInputValueChange={onNumberInput(value =>
+                setAlarm('courseAlarmOffset', value),
+              )}
               type="input"
             />
           )}
@@ -312,10 +134,9 @@ const CalendarEvent: React.FC<Props> = () => {
             <TableCell
               primaryText={t('calendarEventLength')}
               inputValue={(calendarEventLength ?? 30).toString()}
-              onInputValueChange={v =>
-                parseInt(v, 10) &&
-                setSetting('calendarEventLength', parseInt(v, 10) || 30)
-              }
+              onInputValueChange={onNumberInput(value =>
+                setSetting('calendarEventLength', value),
+              )}
               type="input"
             />
           )}
@@ -324,10 +145,7 @@ const CalendarEvent: React.FC<Props> = () => {
             primaryText={t('assignmentCalendarAlarm')}
             switchValue={alarms.assignmentCalendarAlarm}
             onSwitchValueChange={value =>
-              setSetting('alarms', {
-                ...alarms,
-                assignmentCalendarAlarm: value,
-              })
+              setAlarm('assignmentCalendarAlarm', value)
             }
             type="switch"
             switchDisabled={!assignmentCalendarSync}
@@ -338,13 +156,9 @@ const CalendarEvent: React.FC<Props> = () => {
               inputValue={(
                 alarms.assignmentCalendarAlarmOffset ?? 24 * 60
               ).toString()}
-              onInputValueChange={v =>
-                parseInt(v, 10) &&
-                setSetting('alarms', {
-                  ...alarms,
-                  assignmentCalendarAlarmOffset: parseInt(v, 10) || 24 * 60,
-                })
-              }
+              onInputValueChange={onNumberInput(value =>
+                setAlarm('assignmentCalendarAlarmOffset', value),
+              )}
               type="input"
             />
           )}
@@ -354,10 +168,7 @@ const CalendarEvent: React.FC<Props> = () => {
               primaryText={t('assignmentCalendarSecondAlarm')}
               switchValue={alarms.assignmentCalendarSecondAlarm}
               onSwitchValueChange={value =>
-                setSetting('alarms', {
-                  ...alarms,
-                  assignmentCalendarSecondAlarm: value,
-                })
+                setAlarm('assignmentCalendarSecondAlarm', value)
               }
               type="switch"
               switchDisabled={!assignmentCalendarSync}
@@ -370,13 +181,9 @@ const CalendarEvent: React.FC<Props> = () => {
                 inputValue={(
                   alarms.assignmentCalendarSecondAlarmOffset ?? 30
                 ).toString()}
-                onInputValueChange={v =>
-                  parseInt(v, 10) &&
-                  setSetting('alarms', {
-                    ...alarms,
-                    assignmentCalendarSecondAlarmOffset: parseInt(v, 10) || 30,
-                  })
-                }
+                onInputValueChange={onNumberInput(value =>
+                  setAlarm('assignmentCalendarSecondAlarmOffset', value),
+                )}
                 type="input"
               />
             )}
@@ -386,10 +193,7 @@ const CalendarEvent: React.FC<Props> = () => {
               primaryText={t('assignmentCalendarNoAlarmIfComplete')}
               switchValue={alarms.assignmentCalendarNoAlarmIfComplete}
               onSwitchValueChange={value =>
-                setSetting('alarms', {
-                  ...alarms,
-                  assignmentCalendarNoAlarmIfComplete: value,
-                })
+                setAlarm('assignmentCalendarNoAlarmIfComplete', value)
               }
               type="switch"
               switchDisabled={!assignmentCalendarSync}
@@ -413,10 +217,7 @@ const CalendarEvent: React.FC<Props> = () => {
                 primaryText={t('assignmentReminderAlarm')}
                 switchValue={alarms.assignmentReminderAlarm}
                 onSwitchValueChange={value =>
-                  setSetting('alarms', {
-                    ...alarms,
-                    assignmentReminderAlarm: value,
-                  })
+                  setAlarm('assignmentReminderAlarm', value)
                 }
                 type="switch"
                 switchDisabled={!assignmentReminderSync}
@@ -427,13 +228,9 @@ const CalendarEvent: React.FC<Props> = () => {
                   inputValue={(
                     alarms.assignmentReminderAlarmOffset ?? 24 * 60
                   ).toString()}
-                  onInputValueChange={v =>
-                    parseInt(v, 10) &&
-                    setSetting('alarms', {
-                      ...alarms,
-                      assignmentReminderAlarmOffset: parseInt(v, 10) || 24 * 60,
-                    })
-                  }
+                  onInputValueChange={onNumberInput(value =>
+                    setAlarm('assignmentReminderAlarmOffset', value),
+                  )}
                   type="input"
                 />
               )}
@@ -447,7 +244,7 @@ const CalendarEvent: React.FC<Props> = () => {
             iconName="ios-share"
             primaryText={t('exportSyncedCalendars')}
             type="none"
-            onPress={handleCalendarExport}
+            onPress={exportToICS}
             loading={exporting}
           />
           <Caption style={styles.caption}>
@@ -458,7 +255,7 @@ const CalendarEvent: React.FC<Props> = () => {
             iconName="event-busy"
             primaryText={t('deleteSyncedCalendarsAndReminders')}
             type="none"
-            onPress={handleCalendarDelete}
+            onPress={confirmDeleteCalendars}
           />
           <TableCell
             iconName="settings"
@@ -477,17 +274,17 @@ const CalendarEvent: React.FC<Props> = () => {
       <DatePickerModal
         locale={isLocaleChinese() ? 'zh' : 'en'}
         mode="range"
-        visible={datePickerOpen}
-        saveLabelDisabled={!startDate || !endDate}
+        visible={picker.open}
+        saveLabelDisabled={!picker.startDate || !picker.endDate}
         startLabel={t('datePickerStartLabel')}
         endLabel={t('datePickerEndLabel')}
         saveLabel={t('datePickerSaveLabel')}
         label={t('datePickerLabel')}
-        onDismiss={handleDatePickerDismiss}
-        startDate={startDate}
-        endDate={endDate}
-        onChange={handleSyncRangeChange}
-        onConfirm={handleSyncRangeConfirm}
+        onDismiss={picker.closePicker}
+        startDate={picker.startDate}
+        endDate={picker.endDate}
+        onChange={picker.onRangeChange}
+        onConfirm={picker.onRangeConfirm}
       />
     </SafeArea>
   );
