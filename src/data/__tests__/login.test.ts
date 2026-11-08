@@ -35,6 +35,7 @@ beforeEach(() => {
   jest.spyOn(queryClient, 'prefetchQuery').mockResolvedValue();
   jest.mocked(loginWithFingerPrint).mockClear();
   jest.mocked(resetDataSource).mockClear();
+  jest.mocked(isServerReachable).mockClear();
 });
 
 describe('login', () => {
@@ -84,15 +85,25 @@ describe('login', () => {
     });
   });
 
+  it('records a failed fetch as offline, even if the network is back', async () => {
+    jest.mocked(loginWithFingerPrint).mockRejectedValueOnce({
+      reason: FailReason.ERROR_FETCH_FROM_ID,
+      extra: new TypeError('Network request failed'),
+    });
+    await login({ reset: true });
+    expect(getAuth()).toMatchObject({ failure: 'offline' });
+    expect(isServerReachable).not.toHaveBeenCalled();
+  });
+
   it('records a failed login as offline when the server is unreachable', async () => {
     jest
       .mocked(loginWithFingerPrint)
-      .mockRejectedValueOnce(new TypeError('Network request failed'));
+      .mockRejectedValueOnce({ reason: FailReason.ERROR_FETCH_FROM_ID });
     jest.mocked(isServerReachable).mockResolvedValueOnce(false);
     await login({ reset: true });
     expect(getAuth()).toMatchObject({
       loggedIn: false,
-      error: FailReason.UNEXPECTED_STATUS,
+      error: FailReason.ERROR_FETCH_FROM_ID,
       failure: 'offline',
     });
   });

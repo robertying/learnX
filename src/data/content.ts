@@ -45,6 +45,20 @@ const createContent = <T extends { id: string; courseId: string }>({
   fetchCourse: (courseId: string) => Promise<object[]>;
   sort: (items: T[]) => T[];
 }) => {
+  /**
+   * Changes made in the app (marking an item read) that the server may not
+   * report yet, applied to every response for the rest of the session, so a
+   * fetch that was already under way doesn't undo them.
+   */
+  const overrides = new Map<string, Partial<T>>();
+  const withOverrides = (items: T[]) =>
+    overrides.size === 0
+      ? items
+      : items.map(item => {
+          const change = overrides.get(item.id);
+          return change ? { ...item, ...change } : item;
+        });
+
   const query = (semesterId: string) =>
     queryOptions({
       queryKey: [name, semesterId] as const,
@@ -52,8 +66,10 @@ const createContent = <T extends { id: string; courseId: string }>({
         const results: Record<string, object[]> =
           await dataSource.getAllContents(await courseIdsOf(semesterId), type);
         return sort(
-          Object.entries(results).flatMap(([courseId, items]) =>
-            tag<T>(courseId, items),
+          withOverrides(
+            Object.entries(results).flatMap(([courseId, items]) =>
+              tag<T>(courseId, items),
+            ),
           ),
         );
       },
@@ -61,7 +77,7 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   /** Replaces one course's items in the semester list and saves it. */
   const refreshCourse = async (semesterId: string, courseId: string) => {
-    const items = tag<T>(courseId, await fetchCourse(courseId));
+    const items = withOverrides(tag<T>(courseId, await fetchCourse(courseId)));
     const { queryKey } = query(semesterId);
     queryClient.setQueryData<T[]>(queryKey, old =>
       sort([...(old ?? []).filter(i => i.courseId !== courseId), ...items]),
@@ -71,9 +87,11 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   /**
    * Changes one cached item of the semester being shown and saves the list,
-   * e.g. to mark it read before the next refresh says so.
+   * e.g. to mark it read before the server says so. Later responses this
+   * session keep the change.
    */
   const updateItem = (id: string, change: Partial<T>) => {
+    overrides.set(id, { ...overrides.get(id), ...change });
     const semesterId = getUserData().currentSemester;
     if (!semesterId) {
       return;

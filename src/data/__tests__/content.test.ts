@@ -173,6 +173,23 @@ describe('marking items read', () => {
     expect(after.find(f => f.id === file.id)?.isNew).toBe(false);
   });
 
+  it('keeps the change when a fetch already under way lands', async () => {
+    const files = await queryClient.fetchQuery(filesQuery(semesterId));
+    const file = files.find(f => f.isNew)!;
+    setMockNetworkConfig({ latency: 'normal' });
+
+    const refetch = queryClient.fetchQuery({
+      ...filesQuery(semesterId),
+      staleTime: 0,
+    });
+    markFileSeen(file.id);
+    const fetched = await refetch;
+
+    expect(fetched.find(f => f.id === file.id)?.isNew).toBe(false);
+    const after = queryClient.getQueryData(filesQuery(semesterId).queryKey)!;
+    expect(after.find(f => f.id === file.id)?.isNew).toBe(false);
+  });
+
   it('does nothing for an item that is not cached', () => {
     markNoticeRead('missing');
     expect(

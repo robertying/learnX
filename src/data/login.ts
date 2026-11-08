@@ -15,7 +15,7 @@ import { resetSettings } from 'data/settings';
 import { resetUserData } from 'data/userData';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
-import { serializeError } from 'helpers/parse';
+import { isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
 import { resetNotified } from 'data/notified';
@@ -59,15 +59,21 @@ export async function login({
       resetDataSource();
     }
 
-    await retry(async () => {
-      await loginWithFingerPrint(
-        username,
-        password,
-        fingerPrint,
-        fingerGenPrint,
-        fingerGenPrint3,
-      );
-    });
+    // Without a connection, another try right away won't help (and a timeout
+    // takes long); the offline retries in useReLogin take over instead.
+    await retry(
+      () =>
+        loginWithFingerPrint(
+          username,
+          password,
+          fingerPrint,
+          fingerGenPrint,
+          fingerGenPrint3,
+        ),
+      3,
+      1000,
+      error => !isNetworkError(error),
+    );
 
     if (username && password && fingerPrint) {
       // A failed write keeps the login for this session only.
@@ -82,16 +88,15 @@ export async function login({
     loggedIn();
     queryClient.prefetchQuery(userQuery);
   } catch (err) {
-    const error = serializeError(err).reason;
-    // The server can't be told apart from the network by the error alone:
-    // thu-learn-lib reports both a wrong password and no connection as
-    // ERROR_FETCH_FROM_ID.
-    const reachable = await isServerReachable();
+    // thu-learn-lib reports a wrong password and no connection alike, as
+    // ERROR_FETCH_FROM_ID. A failed fetch in the last attempt means offline;
+    // otherwise, if the server answers now, it turned the login down.
+    const offline = isNetworkError(err) || !(await isServerReachable());
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,
-      error,
-      failure: reachable ? 'rejected' : 'offline',
+      error: serializeError(err).reason,
+      failure: offline ? 'offline' : 'rejected',
     });
   }
 }
