@@ -16,7 +16,7 @@ public final class CrashlyticsModule: Module {
 
     Function("recordError") { (name: String, message: String, frames: [JSStackFrame]) in
       let exception = ExceptionModel(name: name, reason: message)
-      // A frame only has a line, and Hermes bundles are a single line, so the column goes with the file.
+      // A frame only has a line, and symbolicating needs the column too, so it goes with the file.
       exception.stackTrace = frames.map {
         StackFrame(symbol: $0.symbol, file: "\($0.file):\($0.line):\($0.column)", line: $0.line)
       }

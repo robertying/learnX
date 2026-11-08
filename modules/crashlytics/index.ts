@@ -1,6 +1,6 @@
 import { requireOptionalNativeModule } from 'expo';
 
-/** A parsed JS stack frame. Hermes bundles are one line, so the column matters. */
+/** A parsed JS stack frame. Symbolicating needs the column as well as the line. */
 export interface StackFrame {
   symbol: string;
   file: string;

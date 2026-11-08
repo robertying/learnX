@@ -60,7 +60,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 ## Crash reporting
 
-- Firebase Crashlytics is linked natively (iOS, Mac Catalyst, Android). JS errors reach it through `modules/crashlytics`, a local Expo module that records them with their JS frames as the stack (`ExceptionModel` on iOS, a `JavaScriptError` with `JS.fn(file:line:column)` frames on Android). Hermes bundles are one line, so each frame's column goes with its file.
+- Firebase Crashlytics is linked natively (iOS, Mac Catalyst, Android). JS errors reach it through `modules/crashlytics`, a local Expo module that records them with their JS frames as the stack (`ExceptionModel` on iOS, a `JavaScriptError` with `JS.fn(file:line:column)` frames on Android). Frames only have a line, so the column (which `metro-symbolicate` needs) goes with the file. Hermes release builds keep function names, though small functions can be inlined into their caller.
 - `helpers/crashReporting` installs the global handler (from `index.js`): every uncaught error is recorded as a non-fatal first, then React Native's default handler runs, so fatal ones still crash natively; the `js_fatal` key tells the two apart. `components/ErrorBoundary` wraps the app, reports render errors with their component stack, and offers a reload. Call `recordError` for other errors worth reporting.
 - Nothing is reported from debug builds or the mock accounts, and nothing if the native module isn't in the binary. Custom keys: `js_fatal`, `screen` (last route in any navigation container, set by `trackScreen`).
 - Crashlytics doesn't symbolicate JS; use `metro-symbolicate` with the source maps from the release build (see Releases).

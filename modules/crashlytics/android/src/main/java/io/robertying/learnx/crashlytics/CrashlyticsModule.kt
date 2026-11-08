@@ -26,7 +26,7 @@ class CrashlyticsModule : Module() {
     Function("recordError") { name: String, message: String, frames: List<JSStackFrame> ->
       val error = JavaScriptError("$name: $message")
       // Shown as `JS.symbol(file:line:column)`. A negative line number leaves the file as it is, which keeps the
-      // column: Hermes bundles are a single line.
+      // column, which symbolicating needs.
       error.stackTrace = frames
         .map { StackTraceElement("JS", it.symbol, "${it.file}:${it.line}:${it.column}", -1) }
         .toTypedArray()
