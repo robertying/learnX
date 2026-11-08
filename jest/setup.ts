@@ -138,16 +138,20 @@ jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   background: jest.fn(),
   buttonStyle: jest.fn(),
-  disabled: jest.fn(),
+  // Read by the Button stand-in, so tests can tell a disabled button.
+  disabled: jest.fn((isDisabled: boolean) => ({ disabled: isDisabled })),
   font: jest.fn(),
   foregroundStyle: jest.fn(),
   frame: jest.fn(),
   headerProminence: jest.fn(),
   labelsHidden: jest.fn(),
+  lineLimit: jest.fn(),
   listRowBackground: jest.fn(),
   refreshable: jest.fn(),
   scrollContentBackground: jest.fn(),
+  strikethrough: jest.fn(),
   toggleStyle: jest.fn(),
+  truncationMode: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for
 // types (they are strings after the Babel transform), and any test that

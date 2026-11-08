@@ -76,25 +76,35 @@ export const LabeledContent = ({
 );
 
 export const Button = ({
+  label,
   onPress,
   role,
   testID,
+  modifiers,
   children,
 }: {
+  label?: string;
   onPress?: () => void;
   role?: string;
   testID?: string;
+  modifiers?: ({ disabled?: boolean } | undefined)[];
   children?: ReactNode;
-}) => (
-  <Pressable
-    accessibilityRole="button"
-    accessibilityHint={role}
-    testID={testID}
-    onPress={onPress}
-  >
-    {children}
-  </Pressable>
-);
+}) => {
+  const isDisabled = !!modifiers?.some(modifier => modifier?.disabled);
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityHint={role}
+      accessibilityState={{ disabled: isDisabled }}
+      disabled={isDisabled}
+      testID={testID}
+      onPress={onPress}
+    >
+      {label ? <RNText>{label}</RNText> : null}
+      {children}
+    </Pressable>
+  );
+};
 
 export const Toggle = ({
   isOn,

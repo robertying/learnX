@@ -40,7 +40,6 @@ import {
 } from 'hooks/useAssignmentSubmission';
 import { AssignmentSubmissionParamList } from './types';
 import { Caption } from 'components/Text';
-import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,
@@ -68,8 +67,6 @@ const AssignmentSubmissionContent: React.FC<{
   assignment: Assignment;
   navigation: Props['navigation'];
 }> = ({ assignment, navigation }) => {
-  const theme = useTheme();
-
   const { title, submitTime, submittedAttachment, submittedContent } =
     assignment;
 
@@ -225,7 +222,8 @@ const AssignmentSubmissionContent: React.FC<{
       headerRight: () => (
         <TextButton
           disabled={submitDisabled}
-          style={{ fontSize: 17, fontWeight: 'bold' }}
+          size="large"
+          bold
           onPress={confirmSubmit}
         >
           {t('submit')}
@@ -276,15 +274,9 @@ const AssignmentSubmissionContent: React.FC<{
             {submittedAttachment ? (
               <TextButton
                 disabled={uploading}
-                style={
-                  attachmentResult || removeAttachment
-                    ? {
-                        textDecorationLine: 'line-through',
-                        color: theme.colors.onSurfaceDisabled,
-                      }
-                    : undefined
-                }
-                containerStyle={[styles.attachmentButton, Styles.spacey1]}
+                struck={!!attachmentResult || removeAttachment}
+                fill
+                style={Styles.spacey1}
                 onPress={() => handleFileOpen(submittedAttachment)}
               >
                 {submittedAttachment.name}
@@ -292,13 +284,14 @@ const AssignmentSubmissionContent: React.FC<{
             ) : undefined}
             {!removeAttachment && attachmentResult ? (
               <TextButton
-                containerStyle={[styles.attachmentButton, Styles.spacey1]}
+                fill
+                style={Styles.spacey1}
                 disabled={uploading}
                 onPress={() =>
                   handleFileOpen(pickedAsRemoteFile(attachmentResult))
                 }
               >
-                {attachmentResult.name} {isShared ? t('previouslyShared') : ''}
+                {`${attachmentResult.name} ${isShared ? t('previouslyShared') : ''}`.trim()}
               </TextButton>
             ) : undefined}
             <View style={styles.attachmentActionButtons}>
@@ -344,7 +337,7 @@ const AssignmentSubmissionContent: React.FC<{
                 <Caption>{t('draftSaved')}</Caption>
                 <TextButton
                   disabled={uploading}
-                  style={styles.draftDiscard}
+                  size="small"
                   onPress={handleDraftDiscard}
                 >
                   {t('discardDraft')}
@@ -388,12 +381,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  draftDiscard: {
-    fontSize: 12,
-  },
-  attachmentButton: {
-    flex: 0,
   },
   submitButton: {
     alignSelf: 'flex-start',
