@@ -80,6 +80,8 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       return;
     }
     navigation?.setOptions({
+      // As in the Settings app, no hairline between the header and the Form.
+      headerShadowVisible: false,
       headerStyle: {
         backgroundColor: theme.dark
           ? groupedBackground.dark
