@@ -179,3 +179,37 @@ index 1ffad5e..cb27e85 100644
      "configuration" to emptyMap<String, Any?>(),
      // TODO(@jakex7): accessing a materialColors through environment is
      //  a hack to fulfill expo-ui module stub with data
+diff --git a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
+index 3df9e4a..b2257d0 100644
+--- a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
++++ b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
+@@ -4,6 +4,8 @@ package expo.modules.widgets
+ 
+ import android.annotation.SuppressLint
+ import android.content.Context
++import android.content.Intent
++import android.net.Uri
+ import android.graphics.Color as AndroidColor
+ import androidx.compose.ui.unit.DpSize
+ import androidx.compose.ui.unit.TextUnit
+@@ -66,6 +68,7 @@ import androidx.glance.ImageProvider
+ import androidx.glance.TintColorFilterParams
+ import androidx.glance.GlanceModifier
+ import androidx.glance.action.clickable
++import androidx.glance.appwidget.action.actionStartActivity
+ import androidx.glance.appwidget.CheckboxDefaults
+ import androidx.glance.appwidget.cornerRadius
+ import androidx.glance.appwidget.EmittableCheckBox
+@@ -419,6 +422,12 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+     "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
+       ?.let { GlanceModifier.background(it) }
+     "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
++    // learnX: `{ $type: 'openUrl', url }` opens the URL in the app, e.g. a widget row's assignment.
++    "openUrl" -> this["url"]?.asString()?.let { url ->
++      val context = converterContext.applicationContext
++      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(context.packageName)
++      GlanceModifier.clickable(actionStartActivity(intent))
++    }
+     // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
+     else -> null
+   } ?: GlanceModifier

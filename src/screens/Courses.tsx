@@ -9,6 +9,7 @@ import { useLoggedIn } from 'data/auth';
 import { useSettings } from 'data/settings';
 import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
+import usePullToRefresh from 'hooks/usePullToRefresh';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/parse';
 import { uploadCourses } from 'helpers/coursex';
@@ -28,6 +29,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
     courses: fetchedCourses,
     isFetching: fetching,
     refetch,
+    dataUpdatedAt,
   } = useCourses();
   const courseOrder = useUserData(data => data.courseOrder);
   const courses = sortByOrder(fetchedCourses, courseOrder);
@@ -57,11 +59,10 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));
 
   const loggedIn = useLoggedIn();
-  const handleRefresh = () => {
-    if (loggedIn && currentSemesterId) {
-      refetch();
-    }
-  };
+  const handleRefresh = () =>
+    loggedIn && currentSemesterId ? refetch() : undefined;
+
+  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
   const handlePush = (item: Course) => {
     if (detailNavigator) {
@@ -98,8 +99,9 @@ const Courses: React.FC<Props> = ({ navigation }) => {
         itemComponent={CourseCard}
         navigation={navigation}
         onItemPress={handlePush}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
+        refreshing={pullToRefresh.refreshing}
+        onRefresh={pullToRefresh.onRefresh}
+        updatedAt={dataUpdatedAt}
       />
     </SafeArea>
   );

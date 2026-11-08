@@ -76,6 +76,8 @@ PODS:
     - ExpoModulesCore
   - ExpoCrypto (58.0.7):
     - ExpoModulesCore
+  - ExpoDevice (58.0.5):
+    - ExpoModulesCore
   - ExpoDocumentPicker (58.0.4):
     - ExpoModulesCore
   - ExpoFileSystem (58.0.13):
@@ -87,6 +89,8 @@ PODS:
   - ExpoImagePicker (58.0.10):
     - ExpoModulesCore
   - ExpoKeepAwake (58.0.3):
+    - ExpoModulesCore
+  - ExpoLocalization (58.0.5):
     - ExpoModulesCore
   - ExpoLogBox (58.0.15):
     - React-Core
@@ -243,6 +247,8 @@ PODS:
     - ExpoModulesCore
     - FirebaseCrashlytics
   - LearnXSpotlight (1.0.0):
+    - ExpoModulesCore
+  - LearnXToast (1.0.0):
     - ExpoModulesCore
   - nanopb (3.30910.0):
     - nanopb/decode (= 3.30910.0)
@@ -2607,7 +2613,6 @@ PODS:
     - SocketRocket
     - Yoga
   - react-native-vector-icons-material-design-icons (14.0.0)
-  - react-native-vector-icons-material-icons (14.0.0)
   - react-native-webview (14.0.1):
     - boost
     - DoubleConversion
@@ -3287,37 +3292,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNCClipboard (1.16.3):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-bridging
-    - React-Core
-    - React-cxxstableapi
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Yoga
-  - RNDeviceInfo (15.0.2):
-    - React-Core
   - RNGestureHandler (3.4.0):
     - boost
     - DoubleConversion
@@ -3347,35 +3321,6 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/core
     - RNWorklets (>= 0.8.0)
-    - SocketRocket
-    - Yoga
-  - RNLocalize (3.7.2):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-bridging
-    - React-Core
-    - React-cxxstableapi
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
   - RNReanimated (4.7.1):
@@ -3707,12 +3652,14 @@ DEPENDENCIES:
   - ExpoBackgroundTask (from `../node_modules/expo-background-task/ios`)
   - ExpoCalendar (from `../node_modules/expo-calendar/ios`)
   - ExpoCrypto (from `../node_modules/expo-crypto/ios`)
+  - ExpoDevice (from `../node_modules/expo-device/ios`)
   - ExpoDocumentPicker (from `../node_modules/expo-document-picker/ios`)
   - ExpoFileSystem (from `../node_modules/expo-file-system/ios`)
   - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoHaptics (from `../node_modules/expo-haptics/ios`)
   - ExpoImagePicker (from `../node_modules/expo-image-picker/ios`)
   - ExpoKeepAwake (from `../node_modules/expo-keep-awake/ios`)
+  - ExpoLocalization (from `../node_modules/expo-localization/ios`)
   - "ExpoLogBox (from `../node_modules/@expo/log-box`)"
   - ExpoModulesCore (from `../node_modules/expo-modules-core`)
   - ExpoModulesJSI (from `../node_modules/expo-modules-jsi/apple`)
@@ -3733,6 +3680,7 @@ DEPENDENCIES:
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - LearnXCrashlytics (from `../modules/crashlytics/ios`)
   - LearnXSpotlight (from `../modules/spotlight/ios`)
+  - LearnXToast (from `../modules/toast/ios`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -3780,7 +3728,6 @@ DEPENDENCIES:
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-vector-icons (from `../node_modules/@react-native-vector-icons/get-image`)"
   - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
-  - "react-native-vector-icons-material-icons (from `../node_modules/@react-native-vector-icons/material-icons`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../node_modules/react-native/ReactCommon/react/networking`)
@@ -3819,10 +3766,7 @@ DEPENDENCIES:
   - ReactCodegen (from `build/generated/ios/ReactCodegen`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
-  - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
-  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
-  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -3873,6 +3817,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-calendar/ios"
   ExpoCrypto:
     :path: "../node_modules/expo-crypto/ios"
+  ExpoDevice:
+    :path: "../node_modules/expo-device/ios"
   ExpoDocumentPicker:
     :path: "../node_modules/expo-document-picker/ios"
   ExpoFileSystem:
@@ -3885,6 +3831,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-image-picker/ios"
   ExpoKeepAwake:
     :path: "../node_modules/expo-keep-awake/ios"
+  ExpoLocalization:
+    :path: "../node_modules/expo-localization/ios"
   ExpoLogBox:
     :path: "../node_modules/@expo/log-box"
   ExpoModulesCore:
@@ -3922,6 +3870,8 @@ EXTERNAL SOURCES:
     :path: "../modules/crashlytics/ios"
   LearnXSpotlight:
     :path: "../modules/spotlight/ios"
+  LearnXToast:
+    :path: "../modules/toast/ios"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -4014,8 +3964,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-vector-icons/get-image"
   react-native-vector-icons-material-design-icons:
     :path: "../node_modules/@react-native-vector-icons/material-design-icons"
-  react-native-vector-icons-material-icons:
-    :path: "../node_modules/@react-native-vector-icons/material-icons"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -4092,14 +4040,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
-  RNCClipboard:
-    :path: "../node_modules/@react-native-clipboard/clipboard"
-  RNDeviceInfo:
-    :path: "../node_modules/react-native-device-info"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
-  RNLocalize:
-    :path: "../node_modules/react-native-localize"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -4128,12 +4070,14 @@ SPEC CHECKSUMS:
   ExpoBackgroundTask: 5884fc3eeabd6c50e1e518c1890110092608147b
   ExpoCalendar: 47dcd767c17ecec01f449ee57140d8a29ae9eef7
   ExpoCrypto: 33ede543a3747abbef071c3bd747135ccc4e4fd5
+  ExpoDevice: 77a9816436a09a0bfc00f5ace649c6ccb219b96d
   ExpoDocumentPicker: af0917aa6f1b54ab3a0f47977935a1e20ffb1537
   ExpoFileSystem: b619d80b490c53117a9a9c976021a4ce5a9da440
   ExpoFont: 77eaad26c6a7ef6be8d431963358def09d8e3a73
   ExpoHaptics: c95d1e2162895e710b68dd912eec619900ebdf33
   ExpoImagePicker: a466134ec92fed0b38bbf9062c7eb5f3c8c49d94
   ExpoKeepAwake: fd18a5d233329013c578030ad399d8e10b252b5f
+  ExpoLocalization: ed930f5d68e7b3c2073a04787358839e1a8e1680
   ExpoLogBox: 9bfba7bb99c806b678703e6c62323f3c4785e706
   ExpoModulesCore: 69b79053c40b86ff64f6dfe34fdb580ea127ae7f
   ExpoModulesJSI: 68a068c5214c88982f236bb26dd44fa004f10f35
@@ -4163,6 +4107,7 @@ SPEC CHECKSUMS:
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXCrashlytics: 63f95b500661a47294c116ef17d114c26e3cf925
   LearnXSpotlight: 3798acfbc9c8b50939afb38da0989453960fd73f
+  LearnXToast: 4e9ef863bd4d020ccca18184a8ea4031fd2b3c05
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275
   PromisesObjC: 752c3227f599e3467650e47ea36f433eeb10c273
   PromisesSwift: 217dea0fd5d2ad65222a109c48698add13cc1c5b
@@ -4212,7 +4157,6 @@ SPEC CHECKSUMS:
   react-native-safe-area-context: bf2730548c1fc428170a180c6084360ff9d72ac1
   react-native-vector-icons: 279d73aea8547e8991e3943c9c03a2494b3942a9
   react-native-vector-icons-material-design-icons: 811f6c4447a60d8a66394644093dcffdc546772f
-  react-native-vector-icons-material-icons: c62c72e4fa041a49e2cab6c760e4cb5c1343acb3
   react-native-webview: 5b569d5abb1b80f21e51736948f7795bcabf8495
   React-NativeModulesApple: 96a3744dd084a743a9feaab8a9cc5241704eeb44
   React-networking: 31d34c6f410d7a2eafcde67a54e1ac89ef762dc2
@@ -4251,10 +4195,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 56cc43aaea9e865696b9fe62cc64e6262d44460d
   ReactCommon: 7a435707a749bfae5488145184756e9405384989
   RNCAsyncStorage: 6bcb1c6daf2dd961b23fa7b7acc75ceb3517f61c
-  RNCClipboard: 4983c6e2e72a4e1feeace6f66f5f8ebe8e5f22dc
-  RNDeviceInfo: 4c852998208b60dc192ae3529e5867817719ad1e
   RNGestureHandler: 1db87e72f9c221e595934433c3dadbef23c23238
-  RNLocalize: 50602723d573199559bcf606b6c0a2f326bdca19
   RNReanimated: 9193e64bd3b772855cae6662e599514c6bcf2403
   RNScreens: 1300f6c92e6fe1a58f19bff4155f6daa6a312edb
   RNShare: 5a48bdd5e66a1aa636a938a05ae8da8da75ea3b1

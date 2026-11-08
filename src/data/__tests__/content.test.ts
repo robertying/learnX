@@ -2,6 +2,8 @@ import dayjs from 'dayjs';
 import {
   assignmentsQuery,
   filesQuery,
+  markFileSeen,
+  markNoticeRead,
   noticesQuery,
   refreshCourseAssignments,
   refreshCourseFiles,
@@ -20,6 +22,7 @@ import {
 } from 'data/mockSource';
 import { clearQueryCache, queryClient, queryPersister } from 'data/queryClient';
 import { Notice } from 'data/types/state';
+import { resetUserData, setCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 
 // The emulated server, as when a mock account is logged in.
@@ -134,5 +137,63 @@ describe('files', () => {
     );
     await refreshCourseFiles(semesterId, courseId);
     expect(queryClient.getQueryData(key)).toEqual(files);
+  });
+});
+
+describe('marking items read', () => {
+  beforeEach(() => {
+    resetUserData();
+    setCurrentSemester(semesterId);
+  });
+
+  it('marks a notice read in the cached list and saves it', async () => {
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const unread = notices.find(n => !n.hasRead)!;
+    const persist = jest.spyOn(queryPersister, 'persistQueryByKey');
+
+    markNoticeRead(unread.id);
+
+    const after = queryClient.getQueryData(noticesQuery(semesterId).queryKey)!;
+    expect(after.find(n => n.id === unread.id)?.hasRead).toBe(true);
+    expect(after.filter(n => n.id !== unread.id)).toEqual(
+      notices.filter(n => n.id !== unread.id),
+    );
+    expect(persist).toHaveBeenCalledWith(
+      noticesQuery(semesterId).queryKey,
+      queryClient,
+    );
+    persist.mockRestore();
+  });
+
+  it('marks a file seen', async () => {
+    const files = await queryClient.fetchQuery(filesQuery(semesterId));
+    const file = files.find(f => f.isNew) ?? files[0];
+    markFileSeen(file.id);
+    const after = queryClient.getQueryData(filesQuery(semesterId).queryKey)!;
+    expect(after.find(f => f.id === file.id)?.isNew).toBe(false);
+  });
+
+  it('keeps the change when a fetch already under way lands', async () => {
+    const files = await queryClient.fetchQuery(filesQuery(semesterId));
+    const file = files.find(f => f.isNew)!;
+    setMockNetworkConfig({ latency: 'normal' });
+
+    const refetch = queryClient.fetchQuery({
+      ...filesQuery(semesterId),
+      staleTime: 0,
+    });
+    markFileSeen(file.id);
+    const fetched = await refetch;
+
+    expect(fetched.find(f => f.id === file.id)?.isNew).toBe(false);
+    const after = queryClient.getQueryData(filesQuery(semesterId).queryKey)!;
+    expect(after.find(f => f.id === file.id)?.isNew).toBe(false);
+  });
+
+  it('does nothing for an item that is not cached', () => {
+    markNoticeRead('missing');
+    expect(
+      queryClient.getQueryData(noticesQuery(semesterId).queryKey),
+    ).toBeUndefined();
   });
 });

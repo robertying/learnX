@@ -99,6 +99,40 @@ export function installGlobalErrorHandler() {
   });
 }
 
+// Each launch reports at most this many unhandled rejections, and each
+// distinct one once, so a failing loop can't flood Crashlytics.
+const MAX_REJECTION_REPORTS = 10;
+
+let trackingRejections = false;
+
+/**
+ * Reports promise rejections nothing handled as non-fatal errors. Hermes only
+ * tracks them in development, where React Native shows them in LogBox, so this
+ * turns its tracker on in release builds.
+ */
+export function installRejectionTracker() {
+  const hermes = (globalThis as any).HermesInternal;
+  if (__DEV__ || trackingRejections || !hermes?.enablePromiseRejectionTracker) {
+    return;
+  }
+  trackingRejections = true;
+
+  const reported = new Set<string>();
+  hermes.enablePromiseRejectionTracker({
+    allRejections: true,
+    onUnhandled: (_id: number, rejection: unknown) => {
+      const error = toError(rejection);
+      const key = `${error.name}: ${error.message}`;
+      if (reported.size >= MAX_REJECTION_REPORTS || reported.has(key)) {
+        return;
+      }
+      reported.add(key);
+      recordError(error, 'Unhandled promise rejection');
+    },
+    onHandled: () => {},
+  });
+}
+
 type State = NavigationState | PartialState<NavigationState>;
 
 const currentRouteName = (state: State | undefined): string | undefined => {

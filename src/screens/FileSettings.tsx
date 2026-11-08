@@ -1,8 +1,15 @@
-import { Alert, Linking, Platform, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Linking, Platform, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
-import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import {
+  ensureLearnXFilesDir,
+  listDownloads,
+  moveDownloadsToCurrentDirectory,
+} from 'helpers/fs';
+import { formatFileSize } from 'helpers/filename';
+import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -13,7 +20,7 @@ import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
-const FileSettings: React.FC<Props> = () => {
+const FileSettings: React.FC<Props> = ({ navigation }) => {
   const fileUseDocumentDir = useSettings(
     settings => settings.fileUseDocumentDir,
   );
@@ -24,30 +31,14 @@ const FileSettings: React.FC<Props> = () => {
     settings => settings.openFileAfterDownload,
   );
 
-  const handleClearCache = () => {
-    Alert.alert(
-      t('clearFileCache'),
-      t('clearFileCacheConfirmation'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('ok'),
-          onPress: async () => {
-            try {
-              await removeFileDir();
-              toast(t('clearFileCacheSucceeded'), 'success');
-            } catch (e) {
-              toast(t('clearFileCacheFailed') + (e as Error).message, 'error');
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  };
+  const [downloadsSize, setDownloadsSize] = useState<number | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      setDownloadsSize(
+        listDownloads().reduce((total, course) => total + course.size, 0),
+      );
+    }, []),
+  );
 
   return (
     <SafeArea>
@@ -56,41 +47,39 @@ const FileSettings: React.FC<Props> = () => {
           iconName="cached"
           primaryText={t('fileUseDocumentDir')}
           switchValue={fileUseDocumentDir}
-          onSwitchValueChange={value => setSetting('fileUseDocumentDir', value)}
+          onSwitchValueChange={value => {
+            setSetting('fileUseDocumentDir', value);
+            moveDownloadsToCurrentDirectory();
+          }}
           type="switch"
         />
         <Caption style={styles.caption}>
-          {isLocaleChinese()
-            ? fileUseDocumentDir
-              ? '文件保存在 App 的“文档”中，只会随 App 卸载而被删除。'
-              : '文件保存在 App 的“缓存”中，会在设备空间不足或其他系统预设情况下被自动清除以节约空间。'
-            : fileUseDocumentDir
-              ? 'Files are saved in App Document folder and will only be deleted along with the App.'
-              : 'Files are saved in App Cache Folder and will be deleted by the system on demand.'}
+          {fileUseDocumentDir
+            ? t('fileUseDocumentDirOnCaption')
+            : t('fileUseDocumentDirOffCaption')}
         </Caption>
         <TableCell
           style={styles.marginTop}
-          iconName="drive-file-rename-outline"
+          iconName="rename-outline"
           primaryText={t('fileOmitCourseName')}
           switchValue={fileOmitCourseName}
           onSwitchValueChange={value => setSetting('fileOmitCourseName', value)}
           type="switch"
         />
         <Caption style={styles.caption}>
-          {isLocaleChinese()
-            ? fileOmitCourseName
-              ? '文件以“文件名”形式保存。'
-              : '文件以“课程名-文件名”形式保存。'
-            : fileOmitCourseName
-              ? 'Files are saved as "filename".'
-              : 'Files are saved as "coursename-filename".'}
+          {fileOmitCourseName
+            ? t('fileOmitCourseNameOnCaption')
+            : t('fileOmitCourseNameOffCaption')}
         </Caption>
         <TableCell
           style={styles.marginTop}
-          iconName="delete"
-          primaryText={t('clearFileCache')}
-          type="none"
-          onPress={handleClearCache}
+          iconName="download"
+          primaryText={t('downloads')}
+          secondaryText={
+            downloadsSize === null ? undefined : formatFileSize(downloadsSize)
+          }
+          type="arrow"
+          onPress={() => navigation.push('Downloads')}
         />
         {DeviceInfo.isMac() && (
           <TableCell

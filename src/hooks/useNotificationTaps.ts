@@ -9,9 +9,7 @@ import useOpenTarget from 'hooks/useOpenTarget';
  */
 const useNotificationTaps = () => {
   const response = Notifications.useLastNotificationResponse();
-
-  const openTarget = useOpenTarget();
-  const open = useEffectEvent(openTarget);
+  const open = useEffectEvent(useOpenTarget());
 
   useEffect(() => {
     if (

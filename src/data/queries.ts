@@ -43,6 +43,8 @@ export const userQuery = queryOptions({
     const user = await dataSource.getUserInfo(CourseType.STUDENT);
     return {
       name: user?.name ?? null,
+      // The server marks untranslated departments in English mode
+      // oxlint-disable-next-line learnx/no-han-outside-translations --server text
       department: user?.department?.replace('(未译)', '') ?? null,
     };
   },

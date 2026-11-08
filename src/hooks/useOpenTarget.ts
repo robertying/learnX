@@ -3,8 +3,8 @@ import { NotificationTarget } from 'helpers/notifications';
 import { setPendingNotificationTarget } from 'hooks/useNotificationTarget';
 
 /**
- * Opens an item from outside the app (a notification, a Spotlight result):
- * its detail, or its list without an id.
+ * Opens what a tapped notification, widget row or Spotlight result points
+ * to: the item's detail, or its list.
  */
 const useOpenTarget = () => {
   const navigation = useNavigation();

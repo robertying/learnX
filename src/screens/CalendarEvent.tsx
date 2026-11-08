@@ -13,7 +13,7 @@ import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import {
   confirmDeleteCalendars,
   useAssignmentSync,
@@ -72,21 +72,21 @@ const CalendarEvent: React.FC<Props> = () => {
       >
         <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
           <TableCell
-            iconName="people"
+            iconName="account-multiple"
             primaryText={t('graduate')}
             switchValue={graduate}
             onSwitchValueChange={value => setSetting('graduate', value)}
             type="switch"
           />
           <TableCell
-            iconName="event"
+            iconName="calendar"
             primaryText={t('syncCourseSchedule')}
             type="none"
             onPress={picker.openPicker}
             loading={courseSyncing}
           />
           <TableCell
-            iconName="access-alarm"
+            iconName="alarm"
             primaryText={t('classAlarm')}
             switchValue={alarms.courseAlarm}
             onSwitchValueChange={value => setAlarm('courseAlarm', value)}
@@ -103,7 +103,7 @@ const CalendarEvent: React.FC<Props> = () => {
             />
           )}
           <TableCell
-            iconName="location-off"
+            iconName="map-marker-off"
             primaryText={t('courseEventOmitLocation')}
             switchValue={courseEventOmitLocation}
             onSwitchValueChange={value =>
@@ -112,17 +112,15 @@ const CalendarEvent: React.FC<Props> = () => {
             type="switch"
           />
           <Caption style={styles.caption}>
-            {isLocaleChinese()
-              ? `手动同步${
-                  graduate ? '研究生' : '本科生'
-                }课表到日历；请在更改设置后重新同步以应用更改。`
-              : `Manually sync ${
-                  graduate ? 'graduate' : 'undergraduate'
-                } course schedule to your calendar. Please re-sync after any setting change.`}
+            {t('courseScheduleSyncCaption', {
+              type: graduate
+                ? t('graduateSchedule')
+                : t('undergraduateSchedule'),
+            })}
           </Caption>
           <TableCell
             style={styles.marginTop}
-            iconName="event-note"
+            iconName="calendar-text"
             primaryText={t('assignmentCalendarSync')}
             switchValue={assignmentCalendarSync}
             onSwitchValueChange={enabled =>
@@ -142,7 +140,7 @@ const CalendarEvent: React.FC<Props> = () => {
             />
           )}
           <TableCell
-            iconName="access-alarm"
+            iconName="alarm"
             primaryText={t('assignmentCalendarAlarm')}
             switchValue={alarms.assignmentCalendarAlarm}
             onSwitchValueChange={value =>
@@ -165,7 +163,7 @@ const CalendarEvent: React.FC<Props> = () => {
           )}
           {alarms.assignmentCalendarAlarm && (
             <TableCell
-              iconName="access-alarm"
+              iconName="alarm"
               primaryText={t('assignmentCalendarSecondAlarm')}
               switchValue={alarms.assignmentCalendarSecondAlarm}
               onSwitchValueChange={value =>
@@ -204,7 +202,7 @@ const CalendarEvent: React.FC<Props> = () => {
             <>
               <TableCell
                 style={{ marginTop: 16 }}
-                iconName="event-available"
+                iconName="calendar-check"
                 primaryText={t('assignmentReminderSync')}
                 switchValue={assignmentReminderSync}
                 onSwitchValueChange={enabled =>
@@ -214,7 +212,7 @@ const CalendarEvent: React.FC<Props> = () => {
                 loading={assignmentReminderSyncing}
               />
               <TableCell
-                iconName="access-alarm"
+                iconName="alarm"
                 primaryText={t('assignmentReminderAlarm')}
                 switchValue={alarms.assignmentReminderAlarm}
                 onSwitchValueChange={value =>
@@ -242,7 +240,7 @@ const CalendarEvent: React.FC<Props> = () => {
           </Caption>
           <TableCell
             style={styles.marginTop}
-            iconName="ios-share"
+            iconName="export-variant"
             primaryText={t('exportSyncedCalendars')}
             type="none"
             onPress={exportToICS}
@@ -253,13 +251,13 @@ const CalendarEvent: React.FC<Props> = () => {
           </Caption>
           <TableCell
             style={styles.marginTop}
-            iconName="event-busy"
+            iconName="calendar-remove"
             primaryText={t('deleteSyncedCalendarsAndReminders')}
             type="none"
             onPress={confirmDeleteCalendars}
           />
           <TableCell
-            iconName="settings"
+            iconName="cog"
             primaryText={t('configureCalendarAndReminder')}
             type="none"
             onPress={() =>

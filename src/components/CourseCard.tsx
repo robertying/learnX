@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { Course } from 'data/types/state';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { Caption, Subheading, Title } from 'components/Text';
@@ -34,11 +34,11 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
         </View>
         <View style={styles.countSections}>
           <View style={styles.section}>
-            <Icon name="notifications" color={theme.colors.outline} />
+            <Icon name="bell" color={theme.colors.outline} />
             <Caption style={styles.sectionText}>{unreadNoticeCount}</Caption>
           </View>
           <View style={styles.section}>
-            <Icon name="event" color={theme.colors.outline} />
+            <Icon name="calendar" color={theme.colors.outline} />
             <Caption style={styles.sectionText}>
               {unfinishedAssignmentCount}
             </Caption>

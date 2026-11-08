@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAuth, initialAuth, useAuthStore } from 'data/auth';
-import { loginWithFingerPrint, resetDataSource } from 'data/source';
+import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
+import {
+  isServerReachable,
+  loginWithFingerPrint,
+  resetDataSource,
+} from 'data/source';
 import {
   clearCredentials,
   Credentials,
@@ -11,15 +15,22 @@ import { resetSettings } from 'data/settings';
 import { resetUserData } from 'data/userData';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
-import { serializeError } from 'helpers/parse';
+import { isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
 import { clearSpotlight } from 'helpers/spotlight';
 import { resetNotified } from 'data/notified';
+import { clearSubmissionDrafts } from 'data/submissionDrafts';
 import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 
 const loggedIn = () =>
-  useAuthStore.setState({ loggingIn: false, loggedIn: true, error: null });
+  useAuthStore.setState({
+    loggingIn: false,
+    loggedIn: true,
+    error: null,
+    failure: null,
+    reloginRequested: false,
+  });
 
 /**
  * Signs in with the given login, or the saved one when none is given. A login
@@ -50,15 +61,21 @@ export async function login({
       resetDataSource();
     }
 
-    await retry(async () => {
-      await loginWithFingerPrint(
-        username,
-        password,
-        fingerPrint,
-        fingerGenPrint,
-        fingerGenPrint3,
-      );
-    });
+    // Without a connection, another try right away won't help (and a timeout
+    // takes long); the offline retries in useReLogin take over instead.
+    await retry(
+      () =>
+        loginWithFingerPrint(
+          username,
+          password,
+          fingerPrint,
+          fingerGenPrint,
+          fingerGenPrint3,
+        ),
+      3,
+      1000,
+      error => !isNetworkError(error),
+    );
 
     if (username && password && fingerPrint) {
       // A failed write keeps the login for this session only.
@@ -73,16 +90,24 @@ export async function login({
     loggedIn();
     queryClient.prefetchQuery(userQuery);
   } catch (err) {
+    // thu-learn-lib reports a wrong password and no connection alike, as
+    // ERROR_FETCH_FROM_ID. A failed fetch in the last attempt means offline;
+    // otherwise, if the server answers now, it turned the login down.
+    const offline = isNetworkError(err) || !(await isServerReachable());
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,
       error: serializeError(err).reason,
+      failure: offline ? 'offline' : 'rejected',
     });
   }
 }
 
-/** Shows the cached data without signing in. */
-export const loginWithOfflineMode = loggedIn;
+/**
+ * Leaves the login screen for the saved data, without a session. Lists show
+ * what was cached; refreshing them logs in again.
+ */
+export const loginWithOfflineMode = cancelRelogin;
 
 /** Loads the mock account's data, replacing whatever was there. */
 export function loginWithMockAccount() {
@@ -90,16 +115,21 @@ export function loginWithMockAccount() {
   resetSettings();
   resetUserData(mockUserData);
   resetNotified();
+  clearSubmissionDrafts();
   clearQueryCache();
   loggedIn();
 }
 
-/** Logs out: forgets the login, the server data and the user's own data. */
+/**
+ * Logs out: forgets the login, the server data and the user's own data,
+ * submission drafts included.
+ */
 export async function logout() {
   useAuthStore.setState(initialAuth);
   resetSettings();
   resetUserData();
   resetNotified();
+  clearSubmissionDrafts();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
   clearSpotlight();

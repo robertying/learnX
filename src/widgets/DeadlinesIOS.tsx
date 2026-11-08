@@ -1,4 +1,4 @@
-import { HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
+import { HStack, Link, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   containerBackground,
   font,
@@ -6,6 +6,7 @@ import {
   frame,
   layoutPriority,
   lineLimit,
+  widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
 import { PlatformColor } from 'react-native';
@@ -15,6 +16,10 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * Runs in the widget extension, not the app: the `widget` directive turns it
  * into a string at build time. It can't use hooks, imports or anything outside
  * the function; only its props, `environment` and the @expo/ui components.
+ *
+ * A small widget or a Lock Screen one has one tap target, so it opens the
+ * list, or the next assignment. Medium and large ones open the tapped row's
+ * assignment, and the list when tapped elsewhere.
  */
 function DeadlinesWidget(
   props: DeadlineWidgetProps,
@@ -28,11 +33,17 @@ function DeadlinesWidget(
     'widget',
   );
   const deadlines = props.deadlines ?? [];
+  // Props sent before widget rows had links have no URLs.
+  const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
   if (family === 'accessoryRectangular') {
     const next = deadlines[0];
     return (
-      <VStack alignment="leading" spacing={0} modifiers={[background]}>
+      <VStack
+        alignment="leading"
+        spacing={0}
+        modifiers={[background, ...openUrl(next?.url ?? props.url)]}
+      >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
           {next ? next.title : props.empty}
         </Text>
@@ -68,6 +79,7 @@ function DeadlinesWidget(
       modifiers={[
         frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
         background,
+        ...openUrl(props.url),
       ]}
     >
       <HStack>
@@ -101,60 +113,80 @@ function DeadlinesWidget(
           {props.empty}
         </Text>
       ) : null}
-      {shown.map(item => (
-        <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
-          <Text
-            modifiers={[
-              font({
-                textStyle: large ? 'headline' : 'subheadline',
-                weight: large ? 'semibold' : 'medium',
-              }),
-              lineLimit(1),
-            ]}
-          >
-            {item.title}
-          </Text>
-          {/*
-            A relative date Text takes all the width it's offered (and
-            breaks the layout with fixedSize), so it goes last: the course
-            name gets its width first and the date follows right after it.
-          */}
-          <HStack spacing={0}>
-            {showCourse ? (
-              <Text
-                modifiers={[
-                  font({ textStyle: large ? 'subheadline' : 'caption' }),
-                  foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-                  lineLimit(1),
-                  layoutPriority(1),
-                ]}
-              >
-                {`${item.courseName} · `}
-              </Text>
-            ) : null}
-            <Text
-              date={new Date(item.deadline)}
-              dateStyle="relative"
-              modifiers={[
-                font({ textStyle: large ? 'subheadline' : 'caption' }),
-                foregroundStyle(accent),
-                lineLimit(1),
-              ]}
-            />
-          </HStack>
-          {large ? (
+      {shown.map(item => {
+        const row = (
+          <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
             <Text
               modifiers={[
-                font({ textStyle: 'caption' }),
-                foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
+                font({
+                  textStyle: large ? 'headline' : 'subheadline',
+                  weight: large ? 'semibold' : 'medium',
+                }),
                 lineLimit(1),
               ]}
             >
-              {item.due}
+              {item.title}
             </Text>
-          ) : null}
-        </VStack>
-      ))}
+            {/*
+              A relative date Text takes all the width it's offered (and
+              breaks the layout with fixedSize), so it goes last: the course
+              name gets its width first and the date follows right after it.
+            */}
+            <HStack spacing={0}>
+              {showCourse ? (
+                <Text
+                  modifiers={[
+                    font({ textStyle: large ? 'subheadline' : 'caption' }),
+                    foregroundStyle({
+                      type: 'hierarchical',
+                      style: 'secondary',
+                    }),
+                    lineLimit(1),
+                    layoutPriority(1),
+                  ]}
+                >
+                  {`${item.courseName} · `}
+                </Text>
+              ) : null}
+              <Text
+                date={new Date(item.deadline)}
+                dateStyle="relative"
+                modifiers={[
+                  font({ textStyle: large ? 'subheadline' : 'caption' }),
+                  foregroundStyle(accent),
+                  lineLimit(1),
+                ]}
+              />
+            </HStack>
+            {large ? (
+              <Text
+                modifiers={[
+                  font({ textStyle: 'caption' }),
+                  foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
+                  lineLimit(1),
+                ]}
+              >
+                {item.due}
+              </Text>
+            ) : null}
+          </VStack>
+        );
+        // A small widget can't have links; its widgetURL opens the list.
+        return family === 'systemSmall' || !item.url ? (
+          row
+        ) : (
+          <Link
+            key={item.id}
+            destination={item.url}
+            modifiers={[
+              // Not the link tint: the row keeps its colors.
+              foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+            ]}
+          >
+            {row}
+          </Link>
+        );
+      })}
       <Spacer />
     </VStack>
   );

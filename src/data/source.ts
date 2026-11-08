@@ -5,6 +5,7 @@ import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { getCredentials } from 'data/credentials';
 import {
+  getMockNetworkConfig,
   mockDownloadFile,
   mockSource,
   mockSubmitAssignment,
@@ -78,6 +79,30 @@ export const loginWithFingerPrint = async (
     fingerGenPrint,
     fingerGenPrint3,
   );
+};
+
+const REACHABILITY_TIMEOUT_MS = 8 * 1000;
+
+/**
+ * Whether the school's login server answers at all, to tell a device without
+ * a connection from a login the server turned down. Any HTTP answer counts.
+ * The mock accounts ask the network emulation instead.
+ */
+export const isServerReachable = async () => {
+  if (isMockSession()) {
+    const { failure } = getMockNetworkConfig();
+    return failure !== 'offline' && failure !== 'timeout';
+  }
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REACHABILITY_TIMEOUT_MS);
+  try {
+    await fetch(Urls.id, { method: 'HEAD', signal: controller.signal });
+    return true;
+  } catch {
+    return false;
+  } finally {
+    clearTimeout(timeout);
+  }
 };
 
 export const resetDataSource = () => {

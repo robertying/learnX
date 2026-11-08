@@ -3,7 +3,7 @@ import type { ComponentProps } from 'react';
 import { Platform } from 'react-native';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import type { AppleIcon } from 'react-native-bottom-tabs';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { t } from 'helpers/i18n';
 import { MainTabParams } from 'screens/types';
 import { useSplitLaidOut } from 'components/NativeSplitView';
@@ -27,11 +27,11 @@ const MainSidebarNavigator = createSidebarSplitNavigator<MainTabParams>();
 
 const getTabBarIcon = (
   sfSymbol: AppleIcon['sfSymbol'],
-  materialIcon: ComponentProps<typeof MaterialIcons>['name'],
+  materialIcon: ComponentProps<typeof MaterialCommunityIcons>['name'],
 ) =>
   Platform.OS === 'ios'
     ? { sfSymbol }
-    : MaterialIcons.getImageSourceSync(materialIcon, 24)!;
+    : MaterialCommunityIcons.getImageSourceSync(materialIcon, 24)!;
 
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
 // contains the split view, so each tab gets its own split.
@@ -147,7 +147,7 @@ const MainTab = () => {
         options={{
           title: t('notices'),
           tabBarButtonTestID: 'tab-notices',
-          tabBarIcon: () => getTabBarIcon('bell.fill', 'notifications'),
+          tabBarIcon: () => getTabBarIcon('bell.fill', 'bell'),
         }}
       />
       <MainNativeNavigator.Screen
@@ -158,7 +158,7 @@ const MainTab = () => {
           title: t('assignments'),
           tabBarButtonTestID: 'tab-assignments',
           tabBarIcon: () =>
-            getTabBarIcon('list.bullet.clipboard.fill', 'event'),
+            getTabBarIcon('list.bullet.clipboard.fill', 'calendar'),
         }}
       />
       <MainNativeNavigator.Screen
@@ -188,7 +188,7 @@ const MainTab = () => {
           lazy: mountedTabCount <= 4,
           title: t('settings'),
           tabBarButtonTestID: 'tab-settings',
-          tabBarIcon: () => getTabBarIcon('gearshape.fill', 'settings'),
+          tabBarIcon: () => getTabBarIcon('gearshape.fill', 'cog'),
           tabBarBadge: settingsBadge ? ' ' : undefined,
         }}
       />
