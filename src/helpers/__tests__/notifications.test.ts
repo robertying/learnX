@@ -93,6 +93,7 @@ describe('postNotification', () => {
         title: 'Course',
         body: 'Title',
         data: { type: 'notice', id: 'n1' },
+        categoryIdentifier: 'contentItem',
       },
       trigger: null,
     });
