@@ -5,7 +5,7 @@ import {
   Text,
 } from '@expo/ui/jetpack-compose';
 import { useComposeColorOverrides, useTheme } from 'theme';
-import { percentLabel, type SpinnerProps } from './Spinner';
+import { percentLabel, type SpinnerProps } from './Spinner.shared';
 
 /**
  * The Material 3 `CircularProgressIndicator` (indeterminate, primary color)
