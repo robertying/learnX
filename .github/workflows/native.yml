@@ -105,11 +105,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # --deployment fails if Podfile.lock is out of date with the Podfile or
-      # the installed native modules.
+      # Not --deployment: ExpoWidgets' podspec embeds the checkout's absolute
+      # path, so its checksum in Podfile.lock differs on every machine.
       - name: Install pods
         working-directory: ios
-        run: bundle exec pod install --deployment
+        run: bundle exec pod install
         env:
           LANG: en_US.UTF-8
 
