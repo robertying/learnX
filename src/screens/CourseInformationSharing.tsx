@@ -91,7 +91,11 @@ const CourseInformationSharing: React.FC<Props> = () => {
           }
         >
           <FormToggle
-            icon={{ ios: 'info.circle', android: 'information-outline' }}
+            icon={{
+              ios: 'info.circle',
+              android: 'information-outline',
+              color: 'blue',
+            }}
             title={t('courseInformationSharing')}
             value={courseInformationSharing}
             onValueChange={handleEnable}
@@ -99,7 +103,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
         </FormSection>
         <FormSection>
           <FormButton
-            icon={{ ios: 'safari', android: 'open-in-new' }}
+            icon={{ ios: 'safari', android: 'open-in-new', color: 'blue' }}
             title={t('courseX')}
             onPress={() => Linking.openURL('https://tsinghua.app/courses')}
           />

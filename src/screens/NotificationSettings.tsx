@@ -43,27 +43,31 @@ const contentToggles: {
 }[] = [
   {
     key: 'notices',
-    icon: { ios: 'bell', android: 'bell' },
+    icon: { ios: 'bell', android: 'bell', color: 'red' },
     label: t('notifyNewNotices'),
   },
   {
     key: 'files',
-    icon: { ios: 'folder', android: 'folder' },
+    icon: { ios: 'folder', android: 'folder', color: 'blue' },
     label: t('notifyNewFiles'),
   },
   {
     key: 'assignments',
-    icon: { ios: 'calendar', android: 'calendar' },
+    icon: { ios: 'calendar', android: 'calendar', color: 'red' },
     label: t('notifyNewAssignments'),
   },
   {
     key: 'grades',
-    icon: { ios: 'checkmark.seal', android: 'clipboard-check-outline' },
+    icon: {
+      ios: 'checkmark.seal',
+      android: 'clipboard-check-outline',
+      color: 'green',
+    },
     label: t('notifyGrades'),
   },
   {
     key: 'deadlineChanges',
-    icon: { ios: 'clock.arrow.circlepath', android: 'update' },
+    icon: { ios: 'clock.arrow.circlepath', android: 'update', color: 'indigo' },
     label: t('notifyDeadlineChanges'),
   },
 ];
@@ -170,7 +174,7 @@ const NotificationSettings: React.FC<Props> = () => {
         >
           <FormToggle
             testID="notifications-deadlineReminders"
-            icon={{ ios: 'alarm', android: 'alarm' }}
+            icon={{ ios: 'alarm', android: 'alarm', color: 'orange' }}
             title={t('notifyDeadlineReminders')}
             value={notifications.deadlineReminders}
             onValueChange={value => handleToggle('deadlineReminders', value)}
@@ -185,27 +189,31 @@ const NotificationSettings: React.FC<Props> = () => {
         </FormSection>
         <FormSection>
           <FormButton
-            icon={{ ios: 'gear', android: 'cog' }}
+            icon={{ ios: 'gear', android: 'cog', color: 'gray' }}
             title={t('configureNotifications')}
             onPress={openSystemSettings}
           />
           {__DEV__ && (
             <FormButton
-              icon={{ ios: 'paperplane', android: 'send' }}
+              icon={{ ios: 'paperplane', android: 'send', color: 'blue' }}
               title={t('sendTestNotification')}
               onPress={sendTestNotification}
             />
           )}
           {__DEV__ && (
             <FormButton
-              icon={{ ios: 'arrow.triangle.2.circlepath', android: 'sync' }}
+              icon={{
+                ios: 'arrow.triangle.2.circlepath',
+                android: 'sync',
+                color: 'blue',
+              }}
               title={t('simulateNewContent')}
               onPress={handleSimulateNewContent}
             />
           )}
           {__DEV__ && (
             <FormButton
-              icon={{ ios: 'alarm', android: 'alarm-check' }}
+              icon={{ ios: 'alarm', android: 'alarm-check', color: 'orange' }}
               title={t('previewDeadlineReminder')}
               onPress={async () =>
                 toast(String(await previewDeadlineReminder()), 'success')

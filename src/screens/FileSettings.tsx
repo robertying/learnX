@@ -67,7 +67,7 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
           }
         >
           <FormToggle
-            icon={{ ios: 'internaldrive', android: 'cached' }}
+            icon={{ ios: 'internaldrive', android: 'cached', color: 'gray' }}
             title={t('fileUseDocumentDir')}
             value={fileUseDocumentDir}
             onValueChange={value => {
@@ -84,7 +84,11 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
           }
         >
           <FormToggle
-            icon={{ ios: 'character.cursor.ibeam', android: 'rename-outline' }}
+            icon={{
+              ios: 'character.cursor.ibeam',
+              android: 'rename-outline',
+              color: 'gray',
+            }}
             title={t('fileOmitCourseName')}
             value={fileOmitCourseName}
             onValueChange={value => setSetting('fileOmitCourseName', value)}
@@ -93,7 +97,11 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
         {Platform.OS === 'android' && (
           <FormSection>
             <FormToggle
-              icon={{ ios: 'arrow.up.forward.app', android: 'open-in-new' }}
+              icon={{
+                ios: 'arrow.up.forward.app',
+                android: 'open-in-new',
+                color: 'blue',
+              }}
               title={t('openFileAfterDownload')}
               value={openFileAfterDownload}
               onValueChange={value =>
@@ -104,7 +112,11 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
         )}
         <FormSection>
           <FormLink
-            icon={{ ios: 'arrow.down.circle', android: 'download' }}
+            icon={{
+              ios: 'arrow.down.circle',
+              android: 'download',
+              color: 'green',
+            }}
             title={t('downloads')}
             detail={
               downloadsSize === null ? undefined : formatFileSize(downloadsSize)
@@ -113,7 +125,7 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
           />
           {DeviceInfo.isMac() && (
             <FormButton
-              icon={{ ios: 'folder', android: 'open-in-new' }}
+              icon={{ ios: 'folder', android: 'open-in-new', color: 'blue' }}
               title={t('openFileDownloadDirectory')}
               onPress={openDownloadDirectory}
             />

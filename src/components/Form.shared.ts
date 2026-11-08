@@ -29,10 +29,25 @@ export interface FormSectionProps {
   footer?: string;
 }
 
+/** A system color for a Mac icon tile, as in System Settings. */
+export type FormIconColor =
+  | 'blue'
+  | 'brown'
+  | 'gray'
+  | 'green'
+  | 'indigo'
+  | 'orange'
+  | 'pink'
+  | 'purple'
+  | 'red'
+  | 'teal';
+
 /** An icon from each platform's set: an SF Symbol and a Material one. */
 export interface FormIcon {
   ios: SFSymbol;
   android: MaterialDesignIconsIconName;
+  /** The Mac draws the symbol white on a tile of this color (default gray). */
+  color?: FormIconColor;
 }
 
 interface FormRowProps {

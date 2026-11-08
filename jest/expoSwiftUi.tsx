@@ -18,6 +18,7 @@ export const VStack = Box;
 export const ZStack = Box;
 export const Spacer = () => null;
 export const Circle = () => <View />;
+export const RoundedRectangle = () => <View />;
 
 export const Text = ({ children }: { children?: ReactNode }) => (
   <RNText>{children}</RNText>
@@ -47,13 +48,16 @@ export const Section = ({
 
 export const Label = ({
   systemImage,
+  icon,
   children,
 }: {
   systemImage?: string;
+  icon?: ReactNode;
   children?: ReactNode;
 }) => (
   <View>
     {systemImage ? <View testID={`icon-${systemImage}`} /> : null}
+    {icon}
     {children}
   </View>
 );
@@ -98,7 +102,9 @@ export const Toggle = ({
   label,
   systemImage,
   testID,
+  children,
 }: {
+  children?: ReactNode;
   isOn?: boolean;
   onIsOnChange?: (isOn: boolean) => void;
   label?: string;
@@ -114,5 +120,6 @@ export const Toggle = ({
     {...{ onValueChange: onIsOnChange }}
   >
     {systemImage ? <View testID={`icon-${systemImage}`} /> : null}
+    {children}
   </View>
 );
