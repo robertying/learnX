@@ -85,6 +85,19 @@ export interface FormNumberFieldProps extends FormRowProps {
   onValueChange: (value: number) => void;
 }
 
+/**
+ * Text that wraps over several lines, filling the row: a file's name or
+ * description. It can be selected and copied on iOS and the Mac.
+ */
+export interface FormParagraphProps {
+  text: string;
+  /** In the headline font, for a name above its details. */
+  headline?: boolean;
+  testID?: string;
+  /** Set by `FormSection` on Android, for the row's corners. */
+  position?: FormRowPosition;
+}
+
 export interface FormProfileProps {
   name: string;
   detail?: string;
