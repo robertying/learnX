@@ -14,6 +14,7 @@ import { userQuery } from 'data/queries';
 import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
+import { resetNotified } from 'data/notified';
 
 const loggedIn = () =>
   useAuthStore.setState({ loggingIn: false, loggedIn: true, error: null });
@@ -86,6 +87,7 @@ export function loginWithMockAccount() {
   const { mockUserData } = require('data/mock') as typeof import('data/mock');
   resetSettings();
   resetUserData(mockUserData);
+  resetNotified();
   clearQueryCache();
   loggedIn();
 }
@@ -95,6 +97,7 @@ export async function logout() {
   useAuthStore.setState(initialAuth);
   resetSettings();
   resetUserData();
+  resetNotified();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
   await Promise.all([

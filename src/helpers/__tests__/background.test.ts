@@ -21,13 +21,19 @@ import {
   setCurrentSemester,
   useUserDataStore,
 } from 'data/userData';
-import { syncContent } from 'helpers/background';
+import { notifyContent, syncContent } from 'helpers/background';
+import { AppState } from 'react-native';
+import * as Notifications from 'expo-notifications';
+import { defaultSettings, setSetting } from 'data/settings';
+import { getNotifiedKeys, resetNotified } from 'data/notified';
+import { ContentDiff } from 'data/contentDiff';
 
 jest.mock('expo-background-task', () => ({
   BackgroundTaskResult: { Success: 1, Failed: 2 },
   registerTaskAsync: jest.fn(),
 }));
 jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
+jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
 
 // The emulated server, as when a mock account is logged in.
 jest.mock('data/source', () => ({
@@ -213,4 +219,73 @@ it('stays on a semester the user picked', async () => {
   ]);
   await syncContent();
   expect(getUserData().currentSemester).toBe(picked);
+});
+
+describe('notifyContent', () => {
+  const unread = {
+    ...inSemester(mockNotices)[0],
+    hasRead: false,
+    publishTime: new Date().toISOString(),
+  };
+  const diff = (): ContentDiff => ({
+    notices: { added: [unread] },
+    assignments: { added: [], graded: [], deadlineChanged: [] },
+    files: { added: [] },
+  });
+  const setAppState = (state: string) =>
+    Object.defineProperty(AppState, 'currentState', {
+      value: state,
+      configurable: true,
+    });
+
+  beforeEach(() => {
+    resetNotified();
+    setSetting('notifications', {
+      ...defaultSettings.notifications,
+      notices: true,
+    });
+    jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+    jest
+      .mocked(Notifications.getPermissionsAsync)
+      .mockResolvedValue({ granted: true, canAskAgain: true } as never);
+    setAppState('background');
+  });
+
+  it('posts what the user turned on, once', async () => {
+    await notifyContent(diff());
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+    expect(
+      jest.mocked(Notifications.scheduleNotificationAsync).mock.calls[0][0]
+        .content,
+    ).toMatchObject({
+      title: `${unread.courseName} · New notices`,
+      body: unread.title,
+      data: { type: 'notice', id: unread.id },
+    });
+
+    await notifyContent(diff());
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't post while the app is open, and remembers what it saw", async () => {
+    setAppState('active');
+    await notifyContent(diff());
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    expect(getNotifiedKeys()).toContain(`notice:${unread.id}`);
+  });
+
+  it("doesn't post without the permission", async () => {
+    jest
+      .mocked(Notifications.getPermissionsAsync)
+      .mockResolvedValue({ granted: false, canAskAgain: false } as never);
+    await notifyContent(diff());
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  it('posts nothing with notifications off', async () => {
+    setSetting('notifications', defaultSettings.notifications);
+    await notifyContent(diff());
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    expect(getNotifiedKeys().size).toBe(0);
+  });
 });
