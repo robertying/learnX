@@ -5,6 +5,7 @@ import Spotlight, {
 } from '../../modules/spotlight';
 import { Assignment, Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import type { UpcomingClass } from 'helpers/upNext';
 import { upcomingDeadlines } from 'helpers/widgetDeadlines';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
@@ -116,7 +117,35 @@ export async function updateSpotlight(
   await queue;
 }
 
-/** Removes everything from Spotlight and the App Intent, e.g. on logout. */
+/** What the "Next Class" App Intent was last given. */
+let savedClasses: string | undefined;
+
+/** Saves the classes still ahead for the "Next Class" App Intent. */
+export function saveUpcomingClasses(classes: UpcomingClass[]) {
+  if (!Spotlight) {
+    return;
+  }
+  const items = classes.map(({ courseName, location, start, end }) => ({
+    courseName,
+    location,
+    start,
+    end,
+  }));
+  const key = JSON.stringify(items);
+  if (key === savedClasses) {
+    return;
+  }
+  try {
+    Spotlight.setUpcomingClasses?.(items);
+    savedClasses = key;
+  } catch (error) {
+    if (__DEV__) {
+      console.warn('Failed to save upcoming classes', error);
+    }
+  }
+}
+
+/** Removes everything from Spotlight and the App Intents, e.g. on logout. */
 export function clearSpotlight() {
   if (!Spotlight) {
     return;
@@ -125,5 +154,6 @@ export function clearSpotlight() {
   try {
     Spotlight.setUpcomingDeadlines([]);
   } catch {}
+  saveUpcomingClasses([]);
   enqueue(() => Spotlight!.removeAllItems());
 }
