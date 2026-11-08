@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
@@ -66,12 +65,10 @@ const Courses: React.FC<Props> = ({ navigation }) => {
 
   const handlePush = (item: Course) => {
     if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace('CourseDetail', {
-          id: item.id,
-          disableAnimation: true,
-        }),
-      );
+      detailNavigator.replace('CourseDetail', {
+        id: item.id,
+        disableAnimation: true,
+      });
     } else {
       navigation.push('CourseDetail', { id: item.id });
     }

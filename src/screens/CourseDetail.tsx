@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { StackActions, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
   TabView,
@@ -38,7 +38,7 @@ import DeviceInfo from 'constants/DeviceInfo';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import {
-  CourseStackParams,
+  CourseDetailParamList,
   MainStackNavigationProp,
   MainStackScreenProps,
 } from './types';
@@ -51,7 +51,7 @@ const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
   : ('automatic' as const);
 
 type NavigationProp = MainStackNavigationProp<
-  CourseStackParams,
+  CourseDetailParamList,
   'CourseDetail'
 >;
 
@@ -178,7 +178,7 @@ const routes = [
   { key: 'file', title: t('files') },
 ];
 
-type Props = MainStackScreenProps<CourseStackParams, 'CourseDetail'>;
+type Props = MainStackScreenProps<CourseDetailParamList, 'CourseDetail'>;
 
 const CourseDetail: React.FC<Props> = ({ navigation, route }) => {
   const course = useCourse(route.params.id);
@@ -305,7 +305,7 @@ const CourseDetailContent: React.FC<{
 
   const handleNavigateCourseX = () => {
     if (detailNavigator) {
-      detailNavigator.dispatch(StackActions.push('CourseX', { id: course.id }));
+      detailNavigator.push('CourseX', { id: course.id });
     } else {
       navigation.navigate('CourseXStack', {
         screen: 'CourseX',

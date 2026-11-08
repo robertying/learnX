@@ -10,7 +10,11 @@ import {
   SafeAreaProvider,
   useSafeAreaFrame,
 } from 'react-native-safe-area-context';
-import { RootStackParams, SplitRootStackParams } from 'screens/types';
+import {
+  DetailStackParams,
+  RootStackParams,
+  SplitRootStackParams,
+} from 'screens/types';
 import Splash from 'components/Splash';
 import { SplitViewProvider } from 'components/SplitView';
 import { WindowSafeAreaProvider } from 'components/WindowSafeArea';
@@ -56,7 +60,8 @@ const renderMainScreens = () => (
 const SplitMain = () => {
   const theme = useNavigationTheme();
   const frame = useSafeAreaFrame();
-  const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
+  const detailNavigationContainerRef =
+    useRef<NavigationContainerRef<DetailStackParams>>(null);
 
   // The master pane mounts along with the detail container, before the ref is
   // set. Hand the ref out only once it is, so that its consumers render again.

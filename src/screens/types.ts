@@ -1,6 +1,7 @@
 import type {
   CompositeNavigationProp,
   CompositeScreenProps,
+  NavigationContainerRef,
   NavigatorScreenParams,
   ParamListBase,
 } from '@react-navigation/native';
@@ -124,8 +125,13 @@ export type DetailStackParams = {
   Help: ExtraParams;
   About: ExtraParams;
   Changelog: ExtraParams;
+  Maintainer: ExtraParams;
   MockNetwork: ExtraParams;
 };
+
+/** The container of a split view's detail stack. */
+export type DetailNavigationContainerRef =
+  React.RefObject<NavigationContainerRef<DetailStackParams> | null>;
 
 export type RootStackParams = {
   MainTab: NavigatorScreenParams<MainTabParams>;
@@ -159,6 +165,46 @@ export type MainStackScreenProps<
 > = CompositeScreenProps<
   NativeStackScreenProps<ParamList, RouteName>,
   NativeStackScreenProps<RootStackParams>
+>;
+
+/**
+ * The routes that every one of the given param lists has. A screen that is
+ * mounted in several navigators can only navigate to these, and gets the
+ * params that any of them may pass.
+ */
+export type SharedParamList<ParamList extends ParamListBase> = Pick<
+  ParamList,
+  keyof ParamList
+>;
+
+// Screens mounted in several navigators: the stacks of the tabs, the root
+// stacks, and the detail stack of the split view.
+export type NoticeDetailParamList = SharedParamList<
+  NoticeStackParams | CourseStackParams | SearchStackParams | DetailStackParams
+>;
+export type AssignmentDetailParamList = SharedParamList<
+  | AssignmentStackParams
+  | CourseStackParams
+  | SearchStackParams
+  | DetailStackParams
+>;
+export type FileDetailParamList = SharedParamList<
+  | NoticeStackParams
+  | AssignmentStackParams
+  | FileStackParams
+  | CourseStackParams
+  | SearchStackParams
+  | AssignmentSubmissionStackParams
+  | DetailStackParams
+>;
+export type CourseDetailParamList = SharedParamList<
+  CourseStackParams | DetailStackParams
+>;
+export type AssignmentSubmissionParamList = SharedParamList<
+  AssignmentSubmissionStackParams | DetailStackParams
+>;
+export type CourseXParamList = SharedParamList<
+  CourseXStackParams | DetailStackParams
 >;
 
 declare global {

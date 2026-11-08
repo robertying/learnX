@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent } from 'react';
-import { StackActions } from '@react-navigation/native';
 import NoticeCard from 'components/NoticeCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
@@ -41,12 +40,10 @@ const Notices: React.FC<Props> = ({ navigation }) => {
 
   const handlePush = (item: Notice) => {
     if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace('NoticeDetail', {
-          id: item.id,
-          disableAnimation: true,
-        }),
-      );
+      detailNavigator.replace('NoticeDetail', {
+        id: item.id,
+        disableAnimation: true,
+      });
     } else {
       navigation.push('NoticeDetail', { id: item.id });
     }
