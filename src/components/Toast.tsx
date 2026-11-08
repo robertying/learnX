@@ -102,8 +102,10 @@ const cornerRadius = 25;
 
 const hiddenOffset = -24;
 
-// iPad shows the tab bar at the top, under the status bar; stay clear of it.
-const topMargin = DeviceInfo.isTablet() && !DeviceInfo.isMac() ? 8 + 50 + 8 : 8;
+// Centered over the navigation bar, as the system's HUDs sit. iPhone's bar is
+// about 54pt under the status bar; iPad's tab bar comes first, then a header
+// row of about 76pt. The Mac has neither under its title bar.
+const topMargin = DeviceInfo.isMac() ? 8 : DeviceInfo.isTablet() ? 58 : 2;
 
 const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   id,
