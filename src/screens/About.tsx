@@ -27,6 +27,7 @@ const About: React.FC<Props> = () => {
           style={[styles.text, styles.link]}
           onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}
         >
+          {/* oxlint-disable-next-line learnx/no-han-outside-translations -- ICP filing number, shown as filed */}
           浙ICP备20024838号-2A
         </Text>
         <Title style={styles.marginTop}>{t('contributors')}</Title>

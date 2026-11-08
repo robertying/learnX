@@ -45,11 +45,15 @@ function DeadlinesWidget(
         caption: '#4C444D',
         accent: '#9A25AE',
       };
+  // Fallbacks for before the app first sends its strings. Widget layouts run
+  // in their own runtime without the app's translations.
+  /* oxlint-disable learnx/no-han-outside-translations */
   const zh = (environment.locale ?? '').startsWith('zh');
   const title = props.title || (zh ? '作业截止' : 'Deadlines');
   const empty =
     props.empty ||
     (zh ? '打开 learnX 以显示作业' : 'Open learnX to see deadlines');
+  /* oxlint-enable learnx/no-han-outside-translations */
   const deadlines = (props.deadlines ?? []).slice(0, 4);
   const more = (props.total ?? 0) - deadlines.length;
   // Handled by patches/expo-widgets+58.0.27.patch; other platforms ignore it.

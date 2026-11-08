@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import {
   getNotificationPermission,
   notificationChannels,
@@ -69,7 +69,7 @@ const reminderContent = ({
 }: WidgetDeadline) => ({
   title,
   body: `${courseName} · ${t('deadlineReminderDue')} ${dayjs(deadline).format(
-    isLocaleChinese() ? 'M 月 D 日 HH:mm' : 'MMM D HH:mm',
+    t('shortDateTimeFormat'),
   )}`,
   data: { type: 'assignment', id },
 });

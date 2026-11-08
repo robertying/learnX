@@ -2,11 +2,7 @@ import dayjs from 'dayjs';
 import { ContentDiff } from 'data/contentDiff';
 import { BookmarkType } from 'data/userData';
 import { Assignment, NotificationSettings } from 'data/types/state';
-import {
-  getAssignmentGradeLevelDescription,
-  isLocaleChinese,
-  t,
-} from 'helpers/i18n';
+import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { NotificationTarget } from 'helpers/notifications';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
@@ -68,7 +64,7 @@ const targetTypes: Record<ContentKind, NotificationTarget['type']> = {
 };
 
 const formatTime = (time: string) =>
-  dayjs(time).format(isLocaleChinese() ? 'M 月 D 日 HH:mm' : 'MMM D HH:mm');
+  dayjs(time).format(t('shortDateTimeFormat'));
 
 const gradeText = (a: Assignment) => {
   if (a.gradeLevel) {

@@ -1,5 +1,14 @@
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
+import { t } from './i18n';
+
+/** "due in 3 days" or "closed 2 days ago", in the app's language */
+export const deadlineText = (deadline: string, now = dayjs()) => {
+  const dl = dayjs(deadline);
+  return now.isAfter(dl)
+    ? t('deadlinePassed', { time: now.to(dl) })
+    : t('deadlineIn', { time: now.to(dl, true) });
+};
 
 /**
  * Upcoming assignments first, earliest deadline first, followed by past
