@@ -92,13 +92,15 @@ function darkenBorder(color, baseLightness) {
 
 /**
  * Background colors: light ones become dark, with white mapping onto the page
- * background so white boxes blend in; dark ones stay. Bright saturated colors
- * such as a yellow highlight keep a high luminance at any HSL lightness, so
- * they are darkened further until light text on them is readable.
+ * background (`base`, in HSL) so white boxes blend in; dark ones stay. Grays
+ * take the page background's tint. Bright saturated colors such as a yellow
+ * highlight keep a high luminance at any HSL lightness, so they are darkened
+ * further until light text on them is readable.
  */
-function darkenBackground(color, baseLightness) {
-  const hsl = rgbToHsl(color);
-  let l = Math.min(hsl.l, baseLightness + (1 - hsl.l) * 0.5);
+function darkenBackground(color, base) {
+  const own = rgbToHsl(color);
+  const hsl = own.s < 0.05 ? { ...own, h: base.h, s: base.s } : own;
+  let l = Math.min(hsl.l, base.l + (1 - hsl.l) * 0.5);
   while (l > 0 && luminance({ ...hsl, l }) > 0.06) {
     l = Math.max(0, l - 0.02);
   }
@@ -109,7 +111,8 @@ const borderSides = ['top', 'right', 'bottom', 'left'];
 
 function applyDarkMode(root, backgroundColor) {
   const base = parseColor(backgroundColor);
-  const baseLightness = base ? rgbToHsl(base).l : 0.1;
+  const baseHsl = base ? rgbToHsl(base) : { h: 0, s: 0, l: 0.1, a: 1 };
+  const baseLightness = baseHsl.l;
 
   // Read everything first, so that one change does not show up in the
   // computed style of the elements after it
@@ -143,7 +146,7 @@ function applyDarkMode(root, backgroundColor) {
     if (background && background.a > 0) {
       element.style.setProperty(
         'background-color',
-        darkenBackground(background, baseLightness),
+        darkenBackground(background, baseHsl),
         'important',
       );
     }
@@ -168,6 +171,7 @@ if (typeof module === 'object' && module.exports) {
     darkenBackground,
     darkenBorder,
     luminance,
+    hslToString,
     applyDarkMode,
   };
 }

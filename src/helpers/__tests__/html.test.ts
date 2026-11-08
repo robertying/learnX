@@ -7,6 +7,7 @@ const {
   darkenBackground,
   darkenBorder,
   luminance,
+  hslToString,
 } = require('helpers/preval/darkMode.js');
 
 jest.mock('data/source', () => ({
@@ -112,7 +113,7 @@ describe('dark mode colors', () => {
   });
 
   it('darkens bright highlights enough for light text', () => {
-    const base = rgbToHsl(parseColor('rgb(30, 26, 29)')).l;
+    const base = rgbToHsl(parseColor('rgb(30, 26, 29)'));
     const yellow = darkenBackground(parseColor('rgb(255, 255, 0)'), base);
     const background = rgbToHsl(parseColor('rgb(255, 255, 0)'));
     const text = rgbToHsl(parseColor('rgb(233, 224, 228)'));
@@ -137,10 +138,11 @@ describe('dark mode colors', () => {
   });
 
   it('maps white backgrounds onto the page background and keeps dark ones', () => {
-    const base = rgbToHsl(parseColor('rgb(30, 26, 29)')).l;
-    expect(
-      lightness(darkenBackground(parseColor('rgb(255, 255, 255)'), base)),
-    ).toBeCloseTo(base, 2);
+    const base = rgbToHsl(parseColor('rgb(30, 26, 29)'));
+    // White becomes the page background itself, tint included
+    expect(darkenBackground(parseColor('rgb(255, 255, 255)'), base)).toBe(
+      hslToString(base),
+    );
     expect(
       lightness(darkenBackground(parseColor('rgb(40, 40, 40)'), base)),
     ).toBeCloseTo(0.157, 2);
