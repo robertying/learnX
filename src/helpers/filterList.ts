@@ -1,7 +1,7 @@
 // Pure parts of components/FilterList: which list a filter shows, the header
 // subtitle for it, and the ids picked in selection mode.
 import type { FilterSelection } from 'components/Filter';
-import { isLocaleChinese, t } from './i18n';
+import { t } from './i18n';
 
 export interface FilterLists<T> {
   all: T[];
@@ -77,7 +77,7 @@ export const toggleAllSelection = (
 };
 
 export const selectedCountLabel = (count: number) =>
-  isLocaleChinese() ? `已选中 ${count} 个` : `${count} selected`;
+  t('selectedCount', { count });
 
 /** Whether two objects have the same own keys with identical values */
 export const shallowEqual = (a: object, b: object) => {

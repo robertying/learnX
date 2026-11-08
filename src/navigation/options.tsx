@@ -5,7 +5,7 @@ import type {
   NativeStackNavigationOptions,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { t } from 'helpers/i18n';
 import { getTitleOptions } from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
@@ -19,7 +19,9 @@ export const BackButton = () => {
     <IconButton
       accessibilityLabel={t('close')}
       onPress={() => navigation.goBack()}
-      icon={props => <MaterialIcons {...props} name="close" size={32} />}
+      icon={props => (
+        <MaterialCommunityIcons {...props} name="close" size={32} />
+      )}
     />
   );
 };

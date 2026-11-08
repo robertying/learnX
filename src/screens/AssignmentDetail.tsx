@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Chip from 'components/Chip';
 import dayjs from 'dayjs';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {
   HomeworkCompletionType,
@@ -20,10 +19,11 @@ import useDetailNavigator from 'hooks/useDetailNavigator';
 import { getWebViewTemplate, removeTags } from 'helpers/html';
 import { getExtension, stripExtension } from 'helpers/fs';
 import {
+  formatLiteral,
   getAssignmentGradeLevelDescription,
-  isLocaleChinese,
   t,
 } from 'helpers/i18n';
+import { deadlineText } from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
 import { useAssignment } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
@@ -134,7 +134,9 @@ const AssignmentDetailContent: React.FC<{
             disabled={dayjs().isAfter(dayjs(deadline))}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
-            icon={props => <MaterialIcons {...props} name="file-upload" />}
+            icon={props => (
+              <MaterialCommunityIcons {...props} name="file-upload" />
+            )}
           />
         ),
         unstable_headerRightItems: () => [
@@ -172,29 +174,13 @@ const AssignmentDetailContent: React.FC<{
           </View>
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
-            <Caption>
-              {isLocaleChinese()
-                ? dayjs().isAfter(dayjs(deadline))
-                  ? dayjs().to(dayjs(deadline)) + '截止'
-                  : '还剩 ' + dayjs().to(dayjs(deadline), true)
-                : dayjs().isAfter(dayjs(deadline))
-                  ? 'closed ' + dayjs().to(dayjs(deadline))
-                  : 'due in ' + dayjs().to(dayjs(deadline), true)}
-            </Caption>
-            <Caption>
-              {dayjs(deadline).format(
-                isLocaleChinese()
-                  ? 'YYYY 年 M 月 D 日 dddd HH:mm'
-                  : 'ddd, MMM D, YYYY HH:mm',
-              )}
-            </Caption>
+            <Caption>{deadlineText(deadline)}</Caption>
+            <Caption>{dayjs(deadline).format(t('fullDateTimeFormat'))}</Caption>
           </View>
           {lateSubmissionDeadline && (
             <Caption style={Styles.flexRowCenter}>
               {dayjs(lateSubmissionDeadline).format(
-                isLocaleChinese()
-                  ? 'YYYY 年 M 月 D 日 dddd HH:mm 补交截止'
-                  : '[late submission due] ddd, MMM D, YYYY HH:mm',
+                t('lateSubmissionDeadlineFormat'),
               )}
             </Caption>
           )}
@@ -264,13 +250,9 @@ const AssignmentDetailContent: React.FC<{
                 <Caption>
                   {submitTime
                     ? dayjs(submitTime).format(
-                        isLocaleChinese()
-                          ? isLateSubmission
-                            ? 'YYYY 年 M 月 D 日 dddd HH:mm 补交'
-                            : 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
-                          : isLateSubmission
-                            ? '[submitted late at] HH:mm, MMM D, YYYY'
-                            : '[submitted at] HH:mm, MMM D, YYYY',
+                        isLateSubmission
+                          ? t('submittedLateAtFormat')
+                          : t('submittedAtFormat'),
                       )
                     : t('submitted')}
                 </Caption>
@@ -282,9 +264,9 @@ const AssignmentDetailContent: React.FC<{
         {graded && (
           <>
             <View style={[styles.section, styles.iconButton]}>
-              <MaterialIcons
+              <MaterialCommunityIcons
                 style={styles.icon}
-                name="grade"
+                name="star"
                 color={theme.colors.primary}
                 size={17}
               />
@@ -311,13 +293,11 @@ const AssignmentDetailContent: React.FC<{
                 ) : null}
                 <Caption>
                   {dayjs(gradeTime).format(
-                    isLocaleChinese()
-                      ? graderName
-                        ? `YYYY 年 M 月 D 日 dddd HH:mm 由${graderName}批改`
-                        : 'YYYY 年 M 月 D 日 dddd HH:mm 批改'
-                      : graderName
-                        ? `[graded by ${graderName} at] HH:mm, MMM D, YYYY`
-                        : '[graded at] HH:mm, MMM D, YYYY',
+                    graderName
+                      ? t('gradedByAtFormat', {
+                          grader: formatLiteral(graderName),
+                        })
+                      : t('gradedAtFormat'),
                   )}
                 </Caption>
               </View>
@@ -380,9 +360,7 @@ const AssignmentDetailContent: React.FC<{
                       </TextButton>
                     )}
                     <Caption>
-                      {isLocaleChinese()
-                        ? `${authorName}的优秀作业`
-                        : `excellent homework by ${authorName}`}
+                      {t('excellentHomeworkBy', { name: authorName })}
                     </Caption>
                   </View>
                 </View>

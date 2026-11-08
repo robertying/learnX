@@ -21,7 +21,9 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * android/app/src/main/expo-widgets-layout-registry.config.json), so a widget
  * added before the app has run shows a prompt to open it; its strings can't
  * come from the app's translations, so they're picked by the system locale.
- * Tapping anywhere opens the app (patches/expo-widgets+58.0.27.patch).
+ * Tapping a row opens its assignment and tapping elsewhere the list, through
+ * the `openUrl` modifier our expo-widgets patch adds (Glance has no links).
+ * Before the app has sent props, tapping anywhere opens the app.
  */
 function DeadlinesWidget(
   props: DeadlineWidgetProps,
@@ -43,13 +45,20 @@ function DeadlinesWidget(
         caption: '#4C444D',
         accent: '#9A25AE',
       };
+  // Fallbacks for before the app first sends its strings. Widget layouts run
+  // in their own runtime without the app's translations.
+  /* oxlint-disable learnx/no-han-outside-translations */
   const zh = (environment.locale ?? '').startsWith('zh');
   const title = props.title || (zh ? '作业截止' : 'Deadlines');
   const empty =
     props.empty ||
     (zh ? '打开 learnX 以显示作业' : 'Open learnX to see deadlines');
+  /* oxlint-enable learnx/no-han-outside-translations */
   const deadlines = (props.deadlines ?? []).slice(0, 4);
   const more = (props.total ?? 0) - deadlines.length;
+  // Handled by patches/expo-widgets+58.0.27.patch; other platforms ignore it.
+  const openUrl = (url: string | undefined) =>
+    url ? [{ $type: 'openUrl', url }] : [];
 
   return (
     <Column
@@ -58,6 +67,7 @@ function DeadlinesWidget(
         background(colors.background),
         cornerRadius(16),
         paddingAll(12),
+        ...openUrl(props.url),
       ]}
     >
       <Row modifiers={[fillMaxWidth()]}>
@@ -81,7 +91,10 @@ function DeadlinesWidget(
         </Text>
       ) : null}
       {deadlines.map(item => (
-        <Column key={item.id} modifiers={[fillMaxWidth(), paddingAll(2)]}>
+        <Column
+          key={item.id}
+          modifiers={[fillMaxWidth(), paddingAll(2), ...openUrl(item.url)]}
+        >
           <Text
             color={colors.title}
             style={{ fontSize: 14, fontWeight: 'bold' }}
@@ -104,6 +117,7 @@ const initialProps: DeadlineWidgetProps = {
   total: 0,
   title: '',
   empty: '',
+  url: '',
 };
 
 export default createWidget<DeadlineWidgetProps>(

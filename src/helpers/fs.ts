@@ -15,6 +15,7 @@ import { SUBMISSION_DRAFTS_DIR } from 'data/submissionDrafts';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
+import { t } from './i18n';
 
 /**
  * The Mac app's Downloads folder, next to its Documents folder in the app
@@ -174,7 +175,7 @@ export const shareFile = async (file: DownloadableFile) => {
     type:
       (file.fileType && mime.getType(file.fileType)) ||
       'application/octet-stream',
-    title: '分享文件',
+    title: t('shareFile'),
     showAppsToView: true,
     failOnCancel: false,
   });

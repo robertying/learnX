@@ -1,5 +1,9 @@
 import { ApiError, FailReason } from 'thu-learn-lib';
-import { getSemesterTextFromId, serializeError } from 'helpers/parse';
+import {
+  getSemesterTextFromId,
+  isNetworkError,
+  serializeError,
+} from 'helpers/parse';
 import { mockLocale } from '../../../jest/locale';
 
 describe('getSemesterTextFromId', () => {
@@ -52,5 +56,30 @@ describe('serializeError', () => {
     expect(serializeError(new Error('boom'))).toEqual({
       reason: FailReason.UNEXPECTED_STATUS,
     });
+  });
+});
+
+describe('isNetworkError', () => {
+  it('spots a failed fetch, bare or wrapped by thu-learn-lib', () => {
+    expect(isNetworkError(new TypeError('Network request failed'))).toBe(true);
+    expect(
+      isNetworkError({
+        reason: 'x',
+        extra: new TypeError('Network request timed out'),
+      }),
+    ).toBe(true);
+  });
+
+  it('does not count other failures', () => {
+    expect(
+      isNetworkError({
+        reason: 'x',
+        extra: new TypeError(
+          "Cannot read properties of undefined (reading 'split')",
+        ),
+      }),
+    ).toBe(false);
+    expect(isNetworkError({ reason: 'x' })).toBe(false);
+    expect(isNetworkError(null)).toBe(false);
   });
 });

@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import Styles from 'constants/Styles';
 import { t } from 'helpers/i18n';
 import { Text } from 'components/Text';

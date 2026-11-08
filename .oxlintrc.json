@@ -1,6 +1,7 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["unicorn", "react", "jest"],
+  "jsPlugins": ["./lint/plugin.mjs"],
   "categories": {
     "correctness": "warn"
   },
@@ -169,6 +170,23 @@
       ],
       "env": {
         "jest": true
+      }
+    },
+    {
+      "files": ["src/**/*.{js,ts,tsx}"],
+      "rules": {
+        "learnx/no-han-outside-translations": "error"
+      }
+    },
+    {
+      "files": [
+        "src/assets/translations/**",
+        "src/**/__tests__/**",
+        "src/**/*.{spec,test}.{js,ts,tsx}",
+        "src/data/mock.ts"
+      ],
+      "rules": {
+        "learnx/no-han-outside-translations": "off"
       }
     },
     {

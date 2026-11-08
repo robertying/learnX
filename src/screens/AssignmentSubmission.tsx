@@ -17,7 +17,7 @@ import SafeArea from 'components/SafeArea';
 import ContainedButton from 'components/ContainedButton';
 import TextButton from 'components/TextButton';
 import Styles from 'constants/Styles';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import {
   attachmentForFileDetail,
   canSubmit,
@@ -298,12 +298,7 @@ const AssignmentSubmissionContent: React.FC<{
                   handleFileOpen(pickedAsRemoteFile(attachmentResult))
                 }
               >
-                {attachmentResult.name}{' '}
-                {isShared
-                  ? isLocaleChinese()
-                    ? '（之前分享的）'
-                    : '(previously shared)'
-                  : ''}
+                {attachmentResult.name} {isShared ? t('previouslyShared') : ''}
               </TextButton>
             ) : undefined}
             <View style={styles.attachmentActionButtons}>
@@ -358,11 +353,7 @@ const AssignmentSubmissionContent: React.FC<{
             )}
             {submitTime && (
               <Caption style={Styles.spacey1}>
-                {dayjs(submitTime).format(
-                  isLocaleChinese()
-                    ? '上次提交于 YYYY 年 M 月 D 日 dddd HH:mm'
-                    : '[last submitted at] HH:mm, MMM D, YYYY',
-                )}
+                {dayjs(submitTime).format(t('lastSubmittedAtFormat'))}
               </Caption>
             )}
           </View>

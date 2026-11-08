@@ -1,11 +1,9 @@
 import { StyleSheet, View } from 'react-native';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import { isLocaleChinese } from 'helpers/i18n';
+import { deadlineText } from 'helpers/assignments';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import Colors from 'constants/Colors';
 import { Caption, Paragraph, Subheading, Title } from 'components/Text';
@@ -35,16 +33,6 @@ const AssignmentCard: React.FC<
   ...restProps
 }) => {
   const strippedDescription = removeTags(description);
-  const now = dayjs();
-  const dl = dayjs(deadline);
-  const isPast = now.isAfter(dl);
-  const deadlineText = isLocaleChinese()
-    ? isPast
-      ? now.to(dl) + '截止'
-      : '还剩 ' + now.to(dl, true)
-    : isPast
-      ? 'closed ' + now.to(dl)
-      : 'due in ' + now.to(dl, true);
 
   return (
     <CardWrapper {...restProps}>
@@ -73,9 +61,9 @@ const AssignmentCard: React.FC<
               />
             )}
             {graded && (
-              <MaterialIcons
+              <MaterialCommunityIcons
                 style={styles.icon}
-                name="grade"
+                name="star"
                 color={Colors.red500}
                 size={18}
               />
@@ -103,7 +91,7 @@ const AssignmentCard: React.FC<
         ) : null}
         <View style={Styles.flexRowCenter}>
           <Caption>{courseTeacherName}</Caption>
-          <Caption>{deadlineText}</Caption>
+          <Caption>{deadlineText(deadline)}</Caption>
         </View>
       </View>
     </CardWrapper>

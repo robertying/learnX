@@ -11,7 +11,7 @@ dayjs.extend(relativeTime);
 // specifier module-resolver produces ('helpers/env', './env', '../helpers/env').
 jest.mock('../src/helpers/env', () => require('./env'));
 
-jest.mock('react-native-localize', () => ({
+jest.mock('expo-localization', () => ({
   getLocales: () => [
     {
       languageTag: mockLocale.current,
@@ -102,9 +102,6 @@ jest.mock('expo-notifications', () => ({
 jest.mock('@react-native-vector-icons/material-design-icons', () =>
   require('./icons'),
 );
-jest.mock('@react-native-vector-icons/material-icons', () =>
-  require('./icons'),
-);
 
 jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () =>
   require('./swipeable'),
@@ -121,9 +118,16 @@ jest.mock('expo-haptics', () => ({
   impactAsync: jest.fn(() => Promise.resolve()),
 }));
 
-jest.mock('react-native-device-info', () =>
-  require('react-native-device-info/jest/react-native-device-info-mock'),
-);
+// An iPhone
+jest.mock('expo-device', () => ({
+  DeviceType: { UNKNOWN: 0, PHONE: 1, TABLET: 2, DESKTOP: 3, TV: 4 },
+  deviceType: 1,
+  modelName: 'iPhone',
+  osName: 'iOS',
+  osVersion: '26.0',
+  supportedCpuArchitectures: ['arm64'],
+}));
+jest.mock('expo-application', () => ({ nativeBuildVersion: '1' }));
 
 // @expo/ui renders SwiftUI / Jetpack Compose; tests get plain views.
 jest.mock('@expo/ui', () => require('./expoUi'));
@@ -137,6 +141,17 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
 jest.mock('@expo/ui/swift-ui', () => ({}));
 jest.mock('@expo/ui/jetpack-compose', () => ({}));
 jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
+
+// The toast's UIKit views: plain views, the symbol findable as `icon-<name>`.
+jest.mock('../modules/toast', () => {
+  const { createElement } = require('react');
+  const { View } = require('react-native');
+  return {
+    ToastBackground: View,
+    ToastSymbol: ({ name }: { name: string }) =>
+      createElement(View, { testID: `icon-${name}` }),
+  };
+});
 
 jest.mock(
   'react-native-safe-area-context',
