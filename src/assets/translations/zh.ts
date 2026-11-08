@@ -148,8 +148,6 @@ const zh: typeof en = {
   pushNotificationTokenDescription:
     '使用此标识符，配合 learnX Companion 应用，您可以在此设备上接收推送通知。请勿分享此标识符给其他人。',
   copied: '已复制',
-  configurePushNotifications: '推送通知权限设置',
-  noPushNotificationsPermission: '未授予推送通知权限',
   learnXCompanionUsageGuide: 'learnX Companion 使用指南',
   noFileDescription: '无文件描述',
   githubRecommended: 'GitHub（推荐）',
@@ -222,6 +220,23 @@ const zh: typeof en = {
   info: '详情',
   preview: '预览',
   unknownFileType: '未知',
+  notifications: '通知',
+  notificationsCaption:
+    'learnX 会在系统允许时于后台检查新内容，因此这些通知可能会有延迟。',
+  notificationChannelContent: '新内容',
+  notificationChannelDeadlines: '截止提醒',
+  notifyNewNotices: '新公告',
+  notifyNewFiles: '新文件',
+  notifyNewAssignments: '新作业',
+  notifyGrades: '作业批改',
+  notifyDeadlineChanges: '截止时间变更',
+  notifyDeadlineReminders: '截止提醒',
+  notifyDeadlineRemindersCaption:
+    '在未提交的作业截止前提醒你，可与日历和提醒事项的提醒同时使用。',
+  deadlineReminderOffset: '提前提醒（分钟）',
+  notificationPermissionDenied: '系统设置中已关闭 learnX 的通知。',
+  configureNotifications: '通知权限设置',
+  sendTestNotification: '发送测试通知',
 };
 
 export default zh;

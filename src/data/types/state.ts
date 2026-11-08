@@ -19,6 +19,17 @@ export interface AlarmSettings {
   assignmentReminderAlarm: boolean;
   assignmentReminderAlarmOffset?: number;
 }
+/** Which notifications the app posts; all off until the user turns them on. */
+export interface NotificationSettings {
+  notices: boolean;
+  files: boolean;
+  assignments: boolean;
+  grades: boolean;
+  deadlineChanges: boolean;
+  deadlineReminders: boolean;
+  /** Minutes before an assignment's deadline to remind the user. */
+  deadlineReminderOffset: number;
+}
 export interface SettingsState {
   assignmentCalendarSync: boolean;
   calendarEventLength?: number;
@@ -36,6 +47,7 @@ export interface SettingsState {
     [tab in Tab]?: FilterSelection;
   };
   alarms: AlarmSettings;
+  notifications: NotificationSettings;
   graduate: boolean;
   fileUseDocumentDir: boolean;
   fileOmitCourseName: boolean;

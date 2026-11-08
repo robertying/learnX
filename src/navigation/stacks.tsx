@@ -25,6 +25,7 @@ import Login from 'screens/Login';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import FileSettings from 'screens/FileSettings';
+import NotificationSettings from 'screens/NotificationSettings';
 import MockNetwork from 'screens/MockNetwork';
 import SSO from 'screens/SSO';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
@@ -162,6 +163,11 @@ export const renderSettingDetails = () => (
       name="FileSettings"
       component={FileSettings}
       options={getTitleOptions(t('fileSettings'))}
+    />
+    <SettingStackNavigator.Screen
+      name="NotificationSettings"
+      component={NotificationSettings}
+      options={getTitleOptions(t('notifications'))}
     />
     <SettingStackNavigator.Screen
       name="Maintainer"

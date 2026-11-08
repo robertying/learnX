@@ -71,3 +71,23 @@ jest.mock('expo-widgets', () => ({
     reload: jest.fn(),
   })),
 }));
+
+// Notifications need the native module; tests read what was scheduled.
+jest.mock('expo-notifications', () => ({
+  AndroidImportance: { DEFAULT: 3, HIGH: 4 },
+  IosAuthorizationStatus: { PROVISIONAL: 3 },
+  DEFAULT_ACTION_IDENTIFIER: 'expo.modules.notifications.actions.DEFAULT',
+  setNotificationHandler: jest.fn(),
+  setNotificationChannelAsync: jest.fn(() => Promise.resolve(null)),
+  getPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ granted: false, canAskAgain: true }),
+  ),
+  requestPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ granted: true, canAskAgain: true }),
+  ),
+  scheduleNotificationAsync: jest.fn(() => Promise.resolve('id')),
+  cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
+  getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  useLastNotificationResponse: jest.fn(() => null),
+  clearLastNotificationResponse: jest.fn(),
+}));

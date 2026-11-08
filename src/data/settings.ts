@@ -27,6 +27,15 @@ export const defaultSettings: SettingsState = {
     assignmentReminderAlarm: false,
     courseAlarm: false,
   },
+  notifications: {
+    notices: false,
+    files: false,
+    assignments: false,
+    grades: false,
+    deadlineChanges: false,
+    deadlineReminders: false,
+    deadlineReminderOffset: 24 * 60,
+  },
   courseInformationSharing: false,
   courseInformationSharingBadgeShown: false,
   lastShowChangelogVersion: null,
@@ -53,6 +62,7 @@ export const mergeSettings = (
     ...saved.tabFilterSelections,
   },
   alarms: { ...current.alarms, ...saved.alarms },
+  notifications: { ...current.notifications, ...saved.notifications },
   newUpdate: current.newUpdate,
 });
 

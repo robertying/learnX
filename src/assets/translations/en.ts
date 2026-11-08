@@ -154,8 +154,6 @@ export default {
   pushNotificationTokenDescription:
     "Use this token with the learnX Companion app to receive push notifications on this device. Don't share it with others.",
   copied: 'Copied',
-  configurePushNotifications: 'Push Notifications Permission Settings',
-  noPushNotificationsPermission: 'No Push Notifications Permission',
   learnXCompanionUsageGuide: 'learnX Companion Usage Guide',
   noFileDescription: 'No file description',
   githubRecommended: 'GitHub (Recommended)',
@@ -231,4 +229,22 @@ export default {
   info: 'Info',
   preview: 'Preview',
   unknownFileType: 'Unknown',
+  notifications: 'Notifications',
+  notificationsCaption:
+    'learnX checks for new content in the background when the system lets it, so these notifications can arrive late.',
+  notificationChannelContent: 'New content',
+  notificationChannelDeadlines: 'Deadline reminders',
+  notifyNewNotices: 'New notices',
+  notifyNewFiles: 'New files',
+  notifyNewAssignments: 'New assignments',
+  notifyGrades: 'Graded assignments',
+  notifyDeadlineChanges: 'Deadline changes',
+  notifyDeadlineReminders: 'Deadline reminders',
+  notifyDeadlineRemindersCaption:
+    'Reminds you of unsubmitted assignments before they are due. Works alongside calendar and Reminders alarms.',
+  deadlineReminderOffset: 'Remind before (minutes)',
+  notificationPermissionDenied:
+    'Notifications for learnX are turned off in system settings.',
+  configureNotifications: 'Notification Permission Settings',
+  sendTestNotification: 'Send a Test Notification',
 };
