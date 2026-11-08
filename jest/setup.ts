@@ -136,8 +136,11 @@ jest.mock('expo-application', () => ({ nativeBuildVersion: '1' }));
 jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
+  animation: jest.fn(),
+  Animation: { easeInOut: jest.fn() },
   background: jest.fn(),
   buttonStyle: jest.fn(),
+  controlSize: jest.fn(),
   disabled: jest.fn(),
   font: jest.fn(),
   foregroundStyle: jest.fn(),
@@ -145,8 +148,10 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   headerProminence: jest.fn(),
   labelsHidden: jest.fn(),
   listRowBackground: jest.fn(),
+  monospacedDigit: jest.fn(),
   refreshable: jest.fn(),
   scrollContentBackground: jest.fn(),
+  tint: jest.fn(),
   toggleStyle: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for

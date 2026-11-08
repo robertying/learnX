@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import ProgressBar from 'components/ProgressBar';
 import Chip from 'components/Chip';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
@@ -11,7 +10,7 @@ import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { canPreviewInline, needWhiteBackground } from 'helpers/filePreview';
 import { t } from 'helpers/i18n';
-import Skeleton from 'components/Skeleton';
+import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
 import ScrollView from 'components/ScrollView';
@@ -105,10 +104,9 @@ const FileDetailContent: React.FC<{
   return (
     <SafeArea testID="file-detail" collapsable={false}>
       {error ? (
-        // A key of its own: React would otherwise reuse the skeleton list's
-        // View below, which keeps its taller height on iOS and pushes the
-        // centered icon down behind the tab bar.
-        <View key="error" style={styles.errorRoot}>
+        // Keys of their own: React would otherwise reuse one View for the
+        // error and the loading state below.
+        <View key="error" style={styles.centered}>
           <Icon
             style={Styles.spacey1}
             name="alert-circle"
@@ -120,18 +118,8 @@ const FileDetailContent: React.FC<{
           </Text>
         </View>
       ) : !path ? (
-        <View>
-          {progress ? <ProgressBar progress={progress} /> : null}
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
-          <Skeleton />
+        <View key="loading" style={styles.centered}>
+          <Spinner progress={progress} />
         </View>
       ) : !showInfo && canRender ? (
         file.fileType === 'pdf' ? (
@@ -232,7 +220,7 @@ const FileDetailContent: React.FC<{
 };
 
 const styles = StyleSheet.create({
-  errorRoot: {
+  centered: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
