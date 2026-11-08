@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -6,8 +6,12 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Searchbar } from 'react-native-paper';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import type { ParamListBase } from '@react-navigation/native';
+import type { SearchBarCommands } from 'react-native-screens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
 import Styles from 'constants/Styles';
@@ -34,7 +38,73 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   const { assignments } = useAssignments();
   const { files } = useFiles();
 
-  const [searchQuery, setSearchQuery] = useState(route.params?.query ?? '');
+  const initialQuery = route.params?.query ?? '';
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
+
+  // The system search bar in the header (UISearchController on iOS and Mac,
+  // the toolbar search view on Android).
+  const searchBarRef = useRef<SearchBarCommands>(null);
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerSearchBarOptions: {
+        ref: searchBarRef,
+        placeholder: t('searchPlaceholder'),
+        autoCapitalize: 'none',
+        autoFocus: true,
+        hideWhenScrolling: false,
+        hideNavigationBar: false,
+        obscureBackground: false,
+        tintColor: theme.colors.primary,
+        onChangeText: e => setSearchQuery(e.nativeEvent.text),
+        // The clear and cancel buttons don't always send a text change.
+        onCancelButtonPress: () => setSearchQuery(''),
+        onClose: () => setSearchQuery(''),
+        onFocus: () => {
+          searchBarFocused.current = true;
+        },
+      },
+    });
+  }, [navigation, theme.colors.primary]);
+
+  // Android focuses through autoFocus. On iOS the header search bar is
+  // attached some time after the screen mounts (once the search modal is
+  // presented), and focus() before that does nothing. So keep asking until
+  // the bar reports focus: on each early transitionEnd and on a few timers
+  // after mounting. Coming back from a result doesn't refocus it.
+  const searchBarFocused = useRef(false);
+  useEffect(() => {
+    let attempts = 0;
+    const focusSearchBar = () => {
+      if (searchBarFocused.current || attempts >= 8) {
+        return;
+      }
+      if (attempts === 0 && initialQuery) {
+        searchBarRef.current?.setText(initialQuery);
+      }
+      attempts++;
+      searchBarRef.current?.focus();
+    };
+    const timers = [50, 200, 400, 700, 1000].map(delay =>
+      setTimeout(focusSearchBar, delay),
+    );
+    const parent =
+      navigation.getParent<NativeStackNavigationProp<ParamListBase>>();
+    const unsubscribeParent = parent?.addListener('transitionEnd', e => {
+      if (!e.data.closing) {
+        focusSearchBar();
+      }
+    });
+    const unsubscribe = navigation.addListener('transitionEnd', e => {
+      if (!e.data.closing) {
+        focusSearchBar();
+      }
+    });
+    return () => {
+      timers.forEach(clearTimeout);
+      unsubscribeParent?.();
+      unsubscribe();
+    };
+  }, [navigation, initialQuery]);
 
   const [noticeResult, assignmentResult, fileResult] = useSearch(
     notices,
@@ -53,15 +123,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
   return (
     <SafeArea>
       <View style={Styles.flex1}>
-        <Searchbar
-          style={[styles.searchBar, { backgroundColor: theme.colors.surface }]}
-          elevation={0}
-          placeholderTextColor={theme.colors.outline}
-          placeholder={t('searchPlaceholder')}
-          onChangeText={setSearchQuery}
-          value={searchQuery}
-          autoFocus
-        />
         {noticeResult.length === 0 &&
         assignmentResult.length === 0 &&
         fileResult.length === 0 ? (
@@ -73,6 +134,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
           </KeyboardAvoidingView>
         ) : (
           <SectionList<Notice | Assignment | File>
+            contentInsetAdjustmentBehavior="automatic"
             contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
             sections={[
               { key: 'notice', title: t('notices'), data: noticeResult },
@@ -130,10 +192,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  searchBar: {
-    elevation: 0,
-    borderRadius: 0,
-  },
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
