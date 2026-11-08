@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Animated, {
   Easing,
@@ -249,15 +249,17 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
   },
+  // Paper's List.Item heights: 54 pt on iOS (its title had 8 pt of top
+  // padding there) and 52 pt on Android.
   listItem: {
-    paddingVertical: 8,
+    height: Platform.OS === 'ios' ? 54 : 52,
+    justifyContent: 'center',
     paddingLeft: 16,
     paddingRight: 24,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 6,
   },
   icon: {
     marginLeft: 16,
