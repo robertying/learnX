@@ -6,7 +6,7 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
-import TableCell from 'components/TableCell';
+import TableCell, { TableCellProps } from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import WindowSafeArea from 'components/WindowSafeArea';
 import ScrollView from 'components/ScrollView';
@@ -32,6 +32,28 @@ const onNumberInput = (apply: (value: number) => void) => (v: string) => {
   if (value) {
     apply(value);
   }
+};
+
+/**
+ * A switch row that toggles when the row itself is pressed. On Mac Catalyst,
+ * pressing the row through accessibility (AXPress) presses the row, not the
+ * switch, so without this the row's accessibility action does nothing.
+ */
+const SwitchCell: React.FC<
+  Omit<TableCellProps, 'type' | 'onPress'>
+> = props => {
+  const { switchValue, switchDisabled, loading, onSwitchValueChange } = props;
+  return (
+    <TableCell
+      {...props}
+      type="switch"
+      onPress={
+        switchDisabled || loading
+          ? undefined
+          : () => onSwitchValueChange?.(!switchValue)
+      }
+    />
+  );
 };
 
 const CalendarEvent: React.FC<Props> = () => {
@@ -71,12 +93,11 @@ const CalendarEvent: React.FC<Props> = () => {
         keyboardVerticalOffset={120}
       >
         <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-          <TableCell
+          <SwitchCell
             iconName="people"
             primaryText={t('graduate')}
             switchValue={graduate}
             onSwitchValueChange={value => setSetting('graduate', value)}
-            type="switch"
           />
           <TableCell
             iconName="event"
@@ -85,12 +106,11 @@ const CalendarEvent: React.FC<Props> = () => {
             onPress={picker.openPicker}
             loading={courseSyncing}
           />
-          <TableCell
+          <SwitchCell
             iconName="access-alarm"
             primaryText={t('classAlarm')}
             switchValue={alarms.courseAlarm}
             onSwitchValueChange={value => setAlarm('courseAlarm', value)}
-            type="switch"
           />
           {alarms.courseAlarm && (
             <TableCell
@@ -102,14 +122,13 @@ const CalendarEvent: React.FC<Props> = () => {
               type="input"
             />
           )}
-          <TableCell
+          <SwitchCell
             iconName="location-off"
             primaryText={t('courseEventOmitLocation')}
             switchValue={courseEventOmitLocation}
             onSwitchValueChange={value =>
               setSetting('courseEventOmitLocation', value)
             }
-            type="switch"
           />
           <Caption style={styles.caption}>
             {isLocaleChinese()
@@ -120,7 +139,7 @@ const CalendarEvent: React.FC<Props> = () => {
                   graduate ? 'graduate' : 'undergraduate'
                 } course schedule to your calendar. Please re-sync after any setting change.`}
           </Caption>
-          <TableCell
+          <SwitchCell
             style={styles.marginTop}
             iconName="event-note"
             primaryText={t('assignmentCalendarSync')}
@@ -128,7 +147,6 @@ const CalendarEvent: React.FC<Props> = () => {
             onSwitchValueChange={enabled =>
               handleAssignmentSync('calendar', enabled)
             }
-            type="switch"
             loading={assignmentCalendarSyncing}
           />
           {assignmentCalendarSync && (
@@ -141,14 +159,13 @@ const CalendarEvent: React.FC<Props> = () => {
               type="input"
             />
           )}
-          <TableCell
+          <SwitchCell
             iconName="access-alarm"
             primaryText={t('assignmentCalendarAlarm')}
             switchValue={alarms.assignmentCalendarAlarm}
             onSwitchValueChange={value =>
               setAlarm('assignmentCalendarAlarm', value)
             }
-            type="switch"
             switchDisabled={!assignmentCalendarSync}
           />
           {alarms.assignmentCalendarAlarm && (
@@ -164,14 +181,13 @@ const CalendarEvent: React.FC<Props> = () => {
             />
           )}
           {alarms.assignmentCalendarAlarm && (
-            <TableCell
+            <SwitchCell
               iconName="access-alarm"
               primaryText={t('assignmentCalendarSecondAlarm')}
               switchValue={alarms.assignmentCalendarSecondAlarm}
               onSwitchValueChange={value =>
                 setAlarm('assignmentCalendarSecondAlarm', value)
               }
-              type="switch"
               switchDisabled={!assignmentCalendarSync}
             />
           )}
@@ -189,20 +205,19 @@ const CalendarEvent: React.FC<Props> = () => {
               />
             )}
           {alarms.assignmentCalendarAlarm && (
-            <TableCell
+            <SwitchCell
               iconName="check-circle-outline"
               primaryText={t('assignmentCalendarNoAlarmIfComplete')}
               switchValue={alarms.assignmentCalendarNoAlarmIfComplete}
               onSwitchValueChange={value =>
                 setAlarm('assignmentCalendarNoAlarmIfComplete', value)
               }
-              type="switch"
               switchDisabled={!assignmentCalendarSync}
             />
           )}
           {Platform.OS === 'ios' ? (
             <>
-              <TableCell
+              <SwitchCell
                 style={{ marginTop: 16 }}
                 iconName="event-available"
                 primaryText={t('assignmentReminderSync')}
@@ -210,17 +225,15 @@ const CalendarEvent: React.FC<Props> = () => {
                 onSwitchValueChange={enabled =>
                   handleAssignmentSync('reminder', enabled)
                 }
-                type="switch"
                 loading={assignmentReminderSyncing}
               />
-              <TableCell
+              <SwitchCell
                 iconName="access-alarm"
                 primaryText={t('assignmentReminderAlarm')}
                 switchValue={alarms.assignmentReminderAlarm}
                 onSwitchValueChange={value =>
                   setAlarm('assignmentReminderAlarm', value)
                 }
-                type="switch"
                 switchDisabled={!assignmentReminderSync}
               />
               {alarms.assignmentReminderAlarm && (
