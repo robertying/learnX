@@ -9,6 +9,11 @@ import useNotificationTarget, {
 // The split view's divider pulls in the theme, which isn't needed here.
 jest.mock('components/Divider', () => () => null);
 jest.mock('@react-navigation/native', () => ({}));
+jest.mock('navigation/layout', () => ({ nativeSplit: true }));
+let mockSplitLaidOut = true;
+jest.mock('components/NativeSplitView', () => ({
+  useSplitLaidOut: () => mockSplitLaidOut,
+}));
 
 const splitContext = (navigator: object | null) => ({
   detailNavigationContainerRef: navigator
@@ -21,7 +26,10 @@ const splitContext = (navigator: object | null) => ({
   masterWidth: Numbers.splitViewMasterWidth,
 });
 
-afterEach(() => setPendingNotificationTarget(null));
+afterEach(() => {
+  setPendingNotificationTarget(null);
+  mockSplitLaidOut = true;
+});
 
 it('opens a pending item of its type once', async () => {
   const open = jest.fn();
@@ -63,6 +71,26 @@ it('waits for the detail pane of a split view', async () => {
   expect(open).not.toHaveBeenCalled();
 
   context = splitContext({});
+  await hook.rerender({});
+  expect(open.mock.calls).toEqual([['n1']]);
+});
+
+it("waits for the split to be laid out, when a phone's still hands out its hidden pane", async () => {
+  const open = jest.fn();
+  mockSplitLaidOut = false;
+  const context = splitContext({});
+  const wrapper = ({ children }: React.PropsWithChildren) => (
+    <SplitViewContext.Provider value={context}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+  setPendingNotificationTarget({ type: 'notice', id: 'n1' });
+  const hook = await renderHook(() => useNotificationTarget('notice', open), {
+    wrapper,
+  });
+  expect(open).not.toHaveBeenCalled();
+
+  mockSplitLaidOut = true;
   await hook.rerender({});
   expect(open.mock.calls).toEqual([['n1']]);
 });

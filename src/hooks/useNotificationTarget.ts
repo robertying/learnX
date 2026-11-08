@@ -1,6 +1,8 @@
 import { useContext, useEffect, useEffectEvent } from 'react';
 import { create } from 'zustand';
 import { SplitViewContext } from 'components/SplitView';
+import { useSplitLaidOut } from 'components/NativeSplitView';
+import { nativeSplit } from 'navigation/layout';
 import { NotificationTarget } from 'helpers/notifications';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 
@@ -16,7 +18,7 @@ export const setPendingNotificationTarget = (
 /**
  * Lets a list screen open the item of a tapped notification the way a tap on
  * the item would: pushed on a phone, or in the detail pane of its split view,
- * once that pane is ready.
+ * once the split is laid out and that pane is ready.
  */
 const useNotificationTarget = (
   type: NotificationTarget['type'],
@@ -25,7 +27,11 @@ const useNotificationTarget = (
   const target = usePendingTargetStore(state => state.target);
   const { showDetail } = useContext(SplitViewContext);
   const detailNavigator = useDetailNavigator();
-  const waitingForDetail = showDetail && !detailNavigator;
+  // Until UIKit lays out the split, a phone's collapsed split still hands
+  // out its hidden detail pane.
+  const splitLaidOut = useSplitLaidOut();
+  const waitingForDetail =
+    (nativeSplit && !splitLaidOut) || (showDetail && !detailNavigator);
 
   const openTarget = useEffectEvent(open);
 
