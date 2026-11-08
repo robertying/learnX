@@ -86,12 +86,32 @@ def notes_path(options)
   default_notes_path
 end
 
+# What the release lanes upload. With no notes file yet, an interactive run
+# writes one (as `fastlane notes` does) and waits until it's reviewed. A
+# non-interactive run, or a rebuild of a tagged version, uploads without notes.
+def notes_for_release(options)
+  path = notes_path(options)
+  if path.nil? && UI.interactive? && !tagged?(app_version)
+    UI.important("No release notes for v#{app_version} yet, so writing them first.")
+    path = write_notes(use_claude: use_claude?(options))
+    print_notes(path)
+    unless UI.confirm("Edit #{path} if needed. Upload with these notes?")
+      UI.user_error!("Stopped before building. Edit #{path}, then run the lane again.")
+    end
+  end
+  release_notes(path)
+end
+
 def release_notes(path)
   return nil if path.nil? || path.empty?
 
   file = File.expand_path(path, ROOT)
   UI.user_error!("Release notes not found: #{file}") unless File.exist?(file)
-  sections = File.read(file).split(/^={4,}[ \t]*$/).map(&:strip)
+  text = File.read(file)
+  if text.include?(NOTES_TODO)
+    UI.user_error!("#{file} still has #{NOTES_TODO} placeholders. Finish the notes and delete them first.")
+  end
+  sections = text.split(/^={4,}[ \t]*$/).map(&:strip)
   UI.user_error!("#{file} needs 4 sections split by `====` lines, found #{sections.size}") unless sections.size == 4
 
   github, play, ios, mac = sections
@@ -113,6 +133,152 @@ def split_languages(section, name)
     UI.user_error!("#{name} notes need English, a `---` line, then Chinese")
   end
   { en: en, zh: zh }
+end
+
+# The fallback draft marks what's left to write with this, and the release
+# lanes refuse notes that still have it.
+NOTES_TODO = "TODO(release-notes)"
+
+# Commits users never see, left out of the fallback draft.
+INTERNAL_COMMIT = /\A(Bump|Release|Merge|Update dependency|chore|ci|build)\b|\bfastlane\b|\bskills?\b/i
+
+# claude:false skips Claude Code (fastlane may pass the string).
+def use_claude?(options)
+  !%w[false no 0].include?(options[:claude].to_s.downcase)
+end
+
+# The newest release tag, as the release-notes skill finds it.
+def last_release_tag
+  Dir.chdir(ROOT) { `git tag --list 'v*' --sort=-creatordate`.lines.map(&:strip) }.first
+end
+
+def tagged?(version)
+  Dir.chdir(ROOT) { system("git rev-parse -q --verify refs/tags/v#{version} > /dev/null") }
+end
+
+# Writes default_notes_path with Claude Code, or the fallback draft when
+# use_claude is false or Claude Code isn't available or fails.
+def write_notes(use_claude: true)
+  if tagged?(app_version)
+    UI.user_error!("v#{app_version} is already released. Run `bundle exec fastlane bump version:x.y.z` first, so the notes are for the next version.")
+  end
+  path = default_notes_path
+  FileUtils.mkdir_p(File.dirname(path))
+  FileUtils.rm_f(path)
+
+  if use_claude && write_notes_with_claude(path)
+    release_notes(path)
+    UI.success("Claude Code wrote the release notes: #{path}")
+  else
+    write_fallback_notes(path)
+    UI.important("Wrote a draft from the commit list instead: #{path}")
+    UI.important("Fill in every #{NOTES_TODO}; the release lanes won't upload notes that still have one.")
+  end
+  path
+end
+
+def write_notes_with_claude(path)
+  unless system("command -v claude > /dev/null")
+    UI.important("The `claude` CLI isn't on PATH (install Claude Code from https://code.claude.com and log in with `claude` once).")
+    return false
+  end
+
+  prompt = <<~PROMPT
+    Use the release-notes skill to write the release notes for learnX v#{app_version}.
+    Save the file to #{path} instead of the scratchpad. Don't publish or upload anything.
+    This runs unattended, so don't stop to ask: make the best call, and list anything unsure in your reply.
+  PROMPT
+  # Read-only git and gh, plus writing the notes file.
+  allowed = [
+    "Skill", "Read", "Grep", "Glob", "Write", "Edit",
+    "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
+    "Bash(gh release list:*)", "Bash(gh release view:*)",
+  ]
+  # claude -p waits for stdin when it isn't a terminal, so give it none.
+  command = ["claude", "-p", prompt, "--allowedTools", allowed.join(",")].shelljoin
+  UI.message("Running Claude Code with the release-notes skill (takes a few minutes)…")
+  ok = Dir.chdir(ROOT) { system("#{command} < /dev/null") }
+  unless ok
+    UI.important("Claude Code failed (exit #{$?.exitstatus}). Not logged in? Run `claude` once to check.")
+    return false
+  end
+  return true if File.exist?(path)
+
+  UI.important("Claude Code finished but wrote no notes to #{path}.")
+  false
+end
+
+# The release-notes shape with the commits since the last tag, for a person
+# to sort and translate.
+def write_fallback_notes(path)
+  tag = last_release_tag
+  range = tag ? "#{tag}..HEAD" : "HEAD"
+  log = Dir.chdir(ROOT) { `git log --no-merges --format=%s #{range.shellescape}` }
+  commits = log.lines.map(&:strip).reject { |line| line.empty? || line.match?(INTERNAL_COMMIT) }
+  list = commits.empty? ? "- #{NOTES_TODO}" : commits.map { |line| "- #{line}" }.join("\n")
+  short = commits.empty? ? "- #{NOTES_TODO}" : commits.map { |line| "- #{line.sub(/\s*\(#\d+\)\z/, '')}" }.join("\n")
+
+  store = <<~STORE.strip
+    # Features
+
+    - #{NOTES_TODO}: only this platform's changes, or "Fix minor issues." under # Fixes
+
+    # Fixes
+
+    - #{NOTES_TODO}
+
+    ---
+
+    # 功能
+
+    - #{NOTES_TODO}：中文，全角标点
+
+    # 修复
+
+    - #{NOTES_TODO}
+  STORE
+
+  File.write(path, <<~NOTES)
+    <!-- #{NOTES_TODO}: Claude Code didn't write these. Commits since #{tag || 'the first commit'}; keep what users see: -->
+    <!--
+    #{short}
+    -->
+
+    # 功能
+
+    - #{NOTES_TODO}
+
+    # 修复
+
+    - #{NOTES_TODO}
+
+    ---
+
+    # Features
+
+    #{list}
+
+    # Fixes
+
+    - #{NOTES_TODO}
+
+    ====
+
+    #{store}
+
+    ====
+
+    #{store}
+
+    ====
+
+    #{store}
+  NOTES
+end
+
+def print_notes(path)
+  UI.header("Release notes v#{app_version}")
+  puts(File.read(path))
 end
 
 # ---------------------------------------------------------------------------
@@ -328,36 +494,12 @@ end
 
 desc "Write the release notes with Claude Code (`claude -p` and the release-notes skill) for review."
 desc "Saves build/release/v<version>/release-notes.md, which the release lanes use when no notes: is given."
-desc "Usage: bundle exec fastlane notes   (run `bump` first, so the version is the new one)"
-lane :notes do
-  version = app_version
-  path = default_notes_path
-  FileUtils.mkdir_p(File.dirname(path))
-  FileUtils.rm_f(path)
-
-  prompt = <<~PROMPT
-    Use the release-notes skill to write the release notes for learnX v#{version}.
-    Save the file to #{path} instead of the scratchpad. Don't publish or upload anything.
-  PROMPT
-  # Read-only git and gh, plus writing the notes file.
-  allowed = [
-    "Skill", "Read", "Grep", "Glob", "Write", "Edit",
-    "Bash(git log:*)", "Bash(git show:*)", "Bash(git tag:*)", "Bash(git describe:*)", "Bash(git diff:*)",
-    "Bash(gh release list:*)", "Bash(gh release view:*)",
-  ]
-  unless system("command -v claude > /dev/null")
-    UI.user_error!("The `claude` CLI isn't on PATH. Install Claude Code (https://code.claude.com) and log in with `claude` once.")
-  end
-  # claude -p waits for stdin when it isn't a terminal, so give it none.
-  command = ["claude", "-p", prompt, "--allowedTools", allowed.join(",")].shelljoin
-  Dir.chdir(ROOT) do
-    sh("#{command} < /dev/null")
-  end
-
-  UI.user_error!("Claude Code wrote no notes to #{path}") unless File.exist?(path)
-  release_notes(path)
-  UI.success("Release notes: #{path}")
-  UI.important("Review and edit it, then run a release lane; it picks the file up without notes:.")
+desc "Without Claude Code (or with claude:false), writes a draft with the commit list and TODOs to fill in."
+desc "Usage: bundle exec fastlane notes [claude:false]   (run `bump` first, so the version is the new one)"
+lane :notes do |options|
+  path = write_notes(use_claude: use_claude?(options))
+  print_notes(path)
+  UI.important("Review and edit #{path}, then run a release lane; it picks the file up without notes:.")
 end
 
 desc "Build and upload everything: iOS, Mac, Android (Play draft) and a draft GitHub release."
@@ -365,7 +507,7 @@ desc "Builds all platforms before uploading anything. Nothing is submitted for r
 desc "Usage: bundle exec fastlane release [notes:/path/to/notes.md] [track:production]"
 lane :release do |options|
   ensure_git_status_clean
-  notes = release_notes(notes_path(options))
+  notes = notes_for_release(options)
   ipa = build_apple("ios")
   pkg = build_apple("macos")
   build_android
@@ -378,7 +520,7 @@ end
 desc "Create a draft GitHub release with the APKs, latest.json and source maps from `android build`."
 desc "Usage: bundle exec fastlane github_release [notes:/path/to/notes.md]"
 lane :github_release do |options|
-  publish_github(release_notes(notes_path(options)))
+  publish_github(notes_for_release(options))
 end
 
 platform :ios do
@@ -391,7 +533,7 @@ platform :ios do
   desc "Usage: bundle exec fastlane ios release [notes:/path/to/notes.md]"
   lane :release do |options|
     ensure_git_status_clean
-    notes = release_notes(notes_path(options))
+    notes = notes_for_release(options)
     upload_apple("ios", build_apple("ios"), notes && notes[:ios])
   end
 end
@@ -406,7 +548,7 @@ platform :mac do
   desc "Usage: bundle exec fastlane mac release [notes:/path/to/notes.md]"
   lane :release do |options|
     ensure_git_status_clean
-    notes = release_notes(notes_path(options))
+    notes = notes_for_release(options)
     upload_apple("macos", build_apple("macos"), notes && notes[:mac])
   end
 end
@@ -421,7 +563,7 @@ platform :android do
   desc "Usage: bundle exec fastlane android release [notes:/path/to/notes.md] [track:production]"
   lane :release do |options|
     ensure_git_status_clean
-    notes = release_notes(notes_path(options))
+    notes = notes_for_release(options)
     build_android
     upload_android(notes && notes[:play], options[:track] || "production")
   end
