@@ -131,6 +131,12 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   buttonStyle: jest.fn(),
   labelsHidden: jest.fn(),
 }));
+// The other entry points are ESM only. The widget layouts import them just for
+// types (they are strings after the Babel transform), and any test that
+// refreshes data updates the widget, so every test needs these.
+jest.mock('@expo/ui/swift-ui', () => ({}));
+jest.mock('@expo/ui/jetpack-compose', () => ({}));
+jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
 
 jest.mock(
   'react-native-safe-area-context',

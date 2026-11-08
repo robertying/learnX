@@ -1,0 +1,13 @@
+# Keeps the GitHub Actions in .github/workflows on their latest versions.
+# npm dependencies are upgraded by hand (React Native upgrades need native work).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: CI
