@@ -10,6 +10,7 @@ import { useSplitLaidOut } from 'components/NativeSplitView';
 import createSidebarSplitNavigator from 'components/SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
+import useKeyboardShown from 'hooks/useKeyboardShown';
 import useMainCommands from 'hooks/useMainCommands';
 import useMainStartup from 'hooks/useMainStartup';
 import packageJson from '../../package.json';
@@ -76,6 +77,9 @@ const useMountedTabCount = () => {
 
 const MainTab = () => {
   const mountedTabCount = useMountedTabCount();
+  // The window resizes for the keyboard on Android (adjustResize), which would
+  // lift the bottom navigation bar on top of it. Material hides it instead.
+  const keyboardShown = useKeyboardShown();
   useMainStartup();
   useMainCommands();
   const newChangelog = useSettings(
@@ -142,6 +146,7 @@ const MainTab = () => {
     <MainNativeNavigator.Navigator
       labeled
       sidebarAdaptable={DeviceInfo.isIPad()}
+      tabBarHidden={keyboardShown}
     >
       <MainNativeNavigator.Screen
         name="NoticeStack"
