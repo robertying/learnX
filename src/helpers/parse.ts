@@ -47,3 +47,9 @@ export const isNetworkError = (err: unknown): boolean => {
       isFetchFailure((err as { extra?: unknown }).extra))
   );
 };
+
+/** Whether thu-learn-lib rejected a login for a wrong username or password. */
+export const isBadCredential = (err: unknown): boolean =>
+  !!err &&
+  typeof err === 'object' &&
+  (err as Partial<ApiError>).reason === FailReason.BAD_CREDENTIAL;
