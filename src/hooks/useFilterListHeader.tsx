@@ -5,7 +5,6 @@ import type {
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import HeaderTitle from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -123,7 +122,7 @@ const useFilterListHeader = ({
         headerLeft: () => (
           <IconButton
             accessibilityLabel={t('reorder')}
-            icon={props => <MaterialCommunityIcons {...props} name="sort" />}
+            icon="reorder"
             onPress={onReorder}
             mode="contained"
           />
@@ -174,20 +173,13 @@ const useFilterListHeader = ({
             <IconButton
               accessibilityLabel={t('select')}
               onPress={onSelect}
-              icon={props => (
-                <MaterialCommunityIcons
-                  {...props}
-                  name="format-list-bulleted"
-                />
-              )}
+              icon="select"
               mode="contained"
             />
             <IconButton
               accessibilityLabel={t('checkAll')}
               onPress={onCheckAll}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="check-all" />
-              )}
+              icon="checkAll"
             />
           </>
         ),
@@ -197,16 +189,7 @@ const useFilterListHeader = ({
               filterSelected === 'archived' ? t('restore') : t('archive')
             }
             onPress={onArchiveSelected}
-            icon={props => (
-              <MaterialCommunityIcons
-                {...props}
-                name={
-                  filterSelected === 'archived'
-                    ? 'archive-arrow-up'
-                    : 'archive-arrow-down'
-                }
-              />
-            )}
+            icon={filterSelected === 'archived' ? 'restore' : 'archive'}
           />
         ),
         ...getHeaderTitleOptions(
@@ -302,39 +285,25 @@ const useFilterListHeader = ({
             {isCourse ? (
               <IconButton
                 accessibilityLabel={t('reorder')}
-                icon={props => (
-                  <MaterialCommunityIcons {...props} name="sort" />
-                )}
+                icon="reorder"
                 onPress={onReorder}
               />
             ) : (
               <IconButton
                 accessibilityLabel={t('select')}
                 onPress={onSelect}
-                icon={props => (
-                  <MaterialCommunityIcons
-                    {...props}
-                    name="format-list-bulleted"
-                  />
-                )}
+                icon="select"
               />
             )}
             <IconButton
               accessibilityLabel={t('filter')}
               onPress={onFilter}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="filter-variant" />
-              )}
+              icon="filter"
             />
             {isCourse && (
               <IconButton
                 accessibilityLabel={t('courseX')}
-                icon={props => (
-                  <MaterialCommunityIcons
-                    {...props}
-                    name="information-outline"
-                  />
-                )}
+                icon="info"
                 onPress={onCourseX}
               />
             )}
@@ -347,17 +316,13 @@ const useFilterListHeader = ({
                 accessibilityLabel={t('refresh')}
                 disabled={refreshing}
                 onPress={onRefresh}
-                icon={props => (
-                  <MaterialCommunityIcons {...props} name="refresh" />
-                )}
+                icon="refresh"
               />
             )}
             <IconButton
               accessibilityLabel={t('search')}
               onPress={() => navigation.navigate('SearchStack')}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="magnify" />
-              )}
+              icon="search"
             />
           </>
         ),

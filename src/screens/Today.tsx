@@ -4,7 +4,6 @@ import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
 import AssignmentCard from 'components/AssignmentCard';
-import Badge from 'components/Badge';
 import Divider from 'components/Divider';
 import IconButton from 'components/IconButton';
 import SafeArea from 'components/SafeArea';
@@ -301,15 +300,13 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ],
       headerRight: showSettings
         ? () => (
-            <View>
-              <IconButton
-                testID="today-settings"
-                accessibilityLabel={t('settings')}
-                icon="cog-outline"
-                onPress={openSettings}
-              />
-              {settingsBadge && <Badge size={8} style={styles.badge} />}
-            </View>
+            <IconButton
+              testID="today-settings"
+              accessibilityLabel={t('settings')}
+              icon="settings"
+              badge={settingsBadge}
+              onPress={openSettings}
+            />
           )
         : undefined,
     });
@@ -489,11 +486,6 @@ const styles = StyleSheet.create({
   },
   rowIcon: {
     marginRight: 12,
-  },
-  badge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
   },
 });
 

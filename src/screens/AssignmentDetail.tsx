@@ -175,9 +175,7 @@ const AssignmentDetailContent: React.FC<{
             disabled={closed}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
-            icon={props => (
-              <MaterialCommunityIcons {...props} name="file-upload" />
-            )}
+            icon="upload"
           />
         ),
         unstable_headerRightItems: () => [

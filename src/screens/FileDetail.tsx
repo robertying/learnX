@@ -205,7 +205,12 @@ const FileDetailContent: React.FC<{
             style={[styles.actions, { backgroundColor: theme.colors.surface }]}
           >
             <View style={styles.colCenter}>
-              <IconButton icon="share" size={48} onPress={share} />
+              <IconButton
+                icon="share"
+                size={48}
+                accessibilityLabel={t('share')}
+                onPress={share}
+              />
               <Text>{t('share')}</Text>
             </View>
             {DeviceInfo.isMac() && (
@@ -213,6 +218,7 @@ const FileDetailContent: React.FC<{
                 <IconButton
                   icon="download"
                   size={48}
+                  accessibilityLabel={t('download')}
                   onPress={copyToDownloads}
                 />
                 <Text>{t('download')}</Text>
@@ -220,7 +226,12 @@ const FileDetailContent: React.FC<{
             )}
             {Platform.OS === 'android' && (
               <View style={styles.colCenter}>
-                <IconButton icon="open-in-new" size={48} onPress={open} />
+                <IconButton
+                  icon="openInNew"
+                  size={48}
+                  accessibilityLabel={t('open')}
+                  onPress={open}
+                />
                 <Text>{t('open')}</Text>
               </View>
             )}

@@ -137,12 +137,14 @@ jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   background: jest.fn(),
+  buttonBorderShape: jest.fn(),
   buttonStyle: jest.fn(),
   disabled: jest.fn(),
   font: jest.fn(),
   foregroundStyle: jest.fn(),
   frame: jest.fn(),
   headerProminence: jest.fn(),
+  labelStyle: jest.fn(),
   labelsHidden: jest.fn(),
   listRowBackground: jest.fn(),
   refreshable: jest.fn(),
