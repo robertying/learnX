@@ -9,6 +9,7 @@ import SafeArea from 'components/SafeArea';
 import { setSSOInProgress } from 'data/auth';
 import { login } from 'data/login';
 import { generateFingerprint } from 'helpers/fingerprint';
+import { fillSSOScript } from 'helpers/ssoScript';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import { LoginStackParams } from './types';
@@ -39,14 +40,12 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   } | null>(null);
   const webviewRef = useRef<WebView>(null);
 
-  const injectedJs = ssoCustomScript
-    .replaceAll('${username}', username)
-    .replaceAll("'${password}'", JSON.stringify(password)) // `password` may contain single quotes
-    .replaceAll(
-      '${deviceName}',
-      `${DeviceInfo.model()},learnX/${packageJson.version}`,
-    )
-    .replaceAll('${fingerPrint}', fingerPrint);
+  const injectedJs = fillSSOScript(ssoCustomScript, {
+    username,
+    password,
+    deviceName: `${DeviceInfo.model()},learnX/${packageJson.version}`,
+    fingerPrint,
+  });
 
   const handleShouldStartLoadWithRequest: OnShouldStartLoadWithRequest =
     event => {
@@ -68,9 +67,15 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
     };
 
   const handleMessage = (event: WebViewMessageEvent) => {
-    const { type, data } = JSON.parse(event.nativeEvent.data);
+    let message: { type?: unknown; data?: any };
+    try {
+      message = JSON.parse(event.nativeEvent.data);
+    } catch {
+      return;
+    }
+    const { type, data } = message ?? {};
 
-    if (type === 'JQUERY_SUBMIT' && data.formId === 'theform') {
+    if (type === 'JQUERY_SUBMIT' && data?.formId === 'theform') {
       formData.current = {
         username,
         password,

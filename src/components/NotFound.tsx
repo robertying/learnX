@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import SafeArea from 'components/SafeArea';
 import Styles from 'constants/Styles';
 import { t } from 'helpers/i18n';
@@ -18,7 +18,7 @@ const NotFound: React.FC = () => {
       <View style={styles.root}>
         <Icon
           style={Styles.spacey1}
-          name="search-off"
+          name="magnify-close"
           color={theme.colors.outline}
           size={56}
         />

@@ -7,6 +7,7 @@ import { useLoggedIn } from 'data/auth';
 import { useUserData } from 'data/userData';
 import { useCourseIds } from 'data/queries';
 import { File } from 'data/types/state';
+import usePullToRefresh from 'hooks/usePullToRefresh';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useNotificationTarget from 'hooks/useNotificationTarget';
@@ -22,7 +23,7 @@ const Files: React.FC<Props> = ({ navigation }) => {
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.file);
   const archivedIds = useUserData(data => data.archived.file);
-  const { files, isFetching: fetching, refetch } = useFiles();
+  const { files, isFetching: fetching, refetch, dataUpdatedAt } = useFiles();
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: files,
@@ -31,11 +32,10 @@ const Files: React.FC<Props> = ({ navigation }) => {
     hidden: hiddenCourseIds,
   });
 
-  const handleRefresh = () => {
-    if (loggedIn) {
-      refetch({ cancelRefetch: false });
-    }
-  };
+  const handleRefresh = () =>
+    loggedIn ? refetch({ cancelRefetch: false }) : undefined;
+
+  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
   const refresh = useEffectEvent(handleRefresh);
 
@@ -71,8 +71,9 @@ const Files: React.FC<Props> = ({ navigation }) => {
         itemComponent={FileCard}
         navigation={navigation}
         onItemPress={handlePush}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
+        refreshing={pullToRefresh.refreshing}
+        onRefresh={pullToRefresh.onRefresh}
+        updatedAt={dataUpdatedAt}
       />
     </SafeArea>
   );

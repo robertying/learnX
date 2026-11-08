@@ -9,7 +9,7 @@ import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
 import { CardAction, cardActions } from 'helpers/cardActions';
@@ -184,9 +184,9 @@ const CardWrapper: React.FC<
           </View>
         )}
         {reorderMode && (
-          <MaterialIcons
+          <MaterialCommunityIcons
             style={styles.checkbox}
-            name="reorder"
+            name="reorder-horizontal"
             size={20}
             color={theme.colors.onSurface}
           />

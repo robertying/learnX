@@ -8,11 +8,10 @@ import {
   ViewProps,
   TextInput,
 } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import MaterialCommunityIcons, {
+  type MaterialDesignIconsIconName,
+} from '@react-native-vector-icons/material-design-icons';
 import Badge from 'components/Badge';
-import Icon, {
-  MaterialIconsIconName,
-} from '@react-native-vector-icons/material-icons';
 import Touchable from './Touchable';
 import Switch from 'components/Switch';
 import { Text } from 'components/Text';
@@ -23,7 +22,7 @@ export interface TableCellProps extends ViewProps {
   onPress?: () => void;
   primaryText: string;
   secondaryText?: string;
-  iconName?: MaterialIconsIconName;
+  iconName?: MaterialDesignIconsIconName;
   imageSrc?: ImageSourcePropType;
   imageAlt?: string;
   switchDisabled?: boolean;
@@ -119,7 +118,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
         ) : null}
         {iconName ? (
           <View style={{ position: 'relative' }}>
-            <Icon
+            <MaterialCommunityIcons
               style={styles.icon}
               name={iconName}
               size={21}
@@ -155,7 +154,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           </View>
         ) : null}
         {type === 'arrow' ? (
-          <Icon name="keyboard-arrow-right" size={21} color="grey" />
+          <MaterialCommunityIcons name="chevron-right" size={21} color="grey" />
         ) : null}
         {type === 'input' ? (
           <TextInput

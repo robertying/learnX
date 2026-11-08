@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  // Holds the password: only ever run on Tsinghua's own pages over HTTPS.
+  if (
+    window.location.protocol !== 'https:' ||
+    !/(^|\.)tsinghua\.edu\.cn$/.test(window.location.hostname)
+  ) {
+    return true;
+  }
+
   const sendToReactNative = (type, data) => {
     window?.ReactNativeWebView?.postMessage?.(JSON.stringify({ type, data }));
   };
@@ -23,6 +31,7 @@
       const params = new URLSearchParams(body);
       params.set('fingerprint', '${fingerPrint}');
       params.set('deviceName', '${deviceName}');
+      // oxlint-disable-next-line learnx/no-han-outside-translations -- form value the SSO server expects
       params.set('radioVal', '是');
       body = params.toString();
     }

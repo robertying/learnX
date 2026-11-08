@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Chip from 'components/Chip';
 import dayjs from 'dayjs';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {
   HomeworkCompletionType,
@@ -18,16 +17,17 @@ import Styles from 'constants/Styles';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
-import { deadlineText } from 'helpers/assignments';
 import { getWebViewTemplate, removeTags } from 'helpers/html';
 import { getExtension, stripExtension } from 'helpers/fs';
 import {
+  formatLiteral,
   getAssignmentGradeLevelDescription,
-  isLocaleChinese,
   t,
 } from 'helpers/i18n';
+import { deadlineText } from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
 import { useAssignment } from 'data/content';
+import { useHasSubmissionDraft } from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import { Caption, Text, Title } from 'components/Text';
@@ -64,6 +64,7 @@ const AssignmentDetailContent: React.FC<{
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();
+  const hasDraft = useHasSubmissionDraft(assignment.id);
 
   const {
     id,
@@ -137,7 +138,9 @@ const AssignmentDetailContent: React.FC<{
             disabled={closed}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
-            icon={props => <MaterialIcons {...props} name="file-upload" />}
+            icon={props => (
+              <MaterialCommunityIcons {...props} name="file-upload" />
+            )}
           />
         ),
         unstable_headerRightItems: () => [
@@ -176,20 +179,12 @@ const AssignmentDetailContent: React.FC<{
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
             <Caption>{deadlineText(deadline, now)}</Caption>
-            <Caption>
-              {dayjs(deadline).format(
-                isLocaleChinese()
-                  ? 'YYYY 年 M 月 D 日 dddd HH:mm'
-                  : 'ddd, MMM D, YYYY HH:mm',
-              )}
-            </Caption>
+            <Caption>{dayjs(deadline).format(t('fullDateTimeFormat'))}</Caption>
           </View>
           {lateSubmissionDeadline && (
             <Caption style={Styles.flexRowCenter}>
               {dayjs(lateSubmissionDeadline).format(
-                isLocaleChinese()
-                  ? 'YYYY 年 M 月 D 日 dddd HH:mm 补交截止'
-                  : '[late submission due] ddd, MMM D, YYYY HH:mm',
+                t('lateSubmissionDeadlineFormat'),
               )}
             </Caption>
           )}
@@ -209,6 +204,25 @@ const AssignmentDetailContent: React.FC<{
                 onPress={() => handleFileOpen(attachment)}
               >
                 {attachment.name}
+              </TextButton>
+            </View>
+            <Divider />
+          </>
+        )}
+        {hasDraft && (
+          <>
+            <View style={[styles.section, styles.iconButton]}>
+              <MaterialCommunityIcons
+                style={styles.icon}
+                name="pencil-outline"
+                color={theme.colors.primary}
+                size={17}
+              />
+              <TextButton
+                style={styles.textPaddingRight}
+                onPress={handleSubmit}
+              >
+                {t('assignmentDraft')}
               </TextButton>
             </View>
             <Divider />
@@ -240,13 +254,9 @@ const AssignmentDetailContent: React.FC<{
                 <Caption>
                   {submitTime
                     ? dayjs(submitTime).format(
-                        isLocaleChinese()
-                          ? isLateSubmission
-                            ? 'YYYY 年 M 月 D 日 dddd HH:mm 补交'
-                            : 'YYYY 年 M 月 D 日 dddd HH:mm 提交'
-                          : isLateSubmission
-                            ? '[submitted late at] HH:mm, MMM D, YYYY'
-                            : '[submitted at] HH:mm, MMM D, YYYY',
+                        isLateSubmission
+                          ? t('submittedLateAtFormat')
+                          : t('submittedAtFormat'),
                       )
                     : t('submitted')}
                 </Caption>
@@ -258,9 +268,9 @@ const AssignmentDetailContent: React.FC<{
         {graded && (
           <>
             <View style={[styles.section, styles.iconButton]}>
-              <MaterialIcons
+              <MaterialCommunityIcons
                 style={styles.icon}
-                name="grade"
+                name="star"
                 color={theme.colors.primary}
                 size={17}
               />
@@ -287,13 +297,11 @@ const AssignmentDetailContent: React.FC<{
                 ) : null}
                 <Caption>
                   {dayjs(gradeTime).format(
-                    isLocaleChinese()
-                      ? graderName
-                        ? `YYYY 年 M 月 D 日 dddd HH:mm 由${graderName}批改`
-                        : 'YYYY 年 M 月 D 日 dddd HH:mm 批改'
-                      : graderName
-                        ? `[graded by ${graderName} at] HH:mm, MMM D, YYYY`
-                        : '[graded at] HH:mm, MMM D, YYYY',
+                    graderName
+                      ? t('gradedByAtFormat', {
+                          grader: formatLiteral(graderName),
+                        })
+                      : t('gradedAtFormat'),
                   )}
                 </Caption>
               </View>
@@ -356,9 +364,7 @@ const AssignmentDetailContent: React.FC<{
                       </TextButton>
                     )}
                     <Caption>
-                      {isLocaleChinese()
-                        ? `${authorName}的优秀作业`
-                        : `excellent homework by ${authorName}`}
+                      {t('excellentHomeworkBy', { name: authorName })}
                     </Caption>
                   </View>
                 </View>

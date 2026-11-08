@@ -2,11 +2,7 @@ import dayjs from 'dayjs';
 import { ContentDiff } from 'data/contentDiff';
 import { BookmarkType } from 'data/userData';
 import { Assignment, NotificationSettings } from 'data/types/state';
-import {
-  getAssignmentGradeLevelDescription,
-  isLocaleChinese,
-  t,
-} from 'helpers/i18n';
+import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { NotificationTarget } from 'helpers/notifications';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
@@ -38,6 +34,8 @@ export interface ContentNotification {
   title: string;
   body: string;
   target: NotificationTarget;
+  /** Ids of the items it covers when there are several, all of one type. */
+  ids?: string[];
   /** Keys of the items it covers. */
   keys: string[];
 }
@@ -68,7 +66,7 @@ const targetTypes: Record<ContentKind, NotificationTarget['type']> = {
 };
 
 const formatTime = (time: string) =>
-  dayjs(time).format(isLocaleChinese() ? 'M 月 D 日 HH:mm' : 'MMM D HH:mm');
+  dayjs(time).format(t('shortDateTimeFormat'));
 
 const gradeText = (a: Assignment) => {
   if (a.gradeLevel) {
@@ -187,6 +185,7 @@ export const groupContentItems = (
       title: `${first.courseName} · ${kindLabels[first.kind]()}`,
       body: group.map(i => i.text).join('\n'),
       target: group.length === 1 ? first.target : { type: first.target.type },
+      ids: group.length === 1 ? undefined : group.map(i => i.target.id),
       keys: group.map(i => i.key),
     };
   });
@@ -194,7 +193,8 @@ export const groupContentItems = (
   if (notifications.length <= MAX_NOTIFICATIONS) {
     return notifications;
   }
-  // Too many courses at once: keep the first ones and sum up the rest.
+  // Too many courses at once: keep the first ones and sum up the rest, which
+  // may mix types, so it has no Archive All.
   const kept = notifications.slice(0, MAX_NOTIFICATIONS - 1);
   const rest = notifications.slice(MAX_NOTIFICATIONS - 1);
   return [

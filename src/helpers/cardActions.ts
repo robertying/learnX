@@ -1,20 +1,11 @@
 // The actions a card offers when swiped (iOS), long-pressed (Android, WSA) or
 // right-clicked (iPad, Mac), and as accessibility actions everywhere.
 import type { SFSymbol } from 'sf-symbols-typescript';
-import type MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import type MaterialIcons from '@react-native-vector-icons/material-icons';
+import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
 import Colors from 'constants/Colors';
 import { t } from './i18n';
 
-export type CardActionIconName =
-  | {
-      set: 'material';
-      name: React.ComponentProps<typeof MaterialIcons>['name'];
-    }
-  | {
-      set: 'community';
-      name: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
-    };
+export type CardActionIconName = MaterialDesignIconsIconName;
 
 export interface CardAction {
   key: 'hide' | 'fav' | 'archive';
@@ -49,10 +40,7 @@ export const cardActions = ({
         key: 'hide',
         testID: 'card-hide',
         label: hidden ? t('unhide') : t('hide'),
-        icon: {
-          set: 'material',
-          name: hidden ? 'visibility' : 'visibility-off',
-        },
+        icon: hidden ? 'eye' : 'eye-off',
         systemImage: hidden ? 'eye' : 'eye.slash',
         color: Colors.yellow500,
         background: 'rgba(255,204,0,0.2)',
@@ -66,7 +54,7 @@ export const cardActions = ({
       key: 'fav',
       testID: 'card-fav',
       label: fav ? t('unfavorite') : t('favorite'),
-      icon: { set: 'community', name: fav ? 'heart-off' : 'heart' },
+      icon: fav ? 'heart-off' : 'heart',
       systemImage: fav ? 'heart.slash' : 'heart',
       color: Colors.red500,
       background: 'rgba(255,59,48,0.2)',
@@ -76,10 +64,7 @@ export const cardActions = ({
     key: 'archive',
     testID: 'card-archive',
     label: archived ? t('restore') : t('archive'),
-    icon: {
-      set: 'community',
-      name: archived ? 'archive-arrow-up' : 'archive-arrow-down',
-    },
+    icon: archived ? 'archive-arrow-up' : 'archive-arrow-down',
     systemImage: archived ? 'arrow.up.bin' : 'archivebox',
     color: Colors.blue500,
     background: 'rgba(33,150,243,0.2)',

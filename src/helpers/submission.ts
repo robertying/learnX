@@ -5,6 +5,7 @@ import { RemoteFile } from 'thu-learn-lib';
 import { submitAssignment } from 'data/source';
 import { Assignment } from 'data/types/state';
 import { getExtension, stripExtension } from './filename';
+import { interpolate, translationsFor } from './i18n';
 import { removeTags } from './text';
 
 /** A file picked or shared for submission, not uploaded yet */
@@ -19,14 +20,17 @@ export interface PickedAttachment {
 export const initialSubmissionContent = (submittedContent?: string) =>
   (removeTags(submittedContent || '') ?? '').replace('-->', '');
 
-/** "<title>-提交.<ext>" or "<title> Submission.<ext>", ext from the MIME type */
+/** "<title> Submission.<ext>" in the given language, ext from the MIME type */
 export const defaultAttachmentName = (
   title: string,
   mimeType: string | null | undefined,
   chinese: boolean,
 ) => {
   const ext = mime.getExtension(mimeType ?? 'application/octet-stream');
-  return chinese ? `${title}-提交.${ext}` : `${title} Submission.${ext}`;
+  return interpolate(translationsFor(chinese).submissionAttachmentName, {
+    title,
+    ext: String(ext),
+  });
 };
 
 /** Custom names get the picked file's extension, so dots are not allowed */

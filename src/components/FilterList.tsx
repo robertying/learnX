@@ -29,6 +29,7 @@ import { checkedIds, listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
 import Filter, { FilterSelection } from './Filter';
 import Empty from './Empty';
+import SyncStatus from './SyncStatus';
 import FilterListRow, {
   FilterListRowActions,
   ItemComponentProps,
@@ -55,6 +56,8 @@ export interface FilterListProps<T> {
   onItemPress?: (item: T) => void;
   refreshing: boolean;
   onRefresh?: () => void;
+  /** When the list's data was last fetched (ms), shown while offline. */
+  updatedAt?: number;
 }
 
 const FilterList = <T extends Notice | Assignment | File | Course>({
@@ -73,6 +76,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   defaultSubtitle,
   refreshing,
   onRefresh,
+  updatedAt,
 }: FilterListProps<T>) => {
   const detailNavigator = useDetailNavigator();
 
@@ -319,6 +323,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   return (
     <View style={Styles.flex1}>
+      <SyncStatus updatedAt={updatedAt} />
       <Filter
         visible={filterVisible}
         selected={filterSelected}

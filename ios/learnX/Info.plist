@@ -111,7 +111,6 @@
 	<true/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>MaterialIcons.ttf</string>
 		<string>MaterialDesignIcons.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>

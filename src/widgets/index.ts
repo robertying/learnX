@@ -2,7 +2,8 @@ import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
+import { getTargetUrl } from 'helpers/notifications';
 import { deadlineTimeline, UpcomingDeadlines } from 'helpers/widgetDeadlines';
 import type { DeadlineWidgetProps } from 'widgets/props';
 
@@ -20,13 +21,13 @@ const toProps = ({
 }: UpcomingDeadlines): DeadlineWidgetProps => ({
   deadlines: deadlines.map(d => ({
     ...d,
-    due: dayjs(d.deadline).format(
-      isLocaleChinese() ? 'M月D日 HH:mm' : 'MMM D, HH:mm',
-    ),
+    due: dayjs(d.deadline).format(t('widgetDateTimeFormat')),
+    url: getTargetUrl({ type: 'assignment', id: d.id }),
   })),
   total,
   title: t('widgetDeadlines'),
   empty: t('widgetNoDeadlines'),
+  url: getTargetUrl({ type: 'assignment' }),
 });
 
 /**

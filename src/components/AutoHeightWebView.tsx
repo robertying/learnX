@@ -8,6 +8,7 @@ import {
   WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
 import CookieManager from '@preeternal/react-native-cookie-manager';
+import { recordError } from 'helpers/crashReporting';
 import Urls from 'constants/Urls';
 
 const AutoHeightWebView: React.FC<
@@ -31,7 +32,10 @@ const AutoHeightWebView: React.FC<
       if (webViewRef.current) {
         webViewRef.current.stopLoading();
       }
-      Linking.openURL(e.url);
+      // Course content is written by teachers; only open web and mail links.
+      if (/^(https?|mailto):/i.test(e.url)) {
+        Linking.openURL(e.url).catch(() => {});
+      }
     }
   };
 
@@ -93,7 +97,14 @@ const AutoHeightWebView: React.FC<
 
   useEffect(() => {
     (async () => {
-      const cookies = await CookieManager.get(Urls.learn);
+      let cookies: Awaited<ReturnType<typeof CookieManager.get>>;
+      try {
+        cookies = await CookieManager.get(Urls.learn);
+      } catch (error) {
+        recordError(error);
+        return;
+      }
+      // The page still loads with the Cookie header below if these fail.
       await Promise.all(
         Object.entries(cookies).map(([, value]) =>
           CookieManager.set(
@@ -102,7 +113,7 @@ const AutoHeightWebView: React.FC<
             true,
           ),
         ),
-      );
+      ).catch(recordError);
 
       setCookieString(
         Object.entries(cookies)
