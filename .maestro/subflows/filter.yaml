@@ -1,5 +1,6 @@
 # Switch the current list's filter to the one labelled LABEL (a regex such
-# as 'Favorites|收藏'), from the filter button's pull-down menu.
+# as 'Favorites(, .*)?|收藏(, .*)?', since iOS reads the count after the
+# label), from the filter button's pull-down menu.
 appId: ${APP_ID}
 ---
 - tapOn: 'Filter|过滤'
