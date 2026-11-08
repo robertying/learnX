@@ -5,7 +5,6 @@ import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { Menu } from 'react-native-paper';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -14,6 +13,7 @@ import useCardSwipe from 'hooks/useCardSwipe';
 import CardActionIcon from './CardActionIcon';
 import CardSwipeActions from './CardSwipeActions';
 import Touchable from './Touchable';
+import SelectionMark from './SelectionMark';
 import { useTheme } from 'theme';
 
 const swipeableNotSupported = DeviceInfo.isWSA() || Platform.OS === 'android';
@@ -147,14 +147,7 @@ const CardWrapper: React.FC<
       <View style={styles.root}>
         {selectionMode && (
           <View style={styles.checkbox}>
-            <MaterialCommunityIcons
-              style={styles.checkboxIcon}
-              name={checked ? 'checkbox-marked' : 'checkbox-blank-outline'}
-              size={24}
-              color={
-                checked ? theme.colors.primary : theme.colors.onSurfaceVariant
-              }
-            />
+            <SelectionMark checked={!!checked} />
           </View>
         )}
         {reorderMode && (
@@ -216,10 +209,6 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     marginRight: 8,
-  },
-  // The selection mark is display only: the whole card toggles it.
-  checkboxIcon: {
-    padding: 6,
   },
 });
 
