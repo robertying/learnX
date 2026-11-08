@@ -1,7 +1,14 @@
-import { Alert, Linking, Platform, StyleSheet } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Linking, Platform, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
-import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
+import {
+  ensureLearnXFilesDir,
+  listDownloads,
+  moveDownloadsToCurrentDirectory,
+} from 'helpers/fs';
+import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import TableCell from 'components/TableCell';
@@ -13,7 +20,7 @@ import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
-const FileSettings: React.FC<Props> = () => {
+const FileSettings: React.FC<Props> = ({ navigation }) => {
   const fileUseDocumentDir = useSettings(
     settings => settings.fileUseDocumentDir,
   );
@@ -24,30 +31,14 @@ const FileSettings: React.FC<Props> = () => {
     settings => settings.openFileAfterDownload,
   );
 
-  const handleClearCache = () => {
-    Alert.alert(
-      t('clearFileCache'),
-      t('clearFileCacheConfirmation'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('ok'),
-          onPress: async () => {
-            try {
-              await removeFileDir();
-              toast(t('clearFileCacheSucceeded'), 'success');
-            } catch (e) {
-              toast(t('clearFileCacheFailed') + (e as Error).message, 'error');
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  };
+  const [downloadsSize, setDownloadsSize] = useState<number | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      setDownloadsSize(
+        listDownloads().reduce((total, course) => total + course.size, 0),
+      );
+    }, []),
+  );
 
   return (
     <SafeArea>
@@ -56,7 +47,10 @@ const FileSettings: React.FC<Props> = () => {
           iconName="cached"
           primaryText={t('fileUseDocumentDir')}
           switchValue={fileUseDocumentDir}
-          onSwitchValueChange={value => setSetting('fileUseDocumentDir', value)}
+          onSwitchValueChange={value => {
+            setSetting('fileUseDocumentDir', value);
+            moveDownloadsToCurrentDirectory();
+          }}
           type="switch"
         />
         <Caption style={styles.caption}>
@@ -79,10 +73,13 @@ const FileSettings: React.FC<Props> = () => {
         </Caption>
         <TableCell
           style={styles.marginTop}
-          iconName="delete"
-          primaryText={t('clearFileCache')}
-          type="none"
-          onPress={handleClearCache}
+          iconName="download"
+          primaryText={t('downloads')}
+          secondaryText={
+            downloadsSize === null ? undefined : formatFileSize(downloadsSize)
+          }
+          type="arrow"
+          onPress={() => navigation.push('Downloads')}
         />
         {DeviceInfo.isMac() && (
           <TableCell

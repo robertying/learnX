@@ -291,6 +291,15 @@ const zh: typeof en = {
     '退出课程信息共享计划后，课程信息将不再自动上传。',
   courseInformationSharingOffCaption:
     '加入课程信息共享计划后，当前学期的课程信息（包括课程号、课程名、任课教师、上课时间和地点）会自动上传至 courseX 平台，共享给其他用户。上传内容不包含任何个人信息。\n\n你可以通过 courseX 查询所有已上传课程的信息，如上课时间和地点等。',
+  delete: '删除',
+  downloads: '已下载文件',
+  downloadsTotal: '全部已下载文件',
+  downloadsCaption:
+    '在 learnX 中下载的文件，按课程分类。轻点课程可删除其文件。',
+  downloadsDeleteCourse: '删除已下载的文件？',
+  downloadsOneFile: '1 个文件',
+  downloadsFileCount: '{count} 个文件',
+  downloadsDeletedCourse: '已删除{course}的已下载文件',
 };
 
 export default zh;

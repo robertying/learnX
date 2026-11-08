@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import semverGt from 'semver/functions/gt';
 import { getLatestRelease } from 'helpers/update';
 import { setUpBackgroundFetch } from 'helpers/background';
+import { migrateDownloads } from 'helpers/fs';
 import { configureNotifications } from 'helpers/notifications';
 import useNotificationTaps from 'hooks/useNotificationTaps';
 import useLinkTaps from 'hooks/useLinkTaps';
@@ -18,7 +19,8 @@ import packageJson from '../../package.json';
 /**
  * What the main UI starts once logged in: picks the semester, keeps its
  * courses fetched, schedules background fetch, keeps the deadline widget
- * and reminders current, sets up notifications and opens their taps and widget rows' links, and checks
+ * and reminders current, sets up notifications and opens their taps and
+ * widget rows' links, moves downloads from the old folder layout, and checks
  * for an Android update.
  */
 const useMainStartup = () => {
@@ -50,6 +52,7 @@ const useMainStartup = () => {
 
   useEffect(() => {
     configureNotifications();
+    migrateDownloads();
   }, []);
   useNotificationTaps();
   useLinkTaps();
