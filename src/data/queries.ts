@@ -53,6 +53,9 @@ export const userQuery = queryOptions({
 export const coursesQuery = (semesterId: string) =>
   queryOptions({
     queryKey: queryKeys.courses(semesterId),
+    // Courses rarely change during a term, and each fetch also asks for every
+    // course's time and location; pull to refresh on Courses still refetches.
+    staleTime: 24 * 60 * 60 * 1000,
     queryFn: async (): Promise<Course[]> => {
       const lang = await setLanguage();
       const results = await dataSource.getCourseList(

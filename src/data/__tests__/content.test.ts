@@ -18,6 +18,7 @@ import {
 } from 'data/mock';
 import {
   defaultMockNetworkConfig,
+  mockSource,
   setMockNetworkConfig,
 } from 'data/mockSource';
 import { clearQueryCache, queryClient, queryPersister } from 'data/queryClient';
@@ -43,6 +44,7 @@ const isNewestFirst = (notices: Notice[]) =>
   );
 
 beforeEach(() => {
+  jest.restoreAllMocks();
   setMockNetworkConfig({ ...defaultMockNetworkConfig, latency: 'none' });
   clearQueryCache();
 });
@@ -114,6 +116,43 @@ describe('assignments', () => {
     const refreshed = queryClient.getQueryData(key)!;
     expect(ids(refreshed).sort()).toEqual(ids(assignments).sort());
     expect(ids(refreshed)).toEqual(ids(sortAssignments(refreshed)));
+  });
+});
+
+describe('fetching course by course', () => {
+  it('keeps the cached items of a course that fails', async () => {
+    const key = noticesQuery(semesterId).queryKey;
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const failing = notices[0].courseId;
+    const kept = notices.filter(n => n.courseId === failing);
+    const getNotificationList = mockSource.getNotificationList;
+    jest
+      .spyOn(mockSource, 'getNotificationList')
+      .mockImplementation(((id: string) =>
+        id === failing
+          ? Promise.reject(new Error('server error'))
+          : getNotificationList(id)) as typeof getNotificationList);
+
+    const refetched = await queryClient.fetchQuery({
+      ...noticesQuery(semesterId),
+      staleTime: 0,
+    });
+
+    expect(refetched.map(n => n.id).sort()).toEqual(
+      notices.map(n => n.id).sort(),
+    );
+    expect(refetched.filter(n => n.courseId === failing)).toEqual(kept);
+    expect(isNewestFirst(queryClient.getQueryData(key)!)).toBe(true);
+  });
+
+  it('fails when every course fails', async () => {
+    await queryClient.fetchQuery(filesQuery(semesterId));
+    jest
+      .spyOn(mockSource, 'getFileList')
+      .mockRejectedValue(new Error('server error'));
+    await expect(
+      queryClient.fetchQuery({ ...filesQuery(semesterId), staleTime: 0 }),
+    ).rejects.toThrow('server error');
   });
 });
 
