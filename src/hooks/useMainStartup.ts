@@ -6,6 +6,7 @@ import { getLatestRelease } from 'helpers/update';
 import { setUpBackgroundFetch } from 'helpers/background';
 import { configureNotifications } from 'helpers/notifications';
 import useNotificationTaps from 'hooks/useNotificationTaps';
+import useLinkTaps from 'hooks/useLinkTaps';
 import { setSetting } from 'data/settings';
 import { useLoggedIn } from 'data/auth';
 import { latestSemesterQuery, useCourses } from 'data/queries';
@@ -17,7 +18,7 @@ import packageJson from '../../package.json';
 /**
  * What the main UI starts once logged in: picks the semester, keeps its
  * courses fetched, schedules background fetch, keeps the deadline widget
- * and reminders current, sets up notifications and their taps, and checks
+ * and reminders current, sets up notifications and opens their taps and widget rows' links, and checks
  * for an Android update.
  */
 const useMainStartup = () => {
@@ -51,6 +52,7 @@ const useMainStartup = () => {
     configureNotifications();
   }, []);
   useNotificationTaps();
+  useLinkTaps();
 
   useEffect(() => {
     if (loggedIn && Platform.OS === 'android') {
