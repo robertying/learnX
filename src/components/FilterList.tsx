@@ -6,6 +6,7 @@ import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
   reorderItems,
+  useReorderableDrag,
 } from 'react-native-reorderable-list';
 import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
@@ -54,6 +55,17 @@ export interface FilterListProps<T> {
   refreshing: boolean;
   onRefresh?: () => void;
 }
+
+/** A list item inside `ReorderableList`, the only place its drag handle exists. */
+const ReorderableItem = <T,>({
+  component: Component,
+  ...props
+}: ItemComponentProps<T> & {
+  component: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+}) => {
+  const drag = useReorderableDrag();
+  return <Component {...props} onDrag={drag} />;
+};
 
 const FilterList = <T extends Notice | Assignment | File | Course>({
   type,
@@ -218,29 +230,30 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const refreshControlRefreshing = useInitialRefreshHidden(refreshing);
 
   const renderItem = ({ item }: { item: T }) => {
-    return (
-      <Component
-        data={item}
-        selectionMode={selectionMode}
-        reorderMode={reorderMode}
-        disableSwipe={selectionMode || reorderMode}
-        checked={selection[item.id]}
-        onCheck={checked => setChecked(item.id, checked)}
-        onPress={() => {
-          setFilterVisible(false);
-          onItemPress?.(item);
-        }}
-        fav={favIdSet.has(item.id)}
-        onFav={() => handleFav(favIdSet.has(item.id), item)}
-        archived={archivedIdSet.has(item.id)}
-        onArchive={() => handleArchive(archivedIdSet.has(item.id), [item.id])}
-        hidden={hiddenIdSet.has(item.id)}
-        onHide={
-          isCourse
-            ? () => handleHide(hiddenIdSet.has(item.id), item.id)
-            : undefined
-        }
-      />
+    const itemProps: ItemComponentProps<T> = {
+      data: item,
+      selectionMode,
+      reorderMode,
+      disableSwipe: selectionMode || reorderMode,
+      checked: selection[item.id],
+      onCheck: checked => setChecked(item.id, checked),
+      onPress: () => {
+        setFilterVisible(false);
+        onItemPress?.(item);
+      },
+      fav: favIdSet.has(item.id),
+      onFav: () => handleFav(favIdSet.has(item.id), item),
+      archived: archivedIdSet.has(item.id),
+      onArchive: () => handleArchive(archivedIdSet.has(item.id), [item.id]),
+      hidden: hiddenIdSet.has(item.id),
+      onHide: isCourse
+        ? () => handleHide(hiddenIdSet.has(item.id), item.id)
+        : undefined,
+    };
+    return isCourse ? (
+      <ReorderableItem component={Component} {...itemProps} />
+    ) : (
+      <Component {...itemProps} />
     );
   };
 
