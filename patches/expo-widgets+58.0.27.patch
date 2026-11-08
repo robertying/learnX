@@ -124,3 +124,58 @@ index f1e1fee..61c7e28 100644
    }
  }
 +#endif
+diff --git a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
+index edabde8..95f0cb5 100644
+--- a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
++++ b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
+@@ -6,8 +6,13 @@ import android.content.Context
+ import android.os.Bundle
+ import androidx.compose.ui.unit.DpSize
+ import androidx.glance.Emittable
++import androidx.glance.GlanceModifier
++import androidx.glance.action.clickable
+ import androidx.glance.appwidget.AppWidgetId
+ import androidx.glance.appwidget.SizeMode
++import androidx.glance.appwidget.action.actionStartActivity
++import androidx.glance.layout.EmittableBox
++import androidx.glance.layout.fillMaxSize
+ import io.github.expo.peek.emittables.PeekEmittableAppWidget
+ 
+ internal class ExpoWidgetsPeekWidget(
+@@ -23,11 +28,21 @@ internal class ExpoWidgetsPeekWidget(
+   ): Emittable {
+     val appContext = context.applicationContext
+     val layout = WidgetsLayoutRegistry.layout(appContext, widgetName)
+-      ?: return createErrorRoot("No layout found for $widgetName")
++      ?: return createErrorRoot("No layout found for $widgetName").openingApp(appContext)
+     val props = WidgetsLayoutRegistry.props(appContext, widgetName)
+     val environment = getWidgetEnvironment(appContext)
+     val node = evaluateLayout(appContext, layout, props, environment)
+ 
+-    return node.toPeekRoot(appContext, InteractionSource.Widget(widgetName), size)
++    return node.toPeekRoot(appContext, InteractionSource.Widget(widgetName), size).openingApp(appContext)
++  }
++}
++
++// learnX: tapping the widget opens the app, as on iOS. Buttons with a target keep their own action.
++private fun Emittable.openingApp(context: Context): Emittable {
++  val intent = context.packageManager.getLaunchIntentForPackage(context.packageName) ?: return this
++  val content = this
++  return EmittableBox().also {
++    it.modifier = GlanceModifier.fillMaxSize().clickable(actionStartActivity(intent))
++    it.children += content
+   }
+ }
+diff --git a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
+index 1ffad5e..cb27e85 100644
+--- a/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
++++ b/node_modules/expo-widgets/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
+@@ -9,6 +9,8 @@ import expo.modules.ui.colors.getMaterialColorTokens
+ internal fun getWidgetEnvironment(context: Context): Map<String, Any?> {
+   return mapOf(
+     "colorScheme" to context.colorScheme(),
++    // learnX: lets a layout pick its language before the app has sent any props.
++    "locale" to context.resources.configuration.locales[0].toLanguageTag(),
+     "configuration" to emptyMap<String, Any?>(),
+     // TODO(@jakex7): accessing a materialColors through environment is
+     //  a hack to fulfill expo-ui module stub with data

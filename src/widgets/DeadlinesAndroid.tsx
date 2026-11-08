@@ -16,10 +16,17 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * the function; only its props, `environment` and the @expo/ui components
  * Glance supports (Column, Row, Text, Spacer, ...). Android widgets have no
  * self-updating dates, so it shows the due time the app formatted.
+ *
+ * The build embeds this layout with `initialProps` (see
+ * android/app/src/main/expo-widgets-layout-registry.config.json), so a widget
+ * added before the app has run shows a prompt to open it; its strings can't
+ * come from the app's translations, so they're picked by the system locale.
+ * Tapping anywhere opens the app (patches/expo-widgets+58.0.27.patch).
  */
 function DeadlinesWidget(
   props: DeadlineWidgetProps,
-  environment: WidgetEnvironment,
+  // `locale` is added by our expo-widgets patch.
+  environment: WidgetEnvironment & { locale?: string },
 ) {
   'widget';
   const dark = environment.colorScheme === 'dark';
@@ -36,8 +43,13 @@ function DeadlinesWidget(
         caption: '#4C444D',
         accent: '#9A25AE',
       };
+  const zh = (environment.locale ?? '').startsWith('zh');
+  const title = props.title || (zh ? '作业截止' : 'Deadlines');
+  const empty =
+    props.empty ||
+    (zh ? '打开 learnX 以显示作业' : 'Open learnX to see deadlines');
   const deadlines = (props.deadlines ?? []).slice(0, 4);
-  const more = props.total - deadlines.length;
+  const more = (props.total ?? 0) - deadlines.length;
 
   return (
     <Column
@@ -54,7 +66,7 @@ function DeadlinesWidget(
           style={{ fontSize: 13, fontWeight: 'bold' }}
           maxLines={1}
         >
-          {props.title}
+          {title}
         </Text>
         {more > 0 ? (
           <Text color={colors.caption} style={{ fontSize: 13 }} maxLines={1}>
@@ -65,7 +77,7 @@ function DeadlinesWidget(
       <Spacer modifiers={[height(6)]} />
       {deadlines.length === 0 ? (
         <Text color={colors.caption} style={{ fontSize: 13 }}>
-          {props.empty}
+          {empty}
         </Text>
       ) : null}
       {deadlines.map(item => (
@@ -86,4 +98,16 @@ function DeadlinesWidget(
   );
 }
 
-export default createWidget<DeadlineWidgetProps>('Deadlines', DeadlinesWidget);
+/** What the widget shows until the app sends the first snapshot. */
+const initialProps: DeadlineWidgetProps = {
+  deadlines: [],
+  total: 0,
+  title: '',
+  empty: '',
+};
+
+export default createWidget<DeadlineWidgetProps>(
+  'Deadlines',
+  DeadlinesWidget,
+  initialProps,
+);

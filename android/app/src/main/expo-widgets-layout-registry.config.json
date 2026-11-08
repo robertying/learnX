@@ -1,3 +1,8 @@
 {
-  "widgets": []
+  "widgets": [
+    {
+      "name": "Deadlines",
+      "initialLayout": "src/widgets/DeadlinesAndroid.tsx"
+    }
+  ]
 }
