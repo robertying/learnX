@@ -20,6 +20,7 @@ import {
   postNotification,
 } from 'helpers/notifications';
 import { updateDeadlineWidget } from 'widgets';
+import { syncDeadlineReminders } from 'helpers/deadlineReminders';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -121,6 +122,15 @@ export const syncContent = async (): Promise<SyncResult> => {
       hiddenCourses,
       archived: archived.assignment,
     });
+    try {
+      await syncDeadlineReminders(after.assignments, {
+        settings: getSettings().notifications,
+        hiddenCourses,
+        archived: archived.assignment,
+      });
+    } catch (error) {
+      recordError(error, 'Scheduling deadline reminders');
+    }
   }
   return { status: 'synced', diff: diffContent(before, after) };
 };

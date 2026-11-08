@@ -15,6 +15,7 @@ import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
 import { resetNotified } from 'data/notified';
+import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 
 const loggedIn = () =>
   useAuthStore.setState({ loggingIn: false, loggedIn: true, error: null });
@@ -101,6 +102,7 @@ export async function logout() {
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
   await Promise.all([
+    cancelDeadlineReminders().catch(() => {}),
     clearCredentials(),
     // Only left behind if the one-time import failed; they must not come
     // back after logging out.

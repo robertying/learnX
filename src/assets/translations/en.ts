@@ -244,10 +244,12 @@ export default {
   notifyDeadlineReminders: 'Deadline reminders',
   notifyDeadlineRemindersCaption:
     'Reminds you of unsubmitted assignments before they are due. Works alongside calendar and Reminders alarms.',
+  deadlineReminderDue: 'Due',
   deadlineReminderOffset: 'Remind before (minutes)',
   notificationPermissionDenied:
     'Notifications for learnX are turned off in system settings.',
   configureNotifications: 'Notification Permission Settings',
   simulateNewContent: 'Simulate New Content',
+  previewDeadlineReminder: 'Preview a Deadline Reminder',
   sendTestNotification: 'Send a Test Notification',
 };
