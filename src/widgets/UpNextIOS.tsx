@@ -27,7 +27,7 @@ function UpNextWidget(
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
-  const accent = 'rgb(154, 37, 174)';
+  const accent = environment.colorScheme === 'dark' ? '#F4ABFF' : '#660874';
   const secondary = foregroundStyle({
     type: 'hierarchical',
     style: 'secondary',
