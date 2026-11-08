@@ -32,6 +32,7 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
+        id: install
         run: pnpm install --frozen-lockfile
 
       # src/helpers/env.ts inlines .env at build time via babel preval.
@@ -46,16 +47,21 @@ jobs:
           COURSEX_REFRESH_TOKEN=ci-dummy-token
           ENV
 
+      # The checks below run even if an earlier one fails, so one push shows
+      # every failure. They're skipped only when setup failed.
       - name: Typecheck
         run: pnpm typecheck
 
       - name: Lint
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm lint --deny-warnings
 
       - name: Format
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm format --check
 
       - name: Test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm test
 
   fastlane:

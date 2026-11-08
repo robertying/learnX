@@ -4,13 +4,6 @@ import { updateDeadlineWidget } from 'widgets';
 import iosWidget from 'widgets/DeadlinesIOS';
 import androidWidget from 'widgets/DeadlinesAndroid';
 
-// The layouts are strings after the Babel transform; their @expo/ui imports
-// are only for type checking.
-jest.mock('@expo/ui/swift-ui', () => ({}));
-jest.mock('@expo/ui/swift-ui/modifiers', () => ({}));
-jest.mock('@expo/ui/jetpack-compose', () => ({}));
-jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
-
 const assignment = (id: string, deadline: string) =>
   ({
     id,
