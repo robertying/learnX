@@ -142,6 +142,17 @@ jest.mock('@expo/ui/swift-ui', () => ({}));
 jest.mock('@expo/ui/jetpack-compose', () => ({}));
 jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
 
+// The toast's UIKit views: plain views, the symbol findable as `icon-<name>`.
+jest.mock('../modules/toast', () => {
+  const { createElement } = require('react');
+  const { View } = require('react-native');
+  return {
+    ToastBackground: View,
+    ToastSymbol: ({ name }: { name: string }) =>
+      createElement(View, { testID: `icon-${name}` }),
+  };
+});
+
 jest.mock(
   'react-native-safe-area-context',
   () => require('react-native-safe-area-context/jest/mock').default,

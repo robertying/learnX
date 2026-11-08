@@ -1,6 +1,9 @@
 appId: ${APP_ID}
 name: Favorite and archive a notice
 ---
+# Checks the outcome of each action, not its toast: on iOS the Liquid Glass
+# toast keeps the screen from settling, so Maestro's settle wait outlasts a
+# 3 s toast. Toasts are covered by Jest (components/__tests__/Toast.test.tsx).
 - runFlow: subflows/login.yaml
 
 # Favorite
@@ -10,7 +13,6 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-fav
-- assertVisible: 'Added to Favorites|已添加到收藏'
 - runFlow:
     file: subflows/filter.yaml
     env:
@@ -24,7 +26,6 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-fav
-- assertVisible: 'Removed from Favorites|已从收藏移除'
 - assertNotVisible: '.*请按照助教的安排交作业.*'
 
 # Archive from the full list
@@ -38,7 +39,6 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-archive
-- assertVisible: 'Archived|已归档'
 - assertNotVisible: '.*请按照助教的安排交作业.*'
 - runFlow:
     file: subflows/filter.yaml
@@ -53,7 +53,6 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-archive
-- assertVisible: 'Undo archiving|已撤销归档'
 - runFlow:
     file: subflows/filter.yaml
     env:
