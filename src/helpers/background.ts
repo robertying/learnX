@@ -21,6 +21,7 @@ import {
 } from 'helpers/notifications';
 import { updateDeadlineWidget } from 'widgets';
 import { syncDeadlineReminders } from 'helpers/deadlineReminders';
+import { updateSpotlight } from 'helpers/spotlight';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -116,8 +117,12 @@ export const syncContent = async (): Promise<SyncResult> => {
   if (!after.notices && !after.assignments && !after.files) {
     return { status: 'failed' };
   }
+  const { hiddenCourses, archived } = getUserData();
+  await updateSpotlight(after, {
+    hiddenCourses,
+    archived: archived.assignment,
+  });
   if (after.assignments) {
-    const { hiddenCourses, archived } = getUserData();
     updateDeadlineWidget(after.assignments, {
       hiddenCourses,
       archived: archived.assignment,

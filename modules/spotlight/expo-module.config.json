@@ -1,0 +1,7 @@
+{
+  "platforms": ["apple"],
+  "apple": {
+    "modules": ["SpotlightModule"],
+    "appDelegateSubscribers": ["SpotlightAppDelegateSubscriber"]
+  }
+}

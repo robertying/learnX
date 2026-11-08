@@ -18,6 +18,7 @@ import { userQuery } from 'data/queries';
 import { isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
+import { clearSpotlight } from 'helpers/spotlight';
 import { resetNotified } from 'data/notified';
 import { clearSubmissionDrafts } from 'data/submissionDrafts';
 import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
@@ -131,6 +132,7 @@ export async function logout() {
   clearSubmissionDrafts();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
+  clearSpotlight();
   await Promise.all([
     cancelDeadlineReminders().catch(() => {}),
     clearCredentials(),
