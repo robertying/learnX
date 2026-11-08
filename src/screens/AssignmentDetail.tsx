@@ -17,6 +17,8 @@ import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import useMinute from 'hooks/useMinute';
+import { deadlineText } from 'helpers/assignments';
 import { getWebViewTemplate, removeTags } from 'helpers/html';
 import { getExtension, stripExtension } from 'helpers/fs';
 import {
@@ -90,6 +92,9 @@ const AssignmentDetailContent: React.FC<{
     excellentHomeworkList,
   } = assignment;
 
+  const now = useMinute();
+  const closed = dayjs(now).isAfter(dayjs(deadline));
+
   const html = getWebViewTemplate(
     description || `<p>${t('noAssignmentDescription')}</p>`,
     {
@@ -129,7 +134,7 @@ const AssignmentDetailContent: React.FC<{
       navigation.setOptions({
         headerRight: () => (
           <IconButton
-            disabled={dayjs().isAfter(dayjs(deadline))}
+            disabled={closed}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
             icon={props => <MaterialIcons {...props} name="file-upload" />}
@@ -144,13 +149,13 @@ const AssignmentDetailContent: React.FC<{
               type: 'sfSymbol',
               name: 'arrow.up.circle',
             },
-            disabled: dayjs().isAfter(dayjs(deadline)),
+            disabled: closed,
             onPress: handleSubmit,
           },
         ],
       });
     }
-  }, [submissionType, deadline, handleSubmit, navigation]);
+  }, [submissionType, closed, handleSubmit, navigation]);
 
   return (
     <SafeArea testID="assignment-detail" collapsable={false}>
@@ -170,15 +175,7 @@ const AssignmentDetailContent: React.FC<{
           </View>
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
-            <Caption>
-              {isLocaleChinese()
-                ? dayjs().isAfter(dayjs(deadline))
-                  ? dayjs().to(dayjs(deadline)) + '截止'
-                  : '还剩 ' + dayjs().to(dayjs(deadline), true)
-                : dayjs().isAfter(dayjs(deadline))
-                  ? 'closed ' + dayjs().to(dayjs(deadline))
-                  : 'due in ' + dayjs().to(dayjs(deadline), true)}
-            </Caption>
+            <Caption>{deadlineText(deadline, now)}</Caption>
             <Caption>
               {dayjs(deadline).format(
                 isLocaleChinese()

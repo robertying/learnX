@@ -1,5 +1,23 @@
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
+import { isLocaleChinese } from './i18n';
+
+/** "due in 3 days" or "closed 2 hours ago", relative to `now` */
+export function deadlineText(
+  deadline: dayjs.ConfigType,
+  now: dayjs.ConfigType,
+): string {
+  const n = dayjs(now);
+  const dl = dayjs(deadline);
+  const isPast = n.isAfter(dl);
+  return isLocaleChinese()
+    ? isPast
+      ? n.to(dl) + '截止'
+      : '还剩 ' + n.to(dl, true)
+    : isPast
+      ? 'closed ' + n.to(dl)
+      : 'due in ' + n.to(dl, true);
+}
 
 /**
  * Upcoming assignments first, earliest deadline first, followed by past

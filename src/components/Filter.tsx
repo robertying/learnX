@@ -65,6 +65,10 @@ const ListItem: React.FC<{
       testID={`filter-${name}`}
       style={styles.listItem}
       onPress={() => onSelectionChange(name)}
+      accessibilityRole="button"
+      accessibilityState={{ selected: selected === name }}
+      // The icons are font glyphs, which would otherwise be read out.
+      accessibilityLabel={count === undefined ? text : `${text}, ${count}`}
     >
       <View style={styles.row}>
         {name === 'hidden' ? (

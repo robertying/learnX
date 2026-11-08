@@ -1,5 +1,10 @@
 import { Text } from 'react-native';
-import { render, screen, userEvent } from '@testing-library/react-native';
+import {
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import { mockSwipeableMethods } from '../../../jest/swipeable';
 
@@ -15,6 +20,15 @@ const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 const press = () => user.press(screen.getByText('Card'));
 const longPress = () => user.longPress(screen.getByText('Card'));
 const swipeEnabled = () => screen.getByTestId('swipeable').props.enabled;
+const touchable = () => screen.getByRole(/button|checkbox/);
+const accessibilityAction = (actionName: string) =>
+  fireEvent(touchable(), 'accessibilityAction', {
+    nativeEvent: { actionName },
+  });
+const actionNames = () =>
+  touchable().props.accessibilityActions?.map(
+    (a: { name: string; label: string }) => `${a.name}:${a.label}`,
+  );
 
 beforeEach(() => {
   jest.useFakeTimers();
@@ -48,6 +62,56 @@ describe('CardWrapper', () => {
     expect(swipeEnabled()).toBe(false);
     await longPress();
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
+  });
+
+  describe('for VoiceOver and TalkBack', () => {
+    it('is a button with the swipe actions as accessibility actions', async () => {
+      const onFav = jest.fn();
+      const onArchive = jest.fn();
+      await render(card({ fav: false, onFav, archived: false, onArchive }));
+      expect(screen.getByRole('button')).toBeTruthy();
+      expect(actionNames()).toEqual(['fav:Favorite', 'archive:Archive']);
+
+      await accessibilityAction('fav');
+      expect(onFav).toHaveBeenLastCalledWith(true);
+      await accessibilityAction('archive');
+      expect(onArchive).toHaveBeenLastCalledWith(true);
+    });
+
+    it('offers unfavorite, restore and show for items already in that state', async () => {
+      const onHide = jest.fn();
+      const view = await render(card({ fav: true, onFav: jest.fn() }));
+      expect(actionNames()).toEqual(['fav:Unfavorite', 'archive:Archive']);
+
+      await view.rerender(card({ archived: true }));
+      expect(actionNames()).toEqual(['archive:Restore']);
+
+      await view.rerender(card({ hidden: true, onHide }));
+      expect(actionNames()).toEqual(['hide:Unhide']);
+      await accessibilityAction('hide');
+      expect(onHide).toHaveBeenLastCalledWith(false);
+    });
+
+    it('is a checkbox with its state in selection mode, without the actions', async () => {
+      const onFav = jest.fn();
+      const view = await render(
+        card({ selectionMode: true, checked: false, onFav }),
+      );
+      expect(screen.getByRole('checkbox', { checked: false })).toBeTruthy();
+      expect(actionNames()).toBeUndefined();
+      await accessibilityAction('fav');
+      expect(onFav).not.toHaveBeenCalled();
+
+      await view.rerender(card({ selectionMode: true, checked: true, onFav }));
+      expect(screen.getByRole('checkbox', { checked: true })).toBeTruthy();
+    });
+
+    it('has no actions in reorder mode or with disableSwipe', async () => {
+      const view = await render(card({ reorderMode: true }));
+      expect(actionNames()).toBeUndefined();
+      await view.rerender(card({ disableSwipe: true }));
+      expect(actionNames()).toBeUndefined();
+    });
   });
 
   describe('in selection mode', () => {

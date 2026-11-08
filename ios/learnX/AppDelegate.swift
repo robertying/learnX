@@ -1,5 +1,6 @@
 internal import Expo
 import FirebaseCore
+import LearnXMenus
 import RNShareMenu
 import React
 import ReactAppDependencyProvider
@@ -38,6 +39,12 @@ class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {
     options: [UIApplication.OpenURLOptionsKey: Any] = [:]
   ) -> Bool {
     return ShareMenuManager.application(app, open: url, options: options)
+  }
+
+  // Refresh, Search, Settings… and next/previous item in the menu bar, with their shortcuts.
+  override func buildMenu(with builder: UIMenuBuilder) {
+    super.buildMenu(with: builder)
+    AppCommands.buildMenu(with: builder)
   }
 }
 
