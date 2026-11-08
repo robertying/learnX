@@ -4,6 +4,8 @@ export { removeTags } from './text';
 
 const darkMode = require('./preval/darkMode.preval.js');
 
+const csrfLinks = require('./preval/csrfLinks.preval.js');
+
 const katexStyles = require('./preval/katexStyles.preval.js');
 
 const katex = require('./preval/katex.preval.js');
@@ -73,32 +75,13 @@ export const getWebViewTemplate = (
       }
       ${math ? `<style>${katexStyles}</style>` : ''}
       <script>
-        function addCSRFTokenToUrl(url, token) {
-          const newUrl = new URL(url);
-          if (newUrl.hostname?.endsWith('tsinghua.edu.cn')) {
-            newUrl.searchParams.set('_csrf', token);
-          }
-          return newUrl.toString();
-        }
-
-        const csrfToken = "${dataSource.getCSRFToken()}";
-        document.addEventListener('DOMContentLoaded', () => {
-          document.querySelectorAll('[href]').forEach((element) => {
-            const url = element.getAttribute('href');
-            if (!url) {
-              return;
-            }
-
-            element.setAttribute('href', addCSRFTokenToUrl(url, csrfToken));
-          });
-          document.querySelectorAll('[src]').forEach((element) => {
-            const url = element.getAttribute('src');
-            if (!url) {
-              return;
-            }
-
-            element.setAttribute('src', addCSRFTokenToUrl(url, csrfToken));
-          });
+        ${csrfLinks}
+        document.addEventListener('DOMContentLoaded', function () {
+          addCSRFTokenToLinks(
+            document,
+            ${JSON.stringify(dataSource.getCSRFToken())},
+            document.baseURI
+          );
         });
       </script>
       ${math ? `<script>${katex}</script>` : ''}
