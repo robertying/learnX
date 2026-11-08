@@ -1,9 +1,11 @@
 // The filters in a Material 3 dropdown menu, anchored under the top app
 // bar's filter button, with the current one checked and each one's count.
 import { StyleSheet } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   DropdownMenu,
   Host,
+  RNHostView,
   SelectableDropdownMenuItem,
   Spacer,
   Text,
@@ -41,6 +43,19 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               onClick={() => onSelectionChange(option.name)}
               modifiers={[testID(`filter-${option.name}`)]}
             >
+              <SelectableDropdownMenuItem.LeadingIcon>
+                <RNHostView matchContents>
+                  <MaterialDesignIcons
+                    name={option.materialIcon}
+                    size={24}
+                    color={
+                      selected === option.name
+                        ? theme.colors.onSecondaryContainer
+                        : theme.colors.onSurfaceVariant
+                    }
+                  />
+                </RNHostView>
+              </SelectableDropdownMenuItem.LeadingIcon>
               <SelectableDropdownMenuItem.Text>
                 <Text>{option.label}</Text>
               </SelectableDropdownMenuItem.Text>
