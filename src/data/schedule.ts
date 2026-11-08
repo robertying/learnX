@@ -6,6 +6,7 @@ import { dataSource, loginWithFingerPrint } from 'data/source';
 import { useSettings } from 'data/settings';
 import { useUserData } from 'data/userData';
 import { createLimiter } from 'helpers/limiter';
+import { isNetworkError } from 'helpers/parse';
 import {
   CalendarClass,
   ClassSession,
@@ -71,15 +72,19 @@ export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
     queryKey: scheduleKeys.calendar(weekStart, graduate),
     // Timetables rarely change within a day.
     staleTime: DAY / 2,
-    retry: 2,
-    retryDelay: attempt => Math.min(2000 * 2 ** attempt, 30 * 1000),
+    // Offline, a retry only keeps the spinner going; the saved week shows.
+    retry: (failures, err) => failures < 2 && !isNetworkError(err),
+    retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10 * 1000),
     queryFn: () =>
       calendarFetches(async () => {
         const start = dayjs(weekStart).format('YYYYMMDD');
         const end = dayjs(weekStart).add(6, 'day').format('YYYYMMDD');
         try {
           return await fetchCalendar(start, end, graduate);
-        } catch {
+        } catch (err) {
+          if (isNetworkError(err)) {
+            throw err;
+          }
           // The registrar's ticket comes from a fresh login, as the calendar
           // sync in Settings does.
           await loginWithFingerPrint();

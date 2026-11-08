@@ -86,7 +86,6 @@ export const mockCourses: Course[] = [
     timeAndLocation: [
       '星期二第1节(全周)，六教6A118',
       '星期四第1节(全周)，六教6A118',
-      '星期日第1节(9周)，六教6A118',
     ],
   },
   {
@@ -174,7 +173,6 @@ export const mockCourses: Course[] = [
     timeAndLocation: [
       '星期二第6节(全周)，东主楼10-103',
       '星期五第1节(全周)，东主楼10-103',
-      '星期六第3节(9周)，东主楼10-103',
     ],
   },
   {
@@ -308,7 +306,8 @@ export const mockAssignments: Assignment[] = [
   {
     id: '26ef84e76db3f55b016db426e15c07b9',
     title: '大作业1',
-    deadline: iso(5, 23, 59),
+    // Due tomorrow, so Today lists it under Due Soon.
+    deadline: iso(1, 23, 59),
     completionType: HomeworkCompletionType.INDIVIDUAL,
     submissionType: HomeworkSubmissionType.WEB_LEARNING,
     isLateSubmission: false,
