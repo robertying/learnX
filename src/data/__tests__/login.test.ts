@@ -2,7 +2,11 @@ import { FailReason } from 'thu-learn-lib';
 import { getAuth, initialAuth, useAuthStore } from 'data/auth';
 import { getCredentials } from 'data/credentials';
 import { login, loginWithOfflineMode, logout } from 'data/login';
-import { loginWithFingerPrint, resetDataSource } from 'data/source';
+import {
+  isServerReachable,
+  loginWithFingerPrint,
+  resetDataSource,
+} from 'data/source';
 import { queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 
@@ -10,6 +14,7 @@ jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
   loginWithFingerPrint: jest.fn(async () => {}),
   resetDataSource: jest.fn(),
+  isServerReachable: jest.fn(async () => true),
 }));
 // One attempt, without the backoff.
 jest.mock('helpers/retry', () => ({
@@ -39,6 +44,8 @@ describe('login', () => {
       ssoInProgress: false,
       loggedIn: false,
       error: null,
+      failure: null,
+      reloginRequested: false,
     });
   });
 
@@ -64,15 +71,44 @@ describe('login', () => {
     expect(queryClient.prefetchQuery).toHaveBeenCalledWith(userQuery);
   });
 
-  it('records the reason of a failed login', async () => {
+  it('records a failed login the server answered as rejected', async () => {
     jest
       .mocked(loginWithFingerPrint)
-      .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
+      .mockRejectedValueOnce({ reason: FailReason.ERROR_FETCH_FROM_ID });
     await login(sso);
     expect(getAuth()).toMatchObject({
       loggingIn: false,
       loggedIn: false,
-      error: FailReason.BAD_CREDENTIAL,
+      error: FailReason.ERROR_FETCH_FROM_ID,
+      failure: 'rejected',
+    });
+  });
+
+  it('records a failed login as offline when the server is unreachable', async () => {
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce(new TypeError('Network request failed'));
+    jest.mocked(isServerReachable).mockResolvedValueOnce(false);
+    await login({ reset: true });
+    expect(getAuth()).toMatchObject({
+      loggedIn: false,
+      error: FailReason.UNEXPECTED_STATUS,
+      failure: 'offline',
+    });
+  });
+
+  it('clears the failure and the login screen once a login works', async () => {
+    useAuthStore.setState({
+      failure: 'rejected',
+      error: FailReason.ERROR_FETCH_FROM_ID,
+      reloginRequested: true,
+    });
+    await login(sso);
+    expect(getAuth()).toMatchObject({
+      loggedIn: true,
+      error: null,
+      failure: null,
+      reloginRequested: false,
     });
   });
 
@@ -87,10 +123,13 @@ describe('login', () => {
     expect(loginWithFingerPrint).not.toHaveBeenCalled();
   });
 
-  it('can show the cached data offline', () => {
-    useAuthStore.setState({ error: FailReason.NOT_LOGGED_IN });
+  it('goes back from the login screen to the cached data', () => {
+    useAuthStore.setState({ reloginRequested: true, failure: 'rejected' });
     loginWithOfflineMode();
-    expect(getAuth()).toMatchObject({ loggedIn: true, error: null });
+    expect(getAuth()).toMatchObject({
+      reloginRequested: false,
+      loggedIn: false,
+    });
   });
 
   it('logs out and forgets the login', async () => {

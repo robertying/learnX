@@ -1,6 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getAuth, initialAuth, useAuthStore } from 'data/auth';
-import { loginWithFingerPrint, resetDataSource } from 'data/source';
+import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
+import {
+  isServerReachable,
+  loginWithFingerPrint,
+  resetDataSource,
+} from 'data/source';
 import {
   clearCredentials,
   Credentials,
@@ -18,7 +22,13 @@ import { resetNotified } from 'data/notified';
 import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 
 const loggedIn = () =>
-  useAuthStore.setState({ loggingIn: false, loggedIn: true, error: null });
+  useAuthStore.setState({
+    loggingIn: false,
+    loggedIn: true,
+    error: null,
+    failure: null,
+    reloginRequested: false,
+  });
 
 /**
  * Signs in with the given login, or the saved one when none is given. A login
@@ -72,16 +82,25 @@ export async function login({
     loggedIn();
     queryClient.prefetchQuery(userQuery);
   } catch (err) {
+    const error = serializeError(err).reason;
+    // The server can't be told apart from the network by the error alone:
+    // thu-learn-lib reports both a wrong password and no connection as
+    // ERROR_FETCH_FROM_ID.
+    const reachable = await isServerReachable();
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,
-      error: serializeError(err).reason,
+      error,
+      failure: reachable ? 'rejected' : 'offline',
     });
   }
 }
 
-/** Shows the cached data without signing in. */
-export const loginWithOfflineMode = loggedIn;
+/**
+ * Leaves the login screen for the saved data, without a session. Lists show
+ * what was cached; refreshing them logs in again.
+ */
+export const loginWithOfflineMode = cancelRelogin;
 
 /** Loads the mock account's data, replacing whatever was there. */
 export function loginWithMockAccount() {

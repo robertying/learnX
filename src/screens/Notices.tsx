@@ -7,6 +7,7 @@ import { useUserData } from 'data/userData';
 import { useCourseIds } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { Notice } from 'data/types/state';
+import usePullToRefresh from 'hooks/usePullToRefresh';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useNotificationTarget from 'hooks/useNotificationTarget';
@@ -22,7 +23,12 @@ const Notices: React.FC<Props> = ({ navigation }) => {
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.notice);
   const archivedIds = useUserData(data => data.archived.notice);
-  const { notices, isFetching: fetching, refetch } = useNotices();
+  const {
+    notices,
+    isFetching: fetching,
+    refetch,
+    dataUpdatedAt,
+  } = useNotices();
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: notices,
@@ -36,6 +42,8 @@ const Notices: React.FC<Props> = ({ navigation }) => {
       refetch({ cancelRefetch: false });
     }
   };
+
+  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
   const refresh = useEffectEvent(handleRefresh);
 
@@ -73,8 +81,9 @@ const Notices: React.FC<Props> = ({ navigation }) => {
         itemComponent={NoticeCard}
         navigation={navigation}
         onItemPress={handlePush}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
+        refreshing={pullToRefresh.refreshing}
+        onRefresh={pullToRefresh.onRefresh}
+        updatedAt={dataUpdatedAt}
       />
     </SafeArea>
   );

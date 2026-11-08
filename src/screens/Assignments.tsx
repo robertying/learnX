@@ -10,6 +10,7 @@ import { useCourseIds } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { useAssignments } from 'data/content';
 import { Assignment } from 'data/types/state';
+import usePullToRefresh from 'hooks/usePullToRefresh';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useNotificationTarget from 'hooks/useNotificationTarget';
 import useFilteredData from 'hooks/useFilteredData';
@@ -27,7 +28,12 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.assignment);
   const archivedIds = useUserData(data => data.archived.assignment);
-  const { assignments, isFetching: fetching, refetch } = useAssignments();
+  const {
+    assignments,
+    isFetching: fetching,
+    refetch,
+    dataUpdatedAt,
+  } = useAssignments();
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );
@@ -47,6 +53,8 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
       refetch({ cancelRefetch: false });
     }
   };
+
+  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
   const refresh = useEffectEvent(handleRefresh);
 
@@ -124,8 +132,9 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
         itemComponent={AssignmentCard}
         navigation={navigation}
         onItemPress={handlePush}
-        refreshing={fetching}
-        onRefresh={handleRefresh}
+        refreshing={pullToRefresh.refreshing}
+        onRefresh={pullToRefresh.onRefresh}
+        updatedAt={dataUpdatedAt}
       />
     </SafeArea>
   );
