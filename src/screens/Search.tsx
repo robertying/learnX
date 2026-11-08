@@ -6,7 +6,11 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import {
+  NativeStackNavigationProp,
+  NativeStackScreenProps,
+} from '@react-navigation/native-stack';
+import type { ParamListBase } from '@react-navigation/native';
 import type { SearchBarCommands } from 'react-native-screens';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useSearch from 'hooks/useSearch';
@@ -56,13 +60,35 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     });
   }, [navigation, theme.colors.primary]);
 
-  // Android focuses through autoFocus; iOS needs the command.
+  // Android focuses through autoFocus. On iOS the search bar is attached only
+  // once the search modal has been presented (a transition of the parent
+  // stack), so focus it then, once: coming back from a result keeps the
+  // keyboard down.
+  const focusedOnce = useRef(false);
   useEffect(() => {
-    if (initialQuery) {
-      searchBarRef.current?.setText(initialQuery);
-    }
-    searchBarRef.current?.focus();
-  }, [initialQuery]);
+    const focusSearchBar = (closing: boolean) => {
+      if (closing || focusedOnce.current) {
+        return;
+      }
+      focusedOnce.current = true;
+      if (initialQuery) {
+        searchBarRef.current?.setText(initialQuery);
+      }
+      searchBarRef.current?.focus();
+    };
+    const parent =
+      navigation.getParent<NativeStackNavigationProp<ParamListBase>>();
+    const unsubscribeParent = parent?.addListener('transitionEnd', e =>
+      focusSearchBar(e.data.closing),
+    );
+    const unsubscribe = navigation.addListener('transitionEnd', e =>
+      focusSearchBar(e.data.closing),
+    );
+    return () => {
+      unsubscribeParent?.();
+      unsubscribe();
+    };
+  }, [navigation, initialQuery]);
 
   const [noticeResult, assignmentResult, fileResult] = useSearch(
     notices,
@@ -92,6 +118,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
           </KeyboardAvoidingView>
         ) : (
           <SectionList<Notice | Assignment | File>
+            contentInsetAdjustmentBehavior="automatic"
             contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
             sections={[
               { key: 'notice', title: t('notices'), data: noticeResult },
