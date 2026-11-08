@@ -167,7 +167,9 @@ function UpNextWidget(
           >
             {whenAndWhere(featured)}
           </Text>
-          {countdown(small ? 'caption' : 'footnote')}
+          {/* SwiftUI's live relative date counts seconds within the hour, which a
+              small widget cuts off; it shows the time instead. */}
+          {small ? null : countdown('footnote')}
         </VStack>
       ) : (
         <Text modifiers={[font({ textStyle: 'footnote' }), secondary]}>

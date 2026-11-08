@@ -5,6 +5,7 @@ import {
   fillMaxSize,
   fillMaxWidth,
   height,
+  padding,
   paddingAll,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
@@ -123,8 +124,15 @@ function UpNextWidget(
         </Column>
       ) : null}
       {deadline ? (
-        <Column modifiers={[fillMaxWidth(), ...openUrl(deadline.url)]}>
-          <Spacer modifiers={[height(6)]} />
+        // Padded so the row is easier to tap; more would push it out of a
+        // widget at its smallest size.
+        <Column
+          modifiers={[
+            fillMaxWidth(),
+            padding(0, 8, 0, 8),
+            ...openUrl(deadline.url),
+          ]}
+        >
           <Row modifiers={[fillMaxWidth()]}>
             <Text
               color={colors.accent}
