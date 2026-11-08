@@ -1,4 +1,5 @@
 import { KeyboardAvoidingView, Linking, StyleSheet } from 'react-native';
+import dayjs from 'dayjs';
 import { MaterialIconsIconName } from '@react-native-vector-icons/material-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import TableCell from 'components/TableCell';
@@ -8,7 +9,15 @@ import { Caption } from 'components/Text';
 import { toast } from 'components/Toast';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { useNotices } from 'data/content';
+import {
+  assignmentsQuery,
+  filesQuery,
+  noticesQuery,
+  useNotices,
+} from 'data/content';
+import { queryClient } from 'data/queryClient';
+import { getUserData } from 'data/userData';
+import { notifyContent, syncContent } from 'helpers/background';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
@@ -45,6 +54,35 @@ const openSystemSettings = () =>
         'x-apple.systempreferences:com.apple.preference.notifications',
       )
     : Linking.openSettings();
+
+/**
+ * Debug builds: forgets a few items and grades, then syncs as the background
+ * task does, so what comes back is posted as new.
+ */
+const simulateNewContent = async () => {
+  const semesterId = getUserData().currentSemester;
+  if (!semesterId) {
+    return;
+  }
+  queryClient.setQueryData(noticesQuery(semesterId).queryKey, old =>
+    old?.slice(3),
+  );
+  queryClient.setQueryData(filesQuery(semesterId).queryKey, old =>
+    old?.slice(3),
+  );
+  queryClient.setQueryData(assignmentsQuery(semesterId).queryKey, old =>
+    old
+      ?.filter(a => a.submitted || dayjs(a.deadline).isBefore(dayjs()))
+      .map(a => (a.graded ? { ...a, graded: false } : a)),
+  );
+  const result = await syncContent();
+  if (result.status !== 'synced') {
+    toast(result.status, 'error');
+    return;
+  }
+  const posted = await notifyContent(result.diff, { inForeground: true });
+  toast(String(posted.length), 'success');
+};
 
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
@@ -142,6 +180,20 @@ const NotificationSettings: React.FC<Props> = () => {
                   body: notice?.title ?? t('notifications'),
                   target: { type: 'notice', id: notice?.id },
                 });
+              }}
+            />
+          )}
+          {__DEV__ && (
+            <TableCell
+              iconName="sync"
+              primaryText={t('simulateNewContent')}
+              type="none"
+              onPress={async () => {
+                if (!(await request())) {
+                  toast(t('notificationPermissionDenied'), 'error');
+                  return;
+                }
+                await simulateNewContent();
               }}
             />
           )}

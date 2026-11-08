@@ -248,5 +248,6 @@ export default {
   notificationPermissionDenied:
     'Notifications for learnX are turned off in system settings.',
   configureNotifications: 'Notification Permission Settings',
+  simulateNewContent: 'Simulate New Content',
   sendTestNotification: 'Send a Test Notification',
 };

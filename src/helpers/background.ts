@@ -128,9 +128,13 @@ export const syncContent = async (): Promise<SyncResult> => {
 /**
  * Tells the user what a sync found, as they chose in Settings › Notifications.
  * Nothing is posted while the app is open, where the lists show it; what was
- * found is still remembered so it isn't posted later.
+ * found is still remembered so it isn't posted later. `inForeground` posts
+ * anyway, for trying it out in a debug build.
  */
-export const notifyContent = async (diff: ContentDiff) => {
+export const notifyContent = async (
+  diff: ContentDiff,
+  { inForeground = false }: { inForeground?: boolean } = {},
+) => {
   const settings = getSettings().notifications;
   const { hiddenCourses, archived } = getUserData();
   const items = pickContentItems(diff, {
@@ -145,7 +149,7 @@ export const notifyContent = async (diff: ContentDiff) => {
 
   const notifications = groupContentItems(items);
   if (
-    AppState.currentState !== 'active' &&
+    (inForeground || AppState.currentState !== 'active') &&
     (await getNotificationPermission()) === 'granted'
   ) {
     for (const notification of notifications) {
