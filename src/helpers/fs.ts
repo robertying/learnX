@@ -12,8 +12,10 @@ import {
 } from 'data/source';
 import { getSettings } from 'data/settings';
 import { SUBMISSION_DRAFTS_DIR } from 'data/submissionDrafts';
+import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
+import { sanitizeFileName } from './filename';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from './i18n';
 
@@ -33,24 +35,28 @@ export const copyFileToMacDownloads = async (
   return to.uri;
 };
 
-/**
- * Where downloaded files live: the app's Documents or Caches folder, by the
- * `fileUseDocumentDir` setting. Each file sits in a `<courseName>-<id>`
- * folder right under it, the layout react-native-fs used, so files
- * downloaded by earlier versions are found again.
- */
-const getLearnXFilesDirectory = () =>
-  getSettings().fileUseDocumentDir ? Paths.document : Paths.cache;
+/** The folder downloads live in, under Documents or Caches. */
+const DOWNLOADS_DIR = 'learnX Files';
+/** Where files shared into the app are copied, under Caches. */
+const SHARED_DIR = 'learnX Shared';
 
 /**
- * Folders in the files directory that are not downloaded files. expo-sqlite
- * keeps its databases (settings, user data, query cache) in `SQLite` under
- * Documents, and submission drafts keep their files next to it.
+ * The app's Documents or Caches folder, by the `fileUseDocumentDir` setting.
  */
-const keptEntries = new Set(['SQLite', SUBMISSION_DRAFTS_DIR]);
+const getBaseDirectory = (useDocumentDir = getSettings().fileUseDocumentDir) =>
+  useDocumentDir ? Paths.document : Paths.cache;
+
+/**
+ * Where downloaded files live: `learnX Files/<course>/<id>/<name>` under the
+ * base folder. Keeping them in their own folder means clearing them never
+ * touches what other code keeps in Caches or Documents (WebKit, Crashlytics,
+ * SQLite).
+ */
+const getDownloadsDirectory = (useDocumentDir?: boolean) =>
+  new Directory(getBaseDirectory(useDocumentDir), DOWNLOADS_DIR);
 
 export const ensureLearnXFilesDir = async () => {
-  const dir = getLearnXFilesDirectory();
+  const dir = getDownloadsDirectory();
   dir.create({ intermediates: true, idempotent: true });
   return dir.uri;
 };
@@ -74,13 +80,14 @@ export const getDownloadedFile = (file: DownloadableFile) => {
   const settings = getSettings();
   const extension = file.fileType ? `.${file.fileType}` : '';
   const name = settings.fileOmitCourseName
-    ? `${file.title}${extension}`
-    : `${file.courseName}-${file.title}${extension}`;
+    ? file.title
+    : `${file.courseName}-${file.title}`;
 
   return new File(
-    getLearnXFilesDirectory(),
-    `${file.courseName}-${file.id}`,
-    name,
+    getDownloadsDirectory(),
+    sanitizeFileName(file.courseName),
+    sanitizeFileName(file.id),
+    sanitizeFileName(name, extension),
   );
 };
 
@@ -206,24 +213,28 @@ export const exportTextFile = async (
 const toDirectory = (path: string) =>
   new Directory(path.includes('://') ? path : `file://${path}`);
 
+const deleteDirectory = (dir: Directory) => {
+  if (dir.exists) {
+    dir.delete();
+  }
+};
+
 /** Deletes downloaded files and files shared into the app. */
 export const removeFileDir = async () => {
-  const dir = getLearnXFilesDirectory();
-  if (dir.exists) {
-    const failed = dir
-      .list()
-      .filter(entry => !keptEntries.has(entry.name))
-      .filter(entry => {
-        try {
-          entry.delete();
-          return false;
-        } catch {
-          return true;
-        }
-      });
-    if (failed.length > 0) {
-      throw new Error(failed.map(entry => entry.name).join(', '));
+  const failed: string[] = [];
+  for (const dir of [
+    getDownloadsDirectory(true),
+    getDownloadsDirectory(false),
+    new Directory(Paths.cache, SHARED_DIR),
+  ]) {
+    try {
+      deleteDirectory(dir);
+    } catch {
+      failed.push(dir.name);
     }
+  }
+  if (failed.length > 0) {
+    throw new Error(failed.join(', '));
   }
 
   if (Platform.OS === 'ios') {
@@ -231,16 +242,181 @@ export const removeFileDir = async () => {
       ShareMenu.getSharedCacheDirectory(sharedDir => {
         try {
           if (sharedDir) {
-            const shared = toDirectory(sharedDir);
-            if (shared.exists) {
-              shared.delete();
-            }
+            deleteDirectory(toDirectory(sharedDir));
           }
         } catch {}
         resolve();
       });
     });
   }
+};
+
+const subdirectories = (dir: Directory) =>
+  dir.exists
+    ? dir
+        .list()
+        .filter((entry): entry is Directory => entry instanceof Directory)
+    : [];
+
+const sizeOf = (dir: Directory) => {
+  try {
+    return dir.size ?? 0;
+  } catch {
+    return 0;
+  }
+};
+
+export interface CourseDownloads {
+  /** The course's folder name, which is its sanitized name. */
+  courseName: string;
+  /** Downloaded files, one per `<id>` folder. */
+  count: number;
+  /** Bytes on disk. */
+  size: number;
+}
+
+/** Downloads grouped by course, largest first. */
+export const listDownloads = (): CourseDownloads[] =>
+  subdirectories(getDownloadsDirectory())
+    .map(course => ({
+      courseName: course.name,
+      count: subdirectories(course).length,
+      size: sizeOf(course),
+    }))
+    .filter(course => course.count > 0)
+    .sort((a, b) => b.size - a.size);
+
+/** Deletes one course's downloads; `courseName` is from `listDownloads`. */
+export const removeCourseDownloads = (courseName: string) =>
+  deleteDirectory(
+    new Directory(getDownloadsDirectory(), sanitizeFileName(courseName)),
+  );
+
+/**
+ * Moves one downloaded file's `<id>` folder into `<downloads>/<course>/`.
+ * A copy already there wins; the moved one is dropped.
+ */
+const moveDownload = (from: Directory, courseName: string, id: string) => {
+  const course = new Directory(
+    getDownloadsDirectory(),
+    sanitizeFileName(courseName),
+  );
+  course.create({ intermediates: true, idempotent: true });
+  const to = new Directory(course, sanitizeFileName(id));
+  if (to.exists) {
+    from.delete();
+  } else {
+    // Moving onto a path that doesn't exist yet renames the folder.
+    from.moveSync(to);
+  }
+};
+
+/**
+ * Moves downloads from the folder the `fileUseDocumentDir` setting no longer
+ * points at, so switching it keeps the files and "Clear" still finds them.
+ */
+export const moveDownloadsToCurrentDirectory = () => {
+  const other = getDownloadsDirectory(!getSettings().fileUseDocumentDir);
+  for (const course of subdirectories(other)) {
+    for (const download of subdirectories(course)) {
+      try {
+        moveDownload(download, course.name, download.name);
+      } catch {}
+    }
+  }
+  try {
+    deleteDirectory(other);
+  } catch {}
+};
+
+/**
+ * Where an old `<courseName>-<id>` download folder belongs. Ids of items the
+ * app still has cached give an exact match. Otherwise a folder with a single
+ * file named `<courseName>-<title>` gives the course name as the part both
+ * names share; anything else is left alone, since Caches and Documents also
+ * hold other code's folders.
+ */
+const matchOldDownload = (
+  dir: Directory,
+  known: Map<string, { courseName: string; id: string }>,
+) => {
+  const exact = known.get(dir.name);
+  if (exact) {
+    return exact;
+  }
+  const entries = dir.list();
+  const [file] = entries;
+  if (entries.length !== 1 || !(file instanceof File)) {
+    return null;
+  }
+  let common = 0;
+  while (
+    common < dir.name.length &&
+    common < file.name.length &&
+    dir.name[common] === file.name[common]
+  ) {
+    common++;
+  }
+  const dash = dir.name.lastIndexOf('-', common - 1);
+  if (dash < 1 || dash === dir.name.length - 1) {
+    return null;
+  }
+  return {
+    courseName: dir.name.slice(0, dash),
+    id: dir.name.slice(dash + 1),
+  };
+};
+
+/**
+ * Folders in Documents and Caches that are never old downloads: ours, and
+ * expo-sqlite's databases and submission drafts' files in Documents.
+ */
+const notDownloads = new Set([
+  DOWNLOADS_DIR,
+  SHARED_DIR,
+  'SQLite',
+  SUBMISSION_DRAFTS_DIR,
+]);
+
+/** `<courseName>-<id>` of every cached notice, assignment and file. */
+const knownDownloadFolders = () => {
+  const known = new Map<string, { courseName: string; id: string }>();
+  for (const name of ['notices', 'assignments', 'files']) {
+    for (const [, items] of queryClient.getQueriesData<
+      { id: string; courseName: string }[]
+    >({ queryKey: [name] })) {
+      for (const { id, courseName } of items ?? []) {
+        known.set(`${courseName}-${id}`, { courseName, id });
+      }
+    }
+  }
+  return known;
+};
+
+/**
+ * Earlier versions kept downloads in `<courseName>-<id>` folders right in
+ * Documents or Caches. Moves them into the downloads folder; safe to run on
+ * every launch.
+ */
+export const migrateDownloads = async () => {
+  try {
+    moveDownloadsToCurrentDirectory();
+    await restoreQueryCache();
+    const known = knownDownloadFolders();
+    for (const base of [Paths.document, Paths.cache]) {
+      for (const dir of subdirectories(base)) {
+        if (notDownloads.has(dir.name)) {
+          continue;
+        }
+        try {
+          const match = matchOldDownload(dir, known);
+          if (match) {
+            moveDownload(dir, match.courseName, match.id);
+          }
+        } catch {}
+      }
+    }
+  } catch {}
 };
 
 export const openFile = async (uri: string, type?: string | null) => {
@@ -257,7 +433,9 @@ export const openFile = async (uri: string, type?: string | null) => {
 /** Copies a file shared into the app to a place the app can read later. */
 export const copyFileToCache = async (uri: string) => {
   const from = new File(uri);
-  const to = new File(Paths.cache, from.name);
+  const dir = new Directory(Paths.cache, SHARED_DIR);
+  dir.create({ intermediates: true, idempotent: true });
+  const to = new File(dir, from.name);
   await from.copy(to, { overwrite: true });
   return to.uri;
 };

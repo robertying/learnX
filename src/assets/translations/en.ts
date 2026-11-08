@@ -302,4 +302,12 @@ export default {
     'Course information will stop being uploaded after you turn off Course Information Sharing.',
   courseInformationSharingOffCaption:
     'Information of courses (e.g. course number, name, lecturer, time and locations) of the current semester will be uploaded to courseX after you turn on Course Information Sharing. The information will be available to others. Personal information will never be uploaded or shared.\n\nYou can search for interesting courses and learn when and where they take place using courseX.',
+  delete: 'Delete',
+  downloads: 'Downloads',
+  downloadsTotal: 'All Downloads',
+  downloadsCaption:
+    'Files downloaded in learnX, by course. Tap a course to delete its files.',
+  downloadsDeleteCourse: 'Delete Downloaded Files?',
+  downloadsOneFile: '1 file',
+  downloadsFileCount: '{count} files',
 };
