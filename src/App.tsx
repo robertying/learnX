@@ -9,6 +9,7 @@ import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
 import { en, zh, registerTranslation } from 'react-native-paper-dates';
 import { isLocaleChinese, t } from 'helpers/i18n';
+import ErrorBoundary from 'components/ErrorBoundary';
 import { Toast, toast } from 'components/Toast';
 import Splash from 'components/Splash';
 import { useCredentials } from 'data/credentials';
@@ -53,16 +54,18 @@ const App = () => {
 
   return (
     <GestureHandlerRootView>
-      <PaperProvider theme={paperTheme}>
-        <QueryClientProvider client={queryClient}>
-          {loaded ? <Container /> : <Splash />}
-        </QueryClientProvider>
-        <Toast />
-        <StatusBar
-          barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
-          animated
-        />
-      </PaperProvider>
+      <ErrorBoundary>
+        <PaperProvider theme={paperTheme}>
+          <QueryClientProvider client={queryClient}>
+            {loaded ? <Container /> : <Splash />}
+          </QueryClientProvider>
+          <Toast />
+        </PaperProvider>
+      </ErrorBoundary>
+      <StatusBar
+        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        animated
+      />
     </GestureHandlerRootView>
   );
 };

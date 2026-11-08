@@ -17,6 +17,7 @@ import { WindowSafeAreaProvider } from 'components/WindowSafeArea';
 import Numbers from 'constants/Numbers';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
+import { trackScreen } from 'helpers/crashReporting';
 import { useNavigationTheme } from 'theme';
 import { DetailStack } from './DetailStack';
 import MainTab from './MainTab';
@@ -87,6 +88,7 @@ const SplitMain = () => {
           theme={theme}
           fallback={<Splash />}
           onReady={() => setDetailReady(true)}
+          onStateChange={trackScreen}
         >
           <DetailStack />
         </NavigationContainer>
@@ -114,7 +116,11 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
   return (
     <SafeAreaProvider>
       <WindowSafeAreaProvider>
-        <NavigationContainer theme={theme} fallback={<Splash />}>
+        <NavigationContainer
+          theme={theme}
+          fallback={<Splash />}
+          onStateChange={trackScreen}
+        >
           {nativeSplit ? (
             <RootNavigator.Navigator
               screenOptions={{

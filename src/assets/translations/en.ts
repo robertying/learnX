@@ -231,4 +231,6 @@ export default {
   info: 'Info',
   preview: 'Preview',
   unknownFileType: 'Unknown',
+  somethingWentWrong: 'Something went wrong',
+  reloadApp: 'Reload learnX',
 };

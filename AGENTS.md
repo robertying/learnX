@@ -58,6 +58,13 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - `updateDeadlineWidget` (`src/widgets`) is called by `useDeadlineWidget` (main UI, whenever assignments, archives or hidden courses change), by the background sync and on logout. On iOS it writes a timeline with an entry at each upcoming deadline, so due items drop off without the app; Android gets a snapshot with preformatted due times.
 - We don't use prebuild, so the native setup the expo-widgets config plugin would generate is checked in: the `ExpoWidgetsTarget` extension (`ios/ExpoWidgetsTarget`, bundle id `io.robertying.learnX.Widgets`, app group `group.io.robertying.learnX`, iOS only, not on Mac Catalyst), its Podfile target, `ExpoWidgetsAppGroupIdentifier` in the app's Info.plist, and on Android `DeadlinesProvider`, its manifest receiver and `res/xml/deadlines_info.xml` / `res/values/expo_widgets.xml`. When upgrading expo-widgets, run its config plugin in a throwaway prebuild copy and compare. Adding a widget means a new Swift widget in `index.swift`, a provider on Android and an entry in `expo_widgets_names`.
 
+## Crash reporting
+
+- Firebase Crashlytics is linked natively (iOS, Mac Catalyst, Android). JS errors reach it through `modules/crashlytics`, a local Expo module that records them with their JS frames as the stack (`ExceptionModel` on iOS, a `JavaScriptError` with `JS.fn(file:line:column)` frames on Android). Hermes bundles are one line, so each frame's column goes with its file.
+- `helpers/crashReporting` installs the global handler (from `index.js`): every uncaught error is recorded as a non-fatal first, then React Native's default handler runs, so fatal ones still crash natively; the `js_fatal` key tells the two apart. `components/ErrorBoundary` wraps the app, reports render errors with their component stack, and offers a reload. Call `recordError` for other errors worth reporting.
+- Nothing is reported from debug builds or the mock accounts, and nothing if the native module isn't in the binary. Custom keys: `js_fatal`, `screen` (last route in any navigation container, set by `trackScreen`).
+- Crashlytics doesn't symbolicate JS; use `metro-symbolicate` with the source maps from the release build (see Releases).
+
 ## Testing and debugging
 
 ### Unit tests (Jest)
