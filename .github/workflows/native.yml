@@ -127,12 +127,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2.24
-        with:
-          key: ${{ matrix.name }}
-          save: ${{ env.SAVE_CACHE }}
-
       - name: Restore Pods
         id: pods
         uses: actions/cache/restore@v6
@@ -150,8 +144,6 @@ jobs:
         run: bundle exec pod install
         env:
           LANG: en_US.UTF-8
-          # React Native's post_install points the compilers at its ccache wrappers.
-          USE_CCACHE: '1'
 
       # Both matrix jobs make the same Pods; whichever finishes second skips the save.
       - name: Save Pods
@@ -164,9 +156,17 @@ jobs:
             ~/Library/Caches/CocoaPods
           key: ${{ steps.pods.outputs.cache-primary-key }}
 
+      # Xcode's own compilation cache (Swift and C-family). ccache doesn't work
+      # here: Xcode 26 never calls the CC wrapper React Native sets up.
+      - name: Restore compilation cache
+        uses: actions/cache/restore@v6
+        with:
+          path: build/DerivedData/CompilationCache.noindex
+          key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
+          restore-keys: xcode-cas-${{ matrix.name }}-
+
       # No signing certificates on CI, so this only proves the code compiles and
       # links. Build signed (as AGENTS.md says) when running the app.
-      # Explicitly built modules bypass the CC setting, and with it ccache.
       - name: Build
         run: |
           mkdir -p build
@@ -178,22 +178,24 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
-            CLANG_ENABLE_EXPLICIT_MODULES=NO \
+            COMPILATION_CACHE_ENABLE_CACHING=YES \
             > build/xcodebuild.log 2>&1 || {
             grep -E 'error:' build/xcodebuild.log | sort -u | head -50
             tail -n 80 build/xcodebuild.log
             exit 1
           }
           tail -n 5 build/xcodebuild.log
-          # One compile command, to see whether it went through ccache
-          grep -m1 -A3 '^CompileC ' build/xcodebuild.log | cut -c1-400
+          du -sh build/DerivedData/CompilationCache.noindex || true
 
-      - name: Show ccache stats
+      - name: Save compilation cache
         if: always()
-        run: ccache --show-stats || true
+        uses: actions/cache/save@v6
+        with:
+          path: build/DerivedData/CompilationCache.noindex
+          key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
 
       - name: Upload build log
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: xcodebuild-${{ matrix.name }}
