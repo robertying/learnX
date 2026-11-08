@@ -151,6 +151,7 @@ describe('importing user data saved by 18.0.x', () => {
       hiddenCourses: ['c3'],
       courseOrder: ['c2', 'c1'],
       currentSemester: '2025-2026-1',
+      latestSemester: null,
     });
   });
 

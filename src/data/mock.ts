@@ -594,4 +594,5 @@ export const mockUserData: UserData = {
   courseOrder: [],
   // Fetched from the emulated server, like a real account.
   currentSemester: null,
+  latestSemester: null,
 };

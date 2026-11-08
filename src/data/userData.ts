@@ -25,6 +25,12 @@ export interface UserData {
    * can be changed in Settings.
    */
   currentSemester: string | null;
+  /**
+   * The school's current semester when the app last checked, so a new term
+   * can tell a user who follows the school's semester from one who picked an
+   * earlier semester on purpose.
+   */
+  latestSemester: string | null;
 }
 
 export const emptyUserData = (): UserData => ({
@@ -33,6 +39,7 @@ export const emptyUserData = (): UserData => ({
   hiddenCourses: [],
   courseOrder: [],
   currentSemester: null,
+  latestSemester: null,
 });
 
 /** Lays saved user data over the current, keeping lists that are missing. */
@@ -109,6 +116,24 @@ export const setCourseOrder = (courseIds: string[]) => {
 
 export const setCurrentSemester = (semesterId: string) => {
   useUserDataStore.setState({ currentSemester: semesterId });
+};
+
+/**
+ * Records the school's current semester and moves the semester being shown to
+ * it when the user was following the school's: nothing was shown yet, or the
+ * shown one was the school's last time. Before the app remembered the
+ * school's semester, any earlier semester counts as following. Returns the
+ * semester being shown afterwards.
+ */
+export const applyLatestSemester = (latest: string) => {
+  const { currentSemester: current, latestSemester: previous } =
+    useUserDataStore.getState();
+  const following =
+    !current ||
+    (previous ? current === previous : current.localeCompare(latest) < 0);
+  const currentSemester = following ? latest : current;
+  useUserDataStore.setState({ currentSemester, latestSemester: latest });
+  return currentSemester;
 };
 
 export const useCurrentSemester = () =>

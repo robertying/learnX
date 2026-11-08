@@ -15,7 +15,12 @@ import {
 import { coursesQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { loginWithFingerPrint } from 'data/source';
-import { resetUserData, setCurrentSemester } from 'data/userData';
+import {
+  getUserData,
+  resetUserData,
+  setCurrentSemester,
+  useUserDataStore,
+} from 'data/userData';
 import { syncContent } from 'helpers/background';
 
 jest.mock('expo-background-task', () => ({
@@ -172,4 +177,40 @@ it('skips when the login fails', async () => {
   await seed();
   jest.mocked(loginWithFingerPrint).mockRejectedValueOnce(new Error('no'));
   expect(await syncContent()).toEqual({ status: 'skipped' });
+});
+
+it("moves to the school's new semester when a term starts", async () => {
+  const previous = '2025-2026-2';
+  useUserDataStore.setState({
+    currentSemester: previous,
+    latestSemester: previous,
+  });
+  queryClient.setQueryData(coursesQuery(previous).queryKey, [
+    { ...mockCourses[0], semesterId: previous },
+  ]);
+
+  const diff = await sync();
+
+  expect(getUserData().currentSemester).toBe(semesterId);
+  expect(queryClient.getQueryData(coursesQuery(semesterId).queryKey)).toEqual(
+    mockCourses.filter(c => c.semesterId === semesterId),
+  );
+  // The new semester's first fetch reports nothing new.
+  expect(diff.notices.added).toEqual([]);
+  expect(
+    queryClient.getQueryData(noticesQuery(semesterId).queryKey),
+  ).toHaveLength(inSemester(mockNotices).length);
+});
+
+it('stays on a semester the user picked', async () => {
+  const picked = '2025-2026-1';
+  useUserDataStore.setState({
+    currentSemester: picked,
+    latestSemester: semesterId,
+  });
+  queryClient.setQueryData(coursesQuery(picked).queryKey, [
+    { ...mockCourses[0], semesterId: picked },
+  ]);
+  await syncContent();
+  expect(getUserData().currentSemester).toBe(picked);
 });
