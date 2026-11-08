@@ -19,7 +19,7 @@ const Changelog: React.FC<Props> = () => {
       if (webViewRef.current) {
         webViewRef.current.stopLoading();
       }
-      Linking.openURL(e.url);
+      void Linking.openURL(e.url);
     }
   };
 

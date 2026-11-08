@@ -267,7 +267,7 @@ export const useSubmitAssignment = (
       setUploadError(true);
       setProgress(0);
 
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
     }
 

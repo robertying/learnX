@@ -66,18 +66,18 @@ const useReLogin = () => {
       // The lists only refresh by themselves when the session starts; one
       // that was already open would keep showing what it had.
       if (getAuth().loggedIn) {
-        refreshOpenLists();
+        void refreshOpenLists();
       }
     } else if (auth.loggedIn) {
-      refreshOpenLists();
+      void refreshOpenLists();
     } else if (auth.failure) {
       // Back from a short break without a session: try again quietly.
-      login({ reset: true });
+      void login({ reset: true });
     }
   });
 
   useEffect(() => {
-    handleReLogin();
+    void handleReLogin();
 
     const sub = AppState.addEventListener('change', nextAppState => {
       if (appState.current === 'active' && nextAppState !== 'active') {
@@ -88,7 +88,7 @@ const useReLogin = () => {
         appState.current?.match(/inactive|background/) &&
         nextAppState === 'active'
       ) {
-        handleReLogin();
+        void handleReLogin();
       }
 
       appState.current = nextAppState;
@@ -101,7 +101,7 @@ const useReLogin = () => {
   const retry = useEffectEvent(() => {
     if (canLogIn() && getAuth().failure === 'offline') {
       retries.current += 1;
-      login({ reset: true });
+      void login({ reset: true });
     }
   });
 

@@ -23,7 +23,7 @@ export const toast = (text: string, type: ToastType, duration?: number) => {
   ToastAndroid.show(text, long ? ToastAndroid.LONG : ToastAndroid.SHORT);
   const feedback = haptics[type];
   if (feedback !== undefined) {
-    Haptics.notificationAsync(feedback);
+    void Haptics.notificationAsync(feedback);
   }
 };
 

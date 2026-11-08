@@ -96,7 +96,12 @@
     "no-self-compare": "warn",
     "no-sequences": "warn",
     "no-useless-escape": "warn",
-    "no-void": "warn",
+    "no-void": [
+      "warn",
+      {
+        "allowAsStatement": true
+      }
+    ],
     "no-with": "warn",
     "radix": "warn",
     "yoda": "warn",
@@ -170,6 +175,10 @@
       ],
       "env": {
         "jest": true
+      },
+      "plugins": ["typescript"],
+      "rules": {
+        "typescript/unbound-method": "off"
       }
     },
     {
@@ -202,7 +211,8 @@
     }
   },
   "options": {
-    "reportUnusedDisableDirectives": "warn"
+    "reportUnusedDisableDirectives": "warn",
+    "typeAware": true
   },
   "ignorePatterns": ["android/", "ios/"]
 }

@@ -81,7 +81,7 @@ export const toast = (text: string, type: ToastType, duration?: number) => {
   }));
   const feedback = haptics[type];
   if (feedback !== undefined) {
-    Haptics.notificationAsync(feedback);
+    void Haptics.notificationAsync(feedback);
   }
   // The toast lives in its own window, outside the screen VoiceOver is on.
   AccessibilityInfo.announceForAccessibility(text);

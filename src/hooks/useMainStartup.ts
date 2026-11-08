@@ -49,13 +49,13 @@ const useMainStartup = () => {
 
   useEffect(() => {
     if (loggedIn) {
-      setUpBackgroundFetch();
+      void setUpBackgroundFetch();
     }
   }, [loggedIn]);
 
   useEffect(() => {
-    configureNotifications();
-    migrateDownloads();
+    void configureNotifications();
+    void migrateDownloads();
   }, []);
   useNotificationTaps();
   useLinkTaps();

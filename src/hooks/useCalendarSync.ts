@@ -67,7 +67,7 @@ export const useCourseScheduleSync = () => {
   const onRangeConfirm: RangeChange = range => {
     onRangeChange(range);
     closePicker();
-    sync(range.startDate, range.endDate);
+    void sync(range.startDate, range.endDate);
   };
 
   return {

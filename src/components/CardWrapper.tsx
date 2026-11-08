@@ -150,7 +150,7 @@ const CardWrapper: React.FC<
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       if (swipeableNotSupported) {
-        Haptics.selectionAsync();
+        void Haptics.selectionAsync();
         setMenuVisible(true);
       } else {
         openActions();

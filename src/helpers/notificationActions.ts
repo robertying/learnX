@@ -117,7 +117,7 @@ export const setUpNotificationActions = () => {
     last &&
     last.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER
   ) {
-    handle(last);
+    void handle(last);
     Notifications.clearLastNotificationResponse();
   }
   const subscription =

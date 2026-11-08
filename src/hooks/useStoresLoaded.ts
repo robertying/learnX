@@ -14,7 +14,7 @@ const loadStores = () =>
 const useStoresLoaded = () => {
   const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    loadStores().finally(() => setLoaded(true));
+    void loadStores().finally(() => setLoaded(true));
   }, []);
   return loaded;
 };

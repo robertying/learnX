@@ -57,7 +57,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
         // Something went wrong
         toast(t('ssoFailed'), 'error');
       } else {
-        login(formData.current);
+        void login(formData.current);
       }
 
       setSSOInProgress(false);
