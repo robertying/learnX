@@ -1,7 +1,7 @@
 import { Platform, StyleProp, ViewStyle } from 'react-native';
 import { Button, Host } from '@expo/ui';
 import { buttonStyle } from '@expo/ui/swift-ui/modifiers';
-import { useTheme } from 'theme';
+import { useComposeColorOverrides, useTheme } from 'theme';
 
 export interface ContainedButtonProps {
   label: string;
@@ -25,9 +25,16 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
   style,
 }) => {
   const theme = useTheme();
+  const colorOverrides = useComposeColorOverrides();
 
   return (
-    <Host matchContents seedColor={theme.colors.primary} style={style}>
+    <Host
+      matchContents
+      seedColor={theme.colors.primary}
+      // The universal Host passes this through to Compose on Android.
+      {...(Platform.OS === 'android' ? { colorOverrides } : {})}
+      style={style}
+    >
       <Button
         label={label}
         disabled={disabled}

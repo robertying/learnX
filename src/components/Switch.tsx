@@ -1,7 +1,7 @@
 import { Platform, StyleProp, ViewStyle } from 'react-native';
 import { Host, Switch as NativeSwitch } from '@expo/ui';
 import { labelsHidden } from '@expo/ui/swift-ui/modifiers';
-import { useTheme } from 'theme';
+import { useComposeColorOverrides, useTheme } from 'theme';
 
 export interface SwitchProps {
   value: boolean;
@@ -23,11 +23,14 @@ const Switch: React.FC<SwitchProps> = ({
   ...props
 }) => {
   const theme = useTheme();
+  const colorOverrides = useComposeColorOverrides();
 
   return (
     <Host
       matchContents
       seedColor={theme.colors.primary}
+      // The universal Host passes this through to Compose on Android.
+      {...(Platform.OS === 'android' ? { colorOverrides } : {})}
       style={style}
       accessibilityLabel={
         Platform.OS === 'android' ? accessibilityLabel : undefined

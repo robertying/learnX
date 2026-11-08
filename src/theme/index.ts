@@ -176,6 +176,32 @@ export const BrandDarkNavigationTheme = {
   colors: BrandDarkTheme.colors,
 };
 
+/**
+ * Compose builds its own `SchemeTonalSpot` palette from a Host's `seedColor`,
+ * which mutes the primary roles (#7C4E7F instead of #660874). Android Hosts
+ * pass these as `colorOverrides` to keep the brand color.
+ */
+const composeOverrides = {
+  light: {
+    primary: brandColors.light,
+    onPrimary: '#FFFFFF',
+    primaryContainer: '#FFD6FD',
+    onPrimaryContainer: '#36003F',
+    inversePrimary: brandColors.dark,
+  },
+  dark: {
+    primary: brandColors.dark,
+    onPrimary: '#580065',
+    primaryContainer: '#751D82',
+    onPrimaryContainer: '#FFD6FD',
+    inversePrimary: brandColors.light,
+  },
+} as const;
+
+/** `colorOverrides` for a Compose Host, in the system appearance. */
+export const useComposeColorOverrides = () =>
+  useColorScheme() === 'dark' ? composeOverrides.dark : composeOverrides.light;
+
 /** The app's colors for the system appearance. Use this in components. */
 export const useTheme = (): Theme =>
   useColorScheme() === 'dark' ? BrandDarkTheme : BrandLightTheme;
