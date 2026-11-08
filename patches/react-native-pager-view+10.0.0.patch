@@ -1,0 +1,17 @@
+diff --git a/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift b/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift
+index 78361b7..e94a5a4 100644
+--- a/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift
++++ b/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift
+@@ -145,6 +145,12 @@ private extension PagerGestureObserver {
+     // Already wearing the subclass, e.g. after a recycle.
+     guard !currentName.hasSuffix(subclassSuffix) else { return }
+ 
++    // Key-value observing has already swapped in its own subclass (Mac
++    // Catalyst's window observes scroll views for its toolbar). A subclass of
++    // that one breaks KVO, and SwiftUI then crashes casting the view to UIView,
++    // so the pan is left as it is.
++    guard !currentName.hasPrefix("NSKVONotifying_") else { return }
++
+     let subclassName = currentName.appending(subclassSuffix)
+ 
+     if let existing = NSClassFromString(subclassName) {
