@@ -1,4 +1,10 @@
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/zh-cn';
 import { mockLocale } from './locale';
+
+// As App.tsx does at startup
+dayjs.extend(relativeTime);
 
 // helpers/env inlines the repo's .env at build time via babel preval; tests
 // use fixed fixture values instead. Mocked by path so it covers every import
@@ -92,3 +98,41 @@ jest.mock('expo-notifications', () => ({
   useLastNotificationResponse: jest.fn(() => null),
   clearLastNotificationResponse: jest.fn(),
 }));
+
+jest.mock('@react-native-vector-icons/material-design-icons', () =>
+  require('./icons'),
+);
+jest.mock('@react-native-vector-icons/material-icons', () =>
+  require('./icons'),
+);
+
+jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () =>
+  require('./swipeable'),
+);
+
+jest.mock('expo-haptics', () => ({
+  NotificationFeedbackType: {
+    Success: 'success',
+    Warning: 'warning',
+    Error: 'error',
+  },
+  selectionAsync: jest.fn(() => Promise.resolve()),
+  notificationAsync: jest.fn(() => Promise.resolve()),
+  impactAsync: jest.fn(() => Promise.resolve()),
+}));
+
+jest.mock('react-native-device-info', () =>
+  require('react-native-device-info/jest/react-native-device-info-mock'),
+);
+
+// @expo/ui renders SwiftUI / Jetpack Compose; tests get plain views.
+jest.mock('@expo/ui', () => require('./expoUi'));
+jest.mock('@expo/ui/swift-ui/modifiers', () => ({
+  buttonStyle: jest.fn(),
+  labelsHidden: jest.fn(),
+}));
+
+jest.mock(
+  'react-native-safe-area-context',
+  () => require('react-native-safe-area-context/jest/mock').default,
+);

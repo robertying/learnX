@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import Colors from 'constants/Colors';
 import { File } from 'data/types/state';
-import { removeTags } from 'helpers/html';
+import { removeTags } from 'helpers/text';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { Caption, Paragraph, Subheading, Title } from 'components/Text';
 

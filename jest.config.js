@@ -5,14 +5,17 @@ process.env.TZ = 'Asia/Shanghai';
 module.exports = {
   preset: '@react-native/jest-preset',
   roots: ['<rootDir>/src'],
+  // Loads Reanimated's and Worklets' web builds instead of the native ones
+  resolver: 'react-native-reanimated/jest/resolver',
   setupFiles: ['<rootDir>/jest/setup.ts'],
   transform: {
     '^.+\\.mjs$': 'babel-jest',
   },
   transformIgnorePatterns: [
-    // thu-learn-lib (and some of its dependencies) and mime ship ESM only, so
-    // they go through Babel like the React Native packages (entities is nested
+    // React Native libraries (react-native-*, @react-native-*), React
+    // Navigation, thu-learn-lib (and some of its dependencies) and mime ship
+    // ESM or untranspiled source, so they go through Babel (entities is nested
     // under thu-learn-lib, newer and ESM-only; he resolves to its .mjs build)
-    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|thu-learn-lib|node-fetch-native|fetch-cookie|entities|mime|he)/)',
+    'node_modules/(?!((jest-)?react-native[^/]*|@react-native[^/]*|@react-navigation|thu-learn-lib|node-fetch-native|fetch-cookie|entities|mime|he)/)',
   ],
 };
