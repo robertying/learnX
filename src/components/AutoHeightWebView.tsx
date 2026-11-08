@@ -31,7 +31,10 @@ const AutoHeightWebView: React.FC<
       if (webViewRef.current) {
         webViewRef.current.stopLoading();
       }
-      Linking.openURL(e.url);
+      // Course content is written by teachers; only open web and mail links.
+      if (/^(https?|mailto):/i.test(e.url)) {
+        Linking.openURL(e.url).catch(() => {});
+      }
     }
   };
 
