@@ -1,10 +1,10 @@
 import { HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   containerBackground,
-  fixedSize,
   font,
   foregroundStyle,
   frame,
+  layoutPriority,
   lineLimit,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
@@ -114,7 +114,24 @@ function DeadlinesWidget(
           >
             {item.title}
           </Text>
-          <HStack spacing={4}>
+          {/*
+            A relative date Text takes all the width it's offered (and
+            breaks the layout with fixedSize), so it goes last: the course
+            name gets its width first and the date follows right after it.
+          */}
+          <HStack spacing={0}>
+            {showCourse ? (
+              <Text
+                modifiers={[
+                  font({ textStyle: large ? 'subheadline' : 'caption' }),
+                  foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+                  lineLimit(1),
+                  layoutPriority(1),
+                ]}
+              >
+                {`${item.courseName} · `}
+              </Text>
+            ) : null}
             <Text
               date={new Date(item.deadline)}
               dateStyle="relative"
@@ -122,22 +139,8 @@ function DeadlinesWidget(
                 font({ textStyle: large ? 'subheadline' : 'caption' }),
                 foregroundStyle(accent),
                 lineLimit(1),
-                // A relative date takes all the width it can otherwise,
-                // pushing the course name to the far edge.
-                fixedSize(),
               ]}
             />
-            {showCourse ? (
-              <Text
-                modifiers={[
-                  font({ textStyle: large ? 'subheadline' : 'caption' }),
-                  foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-                  lineLimit(1),
-                ]}
-              >
-                {item.courseName}
-              </Text>
-            ) : null}
           </HStack>
           {large ? (
             <Text
