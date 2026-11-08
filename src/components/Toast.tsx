@@ -1,16 +1,47 @@
-import { useEffect } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, FadeOut, Keyframe } from 'react-native-reanimated';
+import { ComponentProps, useEffect, useState } from 'react';
+import {
+  AccessibilityInfo,
+  PanResponder,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { FullWindowOverlay } from 'react-native-screens';
+import { Host, Icon } from '@expo/ui';
+import { RoundedRectangle } from '@expo/ui/swift-ui';
+import { foregroundStyle, glassEffect } from '@expo/ui/swift-ui/modifiers';
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import { useTheme } from 'theme';
 
 export type ToastType = 'success' | 'warning' | 'error' | 'none';
 
-const useToastStore = create<{ text: string; duration: number }>(() => ({
+interface ToastState {
+  /** Changes with every toast, so that each one mounts afresh. */
+  id: number;
+  text: string;
+  type: ToastType;
+  duration: number;
+  /** False while the toast animates away; `text` empties once it is gone. */
+  visible: boolean;
+}
+
+const useToastStore = create<ToastState>(() => ({
+  id: 0,
   text: '',
+  type: 'none',
   duration: 3000,
+  visible: false,
 }));
 
 const defaultDurations: Record<ToastType, number> = {
@@ -26,50 +57,131 @@ const haptics: Partial<Record<ToastType, Haptics.NotificationFeedbackType>> = {
   error: Haptics.NotificationFeedbackType.Error,
 };
 
-/** Shows a snackbar. A plain function, so it is safe to call from anywhere. */
+// The SF Symbols and system colors Apple's own HUDs use for each outcome.
+const symbols: Partial<
+  Record<
+    ToastType,
+    { name: ComponentProps<typeof Icon>['name']; color: string }
+  >
+> = {
+  success: { name: 'checkmark.circle.fill', color: '#34C759' },
+  warning: { name: 'exclamationmark.triangle.fill', color: '#FF9500' },
+  error: { name: 'xmark.circle.fill', color: '#FF3B30' },
+};
+
+/**
+ * Shows a toast. A plain function, so it is safe to call from anywhere. An
+ * empty `text` hides the current one.
+ */
 export const toast = (text: string, type: ToastType, duration?: number) => {
-  useToastStore.setState({
+  if (!text) {
+    useToastStore.setState({ text: '', visible: false });
+    return;
+  }
+  useToastStore.setState(state => ({
+    id: state.id + 1,
     text,
+    type,
     duration: duration ?? defaultDurations[type],
-  });
+    visible: true,
+  }));
   const feedback = haptics[type];
-  if (text && feedback !== undefined) {
+  if (feedback !== undefined) {
     Haptics.notificationAsync(feedback);
+  }
+  // The toast lives in its own window, outside the screen VoiceOver is on.
+  AccessibilityInfo.announceForAccessibility(text);
+};
+
+const dismiss = (id: number) => {
+  if (useToastStore.getState().id === id) {
+    useToastStore.setState({ visible: false });
   }
 };
 
-const dismiss = () => {
-  useToastStore.setState({ text: '' });
+const remove = (id: number) => {
+  if (useToastStore.getState().id === id) {
+    useToastStore.setState({ text: '' });
+  }
 };
 
-// Material's snackbar motion: fade and grow in, fade out.
-const entering = new Keyframe({
-  0: { opacity: 0, transform: [{ scale: 0.9 }] },
-  100: {
-    opacity: 1,
-    transform: [{ scale: 1 }],
-    easing: Easing.out(Easing.ease),
-  },
-}).duration(200);
-const exiting = FadeOut.duration(100);
+const supportsGlass = parseInt(String(Platform.Version), 10) >= 26;
+const cornerRadius = 25;
+// Liquid Glass on iOS 26 and later; the blur material Apple's HUDs used
+// before that.
+const backgroundModifiers = supportsGlass
+  ? [
+      foregroundStyle('transparent'),
+      glassEffect({
+        glass: { variant: 'regular' },
+        shape: 'roundedRectangle',
+        cornerRadius,
+      }),
+    ]
+  : [foregroundStyle({ type: 'material', material: 'regular' })];
 
-/**
- * Renders the current toast as a snackbar at the bottom of the window (iOS has
- * no system toast). Mount once, above the navigation container.
- */
-export const Toast: React.FC = () => {
+const hiddenOffset = -24;
+
+const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
+  id,
+  text,
+  type,
+  visible,
+}) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const text = useToastStore(state => state.text);
-  const duration = useToastStore(state => state.duration);
+  const progress = useSharedValue(0);
+  const drag = useSharedValue(0);
 
   useEffect(() => {
-    if (!text) {
-      return;
+    if (visible) {
+      progress.set(withSpring(1, { damping: 18, stiffness: 220 }));
+    } else {
+      progress.set(
+        withTiming(0, { duration: 200 }, finished => {
+          if (finished) {
+            scheduleOnRN(remove, id);
+          }
+        }),
+      );
     }
-    const timer = setTimeout(dismiss, duration);
-    return () => clearTimeout(timer);
-  }, [text, duration]);
+  }, [id, progress, visible]);
+
+  // Tap or swipe up to dismiss, as with a notification banner; pulling down
+  // stretches a little and springs back.
+  const [responder] = useState(() =>
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, { dy }) => {
+        drag.set(dy < 0 ? dy : dy / 6);
+      },
+      onPanResponderRelease: (_, { dx, dy, vy }) => {
+        const tapped = Math.abs(dx) < 5 && Math.abs(dy) < 5;
+        if (tapped || dy < -20 || vy < -0.5) {
+          dismiss(id);
+        } else {
+          drag.set(withSpring(0));
+        }
+      },
+      onPanResponderTerminate: () => {
+        drag.set(withSpring(0));
+      },
+    }),
+  );
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: progress.get(),
+    transform: [
+      {
+        translateY:
+          interpolate(progress.get(), [0, 1], [hiddenOffset, 0]) +
+          (visible ? drag.get() : Math.min(drag.get(), 0)),
+      },
+      { scale: interpolate(progress.get(), [0, 1], [0.9, 1]) },
+    ],
+  }));
+
+  const symbol = symbols[type];
 
   return (
     <View
@@ -77,56 +189,95 @@ export const Toast: React.FC = () => {
       style={[
         styles.wrapper,
         {
-          paddingBottom: insets.bottom,
-          paddingHorizontal: Math.max(insets.left, insets.right),
+          paddingTop: insets.top + 8,
+          paddingLeft: insets.left + 16,
+          paddingRight: insets.right + 16,
         },
       ]}
     >
-      {text ? (
-        <Animated.View
-          key={text}
-          entering={entering}
-          exiting={exiting}
-          accessibilityLiveRegion="polite"
-          accessibilityRole="alert"
-          style={[
-            styles.snackbar,
-            { backgroundColor: theme.colors.inverseSurface },
-          ]}
+      <Animated.View
+        {...responder.panHandlers}
+        accessible
+        accessibilityRole="alert"
+        accessibilityLabel={text}
+        accessibilityHint=""
+        style={[styles.toast, animatedStyle]}
+      >
+        <Host pointerEvents="none" style={StyleSheet.absoluteFill}>
+          <RoundedRectangle
+            cornerRadius={cornerRadius}
+            modifiers={backgroundModifiers}
+          />
+        </Host>
+        {symbol ? (
+          <Host matchContents pointerEvents="none" style={styles.icon}>
+            <Icon name={symbol.name} size={20} color={symbol.color} />
+          </Host>
+        ) : null}
+        <Text
+          style={[styles.text, { color: theme.colors.onSurface }]}
+          numberOfLines={3}
         >
-          <Text style={[styles.text, { color: theme.colors.inverseOnSurface }]}>
-            {text}
-          </Text>
-        </Animated.View>
-      ) : null}
+          {text}
+        </Text>
+      </Animated.View>
     </View>
+  );
+};
+
+/**
+ * Renders the current toast as a HUD at the top of the window, like the
+ * system's own (iOS has no toast API). It draws in a window of its own, so it
+ * shows over modals and sheets too. Mount once.
+ */
+export const Toast: React.FC = () => {
+  const { id, text, type, duration, visible } = useToastStore();
+
+  useEffect(() => {
+    if (!text || !visible) {
+      return;
+    }
+    const timer = setTimeout(() => dismiss(id), duration);
+    return () => clearTimeout(timer);
+  }, [id, text, visible, duration]);
+
+  if (!text) {
+    return null;
+  }
+
+  // Mounting the overlay adds its window on top. Remounting it for each toast
+  // keeps a toast above a modal that was presented after the previous one.
+  return (
+    <FullWindowOverlay
+      key={id}
+      unstable_accessibilityContainerViewIsModal={false}
+    >
+      <ToastView id={id} text={text} type={type} visible={visible} />
+    </FullWindowOverlay>
   );
 };
 
 const styles = StyleSheet.create({
   wrapper: {
-    position: 'absolute',
-    bottom: 0,
-    width: '100%',
-    marginBottom: Platform.OS === 'android' ? 80 : 48,
+    ...StyleSheet.absoluteFill,
+    alignItems: 'center',
   },
-  snackbar: {
-    margin: 8,
-    borderRadius: 4,
-    minHeight: 48,
-    justifyContent: 'center',
-    // Material 3 level 3 shadow.
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+  toast: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    maxWidth: 420,
+    minHeight: cornerRadius * 2,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  icon: {
+    marginRight: 10,
   },
   text: {
-    marginHorizontal: 16,
-    marginVertical: 14,
-    fontSize: 14,
+    flexShrink: 1,
+    fontSize: 15,
     lineHeight: 20,
-    letterSpacing: 0.25,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });
