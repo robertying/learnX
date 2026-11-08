@@ -76,6 +76,7 @@ jest.mock('expo-widgets', () => ({
 jest.mock('expo-notifications', () => ({
   AndroidImportance: { DEFAULT: 3, HIGH: 4 },
   IosAuthorizationStatus: { PROVISIONAL: 3 },
+  SchedulableTriggerInputTypes: { DATE: 'date' },
   DEFAULT_ACTION_IDENTIFIER: 'expo.modules.notifications.actions.DEFAULT',
   setNotificationHandler: jest.fn(),
   setNotificationChannelAsync: jest.fn(() => Promise.resolve(null)),

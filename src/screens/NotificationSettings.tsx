@@ -18,6 +18,7 @@ import {
 import { queryClient } from 'data/queryClient';
 import { getUserData } from 'data/userData';
 import { notifyContent, syncContent } from 'helpers/background';
+import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
@@ -195,6 +196,16 @@ const NotificationSettings: React.FC<Props> = () => {
                 }
                 await simulateNewContent();
               }}
+            />
+          )}
+          {__DEV__ && (
+            <TableCell
+              iconName="alarm-on"
+              primaryText={t('previewDeadlineReminder')}
+              type="none"
+              onPress={async () =>
+                toast(String(await previewDeadlineReminder()), 'success')
+              }
             />
           )}
         </ScrollView>
