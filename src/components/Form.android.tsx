@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
@@ -8,6 +8,7 @@ import {
   Column,
   Host,
   LazyColumn,
+  LinearProgressIndicator,
   ListItem,
   OutlinedTextField,
   PullToRefreshBox,
@@ -40,6 +41,7 @@ import {
   positionRows,
   type FormButtonProps,
   type FormIcon,
+  type FormItemRowProps,
   type FormLinkProps,
   type FormNumberFieldProps,
   type FormParagraphProps,
@@ -189,18 +191,16 @@ const RowIcon: React.FC<{ icon: FormIcon; color: string }> = ({
   </RNHostView>
 );
 
-const FormRow: React.FC<{
-  title: string;
-  icon?: FormIcon;
-  testID?: string;
-  position?: FormRowPosition;
-  /** How the row takes a tap: clickable, toggleable or selectable. */
-  action?: ModifierConfig;
-  titleColor?: string;
-  detail?: string;
-  trailing?: ReactNode;
-}> = ({
+const FormRow: React.FC<
+  FormItemRowProps & {
+    /** How the row takes a tap: clickable, toggleable or selectable. */
+    action?: ModifierConfig;
+    titleColor?: string;
+    trailing?: ReactNode;
+  }
+> = ({
   title,
+  subtitle,
   icon,
   testID,
   position,
@@ -208,19 +208,53 @@ const FormRow: React.FC<{
   titleColor,
   detail,
   trailing,
+  done,
+  progress,
 }) => {
   const colors = useMaterialColors();
+  // Over: the text in the secondary color, with a check at the end.
+  const contentColor = done ? colors.outline : titleColor;
+  const check = done ? (
+    <RNHostView matchContents>
+      <MaterialDesignIcons name="check" size={20} color={colors.outline} />
+    </RNHostView>
+  ) : null;
+  const ends = [
+    detail ? (
+      <Text
+        key="detail"
+        color={done ? colors.outline : colors.onSurfaceVariant}
+      >
+        {detail}
+      </Text>
+    ) : null,
+    check ? <Fragment key="check">{check}</Fragment> : null,
+    trailing ? <Fragment key="trailing">{trailing}</Fragment> : null,
+  ].filter(Boolean);
   const end =
-    detail && trailing ? (
+    ends.length > 1 ? (
       <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 8 }}>
-        <Text color={colors.onSurfaceVariant}>{detail}</Text>
-        {trailing}
+        {ends}
       </Row>
-    ) : detail ? (
-      <Text color={colors.onSurfaceVariant}>{detail}</Text>
     ) : (
-      trailing
+      ends[0]
     );
+  const supporting =
+    subtitle || progress !== undefined ? (
+      <Column verticalArrangement={{ spacedBy: 8 }}>
+        {subtitle ? (
+          <Text color={done ? colors.outline : colors.onSurfaceVariant}>
+            {subtitle}
+          </Text>
+        ) : null}
+        {progress !== undefined ? (
+          <LinearProgressIndicator
+            progress={progress}
+            modifiers={[fillMaxWidth()]}
+          />
+        ) : null}
+      </Column>
+    ) : null;
   return (
     <ListItem
       colors={{ containerColor: colors.surfaceContainer }}
@@ -232,11 +266,17 @@ const FormRow: React.FC<{
       ]}
     >
       <ListItem.HeadlineContent>
-        <Text color={titleColor}>{title}</Text>
+        <Text color={contentColor}>{title}</Text>
       </ListItem.HeadlineContent>
+      {supporting ? (
+        <ListItem.SupportingContent>{supporting}</ListItem.SupportingContent>
+      ) : null}
       {icon ? (
         <ListItem.LeadingContent>
-          <RowIcon icon={icon} color={titleColor ?? colors.onSurfaceVariant} />
+          <RowIcon
+            icon={icon}
+            color={contentColor ?? colors.onSurfaceVariant}
+          />
         </ListItem.LeadingContent>
       ) : null}
       {end ? <ListItem.TrailingContent>{end}</ListItem.TrailingContent> : null}

@@ -9,7 +9,7 @@ tags:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-today|sun\.max\.fill'
-- assertVisible: '(Due Soon|即将截止)'
+- assertVisible: '(?i)(Due Soon|即将截止)'
 - runFlow:
     file: subflows/tab.yaml
     env:
