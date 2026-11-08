@@ -801,6 +801,21 @@ index 9039e5a1..131e8cea 100644
    /**
     * @summary Determines whether a button to toggle to and from secondaryOnly display mode is visible.
     */
+diff --git a/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx b/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx
+index 7a5de71..d6e18e8 100644
+--- a/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx
++++ b/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx
+@@ -30,7 +30,9 @@ const isValidDisplayModeForSplitBehavior = (
+   displayMode: SplitDisplayMode,
+   splitBehavior: SplitBehavior,
+ ) => {
+-  if (splitBehavior === 'automatic') {
++  // UIKit takes 'automatic' with any split behavior: it leaves the choice (or
++  // the mode restored with the scene) to the system.
++  if (displayMode === 'automatic' || splitBehavior === 'automatic') {
+     // for automatic we cannot easily verify the compatibility, because it depends on the system preference for display mode, therefore we're assuming that 'automatic' has only valid combinations
+     return true;
+   }
 diff --git a/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx b/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx
 index 52b7d211..1ac28ef0 100644
 --- a/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx
