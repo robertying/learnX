@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { reloadAppAsync } from 'expo';
 import TextButton from 'components/TextButton';
 import { Text } from 'components/Text';
@@ -20,7 +20,7 @@ const ErrorFallback: React.FC = () => {
     >
       <Icon
         style={Styles.spacey1}
-        name="error-outline"
+        name="alert-circle-outline"
         color={theme.colors.outline}
         size={56}
       />

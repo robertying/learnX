@@ -2,7 +2,6 @@ import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Chip from 'components/Chip';
 import dayjs from 'dayjs';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {
   HomeworkCompletionType,
@@ -132,7 +131,9 @@ const AssignmentDetailContent: React.FC<{
             disabled={dayjs().isAfter(dayjs(deadline))}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
-            icon={props => <MaterialIcons {...props} name="file-upload" />}
+            icon={props => (
+              <MaterialCommunityIcons {...props} name="file-upload" />
+            )}
           />
         ),
         unstable_headerRightItems: () => [
@@ -261,9 +262,9 @@ const AssignmentDetailContent: React.FC<{
         {graded && (
           <>
             <View style={[styles.section, styles.iconButton]}>
-              <MaterialIcons
+              <MaterialCommunityIcons
                 style={styles.icon}
-                name="grade"
+                name="star"
                 color={theme.colors.primary}
                 size={17}
               />

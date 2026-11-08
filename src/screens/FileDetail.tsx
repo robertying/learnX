@@ -4,7 +4,7 @@ import ProgressBar from 'components/ProgressBar';
 import Chip from 'components/Chip';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import Pdf from 'react-native-pdf';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
@@ -96,7 +96,7 @@ const FileDetailContent: React.FC<{
         <View key="error" style={styles.errorRoot}>
           <Icon
             style={Styles.spacey1}
-            name="error"
+            name="alert-circle"
             color={theme.colors.outline}
             size={56}
           />
@@ -165,7 +165,7 @@ const FileDetailContent: React.FC<{
             <View style={[styles.section, styles.iconButton]}>
               <Icon
                 style={styles.icon}
-                name="insert-drive-file"
+                name="file"
                 color={theme.colors.primary}
                 size={17}
               />

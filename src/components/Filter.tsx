@@ -7,7 +7,6 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import { t } from 'helpers/i18n';
 import Colors from 'constants/Colors';
 import { Text } from 'components/Text';
@@ -68,9 +67,9 @@ const ListItem: React.FC<{
     >
       <View style={styles.row}>
         {name === 'hidden' ? (
-          <MaterialIcons
+          <MaterialCommunityIcons
             style={styles.icon}
-            name="visibility-off"
+            name="eye-off"
             size={24}
             color={iconColor}
           />

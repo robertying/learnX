@@ -1,4 +1,4 @@
-import { getLocales } from 'react-native-localize';
+import { getLocales } from 'expo-localization';
 import { HomeworkGradeLevel } from 'thu-learn-lib';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';

@@ -70,7 +70,7 @@ const FileSettings: React.FC<Props> = () => {
         </Caption>
         <TableCell
           style={styles.marginTop}
-          iconName="drive-file-rename-outline"
+          iconName="rename-outline"
           primaryText={t('fileOmitCourseName')}
           switchValue={fileOmitCourseName}
           onSwitchValueChange={value => setSetting('fileOmitCourseName', value)}

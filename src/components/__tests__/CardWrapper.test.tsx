@@ -86,7 +86,7 @@ describe('CardWrapper', () => {
       const onCheck = jest.fn();
       const onDrag = jest.fn();
       await render(card({ reorderMode: true, onPress, onCheck, onDrag }));
-      expect(screen.getByTestId('icon-reorder')).toBeTruthy();
+      expect(screen.getByTestId('icon-reorder-horizontal')).toBeTruthy();
       expect(swipeEnabled()).toBe(false);
 
       await press();
