@@ -2,9 +2,9 @@ import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import { loginWithFingerPrint } from 'data/source';
 import { loadCredentials } from 'data/credentials';
-import { coursesQuery } from 'data/queries';
+import { coursesQuery, latestSemesterQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
-import { getUserData } from 'data/userData';
+import { applyLatestSemester, getUserData } from 'data/userData';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { ContentDiff, diffContent } from 'data/contentDiff';
 import { updateDeadlineWidget } from 'widgets';
@@ -18,6 +18,24 @@ export type SyncResult =
   | { status: 'synced'; diff: ContentDiff };
 
 /**
+ * Moves to the school's new semester when a term starts, as the app does at
+ * launch, and fetches its courses. Stays on the shown semester if the check
+ * or the courses fail.
+ */
+const followLatestSemester = async (shownSemester: string) => {
+  try {
+    const latest = await queryClient.fetchQuery(latestSemesterQuery);
+    const semesterId = applyLatestSemester(latest);
+    if (semesterId !== shownSemester) {
+      await queryClient.ensureQueryData(coursesQuery(semesterId));
+    }
+    return semesterId;
+  } catch {
+    return getUserData().currentSemester ?? shownSemester;
+  }
+};
+
+/**
  * Logs in and refetches the current semester's notices, assignments and files
  * with the queries the screens use, so the app shows them at its next launch
  * and the persisted cache is up to date. Returns what changed.
@@ -28,12 +46,13 @@ export const syncContent = async (): Promise<SyncResult> => {
     loadCredentials(),
     restoreQueryCache(),
   ]);
-  const semesterId = getUserData().currentSemester;
+  const shownSemester = getUserData().currentSemester;
   const courses =
-    semesterId && queryClient.getQueryData(coursesQuery(semesterId).queryKey);
+    shownSemester &&
+    queryClient.getQueryData(coursesQuery(shownSemester).queryKey);
 
   if (
-    !semesterId ||
+    !shownSemester ||
     !credentials?.username ||
     !credentials.password ||
     !credentials.fingerPrint ||
@@ -53,6 +72,8 @@ export const syncContent = async (): Promise<SyncResult> => {
   } catch {
     return { status: 'skipped' };
   }
+
+  const semesterId = await followLatestSemester(shownSemester);
 
   const queries = {
     notices: noticesQuery(semesterId),
