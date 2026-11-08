@@ -90,8 +90,11 @@ const AssignmentDetailContent: React.FC<{
 
   const html = getWebViewTemplate(
     description || `<p>${t('noAssignmentDescription')}</p>`,
-    theme.dark,
-    theme.colors.surface,
+    {
+      dark: theme.dark,
+      backgroundColor: theme.colors.surface,
+      textColor: theme.colors.onSurfaceHigh,
+    },
   );
 
   const handleFileOpen = (remoteFile?: RemoteFile) => {

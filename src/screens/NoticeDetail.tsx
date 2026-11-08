@@ -52,11 +52,11 @@ const NoticeDetailContent: React.FC<{
     attachment,
   } = notice;
 
-  const html = getWebViewTemplate(
-    content || `<p>${t('noNoticeContent')}</p>`,
-    theme.dark,
-    theme.colors.surface,
-  );
+  const html = getWebViewTemplate(content || `<p>${t('noNoticeContent')}</p>`, {
+    dark: theme.dark,
+    backgroundColor: theme.colors.surface,
+    textColor: theme.colors.onSurfaceHigh,
+  });
 
   const handleFileOpen = () => {
     if (attachment) {
