@@ -6,7 +6,7 @@ import { coursesQuery, getCourseNames } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import { Assignment, File, Notice } from 'data/types/state';
-import { useCurrentSemester } from 'data/userData';
+import { getUserData, useCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 
 /** Adds the course's id and names to each item the server lists for it. */
@@ -45,6 +45,20 @@ const createContent = <T extends { id: string; courseId: string }>({
   fetchCourse: (courseId: string) => Promise<object[]>;
   sort: (items: T[]) => T[];
 }) => {
+  /**
+   * Changes made in the app (marking an item read) that the server may not
+   * report yet, applied to every response for the rest of the session, so a
+   * fetch that was already under way doesn't undo them.
+   */
+  const overrides = new Map<string, Partial<T>>();
+  const withOverrides = (items: T[]) =>
+    overrides.size === 0
+      ? items
+      : items.map(item => {
+          const change = overrides.get(item.id);
+          return change ? { ...item, ...change } : item;
+        });
+
   const query = (semesterId: string) =>
     queryOptions({
       queryKey: [name, semesterId] as const,
@@ -52,8 +66,10 @@ const createContent = <T extends { id: string; courseId: string }>({
         const results: Record<string, object[]> =
           await dataSource.getAllContents(await courseIdsOf(semesterId), type);
         return sort(
-          Object.entries(results).flatMap(([courseId, items]) =>
-            tag<T>(courseId, items),
+          withOverrides(
+            Object.entries(results).flatMap(([courseId, items]) =>
+              tag<T>(courseId, items),
+            ),
           ),
         );
       },
@@ -61,12 +77,34 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   /** Replaces one course's items in the semester list and saves it. */
   const refreshCourse = async (semesterId: string, courseId: string) => {
-    const items = tag<T>(courseId, await fetchCourse(courseId));
+    const items = withOverrides(tag<T>(courseId, await fetchCourse(courseId)));
     const { queryKey } = query(semesterId);
     queryClient.setQueryData<T[]>(queryKey, old =>
       sort([...(old ?? []).filter(i => i.courseId !== courseId), ...items]),
     );
     await queryPersister.persistQueryByKey(queryKey, queryClient);
+  };
+
+  /**
+   * Changes one cached item of the semester being shown and saves the list,
+   * e.g. to mark it read before the server says so. Later responses this
+   * session keep the change.
+   */
+  const updateItem = (id: string, change: Partial<T>) => {
+    overrides.set(id, { ...overrides.get(id), ...change });
+    const semesterId = getUserData().currentSemester;
+    if (!semesterId) {
+      return;
+    }
+    const { queryKey } = query(semesterId);
+    const items = queryClient.getQueryData<T[]>(queryKey);
+    if (!items?.some(item => item.id === id)) {
+      return;
+    }
+    queryClient.setQueryData<T[]>(queryKey, old =>
+      old?.map(item => (item.id === id ? { ...item, ...change } : item)),
+    );
+    queryPersister.persistQueryByKey(queryKey, queryClient).catch(() => {});
   };
 
   const empty: T[] = [];
@@ -92,7 +130,14 @@ const createContent = <T extends { id: string; courseId: string }>({
     });
   };
 
-  return { query, refreshCourse, useList, useItem, useRefreshCourse };
+  return {
+    query,
+    refreshCourse,
+    updateItem,
+    useList,
+    useItem,
+    useRefreshCourse,
+  };
 };
 
 const notices = createContent<Notice>({
@@ -106,6 +151,9 @@ export const noticesQuery = notices.query;
 export const refreshCourseNotices = notices.refreshCourse;
 export const useNotice = notices.useItem;
 export const useRefreshCourseNotices = notices.useRefreshCourse;
+/** Opening a notice marks it read on the server; the list shows it now. */
+export const markNoticeRead = (id: string) =>
+  notices.updateItem(id, { hasRead: true });
 export const useNotices = () => {
   const { items, ...result } = notices.useList();
   return { ...result, notices: items };
@@ -138,6 +186,9 @@ export const filesQuery = files.query;
 export const refreshCourseFiles = files.refreshCourse;
 export const useFile = files.useItem;
 export const useRefreshCourseFiles = files.useRefreshCourse;
+/** Downloading a file marks it seen on the server; the list shows it now. */
+export const markFileSeen = (id: string) =>
+  files.updateItem(id, { isNew: false });
 export const useFiles = () => {
   const { items, ...result } = files.useList();
   return { ...result, files: items };
