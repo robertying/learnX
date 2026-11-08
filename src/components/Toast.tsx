@@ -1,8 +1,7 @@
-import { ComponentProps, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
   PanResponder,
-  Platform,
   StyleSheet,
   Text,
   View,
@@ -17,12 +16,10 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FullWindowOverlay } from 'react-native-screens';
-import { Host, Icon } from '@expo/ui';
-import { RoundedRectangle } from '@expo/ui/swift-ui';
-import { foregroundStyle, glassEffect } from '@expo/ui/swift-ui/modifiers';
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import { useTheme } from 'theme';
+import { ToastBackground, ToastSymbol } from '../../modules/toast';
 
 export type ToastType = 'success' | 'warning' | 'error' | 'none';
 
@@ -58,12 +55,7 @@ const haptics: Partial<Record<ToastType, Haptics.NotificationFeedbackType>> = {
 };
 
 // The SF Symbols and system colors Apple's own HUDs use for each outcome.
-const symbols: Partial<
-  Record<
-    ToastType,
-    { name: ComponentProps<typeof Icon>['name']; color: string }
-  >
-> = {
+const symbols: Partial<Record<ToastType, { name: string; color: string }>> = {
   success: { name: 'checkmark.circle.fill', color: '#34C759' },
   warning: { name: 'exclamationmark.triangle.fill', color: '#FF9500' },
   error: { name: 'xmark.circle.fill', color: '#FF3B30' },
@@ -105,20 +97,7 @@ const remove = (id: number) => {
   }
 };
 
-const supportsGlass = parseInt(String(Platform.Version), 10) >= 26;
 const cornerRadius = 25;
-// Liquid Glass on iOS 26 and later; the blur material Apple's HUDs used
-// before that.
-const backgroundModifiers = supportsGlass
-  ? [
-      foregroundStyle('transparent'),
-      glassEffect({
-        glass: { variant: 'regular' },
-        shape: 'roundedRectangle',
-        cornerRadius,
-      }),
-    ]
-  : [foregroundStyle({ type: 'material', material: 'regular' })];
 
 const hiddenOffset = -24;
 
@@ -203,16 +182,17 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         accessibilityHint=""
         style={[styles.toast, animatedStyle]}
       >
-        <Host pointerEvents="none" style={StyleSheet.absoluteFill}>
-          <RoundedRectangle
-            cornerRadius={cornerRadius}
-            modifiers={backgroundModifiers}
-          />
-        </Host>
+        <ToastBackground
+          cornerRadius={cornerRadius}
+          style={StyleSheet.absoluteFill}
+        />
         {symbol ? (
-          <Host matchContents pointerEvents="none" style={styles.icon}>
-            <Icon name={symbol.name} size={20} color={symbol.color} />
-          </Host>
+          <ToastSymbol
+            name={symbol.name}
+            size={20}
+            color={symbol.color}
+            style={styles.icon}
+          />
         ) : null}
         <Text
           style={[styles.text, { color: theme.colors.onSurface }]}
@@ -271,6 +251,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   icon: {
+    width: 24,
+    height: 24,
     marginRight: 10,
   },
   text: {

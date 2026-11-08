@@ -129,16 +129,25 @@ jest.mock('react-native-device-info', () =>
 jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   buttonStyle: jest.fn(),
-  foregroundStyle: jest.fn(),
-  glassEffect: jest.fn(),
   labelsHidden: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for
 // types (they are strings after the Babel transform), and any test that
 // refreshes data updates the widget, so every test needs these.
-jest.mock('@expo/ui/swift-ui', () => ({ RoundedRectangle: () => null }));
+jest.mock('@expo/ui/swift-ui', () => ({}));
 jest.mock('@expo/ui/jetpack-compose', () => ({}));
 jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
+
+// The toast's UIKit views: plain views, the symbol findable as `icon-<name>`.
+jest.mock('../modules/toast', () => {
+  const { createElement } = require('react');
+  const { View } = require('react-native');
+  return {
+    ToastBackground: View,
+    ToastSymbol: ({ name }: { name: string }) =>
+      createElement(View, { testID: `icon-${name}` }),
+  };
+});
 
 jest.mock(
   'react-native-safe-area-context',
