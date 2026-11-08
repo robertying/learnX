@@ -67,7 +67,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
           >
             {Children.toArray(children)[0]}
           </View>
-          {showDetail && <Divider style={styles.divider} />}
+          {showDetail && <Divider vertical />}
           <View
             testID="rns-split-detail"
             style={[styles.detail, { display: showDetail ? 'flex' : 'none' }]}
@@ -100,10 +100,6 @@ const styles = StyleSheet.create({
   detail: {
     flex: 1,
     zIndex: 1,
-  },
-  divider: {
-    height: '100%',
-    width: 1,
   },
 });
 

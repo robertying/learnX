@@ -17,6 +17,7 @@ export const HStack = Box;
 export const VStack = Box;
 export const ZStack = Box;
 export const Spacer = () => null;
+export const Divider = () => <View />;
 export const Circle = () => <View />;
 export const RoundedRectangle = () => <View />;
 

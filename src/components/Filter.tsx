@@ -99,10 +99,9 @@ const ListItem: React.FC<{
         )}
         <Text style={styles.text}>{text}</Text>
         <Badge
-          style={[
-            styles.badge,
-            { color: color ?? 'white', backgroundColor: badgeColor },
-          ]}
+          style={styles.badge}
+          color={color ?? 'white'}
+          backgroundColor={badgeColor}
         >
           {count}
         </Badge>
