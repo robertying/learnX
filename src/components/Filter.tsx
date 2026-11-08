@@ -8,7 +8,6 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { t } from 'helpers/i18n';
-import Colors from 'constants/Colors';
 import { Text } from 'components/Text';
 import Divider from 'components/Divider';
 import Badge from 'components/Badge';
@@ -177,7 +176,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
             name="unfinished"
             text={t('unfinished')}
             count={unfinishedCount}
-            badgeColor={Colors.orange500}
+            badgeColor={theme.colors.status.orange}
           />
         ) : null}
         {unfinishedCount !== undefined ? (
@@ -186,7 +185,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
             name="finished"
             text={t('finished')}
             count={allCount - unfinishedCount}
-            badgeColor={Colors.green500}
+            badgeColor={theme.colors.status.green}
           />
         ) : null}
         <ListItem
@@ -194,7 +193,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
           name="all"
           text={t('all')}
           count={allCount}
-          badgeColor={Colors.grey500}
+          badgeColor={theme.colors.status.grey}
         />
         {unreadCount !== undefined ? (
           <ListItem
@@ -202,7 +201,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
             name="unread"
             text={t('unread')}
             count={unreadCount}
-            badgeColor={Colors.blue500}
+            badgeColor={theme.colors.status.blue}
           />
         ) : null}
         {favCount !== undefined ? (
@@ -211,7 +210,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
             name="fav"
             text={t('fav')}
             count={favCount}
-            badgeColor={Colors.red500}
+            badgeColor={theme.colors.status.red}
           />
         ) : null}
         {archivedCount !== undefined ? (
@@ -220,7 +219,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
             name="archived"
             text={t('archived')}
             count={archivedCount}
-            badgeColor={Colors.grey500}
+            badgeColor={theme.colors.status.grey}
           />
         ) : null}
         <ListItem
@@ -228,7 +227,7 @@ const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
           name="hidden"
           text={t('hidden')}
           count={hiddenCount}
-          badgeColor={Colors.grey500}
+          badgeColor={theme.colors.status.grey}
         />
         <Divider />
       </View>

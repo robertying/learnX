@@ -27,7 +27,8 @@ function DeadlinesWidget(
 ) {
   'widget';
   const family = environment.widgetFamily ?? 'systemMedium';
-  const accent = 'rgb(154, 37, 174)';
+  // brandColors in src/theme; a widget can't import it.
+  const accent = environment.colorScheme === 'dark' ? '#F4ABFF' : '#660874';
   const background = containerBackground(
     PlatformColor('systemBackground'),
     'widget',
