@@ -4,7 +4,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import { Assignment } from 'data/types/state';
-import { removeTags } from 'helpers/html';
+import { removeTags } from 'helpers/text';
 import { isLocaleChinese } from 'helpers/i18n';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import Colors from 'constants/Colors';
