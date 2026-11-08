@@ -1,35 +1,24 @@
-name: Native build
+name: Build
 
-# Compiles the apps so a broken patch, Podfile, Gradle or native module change
-# shows up on the PR, not on a Mac later. Debug builds only: no JS bundle, no
-# signing, no uploads. Not a required check.
+# Compiles debug builds so a broken patch, Podfile, Gradle or native module
+# change shows up in CI, not on a Mac later. No JS bundle, no signing, no
+# uploads. Not a required check.
+#
+# Manual only for now: paused until the build caches are tuned. The plan is
+# Android on PRs that touch native paths, and iOS/Mac on main or with a label.
 on:
-  pull_request:
-    paths:
-      - android/**
-      - ios/**
-      - modules/**
-      - patches/**
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - app.json
-      - Gemfile
-      - Gemfile.lock
-      - .github/workflows/native.yml
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: native-${{ github.event.pull_request.number || github.ref }}
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 # ccache keeps compiled C/C++/Objective-C between runs. Only main saves caches
-# (Gradle, ccache, Pods), so PRs start from main's and can't evict or poison them.
+# (Gradle, ccache, Pods, Xcode compilation cache), so other refs start from
+# main's and can't evict or poison them.
 env:
   CCACHE_DIR: ${{ github.workspace }}/.ccache
   CCACHE_BASEDIR: ${{ github.workspace }}
@@ -103,7 +92,7 @@ jobs:
         include:
           - name: iOS
             destination: generic/platform=iOS Simulator
-          - name: Mac Catalyst
+          - name: Mac
             destination: generic/platform=macOS,variant=Mac Catalyst
     steps:
       - name: Checkout repository
@@ -188,7 +177,7 @@ jobs:
           du -sh build/DerivedData/CompilationCache.noindex || true
 
       - name: Save compilation cache
-        if: always()
+        if: always() && env.SAVE_CACHE == 'true'
         uses: actions/cache/save@v6
         with:
           path: build/DerivedData/CompilationCache.noindex
