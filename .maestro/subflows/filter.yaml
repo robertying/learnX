@@ -1,9 +1,9 @@
-# Switch the current list's filter to FILTER (all, unread, fav, archived, ...).
+# Switch the current list's filter to the one labelled LABEL (a regex such
+# as 'Favorites(, .*)?|收藏(, .*)?', since iOS reads the count after the
+# label), from the filter button's pull-down menu.
 appId: ${APP_ID}
 ---
 - tapOn: 'Filter|过滤'
-# A tap while the panel is still sliding in can miss the item.
 - waitForAnimationToEnd
-- tapOn:
-    id: filter-${FILTER}
+- tapOn: ${LABEL}
 - waitForAnimationToEnd

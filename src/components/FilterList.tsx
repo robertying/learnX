@@ -27,7 +27,8 @@ import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { checkedIds, listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
-import Filter, { FilterSelection } from './Filter';
+import { filterOptions, type FilterSelection } from 'helpers/filterOptions';
+import FilterMenu from './FilterMenu';
 import Empty from './Empty';
 import SyncStatus from './SyncStatus';
 import FilterListRow, {
@@ -98,6 +99,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     hidden,
   });
   const isCourse = type === 'course';
+
+  const options = filterOptions({
+    unfinishedCount: unfinished?.length,
+    allCount: all.length,
+    unreadCount: unread?.length,
+    favCount: fav?.length,
+    archivedCount: archived?.length,
+    hiddenCount: hidden.length,
+  });
 
   const favIdSet = new Set(fav?.map(i => i.id));
   const archivedIdSet = new Set(archived?.map(i => i.id));
@@ -213,6 +223,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     refreshing,
     onRefresh,
     onFilter: handleFilter,
+    filterOptions: options,
+    onFilterSelect: handleFilterSelect,
     onReorder: handleReorder,
     onSelect: handleSelect,
     onCheckAll: checkAll,
@@ -324,16 +336,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   return (
     <View style={Styles.flex1}>
       <SyncStatus updatedAt={updatedAt} />
-      <Filter
+      <FilterMenu
         visible={filterVisible}
+        options={options}
         selected={filterSelected}
         onSelectionChange={handleFilterSelect}
-        unfinishedCount={unfinished?.length}
-        allCount={all.length}
-        unreadCount={unread?.length}
-        favCount={fav?.length}
-        archivedCount={archived?.length}
-        hiddenCount={hidden.length}
+        onDismiss={() => setFilterVisible(false)}
       />
       {isCourse ? (
         <ReorderableList
