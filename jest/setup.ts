@@ -193,3 +193,10 @@ jest.mock('expo-file-system', () => {
     },
   };
 });
+
+// The native menu module isn't in Jest (and `expo` is ESM). Without it, cards
+// render their content without a context menu, and menu commands never fire.
+jest.mock('../modules/menus', () => ({
+  Menus: null,
+  ContextMenuView: ({ children }: { children: React.ReactNode }) => children,
+}));

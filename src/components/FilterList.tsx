@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase } from '@react-navigation/native';
+import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
@@ -17,6 +17,7 @@ import {
   setFavorite,
 } from 'data/userData';
 import { toast } from 'components/Toast';
+import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
 import useInitialRefreshHidden from 'hooks/useInitialRefreshHidden';
@@ -221,12 +222,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const refreshControlRefreshing = useInitialRefreshHidden(refreshing);
 
+  const lastOpenedIdRef = useRef<string | undefined>(undefined);
+
   // Rows get one actions object that never changes, and call the latest
   // handlers through it, so a new onItemPress from the screen or a toggled
   // selection does not re-render every row.
   const rowHandlers: FilterListRowActions<T> = {
     press: item => {
       setFilterVisible(false);
+      lastOpenedIdRef.current = item.id;
       onItemPress?.(item);
     },
     check: setChecked,
@@ -234,6 +238,42 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     archive: (id, isArchived) => handleArchive(isArchived, [id]),
     hide: (id, isHidden) => handleHide(isHidden, id),
   };
+  // Menu bar commands and their shortcuts on iPad and Mac, for the list on
+  // screen. Every tab's list stays mounted.
+  const isFocused = useIsFocused();
+  const commandsEnabled = isFocused && !selectionMode && !reorderMode;
+  useAppCommand(
+    'refresh',
+    () => {
+      if (!refreshing) {
+        onRefresh?.();
+      }
+    },
+    commandsEnabled,
+  );
+  // Steps through the list from the item last opened, beside it in the split
+  // view.
+  const openAdjacent = (offset: 1 | -1) => {
+    const index = data.findIndex(i => i.id === lastOpenedIdRef.current);
+    const item =
+      index === -1
+        ? data[offset === 1 ? 0 : data.length - 1]
+        : data[index + offset];
+    if (item) {
+      rowHandlers.press(item);
+    }
+  };
+  useAppCommand(
+    'nextItem',
+    () => openAdjacent(1),
+    commandsEnabled && !!detailNavigator,
+  );
+  useAppCommand(
+    'previousItem',
+    () => openAdjacent(-1),
+    commandsEnabled && !!detailNavigator,
+  );
+
   const rowHandlersRef = useRef(rowHandlers);
   useLayoutEffect(() => {
     rowHandlersRef.current = rowHandlers;

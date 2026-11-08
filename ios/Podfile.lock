@@ -246,6 +246,7 @@ PODS:
   - LearnXCrashlytics (1.0.0):
     - ExpoModulesCore
     - FirebaseCrashlytics
+  - LearnXMenus (1.0.0):
   - LearnXSpotlight (1.0.0):
     - ExpoModulesCore
   - LearnXToast (1.0.0):
@@ -3679,6 +3680,7 @@ DEPENDENCIES:
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
   - LearnXCrashlytics (from `../modules/crashlytics/ios`)
+  - LearnXMenus (from `../modules/menus/ios`)
   - LearnXSpotlight (from `../modules/spotlight/ios`)
   - LearnXToast (from `../modules/toast/ios`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
@@ -3868,6 +3870,8 @@ EXTERNAL SOURCES:
     :tag: hermes-v260318099.0.5
   LearnXCrashlytics:
     :path: "../modules/crashlytics/ios"
+  LearnXMenus:
+    :path: "../modules/menus/ios"
   LearnXSpotlight:
     :path: "../modules/spotlight/ios"
   LearnXToast:
@@ -4106,6 +4110,7 @@ SPEC CHECKSUMS:
   GoogleUtilities: 7dc09b3fa9ecb5c2298b952313d14628b61b9da3
   hermes-engine: 79484fc4e58f328d01b9339ef899ca633d3702ee
   LearnXCrashlytics: 63f95b500661a47294c116ef17d114c26e3cf925
+  LearnXMenus: 5fff19ce7a099fcb02db56e688d42f6bb215395b
   LearnXSpotlight: 3798acfbc9c8b50939afb38da0989453960fd73f
   LearnXToast: 4e9ef863bd4d020ccca18184a8ea4031fd2b3c05
   nanopb: fad817b59e0457d11a5dfbde799381cd727c1275

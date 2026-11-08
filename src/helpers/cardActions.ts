@@ -1,4 +1,6 @@
-// The actions a card offers when swiped (iOS) or long-pressed (Android, WSA).
+// The actions a card offers when swiped (iOS), long-pressed (Android, WSA) or
+// right-clicked (iPad, Mac), and as accessibility actions everywhere.
+import type { SFSymbol } from 'sf-symbols-typescript';
 import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
 import Colors from 'constants/Colors';
 import { t } from './i18n';
@@ -10,6 +12,8 @@ export interface CardAction {
   testID: string;
   label: string;
   icon: CardActionIconName;
+  /** The context menu's icon on iPad and Mac */
+  systemImage: SFSymbol;
   color: string;
   /** Swipe button background */
   background: string;
@@ -37,6 +41,7 @@ export const cardActions = ({
         testID: 'card-hide',
         label: hidden ? t('unhide') : t('hide'),
         icon: hidden ? 'eye' : 'eye-off',
+        systemImage: hidden ? 'eye' : 'eye.slash',
         color: Colors.yellow500,
         background: 'rgba(255,204,0,0.2)',
       },
@@ -50,6 +55,7 @@ export const cardActions = ({
       testID: 'card-fav',
       label: fav ? t('unfavorite') : t('favorite'),
       icon: fav ? 'heart-off' : 'heart',
+      systemImage: fav ? 'heart.slash' : 'heart',
       color: Colors.red500,
       background: 'rgba(255,59,48,0.2)',
     });
@@ -59,6 +65,7 @@ export const cardActions = ({
     testID: 'card-archive',
     label: archived ? t('restore') : t('archive'),
     icon: archived ? 'archive-arrow-up' : 'archive-arrow-down',
+    systemImage: archived ? 'arrow.up.bin' : 'archivebox',
     color: Colors.blue500,
     background: 'rgba(33,150,243,0.2)',
   });

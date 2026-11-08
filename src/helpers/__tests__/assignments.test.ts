@@ -1,5 +1,5 @@
 import { Assignment } from 'data/types/state';
-import { sortAssignments } from 'helpers/assignments';
+import { deadlineText, sortAssignments } from 'helpers/assignments';
 
 const assignment = (id: string, deadline: string) =>
   ({ id, deadline }) as unknown as Assignment;
@@ -64,5 +64,27 @@ describe('sortAssignments', () => {
 
   it('handles an empty list', () => {
     expect(sortAssignments([])).toEqual([]);
+  });
+});
+
+describe('deadlineText', () => {
+  const now = '2026-03-15T12:00:00Z';
+
+  it('counts down to an upcoming deadline', () => {
+    expect(deadlineText('2026-03-18T12:00:00Z', now)).toBe('due in 3 days');
+  });
+
+  it('says how long ago a past deadline closed', () => {
+    expect(deadlineText('2026-03-15T10:00:00Z', now)).toBe(
+      'closed 2 hours ago',
+    );
+  });
+
+  it('follows the time it is given, so a later minute updates the text', () => {
+    const deadline = '2026-03-15T12:30:00Z';
+    expect(deadlineText(deadline, now)).toBe('due in 30 minutes');
+    expect(deadlineText(deadline, '2026-03-15T12:45:00Z')).toBe(
+      'closed 15 minutes ago',
+    );
   });
 });
