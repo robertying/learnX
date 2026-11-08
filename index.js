@@ -9,6 +9,11 @@ import {
   installRejectionTracker,
 } from './src/helpers/crashReporting';
 import { setUpNotificationActions } from './src/helpers/notificationActions';
+// Defines the background fetch task. A task has to be defined while the bundle
+// first runs: a background launch runs only this file, without mounting the
+// app. Metro inlines requires, so the import where the task is registered
+// (useMainStartup) would load the module only once the app has mounted.
+import './src/helpers/background';
 
 // Keep LogBox off: its "Open debugger to view warnings" toast covers the tab
 // bar and opens a React Native DevTools window when tapped. Read warnings in
