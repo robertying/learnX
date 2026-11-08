@@ -8,7 +8,7 @@ import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
-import { NoticeStackParams } from 'screens/types';
+import { NoticeDetailParamList } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import { stripExtension, getExtension } from 'helpers/fs';
@@ -20,7 +20,7 @@ import { Caption, Title } from 'components/Text';
 import Divider from 'components/Divider';
 import { useTheme } from 'theme';
 
-type Props = NativeStackScreenProps<NoticeStackParams, 'NoticeDetail'>;
+type Props = NativeStackScreenProps<NoticeDetailParamList, 'NoticeDetail'>;
 
 const NoticeDetail: React.FC<Props> = ({ route, navigation }) => {
   const notice = useNotice(route.params.id);

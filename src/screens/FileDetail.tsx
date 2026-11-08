@@ -14,7 +14,7 @@ import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
 import ScrollView from 'components/ScrollView';
-import { FileStackParams } from './types';
+import { FileDetailParamList } from './types';
 import { useFile } from 'data/content';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';
@@ -25,7 +25,7 @@ import { Caption, Text, Title } from 'components/Text';
 import Divider from 'components/Divider';
 import { useTheme } from 'theme';
 
-type Props = NativeStackScreenProps<FileStackParams, 'FileDetail'>;
+type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 
 const FileDetail: React.FC<Props> = ({ route, navigation }) => {
   const { params } = route;

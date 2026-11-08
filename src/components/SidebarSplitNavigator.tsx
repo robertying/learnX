@@ -17,6 +17,10 @@ import {
   type TabRouterOptions,
   type TypedNavigator,
 } from '@react-navigation/native';
+import type {
+  DetailNavigationContainerRef,
+  DetailStackParams,
+} from 'screens/types';
 import { SidebarView } from '../../modules/sidebar';
 import NativeSplitViewProvider from './NativeSplitView';
 import { SplitViewContext } from './SplitView';
@@ -29,9 +33,6 @@ export interface SidebarSplitNavigationOptions {
   /** Whether to wait until the tab is first selected to mount it. */
   lazy?: boolean;
 }
-
-type DetailNavigationContainerRef =
-  React.RefObject<NavigationContainerRef<{}> | null>;
 
 export interface SidebarSplitNavigationConfig {
   /** Each tab has a detail stack of its own, in this container. */
@@ -188,7 +189,11 @@ function SidebarSplitNavigator({
       ? new Map([
           ...detailRefs,
           ...missingKeys.map(
-            key => [key, createRef<NavigationContainerRef<{}>>()] as const,
+            key =>
+              [
+                key,
+                createRef<NavigationContainerRef<DetailStackParams>>(),
+              ] as const,
           ),
         ])
       : detailRefs;

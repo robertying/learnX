@@ -32,12 +32,12 @@ import {
   useAttachmentPicker,
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
-import { AssignmentSubmissionStackParams } from './types';
+import { AssignmentSubmissionParamList } from './types';
 import { Caption } from 'components/Text';
 import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<
-  AssignmentSubmissionStackParams,
+  AssignmentSubmissionParamList,
   'AssignmentSubmission'
 >;
 

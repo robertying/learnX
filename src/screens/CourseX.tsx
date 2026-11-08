@@ -6,10 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
-import { CourseXStackParams } from './types';
+import { CourseXParamList } from './types';
 import { useTheme } from 'theme';
 
-type Props = NativeStackScreenProps<CourseXStackParams, 'CourseX'>;
+type Props = NativeStackScreenProps<CourseXParamList, 'CourseX'>;
 
 const CourseX: React.FC<Props> = ({ route }) => {
   const courseId = route.params?.id ?? '';

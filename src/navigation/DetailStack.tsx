@@ -8,7 +8,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import { trackScreen } from 'helpers/crashReporting';
 import NoticeDetail from 'screens/NoticeDetail';
-import { DetailStackParams, ExtraParams } from 'screens/types';
+import {
+  DetailNavigationContainerRef,
+  DetailStackParams,
+  ExtraParams,
+} from 'screens/types';
 import AssignmentDetail from 'screens/AssignmentDetail';
 import FileDetail from 'screens/FileDetail';
 import CourseDetail from 'screens/CourseDetail';
@@ -86,7 +90,7 @@ export const DetailStack = () => (
 );
 
 const DetailContainer: React.FC<{
-  navigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null>;
+  navigationContainerRef: DetailNavigationContainerRef;
 }> = ({ navigationContainerRef }) => {
   const theme = useNavigationTheme();
 
@@ -103,13 +107,14 @@ const DetailContainer: React.FC<{
   );
 };
 
-export const renderDetailContainer = (
-  ref: React.RefObject<NavigationContainerRef<{}> | null>,
-) => <DetailContainer navigationContainerRef={ref} />;
+export const renderDetailContainer = (ref: DetailNavigationContainerRef) => (
+  <DetailContainer navigationContainerRef={ref} />
+);
 
 /** A tab of the native split view, with a detail pane of its own. */
 export const TabSplit: React.FC<React.PropsWithChildren> = ({ children }) => {
-  const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
+  const detailNavigationContainerRef =
+    useRef<NavigationContainerRef<DetailStackParams>>(null);
 
   return (
     <NativeSplitViewProvider

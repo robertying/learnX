@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { AppState } from 'react-native';
-import { NavigationContainerRef } from '@react-navigation/native';
+import type { DetailNavigationContainerRef } from 'screens/types';
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,
@@ -24,7 +24,7 @@ import { SplitViewContext } from './SplitView';
 export interface NativeSplitViewProps {
   /** Without the split, only the first child is rendered. */
   enabled: boolean;
-  detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null>;
+  detailNavigationContainerRef: DetailNavigationContainerRef;
   /**
    * Shown in a column of its own before the master one, which makes it the
    * system's sidebar. The split then only collapses in compact width.
