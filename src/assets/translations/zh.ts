@@ -299,6 +299,7 @@ const zh: typeof en = {
   downloadsDeleteCourse: '删除已下载的文件？',
   downloadsOneFile: '1 个文件',
   downloadsFileCount: '{count} 个文件',
+  downloadsDeletedCourse: '已删除{course}的已下载文件',
 };
 
 export default zh;

@@ -378,15 +378,29 @@ const notDownloads = new Set([
   SUBMISSION_DRAFTS_DIR,
 ]);
 
-/** `<courseName>-<id>` of every cached notice, assignment and file. */
+/**
+ * `<courseName>-<id>` of every cached notice, assignment and file, and of
+ * their attachments, which assignments download under the attachment's id.
+ */
 const knownDownloadFolders = () => {
   const known = new Map<string, { courseName: string; id: string }>();
+  const add = (courseName: string, id: unknown) => {
+    if (typeof id === 'string' && id) {
+      known.set(`${courseName}-${id}`, { courseName, id });
+    }
+  };
   for (const name of ['notices', 'assignments', 'files']) {
     for (const [, items] of queryClient.getQueriesData<
-      { id: string; courseName: string }[]
+      ({ id: string; courseName: string } & Record<string, unknown>)[]
     >({ queryKey: [name] })) {
-      for (const { id, courseName } of items ?? []) {
-        known.set(`${courseName}-${id}`, { courseName, id });
+      for (const item of items ?? []) {
+        add(item.courseName, item.id);
+        // attachment, submittedAttachment, gradeAttachment, answerAttachment
+        for (const value of Object.values(item)) {
+          if (value && typeof value === 'object' && 'downloadUrl' in value) {
+            add(item.courseName, (value as { id?: unknown }).id);
+          }
+        }
       }
     }
   }

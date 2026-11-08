@@ -310,4 +310,5 @@ export default {
   downloadsDeleteCourse: 'Delete Downloaded Files?',
   downloadsOneFile: '1 file',
   downloadsFileCount: '{count} files',
+  downloadsDeletedCourse: 'Deleted downloaded files of {course}',
 };

@@ -46,6 +46,7 @@ const Downloads: React.FC<Props> = () => {
     title: string,
     message: string,
     action: () => void | Promise<void>,
+    succeeded: string,
   ) =>
     Alert.alert(
       title,
@@ -58,9 +59,9 @@ const Downloads: React.FC<Props> = () => {
           onPress: async () => {
             try {
               await action();
-              toast(t('clearFileCacheSucceeded'), 'success');
+              toast(succeeded, 'success');
             } catch (e) {
-              toast(t('clearFileCacheFailed') + (e as Error).message, 'error');
+              toast(t('deleteFailed') + (e as Error).message, 'error');
             }
             reload();
           },
@@ -91,6 +92,7 @@ const Downloads: React.FC<Props> = () => {
                 t('downloadsDeleteCourse'),
                 `${course.courseName}\n${summary(course)}`,
                 () => removeCourseDownloads(course.courseName),
+                t('downloadsDeletedCourse', { course: course.courseName }),
               )
             }
           />
@@ -105,6 +107,7 @@ const Downloads: React.FC<Props> = () => {
               t('clearFileCache'),
               t('clearFileCacheConfirmation'),
               removeFileDir,
+              t('clearFileCacheSucceeded'),
             )
           }
         />
