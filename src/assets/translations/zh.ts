@@ -220,6 +220,8 @@ const zh: typeof en = {
   info: '详情',
   preview: '预览',
   unknownFileType: '未知',
+  updateReady: '新版本已就绪',
+  restart: '重启',
 };
 
 export default zh;

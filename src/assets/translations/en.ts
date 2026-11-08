@@ -229,4 +229,6 @@ export default {
   info: 'Info',
   preview: 'Preview',
   unknownFileType: 'Unknown',
+  updateReady: 'A new version is ready.',
+  restart: 'Restart',
 };

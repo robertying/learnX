@@ -31,6 +31,31 @@
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
 
+        <meta-data
+            android:name="expo.modules.updates.ENABLED"
+            android:value="true" />
+        <meta-data
+            android:name="expo.modules.updates.EXPO_UPDATE_URL"
+            android:value="https://ota.example.invalid/manifest" />
+        <meta-data
+            android:name="expo.modules.updates.EXPO_RUNTIME_VERSION"
+            android:value="@string/expo_runtime_version" />
+        <meta-data
+            android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH"
+            android:value="ALWAYS" />
+        <meta-data
+            android:name="expo.modules.updates.EXPO_UPDATES_LAUNCH_WAIT_MS"
+            android:value="0" />
+        <meta-data
+            android:name="expo.modules.updates.UPDATES_CONFIGURATION_REQUEST_HEADERS_KEY"
+            android:value="{&quot;expo-channel-name&quot;:&quot;production&quot;}" />
+        <meta-data
+            android:name="expo.modules.updates.CODE_SIGNING_CERTIFICATE"
+            android:value="-----BEGIN CERTIFICATE-----&#10;MIICzzCCAbegAwIBAgIJAVxNQbSOr21YMA0GCSqGSIb3DQEBCwUAMBExDzANBgNV&#10;BAMTBmxlYXJuWDAeFw0yNjExMDcxMzE0MzJaFw0zNjExMDcxMzE0MzJaMBExDzAN&#10;BgNVBAMTBmxlYXJuWDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAM36&#10;JGdYfMuHQf01+7uUHloH9W1qmjeqboP8gwyk9cvMr9hlKHYaF8PcSzOGQfKmpyB7&#10;yob4NFGyiVIPutOd7qNQjLXEF+BpaMeZFxi+KBrp/Ne3Cydd5fTFGCyBGj0l2CAo&#10;N5DGwoF1KTXdHI5qfVyYnujsl7uL25KWqvgs8Uy8eObhNj4Ml+InvlsYi+R5rMnN&#10;UHVXSWZvixruYdvvnoRq3p2waEcFFbtQD6i+yeNKMN9olgYdCOCiRa5xYRBhQjNP&#10;Oe9Zicg869z6AEoHLKqIK57BQ0Mj+jqaZcpsOEzk5+zreROcdvvgUppeg83cpBUD&#10;4J0ekGG69LwX9Vr+T4ECAwEAAaMqMCgwDgYDVR0PAQH/BAQDAgeAMBYGA1UdJQEB&#10;/wQMMAoGCCsGAQUFBwMDMA0GCSqGSIb3DQEBCwUAA4IBAQBMXkH/6C0oWTkq2yZ9&#10;EpXAUoD8/o2CU5WfExZYk0OpYbamZgdq8dbU1MzoktNNIvDMTK0hotvRs7AZBeqt&#10;3WsRiEWXyShYkJU57b3Bmk9om4GCQRB33M9Lt3yiZrfcO9y3yzKN7ZIJSe5hwXsV&#10;Gg0PDpaYdlUeyTE5JVKXgDFOSEe6sGtrz7aPXiyJwNpPQpHMGA8aBE/0QaB8dpqD&#10;KXj9IZr4iA4hH1ewmCJ4qOUS2FLyzfNvS+8VRMJ8utu149cuuYCycGQ6/zhASPIy&#10;N/eyt3Eh76Bqg9fbdYvmdz5m0NpNlmKNifjM0zqaO4ORKfGZrAu88QJULlJqS3i8&#10;8qpl&#10;-----END CERTIFICATE-----" />
+        <meta-data
+            android:name="expo.modules.updates.CODE_SIGNING_METADATA"
+            android:value="{&quot;keyid&quot;:&quot;main&quot;,&quot;alg&quot;:&quot;rsa-v1_5-sha256&quot;}" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"

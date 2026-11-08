@@ -5,7 +5,16 @@ import { create } from 'zustand';
 
 export type ToastType = 'success' | 'warning' | 'error' | 'none';
 
-const useToastStore = create<{ text: string; duration: number }>(() => ({
+export interface ToastAction {
+  label: string;
+  onPress: () => void;
+}
+
+const useToastStore = create<{
+  text: string;
+  duration: number;
+  action?: ToastAction;
+}>(() => ({
   text: '',
   duration: 3000,
 }));
@@ -24,10 +33,16 @@ const haptics: Partial<Record<ToastType, Haptics.NotificationFeedbackType>> = {
 };
 
 /** Shows a snackbar. A plain function, so it is safe to call from anywhere. */
-export const toast = (text: string, type: ToastType, duration?: number) => {
+export const toast = (
+  text: string,
+  type: ToastType,
+  duration?: number,
+  action?: ToastAction,
+) => {
   useToastStore.setState({
     text,
     duration: duration ?? defaultDurations[type],
+    action,
   });
   const feedback = haptics[type];
   if (text && feedback !== undefined) {
@@ -43,6 +58,7 @@ const dismiss = () => {
 export const Toast: React.FC = () => {
   const text = useToastStore(state => state.text);
   const duration = useToastStore(state => state.duration);
+  const action = useToastStore(state => state.action);
 
   return (
     <Snackbar
@@ -50,6 +66,7 @@ export const Toast: React.FC = () => {
       wrapperStyle={styles.snackbar}
       visible={!!text}
       duration={duration}
+      action={action}
       onDismiss={dismiss}
     >
       {text}

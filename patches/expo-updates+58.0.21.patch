@@ -1,0 +1,10 @@
+diff --git a/node_modules/expo-updates/android/CMakeLists.txt b/node_modules/expo-updates/android/CMakeLists.txt
+index 9dd4038..e6ab1d2 100644
+--- a/node_modules/expo-updates/android/CMakeLists.txt
++++ b/node_modules/expo-updates/android/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 3.4.1)
++cmake_minimum_required(VERSION 3.13)
+ 
+ project(expo-updates)
+ 

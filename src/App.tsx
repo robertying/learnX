@@ -14,6 +14,7 @@ import Splash from 'components/Splash';
 import { useCredentials } from 'data/credentials';
 import { useLoginError } from 'data/auth';
 import { queryClient } from 'data/queryClient';
+import useOtaUpdate from 'hooks/useOtaUpdate';
 import useReLogin from 'hooks/useReLogin';
 import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
@@ -50,6 +51,7 @@ const App = () => {
   const colorScheme = useColorScheme();
   const paperTheme = usePaperTheme();
   const loaded = useStoresLoaded();
+  useOtaUpdate();
 
   return (
     <GestureHandlerRootView>
