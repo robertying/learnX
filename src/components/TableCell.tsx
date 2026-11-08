@@ -1,4 +1,5 @@
 import {
+  AccessibilityActionEvent,
   ActivityIndicator,
   Image,
   ImageSourcePropType,
@@ -53,10 +54,33 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
 }) => {
   const theme = useTheme();
 
+  // The row is one accessibility element (Touchable is accessible), which
+  // hides the switch inside it from VoiceOver, TalkBack and the Mac
+  // accessibility tree. So a switch row is the switch: it reads as one and
+  // toggles on activate.
+  const isSwitch = type === 'switch' && !loading;
+  const switchAccessibility = isSwitch
+    ? {
+        accessibilityRole: 'switch' as const,
+        accessibilityLabel: primaryText,
+        accessibilityState: {
+          checked: !!switchValue,
+          disabled: !!switchDisabled,
+        },
+        accessibilityActions: [{ name: 'activate' }],
+        onAccessibilityAction: (event: AccessibilityActionEvent) => {
+          if (event.nativeEvent.actionName === 'activate' && !switchDisabled) {
+            onSwitchValueChange?.(!switchValue);
+          }
+        },
+      }
+    : undefined;
+
   return (
     <Touchable
       style={[{ backgroundColor: theme.colors.surface }, restProps.style]}
       onPress={onPress}
+      {...switchAccessibility}
     >
       <View
         {...restProps}
@@ -111,12 +135,14 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           {primaryText}
         </Text>
         <Text style={styles.secondaryText}>{secondaryText}</Text>
-        {type === 'switch' && !loading ? (
-          <View>
+        {isSwitch ? (
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
             <Switch
               disabled={switchDisabled}
               value={!!switchValue}
-              accessibilityLabel={primaryText}
               onValueChange={value => onSwitchValueChange?.(value)}
             />
           </View>
