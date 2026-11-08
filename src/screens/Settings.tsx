@@ -73,16 +73,19 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     if (Platform.OS === 'android') {
-      (async () => {
-        const { version, url } = await getLatestRelease();
-        if (semverGt(version, packageJson.version)) {
-          setUpdate({
-            version,
-            url,
-          });
-          setSetting('newUpdate', true);
-        }
-      })();
+      getLatestRelease().then(
+        ({ version, url }) => {
+          if (semverGt(version, packageJson.version)) {
+            setUpdate({
+              version,
+              url,
+            });
+            setSetting('newUpdate', true);
+          }
+        },
+        // Offline or the mirror is down; the update row stays hidden.
+        () => {},
+      );
     }
   }, []);
 
@@ -97,40 +100,40 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         />
         <TableCell
           testID="settings-logout"
-          iconName="person-remove"
+          iconName="account-remove"
           primaryText={t('logout')}
           type="none"
           onPress={handleLogout}
         />
         <TableCell
           style={styles.marginTop}
-          iconName="loop"
+          iconName="autorenew"
           primaryText={t('semesterSelection')}
           type="arrow"
           onPress={() => handlePush('SemesterSelection')}
         />
         <TableCell
-          iconName="date-range"
+          iconName="calendar-range"
           primaryText={t('calendarsAndReminders')}
           type="arrow"
           onPress={() => handlePush('CalendarEvent')}
         />
         <TableCell
-          iconName="rule-folder"
+          iconName="folder-cog"
           primaryText={t('fileSettings')}
           type="arrow"
           onPress={() => handlePush('FileSettings')}
         />
         <TableCell
           testID="settings-notifications"
-          iconName="notifications"
+          iconName="bell"
           primaryText={t('notifications')}
           type="arrow"
           onPress={() => handlePush('NotificationSettings')}
         />
         <TableCell
           style={styles.marginTop}
-          iconName="info"
+          iconName="information"
           badge={!courseInformationSharingBadgeShown}
           primaryText={t('courseInformationSharing')}
           type="arrow"
@@ -138,7 +141,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         />
         <TableCell
           style={styles.marginTop}
-          iconName="sticky-note-2"
+          iconName="note-text"
           badge={newChangelog}
           primaryText={t('changelog')}
           type="arrow"
@@ -154,7 +157,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
         )}
         <TableCell
-          iconName="logo-dev"
+          iconName="dev-to"
           primaryText={t('becomeMaintainer')}
           type="arrow"
           onPress={() => handlePush('Maintainer')}
@@ -175,7 +178,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <TableCell
             testID="settings-mock-network"
             style={styles.marginTop}
-            iconName="network-check"
+            iconName="network"
             primaryText="Network emulation"
             type="arrow"
             onPress={() => handlePush('MockNetwork')}

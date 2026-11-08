@@ -54,12 +54,15 @@ const useMainStartup = () => {
 
   useEffect(() => {
     if (loggedIn && Platform.OS === 'android') {
-      (async () => {
-        const { version } = await getLatestRelease();
-        if (semverGt(version, packageJson.version)) {
-          setSetting('newUpdate', true);
-        }
-      })();
+      getLatestRelease().then(
+        ({ version }) => {
+          if (semverGt(version, packageJson.version)) {
+            setSetting('newUpdate', true);
+          }
+        },
+        // Offline or the mirror is down; checked again on the next launch.
+        () => {},
+      );
     }
   }, [loggedIn]);
 };
