@@ -1,6 +1,7 @@
 import { HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   containerBackground,
+  fixedSize,
   font,
   foregroundStyle,
   frame,
@@ -58,11 +59,12 @@ function DeadlinesWidget(
   const shown = deadlines.slice(0, count);
   const more = props.total - shown.length;
   const showCourse = family !== 'systemSmall';
+  const large = family === 'systemLarge' || family === 'systemExtraLarge';
 
   return (
     <VStack
       alignment="leading"
-      spacing={6}
+      spacing={large ? 12 : 6}
       modifiers={[
         frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
         background,
@@ -100,10 +102,13 @@ function DeadlinesWidget(
         </Text>
       ) : null}
       {shown.map(item => (
-        <VStack key={item.id} alignment="leading" spacing={1}>
+        <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
           <Text
             modifiers={[
-              font({ textStyle: 'subheadline', weight: 'medium' }),
+              font({
+                textStyle: large ? 'headline' : 'subheadline',
+                weight: large ? 'semibold' : 'medium',
+              }),
               lineLimit(1),
             ]}
           >
@@ -114,15 +119,18 @@ function DeadlinesWidget(
               date={new Date(item.deadline)}
               dateStyle="relative"
               modifiers={[
-                font({ textStyle: 'caption' }),
+                font({ textStyle: large ? 'subheadline' : 'caption' }),
                 foregroundStyle(accent),
                 lineLimit(1),
+                // A relative date takes all the width it can otherwise,
+                // pushing the course name to the far edge.
+                fixedSize(),
               ]}
             />
             {showCourse ? (
               <Text
                 modifiers={[
-                  font({ textStyle: 'caption' }),
+                  font({ textStyle: large ? 'subheadline' : 'caption' }),
                   foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                   lineLimit(1),
                 ]}
@@ -131,6 +139,17 @@ function DeadlinesWidget(
               </Text>
             ) : null}
           </HStack>
+          {large ? (
+            <Text
+              modifiers={[
+                font({ textStyle: 'caption' }),
+                foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
+                lineLimit(1),
+              ]}
+            >
+              {item.due}
+            </Text>
+          ) : null}
         </VStack>
       ))}
       <Spacer />
