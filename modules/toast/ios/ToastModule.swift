@@ -11,6 +11,9 @@ public final class ToastModule: Module {
       Prop("cornerRadius") { (view: ToastBackgroundView, radius: Double) in
         view.cornerRadius = radius
       }
+      Prop("visible") { (view: ToastBackgroundView, visible: Bool) in
+        view.visible = visible
+      }
     }
 
     View(ToastSymbolView.self) {
@@ -27,9 +30,25 @@ public final class ToastModule: Module {
   }
 }
 
-/// Liquid Glass on iOS 26 and later; the thick blur material system HUDs used before that.
+/// Liquid Glass on iOS 26 and later; the thick blur material system HUDs used before that. It fades itself in and
+/// out by animating the effect, because a glass effect view under an ancestor with alpha below 1 never renders: JS
+/// must not fade this view or its ancestors.
 final class ToastBackgroundView: ExpoView {
-  private let effectView: UIVisualEffectView
+  private let effectView = UIVisualEffectView(effect: nil)
+  private let usesGlass: Bool
+
+  var visible = false {
+    didSet {
+      guard visible != oldValue else { return }
+      // Once in a window, so the change animates instead of applying with the first layout.
+      DispatchQueue.main.async { [weak self] in
+        guard let self else { return }
+        UIView.animate(withDuration: self.visible ? 0.3 : 0.2) {
+          self.effectView.effect = self.visible ? self.makeEffect() : nil
+        }
+      }
+    }
+  }
 
   var cornerRadius: CGFloat = 0 {
     didSet {
@@ -38,18 +57,27 @@ final class ToastBackgroundView: ExpoView {
   }
 
   required init(appContext: AppContext? = nil) {
-    effectView = UIVisualEffectView(effect: Self.makeEffect())
+    usesGlass = Self.glassAvailable
     super.init(appContext: appContext)
     isUserInteractionEnabled = false
     effectView.layer.cornerCurve = .continuous
     // Glass draws its own rim and shadow outside its shape; only the blur needs clipping.
-    effectView.clipsToBounds = effectView.effect is UIBlurEffect
+    effectView.clipsToBounds = !usesGlass
     addSubview(effectView)
   }
 
-  private static func makeEffect() -> UIVisualEffect {
+  private static var glassAvailable: Bool {
 #if compiler(>=6.2)  // Xcode 26
     if #available(iOS 26.0, *) {
+      return true
+    }
+#endif
+    return false
+  }
+
+  private func makeEffect() -> UIVisualEffect {
+#if compiler(>=6.2)  // Xcode 26
+    if #available(iOS 26.0, *), usesGlass {
       return UIGlassEffect()
     }
 #endif

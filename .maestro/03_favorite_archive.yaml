@@ -10,6 +10,8 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-fav
+    # The toast only stays up for 3 s; don't spend it waiting to settle.
+    waitToSettleTimeoutMs: 500
 - assertVisible: 'Added to Favorites|已添加到收藏'
 - runFlow:
     file: subflows/filter.yaml
@@ -24,6 +26,8 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-fav
+    # The toast only stays up for 3 s; don't spend it waiting to settle.
+    waitToSettleTimeoutMs: 500
 - assertVisible: 'Removed from Favorites|已从收藏移除'
 - assertNotVisible: '.*请按照助教的安排交作业.*'
 
@@ -38,6 +42,7 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-archive
+    waitToSettleTimeoutMs: 500
 - assertVisible: 'Archived|已归档'
 - assertNotVisible: '.*请按照助教的安排交作业.*'
 - runFlow:
@@ -53,6 +58,7 @@ name: Favorite and archive a notice
       CARD: '.*请按照助教的安排交作业.*'
 - tapOn:
     id: card-archive
+    waitToSettleTimeoutMs: 500
 - assertVisible: 'Undo archiving|已撤销归档'
 - runFlow:
     file: subflows/filter.yaml

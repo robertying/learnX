@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FullWindowOverlay } from 'react-native-screens';
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
+import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
 import { ToastBackground, ToastSymbol } from '../../modules/toast';
 
@@ -101,6 +102,9 @@ const cornerRadius = 25;
 
 const hiddenOffset = -24;
 
+// iPad shows the tab bar at the top, under the status bar; stay clear of it.
+const topMargin = DeviceInfo.isTablet() && !DeviceInfo.isMac() ? 8 + 50 + 8 : 8;
+
 const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   id,
   text,
@@ -148,8 +152,9 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
     }),
   );
 
+  // The backdrop fades itself (see ToastBackground); only the content fades
+  // here.
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: progress.get(),
     transform: [
       {
         translateY:
@@ -160,6 +165,10 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
     ],
   }));
 
+  const contentStyle = useAnimatedStyle(() => ({
+    opacity: progress.get(),
+  }));
+
   const symbol = symbols[type];
 
   return (
@@ -168,7 +177,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
       style={[
         styles.wrapper,
         {
-          paddingTop: insets.top + 8,
+          paddingTop: insets.top + topMargin,
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,
         },
@@ -184,22 +193,25 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
       >
         <ToastBackground
           cornerRadius={cornerRadius}
+          visible={visible}
           style={StyleSheet.absoluteFill}
         />
-        {symbol ? (
-          <ToastSymbol
-            name={symbol.name}
-            size={20}
-            color={symbol.color}
-            style={styles.icon}
-          />
-        ) : null}
-        <Text
-          style={[styles.text, { color: theme.colors.onSurface }]}
-          numberOfLines={3}
-        >
-          {text}
-        </Text>
+        <Animated.View style={[styles.content, contentStyle]}>
+          {symbol ? (
+            <ToastSymbol
+              name={symbol.name}
+              size={20}
+              color={symbol.color}
+              style={styles.icon}
+            />
+          ) : null}
+          <Text
+            style={[styles.text, { color: theme.colors.onSurface }]}
+            numberOfLines={3}
+          >
+            {text}
+          </Text>
+        </Animated.View>
       </Animated.View>
     </View>
   );
@@ -243,10 +255,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   toast: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    justifyContent: 'center',
     maxWidth: 420,
     minHeight: cornerRadius * 2,
+  },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexShrink: 1,
     paddingHorizontal: 20,
     paddingVertical: 12,
   },

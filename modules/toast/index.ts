@@ -3,6 +3,11 @@ import type { ViewProps } from 'react-native';
 
 export interface ToastBackgroundProps extends ViewProps {
   cornerRadius: number;
+  /**
+   * Animates the effect in or out natively. A glass effect view never renders
+   * under an ancestor with opacity below 1, so don't fade it from JS.
+   */
+  visible: boolean;
 }
 
 export interface ToastSymbolProps extends ViewProps {
