@@ -6,10 +6,10 @@ import {
   Dialog,
   List,
   Portal,
-  ProgressBar,
   Snackbar,
   TextInput,
 } from 'react-native-paper';
+import ProgressBar from 'components/ProgressBar';
 import dayjs from 'dayjs';
 import { RemoteFile } from 'thu-learn-lib';
 import SafeArea from 'components/SafeArea';

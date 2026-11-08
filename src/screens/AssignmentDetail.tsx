@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Chip } from 'react-native-paper';
+import Chip from 'components/Chip';
 import dayjs from 'dayjs';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
@@ -156,12 +156,12 @@ const AssignmentDetailContent: React.FC<{
       <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <View style={Styles.flexRow}>
-            <Chip compact mode="outlined" style={styles.chip}>
+            <Chip style={styles.chip}>
               {completionType === HomeworkCompletionType.GROUP
                 ? t('assignmentGroupCompletion')
                 : t('assignmentIndividualCompletion')}
             </Chip>
-            <Chip compact mode="outlined" style={styles.chip}>
+            <Chip style={styles.chip}>
               {submissionType === HomeworkSubmissionType.OFFLINE
                 ? t('assignmentOfflineSubmission')
                 : t('assignmentOnlineSubmission')}
