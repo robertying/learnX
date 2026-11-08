@@ -1,15 +1,18 @@
 import { Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import { t } from 'helpers/i18n';
+import { useTheme } from 'theme';
 import { SettingsStackParams } from './types';
 import { Text } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Maintainer'>;
 
 const Maintainer: React.FC<Props> = () => {
+  const theme = useTheme();
+  const link = { color: theme.colors.primary };
+
   return (
     <SafeArea>
       <ScrollView
@@ -18,7 +21,7 @@ const Maintainer: React.FC<Props> = () => {
       >
         <Text style={styles.text}>{t('maintainerDescription')}</Text>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
         >
           learnX@ruiying.io
@@ -37,9 +40,6 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: 8,
-  },
-  link: {
-    color: Colors.theme,
   },
 });
 

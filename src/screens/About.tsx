@@ -1,10 +1,10 @@
 import { Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DeviceInfo from 'constants/DeviceInfo';
-import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import { t } from 'helpers/i18n';
+import { useTheme } from 'theme';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 import { Text, Title } from 'components/Text';
@@ -12,6 +12,9 @@ import { Text, Title } from 'components/Text';
 type Props = NativeStackScreenProps<SettingsStackParams, 'About'>;
 
 const About: React.FC<Props> = () => {
+  const theme = useTheme();
+  const link = { color: theme.colors.primary };
+
   return (
     <SafeArea>
       <ScrollView
@@ -24,7 +27,7 @@ const About: React.FC<Props> = () => {
         </Text>
         <Text style={styles.text}>© 2026 Rui Ying</Text>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}
         >
           {/* oxlint-disable-next-line learnx/no-han-outside-translations -- ICP filing number, shown as filed */}
@@ -32,25 +35,25 @@ const About: React.FC<Props> = () => {
         </Text>
         <Title style={styles.marginTop}>{t('contributors')}</Title>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('https://github.com/robertying')}
         >
           Rui Ying (robertying)
         </Text>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('https://github.com/hezicyan')}
         >
           HeziCyan (hezicyan)
         </Text>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('https://github.com/Brunch-Life')}
         >
           Yinuo Chen (Brunch-Life)
         </Text>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('https://github.com/lyrenius')}
         >
           Junbo Niu (lyrenius)
@@ -58,7 +61,7 @@ const About: React.FC<Props> = () => {
         <Text style={styles.text}>
           {t('opensourceAt')}{' '}
           <Text
-            style={styles.link}
+            style={link}
             onPress={() =>
               Linking.openURL('https://github.com/robertying/learnX')
             }
@@ -70,7 +73,7 @@ const About: React.FC<Props> = () => {
         <Text style={styles.text}>
           {t('harryChen')}{' '}
           <Text
-            style={styles.link}
+            style={link}
             onPress={() =>
               Linking.openURL('https://github.com/Harry-Chen/thu-learn-lib')
             }
@@ -102,9 +105,6 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: 8,
-  },
-  link: {
-    color: Colors.theme,
   },
 });
 

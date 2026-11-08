@@ -5,6 +5,7 @@ import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
 import type { AppleIcon } from 'react-native-bottom-tabs';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { t } from 'helpers/i18n';
+import { useTheme } from 'theme';
 import { MainTabParams } from 'screens/types';
 import { useSplitLaidOut } from 'components/NativeSplitView';
 import createSidebarSplitNavigator from 'components/SidebarSplitNavigator';
@@ -80,6 +81,7 @@ const useMountedTabCount = () => {
 };
 
 const MainTab = () => {
+  const theme = useTheme();
   const mountedTabCount = useMountedTabCount();
   // The window resizes for the keyboard on Android (adjustResize), which would
   // lift the bottom navigation bar on top of it. Material hides it instead.
@@ -150,6 +152,12 @@ const MainTab = () => {
     <MainNativeNavigator.Navigator
       labeled
       sidebarAdaptable={DeviceInfo.isIPad()}
+      // Material's baseline otherwise, which doesn't match the headers
+      tabBarStyle={
+        Platform.OS === 'android'
+          ? { backgroundColor: theme.colors.card }
+          : undefined
+      }
       tabBarHidden={keyboardShown}
     >
       <MainNativeNavigator.Screen

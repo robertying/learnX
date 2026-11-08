@@ -34,7 +34,7 @@ import {
   width,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
-import { useTheme } from 'theme';
+import { useComposeColorOverrides, useTheme } from 'theme';
 import {
   parseNumberInput,
   positionRows,
@@ -118,10 +118,12 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 
 export const Form: React.FC<FormProps> = props => {
   const theme = useTheme();
+  const colorOverrides = useComposeColorOverrides();
   return (
     <Host
       style={[styles.fill, { backgroundColor: theme.colors.surface }]}
       seedColor={theme.colors.primary}
+      colorOverrides={colorOverrides}
     >
       <FormContent {...props} />
     </Host>

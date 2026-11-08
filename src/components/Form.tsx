@@ -1,4 +1,6 @@
+import { useContext, useLayoutEffect } from 'react';
 import { PlatformColor, StyleSheet } from 'react-native';
+import { NavigationContext } from '@react-navigation/native';
 import { TextInput } from '@expo/ui';
 import {
   Button,
@@ -63,8 +65,30 @@ const macFormModifiers = [
   background(PlatformColor('systemBackground')),
 ];
 
+// systemGroupedBackground, behind iOS's inset grouped rows
+const groupedBackground = { light: 'rgb(242, 242, 247)', dark: 'rgb(0, 0, 0)' };
+
 export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   const theme = useTheme();
+  // Optional: a Form outside a navigator (as in tests) has no header.
+  const navigation = useContext(NavigationContext);
+
+  // The header continues the gray grouped background on iOS instead of
+  // sitting on it as a white bar. Mac Forms are white, like the header.
+  useLayoutEffect(() => {
+    if (DeviceInfo.isMac()) {
+      return;
+    }
+    navigation?.setOptions({
+      // As in the Settings app, no hairline between the header and the Form.
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: theme.dark
+          ? groupedBackground.dark
+          : groupedBackground.light,
+      },
+    });
+  }, [navigation, theme.dark]);
 
   return (
     <Host style={styles.fill} seedColor={theme.colors.primary} testID={testID}>
@@ -161,7 +185,7 @@ export const FormLink: React.FC<FormLinkProps> = ({
         {badge ? (
           <Circle
             modifiers={[
-              foregroundStyle(theme.colors.error),
+              foregroundStyle(theme.colors.status.red),
               frame({ width: 10, height: 10 }),
             ]}
           />
@@ -275,7 +299,11 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
     <HStack spacing={12}>
       <ZStack modifiers={[frame({ width: avatarSize, height: avatarSize })]}>
         <Circle modifiers={[foregroundStyle(theme.colors.primary)]} />
-        <Image systemName="person.fill" size={avatarSize / 2} color="white" />
+        <Image
+          systemName="person.fill"
+          size={avatarSize / 2}
+          color={theme.colors.onPrimary}
+        />
       </ZStack>
       <VStack alignment="leading" spacing={2}>
         <Text modifiers={[nameFont]}>{name}</Text>

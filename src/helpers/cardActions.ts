@@ -2,8 +2,12 @@
 // right-clicked (iPad, Mac), and as accessibility actions everywhere.
 import type { SFSymbol } from 'sf-symbols-typescript';
 import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
-import Colors from 'constants/Colors';
+import { statusColors, withAlpha } from 'theme';
 import { t } from './i18n';
+
+// Light-mode system colors: the swipe buttons tint them at 20%, which works on
+// both light and dark cards.
+const status = statusColors.light;
 
 export type CardActionIconName = MaterialDesignIconsIconName;
 
@@ -42,8 +46,8 @@ export const cardActions = ({
         label: hidden ? t('unhide') : t('hide'),
         icon: hidden ? 'eye' : 'eye-off',
         systemImage: hidden ? 'eye' : 'eye.slash',
-        color: Colors.yellow500,
-        background: 'rgba(255,204,0,0.2)',
+        color: status.yellow,
+        background: withAlpha(status.yellow, 0.2),
       },
     ];
   }
@@ -56,8 +60,8 @@ export const cardActions = ({
       label: fav ? t('unfavorite') : t('favorite'),
       icon: fav ? 'heart-off' : 'heart',
       systemImage: fav ? 'heart.slash' : 'heart',
-      color: Colors.red500,
-      background: 'rgba(255,59,48,0.2)',
+      color: status.red,
+      background: withAlpha(status.red, 0.2),
     });
   }
   actions.push({
@@ -66,8 +70,8 @@ export const cardActions = ({
     label: archived ? t('restore') : t('archive'),
     icon: archived ? 'archive-arrow-up' : 'archive-arrow-down',
     systemImage: archived ? 'arrow.up.bin' : 'archivebox',
-    color: Colors.blue500,
-    background: 'rgba(33,150,243,0.2)',
+    color: status.blue,
+    background: withAlpha(status.blue, 0.2),
   });
   return actions;
 };

@@ -2,9 +2,9 @@ import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
-import Colors from 'constants/Colors';
 import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { Caption, Paragraph, Subheading, Title } from 'components/Text';
 
@@ -27,6 +27,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
   hideCourseName,
   ...restProps
 }) => {
+  const theme = useTheme();
   const strippedContent = removeTags(content);
   const timeAgo = dayjs(publishTime).fromNow();
 
@@ -45,7 +46,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
               <Icon
                 style={styles.icon}
                 name="attachment"
-                color={Colors.orange500}
+                color={theme.colors.status.orange}
                 size={20}
               />
             )}
@@ -53,7 +54,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
               <Icon
                 style={styles.icon}
                 name="flag"
-                color={Colors.red500}
+                color={theme.colors.status.red}
                 size={20}
               />
             )}
@@ -61,7 +62,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
               <Icon
                 style={styles.icon}
                 name="checkbox-blank-circle"
-                color={Colors.blue500}
+                color={theme.colors.status.blue}
               />
             )}
           </View>
