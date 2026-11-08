@@ -116,6 +116,21 @@ export const statusColors = {
 export const withAlpha = (rgb: string, alpha: number) =>
   rgb.replace(/^rgb\((.*)\)$/, `rgba($1, ${alpha})`);
 
+const luminance = (rgb: string) => {
+  const [r, g, b] = (rgb.match(/\d+/g) ?? []).map(c => {
+    const v = Number(c) / 255;
+    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+
+/**
+ * Text color on a solid `rgb(r, g, b)` background, such as a status badge:
+ * white while it keeps 3:1 contrast, black otherwise.
+ */
+export const textOn = (rgb: string) =>
+  1.05 / (luminance(rgb) + 0.05) >= 3 ? 'white' : 'black';
+
 const buildColors = (dark: boolean) => {
   const material = dark ? materialDark : materialLight;
   const colors = {

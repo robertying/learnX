@@ -12,7 +12,7 @@ import { Text } from 'components/Text';
 import Divider from 'components/Divider';
 import Badge from 'components/Badge';
 import Touchable from 'components/Touchable';
-import { useTheme } from 'theme';
+import { textOn, useTheme } from 'theme';
 
 export type FilterSelection =
   | 'all'
@@ -100,7 +100,10 @@ const ListItem: React.FC<{
         <Badge
           style={[
             styles.badge,
-            { color: color ?? 'white', backgroundColor: badgeColor },
+            {
+              color: color ?? (badgeColor ? textOn(badgeColor) : 'white'),
+              backgroundColor: badgeColor,
+            },
           ]}
         >
           {count}
