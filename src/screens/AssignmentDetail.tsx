@@ -131,6 +131,7 @@ const AssignmentDetailContent: React.FC<{
           <IconButton
             disabled={dayjs().isAfter(dayjs(deadline))}
             onPress={handleSubmit}
+            accessibilityLabel={t('submit')}
             icon={props => <MaterialIcons {...props} name="file-upload" />}
           />
         ),

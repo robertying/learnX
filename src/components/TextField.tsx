@@ -38,7 +38,14 @@ const TextField: React.FC<TextFieldProps> = ({
 
   return (
     <View style={[disabled && styles.disabled, style]}>
-      {label ? <Caption style={styles.label}>{label}</Caption> : null}
+      {label ? (
+        <Caption
+          testID={props.testID ? `${props.testID}-label` : undefined}
+          style={styles.label}
+        >
+          {label}
+        </Caption>
+      ) : null}
       <TextInput
         {...props}
         ref={ref}
