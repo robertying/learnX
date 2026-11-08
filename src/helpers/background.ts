@@ -6,15 +6,27 @@ import { loadCredentials } from 'data/credentials';
 import { coursesQuery, latestSemesterQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { applyLatestSemester, getUserData } from 'data/userData';
-import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
-import { ContentDiff, diffContent } from 'data/contentDiff';
+import {
+  assignmentsQuery,
+  contentLists,
+  filesQuery,
+  noticesQuery,
+} from 'data/content';
+import {
+  SyncListName,
+  SyncRun,
+  addSyncRun,
+  describeSyncRun,
+} from 'data/syncLog';
+import { ContentDiff, ContentLists, diffContent } from 'data/contentDiff';
 import { getSettings } from 'data/settings';
 import { addNotifiedKeys, getNotifiedKeys } from 'data/notified';
 import {
   groupContentItems,
   pickContentItems,
 } from 'helpers/contentNotifications';
-import { recordError } from 'helpers/crashReporting';
+import { recordError, setCustomKey } from 'helpers/crashReporting';
+import { runUntil } from 'helpers/runUntil';
 import {
   getNotificationPermission,
   postNotification,
@@ -50,11 +62,57 @@ const followLatestSemester = async (shownSemester: string) => {
 };
 
 /**
- * Logs in and refetches the current semester's notices, assignments and files
- * with the queries the screens use, so the app shows them at its next launch
- * and the persisted cache is up to date. Returns what changed.
+ * How long a sync may spend logging in and fetching. iOS runs the task as a
+ * background processing task, which it can end at any moment (when the user
+ * picks the phone up), and Android stops it after 10 minutes; what's fetched
+ * by then is saved and notified about, and the rest waits for the next run.
  */
-export const syncContent = async (): Promise<SyncResult> => {
+export const SYNC_BUDGET_MS = 25_000;
+
+/**
+ * Courses fetched at once. A course's assignments take a few requests plus
+ * two per assignment, so a few courses already keep the connections busy.
+ */
+const COURSE_CONCURRENCY = 3;
+
+/** Fetched in this order, deadlines first, so they're in if time runs out. */
+const SYNC_LISTS: readonly SyncListName[] = ['assignments', 'notices', 'files'];
+
+/**
+ * Logs in and refetches the current semester's notices, assignments and files
+ * course by course, skipping hidden courses, within `SYNC_BUDGET_MS`. The
+ * fetched courses replace theirs in the lists the screens use, so the app
+ * shows them at its next launch and the persisted cache is up to date.
+ * Returns what changed in the courses it fetched, and records the run.
+ */
+export const syncContent = async ({
+  manual = false,
+  budget = SYNC_BUDGET_MS,
+}: { manual?: boolean; budget?: number } = {}): Promise<SyncResult> => {
+  const startedAt = Date.now();
+  const deadline = startedAt + budget;
+  const record = (
+    result: SyncResult,
+    details: Pick<SyncRun, 'courses' | 'timedOut'> = {},
+  ) => {
+    const run: SyncRun = {
+      startedAt,
+      duration: Date.now() - startedAt,
+      status: result.status,
+      ...details,
+      ...(manual && { manual }),
+    };
+    addSyncRun(run);
+    setCustomKey('last_sync', describeSyncRun(run));
+    if (run.timedOut && !manual) {
+      recordError(
+        new Error('Background sync ran out of time'),
+        describeSyncRun(run),
+      );
+    }
+    return result;
+  };
+
   // The task can run before the app UI has loaded them.
   const [credentials] = await Promise.all([
     loadCredentials(),
@@ -72,7 +130,7 @@ export const syncContent = async (): Promise<SyncResult> => {
     !credentials.fingerPrint ||
     !courses?.length
   ) {
-    return { status: 'skipped' };
+    return record({ status: 'skipped' });
   }
 
   try {
@@ -84,38 +142,80 @@ export const syncContent = async (): Promise<SyncResult> => {
       credentials.fingerGenPrint3,
     );
   } catch {
-    return { status: 'skipped' };
+    return record({ status: 'skipped' });
   }
 
   const semesterId = await followLatestSemester(shownSemester);
+  // Nothing is shown or notified for hidden courses, so they aren't fetched.
+  const hidden = new Set(getUserData().hiddenCourses);
+  const courseIds = (
+    queryClient.getQueryData(coursesQuery(semesterId).queryKey) ?? []
+  )
+    .map(course => course.id)
+    .filter(id => !hidden.has(id));
+  if (courseIds.length === 0) {
+    return record({ status: 'skipped' });
+  }
 
   const queries = {
     notices: noticesQuery(semesterId),
     assignments: assignmentsQuery(semesterId),
     files: filesQuery(semesterId),
   };
-  const before = {
+  const before: ContentLists = {
     notices: queryClient.getQueryData(queries.notices.queryKey),
     assignments: queryClient.getQueryData(queries.assignments.queryKey),
     files: queryClient.getQueryData(queries.files.queryKey),
   };
 
-  // Fetched afresh even when the cached lists are recent.
-  const [notices, assignments, files] = await Promise.allSettled([
-    queryClient.fetchQuery({ ...queries.notices, staleTime: 0 }),
-    queryClient.fetchQuery({ ...queries.assignments, staleTime: 0 }),
-    queryClient.fetchQuery({ ...queries.files, staleTime: 0 }),
-  ]);
-  const value = <T>(result: PromiseSettledResult<T>) =>
-    result.status === 'fulfilled' ? result.value : undefined;
+  const jobs = SYNC_LISTS.flatMap(list =>
+    courseIds.map(courseId => ({ list, courseId })),
+  );
+  const results = await runUntil(
+    jobs.map(
+      ({ list, courseId }) =>
+        () =>
+          contentLists[list].fetchCourse(courseId),
+    ),
+    { concurrency: COURSE_CONCURRENCY, deadline },
+  );
+
+  const counts = {} as NonNullable<SyncRun['courses']>;
+  /** Saves the courses of `list` that came back; undefined if none did. */
+  const put = async <T>(
+    list: SyncListName,
+    putCourses: (
+      semesterId: string,
+      fetched: ReadonlyMap<string, object[]>,
+      options: { complete: boolean },
+    ) => Promise<T[]>,
+  ) => {
+    const fetched = new Map<string, object[]>();
+    jobs.forEach((job, index) => {
+      const result = results[index];
+      if (job.list === list && result?.status === 'fulfilled') {
+        fetched.set(job.courseId, result.value);
+      }
+    });
+    counts[list] = { fetched: fetched.size, total: courseIds.length };
+    return fetched.size > 0
+      ? putCourses(semesterId, fetched, {
+          complete: fetched.size === courseIds.length,
+        })
+      : undefined;
+  };
   const after = {
-    notices: value(notices),
-    assignments: value(assignments),
-    files: value(files),
+    assignments: await put('assignments', contentLists.assignments.putCourses),
+    notices: await put('notices', contentLists.notices.putCourses),
+    files: await put('files', contentLists.files.putCourses),
+  };
+  const details = {
+    courses: counts,
+    timedOut: results.some(result => result === undefined),
   };
 
   if (!after.notices && !after.assignments && !after.files) {
-    return { status: 'failed' };
+    return record({ status: 'failed' }, details);
   }
   const { hiddenCourses, archived } = getUserData();
   await updateSpotlight(after, {
@@ -137,7 +237,10 @@ export const syncContent = async (): Promise<SyncResult> => {
       recordError(error, 'Scheduling deadline reminders');
     }
   }
-  return { status: 'synced', diff: diffContent(before, after) };
+  return record(
+    { status: 'synced', diff: diffContent(before, after) },
+    details,
+  );
 };
 
 /**
