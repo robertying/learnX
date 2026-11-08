@@ -56,7 +56,7 @@ const Files: React.FC<Props> = ({ navigation }) => {
 
   // Fetch on mount and again when the user signs in or the courses change.
   useEffect(() => {
-    refresh();
+    void refresh();
   }, [courseIds, loggedIn]);
 
   return (

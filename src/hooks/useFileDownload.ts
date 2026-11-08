@@ -56,7 +56,7 @@ const useFileDownload = (file: DownloadableFile) => {
   const redownload = useCallback(() => {
     setPath('');
     setError(false);
-    download(true);
+    void download(true);
   }, [download]);
 
   const share = useCallback(async () => {
@@ -85,7 +85,7 @@ const useFileDownload = (file: DownloadableFile) => {
   }, [downloadable.fileType, path]);
 
   useEffect(() => {
-    download(false);
+    void download(false);
   }, [download]);
 
   const openAfterDownload = useEffectEvent(() => {
@@ -94,7 +94,7 @@ const useFileDownload = (file: DownloadableFile) => {
       openFileAfterDownload &&
       downloadable.fileType !== 'pdf'
     ) {
-      open();
+      void open();
     }
   });
 

@@ -96,7 +96,7 @@ const AutoHeightWebView: React.FC<
   `;
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       let cookies: Awaited<ReturnType<typeof CookieManager.get>>;
       try {
         cookies = await CookieManager.get(Urls.learn);

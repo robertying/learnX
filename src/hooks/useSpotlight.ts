@@ -17,7 +17,7 @@ const useSpotlight = () => {
   const archived = useUserData(data => data.archived.assignment);
 
   useEffect(() => {
-    updateSpotlight({ notices, assignments }, { hiddenCourses, archived });
+    void updateSpotlight({ notices, assignments }, { hiddenCourses, archived });
   }, [notices, assignments, hiddenCourses, archived]);
 
   const openTarget = useOpenTarget();

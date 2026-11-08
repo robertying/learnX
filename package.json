@@ -76,6 +76,7 @@
     "mime": "4.1.2",
     "oxfmt": "0.77.0",
     "oxlint": "1.92.0",
+    "oxlint-tsgolint": "7.0.2006",
     "patch-package": "8.0.1",
     "react": "19.3.1",
     "react-native": "0.88.1",

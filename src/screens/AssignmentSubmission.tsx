@@ -155,9 +155,9 @@ const AssignmentSubmissionContent: React.FC<{
     const options = [t('documents'), t('photos'), t('cancel')];
     const handleChoice = (index: number) => {
       if (index === 0) {
-        handleDocumentPick();
+        void handleDocumentPick();
       } else if (index === 1) {
-        handlePhotoPick();
+        void handlePhotoPick();
       } else {
         handlePickerMenuClose();
       }

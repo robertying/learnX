@@ -88,7 +88,7 @@ export async function login({
       }).catch(() => undefined);
     }
     loggedIn();
-    queryClient.prefetchQuery(userQuery);
+    void queryClient.prefetchQuery(userQuery);
   } catch (err) {
     // thu-learn-lib reports a wrong password and no connection alike, as
     // ERROR_FETCH_FROM_ID. A failed fetch in the last attempt means offline;

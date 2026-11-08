@@ -14,7 +14,7 @@ export const resetLocale = () => {
 
 export const isLocaleChinese = () => getLocale().startsWith('zh');
 
-export type TranslationKey = keyof typeof en & keyof typeof zh;
+export type TranslationKey = keyof typeof en;
 
 /** The translations for a locale, Chinese or English. */
 export const translationsFor = (chinese: boolean) => (chinese ? zh : en);

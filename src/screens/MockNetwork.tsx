@@ -35,7 +35,7 @@ const MockNetwork: React.FC = () => {
 
   const handleReLogin = () => {
     // What the app does when it comes back after 10 minutes.
-    login({ reset: true });
+    void login({ reset: true });
     toast(t('loggingIn'), 'none', 1 * 1000);
   };
 

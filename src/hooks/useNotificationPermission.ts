@@ -18,10 +18,10 @@ const useNotificationPermission = () => {
   useEffect(() => {
     const check = () =>
       getNotificationPermission().then(setPermission, () => {});
-    check();
+    void check();
     const sub = AppState.addEventListener('change', state => {
       if (state === 'active') {
-        check();
+        void check();
       }
     });
     return () => sub.remove();

@@ -62,7 +62,7 @@ const Notices: React.FC<Props> = ({ navigation }) => {
   // Refreshes on mount, on sign-in and when the semester's courses change.
   useEffect(() => {
     if (courseIds.length > 0) {
-      refresh();
+      void refresh();
     }
   }, [courseIds, loggedIn]);
 

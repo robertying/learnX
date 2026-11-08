@@ -77,7 +77,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     if (courseInformationSharing) {
-      (async () => {
+      void (async () => {
         try {
           await uploadCourses(fetchedCourses);
         } catch {}

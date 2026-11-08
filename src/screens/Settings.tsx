@@ -65,9 +65,9 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         {
           text: t('ok'),
           onPress: () => {
-            dataSource.logout();
-            clearLoginCookies();
-            logout();
+            void dataSource.logout();
+            void clearLoginCookies();
+            void logout();
           },
         },
       ],

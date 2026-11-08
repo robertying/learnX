@@ -71,7 +71,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
       if (username === env.DUMMY_PERSIST_USERNAME) {
         // Goes through the emulated server and saves the login, so it
         // survives relaunch.
-        login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
+        void login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
       } else {
         // The ephemeral account skips the login and is kept in memory only.
         await saveCredentials({
@@ -113,7 +113,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleRetryLogin = () => {
-    login({ reset: true });
+    void login({ reset: true });
   };
 
   const handleLoginWithOfflineMode = () => {

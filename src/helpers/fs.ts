@@ -194,12 +194,12 @@ export const exportTextFile = async (
   type: string,
 ) => {
   if (DeviceInfo.isMac()) {
-    new File(getMacDownloadDirectory(), filename).write(content);
+    await new File(getMacDownloadDirectory(), filename).write(content);
     return;
   }
 
   const file = new File(Paths.cache, filename);
-  file.write(content);
+  await file.write(content);
 
   await Share.open({
     filename,
