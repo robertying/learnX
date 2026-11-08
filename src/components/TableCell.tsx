@@ -108,6 +108,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
             <Switch
               disabled={switchDisabled}
               value={!!switchValue}
+              accessibilityLabel={primaryText}
               onValueChange={value => onSwitchValueChange?.(value)}
             />
           </View>

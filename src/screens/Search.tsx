@@ -56,6 +56,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         obscureBackground: false,
         tintColor: theme.colors.primary,
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
+        // The clear and cancel buttons don't always send a text change.
+        onCancelButtonPress: () => setSearchQuery(''),
+        onClose: () => setSearchQuery(''),
         onFocus: () => {
           searchBarFocused.current = true;
         },

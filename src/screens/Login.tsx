@@ -133,6 +133,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
           <Logo iosSize={120} style={styles.logo} />
           <View style={styles.switchContainer}>
             <Switch
+              accessibilityLabel={t('graduate')}
               style={Styles.spacex1}
               value={graduate}
               onValueChange={checked => {
