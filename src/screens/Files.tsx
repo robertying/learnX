@@ -50,7 +50,9 @@ const Files: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  useNotificationTarget('file', id => handlePush({ id }));
+  useNotificationTarget('file', (id, inDetail) =>
+    inDetail ? handlePush({ id }) : navigation.push('FileDetail', { id }),
+  );
 
   // Fetch on mount and again when the user signs in or the courses change.
   useEffect(() => {

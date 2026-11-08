@@ -1,5 +1,6 @@
 import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
+import { AppState } from 'react-native';
 import { loginWithFingerPrint } from 'data/source';
 import { loadCredentials } from 'data/credentials';
 import { coursesQuery, latestSemesterQuery } from 'data/queries';
@@ -7,6 +8,17 @@ import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { applyLatestSemester, getUserData } from 'data/userData';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { ContentDiff, diffContent } from 'data/contentDiff';
+import { getSettings } from 'data/settings';
+import { addNotifiedKeys, getNotifiedKeys } from 'data/notified';
+import {
+  groupContentItems,
+  pickContentItems,
+} from 'helpers/contentNotifications';
+import { recordError } from 'helpers/crashReporting';
+import {
+  getNotificationPermission,
+  postNotification,
+} from 'helpers/notifications';
 import { updateDeadlineWidget } from 'widgets';
 
 export type SyncResult =
@@ -113,10 +125,54 @@ export const syncContent = async (): Promise<SyncResult> => {
   return { status: 'synced', diff: diffContent(before, after) };
 };
 
+/**
+ * Tells the user what a sync found, as they chose in Settings › Notifications.
+ * Nothing is posted while the app is open, where the lists show it; what was
+ * found is still remembered so it isn't posted later. `inForeground` posts
+ * anyway, for trying it out in a debug build.
+ */
+export const notifyContent = async (
+  diff: ContentDiff,
+  { inForeground = false }: { inForeground?: boolean } = {},
+) => {
+  const settings = getSettings().notifications;
+  const { hiddenCourses, archived } = getUserData();
+  const items = pickContentItems(diff, {
+    settings,
+    notified: getNotifiedKeys(),
+    hiddenCourses,
+    archived,
+  });
+  if (items.length === 0) {
+    return [];
+  }
+
+  const notifications = groupContentItems(items);
+  if (
+    (inForeground || AppState.currentState !== 'active') &&
+    (await getNotificationPermission()) === 'granted'
+  ) {
+    for (const notification of notifications) {
+      try {
+        await postNotification(notification);
+      } catch {}
+    }
+  }
+  addNotifiedKeys(items.map(item => item.key));
+  return notifications;
+};
+
 const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 
 TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const result = await syncContent();
+  if (result.status === 'synced') {
+    try {
+      await notifyContent(result.diff);
+    } catch (error) {
+      recordError(error, 'Posting new content notifications');
+    }
+  }
   return result.status === 'failed'
     ? BackgroundTask.BackgroundTaskResult.Failed
     : BackgroundTask.BackgroundTaskResult.Success;

@@ -12,6 +12,11 @@ jest.mock('components/Divider', () => () => null);
 jest.mock('@react-navigation/native', () => ({}));
 jest.mock('navigation/layout', () => ({ nativeSplit: true }));
 let mockSplitLaidOut = true;
+let mockTablet = true;
+jest.mock('constants/DeviceInfo', () => ({
+  isTablet: () => mockTablet,
+  isMac: () => false,
+}));
 jest.mock('components/NativeSplitView', () => ({
   useSplitLaidOut: () => mockSplitLaidOut,
 }));
@@ -30,13 +35,14 @@ const splitContext = (navigator: object | null) => ({
 afterEach(() => {
   setPendingNotificationTarget(null);
   mockSplitLaidOut = true;
+  mockTablet = true;
 });
 
 it('opens a pending item of its type once', async () => {
   const open = jest.fn();
   setPendingNotificationTarget({ type: 'notice', id: 'n1' });
   const hook = await renderHook(() => useNotificationTarget('notice', open));
-  expect(open.mock.calls).toEqual([['n1']]);
+  expect(open.mock.calls).toEqual([['n1', false]]);
   await hook.rerender({});
   expect(open).toHaveBeenCalledTimes(1);
 });
@@ -54,7 +60,7 @@ it('opens a tap that arrives while the list is shown', async () => {
   await act(() =>
     setPendingNotificationTarget({ type: 'assignment', id: 'a1' }),
   );
-  expect(open.mock.calls).toEqual([['a1']]);
+  expect(open.mock.calls).toEqual([['a1', false]]);
 });
 
 it('waits for the detail pane of a split view', async () => {
@@ -73,10 +79,10 @@ it('waits for the detail pane of a split view', async () => {
 
   context = splitContext({});
   await hook.rerender({});
-  expect(open.mock.calls).toEqual([['n1']]);
+  expect(open.mock.calls).toEqual([['n1', true]]);
 });
 
-it("waits for the split to be laid out, when a phone's still hands out its hidden pane", async () => {
+it('waits for the split to be laid out on iPad', async () => {
   const open = jest.fn();
   mockSplitLaidOut = false;
   const context = splitContext({});
@@ -93,5 +99,20 @@ it("waits for the split to be laid out, when a phone's still hands out its hidde
 
   mockSplitLaidOut = true;
   await hook.rerender({});
-  expect(open.mock.calls).toEqual([['n1']]);
+  expect(open.mock.calls).toEqual([['n1', true]]);
+});
+
+it("pushes on an iPhone, even while a tab's split hands out its hidden pane", async () => {
+  const open = jest.fn();
+  mockTablet = false;
+  mockSplitLaidOut = false;
+  const context = splitContext({});
+  const wrapper = ({ children }: React.PropsWithChildren) => (
+    <SplitViewContext.Provider value={context}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+  setPendingNotificationTarget({ type: 'file', id: 'f1' });
+  await renderHook(() => useNotificationTarget('file', open), { wrapper });
+  expect(open.mock.calls).toEqual([['f1', false]]);
 });
