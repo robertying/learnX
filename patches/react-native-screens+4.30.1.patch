@@ -295,7 +295,7 @@ index 12f22720..0d912b2e 100644
      _titleFontFamily = RCTNSStringFromStringNilIfEmpty(newScreenProps.titleFontFamily);
    }
 diff --git a/node_modules/react-native-screens/ios/RNSSearchBar.mm b/node_modules/react-native-screens/ios/RNSSearchBar.mm
-index 2345734..f53f393 100644
+index 2345734..4191a4b 100644
 --- a/node_modules/react-native-screens/ios/RNSSearchBar.mm
 +++ b/node_modules/react-native-screens/ios/RNSSearchBar.mm
 @@ -14,6 +14,12 @@
@@ -311,15 +311,29 @@ index 2345734..f53f393 100644
  @implementation RNSSearchBar {
    UISearchController *_controller;
    UIColor *_textColor;
-@@ -46,6 +52,7 @@ namespace react = facebook::react;
+@@ -46,6 +52,13 @@ namespace react = facebook::react;
  #endif
  
    _controller.searchBar.delegate = self;
 +  _controller.searchResultsUpdater = self;
++#if !TARGET_OS_TV
++  // No cancel button: it only empties the field, as the clear button inside it does, and the app's
++  // one search bar is on a modal with its own Close button. With this off, the system doesn't add
++  // it when the search becomes active, and it isn't shown on begin editing below.
++  _controller.automaticallyShowsCancelButton = NO;
++#endif
  
    _isObscureBackgroundSet = NO;
    _isHideNavigationBarSet = NO;
-@@ -274,6 +281,11 @@ namespace react = facebook::react;
+@@ -258,7 +271,6 @@ namespace react = facebook::react;
+   }
+ #endif
+ 
+-  [self showCancelButton];
+   [self becomeFirstResponder];
+   [self emitOnFocusEvent];
+ }
+@@ -274,6 +286,11 @@ namespace react = facebook::react;
    [self emitOnChangeTextEventWithText:_controller.searchBar.text];
  }
  

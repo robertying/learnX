@@ -56,8 +56,9 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         obscureBackground: false,
         tintColor: theme.colors.primary,
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
-        // The clear and cancel buttons don't always send a text change.
-        onCancelButtonPress: () => setSearchQuery(''),
+        // Android's close button doesn't always send a text change. iOS and
+        // Mac have no cancel button (patched out): it only did what the clear
+        // button in the field does, and the modal has its own Close button.
         onClose: () => setSearchQuery(''),
         onFocus: () => {
           searchBarFocused.current = true;
@@ -135,6 +136,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         ) : (
           <SectionList<Notice | Assignment | File>
             contentInsetAdjustmentBehavior="automatic"
+            keyboardDismissMode="on-drag"
             contentContainerStyle={{ paddingBottom: safeAreaInsets.bottom }}
             sections={[
               { key: 'notice', title: t('notices'), data: noticeResult },

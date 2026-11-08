@@ -119,11 +119,11 @@ describe('Search', () => {
     expect(navigation.push).toHaveBeenCalledWith('FileDetail', { id: 'f1' });
   });
 
-  it('clears the results on cancel', async () => {
+  it('clears the results when the search bar closes', async () => {
     const { type, options } = await setup();
     await type('calculus');
     expect(screen.getByText('Midterm room change')).toBeTruthy();
-    await act(() => options().onCancelButtonPress!({} as never));
+    await act(() => options().onClose!());
     expect(screen.getByText('No Content')).toBeTruthy();
   });
 
