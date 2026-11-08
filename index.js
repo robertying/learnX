@@ -1,7 +1,7 @@
 import './setupEnv';
 import './polyfills';
 
-import { AppRegistry } from 'react-native';
+import { AppRegistry, LogBox } from 'react-native';
 import { name as appName } from './app.json';
 import App from './src/App';
 import {
@@ -9,6 +9,11 @@ import {
   installRejectionTracker,
 } from './src/helpers/crashReporting';
 import { setUpNotificationActions } from './src/helpers/notificationActions';
+
+// Keep LogBox off: its "Open debugger to view warnings" toast covers the tab
+// bar and opens a React Native DevTools window when tapped. Read warnings in
+// the Metro log instead.
+LogBox.ignoreAllLogs(true);
 
 installGlobalErrorHandler();
 installRejectionTracker();
