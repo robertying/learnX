@@ -294,6 +294,43 @@ index 12f22720..0d912b2e 100644
    if (newScreenProps.titleFontFamily != oldScreenProps.titleFontFamily) {
      _titleFontFamily = RCTNSStringFromStringNilIfEmpty(newScreenProps.titleFontFamily);
    }
+diff --git a/node_modules/react-native-screens/ios/RNSSearchBar.mm b/node_modules/react-native-screens/ios/RNSSearchBar.mm
+index 2345734..f53f393 100644
+--- a/node_modules/react-native-screens/ios/RNSSearchBar.mm
++++ b/node_modules/react-native-screens/ios/RNSSearchBar.mm
+@@ -14,6 +14,12 @@
+ 
+ namespace react = facebook::react;
+ 
++// The delegate's textDidChange isn't called for every change: on Mac Catalyst, the toolbar search
++// field's clear button empties the field without it. The search controller's results updater sees
++// every change, so it reports the text as well. A change may be reported twice; that's harmless.
++@interface RNSSearchBar () <UISearchResultsUpdating>
++@end
++
+ @implementation RNSSearchBar {
+   UISearchController *_controller;
+   UIColor *_textColor;
+@@ -46,6 +52,7 @@ namespace react = facebook::react;
+ #endif
+ 
+   _controller.searchBar.delegate = self;
++  _controller.searchResultsUpdater = self;
+ 
+   _isObscureBackgroundSet = NO;
+   _isHideNavigationBarSet = NO;
+@@ -274,6 +281,11 @@ namespace react = facebook::react;
+   [self emitOnChangeTextEventWithText:_controller.searchBar.text];
+ }
+ 
++- (void)updateSearchResultsForSearchController:(UISearchController *)searchController
++{
++  [self emitOnChangeTextEventWithText:searchController.searchBar.text];
++}
++
+ - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
+ {
+   [self emitOnSearchButtonPressEventWithText:_controller.searchBar.text];
 diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm b/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm
 index e33c804f..40cbe0dd 100644
 --- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm

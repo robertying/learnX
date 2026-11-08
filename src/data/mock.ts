@@ -477,6 +477,36 @@ export const mockAssignments: Assignment[] = [
     url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
     graded: false,
   },
+  {
+    // Submitted with an attachment and still open, so the submission screen
+    // can replace or remove the uploaded attachment.
+    id: '26ef84e76db3f55b016db4d1a2c45e10',
+    title: '第二次书面作业',
+    deadline: iso(7, 23, 59),
+    completionType: HomeworkCompletionType.INDIVIDUAL,
+    submissionType: HomeworkSubmissionType.WEB_LEARNING,
+    isLateSubmission: false,
+    submitTime: iso(-1, 21, 32),
+    submitted: true,
+    description: '<p>完成课件第三章习题1、3、5，提交电子版。</p>',
+    submittedContent:
+      '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">第3题的推导见附件。</span>',
+    submittedAttachment: {
+      id: '1234990182_ZY_1604316692859411626215e-c233-4663-a567-a932bf4d4962',
+      name: '第二次书面作业.pdf',
+      downloadUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      previewUrl:
+        'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+      size: '239.54KB',
+    },
+    courseId: '2019-2020-1139283221',
+    studentHomeworkId: '1',
+    courseName: '通信与网络',
+    courseTeacherName: '周世东',
+    url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',
+    graded: false,
+  },
 ];
 
 export const mockFiles: File[] = [
