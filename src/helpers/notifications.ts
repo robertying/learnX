@@ -2,7 +2,7 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { t } from 'helpers/i18n';
 
-/** What a tap on a notification opens. */
+/** What a tap on a notification or a widget row opens. */
 export interface NotificationTarget {
   type: 'notice' | 'assignment' | 'file';
   /** The item to open; without it, the type's list. */
@@ -111,4 +111,29 @@ export const getNotificationTarget = (
     type: data.type as NotificationTarget['type'],
     id: typeof data.id === 'string' ? data.id : undefined,
   };
+};
+
+/**
+ * The learnx:// link that opens a target, e.g. `learnx://assignment/<id>` for
+ * a widget row. Without an id, it opens the type's list.
+ */
+export const getTargetUrl = ({ type, id }: NotificationTarget) =>
+  `learnx://${type}${id ? `/${encodeURIComponent(id)}` : ''}`;
+
+/** The target of a learnx:// link, if it points to one. */
+export const getUrlTarget = (url: string): NotificationTarget | null => {
+  const match = /^learnx:\/\/([a-z]+)(?:\/([^/?#]+))?\/?(?:[?#].*)?$/i.exec(
+    url,
+  );
+  if (!match || !targetTypes.has(match[1])) {
+    return null;
+  }
+  try {
+    return {
+      type: match[1] as NotificationTarget['type'],
+      id: match[2] ? decodeURIComponent(match[2]) : undefined,
+    };
+  } catch {
+    return null;
+  }
 };
