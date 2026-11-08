@@ -6,7 +6,7 @@ import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Paragraph, Subheading, Title } from 'components/Text';
+import { Caption, Paragraph, Subheading, Headline } from 'components/Text';
 
 export interface FileCardProps extends CardWrapperProps {
   data: File;
@@ -40,7 +40,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
             {hideCourseName ? null : (
               <Subheading numberOfLines={1}>{courseName}</Subheading>
             )}
-            <Title numberOfLines={1}>{title}</Title>
+            <Headline numberOfLines={1}>{title}</Headline>
           </View>
           <View style={[Styles.flexRowCenter, styles.icons]}>
             {markedImportant ? (

@@ -4,26 +4,130 @@ import {
   StyleSheet,
   Text as NativeText,
   TextProps as NativeTextProps,
+  type TextStyle,
 } from 'react-native';
 import { useTheme } from 'theme';
 
-export type TextProps = NativeTextProps;
+/**
+ * The platform's own text styles: Apple's Dynamic Type styles on iOS, iPadOS
+ * and Mac, and the Material 3 type scale on Android.
+ *
+ * | variant       | iOS / Mac (default size)  | Android (M3)   |
+ * | ------------- | ------------------------- | -------------- |
+ * | `title`       | Title 3, 20/25 semibold   | titleLarge     |
+ * | `headline`    | Headline, 17/22 semibold  | titleMedium    |
+ * | `body`        | Body, 17/22               | bodyLarge      |
+ * | `subheadline` | Subheadline, 15/20        | bodyMedium     |
+ * | `label`       | Subheadline, 15/20 medium | labelLarge     |
+ * | `footnote`    | Footnote, 13/18           | bodySmall      |
+ * | `caption`     | Caption 2, 11/13          | labelSmall     |
+ *
+ * On iOS each variant scales with the user's text size along its own Dynamic
+ * Type curve (`dynamicTypeRamp`), as UIKit's text styles do. Mac Catalyst
+ * ("Optimize for Mac") draws these at 77%, which gives macOS's own sizes
+ * (body 13 pt). Android scales them with the system font scale.
+ */
+export type TextVariant =
+  | 'title'
+  | 'headline'
+  | 'body'
+  | 'subheadline'
+  | 'label'
+  | 'footnote'
+  | 'caption';
+
+type Ramp = NonNullable<NativeTextProps['dynamicTypeRamp']>;
+
+const fontFamily = Platform.select({ ios: 'System', default: 'sans-serif' });
+
+const iosStyles: Record<TextVariant, TextStyle> = {
+  title: { fontSize: 20, lineHeight: 25, fontWeight: '600' },
+  headline: { fontSize: 17, lineHeight: 22, fontWeight: '600' },
+  body: { fontSize: 17, lineHeight: 22, fontWeight: '400' },
+  subheadline: { fontSize: 15, lineHeight: 20, fontWeight: '400' },
+  label: { fontSize: 15, lineHeight: 20, fontWeight: '500' },
+  footnote: { fontSize: 13, lineHeight: 18, fontWeight: '400' },
+  caption: { fontSize: 11, lineHeight: 13, fontWeight: '400' },
+};
+
+const androidStyles: Record<TextVariant, TextStyle> = {
+  title: { fontSize: 22, lineHeight: 28, fontWeight: '400', letterSpacing: 0 },
+  headline: {
+    fontSize: 16,
+    lineHeight: 24,
+    fontWeight: '500',
+    letterSpacing: 0.15,
+  },
+  body: { fontSize: 16, lineHeight: 24, fontWeight: '400', letterSpacing: 0.5 },
+  subheadline: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '400',
+    letterSpacing: 0.25,
+  },
+  label: {
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+    letterSpacing: 0.1,
+  },
+  footnote: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: '400',
+    letterSpacing: 0.4,
+  },
+  caption: {
+    fontSize: 11,
+    lineHeight: 16,
+    fontWeight: '500',
+    letterSpacing: 0.5,
+  },
+};
+
+const ramps: Record<TextVariant, Ramp> = {
+  title: 'title3',
+  headline: 'headline',
+  body: 'body',
+  subheadline: 'subheadline',
+  label: 'subheadline',
+  footnote: 'footnote',
+  caption: 'caption2',
+};
+
+/**
+ * The style of a text variant, for text that isn't drawn by `Text` (such as a
+ * `TextInput`). Prefer the components below.
+ */
+export const textStyles: Record<TextVariant, TextStyle> = StyleSheet.create(
+  Object.fromEntries(
+    Object.entries(Platform.OS === 'ios' ? iosStyles : androidStyles).map(
+      ([variant, style]) => [variant, { fontFamily, ...style }],
+    ),
+  ) as Record<TextVariant, TextStyle>,
+);
+
+export interface TextProps extends NativeTextProps {
+  /** The platform text style. Defaults to the component's own. */
+  variant?: TextVariant;
+}
 
 const writingDirection = I18nManager.getConstants().isRTL ? 'rtl' : 'ltr';
 
 interface StyledTextProps extends TextProps {
   color: 'onSurface' | 'onSurfaceHigh' | 'onSurfaceMedium';
-  typeStyle: TextProps['style'];
+  variant: TextVariant;
 }
 
-const StyledText = ({ color, typeStyle, style, ...rest }: StyledTextProps) => {
+const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();
   return (
     <NativeText
+      dynamicTypeRamp={ramps[variant]}
       {...rest}
       style={[
         styles.base,
-        typeStyle,
+        textStyles[variant],
         { color: theme.colors[color], writingDirection },
         style,
       ]}
@@ -31,67 +135,41 @@ const StyledText = ({ color, typeStyle, style, ...rest }: StyledTextProps) => {
   );
 };
 
-/*
- * The type scale the app had with React Native Paper (MD3 `Text` without a
- * variant, and the v2 `Title`, `Subheading`, `Paragraph` and `Caption`), so
- * moving off Paper doesn't change how text looks.
- */
 const styles = StyleSheet.create({
   base: {
     textAlign: 'left',
   },
-  body: {
-    fontFamily: Platform.select({ ios: 'System', default: 'sans-serif' }),
-    fontWeight: '400',
-    letterSpacing: 0,
-  },
-  title: {
-    fontSize: 20,
-    lineHeight: 30,
-    marginVertical: 2,
-    letterSpacing: 0.15,
-  },
-  subheading: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginVertical: 2,
-    letterSpacing: 0.5,
-  },
-  paragraph: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginVertical: 2,
-    letterSpacing: 0.25,
-  },
-  caption: {
-    fontSize: 12,
-    lineHeight: 20,
-    marginVertical: 2,
-    letterSpacing: 0.4,
-  },
 });
 
 /** Body text in the surface color. */
-export const Text = (props: TextProps) => (
-  <StyledText {...props} color="onSurface" typeStyle={styles.body} />
+export const Text = ({ variant = 'body', ...props }: TextProps) => (
+  <StyledText {...props} color="onSurface" variant={variant} />
 );
 
-/** A card or section title. */
-export const Title = (props: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" typeStyle={styles.title} />
+/** The title of a detail screen or a section of text. */
+export const Title = ({ variant = 'title', ...props }: TextProps) => (
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
+);
+
+/** The title of a card or row. */
+export const Headline = ({ variant = 'headline', ...props }: TextProps) => (
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
 );
 
 /** A secondary title, such as a card's course name. */
-export const Subheading = (props: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" typeStyle={styles.subheading} />
+export const Subheading = ({
+  variant = 'subheadline',
+  ...props
+}: TextProps) => (
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
 );
 
 /** Body text in cards. */
-export const Paragraph = (props: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" typeStyle={styles.paragraph} />
+export const Paragraph = ({ variant = 'subheadline', ...props }: TextProps) => (
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
 );
 
 /** Small, dimmed text for metadata and hints. */
-export const Caption = (props: TextProps) => (
-  <StyledText {...props} color="onSurfaceMedium" typeStyle={styles.caption} />
+export const Caption = ({ variant = 'footnote', ...props }: TextProps) => (
+  <StyledText {...props} color="onSurfaceMedium" variant={variant} />
 );

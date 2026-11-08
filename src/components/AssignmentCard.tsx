@@ -7,7 +7,7 @@ import { deadlineText } from 'helpers/assignments';
 import useMinute from 'hooks/useMinute';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import { Caption, Paragraph, Subheading, Title } from 'components/Text';
+import { Caption, Paragraph, Subheading, Headline } from 'components/Text';
 
 export interface AssignmentCardProps extends CardWrapperProps {
   data: Assignment;
@@ -46,7 +46,7 @@ const AssignmentCard: React.FC<
             {hideCourseName ? null : (
               <Subheading numberOfLines={1}>{courseName}</Subheading>
             )}
-            <Title numberOfLines={1}>{title}</Title>
+            <Headline numberOfLines={1}>{title}</Headline>
           </View>
           <View style={[Styles.flexRowCenter, styles.icons]}>
             {attachment && (

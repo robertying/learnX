@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 import type { ChipProps } from './Chip.shared';
 
@@ -29,6 +30,7 @@ const Chip: React.FC<ChipProps> = ({ children, style }) => {
       <Text
         selectable={false}
         numberOfLines={1}
+        dynamicTypeRamp="subheadline"
         style={[styles.label, { color: theme.colors.onSurfaceVariant }]}
       >
         {children}
@@ -45,10 +47,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   label: {
-    fontSize: 14,
-    lineHeight: 20,
-    letterSpacing: 0.1,
-    fontWeight: '500',
+    ...textStyles.label,
     marginVertical: 6,
     marginHorizontal: 12,
   },

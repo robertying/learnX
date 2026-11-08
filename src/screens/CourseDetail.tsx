@@ -239,7 +239,10 @@ const CourseDetailContent: React.FC<{
             android_ripple={{ color: theme.colors.surfaceVariant }}
             onPress={() => jumpTo(tabRoute.key)}
           >
-            <Text style={[styles.tabLabel, { color: theme.colors.onSurface }]}>
+            <Text
+              variant="label"
+              style={[styles.tabLabel, { color: theme.colors.onSurface }]}
+            >
               {tabRoute.title}
             </Text>
           </Pressable>
@@ -332,7 +335,7 @@ const CourseDetailContent: React.FC<{
           name="information-outline"
           size={20}
         />
-        <Text style={styles.textButton}>{t('courseInformation')}</Text>
+        <Text>{t('courseInformation')}</Text>
       </TouchableOpacity>
       <Divider />
       <TabView
@@ -364,9 +367,6 @@ const styles = StyleSheet.create({
   icon: {
     marginHorizontal: 4,
   },
-  textButton: {
-    fontSize: 16,
-  },
   tabBar: {
     flexDirection: 'row',
   },
@@ -379,8 +379,6 @@ const styles = StyleSheet.create({
   },
   tabLabel: {
     margin: 4,
-    fontSize: 14,
-    fontWeight: '500',
   },
   tabIndicator: {
     position: 'absolute',

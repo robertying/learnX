@@ -20,6 +20,7 @@ import { FullWindowOverlay } from 'react-native-screens';
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
+import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 import { ToastBackground, ToastSymbol } from '../../modules/toast';
 
@@ -232,6 +233,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
             />
           ) : null}
           <Text
+            dynamicTypeRamp="subheadline"
             style={[styles.text, { color: theme.colors.onSurface }]}
             numberOfLines={3}
           >
@@ -300,8 +302,7 @@ const styles = StyleSheet.create({
   },
   text: {
     flexShrink: 1,
-    fontSize: 15,
-    lineHeight: 20,
+    ...textStyles.subheadline,
     fontWeight: '600',
     textAlign: 'center',
   },

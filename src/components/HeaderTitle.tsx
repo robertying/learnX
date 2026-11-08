@@ -8,6 +8,10 @@ export interface HeaderTitleProps {
   subtitle?: string;
 }
 
+// Navigation bar titles keep their size on iOS, as UIKit's do; Android's
+// top app bar titles follow the font scale.
+const allowFontScaling = Platform.OS !== 'ios';
+
 const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
   title,
   subtitle,
@@ -26,11 +30,22 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
         alignItems: Platform.OS === 'android' ? 'flex-start' : 'center',
       }}
     >
-      <Text style={styles.title} numberOfLines={1} ellipsizeMode="middle">
+      <Text
+        variant={Platform.OS === 'ios' ? 'headline' : 'title'}
+        allowFontScaling={allowFontScaling}
+        numberOfLines={1}
+        ellipsizeMode="middle"
+      >
         {title}
       </Text>
       {subtitle ? (
-        <Text style={styles.subtitle} numberOfLines={1} ellipsizeMode="middle">
+        <Text
+          variant="caption"
+          allowFontScaling={allowFontScaling}
+          style={styles.subtitle}
+          numberOfLines={1}
+          ellipsizeMode="middle"
+        >
           {subtitle}
         </Text>
       ) : null}
@@ -39,12 +54,7 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
 };
 
 const styles = StyleSheet.create({
-  title: {
-    fontSize: Platform.OS === 'ios' ? 17 : 20,
-    fontWeight: Platform.OS === 'ios' ? '600' : 'bold',
-  },
   subtitle: {
-    fontSize: 11,
     marginTop: 2,
     width: '100%',
     textAlign: Platform.OS === 'android' ? 'left' : 'center',

@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { Course } from 'data/types/state';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Subheading, Title } from 'components/Text';
+import { Caption, Subheading, Headline } from 'components/Text';
 import { useTheme } from 'theme';
 
 export interface CourseCardProps extends CardWrapperProps {
@@ -30,7 +30,7 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
       <View style={styles.root}>
         <View style={styles.contentSections}>
           <Subheading numberOfLines={1}>{teacherName}</Subheading>
-          <Title>{name}</Title>
+          <Headline>{name}</Headline>
         </View>
         <View style={styles.countSections}>
           <View style={styles.section}>
