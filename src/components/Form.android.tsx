@@ -109,6 +109,10 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 
   return (
     <PullToRefreshBox
+      // The indicator takes the box's alignment: @expo/ui replaces Compose's
+      // default modifier (align(TopCenter)), so without this it sits at the
+      // start edge. The list fills the box either way.
+      contentAlignment="topCenter"
       isRefreshing={refreshing}
       onRefresh={handleRefresh}
       indicator={{ color: colors.primary }}
@@ -241,7 +245,12 @@ const FormRow: React.FC<
     );
   const supporting =
     subtitle || progress !== undefined ? (
-      <Column verticalArrangement={{ spacedBy: 8 }}>
+      // Full width, so the progress bar spans the row and not just the
+      // subtitle.
+      <Column
+        verticalArrangement={{ spacedBy: 8 }}
+        modifiers={[fillMaxWidth()]}
+      >
         {subtitle ? (
           <Text color={done ? colors.outline : colors.onSurfaceVariant}>
             {subtitle}
