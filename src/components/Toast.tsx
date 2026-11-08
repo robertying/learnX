@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
+  Keyboard,
   PanResponder,
   StyleSheet,
   Text,
@@ -100,12 +101,31 @@ const remove = (id: number) => {
 
 const cornerRadius = 25;
 
-const hiddenOffset = -24;
+// Slides up into place.
+const hiddenOffset = 24;
 
-// Centered over the navigation bar, as the system's HUDs sit. iPhone's bar is
-// about 54pt under the status bar; iPad's tab bar comes first, then a header
-// row of about 76pt. The Mac has neither under its title bar.
-const topMargin = DeviceInfo.isMac() ? 8 : DeviceInfo.isTablet() ? 58 : 2;
+// Above the tab bar, which is at the bottom only on iPhone (about 56pt over
+// the home indicator inset). iPad's tab bar is at the top and the Mac has a
+// sidebar, so there the toast sits just above the bottom edge.
+const bottomMargin = DeviceInfo.isTablet() || DeviceInfo.isMac() ? 16 : 56 + 8;
+
+/** The height of the keyboard while it is up, so the toast can sit above it. */
+const useKeyboardHeight = () => {
+  const [height, setHeight] = useState(() =>
+    Keyboard.isVisible() ? (Keyboard.metrics()?.height ?? 0) : 0,
+  );
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardWillShow', e =>
+      setHeight(e.endCoordinates.height),
+    );
+    const hide = Keyboard.addListener('keyboardWillHide', () => setHeight(0));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return height;
+};
 
 const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   id,
@@ -115,6 +135,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const keyboardHeight = useKeyboardHeight();
   const progress = useSharedValue(0);
   const drag = useSharedValue(0);
 
@@ -132,17 +153,17 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
     }
   }, [id, progress, visible]);
 
-  // Tap or swipe up to dismiss, as with a notification banner; pulling down
-  // stretches a little and springs back.
+  // Tap or swipe down to dismiss; pulling up stretches a little and springs
+  // back.
   const [responder] = useState(() =>
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderMove: (_, { dy }) => {
-        drag.set(dy < 0 ? dy : dy / 6);
+        drag.set(dy > 0 ? dy : dy / 6);
       },
       onPanResponderRelease: (_, { dx, dy, vy }) => {
         const tapped = Math.abs(dx) < 5 && Math.abs(dy) < 5;
-        if (tapped || dy < -20 || vy < -0.5) {
+        if (tapped || dy > 20 || vy > 0.5) {
           dismiss(id);
         } else {
           drag.set(withSpring(0));
@@ -161,7 +182,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
       {
         translateY:
           interpolate(progress.get(), [0, 1], [hiddenOffset, 0]) +
-          (visible ? drag.get() : Math.min(drag.get(), 0)),
+          (visible ? drag.get() : Math.max(drag.get(), 0)),
       },
       { scale: interpolate(progress.get(), [0, 1], [0.9, 1]) },
     ],
@@ -179,7 +200,10 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
       style={[
         styles.wrapper,
         {
-          paddingTop: insets.top + topMargin,
+          paddingBottom:
+            keyboardHeight > 0
+              ? keyboardHeight + 16
+              : insets.bottom + bottomMargin,
           paddingLeft: insets.left + 16,
           paddingRight: insets.right + 16,
         },
@@ -220,8 +244,8 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
 };
 
 /**
- * Renders the current toast as a HUD at the top of the window, like the
- * system's own (iOS has no toast API). It draws in a window of its own, so it
+ * Renders the current toast as a HUD at the bottom of the window, above the
+ * tab bar and the keyboard (iOS has no toast API). It draws in a window of its own, so it
  * shows over modals and sheets too. Mount once.
  */
 export const Toast: React.FC = () => {
@@ -255,6 +279,7 @@ const styles = StyleSheet.create({
   wrapper: {
     ...StyleSheet.absoluteFill,
     alignItems: 'center',
+    justifyContent: 'flex-end',
   },
   toast: {
     justifyContent: 'center',
