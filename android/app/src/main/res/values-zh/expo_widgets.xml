@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="deadlines_display_name">作业截止</string>
+  <string name="deadlines_description">即将截止的作业。</string>
+</resources>

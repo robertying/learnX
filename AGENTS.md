@@ -52,6 +52,12 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 - `src/data/mock.ts` computes dates relative to now: keep new entries relative and free of sensitive info (emails, phone numbers, student IDs, URLs).
 - Assignment submission is disabled after the deadline, so keep some mock deadlines in the future.
 
+## Widgets
+
+- The "Deadlines" home screen widget (iOS and Android) is built with `expo-widgets`. Its layouts are `src/widgets/DeadlinesIOS.tsx` (`@expo/ui/swift-ui`) and `src/widgets/DeadlinesAndroid.tsx` (`@expo/ui/jetpack-compose`, limited to what Glance supports). A function with the `'widget'` directive is turned into a string by the widgets Babel plugin (added in `babel.config.js`, since we don't use babel-preset-expo) and runs in the widget runtime: no hooks, imports or outside values, only its props and `environment`. `src/widgets` is left out of the React Compiler.
+- `updateDeadlineWidget` (`src/widgets`) is called by `useDeadlineWidget` (main UI, whenever assignments, archives or hidden courses change), by the background sync and on logout. On iOS it writes a timeline with an entry at each upcoming deadline, so due items drop off without the app; Android gets a snapshot with preformatted due times.
+- We don't use prebuild, so the native setup the expo-widgets config plugin would generate is checked in: the `ExpoWidgetsTarget` extension (`ios/ExpoWidgetsTarget`, bundle id `io.robertying.learnX.Widgets`, app group `group.io.robertying.learnX`, iOS only, not on Mac Catalyst), its Podfile target, `ExpoWidgetsAppGroupIdentifier` in the app's Info.plist, and on Android `DeadlinesProvider`, its manifest receiver and `res/xml/deadlines_info.xml` / `res/values/expo_widgets.xml`. When upgrading expo-widgets, run its config plugin in a throwaway prebuild copy and compare. Adding a widget means a new Swift widget in `index.swift`, a provider on Android and an entry in `expo_widgets_names`.
+
 ## Testing and debugging
 
 ### Unit tests (Jest)

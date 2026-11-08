@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string-array name="expo_widgets_names">
+    <item>Deadlines</item>
+  </string-array>
+  <string name="deadlines_display_name">Deadlines</string>
+  <string name="deadlines_description">Your upcoming assignment deadlines.</string>
+</resources>
+

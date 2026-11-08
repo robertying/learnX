@@ -5,6 +5,8 @@ const zh: typeof en = {
   close: '关闭',
   notices: '通知',
   assignments: '作业',
+  widgetDeadlines: '作业截止',
+  widgetNoDeadlines: '暂无待交作业',
   files: '文件',
   courses: '课程',
   calendarsAndReminders: '日历与提醒事项',

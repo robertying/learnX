@@ -83,3 +83,20 @@ target 'ShareExtension' do
 
   pod 'RNShareMenu', :path => '../node_modules/react-native-share-menu'
 end
+
+# Home screen widgets (expo-widgets). The widget extension only links Expo,
+# ExpoUI and ExpoWidgets; see `use_expo_modules_widgets!`. This mirrors what
+# the expo-widgets config plugin adds to a prebuild project.
+require File.join(File.dirname(`node --print "require.resolve('expo-widgets/package.json')"`), "scripts/autolinking")
+
+target 'ExpoWidgetsTarget' do
+  use_expo_modules_widgets!
+
+  config = use_expo_native_module!(config_command)
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    hermes_enabled: true
+  )
+end

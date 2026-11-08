@@ -21,6 +21,10 @@
 		D4605C0D2E74F66B008F0837 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D4605C0C2E74F66B008F0837 /* AppIcon.icon */; };
 		D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49236392D408A2A00F625A8 /* AppDelegate.swift */; };
 		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
+		E7D60000000000000000000C /* index.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000007 /* index.swift */; };
+		E7D60000000000000000000D /* Deadlines.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000008 /* Deadlines.swift */; };
+		E7D600000000000000000014 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000011 /* Localizable.strings */; };
+		E7D600000000000000000005 /* ExpoWidgetsTarget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000002 /* ExpoWidgetsTarget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +34,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = D40B9F6E2B248C8E004BC08C;
 			remoteInfo = ShareExtension;
+		};
+		E7D600000000000000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E7D600000000000000000001;
+			remoteInfo = ExpoWidgetsTarget;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -41,6 +52,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */,
+							E7D600000000000000000005 /* ExpoWidgetsTarget.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -72,6 +84,14 @@
 		D4605C0C2E74F66B008F0837 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; name = AppIcon.icon; path = learnX/AppIcon.icon; sourceTree = "<group>"; };
 		D49236392D408A2A00F625A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = learnX/AppDelegate.swift; sourceTree = "<group>"; };
 		D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		E7D600000000000000000002 /* ExpoWidgetsTarget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ExpoWidgetsTarget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7D600000000000000000007 /* index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = index.swift; sourceTree = "<group>"; };
+		E7D600000000000000000008 /* Deadlines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deadlines.swift; sourceTree = "<group>"; };
+		E7D600000000000000000009 /* ExpoWidgetsTarget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExpoWidgetsTarget.entitlements; sourceTree = "<group>"; };
+		E7D60000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ExpoWidgetsLayoutRegistry.config.json; sourceTree = "<group>"; };
+		E7D600000000000000000012 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		E7D600000000000000000013 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +108,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E3E7B937EFCF0B8FF04F8CB /* Pods_ShareExtension.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E7D60000000000000000000F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -125,6 +152,7 @@
 			children = (
 				13B07FAE1A68108700A75B9A /* learnX */,
 				D40B9F702B248C8E004BC08C /* ShareExtension */,
+				E7D600000000000000000006 /* ExpoWidgetsTarget */,
 				AC5859D138A6B40B1C9419B9 /* ExpoModulesProviders */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -140,6 +168,7 @@
 			children = (
 				13B07F961A680F5B00A75B9A /* learnX.app */,
 				D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */,
+				E7D600000000000000000002 /* ExpoWidgetsTarget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -182,6 +211,19 @@
 			path = ShareExtension;
 			sourceTree = "<group>";
 		};
+		E7D600000000000000000006 /* ExpoWidgetsTarget */ = {
+			isa = PBXGroup;
+			children = (
+				E7D600000000000000000007 /* index.swift */,
+				E7D600000000000000000008 /* Deadlines.swift */,
+				E7D600000000000000000011 /* Localizable.strings */,
+				E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */,
+				E7D60000000000000000000A /* Info.plist */,
+				E7D600000000000000000009 /* ExpoWidgetsTarget.entitlements */,
+			);
+			path = ExpoWidgetsTarget;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -204,6 +246,7 @@
 			);
 			dependencies = (
 				D40B9F782B248C8E004BC08C /* PBXTargetDependency */,
+				E7D600000000000000000004 /* PBXTargetDependency */,
 			);
 			name = learnX;
 			productName = learnX;
@@ -229,6 +272,23 @@
 			productReference = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		E7D600000000000000000001 /* ExpoWidgetsTarget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E7D600000000000000000015 /* Build configuration list for PBXNativeTarget "ExpoWidgetsTarget" */;
+			buildPhases = (
+				E7D60000000000000000000E /* Sources */,
+				E7D60000000000000000000F /* Frameworks */,
+				E7D600000000000000000010 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ExpoWidgetsTarget;
+			productName = ExpoWidgetsTarget;
+			productReference = E7D600000000000000000002 /* ExpoWidgetsTarget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -245,6 +305,9 @@
 					D40B9F6E2B248C8E004BC08C = {
 						CreatedOnToolsVersion = 15.0.1;
 						LastSwiftMigration = 1500;
+					};
+					E7D600000000000000000001 = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -264,6 +327,7 @@
 			targets = (
 				13B07F861A680F5B00A75B9A /* learnX */,
 				D40B9F6E2B248C8E004BC08C /* ShareExtension */,
+				E7D600000000000000000001 /* ExpoWidgetsTarget */,
 			);
 		};
 /* End PBXProject section */
@@ -287,6 +351,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E7D600000000000000000010 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7D600000000000000000014 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -476,6 +548,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E7D60000000000000000000E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E7D60000000000000000000C /* index.swift in Sources */,
+				E7D60000000000000000000D /* Deadlines.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -483,6 +564,12 @@
 			isa = PBXTargetDependency;
 			target = D40B9F6E2B248C8E004BC08C /* ShareExtension */;
 			targetProxy = D40B9F772B248C8E004BC08C /* PBXContainerItemProxy */;
+		};
+		E7D600000000000000000004 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = E7D600000000000000000001 /* ExpoWidgetsTarget */;
+			targetProxy = E7D600000000000000000003 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -502,6 +589,15 @@
 				D40B9F862B248EFD004BC08C /* zh-Hans */,
 			);
 			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		E7D600000000000000000011 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E7D600000000000000000012 /* en */,
+				E7D600000000000000000013 /* zh-Hans */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -957,6 +1053,121 @@
 			};
 			name = Release;
 		};
+		E7D600000000000000000016 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = ExpoWidgetsTarget/ExpoWidgetsTarget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = G896QC26MC;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ExpoWidgetsTarget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = learnX;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E7D600000000000000000017 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = ExpoWidgetsTarget/ExpoWidgetsTarget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = G896QC26MC;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ExpoWidgetsTarget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = learnX;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(SDKROOT)/usr/lib/swift",
+					"$(SDKROOT)/System/iOSSupport/usr/lib/swift",
+					"$(inherited)",
+				);
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-lc++",
+				);
+				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
+				PRESERVE_DEAD_CODE_INITS_AND_TERMS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnX.Widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -983,6 +1194,15 @@
 			buildConfigurations = (
 				D40B9F7B2B248C8E004BC08C /* Debug */,
 				D40B9F7C2B248C8E004BC08C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E7D600000000000000000015 /* Build configuration list for PBXNativeTarget "ExpoWidgetsTarget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7D600000000000000000016 /* Debug */,
+				E7D600000000000000000017 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -13,6 +13,7 @@ import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
+import { updateDeadlineWidget } from 'widgets';
 
 const loggedIn = () =>
   useAuthStore.setState({ loggingIn: false, loggedIn: true, error: null });
@@ -95,6 +96,7 @@ export async function logout() {
   resetSettings();
   resetUserData();
   clearQueryCache();
+  updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
   await Promise.all([
     clearCredentials(),
     // Only left behind if the one-time import failed; they must not come

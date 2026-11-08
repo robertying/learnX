@@ -69,6 +69,7 @@
     "expo-secure-store": "58.0.2",
     "expo-sqlite": "58.0.15",
     "expo-task-manager": "58.0.13",
+    "expo-widgets": "58.0.27",
     "fuse.js": "7.5.0",
     "graphql": "17.1.0",
     "graphql-request": "7.4.0",

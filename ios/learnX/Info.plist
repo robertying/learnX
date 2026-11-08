@@ -41,6 +41,10 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>ExpoWidgetsAppGroupIdentifier</key>
+	<string>group.io.robertying.learnX</string>
+	<key>ExpoWidgets_EnablePushNotifications</key>
+	<false/>
 	<key>GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED</key>
 	<false/>
 	<key>ITSAppUsesNonExemptEncryption</key>
