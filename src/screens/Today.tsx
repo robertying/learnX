@@ -64,33 +64,36 @@ const Highlight: React.FC<{
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
     >
-      <Caption style={{ color: theme.colors.primary }}>
-        {current ? t('todayNow') : t('todayNext')}
-      </Caption>
-      <Title numberOfLines={1}>{session.courseName}</Title>
-      <Paragraph numberOfLines={1}>
-        {`${time(session.start)}–${time(session.end)}`}
-        {session.location ? ` · ${sanitizeLocation(session.location)}` : ''}
-      </Paragraph>
-      <Caption>{when}</Caption>
-      {current && (
-        <View
-          style={[
-            styles.progressTrack,
-            { backgroundColor: theme.colors.outlineVariant },
-          ]}
-        >
+      {/* TouchableHighlight on iOS takes a single child. */}
+      <View>
+        <Caption style={{ color: theme.colors.primary }}>
+          {current ? t('todayNow') : t('todayNext')}
+        </Caption>
+        <Title numberOfLines={1}>{session.courseName}</Title>
+        <Paragraph numberOfLines={1}>
+          {`${time(session.start)}–${time(session.end)}`}
+          {session.location ? ` · ${sanitizeLocation(session.location)}` : ''}
+        </Paragraph>
+        <Caption>{when}</Caption>
+        {current && (
           <View
             style={[
-              styles.progressBar,
-              {
-                backgroundColor: theme.colors.primary,
-                width: `${Math.round(progress * 100)}%`,
-              },
+              styles.progressTrack,
+              { backgroundColor: theme.colors.outlineVariant },
             ]}
-          />
-        </View>
-      )}
+          >
+            <View
+              style={[
+                styles.progressBar,
+                {
+                  backgroundColor: theme.colors.primary,
+                  width: `${Math.round(progress * 100)}%`,
+                },
+              ]}
+            />
+          </View>
+        )}
+      </View>
     </Touchable>
   );
 };
@@ -105,37 +108,39 @@ const ClassRow: React.FC<{
 
   return (
     <Touchable
-      style={[styles.row, over && styles.over]}
+      style={over && styles.over}
       onPress={onPress}
       disabled={!onPress}
       accessibilityRole={onPress ? 'button' : undefined}
     >
-      <View style={styles.rowTime}>
-        <Text style={{ color: theme.colors.onSurfaceHigh }}>
-          {time(session.start)}
-        </Text>
-        <Caption>{time(session.end)}</Caption>
+      <View style={styles.row}>
+        <View style={styles.rowTime}>
+          <Text style={{ color: theme.colors.onSurfaceHigh }}>
+            {time(session.start)}
+          </Text>
+          <Caption>{time(session.end)}</Caption>
+        </View>
+        <View style={styles.rowBody}>
+          <Text
+            numberOfLines={1}
+            style={[styles.rowTitle, { color: theme.colors.onSurfaceHigh }]}
+          >
+            {session.courseName}
+          </Text>
+          {session.location ? (
+            <Caption numberOfLines={1}>
+              {sanitizeLocation(session.location)}
+            </Caption>
+          ) : null}
+        </View>
+        {over && (
+          <MaterialCommunityIcons
+            name="check"
+            size={18}
+            color={theme.colors.onSurfaceMedium}
+          />
+        )}
       </View>
-      <View style={styles.rowBody}>
-        <Text
-          numberOfLines={1}
-          style={[styles.rowTitle, { color: theme.colors.onSurfaceHigh }]}
-        >
-          {session.courseName}
-        </Text>
-        {session.location ? (
-          <Caption numberOfLines={1}>
-            {sanitizeLocation(session.location)}
-          </Caption>
-        ) : null}
-      </View>
-      {over && (
-        <MaterialCommunityIcons
-          name="check"
-          size={18}
-          color={theme.colors.onSurfaceMedium}
-        />
-      )}
     </Touchable>
   );
 };
@@ -147,21 +152,23 @@ const LinkRow: React.FC<{
 }> = ({ icon, title, onPress }) => {
   const theme = useTheme();
   return (
-    <Touchable style={styles.row} onPress={onPress} accessibilityRole="button">
-      <MaterialCommunityIcons
-        name={icon}
-        size={20}
-        color={theme.colors.primary}
-        style={styles.rowIcon}
-      />
-      <Text style={[styles.rowBody, { color: theme.colors.onSurfaceHigh }]}>
-        {title}
-      </Text>
-      <MaterialCommunityIcons
-        name="chevron-right"
-        size={20}
-        color={theme.colors.onSurfaceMedium}
-      />
+    <Touchable onPress={onPress} accessibilityRole="button">
+      <View style={styles.row}>
+        <MaterialCommunityIcons
+          name={icon}
+          size={20}
+          color={theme.colors.primary}
+          style={styles.rowIcon}
+        />
+        <Text style={[styles.rowBody, { color: theme.colors.onSurfaceHigh }]}>
+          {title}
+        </Text>
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={20}
+          color={theme.colors.onSurfaceMedium}
+        />
+      </View>
     </Touchable>
   );
 };
