@@ -122,6 +122,13 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           onPress={() => handlePush('FileSettings')}
         />
         <TableCell
+          testID="settings-notifications"
+          iconName="notifications"
+          primaryText={t('notifications')}
+          type="arrow"
+          onPress={() => handlePush('NotificationSettings')}
+        />
+        <TableCell
           style={styles.marginTop}
           iconName="info"
           badge={!courseInformationSharingBadgeShown}

@@ -9,6 +9,7 @@ import { useCourseIds } from 'data/queries';
 import { File } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import useNotificationTarget from 'hooks/useNotificationTarget';
 import { FileStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<FileStackParams, 'Files'>;
@@ -38,7 +39,7 @@ const Files: React.FC<Props> = ({ navigation }) => {
 
   const refresh = useEffectEvent(handleRefresh);
 
-  const handlePush = (item: File) => {
+  const handlePush = (item: Pick<File, 'id'>) => {
     if (detailNavigator) {
       detailNavigator.replace('FileDetail', {
         id: item.id,
@@ -48,6 +49,8 @@ const Files: React.FC<Props> = ({ navigation }) => {
       navigation.push('FileDetail', { id: item.id });
     }
   };
+
+  useNotificationTarget('file', id => handlePush({ id }));
 
   // Fetch on mount and again when the user signs in or the courses change.
   useEffect(() => {

@@ -9,6 +9,7 @@ import { useLoggedIn } from 'data/auth';
 import { Notice } from 'data/types/state';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import useNotificationTarget from 'hooks/useNotificationTarget';
 import { NoticeStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<NoticeStackParams, 'Notices'>;
@@ -38,7 +39,7 @@ const Notices: React.FC<Props> = ({ navigation }) => {
 
   const refresh = useEffectEvent(handleRefresh);
 
-  const handlePush = (item: Notice) => {
+  const handlePush = (item: Pick<Notice, 'id'>) => {
     if (detailNavigator) {
       detailNavigator.replace('NoticeDetail', {
         id: item.id,
@@ -48,6 +49,8 @@ const Notices: React.FC<Props> = ({ navigation }) => {
       navigation.push('NoticeDetail', { id: item.id });
     }
   };
+
+  useNotificationTarget('notice', id => handlePush({ id }));
 
   // Refreshes on mount, on sign-in and when the semester's courses change.
   useEffect(() => {

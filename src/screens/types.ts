@@ -66,6 +66,7 @@ export type SettingsStackParams = {
   CalendarEvent: ExtraParams | undefined;
   SemesterSelection: ExtraParams | undefined;
   FileSettings: ExtraParams | undefined;
+  NotificationSettings: ExtraParams | undefined;
   Help: ExtraParams | undefined;
   About: ExtraParams | undefined;
   Changelog: ExtraParams | undefined;
@@ -122,6 +123,7 @@ export type DetailStackParams = {
   CalendarEvent: ExtraParams;
   SemesterSelection: ExtraParams;
   FileSettings: ExtraParams;
+  NotificationSettings: ExtraParams;
   Help: ExtraParams;
   About: ExtraParams;
   Changelog: ExtraParams;

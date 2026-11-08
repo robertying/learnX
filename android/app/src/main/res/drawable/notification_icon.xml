@@ -1,0 +1,13 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="832"
+    android:viewportHeight="832">
+  <!-- The launcher icon's X, centered with padding, for the status bar. -->
+  <group android:translateX="150.5"
+      android:translateY="100">
+    <path
+        android:pathData="M0.69,632L234.75,287.25L215.94,348.06V313.06L3.31,0.69H98.25L267.13,254.88H303L250.94,282.88L440.38,0.69H530.06L311.75,317V352L292.94,291.19L525.25,632H430.75L262.75,380H226.88L278.94,352.44L89.94,632H0.69Z"
+        android:fillColor="#ffffff"/>
+  </group>
+</vector>
