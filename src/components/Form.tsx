@@ -44,6 +44,7 @@ export * from './Form.shared';
 // Concrete system colors: inside a Button, hierarchical styles resolve to
 // the tint.
 const primaryText = foregroundStyle(PlatformColor('label'));
+const checkmarkModifiers = [font({ textStyle: 'body', weight: 'semibold' })];
 const chevronModifiers = [
   font({ textStyle: 'footnote', weight: 'semibold' }),
   foregroundStyle(PlatformColor('tertiaryLabel')),
@@ -79,11 +80,9 @@ const RowLabel: React.FC<{
   const text = (
     <Text modifiers={plain ? [primaryText] : undefined}>{title}</Text>
   );
-  return icon ? (
-    <Label icon={<Image systemName={icon.ios} />}>{text}</Label>
-  ) : (
-    text
-  );
+  // The system draws the symbol at the row's text size. (@expo/ui's Image
+  // would draw it at a fixed 24 pt.)
+  return icon ? <Label systemImage={icon.ios}>{text}</Label> : text;
 };
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
@@ -159,7 +158,9 @@ export const FormButton: React.FC<FormButtonProps> = ({
         <Spacer />
         <RowDetail detail={detail} />
         {loading ? <ProgressView /> : null}
-        {selected ? <Image systemName="checkmark" /> : null}
+        {selected ? (
+          <Image systemName="checkmark" modifiers={checkmarkModifiers} />
+        ) : null}
       </HStack>
     </Button>
   );

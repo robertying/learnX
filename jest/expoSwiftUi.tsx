@@ -46,14 +46,14 @@ export const Section = ({
 );
 
 export const Label = ({
-  icon,
+  systemImage,
   children,
 }: {
-  icon?: ReactNode;
+  systemImage?: string;
   children?: ReactNode;
 }) => (
   <View>
-    {icon}
+    {systemImage ? <View testID={`icon-${systemImage}`} /> : null}
     {children}
   </View>
 );
