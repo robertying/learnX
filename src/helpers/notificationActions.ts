@@ -18,7 +18,9 @@ import { updateDeadlineWidget } from 'widgets';
 /**
  * Keeps the widget and the reminders in step with archived assignments. The
  * app's hooks do this while it runs; this covers an action handled while it
- * doesn't.
+ * doesn't. iOS gives an app it launches for an action only a few seconds, so
+ * this may not finish there; the next sync or app launch then cancels the
+ * reminders instead.
  */
 const afterArchivingAssignments = async (ids: string[]) => {
   await cancelDeadlineRemindersOf(ids);

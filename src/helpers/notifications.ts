@@ -72,37 +72,41 @@ const setUpChannels = async () => {
  * Registers the action buttons, in the app's language. Actions that don't
  * open the app are handled by `helpers/notificationActions`.
  */
-const setUpCategories = () => {
+const setUpCategories = async () => {
   const inBackground = { opensAppToForeground: false };
   const archive = {
     identifier: notificationActions.archive,
     buttonTitle: t('archive'),
     options: inBackground,
   };
-  return Promise.all([
-    Notifications.setNotificationCategoryAsync(notificationCategories.item, [
+  // One at a time: expo-notifications reads, changes and writes the whole
+  // set for each, so categories set at once overwrite each other.
+  await Notifications.setNotificationCategoryAsync(
+    notificationCategories.item,
+    [
       {
         identifier: notificationActions.favorite,
         buttonTitle: t('favorite'),
         options: inBackground,
       },
       archive,
-    ]),
-    Notifications.setNotificationCategoryAsync(notificationCategories.items, [
-      { ...archive, buttonTitle: t('notificationArchiveAll') },
-    ]),
-    Notifications.setNotificationCategoryAsync(
-      notificationCategories.deadline,
-      [
-        {
-          identifier: notificationActions.remindLater,
-          buttonTitle: t('notificationRemindLater'),
-          options: inBackground,
-        },
-        archive,
-      ],
-    ),
-  ]);
+    ],
+  );
+  await Notifications.setNotificationCategoryAsync(
+    notificationCategories.items,
+    [{ ...archive, buttonTitle: t('notificationArchiveAll') }],
+  );
+  await Notifications.setNotificationCategoryAsync(
+    notificationCategories.deadline,
+    [
+      {
+        identifier: notificationActions.remindLater,
+        buttonTitle: t('notificationRemindLater'),
+        options: inBackground,
+      },
+      archive,
+    ],
+  );
 };
 
 /**
