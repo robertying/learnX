@@ -36,8 +36,16 @@ struct UpcomingDeadlineRecord: Record {
   @Field var deadline: Double = 0
 }
 
+struct UpcomingClassRecord: Record {
+  @Field var courseName: String = ""
+  @Field var location: String = ""
+  /// Milliseconds since the epoch.
+  @Field var start: Double = 0
+  @Field var end: Double = 0
+}
+
 /// Indexes the app's items in Spotlight, hands the item of a tapped search result to JS, and keeps the upcoming
-/// deadlines for the "Next Deadline" App Intent.
+/// deadlines and classes for the "Next Deadline" and "Next Class" App Intents.
 public final class SpotlightModule: Module {
   public func definition() -> ModuleDefinition {
     Name("Spotlight")
@@ -89,6 +97,19 @@ public final class SpotlightModule: Module {
             title: $0.title,
             courseName: $0.courseName,
             deadline: Date(milliseconds: $0.deadline)
+          )
+        }
+      )
+    }
+
+    Function("setUpcomingClasses") { (classes: [UpcomingClassRecord]) in
+      UpcomingClasses.save(
+        classes.map {
+          UpcomingClass(
+            courseName: $0.courseName,
+            location: $0.location,
+            start: Date(milliseconds: $0.start),
+            end: Date(milliseconds: $0.end)
           )
         }
       )

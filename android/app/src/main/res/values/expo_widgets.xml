@@ -2,8 +2,11 @@
 <resources>
   <string-array name="expo_widgets_names">
     <item>Deadlines</item>
+    <item>UpNext</item>
   </string-array>
   <string name="deadlines_display_name">Deadlines</string>
   <string name="deadlines_description">Your upcoming assignment deadlines.</string>
+  <string name="up_next_display_name">Up Next</string>
+  <string name="up_next_description">Your class on now or next, and what\'s due next.</string>
 </resources>
 

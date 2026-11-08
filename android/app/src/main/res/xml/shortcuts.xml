@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- App shortcuts (long-press the launcher icon). "Next class" opens Today, which shows the class on
+     now or next. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="next_class"
+        android:enabled="true"
+        android:icon="@drawable/shortcut_next_class"
+        android:shortcutShortLabel="@string/shortcut_next_class"
+        android:shortcutLongLabel="@string/shortcut_next_class_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="learnx://today"
+            android:targetPackage="io.robertying.learnx"
+            android:targetClass="io.robertying.learnx.MainActivity" />
+    </shortcut>
+</shortcuts>

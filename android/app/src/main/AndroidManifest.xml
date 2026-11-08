@@ -45,6 +45,9 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -92,6 +95,23 @@
             <meta-data
                 android:name="expo.modules.widgets.NAME"
                 android:value="Deadlines" />
+        </receiver>
+
+        <!-- Home screen widget from expo-widgets (src/widgets/UpNextAndroid.tsx). -->
+        <receiver
+            android:name=".UpNextProvider"
+            android:exported="true"
+            android:label="@string/up_next_display_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="expo.modules.widgets.ACTION_WIDGET_INTERACTION" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/up_next_info" />
+            <meta-data
+                android:name="expo.modules.widgets.NAME"
+                android:value="UpNext" />
         </receiver>
     </application>
 

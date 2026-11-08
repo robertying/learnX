@@ -18,7 +18,7 @@ import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 import { isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
-import { updateDeadlineWidget } from 'widgets';
+import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 import { clearSpotlight } from 'helpers/spotlight';
 import { resetNotified } from 'data/notified';
 import { resetSyncLog } from 'data/syncLog';
@@ -141,6 +141,7 @@ export async function logout() {
   clearSubmissionDrafts();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
+  updateUpNextWidget();
   clearSpotlight();
   await Promise.all([
     cancelDeadlineReminders().catch(() => {}),

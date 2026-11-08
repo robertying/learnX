@@ -9,6 +9,9 @@ export interface NotificationTarget {
   id?: string;
 }
 
+/** What a learnx:// link opens: an item or list, or the Today tab. */
+export type LinkTarget = NotificationTarget | { type: 'today'; id?: undefined };
+
 /**
  * Action buttons a notification shows, by what it is about. Identifiers
  * mustn't contain `:` or `-`.
@@ -232,14 +235,17 @@ export const getNotificationTarget = (
  * The learnx:// link that opens a target, e.g. `learnx://assignment/<id>` for
  * a widget row. Without an id, it opens the type's list.
  */
-export const getTargetUrl = ({ type, id }: NotificationTarget) =>
+export const getTargetUrl = ({ type, id }: LinkTarget) =>
   `learnx://${type}${id ? `/${encodeURIComponent(id)}` : ''}`;
 
 /** The target of a learnx:// link, if it points to one. */
-export const getUrlTarget = (url: string): NotificationTarget | null => {
+export const getUrlTarget = (url: string): LinkTarget | null => {
   const match = /^learnx:\/\/([a-z]+)(?:\/([^/?#]+))?\/?(?:[?#].*)?$/i.exec(
     url,
   );
+  if (match?.[1] === 'today') {
+    return { type: 'today' };
+  }
   if (!match || !targetTypes.has(match[1])) {
     return null;
   }

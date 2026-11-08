@@ -64,5 +64,15 @@ struct LearnXShortcuts: AppShortcutsProvider {
       shortTitle: "Next Deadline",
       systemImageName: "calendar.badge.clock"
     )
+    AppShortcut(
+      intent: NextClassIntent(),
+      phrases: [
+        "What's my next class in \(.applicationName)",
+        "Next class in \(.applicationName)",
+        "\(.applicationName) next class",
+      ],
+      shortTitle: "Next Class",
+      systemImageName: "studentdesk"
+    )
   }
 }

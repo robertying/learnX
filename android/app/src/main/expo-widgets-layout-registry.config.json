@@ -3,6 +3,10 @@
     {
       "name": "Deadlines",
       "initialLayout": "src/widgets/DeadlinesAndroid.tsx"
+    },
+    {
+      "name": "UpNext",
+      "initialLayout": "src/widgets/UpNextAndroid.tsx"
     }
   ]
 }

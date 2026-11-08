@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_next_class">下一节课</string>
+    <string name="shortcut_next_class_long">查看下一节课</string>
+</resources>

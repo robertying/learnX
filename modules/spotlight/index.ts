@@ -28,6 +28,14 @@ export interface UpcomingDeadline {
   deadline: number;
 }
 
+export interface UpcomingClass {
+  courseName: string;
+  location: string;
+  /** Milliseconds since the epoch. */
+  start: number;
+  end: number;
+}
+
 type SpotlightEvents = {
   onOpenItem: (item: SpotlightOpenedItem) => void;
 };
@@ -44,6 +52,11 @@ declare class SpotlightModule extends NativeModule<SpotlightEvents> {
   takeOpenedItem(): SpotlightOpenedItem | null;
   /** Saves the open assignments for the "Next Deadline" App Intent. */
   setUpcomingDeadlines(deadlines: UpcomingDeadline[]): void;
+  /**
+   * Saves the classes still ahead for the "Next Class" App Intent. Missing in
+   * an app built before the intent was added.
+   */
+  setUpcomingClasses?(classes: UpcomingClass[]): void;
 }
 
 /**
