@@ -1,0 +1,126 @@
+diff --git a/node_modules/expo-widgets/ios/LiveActivity.swift b/node_modules/expo-widgets/ios/LiveActivity.swift
+index b80655d..57de329 100644
+--- a/node_modules/expo-widgets/ios/LiveActivity.swift
++++ b/node_modules/expo-widgets/ios/LiveActivity.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import ExpoModulesCore
+ import ActivityKit
+ 
+@@ -75,3 +76,4 @@ final class LiveActivity: SharedObject {
+     pushTokenObserverTask = nil
+   }
+ }
++#endif
+diff --git a/node_modules/expo-widgets/ios/LiveActivityFactory.swift b/node_modules/expo-widgets/ios/LiveActivityFactory.swift
+index 29e4f15..fdbffad 100644
+--- a/node_modules/expo-widgets/ios/LiveActivityFactory.swift
++++ b/node_modules/expo-widgets/ios/LiveActivityFactory.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import ExpoModulesCore
+ import ActivityKit
+ 
+@@ -63,3 +64,4 @@ final class LiveActivityFactory: SharedObject {
+     instances.removeAll()
+   }
+ }
++#endif
+diff --git a/node_modules/expo-widgets/ios/Widgets/LiveActivityBanner.swift b/node_modules/expo-widgets/ios/Widgets/LiveActivityBanner.swift
+index 3e6ff0b..0ac8618 100644
+--- a/node_modules/expo-widgets/ios/Widgets/LiveActivityBanner.swift
++++ b/node_modules/expo-widgets/ios/Widgets/LiveActivityBanner.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import SwiftUI
+ import WidgetKit
+ 
+@@ -17,3 +18,4 @@ struct LiveActivityBanner: View {
+     }
+   }
+ }
++#endif
+diff --git a/node_modules/expo-widgets/ios/Widgets/Utils.swift b/node_modules/expo-widgets/ios/Widgets/Utils.swift
+index 76b2199..bffd6ee 100644
+--- a/node_modules/expo-widgets/ios/Widgets/Utils.swift
++++ b/node_modules/expo-widgets/ios/Widgets/Utils.swift
+@@ -117,6 +117,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+   return env
+ }
+ 
++#if !targetEnvironment(macCatalyst)
+ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context: ActivityViewContext<LiveActivityAttributes>) -> [String: Any] {
+   var env: [String: Any] = [
+     "colorScheme": "\(environment.colorScheme)",
+@@ -134,3 +135,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
+   }
+   return env
+ }
++#endif
+diff --git a/node_modules/expo-widgets/ios/Widgets/WidgetLiveActivity.swift b/node_modules/expo-widgets/ios/Widgets/WidgetLiveActivity.swift
+index 4d135c4..7c4bd9d 100644
+--- a/node_modules/expo-widgets/ios/Widgets/WidgetLiveActivity.swift
++++ b/node_modules/expo-widgets/ios/Widgets/WidgetLiveActivity.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import SwiftUI
+ import WidgetKit
+ import ExpoModulesCore
+@@ -114,3 +115,4 @@ extension WidgetConfiguration {
+     }
+   }
+ }
++#endif
+diff --git a/node_modules/expo-widgets/ios/WidgetsModule.swift b/node_modules/expo-widgets/ios/WidgetsModule.swift
+index 285136b..6925014 100644
+--- a/node_modules/expo-widgets/ios/WidgetsModule.swift
++++ b/node_modules/expo-widgets/ios/WidgetsModule.swift
+@@ -85,6 +85,7 @@ public final class WidgetsModule: Module {
+       }
+     }
+ 
++    #if !targetEnvironment(macCatalyst)
+     Class("LiveActivityFactory", LiveActivityFactory.self) {
+       Constructor { (name: String, layout: String) in
+         LiveActivityFactory(name: name, layout: layout)
+@@ -116,6 +117,7 @@ public final class WidgetsModule: Module {
+         try instance.getPushToken()
+       }
+     }
++    #endif
+   }
+ 
+   @objc func handleUserInteractionNotification(_ notification: Notification) {
+@@ -135,6 +137,7 @@ public final class WidgetsModule: Module {
+   }
+ 
+   private func observePushToStartToken() {
++    #if !targetEnvironment(macCatalyst)
+     guard #available(iOS 17.2, *), ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+     pushToStartTokenObserverTask = Task {
+       let initialToken = (Activity<LiveActivityAttributes>.pushToStartToken?.reduce("") { $0 + String(format: "%02x", $1) })
+@@ -149,6 +152,7 @@ public final class WidgetsModule: Module {
+         }
+       }
+     }
++    #endif
+   }
+ 
+   private var pushNotificationsEnabled: Bool {
+diff --git a/node_modules/expo-widgets/ios/WidgetsRecords.swift b/node_modules/expo-widgets/ios/WidgetsRecords.swift
+index f1e1fee..61c7e28 100644
+--- a/node_modules/expo-widgets/ios/WidgetsRecords.swift
++++ b/node_modules/expo-widgets/ios/WidgetsRecords.swift
+@@ -23,6 +23,7 @@ struct WidgetConfigurationOptionRecord: Record {
+   }
+ }
+ 
++#if !targetEnvironment(macCatalyst)
+ internal enum LiveActivityDismissalPolicy: String, Enumerable {
+   case `default`
+   case immediate
+@@ -36,3 +37,4 @@ internal enum LiveActivityDismissalPolicy: String, Enumerable {
+     }
+   }
+ }
++#endif

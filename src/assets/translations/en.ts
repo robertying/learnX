@@ -3,6 +3,8 @@ export default {
   close: 'Close',
   notices: 'Notices',
   assignments: 'Assignments',
+  widgetDeadlines: 'Deadlines',
+  widgetNoDeadlines: 'Nothing due',
   files: 'Files',
   courses: 'Courses',
   calendarsAndReminders: 'Calendars & Reminders',

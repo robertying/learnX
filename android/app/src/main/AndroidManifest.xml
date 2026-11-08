@@ -73,6 +73,23 @@
         <activity
             android:name="expo.modules.imagepicker.ExpoCropImageActivity"
             tools:node="remove" />
+
+        <!-- Home screen widget from expo-widgets (src/widgets/Deadlines.tsx). -->
+        <receiver
+            android:name=".DeadlinesProvider"
+            android:exported="true"
+            android:label="@string/deadlines_display_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="expo.modules.widgets.ACTION_WIDGET_INTERACTION" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/deadlines_info" />
+            <meta-data
+                android:name="expo.modules.widgets.NAME"
+                android:value="Deadlines" />
+        </receiver>
     </application>
 
     <queries>

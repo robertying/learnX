@@ -62,3 +62,12 @@ jest.mock('expo-sqlite/kv-store', () => {
 });
 
 jest.mock('expo-calendar', () => require('./expoCalendar'));
+
+// Widgets need the native module; each createWidget returns mocked methods.
+jest.mock('expo-widgets', () => ({
+  createWidget: jest.fn(() => ({
+    updateSnapshot: jest.fn(),
+    updateTimeline: jest.fn(),
+    reload: jest.fn(),
+  })),
+}));

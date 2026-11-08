@@ -7,6 +7,7 @@ import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { getUserData } from 'data/userData';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { ContentDiff, diffContent } from 'data/contentDiff';
+import { updateDeadlineWidget } from 'widgets';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -80,6 +81,13 @@ export const syncContent = async (): Promise<SyncResult> => {
 
   if (!after.notices && !after.assignments && !after.files) {
     return { status: 'failed' };
+  }
+  if (after.assignments) {
+    const { hiddenCourses, archived } = getUserData();
+    updateDeadlineWidget(after.assignments, {
+      hiddenCourses,
+      archived: archived.assignment,
+    });
   }
   return { status: 'synced', diff: diffContent(before, after) };
 };
