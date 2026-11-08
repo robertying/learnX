@@ -145,8 +145,10 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   headerProminence: jest.fn(),
   labelsHidden: jest.fn(),
   listRowBackground: jest.fn(),
+  pickerStyle: jest.fn(),
   refreshable: jest.fn(),
   scrollContentBackground: jest.fn(),
+  tag: jest.fn(),
   toggleStyle: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for

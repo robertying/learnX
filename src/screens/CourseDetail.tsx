@@ -1,12 +1,5 @@
 import { useContext, useState } from 'react';
-import {
-  Animated,
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
@@ -44,6 +37,7 @@ import {
 } from './types';
 import { Text } from 'components/Text';
 import Divider from 'components/Divider';
+import SegmentedTabs from 'components/SegmentedTabs';
 import { useTheme } from 'theme';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
@@ -207,67 +201,21 @@ const CourseDetailContent: React.FC<{
 
   const [index, setIndex] = useState(0);
 
-  // Laid out with flex and percentages rather than the measured width that
-  // TabBar goes by, so that it keeps up as the column is resized (e.g. while
-  // a sidebar slides in or out). Only the indicator's movement between tabs
-  // during a swipe is measured, and it is nothing once the pager comes to rest.
   const renderTabBar = ({
     navigationState,
-    position,
-    layout,
     jumpTo,
   }: SceneRendererProps & {
     navigationState: NavigationState<{
       key: string;
       title: string;
     }>;
-  }) => {
-    const tabCount = navigationState.routes.length;
-    const tabWidth = layout.width / tabCount;
-
-    return (
-      <View
-        style={[styles.tabBar, { backgroundColor: theme.colors.surface }]}
-        accessibilityRole="tablist"
-      >
-        {navigationState.routes.map((tabRoute, i) => (
-          <Pressable
-            key={tabRoute.key}
-            style={styles.tab}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: i === navigationState.index }}
-            android_ripple={{ color: theme.colors.surfaceVariant }}
-            onPress={() => jumpTo(tabRoute.key)}
-          >
-            <Text style={[styles.tabLabel, { color: theme.colors.onSurface }]}>
-              {tabRoute.title}
-            </Text>
-          </Pressable>
-        ))}
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            styles.tabIndicator,
-            {
-              backgroundColor: theme.colors.primary,
-              width: `${100 / tabCount}%`,
-              start: `${(100 / tabCount) * navigationState.index}%`,
-              transform: [
-                {
-                  translateX: tabWidth
-                    ? Animated.multiply(
-                        Animated.subtract(position, navigationState.index),
-                        tabWidth,
-                      )
-                    : 0,
-                },
-              ],
-            },
-          ]}
-        />
-      </View>
-    );
-  };
+  }) => (
+    <SegmentedTabs
+      titles={navigationState.routes.map(r => r.title)}
+      selectedIndex={navigationState.index}
+      onSelect={i => jumpTo(navigationState.routes[i].key)}
+    />
+  );
 
   const renderScene = ({
     route: sceneRoute,
@@ -366,26 +314,6 @@ const styles = StyleSheet.create({
   },
   textButton: {
     fontSize: 16,
-  },
-  tabBar: {
-    flexDirection: 'row',
-  },
-  tab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 10,
-    minHeight: 48,
-  },
-  tabLabel: {
-    margin: 4,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  tabIndicator: {
-    position: 'absolute',
-    bottom: 0,
-    height: 2,
   },
 });
 
