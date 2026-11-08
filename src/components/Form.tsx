@@ -27,6 +27,7 @@ import {
   listRowBackground,
   refreshable,
   scrollContentBackground,
+  toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
@@ -209,6 +210,10 @@ export const FormButton: React.FC<FormButtonProps> = ({
   );
 };
 
+// A switch at the end of the row, as in System Settings. (The Mac's default
+// toggle is a checkbox before the label.)
+const switchStyle = toggleStyle('switch');
+
 export const FormToggle: React.FC<FormToggleProps> = ({
   title,
   icon,
@@ -229,7 +234,7 @@ export const FormToggle: React.FC<FormToggleProps> = ({
       label={title}
       systemImage={icon?.ios}
       testID={testID}
-      modifiers={isDisabled ? [disabled(true)] : undefined}
+      modifiers={isDisabled ? [switchStyle, disabled(true)] : [switchStyle]}
     />
   );
 
