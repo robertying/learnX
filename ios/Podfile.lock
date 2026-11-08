@@ -3294,7 +3294,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNGestureHandler (3.4.0):
+  - RNGestureHandler (3.5.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -4093,7 +4093,7 @@ SPEC CHECKSUMS:
   ExpoSQLite: 580284867126f45f25a5a70a06a84df9664d3786
   ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
   ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
-  ExpoWidgets: 2325f043a0a3d2954f7ec686b20603b8027d045f
+  ExpoWidgets: 05fdbb8aef19bc7793992333740d5eab5f92163b
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: d2917ee70e37e91475560bf7ab916b0f60b8c14f
   FirebaseAnalytics: 6433dfd311ba78084fc93bdfc145e8cb75740eae
@@ -4201,7 +4201,7 @@ SPEC CHECKSUMS:
   ReactCodegen: 56cc43aaea9e865696b9fe62cc64e6262d44460d
   ReactCommon: 7a435707a749bfae5488145184756e9405384989
   RNCAsyncStorage: 6bcb1c6daf2dd961b23fa7b7acc75ceb3517f61c
-  RNGestureHandler: 1db87e72f9c221e595934433c3dadbef23c23238
+  RNGestureHandler: bf43457a553570bb68221727790a7b1a63519cfc
   RNReanimated: 9193e64bd3b772855cae6662e599514c6bcf2403
   RNScreens: 1300f6c92e6fe1a58f19bff4155f6daa6a312edb
   RNShare: 5a48bdd5e66a1aa636a938a05ae8da8da75ea3b1

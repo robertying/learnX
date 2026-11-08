@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */; };
+		5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000001 /* NextDeadlineIntent.swift */; };
+		5A0710000000000000000005 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000003 /* Localizable.strings */; };
+		5A0710000000000000000008 /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000006 /* AppShortcuts.strings */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75600012A61A4062AECAF1A7 /* SceneDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -27,9 +30,6 @@
 		E7D60000000000000000000D /* Deadlines.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000008 /* Deadlines.swift */; };
 		E7D600000000000000000014 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000011 /* Localizable.strings */; };
 		F2A5304F6571E97B5D30F690 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A24FF361CA741CC1978F73 /* ExpoModulesProvider.swift */; };
-		5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000001 /* NextDeadlineIntent.swift */; };
-		5A0710000000000000000005 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000003 /* Localizable.strings */; };
-		5A0710000000000000000008 /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000006 /* AppShortcuts.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +74,9 @@
 		3DB0FD5EB202598E5106AC5E /* Pods-ExpoWidgetsTarget.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExpoWidgetsTarget.debug.xcconfig"; path = "Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget.debug.xcconfig"; sourceTree = "<group>"; };
 		46A94B4E66EB79E2AC7994A8 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
+		5A0710000000000000000001 /* NextDeadlineIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextDeadlineIntent.swift; path = learnX/NextDeadlineIntent.swift; sourceTree = "<group>"; };
+		5A0710000000000000000004 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		5A0710000000000000000007 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8257AB0E0F3BEAA229130429 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
@@ -101,9 +104,6 @@
 		E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ExpoWidgetsLayoutRegistry.config.json; sourceTree = "<group>"; };
 		E7D600000000000000000012 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E7D600000000000000000013 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		5A0710000000000000000001 /* NextDeadlineIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextDeadlineIntent.swift; path = learnX/NextDeadlineIntent.swift; sourceTree = "<group>"; };
-		5A0710000000000000000004 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		5A0710000000000000000007 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -672,6 +672,22 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		5A0710000000000000000003 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5A0710000000000000000004 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		5A0710000000000000000006 /* AppShortcuts.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5A0710000000000000000007 /* zh-Hans */,
+			);
+			name = AppShortcuts.strings;
+			sourceTree = "<group>";
+		};
 		D40B9F732B248C8E004BC08C /* MainInterface.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -696,22 +712,6 @@
 				E7D600000000000000000013 /* zh-Hans */,
 			);
 			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		5A0710000000000000000003 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5A0710000000000000000004 /* zh-Hans */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		5A0710000000000000000006 /* AppShortcuts.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5A0710000000000000000007 /* zh-Hans */,
-			);
-			name = AppShortcuts.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
