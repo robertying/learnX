@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { PlatformColor, StyleSheet } from 'react-native';
 import { TextInput } from '@expo/ui';
 import {
   Button,
@@ -41,10 +41,12 @@ import {
 
 export * from './Form.shared';
 
-const primaryText = foregroundStyle({ type: 'hierarchical', style: 'primary' });
+// Concrete system colors: inside a Button, hierarchical styles resolve to
+// the tint.
+const primaryText = foregroundStyle(PlatformColor('label'));
 const chevronModifiers = [
   font({ textStyle: 'footnote', weight: 'semibold' }),
-  foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
+  foregroundStyle(PlatformColor('tertiaryLabel')),
 ];
 
 export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
@@ -84,10 +86,7 @@ const RowLabel: React.FC<{
   );
 };
 
-const secondaryText = foregroundStyle({
-  type: 'hierarchical',
-  style: 'secondary',
-});
+const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 
 const RowDetail: React.FC<{ detail?: string }> = ({ detail }) =>
   detail ? <Text modifiers={[secondaryText]}>{detail}</Text> : null;
@@ -204,6 +203,8 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
       onChangeText={parseNumberInput(onValueChange)}
       keyboardType="number-pad"
       textAlign="right"
+      // Narrow, so the label keeps the rest of the row.
+      style={styles.numberField}
       accessibilityLabel={title}
       testID={testID}
     />
@@ -241,5 +242,8 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
+  },
+  numberField: {
+    width: 72,
   },
 });

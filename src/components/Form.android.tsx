@@ -24,6 +24,7 @@ import {
   clip,
   fillMaxSize,
   fillMaxWidth,
+  imePadding,
   padding,
   selectable,
   Shapes,
@@ -78,7 +79,13 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     <LazyColumn
       verticalArrangement={{ spacedBy: 24 }}
       contentPadding={{ start: 16, end: 16, top: 16, bottom: 16 }}
-      modifiers={[fillMaxSize(), ...(testID ? [testIDModifier(testID)] : [])]}
+      modifiers={[
+        fillMaxSize(),
+        // Shrinks the list above the keyboard, so a focused number field
+        // scrolls into view.
+        imePadding(),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
     >
       {children}
     </LazyColumn>
