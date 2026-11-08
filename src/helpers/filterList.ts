@@ -1,6 +1,6 @@
 // Pure parts of components/FilterList: which list a filter shows, the header
 // subtitle for it, and the ids picked in selection mode.
-import type { FilterSelection } from 'components/Filter';
+import type { FilterSelection } from 'helpers/filterOptions';
 import { t } from './i18n';
 
 export interface FilterLists<T> {

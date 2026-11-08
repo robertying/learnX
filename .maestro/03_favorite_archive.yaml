@@ -16,7 +16,7 @@ name: Favorite and archive a notice
 - runFlow:
     file: subflows/filter.yaml
     env:
-      FILTER: fav
+      LABEL: 'Favorites|收藏'
 - assertVisible: '.*请按照助教的安排交作业.*'
 
 # Unfavorite from the favorites list
@@ -32,7 +32,7 @@ name: Favorite and archive a notice
 - runFlow:
     file: subflows/filter.yaml
     env:
-      FILTER: all
+      LABEL: 'All|全部'
 - runFlow:
     file: subflows/card_actions.yaml
     env:
@@ -43,7 +43,7 @@ name: Favorite and archive a notice
 - runFlow:
     file: subflows/filter.yaml
     env:
-      FILTER: archived
+      LABEL: 'Archived|归档'
 - assertVisible: '.*请按照助教的安排交作业.*'
 
 # Restore it
@@ -56,5 +56,5 @@ name: Favorite and archive a notice
 - runFlow:
     file: subflows/filter.yaml
     env:
-      FILTER: all
+      LABEL: 'All|全部'
 - assertVisible: '.*请按照助教的安排交作业.*'
