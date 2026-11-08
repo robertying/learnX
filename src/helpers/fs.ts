@@ -11,6 +11,7 @@ import {
   loginWithFingerPrint,
 } from 'data/source';
 import { getSettings } from 'data/settings';
+import { SUBMISSION_DRAFTS_DIR } from 'data/submissionDrafts';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -43,9 +44,9 @@ const getLearnXFilesDirectory = () =>
 /**
  * Folders in the files directory that are not downloaded files. expo-sqlite
  * keeps its databases (settings, user data, query cache) in `SQLite` under
- * Documents.
+ * Documents, and submission drafts keep their files next to it.
  */
-const keptEntries = new Set(['SQLite']);
+const keptEntries = new Set(['SQLite', SUBMISSION_DRAFTS_DIR]);
 
 export const ensureLearnXFilesDir = async () => {
   const dir = getLearnXFilesDirectory();

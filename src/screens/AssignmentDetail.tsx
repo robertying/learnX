@@ -26,6 +26,7 @@ import {
 } from 'helpers/i18n';
 import { Assignment } from 'data/types/state';
 import { useAssignment } from 'data/content';
+import { useHasSubmissionDraft } from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import { Caption, Text, Title } from 'components/Text';
@@ -62,6 +63,7 @@ const AssignmentDetailContent: React.FC<{
   const theme = useTheme();
 
   const detailNavigator = useDetailNavigator();
+  const hasDraft = useHasSubmissionDraft(assignment.id);
 
   const {
     id,
@@ -212,6 +214,25 @@ const AssignmentDetailContent: React.FC<{
                 onPress={() => handleFileOpen(attachment)}
               >
                 {attachment.name}
+              </TextButton>
+            </View>
+            <Divider />
+          </>
+        )}
+        {hasDraft && (
+          <>
+            <View style={[styles.section, styles.iconButton]}>
+              <MaterialCommunityIcons
+                style={styles.icon}
+                name="pencil-outline"
+                color={theme.colors.primary}
+                size={17}
+              />
+              <TextButton
+                style={styles.textPaddingRight}
+                onPress={handleSubmit}
+              >
+                {t('assignmentDraft')}
               </TextButton>
             </View>
             <Divider />

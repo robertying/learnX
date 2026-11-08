@@ -15,6 +15,7 @@ import { serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
 import { resetNotified } from 'data/notified';
+import { clearSubmissionDrafts } from 'data/submissionDrafts';
 import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 
 const loggedIn = () =>
@@ -89,16 +90,21 @@ export function loginWithMockAccount() {
   resetSettings();
   resetUserData(mockUserData);
   resetNotified();
+  clearSubmissionDrafts();
   clearQueryCache();
   loggedIn();
 }
 
-/** Logs out: forgets the login, the server data and the user's own data. */
+/**
+ * Logs out: forgets the login, the server data and the user's own data,
+ * submission drafts included.
+ */
 export async function logout() {
   useAuthStore.setState(initialAuth);
   resetSettings();
   resetUserData();
   resetNotified();
+  clearSubmissionDrafts();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
   await Promise.all([

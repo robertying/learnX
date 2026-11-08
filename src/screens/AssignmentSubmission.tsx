@@ -27,10 +27,15 @@ import {
 } from 'helpers/submission';
 import { Assignment } from 'data/types/state';
 import { useAssignment } from 'data/content';
+import {
+  getSubmissionDraft,
+  useHasSubmissionDraft,
+} from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import {
   useAttachmentPicker,
+  useSaveSubmissionDraft,
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
 import { AssignmentSubmissionParamList } from './types';
@@ -68,11 +73,18 @@ const AssignmentSubmissionContent: React.FC<{
   const { title, submitTime, submittedAttachment, submittedContent } =
     assignment;
 
-  const [content, setContent] = useState(
-    initialSubmissionContent(submittedContent),
+  const initialContent = initialSubmissionContent(submittedContent);
+  // An unsent submission left from before, read once.
+  const [draft] = useState(() => getSubmissionDraft(assignment.id));
+  const hasDraft = useHasSubmissionDraft(assignment.id);
+
+  const [content, setContent] = useState(draft?.content ?? initialContent);
+  const [customAttachmentName, setCustomAttachmentName] = useState(
+    draft?.customAttachmentName ?? '',
   );
-  const [customAttachmentName, setCustomAttachmentName] = useState('');
-  const [removeAttachment, setRemoveAttachment] = useState(false);
+  const [removeAttachment, setRemoveAttachment] = useState(
+    draft?.removeAttachment ?? false,
+  );
 
   const {
     picked: attachmentResult,
@@ -82,7 +94,18 @@ const AssignmentSubmissionContent: React.FC<{
     pickDocument: handleDocumentPick,
     pickPhoto: handlePhotoPick,
     removePicked: handlePickedAttachmentRemove,
-  } = useAttachmentPicker(title);
+  } = useAttachmentPicker(title, draft?.picked);
+
+  const { stop: stopSavingDraft } = useSaveSubmissionDraft(
+    assignment.id,
+    {
+      content,
+      customAttachmentName,
+      removeAttachment,
+      picked: attachmentResult,
+    },
+    initialContent,
+  );
 
   const {
     uploading,
@@ -98,8 +121,32 @@ const AssignmentSubmissionContent: React.FC<{
       customAttachmentName,
       removeAttachment,
     },
-    () => navigation.goBack(),
+    () => {
+      stopSavingDraft();
+      navigation.goBack();
+    },
   );
+
+  const handleDraftDiscard = () => {
+    Alert.alert(
+      t('discardDraft'),
+      t('discardDraftConfirmation'),
+      [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('discard'),
+          style: 'destructive',
+          onPress: () => {
+            setContent(initialContent);
+            setCustomAttachmentName('');
+            setRemoveAttachment(false);
+            handlePickedAttachmentRemove();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
 
   // The system's own choice sheet: an action sheet on iOS and Mac, an alert
   // on Android.
@@ -297,6 +344,18 @@ const AssignmentSubmissionContent: React.FC<{
                 </>
               ) : undefined}
             </View>
+            {hasDraft && (
+              <View style={[styles.draftRow, Styles.spacey1]}>
+                <Caption>{t('draftSaved')}</Caption>
+                <TextButton
+                  disabled={uploading}
+                  style={styles.draftDiscard}
+                  onPress={handleDraftDiscard}
+                >
+                  {t('discardDraft')}
+                </TextButton>
+              </View>
+            )}
             {submitTime && (
               <Caption style={Styles.spacey1}>
                 {dayjs(submitTime).format(
@@ -333,6 +392,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginBottom: 96,
+  },
+  draftRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  draftDiscard: {
+    fontSize: 12,
   },
   attachmentButton: {
     flex: 0,
