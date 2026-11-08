@@ -62,6 +62,36 @@ describe('TableCell', () => {
     expect(onSwitchValueChange).toHaveBeenCalledWith(false);
   });
 
+  it('toggles a switch row when the row is pressed', async () => {
+    const onSwitchValueChange = jest.fn();
+    await render(
+      <TableCell
+        type="switch"
+        primaryText="Sync calendar"
+        switchValue
+        onSwitchValueChange={onSwitchValueChange}
+      />,
+    );
+    await userEvent.setup().press(screen.getByText('Sync calendar'));
+    expect(onSwitchValueChange).toHaveBeenCalledTimes(1);
+    expect(onSwitchValueChange).toHaveBeenCalledWith(false);
+  });
+
+  it('ignores a press on a disabled switch row', async () => {
+    const onSwitchValueChange = jest.fn();
+    await render(
+      <TableCell
+        type="switch"
+        primaryText="Sync calendar"
+        switchValue
+        switchDisabled
+        onSwitchValueChange={onSwitchValueChange}
+      />,
+    );
+    await userEvent.setup().press(screen.getByText('Sync calendar'));
+    expect(onSwitchValueChange).not.toHaveBeenCalled();
+  });
+
   it('ignores activate on a disabled switch row', async () => {
     const onSwitchValueChange = jest.fn();
     await render(

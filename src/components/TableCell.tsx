@@ -57,8 +57,15 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
   // The row is one accessibility element (Touchable is accessible), which
   // hides the switch inside it from VoiceOver, TalkBack and the Mac
   // accessibility tree. So a switch row is the switch: it reads as one and
-  // toggles on activate.
+  // toggles on activate. It also toggles when the row is pressed, because on
+  // Mac Catalyst an accessibility press (AXPress) presses the row rather than
+  // sending activate.
   const isSwitch = type === 'switch' && !loading;
+  const toggleSwitch = () => {
+    if (!switchDisabled) {
+      onSwitchValueChange?.(!switchValue);
+    }
+  };
   const switchAccessibility = isSwitch
     ? {
         accessibilityRole: 'switch' as const,
@@ -69,8 +76,8 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
         },
         accessibilityActions: [{ name: 'activate' }],
         onAccessibilityAction: (event: AccessibilityActionEvent) => {
-          if (event.nativeEvent.actionName === 'activate' && !switchDisabled) {
-            onSwitchValueChange?.(!switchValue);
+          if (event.nativeEvent.actionName === 'activate') {
+            toggleSwitch();
           }
         },
       }
@@ -79,7 +86,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
   return (
     <Touchable
       style={[{ backgroundColor: theme.colors.surface }, restProps.style]}
-      onPress={onPress}
+      onPress={onPress ?? (isSwitch ? toggleSwitch : undefined)}
       {...switchAccessibility}
     >
       <View
