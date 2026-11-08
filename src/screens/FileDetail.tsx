@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { canPreviewInline, needWhiteBackground } from 'helpers/filePreview';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import Skeleton from 'components/Skeleton';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
@@ -153,11 +153,7 @@ const FileDetailContent: React.FC<{
               <View style={Styles.flexRowCenter}>
                 <Caption>{file.courseTeacherName}</Caption>
                 <Caption>
-                  {dayjs(file.uploadTime).format(
-                    isLocaleChinese()
-                      ? 'YYYY 年 M 月 D 日 dddd HH:mm'
-                      : 'MMM D, YYYY HH:mm',
-                  )}
+                  {dayjs(file.uploadTime).format(t('dateTimeFormat'))}
                 </Caption>
               </View>
             </View>

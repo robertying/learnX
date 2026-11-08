@@ -9,8 +9,12 @@ import { removeTags } from './text';
 import { ICSEvent } from './ics';
 import locationMappings from '../assets/locationMappings.json';
 
+// Calendars are found by name, so translating these would orphan the ones
+// users already have.
+/* oxlint-disable learnx/no-han-outside-translations */
 export const courseCalendarName = 'learnX 课表';
 export const assignmentCalendarReminderName = 'learnX 作业';
+/* oxlint-enable learnx/no-han-outside-translations */
 export const exportCalendarName = 'learnX';
 export const TZ = 'Asia/Shanghai';
 

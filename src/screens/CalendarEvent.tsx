@@ -13,7 +13,7 @@ import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import {
   confirmDeleteCalendars,
   useAssignmentSync,
@@ -112,13 +112,11 @@ const CalendarEvent: React.FC<Props> = () => {
             type="switch"
           />
           <Caption style={styles.caption}>
-            {isLocaleChinese()
-              ? `手动同步${
-                  graduate ? '研究生' : '本科生'
-                }课表到日历；请在更改设置后重新同步以应用更改。`
-              : `Manually sync ${
-                  graduate ? 'graduate' : 'undergraduate'
-                } course schedule to your calendar. Please re-sync after any setting change.`}
+            {t('courseScheduleSyncCaption', {
+              type: graduate
+                ? t('graduateSchedule')
+                : t('undergraduateSchedule'),
+            })}
           </Caption>
           <TableCell
             style={styles.marginTop}

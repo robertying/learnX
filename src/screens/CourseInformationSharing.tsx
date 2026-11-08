@@ -9,7 +9,7 @@ import { useCredentialsStore } from 'data/credentials';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
@@ -93,13 +93,9 @@ const CourseInformationSharing: React.FC<Props> = () => {
           type="switch"
         />
         <Caption style={styles.caption}>
-          {isLocaleChinese()
-            ? courseInformationSharing
-              ? '退出课程信息共享计划后，课程信息将不再自动上传。'
-              : '加入课程信息共享计划后，当前学期的课程信息（包括课程号、课程名、任课教师、上课时间和地点）会自动上传至 courseX 平台，共享给其他用户。上传内容不包含任何个人信息。\n\n你可以通过 courseX 查询所有已上传课程的信息，如上课时间和地点等。'
-            : courseInformationSharing
-              ? 'Course information will stop being uploaded after you turn off Course Information Sharing.'
-              : 'Information of courses (e.g. course number, name, lecturer, time and locations) of the current semester will be uploaded to courseX after you turn on Course Information Sharing. The information will be available to others. Personal information will never be uploaded or shared.\n\nYou can search for interesting courses and learn when and where they take place using courseX.'}
+          {courseInformationSharing
+            ? t('courseInformationSharingOnCaption')
+            : t('courseInformationSharingOffCaption')}
         </Caption>
         <TableCell
           style={styles.marginTop}
