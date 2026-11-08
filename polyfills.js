@@ -1,6 +1,3 @@
-import { Buffer } from 'buffer';
-global.Buffer = Buffer;
-
 import * as ExpoCrypto from 'expo-crypto';
 global.crypto = {
   getRandomValues: ExpoCrypto.getRandomValues,
