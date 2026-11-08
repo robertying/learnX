@@ -2,12 +2,13 @@ import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
 import { t } from './i18n';
 
-/** "due in 3 days" or "closed 2 days ago", in the app's language */
-export const deadlineText = (deadline: string, now = dayjs()) => {
+/** "due in 3 days" or "closed 2 days ago", in the app's language, relative to `now` (default: the current time) */
+export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
+  const n = dayjs(now);
   const dl = dayjs(deadline);
-  return now.isAfter(dl)
-    ? t('deadlinePassed', { time: now.to(dl) })
-    : t('deadlineIn', { time: now.to(dl, true) });
+  return n.isAfter(dl)
+    ? t('deadlinePassed', { time: n.to(dl) })
+    : t('deadlineIn', { time: n.to(dl, true) });
 };
 
 /**

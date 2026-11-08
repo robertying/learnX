@@ -10,6 +10,7 @@ import { useSplitLaidOut } from 'components/NativeSplitView';
 import createSidebarSplitNavigator from 'components/SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useSettings } from 'data/settings';
+import useMainCommands from 'hooks/useMainCommands';
 import useMainStartup from 'hooks/useMainStartup';
 import packageJson from '../../package.json';
 import { renderDetailContainer, TabSplit } from './DetailStack';
@@ -76,6 +77,7 @@ const useMountedTabCount = () => {
 const MainTab = () => {
   const mountedTabCount = useMountedTabCount();
   useMainStartup();
+  useMainCommands();
   const newChangelog = useSettings(
     settings => settings.lastShowChangelogVersion !== packageJson.version,
   );

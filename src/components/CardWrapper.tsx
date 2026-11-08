@@ -1,5 +1,10 @@
 import { PropsWithChildren, useState } from 'react';
-import { View, StyleSheet, Platform } from 'react-native';
+import {
+  AccessibilityActionEvent,
+  View,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
@@ -14,8 +19,12 @@ import CardSwipeActions from './CardSwipeActions';
 import Touchable from './Touchable';
 import SelectionMark from './SelectionMark';
 import { useTheme } from 'theme';
+import { ContextMenuView } from '../../modules/menus';
 
 const swipeableNotSupported = DeviceInfo.isWSA() || Platform.OS === 'android';
+// A pointer's right-click, or a long press on iPad, shows the actions in a
+// menu, as everywhere else on these platforms.
+const contextMenuSupported = DeviceInfo.isIPad() || DeviceInfo.isMac();
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -60,6 +69,7 @@ const CardWrapper: React.FC<
   const [menuVisible, setMenuVisible] = useState(false);
 
   const actions = cardActions({ fav, archived, hidden, canHide: !!onHide });
+  const actionsEnabled = !disableSwipe && !selectionMode && !reorderMode;
 
   const runAction = (action: CardAction) => {
     switch (action.key) {
@@ -72,6 +82,26 @@ const CardWrapper: React.FC<
       case 'hide':
         onHide?.(!hidden);
         break;
+    }
+  };
+
+  const handleAccessibilityAction = ({
+    nativeEvent,
+  }: AccessibilityActionEvent) => {
+    const action = actions.find(a => a.key === nativeEvent.actionName);
+    if (action && actionsEnabled) {
+      runAction(action);
+    }
+  };
+
+  const handleContextMenuAction = ({
+    nativeEvent,
+  }: {
+    nativeEvent: { key: string };
+  }) => {
+    const action = actions.find(a => a.key === nativeEvent.key);
+    if (action) {
+      runAction(action);
     }
   };
 
@@ -118,7 +148,7 @@ const CardWrapper: React.FC<
   const handleLongPress = () => {
     if (reorderMode) {
       onDrag?.();
-    } else if (!disableSwipe && !selectionMode) {
+    } else if (actionsEnabled && !contextMenuSupported) {
       if (swipeableNotSupported) {
         Haptics.selectionAsync();
         setMenuVisible(true);
@@ -137,6 +167,15 @@ const CardWrapper: React.FC<
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress
       }
       onLongPress={handleLongPress}
+      accessibilityRole={selectionMode ? 'checkbox' : 'button'}
+      accessibilityState={selectionMode ? { checked: !!checked } : undefined}
+      // Swipe and long press aren't reachable with VoiceOver or TalkBack.
+      accessibilityActions={
+        actionsEnabled
+          ? actions.map(a => ({ name: a.key, label: a.label }))
+          : undefined
+      }
+      onAccessibilityAction={handleAccessibilityAction}
     >
       <View style={styles.root}>
         {selectionMode && (
@@ -171,6 +210,25 @@ const CardWrapper: React.FC<
     );
   }
 
+  const content = contextMenuSupported ? (
+    <ContextMenuView
+      actions={
+        actionsEnabled
+          ? actions.map(a => ({
+              key: a.key,
+              title: a.label,
+              systemImage: a.systemImage,
+            }))
+          : []
+      }
+      onAction={handleContextMenuAction}
+    >
+      {touchable}
+    </ContextMenuView>
+  ) : (
+    touchable
+  );
+
   return (
     <ReanimatedSwipeable
       ref={snapRef}
@@ -182,7 +240,7 @@ const CardWrapper: React.FC<
       onSwipeableWillOpen={onWillOpen}
       onSwipeableWillClose={onWillClose}
     >
-      {touchable}
+      {content}
     </ReanimatedSwipeable>
   );
 };

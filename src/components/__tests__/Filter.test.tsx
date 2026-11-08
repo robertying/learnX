@@ -60,6 +60,15 @@ describe('Filter', () => {
     expect(within(row('finished')).getByText('3')).toBeTruthy();
   });
 
+  it('tells screen readers which filter is selected, with its count', async () => {
+    await setup({ unreadCount: 3, selected: 'unread' });
+    expect(row('unread').props.accessibilityState).toEqual({ selected: true });
+    expect(row('all').props.accessibilityState).toEqual({ selected: false });
+    expect(screen.getByRole('button', { name: 'unread, 3' })).toBe(
+      row('unread'),
+    );
+  });
+
   it('checks the selected filter only', async () => {
     const view = await setup({ unreadCount: 3, selected: 'unread' });
     expect(within(row('unread')).getByTestId('icon-check')).toBeTruthy();
