@@ -70,6 +70,20 @@ describe('isNetworkError', () => {
     ).toBe(true);
   });
 
+  it('counts a thu-learn-lib timeout, bare or wrapped by login', () => {
+    const timeout = {
+      reason: FailReason.REQUEST_TIMEOUT,
+      extra: { url: 'https://learn.tsinghua.edu.cn', timeout: 60000 },
+    };
+    expect(isNetworkError(timeout)).toBe(true);
+    expect(
+      isNetworkError({
+        reason: FailReason.ERROR_FETCH_FROM_ID,
+        extra: timeout,
+      }),
+    ).toBe(true);
+  });
+
   it('does not count other failures', () => {
     expect(
       isNetworkError({
