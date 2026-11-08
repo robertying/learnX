@@ -50,7 +50,9 @@ const Notices: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  useNotificationTarget('notice', id => handlePush({ id }));
+  useNotificationTarget('notice', (id, inDetail) =>
+    inDetail ? handlePush({ id }) : navigation.push('NoticeDetail', { id }),
+  );
 
   // Refreshes on mount, on sign-in and when the semester's courses change.
   useEffect(() => {

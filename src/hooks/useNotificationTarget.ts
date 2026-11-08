@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { SplitViewContext } from 'components/SplitView';
 import { useSplitLaidOut } from 'components/NativeSplitView';
 import { nativeSplit } from 'navigation/layout';
+import DeviceInfo from 'constants/DeviceInfo';
 import { NotificationTarget } from 'helpers/notifications';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 
@@ -16,22 +17,31 @@ export const setPendingNotificationTarget = (
 ) => usePendingTargetStore.setState({ target });
 
 /**
- * Lets a list screen open the item of a tapped notification the way a tap on
- * the item would: pushed on a phone, or in the detail pane of its split view,
- * once the split is laid out and that pane is ready.
+ * An iPhone's tabs are native splits that stay collapsed, but until UIKit
+ * collapses one (when its tab first shows), it hands out its hidden detail
+ * pane. Items are pushed on the list there instead.
+ */
+const phoneSplit = () =>
+  nativeSplit && !DeviceInfo.isTablet() && !DeviceInfo.isMac();
+
+/**
+ * Lets a list screen open the item of a tapped notification: in the detail
+ * pane of its split view once the split is laid out and the pane is ready
+ * (`inDetail`), or else pushed on the list.
  */
 const useNotificationTarget = (
   type: NotificationTarget['type'],
-  open: (id: string) => void,
+  open: (id: string, inDetail: boolean) => void,
 ) => {
   const target = usePendingTargetStore(state => state.target);
   const { showDetail } = useContext(SplitViewContext);
   const detailNavigator = useDetailNavigator();
-  // Until UIKit lays out the split, a phone's collapsed split still hands
-  // out its hidden detail pane.
   const splitLaidOut = useSplitLaidOut();
+  const onPhone = phoneSplit();
   const waitingForDetail =
-    (nativeSplit && !splitLaidOut) || (showDetail && !detailNavigator);
+    !onPhone &&
+    ((nativeSplit && !splitLaidOut) || (showDetail && !detailNavigator));
+  const inDetail = !onPhone && !!detailNavigator;
 
   const openTarget = useEffectEvent(open);
 
@@ -40,8 +50,8 @@ const useNotificationTarget = (
       return;
     }
     setPendingNotificationTarget(null);
-    openTarget(target.id);
-  }, [target, type, waitingForDetail]);
+    openTarget(target.id, inDetail);
+  }, [target, type, waitingForDetail, inDetail]);
 };
 
 export default useNotificationTarget;

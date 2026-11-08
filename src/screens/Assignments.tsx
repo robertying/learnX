@@ -61,7 +61,9 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  useNotificationTarget('assignment', id => handlePush({ id }));
+  useNotificationTarget('assignment', (id, inDetail) =>
+    inDetail ? handlePush({ id }) : navigation.push('AssignmentDetail', { id }),
+  );
 
   const handleSync = useEffectEvent(async (type: 'calendar' | 'reminder') => {
     const now = dayjs();
