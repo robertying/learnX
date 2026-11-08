@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { HomeworkGradeLevel } from 'thu-learn-lib';
+import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import { diffById, diffContent, isContentDiffEmpty } from 'data/contentDiff';
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Assignment } from 'data/types/state';

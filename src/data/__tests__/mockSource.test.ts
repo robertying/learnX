@@ -1,4 +1,4 @@
-import { ContentType, FailReason } from 'thu-learn-lib';
+import { CourseType, FailReason } from '@robertying/thu-learn-lib';
 import {
   defaultMockNetworkConfig,
   MOCK_TIMEOUT_MS,
@@ -15,8 +15,6 @@ import {
   mockSemesters,
 } from 'data/mock';
 
-const courseIds = mockCourses.map(c => c.id);
-
 beforeEach(() => {
   setMockNetworkConfig({ ...defaultMockNetworkConfig, latency: 'none' });
 });
@@ -27,17 +25,96 @@ afterEach(() => {
 
 describe('mockSource', () => {
   it('answers with the mock data, minus the fields the app adds', async () => {
-    const notices = await mockSource.getAllContents(
-      courseIds,
-      ContentType.NOTIFICATION,
-    );
-    expect(Object.keys(notices).sort()).toEqual([...courseIds].sort());
-    const all = Object.values(notices).flat();
+    const all = (
+      await Promise.all(
+        [...new Set(mockNotices.map(n => n.courseId))].map(courseId =>
+          mockSource.getNotificationList(courseId),
+        ),
+      )
+    ).flat();
     expect(all.map(n => n.id).sort()).toEqual(
       mockNotices.map(n => n.id).sort(),
     );
     expect(all[0]).not.toHaveProperty('courseId');
     expect(all[0]).not.toHaveProperty('courseName');
+  });
+
+  it('names notice attachments, and fetches them only when asked', async () => {
+    const withAttachment = mockNotices.find(n => n.attachment)!;
+    const listed = (
+      await mockSource.getNotificationList(withAttachment.courseId)
+    ).find(n => n.id === withAttachment.id)!;
+    expect(listed.attachment).toBeUndefined();
+    expect(listed.attachmentName).toBe(withAttachment.attachment!.name);
+    await expect(mockSource.getNotificationAttachment(listed)).resolves.toEqual(
+      withAttachment.attachment,
+    );
+
+    const selected = (
+      await mockSource.getNotificationList(
+        withAttachment.courseId,
+        CourseType.STUDENT,
+        { attachments: n => n.id === withAttachment.id },
+      )
+    ).find(n => n.id === withAttachment.id)!;
+    expect(selected.attachment).toEqual(withAttachment.attachment);
+  });
+
+  it('leaves out assignment details unless asked', async () => {
+    const assignment = mockAssignments.find(a => a.description)!;
+    const listed = (await mockSource.getHomeworkList(assignment.courseId)).find(
+      a => a.id === assignment.id,
+    )!;
+    expect(listed).not.toHaveProperty('description');
+    await expect(mockSource.getHomeworkDetail(listed)).resolves.toMatchObject({
+      description: assignment.description,
+    });
+
+    const detailed = (
+      await mockSource.getHomeworkList(
+        assignment.courseId,
+        CourseType.STUDENT,
+        {
+          details: 'all',
+        },
+      )
+    ).find(a => a.id === assignment.id)!;
+    expect(detailed.description).toBe(assignment.description);
+  });
+
+  it('lists excellent homework without details', async () => {
+    const assignment = mockAssignments.find(a => a.excellentHomeworkList)!;
+    const listed = (
+      await mockSource.getHomeworkList(
+        assignment.courseId,
+        CourseType.STUDENT,
+        {
+          details: 'all',
+        },
+      )
+    ).find(a => a.id === assignment.id)!;
+    const [excellent] = listed.excellentHomeworkList!;
+    expect(excellent).not.toHaveProperty('submittedAttachment');
+    await expect(
+      mockSource.getExcellentHomeworkDetail(excellent),
+    ).resolves.toMatchObject({
+      submittedAttachment:
+        assignment.excellentHomeworkList![0].submittedAttachment,
+    });
+  });
+
+  it('fetches course times only when asked', async () => {
+    const [course] = await mockSource.getCourseList(mockCurrentSemester);
+    expect(course).not.toHaveProperty('timeAndLocation');
+    const [withTimes] = await mockSource.getCourseList(
+      mockCurrentSemester,
+      CourseType.STUDENT,
+      undefined,
+      { timeAndLocation: true },
+    );
+    expect(withTimes.timeAndLocation).toEqual(
+      mockCourses.find(c => c.id === withTimes.id)!.timeAndLocation,
+    );
   });
 
   it('returns a fresh copy for every response', async () => {

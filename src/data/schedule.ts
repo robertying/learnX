@@ -2,7 +2,7 @@ import { queryOptions, useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { coursesQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
-import { dataSource, loginWithFingerPrint } from 'data/source';
+import { dataSource } from 'data/source';
 import { useSettings } from 'data/settings';
 import { useUserData } from 'data/userData';
 import { createLimiter } from 'helpers/limiter';
@@ -43,8 +43,9 @@ export const semesterDatesQuery = queryOptions({
 
 /**
  * The registrar's calendar fails for some ranges, often for long ones and
- * now and then for no clear reason, and needs a session of its own. So it's
- * asked for one week at a time, one request at a time.
+ * now and then for no clear reason. So it's asked for one week at a time, one
+ * request at a time, and a failed week only affects that week. thu-learn-lib
+ * gets the registrar's ticket itself and retries a failed request once.
  */
 const calendarFetches = createLimiter(1);
 
@@ -53,7 +54,14 @@ const fetchCalendar = async (
   end: string,
   graduate: boolean,
 ): Promise<CalendarClass[]> => {
-  const events = await dataSource.getCalendar(start, end, graduate);
+  // A week is a single window, so a failure rejects rather than showing up
+  // in failedRanges; check anyway so a failed week never counts as empty.
+  const { events, failedRanges } = await dataSource.getCalendar(start, end, {
+    graduate,
+  });
+  if (failedRanges.length > 0) {
+    throw new Error(`Calendar unavailable for ${start}–${end}`);
+  }
   return events.map(({ courseName, location, date, startTime, endTime }) => ({
     courseName,
     location,
@@ -76,21 +84,13 @@ export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
     retry: (failures, err) => failures < 2 && !isNetworkError(err),
     retryDelay: attempt => Math.min(1000 * 2 ** attempt, 10 * 1000),
     queryFn: () =>
-      calendarFetches(async () => {
-        const start = dayjs(weekStart).format('YYYYMMDD');
-        const end = dayjs(weekStart).add(6, 'day').format('YYYYMMDD');
-        try {
-          return await fetchCalendar(start, end, graduate);
-        } catch (err) {
-          if (isNetworkError(err)) {
-            throw err;
-          }
-          // The registrar's ticket comes from a fresh login, as the calendar
-          // sync in Settings does.
-          await loginWithFingerPrint();
-          return await fetchCalendar(start, end, graduate);
-        }
-      }),
+      calendarFetches(() =>
+        fetchCalendar(
+          dayjs(weekStart).format('YYYYMMDD'),
+          dayjs(weekStart).add(6, 'day').format('YYYYMMDD'),
+          graduate,
+        ),
+      ),
   });
 
 export type ScheduleSource =

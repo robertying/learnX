@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { Learn2018Helper, addCSRFTokenToUrl } from 'thu-learn-lib';
+import { Learn2018Helper, addCSRFTokenToUrl } from '@robertying/thu-learn-lib';
 import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
@@ -17,6 +17,7 @@ import { isMockUser } from 'helpers/mock';
 export type DataSource = Pick<
   Learn2018Helper,
   | 'login'
+  | 'ensureSession'
   | 'logout'
   | 'getCSRFToken'
   | 'setLanguage'
@@ -25,9 +26,11 @@ export type DataSource = Pick<
   | 'getCurrentSemester'
   | 'getCourseList'
   | 'getNotificationList'
+  | 'getNotificationAttachment'
   | 'getHomeworkList'
+  | 'getHomeworkDetail'
+  | 'getExcellentHomeworkDetail'
   | 'getFileList'
-  | 'getAllContents'
   | 'getCalendar'
 >;
 

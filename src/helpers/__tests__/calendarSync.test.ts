@@ -120,7 +120,9 @@ describe('syncCourseSchedule', () => {
 
   it('fetches the range and saves the events', async () => {
     const events = [{ courseName: 'Calculus' }];
-    jest.mocked(dataSource.getCalendar).mockResolvedValue(events as never);
+    jest
+      .mocked(dataSource.getCalendar)
+      .mockResolvedValue({ events, failedRanges: [] } as never);
 
     await expect(syncCourseSchedule(start, end, true)).resolves.toEqual({
       text: t('courseScheduleSyncSucceeded'),
@@ -130,13 +132,34 @@ describe('syncCourseSchedule', () => {
     expect(dataSource.getCalendar).toHaveBeenCalledWith(
       '20260301',
       '20260328',
-      true,
+      { graduate: true },
     );
-    expect(saveCoursesToCalendar).toHaveBeenCalledWith(events, start, end);
+    expect(saveCoursesToCalendar).toHaveBeenCalledWith(events, start, end, []);
+  });
+
+  it('saves the weeks that came back and warns about the rest', async () => {
+    const events = [{ courseName: 'Calculus' }];
+    const failedRanges = [{ startDate: '20260315', endDate: '20260328' }];
+    jest
+      .mocked(dataSource.getCalendar)
+      .mockResolvedValue({ events, failedRanges } as never);
+
+    await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
+      text: t('courseScheduleSyncPartial'),
+      type: 'warning',
+    });
+    expect(saveCoursesToCalendar).toHaveBeenCalledWith(
+      events,
+      start,
+      end,
+      failedRanges,
+    );
   });
 
   it('warns when there are no courses', async () => {
-    jest.mocked(dataSource.getCalendar).mockResolvedValue([]);
+    jest
+      .mocked(dataSource.getCalendar)
+      .mockResolvedValue({ events: [], failedRanges: [] });
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
       text: t('courseScheduleSyncNoCourse'),
@@ -146,7 +169,9 @@ describe('syncCourseSchedule', () => {
   });
 
   it('turns failures into toasts', async () => {
-    jest.mocked(dataSource.getCalendar).mockResolvedValue([{}] as never);
+    jest
+      .mocked(dataSource.getCalendar)
+      .mockResolvedValue({ events: [{}], failedRanges: [] } as never);
     jest
       .mocked(saveCoursesToCalendar)
       .mockImplementation(fail('Missing calendar permission'));

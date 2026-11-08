@@ -3,7 +3,7 @@
 // store, so it can be tested without native modules.
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
-import { CalendarEvent } from 'thu-learn-lib';
+import { CalendarEvent } from '@robertying/thu-learn-lib';
 import { Assignment, Course, SettingsState } from 'data/types/state';
 import { removeTags } from './text';
 import { ICSEvent } from './ics';

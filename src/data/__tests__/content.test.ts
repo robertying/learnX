@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import type { HomeworkListOptions } from '@robertying/thu-learn-lib';
 import {
   assignmentsQuery,
   filesQuery,
@@ -116,6 +117,103 @@ describe('assignments', () => {
     const refreshed = queryClient.getQueryData(key)!;
     expect(ids(refreshed).sort()).toEqual(ids(assignments).sort());
     expect(ids(refreshed)).toEqual(ids(sortAssignments(refreshed)));
+  });
+});
+
+describe('per-item details', () => {
+  const refetch = <T>(query: { queryKey: readonly unknown[] }) =>
+    queryClient.fetchQuery({ ...(query as any), staleTime: 0 }) as Promise<T>;
+
+  it('fetches assignment details only for new or changed assignments', async () => {
+    const query = assignmentsQuery(semesterId);
+    const first = await queryClient.fetchQuery(query);
+    const described = mockAssignments.filter(
+      a => courseIds.has(a.courseId) && a.description,
+    );
+    for (const a of described) {
+      expect(first.find(f => f.id === a.id)!.description).toBe(a.description);
+    }
+
+    const detail = jest.spyOn(mockSource, 'getHomeworkDetail');
+    const list = jest.spyOn(mockSource, 'getHomeworkList');
+    // One assignment changed on the server since the last fetch.
+    const changed = described[0];
+    queryClient.setQueryData(query.queryKey, old =>
+      old!.map(a =>
+        a.id === changed.id
+          ? { ...a, submitted: !a.submitted, description: 'stale' }
+          : a,
+      ),
+    );
+
+    const second = await refetch<typeof first>(query);
+    // Each course's selector, asked about that course's assignments.
+    const calls = list.mock.calls as unknown as [
+      string,
+      unknown,
+      HomeworkListOptions?,
+    ][];
+    const selected = calls.flatMap(([courseId, , options]) => {
+      const select = options?.details;
+      return mockAssignments.filter(
+        a =>
+          a.courseId === courseId &&
+          typeof select === 'function' &&
+          select(a as never),
+      );
+    });
+    expect(selected.map(a => a.id)).toEqual([changed.id]);
+    expect(detail).not.toHaveBeenCalled();
+    // The unchanged ones keep their cached detail; the changed one is new.
+    for (const a of described) {
+      expect(second.find(f => f.id === a.id)!.description).toBe(a.description);
+    }
+  });
+
+  it('fetches notice attachments only for new or changed notices', async () => {
+    const query = noticesQuery(semesterId);
+    const withAttachment = mockNotices.filter(
+      n => courseIds.has(n.courseId) && n.attachment,
+    );
+    expect(withAttachment.length).toBeGreaterThan(0);
+    const first = await queryClient.fetchQuery(query);
+    for (const n of withAttachment) {
+      expect(first.find(f => f.id === n.id)!.attachment).toEqual(n.attachment);
+    }
+
+    const list = jest.spyOn(mockSource, 'getNotificationList');
+    const second = await refetch<typeof first>(query);
+    const selected = list.mock.calls.flatMap(([courseId, , options]) => {
+      const select = options?.attachments;
+      return mockNotices.filter(
+        n =>
+          n.courseId === courseId &&
+          typeof select === 'function' &&
+          select({ ...n, attachmentName: n.attachment?.name } as never),
+      );
+    });
+    expect(selected).toEqual([]);
+    for (const n of withAttachment) {
+      expect(second.find(f => f.id === n.id)!.attachment).toEqual(n.attachment);
+    }
+  });
+
+  it("refreshing a course fetches every item's details again", async () => {
+    const query = assignmentsQuery(semesterId);
+    const assignments = await queryClient.fetchQuery(query);
+    const courseId = assignments[0].courseId;
+    queryClient.setQueryData(query.queryKey, old =>
+      old!.map(a => ({ ...a, description: 'stale' })),
+    );
+
+    await refreshCourseAssignments(semesterId, courseId);
+
+    const refreshed = queryClient.getQueryData(query.queryKey)!;
+    for (const a of refreshed.filter(r => r.courseId === courseId)) {
+      expect(a.description).toBe(
+        mockAssignments.find(m => m.id === a.id)!.description,
+      );
+    }
   });
 });
 

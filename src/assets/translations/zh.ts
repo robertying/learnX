@@ -55,6 +55,8 @@ const zh: typeof en = {
   overwriteAttachment: '覆盖已上传的附件',
   pickAttachment: '选择附件',
   courseScheduleSyncSucceeded: '课表同步成功',
+  courseScheduleSyncPartial:
+    '课表已部分同步：部分周的课表获取失败，已保留原有日程，请稍后重试',
   courseScheduleSyncNoCalendarPermission:
     '课表同步失败：请给予 App 日历的完全访问权限；如果您已经授予该权限，请尝试重启 App',
   courseScheduleSyncNoReminderPermission:

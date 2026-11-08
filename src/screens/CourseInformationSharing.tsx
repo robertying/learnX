@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Alert, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CourseType, Language } from 'thu-learn-lib';
+import { CourseType, Language } from '@robertying/thu-learn-lib';
 import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { dataSource } from 'data/source';

@@ -4,10 +4,11 @@ import Chip from 'components/Chip';
 import dayjs from 'dayjs';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {
+  ExcellentHomework,
   HomeworkCompletionType,
   HomeworkSubmissionType,
   RemoteFile,
-} from 'thu-learn-lib';
+} from '@robertying/thu-learn-lib';
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
@@ -26,7 +27,7 @@ import {
 } from 'helpers/i18n';
 import { deadlineText } from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
-import { useAssignment } from 'data/content';
+import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -54,6 +55,42 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <AssignmentDetailContent assignment={assignment} navigation={navigation} />
+  );
+};
+
+/** An excellent homework, its attachment fetched when it's shown. */
+const ExcellentHomeworkRow: React.FC<{
+  homework: ExcellentHomework;
+  onFileOpen: (file?: RemoteFile) => void;
+}> = ({ homework, onFileOpen }) => {
+  const theme = useTheme();
+  const { gradeAttachment, submittedAttachment, author } =
+    useExcellentHomeworkDetail(homework);
+  const homeworkAttachment = gradeAttachment || submittedAttachment;
+  const authorName = author.anonymous ? t('anonymous') : author.name;
+  return (
+    <>
+      <View style={[styles.section, styles.iconButton]}>
+        <MaterialCommunityIcons
+          style={styles.icon}
+          name="medal"
+          color={theme.colors.primary}
+          size={17}
+        />
+        <View style={Styles.flex1}>
+          {homeworkAttachment && (
+            <TextButton
+              style={[Styles.spacey1, styles.textPaddingRight]}
+              onPress={() => onFileOpen(homeworkAttachment)}
+            >
+              {homeworkAttachment.name}
+            </TextButton>
+          )}
+          <Caption>{t('excellentHomeworkBy', { name: authorName })}</Caption>
+        </View>
+      </View>
+      <Divider />
+    </>
   );
 };
 
@@ -337,41 +374,13 @@ const AssignmentDetailContent: React.FC<{
             <Divider />
           </>
         )}
-        {excellentHomeworkList &&
-          excellentHomeworkList.map(excellentHomework => {
-            const homeworkAttachment =
-              excellentHomework.gradeAttachment ||
-              excellentHomework.submittedAttachment;
-            const authorName = excellentHomework.author.anonymous
-              ? t('anonymous')
-              : excellentHomework.author.name;
-            return (
-              <>
-                <View style={[styles.section, styles.iconButton]}>
-                  <MaterialCommunityIcons
-                    style={styles.icon}
-                    name="medal"
-                    color={theme.colors.primary}
-                    size={17}
-                  />
-                  <View style={Styles.flex1}>
-                    {homeworkAttachment && (
-                      <TextButton
-                        style={[Styles.spacey1, styles.textPaddingRight]}
-                        onPress={() => handleFileOpen(homeworkAttachment)}
-                      >
-                        {homeworkAttachment.name}
-                      </TextButton>
-                    )}
-                    <Caption>
-                      {t('excellentHomeworkBy', { name: authorName })}
-                    </Caption>
-                  </View>
-                </View>
-                <Divider />
-              </>
-            );
-          })}
+        {excellentHomeworkList?.map(excellentHomework => (
+          <ExcellentHomeworkRow
+            key={excellentHomework.id}
+            homework={excellentHomework}
+            onFileOpen={handleFileOpen}
+          />
+        ))}
         <AutoHeightWebView
           source={{
             html,

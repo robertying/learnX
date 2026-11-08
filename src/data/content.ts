@@ -1,5 +1,12 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
-import { CourseType } from 'thu-learn-lib';
+import {
+  CourseType,
+  type ExcellentHomework,
+  type Homework,
+  type IHomework,
+  type IHomeworkDetail,
+  type Notification,
+} from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { queryClient, queryPersister } from 'data/queryClient';
 import { coursesQuery, getCourseNames } from 'data/queries';
@@ -12,9 +19,9 @@ import { createLimiter } from 'helpers/limiter';
 
 /**
  * Course lists fetched at once, across notices, assignments and files. A
- * course's assignments alone take a few requests plus two per assignment, so
- * a few courses keep the connections busy, and the server isn't hit with
- * every course of every list at the same moment.
+ * course's assignments take a few requests plus two per new or changed
+ * assignment, so a few courses keep the connections busy, and the server
+ * isn't hit with every course of every list at the same moment.
  */
 const courseFetches = createLimiter(4);
 
@@ -46,12 +53,17 @@ const courseIdsOf = async (semesterId: string) =>
  */
 const createContent = <T extends { id: string; courseId: string }>({
   name,
-  fetchCourse,
+  fetchCourse: fetchFromServer,
   sort,
   priority,
 }: {
   name: string;
-  fetchCourse: (courseId: string) => Promise<object[]>;
+  /**
+   * Fetches a course's items. `cached` holds what the list has for the course
+   * (possibly nothing), to skip the per-item requests for items that didn't
+   * change and fill those items in from it.
+   */
+  fetchCourse: (courseId: string, cached: T[]) => Promise<object[]>;
   sort: (items: T[]) => T[];
   /** Lower lists get their courses fetched first when several refresh. */
   priority: number;
@@ -70,6 +82,15 @@ const createContent = <T extends { id: string; courseId: string }>({
           return change ? { ...item, ...change } : item;
         });
 
+  /** Fetches a course's items, reusing what the semester list has cached. */
+  const fetchCourse = (semesterId: string, courseId: string) =>
+    fetchFromServer(
+      courseId,
+      (queryClient.getQueryData<T[]>([name, semesterId]) ?? []).filter(
+        item => item.courseId === courseId,
+      ),
+    );
+
   const query = (semesterId: string) =>
     queryOptions({
       queryKey: [name, semesterId] as const,
@@ -77,7 +98,7 @@ const createContent = <T extends { id: string; courseId: string }>({
         const courseIds = await courseIdsOf(semesterId);
         const results = await Promise.allSettled(
           courseIds.map(courseId =>
-            courseFetches(() => fetchCourse(courseId), priority),
+            courseFetches(() => fetchCourse(semesterId, courseId), priority),
           ),
         );
         const failure = results.find(r => r.status === 'rejected');
@@ -105,9 +126,15 @@ const createContent = <T extends { id: string; courseId: string }>({
       },
     });
 
-  /** Replaces one course's items in the semester list and saves it. */
+  /**
+   * Replaces one course's items in the semester list and saves it. Every item
+   * gets its per-item requests again, as the user asked for it (or it follows
+   * a submission), so details changed in place show up too.
+   */
   const refreshCourse = async (semesterId: string, courseId: string) => {
-    const items = withOverrides(tag<T>(courseId, await fetchCourse(courseId)));
+    const items = withOverrides(
+      tag<T>(courseId, await fetchFromServer(courseId, [])),
+    );
     const { queryKey } = query(semesterId);
     queryClient.setQueryData<T[]>(queryKey, old =>
       sort([...(old ?? []).filter(i => i.courseId !== courseId), ...items]),
@@ -199,10 +226,37 @@ const createContent = <T extends { id: string; courseId: string }>({
   };
 };
 
+/**
+ * A course's notices. The list only names a notice's attachment and fetching
+ * it takes a request per notice, so only new or changed notices get it; the
+ * others keep the one cached.
+ */
+const fetchNotices = async (courseId: string, cached: Notice[]) => {
+  const known = new Map(cached.map(notice => [notice.id, notice]));
+  const isUnchanged = (notice: Notification) => {
+    const old = known.get(notice.id);
+    return (
+      !!old &&
+      old.publishTime === notice.publishTime &&
+      old.attachment?.name === notice.attachmentName
+    );
+  };
+  const notices = await dataSource.getNotificationList(
+    courseId,
+    CourseType.STUDENT,
+    { attachments: notice => !isUnchanged(notice) },
+  );
+  return notices.map(notice =>
+    notice.attachmentName && !notice.attachment && isUnchanged(notice)
+      ? { ...notice, attachment: known.get(notice.id)!.attachment }
+      : notice,
+  );
+};
+
 const notices = createContent<Notice>({
   name: 'notices',
   priority: 1,
-  fetchCourse: courseId => dataSource.getNotificationList(courseId),
+  fetchCourse: fetchNotices,
   sort: byNewest(notice => notice.publishTime),
 });
 
@@ -218,10 +272,64 @@ export const useNotices = () => {
   return { ...result, notices: items };
 };
 
+/**
+ * What the assignment list says about an assignment; its detail (description,
+ * attachments, submission, answer) takes two more requests, so it's only
+ * fetched for an assignment that is new or whose list entry changed.
+ */
+const listFields = [
+  'title',
+  'deadline',
+  'lateSubmissionDeadline',
+  'submitted',
+  'submitTime',
+  'isLateSubmission',
+  'graded',
+  'grade',
+  'gradeLevel',
+  'gradeTime',
+  'graderName',
+  'gradeContent',
+] as const satisfies readonly (keyof Assignment & keyof Homework)[];
+
+/** The fields of an assignment that come from its detail. */
+const detailFields = [
+  'description',
+  'attachment',
+  'answerContent',
+  'answerAttachment',
+  'submittedContent',
+  'submittedAttachment',
+  'gradeAttachment',
+] as const satisfies readonly (keyof Assignment & keyof IHomeworkDetail)[];
+
+const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
+  const known = new Map(cached.map(assignment => [assignment.id, assignment]));
+  const isUnchanged = (homework: IHomework) => {
+    const old = known.get(homework.id);
+    return !!old && listFields.every(field => old[field] === homework[field]);
+  };
+  const homework = await dataSource.getHomeworkList(
+    courseId,
+    CourseType.STUDENT,
+    { details: item => !isUnchanged(item) },
+  );
+  return homework.map(item => {
+    if (!isUnchanged(item)) {
+      return item;
+    }
+    const old = known.get(item.id)!;
+    const detail = Object.fromEntries(
+      detailFields.map(field => [field, old[field]]),
+    );
+    return { ...item, ...detail };
+  });
+};
+
 const assignments = createContent<Assignment>({
   name: 'assignments',
   priority: 0,
-  fetchCourse: courseId => dataSource.getHomeworkList(courseId),
+  fetchCourse: fetchAssignments,
   sort: sortAssignments,
 });
 
@@ -251,6 +359,23 @@ export const markFileSeen = (id: string) =>
 export const useFiles = () => {
   const { items, ...result } = files.useList();
   return { ...result, files: items };
+};
+
+/**
+ * An excellent homework's detail (its attachments). The assignment list leaves
+ * it out, as it takes two requests each, so it's fetched when it's shown.
+ */
+export const useExcellentHomeworkDetail = (homework: ExcellentHomework) => {
+  const loggedIn = useLoggedIn();
+  const listed = !!(homework.gradeAttachment || homework.submittedAttachment);
+  const { data } = useQuery({
+    queryKey: ['excellentHomework', homework.id] as const,
+    queryFn: () => dataSource.getExcellentHomeworkDetail(homework),
+    // An excellent homework doesn't change once it's picked.
+    staleTime: Infinity,
+    enabled: loggedIn && !listed,
+  });
+  return listed ? homework : { ...homework, ...data };
 };
 
 /** Fetching the lists a course at a time, as background sync does. */

@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
-import { CalendarEvent } from 'thu-learn-lib';
+import { CalendarEvent, CalendarRange } from '@robertying/thu-learn-lib';
 import {
   clearEventIds,
   getSettings,
@@ -152,10 +152,15 @@ export const getCourseCalendarId = () =>
     entityType: Calendar.EntityTypes.EVENT,
   });
 
+/**
+ * Replaces the synced classes in the range with `events`. Classes in
+ * `failedRanges` (weeks the registrar didn't answer for) stay as they were.
+ */
 export const saveCoursesToCalendar = async (
   events: CalendarEvent[],
   startDate: Dayjs,
   endDate: Dayjs,
+  failedRanges: CalendarRange[] = [],
 ) => {
   const settings = getSettings();
 
@@ -173,7 +178,17 @@ export const saveCoursesToCalendar = async (
     endDate.toDate(),
   );
 
-  await Promise.all(oldEvents.map(async e => await e.delete()));
+  const isInFailedRange = (date: string | Date) => {
+    const day = dayjs(date).format('YYYYMMDD');
+    return failedRanges.some(
+      range => range.startDate <= day && day <= range.endDate,
+    );
+  };
+  await Promise.all(
+    oldEvents
+      .filter(e => !isInFailedRange(e.startDate))
+      .map(async e => await e.delete()),
+  );
 
   await Promise.all(
     events.map(
