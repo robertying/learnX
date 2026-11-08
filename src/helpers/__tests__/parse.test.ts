@@ -1,6 +1,7 @@
 import { ApiError, FailReason } from '@robertying/thu-learn-lib';
 import {
   getSemesterTextFromId,
+  isBadCredential,
   isNetworkError,
   serializeError,
 } from 'helpers/parse';
@@ -95,5 +96,15 @@ describe('isNetworkError', () => {
     ).toBe(false);
     expect(isNetworkError({ reason: 'x' })).toBe(false);
     expect(isNetworkError(null)).toBe(false);
+  });
+});
+
+describe('isBadCredential', () => {
+  it('spots a wrong password only', () => {
+    expect(isBadCredential({ reason: FailReason.BAD_CREDENTIAL })).toBe(true);
+    expect(isBadCredential({ reason: FailReason.ERROR_FETCH_FROM_ID })).toBe(
+      false,
+    );
+    expect(isBadCredential(null)).toBe(false);
   });
 });
