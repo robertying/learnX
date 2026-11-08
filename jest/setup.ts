@@ -151,6 +151,7 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   monospacedDigit: jest.fn(),
   refreshable: jest.fn(),
   scrollContentBackground: jest.fn(),
+  textSelection: jest.fn(),
   tint: jest.fn(),
   toggleStyle: jest.fn(),
 }));

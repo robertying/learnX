@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import Chip from 'components/Chip';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -12,8 +11,6 @@ import { canPreviewInline, needWhiteBackground } from 'helpers/filePreview';
 import { t } from 'helpers/i18n';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
-import IconButton from 'components/IconButton';
-import ScrollView from 'components/ScrollView';
 import { FileDetailParamList } from './types';
 import { markFileSeen, useFile } from 'data/content';
 import { DownloadableFile, File } from 'data/types/state';
@@ -21,8 +18,14 @@ import NotFound from 'components/NotFound';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
 import useHeaderTitle from 'hooks/useHeaderTitle';
-import { Caption, Text, Title } from 'components/Text';
-import Divider from 'components/Divider';
+import { Text } from 'components/Text';
+import {
+  Form,
+  FormButton,
+  FormParagraph,
+  FormSection,
+  FormText,
+} from 'components/Form';
 import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
@@ -140,121 +143,77 @@ const FileDetailContent: React.FC<{
           />
         )
       ) : (
-        <>
-          <ScrollView
-            style={[Styles.flex1, { backgroundColor: theme.colors.surface }]}
-          >
-            <View style={styles.section}>
-              <View style={Styles.flexRowCenter}>
-                {file.category?.title && (
-                  <Chip style={styles.categoryChip}>
-                    {file.category?.title}
-                  </Chip>
-                )}
-              </View>
-              <Title>{file.title}</Title>
-              <View style={Styles.flexRowCenter}>
-                <Caption>{file.courseTeacherName}</Caption>
-                <Caption>
-                  {dayjs(file.uploadTime).format(t('dateTimeFormat'))}
-                </Caption>
-              </View>
-            </View>
-            <Divider />
-            <View style={[styles.section, styles.iconButton]}>
-              <Icon
-                style={styles.icon}
-                name="file"
-                color={theme.colors.primary}
-                size={17}
-              />
-              <Text style={styles.textPaddingRight}>
-                {file.fileType?.toUpperCase?.() || t('unknownFileType')}
-              </Text>
-            </View>
-            <Divider />
-            <View style={[styles.section, styles.iconButton]}>
-              <Icon
-                style={styles.icon}
-                name="file-download"
-                color={theme.colors.primary}
-                size={17}
-              />
-              <Text style={styles.textPaddingRight}>
-                {file.size ?? t('noFileSize')}
-              </Text>
-            </View>
-            <Divider />
-            <Text style={styles.description}>
-              {file.description || t('noFileDescription')}
-            </Text>
-          </ScrollView>
-          <View
-            style={[styles.actions, { backgroundColor: theme.colors.surface }]}
-          >
-            <View style={styles.colCenter}>
-              <IconButton icon="share" size={48} onPress={share} />
-              <Text>{t('share')}</Text>
-            </View>
-            {DeviceInfo.isMac() && (
-              <View style={styles.colCenter}>
-                <IconButton
-                  icon="download"
-                  size={48}
-                  onPress={copyToDownloads}
-                />
-                <Text>{t('download')}</Text>
-              </View>
-            )}
-            {Platform.OS === 'android' && (
-              <View style={styles.colCenter}>
-                <IconButton icon="open-in-new" size={48} onPress={open} />
-                <Text>{t('open')}</Text>
-              </View>
-            )}
-          </View>
-        </>
+        <FileInfo
+          file={file}
+          onShare={share}
+          onCopyToDownloads={copyToDownloads}
+          onOpen={open}
+        />
       )}
     </SafeArea>
   );
 };
+
+/** The file's details, and what to do with it, when it isn't previewed. */
+const FileInfo: React.FC<{
+  file: DownloadableFile & Partial<File>;
+  onShare: () => void;
+  onCopyToDownloads: () => void;
+  onOpen: () => void;
+}> = ({ file, onShare, onCopyToDownloads, onOpen }) => (
+  <Form testID="file-info">
+    <FormSection>
+      <FormParagraph text={file.title} headline />
+      {file.category?.title ? (
+        <FormText title={t('fileCategory')} detail={file.category.title} />
+      ) : null}
+      <FormText
+        title={t('fileType')}
+        detail={file.fileType?.toUpperCase?.() || t('unknownFileType')}
+      />
+      <FormText title={t('fileSize')} detail={file.size ?? t('noFileSize')} />
+      {file.courseTeacherName ? (
+        <FormText title={t('fileTeacher')} detail={file.courseTeacherName} />
+      ) : null}
+      {file.uploadTime ? (
+        <FormText
+          title={t('fileUploadTime')}
+          detail={dayjs(file.uploadTime).format(t('dateTimeFormat'))}
+        />
+      ) : null}
+    </FormSection>
+    <FormSection title={t('fileDescription')}>
+      <FormParagraph text={file.description || t('noFileDescription')} />
+    </FormSection>
+    <FormSection>
+      <FormButton
+        title={t('share')}
+        icon={{ ios: 'square.and.arrow.up', android: 'share-variant' }}
+        onPress={onShare}
+      />
+      {DeviceInfo.isMac() ? (
+        <FormButton
+          title={t('download')}
+          icon={{ ios: 'arrow.down.circle', android: 'download' }}
+          onPress={onCopyToDownloads}
+        />
+      ) : null}
+      {Platform.OS === 'android' ? (
+        <FormButton
+          title={t('open')}
+          icon={{ ios: 'arrow.up.forward.app', android: 'open-in-new' }}
+          onPress={onOpen}
+        />
+      ) : null}
+    </FormSection>
+  </Form>
+);
 
 const styles = StyleSheet.create({
   centered: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingTop: 8,
-    paddingBottom: Platform.OS === 'ios' && !DeviceInfo.isMac() ? 96 : 32,
-  },
-  colCenter: {
-    alignItems: 'center',
-  },
-  section: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  textPaddingRight: {
-    paddingRight: 16,
-  },
-  icon: {
-    marginRight: 8,
-  },
-  iconButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  description: {
-    padding: 16,
-    fontSize: 16,
-  },
-  categoryChip: {
-    marginBottom: 8,
   },
 });
 

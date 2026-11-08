@@ -29,6 +29,7 @@ import {
   listRowBackground,
   refreshable,
   scrollContentBackground,
+  textSelection,
   toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -40,6 +41,7 @@ import {
   type FormIcon,
   type FormLinkProps,
   type FormNumberFieldProps,
+  type FormParagraphProps,
   type FormProfileProps,
   type FormProps,
   type FormSectionProps,
@@ -88,6 +90,13 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
           : groupedBackground.light,
       },
     });
+    // The default header again for a screen that shows something else after
+    // its Form (file detail's preview).
+    return () =>
+      navigation?.setOptions({
+        headerShadowVisible: undefined,
+        headerStyle: undefined,
+      });
   }, [navigation, theme.dark]);
 
   return (
@@ -284,8 +293,27 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
   </LabeledContent>
 );
 
-/** The account at the top of Settings, as in the Settings app. */
+const paragraphModifiers = [primaryText, textSelection(true)];
+const headlineModifiers = [
+  font({ textStyle: 'headline' }),
+  ...paragraphModifiers,
+];
 
+/** Text over several lines, filling the row. */
+export const FormParagraph: React.FC<FormParagraphProps> = ({
+  text,
+  headline,
+  testID,
+}) => (
+  <Text
+    modifiers={headline ? headlineModifiers : paragraphModifiers}
+    testID={testID}
+  >
+    {text}
+  </Text>
+);
+
+/** The account at the top of Settings, as in the Settings app. */
 export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   const theme = useTheme();
   // Smaller on the Mac, as the account row in System Settings.

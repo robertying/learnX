@@ -42,6 +42,7 @@ import {
   type FormIcon,
   type FormLinkProps,
   type FormNumberFieldProps,
+  type FormParagraphProps,
   type FormProfileProps,
   type FormProps,
   type FormRowPosition,
@@ -340,6 +341,32 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
         />
       }
     />
+  );
+};
+
+/** Text over several lines, filling the row. */
+export const FormParagraph: React.FC<FormParagraphProps> = ({
+  text,
+  headline,
+  testID,
+  position,
+}) => {
+  const colors = useMaterialColors();
+  return (
+    <ListItem
+      colors={{ containerColor: colors.surfaceContainer }}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      <ListItem.HeadlineContent>
+        <Text style={{ typography: headline ? 'titleMedium' : 'bodyLarge' }}>
+          {text}
+        </Text>
+      </ListItem.HeadlineContent>
+    </ListItem>
   );
 };
 
