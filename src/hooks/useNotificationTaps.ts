@@ -23,17 +23,17 @@ const useNotificationTaps = () => {
       case 'notice':
         return navigation.navigate('MainTab', {
           screen: 'NoticeStack',
-          params: { screen: 'Notices' },
+          params: { screen: 'Notices', pop: true },
         });
       case 'assignment':
         return navigation.navigate('MainTab', {
           screen: 'AssignmentStack',
-          params: { screen: 'Assignments' },
+          params: { screen: 'Assignments', pop: true },
         });
       case 'file':
         return navigation.navigate('MainTab', {
           screen: 'FileStack',
-          params: { screen: 'Files' },
+          params: { screen: 'Files', pop: true },
         });
     }
   });
