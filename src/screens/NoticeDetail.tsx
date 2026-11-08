@@ -13,7 +13,7 @@ import { getWebViewTemplate } from 'helpers/html';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import { stripExtension, getExtension } from 'helpers/fs';
 import { Notice } from 'data/types/state';
-import { useNotice } from 'data/content';
+import { markNoticeRead, useNotice } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import { Caption, Title } from 'components/Text';
@@ -72,9 +72,12 @@ const NoticeDetailContent: React.FC<{
     }
   };
 
+  // Opening the notice's page marks it read on the server; the cached list
+  // shows it right away instead of after the next refresh.
   useEffect(() => {
     fetch(url).catch(() => {});
-  }, [url]);
+    markNoticeRead(id);
+  }, [url, id]);
 
   return (
     <SafeArea testID="notice-detail" collapsable={false}>

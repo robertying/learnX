@@ -6,7 +6,7 @@ import { coursesQuery, getCourseNames } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import { Assignment, File, Notice } from 'data/types/state';
-import { useCurrentSemester } from 'data/userData';
+import { getUserData, useCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 
 /** Adds the course's id and names to each item the server lists for it. */
@@ -69,6 +69,26 @@ const createContent = <T extends { id: string; courseId: string }>({
     await queryPersister.persistQueryByKey(queryKey, queryClient);
   };
 
+  /**
+   * Changes one cached item of the semester being shown and saves the list,
+   * e.g. to mark it read before the next refresh says so.
+   */
+  const updateItem = (id: string, change: Partial<T>) => {
+    const semesterId = getUserData().currentSemester;
+    if (!semesterId) {
+      return;
+    }
+    const { queryKey } = query(semesterId);
+    const items = queryClient.getQueryData<T[]>(queryKey);
+    if (!items?.some(item => item.id === id)) {
+      return;
+    }
+    queryClient.setQueryData<T[]>(queryKey, old =>
+      old?.map(item => (item.id === id ? { ...item, ...change } : item)),
+    );
+    queryPersister.persistQueryByKey(queryKey, queryClient).catch(() => {});
+  };
+
   const empty: T[] = [];
 
   /** The items of the semester being shown. */
@@ -92,7 +112,14 @@ const createContent = <T extends { id: string; courseId: string }>({
     });
   };
 
-  return { query, refreshCourse, useList, useItem, useRefreshCourse };
+  return {
+    query,
+    refreshCourse,
+    updateItem,
+    useList,
+    useItem,
+    useRefreshCourse,
+  };
 };
 
 const notices = createContent<Notice>({
@@ -106,6 +133,9 @@ export const noticesQuery = notices.query;
 export const refreshCourseNotices = notices.refreshCourse;
 export const useNotice = notices.useItem;
 export const useRefreshCourseNotices = notices.useRefreshCourse;
+/** Opening a notice marks it read on the server; the list shows it now. */
+export const markNoticeRead = (id: string) =>
+  notices.updateItem(id, { hasRead: true });
 export const useNotices = () => {
   const { items, ...result } = notices.useList();
   return { ...result, notices: items };
@@ -138,6 +168,9 @@ export const filesQuery = files.query;
 export const refreshCourseFiles = files.refreshCourse;
 export const useFile = files.useItem;
 export const useRefreshCourseFiles = files.useRefreshCourse;
+/** Downloading a file marks it seen on the server; the list shows it now. */
+export const markFileSeen = (id: string) =>
+  files.updateItem(id, { isNew: false });
 export const useFiles = () => {
   const { items, ...result } = files.useList();
   return { ...result, files: items };

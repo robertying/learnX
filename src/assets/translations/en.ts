@@ -197,6 +197,7 @@ export default {
   syncStatusReconnecting: 'Reconnecting...',
   syncStatusUpdated: 'updated {time}',
   syncStatusLogInAgain: 'Log In Again',
+  refreshFailed: 'Failed to refresh. Showing saved data.',
   archive: 'Archive',
   restore: 'Restore',
   reorder: 'Reorder',

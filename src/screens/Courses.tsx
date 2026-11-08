@@ -59,11 +59,8 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const hidden = coursesWithCounts.filter(i => hiddenIds.includes(i.id));
 
   const loggedIn = useLoggedIn();
-  const handleRefresh = () => {
-    if (loggedIn && currentSemesterId) {
-      refetch();
-    }
-  };
+  const handleRefresh = () =>
+    loggedIn && currentSemesterId ? refetch() : undefined;
 
   const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 

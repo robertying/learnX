@@ -48,11 +48,8 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     hidden: hiddenCourseIds,
   });
 
-  const handleRefresh = () => {
-    if (loggedIn) {
-      refetch({ cancelRefetch: false });
-    }
-  };
+  const handleRefresh = () =>
+    loggedIn ? refetch({ cancelRefetch: false }) : undefined;
 
   const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 

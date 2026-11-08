@@ -7,6 +7,16 @@ import { toast } from 'components/Toast';
 import { getCredentials } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
+import { queryClient } from 'data/queryClient';
+
+/**
+ * Refetches the lists that are mounted and older than their stale time,
+ * joining a fetch already under way rather than restarting it.
+ */
+const refreshOpenLists = () =>
+  queryClient
+    .refetchQueries({ type: 'active', stale: true }, { cancelRefetch: false })
+    .catch(() => {});
 
 const hasSavedLogin = () => {
   const credentials = getCredentials();
@@ -32,7 +42,8 @@ const canLogIn = () => {
  * Logs in again with the saved credentials: at launch, when the app comes
  * back after at least 10 minutes in the background, and when it comes back
  * without a session. While the server can't be reached, it also retries on
- * its own, less and less often, as long as the app is open.
+ * its own, less and less often, as long as the app is open. Coming back with
+ * a session refetches the open lists that are out of date.
  */
 const useReLogin = () => {
   const appState = useRef(AppState.currentState);
@@ -44,14 +55,22 @@ const useReLogin = () => {
   const loggingIn = useAuthStore(state => state.loggingIn);
   const reloginRequested = useAuthStore(state => state.reloginRequested);
 
-  const handleReLogin = useEffectEvent(() => {
+  const handleReLogin = useEffectEvent(async () => {
     if (!canLogIn()) {
       return;
     }
+    const auth = getAuth();
     if (dayjs().diff(lastActiveTime.current, 'minute') >= 10) {
-      login({ reset: true });
       toast(t('loggingIn'), 'none', 1 * 1000);
-    } else if (!getAuth().loggedIn && getAuth().failure) {
+      await login({ reset: true });
+      // The lists only refresh by themselves when the session starts; one
+      // that was already open would keep showing what it had.
+      if (getAuth().loggedIn) {
+        refreshOpenLists();
+      }
+    } else if (auth.loggedIn) {
+      refreshOpenLists();
+    } else if (auth.failure) {
       // Back from a short break without a session: try again quietly.
       login({ reset: true });
     }
