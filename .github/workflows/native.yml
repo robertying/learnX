@@ -166,6 +166,7 @@ jobs:
 
       # No signing certificates on CI, so this only proves the code compiles and
       # links. Build signed (as AGENTS.md says) when running the app.
+      # Explicitly built modules bypass the CC setting, and with it ccache.
       - name: Build
         run: |
           mkdir -p build
@@ -177,12 +178,15 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
+            CLANG_ENABLE_EXPLICIT_MODULES=NO \
             > build/xcodebuild.log 2>&1 || {
             grep -E 'error:' build/xcodebuild.log | sort -u | head -50
             tail -n 80 build/xcodebuild.log
             exit 1
           }
           tail -n 5 build/xcodebuild.log
+          # One compile command, to see whether it went through ccache
+          grep -m1 -A3 '^CompileC ' build/xcodebuild.log | cut -c1-400
 
       - name: Show ccache stats
         if: always()
