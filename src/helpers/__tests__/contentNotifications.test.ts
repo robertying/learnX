@@ -209,6 +209,7 @@ describe('groupContentItems', () => {
         title: 'Calculus · New files',
         body: 'File f1\nFile f2',
         target: { type: 'file' },
+        ids: ['f1', 'f2'],
         keys: ['file:f1', 'file:f2'],
       },
     ]);

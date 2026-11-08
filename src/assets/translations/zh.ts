@@ -250,6 +250,8 @@ const zh: typeof en = {
   deadlineReminderOffset: '提前提醒（分钟）',
   notificationPermissionDenied: '系统设置中已关闭 learnX 的通知。',
   configureNotifications: '通知权限设置',
+  notificationArchiveAll: '全部归档',
+  notificationRemindLater: '稍后提醒',
   simulateNewContent: '模拟新内容',
   previewDeadlineReminder: '预览截止提醒',
   sendTestNotification: '发送测试通知',

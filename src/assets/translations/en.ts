@@ -261,6 +261,8 @@ export default {
   notificationPermissionDenied:
     'Notifications for learnX are turned off in system settings.',
   configureNotifications: 'Notification Permission Settings',
+  notificationArchiveAll: 'Archive All',
+  notificationRemindLater: 'Remind Me Later',
   simulateNewContent: 'Simulate New Content',
   previewDeadlineReminder: 'Preview a Deadline Reminder',
   sendTestNotification: 'Send a Test Notification',
