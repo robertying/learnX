@@ -4,10 +4,38 @@ name: Build
 # change shows up in CI, not on a Mac later. No JS bundle, no signing, no
 # uploads. Not a required check.
 #
-# Manual only for now: paused until the build caches are tuned. The plan is
-# Android on PRs that touch native paths, and iOS/Mac on main or with a label.
+# When each job runs:
+# - Android (~6 min): PRs that touch native paths, main, and by hand.
+# - iOS (~17 min warm): main when native paths changed, and by hand. Only iOS
+#   keeps Xcode's compilation cache; a second Apple cache doesn't fit in the
+#   repo's 10 GB cache limit.
+# - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
+#
+# Paused: only the manual trigger is on. To turn the rest on, uncomment the
+# pull_request and push triggers below.
 on:
   workflow_dispatch:
+    inputs:
+      mac:
+        description: Build Mac
+        type: boolean
+        default: false
+  # pull_request:
+  #   paths: &native-paths
+  #     - android/**
+  #     - ios/**
+  #     - modules/**
+  #     - patches/**
+  #     - package.json
+  #     - pnpm-lock.yaml
+  #     - pnpm-workspace.yaml
+  #     - app.json
+  #     - Gemfile
+  #     - Gemfile.lock
+  #     - .github/workflows/build.yml
+  # push:
+  #   branches: [main]
+  #   paths: *native-paths
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
@@ -82,18 +110,20 @@ jobs:
         if: always()
         run: ccache --show-stats || true
 
-  ios:
+  apple:
     name: ${{ matrix.name }}
+    # iOS never runs on PRs; Mac only when asked for by hand.
+    if: github.event_name != 'pull_request'
     runs-on: macos-26
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: iOS
-            destination: generic/platform=iOS Simulator
-          - name: Mac
-            destination: generic/platform=macOS,variant=Mac Catalyst
+        name: ${{ fromJSON(inputs.mac && '["iOS","Mac"]' || '["iOS"]') }}
+    env:
+      DESTINATION: ${{ matrix.name == 'Mac' && 'generic/platform=macOS,variant=Mac Catalyst' || 'generic/platform=iOS Simulator' }}
+      # Only iOS keeps a compilation cache (see the top of this file).
+      CACHE_CAS: ${{ matrix.name == 'iOS' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -148,6 +178,7 @@ jobs:
       # Xcode's own compilation cache (Swift and C-family). ccache doesn't work
       # here: Xcode 26 never calls the CC wrapper React Native sets up.
       - name: Restore compilation cache
+        if: env.CACHE_CAS == 'true'
         uses: actions/cache/restore@v6
         with:
           path: build/DerivedData/CompilationCache.noindex
@@ -163,7 +194,7 @@ jobs:
             -workspace ios/learnX.xcworkspace \
             -scheme learnX \
             -configuration Debug \
-            -destination '${{ matrix.destination }}' \
+            -destination "$DESTINATION" \
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
@@ -177,7 +208,7 @@ jobs:
           du -sh build/DerivedData/CompilationCache.noindex || true
 
       - name: Save compilation cache
-        if: always() && env.SAVE_CACHE == 'true'
+        if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'
         uses: actions/cache/save@v6
         with:
           path: build/DerivedData/CompilationCache.noindex
