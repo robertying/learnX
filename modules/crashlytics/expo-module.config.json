@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["CrashlyticsModule"]
+  },
+  "android": {
+    "modules": ["io.robertying.learnx.crashlytics.CrashlyticsModule"]
+  }
+}

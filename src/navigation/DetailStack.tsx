@@ -6,6 +6,7 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
+import { trackScreen } from 'helpers/crashReporting';
 import NoticeDetail from 'screens/NoticeDetail';
 import { DetailStackParams, ExtraParams } from 'screens/types';
 import AssignmentDetail from 'screens/AssignmentDetail';
@@ -91,7 +92,11 @@ const DetailContainer: React.FC<{
 
   return (
     <NavigationIndependentTree>
-      <NavigationContainer ref={navigationContainerRef} theme={theme}>
+      <NavigationContainer
+        ref={navigationContainerRef}
+        theme={theme}
+        onStateChange={trackScreen}
+      >
         <DetailStack />
       </NavigationContainer>
     </NavigationIndependentTree>

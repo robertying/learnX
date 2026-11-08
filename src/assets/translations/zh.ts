@@ -222,6 +222,8 @@ const zh: typeof en = {
   info: '详情',
   preview: '预览',
   unknownFileType: '未知',
+  somethingWentWrong: '出错了',
+  reloadApp: '重新加载 learnX',
 };
 
 export default zh;
