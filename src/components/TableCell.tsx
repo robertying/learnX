@@ -1,7 +1,6 @@
 import { StyleSheet, View, ViewProps, TextInput } from 'react-native';
 import {
   Avatar,
-  Switch,
   Badge,
   ActivityIndicator,
   AvatarImageProps,
@@ -10,6 +9,7 @@ import Icon, {
   MaterialIconsIconName,
 } from '@react-native-vector-icons/material-icons';
 import Touchable from './Touchable';
+import Switch from 'components/Switch';
 import { Text } from 'components/Text';
 import { useTheme } from 'theme';
 
@@ -107,8 +107,9 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           <View>
             <Switch
               disabled={switchDisabled}
-              value={switchValue}
-              onValueChange={onSwitchValueChange}
+              value={!!switchValue}
+              accessibilityLabel={primaryText}
+              onValueChange={value => onSwitchValueChange?.(value)}
             />
           </View>
         ) : null}

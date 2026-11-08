@@ -8,7 +8,8 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import { Button, Switch, TextInput } from 'react-native-paper';
+import { Button, TextInput } from 'react-native-paper';
+import Switch from 'components/Switch';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
@@ -132,6 +133,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
           <Logo iosSize={120} style={styles.logo} />
           <View style={styles.switchContainer}>
             <Switch
+              accessibilityLabel={t('graduate')}
               style={Styles.spacex1}
               value={graduate}
               onValueChange={checked => {
