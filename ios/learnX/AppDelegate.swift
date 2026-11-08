@@ -1,6 +1,6 @@
 internal import Expo
 import FirebaseCore
-import LearnXMenus
+internal import LearnXMenus
 import RNShareMenu
 import React
 import ReactAppDependencyProvider
