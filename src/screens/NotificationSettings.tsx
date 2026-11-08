@@ -19,6 +19,7 @@ import {
   useNotices,
 } from 'data/content';
 import { queryClient } from 'data/queryClient';
+import { describeSyncRun, useSyncLogStore } from 'data/syncLog';
 import { getUserData } from 'data/userData';
 import { notifyContent, syncContent } from 'helpers/background';
 import { previewDeadlineReminder } from 'helpers/deadlineReminders';
@@ -95,19 +96,24 @@ const simulateNewContent = async () => {
       ?.filter(a => a.submitted || dayjs(a.deadline).isBefore(dayjs()))
       .map(a => (a.graded ? { ...a, graded: false } : a)),
   );
-  const result = await syncContent();
+  const result = await syncContent({ manual: true });
+  const run = useSyncLogStore.getState().runs.at(-1);
+  const summary = run ? describeSyncRun(run) : result.status;
   if (result.status !== 'synced') {
-    toast(result.status, 'error');
+    toast(summary, 'error');
     return;
   }
   const posted = await notifyContent(result.diff, { inForeground: true });
-  toast(String(posted.length), 'success');
+  toast(`${posted.length} posted, ${summary}`, 'success');
 };
 
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
   const { permission, request } = useNotificationPermission();
   const { notices } = useNotices();
+  const lastBackgroundSync = useSyncLogStore(state =>
+    state.runs.findLast(run => !run.manual),
+  );
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setSetting('notifications', { ...notifications, [key]: value });
@@ -183,7 +189,13 @@ const NotificationSettings: React.FC<Props> = () => {
             />
           )}
         </FormSection>
-        <FormSection>
+        <FormSection
+          footer={
+            __DEV__ && lastBackgroundSync
+              ? `Last background sync ${dayjs(lastBackgroundSync.startedAt).format(t('shortDateTimeFormat'))}: ${describeSyncRun(lastBackgroundSync)}`
+              : undefined
+          }
+        >
           <FormButton
             icon={{ ios: 'gear', android: 'cog' }}
             title={t('configureNotifications')}

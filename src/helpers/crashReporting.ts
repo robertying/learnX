@@ -66,7 +66,8 @@ export function recordError(error: unknown, ...logs: string[]) {
   }
 }
 
-function setCustomKey(key: string, value: string) {
+/** Sent with every later report. Never throws. */
+export function setCustomKey(key: string, value: string) {
   if (!shouldReport()) {
     return;
   }

@@ -1,4 +1,3 @@
-import { ContentType } from 'thu-learn-lib';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import {
   mockAssignments,
@@ -27,13 +26,18 @@ import * as Notifications from 'expo-notifications';
 import { defaultSettings, setSetting } from 'data/settings';
 import { getNotifiedKeys, resetNotified } from 'data/notified';
 import { ContentDiff } from 'data/contentDiff';
+import { resetSyncLog, useSyncLogStore } from 'data/syncLog';
+import { recordError } from 'helpers/crashReporting';
 
 jest.mock('expo-background-task', () => ({
   BackgroundTaskResult: { Success: 1, Failed: 2 },
   registerTaskAsync: jest.fn(),
 }));
 jest.mock('expo-task-manager', () => ({ defineTask: jest.fn() }));
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('helpers/crashReporting', () => ({
+  recordError: jest.fn(),
+  setCustomKey: jest.fn(),
+}));
 
 // The emulated server, as when a mock account is logged in.
 jest.mock('data/source', () => ({
@@ -84,6 +88,8 @@ beforeEach(() => {
   mockSavedCredentials = mockCredentials;
   jest.restoreAllMocks();
   jest.mocked(loginWithFingerPrint).mockClear();
+  jest.mocked(recordError).mockClear();
+  resetSyncLog();
 });
 
 it('logs in with the saved credentials and refetches every list', async () => {
@@ -145,17 +151,88 @@ it('reports nothing new on the first sync', async () => {
 it('keeps the lists that fetched when another fails', async () => {
   await seed();
   queryClient.setQueryData(noticesQuery(semesterId).queryKey, []);
-  const getAllContents = mockSource.getAllContents;
   jest
-    .spyOn(mockSource, 'getAllContents')
-    .mockImplementation((ids, type) =>
-      type === ContentType.HOMEWORK
-        ? Promise.reject(new Error('server error'))
-        : getAllContents(ids, type),
-    );
+    .spyOn(mockSource, 'getHomeworkList')
+    .mockRejectedValue(new Error('server error'));
   const diff = await sync();
   expect(diff.notices.added).toHaveLength(inSemester(mockNotices).length);
   expect(diff.assignments.added).toEqual([]);
+});
+
+it('skips hidden courses and keeps their cached items', async () => {
+  await seed();
+  const hiddenNotice = inSemester(mockNotices)[0];
+  const hidden = hiddenNotice.courseId;
+  useUserDataStore.setState({ hiddenCourses: [hidden] });
+  queryClient.setQueryData(noticesQuery(semesterId).queryKey, old =>
+    old!.filter(n => n.id !== hiddenNotice.id),
+  );
+  const fetched = jest.spyOn(mockSource, 'getNotificationList');
+
+  const diff = await sync();
+
+  expect(fetched).not.toHaveBeenCalledWith(hidden);
+  expect(fetched).toHaveBeenCalledTimes(courseIds.size - 1);
+  expect(diff.notices.added).toEqual([]);
+  // The hidden course's cached items stay, and nothing was added for it.
+  const notices = queryClient.getQueryData(noticesQuery(semesterId).queryKey)!;
+  expect(notices.filter(n => n.courseId === hidden)).toHaveLength(
+    inSemester(mockNotices).filter(n => n.courseId === hidden).length - 1,
+  );
+});
+
+it('keeps what came back when time runs out, deadlines first', async () => {
+  await seed();
+  const [slow] = courseIds;
+  const getHomeworkList = mockSource.getHomeworkList;
+  jest
+    .spyOn(mockSource, 'getHomeworkList')
+    .mockImplementation(((id: string) =>
+      id === slow
+        ? new Promise(() => {})
+        : getHomeworkList(id)) as typeof getHomeworkList);
+  const notices = jest.spyOn(mockSource, 'getNotificationList');
+  const files = jest.spyOn(mockSource, 'getFileList');
+  const key = assignmentsQuery(semesterId).queryKey;
+  const fetchedAt = queryClient.getQueryState(key)!.dataUpdatedAt;
+  queryClient.setQueryData(key, old => old!.slice(0, -1), {
+    updatedAt: fetchedAt,
+  });
+
+  const result = await syncContent({ budget: 200 });
+
+  expect(result.status).toBe('synced');
+  // Everything after the stuck course still ran, assignments first.
+  expect(notices).toHaveBeenCalledTimes(courseIds.size);
+  expect(files).toHaveBeenCalledTimes(courseIds.size);
+  // The list holds the other courses' fresh items but stays stale.
+  expect(queryClient.getQueryState(key)!.dataUpdatedAt).toBe(fetchedAt);
+  const [run] = useSyncLogStore.getState().runs;
+  expect(run).toMatchObject({
+    status: 'synced',
+    timedOut: true,
+    courses: {
+      assignments: { fetched: courseIds.size - 1, total: courseIds.size },
+      notices: { fetched: courseIds.size, total: courseIds.size },
+    },
+  });
+  expect(recordError).toHaveBeenCalledWith(
+    new Error('Background sync ran out of time'),
+    expect.stringContaining(`assignments ${courseIds.size - 1}/`),
+  );
+});
+
+it('records each run', async () => {
+  await seed();
+  await syncContent();
+  await syncContent({ manual: true });
+  const runs = useSyncLogStore.getState().runs;
+  expect(runs).toHaveLength(2);
+  expect(runs[0]).toMatchObject({ status: 'synced', timedOut: false });
+  expect(runs[0].manual).toBeUndefined();
+  expect(runs[1].manual).toBe(true);
+  expect(runs[0].duration).toBeGreaterThanOrEqual(0);
+  expect(recordError).not.toHaveBeenCalled();
 });
 
 it('fails when every list fails', async () => {

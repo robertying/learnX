@@ -20,6 +20,7 @@ import { retry } from 'helpers/retry';
 import { updateDeadlineWidget } from 'widgets';
 import { clearSpotlight } from 'helpers/spotlight';
 import { resetNotified } from 'data/notified';
+import { resetSyncLog } from 'data/syncLog';
 import { clearSubmissionDrafts } from 'data/submissionDrafts';
 import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 
@@ -115,6 +116,7 @@ export function loginWithMockAccount() {
   resetSettings();
   resetUserData(mockUserData);
   resetNotified();
+  resetSyncLog();
   clearSubmissionDrafts();
   clearQueryCache();
   loggedIn();
@@ -129,6 +131,7 @@ export async function logout() {
   resetSettings();
   resetUserData();
   resetNotified();
+  resetSyncLog();
   clearSubmissionDrafts();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });

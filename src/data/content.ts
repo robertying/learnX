@@ -86,6 +86,33 @@ const createContent = <T extends { id: string; courseId: string }>({
   };
 
   /**
+   * Puts freshly fetched courses into the semester list, keeping the cached
+   * items of the other courses, and saves it. Unless `complete`, the list
+   * keeps its old fetch time, so the app still refetches it when it shows it.
+   */
+  const putCourses = async (
+    semesterId: string,
+    fetched: ReadonlyMap<string, object[]>,
+    { complete }: { complete: boolean },
+  ) => {
+    const { queryKey } = query(semesterId);
+    const cached = queryClient.getQueryData<T[]>(queryKey) ?? [];
+    const items = sort(
+      withOverrides([
+        ...cached.filter(item => !fetched.has(item.courseId)),
+        ...[...fetched].flatMap(([courseId, list]) => tag<T>(courseId, list)),
+      ]),
+    );
+    queryClient.setQueryData<T[]>(queryKey, items, {
+      updatedAt: complete
+        ? Date.now()
+        : (queryClient.getQueryState(queryKey)?.dataUpdatedAt ?? 0),
+    });
+    await queryPersister.persistQueryByKey(queryKey, queryClient);
+    return items;
+  };
+
+  /**
    * Changes one cached item of the semester being shown and saves the list,
    * e.g. to mark it read before the server says so. Later responses this
    * session keep the change.
@@ -132,6 +159,8 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   return {
     query,
+    fetchCourse,
+    putCourses,
     refreshCourse,
     updateItem,
     useList,
@@ -192,4 +221,17 @@ export const markFileSeen = (id: string) =>
 export const useFiles = () => {
   const { items, ...result } = files.useList();
   return { ...result, files: items };
+};
+
+/** Fetching the lists a course at a time, as background sync does. */
+export const contentLists = {
+  notices: {
+    fetchCourse: notices.fetchCourse,
+    putCourses: notices.putCourses,
+  },
+  assignments: {
+    fetchCourse: assignments.fetchCourse,
+    putCourses: assignments.putCourses,
+  },
+  files: { fetchCourse: files.fetchCourse, putCourses: files.putCourses },
 };
