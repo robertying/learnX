@@ -45,6 +45,12 @@ export default {
     '(Optional) Enter assignment content...',
   undoRemoveUploadedAttachment: 'Undo removal',
   removeUploadedAttachment: 'Remove uploaded attachment',
+  draftSaved: 'Draft saved',
+  discardDraft: 'Discard Draft',
+  discardDraftConfirmation:
+    'The text and file you have not submitted will be removed.',
+  discard: 'Discard',
+  assignmentDraft: 'You have an unsent draft for this assignment.',
   removePickedAttachment: 'Remove picked attachment',
   reUploadAttachment: 'Pick new attachment',
   overwriteAttachment: 'Overwrite uploaded attachment',
