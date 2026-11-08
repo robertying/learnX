@@ -35,7 +35,6 @@ module.exports = {
     ],
     'preval',
     '@babel/plugin-transform-export-namespace-from',
-    'react-native-paper/babel',
     'react-native-worklets/plugin',
     widgetsPlugin,
   ],

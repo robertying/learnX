@@ -1,9 +1,5 @@
 import { useState } from 'react';
 import { Alert } from 'react-native';
-import type {
-  CalendarDate,
-  RangeChange,
-} from 'react-native-paper-dates/lib/typescript/Date/Calendar';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
 import { useAssignments } from 'data/content';
@@ -26,14 +22,22 @@ const show = (message?: ToastMessage) => {
   }
 };
 
+export interface DateRange {
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+}
+type RangeChange = (range: DateRange) => void;
+
 /** Course schedule sync over a range picked in a date range picker */
 export const useCourseScheduleSync = () => {
   const graduate = useSettings(settings => settings.graduate);
 
   const [syncing, setSyncing] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [startDate, setStartDate] = useState<CalendarDate>(dayjs().toDate());
-  const [endDate, setEndDate] = useState<CalendarDate>(
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    dayjs().toDate(),
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(
     dayjs().add(28, 'day').toDate(),
   );
 
@@ -61,6 +65,7 @@ export const useCourseScheduleSync = () => {
   };
 
   const onRangeConfirm: RangeChange = range => {
+    onRangeChange(range);
     closePicker();
     sync(range.startDate, range.endDate);
   };
