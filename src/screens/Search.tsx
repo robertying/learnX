@@ -56,35 +56,48 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
         obscureBackground: false,
         tintColor: theme.colors.primary,
         onChangeText: e => setSearchQuery(e.nativeEvent.text),
+        onFocus: () => {
+          searchBarFocused.current = true;
+        },
       },
     });
   }, [navigation, theme.colors.primary]);
 
-  // Android focuses through autoFocus. On iOS the search bar is attached only
-  // once the search modal has been presented (a transition of the parent
-  // stack), so focus it then, once: coming back from a result keeps the
-  // keyboard down.
-  const focusedOnce = useRef(false);
+  // Android focuses through autoFocus. On iOS the header search bar is
+  // attached some time after the screen mounts (once the search modal is
+  // presented), and focus() before that does nothing. So keep asking until
+  // the bar reports focus: on each early transitionEnd and on a few timers
+  // after mounting. Coming back from a result doesn't refocus it.
+  const searchBarFocused = useRef(false);
   useEffect(() => {
-    const focusSearchBar = (closing: boolean) => {
-      if (closing || focusedOnce.current) {
+    let attempts = 0;
+    const focusSearchBar = () => {
+      if (searchBarFocused.current || attempts >= 8) {
         return;
       }
-      focusedOnce.current = true;
-      if (initialQuery) {
+      if (attempts === 0 && initialQuery) {
         searchBarRef.current?.setText(initialQuery);
       }
+      attempts++;
       searchBarRef.current?.focus();
     };
+    const timers = [50, 200, 400, 700, 1000].map(delay =>
+      setTimeout(focusSearchBar, delay),
+    );
     const parent =
       navigation.getParent<NativeStackNavigationProp<ParamListBase>>();
-    const unsubscribeParent = parent?.addListener('transitionEnd', e =>
-      focusSearchBar(e.data.closing),
-    );
-    const unsubscribe = navigation.addListener('transitionEnd', e =>
-      focusSearchBar(e.data.closing),
-    );
+    const unsubscribeParent = parent?.addListener('transitionEnd', e => {
+      if (!e.data.closing) {
+        focusSearchBar();
+      }
+    });
+    const unsubscribe = navigation.addListener('transitionEnd', e => {
+      if (!e.data.closing) {
+        focusSearchBar();
+      }
+    });
     return () => {
+      timers.forEach(clearTimeout);
       unsubscribeParent?.();
       unsubscribe();
     };
