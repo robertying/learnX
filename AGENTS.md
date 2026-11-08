@@ -22,11 +22,10 @@
 
 ## UI components
 
-- Colors come from `useTheme()` in `src/theme` (`theme.colors`, `theme.dark`), not Paper's `useTheme`. `onSurfaceHigh` and `onSurfaceMedium` are the title/body and caption text colors.
-- Text uses `Text`, `Title`, `Subheading`, `Paragraph` and `Caption` from `components/Text` (the type scale the app had with Paper), and separators use `components/Divider`. Oxlint blocks importing these from `react-native-paper`.
-- Switches use `components/Switch` (`@expo/ui`'s `Switch` in a `Host` tinted with the primary color). The search screen uses the native header search bar (`headerSearchBarOptions`), and cards in selection mode show `components/SelectionMark` (SF Symbol circles on iOS and Mac, the Material checkbox on Android; display only, the card takes the tap).
-- `components/` also has `ProgressBar`, `Chip` (outlined, display only), `Badge`, `IconButton` and `Touchable` (ripple on Android), drawn to match the Material 3 look the app had with Paper.
-- React Native Paper is still used for Menu, TextInput, Button, Dialog, Portal, Snackbar and List in the assignment submission dialog, which `PaperProvider` in `App.tsx` themes with `usePaperTheme`, and react-native-paper-dates for the date picker. Plan 4.1 moves them off Paper next.
+- The app has its own small component layer in `src/components`; there is no UI kit (React Native Paper was removed in plan 4.1). Colors come from `useTheme()` in `src/theme` (`theme.colors`, `theme.dark`), with `onSurfaceHigh` and `onSurfaceMedium` as the title/body and caption text colors.
+- Text uses `Text`, `Title`, `Subheading`, `Paragraph` and `Caption` from `components/Text`. Also there: `Divider`, `ProgressBar`, `Chip` (display only), `Badge`, `IconButton`, `Touchable` (ripple on Android), `TextField` (React Native's text input, so password AutoFill and content types keep working), `TextButton`, `ContainedButton` and `Toast` (our own snackbar, shown with the module-level `toast()`).
+- Native controls come from `@expo/ui`: `components/Switch`, `components/SelectionMark` (SF Symbol circles on iOS and Mac, the Material checkbox on Android; display only), the Android card long-press menu (`components/CardMenu.android.tsx`, a Compose dropdown menu) and `components/DateRangePicker` (two SwiftUI date pickers in a sheet on iOS and Mac, Material's range picker dialog on Android). Search uses the native header search bar (`headerSearchBarOptions`), and choice sheets use `ActionSheetIOS` / `Alert`.
+- An `@expo/ui` view that exists on only one platform goes in a `.android.tsx` / `.ios.tsx` file, since `@expo/ui/jetpack-compose` and `@expo/ui/swift-ui` look up their native views when imported.
 
 ## Data
 

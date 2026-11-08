@@ -26,6 +26,6 @@ name: Open settings pages and log out
 - extendedWaitUntil:
     visible:
       # After a logout iOS may drop the field's own identifier from the
-      # snapshot; Paper's label keeps a derived one.
-      id: 'login-username(-label-.*)?'
+      # snapshot; TextField's label keeps a derived one.
+      id: 'login-username(-label)?'
     timeout: 10000

@@ -2,12 +2,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar, useColorScheme } from 'react-native';
-import { Provider as PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/en';
 import 'dayjs/locale/zh-cn';
-import { en, zh, registerTranslation } from 'react-native-paper-dates';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import ErrorBoundary from 'components/ErrorBoundary';
 import { Toast, toast } from 'components/Toast';
@@ -19,10 +18,6 @@ import useReLogin from 'hooks/useReLogin';
 import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 import Navigation from 'navigation';
-import { usePaperTheme } from 'theme';
-
-registerTranslation('en', en);
-registerTranslation('zh', zh);
 
 dayjs.extend(relativeTime);
 dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
@@ -49,18 +44,17 @@ const Container = () => {
 
 const App = () => {
   const colorScheme = useColorScheme();
-  const paperTheme = usePaperTheme();
   const loaded = useStoresLoaded();
 
   return (
     <GestureHandlerRootView>
       <ErrorBoundary>
-        <PaperProvider theme={paperTheme}>
+        <SafeAreaProvider>
           <QueryClientProvider client={queryClient}>
             {loaded ? <Container /> : <Splash />}
           </QueryClientProvider>
           <Toast />
-        </PaperProvider>
+        </SafeAreaProvider>
       </ErrorBoundary>
       <StatusBar
         barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}

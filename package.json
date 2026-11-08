@@ -87,8 +87,6 @@
     "react-native-gesture-handler": "3.4.0",
     "react-native-localize": "3.7.2",
     "react-native-pager-view": "10.0.0",
-    "react-native-paper": "5.15.4",
-    "react-native-paper-dates": "0.24.1",
     "react-native-pdf": "7.0.5",
     "react-native-reanimated": "4.7.1",
     "react-native-reorderable-list": "0.18.3",

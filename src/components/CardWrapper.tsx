@@ -1,16 +1,15 @@
-import { PropsWithChildren, useRef, useState } from 'react';
-import { View, StyleSheet, Platform, ViewInstance } from 'react-native';
+import { PropsWithChildren, useState } from 'react';
+import { View, StyleSheet, Platform } from 'react-native';
 import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { Menu } from 'react-native-paper';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
 import { CardAction, cardActions } from 'helpers/cardActions';
 import useCardSwipe from 'hooks/useCardSwipe';
-import CardActionIcon from './CardActionIcon';
+import CardMenu from './CardMenu';
 import CardSwipeActions from './CardSwipeActions';
 import Touchable from './Touchable';
 import SelectionMark from './SelectionMark';
@@ -57,10 +56,8 @@ const CardWrapper: React.FC<
 
   const { snapRef, openActions, onWillOpen, onWillClose, interceptPress } =
     useCardSwipe({ selectionMode, reorderMode });
-  const anchorRef = useRef<ViewInstance>(null);
 
   const [menuVisible, setMenuVisible] = useState(false);
-  const [menuAnchor, setMenuAnchor] = useState({ x: 0, y: 0 });
 
   const actions = cardActions({ fav, archived, hidden, canHide: !!onHide });
 
@@ -124,10 +121,7 @@ const CardWrapper: React.FC<
     } else if (!disableSwipe && !selectionMode) {
       if (swipeableNotSupported) {
         Haptics.selectionAsync();
-        anchorRef.current?.measureInWindow((x, y, width, height) => {
-          setMenuAnchor({ x: x + width, y: y + height });
-          setMenuVisible(true);
-        });
+        setMenuVisible(true);
       } else {
         openActions();
       }
@@ -165,21 +159,14 @@ const CardWrapper: React.FC<
 
   if (swipeableNotSupported) {
     return (
-      <View ref={anchorRef} collapsable={false}>
+      <View collapsable={false}>
         {touchable}
-        <Menu visible={menuVisible} onDismiss={closeMenu} anchor={menuAnchor}>
-          {actions.map(action => (
-            <Menu.Item
-              key={action.key}
-              testID={action.testID}
-              leadingIcon={({ size }) => (
-                <CardActionIcon action={action} size={size} />
-              )}
-              onPress={() => handleMenuAction(action)}
-              title={action.label}
-            />
-          ))}
-        </Menu>
+        <CardMenu
+          visible={menuVisible}
+          actions={actions}
+          onAction={handleMenuAction}
+          onDismiss={closeMenu}
+        />
       </View>
     );
   }

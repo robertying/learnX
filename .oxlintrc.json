@@ -133,31 +133,6 @@
     "no-restricted-imports": [
       "warn",
       {
-        "paths": [
-          {
-            "name": "react-native-paper",
-            "importNames": [
-              "useTheme",
-              "Text",
-              "Title",
-              "Subheading",
-              "Paragraph",
-              "Caption",
-              "Divider",
-              "Switch",
-              "Checkbox",
-              "Searchbar",
-              "ProgressBar",
-              "Chip",
-              "Badge",
-              "Avatar",
-              "ActivityIndicator",
-              "TouchableRipple",
-              "IconButton"
-            ],
-            "message": "Use useTheme from theme, the components in src/components (Text, Divider, Switch, ProgressBar, Chip, Badge, IconButton, Touchable). Search goes in the native header (headerSearchBarOptions)."
-          }
-        ],
         "patterns": [
           {
             "group": ["react-native/**"],

@@ -3,19 +3,24 @@ import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme,
 } from '@react-navigation/native';
-import {
-  MD3LightTheme,
-  MD3DarkTheme,
-  adaptNavigationTheme,
-} from 'react-native-paper';
 
-const { LightTheme, DarkTheme } = adaptNavigationTheme({
-  reactNavigationLight: NavigationDefaultTheme,
-  reactNavigationDark: NavigationDarkTheme,
-});
+// React Navigation's own color keys, as the app had them from Paper's
+// adaptNavigationTheme (Material 3 baseline colors).
+const navigationLightColors = {
+  card: 'rgb(243, 237, 246)',
+  text: 'rgba(28, 27, 31, 1)',
+  border: 'rgba(121, 116, 126, 1)',
+  notification: 'rgba(179, 38, 30, 1)',
+};
+const navigationDarkColors = {
+  card: 'rgb(44, 40, 49)',
+  text: 'rgba(230, 225, 229, 1)',
+  border: 'rgba(147, 143, 153, 1)',
+  notification: 'rgba(242, 184, 181, 1)',
+};
 
 const lightThemeColors = {
-  ...LightTheme.colors,
+  ...navigationLightColors,
   primary: 'rgb(154, 37, 174)',
   onPrimary: 'rgb(255, 255, 255)',
   primaryContainer: 'rgb(255, 214, 254)',
@@ -58,7 +63,7 @@ const lightThemeColors = {
   backdrop: 'rgba(54, 46, 53, 0.4)',
 };
 const darkThemeColors = {
-  ...DarkTheme.colors,
+  ...navigationDarkColors,
   primary: 'rgb(208, 120, 220)',
   onPrimary: 'rgb(87, 0, 102)',
   primaryContainer: 'rgb(123, 0, 143)',
@@ -130,19 +135,9 @@ export const BrandDarkTheme: Theme = {
   colors: { ...darkThemeColors, ...textColors(darkThemeColors) },
 };
 
-export const BrandLightPaperTheme = {
-  ...MD3LightTheme,
-  ...BrandLightTheme,
-  fonts: MD3LightTheme.fonts,
-};
 export const BrandLightNavigationTheme = {
   ...NavigationDefaultTheme,
   colors: lightThemeColors,
-};
-export const BrandDarkPaperTheme = {
-  ...MD3DarkTheme,
-  ...BrandDarkTheme,
-  fonts: MD3DarkTheme.fonts,
 };
 export const BrandDarkNavigationTheme = {
   ...NavigationDarkTheme,
@@ -152,10 +147,6 @@ export const BrandDarkNavigationTheme = {
 /** The app's colors for the system appearance. Use this in components. */
 export const useTheme = (): Theme =>
   useColorScheme() === 'dark' ? BrandDarkTheme : BrandLightTheme;
-
-/** The Paper theme for the system appearance, for the remaining Paper controls. */
-export const usePaperTheme = () =>
-  useColorScheme() === 'dark' ? BrandDarkPaperTheme : BrandLightPaperTheme;
 
 /** The React Navigation theme for the system appearance. */
 export const useNavigationTheme = () =>

@@ -5,7 +5,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { DatePickerModal } from 'react-native-paper-dates';
+import DateRangePicker from 'components/DateRangePicker';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
 import WindowSafeArea from 'components/WindowSafeArea';
@@ -274,19 +274,16 @@ const CalendarEvent: React.FC<Props> = () => {
       </KeyboardAvoidingView>
       {/* Opened from a split view column, but covers the whole window. */}
       <WindowSafeArea>
-        <DatePickerModal
-          locale={isLocaleChinese() ? 'zh' : 'en'}
-          mode="range"
+        <DateRangePicker
           visible={picker.open}
-          saveLabelDisabled={!picker.startDate || !picker.endDate}
+          title={t('datePickerLabel')}
           startLabel={t('datePickerStartLabel')}
           endLabel={t('datePickerEndLabel')}
           saveLabel={t('datePickerSaveLabel')}
-          label={t('datePickerLabel')}
-          onDismiss={picker.closePicker}
+          cancelLabel={t('cancel')}
           startDate={picker.startDate}
           endDate={picker.endDate}
-          onChange={picker.onRangeChange}
+          onDismiss={picker.closePicker}
           onConfirm={picker.onRangeConfirm}
         />
       </WindowSafeArea>

@@ -6,9 +6,11 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
+  TextInputInstance,
   View,
 } from 'react-native';
-import { Button, TextInput } from 'react-native-paper';
+import TextField from 'components/TextField';
+import TextButton from 'components/TextButton';
 import Switch from 'components/Switch';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
@@ -39,7 +41,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
   const [username, setUsername] = useState(savedUsername ?? '');
   const [password, setPassword] = useState(savedPassword ?? '');
-  const passwordTextInputRef = useRef<any>(null);
+  const passwordTextInputRef = useRef<TextInputInstance>(null);
 
   const hasCredential = savedUsername && savedPassword && savedFingerPrint;
 
@@ -142,7 +144,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             />
             <Text style={Styles.spacex1}>{t('graduate')}</Text>
           </View>
-          <TextInput
+          <TextField
             testID="login-username"
             style={styles.textInput}
             label={t('usernameOrId')}
@@ -158,7 +160,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
             value={username}
             onChangeText={v => setUsername(v.trim())}
           />
-          <TextInput
+          <TextField
             ref={passwordTextInputRef}
             testID="login-password"
             style={styles.textInput}
@@ -186,26 +188,31 @@ const Login: React.FC<Props> = ({ navigation }) => {
           />
           {hasCredential && (
             <>
-              <Button
-                style={styles.button}
-                mode="text"
+              <TextButton
+                containerStyle={[styles.button, styles.textButton]}
+                style={styles.textButtonLabel}
                 onPress={handleRetryLogin}
               >
                 {t('retryLogin')}
-              </Button>
-              <Button mode="text" onPress={handleLoginWithOfflineMode}>
+              </TextButton>
+              <TextButton
+                containerStyle={styles.textButton}
+                style={styles.textButtonLabel}
+                onPress={handleLoginWithOfflineMode}
+              >
                 {t('offlineMode')}
-              </Button>
+              </TextButton>
             </>
           )}
           {__DEV__ && isMockUser(savedUsername) && (
-            <Button
+            <TextButton
               testID="login-mock-network"
-              mode="text"
+              containerStyle={styles.textButton}
+              style={styles.textButtonLabel}
               onPress={() => navigation.navigate('MockNetwork')}
             >
               Network emulation
-            </Button>
+            </TextButton>
           )}
         </KeyboardAvoidingView>
       </ScrollView>
@@ -240,6 +247,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginVertical: 8,
+  },
+  textButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  textButtonLabel: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   noteContainer: {
     alignItems: 'center',
