@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
@@ -6,11 +6,10 @@ import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
   reorderItems,
-  useReorderableDrag,
 } from 'react-native-reorderable-list';
 import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
-import { setSetting, useSettings } from 'data/settings';
+import { getSettings, setSetting, useSettings } from 'data/settings';
 import {
   setArchived,
   setCourseHidden,
@@ -29,12 +28,13 @@ import { checkedIds, listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
 import Filter, { FilterSelection } from './Filter';
 import Empty from './Empty';
-import { CardWrapperProps } from './CardWrapper';
+import FilterListRow, {
+  FilterListRowActions,
+  ItemComponentProps,
+} from './FilterListRow';
 import FlatList from './FlatList';
 
-export interface ItemComponentProps<T> extends CardWrapperProps {
-  data: T;
-}
+export type { ItemComponentProps };
 
 export interface FilterListProps<T> {
   type: 'notice' | 'assignment' | 'file' | 'course';
@@ -56,17 +56,6 @@ export interface FilterListProps<T> {
   onRefresh?: () => void;
 }
 
-/** A list item inside `ReorderableList`, the only place its drag handle exists. */
-const ReorderableItem = <T,>({
-  component: Component,
-  ...props
-}: ItemComponentProps<T> & {
-  component: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
-}) => {
-  const drag = useReorderableDrag();
-  return <Component {...props} onDrag={drag} />;
-};
-
 const FilterList = <T extends Notice | Assignment | File | Course>({
   type,
   defaultSelected,
@@ -86,9 +75,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 }: FilterListProps<T>) => {
   const detailNavigator = useDetailNavigator();
 
-  const tabFilterSelections = useSettings(
-    settings => settings.tabFilterSelections,
-  );
+  // Only this tab's selection, so changing another tab's filter does not
+  // re-render this list
   const filterSelected = useSettings(
     settings => settings.tabFilterSelections[type] ?? defaultSelected ?? 'all',
   );
@@ -127,7 +115,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const handleFilterSelect = (selected: FilterSelection) => {
     setSetting('tabFilterSelections', {
-      ...tabFilterSelections,
+      ...getSettings().tabFilterSelections,
       [type]: selected,
     });
     setFilterVisible(false);
@@ -153,7 +141,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     toggleSelectionMode();
   };
 
-  const handleFav = (isFav: boolean, item: T) => {
+  const handleFav = (item: T, isFav: boolean) => {
     if (type !== 'course') {
       setFavorite(type, item.id, !isFav);
     }
@@ -229,33 +217,45 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const refreshControlRefreshing = useInitialRefreshHidden(refreshing);
 
-  const renderItem = ({ item }: { item: T }) => {
-    const itemProps: ItemComponentProps<T> = {
-      data: item,
-      selectionMode,
-      reorderMode,
-      disableSwipe: selectionMode || reorderMode,
-      checked: selection[item.id],
-      onCheck: checked => setChecked(item.id, checked),
-      onPress: () => {
-        setFilterVisible(false);
-        onItemPress?.(item);
-      },
-      fav: favIdSet.has(item.id),
-      onFav: () => handleFav(favIdSet.has(item.id), item),
-      archived: archivedIdSet.has(item.id),
-      onArchive: () => handleArchive(archivedIdSet.has(item.id), [item.id]),
-      hidden: hiddenIdSet.has(item.id),
-      onHide: isCourse
-        ? () => handleHide(hiddenIdSet.has(item.id), item.id)
-        : undefined,
-    };
-    return isCourse ? (
-      <ReorderableItem component={Component} {...itemProps} />
-    ) : (
-      <Component {...itemProps} />
-    );
+  // Rows get one actions object that never changes, and call the latest
+  // handlers through it, so a new onItemPress from the screen or a toggled
+  // selection does not re-render every row.
+  const rowHandlers: FilterListRowActions<T> = {
+    press: item => {
+      setFilterVisible(false);
+      onItemPress?.(item);
+    },
+    check: setChecked,
+    fav: handleFav,
+    archive: (id, isArchived) => handleArchive(isArchived, [id]),
+    hide: (id, isHidden) => handleHide(isHidden, id),
   };
+  const rowHandlersRef = useRef(rowHandlers);
+  useLayoutEffect(() => {
+    rowHandlersRef.current = rowHandlers;
+  });
+  const [rowActions] = useState<FilterListRowActions<T>>(() => ({
+    press: item => rowHandlersRef.current.press(item),
+    check: (id, checked) => rowHandlersRef.current.check(id, checked),
+    fav: (item, isFav) => rowHandlersRef.current.fav(item, isFav),
+    archive: (id, isArchived) => rowHandlersRef.current.archive(id, isArchived),
+    hide: (id, isHidden) => rowHandlersRef.current.hide(id, isHidden),
+  }));
+
+  const renderItem = ({ item }: { item: T }) => (
+    <FilterListRow
+      data={item}
+      component={Component}
+      actions={rowActions}
+      isCourse={isCourse}
+      selectionMode={selectionMode}
+      reorderMode={reorderMode}
+      checked={selection[item.id]}
+      fav={favIdSet.has(item.id)}
+      archived={archivedIdSet.has(item.id)}
+      hidden={hiddenIdSet.has(item.id)}
+    />
+  );
 
   const listProps = {
     style: { height: '100%' as const },
