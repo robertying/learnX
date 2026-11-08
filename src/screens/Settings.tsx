@@ -106,7 +106,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon={{
               ios: 'rectangle.portrait.and.arrow.right',
               android: 'account-remove',
-              color: 'red',
             }}
             title={t('logout')}
             destructive
@@ -115,34 +114,30 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         </FormSection>
         <FormSection>
           <FormLink
-            icon={{
-              ios: 'arrow.triangle.2.circlepath',
-              android: 'autorenew',
-              color: 'blue',
-            }}
+            icon={{ ios: 'arrow.triangle.2.circlepath', android: 'autorenew' }}
             title={t('semesterSelection')}
             onPress={() => handlePush('SemesterSelection')}
           />
           <FormLink
-            icon={{ ios: 'calendar', android: 'calendar-range', color: 'red' }}
+            icon={{ ios: 'calendar', android: 'calendar-range' }}
             title={t('calendarsAndReminders')}
             onPress={() => handlePush('CalendarEvent')}
           />
           <FormLink
-            icon={{ ios: 'folder', android: 'folder-cog', color: 'blue' }}
+            icon={{ ios: 'folder', android: 'folder-cog' }}
             title={t('fileSettings')}
             onPress={() => handlePush('FileSettings')}
           />
           <FormLink
             testID="settings-notifications"
-            icon={{ ios: 'bell', android: 'bell', color: 'red' }}
+            icon={{ ios: 'bell', android: 'bell' }}
             title={t('notifications')}
             onPress={() => handlePush('NotificationSettings')}
           />
         </FormSection>
         <FormSection>
           <FormLink
-            icon={{ ios: 'info.circle', android: 'information', color: 'blue' }}
+            icon={{ ios: 'info.circle', android: 'information' }}
             badge={!courseInformationSharingBadgeShown}
             title={t('courseInformationSharing')}
             onPress={() => handlePush('CourseInformationSharing')}
@@ -150,39 +145,31 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         </FormSection>
         <FormSection>
           <FormLink
-            icon={{ ios: 'note.text', android: 'note-text', color: 'orange' }}
+            icon={{ ios: 'note.text', android: 'note-text' }}
             badge={newChangelog}
             title={t('changelog')}
             onPress={() => handlePush('Changelog')}
           />
           {update && (
             <FormLink
-              icon={{
-                ios: 'arrow.down.circle',
-                android: 'update',
-                color: 'green',
-              }}
+              icon={{ ios: 'arrow.down.circle', android: 'update' }}
               badge
               title={`${t('foundNewVersion')} v${update.version}`}
               onPress={() => Linking.openURL(update.url)}
             />
           )}
           <FormLink
-            icon={{ ios: 'hammer', android: 'dev-to', color: 'brown' }}
+            icon={{ ios: 'hammer', android: 'dev-to' }}
             title={t('becomeMaintainer')}
             onPress={() => handlePush('Maintainer')}
           />
           <FormLink
-            icon={{
-              ios: 'questionmark.circle',
-              android: 'help',
-              color: 'blue',
-            }}
+            icon={{ ios: 'questionmark.circle', android: 'help' }}
             title={t('helpAndFeedback')}
             onPress={() => handlePush('Help')}
           />
           <FormLink
-            icon={{ ios: 'c.circle', android: 'copyright', color: 'gray' }}
+            icon={{ ios: 'c.circle', android: 'copyright' }}
             title={t('about')}
             onPress={() => handlePush('About')}
           />
@@ -191,7 +178,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormSection>
             <FormLink
               testID="settings-mock-network"
-              icon={{ ios: 'network', android: 'network', color: 'blue' }}
+              icon={{ ios: 'network', android: 'network' }}
               title="Network emulation"
               onPress={() => handlePush('MockNetwork')}
             />

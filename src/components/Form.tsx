@@ -10,7 +10,6 @@ import {
   Label,
   LabeledContent,
   ProgressView,
-  RoundedRectangle,
   Section,
   Spacer,
   Text,
@@ -23,8 +22,11 @@ import {
   font,
   foregroundStyle,
   frame,
+  background,
   headerProminence,
+  listRowBackground,
   refreshable,
+  scrollContentBackground,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
@@ -33,7 +35,6 @@ import {
   sectionRows,
   type FormButtonProps,
   type FormIcon,
-  type FormIconColor,
   type FormLinkProps,
   type FormNumberFieldProps,
   type FormProfileProps,
@@ -54,20 +55,39 @@ const chevronModifiers = [
   foregroundStyle(PlatformColor('tertiaryLabel')),
 ];
 
+// Mac apps draw grouped rows in light gray on the window's white (black in
+// Dark Mode), not white rows on gray as on iOS.
+const macFormModifiers = [
+  scrollContentBackground('hidden'),
+  background(PlatformColor('systemBackground')),
+];
+
 export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   const theme = useTheme();
 
   return (
     <Host style={styles.fill} seedColor={theme.colors.primary} testID={testID}>
-      <SwiftUIForm modifiers={onRefresh ? [refreshable(onRefresh)] : undefined}>
+      <SwiftUIForm
+        modifiers={[
+          ...(DeviceInfo.isMac() ? macFormModifiers : []),
+          ...(onRefresh ? [refreshable(onRefresh)] : []),
+        ]}
+      >
         {children}
       </SwiftUIForm>
     </Host>
   );
 };
 
+const macRowBackground = listRowBackground(
+  PlatformColor('quaternarySystemFill'),
+);
 // System Settings on the Mac: bold section titles above the group.
-const macSectionModifiers = [headerProminence('increased')];
+const macTitledSectionModifiers = [
+  headerProminence('increased'),
+  macRowBackground,
+];
+const macSectionModifiers = [macRowBackground];
 
 export const FormSection: React.FC<FormSectionProps> = ({
   children,
@@ -77,40 +97,16 @@ export const FormSection: React.FC<FormSectionProps> = ({
   <Section
     title={title}
     footer={footer ? <Text>{footer}</Text> : undefined}
-    modifiers={title && DeviceInfo.isMac() ? macSectionModifiers : undefined}
+    modifiers={
+      DeviceInfo.isMac()
+        ? title
+          ? macTitledSectionModifiers
+          : macSectionModifiers
+        : undefined
+    }
   >
     {sectionRows(children)}
   </Section>
-);
-
-const tileColors: Record<FormIconColor, string> = {
-  blue: 'systemBlue',
-  brown: 'systemBrown',
-  gray: 'systemGray',
-  green: 'systemGreen',
-  indigo: 'systemIndigo',
-  orange: 'systemOrange',
-  pink: 'systemPink',
-  purple: 'systemPurple',
-  red: 'systemRed',
-  teal: 'systemTeal',
-};
-
-/** A white symbol on a colored rounded square, as in System Settings. */
-const IconTile: React.FC<{ icon: FormIcon }> = ({ icon }) => (
-  <ZStack modifiers={[frame({ width: 20, height: 20 })]}>
-    <RoundedRectangle
-      cornerRadius={5}
-      modifiers={[
-        foregroundStyle(PlatformColor(tileColors[icon.color ?? 'gray'])),
-      ]}
-    />
-    <Image
-      systemName={icon.ios}
-      modifiers={[font({ size: 11, weight: 'semibold' })]}
-      color="white"
-    />
-  </ZStack>
 );
 
 const RowLabel: React.FC<{
@@ -121,16 +117,9 @@ const RowLabel: React.FC<{
   const text = (
     <Text modifiers={plain ? [primaryText] : undefined}>{title}</Text>
   );
-  if (!icon) {
-    return text;
-  }
-  // On iOS the system draws the symbol at the row's text size. (@expo/ui's
-  // Image would draw it at a fixed 24 pt.)
-  return DeviceInfo.isMac() ? (
-    <Label icon={<IconTile icon={icon} />}>{text}</Label>
-  ) : (
-    <Label systemImage={icon.ios}>{text}</Label>
-  );
+  // The system draws the symbol at the row's text size. (@expo/ui's Image
+  // would draw it at a fixed 24 pt.)
+  return icon ? <Label systemImage={icon.ios}>{text}</Label> : text;
 };
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
@@ -228,9 +217,8 @@ export const FormToggle: React.FC<FormToggleProps> = ({
   onValueChange,
   disabled: isDisabled,
   loading,
-}) => {
-  const isMac = DeviceInfo.isMac();
-  return loading ? (
+}) =>
+  loading ? (
     <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
       <ProgressView />
     </LabeledContent>
@@ -238,16 +226,12 @@ export const FormToggle: React.FC<FormToggleProps> = ({
     <Toggle
       isOn={value}
       onIsOnChange={onValueChange}
-      // The Mac labels the switch with the icon tile.
-      label={isMac ? undefined : title}
-      systemImage={isMac ? undefined : icon?.ios}
+      label={title}
+      systemImage={icon?.ios}
       testID={testID}
       modifiers={isDisabled ? [disabled(true)] : undefined}
-    >
-      {isMac ? <RowLabel title={title} icon={icon} plain /> : undefined}
-    </Toggle>
+    />
   );
-};
 
 /** A number typed in at the end of the row. */
 export const FormNumberField: React.FC<FormNumberFieldProps> = ({

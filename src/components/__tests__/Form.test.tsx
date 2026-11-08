@@ -16,7 +16,6 @@ import {
   positionRows,
   sectionRows,
 } from 'components/Form';
-import DeviceInfo from 'constants/DeviceInfo';
 
 describe('Form', () => {
   it('opens a page from a link row with a chevron', async () => {
@@ -142,23 +141,5 @@ describe('form helpers', () => {
       ).map(row => (row.props as { position: string }).position);
     expect(rows(1)).toEqual(['only']);
     expect(rows(3)).toEqual(['first', 'middle', 'last']);
-  });
-});
-
-describe('Form on the Mac', () => {
-  it('draws icons on tiles and labels switches with them', async () => {
-    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
-    await render(
-      <FormToggle
-        title="New notices"
-        icon={{ ios: 'bell', android: 'bell', color: 'red' }}
-        value={false}
-        onValueChange={jest.fn()}
-      />,
-    );
-    // The tile's symbol and the title are the toggle's label.
-    const toggle = screen.getByRole('switch');
-    expect(toggle).toHaveTextContent('New notices');
-    expect(screen.getByTestId('icon-bell')).toBeTruthy();
   });
 });

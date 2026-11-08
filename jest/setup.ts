@@ -136,6 +136,7 @@ jest.mock('expo-application', () => ({ nativeBuildVersion: '1' }));
 jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
+  background: jest.fn(),
   buttonStyle: jest.fn(),
   disabled: jest.fn(),
   font: jest.fn(),
@@ -143,7 +144,9 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   frame: jest.fn(),
   headerProminence: jest.fn(),
   labelsHidden: jest.fn(),
+  listRowBackground: jest.fn(),
   refreshable: jest.fn(),
+  scrollContentBackground: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for
 // types (they are strings after the Babel transform), and any test that

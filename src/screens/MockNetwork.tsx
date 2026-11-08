@@ -73,11 +73,7 @@ const MockNetwork: React.FC = () => {
         >
           <FormToggle
             testID="mock-network-login-fails"
-            icon={{
-              ios: 'key.slash',
-              android: 'form-textbox-password',
-              color: 'gray',
-            }}
+            icon={{ ios: 'key.slash', android: 'form-textbox-password' }}
             title="Reject login (bad credential)"
             value={config.loginFails}
             onValueChange={value => setMockNetworkConfig({ loginFails: value })}
@@ -87,7 +83,6 @@ const MockNetwork: React.FC = () => {
             icon={{
               ios: 'rectangle.portrait.and.arrow.forward',
               android: 'login',
-              color: 'green',
             }}
             title="Log in again now"
             onPress={handleReLogin}
