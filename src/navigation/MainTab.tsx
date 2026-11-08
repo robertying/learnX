@@ -9,11 +9,10 @@ import { MainTabParams } from 'screens/types';
 import { useSplitLaidOut } from 'components/NativeSplitView';
 import createSidebarSplitNavigator from 'components/SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
-import { useSettings } from 'data/settings';
 import useKeyboardShown from 'hooks/useKeyboardShown';
 import useMainCommands from 'hooks/useMainCommands';
 import useMainStartup from 'hooks/useMainStartup';
-import packageJson from '../../package.json';
+import useSettingsBadge from 'hooks/useSettingsBadge';
 import { renderDetailContainer, TabSplit } from './DetailStack';
 import { nativeSplit, sidebarSplit } from './layout';
 import {
@@ -22,6 +21,7 @@ import {
   FileStack,
   NoticeStack,
   SettingStack,
+  TodayStack,
 } from './stacks';
 
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
@@ -45,13 +45,17 @@ const withSplit = (Master: React.ComponentType) =>
         </TabSplit>
       )
     : Master;
+const TodayTab = withSplit(TodayStack);
 const NoticeTab = withSplit(NoticeStack);
 const AssignmentTab = withSplit(AssignmentStack);
 const FileTab = withSplit(FileStack);
 const CourseTab = withSplit(CourseStack);
 const SettingTab = withSplit(SettingStack);
 
-const mainTabCount = 5;
+// Today, Notices, Assignments, Files, Courses, and on Mac Settings. Elsewhere
+// Settings open from Today's header: Android's navigation bar holds at most
+// five tabs, and iPhone moves a sixth into "More".
+const mainTabCount = sidebarSplit ? 6 : 5;
 
 // A tab that only mounts once it's selected shows up empty first. Mounting them
 // all with the first one would delay it, so the rest follow once it has settled,
@@ -82,30 +86,30 @@ const MainTab = () => {
   const keyboardShown = useKeyboardShown();
   useMainStartup();
   useMainCommands();
-  const newChangelog = useSettings(
-    settings => settings.lastShowChangelogVersion !== packageJson.version,
-  );
-  const newUpdate = useSettings(settings => settings.newUpdate);
-  const courseInformationSharingBadgeShown = useSettings(
-    settings => settings.courseInformationSharingBadgeShown,
-  );
-
-  const settingsBadge =
-    newChangelog || newUpdate || !courseInformationSharingBadgeShown;
+  const settingsBadge = useSettingsBadge();
 
   if (sidebarSplit) {
     return (
       <MainSidebarNavigator.Navigator renderDetail={renderDetailContainer}>
         <MainSidebarNavigator.Screen
+          name="TodayStack"
+          component={TodayTab}
+          options={{ title: t('today'), sfSymbol: 'sun.max.fill' }}
+        />
+        <MainSidebarNavigator.Screen
           name="NoticeStack"
           component={NoticeTab}
-          options={{ title: t('notices'), sfSymbol: 'bell.fill' }}
+          options={{
+            lazy: mountedTabCount <= 1,
+            title: t('notices'),
+            sfSymbol: 'bell.fill',
+          }}
         />
         <MainSidebarNavigator.Screen
           name="AssignmentStack"
           component={AssignmentTab}
           options={{
-            lazy: mountedTabCount <= 1,
+            lazy: mountedTabCount <= 2,
             title: t('assignments'),
             sfSymbol: 'list.bullet.clipboard.fill',
           }}
@@ -114,7 +118,7 @@ const MainTab = () => {
           name="FileStack"
           component={FileTab}
           options={{
-            lazy: mountedTabCount <= 2,
+            lazy: mountedTabCount <= 3,
             title: t('files'),
             sfSymbol: 'doc.fill',
           }}
@@ -123,7 +127,7 @@ const MainTab = () => {
           name="CourseStack"
           component={CourseTab}
           options={{
-            lazy: mountedTabCount <= 3,
+            lazy: mountedTabCount <= 4,
             title: t('courses'),
             sfSymbol: 'square.grid.3x3.fill',
           }}
@@ -132,7 +136,7 @@ const MainTab = () => {
           name="SettingStack"
           component={SettingTab}
           options={{
-            lazy: mountedTabCount <= 4,
+            lazy: mountedTabCount <= 5,
             title: t('settings'),
             sfSymbol: 'gearshape.fill',
             badge: settingsBadge,
@@ -149,9 +153,20 @@ const MainTab = () => {
       tabBarHidden={keyboardShown}
     >
       <MainNativeNavigator.Screen
+        name="TodayStack"
+        component={TodayTab}
+        options={{
+          title: t('today'),
+          tabBarButtonTestID: 'tab-today',
+          tabBarIcon: () => getTabBarIcon('sun.max.fill', 'calendar-today'),
+          tabBarBadge: settingsBadge ? ' ' : undefined,
+        }}
+      />
+      <MainNativeNavigator.Screen
         name="NoticeStack"
         component={NoticeTab}
         options={{
+          lazy: mountedTabCount <= 1,
           title: t('notices'),
           tabBarButtonTestID: 'tab-notices',
           tabBarIcon: () => getTabBarIcon('bell.fill', 'bell'),
@@ -161,7 +176,7 @@ const MainTab = () => {
         name="AssignmentStack"
         component={AssignmentTab}
         options={{
-          lazy: mountedTabCount <= 1,
+          lazy: mountedTabCount <= 2,
           title: t('assignments'),
           tabBarButtonTestID: 'tab-assignments',
           tabBarIcon: () =>
@@ -172,7 +187,7 @@ const MainTab = () => {
         name="FileStack"
         component={FileTab}
         options={{
-          lazy: mountedTabCount <= 2,
+          lazy: mountedTabCount <= 3,
           title: t('files'),
           tabBarButtonTestID: 'tab-files',
           tabBarIcon: () => getTabBarIcon('doc.fill', 'folder'),
@@ -182,21 +197,10 @@ const MainTab = () => {
         name="CourseStack"
         component={CourseTab}
         options={{
-          lazy: mountedTabCount <= 3,
+          lazy: mountedTabCount <= 4,
           title: t('courses'),
           tabBarButtonTestID: 'tab-courses',
           tabBarIcon: () => getTabBarIcon('square.grid.3x3.fill', 'apps'),
-        }}
-      />
-      <MainNativeNavigator.Screen
-        name="SettingStack"
-        component={SettingTab}
-        options={{
-          lazy: mountedTabCount <= 4,
-          title: t('settings'),
-          tabBarButtonTestID: 'tab-settings',
-          tabBarIcon: () => getTabBarIcon('gearshape.fill', 'cog'),
-          tabBarBadge: settingsBadge ? ' ' : undefined,
         }}
       />
     </MainNativeNavigator.Navigator>

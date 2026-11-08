@@ -75,7 +75,17 @@ export type SettingsStackParams = {
   MockNetwork: ExtraParams | undefined;
 };
 
+/** Today, and on phones the settings, which open from its header. */
+export type TodayStackParams = {
+  Today: undefined;
+  CourseDetail: DetailParams;
+  NoticeDetail: DetailParams;
+  AssignmentDetail: DetailParams;
+  FileDetail: FileDetailParams;
+} & SettingsStackParams;
+
 export type MainTabParams = {
+  TodayStack: NavigatorScreenParams<TodayStackParams>;
   NoticeStack: NavigatorScreenParams<NoticeStackParams>;
   AssignmentStack: NavigatorScreenParams<AssignmentStackParams>;
   FileStack: NavigatorScreenParams<FileStackParams>;
@@ -184,11 +194,16 @@ export type SharedParamList<ParamList extends ParamListBase> = Pick<
 // Screens mounted in several navigators: the stacks of the tabs, the root
 // stacks, and the detail stack of the split view.
 export type NoticeDetailParamList = SharedParamList<
-  NoticeStackParams | CourseStackParams | SearchStackParams | DetailStackParams
+  | NoticeStackParams
+  | CourseStackParams
+  | TodayStackParams
+  | SearchStackParams
+  | DetailStackParams
 >;
 export type AssignmentDetailParamList = SharedParamList<
   | AssignmentStackParams
   | CourseStackParams
+  | TodayStackParams
   | SearchStackParams
   | DetailStackParams
 >;
@@ -197,12 +212,13 @@ export type FileDetailParamList = SharedParamList<
   | AssignmentStackParams
   | FileStackParams
   | CourseStackParams
+  | TodayStackParams
   | SearchStackParams
   | AssignmentSubmissionStackParams
   | DetailStackParams
 >;
 export type CourseDetailParamList = SharedParamList<
-  CourseStackParams | DetailStackParams
+  CourseStackParams | TodayStackParams | DetailStackParams
 >;
 export type AssignmentSubmissionParamList = SharedParamList<
   AssignmentSubmissionStackParams | DetailStackParams

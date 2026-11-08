@@ -1,5 +1,6 @@
 import { useIsFocused, useNavigation } from '@react-navigation/native';
 import useAppCommand from 'hooks/useAppCommand';
+import { sidebarSplit } from 'navigation/layout';
 
 /**
  * Search (⌘F) and Settings… (⌘,) from the menu bar on iPad and Mac. Only
@@ -18,10 +19,15 @@ const useMainCommands = () => {
   useAppCommand(
     'settings',
     () =>
-      navigation.navigate('MainTab', {
-        screen: 'SettingStack',
-        params: { screen: 'Settings' },
-      }),
+      sidebarSplit
+        ? navigation.navigate('MainTab', {
+            screen: 'SettingStack',
+            params: { screen: 'Settings' },
+          })
+        : navigation.navigate('MainTab', {
+            screen: 'TodayStack',
+            params: { screen: 'Settings' },
+          }),
     isFocused,
   );
 };

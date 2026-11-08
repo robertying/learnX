@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import Notices from 'screens/Notices';
+import Today from 'screens/Today';
 import Search from 'screens/Search';
 import NoticeDetail from 'screens/NoticeDetail';
 import {
@@ -13,6 +14,7 @@ import {
   NoticeStackParams,
   SearchStackParams,
   SettingsStackParams,
+  TodayStackParams,
 } from 'screens/types';
 import Assignments from 'screens/Assignments';
 import AssignmentDetail from 'screens/AssignmentDetail';
@@ -45,6 +47,7 @@ import {
   mockNetworkTitle,
 } from './options';
 
+const TodayStackNavigator = createNativeStackNavigator<TodayStackParams>();
 const NoticeStackNavigator = createNativeStackNavigator<NoticeStackParams>();
 const AssignmentStackNavigator =
   createNativeStackNavigator<AssignmentStackParams>();
@@ -202,15 +205,52 @@ export const renderSettingDetails = () => (
     />
   </>
 );
-export const SettingStack = () => (
-  <SettingStackNavigator.Navigator>
+const renderSettings = () => (
+  <>
     <SettingStackNavigator.Screen
       name="Settings"
       component={Settings}
       options={getTitleOptions(t('settings'))}
     />
     {renderSettingDetails()}
+  </>
+);
+export const SettingStack = () => (
+  <SettingStackNavigator.Navigator>
+    {renderSettings()}
   </SettingStackNavigator.Navigator>
+);
+
+// Settings open from Today's header where there's no Settings tab.
+export const TodayStack = () => (
+  <TodayStackNavigator.Navigator>
+    <TodayStackNavigator.Screen
+      name="Today"
+      component={Today}
+      options={getScreenOptions(t('today'))}
+    />
+    <TodayStackNavigator.Screen
+      name="CourseDetail"
+      component={CourseDetail}
+      options={getDetailScreenOptions()}
+    />
+    <TodayStackNavigator.Screen
+      name="NoticeDetail"
+      component={NoticeDetail}
+      options={getDetailScreenOptions()}
+    />
+    <TodayStackNavigator.Screen
+      name="AssignmentDetail"
+      component={AssignmentDetail}
+      options={getDetailScreenOptions()}
+    />
+    <TodayStackNavigator.Screen
+      name="FileDetail"
+      component={FileDetail}
+      options={getDetailScreenOptions()}
+    />
+    {renderSettings()}
+  </TodayStackNavigator.Navigator>
 );
 
 export const LoginStack = () => (
