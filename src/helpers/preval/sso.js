@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  // Holds the password: only ever run on Tsinghua's own pages over HTTPS.
+  if (
+    window.location.protocol !== 'https:' ||
+    !/(^|\.)tsinghua\.edu\.cn$/.test(window.location.hostname)
+  ) {
+    return true;
+  }
+
   const sendToReactNative = (type, data) => {
     window?.ReactNativeWebView?.postMessage?.(JSON.stringify({ type, data }));
   };
