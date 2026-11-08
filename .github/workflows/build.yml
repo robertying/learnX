@@ -1,32 +1,30 @@
-name: Native build
+name: Build
 
-# Compiles the apps so a broken patch, Podfile, Gradle or native module change
-# shows up on the PR, not on a Mac later. Debug builds only: no JS bundle, no
-# signing, no uploads. Not a required check.
+# Compiles debug builds so a broken patch, Podfile, Gradle or native module
+# change shows up in CI, not on a Mac later. No JS bundle, no signing, no
+# uploads. Not a required check.
+#
+# Manual only for now: paused until the build caches are tuned. The plan is
+# Android on PRs that touch native paths, and iOS/Mac on main or with a label.
 on:
-  pull_request:
-    paths:
-      - android/**
-      - ios/**
-      - modules/**
-      - patches/**
-      - package.json
-      - pnpm-lock.yaml
-      - pnpm-workspace.yaml
-      - app.json
-      - Gemfile
-      - Gemfile.lock
-      - .github/workflows/native.yml
-  push:
-    branches: [main]
   workflow_dispatch:
 
 concurrency:
-  group: native-${{ github.event.pull_request.number || github.ref }}
+  group: build-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+
+# ccache keeps compiled C/C++/Objective-C between runs. Only main saves caches
+# (Gradle, ccache, Pods, Xcode compilation cache), so other refs start from
+# main's and can't evict or poison them.
+env:
+  CCACHE_DIR: ${{ github.workspace }}/.ccache
+  CCACHE_BASEDIR: ${{ github.workspace }}
+  CCACHE_MAXSIZE: 2G
+  CCACHE_COMPRESS: 'true'
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
   android:
@@ -55,8 +53,13 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
         with:
-          # Only main writes the cache, so PRs can't fill it with their own builds.
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+          cache-read-only: ${{ env.SAVE_CACHE != 'true' }}
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: android
+          save: ${{ env.SAVE_CACHE }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -66,10 +69,18 @@ jobs:
       - name: Write local.properties
         run: touch android/local.properties
 
-      # One ABI is enough to compile every native module and keeps the build short.
+      # One ABI is enough to compile every native module and keeps the build
+      # short. CMake (3.17+) picks up the compiler launchers from the environment.
       - name: Build debug APK
         working-directory: android
-        run: ./gradlew app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+        run: ./gradlew app:assembleDebug -PreactNativeArchitectures=x86_64 --build-cache --no-daemon
+        env:
+          CMAKE_C_COMPILER_LAUNCHER: ccache
+          CMAKE_CXX_COMPILER_LAUNCHER: ccache
+
+      - name: Show ccache stats
+        if: always()
+        run: ccache --show-stats || true
 
   ios:
     name: ${{ matrix.name }}
@@ -81,7 +92,7 @@ jobs:
         include:
           - name: iOS
             destination: generic/platform=iOS Simulator
-          - name: Mac Catalyst
+          - name: Mac
             destination: generic/platform=macOS,variant=Mac Catalyst
     steps:
       - name: Checkout repository
@@ -105,6 +116,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Restore Pods
+        id: pods
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('ios/Podfile.lock', 'patches/**') }}
+          restore-keys: pods-${{ runner.os }}-
+
       # Not --deployment: ExpoWidgets' podspec embeds the checkout's absolute
       # path, so its checksum in Podfile.lock differs on every machine.
       - name: Install pods
@@ -112,6 +133,26 @@ jobs:
         run: bundle exec pod install
         env:
           LANG: en_US.UTF-8
+
+      # Both matrix jobs make the same Pods; whichever finishes second skips the save.
+      - name: Save Pods
+        if: env.SAVE_CACHE == 'true' && steps.pods.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        continue-on-error: true
+        with:
+          path: |
+            ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: ${{ steps.pods.outputs.cache-primary-key }}
+
+      # Xcode's own compilation cache (Swift and C-family). ccache doesn't work
+      # here: Xcode 26 never calls the CC wrapper React Native sets up.
+      - name: Restore compilation cache
+        uses: actions/cache/restore@v6
+        with:
+          path: build/DerivedData/CompilationCache.noindex
+          key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
+          restore-keys: xcode-cas-${{ matrix.name }}-
 
       # No signing certificates on CI, so this only proves the code compiles and
       # links. Build signed (as AGENTS.md says) when running the app.
@@ -126,15 +167,24 @@ jobs:
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
+            COMPILATION_CACHE_ENABLE_CACHING=YES \
             > build/xcodebuild.log 2>&1 || {
             grep -E 'error:' build/xcodebuild.log | sort -u | head -50
             tail -n 80 build/xcodebuild.log
             exit 1
           }
           tail -n 5 build/xcodebuild.log
+          du -sh build/DerivedData/CompilationCache.noindex || true
+
+      - name: Save compilation cache
+        if: always() && env.SAVE_CACHE == 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: build/DerivedData/CompilationCache.noindex
+          key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
 
       - name: Upload build log
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: xcodebuild-${{ matrix.name }}

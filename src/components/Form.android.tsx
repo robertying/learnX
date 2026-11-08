@@ -13,6 +13,7 @@ import {
   PullToRefreshBox,
   RadioButton,
   RNHostView,
+  Row,
   Switch,
   Text,
   useMaterialColors,
@@ -44,6 +45,7 @@ import {
   type FormProps,
   type FormRowPosition,
   type FormSectionProps,
+  type FormTextProps,
   type FormToggleProps,
 } from './Form.shared';
 
@@ -185,9 +187,30 @@ const FormRow: React.FC<{
   /** How the row takes a tap: clickable, toggleable or selectable. */
   action?: ModifierConfig;
   titleColor?: string;
+  detail?: string;
   trailing?: ReactNode;
-}> = ({ title, icon, testID, position, action, titleColor, trailing }) => {
+}> = ({
+  title,
+  icon,
+  testID,
+  position,
+  action,
+  titleColor,
+  detail,
+  trailing,
+}) => {
   const colors = useMaterialColors();
+  const end =
+    detail && trailing ? (
+      <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 8 }}>
+        <Text color={colors.onSurfaceVariant}>{detail}</Text>
+        {trailing}
+      </Row>
+    ) : detail ? (
+      <Text color={colors.onSurfaceVariant}>{detail}</Text>
+    ) : (
+      trailing
+    );
   return (
     <ListItem
       colors={{ containerColor: colors.surfaceContainer }}
@@ -206,12 +229,13 @@ const FormRow: React.FC<{
           <RowIcon icon={icon} color={titleColor ?? colors.onSurfaceVariant} />
         </ListItem.LeadingContent>
       ) : null}
-      {trailing ? (
-        <ListItem.TrailingContent>{trailing}</ListItem.TrailingContent>
-      ) : null}
+      {end ? <ListItem.TrailingContent>{end}</ListItem.TrailingContent> : null}
     </ListItem>
   );
 };
+
+/** A row that only shows something. */
+export const FormText: React.FC<FormTextProps> = row => <FormRow {...row} />;
 
 /** A row that opens another page. Material lists don't show a chevron. */
 export const FormLink: React.FC<FormLinkProps> = ({

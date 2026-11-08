@@ -1,0 +1,4 @@
+/* Siri phrases for the App Shortcuts in NextDeadlineIntent.swift */
+"What's my next deadline in ${applicationName}" = "${applicationName}下一个截止的作业是什么";
+"Next deadline in ${applicationName}" = "${applicationName}下一个截止日期";
+"${applicationName} next deadline" = "${applicationName}的截止日期";

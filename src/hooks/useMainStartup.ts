@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import semverGt from 'semver/functions/gt';
 import { getLatestRelease } from 'helpers/update';
 import { setUpBackgroundFetch } from 'helpers/background';
+import { migrateDownloads } from 'helpers/fs';
 import { configureNotifications } from 'helpers/notifications';
 import useNotificationTaps from 'hooks/useNotificationTaps';
 import useLinkTaps from 'hooks/useLinkTaps';
@@ -13,12 +14,15 @@ import { latestSemesterQuery, useCourses } from 'data/queries';
 import { applyLatestSemester } from 'data/userData';
 import useDeadlineWidget from 'hooks/useDeadlineWidget';
 import useDeadlineReminders from 'hooks/useDeadlineReminders';
+import useSpotlight from 'hooks/useSpotlight';
 import packageJson from '../../package.json';
 
 /**
  * What the main UI starts once logged in: picks the semester, keeps its
- * courses fetched, schedules background fetch, keeps the deadline widget
- * and reminders current, sets up notifications and opens their taps and widget rows' links, and checks
+ * courses fetched, schedules background fetch, keeps the deadline widget,
+ * reminders and Spotlight current, sets up notifications and opens their
+ * taps and widget rows' links, moves downloads from the old folder layout,
+ * and checks
  * for an Android update.
  */
 const useMainStartup = () => {
@@ -41,6 +45,7 @@ const useMainStartup = () => {
 
   useDeadlineWidget();
   useDeadlineReminders();
+  useSpotlight();
 
   useEffect(() => {
     if (loggedIn) {
@@ -50,6 +55,7 @@ const useMainStartup = () => {
 
   useEffect(() => {
     configureNotifications();
+    migrateDownloads();
   }, []);
   useNotificationTaps();
   useLinkTaps();

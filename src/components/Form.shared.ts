@@ -38,12 +38,17 @@ export interface FormIcon {
 interface FormRowProps {
   title: string;
   icon?: FormIcon;
+  /** A value or detail at the end of the row, in the secondary color. */
+  detail?: string;
   testID?: string;
   /** Set by `FormSection` on Android, for the row's corners. */
   position?: FormRowPosition;
 }
 
 export type FormRowPosition = 'only' | 'first' | 'middle' | 'last';
+
+/** A row that only shows something. */
+export type FormTextProps = FormRowProps;
 
 export interface FormLinkProps extends FormRowProps {
   /** Opens another page. */

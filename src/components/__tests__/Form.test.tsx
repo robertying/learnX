@@ -10,6 +10,7 @@ import {
   FormLink,
   FormNumberField,
   FormSection,
+  FormText,
   FormToggle,
   parseNumberInput,
   positionRows,
@@ -35,6 +36,17 @@ describe('Form', () => {
     expect(screen.getByTestId('icon-chevron.right')).toBeTruthy();
     await userEvent.setup().press(screen.getByText('Semester'));
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows a detail at the end of a row', async () => {
+    await render(
+      <FormSection>
+        <FormText title="Total" detail="3 files · 1 MB" />
+        <FormLink title="Downloads" detail="1 MB" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    expect(screen.getByText('3 files · 1 MB')).toBeTruthy();
+    expect(screen.getByText('1 MB')).toBeTruthy();
   });
 
   it('makes a toggle row one switch', async () => {

@@ -35,6 +35,7 @@ import {
   type FormProfileProps,
   type FormProps,
   type FormSectionProps,
+  type FormTextProps,
   type FormToggleProps,
 } from './Form.shared';
 
@@ -83,11 +84,34 @@ const RowLabel: React.FC<{
   );
 };
 
+const secondaryText = foregroundStyle({
+  type: 'hierarchical',
+  style: 'secondary',
+});
+
+const RowDetail: React.FC<{ detail?: string }> = ({ detail }) =>
+  detail ? <Text modifiers={[secondaryText]}>{detail}</Text> : null;
+
+export const FormText: React.FC<FormTextProps> = ({
+  title,
+  icon,
+  testID,
+  detail,
+}) => (
+  <LabeledContent
+    label={<RowLabel title={title} icon={icon} plain />}
+    testID={testID}
+  >
+    <RowDetail detail={detail} />
+  </LabeledContent>
+);
+
 /** A row that opens another page, with the chevron. */
 export const FormLink: React.FC<FormLinkProps> = ({
   title,
   icon,
   testID,
+  detail,
   onPress,
   badge,
 }) => {
@@ -97,6 +121,7 @@ export const FormLink: React.FC<FormLinkProps> = ({
       <HStack>
         <RowLabel title={title} icon={icon} plain />
         <Spacer />
+        <RowDetail detail={detail} />
         {badge ? (
           <Circle
             modifiers={[
@@ -116,6 +141,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
   title,
   icon,
   testID,
+  detail,
   onPress,
   destructive,
   loading,
@@ -132,6 +158,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
       <HStack>
         <RowLabel title={title} icon={icon} plain={choice} />
         <Spacer />
+        <RowDetail detail={detail} />
         {loading ? <ProgressView /> : null}
         {selected ? <Image systemName="checkmark" /> : null}
       </HStack>

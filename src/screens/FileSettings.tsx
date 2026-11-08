@@ -1,17 +1,30 @@
-import { Alert, Linking, Platform } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Linking, Platform } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
-import { ensureLearnXFilesDir, removeFileDir } from 'helpers/fs';
+import {
+  ensureLearnXFilesDir,
+  listDownloads,
+  moveDownloadsToCurrentDirectory,
+} from 'helpers/fs';
+import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
-import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
+import {
+  Form,
+  FormButton,
+  FormLink,
+  FormSection,
+  FormToggle,
+} from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import DeviceInfo from 'constants/DeviceInfo';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
-const FileSettings: React.FC<Props> = () => {
+const FileSettings: React.FC<Props> = ({ navigation }) => {
   const fileUseDocumentDir = useSettings(
     settings => settings.fileUseDocumentDir,
   );
@@ -22,30 +35,14 @@ const FileSettings: React.FC<Props> = () => {
     settings => settings.openFileAfterDownload,
   );
 
-  const handleClearCache = () => {
-    Alert.alert(
-      t('clearFileCache'),
-      t('clearFileCacheConfirmation'),
-      [
-        {
-          text: t('cancel'),
-          style: 'cancel',
-        },
-        {
-          text: t('ok'),
-          onPress: async () => {
-            try {
-              await removeFileDir();
-              toast(t('clearFileCacheSucceeded'), 'success');
-            } catch (e) {
-              toast(t('clearFileCacheFailed') + (e as Error).message, 'error');
-            }
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  };
+  const [downloadsSize, setDownloadsSize] = useState<number | null>(null);
+  useFocusEffect(
+    useCallback(() => {
+      setDownloadsSize(
+        listDownloads().reduce((total, course) => total + course.size, 0),
+      );
+    }, []),
+  );
 
   const openDownloadDirectory = async () => {
     try {
@@ -73,7 +70,10 @@ const FileSettings: React.FC<Props> = () => {
             icon={{ ios: 'internaldrive', android: 'cached' }}
             title={t('fileUseDocumentDir')}
             value={fileUseDocumentDir}
-            onValueChange={value => setSetting('fileUseDocumentDir', value)}
+            onValueChange={value => {
+              setSetting('fileUseDocumentDir', value);
+              moveDownloadsToCurrentDirectory();
+            }}
           />
         </FormSection>
         <FormSection
@@ -103,6 +103,14 @@ const FileSettings: React.FC<Props> = () => {
           </FormSection>
         )}
         <FormSection>
+          <FormLink
+            icon={{ ios: 'arrow.down.circle', android: 'download' }}
+            title={t('downloads')}
+            detail={
+              downloadsSize === null ? undefined : formatFileSize(downloadsSize)
+            }
+            onPress={() => navigation.push('Downloads')}
+          />
           {DeviceInfo.isMac() && (
             <FormButton
               icon={{ ios: 'folder', android: 'open-in-new' }}
@@ -110,12 +118,6 @@ const FileSettings: React.FC<Props> = () => {
               onPress={openDownloadDirectory}
             />
           )}
-          <FormButton
-            icon={{ ios: 'trash', android: 'delete' }}
-            title={t('clearFileCache')}
-            destructive
-            onPress={handleClearCache}
-          />
         </FormSection>
       </Form>
     </SafeArea>

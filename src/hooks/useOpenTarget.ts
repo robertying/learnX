@@ -3,8 +3,8 @@ import { NotificationTarget } from 'helpers/notifications';
 import { setPendingNotificationTarget } from 'hooks/useNotificationTarget';
 
 /**
- * Opens what a tapped notification or widget row points to: the item's
- * detail, or its list.
+ * Opens what a tapped notification, widget row or Spotlight result points
+ * to: the item's detail, or its list.
  */
 const useOpenTarget = () => {
   const navigation = useNavigation();
