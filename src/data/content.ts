@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
-import { ContentType, CourseType } from 'thu-learn-lib';
+import { CourseType } from 'thu-learn-lib';
 import dayjs from 'dayjs';
 import { queryClient, queryPersister } from 'data/queryClient';
 import { coursesQuery, getCourseNames } from 'data/queries';
@@ -8,6 +8,15 @@ import { dataSource } from 'data/source';
 import { Assignment, File, Notice } from 'data/types/state';
 import { getUserData, useCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
+import { createLimiter } from 'helpers/limiter';
+
+/**
+ * Course lists fetched at once, across notices, assignments and files. A
+ * course's assignments alone take a few requests plus two per assignment, so
+ * a few courses keep the connections busy, and the server isn't hit with
+ * every course of every list at the same moment.
+ */
+const courseFetches = createLimiter(4);
 
 /** Adds the course's id and names to each item the server lists for it. */
 const tag = <T>(courseId: string, items: object[]) =>
@@ -31,19 +40,21 @@ const courseIdsOf = async (semesterId: string) =>
 
 /**
  * Notices, assignments and files work the same way: one list per semester,
- * fetched for all its courses at once, and CourseDetail refreshing a single
+ * fetched course by course (a course that fails keeps its cached items; the
+ * list fails only when every course does), and CourseDetail refreshing a single
  * course's items into it.
  */
 const createContent = <T extends { id: string; courseId: string }>({
   name,
-  type,
   fetchCourse,
   sort,
+  priority,
 }: {
   name: string;
-  type: ContentType;
   fetchCourse: (courseId: string) => Promise<object[]>;
   sort: (items: T[]) => T[];
+  /** Lower lists get their courses fetched first when several refresh. */
+  priority: number;
 }) => {
   /**
    * Changes made in the app (marking an item read) that the server may not
@@ -62,15 +73,34 @@ const createContent = <T extends { id: string; courseId: string }>({
   const query = (semesterId: string) =>
     queryOptions({
       queryKey: [name, semesterId] as const,
-      queryFn: async () => {
-        const results: Record<string, object[]> =
-          await dataSource.getAllContents(await courseIdsOf(semesterId), type);
-        return sort(
-          withOverrides(
-            Object.entries(results).flatMap(([courseId, items]) =>
-              tag<T>(courseId, items),
-            ),
+      queryFn: async (): Promise<T[]> => {
+        const courseIds = await courseIdsOf(semesterId);
+        const results = await Promise.allSettled(
+          courseIds.map(courseId =>
+            courseFetches(() => fetchCourse(courseId), priority),
           ),
+        );
+        const failure = results.find(r => r.status === 'rejected');
+        if (failure && results.every(r => r.status === 'rejected')) {
+          throw failure.reason;
+        }
+        // A course that failed keeps what was cached for it.
+        const failed = new Set(
+          courseIds.filter((_, i) => results[i].status === 'rejected'),
+        );
+        const cached =
+          failed.size > 0
+            ? (queryClient.getQueryData<T[]>([name, semesterId]) ?? [])
+            : [];
+        return sort(
+          withOverrides([
+            ...cached.filter(item => failed.has(item.courseId)),
+            ...results.flatMap((result, i) =>
+              result.status === 'fulfilled'
+                ? tag<T>(courseIds[i], result.value)
+                : [],
+            ),
+          ]),
         );
       },
     });
@@ -171,7 +201,7 @@ const createContent = <T extends { id: string; courseId: string }>({
 
 const notices = createContent<Notice>({
   name: 'notices',
-  type: ContentType.NOTIFICATION,
+  priority: 1,
   fetchCourse: courseId => dataSource.getNotificationList(courseId),
   sort: byNewest(notice => notice.publishTime),
 });
@@ -190,7 +220,7 @@ export const useNotices = () => {
 
 const assignments = createContent<Assignment>({
   name: 'assignments',
-  type: ContentType.HOMEWORK,
+  priority: 0,
   fetchCourse: courseId => dataSource.getHomeworkList(courseId),
   sort: sortAssignments,
 });
@@ -206,7 +236,7 @@ export const useAssignments = () => {
 
 const files = createContent<File>({
   name: 'files',
-  type: ContentType.FILE,
+  priority: 2,
   fetchCourse: courseId => dataSource.getFileList(courseId, CourseType.STUDENT),
   sort: byNewest(file => file.uploadTime),
 });
