@@ -161,7 +161,7 @@ describe('AssignmentCard', () => {
     for (const icon of [
       'attachment',
       'check',
-      'grade',
+      'star',
       'key-variant',
       'medal',
     ]) {
@@ -184,7 +184,7 @@ describe('AssignmentCard', () => {
     for (const icon of [
       'attachment',
       'check',
-      'grade',
+      'star',
       'key-variant',
       'medal',
     ]) {

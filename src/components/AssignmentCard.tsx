@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
@@ -73,9 +72,9 @@ const AssignmentCard: React.FC<
               />
             )}
             {graded && (
-              <MaterialIcons
+              <MaterialCommunityIcons
                 style={styles.icon}
-                name="grade"
+                name="star"
                 color={Colors.red500}
                 size={18}
               />

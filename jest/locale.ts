@@ -1,2 +1,2 @@
-/** Locale reported by the react-native-localize mock; tests may change it. */
+/** Locale reported by the expo-localization mock; tests may change it. */
 export const mockLocale = { current: 'en-US' };

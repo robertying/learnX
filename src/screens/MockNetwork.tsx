@@ -51,9 +51,7 @@ const MockNetwork: React.FC = () => {
             key={value}
             testID={`mock-network-latency-${value}`}
             iconName={
-              config.latency === value
-                ? 'radio-button-checked'
-                : 'radio-button-unchecked'
+              config.latency === value ? 'radiobox-marked' : 'radiobox-blank'
             }
             primaryText={label}
             type="none"
@@ -66,9 +64,7 @@ const MockNetwork: React.FC = () => {
             key={value}
             testID={`mock-network-failure-${value}`}
             iconName={
-              config.failure === value
-                ? 'radio-button-checked'
-                : 'radio-button-unchecked'
+              config.failure === value ? 'radiobox-marked' : 'radiobox-blank'
             }
             primaryText={label}
             type="none"
@@ -83,7 +79,7 @@ const MockNetwork: React.FC = () => {
         <Caption style={styles.header}>Login</Caption>
         <TableCell
           testID="mock-network-login-fails"
-          iconName="password"
+          iconName="form-textbox-password"
           primaryText="Reject login (bad credential)"
           switchValue={config.loginFails}
           onSwitchValueChange={value =>

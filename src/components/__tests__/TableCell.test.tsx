@@ -19,7 +19,7 @@ describe('TableCell', () => {
     );
     expect(screen.getByText('Semester')).toBeTruthy();
     expect(screen.getByText('2025-2026 Spring')).toBeTruthy();
-    expect(screen.getByTestId('icon-keyboard-arrow-right')).toBeTruthy();
+    expect(screen.getByTestId('icon-chevron-right')).toBeTruthy();
     await userEvent.setup().press(screen.getByText('Semester'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });

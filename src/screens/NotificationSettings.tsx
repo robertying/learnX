@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, Linking, StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
-import { MaterialIconsIconName } from '@react-native-vector-icons/material-icons';
+import { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import TableCell from 'components/TableCell';
 import SafeArea from 'components/SafeArea';
@@ -35,13 +35,13 @@ type Toggle = Exclude<keyof Settings, 'deadlineReminderOffset'>;
 
 const contentToggles: {
   key: Toggle;
-  icon: MaterialIconsIconName;
+  icon: MaterialDesignIconsIconName;
   label: string;
 }[] = [
-  { key: 'notices', icon: 'notifications', label: t('notifyNewNotices') },
+  { key: 'notices', icon: 'bell', label: t('notifyNewNotices') },
   { key: 'files', icon: 'folder', label: t('notifyNewFiles') },
-  { key: 'assignments', icon: 'event', label: t('notifyNewAssignments') },
-  { key: 'grades', icon: 'grading', label: t('notifyGrades') },
+  { key: 'assignments', icon: 'calendar', label: t('notifyNewAssignments') },
+  { key: 'grades', icon: 'clipboard-check-outline', label: t('notifyGrades') },
   {
     key: 'deadlineChanges',
     icon: 'update',
@@ -160,7 +160,7 @@ const NotificationSettings: React.FC<Props> = () => {
           )}
           <TableCell
             style={styles.marginTop}
-            iconName="settings"
+            iconName="cog"
             primaryText={t('configureNotifications')}
             type="none"
             onPress={openSystemSettings}
@@ -200,7 +200,7 @@ const NotificationSettings: React.FC<Props> = () => {
           )}
           {__DEV__ && (
             <TableCell
-              iconName="alarm-on"
+              iconName="alarm-check"
               primaryText={t('previewDeadlineReminder')}
               type="none"
               onPress={async () =>
