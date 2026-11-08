@@ -6,7 +6,9 @@ import {
   SemesterInfo,
   SemesterType,
 } from 'thu-learn-lib';
+import dayjs from 'dayjs';
 import type { DataSource } from 'data/source';
+import { sessionsFromCourses } from 'helpers/schedule';
 
 const mock = (): typeof import('data/mock') => require('data/mock');
 
@@ -149,12 +151,22 @@ const itemsOf = (type: ContentType) => {
   }
 };
 
+/** A YYYYMMDD date, as the calendar takes it. */
+const parseDay = (day: string) =>
+  dayjs(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`);
+
 const semesterInfo = (id: string): SemesterInfo => {
   const [startYear, endYear, term] = id.split('-');
   return {
     id,
-    startDate: '',
-    endDate: '',
+    ...(id === mock().mockCurrentSemester
+      ? {
+          startDate: mock().mockSemesterStart.format('YYYY-MM-DD'),
+          endDate: mock()
+            .mockSemesterStart.add(18, 'week')
+            .format('YYYY-MM-DD'),
+        }
+      : { startDate: '', endDate: '' }),
     startYear: Number(startYear),
     endYear: Number(endYear),
     type:
@@ -203,8 +215,27 @@ export const mockSource: DataSource = {
           courseIds,
         ) as unknown as CourseContent<T>,
     ),
-  // The mock courses have no timetable.
-  getCalendar: () => request(() => []),
+  // The registrar's calendar, worked out from the courses' times.
+  getCalendar: (start, end) =>
+    request(() => {
+      const from = parseDay(start);
+      const days = parseDay(end).diff(from, 'day') + 1;
+      return sessionsFromCourses(
+        mock().mockCourses.filter(
+          course => course.semesterId === mock().mockCurrentSemester,
+        ),
+        mock().mockSemesterStart.format('YYYY-MM-DD'),
+        from,
+        days,
+      ).map(session => ({
+        courseName: session.courseName,
+        location: session.location,
+        status: '',
+        date: dayjs(session.start).format('YYYY-MM-DD'),
+        startTime: dayjs(session.start).format('HH:mm'),
+        endTime: dayjs(session.end).format('HH:mm'),
+      }));
+    }),
 };
 
 /**
