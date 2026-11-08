@@ -12,7 +12,7 @@ import TextField from 'components/TextField';
 import { toast } from 'components/Toast';
 import ProgressBar from 'components/ProgressBar';
 import dayjs from 'dayjs';
-import { RemoteFile } from 'thu-learn-lib';
+import { RemoteFile } from '@robertying/thu-learn-lib';
 import SafeArea from 'components/SafeArea';
 import ContainedButton from 'components/ContainedButton';
 import TextButton from 'components/TextButton';

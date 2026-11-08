@@ -1,4 +1,4 @@
-import { ApiError, FailReason } from 'thu-learn-lib';
+import { ApiError, FailReason } from '@robertying/thu-learn-lib';
 import { t } from './i18n';
 
 export const getSemesterTextFromId = (semesterId: string) => {

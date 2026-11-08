@@ -89,16 +89,21 @@ export const syncCourseSchedule = async (
   try {
     await loginWithFingerPrint();
 
-    const events = await dataSource.getCalendar(
+    // Long ranges are fetched a few weeks at a time; it rejects only when
+    // every window failed.
+    const { events, failedRanges } = await dataSource.getCalendar(
       start.format('YYYYMMDD'),
       end.format('YYYYMMDD'),
-      graduate,
+      { graduate },
     );
 
-    if (events.length === 0) {
+    if (events.length === 0 && failedRanges.length === 0) {
       return { text: t('courseScheduleSyncNoCourse'), type: 'warning' };
     }
-    await saveCoursesToCalendar(events, start, end);
+    await saveCoursesToCalendar(events, start, end, failedRanges);
+    if (failedRanges.length > 0) {
+      return { text: t('courseScheduleSyncPartial'), type: 'warning' };
+    }
     return { text: t('courseScheduleSyncSucceeded'), type: 'success' };
   } catch (err) {
     return courseSyncErrorToast(err);

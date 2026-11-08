@@ -56,6 +56,8 @@ export default {
   overwriteAttachment: 'Overwrite uploaded attachment',
   pickAttachment: 'Pick attachment',
   courseScheduleSyncSucceeded: 'Successfully synced course schedule',
+  courseScheduleSyncPartial:
+    'Synced part of the course schedule. Some weeks could not be fetched and were left as they were; try syncing again later.',
   courseScheduleSyncNoCalendarPermission:
     'Course Schedule Sync failed. Please grant the App full access to calendars, or try restarting the App if you have already done so.',
   courseScheduleSyncNoReminderPermission:

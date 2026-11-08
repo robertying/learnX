@@ -1,8 +1,9 @@
-import { FailReason } from 'thu-learn-lib';
+import { FailReason } from '@robertying/thu-learn-lib';
 import { getAuth, initialAuth, useAuthStore } from 'data/auth';
 import { getCredentials } from 'data/credentials';
 import { login, loginWithOfflineMode, logout } from 'data/login';
 import {
+  dataSource,
   isServerReachable,
   loginWithFingerPrint,
   resetDataSource,
@@ -126,6 +127,23 @@ describe('login', () => {
   it('resets the session when asked', async () => {
     await login({ reset: true });
     expect(resetDataSource).toHaveBeenCalled();
+  });
+
+  it('keeps a session the server still accepts when resuming', async () => {
+    const ensureSession = jest.spyOn(dataSource, 'ensureSession');
+    await login({ resume: true });
+    expect(ensureSession).toHaveBeenCalled();
+    expect(loginWithFingerPrint).not.toHaveBeenCalled();
+    expect(resetDataSource).not.toHaveBeenCalled();
+    expect(getAuth()).toMatchObject({ loggedIn: true, failure: null });
+  });
+
+  it('records a failed resume like a failed login', async () => {
+    jest
+      .spyOn(dataSource, 'ensureSession')
+      .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
+    await login({ resume: true });
+    expect(getAuth()).toMatchObject({ loggedIn: false, failure: 'rejected' });
   });
 
   it('does not start a second login with the saved one', async () => {

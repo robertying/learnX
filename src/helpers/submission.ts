@@ -1,7 +1,7 @@
 // Assignment submission helpers: attachment naming, what the submit button
 // allows, and the upload itself. Used by hooks/useAssignmentSubmission.
 import mime from 'mime';
-import { RemoteFile } from 'thu-learn-lib';
+import { RemoteFile } from '@robertying/thu-learn-lib';
 import { submitAssignment } from 'data/source';
 import { Assignment } from 'data/types/state';
 import { getExtension, stripExtension } from './filename';

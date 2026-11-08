@@ -1,4 +1,7 @@
-import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
+import {
+  HomeworkCompletionType,
+  HomeworkSubmissionType,
+} from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { Assignment, Course, File, Notice, User } from 'data/types/state';
 import type { UserData } from 'data/userData';
@@ -381,7 +384,7 @@ export const mockAssignments: Assignment[] = [
     },
     answerContent: '答案已上传',
     excellentHomeworkList: Array.from({ length: 3 }, (_, index) => ({
-      id: '7f27d54daad54846a43796f5ed008e46',
+      id: `7f27d54daad54846a43796f5ed008e4${index}`,
       baseId: '26ef84e76d60efc1016d6c459d717434',
       title: '第十三次作业',
       url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',

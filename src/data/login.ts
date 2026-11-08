@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
 import {
+  dataSource,
   isServerReachable,
   loginWithFingerPrint,
   resetDataSource,
@@ -36,7 +37,9 @@ const loggedIn = () =>
 /**
  * Signs in with the given login, or the saved one when none is given. A login
  * with a fingerprint (from SSO) is saved; a username and password alone first
- * forget the saved one.
+ * forget the saved one. With `resume`, it keeps the current session when the
+ * server still accepts it (one request) and only signs in again when it has
+ * expired, as when the app comes back from the background.
  */
 export async function login({
   username,
@@ -45,7 +48,8 @@ export async function login({
   fingerGenPrint = '',
   fingerGenPrint3 = '',
   reset = false,
-}: Partial<Credentials> & { reset?: boolean }) {
+  resume = false,
+}: Partial<Credentials> & { reset?: boolean; resume?: boolean }) {
   if (!username || !password || !fingerPrint) {
     if (getAuth().loggingIn) {
       return;
@@ -66,13 +70,15 @@ export async function login({
     // takes long); the offline retries in useReLogin take over instead.
     await retry(
       () =>
-        loginWithFingerPrint(
-          username,
-          password,
-          fingerPrint,
-          fingerGenPrint,
-          fingerGenPrint3,
-        ),
+        resume
+          ? dataSource.ensureSession()
+          : loginWithFingerPrint(
+              username,
+              password,
+              fingerPrint,
+              fingerGenPrint,
+              fingerGenPrint3,
+            ),
       3,
       1000,
       error => !isNetworkError(error),

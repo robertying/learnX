@@ -175,7 +175,7 @@ export const syncContent = async ({
     jobs.map(
       ({ list, courseId }) =>
         () =>
-          contentLists[list].fetchCourse(courseId),
+          contentLists[list].fetchCourse(semesterId, courseId),
     ),
     { concurrency: COURSE_CONCURRENCY, deadline },
   );

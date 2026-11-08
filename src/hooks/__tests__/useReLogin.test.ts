@@ -107,7 +107,7 @@ describe('useReLogin', () => {
     );
   });
 
-  it('logs in again after a long break, then refetches', async () => {
+  it('checks the session after a long break, then refetches', async () => {
     const refetch = jest
       .spyOn(queryClient, 'refetchQueries')
       .mockResolvedValue();
@@ -116,7 +116,7 @@ describe('useReLogin', () => {
     refetch.mockClear();
     jest.mocked(login).mockImplementationOnce(async () => {});
     await leaveAndComeBack(11);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({ resume: true });
     expect(refetch).toHaveBeenCalled();
   });
 });
