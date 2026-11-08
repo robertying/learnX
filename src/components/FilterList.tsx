@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Platform, RefreshControl, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { ParamListBase, StackActions } from '@react-navigation/native';
+import { ParamListBase } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
@@ -203,7 +203,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   const handleNavigateCourseX = () => {
     if (detailNavigator) {
-      detailNavigator.dispatch(StackActions.push('CourseX'));
+      detailNavigator.push('CourseX');
     } else {
       navigation.navigate('CourseXStack');
     }

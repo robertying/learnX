@@ -1,7 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Chip } from 'react-native-paper';
-import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
@@ -16,7 +15,7 @@ import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
 import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
-import { AssignmentStackParams, MainStackScreenProps } from 'screens/types';
+import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { getWebViewTemplate, removeTags } from 'helpers/html';
 import { getExtension, stripExtension } from 'helpers/fs';
@@ -33,7 +32,10 @@ import { Caption, Text, Title } from 'components/Text';
 import Divider from 'components/Divider';
 import { useTheme } from 'theme';
 
-type Props = MainStackScreenProps<AssignmentStackParams, 'AssignmentDetail'>;
+type Props = MainStackScreenProps<
+  AssignmentDetailParamList,
+  'AssignmentDetail'
+>;
 
 const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
   const assignment = useAssignment(route.params.id);
@@ -90,8 +92,11 @@ const AssignmentDetailContent: React.FC<{
 
   const html = getWebViewTemplate(
     description || `<p>${t('noAssignmentDescription')}</p>`,
-    theme.dark,
-    theme.colors.surface,
+    {
+      dark: theme.dark,
+      backgroundColor: theme.colors.surface,
+      textColor: theme.colors.onSurfaceHigh,
+    },
   );
 
   const handleFileOpen = (remoteFile?: RemoteFile) => {
@@ -110,9 +115,7 @@ const AssignmentDetailContent: React.FC<{
 
   const handleSubmit = useCallback(() => {
     if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.push('AssignmentSubmission', { id }),
-      );
+      detailNavigator.push('AssignmentSubmission', { id });
     } else {
       navigation.navigate('AssignmentSubmissionStack', {
         screen: 'AssignmentSubmission',

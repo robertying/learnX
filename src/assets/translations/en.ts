@@ -229,6 +229,8 @@ export default {
   info: 'Info',
   preview: 'Preview',
   unknownFileType: 'Unknown',
+  somethingWentWrong: 'Something went wrong',
+  reloadApp: 'Reload learnX',
   notifications: 'Notifications',
   notificationsCaption:
     'learnX checks for new content in the background when the system lets it, so these notifications can arrive late.',

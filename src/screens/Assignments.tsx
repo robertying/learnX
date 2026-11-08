@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent } from 'react';
-import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import { AssignmentStackParams, MainStackScreenProps } from 'screens/types';
 import FilterList from 'components/FilterList';
@@ -53,12 +52,10 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
 
   const handlePush = (item: Pick<Assignment, 'id'>) => {
     if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace('AssignmentDetail', {
-          id: item.id,
-          disableAnimation: true,
-        }),
-      );
+      detailNavigator.replace('AssignmentDetail', {
+        id: item.id,
+        disableAnimation: true,
+      });
     } else {
       navigation.push('AssignmentDetail', { id: item.id });
     }

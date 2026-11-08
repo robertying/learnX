@@ -10,13 +10,18 @@ import {
   SafeAreaProvider,
   useSafeAreaFrame,
 } from 'react-native-safe-area-context';
-import { RootStackParams, SplitRootStackParams } from 'screens/types';
+import {
+  DetailStackParams,
+  RootStackParams,
+  SplitRootStackParams,
+} from 'screens/types';
 import Splash from 'components/Splash';
 import { SplitViewProvider } from 'components/SplitView';
 import { WindowSafeAreaProvider } from 'components/WindowSafeArea';
 import Numbers from 'constants/Numbers';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
+import { trackScreen } from 'helpers/crashReporting';
 import { useNavigationTheme } from 'theme';
 import { DetailStack } from './DetailStack';
 import MainTab from './MainTab';
@@ -55,7 +60,8 @@ const renderMainScreens = () => (
 const SplitMain = () => {
   const theme = useNavigationTheme();
   const frame = useSafeAreaFrame();
-  const detailNavigationContainerRef = useRef<NavigationContainerRef<{}>>(null);
+  const detailNavigationContainerRef =
+    useRef<NavigationContainerRef<DetailStackParams>>(null);
 
   // The master pane mounts along with the detail container, before the ref is
   // set. Hand the ref out only once it is, so that its consumers render again.
@@ -87,6 +93,7 @@ const SplitMain = () => {
           theme={theme}
           fallback={<Splash />}
           onReady={() => setDetailReady(true)}
+          onStateChange={trackScreen}
         >
           <DetailStack />
         </NavigationContainer>
@@ -114,7 +121,11 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
   return (
     <SafeAreaProvider>
       <WindowSafeAreaProvider>
-        <NavigationContainer theme={theme} fallback={<Splash />}>
+        <NavigationContainer
+          theme={theme}
+          fallback={<Splash />}
+          onStateChange={trackScreen}
+        >
           {nativeSplit ? (
             <RootNavigator.Navigator
               screenOptions={{

@@ -1,0 +1,122 @@
+import type { NavigationState, PartialState } from '@react-navigation/native';
+import Crashlytics, { type StackFrame } from '../../modules/crashlytics';
+import { getCredentials } from 'data/credentials';
+import { isMockUser } from 'helpers/mock';
+
+// `at fn (file:line:column)`, `at fn (address at file:line:column)` (Hermes)
+// or `at file:line:column`. Native frames (`at fn (native)`) have no location
+// and are left out.
+const FRAME_PATTERN =
+  /^\s*at (?:(.+?) \()?(?:address at )?(.+?):(\d+):(\d+)\)?$/;
+
+/** The frames of a Hermes or V8 `error.stack`, file names without their path or query. */
+export const parseStack = (stack?: string): StackFrame[] =>
+  (stack ?? '').split('\n').flatMap(line => {
+    const match = FRAME_PATTERN.exec(line);
+    if (!match) {
+      return [];
+    }
+    const [, symbol, location, frameLine, column] = match;
+    // Metro URLs carry their options after `?` or `//&`.
+    const path = location.replace(/(\?|\/\/&).*$/, '');
+    const file = path.split('/').pop() || path;
+    return [
+      {
+        symbol: symbol || '<anonymous>',
+        file,
+        line: Number(frameLine),
+        column: Number(column),
+      },
+    ];
+  });
+
+const toError = (value: unknown): Error => {
+  if (value instanceof Error) {
+    return value;
+  }
+  const error = new Error(
+    typeof value === 'string'
+      ? value
+      : (JSON.stringify(value) ?? String(value)),
+  );
+  error.name = 'NonError';
+  return error;
+};
+
+// Debug builds and the mock accounts would only add noise.
+const shouldReport = () =>
+  !__DEV__ && !!Crashlytics && !isMockUser(getCredentials()?.username);
+
+/**
+ * Sends a non-fatal report to Crashlytics with the error's JS frames, after
+ * `logs` (e.g. a React component stack). Never throws.
+ */
+export function recordError(error: unknown, ...logs: string[]) {
+  if (!shouldReport()) {
+    return;
+  }
+  try {
+    const { name, message, stack } = toError(error);
+    for (const log of logs) {
+      Crashlytics!.log(log);
+    }
+    Crashlytics!.recordError(name || 'Error', message, parseStack(stack));
+  } catch {
+    // Reporting must never be the reason the app fails.
+  }
+}
+
+function setCustomKey(key: string, value: string) {
+  if (!shouldReport()) {
+    return;
+  }
+  try {
+    Crashlytics!.setCustomKey(key, value);
+  } catch {}
+}
+
+let installed = false;
+
+/**
+ * Reports every uncaught JS error before React Native's own handler, which
+ * still turns fatal ones into a native crash. The report is written first, so
+ * Crashlytics sends it with the crash; `js_fatal` matches the two up.
+ */
+export function installGlobalErrorHandler() {
+  if (installed) {
+    return;
+  }
+  installed = true;
+
+  const defaultHandler = ErrorUtils.getGlobalHandler();
+  setCustomKey('js_fatal', 'false');
+  ErrorUtils.setGlobalHandler((error, isFatal) => {
+    if (isFatal) {
+      setCustomKey('js_fatal', 'true');
+    }
+    recordError(error);
+    defaultHandler(error, isFatal);
+  });
+}
+
+type State = NavigationState | PartialState<NavigationState>;
+
+const currentRouteName = (state: State | undefined): string | undefined => {
+  let route: State['routes'][number] | undefined;
+  while (state) {
+    route = state.routes[state.index ?? state.routes.length - 1];
+    state = route?.state as State | undefined;
+  }
+  return route?.name;
+};
+
+/**
+ * Keeps the `screen` key on the screen last navigated to, in any navigation
+ * container. For their `onStateChange`.
+ */
+export function trackScreen(state: NavigationState | undefined) {
+  const name = currentRouteName(state);
+  if (name) {
+    setCustomKey('screen', name);
+  }
+}

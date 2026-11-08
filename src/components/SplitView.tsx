@@ -1,11 +1,11 @@
 import { createContext, useState, Children } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { NavigationContainerRef } from '@react-navigation/native';
+import type { DetailNavigationContainerRef } from 'screens/types';
 import Numbers from 'constants/Numbers';
 import Divider from 'components/Divider';
 
 const SplitViewContext = createContext<{
-  detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null> | null;
+  detailNavigationContainerRef: DetailNavigationContainerRef | null;
   splitEnabled: boolean;
   showDetail: boolean;
   showMaster: boolean;
@@ -23,7 +23,7 @@ const SplitViewContext = createContext<{
 
 export interface SplitViewProps {
   splitEnabled: boolean;
-  detailNavigationContainerRef: React.RefObject<NavigationContainerRef<{}> | null> | null;
+  detailNavigationContainerRef: DetailNavigationContainerRef | null;
   showDetail: boolean;
 }
 

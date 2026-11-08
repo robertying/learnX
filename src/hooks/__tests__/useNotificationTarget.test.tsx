@@ -1,5 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
+import { DetailStackParams } from 'screens/types';
 import { SplitViewContext } from 'components/SplitView';
 import Numbers from 'constants/Numbers';
 import useNotificationTarget, {
@@ -17,7 +18,7 @@ jest.mock('components/NativeSplitView', () => ({
 
 const splitContext = (navigator: object | null) => ({
   detailNavigationContainerRef: navigator
-    ? { current: navigator as NavigationContainerRef<{}> }
+    ? { current: navigator as NavigationContainerRef<DetailStackParams> }
     : null,
   splitEnabled: true,
   showDetail: true,

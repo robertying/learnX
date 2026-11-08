@@ -220,6 +220,8 @@ const zh: typeof en = {
   info: '详情',
   preview: '预览',
   unknownFileType: '未知',
+  somethingWentWrong: '出错了',
+  reloadApp: '重新加载 learnX',
   notifications: '通知',
   notificationsCaption:
     'learnX 会在系统允许时于后台检查新内容，因此这些通知可能会有延迟。',

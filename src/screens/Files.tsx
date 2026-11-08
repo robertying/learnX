@@ -1,5 +1,4 @@
 import { useEffect, useEffectEvent } from 'react';
-import { StackActions } from '@react-navigation/native';
 import FileCard from 'components/FileCard';
 import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
@@ -42,12 +41,10 @@ const Files: React.FC<Props> = ({ navigation }) => {
 
   const handlePush = (item: Pick<File, 'id'>) => {
     if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace('FileDetail', {
-          id: item.id,
-          disableAnimation: true,
-        }),
-      );
+      detailNavigator.replace('FileDetail', {
+        id: item.id,
+        disableAnimation: true,
+      });
     } else {
       navigation.push('FileDetail', { id: item.id });
     }

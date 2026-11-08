@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Alert, Linking, Platform, StyleSheet } from 'react-native';
-import { StackActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
 import SafeArea from 'components/SafeArea';
@@ -42,11 +41,9 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) => {
     if (detailNavigator) {
-      detailNavigator.dispatch(
-        StackActions.replace(name, {
-          disableAnimation: true,
-        }),
-      );
+      detailNavigator.replace(name, {
+        disableAnimation: true,
+      });
     } else {
       navigation.push(name);
     }
