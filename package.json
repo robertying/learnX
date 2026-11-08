@@ -97,7 +97,7 @@
     "semver": "7.8.6",
     "test-renderer": "1.3.1",
     "thu-learn-lib": "github:robertying/thu-learn-lib",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "zustand": "5.1.0"
   },
   "expo": {
