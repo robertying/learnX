@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
-import { ProgressBar } from 'react-native-paper';
+import ProgressBar from 'components/ProgressBar';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';

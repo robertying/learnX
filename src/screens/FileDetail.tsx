@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
-import { ProgressBar, Chip } from 'react-native-paper';
+import ProgressBar from 'components/ProgressBar';
+import Chip from 'components/Chip';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import Icon from '@react-native-vector-icons/material-icons';
@@ -143,7 +144,7 @@ const FileDetailContent: React.FC<{
             <View style={styles.section}>
               <View style={Styles.flexRowCenter}>
                 {file.category?.title && (
-                  <Chip compact mode="outlined" style={styles.categoryChip}>
+                  <Chip style={styles.categoryChip}>
                     {file.category?.title}
                   </Chip>
                 )}

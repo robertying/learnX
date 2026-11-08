@@ -101,7 +101,7 @@ const darkThemeColors = {
   backdrop: 'rgba(54, 46, 53, 0.4)',
 };
 /** Adds an alpha channel to an `rgb(r, g, b)` color. */
-const withAlpha = (rgb: string, alpha: number) =>
+export const withAlpha = (rgb: string, alpha: number) =>
   rgb.replace(/^rgb\((.*)\)$/, `rgba($1, ${alpha})`);
 
 /**

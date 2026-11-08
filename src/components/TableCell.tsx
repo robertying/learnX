@@ -1,10 +1,14 @@
-import { StyleSheet, View, ViewProps, TextInput } from 'react-native';
 import {
-  Avatar,
-  Badge,
   ActivityIndicator,
-  AvatarImageProps,
-} from 'react-native-paper';
+  Image,
+  ImageSourcePropType,
+  StyleSheet,
+  View,
+  ViewProps,
+  TextInput,
+} from 'react-native';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import Badge from 'components/Badge';
 import Icon, {
   MaterialIconsIconName,
 } from '@react-native-vector-icons/material-icons';
@@ -19,7 +23,7 @@ export interface TableCellProps extends ViewProps {
   primaryText: string;
   secondaryText?: string;
   iconName?: MaterialIconsIconName;
-  imageSrc?: AvatarImageProps['source'];
+  imageSrc?: ImageSourcePropType;
   imageAlt?: string;
   switchDisabled?: boolean;
   switchValue?: boolean;
@@ -63,19 +67,24 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
           },
         ]}
       >
-        {imageAlt && imageSrc ? (
-          <Avatar.Image
-            size={48}
-            style={[styles.avatar, styles.icon]}
-            source={imageSrc}
-          />
-        ) : imageAlt ? (
-          <Avatar.Icon
-            style={styles.icon}
-            size={48}
-            icon="account"
-            color={theme.colors.background}
-          />
+        {imageAlt ? (
+          <View
+            style={[
+              styles.avatar,
+              styles.icon,
+              !imageSrc && { backgroundColor: theme.colors.primary },
+            ]}
+          >
+            {imageSrc ? (
+              <Image style={styles.avatarImage} source={imageSrc} />
+            ) : (
+              <MaterialCommunityIcons
+                name="account"
+                size={48 * 0.6}
+                color={theme.colors.background}
+              />
+            )}
+          </View>
         ) : null}
         {iconName ? (
           <View style={{ position: 'relative' }}>
@@ -91,7 +100,6 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
                   position: 'absolute',
                   backgroundColor: 'red',
                 }}
-                visible
                 size={10}
               />
             )}
@@ -124,7 +132,7 @@ const TableCell: React.FC<React.PropsWithChildren<TableCellProps>> = ({
             onChangeText={onInputValueChange}
           />
         ) : null}
-        {loading ? <ActivityIndicator /> : null}
+        {loading ? <ActivityIndicator color={theme.colors.primary} /> : null}
       </View>
     </Touchable>
   );
@@ -155,7 +163,16 @@ const styles = StyleSheet.create({
     color: 'grey',
   },
   avatar: {
-    backgroundColor: 'transparent',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   input: {
     fontSize: 17,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { LayoutChangeEvent, Platform, StyleSheet, View } from 'react-native';
-import { Badge, List } from 'react-native-paper';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
+import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -12,6 +12,8 @@ import { t } from 'helpers/i18n';
 import Colors from 'constants/Colors';
 import { Text } from 'components/Text';
 import Divider from 'components/Divider';
+import Badge from 'components/Badge';
+import Touchable from 'components/Touchable';
 import { useTheme } from 'theme';
 
 export type FilterSelection =
@@ -54,18 +56,46 @@ const ListItem: React.FC<{
   badgeColor,
   selected,
   onSelectionChange,
-}) => (
-  <List.Item
-    testID={`filter-${name}`}
-    style={styles.listItem}
-    titleStyle={styles.title}
-    title={
-      <View
-        style={[styles.flexRow, { paddingTop: Platform.OS === 'ios' ? 8 : 0 }]}
-      >
+}) => {
+  const theme = useTheme();
+  const iconColor = theme.colors.onSurfaceVariant;
+
+  return (
+    <Touchable
+      testID={`filter-${name}`}
+      style={styles.listItem}
+      onPress={() => onSelectionChange(name)}
+    >
+      <View style={styles.row}>
+        {name === 'hidden' ? (
+          <MaterialIcons
+            style={styles.icon}
+            name="visibility-off"
+            size={24}
+            color={iconColor}
+          />
+        ) : (
+          <MaterialCommunityIcons
+            style={styles.icon}
+            name={
+              name === 'all'
+                ? 'inbox'
+                : name === 'unread'
+                  ? 'email-mark-as-unread'
+                  : name === 'fav'
+                    ? 'heart'
+                    : name === 'archived'
+                      ? 'archive'
+                      : name === 'unfinished'
+                        ? 'checkbox-blank-circle-outline'
+                        : 'checkbox-marked-circle-outline'
+            }
+            size={24}
+            color={iconColor}
+          />
+        )}
         <Text style={styles.text}>{text}</Text>
         <Badge
-          visible
           style={[
             styles.badge,
             { color: color ?? 'white', backgroundColor: badgeColor },
@@ -73,36 +103,19 @@ const ListItem: React.FC<{
         >
           {count}
         </Badge>
+        <View style={styles.flex} />
+        {selected === name ? (
+          <MaterialCommunityIcons
+            style={styles.check}
+            name="check"
+            size={24}
+            color={iconColor}
+          />
+        ) : null}
       </View>
-    }
-    left={props => (
-      <List.Icon
-        {...props}
-        icon={
-          name === 'all'
-            ? 'inbox'
-            : name === 'unread'
-              ? 'email-mark-as-unread'
-              : name === 'fav'
-                ? 'heart'
-                : name === 'archived'
-                  ? 'archive'
-                  : name === 'hidden'
-                    ? p => <MaterialIcons name="visibility-off" {...p} />
-                    : name === 'unfinished'
-                      ? 'checkbox-blank-circle-outline'
-                      : 'checkbox-marked-circle-outline'
-        }
-      />
-    )}
-    right={
-      selected === name
-        ? props => <List.Icon {...props} icon="check" />
-        : undefined
-    }
-    onPress={() => onSelectionChange(name)}
-  />
-);
+    </Touchable>
+  );
+};
 
 const Filter: React.FC<React.PropsWithChildren<FilterProps>> = ({
   visible,
@@ -237,21 +250,31 @@ const styles = StyleSheet.create({
     right: 0,
   },
   listItem: {
-    paddingHorizontal: 16,
+    paddingVertical: 8,
+    paddingLeft: 16,
+    paddingRight: 24,
   },
-  title: {
-    marginLeft: -12,
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  icon: {
+    marginLeft: 16,
   },
   text: {
     fontSize: 16,
-    marginLeft: 4,
-  },
-  flexRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginLeft: 8,
   },
   badge: {
+    alignSelf: 'center',
     marginLeft: 8,
+  },
+  flex: {
+    flex: 1,
+  },
+  check: {
+    marginLeft: 16,
   },
 });
 

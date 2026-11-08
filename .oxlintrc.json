@@ -146,9 +146,17 @@
               "Divider",
               "Switch",
               "Checkbox",
-              "Searchbar"
+              "Searchbar",
+              "ProgressBar",
+              "Chip",
+              "Badge",
+              "Avatar",
+              "ActivityIndicator",
+              "TouchableRipple",
+              "IconButton",
+              "List"
             ],
-            "message": "Use useTheme from theme, the text components from components/Text, components/Divider and components/Switch. Search goes in the native header (headerSearchBarOptions)."
+            "message": "Use useTheme from theme, the components in src/components (Text, Divider, Switch, ProgressBar, Chip, Badge, IconButton, Touchable). Search goes in the native header (headerSearchBarOptions)."
           }
         ],
         "patterns": [

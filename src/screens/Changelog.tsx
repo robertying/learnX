@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Linking, Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView, { WebViewNavigation } from 'react-native-webview';
-import { ProgressBar } from 'react-native-paper';
+import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
 import { setSetting } from 'data/settings';
 import { SettingsStackParams } from './types';
