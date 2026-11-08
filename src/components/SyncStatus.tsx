@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import dayjs from 'dayjs';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { requestRelogin, useAuthStore } from 'data/auth';
 import { t } from 'helpers/i18n';
 import { Caption } from 'components/Text';
@@ -55,7 +55,9 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       accessibilityLiveRegion="polite"
     >
       <Icon
-        name={failure === 'offline' ? 'cloud-off' : 'error-outline'}
+        name={
+          failure === 'offline' ? 'cloud-off-outline' : 'alert-circle-outline'
+        }
         size={16}
         color={theme.colors.onSurfaceVariant}
         style={styles.icon}
