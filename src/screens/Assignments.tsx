@@ -12,6 +12,7 @@ import { useLoggedIn } from 'data/auth';
 import { useAssignments } from 'data/content';
 import { Assignment } from 'data/types/state';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import useNotificationTarget from 'hooks/useNotificationTarget';
 import useFilteredData from 'hooks/useFilteredData';
 import { toast } from 'components/Toast';
 import { saveAssignmentsToReminderOrCalendar } from 'helpers/event';
@@ -50,7 +51,7 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
 
   const refresh = useEffectEvent(handleRefresh);
 
-  const handlePush = (item: Assignment) => {
+  const handlePush = (item: Pick<Assignment, 'id'>) => {
     if (detailNavigator) {
       detailNavigator.dispatch(
         StackActions.replace('AssignmentDetail', {
@@ -62,6 +63,8 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
       navigation.push('AssignmentDetail', { id: item.id });
     }
   };
+
+  useNotificationTarget('assignment', id => handlePush({ id }));
 
   const handleSync = useEffectEvent(async (type: 'calendar' | 'reminder') => {
     const now = dayjs();
