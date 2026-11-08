@@ -13,12 +13,24 @@ name: Open settings pages and log out
     file: subflows/back.yaml
     env:
       LIST: '.*(Logout|退出登录).*'
+# Settings is a native lazy list, and on phones About is near the bottom,
+# under the floating tab bar: scroll it to the middle first.
+- scrollUntilVisible:
+    element: '.*(About|关于).*'
+    direction: DOWN
+    centerElement: true
 - tapOn: '.*(About|关于).*'
 - assertVisible: '.*© \d+ Rui Ying.*'
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: '.*(Logout|退出登录).*'
+      # Not About: the About page's title matches that too.
+      LIST: '.*(Help & Feedbacks|帮助与反馈).*'
+- scrollUntilVisible:
+    element:
+      id: settings-logout
+    direction: UP
+    centerElement: true
 
 - tapOn:
     id: settings-logout

@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Linking, Platform, StyleSheet } from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
@@ -11,12 +11,16 @@ import {
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
-import TableCell from 'components/TableCell';
+import {
+  Form,
+  FormButton,
+  FormLink,
+  FormSection,
+  FormToggle,
+} from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { SettingsStackParams } from './types';
-import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
@@ -40,94 +44,84 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
     }, []),
   );
 
+  const openDownloadDirectory = async () => {
+    try {
+      const dir = await ensureLearnXFilesDir();
+      await Linking.openURL(dir);
+    } catch (e) {
+      toast(
+        t('openFileDownloadDirectoryFailed') + (e as Error).message,
+        'error',
+      );
+    }
+  };
+
   return (
     <SafeArea>
-      <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-        <TableCell
-          iconName="cached"
-          primaryText={t('fileUseDocumentDir')}
-          switchValue={fileUseDocumentDir}
-          onSwitchValueChange={value => {
-            setSetting('fileUseDocumentDir', value);
-            moveDownloadsToCurrentDirectory();
-          }}
-          type="switch"
-        />
-        <Caption style={styles.caption}>
-          {fileUseDocumentDir
-            ? t('fileUseDocumentDirOnCaption')
-            : t('fileUseDocumentDirOffCaption')}
-        </Caption>
-        <TableCell
-          style={styles.marginTop}
-          iconName="rename-outline"
-          primaryText={t('fileOmitCourseName')}
-          switchValue={fileOmitCourseName}
-          onSwitchValueChange={value => setSetting('fileOmitCourseName', value)}
-          type="switch"
-        />
-        <Caption style={styles.caption}>
-          {fileOmitCourseName
-            ? t('fileOmitCourseNameOnCaption')
-            : t('fileOmitCourseNameOffCaption')}
-        </Caption>
-        <TableCell
-          style={styles.marginTop}
-          iconName="download"
-          primaryText={t('downloads')}
-          secondaryText={
-            downloadsSize === null ? undefined : formatFileSize(downloadsSize)
+      <Form>
+        <FormSection
+          footer={
+            fileUseDocumentDir
+              ? t('fileUseDocumentDirOnCaption')
+              : t('fileUseDocumentDirOffCaption')
           }
-          type="arrow"
-          onPress={() => navigation.push('Downloads')}
-        />
-        {DeviceInfo.isMac() && (
-          <TableCell
-            style={styles.marginTop}
-            iconName="open-in-new"
-            primaryText={t('openFileDownloadDirectory')}
-            type="none"
-            onPress={async () => {
-              try {
-                const dir = await ensureLearnXFilesDir();
-                await Linking.openURL(dir);
-              } catch (e) {
-                toast(
-                  t('openFileDownloadDirectoryFailed') + (e as Error).message,
-                  'error',
-                );
-              }
+        >
+          <FormToggle
+            icon={{ ios: 'internaldrive', android: 'cached' }}
+            title={t('fileUseDocumentDir')}
+            value={fileUseDocumentDir}
+            onValueChange={value => {
+              setSetting('fileUseDocumentDir', value);
+              moveDownloadsToCurrentDirectory();
             }}
           />
-        )}
-        {Platform.OS === 'android' && (
-          <TableCell
-            style={styles.marginTop}
-            iconName="open-in-new"
-            primaryText={t('openFileAfterDownload')}
-            switchValue={openFileAfterDownload}
-            onSwitchValueChange={value =>
-              setSetting('openFileAfterDownload', value)
-            }
-            type="switch"
+        </FormSection>
+        <FormSection
+          footer={
+            fileOmitCourseName
+              ? t('fileOmitCourseNameOnCaption')
+              : t('fileOmitCourseNameOffCaption')
+          }
+        >
+          <FormToggle
+            icon={{ ios: 'character.cursor.ibeam', android: 'rename-outline' }}
+            title={t('fileOmitCourseName')}
+            value={fileOmitCourseName}
+            onValueChange={value => setSetting('fileOmitCourseName', value)}
           />
+        </FormSection>
+        {Platform.OS === 'android' && (
+          <FormSection>
+            <FormToggle
+              icon={{ ios: 'arrow.up.forward.app', android: 'open-in-new' }}
+              title={t('openFileAfterDownload')}
+              value={openFileAfterDownload}
+              onValueChange={value =>
+                setSetting('openFileAfterDownload', value)
+              }
+            />
+          </FormSection>
         )}
-      </ScrollView>
+        <FormSection>
+          <FormLink
+            icon={{ ios: 'arrow.down.circle', android: 'download' }}
+            title={t('downloads')}
+            detail={
+              downloadsSize === null ? undefined : formatFileSize(downloadsSize)
+            }
+            onPress={() => navigation.push('Downloads')}
+          />
+          {DeviceInfo.isMac() && (
+            <FormButton
+              icon={{ ios: 'folder', android: 'open-in-new' }}
+              title={t('openFileDownloadDirectory')}
+              onPress={openDownloadDirectory}
+            />
+          )}
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  caption: {
-    marginTop: 8,
-    marginHorizontal: 16,
-  },
-});
 
 export default FileSettings;

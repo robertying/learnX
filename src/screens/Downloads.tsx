@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -11,10 +11,8 @@ import {
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
-import TableCell from 'components/TableCell';
+import { Form, FormButton, FormSection, FormText } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
-import { Caption } from 'components/Text';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
@@ -72,62 +70,52 @@ const Downloads: React.FC<Props> = () => {
 
   return (
     <SafeArea>
-      <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-        <TableCell
-          iconName="harddisk"
-          primaryText={t('downloadsTotal')}
-          secondaryText={summary(total)}
-          type="none"
-        />
-        <Caption style={styles.caption}>{t('downloadsCaption')}</Caption>
-        {courses.map(course => (
-          <TableCell
-            key={course.courseName}
-            iconName="folder"
-            primaryText={course.courseName}
-            secondaryText={summary(course)}
-            type="none"
+      <Form>
+        <FormSection footer={t('downloadsCaption')}>
+          <FormText
+            icon={{ ios: 'internaldrive', android: 'harddisk' }}
+            title={t('downloadsTotal')}
+            detail={summary(total)}
+          />
+        </FormSection>
+        {courses.length > 0 && (
+          <FormSection>
+            {courses.map(course => (
+              <FormButton
+                key={course.courseName}
+                icon={{ ios: 'folder', android: 'folder' }}
+                title={course.courseName}
+                detail={summary(course)}
+                onPress={() =>
+                  confirm(
+                    t('downloadsDeleteCourse'),
+                    `${course.courseName}\n${summary(course)}`,
+                    () => removeCourseDownloads(course.courseName),
+                    t('downloadsDeletedCourse', { course: course.courseName }),
+                  )
+                }
+              />
+            ))}
+          </FormSection>
+        )}
+        <FormSection>
+          <FormButton
+            icon={{ ios: 'trash', android: 'delete' }}
+            title={t('clearFileCache')}
+            destructive
             onPress={() =>
               confirm(
-                t('downloadsDeleteCourse'),
-                `${course.courseName}\n${summary(course)}`,
-                () => removeCourseDownloads(course.courseName),
-                t('downloadsDeletedCourse', { course: course.courseName }),
+                t('clearFileCache'),
+                t('clearFileCacheConfirmation'),
+                removeFileDir,
+                t('clearFileCacheSucceeded'),
               )
             }
           />
-        ))}
-        <TableCell
-          style={styles.marginTop}
-          iconName="delete"
-          primaryText={t('clearFileCache')}
-          type="none"
-          onPress={() =>
-            confirm(
-              t('clearFileCache'),
-              t('clearFileCacheConfirmation'),
-              removeFileDir,
-              t('clearFileCacheSucceeded'),
-            )
-          }
-        />
-      </ScrollView>
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  caption: {
-    marginTop: 8,
-    marginBottom: 24,
-    marginHorizontal: 16,
-  },
-});
 
 export default Downloads;

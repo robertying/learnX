@@ -1,16 +1,15 @@
-import {
-  KeyboardAvoidingView,
-  Linking,
-  Platform,
-  StyleSheet,
-} from 'react-native';
+import { Linking, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
-import TableCell from 'components/TableCell';
+import {
+  Form,
+  FormButton,
+  FormNumberField,
+  FormSection,
+  FormToggle,
+} from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import WindowSafeArea from 'components/WindowSafeArea';
-import ScrollView from 'components/ScrollView';
-import Styles from 'constants/Styles';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
 import { t } from 'helpers/i18n';
@@ -22,17 +21,8 @@ import {
 } from 'hooks/useCalendarSync';
 import { SettingsStackParams } from './types';
 import DeviceInfo from 'constants/DeviceInfo';
-import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
-
-/** Input handler that applies positive whole numbers and ignores the rest */
-const onNumberInput = (apply: (value: number) => void) => (v: string) => {
-  const value = parseInt(v, 10);
-  if (value) {
-    apply(value);
-  }
-};
 
 const CalendarEvent: React.FC<Props> = () => {
   const assignmentCalendarSync = useSettings(
@@ -63,203 +53,168 @@ const CalendarEvent: React.FC<Props> = () => {
     value: AlarmSettings[K],
   ) => setSetting('alarms', { ...alarms, [key]: value });
 
+  const assignmentSyncFooter = t('assignmentSyncDescription');
+
   return (
     <SafeArea>
-      <KeyboardAvoidingView
-        style={Styles.flex1}
-        behavior="padding"
-        keyboardVerticalOffset={120}
-      >
-        <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-          <TableCell
-            iconName="account-multiple"
-            primaryText={t('graduate')}
-            switchValue={graduate}
-            onSwitchValueChange={value => setSetting('graduate', value)}
-            type="switch"
+      <Form>
+        <FormSection
+          footer={t('courseScheduleSyncCaption', {
+            type: graduate ? t('graduateSchedule') : t('undergraduateSchedule'),
+          })}
+        >
+          <FormToggle
+            icon={{ ios: 'person.2', android: 'account-multiple' }}
+            title={t('graduate')}
+            value={graduate}
+            onValueChange={value => setSetting('graduate', value)}
           />
-          <TableCell
-            iconName="calendar"
-            primaryText={t('syncCourseSchedule')}
-            type="none"
+          <FormButton
+            icon={{ ios: 'calendar', android: 'calendar' }}
+            title={t('syncCourseSchedule')}
             onPress={picker.openPicker}
             loading={courseSyncing}
           />
-          <TableCell
-            iconName="alarm"
-            primaryText={t('classAlarm')}
-            switchValue={alarms.courseAlarm}
-            onSwitchValueChange={value => setAlarm('courseAlarm', value)}
-            type="switch"
+          <FormToggle
+            icon={{ ios: 'alarm', android: 'alarm' }}
+            title={t('classAlarm')}
+            value={alarms.courseAlarm}
+            onValueChange={value => setAlarm('courseAlarm', value)}
           />
           {alarms.courseAlarm && (
-            <TableCell
-              primaryText={t('classAlarmBefore')}
-              inputValue={(alarms.courseAlarmOffset ?? 15).toString()}
-              onInputValueChange={onNumberInput(value =>
-                setAlarm('courseAlarmOffset', value),
-              )}
-              type="input"
+            <FormNumberField
+              title={t('classAlarmBefore')}
+              value={alarms.courseAlarmOffset ?? 15}
+              onValueChange={value => setAlarm('courseAlarmOffset', value)}
             />
           )}
-          <TableCell
-            iconName="map-marker-off"
-            primaryText={t('courseEventOmitLocation')}
-            switchValue={courseEventOmitLocation}
-            onSwitchValueChange={value =>
+          <FormToggle
+            icon={{ ios: 'mappin.slash', android: 'map-marker-off' }}
+            title={t('courseEventOmitLocation')}
+            value={courseEventOmitLocation}
+            onValueChange={value =>
               setSetting('courseEventOmitLocation', value)
             }
-            type="switch"
           />
-          <Caption style={styles.caption}>
-            {t('courseScheduleSyncCaption', {
-              type: graduate
-                ? t('graduateSchedule')
-                : t('undergraduateSchedule'),
-            })}
-          </Caption>
-          <TableCell
-            style={styles.marginTop}
-            iconName="calendar-text"
-            primaryText={t('assignmentCalendarSync')}
-            switchValue={assignmentCalendarSync}
-            onSwitchValueChange={enabled =>
-              handleAssignmentSync('calendar', enabled)
-            }
-            type="switch"
+        </FormSection>
+        <FormSection
+          footer={Platform.OS === 'ios' ? undefined : assignmentSyncFooter}
+        >
+          <FormToggle
+            icon={{ ios: 'calendar.badge.clock', android: 'calendar-text' }}
+            title={t('assignmentCalendarSync')}
+            value={assignmentCalendarSync}
+            onValueChange={enabled => handleAssignmentSync('calendar', enabled)}
             loading={assignmentCalendarSyncing}
           />
           {assignmentCalendarSync && (
-            <TableCell
-              primaryText={t('calendarEventLength')}
-              inputValue={(calendarEventLength ?? 30).toString()}
-              onInputValueChange={onNumberInput(value =>
-                setSetting('calendarEventLength', value),
-              )}
-              type="input"
+            <FormNumberField
+              title={t('calendarEventLength')}
+              value={calendarEventLength ?? 30}
+              onValueChange={value => setSetting('calendarEventLength', value)}
             />
           )}
-          <TableCell
-            iconName="alarm"
-            primaryText={t('assignmentCalendarAlarm')}
-            switchValue={alarms.assignmentCalendarAlarm}
-            onSwitchValueChange={value =>
-              setAlarm('assignmentCalendarAlarm', value)
-            }
-            type="switch"
-            switchDisabled={!assignmentCalendarSync}
+          <FormToggle
+            icon={{ ios: 'alarm', android: 'alarm' }}
+            title={t('assignmentCalendarAlarm')}
+            value={alarms.assignmentCalendarAlarm}
+            onValueChange={value => setAlarm('assignmentCalendarAlarm', value)}
+            disabled={!assignmentCalendarSync}
           />
           {alarms.assignmentCalendarAlarm && (
-            <TableCell
-              primaryText={t('assignmentCalendarAlarmOffset')}
-              inputValue={(
-                alarms.assignmentCalendarAlarmOffset ?? 24 * 60
-              ).toString()}
-              onInputValueChange={onNumberInput(value =>
-                setAlarm('assignmentCalendarAlarmOffset', value),
-              )}
-              type="input"
+            <FormNumberField
+              title={t('assignmentCalendarAlarmOffset')}
+              value={alarms.assignmentCalendarAlarmOffset ?? 24 * 60}
+              onValueChange={value =>
+                setAlarm('assignmentCalendarAlarmOffset', value)
+              }
             />
           )}
           {alarms.assignmentCalendarAlarm && (
-            <TableCell
-              iconName="alarm"
-              primaryText={t('assignmentCalendarSecondAlarm')}
-              switchValue={alarms.assignmentCalendarSecondAlarm}
-              onSwitchValueChange={value =>
+            <FormToggle
+              icon={{ ios: 'alarm', android: 'alarm' }}
+              title={t('assignmentCalendarSecondAlarm')}
+              value={alarms.assignmentCalendarSecondAlarm}
+              onValueChange={value =>
                 setAlarm('assignmentCalendarSecondAlarm', value)
               }
-              type="switch"
-              switchDisabled={!assignmentCalendarSync}
+              disabled={!assignmentCalendarSync}
             />
           )}
           {alarms.assignmentCalendarAlarm &&
             alarms.assignmentCalendarSecondAlarm && (
-              <TableCell
-                primaryText={t('assignmentCalendarSecondAlarmOffset')}
-                inputValue={(
-                  alarms.assignmentCalendarSecondAlarmOffset ?? 30
-                ).toString()}
-                onInputValueChange={onNumberInput(value =>
-                  setAlarm('assignmentCalendarSecondAlarmOffset', value),
-                )}
-                type="input"
+              <FormNumberField
+                title={t('assignmentCalendarSecondAlarmOffset')}
+                value={alarms.assignmentCalendarSecondAlarmOffset ?? 30}
+                onValueChange={value =>
+                  setAlarm('assignmentCalendarSecondAlarmOffset', value)
+                }
               />
             )}
           {alarms.assignmentCalendarAlarm && (
-            <TableCell
-              iconName="check-circle-outline"
-              primaryText={t('assignmentCalendarNoAlarmIfComplete')}
-              switchValue={alarms.assignmentCalendarNoAlarmIfComplete}
-              onSwitchValueChange={value =>
+            <FormToggle
+              icon={{
+                ios: 'checkmark.circle',
+                android: 'check-circle-outline',
+              }}
+              title={t('assignmentCalendarNoAlarmIfComplete')}
+              value={alarms.assignmentCalendarNoAlarmIfComplete}
+              onValueChange={value =>
                 setAlarm('assignmentCalendarNoAlarmIfComplete', value)
               }
-              type="switch"
-              switchDisabled={!assignmentCalendarSync}
+              disabled={!assignmentCalendarSync}
             />
           )}
-          {Platform.OS === 'ios' ? (
-            <>
-              <TableCell
-                style={{ marginTop: 16 }}
-                iconName="calendar-check"
-                primaryText={t('assignmentReminderSync')}
-                switchValue={assignmentReminderSync}
-                onSwitchValueChange={enabled =>
-                  handleAssignmentSync('reminder', enabled)
+        </FormSection>
+        {Platform.OS === 'ios' && (
+          <FormSection footer={assignmentSyncFooter}>
+            <FormToggle
+              icon={{ ios: 'checklist', android: 'calendar-check' }}
+              title={t('assignmentReminderSync')}
+              value={assignmentReminderSync}
+              onValueChange={enabled =>
+                handleAssignmentSync('reminder', enabled)
+              }
+              loading={assignmentReminderSyncing}
+            />
+            <FormToggle
+              icon={{ ios: 'alarm', android: 'alarm' }}
+              title={t('assignmentReminderAlarm')}
+              value={alarms.assignmentReminderAlarm}
+              onValueChange={value =>
+                setAlarm('assignmentReminderAlarm', value)
+              }
+              disabled={!assignmentReminderSync}
+            />
+            {alarms.assignmentReminderAlarm && (
+              <FormNumberField
+                title={t('assignmentReminderAlarmOffset')}
+                value={alarms.assignmentReminderAlarmOffset ?? 24 * 60}
+                onValueChange={value =>
+                  setAlarm('assignmentReminderAlarmOffset', value)
                 }
-                type="switch"
-                loading={assignmentReminderSyncing}
               />
-              <TableCell
-                iconName="alarm"
-                primaryText={t('assignmentReminderAlarm')}
-                switchValue={alarms.assignmentReminderAlarm}
-                onSwitchValueChange={value =>
-                  setAlarm('assignmentReminderAlarm', value)
-                }
-                type="switch"
-                switchDisabled={!assignmentReminderSync}
-              />
-              {alarms.assignmentReminderAlarm && (
-                <TableCell
-                  primaryText={t('assignmentReminderAlarmOffset')}
-                  inputValue={(
-                    alarms.assignmentReminderAlarmOffset ?? 24 * 60
-                  ).toString()}
-                  onInputValueChange={onNumberInput(value =>
-                    setAlarm('assignmentReminderAlarmOffset', value),
-                  )}
-                  type="input"
-                />
-              )}
-            </>
-          ) : null}
-          <Caption style={styles.caption}>
-            {t('assignmentSyncDescription')}
-          </Caption>
-          <TableCell
-            style={styles.marginTop}
-            iconName="export-variant"
-            primaryText={t('exportSyncedCalendars')}
-            type="none"
+            )}
+          </FormSection>
+        )}
+        <FormSection footer={t('exportSyncedCalendarsDescription')}>
+          <FormButton
+            icon={{ ios: 'square.and.arrow.up', android: 'export-variant' }}
+            title={t('exportSyncedCalendars')}
             onPress={exportToICS}
             loading={exporting}
           />
-          <Caption style={styles.caption}>
-            {t('exportSyncedCalendarsDescription')}
-          </Caption>
-          <TableCell
-            style={styles.marginTop}
-            iconName="calendar-remove"
-            primaryText={t('deleteSyncedCalendarsAndReminders')}
-            type="none"
+        </FormSection>
+        <FormSection>
+          <FormButton
+            icon={{ ios: 'trash', android: 'calendar-remove' }}
+            title={t('deleteSyncedCalendarsAndReminders')}
+            destructive
             onPress={confirmDeleteCalendars}
           />
-          <TableCell
-            iconName="cog"
-            primaryText={t('configureCalendarAndReminder')}
-            type="none"
+          <FormButton
+            icon={{ ios: 'gear', android: 'cog' }}
+            title={t('configureCalendarAndReminder')}
             onPress={() =>
               DeviceInfo.isMac()
                 ? Linking.openURL(
@@ -268,8 +223,8 @@ const CalendarEvent: React.FC<Props> = () => {
                 : Linking.openSettings()
             }
           />
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </FormSection>
+      </Form>
       {/* Opened from a split view column, but covers the whole window. */}
       <WindowSafeArea>
         <DateRangePicker
@@ -288,18 +243,5 @@ const CalendarEvent: React.FC<Props> = () => {
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  caption: {
-    marginTop: 8,
-    marginHorizontal: 16,
-  },
-});
 
 export default CalendarEvent;

@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from 'react';
-import { StyleSheet } from 'react-native';
 import { login } from 'data/login';
 import {
   getMockNetworkConfig,
@@ -8,12 +7,10 @@ import {
   setMockNetworkConfig,
   subscribeMockNetworkConfig,
 } from 'data/mockSource';
-import TableCell from 'components/TableCell';
+import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
 import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
-import { Caption } from 'components/Text';
 
 // A dev-only tool for the mock accounts, so it is not translated.
 
@@ -44,79 +41,56 @@ const MockNetwork: React.FC = () => {
 
   return (
     <SafeArea>
-      <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-        <Caption style={styles.header}>Latency</Caption>
-        {latencies.map(([value, label]) => (
-          <TableCell
-            key={value}
-            testID={`mock-network-latency-${value}`}
-            iconName={
-              config.latency === value ? 'radiobox-marked' : 'radiobox-blank'
-            }
-            primaryText={label}
-            type="none"
-            onPress={() => setMockNetworkConfig({ latency: value })}
+      <Form>
+        <FormSection title="Latency">
+          {latencies.map(([value, label]) => (
+            <FormButton
+              key={value}
+              testID={`mock-network-latency-${value}`}
+              title={label}
+              selected={config.latency === value}
+              onPress={() => setMockNetworkConfig({ latency: value })}
+            />
+          ))}
+        </FormSection>
+        <FormSection
+          title="Requests"
+          footer="Applies to every request, login and file downloads included. A file already downloaded opens without a request; refresh it to download it again. A refresh logs in first, so it takes about twice the latency."
+        >
+          {failures.map(([value, label]) => (
+            <FormButton
+              key={value}
+              testID={`mock-network-failure-${value}`}
+              title={label}
+              selected={config.failure === value}
+              onPress={() => setMockNetworkConfig({ failure: value })}
+            />
+          ))}
+        </FormSection>
+        <FormSection
+          title="Login"
+          footer="A failed login returns to the login screen, which links back here. The ephemeral mock account ignores login results, so use the persistent one to test logging in again. Settings reset when the app reloads."
+        >
+          <FormToggle
+            testID="mock-network-login-fails"
+            icon={{ ios: 'key.slash', android: 'form-textbox-password' }}
+            title="Reject login (bad credential)"
+            value={config.loginFails}
+            onValueChange={value => setMockNetworkConfig({ loginFails: value })}
           />
-        ))}
-        <Caption style={styles.header}>Requests</Caption>
-        {failures.map(([value, label]) => (
-          <TableCell
-            key={value}
-            testID={`mock-network-failure-${value}`}
-            iconName={
-              config.failure === value ? 'radiobox-marked' : 'radiobox-blank'
-            }
-            primaryText={label}
-            type="none"
-            onPress={() => setMockNetworkConfig({ failure: value })}
+          <FormButton
+            testID="mock-network-relogin"
+            icon={{
+              ios: 'rectangle.portrait.and.arrow.forward',
+              android: 'login',
+            }}
+            title="Log in again now"
+            onPress={handleReLogin}
           />
-        ))}
-        <Caption style={styles.caption}>
-          Applies to every request, login and file downloads included. A file
-          already downloaded opens without a request; refresh it to download it
-          again. A refresh logs in first, so it takes about twice the latency.
-        </Caption>
-        <Caption style={styles.header}>Login</Caption>
-        <TableCell
-          testID="mock-network-login-fails"
-          iconName="form-textbox-password"
-          primaryText="Reject login (bad credential)"
-          switchValue={config.loginFails}
-          onSwitchValueChange={value =>
-            setMockNetworkConfig({ loginFails: value })
-          }
-          type="switch"
-        />
-        <TableCell
-          testID="mock-network-relogin"
-          iconName="login"
-          primaryText="Log in again now"
-          type="none"
-          onPress={handleReLogin}
-        />
-        <Caption style={styles.caption}>
-          A failed login returns to the login screen, which links back here. The
-          ephemeral mock account ignores login results, so use the persistent
-          one to test logging in again. Settings reset when the app reloads.
-        </Caption>
-      </ScrollView>
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  scrollViewPaddings: {
-    paddingVertical: 16,
-  },
-  header: {
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  caption: {
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-});
 
 export default MockNetwork;

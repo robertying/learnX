@@ -1,19 +1,17 @@
 import { useEffect } from 'react';
-import { Alert, Linking, StyleSheet } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { CourseType, Language } from 'thu-learn-lib';
 import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
-import TableCell from 'components/TableCell';
+import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
-import { Caption } from 'components/Text';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -84,42 +82,31 @@ const CourseInformationSharing: React.FC<Props> = () => {
 
   return (
     <SafeArea>
-      <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
-        <TableCell
-          iconName="information-outline"
-          primaryText={t('courseInformationSharing')}
-          switchValue={courseInformationSharing}
-          onSwitchValueChange={handleEnable}
-          type="switch"
-        />
-        <Caption style={styles.caption}>
-          {courseInformationSharing
-            ? t('courseInformationSharingOnCaption')
-            : t('courseInformationSharingOffCaption')}
-        </Caption>
-        <TableCell
-          style={styles.marginTop}
-          iconName="open-in-new"
-          primaryText={t('courseX')}
-          type="none"
-          onPress={() => Linking.openURL('https://tsinghua.app/courses')}
-        />
-      </ScrollView>
+      <Form>
+        <FormSection
+          footer={
+            courseInformationSharing
+              ? t('courseInformationSharingOnCaption')
+              : t('courseInformationSharingOffCaption')
+          }
+        >
+          <FormToggle
+            icon={{ ios: 'info.circle', android: 'information-outline' }}
+            title={t('courseInformationSharing')}
+            value={courseInformationSharing}
+            onValueChange={handleEnable}
+          />
+        </FormSection>
+        <FormSection>
+          <FormButton
+            icon={{ ios: 'safari', android: 'open-in-new' }}
+            title={t('courseX')}
+            onPress={() => Linking.openURL('https://tsinghua.app/courses')}
+          />
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  caption: {
-    marginTop: 8,
-    marginHorizontal: 16,
-  },
-});
 
 export default CourseInformationSharing;

@@ -134,14 +134,24 @@ jest.mock('expo-application', () => ({ nativeBuildVersion: '1' }));
 
 // @expo/ui renders SwiftUI / Jetpack Compose; tests get plain views.
 jest.mock('@expo/ui', () => require('./expoUi'));
+jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
+  background: jest.fn(),
   buttonStyle: jest.fn(),
+  disabled: jest.fn(),
+  font: jest.fn(),
+  foregroundStyle: jest.fn(),
+  frame: jest.fn(),
+  headerProminence: jest.fn(),
   labelsHidden: jest.fn(),
+  listRowBackground: jest.fn(),
+  refreshable: jest.fn(),
+  scrollContentBackground: jest.fn(),
+  toggleStyle: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for
 // types (they are strings after the Babel transform), and any test that
 // refreshes data updates the widget, so every test needs these.
-jest.mock('@expo/ui/swift-ui', () => ({}));
 jest.mock('@expo/ui/jetpack-compose', () => ({}));
 jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
 

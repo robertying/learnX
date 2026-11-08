@@ -1,4 +1,10 @@
-import { Pressable, Text, View, ViewProps } from 'react-native';
+import {
+  Pressable,
+  Text,
+  TextInput as RNTextInput,
+  View,
+  ViewProps,
+} from 'react-native';
 
 /**
  * Stand-ins for the @expo/ui views the app uses, which render SwiftUI or
@@ -53,5 +59,24 @@ export const Switch = ({
     accessibilityLabel={label}
     accessibilityState={{ checked: value, disabled: !!disabled }}
     {...{ onValueChange: disabled ? undefined : onValueChange }}
+  />
+);
+
+export const TextInput = ({
+  defaultValue,
+  onChangeText,
+  accessibilityLabel,
+  testID,
+}: {
+  defaultValue?: string;
+  onChangeText?: (text: string) => void;
+  accessibilityLabel?: string;
+  testID?: string;
+}) => (
+  <RNTextInput
+    defaultValue={defaultValue}
+    onChangeText={onChangeText}
+    accessibilityLabel={accessibilityLabel}
+    testID={testID}
   />
 );
