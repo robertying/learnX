@@ -24,7 +24,8 @@ name: Open settings pages and log out
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: '.*(About|关于).*'
+      # Not About: the About page's title matches that too.
+      LIST: '.*(Help & Feedbacks|帮助与反馈).*'
 - scrollUntilVisible:
     element:
       id: settings-logout
