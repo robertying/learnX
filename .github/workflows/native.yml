@@ -1,0 +1,141 @@
+name: Native build
+
+# Compiles the apps so a broken patch, Podfile, Gradle or native module change
+# shows up on the PR, not on a Mac later. Debug builds only: no JS bundle, no
+# signing, no uploads. Not a required check.
+on:
+  pull_request:
+    paths:
+      - android/**
+      - ios/**
+      - modules/**
+      - patches/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - app.json
+      - Gemfile
+      - Gemfile.lock
+      - .github/workflows/native.yml
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: native-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+        with:
+          # Only main writes the cache, so PRs can't fill it with their own builds.
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # build.gradle reads release signing values from local.properties, so the
+      # file has to exist. The debug build doesn't use them.
+      - name: Write local.properties
+        run: touch android/local.properties
+
+      # One ABI is enough to compile every native module and keeps the build short.
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+
+  ios:
+    name: ${{ matrix.name }}
+    runs-on: macos-26
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: iOS
+            destination: generic/platform=iOS Simulator
+          - name: Mac Catalyst
+            destination: generic/platform=macOS,variant=Mac Catalyst
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: pnpm
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ruby
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Not --deployment: ExpoWidgets' podspec embeds the checkout's absolute
+      # path, so its checksum in Podfile.lock differs on every machine.
+      - name: Install pods
+        working-directory: ios
+        run: bundle exec pod install
+        env:
+          LANG: en_US.UTF-8
+
+      # No signing certificates on CI, so this only proves the code compiles and
+      # links. Build signed (as AGENTS.md says) when running the app.
+      - name: Build
+        run: |
+          mkdir -p build
+          xcodebuild build \
+            -workspace ios/learnX.xcworkspace \
+            -scheme learnX \
+            -configuration Debug \
+            -destination '${{ matrix.destination }}' \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            COMPILER_INDEX_STORE_ENABLE=NO \
+            > build/xcodebuild.log 2>&1 || {
+            grep -E 'error:' build/xcodebuild.log | sort -u | head -50
+            tail -n 80 build/xcodebuild.log
+            exit 1
+          }
+          tail -n 5 build/xcodebuild.log
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: xcodebuild-${{ matrix.name }}
+          path: build/xcodebuild.log
