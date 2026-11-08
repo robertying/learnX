@@ -1,5 +1,6 @@
 import Storage from 'expo-sqlite/kv-store';
 import {
+  applyLatestSemester,
   getUserData,
   resetUserData,
   setArchived,
@@ -29,6 +30,7 @@ describe('user data', () => {
       hiddenCourses: [],
       courseOrder: [],
       currentSemester: null,
+      latestSemester: null,
     });
   });
 
@@ -95,5 +97,37 @@ describe('user data', () => {
     });
     expect(getUserData().hiddenCourses).toEqual(['c']);
     expect(getUserData().courseOrder).toEqual([]);
+  });
+
+  describe('applyLatestSemester', () => {
+    it("shows the school's semester when none is shown", () => {
+      expect(applyLatestSemester('2026-2027-1')).toBe('2026-2027-1');
+      expect(getUserData()).toMatchObject({
+        currentSemester: '2026-2027-1',
+        latestSemester: '2026-2027-1',
+      });
+    });
+
+    it("moves to a new term when the user follows the school's", () => {
+      applyLatestSemester('2025-2026-2');
+      expect(applyLatestSemester('2026-2027-1')).toBe('2026-2027-1');
+    });
+
+    it('keeps an earlier semester the user picked', () => {
+      applyLatestSemester('2025-2026-2');
+      useUserDataStore.setState({ currentSemester: '2025-2026-1' });
+      expect(applyLatestSemester('2026-2027-1')).toBe('2025-2026-1');
+      expect(getUserData().latestSemester).toBe('2026-2027-1');
+    });
+
+    it("treats an older semester as following before the school's was saved", () => {
+      useUserDataStore.setState({ currentSemester: '2025-2026-2' });
+      expect(applyLatestSemester('2026-2027-1')).toBe('2026-2027-1');
+    });
+
+    it('keeps a newer semester the user picked', () => {
+      useUserDataStore.setState({ currentSemester: '2026-2027-2' });
+      expect(applyLatestSemester('2026-2027-1')).toBe('2026-2027-2');
+    });
   });
 });

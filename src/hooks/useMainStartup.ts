@@ -7,7 +7,7 @@ import { setUpBackgroundFetch } from 'helpers/background';
 import { setSetting } from 'data/settings';
 import { useLoggedIn } from 'data/auth';
 import { latestSemesterQuery, useCourses } from 'data/queries';
-import { setCurrentSemester, useCurrentSemester } from 'data/userData';
+import { applyLatestSemester } from 'data/userData';
 import useDeadlineWidget from 'hooks/useDeadlineWidget';
 import packageJson from '../../package.json';
 
@@ -18,18 +18,18 @@ import packageJson from '../../package.json';
  */
 const useMainStartup = () => {
   const loggedIn = useLoggedIn();
-  const currentSemester = useCurrentSemester();
 
-  // Shows the school's current semester until the user picks another.
+  // Shows the school's current semester, and moves to the next one when a
+  // new term starts, unless the user picked an earlier semester.
   const { data: latestSemester } = useQuery({
     ...latestSemesterQuery,
-    enabled: loggedIn && !currentSemester,
+    enabled: loggedIn,
   });
   useEffect(() => {
-    if (!currentSemester && latestSemester) {
-      setCurrentSemester(latestSemester);
+    if (latestSemester) {
+      applyLatestSemester(latestSemester);
     }
-  }, [currentSemester, latestSemester]);
+  }, [latestSemester]);
 
   // Keeps the semester's courses fetched for every tab.
   useCourses();
