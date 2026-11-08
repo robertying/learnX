@@ -12,6 +12,12 @@ concurrency:
 permissions:
   contents: read
 
+# Only main saves the Jest cache, so other refs don't spend the repo's 10 GB
+# cache limit, which the Xcode caches in build.yml need.
+env:
+  SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
+  JEST_CACHE_DIR: ${{ github.workspace }}/.jest-cache
+
 jobs:
   js:
     # Typecheck, lint, format and Jest
@@ -30,7 +36,9 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 26
-          cache: pnpm
+          # A cold `pnpm install` takes about 4 s, and restoring the ~200 MB
+          # store cache took just as long, so it isn't cached.
+          package-manager-cache: false
 
       - name: Install dependencies
         id: install
@@ -61,6 +69,25 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm format --check
 
-      - name: Test
+      # Jest's cache holds Babel output, mostly for node_modules. Its key
+      # follows what changes that output; source files that changed since are
+      # just transformed again.
+      - name: Restore Jest cache
+        id: jest-cache
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: pnpm test
+        uses: actions/cache/restore@v6
+        with:
+          path: ${{ env.JEST_CACHE_DIR }}
+          key: jest-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'jest.config.js') }}
+
+      - name: Test
+        id: test
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pnpm test --cacheDirectory "$JEST_CACHE_DIR"
+
+      - name: Save Jest cache
+        if: env.SAVE_CACHE == 'true' && steps.test.outcome == 'success' && steps.jest-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.JEST_CACHE_DIR }}
+          key: ${{ steps.jest-cache.outputs.cache-primary-key }}
