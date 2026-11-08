@@ -21,6 +21,7 @@ import {
   useNativeState,
 } from '@expo/ui/jetpack-compose';
 import {
+  background,
   clickable,
   clip,
   fillMaxSize,
@@ -243,42 +244,20 @@ const FormRow: React.FC<
     ) : (
       ends[0]
     );
-  const supporting =
-    subtitle || progress !== undefined ? (
-      // Full width, so the progress bar spans the row and not just the
-      // subtitle.
-      <Column
-        verticalArrangement={{ spacedBy: 8 }}
-        modifiers={[fillMaxWidth()]}
-      >
-        {subtitle ? (
-          <Text color={done ? colors.outline : colors.onSurfaceVariant}>
-            {subtitle}
-          </Text>
-        ) : null}
-        {progress !== undefined ? (
-          <LinearProgressIndicator
-            progress={progress}
-            modifiers={[fillMaxWidth()]}
-          />
-        ) : null}
-      </Column>
-    ) : null;
-  return (
+  const item = (rowModifiers: ModifierConfig[]) => (
     <ListItem
       colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[
-        fillMaxWidth(),
-        rowShape(position),
-        ...(action ? [action] : []),
-        ...(testID ? [testIDModifier(testID)] : []),
-      ]}
+      modifiers={[fillMaxWidth(), ...rowModifiers]}
     >
       <ListItem.HeadlineContent>
         <Text color={contentColor}>{title}</Text>
       </ListItem.HeadlineContent>
-      {supporting ? (
-        <ListItem.SupportingContent>{supporting}</ListItem.SupportingContent>
+      {subtitle ? (
+        <ListItem.SupportingContent>
+          <Text color={done ? colors.outline : colors.onSurfaceVariant}>
+            {subtitle}
+          </Text>
+        </ListItem.SupportingContent>
       ) : null}
       {icon ? (
         <ListItem.LeadingContent>
@@ -290,6 +269,34 @@ const FormRow: React.FC<
       ) : null}
       {end ? <ListItem.TrailingContent>{end}</ListItem.TrailingContent> : null}
     </ListItem>
+  );
+  const rowModifiers = [
+    rowShape(position),
+    ...(action ? [action] : []),
+    ...(testID ? [testIDModifier(testID)] : []),
+  ];
+
+  if (progress === undefined) {
+    return item(rowModifiers);
+  }
+  // The bar goes under the whole item, across the row: in the supporting
+  // slot it would stop where the trailing content starts.
+  return (
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        background(colors.surfaceContainer),
+        ...(action ? [action] : []),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      {item([])}
+      <LinearProgressIndicator
+        progress={progress}
+        modifiers={[fillMaxWidth(), padding(16, 0, 16, 16)]}
+      />
+    </Column>
   );
 };
 
