@@ -1,12 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform, StyleSheet } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
 import SafeArea from 'components/SafeArea';
-import TableCell from 'components/TableCell';
-import ScrollView from 'components/ScrollView';
-import Styles from 'constants/Styles';
+import {
+  Form,
+  FormButton,
+  FormLink,
+  FormProfile,
+  FormSection,
+} from 'components/Form';
 import { getLatestRelease } from 'helpers/update';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
@@ -91,108 +95,98 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeArea>
-      <ScrollView style={Styles.flex1}>
-        <TableCell
-          imageAlt={userInfo?.name ?? username ?? 'learnX'}
-          primaryText={userInfo?.name ?? username ?? 'learnX'}
-          secondaryText={userInfo?.department ?? undefined}
-          type="none"
-        />
-        <TableCell
-          testID="settings-logout"
-          iconName="account-remove"
-          primaryText={t('logout')}
-          type="none"
-          onPress={handleLogout}
-        />
-        <TableCell
-          style={styles.marginTop}
-          iconName="autorenew"
-          primaryText={t('semesterSelection')}
-          type="arrow"
-          onPress={() => handlePush('SemesterSelection')}
-        />
-        <TableCell
-          iconName="calendar-range"
-          primaryText={t('calendarsAndReminders')}
-          type="arrow"
-          onPress={() => handlePush('CalendarEvent')}
-        />
-        <TableCell
-          iconName="folder-cog"
-          primaryText={t('fileSettings')}
-          type="arrow"
-          onPress={() => handlePush('FileSettings')}
-        />
-        <TableCell
-          testID="settings-notifications"
-          iconName="bell"
-          primaryText={t('notifications')}
-          type="arrow"
-          onPress={() => handlePush('NotificationSettings')}
-        />
-        <TableCell
-          style={styles.marginTop}
-          iconName="information"
-          badge={!courseInformationSharingBadgeShown}
-          primaryText={t('courseInformationSharing')}
-          type="arrow"
-          onPress={() => handlePush('CourseInformationSharing')}
-        />
-        <TableCell
-          style={styles.marginTop}
-          iconName="note-text"
-          badge={newChangelog}
-          primaryText={t('changelog')}
-          type="arrow"
-          onPress={() => handlePush('Changelog')}
-        />
-        {update && (
-          <TableCell
-            iconName="update"
-            badge
-            primaryText={`${t('foundNewVersion')} v${update.version}`}
-            type="none"
-            onPress={() => Linking.openURL(update.url)}
+      <Form>
+        <FormSection>
+          <FormProfile
+            name={userInfo?.name ?? username ?? 'learnX'}
+            detail={userInfo?.department ?? undefined}
           />
-        )}
-        <TableCell
-          iconName="dev-to"
-          primaryText={t('becomeMaintainer')}
-          type="arrow"
-          onPress={() => handlePush('Maintainer')}
-        />
-        <TableCell
-          iconName="help"
-          primaryText={t('helpAndFeedback')}
-          type="arrow"
-          onPress={() => handlePush('Help')}
-        />
-        <TableCell
-          iconName="copyright"
-          primaryText={t('about')}
-          type="arrow"
-          onPress={() => handlePush('About')}
-        />
+          <FormButton
+            testID="settings-logout"
+            icon={{
+              ios: 'rectangle.portrait.and.arrow.right',
+              android: 'account-remove',
+            }}
+            title={t('logout')}
+            destructive
+            onPress={handleLogout}
+          />
+        </FormSection>
+        <FormSection>
+          <FormLink
+            icon={{ ios: 'arrow.triangle.2.circlepath', android: 'autorenew' }}
+            title={t('semesterSelection')}
+            onPress={() => handlePush('SemesterSelection')}
+          />
+          <FormLink
+            icon={{ ios: 'calendar', android: 'calendar-range' }}
+            title={t('calendarsAndReminders')}
+            onPress={() => handlePush('CalendarEvent')}
+          />
+          <FormLink
+            icon={{ ios: 'folder', android: 'folder-cog' }}
+            title={t('fileSettings')}
+            onPress={() => handlePush('FileSettings')}
+          />
+          <FormLink
+            testID="settings-notifications"
+            icon={{ ios: 'bell', android: 'bell' }}
+            title={t('notifications')}
+            onPress={() => handlePush('NotificationSettings')}
+          />
+        </FormSection>
+        <FormSection>
+          <FormLink
+            icon={{ ios: 'info.circle', android: 'information' }}
+            badge={!courseInformationSharingBadgeShown}
+            title={t('courseInformationSharing')}
+            onPress={() => handlePush('CourseInformationSharing')}
+          />
+        </FormSection>
+        <FormSection>
+          <FormLink
+            icon={{ ios: 'note.text', android: 'note-text' }}
+            badge={newChangelog}
+            title={t('changelog')}
+            onPress={() => handlePush('Changelog')}
+          />
+          {update && (
+            <FormLink
+              icon={{ ios: 'arrow.down.circle', android: 'update' }}
+              badge
+              title={`${t('foundNewVersion')} v${update.version}`}
+              onPress={() => Linking.openURL(update.url)}
+            />
+          )}
+          <FormLink
+            icon={{ ios: 'hammer', android: 'dev-to' }}
+            title={t('becomeMaintainer')}
+            onPress={() => handlePush('Maintainer')}
+          />
+          <FormLink
+            icon={{ ios: 'questionmark.circle', android: 'help' }}
+            title={t('helpAndFeedback')}
+            onPress={() => handlePush('Help')}
+          />
+          <FormLink
+            icon={{ ios: 'c.circle', android: 'copyright' }}
+            title={t('about')}
+            onPress={() => handlePush('About')}
+          />
+        </FormSection>
         {__DEV__ && isMockUser(username) && (
-          <TableCell
-            testID="settings-mock-network"
-            style={styles.marginTop}
-            iconName="network"
-            primaryText="Network emulation"
-            type="arrow"
-            onPress={() => handlePush('MockNetwork')}
-          />
+          <FormSection>
+            <FormLink
+              testID="settings-mock-network"
+              icon={{ ios: 'network', android: 'network' }}
+              title="Network emulation"
+              onPress={() => handlePush('MockNetwork')}
+            />
+          </FormSection>
         )}
-      </ScrollView>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 16,
-  },
-});
 
 export default Settings;

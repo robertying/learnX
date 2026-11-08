@@ -1,13 +1,16 @@
-import { KeyboardAvoidingView, Linking, StyleSheet } from 'react-native';
+import { Linking } from 'react-native';
 import dayjs from 'dayjs';
-import { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import TableCell from 'components/TableCell';
+import {
+  Form,
+  FormButton,
+  FormIcon,
+  FormNumberField,
+  FormSection,
+  FormToggle,
+} from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
-import { Caption } from 'components/Text';
 import { toast } from 'components/Toast';
-import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
   assignmentsQuery,
@@ -35,16 +38,32 @@ type Toggle = Exclude<keyof Settings, 'deadlineReminderOffset'>;
 
 const contentToggles: {
   key: Toggle;
-  icon: MaterialDesignIconsIconName;
+  icon: FormIcon;
   label: string;
 }[] = [
-  { key: 'notices', icon: 'bell', label: t('notifyNewNotices') },
-  { key: 'files', icon: 'folder', label: t('notifyNewFiles') },
-  { key: 'assignments', icon: 'calendar', label: t('notifyNewAssignments') },
-  { key: 'grades', icon: 'clipboard-check-outline', label: t('notifyGrades') },
+  {
+    key: 'notices',
+    icon: { ios: 'bell', android: 'bell' },
+    label: t('notifyNewNotices'),
+  },
+  {
+    key: 'files',
+    icon: { ios: 'folder', android: 'folder' },
+    label: t('notifyNewFiles'),
+  },
+  {
+    key: 'assignments',
+    icon: { ios: 'calendar', android: 'calendar' },
+    label: t('notifyNewAssignments'),
+  },
+  {
+    key: 'grades',
+    icon: { ios: 'checkmark.seal', android: 'clipboard-check-outline' },
+    label: t('notifyGrades'),
+  },
   {
     key: 'deadlineChanges',
-    icon: 'update',
+    icon: { ios: 'clock.arrow.circlepath', android: 'update' },
     label: t('notifyDeadlineChanges'),
   },
 ];
@@ -106,125 +125,97 @@ const NotificationSettings: React.FC<Props> = () => {
     key => key !== 'deadlineReminderOffset' && notifications[key],
   );
 
+  const sendTestNotification = async () => {
+    if (!(await request())) {
+      toast(t('notificationPermissionDenied'), 'error');
+      return;
+    }
+    const notice = notices[0];
+    await postNotification({
+      title: notice?.courseName ?? 'learnX',
+      body: notice?.title ?? t('notifications'),
+      target: { type: 'notice', id: notice?.id },
+    });
+  };
+
+  const handleSimulateNewContent = async () => {
+    if (!(await request())) {
+      toast(t('notificationPermissionDenied'), 'error');
+      return;
+    }
+    await simulateNewContent();
+  };
+
   return (
     <SafeArea>
-      <KeyboardAvoidingView
-        style={Styles.flex1}
-        behavior="padding"
-        keyboardVerticalOffset={120}
-      >
-        <ScrollView contentContainerStyle={styles.scrollViewPaddings}>
+      <Form>
+        <FormSection footer={t('notificationsCaption')}>
           {contentToggles.map(({ key, icon, label }) => (
-            <TableCell
+            <FormToggle
               key={key}
               testID={`notifications-${key}`}
-              iconName={icon}
-              primaryText={label}
-              switchValue={notifications[key]}
-              onSwitchValueChange={value => handleToggle(key, value)}
-              type="switch"
+              icon={icon}
+              title={label}
+              value={notifications[key]}
+              onValueChange={value => handleToggle(key, value)}
             />
           ))}
-          <Caption style={styles.caption}>{t('notificationsCaption')}</Caption>
-          <TableCell
-            style={styles.marginTop}
+        </FormSection>
+        <FormSection
+          footer={
+            permission === 'denied' && anyOn
+              ? `${t('notifyDeadlineRemindersCaption')}\n\n${t('notificationPermissionDenied')}`
+              : t('notifyDeadlineRemindersCaption')
+          }
+        >
+          <FormToggle
             testID="notifications-deadlineReminders"
-            iconName="alarm"
-            primaryText={t('notifyDeadlineReminders')}
-            switchValue={notifications.deadlineReminders}
-            onSwitchValueChange={value =>
-              handleToggle('deadlineReminders', value)
-            }
-            type="switch"
+            icon={{ ios: 'alarm', android: 'alarm' }}
+            title={t('notifyDeadlineReminders')}
+            value={notifications.deadlineReminders}
+            onValueChange={value => handleToggle('deadlineReminders', value)}
           />
           {notifications.deadlineReminders && (
-            <TableCell
-              primaryText={t('deadlineReminderOffset')}
-              inputValue={notifications.deadlineReminderOffset.toString()}
-              onInputValueChange={v => {
-                const value = parseInt(v, 10);
-                if (value) {
-                  set('deadlineReminderOffset', value);
-                }
-              }}
-              type="input"
+            <FormNumberField
+              title={t('deadlineReminderOffset')}
+              value={notifications.deadlineReminderOffset}
+              onValueChange={value => set('deadlineReminderOffset', value)}
             />
           )}
-          <Caption style={styles.caption}>
-            {t('notifyDeadlineRemindersCaption')}
-          </Caption>
-          {permission === 'denied' && anyOn && (
-            <Caption style={styles.caption}>
-              {t('notificationPermissionDenied')}
-            </Caption>
-          )}
-          <TableCell
-            style={styles.marginTop}
-            iconName="cog"
-            primaryText={t('configureNotifications')}
-            type="none"
+        </FormSection>
+        <FormSection>
+          <FormButton
+            icon={{ ios: 'gear', android: 'cog' }}
+            title={t('configureNotifications')}
             onPress={openSystemSettings}
           />
           {__DEV__ && (
-            <TableCell
-              iconName="send"
-              primaryText={t('sendTestNotification')}
-              type="none"
-              onPress={async () => {
-                if (!(await request())) {
-                  toast(t('notificationPermissionDenied'), 'error');
-                  return;
-                }
-                const notice = notices[0];
-                await postNotification({
-                  title: notice?.courseName ?? 'learnX',
-                  body: notice?.title ?? t('notifications'),
-                  target: { type: 'notice', id: notice?.id },
-                });
-              }}
+            <FormButton
+              icon={{ ios: 'paperplane', android: 'send' }}
+              title={t('sendTestNotification')}
+              onPress={sendTestNotification}
             />
           )}
           {__DEV__ && (
-            <TableCell
-              iconName="sync"
-              primaryText={t('simulateNewContent')}
-              type="none"
-              onPress={async () => {
-                if (!(await request())) {
-                  toast(t('notificationPermissionDenied'), 'error');
-                  return;
-                }
-                await simulateNewContent();
-              }}
+            <FormButton
+              icon={{ ios: 'arrow.triangle.2.circlepath', android: 'sync' }}
+              title={t('simulateNewContent')}
+              onPress={handleSimulateNewContent}
             />
           )}
           {__DEV__ && (
-            <TableCell
-              iconName="alarm-check"
-              primaryText={t('previewDeadlineReminder')}
-              type="none"
+            <FormButton
+              icon={{ ios: 'alarm', android: 'alarm-check' }}
+              title={t('previewDeadlineReminder')}
               onPress={async () =>
                 toast(String(await previewDeadlineReminder()), 'success')
               }
             />
           )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  caption: {
-    marginTop: 8,
-    marginHorizontal: 16,
-  },
-});
 
 export default NotificationSettings;

@@ -1,9 +1,7 @@
-import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import TableCell from 'components/TableCell';
+import { Form, FormButton, FormSection } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import FlatList from 'components/FlatList';
 import { latestSemesterQuery, semestersQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
@@ -23,50 +21,34 @@ const SemesterSelection: React.FC<Props> = () => {
   const semesters = semestersResult.data ?? noSemesters;
   const latestSemester = latestResult.data;
 
-  const handleRefresh = () => {
+  const handleRefresh = async () => {
     if (loggedIn) {
-      semestersResult.refetch();
-      latestResult.refetch();
+      await Promise.all([semestersResult.refetch(), latestResult.refetch()]);
     }
   };
 
+  // The latest semester can be missing from the list before it starts.
+  const choices =
+    latestSemester && !semesters.includes(latestSemester)
+      ? [latestSemester, ...semesters]
+      : semesters;
+
   return (
     <SafeArea>
-      <FlatList
-        contentContainerStyle={styles.padding}
-        data={semesters}
-        ListHeaderComponent={
-          latestSemester && !semesters.includes(latestSemester) ? (
-            <TableCell
-              iconName={
-                currentSemesterId === latestSemester ? 'check' : undefined
-              }
-              primaryText={getSemesterTextFromId(latestSemester)}
-              type="none"
-              onPress={() => setCurrentSemester(latestSemester)}
+      <Form onRefresh={handleRefresh}>
+        <FormSection>
+          {choices.map(semester => (
+            <FormButton
+              key={semester}
+              title={getSemesterTextFromId(semester)}
+              selected={currentSemesterId === semester}
+              onPress={() => setCurrentSemester(semester)}
             />
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <TableCell
-            iconName={currentSemesterId === item ? 'check' : undefined}
-            primaryText={item ? getSemesterTextFromId(item) : ''}
-            type="none"
-            onPress={() => setCurrentSemester(item)}
-          />
-        )}
-        keyExtractor={item => item}
-        refreshing={semestersResult.isFetching || latestResult.isFetching}
-        onRefresh={handleRefresh}
-      />
+          ))}
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  padding: {
-    paddingVertical: 32,
-  },
-});
 
 export default SemesterSelection;
