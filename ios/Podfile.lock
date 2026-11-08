@@ -247,6 +247,7 @@ PODS:
     - ExpoModulesCore
     - FirebaseCrashlytics
   - LearnXMenus (1.0.0):
+    - ExpoModulesCore
   - LearnXSpotlight (1.0.0):
     - ExpoModulesCore
   - LearnXToast (1.0.0):

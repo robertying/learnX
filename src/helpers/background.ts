@@ -179,6 +179,9 @@ export const notifyContent = async (
 
 const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';
 
+// Runs when index.js imports this module, so the task exists on a background
+// launch too.
+
 TaskManager.defineTask(FETCH_ALL_CONTENT_TASK, async () => {
   const result = await syncContent();
   if (result.status === 'synced') {
