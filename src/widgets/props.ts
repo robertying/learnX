@@ -5,10 +5,14 @@ export interface DeadlineWidgetProps {
   deadlines: (WidgetDeadline & {
     /** The due time, formatted for widgets that can't format dates. */
     due: string;
+    /** The learnx:// link that opens the assignment. */
+    url: string;
   })[];
   /** How many open assignments there are in all, listed or not. */
   total: number;
   title: string;
   /** Shown when nothing is due. */
   empty: string;
+  /** The learnx:// link that opens the assignment list. */
+  url: string;
 }

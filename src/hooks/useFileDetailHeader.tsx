@@ -5,7 +5,7 @@ import type {
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import IconButton from 'components/IconButton';
 import { SplitViewContext } from 'components/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -73,7 +73,7 @@ const useFileDetailHeader = ({
           <IconButton
             disabled={error || !path}
             onPress={onShare}
-            icon={props => <Icon {...props} name="ios-share" />}
+            icon={props => <Icon {...props} name="export-variant" />}
           />
           {DeviceInfo.isMac() && (
             <IconButton
@@ -94,7 +94,10 @@ const useFileDetailHeader = ({
               disabled={error || !path}
               onPress={onToggleInfo}
               icon={props => (
-                <Icon {...props} name={showInfo ? 'preview' : 'info-outline'} />
+                <Icon
+                  {...props}
+                  name={showInfo ? 'eye' : 'information-outline'}
+                />
               )}
             />
           )}

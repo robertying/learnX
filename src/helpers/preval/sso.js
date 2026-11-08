@@ -31,6 +31,7 @@
       const params = new URLSearchParams(body);
       params.set('fingerprint', '${fingerPrint}');
       params.set('deviceName', '${deviceName}');
+      // oxlint-disable-next-line learnx/no-han-outside-translations -- form value the SSO server expects
       params.set('radioVal', '是');
       body = params.toString();
     }

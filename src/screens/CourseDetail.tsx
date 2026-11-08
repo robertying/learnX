@@ -13,7 +13,7 @@ import {
   TabView,
   NavigationState,
 } from 'react-native-tab-view';
-import Icon from '@react-native-vector-icons/material-icons';
+import Icon from '@react-native-vector-icons/material-design-icons';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useCourse } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
@@ -329,7 +329,7 @@ const CourseDetailContent: React.FC<{
         <Icon
           style={styles.icon}
           color={theme.colors.onSurface}
-          name="info-outline"
+          name="information-outline"
           size={20}
         />
         <Text style={styles.textButton}>{t('courseInformation')}</Text>

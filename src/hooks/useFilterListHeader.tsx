@@ -5,7 +5,6 @@ import type {
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import MaterialIcons from '@react-native-vector-icons/material-icons';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import type { FilterSelection } from 'components/Filter';
 import HeaderTitle from 'components/HeaderTitle';
@@ -93,7 +92,7 @@ const useFilterListHeader = ({
         headerLeft: () => (
           <IconButton
             accessibilityLabel={t('reorder')}
-            icon={props => <MaterialIcons {...props} name="sort" />}
+            icon={props => <MaterialCommunityIcons {...props} name="sort" />}
             onPress={onReorder}
             mode="contained"
           />
@@ -144,13 +143,20 @@ const useFilterListHeader = ({
             <IconButton
               accessibilityLabel={t('select')}
               onPress={onSelect}
-              icon={props => <MaterialIcons {...props} name="list" />}
+              icon={props => (
+                <MaterialCommunityIcons
+                  {...props}
+                  name="format-list-bulleted"
+                />
+              )}
               mode="contained"
             />
             <IconButton
               accessibilityLabel={t('checkAll')}
               onPress={onCheckAll}
-              icon={props => <MaterialIcons {...props} name="done-all" />}
+              icon={props => (
+                <MaterialCommunityIcons {...props} name="check-all" />
+              )}
             />
           </>
         ),
@@ -283,25 +289,39 @@ const useFilterListHeader = ({
             {isCourse ? (
               <IconButton
                 accessibilityLabel={t('reorder')}
-                icon={props => <MaterialIcons {...props} name="sort" />}
+                icon={props => (
+                  <MaterialCommunityIcons {...props} name="sort" />
+                )}
                 onPress={onReorder}
               />
             ) : (
               <IconButton
                 accessibilityLabel={t('select')}
                 onPress={onSelect}
-                icon={props => <MaterialIcons {...props} name="list" />}
+                icon={props => (
+                  <MaterialCommunityIcons
+                    {...props}
+                    name="format-list-bulleted"
+                  />
+                )}
               />
             )}
             <IconButton
               accessibilityLabel={t('filter')}
               onPress={onFilter}
-              icon={props => <MaterialIcons {...props} name="filter-list" />}
+              icon={props => (
+                <MaterialCommunityIcons {...props} name="filter-variant" />
+              )}
             />
             {isCourse && (
               <IconButton
                 accessibilityLabel={t('courseX')}
-                icon={props => <MaterialIcons {...props} name="info-outline" />}
+                icon={props => (
+                  <MaterialCommunityIcons
+                    {...props}
+                    name="information-outline"
+                  />
+                )}
                 onPress={onCourseX}
               />
             )}
@@ -314,13 +334,17 @@ const useFilterListHeader = ({
                 accessibilityLabel={t('refresh')}
                 disabled={refreshing}
                 onPress={onRefresh}
-                icon={props => <MaterialIcons {...props} name="refresh" />}
+                icon={props => (
+                  <MaterialCommunityIcons {...props} name="refresh" />
+                )}
               />
             )}
             <IconButton
               accessibilityLabel={t('search')}
               onPress={() => navigation.navigate('SearchStack')}
-              icon={props => <MaterialIcons {...props} name="search" />}
+              icon={props => (
+                <MaterialCommunityIcons {...props} name="magnify" />
+              )}
             />
           </>
         ),

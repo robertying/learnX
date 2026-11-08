@@ -248,6 +248,44 @@ const zh: typeof en = {
   simulateNewContent: '模拟新内容',
   previewDeadlineReminder: '预览截止提醒',
   sendTestNotification: '发送测试通知',
+  // dayjs formats: text in [] is printed as is
+  dateTimeFormat: 'YYYY 年 M 月 D 日 dddd HH:mm',
+  fullDateTimeFormat: 'YYYY 年 M 月 D 日 dddd HH:mm',
+  shortDateTimeFormat: 'M 月 D 日 HH:mm',
+  widgetDateTimeFormat: 'M月D日 HH:mm',
+  noticeExpireTimeFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [过期]',
+  lateSubmissionDeadlineFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [补交截止]',
+  submittedAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [提交]',
+  submittedLateAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [补交]',
+  lastSubmittedAtFormat: '[上次提交于] YYYY 年 M 月 D 日 dddd HH:mm',
+  gradedAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [批改]',
+  // {grader} is a dayjs literal, e.g. [Name]
+  gradedByAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [由]{grader}[批改]',
+  deadlinePassed: '{time}截止',
+  deadlineIn: '还剩 {time}',
+  excellentHomeworkBy: '{name}的优秀作业',
+  previouslyShared: '（之前分享的）',
+  selectedCount: '已选中 {count} 个',
+  semesterName: '{startYear}-{endYear} 学年{term}',
+  semesterFall: '秋季学期',
+  semesterSpring: '春季学期',
+  semesterSummer: '夏季学期',
+  shareFile: '分享文件',
+  submissionAttachmentName: '{title}-提交.{ext}',
+  courseScheduleSyncCaption:
+    '手动同步{type}课表到日历；请在更改设置后重新同步以应用更改。',
+  graduateSchedule: '研究生',
+  undergraduateSchedule: '本科生',
+  fileUseDocumentDirOnCaption:
+    '文件保存在 App 的“文档”中，只会随 App 卸载而被删除。',
+  fileUseDocumentDirOffCaption:
+    '文件保存在 App 的“缓存”中，会在设备空间不足或其他系统预设情况下被自动清除以节约空间。',
+  fileOmitCourseNameOnCaption: '文件以“文件名”形式保存。',
+  fileOmitCourseNameOffCaption: '文件以“课程名-文件名”形式保存。',
+  courseInformationSharingOnCaption:
+    '退出课程信息共享计划后，课程信息将不再自动上传。',
+  courseInformationSharingOffCaption:
+    '加入课程信息共享计划后，当前学期的课程信息（包括课程号、课程名、任课教师、上课时间和地点）会自动上传至 courseX 平台，共享给其他用户。上传内容不包含任何个人信息。\n\n你可以通过 courseX 查询所有已上传课程的信息，如上课时间和地点等。',
 };
 
 export default zh;

@@ -10,7 +10,7 @@ import ScrollView from 'components/ScrollView';
 import Styles from 'constants/Styles';
 import { NoticeDetailParamList } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
-import { isLocaleChinese, t } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import { stripExtension, getExtension } from 'helpers/fs';
 import { Notice } from 'data/types/state';
 import { markNoticeRead, useNotice } from 'data/content';
@@ -86,21 +86,11 @@ const NoticeDetailContent: React.FC<{
           <Title>{title}</Title>
           <View style={Styles.flexRowCenter}>
             <Caption>{publisher}</Caption>
-            <Caption>
-              {dayjs(publishTime).format(
-                isLocaleChinese()
-                  ? 'YYYY 年 M 月 D 日 dddd HH:mm'
-                  : 'MMM D, YYYY HH:mm',
-              )}
-            </Caption>
+            <Caption>{dayjs(publishTime).format(t('dateTimeFormat'))}</Caption>
           </View>
           {expireTime && (
             <Caption style={Styles.flexRowCenter}>
-              {dayjs(expireTime).format(
-                isLocaleChinese()
-                  ? 'YYYY 年 M 月 D 日 dddd HH:mm 过期'
-                  : '[expire at] MMM D, YYYY HH:mm',
-              )}
+              {dayjs(expireTime).format(t('noticeExpireTimeFormat'))}
             </Caption>
           )}
         </View>
