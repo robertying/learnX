@@ -163,10 +163,15 @@ export const submitAssignment = async (
     },
   });
 
-  if (res.status !== 200) {
-    throw new Error('Failed to submit the assignment: invalid login session');
-  }
-  if (res.data?.result === 'error') {
-    throw new Error('Failed to submit the assignment: ' + res.data?.msg);
+  // An expired session gets a 200 with an HTML page that redirects to the
+  // login page, so only an explicit success counts.
+  const result: unknown = res.data?.result;
+  if (result !== 'success') {
+    const msg: unknown = res.data?.msg;
+    throw new Error(
+      result === 'error' && typeof msg === 'string' && msg
+        ? 'Failed to submit the assignment: ' + msg
+        : 'Failed to submit the assignment: invalid login session',
+    );
   }
 };
