@@ -1,38 +1,61 @@
-// The filters in a Material 3 dropdown menu, anchored under the top app
-// bar's filter button, with the current one checked and each one's count.
-import { StyleSheet } from 'react-native';
+// The top app bar's filter button and its Material 3 dropdown of filters, in
+// one Compose view, so the menu anchors to the button itself. The current
+// filter is checked and each one shows its count; the button turns tonal
+// while a filter other than All is on.
+import { useState } from 'react';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   DropdownMenu,
+  FilledTonalIconButton,
   Host,
+  IconButton,
   RNHostView,
   SelectableDropdownMenuItem,
-  Spacer,
   Text,
 } from '@expo/ui/jetpack-compose';
-import { size, testID } from '@expo/ui/jetpack-compose/modifiers';
+import { semantics, size, testID } from '@expo/ui/jetpack-compose/modifiers';
 import { useTheme } from 'theme';
-import type { FilterMenuProps } from './FilterMenu';
+import type { FilterMenuProps } from './FilterMenu.shared';
 
 const FilterMenu: React.FC<FilterMenuProps> = ({
-  visible,
+  label,
   options,
   selected,
   onSelectionChange,
-  onDismiss,
 }) => {
   const theme = useTheme();
+  const [expanded, setExpanded] = useState(false);
+
+  const Button = selected === 'all' ? IconButton : FilledTonalIconButton;
 
   return (
-    <Host
-      matchContents
-      seedColor={theme.colors.primary}
-      style={styles.anchor}
-      pointerEvents="box-none"
-    >
-      <DropdownMenu expanded={visible} onDismissRequest={onDismiss}>
+    <Host matchContents seedColor={theme.colors.primary}>
+      <DropdownMenu
+        expanded={expanded}
+        onDismissRequest={() => setExpanded(false)}
+      >
         <DropdownMenu.Trigger>
-          <Spacer modifiers={[size(1, 1)]} />
+          <Button
+            onClick={() => setExpanded(true)}
+            // The size of the app's other header buttons.
+            modifiers={[
+              size(32, 32),
+              semantics({ contentDescription: label }),
+              testID('filter'),
+            ]}
+          >
+            <RNHostView matchContents>
+              <MaterialDesignIcons
+                name="filter-variant"
+                size={20}
+                color={
+                  selected === 'all'
+                    ? theme.colors.onSurfaceVariant
+                    : theme.colors.onSecondaryContainer
+                }
+              />
+            </RNHostView>
+          </Button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Items>
           {options.map((option, index) => (
@@ -40,7 +63,10 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               key={option.name}
               selected={selected === option.name}
               shapes={{ index, count: options.length }}
-              onClick={() => onSelectionChange(option.name)}
+              onClick={() => {
+                setExpanded(false);
+                onSelectionChange(option.name);
+              }}
               modifiers={[testID(`filter-${option.name}`)]}
             >
               <SelectableDropdownMenuItem.LeadingIcon>
@@ -69,15 +95,5 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     </Host>
   );
 };
-
-const styles = StyleSheet.create({
-  // Under the second header button (select, then filter).
-  anchor: {
-    position: 'absolute',
-    top: 0,
-    left: 64,
-    zIndex: 1,
-  },
-});
 
 export default FilterMenu;
