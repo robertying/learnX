@@ -92,11 +92,16 @@ function darkenBorder(color, baseLightness) {
 
 /**
  * Background colors: light ones become dark, with white mapping onto the page
- * background so white boxes blend in; dark ones stay.
+ * background so white boxes blend in; dark ones stay. Bright saturated colors
+ * such as a yellow highlight keep a high luminance at any HSL lightness, so
+ * they are darkened further until light text on them is readable.
  */
 function darkenBackground(color, baseLightness) {
   const hsl = rgbToHsl(color);
-  const l = Math.min(hsl.l, baseLightness + (1 - hsl.l) * 0.5);
+  let l = Math.min(hsl.l, baseLightness + (1 - hsl.l) * 0.5);
+  while (l > 0 && luminance({ ...hsl, l }) > 0.06) {
+    l = Math.max(0, l - 0.02);
+  }
   return hslToString({ ...hsl, l });
 }
 
@@ -162,6 +167,7 @@ if (typeof module === 'object' && module.exports) {
     darkenForeground,
     darkenBackground,
     darkenBorder,
+    luminance,
     applyDarkMode,
   };
 }

@@ -6,6 +6,7 @@ const {
   darkenForeground,
   darkenBackground,
   darkenBorder,
+  luminance,
 } = require('helpers/preval/darkMode.js');
 
 jest.mock('data/source', () => ({
@@ -110,6 +111,20 @@ describe('dark mode colors', () => {
     ).toBeGreaterThanOrEqual(0.75);
   });
 
+  it('darkens bright highlights enough for light text', () => {
+    const base = rgbToHsl(parseColor('rgb(30, 26, 29)')).l;
+    const yellow = darkenBackground(parseColor('rgb(255, 255, 0)'), base);
+    const background = rgbToHsl(parseColor('rgb(255, 255, 0)'));
+    const text = rgbToHsl(parseColor('rgb(233, 224, 228)'));
+    // WCAG contrast of the page text on the adjusted highlight
+    const contrast =
+      (luminance(text) + 0.05) /
+      (luminance({ ...background, l: lightness(yellow) }) + 0.05);
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+    // Still yellow, just dark
+    expect(yellow).toMatch(/^hsla\(60, 100%/);
+  });
+
   it('flips border lightness', () => {
     const base = 0.11;
     expect(
@@ -126,9 +141,6 @@ describe('dark mode colors', () => {
     expect(
       lightness(darkenBackground(parseColor('rgb(255, 255, 255)'), base)),
     ).toBeCloseTo(base, 2);
-    expect(
-      lightness(darkenBackground(parseColor('rgb(255, 255, 0)'), base)),
-    ).toBeCloseTo(base + 0.25, 2);
     expect(
       lightness(darkenBackground(parseColor('rgb(40, 40, 40)'), base)),
     ).toBeCloseTo(0.157, 2);
