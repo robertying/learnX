@@ -4,7 +4,6 @@ import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import { useReorderableDrag } from 'react-native-reorderable-list';
 import { Checkbox, Menu } from 'react-native-paper';
 import MaterialIcons from '@react-native-vector-icons/material-icons';
 import * as Haptics from 'expo-haptics';
@@ -28,6 +27,8 @@ export interface CardWrapperProps {
   onPress?: () => void;
   selectionMode?: boolean;
   reorderMode?: boolean;
+  /** Starts dragging the card; set only inside a reorderable list. */
+  onDrag?: () => void;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
   disableSwipe?: boolean;
@@ -46,13 +47,12 @@ const CardWrapper: React.FC<
   children,
   selectionMode,
   reorderMode,
+  onDrag,
   checked,
   onCheck,
   disableSwipe,
 }) => {
   const theme = useTheme();
-
-  const drag = useReorderableDrag();
 
   const { snapRef, openActions, onWillOpen, onWillClose, interceptPress } =
     useCardSwipe({ selectionMode, reorderMode });
@@ -119,7 +119,7 @@ const CardWrapper: React.FC<
 
   const handleLongPress = () => {
     if (reorderMode) {
-      drag();
+      onDrag?.();
     } else if (!disableSwipe && !selectionMode) {
       if (swipeableNotSupported) {
         Haptics.selectionAsync();
