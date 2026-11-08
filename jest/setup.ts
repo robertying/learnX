@@ -78,6 +78,9 @@ jest.mock('expo-widgets', () => ({
   })),
 }));
 
+// Spotlight is native only (iOS and Mac), as on Android.
+jest.mock('../modules/spotlight', () => ({ __esModule: true, default: null }));
+
 // Notifications need the native module; tests read what was scheduled.
 jest.mock('expo-notifications', () => ({
   AndroidImportance: { DEFAULT: 3, HIGH: 4 },

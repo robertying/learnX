@@ -12,12 +12,13 @@ import { latestSemesterQuery, useCourses } from 'data/queries';
 import { applyLatestSemester } from 'data/userData';
 import useDeadlineWidget from 'hooks/useDeadlineWidget';
 import useDeadlineReminders from 'hooks/useDeadlineReminders';
+import useSpotlight from 'hooks/useSpotlight';
 import packageJson from '../../package.json';
 
 /**
  * What the main UI starts once logged in: picks the semester, keeps its
- * courses fetched, schedules background fetch, keeps the deadline widget
- * and reminders current, sets up notifications and their taps, and checks
+ * courses fetched, schedules background fetch, keeps the deadline widget,
+ * reminders and Spotlight current, sets up notifications and their taps, and checks
  * for an Android update.
  */
 const useMainStartup = () => {
@@ -40,6 +41,7 @@ const useMainStartup = () => {
 
   useDeadlineWidget();
   useDeadlineReminders();
+  useSpotlight();
 
   useEffect(() => {
     if (loggedIn) {

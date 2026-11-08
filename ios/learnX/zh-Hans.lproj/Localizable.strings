@@ -1,0 +1,6 @@
+/* The "Next Deadline" App Intent (NextDeadlineIntent.swift) */
+"Next Deadline" = "下一个截止日期";
+"Tells you which assignment is due next." = "告诉您下一个要交的作业。";
+"You have no upcoming deadlines." = "没有即将截止的作业。";
+/* 1: assignment title, 2: course name, 3: relative time, e.g. "in 2 days" */
+"%@ for %@ is due %@." = "%2$@的“%1$@”%3$@截止。";
