@@ -6,6 +6,7 @@ import { submitAssignment } from 'data/source';
 import { Assignment } from 'data/types/state';
 import { getExtension, stripExtension } from './filename';
 import { interpolate, translationsFor } from './i18n';
+import { escape } from 'he';
 import { removeTags } from './text';
 
 /** A file picked or shared for submission, not uploaded yet */
@@ -19,6 +20,27 @@ export interface PickedAttachment {
 /** What the content input starts with: the submitted text, tags removed */
 export const initialSubmissionContent = (submittedContent?: string) =>
   (removeTags(submittedContent || '') ?? '').replace('-->', '');
+
+/**
+ * The answer as the website's editor sends it: HTML, one paragraph per line.
+ * Unchanged from the submitted answer (`initialSubmissionContent` of it), the
+ * submitted HTML goes back as it is, so resending keeps its formatting.
+ */
+export const submissionHtml = (content: string, submittedContent?: string) => {
+  if (
+    submittedContent &&
+    content === initialSubmissionContent(submittedContent)
+  ) {
+    return submittedContent;
+  }
+  if (!content.trim()) {
+    return '';
+  }
+  return content
+    .split(/\r?\n/)
+    .map(line => `<p>${line.trim() ? escape(line) : '&nbsp;'}</p>`)
+    .join('');
+};
 
 /** "<title> Submission.<ext>" in the given language, ext from the MIME type */
 export const defaultAttachmentName = (
@@ -70,27 +92,37 @@ export const canSubmit = ({
 }) => !uploading && (removeAttachment || !!content || !!picked);
 
 /**
- * Sends the submission. Removing the uploaded attachment wins over new
- * content; with nothing to send it does nothing.
+ * Sends the submission like the website does: the whole answer every time
+ * (the server replaces the submitted one with it, so removing the attachment
+ * keeps the text), with the attachment to upload or to remove. With nothing
+ * to send it does nothing.
  */
 export const sendSubmission = async ({
   studentHomeworkId,
   content,
+  submittedContent,
   attachment,
   removeAttachment,
   onProgress,
 }: {
   studentHomeworkId: string;
   content: string;
+  /** The answer submitted before (HTML), kept as it is when not edited */
+  submittedContent?: string;
   attachment?: { uri: string; name: string };
   removeAttachment: boolean;
   onProgress: (progress: number) => void;
 }) => {
-  if (removeAttachment) {
-    await submitAssignment(studentHomeworkId, '', undefined, onProgress, true);
-  } else if (content || attachment) {
-    await submitAssignment(studentHomeworkId, content, attachment, onProgress);
+  if (!content && !attachment && !removeAttachment) {
+    return;
   }
+  await submitAssignment(
+    studentHomeworkId,
+    submissionHtml(content, submittedContent),
+    attachment,
+    onProgress,
+    removeAttachment,
+  );
 };
 
 /** A picked file shaped like a remote one, so it opens in file detail */

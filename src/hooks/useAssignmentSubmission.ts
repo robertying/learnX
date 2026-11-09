@@ -228,7 +228,10 @@ export const useSaveSubmissionDraft = (
  * shared data, refreshes the course's assignments and calls `onSubmitted`.
  */
 export const useSubmitAssignment = (
-  assignment: Pick<Assignment, 'courseId' | 'studentHomeworkId'>,
+  assignment: Pick<
+    Assignment,
+    'courseId' | 'studentHomeworkId' | 'submittedContent'
+  >,
   {
     content,
     picked,
@@ -258,6 +261,7 @@ export const useSubmitAssignment = (
       await sendSubmission({
         studentHomeworkId: assignment.studentHomeworkId,
         content,
+        submittedContent: assignment.submittedContent,
         attachment,
         removeAttachment,
         onProgress: setProgress,

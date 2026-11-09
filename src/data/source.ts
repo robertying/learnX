@@ -175,6 +175,9 @@ export const submitAssignment = async (
       name: attachment.name,
       type: mime.getType(attachment.uri) || 'application/octet-stream',
     } as any);
+  } else {
+    // what the website sends without a file: it appends `files[0]`, undefined
+    body.append('fileupload', 'undefined');
   }
 
   try {
