@@ -353,4 +353,6 @@ export default {
     'Worked out from course times. Holidays and moved classes may be missing.',
   todayCalendarFailed:
     "Couldn't update the timetable; showing the one from {time}.",
+  forward: 'Forward',
+  openInBrowser: 'Open in Browser',
 };
