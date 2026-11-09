@@ -25,14 +25,15 @@ const textStyles = {
 } as const;
 
 /**
- * Point sizes on a Mac. "Optimize for Mac" maps text styles to the macOS
- * scale (subheadline 11 pt, footnote 10 pt), which is far smaller than the
- * React Native text around the button, and the Mac has no Dynamic Type to
- * follow anyway.
+ * Point sizes on a Mac: the iOS default sizes of the text styles above, which
+ * is what React Native `Text` uses (components/Text). SwiftUI text styles on
+ * "Optimize for Mac" switch to the macOS scale instead (subheadline 11 pt,
+ * footnote 10 pt), far smaller than the text around the button, and the Mac
+ * has no Dynamic Type to follow anyway.
  */
 const macSizes = {
   small: 13,
-  regular: 14,
+  regular: 15,
   large: 17,
 } as const;
 
