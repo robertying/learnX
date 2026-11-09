@@ -1,5 +1,6 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
+import { semesterWeek } from '@robertying/thu-learn-lib';
 import { coursesQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
@@ -10,7 +11,6 @@ import { isNetworkError } from 'helpers/parse';
 import {
   CalendarClass,
   ClassSession,
-  semesterWeek,
   sessionsFromCalendar,
   sessionsFromCourses,
   startOfWeek,
@@ -165,7 +165,9 @@ export const useWeekSchedule = (date: dayjs.ConfigType): WeekSchedule => {
   return {
     sessions,
     source,
-    week: knowsStart ? semesterWeek(startDate, weekStart) : null,
+    week: knowsStart
+      ? semesterWeek(dayjs(startDate).format('YYYY-MM-DD'), weekStart)
+      : null,
     updatedAt: calendar.dataUpdatedAt,
     fetching: calendar.isFetching,
     failed: calendar.isError,

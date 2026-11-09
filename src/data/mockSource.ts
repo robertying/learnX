@@ -87,18 +87,27 @@ const randomLatency = () => {
   return min + Math.random() * (max - min);
 };
 
-const apiError = (reason: FailReason): ApiError => ({ reason });
+const apiError = (reason: FailReason, extra?: unknown): ApiError => ({
+  reason,
+  extra,
+});
 
-/** Waits like a round trip, then throws if a failure is switched on. */
+/**
+ * Waits like a round trip, then throws if a failure is switched on, with the
+ * errors thu-learn-lib gives.
+ */
 const roundTrip = async ({ isLogin = false } = {}) => {
   switch (config.failure) {
     case 'offline':
       // No connection fails before the request leaves the device.
       await wait(Math.min(randomLatency(), 300));
-      throw new TypeError('Network request failed');
+      throw apiError(
+        FailReason.NETWORK_ERROR,
+        new TypeError('Network request failed'),
+      );
     case 'timeout':
       await wait(MOCK_TIMEOUT_MS);
-      throw new TypeError('Network request timed out');
+      throw apiError(FailReason.REQUEST_TIMEOUT);
     case 'serverError':
       await wait(randomLatency());
       throw apiError(

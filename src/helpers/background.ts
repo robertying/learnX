@@ -134,13 +134,7 @@ export const syncContent = async ({
   }
 
   try {
-    await loginWithFingerPrint(
-      credentials.username,
-      credentials.password,
-      credentials.fingerPrint,
-      credentials.fingerGenPrint,
-      credentials.fingerGenPrint3,
-    );
+    await loginWithFingerPrint(credentials);
   } catch {
     return record({ status: 'skipped' });
   }

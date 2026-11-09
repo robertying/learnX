@@ -903,7 +903,7 @@ const file = (
     category: {
       id: `${c.id}-${category}`,
       title: category,
-      creationTime: mockSemesterStart.toDate(),
+      creationTime: mockSemesterStart.format(),
     },
   }),
   ...fields,

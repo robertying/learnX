@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { FailReason } from '@robertying/thu-learn-lib';
 import { submitAssignment } from 'data/source';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
@@ -8,13 +9,30 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
   setFromResponse: jest.fn(),
   flush: jest.fn(),
 }));
+const mockGetSubmitRequest = jest.fn(
+  async (
+    id: string,
+    content?: string,
+    attachment?: { filename: string },
+    remove?: boolean,
+  ) => {
+    const body = new FormData();
+    body.append('xszyid', id);
+    body.append('zynr', content ?? '');
+    body.append('fileupload', attachment ? attachment.filename : 'undefined');
+    body.append('isDeleted', remove ? '1' : '0');
+    return { url: 'https://learn.tsinghua.edu.cn/submit?_csrf=token', body };
+  },
+);
 jest.mock('@robertying/thu-learn-lib', () => ({
   ...jest.requireActual('@robertying/thu-learn-lib'),
   Learn2018Helper: class {
-    login = jest.fn(async () => {});
     getCSRFToken = () => 'token';
+    // the helper is made when data/source loads, before this file's consts
+    getHomeworkSubmitRequest = (
+      ...args: Parameters<typeof mockGetSubmitRequest>
+    ) => mockGetSubmitRequest(...args);
   },
-  addCSRFTokenToUrl: (url: string, token: string) => `${url}?_csrf=${token}`,
 }));
 
 const post = jest.mocked(axios.post);
@@ -31,16 +49,31 @@ describe('submitAssignment', () => {
     expect(post).not.toHaveBeenCalled();
   });
 
-  it('sends fileupload as the text "undefined" without a file, like the website', async () => {
-    post.mockResolvedValueOnce({ status: 200, data: { result: 'success' } });
-    await submit();
-    const body = post.mock.calls[0][1] as FormData;
-    expect(body.getAll('fileupload')).toEqual(['undefined']);
-    expect(body.get('isDeleted')).toBe('0');
+  it("sends thu-learn-lib's request, with the file as React Native uploads it", async () => {
+    post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
+    await submitAssignment(
+      'homework-id',
+      '<p>answer</p>',
+      { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
+      undefined,
+      false,
+    );
+    expect(mockGetSubmitRequest).toHaveBeenLastCalledWith(
+      'homework-id',
+      '<p>answer</p>',
+      {
+        filename: 'Answer.pdf',
+        content: { uri: 'file:///tmp/answer.pdf', type: 'application/pdf' },
+      },
+      false,
+    );
+    expect(post.mock.calls[0][1]).toBe(
+      (await mockGetSubmitRequest.mock.results[0].value).body,
+    );
   });
 
   it('resolves when the server says it succeeded', async () => {
-    post.mockResolvedValueOnce({ status: 200, data: { result: 'success' } });
+    post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
     await expect(submit()).resolves.toBeUndefined();
     expect(post).toHaveBeenCalledWith(
       expect.stringContaining('_csrf=token'),
@@ -52,17 +85,21 @@ describe('submitAssignment', () => {
   it('fails on the login redirect page an expired session gets', async () => {
     post.mockResolvedValueOnce({
       status: 200,
-      data: '<script>window.location.href="/f/login"</script>',
+      data: '<html><body><p>您未登录或登录失效</p></body></html>',
     });
-    await expect(submit()).rejects.toThrow('invalid login session');
+    await expect(submit()).rejects.toMatchObject({
+      reason: FailReason.NOT_LOGGED_IN,
+    });
   });
 
   it('fails with the server message on an error result', async () => {
     post.mockResolvedValueOnce({
       status: 200,
-      data: { result: 'error', msg: 'deadline passed' },
+      data: '{"result":"error","msg":"deadline passed"}',
     });
-    await expect(submit()).rejects.toThrow('deadline passed');
+    await expect(submit()).rejects.toMatchObject({
+      reason: FailReason.OPERATION_FAILED,
+    });
   });
 
   it('does not call the server with nothing to submit', async () => {

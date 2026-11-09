@@ -1,11 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
-import {
-  dataSource,
-  isServerReachable,
-  loginWithFingerPrint,
-  resetDataSource,
-} from 'data/source';
+import { dataSource, loginWithFingerPrint, resetDataSource } from 'data/source';
 import {
   clearCredentials,
   Credentials,
@@ -109,11 +104,16 @@ export async function login({
         resume
           ? dataSource.ensureSession()
           : loginWithFingerPrint(
-              username,
-              password,
-              fingerPrint,
-              fingerGenPrint,
-              fingerGenPrint3,
+              // An incomplete login signs in with the saved one.
+              username && password && fingerPrint
+                ? {
+                    username,
+                    password,
+                    fingerPrint,
+                    fingerGenPrint,
+                    fingerGenPrint3,
+                  }
+                : undefined,
             ),
       3,
       1000,
@@ -138,13 +138,10 @@ export async function login({
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
-    // A wrong password is BAD_CREDENTIAL. Otherwise (ERROR_FETCH_FROM_ID: the
-    // SSO server failed or couldn't be reached), a failed fetch in the last
-    // attempt means offline; if the server answers now, it turned the login
+    // Offline when the last attempt got no answer; anything else (a wrong
+    // password, or the server failing the login) is the server turning it
     // down.
-    const offline =
-      !isBadCredential(err) &&
-      (isNetworkError(err) || !(await isServerReachable()));
+    const offline = isNetworkError(err);
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,

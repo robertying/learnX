@@ -4,9 +4,6 @@ import { beijingTime } from 'helpers/serverTime';
 import {
   currentAndNext,
   matchCourse,
-  parseMeeting,
-  parseWeeks,
-  semesterWeek,
   sessionsFromCalendar,
   sessionsFromCourses,
   sessionsOn,
@@ -33,102 +30,10 @@ const course = (
 // A Monday.
 const termStart = '2026-09-14';
 
-describe('startOfWeek / semesterWeek', () => {
+describe('startOfWeek', () => {
   it('starts weeks on Monday', () => {
     expect(startOfWeek('2026-11-08').format('YYYY-MM-DD')).toBe('2026-11-02');
     expect(startOfWeek('2026-11-09').format('YYYY-MM-DD')).toBe('2026-11-09');
-  });
-
-  it('counts teaching weeks from the first day', () => {
-    expect(semesterWeek(termStart, '2026-09-14')).toBe(1);
-    expect(semesterWeek(termStart, '2026-09-20')).toBe(1);
-    expect(semesterWeek(termStart, '2026-11-09')).toBe(9);
-    expect(semesterWeek(termStart, '2026-09-13')).toBe(0);
-  });
-});
-
-describe('parseWeeks', () => {
-  it.each([
-    ['全周', null],
-    ['1-4周', [1, 2, 3, 4]],
-    ['9,11周', [9, 11]],
-    ['第1-2,5周', [1, 2, 5]],
-    ['前八周', [1, 2, 3, 4, 5, 6, 7, 8]],
-    ['单周', [1, 3, 5, 7, 9, 11, 13, 15]],
-    ['奇怪', null],
-    ['Week all ', null],
-    ['Week 1-4', [1, 2, 3, 4]],
-    ['Week 9,11 ', [9, 11]],
-    ['Weeks 1-2, 5', [1, 2, 5]],
-    ['First 8 weeks', [1, 2, 3, 4, 5, 6, 7, 8]],
-    ['Last 8 weeks', [9, 10, 11, 12, 13, 14, 15, 16]],
-    ['Odd weeks', [1, 3, 5, 7, 9, 11, 13, 15]],
-    ['Even weeks', [2, 4, 6, 8, 10, 12, 14, 16]],
-    ['Strange', null],
-  ])('%s', (text, weeks) => {
-    expect(parseWeeks(text)).toEqual(weeks);
-  });
-});
-
-describe('parseMeeting', () => {
-  it('reads the day, period, weeks and place', () => {
-    expect(parseMeeting('星期六第1节(9,11周)，六教6A414')).toEqual({
-      weekday: 6,
-      period: 1,
-      weeks: [9, 11],
-      location: '六教6A414',
-    });
-    expect(parseMeeting('星期日第6节（全周），')).toEqual({
-      weekday: 7,
-      period: 6,
-      weeks: null,
-      location: '',
-    });
-  });
-
-  it('skips entries without a day or period', () => {
-    expect(parseMeeting('星期第0节(全周)，')).toBeNull();
-    expect(parseMeeting('星期一第9节(全周)，')).toBeNull();
-    expect(parseMeeting('')).toBeNull();
-  });
-
-  it('reads the English form', () => {
-    expect(parseMeeting('Section 2 of Wed (Week all ), 六教6A414')).toEqual({
-      weekday: 3,
-      period: 2,
-      weeks: null,
-      location: '六教6A414',
-    });
-    expect(parseMeeting('Section 1 of Sat (Week 9,11 ), 六教6A414')).toEqual({
-      weekday: 6,
-      period: 1,
-      weeks: [9, 11],
-      location: '六教6A414',
-    });
-    expect(parseMeeting('Section 6 of Sun (Week all ), ')).toEqual({
-      weekday: 7,
-      period: 6,
-      weeks: null,
-      location: '',
-    });
-  });
-
-  it.each([
-    ['Section 2  of Mon (Week all ), 六教6C101', 1, 2],
-    ['Section 6 of Tues (Week all ), 六教6A211', 2, 6],
-    ['Section 3 of Tue. (Week all ), 一教101', 2, 3],
-    ['Section 6 of Thur (Week all ), 一教101', 4, 6],
-    ['Section 4 of Thursday (Week all ), 一教101', 4, 4],
-    ['Section 1 of Fri (Week all ), 六教6A414', 5, 1],
-    ['section 5 of SAT (Week all ), 一教101', 6, 5],
-  ])('reads %s', (text, weekday, period) => {
-    expect(parseMeeting(text)).toMatchObject({ weekday, period });
-  });
-
-  it('skips English entries without a day or period', () => {
-    expect(parseMeeting('Section 0  (Week all ), ')).toBeNull();
-    expect(parseMeeting('Section 9 of Mon (Week all ), ')).toBeNull();
-    expect(parseMeeting('Section 2 of Xyz (Week all ), ')).toBeNull();
   });
 });
 
@@ -238,19 +143,6 @@ describe('today', () => {
 
 describe('a term that starts on a weekend', () => {
   // fall 2026 starts on Saturday Sep 12; teachers count Nov 4 as week 8
-  it('counts weeks from the Monday after it', () => {
-    expect(semesterWeek('2026-09-12', '2026-09-14')).toBe(1);
-    expect(semesterWeek('2026-09-12', '2026-09-13')).toBe(0);
-    expect(semesterWeek('2026-09-12', '2026-11-04')).toBe(8);
-    expect(semesterWeek('2026-09-12', '2026-11-13')).toBe(9);
-    expect(semesterWeek('2026-09-13', '2026-11-04')).toBe(8);
-  });
-
-  it('keeps a weekday start in its own week', () => {
-    expect(semesterWeek('2026-09-14', '2026-11-04')).toBe(8);
-    expect(semesterWeek('2026-09-16', '2026-09-14')).toBe(1);
-  });
-
   it('puts week-limited classes in the right weeks', () => {
     const sessions = sessionsFromCourses(
       [course('a', 'A', ['星期一第1节(1周)，'])],
