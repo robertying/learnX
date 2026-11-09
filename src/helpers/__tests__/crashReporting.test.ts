@@ -1,4 +1,4 @@
-import Crashlytics from '../../../modules/crashlytics';
+import Crashlytics from 'modules/crashlytics';
 import { useCredentialsStore } from 'data/credentials';
 import env from 'helpers/env';
 import {
@@ -8,7 +8,7 @@ import {
   trackScreen,
 } from 'helpers/crashReporting';
 
-jest.mock('../../../modules/crashlytics', () => ({
+jest.mock('modules/crashlytics', () => ({
   __esModule: true,
   default: { recordError: jest.fn(), log: jest.fn(), setCustomKey: jest.fn() },
 }));

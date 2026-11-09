@@ -1,7 +1,7 @@
 // What the "Next Deadline" and "Next Class" App Intents read without starting
 // React Native (iOS and Mac). The native side is in modules/spotlight, which
 // saves them to UserDefaults; Spotlight indexing is separate (helpers/spotlight).
-import Spotlight from '../../modules/spotlight';
+import Spotlight from 'modules/spotlight';
 import { Assignment } from 'data/types/state';
 import type { UpcomingClass } from 'helpers/upNext';
 import { upcomingDeadlines } from 'helpers/widgetDeadlines';

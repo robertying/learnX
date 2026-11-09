@@ -22,7 +22,7 @@ import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
 import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
-import { ToastBackground, ToastSymbol } from '../../modules/toast';
+import { ToastBackground, ToastSymbol } from 'modules/toast';
 
 export type ToastType = 'success' | 'warning' | 'error' | 'none';
 

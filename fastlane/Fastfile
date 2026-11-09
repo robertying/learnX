@@ -26,7 +26,7 @@ def app_version
   JSON.parse(File.read(PACKAGE_JSON))["version"]
 end
 
-# The app target's CURRENT_PROJECT_VERSION. The share extension keeps its own (1).
+# CURRENT_PROJECT_VERSION, set once at the project level so the app and its extensions share it.
 def build_number
   File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i).max
 end

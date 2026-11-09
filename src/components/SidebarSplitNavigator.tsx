@@ -21,7 +21,7 @@ import type {
   DetailNavigationContainerRef,
   DetailStackParams,
 } from 'screens/types';
-import { SidebarView } from '../../modules/sidebar';
+import { SidebarView } from 'modules/sidebar';
 import NativeSplitViewProvider from './NativeSplitView';
 import { SplitViewContext } from './SplitView';
 import { useTheme } from 'theme';

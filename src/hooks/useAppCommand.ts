@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent } from 'react';
-import { AppCommand, Menus } from '../../modules/menus';
+import { AppCommand, Menus } from 'modules/menus';
 
 /**
  * Runs `handler` when the menu bar command (or its shortcut) is chosen on
