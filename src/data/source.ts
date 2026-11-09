@@ -1,7 +1,6 @@
 import { Platform } from 'react-native';
 import {
   Learn2018Helper,
-  addCSRFTokenToUrl,
   checkHomeworkSubmitResponse,
   type ApiError,
   type Credential,
@@ -18,6 +17,7 @@ import {
   mockSubmitAssignment,
 } from 'data/mockSource';
 import Urls from 'constants/Urls';
+import { addCSRFTokenToLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
 import {
   assertServerWritesAllowed,
@@ -144,12 +144,8 @@ export const resetDataSource = () => {
 };
 resetDataSource();
 
-export const addCSRF = (url: string) => {
-  if (new URL(url).hostname?.endsWith('tsinghua.edu.cn')) {
-    return addCSRFTokenToUrl(url, dataSource.getCSRFToken());
-  }
-  return url;
-};
+export const addCSRF = (url: string) =>
+  addCSRFTokenToLearnUrl(url, dataSource.getCSRFToken());
 
 /**
  * Applies Settings › Network Emulation to a file download while a mock

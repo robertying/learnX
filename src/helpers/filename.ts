@@ -46,6 +46,19 @@ export const sanitizeFileName = (name: string, suffix = '') => {
   return `${base || '_'}${safeSuffix}`;
 };
 
+/**
+ * The name a file is saved or shared under: its title with its extension, made
+ * safe by `sanitizeFileName`. Every place that names a file on disk from server
+ * data goes through this or `sanitizeFileName`, never a hand-built string.
+ */
+export const fileNameOf = ({
+  title,
+  fileType,
+}: {
+  title: string;
+  fileType?: string | null;
+}) => sanitizeFileName(title, fileType ? `.${fileType}` : '');
+
 /** Bytes as the system shows them: 1000-based, one decimal from KB up. */
 export const formatFileSize = (bytes: number) => {
   const units = ['KB', 'MB', 'GB', 'TB'];

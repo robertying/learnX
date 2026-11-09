@@ -177,6 +177,21 @@ describe('CSRF links', () => {
     expect(addCSRFTokenToUrl('http://[bad', 't', base)).toBeNull();
   });
 
+  it('only gives the token to Web Learning itself, over https', () => {
+    expect(
+      addCSRFTokenToUrl('https://xlearn.tsinghua.edu.cn/a', 't', base),
+    ).toBeNull();
+    expect(
+      addCSRFTokenToUrl('https://eviltsinghua.edu.cn/a', 't', base),
+    ).toBeNull();
+    expect(addCSRFTokenToUrl('https://id.tsinghua.edu.cn/a', 't', base)).toBe(
+      null,
+    );
+    expect(
+      addCSRFTokenToUrl('http://learn.tsinghua.edu.cn/b/file?id=1', 't', base),
+    ).toBe('https://learn.tsinghua.edu.cn/b/file?id=1&_csrf=t');
+  });
+
   it('keeps going after a link it cannot use', () => {
     const elements = [
       ['href', 'http://[bad'],

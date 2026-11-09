@@ -26,6 +26,17 @@ export interface WebViewTemplateColors {
   linkColor?: string;
 }
 
+let scriptNonce: string | undefined;
+
+/**
+ * Marks the template's own scripts, the only ones its policy lets run: the
+ * content is written by teachers and runs as Web Learning, with the login
+ * cookies. One per launch, so the same content gives the same page and the
+ * web view doesn't reload. The web view's injected scripts aren't held to it.
+ */
+const getScriptNonce = () =>
+  (scriptNonce ??= globalThis.crypto.randomUUID().replaceAll('-', ''));
+
 /**
  * Wraps course-site HTML (notice and assignment descriptions) into a page for
  * AutoHeightWebView, without margins of its own: the page sits in a form row,
@@ -38,13 +49,14 @@ export const getWebViewTemplate = (
 ) => {
   const math = hasMath(content);
   const dark = colors?.dark ?? false;
+  const nonce = getScriptNonce();
   return `
   <!DOCTYPE html>
   <html lang="zh-cmn-Hans">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />
-      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests; script-src 'nonce-${nonce}'" />
       <style>
         body {
           margin: 0px;
@@ -91,7 +103,7 @@ export const getWebViewTemplate = (
           : ''
       }
       ${math ? `<style>${katexStyles}</style>` : ''}
-      <script>
+      <script nonce="${nonce}">
         ${csrfLinks}
         document.addEventListener('DOMContentLoaded', function () {
           addCSRFTokenToLinks(
@@ -101,7 +113,7 @@ export const getWebViewTemplate = (
           );
         });
       </script>
-      ${math ? `<script>${katex}</script>` : ''}
+      ${math ? `<script nonce="${nonce}">${katex}</script>` : ''}
     </head>
     <body>
       <div id="root">
@@ -112,7 +124,7 @@ export const getWebViewTemplate = (
       ${
         math
           ? `
-      <script>
+      <script nonce="${nonce}">
         renderMathInElement(document.querySelector("#root"), {
           throwOnError: false
         });
@@ -123,7 +135,7 @@ export const getWebViewTemplate = (
       ${
         dark
           ? `
-      <script>
+      <script nonce="${nonce}">
         ${darkMode}
         applyDarkMode(document.querySelector("#root"), "${colors?.backgroundColor}");
       </script>

@@ -30,16 +30,41 @@ export const parseStack = (stack?: string): StackFrame[] =>
     ];
   });
 
+/**
+ * Leaves the query and fragment out of every URL in `text`: they can carry
+ * the CSRF token or ids that say whose data it is.
+ */
+export const scrubUrls = (text: string) =>
+  text.replace(/(\bhttps?:\/\/[^\s?#"'<>]*)[?#][^\s"'<>]*/gi, '$1');
+
+/**
+ * Turns anything thrown into an `Error` that is safe to send: thu-learn-lib
+ * rejects with plain `{ reason, extra }` objects whose `extra` can hold server
+ * answers with the user's data, so only the `reason` goes; for other objects,
+ * only their keys.
+ */
 const toError = (value: unknown): Error => {
   if (value instanceof Error) {
     return value;
   }
-  const error = new Error(
-    typeof value === 'string'
-      ? value
-      : (JSON.stringify(value) ?? String(value)),
-  );
-  error.name = 'NonError';
+  let message: string;
+  let name = 'NonError';
+  if (typeof value === 'string') {
+    message = value;
+  } else if (
+    value &&
+    typeof value === 'object' &&
+    typeof (value as { reason?: unknown }).reason === 'string'
+  ) {
+    name = 'ApiError';
+    message = (value as { reason: string }).reason;
+  } else if (value && typeof value === 'object') {
+    message = `{${Object.keys(value).join(', ')}}`;
+  } else {
+    message = String(value);
+  }
+  const error = new Error(message);
+  error.name = name;
   return error;
 };
 
@@ -58,9 +83,13 @@ export function recordError(error: unknown, ...logs: string[]) {
   try {
     const { name, message, stack } = toError(error);
     for (const log of logs) {
-      Crashlytics!.log(log);
+      Crashlytics!.log(scrubUrls(log));
     }
-    Crashlytics!.recordError(name || 'Error', message, parseStack(stack));
+    Crashlytics!.recordError(
+      name || 'Error',
+      scrubUrls(message),
+      parseStack(stack),
+    );
   } catch {
     // Reporting must never be the reason the app fails.
   }

@@ -1,15 +1,16 @@
 // Runs in the notice / assignment web view (see helpers/html.ts), so plain
 // browser JS. Inlined at build time by csrfLinks.preval.js.
 
+/** The one host the login cookies and the CSRF token belong to. */
+var LEARN_HOST = 'learn.tsinghua.edu.cn';
+
 /**
- * The URL with the CSRF token added when it points to a tsinghua.edu.cn page
- * over http(s); null for anything else, including in-page anchors. Relative
- * URLs resolve against `base`.
+ * The URL, as https, when it points to Web Learning (learn.tsinghua.edu.cn
+ * itself, not a lookalike or another tsinghua.edu.cn site); null for anything
+ * else. Relative URLs resolve against `base`. The app uses this too (see
+ * helpers/learnUrl.ts), so the login cookies and the token follow one rule.
  */
-function addCSRFTokenToUrl(url, token, base) {
-  if (url.charAt(0) === '#') {
-    return null;
-  }
+function parseLearnUrl(url, base) {
   var parsed;
   try {
     parsed = new URL(url, base);
@@ -18,8 +19,30 @@ function addCSRFTokenToUrl(url, token, base) {
   }
   if (
     (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') ||
-    !parsed.hostname.endsWith('tsinghua.edu.cn')
+    parsed.hostname !== LEARN_HOST
   ) {
+    return null;
+  }
+  // The token never goes out in the clear; the site serves https anyway.
+  parsed.protocol = 'https:';
+  return parsed;
+}
+
+/** Whether the URL points to Web Learning; see `parseLearnUrl`. */
+function isLearnUrl(url, base) {
+  return parseLearnUrl(url, base) !== null;
+}
+
+/**
+ * The URL with the CSRF token added when it points to Web Learning (see
+ * `parseLearnUrl`); null for anything else, including in-page anchors.
+ */
+function addCSRFTokenToUrl(url, token, base) {
+  if (url.charAt(0) === '#') {
+    return null;
+  }
+  var parsed = parseLearnUrl(url, base);
+  if (!parsed) {
     return null;
   }
   parsed.searchParams.set('_csrf', token);
@@ -27,8 +50,8 @@ function addCSRFTokenToUrl(url, token, base) {
 }
 
 /**
- * Adds the CSRF token to every link and source under `root` that points to the
- * course site. One bad URL doesn't stop the rest.
+ * Adds the CSRF token to every link and source under `root` that points to
+ * Web Learning. One bad URL doesn't stop the rest.
  */
 function addCSRFTokenToLinks(root, token, base) {
   ['href', 'src'].forEach(function (attribute) {
@@ -43,5 +66,5 @@ function addCSRFTokenToLinks(root, token, base) {
 }
 
 if (typeof module === 'object' && module.exports) {
-  module.exports = { addCSRFTokenToUrl, addCSRFTokenToLinks };
+  module.exports = { isLearnUrl, addCSRFTokenToUrl, addCSRFTokenToLinks };
 }
