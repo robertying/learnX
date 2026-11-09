@@ -48,10 +48,6 @@ export const getModalScreenOptions =
 
 const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
 
-export const getScreenOptions =
-  (title: string) => (): NativeStackNavigationOptions =>
-    getTitleOptions(title);
-
 // Detail screens set their own title from the item they show.
 export const getDetailScreenOptions = (title = '') =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {

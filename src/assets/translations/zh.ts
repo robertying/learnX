@@ -274,9 +274,6 @@ const zh: typeof en = {
   configureNotifications: '打开系统设置',
   notificationArchiveAll: '全部归档',
   notificationRemindLater: '稍后提醒',
-  simulateNewContent: '模拟新内容',
-  previewDeadlineReminder: '预览截止提醒',
-  sendTestNotification: '发送测试通知',
   // dayjs formats: text in [] is printed as is
   dateTimeFormat: 'YYYY 年 M 月 D 日 dddd HH:mm',
   fullDateTimeFormat: 'YYYY 年 M 月 D 日 dddd HH:mm',

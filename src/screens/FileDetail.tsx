@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
@@ -70,8 +70,6 @@ const FileDetailContent: React.FC<{
 }> = ({ file, courseFileId, navigation }) => {
   const theme = useTheme();
 
-  const webViewRef = useRef<WebView>(null);
-
   const { path, progress, error, redownload, share, copyToDownloads, open } =
     useFileDownload(file);
 
@@ -129,7 +127,6 @@ const FileDetailContent: React.FC<{
           <Pdf style={Styles.flex1} source={{ uri: path }} fitPolicy={0} />
         ) : (
           <WebView
-            ref={webViewRef}
             style={{
               backgroundColor: needWhiteBackground(file.fileType)
                 ? 'white'
@@ -169,7 +166,7 @@ const FileInfo: React.FC<{
       ) : null}
       <FormText
         title={t('fileType')}
-        detail={file.fileType?.toUpperCase?.() || t('unknownFileType')}
+        detail={file.fileType?.toUpperCase() || t('unknownFileType')}
       />
       <FormText title={t('fileSize')} detail={file.size ?? t('noFileSize')} />
       {file.courseTeacherName ? (

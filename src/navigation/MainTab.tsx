@@ -46,17 +46,75 @@ const withSplit = (Master: React.ComponentType) =>
         </TabSplit>
       )
     : Master;
-const TodayTab = withSplit(TodayStack);
-const NoticeTab = withSplit(NoticeStack);
-const AssignmentTab = withSplit(AssignmentStack);
-const FileTab = withSplit(FileStack);
-const CourseTab = withSplit(CourseStack);
-const SettingTab = withSplit(SettingStack);
 
 // Today, Notices, Assignments, Files, Courses, and on Mac Settings. Elsewhere
 // Settings open from Today's header: Android's navigation bar holds at most
-// five tabs, and iPhone moves a sixth into "More".
-const mainTabCount = sidebarSplit ? 6 : 5;
+// five tabs, and iPhone moves a sixth into "More". The first one mounts with
+// the app, the rest one by one after it (`useMountedTabCount`).
+interface Tab {
+  name: keyof MainTabParams;
+  component: React.ComponentType;
+  title: string;
+  sfSymbol: AppleIcon['sfSymbol'];
+  materialIcon: ComponentProps<typeof MaterialCommunityIcons>['name'];
+  testID: string;
+}
+
+const tabs: Tab[] = [
+  {
+    name: 'TodayStack',
+    component: withSplit(TodayStack),
+    title: t('today'),
+    sfSymbol: 'sun.max.fill',
+    materialIcon: 'calendar-today',
+    testID: 'tab-today',
+  },
+  {
+    name: 'NoticeStack',
+    component: withSplit(NoticeStack),
+    title: t('notices'),
+    sfSymbol: 'bell.fill',
+    materialIcon: 'bell',
+    testID: 'tab-notices',
+  },
+  {
+    name: 'AssignmentStack',
+    component: withSplit(AssignmentStack),
+    title: t('assignments'),
+    sfSymbol: 'list.bullet.clipboard.fill',
+    materialIcon: 'calendar',
+    testID: 'tab-assignments',
+  },
+  {
+    name: 'FileStack',
+    component: withSplit(FileStack),
+    title: t('files'),
+    sfSymbol: 'doc.fill',
+    materialIcon: 'folder',
+    testID: 'tab-files',
+  },
+  {
+    name: 'CourseStack',
+    component: withSplit(CourseStack),
+    title: t('courses'),
+    sfSymbol: 'square.grid.3x3.fill',
+    materialIcon: 'apps',
+    testID: 'tab-courses',
+  },
+  ...(sidebarSplit
+    ? ([
+        {
+          name: 'SettingStack',
+          component: withSplit(SettingStack),
+          title: t('settings'),
+          sfSymbol: 'gearshape.fill',
+          materialIcon: 'cog',
+          testID: 'tab-settings',
+        },
+      ] satisfies Tab[])
+    : []),
+];
+const mainTabCount = tabs.length;
 
 // A tab that only mounts once it's selected shows up empty first. Mounting them
 // all with the first one would delay it, so the rest follow once it has settled,
@@ -93,57 +151,19 @@ const MainTab = () => {
   if (sidebarSplit) {
     return (
       <MainSidebarNavigator.Navigator renderDetail={renderDetailContainer}>
-        <MainSidebarNavigator.Screen
-          name="TodayStack"
-          component={TodayTab}
-          options={{ title: t('today'), sfSymbol: 'sun.max.fill' }}
-        />
-        <MainSidebarNavigator.Screen
-          name="NoticeStack"
-          component={NoticeTab}
-          options={{
-            lazy: mountedTabCount <= 1,
-            title: t('notices'),
-            sfSymbol: 'bell.fill',
-          }}
-        />
-        <MainSidebarNavigator.Screen
-          name="AssignmentStack"
-          component={AssignmentTab}
-          options={{
-            lazy: mountedTabCount <= 2,
-            title: t('assignments'),
-            sfSymbol: 'list.bullet.clipboard.fill',
-          }}
-        />
-        <MainSidebarNavigator.Screen
-          name="FileStack"
-          component={FileTab}
-          options={{
-            lazy: mountedTabCount <= 3,
-            title: t('files'),
-            sfSymbol: 'doc.fill',
-          }}
-        />
-        <MainSidebarNavigator.Screen
-          name="CourseStack"
-          component={CourseTab}
-          options={{
-            lazy: mountedTabCount <= 4,
-            title: t('courses'),
-            sfSymbol: 'square.grid.3x3.fill',
-          }}
-        />
-        <MainSidebarNavigator.Screen
-          name="SettingStack"
-          component={SettingTab}
-          options={{
-            lazy: mountedTabCount <= 5,
-            title: t('settings'),
-            sfSymbol: 'gearshape.fill',
-            badge: settingsBadge,
-          }}
-        />
+        {tabs.map((tab, index) => (
+          <MainSidebarNavigator.Screen
+            key={tab.name}
+            name={tab.name}
+            component={tab.component}
+            options={{
+              lazy: mountedTabCount <= index,
+              title: tab.title,
+              sfSymbol: tab.sfSymbol,
+              badge: tab.name === 'SettingStack' && settingsBadge,
+            }}
+          />
+        ))}
       </MainSidebarNavigator.Navigator>
     );
   }
@@ -160,57 +180,22 @@ const MainTab = () => {
       }
       tabBarHidden={keyboardShown}
     >
-      <MainNativeNavigator.Screen
-        name="TodayStack"
-        component={TodayTab}
-        options={{
-          title: t('today'),
-          tabBarButtonTestID: 'tab-today',
-          tabBarIcon: () => getTabBarIcon('sun.max.fill', 'calendar-today'),
-          tabBarBadge: settingsBadge ? ' ' : undefined,
-        }}
-      />
-      <MainNativeNavigator.Screen
-        name="NoticeStack"
-        component={NoticeTab}
-        options={{
-          lazy: mountedTabCount <= 1,
-          title: t('notices'),
-          tabBarButtonTestID: 'tab-notices',
-          tabBarIcon: () => getTabBarIcon('bell.fill', 'bell'),
-        }}
-      />
-      <MainNativeNavigator.Screen
-        name="AssignmentStack"
-        component={AssignmentTab}
-        options={{
-          lazy: mountedTabCount <= 2,
-          title: t('assignments'),
-          tabBarButtonTestID: 'tab-assignments',
-          tabBarIcon: () =>
-            getTabBarIcon('list.bullet.clipboard.fill', 'calendar'),
-        }}
-      />
-      <MainNativeNavigator.Screen
-        name="FileStack"
-        component={FileTab}
-        options={{
-          lazy: mountedTabCount <= 3,
-          title: t('files'),
-          tabBarButtonTestID: 'tab-files',
-          tabBarIcon: () => getTabBarIcon('doc.fill', 'folder'),
-        }}
-      />
-      <MainNativeNavigator.Screen
-        name="CourseStack"
-        component={CourseTab}
-        options={{
-          lazy: mountedTabCount <= 4,
-          title: t('courses'),
-          tabBarButtonTestID: 'tab-courses',
-          tabBarIcon: () => getTabBarIcon('square.grid.3x3.fill', 'apps'),
-        }}
-      />
+      {tabs.map((tab, index) => (
+        <MainNativeNavigator.Screen
+          key={tab.name}
+          name={tab.name}
+          component={tab.component}
+          options={{
+            lazy: mountedTabCount <= index,
+            title: tab.title,
+            tabBarButtonTestID: tab.testID,
+            tabBarIcon: () => getTabBarIcon(tab.sfSymbol, tab.materialIcon),
+            // Settings open from Today's header, so Today carries their badge.
+            tabBarBadge:
+              tab.name === 'TodayStack' && settingsBadge ? ' ' : undefined,
+          }}
+        />
+      ))}
     </MainNativeNavigator.Navigator>
   );
 };
