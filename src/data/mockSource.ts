@@ -368,12 +368,14 @@ export const mockSource: DataSource = {
         homeworkDetailFields,
       ),
     ),
-  // Like the server's, the file list doesn't say which files are favorites.
-  getFileList: courseId =>
+  // Like thu-learn-lib's, the list has `isFavorite` only when asked for.
+  getFileList: (courseId, _courseType, options) =>
     request(
       () =>
         groupByCourse(mock().mockFiles, [courseId])[courseId].map(file =>
-          omit(file, ['isFavorite']),
+          options?.favorites
+            ? withFavorite(file as { id: string })
+            : omit(file, ['isFavorite']),
         ) as any,
     ),
   // An id the server doesn't know answers HTTP 500; adding twice keeps one.
