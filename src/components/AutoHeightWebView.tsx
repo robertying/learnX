@@ -131,9 +131,11 @@ const AutoHeightWebView: React.FC<
       javaScriptEnabled
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
-      // Sized to its content, so the page around it does the scrolling.
-      scrollEnabled={false}
-      nestedScrollEnabled={false}
+      // Sized to its content, so the page around it scrolls vertically; it
+      // only scrolls sideways itself, for wide tables and images. Without
+      // the bounce, a vertical drag goes to the page.
+      bounces={false}
+      directionalLockEnabled
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
       originWhitelist={['*']}
