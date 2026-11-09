@@ -1,5 +1,6 @@
 import { FailReason } from '@robertying/thu-learn-lib';
 import { create } from 'zustand';
+import { isBadCredential } from 'helpers/parse';
 
 /**
  * Why the saved login didn't go through: `offline` when the school's server
@@ -56,3 +57,21 @@ export const requestRelogin = () =>
 /** Goes back from the login screen to the saved data. */
 export const cancelRelogin = () =>
   useAuthStore.setState({ reloginRequested: false });
+
+/**
+ * Notes a failed request. thu-learn-lib logs in again by itself when a request
+ * finds the session expired; when that login is turned down for a wrong
+ * password (changed since it was saved), the session is gone, so the lists say
+ * the login failed and offer to log in again, as after a failed login at
+ * launch. Other errors are the request's own.
+ */
+export const noteRequestError = (error: unknown) => {
+  if (isBadCredential(error) && getAuth().loggedIn) {
+    useAuthStore.setState({
+      loggedIn: false,
+      loggingIn: false,
+      error: FailReason.BAD_CREDENTIAL,
+      failure: 'rejected',
+    });
+  }
+};

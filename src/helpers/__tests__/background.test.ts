@@ -13,7 +13,7 @@ import {
 } from 'data/mockSource';
 import { coursesQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
-import { loginWithFingerPrint } from 'data/source';
+import { ensureSession } from 'data/source';
 import {
   getUserData,
   resetUserData,
@@ -42,7 +42,7 @@ jest.mock('helpers/crashReporting', () => ({
 // The emulated server, as when a mock account is logged in.
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
-  loginWithFingerPrint: jest.fn(() => Promise.resolve()),
+  ensureSession: jest.fn(() => Promise.resolve()),
 }));
 
 const mockCredentials = {
@@ -87,7 +87,7 @@ beforeEach(() => {
   setCurrentSemester(semesterId);
   mockSavedCredentials = mockCredentials;
   jest.restoreAllMocks();
-  jest.mocked(loginWithFingerPrint).mockClear();
+  jest.mocked(ensureSession).mockClear();
   jest.mocked(recordError).mockClear();
   resetSyncLog();
 });
@@ -114,13 +114,7 @@ it('logs in with the saved credentials and refetches every list', async () => {
 
   const diff = await sync();
 
-  expect(loginWithFingerPrint).toHaveBeenCalledWith({
-    username: 'user',
-    password: 'password',
-    fingerPrint: 'fp',
-    fingerGenPrint: 'fp2',
-    fingerGenPrint3: 'fp3',
-  });
+  expect(ensureSession).toHaveBeenCalled();
   expect(diff.notices.added.map(n => n.id)).toEqual([notice.id]);
   expect(diff.files.added.map(f => f.id)).toEqual([file.id]);
   expect(diff.assignments.added.map(a => a.id)).toEqual([assignment.id]);
@@ -253,12 +247,12 @@ it('skips without saved credentials, a semester, or cached courses', async () =>
   setCurrentSemester(semesterId);
   clearQueryCache();
   expect(await syncContent()).toEqual({ status: 'skipped' });
-  expect(loginWithFingerPrint).not.toHaveBeenCalled();
+  expect(ensureSession).not.toHaveBeenCalled();
 });
 
 it('skips when the login fails', async () => {
   await seed();
-  jest.mocked(loginWithFingerPrint).mockRejectedValueOnce(new Error('no'));
+  jest.mocked(ensureSession).mockRejectedValueOnce(new Error('no'));
   expect(await syncContent()).toEqual({ status: 'skipped' });
 });
 

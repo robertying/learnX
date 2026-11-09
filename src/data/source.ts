@@ -10,7 +10,7 @@ import {
 import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import { getCredentials } from 'data/credentials';
+import { getCredentials, loadCredentials } from 'data/credentials';
 import {
   mockDownloadFile,
   mockMarkNoticeRead,
@@ -113,6 +113,19 @@ export const loginWithFingerPrint = async (credential?: Credential) => {
     await clearLoginCookies();
   }
   await (isMock ? mockSource : helper).login(credential);
+};
+
+/**
+ * Makes sure there's a session, with one request when the current one is
+ * still good and a login with the saved credentials only when it has expired
+ * (or none was opened in this JS runtime yet). Use it before work that isn't
+ * a login, such as the background sync, a calendar sync or a download:
+ * thu-learn-lib also logs in again by itself when a request finds the session
+ * expired, so a full login there only costs another SSO round trip.
+ */
+export const ensureSession = async () => {
+  await loadCredentials();
+  await dataSource.ensureSession();
 };
 
 export const resetDataSource = () => {

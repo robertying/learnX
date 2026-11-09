@@ -16,7 +16,12 @@ import { mockUserData } from 'data/mock';
 import { getUserData, resetUserData, setArchived } from 'data/userData';
 import env from 'helpers/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
-import { dataSource, loginWithFingerPrint, resetDataSource } from 'data/source';
+import {
+  clearLoginCookies,
+  dataSource,
+  loginWithFingerPrint,
+  resetDataSource,
+} from 'data/source';
 import { queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 
@@ -24,6 +29,7 @@ jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
   loginWithFingerPrint: jest.fn(async () => {}),
   resetDataSource: jest.fn(),
+  clearLoginCookies: jest.fn(async () => {}),
 }));
 // One attempt, without the backoff.
 jest.mock('helpers/retry', () => ({
@@ -179,7 +185,15 @@ describe('login', () => {
 
   it('logs out and forgets the login', async () => {
     await login(sso);
+    const order: string[] = [];
+    jest.spyOn(dataSource, 'logout').mockImplementationOnce(async () => {
+      order.push('server logout');
+    });
+    jest.mocked(clearLoginCookies).mockImplementationOnce(async () => {
+      order.push('cookies');
+    });
     await logout();
+    expect(order).toEqual(['server logout', 'cookies']);
     expect(getAuth()).toEqual(initialAuth);
     expect(getCredentials()).toBeNull();
   });

@@ -102,6 +102,7 @@ const legacyRoot = serialize({
 const loginModule = (): typeof import('data/login') => {
   jest.doMock('data/source', () => ({
     dataSource: require('data/mockSource').mockSource,
+    clearLoginCookies: jest.fn(async () => {}),
   }));
   return require('data/login');
 };

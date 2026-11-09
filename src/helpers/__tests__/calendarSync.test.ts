@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import DeviceInfo from 'constants/DeviceInfo';
-import { dataSource, loginWithFingerPrint } from 'data/source';
+import { dataSource, ensureSession } from 'data/source';
 import { Assignment } from 'data/types/state';
 import {
   assignmentSyncErrorToast,
@@ -24,7 +24,7 @@ import { t } from 'helpers/i18n';
 
 jest.mock('data/source', () => ({
   dataSource: { getCalendar: jest.fn() },
-  loginWithFingerPrint: jest.fn(async () => {}),
+  ensureSession: jest.fn(async () => {}),
 }));
 jest.mock('helpers/event', () => ({
   exportSyncedCalendarsToICS: jest.fn(),
@@ -128,7 +128,7 @@ describe('syncCourseSchedule', () => {
       text: t('courseScheduleSyncSucceeded'),
       type: 'success',
     });
-    expect(loginWithFingerPrint).toHaveBeenCalled();
+    expect(ensureSession).toHaveBeenCalled();
     expect(dataSource.getCalendar).toHaveBeenCalledWith(
       '20260301',
       '20260328',

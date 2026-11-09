@@ -1,7 +1,7 @@
 import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import { AppState } from 'react-native';
-import { loginWithFingerPrint } from 'data/source';
+import { ensureSession } from 'data/source';
 import { loadCredentials } from 'data/credentials';
 import { coursesQuery, latestSemesterQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
@@ -135,7 +135,9 @@ export const syncContent = async ({
   }
 
   try {
-    await loginWithFingerPrint(credentials);
+    // Keeps the session if it's still good (the app may be running) and logs
+    // in only when it has expired, rather than a full SSO login every run.
+    await ensureSession();
   } catch {
     return record({ status: 'skipped' });
   }

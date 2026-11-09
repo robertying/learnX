@@ -1,7 +1,6 @@
 import { ContentType, FailReason } from '@robertying/thu-learn-lib';
 import { getAuth } from 'data/auth';
 import { markNoticeRead, showFavorite } from 'data/content';
-import { loadCredentials } from 'data/credentials';
 import {
   actionChange,
   actionKey,
@@ -13,6 +12,7 @@ import {
 } from 'data/pendingActions';
 import {
   dataSource,
+  ensureSession as openSession,
   markNoticeReadOnServer,
   serverWritesBlocked,
 } from 'data/source';
@@ -141,8 +141,7 @@ export const flushServerActions = async ({
   }
   if (ensureSession) {
     try {
-      await loadCredentials();
-      await dataSource.ensureSession();
+      await openSession();
     } catch {
       return;
     }
