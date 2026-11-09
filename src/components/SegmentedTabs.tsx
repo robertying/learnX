@@ -2,13 +2,9 @@ import { StyleSheet, View } from 'react-native';
 import { Host, Picker, Text } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
+import type { SegmentedTabsProps } from './SegmentedTabs.shared';
 
-export interface SegmentedTabsProps {
-  titles: string[];
-  selectedIndex: number;
-  onSelect: (index: number) => void;
-  accessibilityLabel?: string;
-}
+export type { SegmentedTabsProps } from './SegmentedTabs.shared';
 
 /**
  * Tabs for a pager as a SwiftUI segmented `Picker`, the system control for

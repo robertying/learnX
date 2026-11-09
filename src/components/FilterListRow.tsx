@@ -24,7 +24,7 @@ export interface FilterListRowActions<T> {
 
 interface FilterListRowProps<T extends { id: string }> {
   data: T;
-  component: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+  component: React.FC<ItemComponentProps<T>>;
   actions: FilterListRowActions<T>;
   /** Courses: rows can be hidden and dragged to reorder */
   isCourse: boolean;
@@ -44,7 +44,7 @@ const ReorderableItem = <T,>({
   component: Component,
   ...props
 }: ItemComponentProps<T> & {
-  component: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+  component: React.FC<ItemComponentProps<T>>;
 }) => {
   const drag = useReorderableDrag();
   return <Component {...props} onDrag={drag} />;

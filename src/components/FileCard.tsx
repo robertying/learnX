@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import useMinute from 'hooks/useMinute';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { t } from 'helpers/i18n';
@@ -15,7 +16,7 @@ export interface FileCardProps extends CardWrapperProps {
   hideCourseName?: boolean;
 }
 
-const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
+const FileCard: React.FC<FileCardProps> = ({
   data: {
     title,
     description,
@@ -31,6 +32,8 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   ...restProps
 }) => {
   const theme = useTheme();
+  // Re-renders the row each minute, past the list's row memoization.
+  const now = useMinute();
   const details = [category?.title, fileType?.toUpperCase(), size]
     .filter(Boolean)
     .join(' · ');
@@ -39,7 +42,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   const preview = strippedDescription
     ? `${details}\n${strippedDescription}`
     : details;
-  const time = dayjs(uploadTime).fromNow();
+  const time = dayjs(uploadTime).from(now);
 
   return (
     <CardWrapper

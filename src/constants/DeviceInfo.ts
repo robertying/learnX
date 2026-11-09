@@ -22,7 +22,6 @@ export default {
   systemVersion: () => osVersion ?? '',
   supportsNativeSubtitle: () =>
     Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 26,
-  isWSA: () => modelName === 'Subsystem for Android(TM)',
   // On a Mac, expo-device names the CPU ("arm64" reads as "Simulator iOS").
   model: () => (isMac ? 'Mac' : modelName || osName || Platform.OS),
 };

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { act, render, screen } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { mockLocale } from '../../../jest/locale';
 import { Assignment, Course, File, Notice } from 'data/types/state';
@@ -89,6 +89,20 @@ describe('NoticeCard', () => {
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     expect(screen.getByText('Moved to Room 101')).toBeTruthy();
     expect(screen.getByText('2 days ago')).toBeTruthy();
+  });
+
+  it('keeps its age current on a list left open', async () => {
+    await render(
+      <NoticeCard
+        data={notice({
+          publishTime: dayjs(NOW).subtract(3, 'minute').toISOString(),
+        })}
+      />,
+    );
+    expect(screen.getByText('3 minutes ago')).toBeTruthy();
+
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(screen.getByText('4 minutes ago')).toBeTruthy();
   });
 
   it('shows the publisher instead of the course inside a course', async () => {
@@ -267,6 +281,20 @@ describe('AssignmentCard', () => {
 });
 
 describe('FileCard', () => {
+  it('keeps its age current on a list left open', async () => {
+    await render(
+      <FileCard
+        data={file({
+          uploadTime: dayjs(NOW).subtract(3, 'minute').toISOString(),
+        })}
+      />,
+    );
+    expect(screen.getByText('3 minutes ago')).toBeTruthy();
+
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(screen.getByText('4 minutes ago')).toBeTruthy();
+  });
+
   it('shows the type, category, size and upload age', async () => {
     await render(<FileCard data={file()} />);
     expect(screen.getByText('Lecture 5 slides')).toBeTruthy();

@@ -188,7 +188,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? t('todayFromCourses')
       : schedule.source === 'calendar' && schedule.failed
         ? t('todayCalendarFailed', {
-            time: dayjs(schedule.updatedAt).fromNow(),
+            time: dayjs(schedule.updatedAt).from(now),
           })
         : undefined;
   const span = (session: ClassSession) =>
