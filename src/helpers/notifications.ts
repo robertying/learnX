@@ -134,6 +134,30 @@ export const requestNotificationPermission = async () => {
 };
 
 /**
+ * Whether reminders go off at their exact time. Android 12 and later can
+ * hold them back while the phone is idle unless the user allows exact alarms
+ * (Android 14 doesn't allow them by default); always true elsewhere.
+ */
+export const canScheduleExactAlarms = async () => {
+  if (Platform.OS !== 'android') {
+    return true;
+  }
+  try {
+    return (await Notifications.getExactAlarmPermissionsAsync()).granted;
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Opens the system page that allows exact alarms (Android 12 and later) and
+ * resolves when the user comes back, to whether they're allowed.
+ */
+export const requestExactAlarms = async () =>
+  Platform.OS !== 'android' ||
+  (await Notifications.requestExactAlarmPermissionsAsync()).granted;
+
+/**
  * Posts a notification now. `ids` are the items a notification about several
  * of them covers, for its Archive All button.
  */

@@ -1,6 +1,7 @@
 // Pure builders for the calendar events, reminders and ICS entries that
 // helpers/event writes. Nothing here touches the calendar or the settings
 // store, so it can be tested without native modules.
+import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarEvent } from '@robertying/thu-learn-lib';
@@ -119,22 +120,37 @@ export const buildAssignmentReminderDetails = (
   };
 };
 
+/**
+ * An alert `minutes` before the deadline, which is the event's end. Alerts
+ * count from the event's start, so the event's length is added back. Android
+ * has no alerts after the start, so one closer to the deadline than the
+ * event is long goes off at the start.
+ */
+export const alertBeforeDeadline = (minutes: number, eventLength: number) => ({
+  relativeOffset:
+    Platform.OS === 'android'
+      ? Math.min(eventLength - minutes, 0)
+      : eventLength - minutes,
+  method: Calendar.AlarmMethod.DEFAULT,
+});
+
 /** Calendar event for an assignment, ending at the deadline */
 export const buildAssignmentEventDetails = (
   settings: SettingsState,
   { title, note, dueDate, completed }: AssignmentEventInput,
 ): EventDetails => {
   const alarms = settings.alarms;
+  const eventLength = settings.calendarEventLength ?? 30;
   const shouldHaveAlarm = !(
     alarms.assignmentCalendarNoAlarmIfComplete && completed
   );
   const alerts =
     shouldHaveAlarm && alarms.assignmentCalendarAlarm
       ? [
-          {
-            relativeOffset: -(alarms.assignmentCalendarAlarmOffset ?? 24 * 60),
-            method: Calendar.AlarmMethod.DEFAULT,
-          },
+          alertBeforeDeadline(
+            alarms.assignmentCalendarAlarmOffset ?? 24 * 60,
+            eventLength,
+          ),
         ]
       : [];
   if (
@@ -142,17 +158,17 @@ export const buildAssignmentEventDetails = (
     alarms.assignmentCalendarAlarm &&
     alarms.assignmentCalendarSecondAlarm
   ) {
-    alerts.push({
-      relativeOffset: -(alarms.assignmentCalendarSecondAlarmOffset ?? 30),
-      method: Calendar.AlarmMethod.DEFAULT,
-    });
+    alerts.push(
+      alertBeforeDeadline(
+        alarms.assignmentCalendarSecondAlarmOffset ?? 30,
+        eventLength,
+      ),
+    );
   }
 
   return {
     title: (completed ? '✅ ' : '') + title,
-    startDate: dueDate
-      .subtract(settings.calendarEventLength ?? 30, 'minute')
-      .toDate(),
+    startDate: dueDate.subtract(eventLength, 'minute').toDate(),
     endDate: dueDate.toDate(),
     timeZone: TZ,
     notes: note,

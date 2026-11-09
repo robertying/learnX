@@ -15,7 +15,9 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * into a string at build time. It can't use hooks, imports or anything outside
  * the function; only its props, `environment` and the @expo/ui components
  * Glance supports (Column, Row, Text, Spacer, ...). Android widgets have no
- * self-updating dates, so it shows the due time the app formatted.
+ * self-updating dates, so it shows the due time the app formatted, and it
+ * leaves out the deadlines that have passed by the time it's drawn (it's
+ * redrawn every half hour, see res/xml/deadlines_info.xml).
  *
  * The build embeds this layout with `initialProps` (see
  * android/app/src/main/expo-widgets-layout-registry.config.json), so a widget
@@ -55,8 +57,12 @@ function DeadlinesWidget(
     props.empty ||
     (zh ? '打开 learnX 以显示作业' : 'Open learnX to see deadlines');
   /* oxlint-enable learnx/no-han-outside-translations */
-  const deadlines = (props.deadlines ?? []).slice(0, 4);
-  const more = (props.total ?? 0) - deadlines.length;
+  const now = Date.now();
+  const all = props.deadlines ?? [];
+  const ahead = all.filter(d => d.deadline > now);
+  const deadlines = ahead.slice(0, 4);
+  const more =
+    (props.total ?? 0) - (all.length - ahead.length) - deadlines.length;
   // Handled by patches/expo-widgets+58.0.27.patch; other platforms ignore it.
   const openUrl = (url: string | undefined) =>
     url ? [{ $type: 'openUrl', url }] : [];

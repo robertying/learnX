@@ -41,7 +41,11 @@ interface Inputs {
   settings: ReturnType<typeof getSettings>;
   /** This and next week's classes still ahead (JSON); empty until known. */
   classes: string;
+  /** How many times the app came back to the foreground. */
+  resumes: number;
 }
+
+let resumes = 0;
 
 const readInputs = (): Inputs => {
   const { currentSemester, hiddenCourses, archived } = getUserData();
@@ -77,6 +81,7 @@ const readInputs = (): Inputs => {
               ...nextWeekSchedule.sessions,
             ]),
           ),
+    resumes,
   };
 };
 
@@ -141,6 +146,9 @@ const surfaces: Surface[] = [
       i.archived,
       i.settings.notifications.deadlineReminders,
       i.settings.notifications.deadlineReminderOffset,
+      // The notification or exact alarm permission may have changed in the
+      // system settings.
+      i.resumes,
     ],
     update: ({ assignments, hiddenCourses, archived, settings }) =>
       assignments &&
@@ -306,6 +314,7 @@ export const watchSurfaces = () => {
   useSettingsStore.subscribe(schedule);
   AppState.addEventListener('change', state => {
     if (state === 'active') {
+      resumes += 1;
       schedule();
     }
   });
