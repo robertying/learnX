@@ -69,7 +69,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Set up Java
@@ -91,11 +91,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      # build.gradle reads release signing values from local.properties, so the
-      # file has to exist. The debug build doesn't use them.
-      - name: Write local.properties
-        run: touch android/local.properties
 
       # One ABI is enough to compile every native module and keeps the build
       # short. CMake (3.17+) picks up the compiler launchers from the environment.
@@ -134,13 +129,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           cache: pnpm
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: ruby
+          # Version comes from .ruby-version.
           bundler-cache: true
 
       - name: Install dependencies

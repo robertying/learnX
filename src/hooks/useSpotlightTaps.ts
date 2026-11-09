@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent } from 'react';
-import Spotlight, { SpotlightOpenedItem } from '../../modules/spotlight';
+import Spotlight, { SpotlightOpenedItem } from 'modules/spotlight';
 import useOpenTarget from 'hooks/useOpenTarget';
 
 /**

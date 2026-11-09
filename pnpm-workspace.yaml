@@ -2,4 +2,6 @@ allowBuilds:
   '@parcel/watcher': true
   msgpackr-extract: true
 nodeLinker: hoisted
-minimumReleaseAge: 0
+# pnpm's default minimumReleaseAge (1 day) applies to everything else.
+minimumReleaseAgeExclude:
+  - '@robertying/thu-learn-lib'

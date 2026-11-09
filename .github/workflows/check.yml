@@ -35,7 +35,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           # A cold `pnpm install` takes about 4 s, and restoring the ~200 MB
           # store cache took just as long, so it isn't cached.
           package-manager-cache: false

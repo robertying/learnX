@@ -1,4 +1,4 @@
-import Crashlytics from '../../../modules/crashlytics';
+import Crashlytics from 'modules/crashlytics';
 import { useCredentialsStore } from 'data/credentials';
 // The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
 import env from '../../../jest/env';
@@ -9,7 +9,7 @@ import {
   trackScreen,
 } from 'helpers/crashReporting';
 
-jest.mock('../../../modules/crashlytics', () => ({
+jest.mock('modules/crashlytics', () => ({
   __esModule: true,
   default: { recordError: jest.fn(), log: jest.fn(), setCustomKey: jest.fn() },
 }));

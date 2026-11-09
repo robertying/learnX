@@ -6,6 +6,7 @@
     "lib": ["esnext", "dom"],
     "noUnusedLocals": true,
     "paths": {
+      "modules/*": ["./modules/*"],
       "*": ["./src/*"]
     }
   }

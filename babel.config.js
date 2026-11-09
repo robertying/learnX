@@ -24,6 +24,8 @@ module.exports = {
       'module-resolver',
       {
         root: ['./src'],
+        // The local Expo modules sit next to src/, not in it
+        alias: { modules: './modules' },
         extensions: ['.ts', '.tsx'],
       },
     ],

@@ -64,8 +64,13 @@ android {
             keyPassword "android"
         }
 
+        // Release signing values; see android/local.properties.example. Without
+        // the file, debug builds still work and release builds fail to sign.
         Properties properties = new Properties()
-        properties.load(project.rootProject.file("local.properties").newDataInputStream())
+        def localProperties = project.rootProject.file("local.properties")
+        if (localProperties.exists()) {
+            localProperties.withInputStream { properties.load(it) }
+        }
 
         release {
             storeFile file("release.keystore")
@@ -90,17 +95,23 @@ android {
     }
 }
 
+// Per-ABI APKs (GitHub Releases and the TUNA mirror) get their own version
+// codes: 1,000,000,000 + build number * 10 + the ABI's digit, e.g. 1000045403
+// for arm64-v8a of build 4540. Up to 18.0.3 they were (versionCode * 1000 +
+// digit), which overflowed Int (18.0.3's arm64-v8a APK is 614595411), so these
+// start above that to keep sideloaded installs upgradable. The AAB for Google
+// Play and the universal APK keep versionCode (9200000 + build number).
 androidComponents {
     onVariants(selector().all()) { variant ->
         variant.outputs.each { output ->
-            def versionCodes = ["armeabi-v7a": 1, "x86": 2, "arm64-v8a": 3, "x86_64": 4]
+            // x86 (2) is no longer built; don't reuse its digit
+            def abiDigits = ["armeabi-v7a": 1, "arm64-v8a": 3, "x86_64": 4]
             def abi = output.filters.find {
                 it.filterType == FilterConfiguration.FilterType.ABI
             }?.identifier
             if (abi != null) {
-                def baseCode = android.defaultConfig.versionCode
-                def abiMultiplier = versionCodes.get(abi) ?: 0
-                output.versionCode.set(baseCode * 1000 + abiMultiplier)
+                def buildNumber = android.defaultConfig.versionCode - 9_200_000
+                output.versionCode.set(1_000_000_000 + buildNumber * 10 + abiDigits[abi])
             }
         }
     }
