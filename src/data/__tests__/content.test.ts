@@ -204,14 +204,13 @@ describe('per-item details', () => {
     }
   });
 
-  it('keeps zone-less server times as Beijing times, and a refetch sees them unchanged', async () => {
-    // thu-learn-lib 5.x passes notice times on as the server writes them
-    const asServer = (time: string) => {
-      const beijing = new Date(dayjs(time).valueOf() + 8 * 3600 * 1000)
-        .toISOString()
-        .slice(0, 16);
-      return beijing.replace('T', ' ');
-    };
+  it('sees the same time written another way as unchanged', async () => {
+    const query = noticesQuery(semesterId);
+    const first = await queryClient.fetchQuery(query);
+    expect(first.length).toBeGreaterThan(0);
+
+    // the same moments in UTC instead of with the Beijing offset
+    const inUtc = (time: string) => dayjs(time).toISOString();
     const getNotificationList = mockSource.getNotificationList;
     const list = jest
       .spyOn(mockSource, 'getNotificationList')
@@ -220,21 +219,8 @@ describe('per-item details', () => {
       ) =>
         (await getNotificationList(...args)).map(n => ({
           ...n,
-          publishTime: asServer(n.publishTime),
+          publishTime: inUtc(n.publishTime),
         }))) as typeof getNotificationList);
-    const query = noticesQuery(semesterId);
-    const first = await queryClient.fetchQuery(query);
-    for (const n of first) {
-      expect(n.publishTime).toMatch(
-        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\+08:00$/,
-      );
-      const original = mockNotices.find(m => m.id === n.id)!;
-      expect(dayjs(n.publishTime).valueOf()).toBe(
-        dayjs(original.publishTime).second(0).millisecond(0).valueOf(),
-      );
-    }
-
-    list.mockClear();
     await refetch<typeof first>(query);
     const selected = list.mock.calls.flatMap(([courseId, , options]) => {
       const select = options?.attachments;
@@ -244,7 +230,7 @@ describe('per-item details', () => {
           typeof select === 'function' &&
           select({
             ...n,
-            publishTime: asServer(n.publishTime),
+            publishTime: inUtc(n.publishTime),
             attachmentName: n.attachment?.name,
           } as never),
       );

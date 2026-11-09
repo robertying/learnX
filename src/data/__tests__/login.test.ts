@@ -16,12 +16,7 @@ import { mockUserData } from 'data/mock';
 import { getUserData, resetUserData, setFavorite } from 'data/userData';
 import env from 'helpers/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
-import {
-  dataSource,
-  isServerReachable,
-  loginWithFingerPrint,
-  resetDataSource,
-} from 'data/source';
+import { dataSource, loginWithFingerPrint, resetDataSource } from 'data/source';
 import { queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 
@@ -29,7 +24,6 @@ jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
   loginWithFingerPrint: jest.fn(async () => {}),
   resetDataSource: jest.fn(),
-  isServerReachable: jest.fn(async () => true),
 }));
 // One attempt, without the backoff.
 jest.mock('helpers/retry', () => ({
@@ -54,7 +48,6 @@ beforeEach(() => {
   jest.spyOn(queryClient, 'prefetchQuery').mockResolvedValue();
   jest.mocked(loginWithFingerPrint).mockClear();
   jest.mocked(resetDataSource).mockClear();
-  jest.mocked(isServerReachable).mockClear();
 });
 
 describe('login', () => {
@@ -80,13 +73,7 @@ describe('login', () => {
       loggedIn: true,
       error: null,
     });
-    expect(loginWithFingerPrint).toHaveBeenCalledWith(
-      'student',
-      'secret',
-      'fp',
-      'g',
-      'g3',
-    );
+    expect(loginWithFingerPrint).toHaveBeenCalledWith(sso);
     expect(getCredentials()).toEqual(sso);
     expect(queryClient.prefetchQuery).toHaveBeenCalledWith(userQuery);
   });
@@ -110,7 +97,6 @@ describe('login', () => {
       .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
     await login(sso);
     expect(loginWithFingerPrint).toHaveBeenCalledTimes(1);
-    expect(isServerReachable).not.toHaveBeenCalled();
     expect(getAuth()).toMatchObject({
       loggedIn: false,
       error: FailReason.BAD_CREDENTIAL,
@@ -118,27 +104,25 @@ describe('login', () => {
     });
   });
 
-  it('records a failed fetch as offline, even if the network is back', async () => {
+  it('records a login that got no answer as offline', async () => {
     jest.mocked(loginWithFingerPrint).mockRejectedValueOnce({
-      reason: FailReason.ERROR_FETCH_FROM_ID,
+      reason: FailReason.NETWORK_ERROR,
       extra: new TypeError('Network request failed'),
     });
     await login({ reset: true });
-    expect(getAuth()).toMatchObject({ failure: 'offline' });
-    expect(isServerReachable).not.toHaveBeenCalled();
-  });
-
-  it('records a failed login as offline when the server is unreachable', async () => {
-    jest
-      .mocked(loginWithFingerPrint)
-      .mockRejectedValueOnce({ reason: FailReason.ERROR_FETCH_FROM_ID });
-    jest.mocked(isServerReachable).mockResolvedValueOnce(false);
-    await login({ reset: true });
     expect(getAuth()).toMatchObject({
       loggedIn: false,
-      error: FailReason.ERROR_FETCH_FROM_ID,
+      error: FailReason.NETWORK_ERROR,
       failure: 'offline',
     });
+  });
+
+  it('records a timed-out login as offline', async () => {
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.REQUEST_TIMEOUT });
+    await login({ reset: true });
+    expect(getAuth()).toMatchObject({ failure: 'offline' });
   });
 
   it('clears the failure and the login screen once a login works', async () => {

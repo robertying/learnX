@@ -114,13 +114,13 @@ it('logs in with the saved credentials and refetches every list', async () => {
 
   const diff = await sync();
 
-  expect(loginWithFingerPrint).toHaveBeenCalledWith(
-    'user',
-    'password',
-    'fp',
-    'fp2',
-    'fp3',
-  );
+  expect(loginWithFingerPrint).toHaveBeenCalledWith({
+    username: 'user',
+    password: 'password',
+    fingerPrint: 'fp',
+    fingerGenPrint: 'fp2',
+    fingerGenPrint3: 'fp3',
+  });
   expect(diff.notices.added.map(n => n.id)).toEqual([notice.id]);
   expect(diff.files.added.map(f => f.id)).toEqual([file.id]);
   expect(diff.assignments.added.map(a => a.id)).toEqual([assignment.id]);

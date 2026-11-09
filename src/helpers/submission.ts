@@ -1,12 +1,11 @@
 // Assignment submission helpers: attachment naming, what the submit button
 // allows, and the upload itself. Used by hooks/useAssignmentSubmission.
 import mime from 'mime';
-import { RemoteFile } from '@robertying/thu-learn-lib';
+import { RemoteFile, homeworkContentHtml } from '@robertying/thu-learn-lib';
 import { submitAssignment } from 'data/source';
 import { Assignment } from 'data/types/state';
 import { getExtension, stripExtension } from './filename';
 import { interpolate, translationsFor } from './i18n';
-import { escape } from 'he';
 import { removeTags } from './text';
 
 /** A file picked or shared for submission, not uploaded yet */
@@ -33,13 +32,7 @@ export const submissionHtml = (content: string, submittedContent?: string) => {
   ) {
     return submittedContent;
   }
-  if (!content.trim()) {
-    return '';
-  }
-  return content
-    .split(/\r?\n/)
-    .map(line => `<p>${line.trim() ? escape(line) : '&nbsp;'}</p>`)
-    .join('');
+  return homeworkContentHtml(content);
 };
 
 /** "<title> Submission.<ext>" in the given language, ext from the MIME type */

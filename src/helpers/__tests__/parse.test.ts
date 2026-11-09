@@ -61,17 +61,21 @@ describe('serializeError', () => {
 });
 
 describe('isNetworkError', () => {
-  it('spots a failed fetch, bare or wrapped by thu-learn-lib', () => {
-    expect(isNetworkError(new TypeError('Network request failed'))).toBe(true);
+  it('spots a request without an answer, bare or wrapped', () => {
+    const offline = {
+      reason: FailReason.NETWORK_ERROR,
+      extra: new TypeError('Network request failed'),
+    };
+    expect(isNetworkError(offline)).toBe(true);
     expect(
       isNetworkError({
-        reason: 'x',
-        extra: new TypeError('Network request timed out'),
+        reason: FailReason.ERROR_FETCH_FROM_ID,
+        extra: offline,
       }),
     ).toBe(true);
   });
 
-  it('counts a thu-learn-lib timeout, bare or wrapped by login', () => {
+  it('counts a thu-learn-lib timeout, bare or wrapped', () => {
     const timeout = {
       reason: FailReason.REQUEST_TIMEOUT,
       extra: { url: 'https://learn.tsinghua.edu.cn', timeout: 60000 },
@@ -88,13 +92,13 @@ describe('isNetworkError', () => {
   it('does not count other failures', () => {
     expect(
       isNetworkError({
-        reason: 'x',
+        reason: FailReason.ERROR_FETCH_FROM_ID,
         extra: new TypeError(
           "Cannot read properties of undefined (reading 'split')",
         ),
       }),
     ).toBe(false);
-    expect(isNetworkError({ reason: 'x' })).toBe(false);
+    expect(isNetworkError({ reason: FailReason.BAD_CREDENTIAL })).toBe(false);
     expect(isNetworkError(null)).toBe(false);
   });
 });

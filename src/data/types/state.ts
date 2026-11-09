@@ -1,8 +1,8 @@
 import type {
   CourseInfo,
   Homework,
-  Notification,
-  File as IFile,
+  CourseNotification,
+  CourseFile,
   UserInfo,
 } from '@robertying/thu-learn-lib';
 import type { FilterSelection } from 'helpers/filterOptions';
@@ -80,7 +80,7 @@ interface CourseExtraInfo {
 }
 
 export type Notice = Pick<
-  Notification,
+  CourseNotification,
   | 'id'
   | 'title'
   | 'publisher'
@@ -125,7 +125,7 @@ export type Assignment = Pick<
   CourseExtraInfo;
 
 export type File = Pick<
-  IFile,
+  CourseFile,
   | 'id'
   | 'title'
   | 'description'

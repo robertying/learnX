@@ -175,10 +175,12 @@ describe('mockSource', () => {
 
   it('fails like a device without a connection', async () => {
     setMockNetworkConfig({ failure: 'offline' });
-    await expect(mockSource.getUserInfo()).rejects.toThrow(
-      'Network request failed',
-    );
-    await expect(mockSource.login()).rejects.toThrow('Network request failed');
+    const offline = {
+      reason: FailReason.NETWORK_ERROR,
+      extra: new TypeError('Network request failed'),
+    };
+    await expect(mockSource.getUserInfo()).rejects.toEqual(offline);
+    await expect(mockSource.login()).rejects.toEqual(offline);
   });
 
   it('fails like a server error', async () => {
@@ -194,9 +196,9 @@ describe('mockSource', () => {
   it('times out', async () => {
     jest.useFakeTimers();
     setMockNetworkConfig({ failure: 'timeout' });
-    const pending = mockSource.getSemesterIdList().catch((e: Error) => e);
+    const pending = mockSource.getSemesterIdList().catch((e: unknown) => e);
     await jest.advanceTimersByTimeAsync(MOCK_TIMEOUT_MS);
-    expect(await pending).toEqual(new TypeError('Network request timed out'));
+    expect(await pending).toEqual({ reason: FailReason.REQUEST_TIMEOUT });
   });
 
   it('rejects logins only when asked to', async () => {
@@ -219,7 +221,9 @@ describe('mockSource', () => {
   it('applies the emulation to file downloads', async () => {
     await expect(mockDownloadFile()).resolves.toBeUndefined();
     setMockNetworkConfig({ failure: 'offline' });
-    await expect(mockDownloadFile()).rejects.toThrow('Network request failed');
+    await expect(mockDownloadFile()).rejects.toMatchObject({
+      reason: FailReason.NETWORK_ERROR,
+    });
     setMockNetworkConfig({ failure: 'serverError' });
     await expect(mockDownloadFile()).rejects.toEqual({
       reason: FailReason.UNEXPECTED_STATUS,
