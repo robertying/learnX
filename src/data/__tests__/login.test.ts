@@ -13,7 +13,7 @@ import {
   logout,
 } from 'data/login';
 import { mockUserData } from 'data/mock';
-import { getUserData, resetUserData, setFavorite } from 'data/userData';
+import { getUserData, resetUserData, setArchived } from 'data/userData';
 import env from 'helpers/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import { dataSource, loginWithFingerPrint, resetDataSource } from 'data/source';
@@ -190,12 +190,12 @@ describe('switching accounts', () => {
 
   /** Data the previous account left behind. */
   const leaveData = () => {
-    setFavorite('notice', 'old-notice', true);
+    setArchived('notice', ['old-notice'], true);
     queryClient.setQueryData(cachedKey, ['old-course']);
   };
 
   const dataKept = () =>
-    getUserData().favorites.notice.includes('old-notice') &&
+    getUserData().archived.notice.includes('old-notice') &&
     queryClient.getQueryData(cachedKey) !== undefined;
 
   it('drops the ephemeral mock account’s data on a real login after a relaunch', async () => {
@@ -217,7 +217,7 @@ describe('switching accounts', () => {
 
     expect(getAuth().loggedIn).toBe(true);
     expect(dataKept()).toBe(false);
-    expect(getUserData().favorites.notice).toEqual([]);
+    expect(getUserData().archived.notice).toEqual([]);
     expect(getUserData().currentSemester).toBeNull();
     expect(getDataOwner()).toBe('student');
   });

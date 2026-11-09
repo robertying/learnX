@@ -26,7 +26,6 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
   const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const favoriteIds = useUserData(data => data.favorites.assignment);
   const archivedIds = useUserData(data => data.archived.assignment);
   const {
     assignments,
@@ -44,7 +43,6 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
 
   const { all, fav, archived, hidden, unfinished, finished } = useFilteredData({
     data: assignments,
-    fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
   });

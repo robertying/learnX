@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import semverGt from 'semver/functions/gt';
 import { getLatestRelease } from 'helpers/update';
@@ -12,6 +12,7 @@ import { setSetting } from 'data/settings';
 import { useLoggedIn } from 'data/auth';
 import { latestSemesterQuery, useCourses } from 'data/queries';
 import { applyLatestSemester } from 'data/userData';
+import { flushServerActions } from 'data/serverActions';
 import useDeadlineWidget from 'hooks/useDeadlineWidget';
 import useDeadlineReminders from 'hooks/useDeadlineReminders';
 import useSpotlight from 'hooks/useSpotlight';
@@ -54,6 +55,21 @@ const useMainStartup = () => {
     if (loggedIn) {
       void setUpBackgroundFetch();
     }
+  }, [loggedIn]);
+
+  // Sends the favorites and notices read that are waiting (offline, or from
+  // a notification) once logged in and whenever the app comes back.
+  useEffect(() => {
+    if (!loggedIn) {
+      return;
+    }
+    void flushServerActions();
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active') {
+        void flushServerActions();
+      }
+    });
+    return () => subscription.remove();
   }, [loggedIn]);
 
   useEffect(() => {

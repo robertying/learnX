@@ -8,7 +8,8 @@ import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
 import { stripExtension, getExtension } from 'helpers/fs';
 import { Notice } from 'data/types/state';
-import { markNoticeRead, useNotice } from 'data/content';
+import { useNotice } from 'data/content';
+import { openNotice } from 'data/serverActions';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import useMinute from 'hooks/useMinute';
@@ -76,11 +77,10 @@ const NoticeDetailContent: React.FC<{
     }
   };
 
-  // Opening the notice's page marks it read on the server; the cached list
-  // shows it right away instead of after the next refresh.
+  // Opening the notice's page marks it read on the server (now, or once the
+  // app is back online); the cached list shows it right away.
   useEffect(() => {
-    fetch(url).catch(() => {});
-    markNoticeRead(id);
+    openNotice(id, url);
   }, [url, id]);
 
   const subtitle = [

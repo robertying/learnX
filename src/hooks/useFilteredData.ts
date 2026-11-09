@@ -3,18 +3,15 @@ import { Assignment, File, Notice } from 'data/types/state';
 
 function useFilteredData<T extends Notice | Assignment | File>({
   data,
-  fav,
   archived,
   hidden,
 }: {
   data: T[];
-  fav: string[];
   archived: string[];
   hidden: string[];
 }) {
   const archivedSet = useMemo(() => new Set(archived), [archived]);
   const hiddenSet = useMemo(() => new Set(hidden), [hidden]);
-  const favSet = useMemo(() => new Set(fav), [fav]);
 
   const _all = useMemo(
     () =>
@@ -31,10 +28,8 @@ function useFilteredData<T extends Notice | Assignment | File>({
     [_all],
   );
 
-  const _fav = useMemo(
-    () => _all.filter(i => favSet.has(i.id)),
-    [_all, favSet],
-  );
+  // The website's favorites (我的收藏), as the server lists them.
+  const _fav = useMemo(() => _all.filter(i => i.isFavorite), [_all]);
 
   const _hidden = useMemo(
     () => data.filter(i => hiddenSet.has(i.courseId)),

@@ -21,7 +21,6 @@ const Files: React.FC<Props> = ({ navigation }) => {
   const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const favoriteIds = useUserData(data => data.favorites.file);
   const archivedIds = useUserData(data => data.archived.file);
   const {
     files,
@@ -33,7 +32,6 @@ const Files: React.FC<Props> = ({ navigation }) => {
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: files,
-    fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
   });

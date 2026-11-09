@@ -10,6 +10,7 @@ import {
   BookmarkType,
   bookmarkTypes,
   emptyUserData,
+  favoritesToActions,
   mergeUserData,
   UserData,
   useUserDataStore,
@@ -135,8 +136,11 @@ export const legacyUserData = (root: Json): Partial<UserData> => {
       continue;
     }
     if (isStringArray(slice.favorites)) {
-      result.favorites ??= emptyUserData().favorites;
-      result.favorites[type] = [...new Set(slice.favorites)];
+      // Sent to the website's favorites, like any favorite kept on the phone.
+      result.pendingActions = [
+        ...(result.pendingActions ?? []),
+        ...favoritesToActions({ [type]: slice.favorites }),
+      ];
     }
     if (isStringArray(slice.archived)) {
       result.archived ??= emptyUserData().archived;

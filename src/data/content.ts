@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import {
+  ContentType,
   CourseType,
   type ExcellentHomework,
   type Homework,
@@ -13,7 +14,8 @@ import { coursesQuery, getCourseNames } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import { Assignment, File, Notice } from 'data/types/state';
-import { getUserData, useCurrentSemester } from 'data/userData';
+import { getUserData, useCurrentSemester, useUserData } from 'data/userData';
+import { type ContentListName, localChanges } from 'data/pendingActions';
 import { sortAssignments } from 'helpers/assignments';
 import { createLimiter } from 'helpers/limiter';
 import { sameServerTime } from 'helpers/serverTime';
@@ -65,7 +67,7 @@ const createContent = <T extends { id: string; courseId: string }>({
   sort,
   priority,
 }: {
-  name: string;
+  name: ContentListName;
   /**
    * Fetches a course's items. `cached` holds what the list has for the course
    * (possibly nothing), to skip the per-item requests for items that didn't
@@ -82,13 +84,21 @@ const createContent = <T extends { id: string; courseId: string }>({
    * fetch that was already under way doesn't undo them.
    */
   const overrides = new Map<string, Partial<T>>();
-  const withOverrides = (items: T[]) =>
-    overrides.size === 0
+  /**
+   * Lays over a response fetched since `startedAt` (ms) what the user changed
+   * in the app: the session's overrides, then the server actions still
+   * waiting or taken since the fetch started (`data/pendingActions`).
+   */
+  const withOverrides = (items: T[], startedAt: number) => {
+    const pending = localChanges(name, getUserData().pendingActions, startedAt);
+    return overrides.size === 0 && pending.size === 0
       ? items
       : items.map(item => {
           const change = overrides.get(item.id);
-          return change ? { ...item, ...change } : item;
+          const local = pending.get(item.id);
+          return change || local ? { ...item, ...change, ...local } : item;
         });
+  };
 
   /** Fetches a course's items, reusing what the semester list has cached. */
   const fetchCourse = (semesterId: string, courseId: string) =>
@@ -103,6 +113,7 @@ const createContent = <T extends { id: string; courseId: string }>({
     queryOptions({
       queryKey: [name, semesterId] as const,
       queryFn: async (): Promise<T[]> => {
+        const startedAt = Date.now();
         const courseIds = await courseIdsOf(semesterId);
         const results = await Promise.allSettled(
           courseIds.map(courseId =>
@@ -122,14 +133,17 @@ const createContent = <T extends { id: string; courseId: string }>({
             ? (queryClient.getQueryData<T[]>([name, semesterId]) ?? [])
             : [];
         return sort(
-          withOverrides([
-            ...cached.filter(item => failed.has(item.courseId)),
-            ...results.flatMap((result, i) =>
-              result.status === 'fulfilled'
-                ? tag<T>(courseIds[i], result.value)
-                : [],
-            ),
-          ]),
+          withOverrides(
+            [
+              ...cached.filter(item => failed.has(item.courseId)),
+              ...results.flatMap((result, i) =>
+                result.status === 'fulfilled'
+                  ? tag<T>(courseIds[i], result.value)
+                  : [],
+              ),
+            ],
+            startedAt,
+          ),
         );
       },
     });
@@ -140,8 +154,10 @@ const createContent = <T extends { id: string; courseId: string }>({
    * a submission), so details changed in place show up too.
    */
   const refreshCourse = async (semesterId: string, courseId: string) => {
+    const startedAt = Date.now();
     const items = withOverrides(
       tag<T>(courseId, await fetchFromServer(courseId, [])),
+      startedAt,
     );
     const { queryKey } = query(semesterId);
     queryClient.setQueryData<T[]>(queryKey, old =>
@@ -154,19 +170,23 @@ const createContent = <T extends { id: string; courseId: string }>({
    * Puts freshly fetched courses into the semester list, keeping the cached
    * items of the other courses, and saves it. Unless `complete`, the list
    * keeps its old fetch time, so the app still refetches it when it shows it.
+   * `startedAt` is when the fetches started (ms).
    */
   const putCourses = async (
     semesterId: string,
     fetched: ReadonlyMap<string, object[]>,
-    { complete }: { complete: boolean },
+    { complete, startedAt }: { complete: boolean; startedAt: number },
   ) => {
     const { queryKey } = query(semesterId);
     const cached = queryClient.getQueryData<T[]>(queryKey) ?? [];
     const items = sort(
-      withOverrides([
-        ...cached.filter(item => !fetched.has(item.courseId)),
-        ...[...fetched].flatMap(([courseId, list]) => tag<T>(courseId, list)),
-      ]),
+      withOverrides(
+        [
+          ...cached.filter(item => !fetched.has(item.courseId)),
+          ...[...fetched].flatMap(([courseId, list]) => tag<T>(courseId, list)),
+        ],
+        startedAt,
+      ),
     );
     queryClient.setQueryData<T[]>(queryKey, items, {
       updatedAt: complete
@@ -179,11 +199,17 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   /**
    * Changes one cached item of the semester being shown and saves the list,
-   * e.g. to mark it read before the server says so. Later responses this
-   * session keep the change.
+   * e.g. to mark it read before the server says so. Unless `keep` is false,
+   * later responses this session keep the change.
    */
-  const updateItem = (id: string, change: Partial<T>) => {
-    overrides.set(id, { ...overrides.get(id), ...change });
+  const updateItem = (
+    id: string,
+    change: Partial<T>,
+    { keep = true }: { keep?: boolean } = {},
+  ) => {
+    if (keep) {
+      overrides.set(id, { ...overrides.get(id), ...change });
+    }
     const semesterId = getUserData().currentSemester;
     if (!semesterId) {
       return;
@@ -201,15 +227,29 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   const empty: T[] = [];
 
-  /** The items of the semester being shown. */
+  /**
+   * The items of the semester being shown, with the server actions still
+   * waiting laid over them, so the cache read at launch (or changed by a
+   * notification action while the app wasn't running) shows them too.
+   */
   const useList = () => {
     const loggedIn = useLoggedIn();
     const semesterId = useCurrentSemester();
+    const pendingActions = useUserData(data => data.pendingActions);
     const result = useQuery({
       ...query(semesterId ?? ''),
       enabled: loggedIn && !!semesterId,
     });
-    return { ...result, items: result.data ?? empty };
+    const data = result.data ?? empty;
+    const pending = localChanges(name, pendingActions, Infinity);
+    const items =
+      pending.size === 0
+        ? data
+        : data.map(item => {
+            const change = pending.get(item.id);
+            return change ? { ...item, ...change } : item;
+          });
+    return { ...result, items };
   };
 
   /**
@@ -370,11 +410,24 @@ export const useAssignments = () => {
   return { ...result, assignments: items };
 };
 
+/**
+ * A course's files. The file list doesn't say which are favorites, so the
+ * course's file favorites are fetched next to it; if they fail, so does the
+ * course, which keeps what was cached.
+ */
+const fetchFiles = async (courseId: string) => {
+  const [list, favorites] = await Promise.all([
+    dataSource.getFileList(courseId, CourseType.STUDENT),
+    dataSource.getFavorites(courseId, ContentType.FILE),
+  ]);
+  const favoriteIds = new Set(favorites.map(favorite => favorite.id));
+  return list.map(file => ({ ...file, isFavorite: favoriteIds.has(file.id) }));
+};
+
 const files = createContent<File>({
   name: 'files',
   priority: 2,
-  fetchCourse: async courseId =>
-    dataSource.getFileList(courseId, CourseType.STUDENT),
+  fetchCourse: fetchFiles,
   sort: byNewest(file => file.uploadTime),
 });
 
@@ -405,6 +458,20 @@ export const useExcellentHomeworkDetail = (homework: ExcellentHomework) => {
     enabled: loggedIn && !listed,
   });
   return listed ? homework : { ...homework, ...data };
+};
+
+/** Shows an item's favorite in the cached list before the server has it. */
+export const showFavorite = (
+  list: ContentListName,
+  id: string,
+  isFavorite: boolean,
+) => {
+  // Not kept as an override: the pending action covers responses until the
+  // server has it, and after that the server's answer counts.
+  const change = { isFavorite };
+  ({ notices, assignments, files })[list].updateItem(id, change, {
+    keep: false,
+  });
 };
 
 /** Fetching the lists a course at a time, as background sync does. */

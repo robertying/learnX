@@ -111,6 +111,10 @@ const upgraded = {
   'persist:settings': legacySettings,
 };
 
+/** Favorites from 18.0.x are queued to be added on the website. */
+const favorite = (type: string, id: string) =>
+  expect.objectContaining({ kind: 'favorite', type, id, flag: true });
+
 describe('importing user data saved by 18.0.x', () => {
   it('moves settings, favorites, archives, hidden courses, order and semester', async () => {
     const m = await launch({ asyncStorage: upgraded });
@@ -146,7 +150,11 @@ describe('importing user data saved by 18.0.x', () => {
       openFileAfterDownload: true,
     });
     expect(m.userData.getUserData()).toEqual({
-      favorites: { notice: ['n1', 'n2'], assignment: ['a1'], file: [] },
+      pendingActions: [
+        favorite('notice', 'n1'),
+        favorite('notice', 'n2'),
+        favorite('assignment', 'a1'),
+      ],
       archived: { notice: ['n2'], assignment: [], file: ['f1'] },
       hiddenCourses: ['c3'],
       courseOrder: ['c2', 'c1'],
@@ -176,7 +184,7 @@ describe('importing user data saved by 18.0.x', () => {
     // That build imported everything but the semester being shown.
     const first = await launch({ asyncStorage: upgraded });
     await first.legacy.importLegacyUserData();
-    first.userData.setFavorite('notice', 'n1', false);
+    first.userData.setArchived('notice', ['n2'], false);
     first.kv.set(
       'userData',
       first.kv
@@ -192,7 +200,7 @@ describe('importing user data saved by 18.0.x', () => {
     await next.legacy.importLegacyUserData();
     expect(next.userData.getUserData().currentSemester).toBe('2025-2026-1');
     // The rest isn't imported again.
-    expect(next.userData.getUserData().favorites.notice).toEqual(['n2']);
+    expect(next.userData.getUserData().archived.notice).toEqual([]);
     expect(await next.AsyncStorage.getItem('persist:root')).toBeNull();
   });
 
@@ -212,7 +220,7 @@ describe('importing user data saved by 18.0.x', () => {
   it('runs only once, so later changes are not overwritten', async () => {
     const first = await launch({ asyncStorage: upgraded });
     await first.legacy.importLegacyUserData();
-    first.userData.setFavorite('notice', 'n1', false);
+    first.userData.setArchived('notice', ['n2'], false);
     first.settings.setSetting('graduate', false);
 
     const next = await launch({
@@ -220,7 +228,7 @@ describe('importing user data saved by 18.0.x', () => {
       asyncStorage: { 'persist:root': legacyRoot },
     });
     await next.legacy.importLegacyUserData();
-    expect(next.userData.getUserData().favorites.notice).toEqual(['n2']);
+    expect(next.userData.getUserData().archived.notice).toEqual([]);
     expect(next.settings.getSettings().graduate).toBe(false);
   });
 
@@ -244,7 +252,11 @@ describe('importing user data saved by 18.0.x', () => {
 
     await m.legacy.importLegacyUserData();
     expect(m.settings.getSettings().graduate).toBe(true);
-    expect(m.userData.getUserData().favorites.notice).toEqual(['n1', 'n2']);
+    expect(m.userData.getUserData().pendingActions).toEqual([
+      favorite('notice', 'n1'),
+      favorite('notice', 'n2'),
+      favorite('assignment', 'a1'),
+    ]);
   });
 
   it('skips values of the wrong type and keys that do not parse', async () => {
@@ -276,7 +288,7 @@ describe('importing user data saved by 18.0.x', () => {
     });
     expect(m.userData.getUserData()).toEqual({
       ...m.userData.emptyUserData(),
-      favorites: { notice: ['n1'], assignment: [], file: [] },
+      pendingActions: [favorite('notice', 'n1')],
     });
   });
 
@@ -289,7 +301,7 @@ describe('importing user data saved by 18.0.x', () => {
     await m.legacy.importLegacyUserData();
 
     const { logout } = loginModule();
-    m.userData.setFavorite('file', 'f9', true);
+    m.userData.setArchived('file', ['f9'], true);
     m.settings.setSetting('graduate', true);
     await logout();
 
@@ -303,7 +315,7 @@ describe('importing user data saved by 18.0.x', () => {
 describe('the mock account', () => {
   it('replaces the user data with its own', async () => {
     const m = await launch();
-    m.userData.setFavorite('notice', 'mine', true);
+    m.userData.setArchived('notice', ['mine'], true);
     m.settings.setSetting('graduate', true);
 
     const { loginWithMockAccount } = loginModule();

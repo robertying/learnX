@@ -3,7 +3,9 @@ import {
   Learn2018Helper,
   addCSRFTokenToUrl,
   checkHomeworkSubmitResponse,
+  type ApiError,
   type Credential,
+  FailReason,
 } from '@robertying/thu-learn-lib';
 import mime from 'mime';
 import axios from 'axios';
@@ -11,12 +13,16 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import { getCredentials } from 'data/credentials';
 import {
   mockDownloadFile,
+  mockMarkNoticeRead,
   mockSource,
   mockSubmitAssignment,
 } from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isMockUser } from 'helpers/mock';
-import { assertServerWritesAllowed } from 'helpers/serverWrites';
+import {
+  assertServerWritesAllowed,
+  getServerWritesAllowed,
+} from 'helpers/serverWrites';
 
 /** The part of thu-learn-lib the app calls. */
 export type DataSource = Pick<
@@ -37,6 +43,9 @@ export type DataSource = Pick<
   | 'getExcellentHomeworkDetail'
   | 'getFileList'
   | 'getCalendar'
+  | 'addToFavorites'
+  | 'removeFromFavorites'
+  | 'getFavorites'
 >;
 
 let helper: Learn2018Helper;
@@ -55,6 +64,31 @@ export const dataSource = new Proxy({} as DataSource, {
     return typeof value === 'function' ? value.bind(source) : value;
   },
 });
+
+/**
+ * Whether changes to the account stay on the phone for now: a debug build
+ * with a real account, until "Allow Server Writes" is on in Settings.
+ */
+export const serverWritesBlocked = () =>
+  !isMockSession() && !getServerWritesAllowed();
+
+/**
+ * Loads a notice's page, which marks the notice read on the server, as the
+ * website does when it's opened.
+ */
+export const markNoticeReadOnServer = async (url: string) => {
+  if (isMockSession()) {
+    await mockMarkNoticeRead();
+    return;
+  }
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw {
+      reason: FailReason.UNEXPECTED_STATUS,
+      extra: response.status,
+    } satisfies ApiError;
+  }
+};
 
 export const clearLoginCookies = async () => {
   if (Platform.OS === 'ios') {

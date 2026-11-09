@@ -21,7 +21,6 @@ const Notices: React.FC<Props> = ({ navigation }) => {
   const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const favoriteIds = useUserData(data => data.favorites.notice);
   const archivedIds = useUserData(data => data.archived.notice);
   const {
     notices,
@@ -33,7 +32,6 @@ const Notices: React.FC<Props> = ({ navigation }) => {
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: notices,
-    fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
   });

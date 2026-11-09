@@ -6,7 +6,7 @@ import {
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { Assignment, Course, File, Notice, User } from 'data/types/state';
-import type { UserData } from 'data/userData';
+import type { BookmarkType, UserData } from 'data/userData';
 
 /*
  * What the mock account sees. Made to look like a real Electronic Engineering
@@ -1078,12 +1078,15 @@ export const mockFiles: File[] = [
 
 // --- The user's own data ------------------------------------------------------
 
+/** The account's favorites (我的收藏) when the emulated server starts. */
+export const mockFavorites: Record<BookmarkType, string[]> = {
+  notice: [noticeId(2), noticeId(4), noticeId(14)],
+  assignment: [assignmentId(7), assignmentId(11)],
+  file: [fileId(2), fileId(4), fileId(7)],
+};
+
 export const mockUserData: UserData = {
-  favorites: {
-    notice: [noticeId(2), noticeId(4), noticeId(14)],
-    assignment: [assignmentId(7), assignmentId(11)],
-    file: [fileId(2), fileId(4), fileId(7)],
-  },
+  pendingActions: [],
   archived: {
     notice: [noticeId(14)],
     assignment: [assignmentId(15)],

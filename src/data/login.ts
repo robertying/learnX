@@ -11,6 +11,10 @@ import { getDataOwner, setDataOwner } from 'data/dataOwner';
 import { LEGACY_ROOT_KEY, LEGACY_SETTINGS_KEY } from 'data/legacy';
 import { resetSettings } from 'data/settings';
 import { resetUserData, UserData } from 'data/userData';
+import {
+  flushServerActionsWithin,
+  resetServerActions,
+} from 'data/serverActions';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
@@ -30,6 +34,7 @@ import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 function clearAccountData(userData?: UserData) {
   resetSettings();
   resetUserData(userData);
+  resetServerActions();
   resetNotified();
   resetSyncLog();
   clearSubmissionDrafts();
@@ -170,6 +175,8 @@ export function loginWithMockAccount(username: string) {
  * submission drafts included.
  */
 export async function logout() {
+  // Favorites not sent yet are lost with the rest; give them one quick try.
+  await flushServerActionsWithin(3_000);
   useAuthStore.setState(initialAuth);
   await Promise.all([
     clearAccountData(),

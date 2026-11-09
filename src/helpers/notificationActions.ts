@@ -1,9 +1,11 @@
-import { Platform } from 'react-native';
+import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
 import { assignmentsQuery } from 'data/content';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
-import { getUserData, setArchived, setFavorite } from 'data/userData';
+import { getAuth } from 'data/auth';
+import { flushServerActions, setFavorite } from 'data/serverActions';
+import { getUserData, setArchived } from 'data/userData';
 import { recordError } from 'helpers/crashReporting';
 import {
   cancelDeadlineRemindersOf,
@@ -57,7 +59,14 @@ export const handleNotificationAction = async (
   switch (actionIdentifier) {
     case notificationActions.favorite:
       if (data.id) {
+        // The cached list gets the heart too, when the app isn't running.
+        await restoreQueryCache();
         setFavorite(data.type, data.id, true);
+        if (!getAuth().loggedIn && AppState.currentState !== 'active') {
+          // Handled without the app: one try, logging in if needed. If it
+          // fails, it waits for the app or the next background sync.
+          await flushServerActions({ ensureSession: true });
+        }
       }
       break;
     case notificationActions.archive:
