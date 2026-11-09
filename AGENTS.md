@@ -20,7 +20,6 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing. Lint is type-aware (`oxlint-tsgolint`): mark an intentionally unawaited promise with `void`.
 - User-visible text goes in `src/assets/translations` (`en.ts` and `zh.ts`), read with `t('key', { param })` from `helpers/i18n`; `{param}` placeholders are filled in, and date formats are translations too. The `learnx/no-han-outside-translations` lint rule (`lint/plugin.mjs`) rejects Chinese text elsewhere in `src`; disable it per line only for text that must not be translated, with the reason.
 - Debug builds load JS from Metro; only native changes need a rebuild.
-- `metro.config.js` resolves `cheerio` (used by thu-learn-lib) to its browser build: its Node entry loads undici and `node:` modules, which Metro can't bundle.
 - `.env` (git-ignored, see `.env.example`) is inlined at build time by `helpers/env.ts`. The app can be used without a Tsinghua account through the mock login (`src/data/AGENTS.md`).
 
 ## React Compiler
