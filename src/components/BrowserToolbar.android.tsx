@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   HorizontalFloatingToolbar,
@@ -14,15 +13,11 @@ import type { BrowserToolbarProps } from './BrowserToolbar.shared';
 
 export type { BrowserToolbarProps } from './BrowserToolbar.shared';
 
-// Glyphs rendered to images, as for the tab bar. They work in debug and release
-// alike (@expo/ui's XML drawables come out blank in debug builds here, because
-// its Metro asset transformer needs babel-preset-expo), and the toolbar tints
-// them like any icon.
 const icons = {
-  back: MaterialCommunityIcons.getImageSourceSync('arrow-left', 24)!,
-  forward: MaterialCommunityIcons.getImageSourceSync('arrow-right', 24)!,
-  reload: MaterialCommunityIcons.getImageSourceSync('refresh', 24)!,
-  open: MaterialCommunityIcons.getImageSourceSync('open-in-new', 24)!,
+  back: require('../assets/icons/arrow_back.xml'),
+  forward: require('../assets/icons/arrow_forward.xml'),
+  reload: require('../assets/icons/refresh.xml'),
+  open: require('../assets/icons/open_in_new.xml'),
 };
 
 /**
