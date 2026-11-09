@@ -426,6 +426,36 @@ def build_android
   UI.success("Source map: #{map}")
 end
 
+# LEARNX_RELEASE_* signing values from android/local.properties, which the
+# release build reads too.
+def android_signing
+  path = File.join(ROOT, "android/local.properties")
+  UI.user_error!("No #{path} with the LEARNX_RELEASE_* signing values.") unless File.exist?(path)
+  File.readlines(path, chomp: true).each_with_object({}) do |line, values|
+    key, value = line.split("=", 2)
+    values[key.strip] = value.strip if value && key.strip.start_with?("LEARNX_RELEASE_")
+  end
+end
+
+# Installs the AAB from `android build` on the connected device the way Google
+# Play would: bundletool picks the APKs for that device.
+def install_android_bundle
+  UI.user_error!("No AAB at #{aab_path}. Run `bundle exec fastlane android build` first.") unless File.exist?(aab_path)
+  UI.user_error!("bundletool not found: brew install bundletool") unless system("command -v bundletool > /dev/null")
+  signing = android_signing
+  apks = aab_path.sub(/\.aab\z/, ".apks")
+  sh(
+    "bundletool", "build-apks", "--connected-device", "--overwrite",
+    "--bundle=#{aab_path}", "--output=#{apks}",
+    "--ks=#{File.join(ANDROID_APP, "release.keystore")}",
+    "--ks-key-alias=#{signing["LEARNX_RELEASE_KEY_ALIAS"]}",
+    "--ks-pass=pass:#{signing["LEARNX_RELEASE_STORE_PASSWORD"]}",
+    "--key-pass=pass:#{signing["LEARNX_RELEASE_KEY_PASSWORD"]}",
+    log: false,
+  )
+  sh("bundletool", "install-apks", "--apks=#{apks}")
+end
+
 def upload_android(notes, track)
   UI.user_error!("No AAB at #{aab_path}. Run `bundle exec fastlane android build` first.") unless File.exist?(aab_path)
 
@@ -586,6 +616,11 @@ platform :android do
   desc "Build the AAB, the APKs and latest.json, upload native symbols to Crashlytics, keep the source map."
   lane :build do
     build_android
+  end
+
+  desc "Install the AAB from `android build` on the connected device through bundletool, as Google Play would."
+  lane :install_bundle do
+    install_android_bundle
   end
 
   desc "Build and upload the AAB to Google Play as a draft release."

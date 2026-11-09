@@ -70,7 +70,10 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
-          cache: pnpm
+          # Not cached, as in check.yml: the ~200 MB store restores no faster
+          # than a cold install and would crowd the Xcode caches out of the
+          # repo's 10 GB.
+          package-manager-cache: false
 
       - name: Set up Java
         uses: actions/setup-java@v6
@@ -130,7 +133,10 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
-          cache: pnpm
+          # Not cached, as in check.yml: the ~200 MB store restores no faster
+          # than a cold install and would crowd the Xcode caches out of the
+          # repo's 10 GB.
+          package-manager-cache: false
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
