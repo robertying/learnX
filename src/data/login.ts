@@ -24,12 +24,10 @@ import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
-import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
-import { clearSpotlight } from 'helpers/spotlight';
+import { clearSurfaces } from 'helpers/surfaces';
 import { resetNotified } from 'data/notified';
 import { resetSyncLog } from 'data/syncLog';
 import { clearSubmissionDrafts } from 'data/submissionDrafts';
-import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
 
 /**
  * Forgets everything kept for the account whose data this is: the server
@@ -45,10 +43,7 @@ function clearAccountData(userData?: UserData) {
   clearSubmissionDrafts();
   clearQueryCache();
   setDataOwner(null);
-  updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
-  updateUpNextWidget();
-  clearSpotlight();
-  return cancelDeadlineReminders().catch(() => {});
+  return clearSurfaces();
 }
 
 /**

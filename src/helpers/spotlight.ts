@@ -5,8 +5,6 @@ import Spotlight, {
 } from '../../modules/spotlight';
 import { Assignment, Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import type { UpcomingClass } from 'helpers/upNext';
-import { upcomingDeadlines } from 'helpers/widgetDeadlines';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
 const MAX_DETAILS_LENGTH = 500;
@@ -80,13 +78,12 @@ const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
 
 /**
  * Makes the notices and assignments findable in Spotlight, without hidden
- * courses, and saves the open assignments for the "Next Deadline" App Intent.
- * A list that isn't loaded keeps what was indexed. Resolves once the index is
+ * courses. A list that isn't loaded keeps what was indexed. Resolves once the index is
  * updated; it never rejects.
  */
 export async function updateSpotlight(
   { notices, assignments }: { notices?: Notice[]; assignments?: Assignment[] },
-  { hiddenCourses, archived }: { hiddenCourses: string[]; archived: string[] },
+  { hiddenCourses }: { hiddenCourses: string[] },
 ) {
   if (!Spotlight) {
     return;
@@ -100,60 +97,15 @@ export async function updateSpotlight(
   }
   if (assignments) {
     replaceItems('assignment', shown(assignments).map(assignmentSpotlightItem));
-    try {
-      Spotlight.setUpcomingDeadlines(
-        upcomingDeadlines(assignments, {
-          hiddenCourses,
-          archived,
-          limit: 20,
-        }).deadlines,
-      );
-    } catch (error) {
-      if (__DEV__) {
-        console.warn('Failed to save upcoming deadlines', error);
-      }
-    }
   }
   await queue;
 }
 
-/** What the "Next Class" App Intent was last given. */
-let savedClasses: string | undefined;
-
-/** Saves the classes still ahead for the "Next Class" App Intent. */
-export function saveUpcomingClasses(classes: UpcomingClass[]) {
-  if (!Spotlight) {
-    return;
-  }
-  const items = classes.map(({ courseName, location, start, end }) => ({
-    courseName,
-    location,
-    start,
-    end,
-  }));
-  const key = JSON.stringify(items);
-  if (key === savedClasses) {
-    return;
-  }
-  try {
-    Spotlight.setUpcomingClasses?.(items);
-    savedClasses = key;
-  } catch (error) {
-    if (__DEV__) {
-      console.warn('Failed to save upcoming classes', error);
-    }
-  }
-}
-
-/** Removes everything from Spotlight and the App Intents, e.g. on logout. */
+/** Removes everything from Spotlight, e.g. on logout. */
 export function clearSpotlight() {
   if (!Spotlight) {
     return;
   }
   indexed = {};
-  try {
-    Spotlight.setUpcomingDeadlines([]);
-  } catch {}
-  saveUpcomingClasses([]);
   enqueue(() => Spotlight!.removeAllItems());
 }

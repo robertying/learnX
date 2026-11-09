@@ -32,6 +32,9 @@ jest.mock('data/source', () => ({
   clearLoginCookies: jest.fn(async () => {}),
 }));
 // One attempt, without the backoff.
+jest.mock('helpers/surfaces', () => ({
+  clearSurfaces: jest.fn(async () => {}),
+}));
 jest.mock('helpers/retry', () => ({
   retry: (fn: () => Promise<unknown>) => fn(),
 }));

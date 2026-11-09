@@ -6,6 +6,8 @@ import { getLatestRelease } from 'helpers/update';
 import { setUpBackgroundFetch } from 'helpers/background';
 import { migrateDownloads } from 'helpers/fs';
 import { configureNotifications } from 'helpers/notifications';
+import { subscribeSurfaceErrors } from 'helpers/surfaces';
+import { toast } from 'components/Toast';
 import useNotificationTaps from 'hooks/useNotificationTaps';
 import useLinkTaps from 'hooks/useLinkTaps';
 import { setSetting } from 'data/settings';
@@ -13,8 +15,6 @@ import { useLoggedIn } from 'data/auth';
 import { latestSemesterQuery, useCourses } from 'data/queries';
 import { applyLatestSemester } from 'data/userData';
 import { flushServerActions } from 'data/serverActions';
-import useDeadlineWidget from 'hooks/useDeadlineWidget';
-import useDeadlineReminders from 'hooks/useDeadlineReminders';
 import useSpotlight from 'hooks/useSpotlight';
 import useUpNext from 'hooks/useUpNext';
 import packageJson from '../../package.json';
@@ -46,10 +46,15 @@ const useMainStartup = () => {
   // Keeps the semester's courses fetched for every tab.
   useCourses();
 
-  useDeadlineWidget();
-  useDeadlineReminders();
-  useSpotlight();
+  // The widgets, reminders and Spotlight follow the data by themselves
+  // (helpers/surfaces); the app keeps the timetable they show fetched and
+  // shows the calendar writes that failed.
   useUpNext();
+  useSpotlight();
+  useEffect(
+    () => subscribeSurfaceErrors(({ text, type }) => toast(text, type)),
+    [],
+  );
 
   useEffect(() => {
     if (loggedIn) {

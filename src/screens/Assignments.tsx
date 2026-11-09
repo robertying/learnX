@@ -1,10 +1,8 @@
 import { useEffect, useEffectEvent } from 'react';
-import dayjs from 'dayjs';
 import { AssignmentStackParams, MainStackScreenProps } from 'screens/types';
 import FilterList from 'components/FilterList';
 import AssignmentCard from 'components/AssignmentCard';
 import SafeArea from 'components/SafeArea';
-import { useSettings } from 'data/settings';
 import { useUserData } from 'data/userData';
 import { useCourseIds } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
@@ -14,9 +12,6 @@ import usePullToRefresh from 'hooks/usePullToRefresh';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useNotificationTarget from 'hooks/useNotificationTarget';
 import useFilteredData from 'hooks/useFilteredData';
-import { toast } from 'components/Toast';
-import { saveAssignmentsToReminderOrCalendar } from 'helpers/event';
-import { t } from 'helpers/i18n';
 
 type Props = MainStackScreenProps<AssignmentStackParams, 'Assignments'>;
 
@@ -34,12 +29,6 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     refetch,
     dataUpdatedAt,
   } = useAssignments();
-  const assignmentCalendarSync = useSettings(
-    settings => settings.assignmentCalendarSync,
-  );
-  const assignmentReminderSync = useSettings(
-    settings => settings.assignmentReminderSync,
-  );
 
   const { all, fav, archived, hidden, unfinished, finished } = useFilteredData({
     data: assignments,
@@ -69,50 +58,12 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     inDetail ? handlePush({ id }) : navigation.push('AssignmentDetail', { id }),
   );
 
-  const handleSync = useEffectEvent(async (type: 'calendar' | 'reminder') => {
-    const now = dayjs();
-    const sync = all.filter(assignment =>
-      dayjs(assignment.deadline).isAfter(now),
-    );
-    try {
-      await saveAssignmentsToReminderOrCalendar(type, sync);
-    } catch (err) {
-      if ((err as Error).message === 'Missing calendar permission') {
-        toast(t('assignmentSyncNoCalendarPermission'), 'error');
-      } else if ((err as Error).message === 'Missing reminder permission') {
-        toast(t('assignmentSyncNoReminderPermission'), 'error');
-      } else if (
-        (err as Error).message ===
-        'CALENDAR permission is required to do this operation.'
-      ) {
-        toast(t('assignmentSyncNoCalendarPermission'), 'error');
-      } else if ((err as Error).message === 'Cannot find any calendar source') {
-        toast(t('missingCalendarSource'), 'error');
-      } else {
-        toast(t('assignmentSyncFailed') + (err as Error).message, 'error');
-      }
-    }
-  });
-
   // Refreshes on mount, on sign-in and when the semester's courses change.
   useEffect(() => {
     if (courseIds.length > 0) {
       void refresh();
     }
   }, [courseIds, loggedIn]);
-
-  // Sync again whenever the assignments change.
-  useEffect(() => {
-    if (assignmentCalendarSync) {
-      void handleSync('calendar');
-    }
-  }, [all, assignmentCalendarSync]);
-
-  useEffect(() => {
-    if (assignmentReminderSync) {
-      void handleSync('reminder');
-    }
-  }, [all, assignmentReminderSync]);
 
   return (
     <SafeArea>
