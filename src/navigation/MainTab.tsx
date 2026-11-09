@@ -7,8 +7,8 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
 import { MainTabParams } from 'screens/types';
-import { useSplitLaidOut } from 'components/NativeSplitView';
-import createSidebarSplitNavigator from 'components/SidebarSplitNavigator';
+import { useSplitLaidOut } from './NativeSplitView';
+import createSidebarSplitNavigator from './SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
 import useKeyboardShown from 'hooks/useKeyboardShown';
 import useMainCommands from 'hooks/useMainCommands';

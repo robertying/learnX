@@ -16,7 +16,7 @@ import {
   SplitRootStackParams,
 } from 'screens/types';
 import Splash from 'components/Splash';
-import { SplitViewProvider } from 'components/SplitView';
+import { SplitViewProvider } from './SplitView';
 import Numbers from 'constants/Numbers';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';

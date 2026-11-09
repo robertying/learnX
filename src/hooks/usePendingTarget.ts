@@ -1,7 +1,7 @@
 import { useContext, useEffect, useEffectEvent } from 'react';
 import { create } from 'zustand';
-import { SplitViewContext } from 'components/SplitView';
-import { useSplitLaidOut } from 'components/NativeSplitView';
+import { SplitViewContext } from 'navigation/SplitView';
+import { useSplitLaidOut } from 'navigation/NativeSplitView';
 import { nativeSplit } from 'navigation/layout';
 import DeviceInfo from 'constants/DeviceInfo';
 import { ItemTarget } from 'helpers/openTarget';

@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
 import { DetailStackParams } from 'screens/types';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import Numbers from 'constants/Numbers';
 import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';
 
@@ -15,7 +15,7 @@ jest.mock('constants/DeviceInfo', () => ({
   isTablet: () => mockTablet,
   isMac: () => false,
 }));
-jest.mock('components/NativeSplitView', () => ({
+jest.mock('navigation/NativeSplitView', () => ({
   useSplitLaidOut: () => mockSplitLaidOut,
 }));
 

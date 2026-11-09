@@ -2,7 +2,7 @@ import { useContext, useEffect } from 'react';
 import { Platform } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import { headerButtons } from 'navigation/headerButtons';

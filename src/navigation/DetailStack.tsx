@@ -22,7 +22,7 @@ import CourseX from 'screens/CourseX';
 import { getTitleOptions } from 'components/HeaderTitle';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
-import NativeSplitViewProvider from 'components/NativeSplitView';
+import NativeSplitViewProvider from './NativeSplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useNavigationTheme } from 'theme';
 import { nativeSplit } from './layout';

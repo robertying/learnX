@@ -5,7 +5,7 @@ import {
   type NavigationProp,
   type ParamListBase,
 } from '@react-navigation/native';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import type { DetailStackParams } from 'screens/types';
 
 // Unlike the navigation prop's, this takes a union of screens with the same
