@@ -54,10 +54,11 @@ export const queryClient = new QueryClient({
       // Lists are refreshed on mount and by pull-to-refresh; a minute keeps
       // the tabs from refetching the same thing as they mount one by one.
       staleTime: 60 * 1000,
-      // Non-hook readers (thunks, the background task) read the cache
-      // directly, so nothing is dropped while the app runs.
+      // Code outside React (the background task, server actions, widgets)
+      // reads the cache directly, so nothing is dropped while the app runs.
       gcTime: Infinity,
-      // Failures surface right away, as before; the login has its own retry.
+      // Failures surface right away; the login has its own retry, and the
+      // timetable's weeks retry on their own.
       retry: false,
     },
   },

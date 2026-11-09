@@ -32,16 +32,23 @@ export type DataSource = Pick<
   | 'getCurrentSemester'
   | 'getCourseList'
   | 'getNotificationList'
-  | 'getNotificationAttachment'
   | 'getHomeworkList'
-  | 'getHomeworkDetail'
   | 'getExcellentHomeworkDetail'
   | 'getFileList'
   | 'getCalendar'
   | 'addToFavorites'
   | 'removeFromFavorites'
-  | 'getFavorites'
 >;
+
+/** What an assignment submission sends. */
+export interface Submission {
+  /** The whole answer as HTML, which replaces the submitted one. */
+  content?: string;
+  attachment?: { uri: string; name: string };
+  /** Deletes the submitted attachment. */
+  remove?: boolean;
+  onProgress?: (progress: number) => void;
+}
 
 /**
  * Everything the app asks of the school's server: thu-learn-lib's calls, and
@@ -56,10 +63,7 @@ export interface AppSource extends DataSource {
   /** See `submitAssignment` below. */
   submitAssignment: (
     studentHomeworkId: string,
-    content: string | undefined,
-    attachment: { uri: string; name: string } | undefined,
-    onProgress: ((progress: number) => void) | undefined,
-    remove: boolean,
+    submission: Submission,
   ) => Promise<void>;
   /** Runs before a file is downloaded from the server. */
   prepareFileDownload: () => Promise<void>;
@@ -117,10 +121,7 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
   },
   submitAssignment: async (
     studentHomeworkId,
-    content,
-    attachment,
-    onProgress,
-    remove,
+    { content, attachment, onProgress, remove = false },
   ) => {
     assertServerWritesAllowed('Assignment submission');
 
@@ -145,7 +146,7 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
       responseType: 'text',
       transformResponse: data => data,
       onUploadProgress: e => {
-        // New architecture doesn't like native floats
+        // Two decimals are plenty for a progress bar.
         onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
       },
     });
@@ -256,22 +257,11 @@ export const addCSRF = (url: string) =>
  */
 export const submitAssignment = async (
   studentHomeworkId: string,
-  content?: string,
-  attachment?: {
-    uri: string;
-    name: string;
-  },
-  onProgress?: (progress: number) => void,
-  remove: boolean = false,
+  submission: Submission,
 ) => {
+  const { content, attachment, remove } = submission;
   if (!content && !attachment && !remove) {
     return;
   }
-  await dataSource.submitAssignment(
-    studentHomeworkId,
-    content,
-    attachment,
-    onProgress,
-    remove,
-  );
+  await dataSource.submitAssignment(studentHomeworkId, submission);
 };

@@ -39,7 +39,7 @@ jest.mock('@robertying/thu-learn-lib', () => ({
 
 const post = jest.mocked(axios.post);
 
-const submit = () => submitAssignment('homework-id', 'content');
+const submit = () => submitAssignment('homework-id', { content: 'content' });
 
 describe('submitAssignment', () => {
   beforeEach(() => setServerWritesAllowed(true));
@@ -53,13 +53,10 @@ describe('submitAssignment', () => {
 
   it("sends thu-learn-lib's request, with the file as React Native uploads it", async () => {
     post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
-    await submitAssignment(
-      'homework-id',
-      '<p>answer</p>',
-      { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
-      undefined,
-      false,
-    );
+    await submitAssignment('homework-id', {
+      content: '<p>answer</p>',
+      attachment: { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
+    });
     expect(mockGetSubmitRequest).toHaveBeenLastCalledWith(
       'homework-id',
       '<p>answer</p>',
@@ -106,7 +103,7 @@ describe('submitAssignment', () => {
 
   it('does not call the server with nothing to submit', async () => {
     post.mockClear();
-    await submitAssignment('homework-id');
+    await submitAssignment('homework-id', {});
     expect(post).not.toHaveBeenCalled();
   });
 });

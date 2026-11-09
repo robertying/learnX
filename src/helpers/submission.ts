@@ -109,13 +109,12 @@ export const sendSubmission = async ({
   if (!content && !attachment && !removeAttachment) {
     return;
   }
-  await submitAssignment(
-    studentHomeworkId,
-    submissionHtml(content, submittedContent),
+  await submitAssignment(studentHomeworkId, {
+    content: submissionHtml(content, submittedContent),
     attachment,
     onProgress,
-    removeAttachment,
-  );
+    remove: removeAttachment,
+  });
 };
 
 /** A picked file shaped like a remote one, so it opens in file detail */

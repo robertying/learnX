@@ -219,13 +219,12 @@ describe('useSubmitAssignment', () => {
     });
     await confirm(result.current.confirmSubmit);
 
-    expect(submitAssignment).toHaveBeenCalledWith(
-      'hw1',
-      '<p>answer</p>',
-      { uri: picked.uri, name: 'Final.pdf' },
-      expect.any(Function),
-      false,
-    );
+    expect(submitAssignment).toHaveBeenCalledWith('hw1', {
+      content: '<p>answer</p>',
+      attachment: { uri: picked.uri, name: 'Final.pdf' },
+      onProgress: expect.any(Function),
+      remove: false,
+    });
     expect(refreshCourseAssignments).toHaveBeenCalledWith('2026-2027-1', 'c1');
     expect(toast).toHaveBeenCalledWith(expect.any(String), 'success');
     expect(onSubmitted).toHaveBeenCalled();
@@ -243,13 +242,12 @@ describe('useSubmitAssignment', () => {
     const { result } = await setup({ removeAttachment: true });
     await confirm(result.current.confirmSubmit);
     // the answer stays: the server replaces the submitted one with what's sent
-    expect(submitAssignment).toHaveBeenCalledWith(
-      'hw1',
-      '<p>answer</p>',
-      undefined,
-      expect.any(Function),
-      true,
-    );
+    expect(submitAssignment).toHaveBeenCalledWith('hw1', {
+      content: '<p>answer</p>',
+      attachment: undefined,
+      onProgress: expect.any(Function),
+      remove: true,
+    });
   });
 
   it('shows uploading and progress while sending', async () => {
@@ -257,7 +255,7 @@ describe('useSubmitAssignment', () => {
     let report: (progress: number) => void = () => {};
     jest
       .mocked(submitAssignment)
-      .mockImplementationOnce((_id, _content, _attachment, onProgress) => {
+      .mockImplementationOnce((_id, { onProgress }) => {
         report = onProgress!;
         return new Promise(resolve => {
           finish = () => resolve(undefined as never);
