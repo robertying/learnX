@@ -143,7 +143,7 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   buttonBorderShape: jest.fn(),
   buttonStyle: jest.fn(),
   controlSize: jest.fn(),
-  // Read by the Button stand-in, so tests can tell a disabled row.
+  // Read by the Button stand-in, so tests can tell a disabled button.
   disabled: jest.fn((isDisabled: boolean) => ({ disabled: isDisabled })),
   font: jest.fn(),
   foregroundStyle: jest.fn(),
@@ -163,6 +163,7 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   textInputAutocapitalization: jest.fn(),
   tint: jest.fn(),
   toggleStyle: jest.fn(),
+  truncationMode: jest.fn(),
 }));
 // The other entry points are ESM only. The widget layouts import them just for
 // types (they are strings after the Babel transform), and any test that

@@ -213,7 +213,8 @@ const AssignmentSubmissionContent: React.FC<{
       headerRight: () => (
         <TextButton
           disabled={submitDisabled}
-          style={{ fontSize: 17, fontWeight: 'bold' }}
+          size="large"
+          bold
           onPress={confirmSubmit}
         >
           {t('submit')}

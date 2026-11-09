@@ -103,12 +103,14 @@ export const LabeledContent = ({
 );
 
 export const Button = ({
+  label,
   onPress,
   role,
   testID,
   modifiers,
   children,
 }: {
+  label?: string;
   onPress?: () => void;
   role?: string;
   testID?: string;
@@ -125,6 +127,7 @@ export const Button = ({
       testID={testID}
       onPress={onPress}
     >
+      {label ? <RNText>{label}</RNText> : null}
       {children}
     </Pressable>
   );
