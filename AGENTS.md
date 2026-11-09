@@ -51,7 +51,7 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 
 - These two values are not real credentials: reading them from `.env` and typing them into the UI is fine, even in tool calls. Do not print or commit any other value in `.env` (tokens, project IDs).
 - In mock mode the app talks to an emulated server instead of learn.tsinghua.edu.cn: `src/data/mockSource.ts` answers every `dataSource` call (and assignment submission) with the mock data after a network-like delay, so refreshes, spinners and errors behave like a real account. File downloads go through the emulation too, then fetch the mock file's real URL. Some features (e.g. course information sharing) still don't work offline.
-- Debug builds show Settings › Network emulation (also linked from the login screen when a mock account is saved) to change the latency, make requests and file downloads fail (offline, server error, 20 s timeout), reject logins, and log in again as the app does after 10 minutes in the background. The choices reset when the JS reloads.
+- Debug builds show Settings › Network Emulation (also linked from the login screen when a mock account is saved) to change the latency, make requests and file downloads fail (offline, server error, 20 s timeout), reject logins, and log in again as the app does after 10 minutes in the background. The choices reset when the JS reloads.
 - The default mock login is not persisted: every relaunch needs the login again, and its login results are ignored. To keep the mock data and session across relaunches, or to test failed logins and logging in again, log in with `DUMMY_PERSIST_USERNAME` / `DUMMY_PERSIST_PASSWORD` from `.env` instead (same data; relaunch logs in through the emulated server).
 
 ### Mock data

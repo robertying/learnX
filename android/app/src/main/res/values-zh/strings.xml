@@ -2,4 +2,8 @@
 <resources>
     <string name="shortcut_next_class">下一节课</string>
     <string name="shortcut_next_class_long">查看下一节课</string>
+    <string name="deadlines_display_name">作业截止</string>
+    <string name="deadlines_description">即将截止的作业。</string>
+    <string name="up_next_display_name">接下来</string>
+    <string name="up_next_description">正在上或下一节课，以及最近截止的作业。</string>
 </resources>

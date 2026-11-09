@@ -27,7 +27,7 @@ describe('submitAssignment', () => {
 
   it('is blocked in debug builds until server writes are allowed', async () => {
     setServerWritesAllowed(false);
-    await expect(submit()).rejects.toThrow('Allow server writes');
+    await expect(submit()).rejects.toThrow('Allow Server Writes');
     expect(post).not.toHaveBeenCalled();
   });
 

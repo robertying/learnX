@@ -22,9 +22,9 @@ const latencies: [MockLatency, string][] = [
 
 const failures: [MockFailure, string][] = [
   ['none', 'Succeed'],
-  ['offline', 'Fail: offline'],
-  ['serverError', 'Fail: server error'],
-  ['timeout', 'Fail: time out after 20 s'],
+  ['offline', 'Fail: Offline'],
+  ['serverError', 'Fail: Server Error'],
+  ['timeout', 'Fail: Time Out After 20 s'],
 ];
 
 const MockNetwork: React.FC = () => {
@@ -74,7 +74,7 @@ const MockNetwork: React.FC = () => {
           <FormToggle
             testID="mock-network-login-fails"
             icon={{ ios: 'key.slash', android: 'form-textbox-password' }}
-            title="Reject login (bad credential)"
+            title="Reject Login (Bad Credential)"
             value={config.loginFails}
             onValueChange={value => setMockNetworkConfig({ loginFails: value })}
           />
@@ -84,7 +84,7 @@ const MockNetwork: React.FC = () => {
               ios: 'rectangle.portrait.and.arrow.forward',
               android: 'login',
             }}
-            title="Log in again now"
+            title="Log In Again Now"
             onPress={handleReLogin}
           />
         </FormSection>

@@ -66,4 +66,4 @@ export const getDetailScreenOptions = (title = '') =>
   };
 
 // Dev-only screen for the mock accounts; not translated.
-export const mockNetworkTitle = 'Network emulation';
+export const mockNetworkTitle = 'Network Emulation';
