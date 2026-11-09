@@ -1,6 +1,7 @@
 import Crashlytics from '../../../modules/crashlytics';
 import { useCredentialsStore } from 'data/credentials';
-import env from 'helpers/env';
+// The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
+import env from '../../../jest/env';
 import {
   installGlobalErrorHandler,
   parseStack,

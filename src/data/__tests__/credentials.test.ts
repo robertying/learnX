@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
-import env from 'helpers/env';
+// The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
+import env from '../../../jest/env';
 
 type Module = typeof import('data/credentials');
 
