@@ -12,6 +12,7 @@ import {
 } from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isMockUser } from 'helpers/mock';
+import { assertServerWritesAllowed } from 'helpers/serverWrites';
 
 /** The part of thu-learn-lib the app calls. */
 export type DataSource = Pick<
@@ -161,6 +162,8 @@ export const submitAssignment = async (
     await mockSubmitAssignment(onProgress);
     return;
   }
+
+  assertServerWritesAllowed('Assignment submission');
 
   const body = new FormData();
   body.append('xszyid', studentHomeworkId);
