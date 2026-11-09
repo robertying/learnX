@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { submitAssignment } from 'data/source';
+import { setServerWritesAllowed } from 'helpers/serverWrites';
 
 jest.mock('axios', () => ({ post: jest.fn() }));
 jest.mock('@preeternal/react-native-cookie-manager', () => ({
@@ -21,6 +22,15 @@ const post = jest.mocked(axios.post);
 const submit = () => submitAssignment('homework-id', 'content');
 
 describe('submitAssignment', () => {
+  beforeEach(() => setServerWritesAllowed(true));
+  afterEach(() => setServerWritesAllowed(false));
+
+  it('is blocked in debug builds until server writes are allowed', async () => {
+    setServerWritesAllowed(false);
+    await expect(submit()).rejects.toThrow('Allow server writes');
+    expect(post).not.toHaveBeenCalled();
+  });
+
   it('resolves when the server says it succeeded', async () => {
     post.mockResolvedValueOnce({ status: 200, data: { result: 'success' } });
     await expect(submit()).resolves.toBeUndefined();

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import semverGt from 'semver/functions/gt';
@@ -10,6 +10,7 @@ import {
   FormLink,
   FormProfile,
   FormSection,
+  FormToggle,
 } from 'components/Form';
 import { getLatestRelease } from 'helpers/update';
 import { logout } from 'data/login';
@@ -21,6 +22,11 @@ import { useCredentialsStore } from 'data/credentials';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
+import {
+  getServerWritesAllowed,
+  setServerWritesAllowed,
+  subscribeServerWrites,
+} from 'helpers/serverWrites';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -32,6 +38,10 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const loggedIn = useLoggedIn();
   const { data: userInfo } = useQuery({ ...userQuery, enabled: loggedIn });
   const username = useCredentialsStore(state => state.credentials?.username);
+  const serverWritesAllowed = useSyncExternalStore(
+    subscribeServerWrites,
+    getServerWritesAllowed,
+  );
   const newChangelog = useSettings(
     settings => settings.lastShowChangelogVersion !== packageJson.version,
   );
@@ -174,6 +184,18 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             onPress={() => handlePush('About')}
           />
         </FormSection>
+        {__DEV__ && !isMockUser(username) && (
+          // A dev-only switch for testing with a real account, so it is not translated.
+          <FormSection footer="Debug builds don't submit assignments or share course information until this is on. It turns off again when the app reloads.">
+            <FormToggle
+              testID="settings-allow-server-writes"
+              icon={{ ios: 'exclamationmark.shield', android: 'shield-alert' }}
+              title="Allow server writes"
+              value={serverWritesAllowed}
+              onValueChange={setServerWritesAllowed}
+            />
+          </FormSection>
+        )}
         {__DEV__ && isMockUser(username) && (
           <FormSection>
             <FormLink
