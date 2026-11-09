@@ -1,10 +1,15 @@
+import { StyleSheet } from 'react-native';
 import {
   Host,
+  Row,
   Text,
   TextButton as ComposeTextButton,
   useMaterialColors,
 } from '@expo/ui/jetpack-compose';
-import { testID as testIDModifier } from '@expo/ui/jetpack-compose/modifiers';
+import {
+  fillMaxWidth,
+  testID as testIDModifier,
+} from '@expo/ui/jetpack-compose/modifiers';
 import { useComposeColorOverrides, useTheme } from 'theme';
 import type { TextButtonProps } from './TextButton.shared';
 
@@ -34,22 +39,33 @@ const TextButton: React.FC<TextButtonProps> = ({
   const theme = useTheme();
   const colorOverrides = useComposeColorOverrides();
 
+  const button = (
+    <ComposeTextButton
+      onClick={onPress}
+      enabled={!disabled}
+      modifiers={testID ? [testIDModifier(testID)] : undefined}
+    >
+      <Label size={size} bold={bold} struck={struck}>
+        {children}
+      </Label>
+    </ComposeTextButton>
+  );
+
   return (
     <Host
       matchContents={fill ? { vertical: true } : true}
       seedColor={theme.colors.primary}
       colorOverrides={colorOverrides}
-      style={style}
+      style={[fill && styles.fill, style]}
     >
-      <ComposeTextButton
-        onClick={onPress}
-        enabled={!disabled}
-        modifiers={testID ? [testIDModifier(testID)] : undefined}
-      >
-        <Label size={size} bold={bold} struck={struck}>
-          {children}
-        </Label>
-      </ComposeTextButton>
+      {fill ? (
+        // The host is as wide as React Native makes it. Measured at that exact
+        // width, the button would stretch and center its label; a row lets it
+        // keep its own width, at the start, and still caps it so it shortens.
+        <Row modifiers={rowModifiers}>{button}</Row>
+      ) : (
+        button
+      )}
     </Host>
   );
 };
@@ -75,5 +91,17 @@ const Label: React.FC<
     </Text>
   );
 };
+
+const rowModifiers = [fillMaxWidth()];
+
+const styles = StyleSheet.create({
+  fill: {
+    // The button's padding and its 40 dp minimum height sit in the gutter, so
+    // the label lines up with the text around it (as the iOS label does) and
+    // the row keeps its height.
+    marginStart: -12,
+    marginVertical: -8,
+  },
+});
 
 export default TextButton;
