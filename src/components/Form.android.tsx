@@ -259,7 +259,8 @@ const FormRow: React.FC<
   const contentColor = done ? colors.outline : titleColor;
   const check = done ? (
     <RNHostView matchContents>
-      <View accessible accessibilityLabel={t('a11yDone')}>
+      {/* sized: an unsized wrapper collapses to nothing in the host */}
+      <View accessible accessibilityLabel={t('a11yDone')} style={styles.check}>
         <MaterialDesignIcons name="check" size={20} color={colors.outline} />
       </View>
     </RNHostView>
@@ -653,5 +654,9 @@ export const FormProfile: React.FC<FormProfileProps> = ({
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
+  },
+  check: {
+    width: 20,
+    height: 20,
   },
 });

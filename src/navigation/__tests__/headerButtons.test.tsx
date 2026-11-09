@@ -47,6 +47,7 @@ describe('headerButtons', () => {
       expect.objectContaining({
         identifier: 'settings',
         badge: { value: '' },
+        accessibilityLabel: 'Settings, New',
       }),
     ]);
   });

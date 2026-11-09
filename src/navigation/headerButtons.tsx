@@ -1,3 +1,4 @@
+import { t } from 'helpers/i18n';
 import { Fragment, type ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type {
@@ -71,6 +72,10 @@ const nativeItem = (
     onPress: entry.onPress,
     disabled: entry.disabled,
     badge: entry.badge ? { value: '' } : undefined,
+    // An empty badge isn't read out, so the label says it.
+    accessibilityLabel: entry.badge
+      ? `${entry.label}, ${t('a11yNewBadge')}`
+      : undefined,
   };
 };
 
