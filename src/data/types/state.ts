@@ -5,7 +5,7 @@ import type {
   CourseFile,
   UserInfo,
 } from '@robertying/thu-learn-lib';
-import type { FilterSelection } from 'helpers/filterOptions';
+import type { FilterSelection } from 'helpers/filters';
 
 export type Tab = 'notice' | 'assignment' | 'file' | 'course';
 export interface AlarmSettings {

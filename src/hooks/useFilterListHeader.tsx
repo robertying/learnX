@@ -8,8 +8,12 @@ import FilterMenu from 'components/FilterMenu';
 import { iconSymbols } from 'components/IconButton.shared';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
-import { filterSubtitle, selectedCountLabel } from 'helpers/filterList';
-import type { FilterOption, FilterSelection } from 'helpers/filterOptions';
+import {
+  filterSubtitle,
+  selectedCountLabel,
+  type FilterOption,
+  type FilterSelection,
+} from 'helpers/filters';
 import { t } from 'helpers/i18n';
 import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
 import { RootStackParams } from 'screens/types';
