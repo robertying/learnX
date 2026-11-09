@@ -7,9 +7,9 @@ import {
 } from '@expo/ui/jetpack-compose';
 import { fillMaxWidth, weight } from '@expo/ui/jetpack-compose/modifiers';
 import { useComposeColorOverrides, useTheme } from 'theme';
-import type { SegmentedTabsProps } from './SegmentedTabs';
+import type { SegmentedTabsProps } from './SegmentedTabs.shared';
 
-export type { SegmentedTabsProps } from './SegmentedTabs';
+export type { SegmentedTabsProps } from './SegmentedTabs.shared';
 
 /**
  * Tabs for a pager as a Material 3 `SingleChoiceSegmentedButtonRow`, with

@@ -16,9 +16,7 @@ export interface AssignmentCardProps extends CardWrapperProps {
   hideCourseName?: boolean;
 }
 
-const AssignmentCard: React.FC<
-  React.PropsWithChildren<AssignmentCardProps>
-> = ({
+const AssignmentCard: React.FC<AssignmentCardProps> = ({
   data: {
     courseName,
     courseTeacherName,

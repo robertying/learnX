@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import dayjs from 'dayjs';
 import Icon from '@react-native-vector-icons/material-design-icons';
@@ -6,6 +5,7 @@ import { requestRelogin, useAuthStore } from 'data/auth';
 import { t } from 'helpers/i18n';
 import { Caption } from 'components/Text';
 import TextButton from 'components/TextButton';
+import useMinute from 'hooks/useMinute';
 import { useTheme } from 'theme';
 
 export interface SyncStatusProps {
@@ -29,14 +29,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   const visible = !loggedIn && failure !== null;
 
   // Keeps "updated … ago" current.
-  const [, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!visible) {
-      return;
-    }
-    const timer = setInterval(() => setNow(Date.now()), 60 * 1000);
-    return () => clearInterval(timer);
-  }, [visible]);
+  const now = useMinute();
 
   if (!visible) {
     return null;
@@ -48,7 +41,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       ? t('syncStatusOffline')
       : t('syncStatusLoginFailed');
   const updated = updatedAt
-    ? t('syncStatusUpdated', { time: dayjs(updatedAt).fromNow() })
+    ? t('syncStatusUpdated', { time: dayjs(updatedAt).from(now) })
     : null;
 
   return (

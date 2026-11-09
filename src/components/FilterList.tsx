@@ -46,7 +46,7 @@ export interface FilterListProps<T> {
   fav?: T[];
   archived?: T[];
   hidden: T[];
-  itemComponent: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+  itemComponent: React.FC<ItemComponentProps<T>>;
   /** The list screen's navigation, for its header and to open root stacks. */
   navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'setOptions'> &
     Pick<NativeStackNavigationProp<RootStackParams>, 'navigate'>;

@@ -7,7 +7,7 @@ import {
   Text,
 } from '@expo/ui/jetpack-compose';
 import { size, testID } from '@expo/ui/jetpack-compose/modifiers';
-import type { CardMenuProps } from './CardMenu';
+import type { CardMenuProps } from './CardMenu.shared';
 
 // A clipped popup loses the status bar offset near the bottom of the screen.
 const popupProperties = { clippingEnabled: false };

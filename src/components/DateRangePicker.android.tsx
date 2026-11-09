@@ -1,5 +1,5 @@
 import { DateRangePickerDialog, Host } from '@expo/ui/jetpack-compose';
-import type { DateRangePickerProps } from './DateRangePicker';
+import type { DateRangePickerProps } from './DateRangePicker.shared';
 import { useTheme } from 'theme';
 
 // Compose's date pickers work in UTC-midnight days: send each local day as that
