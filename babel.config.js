@@ -27,6 +27,8 @@ module.exports = {
         extensions: ['.ts', '.tsx'],
       },
     ],
+    // Inlines the allowed .env keys into src/helpers/env.ts.
+    './babel/inline-env',
     'preval',
   ],
 };
