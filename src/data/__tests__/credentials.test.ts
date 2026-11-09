@@ -27,7 +27,6 @@ const legacyAuth = (auth: Record<string, string | null>) =>
 let m: Module;
 beforeEach(() => {
   keychain.clear();
-  jest.clearAllMocks();
   jest.isolateModules(() => {
     m = require('data/credentials');
   });

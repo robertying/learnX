@@ -8,6 +8,14 @@ const base = {
   // Loads Reanimated's and Worklets' web builds instead of the native ones
   resolver: 'react-native-reanimated/jest/resolver',
   setupFiles: ['<rootDir>/jest/setup.ts'],
+  // Every test starts with fresh call records on every mock.
+  clearMocks: true,
+  // Count every source file, not only the ones some test imports.
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/__tests__/**',
+    '!src/**/*.d.ts',
+  ],
   transform: {
     '^.+\\.mjs$': 'babel-jest',
   },

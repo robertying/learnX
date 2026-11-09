@@ -9,7 +9,6 @@ const exitDuration = 300;
 
 beforeEach(() => {
   jest.useFakeTimers();
-  jest.clearAllMocks();
 });
 
 afterEach(async () => {

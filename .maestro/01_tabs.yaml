@@ -1,7 +1,5 @@
 appId: ${APP_ID}
 name: Log in and visit every tab
-tags:
-  - smoke
 ---
 - runFlow: subflows/login.yaml
 - assertVisible: '.*请按照助教的安排交作业.*'

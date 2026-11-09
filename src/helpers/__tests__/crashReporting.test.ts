@@ -28,7 +28,6 @@ const setUsername = (username: string) =>
   });
 
 beforeEach(() => {
-  jest.clearAllMocks();
   (globalThis as any).__DEV__ = false;
   setUsername('2020000000');
 });

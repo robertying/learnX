@@ -30,7 +30,6 @@ const file: DownloadableFile = {
 const PATH = 'file:///cache/Calculus/Lecture 1.docx';
 
 beforeEach(() => {
-  jest.clearAllMocks();
   jest.mocked(downloadFile).mockResolvedValue(PATH);
   setSetting('openFileAfterDownload', false);
 });

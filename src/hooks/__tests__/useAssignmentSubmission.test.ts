@@ -22,16 +22,11 @@ jest.mock('data/content', () => ({ refreshCourseAssignments: jest.fn() }));
 jest.mock('data/source', () => ({ submitAssignment: jest.fn() }));
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: jest.fn() }));
 jest.mock('expo-image-picker', () => ({ launchImageLibraryAsync: jest.fn() }));
-jest.mock('expo-haptics', () => ({
-  notificationAsync: jest.fn(),
-  NotificationFeedbackType: { Error: 'error' },
-}));
 
 const getDocument = jest.mocked(DocumentPicker.getDocumentAsync);
 const launchLibrary = jest.mocked(ImagePicker.launchImageLibraryAsync);
 
 beforeEach(() => {
-  jest.clearAllMocks();
   usePendingAssignmentStore.setState({ data: null });
   jest.mocked(refreshCourseAssignments).mockResolvedValue(undefined as never);
 });
