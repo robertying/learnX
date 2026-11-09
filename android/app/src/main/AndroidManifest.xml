@@ -36,6 +36,9 @@
         <meta-data
             android:name="expo.modules.notifications.default_notification_icon"
             android:resource="@drawable/notification_icon" />
+        <meta-data
+            android:name="expo.modules.notifications.default_notification_color"
+            android:resource="@color/seed" />
 
         <activity
             android:name=".MainActivity"
@@ -83,7 +86,7 @@
             android:name="expo.modules.imagepicker.ExpoCropImageActivity"
             tools:node="remove" />
 
-        <!-- Home screen widget from expo-widgets (src/widgets/Deadlines.tsx). -->
+        <!-- Home screen widget from expo-widgets (src/widgets/DeadlinesAndroid.tsx). -->
         <receiver
             android:name=".DeadlinesProvider"
             android:exported="true"

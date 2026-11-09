@@ -43,6 +43,15 @@ type SpotlightEvents = {
 declare class SpotlightModule extends NativeModule<SpotlightEvents> {
   /** Replaces the domain's items in the Spotlight index with these. */
   replaceItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
+  /**
+   * Indexes `items` (new or changed) and removes the items with `removedIds`
+   * from the domain. Missing in an app built before it was added.
+   */
+  updateItems?(
+    domain: SpotlightDomain,
+    items: SpotlightItem[],
+    removedIds: string[],
+  ): Promise<void>;
   /** Removes everything the app indexed. */
   removeAllItems(): Promise<void>;
   /**
