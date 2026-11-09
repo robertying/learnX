@@ -186,7 +186,7 @@ jobs:
           restore-keys: xcode-cas-${{ matrix.name }}-
 
       # No signing certificates on CI, so this only proves the code compiles and
-      # links. Build signed (as AGENTS.md says) when running the app.
+      # links. Build signed (as the device-testing skill says) when running the app.
       - name: Build
         run: |
           mkdir -p build
