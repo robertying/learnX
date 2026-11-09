@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Platform, StyleSheet, Text as NativeText, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { Caption, Headline, Paragraph, textStyles } from 'components/Text';
+import { t } from 'helpers/i18n';
 import { useTheme, withAlpha } from 'theme';
 
 const isAndroid = Platform.OS === 'android';
@@ -107,6 +108,43 @@ const CardRow: React.FC<CardRowProps> = ({
     </View>
   );
 };
+
+const previewLength = 120;
+
+/**
+ * What a screen reader says for a row: its title first, then whose it is and
+ * when, then the states and glyphs it shows only visually (the unread dot or
+ * bold title, a flag, a paperclip), then the preview.
+ */
+export const cardAccessibilityLabel = ({
+  unread,
+  title,
+  overline,
+  status,
+  flags = [],
+  preview,
+}: {
+  unread?: boolean;
+  title: string;
+  overline?: string;
+  status?: string;
+  /** Spoken names of the glyphs shown, such as "Attachment". */
+  flags?: (string | false | undefined)[];
+  preview?: string;
+}) =>
+  [
+    unread ? t('unread') : undefined,
+    title,
+    overline,
+    status,
+    ...flags,
+    // The row shows two lines of it; a whole notice is too long to listen to.
+    preview && preview.length > previewLength
+      ? `${preview.slice(0, previewLength)}…`
+      : preview,
+  ]
+    .filter(Boolean)
+    .join(', ');
 
 /** A small glyph next to the time, in the caption color unless `color` is set. */
 export const CardGlyph: React.FC<{

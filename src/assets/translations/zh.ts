@@ -345,6 +345,15 @@ const zh: typeof en = {
   todayCalendarFailed: '课表更新失败，显示的是{time}的课表。',
   forward: '前进',
   openInBrowser: '在浏览器中打开',
+  a11yImportant: '重要',
+  a11yHasAnswer: '有答案',
+  a11yNewBadge: '有新内容',
+  a11yDone: '已结束',
+  a11yStruck: '将被替换或删除',
+  moveUp: '上移',
+  moveDown: '下移',
+  courseUnfinishedAssignments: '{count} 项未完成作业',
+  courseOneUnfinishedAssignment: '1 项未完成作业',
 };
 
 export default zh;

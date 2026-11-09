@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   Badge,
@@ -38,6 +38,7 @@ import {
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
 import { useComposeColorOverrides, useTheme } from 'theme';
+import { t } from 'helpers/i18n';
 import {
   parseNumberInput,
   positionRows,
@@ -241,7 +242,9 @@ const FormRow: React.FC<
   const contentColor = done ? colors.outline : titleColor;
   const check = done ? (
     <RNHostView matchContents>
-      <MaterialDesignIcons name="check" size={20} color={colors.outline} />
+      <View accessible accessibilityLabel={t('a11yDone')}>
+        <MaterialDesignIcons name="check" size={20} color={colors.outline} />
+      </View>
     </RNHostView>
   ) : null;
   const ends = [

@@ -218,8 +218,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  // flexGrow, not flex: at large text sizes the content gets taller than the
+  // screen and has to scroll.
   root: {
-    flex: 1,
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

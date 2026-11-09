@@ -137,6 +137,8 @@ jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   animation: jest.fn(),
+  accessibilityLabel: jest.fn(),
+  accessibilityValue: jest.fn(),
   autocorrectionDisabled: jest.fn(),
   Animation: { easeInOut: jest.fn() },
   background: jest.fn(),

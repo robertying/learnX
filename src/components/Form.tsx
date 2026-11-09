@@ -23,6 +23,8 @@ import {
   ZStack,
 } from '@expo/ui/swift-ui';
 import {
+  accessibilityLabel,
+  accessibilityValue,
   disabled,
   font,
   foregroundStyle,
@@ -42,6 +44,7 @@ import {
   toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
+import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
 import {
   parseNumberInput,
@@ -182,7 +185,16 @@ const RowLabel: React.FC<{
   struck?: boolean;
 }> = ({ title, subtitle, icon, plain, struck }) => {
   const text = (
-    <Text modifiers={struck ? struckText : plain ? [primaryText] : undefined}>
+    <Text
+      modifiers={
+        struck
+          ? // the strikethrough isn't read out
+            [...struckText, accessibilityValue(t('a11yStruck'))]
+          : plain
+            ? [primaryText]
+            : undefined
+      }
+    >
       {title}
     </Text>
   );
@@ -264,7 +276,10 @@ const ItemRow: React.FC<
       <RowDetail detail={detail} />
       {badge}
       {done ? (
-        <Image systemName="checkmark" modifiers={doneCheckModifiers} />
+        <Image
+          systemName="checkmark"
+          modifiers={[...doneCheckModifiers, accessibilityLabel(t('a11yDone'))]}
+        />
       ) : null}
       {trailing}
     </HStack>
@@ -319,6 +334,7 @@ export const FormLink: React.FC<FormLinkProps> = ({
               modifiers={[
                 foregroundStyle(theme.colors.status.red),
                 frame({ width: 10, height: 10 }),
+                accessibilityLabel(t('a11yNewBadge')),
               ]}
             />
           ) : null

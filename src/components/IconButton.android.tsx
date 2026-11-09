@@ -11,6 +11,7 @@ import {
   size as sizeModifier,
   testID as testIDModifier,
 } from '@expo/ui/jetpack-compose/modifiers';
+import { t } from 'helpers/i18n';
 import { useComposeColorOverrides, useTheme } from 'theme';
 import {
   PADDING,
@@ -68,7 +69,11 @@ const IconButton: React.FC<IconButtonProps> = ({
     <Icon
       source={icons[icon]}
       size={size}
-      contentDescription={accessibilityLabel}
+      contentDescription={
+        badge && accessibilityLabel
+          ? `${accessibilityLabel}, ${t('a11yNewBadge')}`
+          : accessibilityLabel
+      }
     />
   );
 
