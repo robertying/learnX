@@ -16,6 +16,7 @@ import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import { sanitizeFileName } from './filename';
+import { fileDownloadCheckUrl } from './fileDownloadCheck';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from './i18n';
 
@@ -117,6 +118,14 @@ export const downloadFile = async (
   }
   // Only a real download is emulated; a file already on the device is not.
   await emulateFileDownload();
+
+  // Web Learning calls this check before every course file download; the
+  // whole download then marks the file seen on the server.
+  const checkUrl = fileDownloadCheckUrl(url);
+  if (checkUrl) {
+    await fetch(addCSRF(checkUrl)).catch(() => {});
+  }
+
   url = addCSRF(url);
 
   target.parentDirectory.create({ intermediates: true, idempotent: true });
