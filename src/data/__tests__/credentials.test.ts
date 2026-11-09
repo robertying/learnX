@@ -114,6 +114,19 @@ describe('loadCredentials', () => {
     await m.saveCredentials(fresh);
     await expect(loading).resolves.toEqual(fresh);
   });
+
+  it('resolves to the login as it is now on later calls', async () => {
+    await expect(m.loadCredentials()).resolves.toBeNull();
+    // Logged in after the first read, as on a fresh install.
+    await m.saveCredentials(credentials);
+    await expect(m.loadCredentials()).resolves.toEqual(credentials);
+    // Logged out, then in as someone else.
+    await m.clearCredentials();
+    await expect(m.loadCredentials()).resolves.toBeNull();
+    const other = { ...credentials, username: 'other' };
+    await m.saveCredentials(other);
+    await expect(m.loadCredentials()).resolves.toEqual(other);
+  });
 });
 
 describe('saveCredentials', () => {
