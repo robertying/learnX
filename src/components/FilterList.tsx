@@ -21,7 +21,7 @@ import useListSelection from 'hooks/useListSelection';
 import { RootStackParams } from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { checkedIds, listForFilter } from 'helpers/filterList';
+import { listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
 import { filterOptions, type FilterSelection } from 'helpers/filterOptions';
 import Empty from './Empty';
@@ -117,7 +117,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const {
     selectionMode,
     selection,
-    selectionRef,
+    checkedIdsRef,
     selectedCount,
     toggleSelectionMode,
     checkAll,
@@ -191,10 +191,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   };
 
   const handleArchiveSelected = () =>
-    handleArchive(
-      filterSelected === 'archived',
-      checkedIds(selectionRef.current),
-    );
+    handleArchive(filterSelected === 'archived', checkedIdsRef.current);
 
   const handleHide = (isHidden: boolean, id: string) => {
     setCourseHidden(id, !isHidden);
@@ -308,7 +305,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       isCourse={isCourse}
       selectionMode={selectionMode}
       reorderMode={reorderMode}
-      checked={selection[item.id]}
+      checked={!!selection[item.id]}
       fav={favIdSet.has(item.id)}
       archived={archivedIdSet.has(item.id)}
       hidden={hiddenIdSet.has(item.id)}
