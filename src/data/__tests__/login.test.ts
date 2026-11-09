@@ -86,6 +86,20 @@ describe('login', () => {
     });
   });
 
+  it('records a wrong password as rejected at once, without retrying', async () => {
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
+    await login(sso);
+    expect(loginWithFingerPrint).toHaveBeenCalledTimes(1);
+    expect(isServerReachable).not.toHaveBeenCalled();
+    expect(getAuth()).toMatchObject({
+      loggedIn: false,
+      error: FailReason.BAD_CREDENTIAL,
+      failure: 'rejected',
+    });
+  });
+
   it('records a failed fetch as offline, even if the network is back', async () => {
     jest.mocked(loginWithFingerPrint).mockRejectedValueOnce({
       reason: FailReason.ERROR_FETCH_FROM_ID,

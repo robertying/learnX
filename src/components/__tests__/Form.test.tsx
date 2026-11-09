@@ -9,6 +9,7 @@ import {
   FormButton,
   FormLink,
   FormNumberField,
+  FormParagraph,
   FormSection,
   FormText,
   FormToggle,
@@ -47,6 +48,37 @@ describe('Form', () => {
     );
     expect(screen.getByText('3 files · 1 MB')).toBeTruthy();
     expect(screen.getByText('1 MB')).toBeTruthy();
+  });
+
+  it('shows a paragraph as a row of its own', async () => {
+    await render(
+      <FormSection title="Description">
+        <FormParagraph text="Lecture 1 slides" headline testID="name" />
+        <FormParagraph text={'Read before class.\nBring questions.'} />
+      </FormSection>,
+    );
+    expect(screen.getByTestId('name')).toHaveTextContent('Lecture 1 slides');
+    expect(
+      screen.getByText('Read before class.\nBring questions.'),
+    ).toBeTruthy();
+  });
+
+  it('shows a subtitle, a done check and progress', async () => {
+    await render(
+      <FormSection>
+        <FormText title="Calculus" subtitle="Room 101" done />
+        <FormLink
+          title="Physics"
+          subtitle="08:00–09:35"
+          progress={0.5}
+          onPress={jest.fn()}
+        />
+      </FormSection>,
+    );
+    expect(screen.getByText('Room 101')).toBeTruthy();
+    expect(screen.getByText('08:00–09:35')).toBeTruthy();
+    expect(screen.getByTestId('icon-checkmark')).toBeTruthy();
+    expect(screen.getByTestId('progress')).toBeTruthy();
   });
 
   it('makes a toggle row one switch', async () => {

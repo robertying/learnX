@@ -17,7 +17,6 @@ import {
 } from 'screens/types';
 import Splash from 'components/Splash';
 import { SplitViewProvider } from 'components/SplitView';
-import { WindowSafeAreaProvider } from 'components/WindowSafeArea';
 import Numbers from 'constants/Numbers';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -120,54 +119,50 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
 
   return (
     <SafeAreaProvider>
-      <WindowSafeAreaProvider>
-        <NavigationContainer
-          theme={theme}
-          fallback={<Splash />}
-          onStateChange={trackScreen}
-        >
-          {nativeSplit ? (
-            <RootNavigator.Navigator
-              screenOptions={{
-                headerShown: false,
-                presentation: 'transparentModal',
-              }}
-            >
-              {showMain ? (
-                renderMainScreens()
-              ) : (
-                <RootNavigator.Screen
-                  name="LoginStack"
-                  component={LoginStack}
-                  options={{ gestureEnabled: false }}
-                />
-              )}
-            </RootNavigator.Navigator>
-          ) : (
-            <SplitRootNavigator.Navigator
-              screenOptions={{ headerShown: false }}
-            >
-              {showMain ? (
-                <SplitRootNavigator.Screen
-                  name="Main"
-                  component={SplitMain}
-                  // Login slides away to reveal the main UI.
-                  options={{ animationTypeForReplace: 'pop' }}
-                />
-              ) : (
-                <SplitRootNavigator.Screen
-                  name="LoginStack"
-                  component={SplitLogin}
-                  options={{
-                    animation: 'slide_from_bottom',
-                    gestureEnabled: false,
-                  }}
-                />
-              )}
-            </SplitRootNavigator.Navigator>
-          )}
-        </NavigationContainer>
-      </WindowSafeAreaProvider>
+      <NavigationContainer
+        theme={theme}
+        fallback={<Splash />}
+        onStateChange={trackScreen}
+      >
+        {nativeSplit ? (
+          <RootNavigator.Navigator
+            screenOptions={{
+              headerShown: false,
+              presentation: 'transparentModal',
+            }}
+          >
+            {showMain ? (
+              renderMainScreens()
+            ) : (
+              <RootNavigator.Screen
+                name="LoginStack"
+                component={LoginStack}
+                options={{ gestureEnabled: false }}
+              />
+            )}
+          </RootNavigator.Navigator>
+        ) : (
+          <SplitRootNavigator.Navigator screenOptions={{ headerShown: false }}>
+            {showMain ? (
+              <SplitRootNavigator.Screen
+                name="Main"
+                component={SplitMain}
+                // Login slides away to reveal the main UI.
+                options={{ animationTypeForReplace: 'pop' }}
+              />
+            ) : (
+              <SplitRootNavigator.Screen
+                name="LoginStack"
+                component={SplitLogin}
+                options={{
+                  animation: 'slide_from_bottom',
+                  gestureEnabled: false,
+                }}
+              />
+            )}
+          </SplitRootNavigator.Navigator>
+        )}
+      </NavigationContainer>
     </SafeAreaProvider>
   );
 };

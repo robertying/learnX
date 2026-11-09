@@ -9,7 +9,6 @@ import {
   FormToggle,
 } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import WindowSafeArea from 'components/WindowSafeArea';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
 import { t } from 'helpers/i18n';
@@ -225,21 +224,18 @@ const CalendarEvent: React.FC<Props> = () => {
           />
         </FormSection>
       </Form>
-      {/* Opened from a split view column, but covers the whole window. */}
-      <WindowSafeArea>
-        <DateRangePicker
-          visible={picker.open}
-          title={t('datePickerLabel')}
-          startLabel={t('datePickerStartLabel')}
-          endLabel={t('datePickerEndLabel')}
-          saveLabel={t('datePickerSaveLabel')}
-          cancelLabel={t('cancel')}
-          startDate={picker.startDate}
-          endDate={picker.endDate}
-          onDismiss={picker.closePicker}
-          onConfirm={picker.onRangeConfirm}
-        />
-      </WindowSafeArea>
+      <DateRangePicker
+        visible={picker.open}
+        title={t('datePickerLabel')}
+        startLabel={t('datePickerStartLabel')}
+        endLabel={t('datePickerEndLabel')}
+        saveLabel={t('datePickerSaveLabel')}
+        cancelLabel={t('cancel')}
+        startDate={picker.startDate}
+        endDate={picker.endDate}
+        onDismiss={picker.closePicker}
+        onConfirm={picker.onRangeConfirm}
+      />
     </SafeArea>
   );
 };

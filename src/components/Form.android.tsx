@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
 import { StyleSheet } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
@@ -8,6 +8,7 @@ import {
   Column,
   Host,
   LazyColumn,
+  LinearProgressIndicator,
   ListItem,
   OutlinedTextField,
   PullToRefreshBox,
@@ -20,6 +21,7 @@ import {
   useNativeState,
 } from '@expo/ui/jetpack-compose';
 import {
+  background,
   clickable,
   clip,
   fillMaxSize,
@@ -40,8 +42,10 @@ import {
   positionRows,
   type FormButtonProps,
   type FormIcon,
+  type FormItemRowProps,
   type FormLinkProps,
   type FormNumberFieldProps,
+  type FormParagraphProps,
   type FormProfileProps,
   type FormProps,
   type FormRowPosition,
@@ -106,6 +110,10 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 
   return (
     <PullToRefreshBox
+      // The indicator takes the box's alignment: @expo/ui replaces Compose's
+      // default modifier (align(TopCenter)), so without this it sits at the
+      // start edge. The list fills the box either way.
+      contentAlignment="topCenter"
       isRefreshing={refreshing}
       onRefresh={handleRefresh}
       indicator={{ color: colors.primary }}
@@ -188,18 +196,16 @@ const RowIcon: React.FC<{ icon: FormIcon; color: string }> = ({
   </RNHostView>
 );
 
-const FormRow: React.FC<{
-  title: string;
-  icon?: FormIcon;
-  testID?: string;
-  position?: FormRowPosition;
-  /** How the row takes a tap: clickable, toggleable or selectable. */
-  action?: ModifierConfig;
-  titleColor?: string;
-  detail?: string;
-  trailing?: ReactNode;
-}> = ({
+const FormRow: React.FC<
+  FormItemRowProps & {
+    /** How the row takes a tap: clickable, toggleable or selectable. */
+    action?: ModifierConfig;
+    titleColor?: string;
+    trailing?: ReactNode;
+  }
+> = ({
   title,
+  subtitle,
   icon,
   testID,
   position,
@@ -207,39 +213,90 @@ const FormRow: React.FC<{
   titleColor,
   detail,
   trailing,
+  done,
+  progress,
 }) => {
   const colors = useMaterialColors();
+  // Over: the text in the secondary color, with a check at the end.
+  const contentColor = done ? colors.outline : titleColor;
+  const check = done ? (
+    <RNHostView matchContents>
+      <MaterialDesignIcons name="check" size={20} color={colors.outline} />
+    </RNHostView>
+  ) : null;
+  const ends = [
+    detail ? (
+      <Text
+        key="detail"
+        color={done ? colors.outline : colors.onSurfaceVariant}
+      >
+        {detail}
+      </Text>
+    ) : null,
+    check ? <Fragment key="check">{check}</Fragment> : null,
+    trailing ? <Fragment key="trailing">{trailing}</Fragment> : null,
+  ].filter(Boolean);
   const end =
-    detail && trailing ? (
+    ends.length > 1 ? (
       <Row verticalAlignment="center" horizontalArrangement={{ spacedBy: 8 }}>
-        <Text color={colors.onSurfaceVariant}>{detail}</Text>
-        {trailing}
+        {ends}
       </Row>
-    ) : detail ? (
-      <Text color={colors.onSurfaceVariant}>{detail}</Text>
     ) : (
-      trailing
+      ends[0]
     );
-  return (
+  const item = (rowModifiers: ModifierConfig[]) => (
     <ListItem
       colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[
-        fillMaxWidth(),
-        rowShape(position),
-        ...(action ? [action] : []),
-        ...(testID ? [testIDModifier(testID)] : []),
-      ]}
+      modifiers={[fillMaxWidth(), ...rowModifiers]}
     >
       <ListItem.HeadlineContent>
-        <Text color={titleColor}>{title}</Text>
+        <Text color={contentColor}>{title}</Text>
       </ListItem.HeadlineContent>
+      {subtitle ? (
+        <ListItem.SupportingContent>
+          <Text color={done ? colors.outline : colors.onSurfaceVariant}>
+            {subtitle}
+          </Text>
+        </ListItem.SupportingContent>
+      ) : null}
       {icon ? (
         <ListItem.LeadingContent>
-          <RowIcon icon={icon} color={titleColor ?? colors.onSurfaceVariant} />
+          <RowIcon
+            icon={icon}
+            color={contentColor ?? colors.onSurfaceVariant}
+          />
         </ListItem.LeadingContent>
       ) : null}
       {end ? <ListItem.TrailingContent>{end}</ListItem.TrailingContent> : null}
     </ListItem>
+  );
+  const rowModifiers = [
+    rowShape(position),
+    ...(action ? [action] : []),
+    ...(testID ? [testIDModifier(testID)] : []),
+  ];
+
+  if (progress === undefined) {
+    return item(rowModifiers);
+  }
+  // The bar goes under the whole item, across the row: in the supporting
+  // slot it would stop where the trailing content starts.
+  return (
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        background(colors.surfaceContainer),
+        ...(action ? [action] : []),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      {item([])}
+      <LinearProgressIndicator
+        progress={progress}
+        modifiers={[fillMaxWidth(), padding(16, 0, 16, 16)]}
+      />
+    </Column>
   );
 };
 
@@ -340,6 +397,32 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
         />
       }
     />
+  );
+};
+
+/** Text over several lines, filling the row. */
+export const FormParagraph: React.FC<FormParagraphProps> = ({
+  text,
+  headline,
+  testID,
+  position,
+}) => {
+  const colors = useMaterialColors();
+  return (
+    <ListItem
+      colors={{ containerColor: colors.surfaceContainer }}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      <ListItem.HeadlineContent>
+        <Text style={{ typography: headline ? 'titleMedium' : 'bodyLarge' }}>
+          {text}
+        </Text>
+      </ListItem.HeadlineContent>
+    </ListItem>
   );
 };
 

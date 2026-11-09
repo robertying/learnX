@@ -1,10 +1,6 @@
-import { useEffect } from 'react';
-import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
+import { StyleProp, ViewStyle } from 'react-native';
+import { Host, ProgressView } from '@expo/ui/swift-ui';
+import { animation, Animation, tint } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
 
 export interface ProgressBarProps {
@@ -13,47 +9,22 @@ export interface ProgressBarProps {
   style?: StyleProp<ViewStyle>;
 }
 
-/** A thin determinate progress bar in the primary color (Material's linear indicator). */
+/** A determinate SwiftUI `ProgressView` (linear) tinted with the primary color. */
 const ProgressBar: React.FC<ProgressBarProps> = ({ progress, style }) => {
   const theme = useTheme();
-  const value = useSharedValue(progress);
-  const fillStyle = useAnimatedStyle(() => ({
-    width: `${Math.min(Math.max(value.value, 0), 1) * 100}%`,
-  }));
-
-  useEffect(() => {
-    value.value = withTiming(progress, { duration: 200 });
-  }, [value, progress]);
+  const value = Math.min(Math.max(progress, 0), 1);
 
   return (
-    <View
-      style={[
-        styles.track,
-        { backgroundColor: theme.colors.surfaceVariant },
-        style,
-      ]}
-      accessibilityRole="progressbar"
-      accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
-    >
-      <Animated.View
-        style={[
-          styles.fill,
-          { backgroundColor: theme.colors.primary },
-          fillStyle,
+    <Host matchContents={{ vertical: true }} style={style}>
+      <ProgressView
+        value={value}
+        modifiers={[
+          tint(theme.colors.primary),
+          animation(Animation.easeInOut({ duration: 0.2 }), value),
         ]}
       />
-    </View>
+    </Host>
   );
 };
-
-const styles = StyleSheet.create({
-  track: {
-    height: 4,
-    overflow: 'hidden',
-  },
-  fill: {
-    height: '100%',
-  },
-});
 
 export default ProgressBar;

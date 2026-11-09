@@ -20,9 +20,13 @@ export const Spacer = () => null;
 export const Circle = () => <View />;
 export const RoundedRectangle = () => <View />;
 
-export const Text = ({ children }: { children?: ReactNode }) => (
-  <RNText>{children}</RNText>
-);
+export const Text = ({
+  children,
+  testID,
+}: {
+  children?: ReactNode;
+  testID?: string;
+}) => <RNText testID={testID}>{children}</RNText>;
 
 export const Image = ({ systemName }: { systemName: string }) => (
   <View testID={`icon-${systemName}`} />

@@ -37,6 +37,8 @@ export interface FormIcon {
 
 interface FormRowProps {
   title: string;
+  /** A second line under the title, in the secondary color. */
+  subtitle?: string;
   icon?: FormIcon;
   /** A value or detail at the end of the row, in the secondary color. */
   detail?: string;
@@ -47,10 +49,18 @@ interface FormRowProps {
 
 export type FormRowPosition = 'only' | 'first' | 'middle' | 'last';
 
-/** A row that only shows something. */
-export type FormTextProps = FormRowProps;
+/** Rows that show something about an item: what's on today, for example. */
+export interface FormItemRowProps extends FormRowProps {
+  /** Dimmed with a checkmark, for something that's over. */
+  done?: boolean;
+  /** A bar under the text, from 0 to 1, for how far along it is. */
+  progress?: number;
+}
 
-export interface FormLinkProps extends FormRowProps {
+/** A row that only shows something. */
+export type FormTextProps = FormItemRowProps;
+
+export interface FormLinkProps extends FormItemRowProps {
   /** Opens another page. */
   onPress: () => void;
   /** A dot for something new on the page it opens. */
@@ -83,6 +93,19 @@ export interface FormNumberFieldProps extends FormRowProps {
   value: number;
   /** Called with each positive whole number typed. */
   onValueChange: (value: number) => void;
+}
+
+/**
+ * Text that wraps over several lines, filling the row: a file's name or
+ * description. It can be selected and copied on iOS and the Mac.
+ */
+export interface FormParagraphProps {
+  text: string;
+  /** In the headline font, for a name above its details. */
+  headline?: boolean;
+  testID?: string;
+  /** Set by `FormSection` on Android, for the row's corners. */
+  position?: FormRowPosition;
 }
 
 export interface FormProfileProps {
