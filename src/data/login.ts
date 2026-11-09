@@ -16,7 +16,7 @@ import { resetSettings } from 'data/settings';
 import { resetUserData } from 'data/userData';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
-import { isNetworkError, serializeError } from 'helpers/parse';
+import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
 import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 import { clearSpotlight } from 'helpers/spotlight';
@@ -81,7 +81,8 @@ export async function login({
             ),
       3,
       1000,
-      error => !isNetworkError(error),
+      // a wrong password won't become right, and repeated tries may lock the account
+      error => !isNetworkError(error) && !isBadCredential(error),
     );
 
     if (username && password && fingerPrint) {
@@ -97,10 +98,13 @@ export async function login({
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
-    // thu-learn-lib reports a wrong password and no connection alike, as
-    // ERROR_FETCH_FROM_ID. A failed fetch in the last attempt means offline;
-    // otherwise, if the server answers now, it turned the login down.
-    const offline = isNetworkError(err) || !(await isServerReachable());
+    // A wrong password is BAD_CREDENTIAL. Otherwise (ERROR_FETCH_FROM_ID: the
+    // SSO server failed or couldn't be reached), a failed fetch in the last
+    // attempt means offline; if the server answers now, it turned the login
+    // down.
+    const offline =
+      !isBadCredential(err) &&
+      (isNetworkError(err) || !(await isServerReachable()));
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,

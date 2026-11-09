@@ -118,3 +118,10 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics-ndk")
     implementation("com.google.firebase:firebase-analytics")
 }
+
+// Fails the build when a patch in patches/ isn't applied to node_modules
+// (scripts/check-patches.sh).
+def checkPatches = tasks.register("checkPatches", Exec) {
+    commandLine "${rootDir}/../scripts/check-patches.sh"
+}
+tasks.named("preBuild").configure { dependsOn checkPatches }
