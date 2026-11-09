@@ -16,7 +16,7 @@ const Empty: React.FC<React.PropsWithChildren<unknown>> = () => {
         color={theme.colors.outline}
         size={56}
       />
-      <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
+      <Text style={[Styles.spacey1, { color: theme.colors.onSurfaceMedium }]}>
         {t('empty')}
       </Text>
     </View>
