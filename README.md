@@ -44,12 +44,6 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 - [GitHub Releases](https://github.com/robertying/learnX/releases)
 
-### Windows
-
-可以通过 Windows Subsystem for Android (WSA) 在 Windows 上运行 [Android](#android) 版应用。
-
-You can run the [Android](#android) version of the App on Windows using Windows Subsystem for Android (WSA).
-
 ## 功能 Features
 
 > 注意：本应用只适用于清华大学学生。
@@ -72,16 +66,33 @@ You can run the [Android](#android) version of the App on Windows using Windows 
 
 ### 高级功能 Advanced
 
+- 今日概览：当天课程、即将截止的作业和未读内容 Today: the day's classes, upcoming deadlines and unread items
+- 桌面小组件 Home screen widgets (Deadlines, Up Next)
+- 新内容通知 Notifications for new notices, files, grades and deadline changes
+- Spotlight 搜索与快捷指令 Spotlight search and Shortcuts (iOS, macOS)
+
 - courseX 课程信息共享计划 Course Information Sharing
 - 课表日历同步 Course schedule calendar sync
 - 作业日历/提醒事项同步 Assignment calendar/reminder sync
 - 归档内容 Archiving read posts
 - 提交作业 Submitting assignments
-- 收藏内容 Adding to Favorites
+- 收藏内容（与网络学堂同步） Favorites, synced with Web Learning
 - 隐藏课程 Hiding courses
 - 暗黑模式 Dark mode
 - 全局搜索 Global search
 - 切换学期 Switching among semesters
+
+## 开发 Development
+
+```bash
+pnpm install
+cp .env.example .env   # fill in the mock login values
+bundle install && pnpm pod   # iOS / Mac, once
+pnpm start             # Metro
+pnpm ios               # or: pnpm android
+```
+
+Before committing: `pnpm format`, `pnpm typecheck`, `pnpm lint` and `pnpm test`. Conventions, architecture and workflows (testing on devices, releasing) are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
 
 ## 开源协议 License
 

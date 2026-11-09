@@ -1,4 +1,4 @@
-# Fresh install state, then log in with the mock account (see AGENTS.md, Mock login).
+# Fresh install state, then log in with the mock account (see src/data/AGENTS.md, Mock login).
 # USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---

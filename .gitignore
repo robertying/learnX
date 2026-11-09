@@ -79,3 +79,6 @@ yarn-error.log
 
 # secrets
 .env
+
+# Agent worktrees
+.claude/worktrees/

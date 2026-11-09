@@ -5,7 +5,7 @@ description: Capture App Store / Mac App Store / Google Play screenshots (iPhone
 
 # Store assets for learnX
 
-Reproduce the existing store screenshots with the current UI, from mock data only (mock login, mock data rules, simulator/emulator basics: see AGENTS.md).
+Reproduce the existing store screenshots with the current UI, from mock data only (mock login and mock data rules: `src/data/AGENTS.md`; simulators, emulators and Metro: the device-testing skill).
 
 - **Never write output into the repo**: save to `~/Downloads/learnX-app-store-assets/` for the user to review (layout in [Output](#output)). Never upload to App Store Connect (ASC) or Play Console unless asked.
 - Keep generated helper binaries in one scratch dir (`/tmp/store-tools`), built from `scripts/` with `swiftc -O`.
@@ -111,7 +111,7 @@ File names follow one pattern everywhere:
 
 - Debug builds need Metro (`pnpm start`).
 - Wait ~5 s before each capture so scroll bars fade and transitions finish; check every shot's status bar.
-- General adb/emulator handling (display ids, install, keyboard, locale) is in AGENTS.md. For store shots:
+- General adb/emulator handling (display ids, install, keyboard, locale) is in the device-testing skill. For store shots:
 - **Sizes**: foldable AVDs are off-spec natively (open 2076x2152 ≈ 1:1; folded 1080x2364 = 2.19:1). Override the size: phone `wm size 1080x1920; wm density 420`, tablet `wm size 2560x1440; wm density 280` (split view; a Pixel Tablet is 276 dpi: at 320 the list pane is too narrow and texts wrap).
 - **Status bar**: do not use SystemUI demo mode (duplicates the wifi icon, shows "3G"). The real bar shows 9:41 and wifi. Keep mobile data enabled (disabled draws a "!" at the signal), pin `adb emu gsm signal-profile 4`, and crop-check the signal icon of every shot (it dips after `wm size` changes). Remove the "Set a screen lock" shield notification: `locksettings set-pin 1234`, `cmd safety_center refresh --reason OTHER`; `locksettings clear --old 1234` afterwards.
 - **Login**: the first 登录 tap after hiding the keyboard is often swallowed: tap again. CJK search "作业": globe until the space bar says 拼音, type `zuoye`, commit with SPACE (`keyevent 62`), then Enter and ESC on phone. On tablet skip ESC and candidate taps (they highlight the links incorrectly): tap the list-pane search icon, never a result row, before capturing.
