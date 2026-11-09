@@ -191,7 +191,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             <FormToggle
               testID="settings-allow-server-writes"
               icon={{ ios: 'exclamationmark.shield', android: 'shield-alert' }}
-              title="Allow server writes"
+              title="Allow Server Writes"
               value={serverWritesAllowed}
               onValueChange={setServerWritesAllowed}
             />
@@ -202,7 +202,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             <FormLink
               testID="settings-mock-network"
               icon={{ ios: 'network', android: 'network' }}
-              title="Network emulation"
+              title="Network Emulation"
               onPress={() => handlePush('MockNetwork')}
             />
           </FormSection>

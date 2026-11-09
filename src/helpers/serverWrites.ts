@@ -25,7 +25,7 @@ export const subscribeServerWrites = (listener: () => void) => {
 export const assertServerWritesAllowed = (what: string) => {
   if (!allowed) {
     throw new Error(
-      `${what} blocked: debug builds need "Allow server writes" in Settings`,
+      `${what} blocked: debug builds need "Allow Server Writes" in Settings`,
     );
   }
 };

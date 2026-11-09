@@ -208,7 +208,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
               style={styles.textButton}
               onPress={() => navigation.navigate('MockNetwork')}
             >
-              Network emulation
+              Network Emulation
             </TextButton>
           )}
         </KeyboardAvoidingView>

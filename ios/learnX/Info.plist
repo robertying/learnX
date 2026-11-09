@@ -78,35 +78,35 @@
 	<key>NSApplicationCrashOnExceptions</key>
 	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
-	<string>Allow learnX to sync courses and assignments to your calendars</string>
+	<string>learnX syncs your course schedule and assignments to Calendar. It reads your list of calendars to choose where to add events, and can delete the calendars it created.</string>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Allow learnX to sync courses and assignments to your calendars</string>
+	<string>learnX syncs your course schedule and assignments to Calendar, and can delete the calendars it created.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow learnX to access your camera and use the photo for assignment submission</string>
+	<string>Take a photo to attach to an assignment submission.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Allow learnX to access your contacts</string>
 	<key>NSDesktopFolderUsageDescription</key>
-	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
-	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSDownloadsFolderUsageDescription</key>
-	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSFileProviderDomainUsageDescription</key>
-	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Allow learnX to access your microphone</string>
 	<key>NSNetworkVolumesUsageDescription</key>
-	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Allow learnX to access your photos</string>
+	<string>Save images from learnX to your photo library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow learnX to access your photos and use them for your assignment submission</string>
+	<string>Choose photos to attach to an assignment submission.</string>
 	<key>NSRemindersFullAccessUsageDescription</key>
-	<string>Allow learnX to sync assignments to your reminders</string>
+	<string>learnX syncs assignments to Reminders, and can delete the list it created.</string>
 	<key>NSRemindersUsageDescription</key>
-	<string>Allow learnX to sync assignments to your reminders</string>
+	<string>learnX syncs assignments to Reminders, and can delete the list it created.</string>
 	<key>NSRemovableVolumesUsageDescription</key>
-	<string>Allow learnX to access your files and use them for your assignment submission</string>
+	<string>Choose files to attach to an assignment submission.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UIAppFonts</key>

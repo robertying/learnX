@@ -133,7 +133,7 @@ export const addCSRF = (url: string) => {
 };
 
 /**
- * Applies Settings › Network emulation to a file download while a mock
+ * Applies Settings › Network Emulation to a file download while a mock
  * account is logged in; does nothing otherwise.
  */
 export const emulateFileDownload = async () => {
