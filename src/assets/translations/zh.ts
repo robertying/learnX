@@ -27,6 +27,7 @@ const zh: typeof en = {
   search: '搜索',
   submit: '提交',
   submitted: '已提交',
+  graded: '已批阅',
   assignmentSubmission: '作业提交',
   loginFailed:
     '登录失败，请检查网络连接并确保用户电子身份服务系统的登录依旧有效',

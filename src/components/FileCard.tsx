@@ -1,12 +1,9 @@
-import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
-import Styles from 'constants/Styles';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Paragraph, Subheading, Headline } from 'components/Text';
+import CardRow, { CardGlyph, FileTypeTile } from './CardRow';
 
 export interface FileCardProps extends CardWrapperProps {
   data: File;
@@ -29,62 +26,30 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   ...restProps
 }) => {
   const theme = useTheme();
+  const details = [category?.title, fileType?.toUpperCase(), size]
+    .filter(Boolean)
+    .join(' · ');
   const strippedDescription = removeTags(description);
-  const timeAgo = dayjs(uploadTime).fromNow();
 
   return (
     <CardWrapper {...restProps}>
-      <View style={Styles.flex1}>
-        <View style={Styles.flexRowCenter}>
-          <View style={styles.title}>
-            {hideCourseName ? null : (
-              <Subheading numberOfLines={1}>{courseName}</Subheading>
-            )}
-            <Headline numberOfLines={1}>{title}</Headline>
-          </View>
-          <View style={[Styles.flexRowCenter, styles.icons]}>
-            {markedImportant ? (
-              <Icon
-                style={styles.icon}
-                name="flag"
-                color={theme.colors.status.red}
-                size={20}
-              />
-            ) : null}
-            {isNew ? (
-              <Icon
-                style={styles.icon}
-                name="checkbox-blank-circle"
-                color={theme.colors.status.blue}
-              />
-            ) : null}
-          </View>
-        </View>
-        {strippedDescription ? (
-          <Paragraph numberOfLines={2}>{strippedDescription}</Paragraph>
-        ) : null}
-        <View style={Styles.metaRow}>
-          <Caption>
-            {`${category?.title ?? ''} ${fileType?.toUpperCase() ?? ''} ${size}`.trim()}
-          </Caption>
-          <Caption>{timeAgo}</Caption>
-        </View>
-      </View>
+      <CardRow
+        overline={hideCourseName ? undefined : courseName}
+        unread={!!isNew}
+        leading={<FileTypeTile fileType={fileType} />}
+        title={title}
+        preview={
+          strippedDescription ? `${details}\n${strippedDescription}` : details
+        }
+        glyphs={
+          markedImportant ? (
+            <CardGlyph name="flag" color={theme.colors.status.orange} />
+          ) : null
+        }
+        trailing={dayjs(uploadTime).fromNow()}
+      />
     </CardWrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  title: {
-    flex: 10,
-  },
-  icons: {
-    flex: 2,
-    justifyContent: 'flex-end',
-  },
-  icon: {
-    marginLeft: 6,
-  },
-});
 
 export default FileCard;

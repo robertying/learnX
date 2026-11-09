@@ -25,6 +25,7 @@ export default {
   search: 'Search',
   submit: 'Submit',
   submitted: 'Submitted',
+  graded: 'Graded',
   assignmentSubmission: 'Assignment Submission',
   loginFailed:
     'Login failed. Please check your network and ensure that the login to the Electronic ID Service System is still valid',
