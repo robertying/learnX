@@ -8,9 +8,9 @@ import {
 } from '@robertying/thu-learn-lib';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
-import IconButton from 'components/IconButton';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import { headerButtons } from 'navigation/headerButtons';
 import useMinute from 'hooks/useMinute';
 import { getWebViewTemplate } from 'helpers/html';
 import { removeTags } from 'helpers/text';
@@ -162,29 +162,17 @@ const AssignmentDetailContent: React.FC<{
 
   useEffect(() => {
     if (submissionType !== HomeworkSubmissionType.OFFLINE) {
-      navigation.setOptions({
-        headerRight: () => (
-          <IconButton
-            disabled={closed}
-            onPress={handleSubmit}
-            accessibilityLabel={t('submit')}
-            icon="upload"
-          />
-        ),
-        unstable_headerRightItems: () => [
+      navigation.setOptions(
+        headerButtons('right', [
           {
-            type: 'button',
-            identifier: 'submit',
+            id: 'submit',
             label: t('submit'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'arrow.up.circle',
-            },
+            icon: 'upload',
             disabled: closed,
             onPress: handleSubmit,
           },
-        ],
-      });
+        ]),
+      );
     }
   }, [submissionType, closed, handleSubmit, navigation]);
 
