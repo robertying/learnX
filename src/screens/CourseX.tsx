@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
+import { t } from 'helpers/i18n';
 import { CourseXParamList } from './types';
 import { useTheme } from 'theme';
 
@@ -57,22 +58,24 @@ const CourseX: React.FC<Props> = ({ route }) => {
         ]}
       >
         <IconButton
-          icon="arrow-left"
+          icon="back"
+          accessibilityLabel={t('back')}
           disabled={!canGoBack}
           onPress={() => webViewRef.current?.goBack()}
         />
         <IconButton
-          icon="arrow-right"
+          icon="forward"
           disabled={!canGoForward}
           onPress={() => webViewRef.current?.goForward()}
         />
         <IconButton
           icon="refresh"
+          accessibilityLabel={t('refresh')}
           disabled={progress && progress !== 1 ? true : false}
           onPress={() => webViewRef.current?.reload()}
         />
         <IconButton
-          icon="open-in-new"
+          icon="openInNew"
           disabled={progress && progress !== 1 ? true : false}
           onPress={() => Linking.openURL(currentUrl)}
         />
