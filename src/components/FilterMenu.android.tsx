@@ -7,7 +7,6 @@ import MaterialDesignIcons from '@react-native-vector-icons/material-design-icon
 import {
   DropdownMenu,
   FilledTonalIconButton,
-  Host,
   Icon,
   IconButton,
   RNHostView,
@@ -15,8 +14,9 @@ import {
   Text,
 } from '@expo/ui/jetpack-compose';
 import { testID } from '@expo/ui/jetpack-compose/modifiers';
-import { useComposeColorOverrides, useTheme } from 'theme';
+import { useTheme } from 'theme';
 import type { FilterMenuProps } from './FilterMenu.shared';
+import ThemedHost from 'components/ThemedHost';
 
 const FilterMenu: React.FC<FilterMenuProps> = ({
   label,
@@ -25,17 +25,12 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   onSelectionChange,
 }) => {
   const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
   const [expanded, setExpanded] = useState(false);
 
   const Button = selected === 'all' ? IconButton : FilledTonalIconButton;
 
   return (
-    <Host
-      matchContents
-      seedColor={theme.colors.primary}
-      colorOverrides={colorOverrides}
-    >
+    <ThemedHost matchContents>
       <DropdownMenu
         expanded={expanded}
         onDismissRequest={() => setExpanded(false)}
@@ -88,7 +83,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
           ))}
         </DropdownMenu.Items>
       </DropdownMenu>
-    </Host>
+    </ThemedHost>
   );
 };
 

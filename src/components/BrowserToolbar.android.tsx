@@ -2,14 +2,13 @@ import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   HorizontalFloatingToolbar,
-  Host,
   Icon,
   IconButton,
 } from '@expo/ui/jetpack-compose';
 import { testID } from '@expo/ui/jetpack-compose/modifiers';
 import { t } from 'helpers/i18n';
-import { useComposeColorOverrides, useTheme } from 'theme';
 import type { BrowserToolbarProps } from './BrowserToolbar.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { BrowserToolbarProps } from './BrowserToolbar.shared';
 
@@ -34,8 +33,6 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
   onReload,
   onOpenInBrowser,
 }) => {
-  const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
   const insets = useSafeAreaInsets();
 
   const item = (
@@ -52,11 +49,7 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
 
   return (
     <View style={[styles.container, { paddingBottom: insets.bottom + 12 }]}>
-      <Host
-        matchContents
-        seedColor={theme.colors.primary}
-        colorOverrides={colorOverrides}
-      >
+      <ThemedHost matchContents>
         <HorizontalFloatingToolbar>
           {item('back', t('back'), canGoBack, onBack, 'courseXBack')}
           {item(
@@ -75,7 +68,7 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
             'courseXOpen',
           )}
         </HorizontalFloatingToolbar>
-      </Host>
+      </ThemedHost>
     </View>
   );
 };

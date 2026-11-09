@@ -24,7 +24,9 @@ import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 import { ToastBackground, ToastSymbol } from '../../modules/toast';
 
-export type ToastType = 'success' | 'warning' | 'error' | 'none';
+import { toastHaptics, type ToastType } from './Toast.shared';
+
+export type { ToastType } from './Toast.shared';
 
 interface ToastState {
   /** Changes with every toast, so that each one mounts afresh. */
@@ -51,12 +53,6 @@ const defaultDurations: Record<ToastType, number> = {
   none: 5000,
 };
 
-const haptics: Partial<Record<ToastType, Haptics.NotificationFeedbackType>> = {
-  success: Haptics.NotificationFeedbackType.Success,
-  warning: Haptics.NotificationFeedbackType.Warning,
-  error: Haptics.NotificationFeedbackType.Error,
-};
-
 // The SF Symbols and system colors Apple's own HUDs use for each outcome.
 const symbols: Partial<Record<ToastType, { name: string; color: string }>> = {
   success: { name: 'checkmark.circle.fill', color: '#34C759' },
@@ -80,7 +76,7 @@ export const toast = (text: string, type: ToastType, duration?: number) => {
     duration: duration ?? defaultDurations[type],
     visible: true,
   }));
-  const feedback = haptics[type];
+  const feedback = toastHaptics[type];
   if (feedback !== undefined) {
     void Haptics.notificationAsync(feedback);
   }

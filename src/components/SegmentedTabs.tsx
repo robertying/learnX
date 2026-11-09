@@ -1,8 +1,9 @@
 import { StyleSheet, View } from 'react-native';
-import { Host, Picker, Text } from '@expo/ui/swift-ui';
+import { Picker, Text } from '@expo/ui/swift-ui';
 import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
 import type { SegmentedTabsProps } from './SegmentedTabs.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { SegmentedTabsProps } from './SegmentedTabs.shared';
 
@@ -21,11 +22,7 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
 
   return (
     <View style={[styles.bar, { backgroundColor: theme.colors.surface }]}>
-      <Host
-        matchContents={{ vertical: true }}
-        style={styles.host}
-        seedColor={theme.colors.primary}
-      >
+      <ThemedHost matchContents={{ vertical: true }} style={styles.host}>
         <Picker
           label={accessibilityLabel}
           selection={selectedIndex}
@@ -38,7 +35,7 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
             </Text>
           ))}
         </Picker>
-      </Host>
+      </ThemedHost>
     </View>
   );
 };

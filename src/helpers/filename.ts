@@ -86,3 +86,26 @@ export const formatFileSize = (bytes: number) => {
   }
   return `${value.toFixed(1)} ${units[unit]}`;
 };
+
+/** The status color a file type's tile is drawn in, by kind of document. */
+export const fileTypeColor = (
+  type: string,
+): 'red' | 'blue' | 'orange' | 'green' | 'grey' => {
+  switch (type.toLowerCase()) {
+    case 'pdf':
+      return 'red';
+    case 'doc':
+    case 'docx':
+      return 'blue';
+    case 'ppt':
+    case 'pptx':
+    case 'key':
+      return 'orange';
+    case 'xls':
+    case 'xlsx':
+    case 'csv':
+      return 'green';
+    default:
+      return 'grey';
+  }
+};

@@ -1,13 +1,9 @@
 import { ToastAndroid } from 'react-native';
 import * as Haptics from 'expo-haptics';
 
-export type ToastType = 'success' | 'warning' | 'error' | 'none';
+import { toastHaptics, type ToastType } from './Toast.shared';
 
-const haptics: Partial<Record<ToastType, Haptics.NotificationFeedbackType>> = {
-  success: Haptics.NotificationFeedbackType.Success,
-  warning: Haptics.NotificationFeedbackType.Warning,
-  error: Haptics.NotificationFeedbackType.Error,
-};
+export type { ToastType } from './Toast.shared';
 
 /**
  * Shows the system toast, which draws above dialogs. The system picks how
@@ -21,7 +17,7 @@ export const toast = (text: string, type: ToastType, duration?: number) => {
   }
   const long = duration !== undefined ? duration > 3000 : type !== 'success';
   ToastAndroid.show(text, long ? ToastAndroid.LONG : ToastAndroid.SHORT);
-  const feedback = haptics[type];
+  const feedback = toastHaptics[type];
   if (feedback !== undefined) {
     void Haptics.notificationAsync(feedback);
   }

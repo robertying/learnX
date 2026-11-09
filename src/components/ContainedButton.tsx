@@ -1,7 +1,8 @@
-import { Platform, StyleProp, ViewStyle } from 'react-native';
-import { Button, Host } from '@expo/ui';
+import { StyleProp, ViewStyle } from 'react-native';
+import { Button } from '@expo/ui';
 import { buttonStyle } from '@expo/ui/swift-ui/modifiers';
-import { useComposeColorOverrides, useTheme } from 'theme';
+import DeviceInfo from 'constants/DeviceInfo';
+import ThemedHost from 'components/ThemedHost';
 
 export interface ContainedButtonProps {
   label: string;
@@ -12,10 +13,9 @@ export interface ContainedButtonProps {
 
 // Below iOS 26, @expo/ui falls back to a plain button for glass, so those keep
 // the button's own filled style.
-const modifiers =
-  Platform.OS === 'ios' && parseInt(String(Platform.Version), 10) >= 26
-    ? [buttonStyle('glassProminent')]
-    : undefined;
+const modifiers = DeviceInfo.hasLiquidGlass()
+  ? [buttonStyle('glassProminent')]
+  : undefined;
 
 /** The system's filled button, tinted with the theme's primary color. */
 const ContainedButton: React.FC<ContainedButtonProps> = ({
@@ -24,24 +24,15 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
   onPress,
   style,
 }) => {
-  const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
-
   return (
-    <Host
-      matchContents
-      seedColor={theme.colors.primary}
-      // The universal Host passes this through to Compose on Android.
-      {...(Platform.OS === 'android' ? { colorOverrides } : {})}
-      style={style}
-    >
+    <ThemedHost matchContents style={style}>
       <Button
         label={label}
         disabled={disabled}
         onPress={onPress}
         modifiers={modifiers}
       />
-    </Host>
+    </ThemedHost>
   );
 };
 

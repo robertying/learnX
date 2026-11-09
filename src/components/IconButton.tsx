@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Host } from '@expo/ui/swift-ui';
+import { Button } from '@expo/ui/swift-ui';
 import {
   buttonBorderShape,
   buttonStyle,
@@ -11,12 +11,12 @@ import {
 import type { SFSymbol } from 'sf-symbols-typescript';
 import Badge from 'components/Badge';
 import { t } from 'helpers/i18n';
-import { useTheme } from 'theme';
 import {
   PADDING,
   type IconButtonIcon,
   type IconButtonProps,
 } from './IconButton.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
 
@@ -56,7 +56,6 @@ const IconButton: React.FC<IconButtonProps> = ({
   testID,
   style,
 }) => {
-  const theme = useTheme();
   // A borderless button reaches 44 pt, Apple's smallest tap target, beyond
   // its padding; a contained one is drawn at its size.
   const buttonSize = Math.max(
@@ -70,7 +69,7 @@ const IconButton: React.FC<IconButtonProps> = ({
 
   return (
     <View style={style}>
-      <Host matchContents seedColor={theme.colors.primary}>
+      <ThemedHost matchContents>
         <Button
           systemImage={symbols[icon]}
           label={label}
@@ -87,7 +86,7 @@ const IconButton: React.FC<IconButtonProps> = ({
             disabledModifier(!!disabled),
           ]}
         />
-      </Host>
+      </ThemedHost>
       {badge && (
         <Badge
           size={8}

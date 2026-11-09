@@ -6,7 +6,6 @@ import {
   Button,
   Circle,
   Form as SwiftUIForm,
-  Host,
   HStack,
   Image,
   Label,
@@ -67,6 +66,7 @@ import {
   type FormToggleProps,
   type FormViewProps,
 } from './Form.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export * from './Form.shared';
 
@@ -119,7 +119,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   }, [navigation, theme.dark]);
 
   return (
-    <Host style={styles.fill} seedColor={theme.colors.primary} testID={testID}>
+    <ThemedHost style={styles.fill} testID={testID}>
       <SwiftUIForm
         modifiers={[
           // Dragging the form down pulls the keyboard away, as in Notes.
@@ -130,7 +130,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       >
         {children}
       </SwiftUIForm>
-    </Host>
+    </ThemedHost>
   );
 };
 

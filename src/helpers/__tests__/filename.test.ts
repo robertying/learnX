@@ -1,5 +1,6 @@
 import {
   fileNameOf,
+  fileTypeColor,
   formatFileSize,
   getExtension,
   sanitizeFileName,
@@ -83,5 +84,16 @@ describe('formatFileSize', () => {
     expect(formatFileSize(1500)).toBe('1.5 KB');
     expect(formatFileSize(2_000_000)).toBe('2.0 MB');
     expect(formatFileSize(3_500_000_000)).toBe('3.5 GB');
+  });
+});
+
+describe('fileTypeColor', () => {
+  it('colors a tile by kind of document, in any case', () => {
+    expect(fileTypeColor('PDF')).toBe('red');
+    expect(fileTypeColor('docx')).toBe('blue');
+    expect(fileTypeColor('key')).toBe('orange');
+    expect(fileTypeColor('csv')).toBe('green');
+    expect(fileTypeColor('zip')).toBe('grey');
+    expect(fileTypeColor('')).toBe('grey');
   });
 });

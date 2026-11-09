@@ -2,12 +2,12 @@ import { StyleSheet } from 'react-native';
 import {
   DropdownMenu,
   DropdownMenuItem,
-  Host,
   Spacer,
   Text,
 } from '@expo/ui/jetpack-compose';
 import { size, testID } from '@expo/ui/jetpack-compose/modifiers';
 import type { CardMenuProps } from './CardMenu.shared';
+import ThemedHost from 'components/ThemedHost';
 
 // A clipped popup loses the status bar offset near the bottom of the screen.
 const popupProperties = { clippingEnabled: false };
@@ -22,7 +22,7 @@ const CardMenu: React.FC<CardMenuProps> = ({
   onAction,
   onDismiss,
 }) => (
-  <Host matchContents style={styles.anchor} pointerEvents="box-none">
+  <ThemedHost matchContents style={styles.anchor} pointerEvents="box-none">
     <DropdownMenu
       expanded={visible}
       onDismissRequest={onDismiss}
@@ -45,7 +45,7 @@ const CardMenu: React.FC<CardMenuProps> = ({
         ))}
       </DropdownMenu.Items>
     </DropdownMenu>
-  </Host>
+  </ThemedHost>
 );
 
 const styles = StyleSheet.create({
