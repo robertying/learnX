@@ -83,8 +83,6 @@
 	<string>learnX syncs your course schedule and assignments to Calendar, and can delete the calendars it created.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo to attach to an assignment submission.</string>
-	<key>NSContactsUsageDescription</key>
-	<string>Allow learnX to access your contacts</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Choose files to attach to an assignment submission.</string>
 	<key>NSDocumentsFolderUsageDescription</key>
