@@ -29,7 +29,7 @@ Reproduce the existing store screenshots with the current UI, from mock data onl
 
 ## Screens to capture
 
-**iPhone (10):** 1 notices list; 2 notices with a row swiped (heart/archive) and the filter menu open; 3 notice detail 第一次大作业 (has an attachment); 4 assignments, filter 全部; 5 assignment submission (open 第一次大作业, upload arrow; needs a future deadline); 6 files; 7 PDF preview of 人类视觉系统 scrolled to the "Climate Change" page; 8 courses with 量子与统计 swiped open (yellow hide action); 9 search "作业"; 10 Settings → 日历与提醒事项.
+**iPhone (10):** 1 notices list; 2 notices with a row swiped (heart/archive) and the filter menu open; 3 notice detail 第一次大作业 (has an attachment); 4 assignments, filter 全部; 5 assignment submission (open 第一次大作业, upload arrow; needs a future deadline); 6 files; 7 PDF preview of 人类视觉系统 scrolled to the cone sensitivity chart (slide 5); 8 courses with 量子与统计 swiped open (yellow hide action); 9 search "作业"; 10 Settings → 日历与提醒事项.
 
 **iPad (8) and Mac (8)** use the same screens with a detail pane: notices + detail; filter menu + swiped row; assignments + detail; submission; files + PDF; courses (row swiped) + course detail; search "作业"; settings + calendar page.
 
@@ -75,7 +75,7 @@ File names follow one pattern everywhere:
 - Login: username (201,421), password (201,500), then check key (349,780) and 登录 (201,621). Paste bubble (fallback) sits ~40 pt above the field.
 - Row swipe: notices `swipe` (340,y)→(120,y) 0.4 s; **courses need `touch_path`** (330→215, ~6 points, 40 ms, last dt 300 ms). Reverse swipe closes it.
 - Filter menu: tap the entry (Assignments 全部 ≈ (85,263)).
-- PDF: wait ~7 s; 5 slow swipes (260,760)→(260,200) 1.6 s (keep x≥200, edges trigger back), one drag down 550, one short drag 300→380.
+- PDF: wait ~7 s, then swipe slowly (260,760)→(260,200) 1.6 s (keep x≥200, edges trigger back) until the cone sensitivity chart (slide 5 of 8) fills the view.
 - Search: tap magnifier, long-press field (180,143), tap 粘贴 (49,189), then search key (348,780).
 - The "Speed up your typing" sheet shows once; tap Continue.
 
@@ -117,7 +117,7 @@ File names follow one pattern everywhere:
 - **Login**: the first 登录 tap after hiding the keyboard is often swallowed: tap again. CJK search "作业": globe until the space bar says 拼音, type `zuoye`, commit with SPACE (`keyevent 62`), then Enter and ESC on phone. On tablet skip ESC and candidate taps (they highlight the links incorrectly): tap the list-pane search icon, never a result row, before capturing.
 - **Phone 1080x1920**: tabs y≈1715 at x 108/323/540/756/972; back/close (74,220); top-right action (985,213); search (985,211); 日历与提醒事项 (250,900).
 - **Tablet 2560x1440 @280**: tabs y≈1312 at x 55/166/278/390/502; list-pane search (496,157); detail back (611,157); submit arrow (2484,160); 日历与提醒事项 (200,608); divider x≈560.
-- **PDF**: wait ~9 s. Phone: 5 swipes (540,1500)→(540,400) 700 ms. Tablet: 14 swipes (1600,1150)→(1600,250) 500 ms, 3 back down, then nudge until "Climate Change" is at the top.
+- **PDF**: wait ~9 s. Swipe (540,1500)→(540,400) 700 ms on phone, (1600,1150)→(1600,250) 500 ms on tablet, until the cone sensitivity chart (slide 5 of 8) is in view.
 - **Tablet handle**: large-screen shots have a dark bar at top centre (the windowing app handle; none on phone): paint it out with `scripts/android-fix-handle.swift <in.png> <out.jpg>` (copies the header color from x=1120 over x 1150-1410, y 0-110; writes an opaque JPEG), output under `android/tablet/`. The camera punch hole (top centre phone, top left tablet) is drawn only by the emulator window, not in `screencap` output.
 
 ## Header / search results / feature graphic

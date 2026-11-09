@@ -38,8 +38,8 @@ describe('server queries', () => {
 
   it('reads the user', async () => {
     expect(await queryClient.fetchQuery(userQuery)).toEqual({
-      name: '测试学生',
-      department: '电子系',
+      name: '陈思远',
+      department: '电子工程系',
     });
   });
 
