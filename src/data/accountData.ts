@@ -9,6 +9,7 @@ import {
 } from 'data/submissionDrafts';
 import { resetSyncLog, SYNC_LOG_KEY } from 'data/syncLog';
 import { resetUserData, USER_DATA_KEY, UserData } from 'data/userData';
+import { removeFileDir } from 'helpers/fs';
 import { clearSurfaces } from 'helpers/surfaces';
 
 /**
@@ -30,8 +31,9 @@ export const accountStores = {
  * Forgets everything kept for the account whose data this is: the stores
  * above (the user data replaced by `userData` when given, e.g. the mock
  * account's), the server cache, the server actions sent this session, the
- * data's owner, and what the widgets, Spotlight and reminders show. The login
- * itself is left alone. Resolves once the reminders are cancelled.
+ * data's owner, the downloaded files, and what the widgets, Spotlight and
+ * reminders show. The login itself is left alone. Resolves once the reminders
+ * are cancelled and the files deleted.
  */
 export function clearAccountData(userData?: UserData) {
   Object.entries(accountStores).forEach(([key, reset]) =>
@@ -40,5 +42,7 @@ export function clearAccountData(userData?: UserData) {
   resetServerActions();
   clearQueryCache();
   setDataOwner(null);
-  return clearSurfaces();
+  return Promise.all([clearSurfaces(), removeFileDir().catch(() => {})]).then(
+    () => {},
+  );
 }
