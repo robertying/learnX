@@ -1,3 +1,4 @@
+import { useDeferredValue } from 'react';
 import Fuse, { FuseGetFunction, IFuseOptions } from 'fuse.js';
 import { Assignment, File, Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
@@ -73,21 +74,36 @@ const fileOptions: IFuseOptions<File> = {
   ],
 };
 
+export interface SearchResults {
+  notices: Notice[];
+  assignments: Assignment[];
+  files: File[];
+}
+
+const noResults: SearchResults = { notices: [], assignments: [], files: [] };
+
+/**
+ * The notices, assignments and files that match `query`. The search follows
+ * typing at a lower priority (`useDeferredValue`), so a keystroke shows
+ * before a search over every body finishes.
+ */
 export default function useSearch(
   notices: Notice[],
   assignments: Assignment[],
   files: File[],
   query: string,
-) {
+): SearchResults {
+  const deferredQuery = useDeferredValue(query);
   const noticeFuse = new Fuse(notices, noticeOptions);
   const assignmentFuse = new Fuse(assignments, assignmentOptions);
   const fileFuse = new Fuse(files, fileOptions);
 
-  return query
-    ? [
-        noticeFuse.search(query).map(i => i.item),
-        assignmentFuse.search(query).map(i => i.item),
-        fileFuse.search(query).map(i => i.item),
-      ]
-    : [[], [], []];
+  if (!deferredQuery) {
+    return noResults;
+  }
+  return {
+    notices: noticeFuse.search(deferredQuery).map(i => i.item),
+    assignments: assignmentFuse.search(deferredQuery).map(i => i.item),
+    files: fileFuse.search(deferredQuery).map(i => i.item),
+  };
 }

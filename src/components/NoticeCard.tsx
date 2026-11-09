@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import useMinute from 'hooks/useMinute';
+import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { t } from 'helpers/i18n';

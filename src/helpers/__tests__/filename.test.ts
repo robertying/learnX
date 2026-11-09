@@ -85,6 +85,11 @@ describe('formatFileSize', () => {
     expect(formatFileSize(2_000_000)).toBe('2.0 MB');
     expect(formatFileSize(3_500_000_000)).toBe('3.5 GB');
   });
+
+  it('moves to the next unit instead of showing 1000.0', () => {
+    expect(formatFileSize(999_950)).toBe('1.0 MB');
+    expect(formatFileSize(999_940)).toBe('999.9 KB');
+  });
 });
 
 describe('fileTypeColor', () => {

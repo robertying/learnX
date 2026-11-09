@@ -20,7 +20,7 @@ import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
 import { useShowDetail } from 'hooks/useDetailNavigator';
-import useMinute from 'hooks/useMinute';
+import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { headerButtons } from 'navigation/headerButtons';

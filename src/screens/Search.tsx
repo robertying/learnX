@@ -107,12 +107,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     };
   }, [navigation, initialQuery]);
 
-  const [noticeResult, assignmentResult, fileResult] = useSearch(
-    notices,
-    assignments,
-    files,
-    searchQuery,
-  );
+  const {
+    notices: noticeResult,
+    assignments: assignmentResult,
+    files: fileResult,
+  } = useSearch(notices, assignments, files, searchQuery);
 
   const handlePush = (
     name: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail',

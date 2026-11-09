@@ -48,7 +48,7 @@ const search = async (query: string) => {
   const { result } = await renderHook(() =>
     useSearch(notices, assignments, files, query),
   );
-  const [n, a, f] = result.current;
+  const { notices: n, assignments: a, files: f } = result.current;
   return {
     notices: n.map(i => i.id),
     assignments: a.map(i => i.id),

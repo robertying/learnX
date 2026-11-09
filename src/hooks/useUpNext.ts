@@ -1,6 +1,6 @@
 import { useWeekSchedule } from 'data/schedule';
 import { startOfWeek } from 'helpers/schedule';
-import { useBeijingDay } from 'hooks/useMinute';
+import { useBeijingDay } from 'hooks/useClock';
 
 /**
  * Keeps this week's and next week's timetable fetched, which the Up Next
