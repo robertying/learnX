@@ -1,6 +1,5 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import {
-  ContentType,
   CourseType,
   type ExcellentHomework,
   type Homework,
@@ -411,18 +410,12 @@ export const useAssignments = () => {
 };
 
 /**
- * A course's files. The file list doesn't say which are favorites, so the
- * course's file favorites are fetched next to it; if they fail, so does the
- * course, which keeps what was cached.
+ * A course's files, with `isFavorite` filled in by thu-learn-lib from the
+ * course's file favorites (the file list has no such field). If those fail,
+ * so does the course, which keeps what was cached.
  */
-const fetchFiles = async (courseId: string) => {
-  const [list, favorites] = await Promise.all([
-    dataSource.getFileList(courseId, CourseType.STUDENT),
-    dataSource.getFavorites(courseId, ContentType.FILE),
-  ]);
-  const favoriteIds = new Set(favorites.map(favorite => favorite.id));
-  return list.map(file => ({ ...file, isFavorite: favoriteIds.has(file.id) }));
-};
+const fetchFiles = (courseId: string) =>
+  dataSource.getFileList(courseId, CourseType.STUDENT, { favorites: true });
 
 const files = createContent<File>({
   name: 'files',
