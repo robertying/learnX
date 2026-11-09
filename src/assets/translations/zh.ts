@@ -285,9 +285,9 @@ const zh: typeof en = {
   submittedAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [提交]',
   submittedLateAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [补交]',
   lastSubmittedAtFormat: '[上次提交于] YYYY 年 M 月 D 日 dddd HH:mm',
-  gradedAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [批改]',
+  gradedAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [批阅]',
   // {grader} is a dayjs literal, e.g. [Name]
-  gradedByAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [由]{grader}[批改]',
+  gradedByAtFormat: 'YYYY 年 M 月 D 日 dddd HH:mm [由]{grader}[批阅]',
   deadlinePassed: '{time}截止',
   deadlineIn: '还剩 {time}',
   excellentHomeworkBy: '{name}的优秀作业',
