@@ -2,12 +2,19 @@ import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
 import { t } from './i18n';
 
-/** "due in 3 days" or "closed 2 days ago", in the app's language, relative to `now` (default: the current time) */
+/**
+ * "due in 3 days" or "closed 2 days ago", in the app's language, relative to
+ * `now` (default: the current time). A deadline more than a year away (some
+ * teachers set one decades ahead) shows its date instead.
+ */
 export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   const n = dayjs(now);
   const dl = dayjs(deadline);
-  return n.isAfter(dl)
-    ? t('deadlinePassed', { time: n.to(dl) })
+  if (n.isAfter(dl)) {
+    return t('deadlinePassed', { time: n.to(dl) });
+  }
+  return dl.isAfter(n.add(1, 'year'))
+    ? t('deadlineOn', { date: dl.format(t('deadlineDateFormat')) })
     : t('deadlineIn', { time: n.to(dl, true) });
 };
 

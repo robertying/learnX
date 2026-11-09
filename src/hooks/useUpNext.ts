@@ -4,7 +4,7 @@ import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
 import { startOfWeek } from 'helpers/schedule';
 import { saveUpcomingClasses } from 'helpers/spotlight';
-import { useToday } from 'hooks/useMinute';
+import { useBeijingDay } from 'hooks/useMinute';
 import { UpcomingClass, upcomingClasses } from 'helpers/upNext';
 import { updateUpNextWidget } from 'widgets';
 
@@ -15,7 +15,7 @@ import { updateUpNextWidget } from 'widgets';
  * keep what they had.
  */
 const useUpNext = () => {
-  const thisWeek = startOfWeek(useToday());
+  const thisWeek = startOfWeek(useBeijingDay());
   const thisWeekSchedule = useWeekSchedule(thisWeek);
   // Classes after the weekend are next week's.
   const nextWeekSchedule = useWeekSchedule(thisWeek.add(7, 'day'));

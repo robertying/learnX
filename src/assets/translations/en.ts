@@ -289,6 +289,7 @@ export default {
   shortDateTimeFormat: 'MMM D HH:mm',
   widgetDateTimeFormat: 'MMM D, HH:mm',
   noticeExpireTimeFormat: '[Expires] MMM D, YYYY HH:mm',
+  noticeExpiredTimeFormat: '[Expired] MMM D, YYYY HH:mm',
   submittedAtFormat: '[Submitted] MMM D, YYYY HH:mm',
   submittedLateAtFormat: '[Submitted late] MMM D, YYYY HH:mm',
   lastSubmittedAtFormat: '[Last submitted] MMM D, YYYY HH:mm',
@@ -297,6 +298,9 @@ export default {
   gradedByAtFormat: '[Graded by] {grader}[,] MMM D, YYYY HH:mm',
   deadlinePassed: 'closed {time}',
   deadlineIn: 'due in {time}',
+  /** a deadline more than a year away, which a relative time would make absurd */
+  deadlineOn: 'due {date}',
+  deadlineDateFormat: 'MMM D, YYYY',
   excellentHomeworkBy: 'excellent homework by {name}',
   previouslyShared: '(previously shared)',
   selectedCount: '{count} selected',

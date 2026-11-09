@@ -27,12 +27,15 @@ const at = (days: number, hour: number, minute: number) =>
 /** An ISO time `days` from today at `hour`:`minute` (assignment times). */
 const iso = (days: number, hour: number, minute: number) =>
   at(days, hour, minute).toISOString();
-/** The same, as the server writes notice and file times. */
+/**
+ * The same with the device's offset. The real server writes notice and file
+ * times in Beijing time without a zone; the mock keeps its times relative to
+ * the device instead, so they look the same in any time zone.
+ */
 const dateTime = (days: number, hour: number, minute: number) =>
-  at(days, hour, minute).format('YYYY-MM-DD HH:mm');
-/** `hours` before now, as the server writes notice and file times. */
-const hoursAgo = (hours: number) =>
-  dayjs().subtract(hours, 'hour').format('YYYY-MM-DD HH:mm');
+  at(days, hour, minute).format();
+/** `hours` before now, with the device's offset. */
+const hoursAgo = (hours: number) => dayjs().subtract(hours, 'hour').format();
 const monthDay = (d: dayjs.Dayjs) => `${d.month() + 1}月${d.date()}日`;
 const sundayText = `${monthDay(dayjs().day(7))}（周日）`;
 const roomChangeDay = monthDay(dayjs().add(9, 'day'));
@@ -347,7 +350,7 @@ export const mockNotices: Notice[] = [
     hasRead: false,
     markedImportant: true,
     publishTime: dateTime(-2, 9, 30),
-    expireTime: examDay.hour(23).minute(59).format('YYYY-MM-DD HH:mm'),
+    expireTime: examDay.hour(23).minute(59).second(0).format(),
     content: `<p>期中考试安排如下，请各位同学按照学号所在考场参加考试，<strong>携带学生证</strong>，提前 15 分钟入场。</p>
 <table border="1" cellpadding="4" cellspacing="0" style="width:760px">
   <thead>

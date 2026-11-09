@@ -2,6 +2,7 @@
 // answers, or worked out from each course's time and location otherwise.
 import dayjs, { Dayjs } from 'dayjs';
 import type { Course } from 'data/types/state';
+import { beijingDate, beijingTime } from './serverTime';
 
 /** One class meeting. Times are ms since the epoch. */
 export interface ClassSession {
@@ -48,13 +49,30 @@ export const startOfWeek = (date: dayjs.ConfigType) => {
   return d.subtract((d.day() + 6) % 7, 'day');
 };
 
-/** The teaching week `date` falls in, from 1; 0 or less before the term. */
+/**
+ * The Monday of teaching week 1. The server gives the term's first day, which
+ * can be a weekend before classes start (fall 2026 starts on Saturday Sep 12;
+ * week 1 is Sep 14–20), so a weekend moves forward to the next Monday and a
+ * weekday back to its Monday.
+ */
+const firstWeekStart = (semesterStart: dayjs.ConfigType) => {
+  const day = dayjs(semesterStart).startOf('day');
+  const weekday = day.day();
+  return weekday === 6 || weekday === 0
+    ? day.add(weekday === 6 ? 2 : 1, 'day')
+    : startOfWeek(day);
+};
+
+/**
+ * The teaching week the day `date` falls in, from 1; 0 or less before the
+ * term. Both are calendar days (Beijing days for the server's dates).
+ */
 export const semesterWeek = (
   semesterStart: dayjs.ConfigType,
   date: dayjs.ConfigType,
 ) =>
   Math.floor(
-    startOfWeek(date).diff(startOfWeek(semesterStart), 'day') / 7 + 0.5,
+    startOfWeek(date).diff(firstWeekStart(semesterStart), 'day') / 7 + 0.5,
   ) + 1;
 
 /* oxlint-disable learnx/no-han-outside-translations -- server text */
@@ -185,10 +203,9 @@ export const parseMeeting = (text: string): Meeting | null => {
 };
 /* oxlint-enable learnx/no-han-outside-translations */
 
-const at = (day: Dayjs, time: string) => {
-  const [hour, minute] = time.split(':').map(Number);
-  return day.hour(hour).minute(minute).second(0).millisecond(0);
-};
+/** `time` on the Beijing day `day`, in ms: class times are Beijing times. */
+const at = (day: Dayjs | string, time: string) =>
+  beijingTime(typeof day === 'string' ? day : day.format('YYYY-MM-DD'), time);
 
 const byStart = (a: ClassSession, b: ClassSession) =>
   a.start - b.start || a.courseName.localeCompare(b.courseName);
@@ -235,8 +252,8 @@ export const sessionsFromCourses = (
         courseName: course.name,
         courseId: course.id,
         location: meeting.location,
-        start: at(day, startTime).valueOf(),
-        end: at(day, endTime).valueOf(),
+        start: at(day, startTime),
+        end: at(day, endTime),
       });
     }
   }
@@ -267,26 +284,25 @@ export const sessionsFromCalendar = (
   classes
     .map((c, i) => {
       const course = matchCourse(c.courseName, courses);
-      const day = dayjs(c.date);
       return {
         key: `${c.date}:${c.startTime}:${i}`,
         courseName: course?.name ?? c.courseName,
         courseId: course?.id,
         location: c.location,
-        start: at(day, c.startTime).valueOf(),
-        end: at(day, c.endTime).valueOf(),
+        start: at(c.date, c.startTime),
+        end: at(c.date, c.endTime),
       };
     })
     .filter(s => !Number.isNaN(s.start) && !Number.isNaN(s.end))
     .sort(byStart);
 
-/** The sessions on the day of `date`, earliest first. */
-export const sessionsOn = (
-  sessions: ClassSession[],
-  date: dayjs.ConfigType,
-) => {
-  const day = dayjs(date);
-  return sessions.filter(s => dayjs(s.start).isSame(day, 'day'));
+/**
+ * The sessions on the Beijing day it is at `time` (ms), earliest first: the
+ * timetable follows the school's days, also on a phone in another time zone.
+ */
+export const sessionsOn = (sessions: ClassSession[], time: number) => {
+  const day = beijingDate(time);
+  return sessions.filter(s => beijingDate(s.start) === day);
 };
 
 /** The class going on at `now`, and the next one to start. */

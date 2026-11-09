@@ -10,6 +10,7 @@ import {
 import dayjs from 'dayjs';
 import type { DataSource } from 'data/source';
 import { sessionsFromCourses } from 'helpers/schedule';
+import { beijingClock, beijingDate } from 'helpers/serverTime';
 
 const mock = (): typeof import('data/mock') => require('data/mock');
 
@@ -321,9 +322,10 @@ export const mockSource: DataSource = {
         courseName: session.courseName,
         location: session.location,
         status: '',
-        date: dayjs(session.start).format('YYYY-MM-DD'),
-        startTime: dayjs(session.start).format('HH:mm'),
-        endTime: dayjs(session.end).format('HH:mm'),
+        // the registrar writes Beijing dates and times
+        date: beijingDate(session.start),
+        startTime: beijingClock(session.start),
+        endTime: beijingClock(session.end),
       }));
       return { events, failedRanges: [] };
     }),

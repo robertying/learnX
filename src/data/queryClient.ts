@@ -6,7 +6,7 @@ import { SQLiteStorage } from 'expo-sqlite/kv-store';
  * Bump to drop every cached response, e.g. when the shape the app keeps of a
  * response changes.
  */
-export const QUERY_CACHE_VERSION = '1';
+export const QUERY_CACHE_VERSION = '2';
 
 /** How long a cached response may be shown before it must be fetched again. */
 const MAX_AGE = 30 * 24 * 60 * 60 * 1000;

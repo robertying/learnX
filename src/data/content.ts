@@ -16,6 +16,7 @@ import { Assignment, File, Notice } from 'data/types/state';
 import { getUserData, useCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 import { createLimiter } from 'helpers/limiter';
+import { sameServerTime, serverTime } from 'helpers/serverTime';
 
 /**
  * Course lists fetched at once, across notices, assignments and files. A
@@ -24,6 +25,31 @@ import { createLimiter } from 'helpers/limiter';
  * isn't hit with every course of every list at the same moment.
  */
 const courseFetches = createLimiter(4);
+
+/**
+ * The item with its server times as ISO strings with an offset (see
+ * `helpers/serverTime`), so they read the same in any time zone.
+ */
+const withServerTimes = <T extends object, K extends keyof T>(
+  item: T,
+  fields: readonly K[],
+): T => {
+  const converted = { ...item };
+  for (const field of fields) {
+    const value = serverTime(item[field]);
+    (converted as Record<K, unknown>)[field] = value;
+  }
+  return converted;
+};
+
+const noticeTimes = ['publishTime', 'expireTime'] as const;
+const assignmentTimes = [
+  'deadline',
+  'lateSubmissionDeadline',
+  'submitTime',
+  'gradeTime',
+] as const;
+const fileTimes = ['uploadTime', 'publishTime'] as const;
 
 /** Adds the course's id and names to each item the server lists for it. */
 const tag = <T>(courseId: string, items: object[]) =>
@@ -237,7 +263,7 @@ const fetchNotices = async (courseId: string, cached: Notice[]) => {
     const old = known.get(notice.id);
     return (
       !!old &&
-      old.publishTime === notice.publishTime &&
+      sameServerTime(old.publishTime, notice.publishTime) &&
       old.attachment?.name === notice.attachmentName
     );
   };
@@ -247,9 +273,12 @@ const fetchNotices = async (courseId: string, cached: Notice[]) => {
     { attachments: notice => !isUnchanged(notice) },
   );
   return notices.map(notice =>
-    notice.attachmentName && !notice.attachment && isUnchanged(notice)
-      ? { ...notice, attachment: known.get(notice.id)!.attachment }
-      : notice,
+    withServerTimes(
+      notice.attachmentName && !notice.attachment && isUnchanged(notice)
+        ? { ...notice, attachment: known.get(notice.id)!.attachment }
+        : notice,
+      noticeTimes,
+    ),
   );
 };
 
@@ -307,7 +336,14 @@ const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
   const known = new Map(cached.map(assignment => [assignment.id, assignment]));
   const isUnchanged = (homework: IHomework) => {
     const old = known.get(homework.id);
-    return !!old && listFields.every(field => old[field] === homework[field]);
+    return (
+      !!old &&
+      listFields.every(field =>
+        (assignmentTimes as readonly string[]).includes(field)
+          ? sameServerTime(old[field], homework[field])
+          : old[field] === homework[field],
+      )
+    );
   };
   const homework = await dataSource.getHomeworkList(
     courseId,
@@ -315,14 +351,15 @@ const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
     { details: item => !isUnchanged(item) },
   );
   return homework.map(item => {
+    const converted = withServerTimes(item, assignmentTimes);
     if (!isUnchanged(item)) {
-      return item;
+      return converted;
     }
     const old = known.get(item.id)!;
     const detail = Object.fromEntries(
       detailFields.map(field => [field, old[field]]),
     );
-    return { ...item, ...detail };
+    return { ...converted, ...detail };
   });
 };
 
@@ -345,7 +382,10 @@ export const useAssignments = () => {
 const files = createContent<File>({
   name: 'files',
   priority: 2,
-  fetchCourse: courseId => dataSource.getFileList(courseId, CourseType.STUDENT),
+  fetchCourse: async courseId =>
+    (await dataSource.getFileList(courseId, CourseType.STUDENT)).map(file =>
+      withServerTimes(file, fileTimes),
+    ),
   sort: byNewest(file => file.uploadTime),
 });
 

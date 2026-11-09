@@ -8,6 +8,7 @@ import { Assignment, Course, SettingsState } from 'data/types/state';
 import { removeTags } from './text';
 import { ICSEvent } from './ics';
 import locationMappings from '../assets/locationMappings.json';
+import { beijingTime } from './serverTime';
 
 // Calendars are found by name, so translating these would orphan the ones
 // users already have.
@@ -62,8 +63,9 @@ export const buildCourseEventDetails = (
   const alarms = settings.alarms;
   return {
     title: e.courseName,
-    startDate: dayjs(`${e.date} ${e.startTime}`).toDate(),
-    endDate: dayjs(`${e.date} ${e.endTime}`).toDate(),
+    // the registrar's dates and times are Beijing times
+    startDate: new Date(beijingTime(e.date, e.startTime)),
+    endDate: new Date(beijingTime(e.date, e.endTime)),
     timeZone: TZ,
     location: settings.courseEventOmitLocation
       ? undefined
