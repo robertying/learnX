@@ -1,7 +1,8 @@
 /**
  * Debug builds don't send anything that changes the real account (assignment
- * submissions, course information sharing) until it's allowed in Settings, so
- * testing with a real account can't change it by accident. Not persisted: a
+ * submissions, course information sharing, favorites) until it's allowed in
+ * Settings, so testing with a real account can't change it by accident.
+ * Favorites wait in the queue meanwhile and go out when it is. Not persisted: a
  * JS reload blocks them again. Release builds always allow them, and the mock
  * accounts go to the emulated server either way.
  */

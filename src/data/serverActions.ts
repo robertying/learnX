@@ -17,6 +17,10 @@ import {
   serverWritesBlocked,
 } from 'data/source';
 import {
+  getServerWritesAllowed,
+  subscribeServerWrites,
+} from 'helpers/serverWrites';
+import {
   type BookmarkType,
   failAction,
   getUserData,
@@ -172,6 +176,14 @@ export const flushServerActionsWithin = async (
   ]);
   clearTimeout(timer);
 };
+
+// Favorites changed while a debug build held them are sent once they're
+// allowed, not at the next foreground.
+subscribeServerWrites(() => {
+  if (getServerWritesAllowed()) {
+    void flushServerActions();
+  }
+});
 
 /** Queues an action and sends it now if the app is logged in. */
 const run = (action: ServerAction) => {

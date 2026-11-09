@@ -187,7 +187,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         </FormSection>
         {__DEV__ && !isMockUser(username) && (
           // A dev-only switch for testing with a real account, so it is not translated.
-          <FormSection footer="Debug builds don't submit assignments or share course information until this is on. It turns off again when the app reloads.">
+          <FormSection footer="Debug builds don't submit assignments, share course information or sync favorites until this is on. Favorites changed meanwhile wait and are sent when it's turned on. It turns off again when the app reloads.">
             <FormToggle
               testID="settings-allow-server-writes"
               icon={{ ios: 'exclamationmark.shield', android: 'shield-alert' }}
