@@ -56,7 +56,9 @@ import {
   type FormSectionProps,
   type FormTextFieldProps,
   type FormTextProps,
+  type FormTitleProps,
   type FormToggleProps,
+  type FormViewProps,
 } from './Form.shared';
 
 export * from './Form.shared';
@@ -206,6 +208,7 @@ const FormRow: React.FC<
     /** How the row takes a tap: clickable, toggleable or selectable. */
     action?: ModifierConfig;
     titleColor?: string;
+    detailTint?: FormTextProps['detailTint'];
     /** Crossed out. */
     struck?: boolean;
     trailing?: ReactNode;
@@ -220,11 +223,13 @@ const FormRow: React.FC<
   titleColor,
   struck,
   detail,
+  detailTint,
   trailing,
   done,
   progress,
 }) => {
   const colors = useMaterialColors();
+  const theme = useTheme();
   // At large font sizes the detail goes under the subtitle instead of at the
   // end, which would squeeze the title into a narrow column.
   const { fontScale } = useWindowDimensions();
@@ -243,7 +248,22 @@ const FormRow: React.FC<
     detail && !stackDetail ? (
       <Text
         key="detail"
-        color={done ? colors.outline : colors.onSurfaceVariant}
+        color={
+          done
+            ? colors.outline
+            : detailTint === 'accent'
+              ? colors.primary
+              : detailTint === 'warning'
+                ? theme.colors.status.orange
+                : colors.onSurfaceVariant
+        }
+        style={
+          detailTint === 'accent'
+            ? { typography: 'titleLarge' }
+            : detailTint === 'warning'
+              ? { typography: 'labelLarge' }
+              : undefined
+        }
       >
         {detail}
       </Text>
@@ -553,6 +573,57 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
         </Text>
       </ListItem.HeadlineContent>
     </ListItem>
+  );
+};
+
+/** The title of a detail page. */
+export const FormTitle: React.FC<FormTitleProps> = ({
+  title,
+  subtitle,
+  testID,
+  position,
+}) => {
+  const colors = useMaterialColors();
+  return (
+    <ListItem
+      colors={{ containerColor: colors.surfaceContainer }}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      <ListItem.HeadlineContent>
+        <Text style={{ typography: 'headlineSmall' }}>{title}</Text>
+      </ListItem.HeadlineContent>
+      {subtitle ? (
+        <ListItem.SupportingContent>
+          <Text color={colors.onSurfaceVariant}>{subtitle}</Text>
+        </ListItem.SupportingContent>
+      ) : null}
+    </ListItem>
+  );
+};
+
+/** A React Native view in the row, as wide as the row and as tall as itself. */
+export const FormView: React.FC<FormViewProps> = ({ children, position }) => {
+  const colors = useMaterialColors();
+  return (
+    <Column
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        background(colors.surfaceContainer),
+        padding(16, 12, 16, 12),
+      ]}
+    >
+      <RNHostView
+        matchContents={{ vertical: true }}
+        modifiers={[fillMaxWidth()]}
+      >
+        {children}
+      </RNHostView>
+    </Column>
   );
 };
 

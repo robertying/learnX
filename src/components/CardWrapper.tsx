@@ -192,6 +192,14 @@ const CardWrapper: React.FC<
           />
         )}
         {children}
+        {Platform.OS === 'ios' ? (
+          <View
+            style={[
+              styles.separator,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
+        ) : null}
       </View>
     </Touchable>
   );
@@ -254,6 +262,14 @@ const styles = StyleSheet.create({
   },
   checkbox: {
     marginRight: 8,
+  },
+  // An inset hairline between rows, as in iOS and Mac lists.
+  separator: {
+    position: 'absolute',
+    left: 16,
+    right: 0,
+    bottom: 0,
+    height: StyleSheet.hairlineWidth,
   },
 });
 

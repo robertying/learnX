@@ -1,8 +1,9 @@
 import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { Course } from 'data/types/state';
+import { t } from 'helpers/i18n';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Subheading, Headline } from 'components/Text';
+import { Caption, Headline } from 'components/Text';
 import { useTheme } from 'theme';
 
 export interface CourseCardProps extends CardWrapperProps {
@@ -13,6 +14,31 @@ export interface CourseCardProps extends CardWrapperProps {
   };
 }
 
+type CountIcon = 'bell-outline' | 'calendar-blank-outline' | 'folder-outline';
+
+/** A count with its icon, left out when there is nothing new. */
+const Count: React.FC<{ icon: CountIcon; count: number; label: string }> = ({
+  icon,
+  count,
+  label,
+}) => {
+  const theme = useTheme();
+  if (!count) {
+    return null;
+  }
+  return (
+    <View style={styles.count} accessible accessibilityLabel={label}>
+      <Icon name={icon} size={15} color={theme.colors.primary} />
+      <Caption
+        variant="subheadline"
+        style={[styles.countText, { color: theme.colors.primary }]}
+      >
+        {count}
+      </Caption>
+    </View>
+  );
+};
+
 const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
   data: {
     name,
@@ -22,59 +48,59 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
     unreadFileCount,
   },
   ...restProps
-}) => {
-  const theme = useTheme();
-
-  return (
-    <CardWrapper {...restProps}>
-      <View style={styles.root}>
-        <View style={styles.contentSections}>
-          <Subheading numberOfLines={1}>{teacherName}</Subheading>
-          <Headline>{name}</Headline>
-        </View>
-        <View style={styles.countSections}>
-          <View style={styles.section}>
-            <Icon name="bell" color={theme.colors.outline} />
-            <Caption style={styles.sectionText}>{unreadNoticeCount}</Caption>
-          </View>
-          <View style={styles.section}>
-            <Icon name="calendar" color={theme.colors.outline} />
-            <Caption style={styles.sectionText}>
-              {unfinishedAssignmentCount}
-            </Caption>
-          </View>
-          <View style={styles.section}>
-            <Icon name="folder" color={theme.colors.outline} />
-            <Caption style={styles.sectionText}>{unreadFileCount}</Caption>
-          </View>
-        </View>
+}) => (
+  <CardWrapper {...restProps}>
+    <View style={styles.root}>
+      <View style={styles.names}>
+        <Headline>{name}</Headline>
+        <Caption variant="subheadline" numberOfLines={1}>
+          {teacherName}
+        </Caption>
       </View>
-    </CardWrapper>
-  );
-};
+      <View style={styles.counts}>
+        <Count
+          icon="bell-outline"
+          count={unreadNoticeCount}
+          label={`${t('notices')} ${unreadNoticeCount}`}
+        />
+        <Count
+          icon="calendar-blank-outline"
+          count={unfinishedAssignmentCount}
+          label={`${t('assignments')} ${unfinishedAssignmentCount}`}
+        />
+        <Count
+          icon="folder-outline"
+          count={unreadFileCount}
+          label={`${t('files')} ${unreadFileCount}`}
+        />
+      </View>
+    </View>
+  </CardWrapper>
+);
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  contentSections: {
-    flex: 2,
-  },
-  countSections: {
+  names: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    marginBottom: 4,
   },
-  section: {
-    flex: 1,
-    marginLeft: 8,
+  counts: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 10,
   },
-  sectionText: {
-    marginLeft: 2,
+  count: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  countText: {
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
 });
 

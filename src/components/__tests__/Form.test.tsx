@@ -8,6 +8,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { useState } from 'react';
+import { Text } from 'react-native';
 import {
   Form,
   FormButton,
@@ -19,7 +20,9 @@ import {
   FormSection,
   FormText,
   FormTextField,
+  FormTitle,
   FormToggle,
+  FormView,
   parseNumberInput,
   positionRows,
   sectionRows,
@@ -217,6 +220,34 @@ describe('Form', () => {
     expect(screen.getByRole('progressbar')).toHaveAccessibilityValue({
       now: 40,
     });
+  });
+
+  it('shows a detail page title, a tinted detail and a hosted view', async () => {
+    await render(
+      <Form>
+        <FormSection>
+          <FormTitle title="Problem set 3" subtitle="Complete Individually" />
+        </FormSection>
+        <FormSection>
+          <FormText title="Grade" detail="80" detailTint="accent" />
+          <FormFile
+            title="answers.pdf"
+            subtitle="By Anonymous"
+            onPress={jest.fn()}
+          />
+        </FormSection>
+        <FormSection title="Description">
+          <FormView>
+            <Text>Chapters 4 and 5</Text>
+          </FormView>
+        </FormSection>
+      </Form>,
+    );
+    expect(screen.getByText('Problem set 3')).toBeTruthy();
+    expect(screen.getByText('Complete Individually')).toBeTruthy();
+    expect(screen.getByText('80')).toBeTruthy();
+    expect(screen.getByText('By Anonymous')).toBeTruthy();
+    expect(screen.getByText('Chapters 4 and 5')).toBeTruthy();
   });
 });
 

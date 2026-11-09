@@ -82,18 +82,18 @@ afterEach(() => {
 });
 
 describe('NoticeCard', () => {
-  it('shows the course, title, plain-text content, publisher and age', async () => {
+  it('shows the course, title, plain-text content and age', async () => {
     await render(<NoticeCard data={notice()} />);
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     expect(screen.getByText('Moved to Room 101')).toBeTruthy();
-    expect(screen.getByText('TA Wang')).toBeTruthy();
     expect(screen.getByText('2 days ago')).toBeTruthy();
   });
 
-  it('leaves out the course name inside a course', async () => {
+  it('shows the publisher instead of the course inside a course', async () => {
     await render(<NoticeCard data={notice()} hideCourseName />);
     expect(screen.queryByText('Calculus')).toBeNull();
+    expect(screen.getByText('TA Wang')).toBeTruthy();
     expect(screen.getByText('Midterm room change')).toBeTruthy();
   });
 
@@ -106,7 +106,7 @@ describe('NoticeCard', () => {
     const view = await render(<NoticeCard data={notice()} />);
     expect(screen.queryByTestId('icon-attachment')).toBeNull();
     expect(screen.queryByTestId('icon-flag')).toBeNull();
-    expect(screen.queryByTestId('icon-checkbox-blank-circle')).toBeNull();
+    expect(screen.queryByTestId('unread-dot')).toBeNull();
 
     await view.rerender(
       <NoticeCard
@@ -119,18 +119,47 @@ describe('NoticeCard', () => {
     );
     expect(screen.getByTestId('icon-attachment')).toBeTruthy();
     expect(screen.getByTestId('icon-flag')).toBeTruthy();
-    expect(screen.getByTestId('icon-checkbox-blank-circle')).toBeTruthy();
+    expect(screen.getByTestId('unread-dot')).toBeTruthy();
   });
 });
 
 describe('AssignmentCard', () => {
-  it('shows the teacher, plain-text description and time left', async () => {
+  it('shows the course, plain-text description and time left', async () => {
     await render(<AssignmentCard data={assignment()} />);
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('Problem set 3')).toBeTruthy();
     expect(screen.getByText('Chapters 4 & 5')).toBeTruthy();
-    expect(screen.getByText('Prof. Li')).toBeTruthy();
     expect(screen.getByText('due in 3 days')).toBeTruthy();
+    expect(screen.queryByTestId('due-soon')).toBeNull();
+  });
+
+  it('shows the teacher instead of the course inside a course', async () => {
+    await render(<AssignmentCard data={assignment()} hideCourseName />);
+    expect(screen.queryByText('Calculus')).toBeNull();
+    expect(screen.getByText('Prof. Li')).toBeTruthy();
+  });
+
+  it('highlights a deadline due by the end of tomorrow', async () => {
+    await render(
+      <AssignmentCard
+        data={assignment({
+          deadline: dayjs(NOW).add(5, 'hour').toISOString(),
+        } as Partial<Assignment>)}
+      />,
+    );
+    expect(screen.getByTestId('due-soon')).toBeTruthy();
+    expect(screen.getByText('due in 5 hours')).toBeTruthy();
+  });
+
+  it('highlights a deadline late tomorrow, as Today does', async () => {
+    await render(
+      <AssignmentCard
+        data={assignment({
+          deadline: dayjs(NOW).add(1, 'day').hour(23).minute(59).toISOString(),
+        } as Partial<Assignment>)}
+      />,
+    );
+    expect(screen.getByTestId('due-soon')).toBeTruthy();
   });
 
   it('says when a past deadline closed', async () => {
@@ -156,40 +185,41 @@ describe('AssignmentCard', () => {
     expect(screen.getByText('2 天前截止')).toBeTruthy();
   });
 
-  it('marks attachments, submission, grade, answers and excellent work', async () => {
+  it('shows submitted and graded assignments as a status', async () => {
+    const view = await render(
+      <AssignmentCard data={assignment({ submitted: true })} />,
+    );
+    expect(screen.getByText('Submitted')).toBeTruthy();
+    expect(screen.queryByText('due in 3 days')).toBeNull();
+
+    await view.rerender(
+      <AssignmentCard
+        data={assignment({ submitted: true, graded: true, grade: 80 })}
+      />,
+    );
+    expect(screen.getByText('80')).toBeTruthy();
+
+    await view.rerender(
+      <AssignmentCard data={assignment({ submitted: true, graded: true })} />,
+    );
+    expect(screen.getByText('Graded')).toBeTruthy();
+  });
+
+  it('marks attachments and answers', async () => {
     const view = await render(<AssignmentCard data={assignment()} />);
-    for (const icon of [
-      'attachment',
-      'check',
-      'star',
-      'key-variant',
-      'medal',
-    ]) {
-      expect(screen.queryByTestId(`icon-${icon}`)).toBeNull();
-    }
+    expect(screen.queryByTestId('icon-attachment')).toBeNull();
+    expect(screen.queryByTestId('icon-key-variant')).toBeNull();
 
     await view.rerender(
       <AssignmentCard
         data={assignment({
           attachment: { id: 'att' } as Assignment['attachment'],
-          submitted: true,
-          graded: true,
           answerContent: 'See solutions',
-          excellentHomeworkList: [
-            { id: 'e1' },
-          ] as Assignment['excellentHomeworkList'],
         })}
       />,
     );
-    for (const icon of [
-      'attachment',
-      'check',
-      'star',
-      'key-variant',
-      'medal',
-    ]) {
-      expect(screen.getByTestId(`icon-${icon}`)).toBeTruthy();
-    }
+    expect(screen.getByTestId('icon-attachment')).toBeTruthy();
+    expect(screen.getByTestId('icon-key-variant')).toBeTruthy();
   });
 
   it('marks an answer that is only an attachment', async () => {
@@ -205,10 +235,11 @@ describe('AssignmentCard', () => {
 });
 
 describe('FileCard', () => {
-  it('shows the category, type, size and upload age', async () => {
+  it('shows the type, category, size and upload age', async () => {
     await render(<FileCard data={file()} />);
     expect(screen.getByText('Lecture 5 slides')).toBeTruthy();
-    expect(screen.getByText('Slides PDF 2.1 MB')).toBeTruthy();
+    expect(screen.getByText('Slides · PDF · 2.1 MB')).toBeTruthy();
+    expect(screen.getByText('PDF')).toBeTruthy();
     expect(screen.getByText('a day ago')).toBeTruthy();
   });
 
@@ -227,23 +258,23 @@ describe('FileCard', () => {
   it('marks important and new files', async () => {
     const view = await render(<FileCard data={file()} />);
     expect(screen.queryByTestId('icon-flag')).toBeNull();
-    expect(screen.queryByTestId('icon-checkbox-blank-circle')).toBeNull();
+    expect(screen.queryByTestId('unread-dot')).toBeNull();
 
     await view.rerender(
       <FileCard data={file({ markedImportant: true, isNew: true })} />,
     );
     expect(screen.getByTestId('icon-flag')).toBeTruthy();
-    expect(screen.getByTestId('icon-checkbox-blank-circle')).toBeTruthy();
+    expect(screen.getByTestId('unread-dot')).toBeTruthy();
   });
 });
 
 describe('CourseCard', () => {
-  it('shows the course with its unread and unfinished counts', async () => {
+  it('shows the course with only the counts that are not zero', async () => {
     await render(<CourseCard data={course} />);
     expect(screen.getByText('Prof. Li')).toBeTruthy();
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('2')).toBeTruthy();
     expect(screen.getByText('1')).toBeTruthy();
-    expect(screen.getByText('0')).toBeTruthy();
+    expect(screen.queryByText('0')).toBeNull();
   });
 });

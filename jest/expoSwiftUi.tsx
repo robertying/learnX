@@ -23,6 +23,9 @@ export const HStack = Box;
 export const VStack = Box;
 export const ZStack = Box;
 export const Spacer = () => null;
+export const RNHostView = ({ children }: { children?: ReactNode }) => (
+  <View>{children}</View>
+);
 export const Divider = () => <View />;
 export const Circle = () => <View />;
 export const RoundedRectangle = () => <View />;

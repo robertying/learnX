@@ -66,7 +66,13 @@ export interface FormItemRowProps extends FormRowProps {
 }
 
 /** A row that only shows something. */
-export type FormTextProps = FormItemRowProps;
+export interface FormTextProps extends FormItemRowProps {
+  /**
+   * Draws the detail in a color of its own: `accent` (the brand color,
+   * bolder, for a grade) or `warning` (orange, for a deadline coming up).
+   */
+  detailTint?: 'accent' | 'warning';
+}
 
 export interface FormLinkProps extends FormItemRowProps {
   /** Opens another page. */
@@ -114,6 +120,28 @@ export interface FormParagraphProps {
   /** In the headline font, for a name above its details. */
   headline?: boolean;
   testID?: string;
+  /** Set by `FormSection` on Android, for the row's corners. */
+  position?: FormRowPosition;
+}
+
+/**
+ * The title of the item a page is about, with a line or two under it: the
+ * first row of a detail page, as in Calendar's event details.
+ */
+export interface FormTitleProps {
+  title: string;
+  subtitle?: string;
+  testID?: string;
+  /** Set by `FormSection` on Android, for the row's corners. */
+  position?: FormRowPosition;
+}
+
+/**
+ * A React Native view the width of the row, sized by its content: for what
+ * the system rows can't show, such as a notice's HTML in a web view.
+ */
+export interface FormViewProps {
+  children: ReactElement;
   /** Set by `FormSection` on Android, for the row's corners. */
   position?: FormRowPosition;
 }

@@ -1,13 +1,8 @@
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
-import Icon from '@react-native-vector-icons/material-design-icons';
-import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
-import Styles from 'constants/Styles';
 import { NoticeDetailParamList } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
@@ -16,8 +11,13 @@ import { Notice } from 'data/types/state';
 import { markNoticeRead, useNotice } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
-import { Caption, Title } from 'components/Text';
-import Divider from 'components/Divider';
+import {
+  Form,
+  FormFile,
+  FormSection,
+  FormTitle,
+  FormView,
+} from 'components/Form';
 import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<NoticeDetailParamList, 'NoticeDetail'>;
@@ -54,8 +54,10 @@ const NoticeDetailContent: React.FC<{
 
   const html = getWebViewTemplate(content || `<p>${t('noNoticeContent')}</p>`, {
     dark: theme.dark,
-    backgroundColor: theme.colors.surface,
+    // The form row's own color shows through.
+    backgroundColor: 'transparent',
     textColor: theme.colors.onSurfaceHigh,
+    linkColor: theme.colors.primary,
   });
 
   const handleFileOpen = () => {
@@ -79,65 +81,39 @@ const NoticeDetailContent: React.FC<{
     markNoticeRead(id);
   }, [url, id]);
 
+  const subtitle = [
+    [publisher, dayjs(publishTime).format(t('dateTimeFormat'))]
+      .filter(Boolean)
+      .join(' · '),
+    expireTime ? dayjs(expireTime).format(t('noticeExpireTimeFormat')) : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
   return (
     <SafeArea testID="notice-detail" collapsable={false}>
-      <ScrollView style={{ backgroundColor: theme.colors.surface }}>
-        <View style={styles.section}>
-          <Title>{title}</Title>
-          <View style={Styles.metaRow}>
-            <Caption>{publisher}</Caption>
-            <Caption>{dayjs(publishTime).format(t('dateTimeFormat'))}</Caption>
-          </View>
-          {expireTime && (
-            <Caption style={Styles.flexRowCenter}>
-              {dayjs(expireTime).format(t('noticeExpireTimeFormat'))}
-            </Caption>
-          )}
-        </View>
-        <Divider />
-        {attachment && (
-          <View style={[styles.section, styles.iconButton]}>
-            <Icon
-              style={styles.icon}
-              name="attachment"
-              color={theme.colors.primary}
-              size={17}
-            />
-            <TextButton
-              fill
-              style={[Styles.flex1, styles.buttonEnd]}
+      <Form>
+        <FormSection>
+          <FormTitle title={title} subtitle={subtitle} />
+        </FormSection>
+        {attachment ? (
+          <FormSection title={t('attachment')}>
+            <FormFile
+              title={attachment.name}
+              detail={attachment.size}
+              icon={{ ios: 'doc', android: 'file-document-outline' }}
               onPress={handleFileOpen}
-            >
-              {attachment.name}
-            </TextButton>
-          </View>
-        )}
-        <Divider />
-        <AutoHeightWebView
-          source={{
-            html,
-          }}
-        />
-      </ScrollView>
+            />
+          </FormSection>
+        ) : null}
+        <FormSection>
+          <FormView>
+            <AutoHeightWebView source={{ html }} />
+          </FormView>
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  section: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  buttonEnd: {
-    marginEnd: 16,
-  },
-  icon: {
-    marginRight: 8,
-  },
-  iconButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-});
 
 export default NoticeDetail;

@@ -12,6 +12,7 @@ import {
   Label,
   LabeledContent,
   ProgressView,
+  RNHostView,
   Section,
   Spacer,
   Text,
@@ -59,7 +60,9 @@ import {
   type FormSectionProps,
   type FormTextFieldProps,
   type FormTextProps,
+  type FormTitleProps,
   type FormToggleProps,
+  type FormViewProps,
 } from './Form.shared';
 
 export * from './Form.shared';
@@ -204,8 +207,28 @@ const useStackedDetail = (subtitle?: string, detail?: string) => {
     : { subtitle, detail };
 };
 
-const RowDetail: React.FC<{ detail?: string }> = ({ detail }) =>
-  detail ? <Text modifiers={[secondaryText]}>{detail}</Text> : null;
+const RowDetail: React.FC<{
+  detail?: string;
+  tint?: FormTextProps['detailTint'];
+}> = ({ detail, tint }) => {
+  const theme = useTheme();
+  if (!detail) {
+    return null;
+  }
+  const modifiers =
+    tint === 'accent'
+      ? [
+          font({ textStyle: 'title3', weight: 'bold' }),
+          foregroundStyle(theme.colors.primary),
+        ]
+      : tint === 'warning'
+        ? [
+            font({ textStyle: 'body', weight: 'semibold' }),
+            foregroundStyle(theme.colors.status.orange),
+          ]
+        : [secondaryText];
+  return <Text modifiers={modifiers}>{detail}</Text>;
+};
 
 const doneModifiers = [opacity(0.5)];
 const doneCheckModifiers = [
@@ -246,7 +269,11 @@ const ItemRow: React.FC<
   );
 };
 
-export const FormText: React.FC<FormTextProps> = ({ testID, ...row }) => {
+export const FormText: React.FC<FormTextProps> = ({
+  testID,
+  detailTint,
+  ...row
+}) => {
   const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
   return row.done || row.progress !== undefined ? (
     <VStack testID={testID}>
@@ -259,7 +286,7 @@ export const FormText: React.FC<FormTextProps> = ({ testID, ...row }) => {
       }
       testID={testID}
     >
-      <RowDetail detail={detail} />
+      <RowDetail detail={detail} tint={detailTint} />
     </LabeledContent>
   );
 };
@@ -338,6 +365,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
 /** A file that opens on tap, with the chevron of a link. */
 export const FormFile: React.FC<FormFileProps> = ({
   title,
+  subtitle,
   icon,
   testID,
   detail,
@@ -351,7 +379,13 @@ export const FormFile: React.FC<FormFileProps> = ({
     modifiers={isDisabled ? [disabled(true)] : undefined}
   >
     <HStack>
-      <RowLabel title={title} icon={icon} plain struck={struck} />
+      <RowLabel
+        title={title}
+        subtitle={subtitle}
+        icon={icon}
+        plain
+        struck={struck}
+      />
       <Spacer />
       <RowDetail detail={detail} />
       <Image systemName="chevron.right" modifiers={chevronModifiers} />
@@ -466,6 +500,28 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
   >
     {text}
   </Text>
+);
+
+const titleModifiers = [
+  font({ textStyle: 'title2', weight: 'bold' }),
+  ...paragraphModifiers,
+];
+
+/** The title of a detail page, as in Calendar's event details. */
+export const FormTitle: React.FC<FormTitleProps> = ({
+  title,
+  subtitle,
+  testID,
+}) => (
+  <VStack alignment="leading" spacing={4} testID={testID}>
+    <Text modifiers={titleModifiers}>{title}</Text>
+    {subtitle ? <Text modifiers={subtitleModifiers}>{subtitle}</Text> : null}
+  </VStack>
+);
+
+/** A React Native view in the row, as wide as the row and as tall as itself. */
+export const FormView: React.FC<FormViewProps> = ({ children }) => (
+  <RNHostView matchContents={{ vertical: true }}>{children}</RNHostView>
 );
 
 /** The account at the top of Settings, as in the Settings app. */
