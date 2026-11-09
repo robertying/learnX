@@ -4,8 +4,8 @@ import type {
   Notification,
   File as IFile,
   UserInfo,
-} from 'thu-learn-lib';
-import { FilterSelection } from 'components/Filter';
+} from '@robertying/thu-learn-lib';
+import type { FilterSelection } from 'helpers/filterOptions';
 
 export type Tab = 'notice' | 'assignment' | 'file' | 'course';
 export interface AlarmSettings {

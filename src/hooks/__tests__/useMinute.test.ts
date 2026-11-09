@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react-native';
-import useMinute from 'hooks/useMinute';
+import useMinute, { useToday } from 'hooks/useMinute';
 
 beforeEach(() => {
   jest.useFakeTimers({ now: new Date('2026-03-15T12:00:30Z') });
@@ -34,5 +34,24 @@ describe('useMinute', () => {
     expect(clearSpy).not.toHaveBeenCalled();
     await second.unmount();
     expect(clearSpy).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useToday', () => {
+  it('is the start of the local day and changes at midnight', async () => {
+    // 23:59:30 in Asia/Shanghai, where tests run.
+    jest.setSystemTime(new Date('2026-03-15T15:59:30Z'));
+    const renders = jest.fn();
+    const view = await renderHook(() => {
+      renders();
+      return useToday();
+    });
+    expect(view.result.current).toBe(Date.parse('2026-03-15T00:00:00+08:00'));
+
+    await act(() => jest.advanceTimersByTime(10_000));
+    expect(renders).toHaveBeenCalledTimes(1);
+
+    await act(() => jest.advanceTimersByTime(30_000));
+    expect(view.result.current).toBe(Date.parse('2026-03-16T00:00:00+08:00'));
   });
 });

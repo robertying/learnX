@@ -1,4 +1,7 @@
-import { HomeworkCompletionType, HomeworkSubmissionType } from 'thu-learn-lib';
+import {
+  HomeworkCompletionType,
+  HomeworkSubmissionType,
+} from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { Assignment, Course, File, Notice, User } from 'data/types/state';
 import type { UserData } from 'data/userData';
@@ -29,6 +32,12 @@ export const mockSemesters: string[] = [
 ];
 
 export const mockCurrentSemester = '2026-2027-1';
+
+/** The current semester began on the Monday eight weeks ago: this is week 9. */
+export const mockSemesterStart = dayjs()
+  .startOf('day')
+  .subtract((dayjs().day() + 6) % 7, 'day')
+  .subtract(8, 'week');
 
 export const mockCourses: Course[] = [
   {
@@ -62,7 +71,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期一第2节(全周)，三教3200',
+      '星期三第2节(单周)，三教3200',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -74,7 +86,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期二第1节(全周)，六教6A118',
+      '星期四第1节(全周)，六教6A118',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -86,7 +101,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期一第3节(1-16周)，四教4101',
+      '星期五第2节(1-16周)，四教4101',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -98,7 +116,7 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: ['星期三第4节(全周)，五教5102'],
   },
   {
     semesterId: '2026-2027-1',
@@ -110,7 +128,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期二第3节(全周)，东主楼9-105',
+      '星期四第5节(前八周)，东主楼9-105',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -122,7 +143,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期五第4节(后八周)，五教5201',
+      '星期三第6节(全周)，五教5201',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -134,7 +158,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期一第1节(全周)，六教6C300',
+      '星期四第3节(全周)，六教6C300',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -146,7 +173,10 @@ export const mockCourses: Course[] = [
     teacherNumber: '2000000000',
     courseNumber: '40230810',
     courseIndex: 0,
-    timeAndLocation: ['星期第0节(全周)，'],
+    timeAndLocation: [
+      '星期二第6节(全周)，东主楼10-103',
+      '星期五第1节(全周)，东主楼10-103',
+    ],
   },
   {
     semesterId: '2026-2027-1',
@@ -279,7 +309,8 @@ export const mockAssignments: Assignment[] = [
   {
     id: '26ef84e76db3f55b016db426e15c07b9',
     title: '大作业1',
-    deadline: iso(5, 23, 59),
+    // Due tomorrow, so Today lists it under Due Soon.
+    deadline: iso(1, 23, 59),
     completionType: HomeworkCompletionType.INDIVIDUAL,
     submissionType: HomeworkSubmissionType.WEB_LEARNING,
     isLateSubmission: false,
@@ -353,7 +384,7 @@ export const mockAssignments: Assignment[] = [
     },
     answerContent: '答案已上传',
     excellentHomeworkList: Array.from({ length: 3 }, (_, index) => ({
-      id: '7f27d54daad54846a43796f5ed008e46',
+      id: `7f27d54daad54846a43796f5ed008e4${index}`,
       baseId: '26ef84e76d60efc1016d6c459d717434',
       title: '第十三次作业',
       url: 'https://www.apple.com/environment/pdf/Apple_Environmental_Responsibility_Report_2018.pdf',

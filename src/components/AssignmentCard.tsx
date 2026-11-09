@@ -5,8 +5,8 @@ import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { deadlineText } from 'helpers/assignments';
 import useMinute from 'hooks/useMinute';
+import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import Colors from 'constants/Colors';
 import { Caption, Paragraph, Subheading, Title } from 'components/Text';
 
 export interface AssignmentCardProps extends CardWrapperProps {
@@ -33,6 +33,7 @@ const AssignmentCard: React.FC<
   hideCourseName,
   ...restProps
 }) => {
+  const theme = useTheme();
   const strippedDescription = removeTags(description);
   const now = useMinute();
   const dueText = deadlineText(deadline, now);
@@ -51,7 +52,7 @@ const AssignmentCard: React.FC<
             {attachment && (
               <MaterialCommunityIcons
                 name="attachment"
-                color={Colors.orange500}
+                color={theme.colors.status.orange}
                 size={20}
               />
             )}
@@ -59,7 +60,7 @@ const AssignmentCard: React.FC<
               <MaterialCommunityIcons
                 style={styles.icon}
                 name="check"
-                color={Colors.green500}
+                color={theme.colors.status.green}
                 size={20}
               />
             )}
@@ -67,7 +68,7 @@ const AssignmentCard: React.FC<
               <MaterialCommunityIcons
                 style={styles.icon}
                 name="star"
-                color={Colors.red500}
+                color={theme.colors.status.red}
                 size={18}
               />
             )}
@@ -75,7 +76,7 @@ const AssignmentCard: React.FC<
               <MaterialCommunityIcons
                 style={styles.icon}
                 name="key-variant"
-                color={Colors.blue500}
+                color={theme.colors.status.blue}
                 size={16}
               />
             )}
@@ -83,7 +84,7 @@ const AssignmentCard: React.FC<
               <MaterialCommunityIcons
                 style={styles.icon}
                 name="medal"
-                color={Colors.yellow500}
+                color={theme.colors.status.yellow}
                 size={16}
               />
             )}

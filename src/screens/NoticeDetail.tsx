@@ -104,7 +104,8 @@ const NoticeDetailContent: React.FC<{
               size={17}
             />
             <TextButton
-              style={styles.textPaddingRight}
+              fill
+              style={[Styles.flex1, styles.buttonEnd]}
               onPress={handleFileOpen}
             >
               {attachment.name}
@@ -127,8 +128,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  textPaddingRight: {
-    paddingRight: 16,
+  buttonEnd: {
+    marginEnd: 16,
   },
   icon: {
     marginRight: 8,

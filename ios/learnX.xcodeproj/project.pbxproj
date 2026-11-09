@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */; };
 		5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000001 /* NextDeadlineIntent.swift */; };
+		5A071000000000000000000A /* NextClassIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000009 /* NextClassIntent.swift */; };
 		5A0710000000000000000005 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000003 /* Localizable.strings */; };
 		5A0710000000000000000008 /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000006 /* AppShortcuts.strings */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
@@ -28,6 +29,7 @@
 		E7D600000000000000000005 /* ExpoWidgetsTarget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000002 /* ExpoWidgetsTarget.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		E7D60000000000000000000C /* index.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000007 /* index.swift */; };
 		E7D60000000000000000000D /* Deadlines.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000008 /* Deadlines.swift */; };
+		E7D6000000000000000000F1 /* UpNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D6000000000000000000F0 /* UpNext.swift */; };
 		E7D600000000000000000014 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000011 /* Localizable.strings */; };
 		F2A5304F6571E97B5D30F690 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A24FF361CA741CC1978F73 /* ExpoModulesProvider.swift */; };
 /* End PBXBuildFile section */
@@ -75,6 +77,7 @@
 		46A94B4E66EB79E2AC7994A8 /* Pods_ShareExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ShareExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
 		5A0710000000000000000001 /* NextDeadlineIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextDeadlineIntent.swift; path = learnX/NextDeadlineIntent.swift; sourceTree = "<group>"; };
+		5A0710000000000000000009 /* NextClassIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextClassIntent.swift; path = learnX/NextClassIntent.swift; sourceTree = "<group>"; };
 		5A0710000000000000000004 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		5A0710000000000000000007 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
@@ -99,6 +102,7 @@
 		E7D600000000000000000002 /* ExpoWidgetsTarget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ExpoWidgetsTarget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7D600000000000000000007 /* index.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = index.swift; sourceTree = "<group>"; };
 		E7D600000000000000000008 /* Deadlines.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Deadlines.swift; sourceTree = "<group>"; };
+		E7D6000000000000000000F0 /* UpNext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpNext.swift; sourceTree = "<group>"; };
 		E7D600000000000000000009 /* ExpoWidgetsTarget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExpoWidgetsTarget.entitlements; sourceTree = "<group>"; };
 		E7D60000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ExpoWidgetsLayoutRegistry.config.json; sourceTree = "<group>"; };
@@ -140,6 +144,7 @@
 				D49236392D408A2A00F625A8 /* AppDelegate.swift */,
 				75600012A61A4062AECAF1A7 /* SceneDelegate.swift */,
 				5A0710000000000000000001 /* NextDeadlineIntent.swift */,
+				5A0710000000000000000009 /* NextClassIntent.swift */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
 				D4605C0C2E74F66B008F0837 /* AppIcon.icon */,
@@ -244,6 +249,7 @@
 			children = (
 				E7D600000000000000000007 /* index.swift */,
 				E7D600000000000000000008 /* Deadlines.swift */,
+				E7D6000000000000000000F0 /* UpNext.swift */,
 				E7D600000000000000000011 /* Localizable.strings */,
 				E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */,
 				E7D60000000000000000000A /* Info.plist */,
@@ -260,6 +266,7 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "learnX" */;
 			buildPhases = (
 				C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */,
+				5A0710000000000000000C01 /* Check patches */,
 				1CD9AD2FFD72D77A8EA12875 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
@@ -539,6 +546,26 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-ShareExtension/Pods-ShareExtension-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		5A0710000000000000000C01 /* Check patches */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Check patches";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"$SRCROOT/../scripts/check-patches.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		C38B50BA6285516D6DCD4F65 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -633,6 +660,7 @@
 				D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */,
 				7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */,
 				5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */,
+				5A071000000000000000000A /* NextClassIntent.swift in Sources */,
 				22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -651,6 +679,7 @@
 			files = (
 				E7D60000000000000000000C /* index.swift in Sources */,
 				E7D60000000000000000000D /* Deadlines.swift in Sources */,
+				E7D6000000000000000000F1 /* UpNext.swift in Sources */,
 				F2A5304F6571E97B5D30F690 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

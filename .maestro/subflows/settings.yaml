@@ -1,0 +1,10 @@
+# Open Settings: from Today's header on phones, iPad and Android, from the
+# sidebar on Mac (which Maestro doesn't drive).
+appId: ${APP_ID}
+---
+- runFlow:
+    file: tab.yaml
+    env:
+      TAB: 'tab-today|sun\.max\.fill'
+# The iOS header button only exposes its label; Android's has the same one.
+- tapOn: 'Settings|设置'

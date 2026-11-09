@@ -16,6 +16,6 @@ module.exports = {
     // Navigation, thu-learn-lib (and some of its dependencies) and mime ship
     // ESM or untranspiled source, so they go through Babel (entities is nested
     // under thu-learn-lib, newer and ESM-only; he resolves to its .mjs build)
-    'node_modules/(?!((jest-)?react-native[^/]*|@react-native[^/]*|@react-navigation|thu-learn-lib|node-fetch-native|fetch-cookie|entities|mime|he)/)',
+    'node_modules/(?!((jest-)?react-native[^/]*|@react-native[^/]*|@react-navigation|@robertying/thu-learn-lib|node-fetch-native|fetch-cookie|entities|mime|he)/)',
   ],
 };

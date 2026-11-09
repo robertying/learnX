@@ -2,10 +2,7 @@ appId: ${APP_ID}
 name: Open settings pages and log out
 ---
 - runFlow: subflows/login.yaml
-- runFlow:
-    file: subflows/tab.yaml
-    env:
-      TAB: 'tab-settings|gearshape\.fill'
+- runFlow: subflows/settings.yaml
 # Changelog first: on iPad the page it opens beside the list is a web view,
 # which keeps the logout alert out of Maestro's snapshot.
 - tapOn: '.*(Changelog|更新日志).*'

@@ -3,6 +3,8 @@ import * as Notifications from 'expo-notifications';
 import {
   getNotificationPermission,
   getNotificationTarget,
+  getTargetUrl,
+  getUrlTarget,
   postNotification,
   requestNotificationPermission,
 } from 'helpers/notifications';
@@ -40,6 +42,24 @@ describe('getNotificationTarget', () => {
       getNotificationTarget(response({ type: 'course', id: 'c' })),
     ).toBeNull();
     expect(getNotificationTarget(response({ url: 'https://x' }))).toBeNull();
+  });
+});
+
+describe('learnx:// links', () => {
+  it('round-trips items, lists and Today', () => {
+    for (const target of [
+      { type: 'assignment', id: 'a/b' },
+      { type: 'notice', id: undefined },
+      { type: 'today', id: undefined },
+    ] as const) {
+      expect(getUrlTarget(getTargetUrl(target))).toEqual(target);
+    }
+    expect(getTargetUrl({ type: 'today' })).toBe('learnx://today');
+  });
+
+  it('ignores other links', () => {
+    expect(getUrlTarget('learnx://share')).toBeNull();
+    expect(getUrlTarget('https://learn.tsinghua.edu.cn')).toBeNull();
   });
 });
 

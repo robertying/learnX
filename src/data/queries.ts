@@ -1,6 +1,6 @@
 import {} from 'react';
 import { queryOptions, useQuery } from '@tanstack/react-query';
-import { CourseType, Language } from 'thu-learn-lib';
+import { CourseType, Language } from '@robertying/thu-learn-lib';
 import { queryClient } from 'data/queryClient';
 import { dataSource } from 'data/source';
 import { useLoggedIn } from 'data/auth';
@@ -58,10 +58,12 @@ export const coursesQuery = (semesterId: string) =>
     staleTime: 24 * 60 * 60 * 1000,
     queryFn: async (): Promise<Course[]> => {
       const lang = await setLanguage();
+      // Course sharing and the timetable use each course's time and location.
       const results = await dataSource.getCourseList(
         semesterId,
         CourseType.STUDENT,
         lang,
+        { timeAndLocation: true },
       );
       return results
         .map(course => ({ ...course, semesterId }))

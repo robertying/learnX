@@ -1,7 +1,7 @@
 // Assignment submission helpers: attachment naming, what the submit button
 // allows, and the upload itself. Used by hooks/useAssignmentSubmission.
 import mime from 'mime';
-import { RemoteFile } from 'thu-learn-lib';
+import { RemoteFile } from '@robertying/thu-learn-lib';
 import { submitAssignment } from 'data/source';
 import { Assignment } from 'data/types/state';
 import { getExtension, stripExtension } from './filename';
@@ -33,9 +33,14 @@ export const defaultAttachmentName = (
   });
 };
 
-/** Custom names get the picked file's extension, so dots are not allowed */
-export const sanitizeCustomAttachmentName = (text: string) =>
-  text.replaceAll('.', '');
+/**
+ * Custom names get the picked file's extension, so dots are not allowed. A
+ * worklet: the filename field runs it on the UI thread as keys land.
+ */
+export const sanitizeCustomAttachmentName = (text: string) => {
+  'worklet';
+  return text.replaceAll('.', '');
+};
 
 /** The attachment to upload, renamed when a custom name was given */
 export const uploadAttachment = (

@@ -5,7 +5,6 @@ import type {
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import IconButton from 'components/IconButton';
 import { SplitViewContext } from 'components/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -56,49 +55,48 @@ const useFileDetailHeader = ({
         <View style={[Styles.flexRow, { justifyContent: 'flex-end' }]}>
           {splitEnabled && !isSearch && (
             <IconButton
+              accessibilityLabel={
+                showMaster ? t('fullscreen') : t('exitFullscreen')
+              }
               onPress={() => toggleMaster(!showMaster)}
-              icon={props => (
-                <Icon
-                  {...props}
-                  name={showMaster ? 'fullscreen' : 'fullscreen-exit'}
-                />
-              )}
+              icon={showMaster ? 'fullscreen' : 'exitFullscreen'}
               disabled={!showDetail}
             />
           )}
           <IconButton
+            accessibilityLabel={t('refresh')}
             onPress={() => onRefresh()}
-            icon={props => <Icon {...props} name="refresh" />}
+            icon="refresh"
+            disabled={!!progress}
           />
           <IconButton
             disabled={error || !path}
+            accessibilityLabel={t('share')}
             onPress={onShare}
-            icon={props => <Icon {...props} name="export-variant" />}
+            icon="share"
           />
           {DeviceInfo.isMac() && (
             <IconButton
               disabled={error || !path}
+              accessibilityLabel={t('download')}
               onPress={onCopyToDownloads}
-              icon={props => <Icon {...props} name="download" />}
+              icon="download"
             />
           )}
           {Platform.OS === 'android' && (
             <IconButton
               disabled={error || !path}
+              accessibilityLabel={t('open')}
               onPress={onOpen}
-              icon={props => <Icon {...props} name="open-in-new" />}
+              icon="openInNew"
             />
           )}
           {canRender && (
             <IconButton
               disabled={error || !path}
+              accessibilityLabel={showInfo ? t('preview') : t('info')}
               onPress={onToggleInfo}
-              icon={props => (
-                <Icon
-                  {...props}
-                  name={showInfo ? 'eye' : 'information-outline'}
-                />
-              )}
+              icon={showInfo ? 'preview' : 'info'}
             />
           )}
         </View>

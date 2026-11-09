@@ -6,6 +6,7 @@ internal import ExpoWidgets
 struct ExportWidgets0: WidgetBundle {
   var body: some Widget {
     Deadlines()
+    UpNext()
     WidgetLiveActivity()
   }
 }

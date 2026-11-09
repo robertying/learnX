@@ -40,8 +40,8 @@ const canLogIn = () => {
 
 /**
  * Logs in again with the saved credentials: at launch, when the app comes
- * back after at least 10 minutes in the background, and when it comes back
- * without a session. While the server can't be reached, it also retries on
+ * back after at least 10 minutes in the background (keeping the session if
+ * the server still accepts it), and when it comes back without a session. While the server can't be reached, it also retries on
  * its own, less and less often, as long as the app is open. Coming back with
  * a session refetches the open lists that are out of date.
  */
@@ -62,7 +62,9 @@ const useReLogin = () => {
     const auth = getAuth();
     if (dayjs().diff(lastActiveTime.current, 'minute') >= 10) {
       toast(t('loggingIn'), 'none', 1 * 1000);
-      await login({ reset: true });
+      // At launch there's no session yet; after a break the session may
+      // still be good, which saves a full SSO login.
+      await login(auth.loggedIn ? { resume: true } : { reset: true });
       // The lists only refresh by themselves when the session starts; one
       // that was already open would keep showing what it had.
       if (getAuth().loggedIn) {

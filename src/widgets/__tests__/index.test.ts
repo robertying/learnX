@@ -1,8 +1,10 @@
 import { Platform } from 'react-native';
 import { Assignment } from 'data/types/state';
-import { updateDeadlineWidget } from 'widgets';
+import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 import iosWidget from 'widgets/DeadlinesIOS';
 import androidWidget from 'widgets/DeadlinesAndroid';
+import iosUpNext from 'widgets/UpNextIOS';
+import androidUpNext from 'widgets/UpNextAndroid';
 
 const assignment = (id: string, deadline: string) =>
   ({
@@ -72,6 +74,85 @@ describe('updateDeadlineWidget', () => {
 
     expect(androidWidget.updateSnapshot).toHaveBeenCalledWith(
       expect.objectContaining({ deadlines: [], total: 0 }),
+    );
+  });
+});
+
+describe('updateUpNextWidget', () => {
+  const os = Platform.OS;
+  const at = (time: string) =>
+    new Date(`2026-03-16T${time}:00+08:00`).getTime();
+  const classes = [
+    {
+      key: 'calculus',
+      courseName: 'Calculus',
+      location: '六教6A414',
+      start: at('08:00'),
+      end: at('09:35'),
+    },
+    {
+      key: 'physics',
+      courseName: 'Physics',
+      location: '',
+      start: at('13:30'),
+      end: at('15:05'),
+    },
+  ];
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-03-15T20:00:00+08:00') });
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+    Platform.OS = os;
+    // Clears what was last sent, so each test sends.
+    updateUpNextWidget();
+  });
+
+  it('gives iOS the same props at each class start and end and deadline', () => {
+    Platform.OS = 'ios';
+    updateUpNextWidget(classes, assignments, options);
+
+    const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
+    expect(entries.map(e => e.date.getTime())).toEqual([
+      new Date('2026-03-15T20:00:00+08:00').getTime(),
+      // Also assignment a's deadline (00:00Z).
+      at('08:00'),
+      at('09:35'),
+      at('13:30'),
+      at('15:05'),
+      new Date('2026-03-17T00:00:00Z').getTime(),
+    ]);
+    expect(new Set(entries.map(e => e.props)).size).toBe(1);
+    expect(entries[0].props).toMatchObject({
+      title: 'Up Next',
+      url: 'learnx://today',
+      classes: [
+        { courseName: 'Calculus', time: '08:00–09:35', day: 'Mon 3/16' },
+        { courseName: 'Physics', time: '13:30–15:05' },
+      ],
+    });
+    expect(entries[0].props.deadlines.map(d => d.id)).toEqual(['a', 'b']);
+  });
+
+  it('gives Android a snapshot, once for the same props', () => {
+    Platform.OS = 'android';
+    updateUpNextWidget(classes, assignments, options);
+    updateUpNextWidget(classes, assignments, options);
+
+    expect(androidUpNext.updateSnapshot).toHaveBeenCalledTimes(1);
+    expect(iosUpNext.updateTimeline).not.toHaveBeenCalled();
+  });
+
+  it('empties the widget when given nothing', () => {
+    Platform.OS = 'android';
+    updateUpNextWidget(classes, assignments, options);
+    updateUpNextWidget();
+
+    expect(androidUpNext.updateSnapshot).toHaveBeenLastCalledWith(
+      expect.objectContaining({ classes: [], deadlines: [] }),
     );
   });
 });

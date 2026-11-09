@@ -34,3 +34,8 @@ appId: ${APP_ID}
     visible:
       id: 'tab-notices|bell\.fill'
     timeout: 30000
+# The app opens on Today; the flows start from the notices.
+- runFlow:
+    file: tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'

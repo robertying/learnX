@@ -4,10 +4,11 @@ import Chip from 'components/Chip';
 import dayjs from 'dayjs';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {
+  ExcellentHomework,
   HomeworkCompletionType,
   HomeworkSubmissionType,
   RemoteFile,
-} from 'thu-learn-lib';
+} from '@robertying/thu-learn-lib';
 import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
@@ -26,7 +27,7 @@ import {
 } from 'helpers/i18n';
 import { deadlineText } from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
-import { useAssignment } from 'data/content';
+import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -54,6 +55,43 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <AssignmentDetailContent assignment={assignment} navigation={navigation} />
+  );
+};
+
+/** An excellent homework, its attachment fetched when it's shown. */
+const ExcellentHomeworkRow: React.FC<{
+  homework: ExcellentHomework;
+  onFileOpen: (file?: RemoteFile) => void;
+}> = ({ homework, onFileOpen }) => {
+  const theme = useTheme();
+  const { gradeAttachment, submittedAttachment, author } =
+    useExcellentHomeworkDetail(homework);
+  const homeworkAttachment = gradeAttachment || submittedAttachment;
+  const authorName = author.anonymous ? t('anonymous') : author.name;
+  return (
+    <>
+      <View style={[styles.section, styles.iconButton]}>
+        <MaterialCommunityIcons
+          style={styles.icon}
+          name="medal"
+          color={theme.colors.primary}
+          size={17}
+        />
+        <View style={Styles.flex1}>
+          {homeworkAttachment && (
+            <TextButton
+              fill
+              style={[Styles.spacey1, styles.buttonEnd]}
+              onPress={() => onFileOpen(homeworkAttachment)}
+            >
+              {homeworkAttachment.name}
+            </TextButton>
+          )}
+          <Caption>{t('excellentHomeworkBy', { name: authorName })}</Caption>
+        </View>
+      </View>
+      <Divider />
+    </>
   );
 };
 
@@ -138,9 +176,7 @@ const AssignmentDetailContent: React.FC<{
             disabled={closed}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
-            icon={props => (
-              <MaterialCommunityIcons {...props} name="file-upload" />
-            )}
+            icon="upload"
           />
         ),
         unstable_headerRightItems: () => [
@@ -200,7 +236,8 @@ const AssignmentDetailContent: React.FC<{
                 size={17}
               />
               <TextButton
-                style={styles.textPaddingRight}
+                fill
+                style={[Styles.flex1, styles.buttonEnd]}
                 onPress={() => handleFileOpen(attachment)}
               >
                 {attachment.name}
@@ -219,7 +256,8 @@ const AssignmentDetailContent: React.FC<{
                 size={17}
               />
               <TextButton
-                style={styles.textPaddingRight}
+                fill
+                style={[Styles.flex1, styles.buttonEnd]}
                 onPress={handleSubmit}
               >
                 {t('assignmentDraft')}
@@ -240,7 +278,8 @@ const AssignmentDetailContent: React.FC<{
               <View style={Styles.flex1}>
                 {submittedAttachment && (
                   <TextButton
-                    style={[Styles.spacey1, styles.textPaddingRight]}
+                    fill
+                    style={[Styles.spacey1, styles.buttonEnd]}
                     onPress={() => handleFileOpen(submittedAttachment)}
                   >
                     {submittedAttachment.name}
@@ -284,7 +323,8 @@ const AssignmentDetailContent: React.FC<{
                 ) : null}
                 {gradeAttachment && (
                   <TextButton
-                    style={[Styles.spacey1, styles.textPaddingRight]}
+                    fill
+                    style={[Styles.spacey1, styles.buttonEnd]}
                     onPress={() => handleFileOpen(gradeAttachment)}
                   >
                     {gradeAttachment.name}
@@ -321,7 +361,8 @@ const AssignmentDetailContent: React.FC<{
               <View style={Styles.flex1}>
                 {answerAttachment && (
                   <TextButton
-                    style={[Styles.spacey1, styles.textPaddingRight]}
+                    fill
+                    style={[Styles.spacey1, styles.buttonEnd]}
                     onPress={() => handleFileOpen(answerAttachment)}
                   >
                     {answerAttachment.name}
@@ -337,41 +378,13 @@ const AssignmentDetailContent: React.FC<{
             <Divider />
           </>
         )}
-        {excellentHomeworkList &&
-          excellentHomeworkList.map(excellentHomework => {
-            const homeworkAttachment =
-              excellentHomework.gradeAttachment ||
-              excellentHomework.submittedAttachment;
-            const authorName = excellentHomework.author.anonymous
-              ? t('anonymous')
-              : excellentHomework.author.name;
-            return (
-              <>
-                <View style={[styles.section, styles.iconButton]}>
-                  <MaterialCommunityIcons
-                    style={styles.icon}
-                    name="medal"
-                    color={theme.colors.primary}
-                    size={17}
-                  />
-                  <View style={Styles.flex1}>
-                    {homeworkAttachment && (
-                      <TextButton
-                        style={[Styles.spacey1, styles.textPaddingRight]}
-                        onPress={() => handleFileOpen(homeworkAttachment)}
-                      >
-                        {homeworkAttachment.name}
-                      </TextButton>
-                    )}
-                    <Caption>
-                      {t('excellentHomeworkBy', { name: authorName })}
-                    </Caption>
-                  </View>
-                </View>
-                <Divider />
-              </>
-            );
-          })}
+        {excellentHomeworkList?.map(excellentHomework => (
+          <ExcellentHomeworkRow
+            key={excellentHomework.id}
+            homework={excellentHomework}
+            onFileOpen={handleFileOpen}
+          />
+        ))}
         <AutoHeightWebView
           source={{
             html,
@@ -387,8 +400,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  textPaddingRight: {
-    paddingRight: 16,
+  buttonEnd: {
+    marginEnd: 16,
   },
   icon: {
     marginRight: 8,

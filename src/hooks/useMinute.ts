@@ -27,3 +27,14 @@ const getMinute = () => Math.floor(Date.now() / 60_000) * 60_000;
 const useMinute = () => useSyncExternalStore(subscribe, getMinute);
 
 export default useMinute;
+
+const getDay = () => {
+  const now = new Date(getMinute());
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+};
+
+/**
+ * The start of today (ms), for things that change once a day. Components only
+ * re-render when the day has changed.
+ */
+export const useToday = () => useSyncExternalStore(subscribe, getDay);

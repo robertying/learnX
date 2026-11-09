@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
 import {
+  dataSource,
   isServerReachable,
   loginWithFingerPrint,
   resetDataSource,
@@ -15,9 +16,9 @@ import { resetSettings } from 'data/settings';
 import { resetUserData } from 'data/userData';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
-import { isNetworkError, serializeError } from 'helpers/parse';
+import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
-import { updateDeadlineWidget } from 'widgets';
+import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 import { clearSpotlight } from 'helpers/spotlight';
 import { resetNotified } from 'data/notified';
 import { resetSyncLog } from 'data/syncLog';
@@ -36,7 +37,9 @@ const loggedIn = () =>
 /**
  * Signs in with the given login, or the saved one when none is given. A login
  * with a fingerprint (from SSO) is saved; a username and password alone first
- * forget the saved one.
+ * forget the saved one. With `resume`, it keeps the current session when the
+ * server still accepts it (one request) and only signs in again when it has
+ * expired, as when the app comes back from the background.
  */
 export async function login({
   username,
@@ -45,7 +48,8 @@ export async function login({
   fingerGenPrint = '',
   fingerGenPrint3 = '',
   reset = false,
-}: Partial<Credentials> & { reset?: boolean }) {
+  resume = false,
+}: Partial<Credentials> & { reset?: boolean; resume?: boolean }) {
   if (!username || !password || !fingerPrint) {
     if (getAuth().loggingIn) {
       return;
@@ -66,16 +70,19 @@ export async function login({
     // takes long); the offline retries in useReLogin take over instead.
     await retry(
       () =>
-        loginWithFingerPrint(
-          username,
-          password,
-          fingerPrint,
-          fingerGenPrint,
-          fingerGenPrint3,
-        ),
+        resume
+          ? dataSource.ensureSession()
+          : loginWithFingerPrint(
+              username,
+              password,
+              fingerPrint,
+              fingerGenPrint,
+              fingerGenPrint3,
+            ),
       3,
       1000,
-      error => !isNetworkError(error),
+      // a wrong password won't become right, and repeated tries may lock the account
+      error => !isNetworkError(error) && !isBadCredential(error),
     );
 
     if (username && password && fingerPrint) {
@@ -91,10 +98,13 @@ export async function login({
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
-    // thu-learn-lib reports a wrong password and no connection alike, as
-    // ERROR_FETCH_FROM_ID. A failed fetch in the last attempt means offline;
-    // otherwise, if the server answers now, it turned the login down.
-    const offline = isNetworkError(err) || !(await isServerReachable());
+    // A wrong password is BAD_CREDENTIAL. Otherwise (ERROR_FETCH_FROM_ID: the
+    // SSO server failed or couldn't be reached), a failed fetch in the last
+    // attempt means offline; if the server answers now, it turned the login
+    // down.
+    const offline =
+      !isBadCredential(err) &&
+      (isNetworkError(err) || !(await isServerReachable()));
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,
@@ -135,6 +145,7 @@ export async function logout() {
   clearSubmissionDrafts();
   clearQueryCache();
   updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
+  updateUpNextWidget();
   clearSpotlight();
   await Promise.all([
     cancelDeadlineReminders().catch(() => {}),

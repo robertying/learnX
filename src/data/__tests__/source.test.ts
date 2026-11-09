@@ -7,8 +7,8 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
   setFromResponse: jest.fn(),
   flush: jest.fn(),
 }));
-jest.mock('thu-learn-lib', () => ({
-  ...jest.requireActual('thu-learn-lib'),
+jest.mock('@robertying/thu-learn-lib', () => ({
+  ...jest.requireActual('@robertying/thu-learn-lib'),
   Learn2018Helper: class {
     login = jest.fn(async () => {});
     getCSRFToken = () => 'token';

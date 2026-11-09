@@ -1,6 +1,7 @@
-import { ApiError, FailReason } from 'thu-learn-lib';
+import { ApiError, FailReason } from '@robertying/thu-learn-lib';
 import {
   getSemesterTextFromId,
+  isBadCredential,
   isNetworkError,
   serializeError,
 } from 'helpers/parse';
@@ -70,6 +71,20 @@ describe('isNetworkError', () => {
     ).toBe(true);
   });
 
+  it('counts a thu-learn-lib timeout, bare or wrapped by login', () => {
+    const timeout = {
+      reason: FailReason.REQUEST_TIMEOUT,
+      extra: { url: 'https://learn.tsinghua.edu.cn', timeout: 60000 },
+    };
+    expect(isNetworkError(timeout)).toBe(true);
+    expect(
+      isNetworkError({
+        reason: FailReason.ERROR_FETCH_FROM_ID,
+        extra: timeout,
+      }),
+    ).toBe(true);
+  });
+
   it('does not count other failures', () => {
     expect(
       isNetworkError({
@@ -81,5 +96,15 @@ describe('isNetworkError', () => {
     ).toBe(false);
     expect(isNetworkError({ reason: 'x' })).toBe(false);
     expect(isNetworkError(null)).toBe(false);
+  });
+});
+
+describe('isBadCredential', () => {
+  it('spots a wrong password only', () => {
+    expect(isBadCredential({ reason: FailReason.BAD_CREDENTIAL })).toBe(true);
+    expect(isBadCredential({ reason: FailReason.ERROR_FETCH_FROM_ID })).toBe(
+      false,
+    );
+    expect(isBadCredential(null)).toBe(false);
   });
 });

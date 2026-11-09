@@ -1,15 +1,18 @@
 import { Linking, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Colors from 'constants/Colors';
 import SafeArea from 'components/SafeArea';
 import ScrollView from 'components/ScrollView';
 import { t } from 'helpers/i18n';
+import { useTheme } from 'theme';
 import { SettingsStackParams } from './types';
 import { Text, Title } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
 
 const Help: React.FC<Props> = () => {
+  const theme = useTheme();
+  const link = { color: theme.colors.primary };
+
   return (
     <SafeArea>
       <ScrollView
@@ -18,7 +21,7 @@ const Help: React.FC<Props> = () => {
       >
         <Title>{t('githubRecommended')}</Title>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() =>
             Linking.openURL(
               'https://github.com/robertying/learnX/issues/new/choose',
@@ -29,7 +32,7 @@ const Help: React.FC<Props> = () => {
         </Text>
         <Title style={styles.marginTop}>{t('emailNotRecommended')}</Title>
         <Text
-          style={[styles.text, styles.link]}
+          style={[styles.text, link]}
           onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
         >
           learnX@ruiying.io
@@ -54,9 +57,6 @@ const styles = StyleSheet.create({
   },
   text: {
     marginTop: 8,
-  },
-  link: {
-    color: Colors.theme,
   },
 });
 

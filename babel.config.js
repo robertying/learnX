@@ -3,17 +3,11 @@ const path = require('path');
 const srcDir = path.join(__dirname, 'src') + path.sep;
 const widgetsDir = path.join(srcDir, 'widgets') + path.sep;
 
-// Turns functions with the 'widget' directive into strings that the widget
-// runtime evaluates (expo-widgets). Our preset isn't babel-preset-expo, so it's
-// added here.
-const { widgetsPlugin } = require(
-  require.resolve('babel-preset-expo/build/plugins/widgets-plugin', {
-    paths: [require.resolve('expo/package.json')],
-  }),
-);
-
+// babel-preset-expo inlines process.env.EXPO_OS and adds the Worklets,
+// expo-widgets and @expo/ui plugins on its own. It only adds the React Compiler
+// under Expo's Metro config, which we don't use, so the compiler is added here.
 module.exports = {
-  presets: ['module:@react-native/babel-preset'],
+  presets: ['babel-preset-expo'],
   plugins: [
     // Must run first, on the original source. Only app code is compiled, not
     // node_modules.
@@ -34,8 +28,5 @@ module.exports = {
       },
     ],
     'preval',
-    '@babel/plugin-transform-export-namespace-from',
-    'react-native-worklets/plugin',
-    widgetsPlugin,
   ],
 };

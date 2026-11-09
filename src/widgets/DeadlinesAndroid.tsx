@@ -32,18 +32,19 @@ function DeadlinesWidget(
 ) {
   'widget';
   const dark = environment.colorScheme === 'dark';
+  // The surface and brand colors from src/theme; a widget can't import them.
   const colors = dark
     ? {
-        background: '#1D1B1E',
-        title: '#E7E1E5',
-        caption: '#CDC3CE',
-        accent: '#D078DC',
+        background: '#171216',
+        title: '#EBDFE6',
+        caption: '#D0C3CC',
+        accent: '#F4ABFF',
       }
     : {
-        background: '#FFFBFF',
-        title: '#1D1B1E',
-        caption: '#4C444D',
-        accent: '#9A25AE',
+        background: '#FFF7FA',
+        title: '#1F1A1F',
+        caption: '#4D444C',
+        accent: '#660874',
       };
   // Fallbacks for before the app first sends its strings. Widget layouts run
   // in their own runtime without the app's translations.

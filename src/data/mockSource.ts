@@ -1,12 +1,14 @@
 import {
   ApiError,
-  ContentType,
-  CourseContent,
+  CalendarResult,
+  DetailSelector,
   FailReason,
   SemesterInfo,
   SemesterType,
-} from 'thu-learn-lib';
+} from '@robertying/thu-learn-lib';
+import dayjs from 'dayjs';
 import type { DataSource } from 'data/source';
+import { sessionsFromCourses } from 'helpers/schedule';
 
 const mock = (): typeof import('data/mock') => require('data/mock');
 
@@ -136,25 +138,84 @@ const groupByCourse = <T extends { courseId: string }>(
     ]),
   );
 
-const itemsOf = (type: ContentType) => {
-  switch (type) {
-    case ContentType.NOTIFICATION:
-      return mock().mockNotices;
-    case ContentType.HOMEWORK:
-      return mock().mockAssignments;
-    case ContentType.FILE:
-      return mock().mockFiles;
-    default:
-      return [];
-  }
+const isSelected = <T>(selector: DetailSelector<T> | undefined, item: T) =>
+  selector === 'all' || (typeof selector === 'function' && selector(item));
+
+/** The fields of an assignment the list leaves out, as the server does. */
+const homeworkDetailFields = [
+  'description',
+  'attachment',
+  'answerContent',
+  'answerAttachment',
+  'submittedContent',
+  'submittedAttachment',
+  'gradeAttachment',
+];
+
+const pick = (item: object, keys: string[]) =>
+  Object.fromEntries(
+    Object.entries(item).filter(([key]) => keys.includes(key)),
+  );
+
+/**
+ * A notice as the list has it: the attachment only by name, unless
+ * `attachments` selects the notice.
+ */
+const listedNotice = (
+  notice: object,
+  attachments: DetailSelector<any> | undefined,
+) => {
+  const { attachment, ...rest } = notice as { attachment?: { name: string } };
+  const listed = attachment
+    ? { ...rest, attachmentName: attachment.name }
+    : rest;
+  return attachment && isSelected(attachments, listed)
+    ? { ...listed, attachment }
+    : listed;
 };
+
+/**
+ * An assignment as the list has it: without its detail unless `details`
+ * selects it, and with its excellent homework never detailed.
+ */
+const listedAssignment = (
+  assignment: object,
+  details: DetailSelector<any> | undefined,
+) => {
+  const { excellentHomeworkList, ...rest } = assignment as {
+    id: string;
+    excellentHomeworkList?: object[];
+  };
+  const listed = {
+    ...omit(rest, homeworkDetailFields),
+    baseId: rest.id,
+    ...(excellentHomeworkList && {
+      excellentHomeworkList: excellentHomeworkList.map(item =>
+        omit(item, homeworkDetailFields),
+      ),
+    }),
+  };
+  return isSelected(details, listed)
+    ? { ...listed, ...pick(rest, homeworkDetailFields) }
+    : listed;
+};
+
+/** A YYYYMMDD date, as the calendar takes it. */
+const parseDay = (day: string) =>
+  dayjs(`${day.slice(0, 4)}-${day.slice(4, 6)}-${day.slice(6, 8)}`);
 
 const semesterInfo = (id: string): SemesterInfo => {
   const [startYear, endYear, term] = id.split('-');
   return {
     id,
-    startDate: '',
-    endDate: '',
+    ...(id === mock().mockCurrentSemester
+      ? {
+          startDate: mock().mockSemesterStart.format('YYYY-MM-DD'),
+          endDate: mock()
+            .mockSemesterStart.add(18, 'week')
+            .format('YYYY-MM-DD'),
+        }
+      : { startDate: '', endDate: '' }),
     startYear: Number(startYear),
     endYear: Number(endYear),
     type:
@@ -170,6 +231,8 @@ const semesterInfo = (id: string): SemesterInfo => {
 // types, so results are cast at this one boundary.
 export const mockSource: DataSource = {
   login: () => roundTrip({ isLogin: true }),
+  // The emulated session never expires: one request either way.
+  ensureSession: () => roundTrip(),
   // Not awaited by callers; never fails.
   logout: () => Promise.resolve(),
   getCSRFToken: () => 'mock-csrf-token',
@@ -178,33 +241,88 @@ export const mockSource: DataSource = {
   getSemesterIdList: () => request(() => mock().mockSemesters),
   getCurrentSemester: () =>
     request(() => semesterInfo(mock().mockCurrentSemester)),
-  getCourseList: semesterId =>
+  getCourseList: (semesterId, _courseType, _lang, options) =>
     request(
       () =>
         mock()
           .mockCourses.filter(course => course.semesterId === semesterId)
-          .map(course => omit(course, ['semesterId'])) as any,
+          .map(course =>
+            omit(
+              course,
+              options?.timeAndLocation
+                ? ['semesterId']
+                : ['semesterId', 'timeAndLocation'],
+            ),
+          ) as any,
     ),
-  getNotificationList: courseId =>
+  getNotificationList: (courseId, _courseType, options) =>
     request(
-      () => groupByCourse(mock().mockNotices, [courseId])[courseId] as any,
+      () =>
+        groupByCourse(mock().mockNotices, [courseId])[courseId].map(notice =>
+          listedNotice(notice, options?.attachments),
+        ) as any,
     ),
-  getHomeworkList: courseId =>
+  getNotificationAttachment: notification =>
     request(
-      () => groupByCourse(mock().mockAssignments, [courseId])[courseId] as any,
+      () =>
+        mock().mockNotices.find(
+          notice =>
+            notice.url === notification.url &&
+            notice.attachment?.name === notification.attachmentName,
+        )?.attachment,
+    ),
+  getHomeworkList: ((courseId: string, _courseType?: unknown, options?: any) =>
+    request(
+      () =>
+        groupByCourse(mock().mockAssignments, [courseId])[courseId].map(
+          assignment => listedAssignment(assignment, options?.details),
+        ) as any,
+    )) as DataSource['getHomeworkList'],
+  getHomeworkDetail: homework =>
+    request(() =>
+      pick(
+        mock().mockAssignments.find(
+          assignment => assignment.id === homework.baseId,
+        ) ?? {},
+        homeworkDetailFields,
+      ),
+    ),
+  // The app passes the whole item; the mock tells them apart by id.
+  getExcellentHomeworkDetail: homework =>
+    request(() =>
+      pick(
+        mock()
+          .mockAssignments.flatMap(
+            assignment => assignment.excellentHomeworkList ?? [],
+          )
+          .find(item => item.id === (homework as { id?: string }).id) ?? {},
+        homeworkDetailFields,
+      ),
     ),
   getFileList: courseId =>
     request(() => groupByCourse(mock().mockFiles, [courseId])[courseId] as any),
-  getAllContents: <T extends ContentType>(courseIds: string[], type: T) =>
-    request(
-      () =>
-        groupByCourse<{ courseId: string }>(
-          itemsOf(type),
-          courseIds,
-        ) as unknown as CourseContent<T>,
-    ),
-  // The mock courses have no timetable.
-  getCalendar: () => request(() => []),
+  // The registrar's calendar, worked out from the courses' times.
+  getCalendar: (start, end) =>
+    request((): CalendarResult => {
+      const from = parseDay(start);
+      const days = parseDay(end).diff(from, 'day') + 1;
+      const events = sessionsFromCourses(
+        mock().mockCourses.filter(
+          course => course.semesterId === mock().mockCurrentSemester,
+        ),
+        mock().mockSemesterStart.format('YYYY-MM-DD'),
+        from,
+        days,
+      ).map(session => ({
+        courseName: session.courseName,
+        location: session.location,
+        status: '',
+        date: dayjs(session.start).format('YYYY-MM-DD'),
+        startTime: dayjs(session.start).format('HH:mm'),
+        endTime: dayjs(session.end).format('HH:mm'),
+      }));
+      return { events, failedRanges: [] };
+    }),
 };
 
 /**

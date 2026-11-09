@@ -29,7 +29,7 @@ const Changelog: React.FC<Props> = () => {
 
   return (
     <SafeArea>
-      {progress ? (
+      {progress && progress !== 1 ? (
         <ProgressBar style={styles.progressBar} progress={progress} />
       ) : undefined}
       <WebView

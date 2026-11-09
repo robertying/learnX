@@ -8,6 +8,11 @@ tags:
 - runFlow:
     file: subflows/tab.yaml
     env:
+      TAB: 'tab-today|sun\.max\.fill'
+- assertVisible: '(?i)(Due Soon|即将截止)'
+- runFlow:
+    file: subflows/tab.yaml
+    env:
       TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
 - assertVisible: '.*大作业1.*'
 - runFlow:
@@ -20,10 +25,7 @@ tags:
     env:
       TAB: 'tab-courses|square\.grid\.3x3\.fill'
 - assertVisible: '.*量子与统计.*'
-- runFlow:
-    file: subflows/tab.yaml
-    env:
-      TAB: 'tab-settings|gearshape\.fill'
+- runFlow: subflows/settings.yaml
 - assertVisible:
     id: settings-logout
 - runFlow:

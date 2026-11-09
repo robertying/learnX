@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">learnX</string>
+    <string name="shortcut_next_class">Next class</string>
+    <string name="shortcut_next_class_long">Show my next class</string>
 </resources>

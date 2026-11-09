@@ -2,9 +2,9 @@ import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
-import Colors from 'constants/Colors';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { Caption, Paragraph, Subheading, Title } from 'components/Text';
 
@@ -28,6 +28,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
   hideCourseName,
   ...restProps
 }) => {
+  const theme = useTheme();
   const strippedDescription = removeTags(description);
   const timeAgo = dayjs(uploadTime).fromNow();
 
@@ -46,7 +47,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
               <Icon
                 style={styles.icon}
                 name="flag"
-                color={Colors.red500}
+                color={theme.colors.status.red}
                 size={20}
               />
             ) : null}
@@ -54,7 +55,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
               <Icon
                 style={styles.icon}
                 name="checkbox-blank-circle"
-                color={Colors.blue500}
+                color={theme.colors.status.blue}
               />
             ) : null}
           </View>

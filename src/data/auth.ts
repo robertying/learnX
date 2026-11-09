@@ -1,4 +1,4 @@
-import { FailReason } from 'thu-learn-lib';
+import { FailReason } from '@robertying/thu-learn-lib';
 import { create } from 'zustand';
 
 /**

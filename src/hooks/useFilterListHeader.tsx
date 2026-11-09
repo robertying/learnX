@@ -1,16 +1,16 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
-import type { FilterSelection } from 'components/Filter';
+import FilterMenu from 'components/FilterMenu';
 import HeaderTitle from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
 import DeviceInfo from 'constants/DeviceInfo';
 import { filterSubtitle, selectedCountLabel } from 'helpers/filterList';
+import type { FilterOption, FilterSelection } from 'helpers/filterOptions';
 import { t } from 'helpers/i18n';
 import { RootStackParams } from 'screens/types';
 
@@ -39,7 +39,9 @@ export interface FilterListHeaderOptions {
   selectedCount: number;
   refreshing: boolean;
   onRefresh?: () => void;
-  onFilter: () => void;
+  /** The choices in the filter menu */
+  filterOptions: FilterOption[];
+  onFilterSelect: (selected: FilterSelection) => void;
   onReorder: () => void;
   onSelect: () => void;
   onCheckAll: () => void;
@@ -63,7 +65,8 @@ const useFilterListHeader = ({
   selectedCount,
   refreshing,
   onRefresh,
-  onFilter,
+  filterOptions,
+  onFilterSelect,
   onReorder,
   onSelect,
   onCheckAll,
@@ -73,6 +76,31 @@ const useFilterListHeader = ({
   const isCourse = type === 'course';
 
   useEffect(() => {
+    // The filter button is a pull-down menu of the filters, with the current
+    // one checked and each one's count beside it.
+    const filterItem: NativeStackHeaderItem = {
+      type: 'menu',
+      identifier: 'filter',
+      label: t('filter'),
+      icon: {
+        type: 'sfSymbol',
+        name:
+          filterSelected === 'all'
+            ? 'line.3.horizontal.decrease.circle'
+            : 'line.3.horizontal.decrease.circle.fill',
+      },
+      menu: {
+        items: filterOptions.map(option => ({
+          type: 'action',
+          label: option.label,
+          description: String(option.count),
+          icon: { type: 'sfSymbol', name: option.sfSymbol },
+          state: filterSelected === option.name ? 'on' : 'off',
+          onPress: () => onFilterSelect(option.name),
+        })),
+      },
+    };
+
     if (reorderMode) {
       navigation.setOptions({
         unstable_headerLeftItems: () => [
@@ -92,9 +120,10 @@ const useFilterListHeader = ({
         headerLeft: () => (
           <IconButton
             accessibilityLabel={t('reorder')}
-            icon={props => <MaterialCommunityIcons {...props} name="sort" />}
+            icon="reorder"
             onPress={onReorder}
             mode="contained"
+            style={styles.headerLeft}
           />
         ),
         headerRight: () => <View />,
@@ -139,26 +168,19 @@ const useFilterListHeader = ({
         ],
 
         headerLeft: () => (
-          <>
+          <View style={styles.headerLeft}>
             <IconButton
               accessibilityLabel={t('select')}
               onPress={onSelect}
-              icon={props => (
-                <MaterialCommunityIcons
-                  {...props}
-                  name="format-list-bulleted"
-                />
-              )}
+              icon="select"
               mode="contained"
             />
             <IconButton
               accessibilityLabel={t('checkAll')}
               onPress={onCheckAll}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="check-all" />
-              )}
+              icon="checkAll"
             />
-          </>
+          </View>
         ),
         headerRight: () => (
           <IconButton
@@ -166,16 +188,7 @@ const useFilterListHeader = ({
               filterSelected === 'archived' ? t('restore') : t('archive')
             }
             onPress={onArchiveSelected}
-            icon={props => (
-              <MaterialCommunityIcons
-                {...props}
-                name={
-                  filterSelected === 'archived'
-                    ? 'archive-arrow-up'
-                    : 'archive-arrow-down'
-                }
-              />
-            )}
+            icon={filterSelected === 'archived' ? 'restore' : 'archive'}
           />
         ),
         ...getHeaderTitleOptions(
@@ -188,16 +201,7 @@ const useFilterListHeader = ({
         unstable_headerLeftItems: () =>
           isCourse
             ? [
-                {
-                  type: 'button',
-                  identifier: 'filter',
-                  label: t('filter'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'line.3.horizontal.decrease.circle',
-                  },
-                  onPress: onFilter,
-                },
+                filterItem,
                 // A third button leaves the title no room beside a sidebar of
                 // the default width, so the rest go in a menu.
                 {
@@ -243,16 +247,7 @@ const useFilterListHeader = ({
                   },
                   onPress: onSelect,
                 },
-                {
-                  type: 'button',
-                  identifier: 'filter',
-                  label: t('filter'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'line.3.horizontal.decrease.circle',
-                  },
-                  onPress: onFilter,
-                },
+                filterItem,
               ],
         unstable_headerRightItems: () => [
           ...(DeviceInfo.isMac()
@@ -285,47 +280,34 @@ const useFilterListHeader = ({
         ],
 
         headerLeft: () => (
-          <>
+          <View style={styles.headerLeft}>
             {isCourse ? (
               <IconButton
                 accessibilityLabel={t('reorder')}
-                icon={props => (
-                  <MaterialCommunityIcons {...props} name="sort" />
-                )}
+                icon="reorder"
                 onPress={onReorder}
               />
             ) : (
               <IconButton
                 accessibilityLabel={t('select')}
                 onPress={onSelect}
-                icon={props => (
-                  <MaterialCommunityIcons
-                    {...props}
-                    name="format-list-bulleted"
-                  />
-                )}
+                icon="select"
               />
             )}
-            <IconButton
-              accessibilityLabel={t('filter')}
-              onPress={onFilter}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="filter-variant" />
-              )}
+            <FilterMenu
+              label={t('filter')}
+              options={filterOptions}
+              selected={filterSelected}
+              onSelectionChange={onFilterSelect}
             />
             {isCourse && (
               <IconButton
                 accessibilityLabel={t('courseX')}
-                icon={props => (
-                  <MaterialCommunityIcons
-                    {...props}
-                    name="information-outline"
-                  />
-                )}
+                icon="info"
                 onPress={onCourseX}
               />
             )}
-          </>
+          </View>
         ),
         headerRight: () => (
           <>
@@ -334,17 +316,13 @@ const useFilterListHeader = ({
                 accessibilityLabel={t('refresh')}
                 disabled={refreshing}
                 onPress={onRefresh}
-                icon={props => (
-                  <MaterialCommunityIcons {...props} name="refresh" />
-                )}
+                icon="refresh"
               />
             )}
             <IconButton
               accessibilityLabel={t('search')}
               onPress={() => navigation.navigate('SearchStack')}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="magnify" />
-              )}
+              icon="search"
             />
           </>
         ),
@@ -356,13 +334,14 @@ const useFilterListHeader = ({
     }
   }, [
     defaultSubtitle,
+    filterOptions,
     filterSelected,
     isCourse,
     navigation,
     onArchiveSelected,
     onCheckAll,
     onCourseX,
-    onFilter,
+    onFilterSelect,
     onRefresh,
     onReorder,
     onSelect,
@@ -373,5 +352,13 @@ const useFilterListHeader = ({
     type,
   ]);
 };
+
+// Android: a gap between the last header button and the title.
+const styles = StyleSheet.create({
+  headerLeft: {
+    flexDirection: 'row',
+    marginEnd: 4,
+  },
+});
 
 export default useFilterListHeader;
