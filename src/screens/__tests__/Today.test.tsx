@@ -10,9 +10,6 @@ jest.mock('react-native-screens/experimental', () => {
 });
 jest.mock('hooks/useDetailNavigator', () => () => undefined);
 jest.mock('data/login', () => ({ login: jest.fn() }));
-jest.mock('helpers/eventDetails', () => ({
-  sanitizeLocation: (l: string) => l,
-}));
 
 const mockSessions: ClassSession[] = [];
 const mockAssignments: Partial<Assignment>[] = [];

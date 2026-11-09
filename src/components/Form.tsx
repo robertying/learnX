@@ -32,6 +32,7 @@ import {
   lineLimit,
   listRowBackground,
   opacity,
+  padding,
   refreshable,
   scrollContentBackground,
   textSelection,
@@ -163,6 +164,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
+// Mac Form rows hug their text; two-line rows get the breathing room they
+// have in Mail and System Settings, and that iOS rows get from their height.
+const macTwoLineModifiers = [padding({ vertical: 4 })];
 const struckText = [
   secondaryText,
   strikethrough({ isActive: true, pattern: 'solid' }),
@@ -181,7 +185,11 @@ const RowLabel: React.FC<{
     </Text>
   );
   const label = subtitle ? (
-    <VStack alignment="leading" spacing={2}>
+    <VStack
+      alignment="leading"
+      spacing={2}
+      modifiers={DeviceInfo.isMac() ? macTwoLineModifiers : undefined}
+    >
       {text}
       <Text modifiers={subtitleModifiers}>{subtitle}</Text>
     </VStack>
