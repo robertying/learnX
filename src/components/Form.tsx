@@ -15,7 +15,9 @@ import {
   Section,
   Spacer,
   Text,
+  TextField,
   Toggle,
+  useNativeState,
   VStack,
   ZStack,
 } from '@expo/ui/swift-ui';
@@ -26,11 +28,16 @@ import {
   frame,
   background,
   headerProminence,
+  lineLimit,
   listRowBackground,
   opacity,
   refreshable,
   scrollContentBackground,
   textSelection,
+  scrollDismissesKeyboard,
+  strikethrough,
+  textInputAutocapitalization,
+  autocorrectionDisabled,
   toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -38,15 +45,19 @@ import { useTheme } from 'theme';
 import {
   parseNumberInput,
   sectionRows,
+  useFieldText,
   type FormButtonProps,
+  type FormFileProps,
   type FormIcon,
   type FormItemRowProps,
   type FormLinkProps,
   type FormNumberFieldProps,
   type FormParagraphProps,
   type FormProfileProps,
+  type FormProgressProps,
   type FormProps,
   type FormSectionProps,
+  type FormTextFieldProps,
   type FormTextProps,
   type FormToggleProps,
 } from './Form.shared';
@@ -105,6 +116,8 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     <Host style={styles.fill} seedColor={theme.colors.primary} testID={testID}>
       <SwiftUIForm
         modifiers={[
+          // Dragging the form down pulls the keyboard away, as in Notes.
+          scrollDismissesKeyboard('interactively'),
           ...(DeviceInfo.isMac() ? macFormModifiers : []),
           ...(onRefresh ? [refreshable(onRefresh)] : []),
         ]}
@@ -147,15 +160,22 @@ export const FormSection: React.FC<FormSectionProps> = ({
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
+const struckText = [
+  secondaryText,
+  strikethrough({ isActive: true, pattern: 'solid' }),
+];
 
 const RowLabel: React.FC<{
   title: string;
   subtitle?: string;
   icon?: FormIcon;
   plain?: boolean;
-}> = ({ title, subtitle, icon, plain }) => {
+  struck?: boolean;
+}> = ({ title, subtitle, icon, plain, struck }) => {
   const text = (
-    <Text modifiers={plain ? [primaryText] : undefined}>{title}</Text>
+    <Text modifiers={struck ? struckText : plain ? [primaryText] : undefined}>
+      {title}
+    </Text>
   );
   const label = subtitle ? (
     <VStack alignment="leading" spacing={2}>
@@ -272,6 +292,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
   onPress,
   destructive,
   loading,
+  disabled: isDisabled,
   selected,
 }) => {
   const choice = selected !== undefined;
@@ -280,7 +301,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
       onPress={onPress}
       role={destructive ? 'destructive' : undefined}
       testID={testID}
-      modifiers={loading ? [disabled(true)] : undefined}
+      modifiers={loading || isDisabled ? [disabled(true)] : undefined}
     >
       <HStack>
         <RowLabel
@@ -301,6 +322,69 @@ export const FormButton: React.FC<FormButtonProps> = ({
     </Button>
   );
 };
+
+/** A file that opens on tap, with the chevron of a link. */
+export const FormFile: React.FC<FormFileProps> = ({
+  title,
+  icon,
+  testID,
+  detail,
+  onPress,
+  struck,
+  disabled: isDisabled,
+}) => (
+  <Button
+    onPress={onPress}
+    testID={testID}
+    modifiers={isDisabled ? [disabled(true)] : undefined}
+  >
+    <HStack>
+      <RowLabel title={title} icon={icon} plain struck={struck} />
+      <Spacer />
+      <RowDetail detail={detail} />
+      <Image systemName="chevron.right" modifiers={chevronModifiers} />
+    </HStack>
+  </Button>
+);
+
+// Starts a few lines tall, as a box to write in, and grows with the text.
+const multilineModifiers = [lineLimit({ min: 6, max: 20 })];
+const plainTextModifiers = [
+  textInputAutocapitalization('never'),
+  autocorrectionDisabled(true),
+];
+
+/** Text the user writes, the whole width of the row. */
+export const FormTextField: React.FC<FormTextFieldProps> = props => {
+  const { placeholder, multiline, plain, disabled: isDisabled, testID } = props;
+  const text = useNativeState(props.value);
+  useFieldText(text, props);
+
+  return (
+    <TextField
+      text={text}
+      placeholder={placeholder}
+      axis={multiline ? 'vertical' : 'horizontal'}
+      testID={testID}
+      modifiers={[
+        ...(multiline ? multilineModifiers : []),
+        ...(plain ? plainTextModifiers : []),
+        ...(isDisabled ? [disabled(true)] : []),
+      ]}
+    />
+  );
+};
+
+/** A bar under its title, as for a download in progress. */
+export const FormProgress: React.FC<FormProgressProps> = ({
+  title,
+  value,
+  testID,
+}) => (
+  <ProgressView value={value} testID={testID}>
+    <Text>{title}</Text>
+  </ProgressView>
+);
 
 // A switch at the end of the row, as in System Settings. (The Mac's default
 // toggle is a checkbox before the label.)

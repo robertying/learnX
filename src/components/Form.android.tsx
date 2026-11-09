@@ -17,6 +17,7 @@ import {
   Row,
   Switch,
   Text,
+  TextField,
   useMaterialColors,
   useNativeState,
 } from '@expo/ui/jetpack-compose';
@@ -40,16 +41,20 @@ import { useComposeColorOverrides, useTheme } from 'theme';
 import {
   parseNumberInput,
   positionRows,
+  useFieldText,
   type FormButtonProps,
+  type FormFileProps,
   type FormIcon,
   type FormItemRowProps,
   type FormLinkProps,
   type FormNumberFieldProps,
   type FormParagraphProps,
   type FormProfileProps,
+  type FormProgressProps,
   type FormProps,
   type FormRowPosition,
   type FormSectionProps,
+  type FormTextFieldProps,
   type FormTextProps,
   type FormToggleProps,
 } from './Form.shared';
@@ -201,6 +206,8 @@ const FormRow: React.FC<
     /** How the row takes a tap: clickable, toggleable or selectable. */
     action?: ModifierConfig;
     titleColor?: string;
+    /** Crossed out. */
+    struck?: boolean;
     trailing?: ReactNode;
   }
 > = ({
@@ -211,6 +218,7 @@ const FormRow: React.FC<
   position,
   action,
   titleColor,
+  struck,
   detail,
   trailing,
   done,
@@ -250,7 +258,12 @@ const FormRow: React.FC<
       modifiers={[fillMaxWidth(), ...rowModifiers]}
     >
       <ListItem.HeadlineContent>
-        <Text color={contentColor}>{title}</Text>
+        <Text
+          color={contentColor}
+          style={struck ? { textDecoration: 'lineThrough' } : undefined}
+        >
+          {title}
+        </Text>
       </ListItem.HeadlineContent>
       {subtitle ? (
         <ListItem.SupportingContent>
@@ -320,9 +333,11 @@ export const FormButton: React.FC<FormButtonProps> = ({
   onPress,
   destructive,
   loading,
+  disabled,
   selected,
   ...row
 }) => {
+  const theme = useTheme();
   const colors = useMaterialColors();
   const run = () => {
     if (!loading) {
@@ -333,9 +348,19 @@ export const FormButton: React.FC<FormButtonProps> = ({
   return (
     <FormRow
       {...row}
-      titleColor={destructive ? colors.error : undefined}
+      titleColor={
+        disabled
+          ? theme.colors.onSurfaceDisabled
+          : destructive
+            ? colors.error
+            : undefined
+      }
       action={
-        choice ? selectable(!!selected, run, 'radioButton') : clickable(run)
+        disabled
+          ? undefined
+          : choice
+            ? selectable(!!selected, run, 'radioButton')
+            : clickable(run)
       }
       trailing={
         loading ? (
@@ -346,6 +371,104 @@ export const FormButton: React.FC<FormButtonProps> = ({
         ) : null
       }
     />
+  );
+};
+
+/** A file that opens on tap. */
+export const FormFile: React.FC<FormFileProps> = ({
+  onPress,
+  struck,
+  disabled,
+  ...row
+}) => {
+  const theme = useTheme();
+  const colors = useMaterialColors();
+  return (
+    <FormRow
+      {...row}
+      struck={struck}
+      titleColor={
+        disabled
+          ? theme.colors.onSurfaceDisabled
+          : struck
+            ? colors.onSurfaceVariant
+            : undefined
+      }
+      action={disabled ? undefined : clickable(onPress)}
+    />
+  );
+};
+
+/**
+ * Text the user writes: a filled field in the row's color and shape, without
+ * the underline, so it reads as a row of the section.
+ */
+export const FormTextField: React.FC<FormTextFieldProps> = props => {
+  const { placeholder, multiline, plain, disabled, testID, position } = props;
+  const colors = useMaterialColors();
+  const text = useNativeState(props.value);
+  useFieldText(text, props);
+  return (
+    <TextField
+      value={text}
+      enabled={!disabled}
+      singleLine={!multiline}
+      minLines={multiline ? 6 : 1}
+      keyboardOptions={
+        plain
+          ? { capitalization: 'none', autoCorrectEnabled: false }
+          : { capitalization: 'sentences' }
+      }
+      colors={{
+        focusedContainerColor: colors.surfaceContainer,
+        unfocusedContainerColor: colors.surfaceContainer,
+        disabledContainerColor: colors.surfaceContainer,
+        focusedIndicatorColor: 'transparent',
+        unfocusedIndicatorColor: 'transparent',
+        disabledIndicatorColor: 'transparent',
+      }}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      {placeholder ? (
+        <TextField.Placeholder>
+          <Text>{placeholder}</Text>
+        </TextField.Placeholder>
+      ) : null}
+    </TextField>
+  );
+};
+
+/** A bar under its title. */
+export const FormProgress: React.FC<FormProgressProps> = ({
+  title,
+  value,
+  testID,
+  position,
+}) => {
+  const colors = useMaterialColors();
+  return (
+    <ListItem
+      colors={{ containerColor: colors.surfaceContainer }}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...(testID ? [testIDModifier(testID)] : []),
+      ]}
+    >
+      <ListItem.HeadlineContent>
+        <Text>{title}</Text>
+      </ListItem.HeadlineContent>
+      <ListItem.SupportingContent>
+        <LinearProgressIndicator
+          progress={value}
+          modifiers={[fillMaxWidth(), padding(0, 8, 0, 0)]}
+        />
+      </ListItem.SupportingContent>
+    </ListItem>
   );
 };
 

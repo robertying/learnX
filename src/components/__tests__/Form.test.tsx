@@ -1,21 +1,29 @@
 import {
+  act,
   fireEvent,
   render,
+  renderHook,
   screen,
   userEvent,
+  waitFor,
 } from '@testing-library/react-native';
+import { useState } from 'react';
 import {
   Form,
   FormButton,
+  FormFile,
   FormLink,
   FormNumberField,
   FormParagraph,
+  FormProgress,
   FormSection,
   FormText,
+  FormTextField,
   FormToggle,
   parseNumberInput,
   positionRows,
   sectionRows,
+  useFieldText,
 } from 'components/Form';
 
 describe('Form', () => {
@@ -136,9 +144,111 @@ describe('Form', () => {
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenCalledWith(30);
   });
+
+  it('keeps a text field and its value in step', async () => {
+    const Field = () => {
+      const [value, setValue] = useState('Draft');
+      return (
+        <>
+          <FormTextField
+            placeholder="Name"
+            value={value}
+            onChangeText={setValue}
+            format={text => {
+              'worklet';
+              return text.replaceAll('.', '');
+            }}
+          />
+          <FormButton title="Clear" onPress={() => setValue('')} />
+        </>
+      );
+    };
+    await render(<Field />);
+    const field = screen.getByLabelText('Name');
+    expect(field.props.value).toBe('Draft');
+    // Formatted text goes back to the field once typing pauses.
+    await fireEvent.changeText(field, 'a.b');
+    await waitFor(() =>
+      expect(screen.getByLabelText('Name').props.value).toBe('ab'),
+    );
+    // A value set from outside replaces what was typed.
+    await userEvent.setup().press(screen.getByText('Clear'));
+    expect(screen.getByLabelText('Name').props.value).toBe('');
+  });
+
+  it('dims disabled rows and fields', async () => {
+    const onPress = jest.fn();
+    await render(
+      <FormSection>
+        <FormTextField
+          placeholder="Content"
+          value=""
+          onChangeText={jest.fn()}
+          disabled
+        />
+        <FormFile title="report.pdf" disabled onPress={onPress} />
+        <FormButton title="Remove" destructive disabled onPress={onPress} />
+      </FormSection>,
+    );
+    expect(screen.getByLabelText('Content').props.editable).toBe(false);
+    await userEvent.setup().press(screen.getByText('report.pdf'));
+    await userEvent.setup().press(screen.getByText('Remove'));
+    expect(onPress).not.toHaveBeenCalled();
+  });
+
+  it('opens a file row', async () => {
+    const onPress = jest.fn();
+    await render(
+      <FormFile
+        title="report.pdf"
+        icon={{ ios: 'doc', android: 'file-outline' }}
+        struck
+        onPress={onPress}
+      />,
+    );
+    expect(screen.getByTestId('icon-doc')).toBeTruthy();
+    await userEvent.setup().press(screen.getByText('report.pdf'));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows progress under its title', async () => {
+    await render(<FormProgress title="Uploading" value={0.4} />);
+    expect(screen.getByText('Uploading')).toBeTruthy();
+    expect(screen.getByRole('progressbar')).toHaveAccessibilityValue({
+      now: 40,
+    });
+  });
 });
 
 describe('form helpers', () => {
+  it("doesn't write a late value over newer typed text", async () => {
+    let fieldText = 'a';
+    const text = {
+      get: () => fieldText,
+      set: jest.fn(),
+      onChange: null as ((value: string) => void) | null,
+    };
+    const onChangeText = jest.fn();
+    const { rerender } = await renderHook(
+      ({ value }: { value: string }) =>
+        useFieldText(text, { value, onChangeText }),
+      { initialProps: { value: 'a' } },
+    );
+    // Two keys reach JS before the first one renders.
+    fieldText = 'abc';
+    await act(() => {
+      text.onChange?.('ab');
+      text.onChange?.('abc');
+    });
+    await rerender({ value: 'ab' });
+    await rerender({ value: 'abc' });
+    expect(text.set).not.toHaveBeenCalled();
+    expect(onChangeText).toHaveBeenLastCalledWith('abc');
+    // A value the field never reported, like a cleared draft, is written.
+    await rerender({ value: '' });
+    expect(text.set).toHaveBeenCalledWith('');
+  });
+
   it('ignores input that is not a positive number', () => {
     const apply = jest.fn();
     ['', 'abc', '0', '-5'].forEach(parseNumberInput(apply));
