@@ -48,7 +48,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       ? t('syncStatusOffline')
       : t('syncStatusLoginFailed');
   const updated = updatedAt
-    ? t('syncStatusUpdated').replace('{time}', dayjs(updatedAt).fromNow())
+    ? t('syncStatusUpdated', { time: dayjs(updatedAt).fromNow() })
     : null;
 
   return (

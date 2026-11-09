@@ -11,7 +11,7 @@ name: Open a notice, an assignment and a file
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: 'Filter|过滤'
+      LIST: 'Filter|筛选'
 
 - runFlow:
     file: subflows/tab.yaml
@@ -26,7 +26,7 @@ name: Open a notice, an assignment and a file
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: 'Filter|过滤'
+      LIST: 'Filter|筛选'
 
 - runFlow:
     file: subflows/tab.yaml
@@ -41,4 +41,4 @@ name: Open a notice, an assignment and a file
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: 'Filter|过滤'
+      LIST: 'Filter|筛选'

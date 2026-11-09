@@ -9,7 +9,7 @@ name: Open settings pages and log out
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: '.*(Logout|退出登录).*'
+      LIST: '.*(Log Out|退出登录).*'
 # Settings is a native lazy list, and on phones About is near the bottom,
 # under the floating tab bar: scroll it to the middle first.
 - scrollUntilVisible:
@@ -22,7 +22,7 @@ name: Open settings pages and log out
     file: subflows/back.yaml
     env:
       # Not About: the About page's title matches that too.
-      LIST: '.*(Help & Feedbacks|帮助与反馈).*'
+      LIST: '.*(Help & Feedback|帮助与反馈).*'
 - scrollUntilVisible:
     element:
       id: settings-logout
@@ -31,7 +31,11 @@ name: Open settings pages and log out
 
 - tapOn:
     id: settings-logout
-- tapOn: '(?i)ok|确定'
+# The alert's button repeats the Settings row's label; the alert comes
+# after the list in the snapshot.
+- tapOn:
+    text: 'Log Out|退出登录'
+    index: 1
 - extendedWaitUntil:
     visible:
       # After a logout iOS may drop the field's own identifier from the

@@ -296,7 +296,7 @@ export const useSubmitAssignment = (
           style: 'cancel',
         },
         {
-          text: t('ok'),
+          text: t('submit'),
           onPress: submit,
         },
       ],

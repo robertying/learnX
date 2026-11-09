@@ -56,7 +56,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
             style: 'cancel',
           },
           {
-            text: t('ok'),
+            text: t('join'),
             onPress: async () => {
               setSetting('courseInformationSharing', enabled);
               if (isDummyUser) {

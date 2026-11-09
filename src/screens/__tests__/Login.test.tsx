@@ -49,7 +49,7 @@ const setup = async () => {
   await render(
     <Login
       navigation={navigation as never}
-      route={{ key: 'Login', name: 'Login' } as never}
+      route={{ key: 'Login', name: 'Log In' } as never}
     />,
   );
   return { navigation };
@@ -61,7 +61,7 @@ const fill = async (username: string, password: string) => {
 };
 
 const pressLogin = () =>
-  user.press(screen.getByRole('button', { name: 'Login' }));
+  user.press(screen.getByRole('button', { name: 'Log In' }));
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -79,16 +79,13 @@ describe('Login', () => {
     await setup();
     await pressLogin();
     expect(toast).toHaveBeenLastCalledWith(
-      'Please enter your username or ID',
+      'Enter your username or student ID',
       'error',
     );
 
     await fireEvent.changeText(screen.getByTestId('login-username'), 'student');
     await pressLogin();
-    expect(toast).toHaveBeenLastCalledWith(
-      'Please enter your password',
-      'error',
-    );
+    expect(toast).toHaveBeenLastCalledWith('Enter your password', 'error');
     expect(login).not.toHaveBeenCalled();
   });
 
@@ -100,7 +97,7 @@ describe('Login', () => {
 
     expect(alert).toHaveBeenCalledTimes(1);
     const buttons = alert.mock.calls[0][2] as AlertButton[];
-    expect(buttons.map(b => b.text)).toEqual(['Cancel', 'Ok']);
+    expect(buttons.map(b => b.text)).toEqual(['Cancel', 'Continue']);
     expect(navigation.navigate).not.toHaveBeenCalled();
 
     await act(async () => {
@@ -156,7 +153,7 @@ describe('Login', () => {
   it('disables the login button while logging in', async () => {
     useAuthStore.setState({ loggingIn: true });
     await setup();
-    expect(screen.getByRole('button', { name: 'Login' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Log In' })).toBeDisabled();
   });
 
   describe('with a saved login', () => {
@@ -172,9 +169,9 @@ describe('Login', () => {
 
     it('retries the saved login or goes offline', async () => {
       await setup();
-      await user.press(screen.getByText('Retry Login With Current Account'));
+      await user.press(screen.getByText('Log In With Saved Account'));
       expect(login).toHaveBeenCalledWith({ reset: true });
-      await user.press(screen.getByText('Offline Mode'));
+      await user.press(screen.getByText('Continue Offline'));
       expect(loginWithOfflineMode).toHaveBeenCalledTimes(1);
     });
 
@@ -199,7 +196,7 @@ describe('Login', () => {
 
   it('has no retry or offline buttons without a saved login', async () => {
     await setup();
-    expect(screen.queryByText('Retry Login With Current Account')).toBeNull();
-    expect(screen.queryByText('Offline Mode')).toBeNull();
+    expect(screen.queryByText('Log In With Saved Account')).toBeNull();
+    expect(screen.queryByText('Continue Offline')).toBeNull();
   });
 });

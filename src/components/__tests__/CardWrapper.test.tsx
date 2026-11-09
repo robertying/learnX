@@ -78,13 +78,13 @@ describe('CardWrapper', () => {
       expect(onArchive).toHaveBeenLastCalledWith(true);
     });
 
-    it('offers unfavorite, restore and show for items already in that state', async () => {
+    it('offers unfavorite, unarchive and show for items already in that state', async () => {
       const onHide = jest.fn();
       const view = await render(card({ fav: true, onFav: jest.fn() }));
       expect(actionNames()).toEqual(['fav:Unfavorite', 'archive:Archive']);
 
       await view.rerender(card({ archived: true }));
-      expect(actionNames()).toEqual(['archive:Restore']);
+      expect(actionNames()).toEqual(['archive:Unarchive']);
 
       await view.rerender(card({ hidden: true, onHide }));
       expect(actionNames()).toEqual(['hide:Unhide']);

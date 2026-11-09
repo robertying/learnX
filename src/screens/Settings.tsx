@@ -55,7 +55,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   const handleLogout = () => {
     Alert.alert(
-      t('logout'),
+      t('logoutQuestion'),
       t('logoutConfirmation'),
       [
         {
@@ -63,7 +63,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           style: 'cancel',
         },
         {
-          text: t('ok'),
+          text: t('logout'),
+          style: 'destructive',
           onPress: () => {
             void dataSource.logout();
             void clearLoginCookies();
@@ -154,7 +155,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             <FormLink
               icon={{ ios: 'arrow.down.circle', android: 'update' }}
               badge
-              title={`${t('foundNewVersion')} v${update.version}`}
+              title={t('foundNewVersion', { version: update.version })}
               onPress={() => Linking.openURL(update.url)}
             />
           )}
