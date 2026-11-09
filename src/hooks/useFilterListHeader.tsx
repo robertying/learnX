@@ -1,17 +1,17 @@
 import { useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import FilterMenu from 'components/FilterMenu';
-import HeaderTitle from 'components/HeaderTitle';
-import IconButton from 'components/IconButton';
+import { iconSymbols } from 'components/IconButton.shared';
+import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { filterSubtitle, selectedCountLabel } from 'helpers/filterList';
 import type { FilterOption, FilterSelection } from 'helpers/filterOptions';
 import { t } from 'helpers/i18n';
+import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
 import { RootStackParams } from 'screens/types';
 
 const TITLES = {
@@ -20,13 +20,6 @@ const TITLES = {
   file: 'files',
   course: 'courses',
 } as const;
-
-const getHeaderTitleOptions = (title: string, subtitle?: string) =>
-  DeviceInfo.supportsNativeSubtitle()
-    ? { title, headerSubtitle: subtitle }
-    : {
-        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
-      };
 
 export interface FilterListHeaderOptions {
   navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'setOptions'> &
@@ -76,262 +69,152 @@ const useFilterListHeader = ({
   const isCourse = type === 'course';
 
   useEffect(() => {
-    // The filter button is a pull-down menu of the filters, with the current
-    // one checked and each one's count beside it.
-    const filterItem: NativeStackHeaderItem = {
-      type: 'menu',
-      identifier: 'filter',
-      label: t('filter'),
-      icon: {
-        type: 'sfSymbol',
-        name:
-          filterSelected === 'all'
-            ? 'line.3.horizontal.decrease.circle'
-            : 'line.3.horizontal.decrease.circle.fill',
-      },
-      menu: {
-        items: filterOptions.map(option => ({
-          type: 'action',
-          label: option.label,
-          description: String(option.count),
-          icon: { type: 'sfSymbol', name: option.sfSymbol },
-          state: filterSelected === option.name ? 'on' : 'off',
-          onPress: () => onFilterSelect(option.name),
-        })),
-      },
+    const reorder: HeaderButton = {
+      id: 'reorder',
+      label: t('reorder'),
+      icon: 'reorder',
+      onPress: onReorder,
+    };
+    const select: HeaderButton = {
+      id: 'select',
+      label: t('select'),
+      icon: 'select',
+      onPress: onSelect,
     };
 
     if (reorderMode) {
       navigation.setOptions({
-        unstable_headerLeftItems: () => [
-          {
-            type: 'button',
-            identifier: 'reorder',
-            label: t('reorder'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'arrow.up.and.down',
-            },
-            onPress: onReorder,
-          },
-        ],
-        unstable_headerRightItems: () => [],
-
-        headerLeft: () => (
-          <IconButton
-            accessibilityLabel={t('reorder')}
-            icon="reorder"
-            onPress={onReorder}
-            mode="contained"
-            style={styles.headerLeft}
-          />
-        ),
-        headerRight: () => <View />,
-        ...getHeaderTitleOptions(t('reorder'), t('dragToReorder')),
+        ...headerButtons('left', [{ ...reorder, contained: true }]),
+        ...headerButtons('right', []),
+        ...getTitleOptions(t('reorder'), t('dragToReorder')),
       });
-    } else if (selectionMode) {
+      return;
+    }
+
+    if (selectionMode) {
+      const restoring = filterSelected === 'archived';
+      const archiveLabel = restoring ? t('restore') : t('archive');
       navigation.setOptions({
-        unstable_headerLeftItems: () => [
+        ...headerButtons('left', [
+          { ...select, contained: true },
           {
-            type: 'button',
-            identifier: 'select',
-            label: t('select'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'checklist',
-            },
-            onPress: onSelect,
-          },
-          {
-            type: 'button',
-            identifier: 'checkAll',
+            id: 'checkAll',
             label: t('checkAll'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'checkmark.circle.fill',
-            },
+            icon: 'checkAll',
             onPress: onCheckAll,
           },
-        ],
-        unstable_headerRightItems: () => [
+        ]),
+        ...headerButtons('right', [
           {
-            type: 'button',
-            identifier: 'archive',
-            label: filterSelected === 'archived' ? t('restore') : t('archive'),
-            icon: {
-              type: 'sfSymbol',
-              name:
-                filterSelected === 'archived' ? 'arrow.up.bin' : 'archivebox',
-            },
+            id: 'archive',
+            label: archiveLabel,
+            icon: restoring ? 'restore' : 'archive',
             onPress: onArchiveSelected,
           },
-        ],
-
-        headerLeft: () => (
-          <View style={styles.headerLeft}>
-            <IconButton
-              accessibilityLabel={t('select')}
-              onPress={onSelect}
-              icon="select"
-              mode="contained"
-            />
-            <IconButton
-              accessibilityLabel={t('checkAll')}
-              onPress={onCheckAll}
-              icon="checkAll"
-            />
-          </View>
-        ),
-        headerRight: () => (
-          <IconButton
-            accessibilityLabel={
-              filterSelected === 'archived' ? t('restore') : t('archive')
-            }
-            onPress={onArchiveSelected}
-            icon={filterSelected === 'archived' ? 'restore' : 'archive'}
-          />
-        ),
-        ...getHeaderTitleOptions(
-          filterSelected === 'archived' ? t('restore') : t('archive'),
-          selectedCountLabel(selectedCount),
-        ),
+        ]),
+        ...getTitleOptions(archiveLabel, selectedCountLabel(selectedCount)),
       });
-    } else {
-      navigation.setOptions({
-        unstable_headerLeftItems: () =>
-          isCourse
-            ? [
-                filterItem,
-                // A third button leaves the title no room beside a sidebar of
-                // the default width, so the rest go in a menu.
-                {
+      return;
+    }
+
+    // The filter button is a pull-down menu of the filters, with the current
+    // one checked and each one's count beside it.
+    const filter = {
+      id: 'filter',
+      item: {
+        type: 'menu',
+        identifier: 'filter',
+        label: t('filter'),
+        icon: {
+          type: 'sfSymbol',
+          name:
+            filterSelected === 'all'
+              ? 'line.3.horizontal.decrease.circle'
+              : 'line.3.horizontal.decrease.circle.fill',
+        },
+        menu: {
+          items: filterOptions.map(option => ({
+            type: 'action',
+            label: option.label,
+            description: String(option.count),
+            icon: { type: 'sfSymbol', name: option.sfSymbol },
+            state: filterSelected === option.name ? 'on' : 'off',
+            onPress: () => onFilterSelect(option.name),
+          })),
+        },
+      } satisfies NativeStackHeaderItem,
+      element: (
+        <FilterMenu
+          label={t('filter')}
+          options={filterOptions}
+          selected={filterSelected}
+          onSelectionChange={onFilterSelect}
+        />
+      ),
+    };
+    const courseX: HeaderButton = {
+      id: 'courseX',
+      label: t('courseX'),
+      icon: 'info',
+      onPress: onCourseX,
+    };
+
+    navigation.setOptions({
+      ...headerButtons(
+        'left',
+        isCourse
+          ? [
+              { ...reorder, nativeItem: false },
+              filter,
+              { ...courseX, nativeItem: false },
+              // A third native button leaves the title no room beside a
+              // sidebar of the default width, so the rest go in a menu.
+              {
+                id: 'more',
+                item: {
                   type: 'menu',
                   identifier: 'more',
                   label: t('more'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'ellipsis.circle',
-                  },
+                  icon: { type: 'sfSymbol', name: 'ellipsis.circle' },
                   menu: {
-                    items: [
-                      {
-                        type: 'action',
-                        label: t('reorder'),
-                        icon: {
-                          type: 'sfSymbol',
-                          name: 'arrow.up.and.down',
-                        },
-                        onPress: onReorder,
+                    items: [reorder, courseX].map(button => ({
+                      type: 'action',
+                      label: button.label,
+                      icon: {
+                        type: 'sfSymbol',
+                        name: iconSymbols[button.icon],
                       },
-                      {
-                        type: 'action',
-                        label: t('courseX'),
-                        icon: {
-                          type: 'sfSymbol',
-                          name: 'info.circle',
-                        },
-                        onPress: onCourseX,
-                      },
-                    ],
+                      onPress: button.onPress,
+                    })),
                   },
                 },
-              ]
-            : [
-                {
-                  type: 'button',
-                  identifier: 'select',
-                  label: t('select'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: 'checklist',
-                  },
-                  onPress: onSelect,
-                },
-                filterItem,
-              ],
-        unstable_headerRightItems: () => [
-          ...(DeviceInfo.isMac()
-            ? ([
-                {
-                  type: 'button',
-                  identifier: 'refresh',
-                  label: t('refresh'),
-                  icon: {
-                    type: 'sfSymbol',
-                    name: refreshing
-                      ? 'arrow.trianglehead.2.clockwise.rotate.90'
-                      : 'arrow.clockwise',
-                  },
-                  disabled: refreshing,
-                  onPress: () => onRefresh?.(),
-                },
-              ] satisfies NativeStackHeaderItem[])
-            : []),
-          {
-            type: 'button',
-            identifier: 'search',
-            label: t('search'),
-            icon: {
-              type: 'sfSymbol',
-              name: 'magnifyingglass',
-            },
-            onPress: () => navigation.navigate('SearchStack'),
-          },
-        ],
-
-        headerLeft: () => (
-          <View style={styles.headerLeft}>
-            {isCourse ? (
-              <IconButton
-                accessibilityLabel={t('reorder')}
-                icon="reorder"
-                onPress={onReorder}
-              />
-            ) : (
-              <IconButton
-                accessibilityLabel={t('select')}
-                onPress={onSelect}
-                icon="select"
-              />
-            )}
-            <FilterMenu
-              label={t('filter')}
-              options={filterOptions}
-              selected={filterSelected}
-              onSelectionChange={onFilterSelect}
-            />
-            {isCourse && (
-              <IconButton
-                accessibilityLabel={t('courseX')}
-                icon="info"
-                onPress={onCourseX}
-              />
-            )}
-          </View>
-        ),
-        headerRight: () => (
-          <>
-            {DeviceInfo.isMac() && (
-              <IconButton
-                accessibilityLabel={t('refresh')}
-                disabled={refreshing}
-                onPress={onRefresh}
-                icon="refresh"
-              />
-            )}
-            <IconButton
-              accessibilityLabel={t('search')}
-              onPress={() => navigation.navigate('SearchStack')}
-              icon="search"
-            />
-          </>
-        ),
-        ...getHeaderTitleOptions(
-          t(TITLES[type]),
-          filterSubtitle(filterSelected, defaultSubtitle),
-        ),
-      });
-    }
+              },
+            ]
+          : [select, filter],
+      ),
+      ...headerButtons('right', [
+        DeviceInfo.isMac() && {
+          id: 'refresh',
+          label: t('refresh'),
+          icon: 'refresh',
+          sfSymbol: refreshing
+            ? 'arrow.trianglehead.2.clockwise.rotate.90'
+            : undefined,
+          disabled: refreshing,
+          onPress: () => onRefresh?.(),
+        },
+        {
+          id: 'search',
+          label: t('search'),
+          icon: 'search',
+          onPress: () => navigation.navigate('SearchStack'),
+        },
+      ]),
+      ...getTitleOptions(
+        t(TITLES[type]),
+        filterSubtitle(filterSelected, defaultSubtitle),
+      ),
+    });
   }, [
     defaultSubtitle,
     filterOptions,
@@ -352,13 +235,5 @@ const useFilterListHeader = ({
     type,
   ]);
 };
-
-// Android: a gap between the last header button and the title.
-const styles = StyleSheet.create({
-  headerLeft: {
-    flexDirection: 'row',
-    marginEnd: 4,
-  },
-});
 
 export default useFilterListHeader;
