@@ -92,7 +92,10 @@ export interface AssignmentEventInput {
   completionDate?: Dayjs;
 }
 
-/** iOS reminder for an assignment; the alarm moves the due date earlier */
+/**
+ * iOS reminder for an assignment, due at the deadline, with an alert the
+ * chosen time before it
+ */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
   {
@@ -108,11 +111,19 @@ export const buildAssignmentReminderDetails = (
   return {
     title,
     startDate: startDate.toDate(),
-    dueDate: alarms.assignmentReminderAlarm
-      ? dueDate
-          .subtract(alarms.assignmentReminderAlarmOffset ?? 24 * 60, 'minute')
-          .toDate()
-      : dueDate.toDate(),
+    dueDate: dueDate.toDate(),
+    alarms: alarms.assignmentReminderAlarm
+      ? [
+          {
+            absoluteDate: dueDate
+              .subtract(
+                alarms.assignmentReminderAlarmOffset ?? 24 * 60,
+                'minute',
+              )
+              .toISOString(),
+          },
+        ]
+      : [],
     timeZone: TZ,
     completed,
     completionDate: completionDate?.toDate(),
@@ -206,6 +217,22 @@ export const buildAssignmentEventInputs = (
         },
       ];
     });
+
+/** Whether learnX created or adopted this calendar or reminder list. */
+export const isSyncedCalendar = (
+  calendar: { id: string; title: string },
+  settings: Pick<
+    SettingsState,
+    'courseCalendarId' | 'assignmentCalendarId' | 'assignmentReminderId'
+  >,
+) =>
+  [
+    settings.courseCalendarId,
+    settings.assignmentCalendarId,
+    settings.assignmentReminderId,
+  ].some(id => !!id && id === calendar.id) ||
+  calendar.title === courseCalendarName ||
+  calendar.title === assignmentCalendarReminderName;
 
 /** The course and assignment calendars learnX created or adopted */
 export const findSyncedCalendars = <T extends { id: string; title: string }>(

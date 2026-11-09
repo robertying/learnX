@@ -83,8 +83,6 @@ const zh: typeof en = {
     '部分周的课表获取失败，已保留原有日程，请稍后重新同步',
   courseScheduleSyncNoCalendarPermission:
     '课表同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX',
-  courseScheduleSyncNoReminderPermission:
-    '课表同步失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX',
   courseScheduleSyncRepetitiveError:
     '课表同步失败：请确保已连接校园网后重试；如果仍然失败，请缩短同步的日期范围',
   courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表',
@@ -118,10 +116,10 @@ const zh: typeof en = {
   assignmentCalendarSecondAlarmOffset: '截止前第二次提醒（分钟）',
   assignmentCalendarNoAlarmIfComplete: '已提交的作业不提醒',
   assignmentReminderSync: '作业提醒事项同步',
-  assignmentReminderAlarm: '提醒事项提前截止',
-  assignmentReminderAlarmOffset: '提前时间（分钟）',
+  assignmentReminderAlarm: '截止前提醒',
+  assignmentReminderAlarmOffset: '截止前提醒（分钟）',
   assignmentSyncDescription:
-    '作业会在刷新时同步；已归档、已过期的作业和已屏蔽课程的作业不会同步。更改设置后请刷新作业。',
+    '作业会在刷新时同步；已过期的作业不会同步，已归档的作业和已屏蔽课程的作业会被移除。更改设置后请刷新作业。',
   clearFileCache: '删除全部已下载文件',
   clearFileCacheConfirmation: '确定删除全部已下载的文件？此操作不可撤销。',
   clearFileCacheSucceeded: '已删除全部已下载文件',

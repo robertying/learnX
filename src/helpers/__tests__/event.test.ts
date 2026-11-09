@@ -11,6 +11,7 @@ import {
   saveCoursesToCalendar,
 } from 'helpers/event';
 import dayjs from 'dayjs';
+import { CalendarError } from 'helpers/calendarError';
 
 jest.mock('data/queries', () => ({
   getCachedCourses: () => [{ id: 'c1', name: 'Calculus' }],
@@ -94,7 +95,7 @@ describe('calendar ids', () => {
 
   it('throws when there is no calendar source', async () => {
     await expect(getCourseCalendarId()).rejects.toThrow(
-      'Cannot find any calendar source',
+      new CalendarError('noSource'),
     );
   });
 
@@ -183,10 +184,19 @@ describe('saveCoursesToCalendar', () => {
     );
   });
 
+  it("doesn't ask for Reminders", async () => {
+    mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
+    setSetting('courseCalendarId', 'courses');
+    mocked.getCalendars.mockResolvedValue([{ id: 'courses', title: 'x' }]);
+    mocked.ExpoCalendar.get.mockResolvedValue(fakeCalendar());
+    await saveCoursesToCalendar([], dayjs(), dayjs());
+    expect(mocked.requestRemindersPermissions).not.toHaveBeenCalled();
+  });
+
   it('needs calendar permission', async () => {
     grant('denied');
     await expect(saveCoursesToCalendar([], dayjs(), dayjs())).rejects.toThrow(
-      'Missing calendar permission',
+      new CalendarError('calendarPermission'),
     );
   });
 });
@@ -267,12 +277,38 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     });
   });
 
+  it('deletes and forgets the entries of removed assignments', async () => {
+    setSetting('syncedCalendarAssignments', { a1: 'e1', gone: 'e2', a3: 'e3' });
+    mocked.ExpoCalendar.get.mockResolvedValue(fakeCalendar());
+    const deleted: string[] = [];
+    mocked.ExpoCalendarEvent.get.mockImplementation(async (id: string) => {
+      if (id === 'e2') {
+        throw new Error('Not found');
+      }
+      return {
+        update: jest.fn(async () => {}),
+        delete: jest.fn(async () => {
+          deleted.push(id);
+        }),
+      };
+    });
+
+    await saveAssignmentsToReminderOrCalendar(
+      'calendar',
+      [assignment('a1')],
+      ['a3', 'gone', 'neverSynced'],
+    );
+
+    expect(deleted).toEqual(['e3']);
+    expect(getSettings().syncedCalendarAssignments).toEqual({ a1: 'e1' });
+  });
+
   it('needs reminder permission for reminders', async () => {
     mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
     mocked.requestRemindersPermissions.mockResolvedValue({ status: 'denied' });
     await expect(
       saveAssignmentsToReminderOrCalendar('reminder', []),
-    ).rejects.toThrow('Missing reminder permission');
+    ).rejects.toThrow(new CalendarError('reminderPermission'));
   });
 });
 
@@ -284,6 +320,13 @@ describe('removeCalendars', () => {
     setSetting('syncedCalendarAssignments', { a1: 'e1' });
     const course = { title: 'learnX 课表', delete: jest.fn(async () => {}) };
     const personal = { title: 'Personal', delete: jest.fn(async () => {}) };
+    // Has learnX in its title, but isn't one of ours.
+    const notes = { title: 'learnX notes', delete: jest.fn(async () => {}) };
+    const adopted = {
+      id: 'a',
+      title: 'Renamed',
+      delete: jest.fn(async () => {}),
+    };
     const reminders = {
       title: 'learnX 作业',
       delete: jest.fn(async () => {
@@ -291,11 +334,13 @@ describe('removeCalendars', () => {
       }),
     };
     mocked.getCalendars.mockImplementation(async (type?: string) =>
-      type === 'reminder' ? [reminders] : [course, personal],
+      type === 'reminder' ? [reminders] : [course, personal, notes, adopted],
     );
 
     await removeCalendars();
 
+    expect(notes.delete).not.toHaveBeenCalled();
+    expect(adopted.delete).toHaveBeenCalled();
     expect(course.delete).toHaveBeenCalled();
     expect(reminders.delete).toHaveBeenCalled();
     expect(personal.delete).not.toHaveBeenCalled();
@@ -352,7 +397,7 @@ describe('exportSyncedCalendarsToICS', () => {
 
   it('throws when nothing is synced', async () => {
     await expect(exportSyncedCalendarsToICS()).rejects.toThrow(
-      'No synced events',
+      new CalendarError('noEvents'),
     );
   });
 });

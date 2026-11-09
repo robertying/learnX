@@ -82,8 +82,6 @@ export default {
     "Some weeks of the course schedule couldn't be fetched and were left as they were. Try syncing again later.",
   courseScheduleSyncNoCalendarPermission:
     "Couldn't sync the course schedule. Give learnX full access to Calendars in Settings. If it already has access, restart learnX.",
-  courseScheduleSyncNoReminderPermission:
-    "Couldn't sync the course schedule. Give learnX access to Reminders in Settings. If it already has access, restart learnX.",
   courseScheduleSyncRepetitiveError:
     "Couldn't sync the course schedule. Make sure you're on the campus network and try again. If it keeps failing, pick a shorter date range.",
   courseScheduleSyncNoCourse:
@@ -119,10 +117,10 @@ export default {
   assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (Minutes)',
   assignmentCalendarNoAlarmIfComplete: 'No Alerts for Submitted Assignments',
   assignmentReminderSync: 'Assignment Reminder Sync',
-  assignmentReminderAlarm: 'Set Reminders Due Early',
-  assignmentReminderAlarmOffset: 'Due Early By (Minutes)',
+  assignmentReminderAlarm: 'Reminder Alert',
+  assignmentReminderAlarmOffset: 'Alert Before Deadline (Minutes)',
   assignmentSyncDescription:
-    "Assignments sync when you refresh them. Archived and past-due assignments and those of hidden courses aren't synced. Refresh assignments after changing these settings.",
+    "Assignments sync when you refresh them. Past-due assignments aren't synced, and archived ones and those of hidden courses are removed. Refresh assignments after changing these settings.",
   clearFileCache: 'Delete All Downloads',
   clearFileCacheConfirmation:
     "Delete all downloaded files? This can't be undone.",
