@@ -1,5 +1,5 @@
 import { useContext, useLayoutEffect } from 'react';
-import { PlatformColor, StyleSheet } from 'react-native';
+import { PlatformColor, StyleSheet, useWindowDimensions } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { TextInput } from '@expo/ui';
 import {
@@ -190,6 +190,20 @@ const RowLabel: React.FC<{
   return icon ? <Label systemImage={icon.ios}>{label}</Label> : label;
 };
 
+/**
+ * At accessibility text sizes the detail goes under the subtitle instead of
+ * at the end of the row, which would squeeze the title into a narrow column.
+ */
+const useStackedDetail = (subtitle?: string, detail?: string) => {
+  const { fontScale } = useWindowDimensions();
+  return detail && fontScale >= 1.5
+    ? {
+        subtitle: [subtitle, detail].filter(Boolean).join('\n'),
+        detail: undefined,
+      }
+    : { subtitle, detail };
+};
+
 const RowDetail: React.FC<{ detail?: string }> = ({ detail }) =>
   detail ? <Text modifiers={[secondaryText]}>{detail}</Text> : null;
 
@@ -208,7 +222,8 @@ const ItemRow: React.FC<
     trailing?: React.ReactNode;
     badge?: React.ReactNode;
   }
-> = ({ title, subtitle, icon, detail, done, progress, badge, trailing }) => {
+> = ({ title, icon, done, progress, badge, trailing, ...rest }) => {
+  const { subtitle, detail } = useStackedDetail(rest.subtitle, rest.detail);
   const row = (
     <HStack modifiers={done ? doneModifiers : undefined}>
       <RowLabel title={title} subtitle={subtitle} icon={icon} plain />
@@ -231,26 +246,23 @@ const ItemRow: React.FC<
   );
 };
 
-export const FormText: React.FC<FormTextProps> = ({ testID, ...row }) =>
-  row.done || row.progress !== undefined ? (
+export const FormText: React.FC<FormTextProps> = ({ testID, ...row }) => {
+  const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
+  return row.done || row.progress !== undefined ? (
     <VStack testID={testID}>
       <ItemRow {...row} />
     </VStack>
   ) : (
     <LabeledContent
       label={
-        <RowLabel
-          title={row.title}
-          subtitle={row.subtitle}
-          icon={row.icon}
-          plain
-        />
+        <RowLabel title={row.title} subtitle={subtitle} icon={row.icon} plain />
       }
       testID={testID}
     >
-      <RowDetail detail={row.detail} />
+      <RowDetail detail={detail} />
     </LabeledContent>
   );
+};
 
 /** A row that opens another page, with the chevron. */
 export const FormLink: React.FC<FormLinkProps> = ({

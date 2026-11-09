@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   Badge,
@@ -225,6 +225,13 @@ const FormRow: React.FC<
   progress,
 }) => {
   const colors = useMaterialColors();
+  // At large font sizes the detail goes under the subtitle instead of at the
+  // end, which would squeeze the title into a narrow column.
+  const { fontScale } = useWindowDimensions();
+  const stackDetail = !!detail && fontScale >= 1.5;
+  const supporting = stackDetail
+    ? [subtitle, detail].filter(Boolean).join('\n')
+    : subtitle;
   // Over: the text in the secondary color, with a check at the end.
   const contentColor = done ? colors.outline : titleColor;
   const check = done ? (
@@ -233,7 +240,7 @@ const FormRow: React.FC<
     </RNHostView>
   ) : null;
   const ends = [
-    detail ? (
+    detail && !stackDetail ? (
       <Text
         key="detail"
         color={done ? colors.outline : colors.onSurfaceVariant}
@@ -265,10 +272,10 @@ const FormRow: React.FC<
           {title}
         </Text>
       </ListItem.HeadlineContent>
-      {subtitle ? (
+      {supporting ? (
         <ListItem.SupportingContent>
           <Text color={done ? colors.outline : colors.onSurfaceVariant}>
-            {subtitle}
+            {supporting}
           </Text>
         </ListItem.SupportingContent>
       ) : null}

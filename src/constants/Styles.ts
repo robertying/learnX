@@ -10,6 +10,14 @@ const Styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  /** Metadata on both ends of a line, wrapping when it doesn't fit. */
+  metaRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    columnGap: 8,
+  },
   flex1: {
     flex: 1,
   },

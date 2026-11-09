@@ -200,7 +200,7 @@ const AssignmentDetailContent: React.FC<{
     <SafeArea testID="assignment-detail" collapsable={false}>
       <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
-          <View style={Styles.flexRow}>
+          <View style={styles.chips}>
             <Chip style={styles.chip}>
               {completionType === HomeworkCompletionType.GROUP
                 ? t('assignmentGroupCompletion')
@@ -213,7 +213,7 @@ const AssignmentDetailContent: React.FC<{
             </Chip>
           </View>
           <Title>{title}</Title>
-          <View style={Styles.flexRowCenter}>
+          <View style={Styles.metaRow}>
             <Caption>{deadlineText(deadline, now)}</Caption>
             <Caption>{dayjs(deadline).format(t('fullDateTimeFormat'))}</Caption>
           </View>
@@ -410,7 +410,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  chips: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+  },
   chip: {
+    flexShrink: 1,
     marginBottom: 8,
     marginRight: 8,
   },

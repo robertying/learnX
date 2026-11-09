@@ -84,7 +84,7 @@ const NoticeDetailContent: React.FC<{
       <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <Title>{title}</Title>
-          <View style={Styles.flexRowCenter}>
+          <View style={Styles.metaRow}>
             <Caption>{publisher}</Caption>
             <Caption>{dayjs(publishTime).format(t('dateTimeFormat'))}</Caption>
           </View>
