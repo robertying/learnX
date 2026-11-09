@@ -1,4 +1,5 @@
-import { Platform, useColorScheme } from 'react-native';
+import { useSyncExternalStore } from 'react';
+import { AccessibilityInfo, Platform, useColorScheme } from 'react-native';
 import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme,
@@ -91,7 +92,8 @@ const iosNeutralDark: Partial<typeof materialLight> = {
 
 /**
  * Status colors for icons and badges: Apple's system colors, which also read
- * well next to Material components on Android.
+ * well next to Material components on Android. Fills, such as the swipe
+ * buttons' tint, use `light` and `dark`; text and glyphs use `theme.colors.status`.
  */
 export const statusColors = {
   light: {
@@ -110,11 +112,47 @@ export const statusColors = {
     blue: 'rgb(10, 132, 255)',
     grey: 'rgb(152, 152, 157)',
   },
+  // Apple's accessible (Increase Contrast) variants. The plain light ones are
+  // 2:1 to 3.5:1 on white, too faint for text and small glyphs, so light mode
+  // always uses these for `theme.colors.status`.
+  accessibleLight: {
+    red: 'rgb(215, 0, 21)',
+    orange: 'rgb(201, 52, 0)',
+    yellow: 'rgb(178, 80, 0)',
+    green: 'rgb(36, 138, 61)',
+    blue: 'rgb(0, 64, 221)',
+    grey: 'rgb(108, 108, 112)',
+  },
+  accessibleDark: {
+    red: 'rgb(255, 105, 97)',
+    orange: 'rgb(255, 179, 64)',
+    yellow: 'rgb(255, 212, 38)',
+    green: 'rgb(48, 219, 91)',
+    blue: 'rgb(64, 156, 255)',
+    grey: 'rgb(174, 174, 178)',
+  },
+};
+
+// iOS's Increase Contrast: darker secondary text and separators on the JS
+// screens, as the system gives its own views.
+const iosHighContrastLight: Partial<typeof materialLight> = {
+  onSurfaceVariant: 'rgb(72, 72, 76)',
+  outline: 'rgb(108, 108, 112)',
+  outlineVariant: 'rgb(142, 142, 147)',
+};
+const iosHighContrastDark: Partial<typeof materialLight> = {
+  onSurfaceVariant: 'rgb(210, 210, 214)',
+  outline: 'rgb(174, 174, 178)',
+  outlineVariant: 'rgb(110, 110, 115)',
 };
 
 /** Adds an alpha channel to an `rgb(r, g, b)` color. */
 export const withAlpha = (rgb: string, alpha: number) =>
   rgb.replace(/^rgb\((.*)\)$/, `rgba($1, ${alpha})`);
+
+/** Darkens an `rgb(r, g, b)` color by `factor` (0.8 keeps 80%). */
+export const shade = (rgb: string, factor: number) =>
+  rgb.replace(/\d+/g, c => String(Math.round(Number(c) * factor)));
 
 const luminance = (rgb: string) => {
   const [r, g, b] = (rgb.match(/\d+/g) ?? []).map(c => {
@@ -131,11 +169,16 @@ const luminance = (rgb: string) => {
 export const textOn = (rgb: string) =>
   1.05 / (luminance(rgb) + 0.05) >= 3 ? 'white' : 'black';
 
-const buildColors = (dark: boolean) => {
+const buildColors = (dark: boolean, highContrast = false) => {
   const material = dark ? materialDark : materialLight;
   const colors = {
     ...material,
     ...(Platform.OS === 'ios' ? (dark ? iosNeutralDark : iosNeutralLight) : {}),
+    ...(Platform.OS === 'ios' && highContrast
+      ? dark
+        ? iosHighContrastDark
+        : iosHighContrastLight
+      : {}),
   };
   return {
     ...colors,
@@ -149,14 +192,18 @@ const buildColors = (dark: boolean) => {
     // Material 3's onSurface and onSurfaceVariant
     onSurfaceHigh: colors.onSurface,
     onSurfaceMedium:
-      Platform.OS === 'ios'
+      Platform.OS === 'ios' && !highContrast
         ? dark
           ? 'rgba(235, 235, 245, 0.6)'
           : 'rgba(60, 60, 67, 0.6)'
         : colors.onSurfaceVariant,
     surfaceDisabled: withAlpha(colors.onSurface, 0.12),
     onSurfaceDisabled: withAlpha(colors.onSurface, 0.38),
-    status: dark ? statusColors.dark : statusColors.light,
+    status: dark
+      ? highContrast
+        ? statusColors.accessibleDark
+        : statusColors.dark
+      : statusColors.accessibleLight,
   };
 };
 
@@ -172,6 +219,14 @@ export const BrandLightTheme: Theme = {
   colors: buildColors(false),
 };
 export const BrandDarkTheme: Theme = { dark: true, colors: buildColors(true) };
+const highContrastLightTheme: Theme = {
+  dark: false,
+  colors: buildColors(false, true),
+};
+const highContrastDarkTheme: Theme = {
+  dark: true,
+  colors: buildColors(true, true),
+};
 
 export const BrandLightNavigationTheme = {
   ...NavigationDefaultTheme,
@@ -208,9 +263,45 @@ const composeOverrides = {
 export const useComposeColorOverrides = () =>
   useColorScheme() === 'dark' ? composeOverrides.dark : composeOverrides.light;
 
-/** The app's colors for the system appearance. Use this in components. */
-export const useTheme = (): Theme =>
-  useColorScheme() === 'dark' ? BrandDarkTheme : BrandLightTheme;
+// iOS's Increase Contrast ("darker system colors"), followed live.
+let increaseContrast = false;
+const contrastListeners = new Set<() => void>();
+const setIncreaseContrast = (enabled: boolean) => {
+  if (enabled !== increaseContrast) {
+    increaseContrast = enabled;
+    contrastListeners.forEach(listener => listener());
+  }
+};
+if (Platform.OS === 'ios') {
+  void AccessibilityInfo.isDarkerSystemColorsEnabled()
+    .then(setIncreaseContrast)
+    .catch(() => {});
+  AccessibilityInfo.addEventListener(
+    'darkerSystemColorsChanged',
+    setIncreaseContrast,
+  );
+}
+const subscribeContrast = (listener: () => void) => {
+  contrastListeners.add(listener);
+  return () => {
+    contrastListeners.delete(listener);
+  };
+};
+const useIncreaseContrast = () =>
+  useSyncExternalStore(subscribeContrast, () => increaseContrast);
+
+/**
+ * The app's colors for the system appearance (and iOS's Increase Contrast).
+ * Use this in components.
+ */
+export const useTheme = (): Theme => {
+  const dark = useColorScheme() === 'dark';
+  const highContrast = useIncreaseContrast();
+  if (highContrast) {
+    return dark ? highContrastDarkTheme : highContrastLightTheme;
+  }
+  return dark ? BrandDarkTheme : BrandLightTheme;
+};
 
 /** The React Navigation theme for the system appearance. */
 export const useNavigationTheme = () =>
