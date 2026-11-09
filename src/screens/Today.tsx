@@ -17,10 +17,9 @@ import { useAssignments, useFiles, useNotices } from 'data/content';
 import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
 import { Assignment } from 'data/types/state';
-import { deadlineText } from 'helpers/assignments';
+import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
-import { sanitizeLocation } from 'helpers/eventDetails';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
 import usePullToRefresh from 'hooks/usePullToRefresh';
@@ -42,8 +41,9 @@ const itemRow = ({ key, onPress, ...row }: ItemRowProps) =>
     <FormText key={key} {...row} />
   );
 
-const where = (session: ClassSession) =>
-  session.location ? sanitizeLocation(session.location) : undefined;
+// The room as the course lists it ("六教6A414"), which students know, not
+// the full building name the calendar export adds for maps.
+const where = (session: ClassSession) => session.location.trim() || undefined;
 
 const Today: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
@@ -69,14 +69,8 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const noticesQuery = useNotices();
   const filesQuery = useFiles();
 
-  const dueBy = today.add(1, 'day').endOf('day');
   const dueSoon = visible(assignmentsQuery.assignments, archived.assignment)
-    .filter(a => {
-      const deadline = dayjs(a.deadline);
-      return (
-        !a.submitted && deadline.isAfter(today) && deadline.isBefore(dueBy)
-      );
-    })
+    .filter(a => !a.submitted && isDueSoon(a.deadline, now))
     .sort((a, b) => dayjs(a.deadline).diff(b.deadline));
   const unreadNotices = visible(noticesQuery.notices, archived.notice).filter(
     n => !n.hasRead,
@@ -197,6 +191,10 @@ const Today: React.FC<Props> = ({ navigation }) => {
         : undefined;
   const span = (session: ClassSession) =>
     `${time(session.start)}–${time(session.end)}`;
+  // Time and room on the second line, as Calendar lists events, so the
+  // course name gets the row's full width.
+  const details = (session: ClassSession) =>
+    [span(session), where(session)].filter(Boolean).join(' · ');
 
   return (
     <SafeArea>
@@ -207,9 +205,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             {itemRow({
               key: current.key,
               title: current.courseName,
-              subtitle: [span(current), where(current)]
-                .filter(Boolean)
-                .join(' · '),
+              subtitle: details(current),
               detail: t('todayEndsIn', { time: dayjs(now).to(current.end) }),
               progress: (now - current.start) / (current.end - current.start),
               onPress: pressOf(current),
@@ -221,7 +217,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             {itemRow({
               key: next.key,
               title: next.courseName,
-              subtitle: [span(next), where(next)].filter(Boolean).join(' · '),
+              subtitle: details(next),
               detail: t('todayStartsIn', { time: dayjs(now).to(next.start) }),
               onPress: pressOf(next),
             })}
@@ -240,8 +236,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                 itemRow({
                   key: session.key,
                   title: session.courseName,
-                  subtitle: where(session),
-                  detail: span(session),
+                  subtitle: details(session),
                   done: session.end <= now,
                   onPress: pressOf(session),
                 }),
