@@ -89,6 +89,16 @@ describe('Login', () => {
     expect(login).not.toHaveBeenCalled();
   });
 
+  it('names its fields for screen readers', async () => {
+    await setup();
+    expect(screen.getByLabelText('Username or Student ID')).toBe(
+      screen.getByTestId('login-username'),
+    );
+    expect(screen.getByLabelText('Password')).toBe(
+      screen.getByTestId('login-password'),
+    );
+  });
+
   it('confirms before handing a real account to the SSO page', async () => {
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
     const { navigation } = await setup();

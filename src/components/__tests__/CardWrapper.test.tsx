@@ -9,7 +9,7 @@ import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import { mockSwipeableMethods } from '../../../jest/swipeable';
 
 const card = (props: CardWrapperProps = {}) => (
-  <CardWrapper {...props}>
+  <CardWrapper accessibilityLabel="Card label" {...props}>
     <Text>Card</Text>
   </CardWrapper>
 );
@@ -20,7 +20,7 @@ const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
 const press = () => user.press(screen.getByText('Card'));
 const longPress = () => user.longPress(screen.getByText('Card'));
 const swipeEnabled = () => screen.getByTestId('swipeable').props.enabled;
-const touchable = () => screen.getByRole(/button|checkbox/);
+const touchable = () => screen.getByLabelText('Card label');
 const accessibilityAction = (actionName: string) =>
   fireEvent(touchable(), 'accessibilityAction', {
     nativeEvent: { actionName },
@@ -111,6 +111,35 @@ describe('CardWrapper', () => {
       expect(actionNames()).toBeUndefined();
       await view.rerender(card({ disableSwipe: true }));
       expect(actionNames()).toBeUndefined();
+    });
+
+    it('says the label it is given instead of its texts', async () => {
+      await render(card());
+      expect(screen.getByRole('button', { name: 'Card label' })).toBeTruthy();
+    });
+
+    it('moves the card up and down in reorder mode', async () => {
+      const onMove = jest.fn();
+      const view = await render(
+        card({ reorderMode: true, onMove, canMoveUp: true, canMoveDown: true }),
+      );
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(actionNames()).toEqual(['moveUp:Move Up', 'moveDown:Move Down']);
+      await accessibilityAction('moveUp');
+      expect(onMove).toHaveBeenLastCalledWith(-1);
+      await accessibilityAction('moveDown');
+      expect(onMove).toHaveBeenLastCalledWith(1);
+
+      // the first card can only go down
+      await view.rerender(
+        card({
+          reorderMode: true,
+          onMove,
+          canMoveUp: false,
+          canMoveDown: true,
+        }),
+      );
+      expect(actionNames()).toEqual(['moveDown:Move Down']);
     });
   });
 

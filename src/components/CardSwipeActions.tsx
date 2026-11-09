@@ -42,6 +42,7 @@ const CardSwipeActions: React.FC<{
           key={action.key}
           testID={action.testID}
           accessibilityLabel={action.label}
+          accessibilityRole="button"
           type="opacity"
           style={[styles.button, { backgroundColor: action.background }]}
           onPress={() => {

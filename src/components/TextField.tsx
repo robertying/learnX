@@ -39,14 +39,18 @@ const TextField: React.FC<TextFieldProps> = ({
   return (
     <View style={[disabled && styles.disabled, style]}>
       {label ? (
+        // The field says its label itself, so screen readers skip this one.
         <Caption
           testID={props.testID ? `${props.testID}-label` : undefined}
           style={styles.label}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         >
           {label}
         </Caption>
       ) : null}
       <TextInput
+        accessibilityLabel={label}
         {...props}
         ref={ref}
         multiline={multiline}

@@ -273,6 +273,7 @@ const CourseDetailContent: React.FC<{
           { backgroundColor: theme.colors.surface },
         ]}
         onPress={handleNavigateCourseX}
+        accessibilityRole="button"
       >
         <Icon
           style={styles.icon}
