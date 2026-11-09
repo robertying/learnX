@@ -108,9 +108,10 @@ const points = (...values: Margin[]) => {
 
 /**
  * Moves the button's 12 dp padding and its 48 dp minimum touch height into
- * the gutter (it overlaps its neighbors, like an inline link), so the label lines up with the text around it (as the iOS label
- * does) and the row keeps its height. The offsets add to the caller's margins
- * rather than being replaced by them.
+ * the gutter, overlapping its neighbors like an inline link, so the label
+ * lines up with the text around it (as the iOS label does) and the row keeps
+ * its height. The offsets add to the caller's margins rather than being
+ * replaced by them.
  */
 const withGutter = (style: StyleProp<ViewStyle>): StyleProp<ViewStyle> => {
   const {
