@@ -11,12 +11,7 @@ import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { getCredentials, loadCredentials } from 'data/credentials';
-import {
-  mockDownloadFile,
-  mockMarkNoticeRead,
-  mockSource,
-  mockSubmitAssignment,
-} from 'data/mockSource';
+import { mockSource } from 'data/mockSource';
 import Urls from 'constants/Urls';
 import { isMockUser } from 'helpers/mock';
 import {
@@ -48,18 +43,102 @@ export type DataSource = Pick<
   | 'getFavorites'
 >;
 
+/**
+ * Everything the app asks of the school's server: thu-learn-lib's calls, and
+ * the few requests the app sends itself.
+ */
+export interface AppSource extends DataSource {
+  /**
+   * Loads a notice's page, which marks the notice read on the server, as the
+   * website does when it's opened.
+   */
+  markNoticeRead: (url: string) => Promise<void>;
+  /** See `submitAssignment` below. */
+  submitAssignment: (
+    studentHomeworkId: string,
+    content: string | undefined,
+    attachment: { uri: string; name: string } | undefined,
+    onProgress: ((progress: number) => void) | undefined,
+    remove: boolean,
+  ) => Promise<void>;
+  /** Runs before a file is downloaded from the server. */
+  prepareFileDownload: () => Promise<void>;
+}
+
 let helper: Learn2018Helper;
 
 const isMockSession = () => isMockUser(getCredentials()?.username);
 
+/** The requests the app sends to learn.tsinghua.edu.cn itself. */
+const realRequests: Omit<AppSource, keyof DataSource> = {
+  markNoticeRead: async url => {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw {
+        reason: FailReason.UNEXPECTED_STATUS,
+        extra: response.status,
+      } satisfies ApiError;
+    }
+  },
+  submitAssignment: async (
+    studentHomeworkId,
+    content,
+    attachment,
+    onProgress,
+    remove,
+  ) => {
+    assertServerWritesAllowed('Assignment submission');
+
+    // Checks the session first, logging in again only if it has expired.
+    const { url, body } = await helper.getHomeworkSubmitRequest(
+      studentHomeworkId,
+      content,
+      attachment && {
+        filename: attachment.name,
+        content: {
+          uri: attachment.uri,
+          type: mime.getType(attachment.uri) || 'application/octet-stream',
+        },
+      },
+      remove,
+    );
+    const res = await axios.post<string>(url, body, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      // Read as text: an expired session answers with the login page.
+      responseType: 'text',
+      transformResponse: data => data,
+      onUploadProgress: e => {
+        // New architecture doesn't like native floats
+        onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
+      },
+    });
+    checkHomeworkSubmitResponse(res.data);
+  },
+  prepareFileDownload: async () => {},
+};
+
+/** learn.tsinghua.edu.cn, through thu-learn-lib and the requests above. */
+const realSource = new Proxy({} as AppSource, {
+  get: (_, key: keyof AppSource) => {
+    if (key in realRequests) {
+      return realRequests[key as keyof typeof realRequests];
+    }
+    const value = helper[key as keyof DataSource];
+    return typeof value === 'function' ? value.bind(helper) : value;
+  },
+});
+
 /**
  * Talks to learn.tsinghua.edu.cn, or to the emulated server in
  * `data/mockSource` while a mock account is logged in. Picked per call, so
- * logging in or out switches it.
+ * logging in or out switches it; nothing else in the app checks for the mock
+ * account to pick a server.
  */
-export const dataSource = new Proxy({} as DataSource, {
-  get: (_, key: keyof DataSource) => {
-    const source: DataSource = isMockSession() ? mockSource : helper;
+export const dataSource = new Proxy({} as AppSource, {
+  get: (_, key: keyof AppSource) => {
+    const source: AppSource = isMockSession() ? mockSource : realSource;
     const value = source[key];
     return typeof value === 'function' ? value.bind(source) : value;
   },
@@ -71,24 +150,6 @@ export const dataSource = new Proxy({} as DataSource, {
  */
 export const serverWritesBlocked = () =>
   !isMockSession() && !getServerWritesAllowed();
-
-/**
- * Loads a notice's page, which marks the notice read on the server, as the
- * website does when it's opened.
- */
-export const markNoticeReadOnServer = async (url: string) => {
-  if (isMockSession()) {
-    await mockMarkNoticeRead();
-    return;
-  }
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw {
-      reason: FailReason.UNEXPECTED_STATUS,
-      extra: response.status,
-    } satisfies ApiError;
-  }
-};
 
 export const clearLoginCookies = async () => {
   if (Platform.OS === 'ios') {
@@ -152,16 +213,6 @@ export const addCSRF = (url: string) => {
 };
 
 /**
- * Applies Settings › Network Emulation to a file download while a mock
- * account is logged in; does nothing otherwise.
- */
-export const emulateFileDownload = async () => {
-  if (isMockSession()) {
-    await mockDownloadFile();
-  }
-};
-
-/**
  * Submits an assignment: `content` is the whole answer as HTML, which replaces
  * the submitted one; `remove` deletes the attachment. Sent with axios, which
  * reports upload progress (thu-learn-lib's fetch can't).
@@ -179,38 +230,11 @@ export const submitAssignment = async (
   if (!content && !attachment && !remove) {
     return;
   }
-
-  if (isMockSession()) {
-    await mockSubmitAssignment(onProgress);
-    return;
-  }
-
-  assertServerWritesAllowed('Assignment submission');
-
-  // Checks the session first, logging in again only if it has expired.
-  const { url, body } = await helper.getHomeworkSubmitRequest(
+  await dataSource.submitAssignment(
     studentHomeworkId,
     content,
-    attachment && {
-      filename: attachment.name,
-      content: {
-        uri: attachment.uri,
-        type: mime.getType(attachment.uri) || 'application/octet-stream',
-      },
-    },
+    attachment,
+    onProgress,
     remove,
   );
-  const res = await axios.post<string>(url, body, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    // Read as text: an expired session answers with the login page.
-    responseType: 'text',
-    transformResponse: data => data,
-    onUploadProgress: e => {
-      // New architecture doesn't like native floats
-      onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
-    },
-  });
-  checkHomeworkSubmitResponse(res.data);
 };

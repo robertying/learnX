@@ -10,7 +10,7 @@ import {
   SemesterType,
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
-import type { DataSource } from 'data/source';
+import type { AppSource } from 'data/source';
 import { sessionsFromCourses } from 'helpers/schedule';
 import { beijingClock, beijingDate } from 'helpers/serverTime';
 
@@ -288,7 +288,7 @@ const withFavorite = <T extends { id: string }>(item: T) => ({
 
 // The mock data holds the app's slimmer state types, not the library's full
 // types, so results are cast at this one boundary.
-export const mockSource: DataSource = {
+export const mockSource: AppSource = {
   login: () => roundTrip({ isLogin: true }),
   // The emulated session never expires: one request either way.
   ensureSession: () => roundTrip(),
@@ -346,7 +346,7 @@ export const mockSource: DataSource = {
               options?.details,
             ),
         ) as any,
-    )) as DataSource['getHomeworkList'],
+    )) as AppSource['getHomeworkList'],
   getHomeworkDetail: homework =>
     request(() =>
       pick(
@@ -438,6 +438,11 @@ export const mockSource: DataSource = {
       }));
       return { events, failedRanges: [] };
     }),
+  // The requests the app sends itself.
+  markNoticeRead: () => mockMarkNoticeRead(),
+  submitAssignment: (_id, _content, _attachment, onProgress) =>
+    mockSubmitAssignment(onProgress),
+  prepareFileDownload: () => mockDownloadFile(),
 };
 
 /**
