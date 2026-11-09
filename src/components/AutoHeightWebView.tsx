@@ -3,7 +3,7 @@ import { Linking, Platform } from 'react-native';
 import WebView, { WebViewProps } from 'react-native-webview';
 import {
   WebViewMessageEvent,
-  WebViewNavigation,
+  ShouldStartLoadRequest,
   WebViewSource,
   WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
@@ -27,16 +27,23 @@ const AutoHeightWebView: React.FC<
     setHeight(measuredHeight);
   };
 
-  const onNavigationStateChange = (e: WebViewNavigation) => {
-    if (e.navigationType === 'click') {
-      if (webViewRef.current) {
-        webViewRef.current.stopLoading();
-      }
-      // Course content is written by teachers; only open web and mail links.
-      if (/^(https?|mailto):/i.test(e.url)) {
-        Linking.openURL(e.url).catch(() => {});
-      }
+  // A tapped link opens outside the app instead of replacing the content.
+  // iOS asks about every load, the first one too, and says which came from a
+  // tap; Android asks only about loads the page starts, so all of those are
+  // links (and never reports `navigationType`, which `onNavigationStateChange`
+  // relied on).
+  const onShouldStartLoadWithRequest = (request: ShouldStartLoadRequest) => {
+    if (Platform.OS === 'ios' && request.navigationType !== 'click') {
+      return true;
     }
+    if (request.isTopFrame === false) {
+      return true;
+    }
+    // Course content is written by teachers; only open web and mail links.
+    if (/^(https?|mailto):/i.test(request.url)) {
+      Linking.openURL(request.url).catch(() => {});
+    }
+    return false;
   };
 
   const injectedScript = `
@@ -136,7 +143,7 @@ const AutoHeightWebView: React.FC<
       // the bounce, a vertical drag goes to the page.
       bounces={false}
       directionalLockEnabled
-      onNavigationStateChange={onNavigationStateChange}
+      onShouldStartLoadWithRequest={onShouldStartLoadWithRequest}
       decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
       originWhitelist={['*']}
       sharedCookiesEnabled
