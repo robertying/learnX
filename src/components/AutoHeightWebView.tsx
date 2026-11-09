@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Linking, Platform } from 'react-native';
 import WebView, { WebViewProps } from 'react-native-webview';
 import {
@@ -18,8 +18,6 @@ const isOwnPage = (url: string) =>
 const AutoHeightWebView: React.FC<WebViewProps> = props => {
   const [height, setHeight] = useState(0);
   const [cookieString, setCookieString] = useState('');
-
-  const webViewRef = useRef<WebView>(null);
 
   const onMessage = (e: WebViewMessageEvent) => {
     const measuredHeight = parseInt(e.nativeEvent.data, 10);
@@ -66,9 +64,9 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       );
     }
 
-    function waitForBridge() {
+    function postHeight() {
       if (!window.ReactNativeWebView?.postMessage) {
-        setTimeout(waitForBridge, 200);
+        setTimeout(postHeight, 200);
       } else {
         var height = measure();
         if (height !== lastHeight) {
@@ -84,7 +82,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       if (!window.ResizeObserver) {
         return;
       }
-      var observer = new ResizeObserver(waitForBridge);
+      var observer = new ResizeObserver(postHeight);
       if (document.documentElement) {
         observer.observe(document.documentElement);
       }
@@ -95,13 +93,13 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
 
     document.addEventListener("DOMContentLoaded", function () {
       observe();
-      waitForBridge();
+      postHeight();
     });
-    window.addEventListener("load", waitForBridge);
-    window.addEventListener("resize", waitForBridge);
+    window.addEventListener("load", postHeight);
+    window.addEventListener("resize", postHeight);
 
     // Update height as long as there's something
-    waitForBridge();
+    postHeight();
 
     true;
   `;
@@ -136,7 +134,6 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
 
   return (
     <WebView
-      ref={webViewRef}
       injectedJavaScriptBeforeContentLoaded={injectedScript}
       onMessage={onMessage}
       javaScriptEnabled

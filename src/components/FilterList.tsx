@@ -5,14 +5,10 @@ import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
 import ReorderableList, {
   ReorderableListReorderEvent,
-  reorderItems,
 } from 'react-native-reorderable-list';
 import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { getSettings, setSetting, useSettings } from 'data/settings';
-import { setArchived, setCourseHidden, setCourseOrder } from 'data/userData';
-import { setFavorite } from 'data/serverActions';
-import { toast } from 'components/Toast';
 import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
@@ -27,6 +23,12 @@ import {
   listForFilter,
   type FilterSelection,
 } from 'helpers/filters';
+import {
+  moveCourse,
+  toggleArchived,
+  toggleCourseHidden,
+  toggleFavorite,
+} from 'helpers/listActions';
 import Empty from './Empty';
 import Spinner from './Spinner';
 import SyncStatus from './SyncStatus';
@@ -138,18 +140,16 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     setReorderMode(v => !v);
   };
 
-  const handleReorderDone = ({ from, to }: ReorderableListReorderEvent) => {
-    const reorderedData = reorderItems(data, from, to);
-    setCourseOrder(reorderedData.map(i => i.id));
-  };
+  const courseIds = () => data.map(i => i.id);
+
+  const handleReorderDone = ({ from, to }: ReorderableListReorderEvent) =>
+    moveCourse(courseIds(), from, to);
 
   const handleMove = (id: string, offset: -1 | 1) => {
     const from = data.findIndex(i => i.id === id);
-    const to = from + offset;
-    if (from === -1 || to < 0 || to >= data.length) {
-      return;
+    if (from !== -1) {
+      moveCourse(courseIds(), from, from + offset);
     }
-    setCourseOrder(reorderItems(data, from, to).map(i => i.id));
   };
 
   const handleDragChange = () => {
@@ -161,15 +161,13 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     toggleSelectionMode();
   };
 
-  const handleFav = (item: T, isFav: boolean) => {
-    if (type !== 'course') {
-      setFavorite(type, item.id, !isFav);
-    }
+  // Only courses can be hidden, and only the other lists favorite and
+  // archive (helpers/cardActions).
+  const bookmarkType = type === 'course' ? undefined : type;
 
-    if (isFav) {
-      toast(t('removeFromFav'), 'success');
-    } else {
-      toast(t('addToFav'), 'success');
+  const handleFav = (item: T, isFav: boolean) => {
+    if (bookmarkType) {
+      toggleFavorite(bookmarkType, item.id, isFav);
     }
   };
 
@@ -177,17 +175,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     if (itemIds.length === 0) {
       return;
     }
-
-    if (type !== 'course') {
-      setArchived(type, itemIds, !isArchived);
+    if (bookmarkType) {
+      toggleArchived(bookmarkType, itemIds, isArchived);
     }
-
-    if (isArchived) {
-      toast(t('undoArchive'), 'success');
-    } else {
-      toast(t('archiveSucceeded'), 'success');
-    }
-
     if (selectionMode) {
       handleSelect();
     }
@@ -196,15 +186,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const handleArchiveSelected = () =>
     handleArchive(filterSelected === 'archived', checkedIdsRef.current);
 
-  const handleHide = (isHidden: boolean, id: string) => {
-    setCourseHidden(id, !isHidden);
-
-    if (isHidden) {
-      toast(t('undoHide'), 'success');
-    } else {
-      toast(t('hideSucceeded'), 'success');
-    }
-  };
+  const handleHide = (isHidden: boolean, id: string) =>
+    toggleCourseHidden(id, isHidden);
 
   const handleNavigateCourseX = () => {
     if (detailNavigator) {
