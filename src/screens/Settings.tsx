@@ -19,6 +19,7 @@ import { useSettings } from 'data/settings';
 import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
+import { mockNetworkTitle } from 'navigation/options';
 import { isMockUser } from 'helpers/mock';
 import {
   getServerWritesAllowed,
@@ -171,7 +172,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             <FormLink
               testID="settings-mock-network"
               icon={{ ios: 'network', android: 'network' }}
-              title="Network Emulation"
+              title={mockNetworkTitle}
               onPress={() => handlePush('MockNetwork')}
             />
           </FormSection>

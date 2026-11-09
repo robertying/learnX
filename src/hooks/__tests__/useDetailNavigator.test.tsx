@@ -5,7 +5,7 @@ import {
   StackActions,
 } from '@react-navigation/native';
 import { DetailStackParams } from 'screens/types';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import Numbers from 'constants/Numbers';
 import useDetailNavigator, {
   reportDetailReady,

@@ -10,9 +10,11 @@ import {
   CourseStackParams,
   CourseXStackParams,
   FileStackParams,
+  ItemDetailParams,
   LoginStackParams,
   NoticeStackParams,
   SearchStackParams,
+  SettingDetailParams,
   SettingsStackParams,
   TodayStackParams,
 } from 'screens/types';
@@ -43,7 +45,6 @@ import DeviceInfo from 'constants/DeviceInfo';
 import {
   getDetailScreenOptions,
   getModalScreenOptions,
-  getScreenOptions,
   mockNetworkTitle,
 } from './options';
 
@@ -60,23 +61,104 @@ const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
 const AssignmentSubmissionNavigator =
   createNativeStackNavigator<AssignmentSubmissionStackParams>();
 
+// Screens shared by several stacks. A `Screen` or `Group` element is only
+// configuration, the same for every navigator, so these are typed against
+// their own param lists, which the stacks' param lists are built from.
+const ItemDetails = createNativeStackNavigator<ItemDetailParams>();
+const SettingDetails = createNativeStackNavigator<SettingDetailParams>();
+
+/** The given item detail screens, for a stack whose params include them. */
+export const renderItemDetails = (
+  names: readonly (keyof ItemDetailParams)[],
+) => (
+  <ItemDetails.Group screenOptions={getDetailScreenOptions()}>
+    {names.includes('CourseDetail') && (
+      <ItemDetails.Screen name="CourseDetail" component={CourseDetail} />
+    )}
+    {names.includes('NoticeDetail') && (
+      <ItemDetails.Screen name="NoticeDetail" component={NoticeDetail} />
+    )}
+    {names.includes('AssignmentDetail') && (
+      <ItemDetails.Screen
+        name="AssignmentDetail"
+        component={AssignmentDetail}
+      />
+    )}
+    {names.includes('FileDetail') && (
+      <ItemDetails.Screen name="FileDetail" component={FileDetail} />
+    )}
+  </ItemDetails.Group>
+);
+
+/** The screens Settings opens; also shown in the split view's detail pane. */
+export const renderSettingDetails = () => (
+  <SettingDetails.Group>
+    <SettingDetails.Screen
+      name="CourseInformationSharing"
+      component={CourseInformationSharing}
+      options={getTitleOptions(t('courseInformationSharing'))}
+    />
+    <SettingDetails.Screen
+      name="CalendarEvent"
+      component={CalendarEvent}
+      options={getTitleOptions(t('calendarsAndReminders'))}
+    />
+    <SettingDetails.Screen
+      name="SemesterSelection"
+      component={SemesterSelection}
+      options={getTitleOptions(t('semesterSelection'))}
+    />
+    <SettingDetails.Screen
+      name="FileSettings"
+      component={FileSettings}
+      options={getTitleOptions(t('fileSettings'))}
+    />
+    <SettingDetails.Screen
+      name="Downloads"
+      component={Downloads}
+      options={getTitleOptions(t('downloads'))}
+    />
+    <SettingDetails.Screen
+      name="NotificationSettings"
+      component={NotificationSettings}
+      options={getTitleOptions(t('notifications'))}
+    />
+    <SettingDetails.Screen
+      name="Maintainer"
+      component={Maintainer}
+      options={getTitleOptions(t('becomeMaintainer'))}
+    />
+    <SettingDetails.Screen
+      name="Help"
+      component={Help}
+      options={getTitleOptions(t('helpAndFeedback'))}
+    />
+    <SettingDetails.Screen
+      name="About"
+      component={About}
+      options={getTitleOptions(t('about'))}
+    />
+    <SettingDetails.Screen
+      name="Changelog"
+      component={Changelog}
+      options={getTitleOptions(t('changelog'))}
+    />
+    <SettingDetails.Screen
+      name="MockNetwork"
+      component={MockNetwork}
+      options={getTitleOptions(mockNetworkTitle)}
+    />
+  </SettingDetails.Group>
+);
+
 export const NoticeStack = () => (
   <NoticeStackNavigator.Navigator>
     <NoticeStackNavigator.Screen
       name="Notices"
       component={Notices}
-      options={getScreenOptions(t('notices'))}
+      options={getTitleOptions(t('notices'))}
     />
-    <NoticeStackNavigator.Screen
-      name="NoticeDetail"
-      component={NoticeDetail}
-      options={getDetailScreenOptions()}
-    />
-    <NoticeStackNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(['NoticeDetail', 'FileDetail'])}
   </NoticeStackNavigator.Navigator>
 );
 
@@ -85,18 +167,9 @@ export const AssignmentStack = () => (
     <AssignmentStackNavigator.Screen
       name="Assignments"
       component={Assignments}
-      options={getScreenOptions(t('assignments'))}
+      options={getTitleOptions(t('assignments'))}
     />
-    <AssignmentStackNavigator.Screen
-      name="AssignmentDetail"
-      component={AssignmentDetail}
-      options={getDetailScreenOptions()}
-    />
-    <AssignmentStackNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(['AssignmentDetail', 'FileDetail'])}
   </AssignmentStackNavigator.Navigator>
 );
 
@@ -105,119 +178,38 @@ export const FileStack = () => (
     <FileStackNavigator.Screen
       name="Files"
       component={Files}
-      options={getScreenOptions(t('files'))}
+      options={getTitleOptions(t('files'))}
     />
-    <FileStackNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(['FileDetail'])}
   </FileStackNavigator.Navigator>
 );
+
+export const allItemDetails = [
+  'CourseDetail',
+  'NoticeDetail',
+  'AssignmentDetail',
+  'FileDetail',
+] as const;
 
 export const CourseStack = () => (
   <CourseStackNavigator.Navigator>
     <CourseStackNavigator.Screen
       name="Courses"
       component={Courses}
-      options={getScreenOptions(t('courses'))}
+      options={getTitleOptions(t('courses'))}
     />
-    <CourseStackNavigator.Screen
-      name="CourseDetail"
-      component={CourseDetail}
-      options={getDetailScreenOptions()}
-    />
-    <CourseStackNavigator.Screen
-      name="NoticeDetail"
-      component={NoticeDetail}
-      options={getDetailScreenOptions()}
-    />
-    <CourseStackNavigator.Screen
-      name="AssignmentDetail"
-      component={AssignmentDetail}
-      options={getDetailScreenOptions()}
-    />
-    <CourseStackNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(allItemDetails)}
   </CourseStackNavigator.Navigator>
 );
 
-// Also shown in the detail pane of the split view.
-export const renderSettingDetails = () => (
-  <>
-    <SettingStackNavigator.Screen
-      name="CourseInformationSharing"
-      component={CourseInformationSharing}
-      options={getTitleOptions(t('courseInformationSharing'))}
-    />
-    <SettingStackNavigator.Screen
-      name="CalendarEvent"
-      component={CalendarEvent}
-      options={getTitleOptions(t('calendarsAndReminders'))}
-    />
-    <SettingStackNavigator.Screen
-      name="SemesterSelection"
-      component={SemesterSelection}
-      options={getTitleOptions(t('semesterSelection'))}
-    />
-    <SettingStackNavigator.Screen
-      name="FileSettings"
-      component={FileSettings}
-      options={getTitleOptions(t('fileSettings'))}
-    />
-    <SettingStackNavigator.Screen
-      name="Downloads"
-      component={Downloads}
-      options={getTitleOptions(t('downloads'))}
-    />
-    <SettingStackNavigator.Screen
-      name="NotificationSettings"
-      component={NotificationSettings}
-      options={getTitleOptions(t('notifications'))}
-    />
-    <SettingStackNavigator.Screen
-      name="Maintainer"
-      component={Maintainer}
-      options={getTitleOptions(t('becomeMaintainer'))}
-    />
-    <SettingStackNavigator.Screen
-      name="Help"
-      component={Help}
-      options={getTitleOptions(t('helpAndFeedback'))}
-    />
-    <SettingStackNavigator.Screen
-      name="About"
-      component={About}
-      options={getTitleOptions(t('about'))}
-    />
-    <SettingStackNavigator.Screen
-      name="Changelog"
-      component={Changelog}
-      options={getTitleOptions(t('changelog'))}
-    />
-    <SettingStackNavigator.Screen
-      name="MockNetwork"
-      component={MockNetwork}
-      options={getTitleOptions(mockNetworkTitle)}
-    />
-  </>
-);
-const renderSettings = () => (
-  <>
+export const SettingStack = () => (
+  <SettingStackNavigator.Navigator>
     <SettingStackNavigator.Screen
       name="Settings"
       component={Settings}
       options={getTitleOptions(t('settings'))}
     />
     {renderSettingDetails()}
-  </>
-);
-export const SettingStack = () => (
-  <SettingStackNavigator.Navigator>
-    {renderSettings()}
   </SettingStackNavigator.Navigator>
 );
 
@@ -227,29 +219,15 @@ export const TodayStack = () => (
     <TodayStackNavigator.Screen
       name="Today"
       component={Today}
-      options={getScreenOptions(t('today'))}
+      options={getTitleOptions(t('today'))}
     />
+    {renderItemDetails(allItemDetails)}
     <TodayStackNavigator.Screen
-      name="CourseDetail"
-      component={CourseDetail}
-      options={getDetailScreenOptions()}
+      name="Settings"
+      component={Settings}
+      options={getTitleOptions(t('settings'))}
     />
-    <TodayStackNavigator.Screen
-      name="NoticeDetail"
-      component={NoticeDetail}
-      options={getDetailScreenOptions()}
-    />
-    <TodayStackNavigator.Screen
-      name="AssignmentDetail"
-      component={AssignmentDetail}
-      options={getDetailScreenOptions()}
-    />
-    <TodayStackNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
-    {renderSettings()}
+    {renderSettingDetails()}
   </TodayStackNavigator.Navigator>
 );
 
@@ -293,21 +271,7 @@ export const SearchStack = () => (
       component={Search}
       options={getModalScreenOptions(t('search'))}
     />
-    <SearchNavigator.Screen
-      name="NoticeDetail"
-      component={NoticeDetail}
-      options={getDetailScreenOptions()}
-    />
-    <SearchNavigator.Screen
-      name="AssignmentDetail"
-      component={AssignmentDetail}
-      options={getDetailScreenOptions()}
-    />
-    <SearchNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(['NoticeDetail', 'AssignmentDetail', 'FileDetail'])}
   </SearchNavigator.Navigator>
 );
 
@@ -318,10 +282,6 @@ export const AssignmentSubmissionStack = () => (
       component={AssignmentSubmission}
       options={getModalScreenOptions(t('assignmentSubmission'))}
     />
-    <AssignmentSubmissionNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(['FileDetail'])}
   </AssignmentSubmissionNavigator.Navigator>
 );

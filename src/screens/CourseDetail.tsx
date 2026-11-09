@@ -26,7 +26,7 @@ import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';

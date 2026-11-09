@@ -1,4 +1,3 @@
-import { Linking } from 'react-native';
 import dayjs from 'dayjs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -11,7 +10,6 @@ import {
 } from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import { toast } from 'components/Toast';
-import DeviceInfo from 'constants/DeviceInfo';
 import {
   assignmentsQuery,
   filesQuery,
@@ -26,6 +24,7 @@ import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
+import { openSystemSettings } from 'helpers/systemSettings';
 import { postNotification } from 'helpers/notifications';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from './types';
@@ -68,13 +67,6 @@ const contentToggles: {
     label: t('notifyDeadlineChanges'),
   },
 ];
-
-const openSystemSettings = () =>
-  DeviceInfo.isMac()
-    ? Linking.openURL(
-        'x-apple.systempreferences:com.apple.preference.notifications',
-      )
-    : Linking.openSettings();
 
 /**
  * Debug builds: forgets a few items and grades, then syncs as the background
@@ -212,26 +204,27 @@ const NotificationSettings: React.FC<Props> = () => {
           <FormButton
             icon={{ ios: 'gear', android: 'cog' }}
             title={t('configureNotifications')}
-            onPress={openSystemSettings}
+            onPress={() => openSystemSettings('notifications')}
           />
+          {/* Debug tools, so not translated. */}
           {__DEV__ && (
             <FormButton
               icon={{ ios: 'paperplane', android: 'send' }}
-              title={t('sendTestNotification')}
+              title="Send a Test Notification"
               onPress={sendTestNotification}
             />
           )}
           {__DEV__ && (
             <FormButton
               icon={{ ios: 'arrow.triangle.2.circlepath', android: 'sync' }}
-              title={t('simulateNewContent')}
+              title="Simulate New Content"
               onPress={handleSimulateNewContent}
             />
           )}
           {__DEV__ && (
             <FormButton
               icon={{ ios: 'alarm', android: 'alarm-check' }}
-              title={t('previewDeadlineReminder')}
+              title="Preview a Deadline Reminder"
               onPress={async () =>
                 toast(String(await previewDeadlineReminder()), 'success')
               }

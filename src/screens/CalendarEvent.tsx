@@ -1,4 +1,4 @@
-import { Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
 import {
@@ -11,7 +11,9 @@ import {
 import SafeArea from 'components/SafeArea';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
+import { calendarDefaults } from 'helpers/eventDetails';
 import { t } from 'helpers/i18n';
+import { openSystemSettings } from 'helpers/systemSettings';
 import {
   confirmDeleteCalendars,
   useAssignmentSync,
@@ -19,7 +21,6 @@ import {
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 import { SettingsStackParams } from './types';
-import DeviceInfo from 'constants/DeviceInfo';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 
@@ -83,7 +84,9 @@ const CalendarEvent: React.FC<Props> = () => {
           {alarms.courseAlarm && (
             <FormNumberField
               title={t('classAlarmBefore')}
-              value={alarms.courseAlarmOffset ?? 15}
+              value={
+                alarms.courseAlarmOffset ?? calendarDefaults.courseAlarmOffset
+              }
               onValueChange={value => setAlarm('courseAlarmOffset', value)}
             />
           )}
@@ -109,7 +112,9 @@ const CalendarEvent: React.FC<Props> = () => {
           {assignmentCalendarSync && (
             <FormNumberField
               title={t('calendarEventLength')}
-              value={calendarEventLength ?? 30}
+              value={
+                calendarEventLength ?? calendarDefaults.calendarEventLength
+              }
               onValueChange={value => setSetting('calendarEventLength', value)}
             />
           )}
@@ -123,7 +128,10 @@ const CalendarEvent: React.FC<Props> = () => {
           {alarms.assignmentCalendarAlarm && (
             <FormNumberField
               title={t('assignmentCalendarAlarmOffset')}
-              value={alarms.assignmentCalendarAlarmOffset ?? 24 * 60}
+              value={
+                alarms.assignmentCalendarAlarmOffset ??
+                calendarDefaults.assignmentCalendarAlarmOffset
+              }
               onValueChange={value =>
                 setAlarm('assignmentCalendarAlarmOffset', value)
               }
@@ -144,7 +152,10 @@ const CalendarEvent: React.FC<Props> = () => {
             alarms.assignmentCalendarSecondAlarm && (
               <FormNumberField
                 title={t('assignmentCalendarSecondAlarmOffset')}
-                value={alarms.assignmentCalendarSecondAlarmOffset ?? 30}
+                value={
+                  alarms.assignmentCalendarSecondAlarmOffset ??
+                  calendarDefaults.assignmentCalendarSecondAlarmOffset
+                }
                 onValueChange={value =>
                   setAlarm('assignmentCalendarSecondAlarmOffset', value)
                 }
@@ -188,7 +199,10 @@ const CalendarEvent: React.FC<Props> = () => {
             {alarms.assignmentReminderAlarm && (
               <FormNumberField
                 title={t('assignmentReminderAlarmOffset')}
-                value={alarms.assignmentReminderAlarmOffset ?? 24 * 60}
+                value={
+                  alarms.assignmentReminderAlarmOffset ??
+                  calendarDefaults.assignmentReminderAlarmOffset
+                }
                 onValueChange={value =>
                   setAlarm('assignmentReminderAlarmOffset', value)
                 }
@@ -214,13 +228,7 @@ const CalendarEvent: React.FC<Props> = () => {
           <FormButton
             icon={{ ios: 'gear', android: 'cog' }}
             title={t('configureCalendarAndReminder')}
-            onPress={() =>
-              DeviceInfo.isMac()
-                ? Linking.openURL(
-                    'x-apple.systempreferences:com.apple.preference.security',
-                  )
-                : Linking.openSettings()
-            }
+            onPress={() => openSystemSettings('security')}
           />
         </FormSection>
       </Form>
