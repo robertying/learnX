@@ -8,9 +8,11 @@ export interface HeaderTitleProps {
   subtitle?: string;
 }
 
-// Navigation bar titles keep their size on iOS, as UIKit's do; Android's
-// top app bar titles follow the font scale.
+// Navigation bar titles keep their size on iOS, as UIKit's do. Android's
+// top app bar titles follow the font scale, up to 1.3x so they fit the bar
+// beside its buttons.
 const allowFontScaling = Platform.OS !== 'ios';
+const maxFontSizeMultiplier = 1.3;
 
 const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
   title,
@@ -33,6 +35,7 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
       <Text
         variant={Platform.OS === 'ios' ? 'headline' : 'title'}
         allowFontScaling={allowFontScaling}
+        maxFontSizeMultiplier={maxFontSizeMultiplier}
         numberOfLines={1}
         ellipsizeMode="middle"
       >
@@ -42,6 +45,7 @@ const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
         <Text
           variant="caption"
           allowFontScaling={allowFontScaling}
+          maxFontSizeMultiplier={maxFontSizeMultiplier}
           style={styles.subtitle}
           numberOfLines={1}
           ellipsizeMode="middle"

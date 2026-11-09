@@ -5,6 +5,7 @@ import {
   Text as NativeText,
   TextProps as NativeTextProps,
   type TextStyle,
+  useWindowDimensions,
 } from 'react-native';
 import { useTheme } from 'theme';
 
@@ -117,10 +118,29 @@ const writingDirection = I18nManager.getConstants().isRTL ? 'rtl' : 'ltr';
 interface StyledTextProps extends TextProps {
   color: 'onSurface' | 'onSurfaceHigh' | 'onSurfaceMedium';
   variant: TextVariant;
+  /** A little space above and below, between stacked titles and captions. */
+  spaced?: boolean;
 }
 
-const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
+/*
+ * Android scales text sizes nonlinearly above about 1.3x (Android 14+), and
+ * React Native scales the line height on its own curve, so a large text's
+ * line height can end up smaller than its glyphs and lines overlap. Past
+ * that point the line height is left to the font.
+ */
+const nonlinearFontScale = 1.3;
+
+const StyledText = ({
+  color,
+  variant,
+  spaced,
+  style,
+  ...rest
+}: StyledTextProps) => {
   const theme = useTheme();
+  const { fontScale } = useWindowDimensions();
+  const fontLineHeight =
+    Platform.OS === 'android' && fontScale > nonlinearFontScale;
   return (
     <NativeText
       dynamicTypeRamp={ramps[variant]}
@@ -128,6 +148,8 @@ const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
       style={[
         styles.base,
         textStyles[variant],
+        fontLineHeight && styles.fontLineHeight,
+        spaced && styles.spaced,
         { color: theme.colors[color], writingDirection },
         style,
       ]}
@@ -139,6 +161,12 @@ const styles = StyleSheet.create({
   base: {
     textAlign: 'left',
   },
+  fontLineHeight: {
+    lineHeight: undefined,
+  },
+  spaced: {
+    marginVertical: 2,
+  },
 });
 
 /** Body text in the surface color. */
@@ -148,12 +176,12 @@ export const Text = ({ variant = 'body', ...props }: TextProps) => (
 
 /** The title of a detail screen or a section of text. */
 export const Title = ({ variant = 'title', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
 );
 
 /** The title of a card or row. */
 export const Headline = ({ variant = 'headline', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
 );
 
 /** A secondary title, such as a card's course name. */
@@ -161,15 +189,15 @@ export const Subheading = ({
   variant = 'subheadline',
   ...props
 }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
 );
 
 /** Body text in cards. */
 export const Paragraph = ({ variant = 'subheadline', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
 );
 
 /** Small, dimmed text for metadata and hints. */
 export const Caption = ({ variant = 'footnote', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceMedium" variant={variant} />
+  <StyledText {...props} color="onSurfaceMedium" variant={variant} spaced />
 );
