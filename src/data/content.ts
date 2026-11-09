@@ -230,7 +230,17 @@ const createContent = <T extends { id: string; courseId: string }>({
     return { ...result, items: result.data ?? empty };
   };
 
-  const useItem = (id: string) => useList().items.find(item => item.id === id);
+  /**
+   * The item with `id`, from the semester being shown or else from another
+   * semester's cached list, so a detail screen left open keeps showing its item
+   * after the semester is switched.
+   */
+  const useItem = (id: string) =>
+    useList().items.find(item => item.id === id) ??
+    queryClient
+      .getQueriesData<T[]>({ queryKey: [name] })
+      .flatMap(([, items]) => items ?? [])
+      .find(item => item.id === id);
 
   /** Refreshes one course's items; `isPending` while it runs. */
   const useRefreshCourse = (courseId: string) => {

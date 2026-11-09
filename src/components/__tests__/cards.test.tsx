@@ -6,6 +6,7 @@ import AssignmentCard from 'components/AssignmentCard';
 import CourseCard from 'components/CourseCard';
 import FileCard from 'components/FileCard';
 import NoticeCard from 'components/NoticeCard';
+import { FileTypeTile } from 'components/CardRow';
 
 const NOW = new Date('2026-03-10T12:00:00+08:00');
 
@@ -276,5 +277,12 @@ describe('CourseCard', () => {
     expect(screen.getByText('2')).toBeTruthy();
     expect(screen.getByText('1')).toBeTruthy();
     expect(screen.queryByText('0')).toBeNull();
+  });
+});
+
+describe('FileTypeTile', () => {
+  it('keeps a four-letter type on one line', async () => {
+    await render(<FileTypeTile fileType="docx" />);
+    expect(screen.getByText('DOCX').props.numberOfLines).toBe(1);
   });
 });

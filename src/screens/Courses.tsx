@@ -28,6 +28,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const {
     courses: fetchedCourses,
     isFetching: fetching,
+    isPending,
     refetch,
     dataUpdatedAt,
   } = useCourses();
@@ -100,6 +101,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
         navigation={navigation}
         onItemPress={handlePush}
         refreshing={pullToRefresh.refreshing}
+        loading={isPending && fetching}
         onRefresh={pullToRefresh.onRefresh}
         updatedAt={dataUpdatedAt}
       />

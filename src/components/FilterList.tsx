@@ -29,6 +29,7 @@ import { checkedIds, listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
 import { filterOptions, type FilterSelection } from 'helpers/filterOptions';
 import Empty from './Empty';
+import Spinner from './Spinner';
 import SyncStatus from './SyncStatus';
 import FilterListRow, {
   FilterListRowActions,
@@ -55,6 +56,11 @@ export interface FilterListProps<T> {
     Pick<NativeStackNavigationProp<RootStackParams>, 'navigate'>;
   onItemPress?: (item: T) => void;
   refreshing: boolean;
+  /**
+   * The list has no data yet and its first fetch is running (e.g. a semester
+   * just switched to): shows a spinner instead of the "No Content" state.
+   */
+  loading?: boolean;
   onRefresh?: () => void;
   /** When the list's data was last fetched (ms), shown while offline. */
   updatedAt?: number;
@@ -75,6 +81,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   onItemPress,
   defaultSubtitle,
   refreshing,
+  loading = false,
   onRefresh,
   updatedAt,
 }: FilterListProps<T>) => {
@@ -309,7 +316,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       data.length ? null : { justifyContent: 'center' as const },
     ],
     data,
-    ListEmptyComponent: <Empty />,
+    ListEmptyComponent: loading ? <Spinner /> : <Empty />,
     renderItem,
     keyExtractor: (item: T) => item.id,
     refreshControl: (
