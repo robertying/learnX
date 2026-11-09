@@ -90,13 +90,11 @@ export const useCourseScheduleSync = () => {
  */
 export const useAssignmentSync = () => {
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const favoriteIds = useUserData(data => data.favorites.assignment);
   const archivedIds = useUserData(data => data.archived.assignment);
   const { assignments } = useAssignments();
 
   const { all } = useFilteredData({
     data: assignments,
-    fav: favoriteIds,
     archived: archivedIds,
     hidden: hiddenCourseIds,
   });

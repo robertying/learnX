@@ -77,6 +77,11 @@ interface CourseExtraInfo {
   courseId: string;
   courseName: string;
   courseTeacherName: string;
+  /**
+   * In the user's favorites (我的收藏) on the website. The notice and
+   * assignment lists say so; files get it from the course's favorites.
+   */
+  isFavorite?: boolean;
 }
 
 export type Notice = Pick<

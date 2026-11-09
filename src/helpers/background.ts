@@ -19,6 +19,7 @@ import {
   describeSyncRun,
 } from 'data/syncLog';
 import { ContentDiff, ContentLists, diffContent } from 'data/contentDiff';
+import { flushServerActionsWithin } from 'data/serverActions';
 import { getSettings } from 'data/settings';
 import { addNotifiedKeys, getNotifiedKeys } from 'data/notified';
 import {
@@ -139,6 +140,12 @@ export const syncContent = async ({
     return record({ status: 'skipped' });
   }
 
+  // Favorites and notices read while offline (or from a notification) go up
+  // first, so the lists fetched below already have them.
+  await flushServerActionsWithin(Math.min(5_000, deadline - Date.now()), {
+    requireLogin: false,
+  });
+
   const semesterId = await followLatestSemester(shownSemester);
   // Nothing is shown or notified for hidden courses, so they aren't fetched.
   const hidden = new Set(getUserData().hiddenCourses);
@@ -162,6 +169,7 @@ export const syncContent = async ({
     files: queryClient.getQueryData(queries.files.queryKey),
   };
 
+  const fetchStartedAt = Date.now();
   const jobs = SYNC_LISTS.flatMap(list =>
     courseIds.map(courseId => ({ list, courseId })),
   );
@@ -181,7 +189,7 @@ export const syncContent = async ({
     putCourses: (
       semesterId: string,
       fetched: ReadonlyMap<string, object[]>,
-      options: { complete: boolean },
+      options: { complete: boolean; startedAt: number },
     ) => Promise<T[]>,
   ) => {
     const fetched = new Map<string, object[]>();
@@ -195,6 +203,7 @@ export const syncContent = async ({
     return fetched.size > 0
       ? putCourses(semesterId, fetched, {
           complete: fetched.size === courseIds.length,
+          startedAt: fetchStartedAt,
         })
       : undefined;
   };

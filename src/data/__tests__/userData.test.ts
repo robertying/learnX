@@ -6,7 +6,9 @@ import {
   setArchived,
   setCourseHidden,
   setCourseOrder,
-  setFavorite,
+  queueAction,
+  removeAction,
+  failAction,
   USER_DATA_KEY,
   useUserDataStore,
 } from 'data/userData';
@@ -25,7 +27,7 @@ beforeEach(() => {
 describe('user data', () => {
   it('starts empty', () => {
     expect(getUserData()).toEqual({
-      favorites: { notice: [], assignment: [], file: [] },
+      pendingActions: [],
       archived: { notice: [], assignment: [], file: [] },
       hiddenCourses: [],
       courseOrder: [],
@@ -34,16 +36,52 @@ describe('user data', () => {
     });
   });
 
-  it('adds and removes favorites per type', () => {
-    setFavorite('notice', 'x', true);
-    setFavorite('notice', 'y', true);
-    setFavorite('file', 'x', true);
-    setFavorite('notice', 'x', false);
-    expect(getUserData().favorites).toEqual({
-      notice: ['y'],
-      assignment: [],
-      file: ['x'],
+  it('keeps only the last action per item', () => {
+    queueAction({ kind: 'favorite', type: 'notice', id: 'x', flag: true });
+    queueAction({ kind: 'favorite', type: 'notice', id: 'y', flag: true });
+    queueAction({ kind: 'favorite', type: 'file', id: 'x', flag: true });
+    queueAction({ kind: 'favorite', type: 'notice', id: 'x', flag: false });
+    queueAction({ kind: 'noticeRead', id: 'x', url: 'u' });
+    expect(
+      getUserData().pendingActions.map(a =>
+        a.kind === 'favorite' ? [a.type, a.id, a.flag] : [a.kind, a.id],
+      ),
+    ).toEqual([
+      ['notice', 'y', true],
+      ['file', 'x', true],
+      ['notice', 'x', false],
+      ['noticeRead', 'x'],
+    ]);
+  });
+
+  it('removes a sent action unless a later one replaced it', () => {
+    const first = queueAction({
+      kind: 'favorite',
+      type: 'notice',
+      id: 'x',
+      flag: true,
     });
+    const later = { ...first, flag: false, queuedAt: first.queuedAt + 1 };
+    useUserDataStore.setState({ pendingActions: [later] });
+    removeAction(first);
+    expect(getUserData().pendingActions).toEqual([later]);
+    removeAction(later);
+    expect(getUserData().pendingActions).toEqual([]);
+  });
+
+  it('drops an action after the third rejection', () => {
+    let action = queueAction({
+      kind: 'favorite',
+      type: 'file',
+      id: 'x',
+      flag: true,
+    });
+    expect(failAction(action)).toBe(false);
+    action = getUserData().pendingActions[0];
+    expect(action.tries).toBe(1);
+    expect(failAction(action)).toBe(false);
+    expect(failAction(getUserData().pendingActions[0])).toBe(true);
+    expect(getUserData().pendingActions).toEqual([]);
   });
 
   it('archives and unarchives several items at once', () => {
@@ -54,11 +92,8 @@ describe('user data', () => {
   });
 
   it('does not add an id twice', () => {
-    setFavorite('notice', 'x', true);
-    setFavorite('notice', 'x', true);
     setArchived('file', ['x', 'x'], true);
     setArchived('file', ['x'], true);
-    expect(getUserData().favorites.notice).toEqual(['x']);
     expect(getUserData().archived.file).toEqual(['x']);
   });
 
@@ -72,12 +107,12 @@ describe('user data', () => {
   });
 
   it('writes every change to storage with a version', () => {
-    setFavorite('assignment', 'x', true);
+    setArchived('assignment', ['x'], true);
     expect(stored()).toEqual({
       state: expect.objectContaining({
-        favorites: { notice: [], assignment: ['x'], file: [] },
+        archived: { notice: [], assignment: ['x'], file: [] },
       }),
-      version: 1,
+      version: 2,
     });
   });
 
@@ -85,18 +120,44 @@ describe('user data', () => {
     (Storage as unknown as { __store: Map<string, string> }).__store.set(
       USER_DATA_KEY,
       JSON.stringify({
-        state: { favorites: { notice: ['n'] }, hiddenCourses: ['c'] },
-        version: 1,
+        state: { archived: { notice: ['n'] }, hiddenCourses: ['c'] },
+        version: 2,
       }),
     );
     await useUserDataStore.persist.rehydrate();
-    expect(getUserData().favorites).toEqual({
+    expect(getUserData().archived).toEqual({
       notice: ['n'],
       assignment: [],
       file: [],
     });
     expect(getUserData().hiddenCourses).toEqual(['c']);
     expect(getUserData().courseOrder).toEqual([]);
+  });
+
+  it('turns favorites kept on the phone into adds for the website', async () => {
+    (Storage as unknown as { __store: Map<string, string> }).__store.set(
+      USER_DATA_KEY,
+      JSON.stringify({
+        state: {
+          favorites: { notice: ['n', 'n'], assignment: [], file: ['f'] },
+          hiddenCourses: ['c'],
+        },
+        version: 1,
+      }),
+    );
+    await useUserDataStore.persist.rehydrate();
+    expect(getUserData()).not.toHaveProperty('favorites');
+    expect(getUserData().pendingActions).toEqual([
+      expect.objectContaining({
+        kind: 'favorite',
+        type: 'notice',
+        id: 'n',
+        flag: true,
+        tries: 0,
+      }),
+      expect.objectContaining({ type: 'file', id: 'f', flag: true }),
+    ]);
+    expect(getUserData().hiddenCourses).toEqual(['c']);
   });
 
   describe('applyLatestSemester', () => {

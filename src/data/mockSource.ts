@@ -1,6 +1,8 @@
 import {
   ApiError,
   CalendarResult,
+  ContentType,
+  type FavoriteItem,
   DetailSelector,
   FailReason,
   Language,
@@ -238,6 +240,52 @@ const semesterInfo = (id: string): SemesterInfo => {
   };
 };
 
+const favoriteTypes = {
+  notice: ContentType.NOTIFICATION,
+  assignment: ContentType.HOMEWORK,
+  file: ContentType.FILE,
+} as const;
+
+/**
+ * The emulated account's favorites, by item id: seeded from `mockFavorites`
+ * and changed by add and remove. Kept in memory, so they start over when the
+ * JS reloads, as the rest of the emulated server does.
+ */
+let favorites: Map<string, ContentType> | undefined;
+const mockFavoriteIds = () =>
+  (favorites ??= new Map(
+    (Object.keys(favoriteTypes) as (keyof typeof favoriteTypes)[]).flatMap(
+      type =>
+        mock().mockFavorites[type].map(
+          id => [id, favoriteTypes[type]] as const,
+        ),
+    ),
+  ));
+
+/** The mock items that can be favorited, with their type. */
+const favoritable = () => [
+  ...mock().mockNotices.map(item => ({
+    item,
+    type: ContentType.NOTIFICATION,
+    time: item.publishTime,
+  })),
+  ...mock().mockAssignments.map(item => ({
+    item,
+    type: ContentType.HOMEWORK,
+    time: item.deadline,
+  })),
+  ...mock().mockFiles.map(item => ({
+    item,
+    type: ContentType.FILE,
+    time: item.uploadTime,
+  })),
+];
+
+const withFavorite = <T extends { id: string }>(item: T) => ({
+  ...item,
+  isFavorite: mockFavoriteIds().has(item.id),
+});
+
 // The mock data holds the app's slimmer state types, not the library's full
 // types, so results are cast at this one boundary.
 export const mockSource: DataSource = {
@@ -273,7 +321,10 @@ export const mockSource: DataSource = {
     request(
       () =>
         groupByCourse(mock().mockNotices, [courseId])[courseId].map(notice =>
-          listedNotice(notice, options?.attachments),
+          listedNotice(
+            withFavorite(notice as { id: string }),
+            options?.attachments,
+          ),
         ) as any,
     ),
   getNotificationAttachment: notification =>
@@ -289,7 +340,11 @@ export const mockSource: DataSource = {
     request(
       () =>
         groupByCourse(mock().mockAssignments, [courseId])[courseId].map(
-          assignment => listedAssignment(assignment, options?.details),
+          assignment =>
+            listedAssignment(
+              withFavorite(assignment as { id: string }),
+              options?.details,
+            ),
         ) as any,
     )) as DataSource['getHomeworkList'],
   getHomeworkDetail: homework =>
@@ -313,8 +368,51 @@ export const mockSource: DataSource = {
         homeworkDetailFields,
       ),
     ),
+  // Like the server's, the file list doesn't say which files are favorites.
   getFileList: courseId =>
-    request(() => groupByCourse(mock().mockFiles, [courseId])[courseId] as any),
+    request(
+      () =>
+        groupByCourse(mock().mockFiles, [courseId])[courseId].map(file =>
+          omit(file, ['isFavorite']),
+        ) as any,
+    ),
+  // An id the server doesn't know answers HTTP 500; adding twice keeps one.
+  addToFavorites: (type, id) =>
+    request(() => {
+      if (!favoritable().some(f => f.type === type && f.item.id === id)) {
+        throw apiError(FailReason.UNEXPECTED_STATUS);
+      }
+      mockFavoriteIds().set(id, type);
+    }),
+  // Removing an item that isn't a favorite succeeds.
+  removeFromFavorites: id =>
+    request(() => {
+      mockFavoriteIds().delete(id);
+    }),
+  getFavorites: (courseId, type) =>
+    request(() =>
+      favoritable()
+        .filter(
+          f =>
+            mockFavoriteIds().get(f.item.id) === f.type &&
+            (!type || f.type === type) &&
+            (!courseId || f.item.courseId === courseId),
+        )
+        .map(({ item, type: itemType, time }): FavoriteItem => ({
+          id: item.id,
+          type: itemType,
+          title: item.title,
+          time,
+          state: '',
+          semesterId:
+            mock().mockCourses.find(course => course.id === item.courseId)
+              ?.semesterId ?? mock().mockCurrentSemester,
+          courseId: item.courseId,
+          pinned: false,
+          addedTime: time,
+          itemId: `favorite-${item.id}`,
+        })),
+    ),
   // The registrar's calendar, worked out from the courses' times.
   getCalendar: (start, end) =>
     request((): CalendarResult => {
@@ -347,6 +445,9 @@ export const mockSource: DataSource = {
  * be shown.
  */
 export const mockDownloadFile = () => roundTrip();
+
+/** Emulates loading a notice's page, which marks it read. */
+export const mockMarkNoticeRead = () => roundTrip();
 
 /** Emulates the assignment upload, reporting progress along the way. */
 export const mockSubmitAssignment = async (

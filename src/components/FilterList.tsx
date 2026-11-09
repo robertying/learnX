@@ -10,12 +10,8 @@ import ReorderableList, {
 import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { getSettings, setSetting, useSettings } from 'data/settings';
-import {
-  setArchived,
-  setCourseHidden,
-  setCourseOrder,
-  setFavorite,
-} from 'data/userData';
+import { setArchived, setCourseHidden, setCourseOrder } from 'data/userData';
+import { setFavorite } from 'data/serverActions';
 import { toast } from 'components/Toast';
 import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator from 'hooks/useDetailNavigator';

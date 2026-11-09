@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import {
+  actionKey,
+  MAX_TRIES,
+  type PendingAction,
+  type ServerAction,
+} from 'data/pendingActions';
 
 export const USER_DATA_KEY = 'userData';
 
@@ -15,7 +21,12 @@ export const bookmarkTypes = [
 
 /** What the user has done to their courses and their content, by id. */
 export interface UserData {
-  favorites: Record<BookmarkType, string[]>;
+  /**
+   * Changes to the account (favorites, notices read) not yet sent to the
+   * server. Favorites themselves are an item field (`isFavorite`) the server
+   * lists; these are laid over its answers until they are sent.
+   */
+  pendingActions: PendingAction[];
   archived: Record<BookmarkType, string[]>;
   hiddenCourses: string[];
   /** Course ids in the order the user dragged them into. */
@@ -34,7 +45,7 @@ export interface UserData {
 }
 
 export const emptyUserData = (): UserData => ({
-  favorites: { notice: [], assignment: [], file: [] },
+  pendingActions: [],
   archived: { notice: [], assignment: [], file: [] },
   hiddenCourses: [],
   courseOrder: [],
@@ -49,15 +60,51 @@ export const mergeUserData = (
 ): UserData => ({
   ...current,
   ...saved,
-  favorites: { ...current.favorites, ...saved.favorites },
   archived: { ...current.archived, ...saved.archived },
 });
+
+/**
+ * Favorites kept on the phone, as user data saved them before they were synced
+ * with the website, turned into actions that add them there. Nothing is
+ * removed on either side.
+ */
+export const favoritesToActions = (
+  favorites: Partial<Record<BookmarkType, unknown>>,
+  queuedAt = Date.now(),
+): PendingAction[] =>
+  bookmarkTypes.flatMap(type => {
+    const ids = favorites[type];
+    return Array.isArray(ids)
+      ? [...new Set(ids.filter(id => typeof id === 'string'))].map(id => ({
+          kind: 'favorite' as const,
+          type,
+          id,
+          flag: true,
+          queuedAt,
+          tries: 0,
+        }))
+      : [];
+  });
 
 export const useUserDataStore = create<UserData>()(
   persist(emptyUserData, {
     name: USER_DATA_KEY,
-    version: 1,
+    version: 2,
     storage: persistStorage,
+    migrate: (saved, version) => {
+      const data = (saved ?? {}) as Partial<UserData> & {
+        favorites?: Partial<Record<BookmarkType, unknown>>;
+      };
+      if (version < 2) {
+        // Version 1 kept favorites on the phone only.
+        const { favorites, ...rest } = data;
+        return {
+          ...rest,
+          pendingActions: favorites ? favoritesToActions(favorites) : [],
+        };
+      }
+      return data;
+    },
     merge: (saved, current) =>
       mergeUserData(current, (saved ?? {}) as Partial<UserData>),
   }),
@@ -82,13 +129,44 @@ const toggle = (list: string[], ids: string[], flag: boolean) => {
   return list.filter(id => !removed.has(id));
 };
 
-export const setFavorite = (type: BookmarkType, id: string, flag: boolean) => {
+/** Queues an action, replacing an earlier one on the same item. */
+export const queueAction = (action: ServerAction) => {
+  const key = actionKey(action);
+  const queued: PendingAction = { ...action, queuedAt: Date.now(), tries: 0 };
   useUserDataStore.setState(state => ({
-    favorites: {
-      ...state.favorites,
-      [type]: toggle(state.favorites[type], [id], flag),
-    },
+    pendingActions: [
+      ...state.pendingActions.filter(a => actionKey(a) !== key),
+      queued,
+    ],
   }));
+  return queued;
+};
+
+const isSame = (a: PendingAction, b: PendingAction) =>
+  actionKey(a) === actionKey(b) && a.queuedAt === b.queuedAt;
+
+/** Removes an action the server took, unless a later one replaced it. */
+export const removeAction = (action: PendingAction) => {
+  useUserDataStore.setState(state => ({
+    pendingActions: state.pendingActions.filter(a => !isSame(a, action)),
+  }));
+};
+
+/**
+ * Counts a try the server turned down. Returns true when that was the last
+ * try and the action was dropped.
+ */
+export const failAction = (action: PendingAction) => {
+  const tries = action.tries + 1;
+  const dropped = tries >= MAX_TRIES;
+  useUserDataStore.setState(state => ({
+    pendingActions: dropped
+      ? state.pendingActions.filter(a => !isSame(a, action))
+      : state.pendingActions.map(a =>
+          isSame(a, action) ? { ...a, tries } : a,
+        ),
+  }));
+  return dropped;
 };
 
 export const setArchived = (
