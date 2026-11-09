@@ -225,3 +225,15 @@ export const Toggle = ({
     {children}
   </View>
 );
+
+export const Picker = ({
+  label,
+  children,
+}: {
+  label?: string;
+  children?: ReactNode;
+}) => (
+  <View accessibilityRole="tablist" accessibilityLabel={label}>
+    {children}
+  </View>
+);
