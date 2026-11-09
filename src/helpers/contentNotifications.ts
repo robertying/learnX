@@ -3,7 +3,7 @@ import { ContentDiff } from 'data/contentDiff';
 import { BookmarkType } from 'data/userData';
 import { Assignment, NotificationSettings } from 'data/types/state';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
-import { NotificationTarget } from 'helpers/notifications';
+import { ItemTarget } from 'helpers/openTarget';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
 const RECENT_DAYS = 7;
@@ -27,13 +27,13 @@ export interface ContentItem {
   courseName: string;
   /** The line shown for the item. */
   text: string;
-  target: Required<NotificationTarget>;
+  target: Required<ItemTarget>;
 }
 
 export interface ContentNotification {
   title: string;
   body: string;
-  target: NotificationTarget;
+  target: ItemTarget;
   /** Ids of the items it covers when there are several, all of one type. */
   ids?: string[];
   /** Keys of the items it covers. */
@@ -57,7 +57,7 @@ const kindLabels: Record<ContentKind, () => string> = {
   deadlineChanges: () => t('notifyDeadlineChanges'),
 };
 
-const targetTypes: Record<ContentKind, NotificationTarget['type']> = {
+const targetTypes: Record<ContentKind, ItemTarget['type']> = {
   notices: 'notice',
   files: 'file',
   assignments: 'assignment',

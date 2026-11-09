@@ -10,7 +10,7 @@ import { File } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import useNotificationTarget from 'hooks/useNotificationTarget';
+import usePendingTarget from 'hooks/usePendingTarget';
 import { FileStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<FileStackParams, 'Files'>;
@@ -54,7 +54,7 @@ const Files: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  useNotificationTarget('file', (id, inDetail) =>
+  usePendingTarget('file', (id, inDetail) =>
     inDetail ? handlePush({ id }) : navigation.push('FileDetail', { id }),
   );
 

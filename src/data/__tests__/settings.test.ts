@@ -38,7 +38,6 @@ describe('settings', () => {
         "fileUseDocumentDir": false,
         "graduate": false,
         "lastShowChangelogVersion": null,
-        "newUpdate": false,
         "notifications": {
           "assignments": false,
           "deadlineChanges": false,
@@ -89,15 +88,6 @@ describe('settings', () => {
     clearEventIds('reminder');
     expect(getSettings().syncedReminderAssignments).toEqual({});
     expect(getSettings().syncedCalendarAssignments).toEqual({ a2: 'e2' });
-  });
-
-  it('does not save whether an update is available', () => {
-    setSetting('newUpdate', true);
-    setSetting('graduate', true);
-    const { state, version } = JSON.parse(kv.get(SETTINGS_KEY)!);
-    expect(version).toBe(1);
-    expect(state.graduate).toBe(true);
-    expect(state).not.toHaveProperty('newUpdate');
   });
 
   it('fills in settings added after they were saved', async () => {

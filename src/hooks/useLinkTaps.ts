@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent } from 'react';
 import { Linking } from 'react-native';
-import { getUrlTarget } from 'helpers/notifications';
+import { getUrlTarget } from 'helpers/openTarget';
 import useOpenTarget from 'hooks/useOpenTarget';
 
 /**
