@@ -3,6 +3,7 @@
 // filter is checked and each one shows its count; the button turns tonal
 // while a filter other than All is on.
 import { useState } from 'react';
+import { StyleSheet } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   DropdownMenu,
@@ -29,7 +30,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   const Button = selected === 'all' ? IconButton : FilledTonalIconButton;
 
   return (
-    <Host matchContents seedColor={theme.colors.primary}>
+    <Host matchContents seedColor={theme.colors.primary} style={styles.host}>
       <DropdownMenu
         expanded={expanded}
         onDismissRequest={() => setExpanded(false)}
@@ -95,5 +96,13 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
     </Host>
   );
 };
+
+const styles = StyleSheet.create({
+  // The other header buttons draw 32 dp inside a 40 dp box, so this keeps the
+  // same gap to them and to the title.
+  host: {
+    marginHorizontal: 4,
+  },
+});
 
 export default FilterMenu;
