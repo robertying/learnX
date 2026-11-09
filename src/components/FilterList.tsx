@@ -28,7 +28,6 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { checkedIds, listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
 import { filterOptions, type FilterSelection } from 'helpers/filterOptions';
-import FilterMenu from './FilterMenu';
 import Empty from './Empty';
 import SyncStatus from './SyncStatus';
 import FilterListRow, {
@@ -87,8 +86,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     settings => settings.tabFilterSelections[type] ?? defaultSelected ?? 'all',
   );
 
-  const [filterVisible, setFilterVisible] = useState(false);
-
   const data = listForFilter(filterSelected, {
     all,
     unread,
@@ -124,21 +121,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     setChecked,
   } = useListSelection(data);
 
-  const handleFilter = () => {
-    setFilterVisible(v => !v);
-  };
-
   const handleFilterSelect = (selected: FilterSelection) => {
     setSetting('tabFilterSelections', {
       ...getSettings().tabFilterSelections,
       [type]: selected,
     });
-    setFilterVisible(false);
   };
 
   const handleReorder = () => {
     setReorderMode(v => !v);
-    setFilterVisible(false);
   };
 
   const handleReorderDone = ({ from, to }: ReorderableListReorderEvent) => {
@@ -152,7 +143,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   };
 
   const handleSelect = () => {
-    setFilterVisible(false);
     toggleSelectionMode();
   };
 
@@ -222,7 +212,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     selectedCount,
     refreshing,
     onRefresh,
-    onFilter: handleFilter,
     filterOptions: options,
     onFilterSelect: handleFilterSelect,
     onReorder: handleReorder,
@@ -241,7 +230,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   // selection does not re-render every row.
   const rowHandlers: FilterListRowActions<T> = {
     press: item => {
-      setFilterVisible(false);
       lastOpenedIdRef.current = item.id;
       onItemPress?.(item);
     },
@@ -336,13 +324,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   return (
     <View style={Styles.flex1}>
       <SyncStatus updatedAt={updatedAt} />
-      <FilterMenu
-        visible={filterVisible}
-        options={options}
-        selected={filterSelected}
-        onSelectionChange={handleFilterSelect}
-        onDismiss={() => setFilterVisible(false)}
-      />
       {isCourse ? (
         <ReorderableList
           key={`${filterSelected}-${reorderMode}`}

@@ -1,10 +1,11 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
+import FilterMenu from 'components/FilterMenu';
 import HeaderTitle from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -38,8 +39,6 @@ export interface FilterListHeaderOptions {
   selectedCount: number;
   refreshing: boolean;
   onRefresh?: () => void;
-  /** Opens the filter dropdown (Android) */
-  onFilter: () => void;
   /** The choices in the filter menu */
   filterOptions: FilterOption[];
   onFilterSelect: (selected: FilterSelection) => void;
@@ -66,7 +65,6 @@ const useFilterListHeader = ({
   selectedCount,
   refreshing,
   onRefresh,
-  onFilter,
   filterOptions,
   onFilterSelect,
   onReorder,
@@ -125,6 +123,7 @@ const useFilterListHeader = ({
             icon="reorder"
             onPress={onReorder}
             mode="contained"
+            style={styles.headerLeft}
           />
         ),
         headerRight: () => <View />,
@@ -169,7 +168,7 @@ const useFilterListHeader = ({
         ],
 
         headerLeft: () => (
-          <>
+          <View style={styles.headerLeft}>
             <IconButton
               accessibilityLabel={t('select')}
               onPress={onSelect}
@@ -181,7 +180,7 @@ const useFilterListHeader = ({
               onPress={onCheckAll}
               icon="checkAll"
             />
-          </>
+          </View>
         ),
         headerRight: () => (
           <IconButton
@@ -281,7 +280,7 @@ const useFilterListHeader = ({
         ],
 
         headerLeft: () => (
-          <>
+          <View style={styles.headerLeft}>
             {isCourse ? (
               <IconButton
                 accessibilityLabel={t('reorder')}
@@ -295,10 +294,11 @@ const useFilterListHeader = ({
                 icon="select"
               />
             )}
-            <IconButton
-              accessibilityLabel={t('filter')}
-              onPress={onFilter}
-              icon="filter"
+            <FilterMenu
+              label={t('filter')}
+              options={filterOptions}
+              selected={filterSelected}
+              onSelectionChange={onFilterSelect}
             />
             {isCourse && (
               <IconButton
@@ -307,7 +307,7 @@ const useFilterListHeader = ({
                 onPress={onCourseX}
               />
             )}
-          </>
+          </View>
         ),
         headerRight: () => (
           <>
@@ -341,7 +341,6 @@ const useFilterListHeader = ({
     onArchiveSelected,
     onCheckAll,
     onCourseX,
-    onFilter,
     onFilterSelect,
     onRefresh,
     onReorder,
@@ -353,5 +352,13 @@ const useFilterListHeader = ({
     type,
   ]);
 };
+
+// Android: a gap between the last header button and the title.
+const styles = StyleSheet.create({
+  headerLeft: {
+    flexDirection: 'row',
+    marginEnd: 4,
+  },
+});
 
 export default useFilterListHeader;
