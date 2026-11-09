@@ -35,6 +35,9 @@ jest.mock('data/source', () => ({
 jest.mock('helpers/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
+jest.mock('helpers/fs', () => ({
+  removeFileDir: jest.fn(async () => {}),
+}));
 jest.mock('helpers/retry', () => ({
   retry: (fn: () => Promise<unknown>) => fn(),
 }));
@@ -303,5 +306,13 @@ describe('switching accounts', () => {
     await login(sso);
     await logout();
     expect(getDataOwner()).toBeNull();
+  });
+
+  it('deletes the downloaded files on logout', async () => {
+    const { removeFileDir } = require('helpers/fs');
+    removeFileDir.mockClear();
+    await login(sso);
+    await logout();
+    expect(removeFileDir).toHaveBeenCalled();
   });
 });
