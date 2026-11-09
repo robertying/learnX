@@ -131,6 +131,9 @@ const AutoHeightWebView: React.FC<
       javaScriptEnabled
       showsHorizontalScrollIndicator={false}
       showsVerticalScrollIndicator={false}
+      // Sized to its content, so the page around it does the scrolling.
+      scrollEnabled={false}
+      nestedScrollEnabled={false}
       onNavigationStateChange={onNavigationStateChange}
       decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
       originWhitelist={['*']}
