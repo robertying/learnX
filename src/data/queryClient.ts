@@ -1,4 +1,11 @@
-import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
+import { AppState } from 'react-native';
+import {
+  hashKey,
+  MutationCache,
+  QueryCache,
+  QueryClient,
+  type QueryKey,
+} from '@tanstack/react-query';
 import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
 import { SQLiteStorage } from 'expo-sqlite/kv-store';
 import { noteRequestError } from 'data/auth';
@@ -67,8 +74,50 @@ export const restoreQueryCache = () => {
   return restoring;
 };
 
+/** How long a small change waits for others before its list is saved. */
+const SAVE_DELAY_MS = 1000;
+
+/** Lists changed in place and not saved yet, by query hash. */
+const unsaved = new Map<string, QueryKey>();
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+
+/** Saves the lists changed in place since the last save. */
+export const saveChangedQueries = () => {
+  clearTimeout(saveTimer);
+  saveTimer = undefined;
+  const keys = [...unsaved.values()];
+  unsaved.clear();
+  return Promise.all(
+    keys.map(key =>
+      queryPersister.persistQueryByKey(key, queryClient).catch(() => {}),
+    ),
+  );
+};
+
+/**
+ * Saves a list changed in place (an item marked read or favorited) a moment
+ * later. A list is saved whole, with every notice's text, so changes made
+ * close together share one write, and the JS thread isn't held for each.
+ * Saved at once when the app leaves the foreground. If the app is killed
+ * first, the next fetch brings the server's state, with the waiting actions
+ * laid over it.
+ */
+export const saveQuerySoon = (queryKey: QueryKey) => {
+  unsaved.set(hashKey(queryKey), queryKey);
+  saveTimer ??= setTimeout(saveChangedQueries, SAVE_DELAY_MS);
+};
+
+AppState.addEventListener('change', state => {
+  if (state !== 'active' && unsaved.size > 0) {
+    void saveChangedQueries();
+  }
+});
+
 /** Forgets every response, in memory and on disk. */
 export const clearQueryCache = () => {
+  clearTimeout(saveTimer);
+  saveTimer = undefined;
+  unsaved.clear();
   queryClient.clear();
   cache.clearSync();
 };
