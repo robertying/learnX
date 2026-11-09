@@ -1,4 +1,5 @@
 import { useSettings } from 'data/settings';
+import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import packageJson from '../../package.json';
 
 /**
@@ -9,7 +10,7 @@ const useSettingsBadge = () => {
   const newChangelog = useSettings(
     settings => settings.lastShowChangelogVersion !== packageJson.version,
   );
-  const newUpdate = useSettings(settings => settings.newUpdate);
+  const newUpdate = !!useAvailableUpdate();
   const courseInformationSharingBadgeShown = useSettings(
     settings => settings.courseInformationSharingBadgeShown,
   );

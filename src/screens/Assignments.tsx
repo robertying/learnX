@@ -10,7 +10,7 @@ import { useAssignments } from 'data/content';
 import { Assignment } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import useNotificationTarget from 'hooks/useNotificationTarget';
+import usePendingTarget from 'hooks/usePendingTarget';
 import useFilteredData from 'hooks/useFilteredData';
 
 type Props = MainStackScreenProps<AssignmentStackParams, 'Assignments'>;
@@ -54,7 +54,7 @@ const Assignments: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  useNotificationTarget('assignment', (id, inDetail) =>
+  usePendingTarget('assignment', (id, inDetail) =>
     inDetail ? handlePush({ id }) : navigation.push('AssignmentDetail', { id }),
   );
 

@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
-import { LinkTarget } from 'helpers/notifications';
-import { setPendingNotificationTarget } from 'hooks/useNotificationTarget';
+import { OpenTarget } from 'helpers/openTarget';
+import { setPendingTarget } from 'hooks/usePendingTarget';
 
 /**
  * Opens what a tapped notification, widget row or Spotlight result points
@@ -9,9 +9,9 @@ import { setPendingNotificationTarget } from 'hooks/useNotificationTarget';
 const useOpenTarget = () => {
   const navigation = useNavigation();
 
-  return (target: LinkTarget) => {
+  return (target: OpenTarget) => {
     if (target.type === 'today') {
-      setPendingNotificationTarget(null);
+      setPendingTarget(null);
       return navigation.navigate('MainTab', {
         screen: 'TodayStack',
         params: { screen: 'Today', pop: true },
@@ -19,7 +19,7 @@ const useOpenTarget = () => {
     }
     // The list opens the item, as a tap on it would, so it lands in the
     // detail pane of a split view and on top of the list on a phone.
-    setPendingNotificationTarget(target.id ? target : null);
+    setPendingTarget(target.id ? target : null);
     switch (target.type) {
       case 'notice':
         return navigation.navigate('MainTab', {

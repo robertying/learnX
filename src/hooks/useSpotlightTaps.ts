@@ -6,7 +6,7 @@ import useOpenTarget from 'hooks/useOpenTarget';
  * Opens the item of a tapped Spotlight result (iOS and Mac), including the one
  * that launched the app. helpers/surfaces keeps the index current.
  */
-const useSpotlight = () => {
+const useSpotlightTaps = () => {
   const openTarget = useOpenTarget();
   const open = useEffectEvent(({ domain, id }: SpotlightOpenedItem) => {
     if (domain === 'notice' || domain === 'assignment') {
@@ -27,4 +27,4 @@ const useSpotlight = () => {
   }, []);
 };
 
-export default useSpotlight;
+export default useSpotlightTaps;

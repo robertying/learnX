@@ -3,9 +3,7 @@ import { NavigationContainerRef } from '@react-navigation/native';
 import { DetailStackParams } from 'screens/types';
 import { SplitViewContext } from 'components/SplitView';
 import Numbers from 'constants/Numbers';
-import useNotificationTarget, {
-  setPendingNotificationTarget,
-} from 'hooks/useNotificationTarget';
+import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';
 
 // The split view's divider pulls in the theme, which isn't needed here.
 jest.mock('components/Divider', () => () => null);
@@ -33,15 +31,15 @@ const splitContext = (navigator: object | null) => ({
 });
 
 afterEach(() => {
-  setPendingNotificationTarget(null);
+  setPendingTarget(null);
   mockSplitLaidOut = true;
   mockTablet = true;
 });
 
 it('opens a pending item of its type once', async () => {
   const open = jest.fn();
-  setPendingNotificationTarget({ type: 'notice', id: 'n1' });
-  const hook = await renderHook(() => useNotificationTarget('notice', open));
+  setPendingTarget({ type: 'notice', id: 'n1' });
+  const hook = await renderHook(() => usePendingTarget('notice', open));
   expect(open.mock.calls).toEqual([['n1', false]]);
   await hook.rerender({});
   expect(open).toHaveBeenCalledTimes(1);
@@ -49,17 +47,15 @@ it('opens a pending item of its type once', async () => {
 
 it('leaves items of other types to their lists', async () => {
   const open = jest.fn();
-  setPendingNotificationTarget({ type: 'file', id: 'f1' });
-  await renderHook(() => useNotificationTarget('notice', open));
+  setPendingTarget({ type: 'file', id: 'f1' });
+  await renderHook(() => usePendingTarget('notice', open));
   expect(open).not.toHaveBeenCalled();
 });
 
 it('opens a tap that arrives while the list is shown', async () => {
   const open = jest.fn();
-  await renderHook(() => useNotificationTarget('assignment', open));
-  await act(() =>
-    setPendingNotificationTarget({ type: 'assignment', id: 'a1' }),
-  );
+  await renderHook(() => usePendingTarget('assignment', open));
+  await act(() => setPendingTarget({ type: 'assignment', id: 'a1' }));
   expect(open.mock.calls).toEqual([['a1', false]]);
 });
 
@@ -71,8 +67,8 @@ it('waits for the detail pane of a split view', async () => {
       {children}
     </SplitViewContext.Provider>
   );
-  setPendingNotificationTarget({ type: 'notice', id: 'n1' });
-  const hook = await renderHook(() => useNotificationTarget('notice', open), {
+  setPendingTarget({ type: 'notice', id: 'n1' });
+  const hook = await renderHook(() => usePendingTarget('notice', open), {
     wrapper,
   });
   expect(open).not.toHaveBeenCalled();
@@ -91,8 +87,8 @@ it('waits for the split to be laid out on iPad', async () => {
       {children}
     </SplitViewContext.Provider>
   );
-  setPendingNotificationTarget({ type: 'notice', id: 'n1' });
-  const hook = await renderHook(() => useNotificationTarget('notice', open), {
+  setPendingTarget({ type: 'notice', id: 'n1' });
+  const hook = await renderHook(() => usePendingTarget('notice', open), {
     wrapper,
   });
   expect(open).not.toHaveBeenCalled();
@@ -112,7 +108,7 @@ it("pushes on an iPhone, even while a tab's split hands out its hidden pane", as
       {children}
     </SplitViewContext.Provider>
   );
-  setPendingNotificationTarget({ type: 'file', id: 'f1' });
-  await renderHook(() => useNotificationTarget('file', open), { wrapper });
+  setPendingTarget({ type: 'file', id: 'f1' });
+  await renderHook(() => usePendingTarget('file', open), { wrapper });
   expect(open.mock.calls).toEqual([['f1', false]]);
 });

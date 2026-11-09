@@ -10,7 +10,6 @@ export const defaultSettings: SettingsState = {
   assignmentReminderSync: false,
   syncedCalendarAssignments: {},
   syncedReminderAssignments: {},
-  newUpdate: false,
   graduate: false,
   fileUseDocumentDir: false,
   fileOmitCourseName: false,
@@ -43,10 +42,6 @@ export const defaultSettings: SettingsState = {
   courseEventOmitLocation: false,
 };
 
-/** Only means something while the app runs: rechecked on every launch. */
-type TransientSetting = 'newUpdate';
-export type PersistedSettings = Omit<SettingsState, TransientSetting>;
-
 /**
  * Lays saved settings over the current ones. Nested objects merge one level
  * deep so a setting added in a later version keeps its default.
@@ -63,7 +58,6 @@ export const mergeSettings = (
   },
   alarms: { ...current.alarms, ...saved.alarms },
   notifications: { ...current.notifications, ...saved.notifications },
-  newUpdate: current.newUpdate,
 });
 
 export const useSettingsStore = create<SettingsState>()(
@@ -71,11 +65,6 @@ export const useSettingsStore = create<SettingsState>()(
     name: SETTINGS_KEY,
     version: 1,
     storage: persistStorage,
-    partialize: (state): PersistedSettings => {
-      const persisted: Partial<SettingsState> = { ...state };
-      delete persisted.newUpdate;
-      return persisted as PersistedSettings;
-    },
     merge: (saved, current) =>
       mergeSettings(current, (saved ?? {}) as Partial<SettingsState>),
   }),

@@ -1,16 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { t } from 'helpers/i18n';
-
-/** What a tap on a notification or a widget row opens. */
-export interface NotificationTarget {
-  type: 'notice' | 'assignment' | 'file';
-  /** The item to open; without it, the type's list. */
-  id?: string;
-}
-
-/** What a learnx:// link opens: an item or list, or the Today tab. */
-export type LinkTarget = NotificationTarget | { type: 'today'; id?: undefined };
+import { isItemType, ItemTarget } from 'helpers/openTarget';
 
 /**
  * Action buttons a notification shows, by what it is about. Identifiers
@@ -150,7 +141,7 @@ export const postNotification = (
   content: {
     title: string;
     body: string;
-    target: NotificationTarget;
+    target: ItemTarget;
     ids?: string[];
   },
   channelId: string = notificationChannels.content,
@@ -169,10 +160,8 @@ export const postNotification = (
     trigger: Platform.OS === 'android' ? { channelId } : null,
   });
 
-const targetTypes = new Set<string>(['notice', 'assignment', 'file']);
-
 /** What one of our notifications carries. */
-export interface NotificationData extends NotificationTarget {
+export interface NotificationData extends ItemTarget {
   /** The items a notification about several of them covers. */
   ids?: string[];
   /** A deadline reminder's deadline, in milliseconds. */
@@ -209,11 +198,11 @@ export const getNotificationData = (
   response: Notifications.NotificationResponse,
 ): NotificationData | null => {
   const data = responseData(response);
-  if (!data || typeof data.type !== 'string' || !targetTypes.has(data.type)) {
+  if (!data || typeof data.type !== 'string' || !isItemType(data.type)) {
     return null;
   }
   return {
-    type: data.type as NotificationTarget['type'],
+    type: data.type as ItemTarget['type'],
     id: typeof data.id === 'string' ? data.id : undefined,
     ids:
       Array.isArray(data.ids) && data.ids.every(id => typeof id === 'string')
@@ -226,35 +215,7 @@ export const getNotificationData = (
 /** The target a notification carries, if it is one of ours. */
 export const getNotificationTarget = (
   response: Notifications.NotificationResponse,
-): NotificationTarget | null => {
+): ItemTarget | null => {
   const data = getNotificationData(response);
   return data ? { type: data.type, id: data.id } : null;
-};
-
-/**
- * The learnx:// link that opens a target, e.g. `learnx://assignment/<id>` for
- * a widget row. Without an id, it opens the type's list.
- */
-export const getTargetUrl = ({ type, id }: LinkTarget) =>
-  `learnx://${type}${id ? `/${encodeURIComponent(id)}` : ''}`;
-
-/** The target of a learnx:// link, if it points to one. */
-export const getUrlTarget = (url: string): LinkTarget | null => {
-  const match = /^learnx:\/\/([a-z]+)(?:\/([^/?#]+))?\/?(?:[?#].*)?$/i.exec(
-    url,
-  );
-  if (match?.[1] === 'today') {
-    return { type: 'today' };
-  }
-  if (!match || !targetTypes.has(match[1])) {
-    return null;
-  }
-  try {
-    return {
-      type: match[1] as NotificationTarget['type'],
-      id: match[2] ? decodeURIComponent(match[2]) : undefined,
-    };
-  } catch {
-    return null;
-  }
 };

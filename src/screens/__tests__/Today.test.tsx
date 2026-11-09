@@ -9,6 +9,7 @@ jest.mock('react-native-screens/experimental', () => {
   return { SafeAreaView: View };
 });
 jest.mock('hooks/useDetailNavigator', () => () => undefined);
+jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
 
 const mockSessions: ClassSession[] = [];

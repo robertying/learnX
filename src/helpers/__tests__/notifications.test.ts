@@ -3,11 +3,10 @@ import * as Notifications from 'expo-notifications';
 import {
   getNotificationPermission,
   getNotificationTarget,
-  getTargetUrl,
-  getUrlTarget,
   postNotification,
   requestNotificationPermission,
 } from 'helpers/notifications';
+import { getTargetUrl, getUrlTarget } from 'helpers/openTarget';
 
 const response = (data: unknown) =>
   ({
