@@ -9,7 +9,7 @@ import { useCourseIds } from 'data/queries';
 import { useUserData } from 'data/userData';
 import type { Assignment, File, Notice } from 'data/types/state';
 import { useShowDetail } from 'hooks/useDetailNavigator';
-import useFilteredData from 'hooks/useFilteredData';
+import useFilteredData, { type ExtraLists } from 'hooks/useFilteredData';
 import usePendingTarget from 'hooks/usePendingTarget';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 
@@ -36,11 +36,16 @@ export interface ContentListQuery {
  * refresh on mount, on sign-in and when the semester's courses change, pull to
  * refresh, and opening an item (also one from a notification or widget).
  */
-const useContentList = <T extends Notice | Assignment | File>(
+const useContentList = <
+  T extends Notice | Assignment | File,
+  K extends string = never,
+>(
   type: ContentType,
   items: T[],
   query: ContentListQuery,
   navigation: Pick<NavigationProp<ParamListBase>, 'dispatch'>,
+  /** The kind's own filters, such as `noticeLists`. */
+  lists?: ExtraLists<T, K>,
 ) => {
   const loggedIn = useLoggedIn();
   const courseIds = useCourseIds();
@@ -51,6 +56,7 @@ const useContentList = <T extends Notice | Assignment | File>(
     data: items,
     archived: archivedIds,
     hidden: hiddenCourseIds,
+    lists,
   });
 
   const handleRefresh = () =>

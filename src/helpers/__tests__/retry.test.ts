@@ -40,7 +40,9 @@ describe('retry', () => {
     const fn = jest
       .fn<Promise<string>, []>()
       .mockRejectedValue(new Error('offline'));
-    await expect(retry(fn, 3, 1000, () => false)).rejects.toThrow('offline');
+    await expect(retry(fn, { shouldRetry: () => false })).rejects.toThrow(
+      'offline',
+    );
     expect(fn).toHaveBeenCalledTimes(1);
   });
 });
