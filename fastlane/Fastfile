@@ -15,7 +15,7 @@ ANDROID_APP = File.join(ROOT, "android/app")
 GITHUB_REPO = "robertying/learnX"
 # The Android versionCode is this plus the iOS build number (18.0.3: 4530 -> 9204530).
 ANDROID_VERSION_CODE_BASE = 9_200_000
-APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a x86 universal].freeze
+APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a universal].freeze
 
 skip_docs
 

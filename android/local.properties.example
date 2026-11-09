@@ -1,0 +1,9 @@
+# Copy to android/local.properties (git-ignored). Android Studio adds sdk.dir
+# itself; set it by hand only if Gradle can't find the SDK (or set ANDROID_HOME).
+# sdk.dir=/Users/<you>/Library/Android/sdk
+
+# Release signing (fastlane android build/release), with the keystore at
+# android/app/release.keystore. Debug builds don't need these.
+LEARNX_RELEASE_STORE_PASSWORD=
+LEARNX_RELEASE_KEY_ALIAS=
+LEARNX_RELEASE_KEY_PASSWORD=
