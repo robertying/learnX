@@ -12,7 +12,7 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import { getCredentials, loadCredentials } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import Urls from 'constants/Urls';
-import { addCSRFTokenToLearnUrl } from 'helpers/learnUrl';
+import { addCSRFTokenToLearnUrl, isLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
 import {
   assertServerWritesAllowed,
@@ -69,15 +69,50 @@ let helper: Learn2018Helper;
 
 const isMockSession = () => isMockUser(getCredentials()?.username);
 
+/** Web Learning's login pages are short; a notice's page never is. */
+const MAX_LOGIN_PAGE_LENGTH = 4096;
+
+/**
+ * Whether a page load found the session expired: Web Learning answers with
+ * its "login timeout" page, or redirects to it or to the SSO login, with
+ * status 200 (403 for some pages), the way thu-learn-lib tells. Throws for any
+ * other failed status.
+ */
+const isSessionExpired = async (response: Response) => {
+  if (response.status === 403 || response.url.includes('login_timeout')) {
+    return true;
+  }
+  if (!response.ok) {
+    throw {
+      reason: FailReason.UNEXPECTED_STATUS,
+      extra: response.status,
+    } satisfies ApiError;
+  }
+  const text = await response.text();
+  return (
+    text.length < MAX_LOGIN_PAGE_LENGTH &&
+    /登录超时|您未登录或登录失效|log_fail\.png|login_timeout|id\.tsinghua\.edu\.cn\/do\/off\/ui\/auth\/login|j_spring_security_thauth_roaming_entry/.test(
+      text,
+    )
+  );
+};
+
 /** The requests the app sends to learn.tsinghua.edu.cn itself. */
 const realRequests: Omit<AppSource, keyof DataSource> = {
   markNoticeRead: async url => {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw {
-        reason: FailReason.UNEXPECTED_STATUS,
-        extra: response.status,
-      } satisfies ApiError;
+    // Only Web Learning's own pages: the session cookies go with the request.
+    if (!isLearnUrl(url)) {
+      return;
+    }
+    if (await isSessionExpired(await fetch(url))) {
+      // The page was the login page, so the notice isn't marked read yet.
+      // Log in again if the session has expired, and load it once more.
+      await helper.ensureSession();
+      if (await isSessionExpired(await fetch(url))) {
+        throw {
+          reason: FailReason.NOT_LOGGED_IN,
+        } satisfies ApiError;
+      }
     }
   },
   submitAssignment: async (
