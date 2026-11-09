@@ -33,7 +33,7 @@ export const canRenderInMacWebview = (ext?: string | null) => {
   );
 };
 
-const iosSupportedMimeTypes = [
+const iosSupportedMimeTypes = new Set([
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-powerpoint',
@@ -44,7 +44,7 @@ const iosSupportedMimeTypes = [
   'application/vnd.apple.keynote',
   'application/vnd.apple.numbers',
   'application/pdf',
-];
+]);
 
 export const canRenderInIosWebview = (ext?: string | null) => {
   if (!ext) {
@@ -57,7 +57,7 @@ export const canRenderInIosWebview = (ext?: string | null) => {
   }
 
   return (
-    iosSupportedMimeTypes.includes(mimeType) ||
+    iosSupportedMimeTypes.has(mimeType) ||
     mimeType.includes('image/') ||
     mimeType.includes('audio/') ||
     mimeType.includes('video/') ||
