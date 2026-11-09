@@ -77,31 +77,53 @@ const range = (from: number, to: number, step = 1) => {
   return weeks;
 };
 
+/** English weekday names by their first three letters (`Tues`, `Thur`, …). */
+const ENGLISH_WEEKDAYS: Record<string, number> = {
+  mon: 1,
+  tue: 2,
+  wed: 3,
+  thu: 4,
+  fri: 5,
+  sat: 6,
+  sun: 7,
+};
+
+/** Week specs that aren't a list of weeks, in Chinese and in English. */
+const NAMED_WEEKS: Record<string, () => number[] | null> = {
+  全周: () => null,
+  all: () => null,
+  every: () => null,
+  full: () => null,
+  前八周: () => range(1, 8),
+  first8: () => range(1, 8),
+  firsteight: () => range(1, 8),
+  后八周: () => range(9, TERM_WEEKS),
+  last8: () => range(9, TERM_WEEKS),
+  lasteight: () => range(9, TERM_WEEKS),
+  单周: () => range(1, TERM_WEEKS, 2),
+  odd: () => range(1, TERM_WEEKS, 2),
+  双周: () => range(2, TERM_WEEKS, 2),
+  even: () => range(2, TERM_WEEKS, 2),
+};
+
 /**
  * The weeks a meeting happens in, from the part in parentheses, e.g.
- * `全周`, `1-8周`, `9,11周`, `单周`. `null` means every week, also for
- * text it doesn't know.
+ * `全周`, `1-8周`, `9,11周`, `单周`, or in English `Week all`, `Week 1-8`,
+ * `Odd weeks`. `null` means every week, also for text it doesn't know.
  */
 export const parseWeeks = (text: string): number[] | null => {
-  const spec = text.replace(/\s/g, '');
-  switch (spec) {
-    case '全周':
-      return null;
-    case '前八周':
-      return range(1, 8);
-    case '后八周':
-      return range(9, TERM_WEEKS);
-    case '单周':
-      return range(1, TERM_WEEKS, 2);
-    case '双周':
-      return range(2, TERM_WEEKS, 2);
+  const spec = text
+    .replace(/\s/g, '')
+    .toLowerCase()
+    .replace(/^(?:第|weeks?|wks?)/, '')
+    .replace(/(?:周|weeks?|wks?)$/, '');
+  const named = NAMED_WEEKS[spec] ?? NAMED_WEEKS[`${spec}周`];
+  if (named) {
+    return named();
   }
   const weeks: number[] = [];
-  for (const part of spec
-    .replace(/^第/, '')
-    .replace(/周$/, '')
-    .split(/[,，、]/)) {
-    const match = part.match(/^(\d+)(?:-(\d+))?$/);
+  for (const part of spec.split(/[,，、;；]/)) {
+    const match = part.match(/^(\d+)(?:[-~～–—](\d+))?$/);
     if (!match) {
       return null;
     }
@@ -119,28 +141,47 @@ export interface Meeting {
   location: string;
 }
 
+const toMeeting = (
+  weekday: number | undefined,
+  period: number,
+  weeks: string,
+  location: string,
+): Meeting | null =>
+  weekday && PERIOD_TIMES[period]
+    ? { weekday, period, weeks: parseWeeks(weeks), location: location.trim() }
+    : null;
+
 /**
  * Reads one entry of a course's time and location, such as
- * `星期六第1节(9,11周)，六教6A414`. Entries without a day or a known period
- * (`星期第0节(全周)，`) give `null`.
+ * `星期六第1节(9,11周)，六教6A414`, or `Section 1 of Sat (Week 9,11 ), 六教6A414`
+ * when the website is in English. Entries without a day or a known period
+ * (`星期第0节(全周)，`, `Section 0  (Week all ), `) give `null`.
  */
 export const parseMeeting = (text: string): Meeting | null => {
-  const match = text.match(
+  const chinese = text.match(
     /星期([一二三四五六日天])第(\d+)节\s*[(（]([^)）]*)[)）]\s*[，,]?\s*(.*)$/,
   );
-  if (!match) {
-    return null;
+  if (chinese) {
+    return toMeeting(
+      WEEKDAYS[chinese[1]],
+      Number(chinese[2]),
+      chinese[3],
+      chinese[4],
+    );
   }
-  const period = Number(match[2]);
-  if (!PERIOD_TIMES[period]) {
-    return null;
+  const english = text.match(
+    /section\s*(\d+)\s*(?:of\s*([a-z]+)\.?)?\s*[(（]([^)）]*)[)）]\s*[，,]?\s*(.*)$/i,
+  );
+  if (english) {
+    const day = english[2]?.slice(0, 3).toLowerCase();
+    return toMeeting(
+      day ? ENGLISH_WEEKDAYS[day] : undefined,
+      Number(english[1]),
+      english[3],
+      english[4],
+    );
   }
-  return {
-    weekday: WEEKDAYS[match[1]],
-    period,
-    weeks: parseWeeks(match[3]),
-    location: match[4].trim(),
-  };
+  return null;
 };
 /* oxlint-enable learnx/no-han-outside-translations */
 

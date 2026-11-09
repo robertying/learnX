@@ -55,6 +55,15 @@ describe('parseWeeks', () => {
     ['前八周', [1, 2, 3, 4, 5, 6, 7, 8]],
     ['单周', [1, 3, 5, 7, 9, 11, 13, 15]],
     ['奇怪', null],
+    ['Week all ', null],
+    ['Week 1-4', [1, 2, 3, 4]],
+    ['Week 9,11 ', [9, 11]],
+    ['Weeks 1-2, 5', [1, 2, 5]],
+    ['First 8 weeks', [1, 2, 3, 4, 5, 6, 7, 8]],
+    ['Last 8 weeks', [9, 10, 11, 12, 13, 14, 15, 16]],
+    ['Odd weeks', [1, 3, 5, 7, 9, 11, 13, 15]],
+    ['Even weeks', [2, 4, 6, 8, 10, 12, 14, 16]],
+    ['Strange', null],
   ])('%s', (text, weeks) => {
     expect(parseWeeks(text)).toEqual(weeks);
   });
@@ -81,6 +90,45 @@ describe('parseMeeting', () => {
     expect(parseMeeting('星期一第9节(全周)，')).toBeNull();
     expect(parseMeeting('')).toBeNull();
   });
+
+  it('reads the English form', () => {
+    expect(parseMeeting('Section 2 of Wed (Week all ), 六教6A414')).toEqual({
+      weekday: 3,
+      period: 2,
+      weeks: null,
+      location: '六教6A414',
+    });
+    expect(parseMeeting('Section 1 of Sat (Week 9,11 ), 六教6A414')).toEqual({
+      weekday: 6,
+      period: 1,
+      weeks: [9, 11],
+      location: '六教6A414',
+    });
+    expect(parseMeeting('Section 6 of Sun (Week all ), ')).toEqual({
+      weekday: 7,
+      period: 6,
+      weeks: null,
+      location: '',
+    });
+  });
+
+  it.each([
+    ['Section 2  of Mon (Week all ), 六教6C101', 1, 2],
+    ['Section 6 of Tues (Week all ), 六教6A211', 2, 6],
+    ['Section 3 of Tue. (Week all ), 一教101', 2, 3],
+    ['Section 6 of Thur (Week all ), 一教101', 4, 6],
+    ['Section 4 of Thursday (Week all ), 一教101', 4, 4],
+    ['Section 1 of Fri (Week all ), 六教6A414', 5, 1],
+    ['section 5 of SAT (Week all ), 一教101', 6, 5],
+  ])('reads %s', (text, weekday, period) => {
+    expect(parseMeeting(text)).toMatchObject({ weekday, period });
+  });
+
+  it('skips English entries without a day or period', () => {
+    expect(parseMeeting('Section 0  (Week all ), ')).toBeNull();
+    expect(parseMeeting('Section 9 of Mon (Week all ), ')).toBeNull();
+    expect(parseMeeting('Section 2 of Xyz (Week all ), ')).toBeNull();
+  });
 });
 
 describe('sessionsFromCourses', () => {
@@ -90,6 +138,7 @@ describe('sessionsFromCourses', () => {
       '星期一第1节(1-8周)，四教4101',
       '星期三第3节(单周)，',
     ]),
+    course('c', 'English', ['Section 4 of Wed (Week 1-8 ), 一教101']),
   ];
 
   it('places each meeting on its day and period', () => {
@@ -100,6 +149,7 @@ describe('sessionsFromCourses', () => {
       ['b', 'Mon 08:00'],
       ['a', 'Mon 09:50'],
       ['b', 'Wed 13:30'],
+      ['c', 'Wed 15:20'],
     ]);
     expect(dayjs(sessions[1].end).format('HH:mm')).toBe('12:15');
     expect(sessions[1].location).toBe('六教6A414');
