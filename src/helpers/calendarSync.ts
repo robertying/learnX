@@ -11,6 +11,7 @@ import {
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from './event';
+import { calendarErrorCode } from './calendarError';
 import { exportTextFile } from './fs';
 import { t } from './i18n';
 
@@ -22,15 +23,10 @@ export interface ToastMessage {
 const messageOf = (err: unknown) => (err as Error).message;
 
 export const courseSyncErrorToast = (err: unknown): ToastMessage => {
-  switch (messageOf(err)) {
-    case 'Missing calendar permission':
+  switch (calendarErrorCode(err)) {
+    case 'calendarPermission':
       return {
         text: t('courseScheduleSyncNoCalendarPermission'),
-        type: 'error',
-      };
-    case 'Missing reminder permission':
-      return {
-        text: t('courseScheduleSyncNoReminderPermission'),
         type: 'error',
       };
     default:
@@ -39,13 +35,12 @@ export const courseSyncErrorToast = (err: unknown): ToastMessage => {
 };
 
 export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
-  switch (messageOf(err)) {
-    case 'Missing calendar permission':
-    case 'CALENDAR permission is required to do this operation.':
+  switch (calendarErrorCode(err)) {
+    case 'calendarPermission':
       return { text: t('assignmentSyncNoCalendarPermission'), type: 'error' };
-    case 'Missing reminder permission':
+    case 'reminderPermission':
       return { text: t('assignmentSyncNoReminderPermission'), type: 'error' };
-    case 'Cannot find any calendar source':
+    case 'noSource':
       return { text: t('missingCalendarSource'), type: 'error' };
     default:
       return {
@@ -56,10 +51,10 @@ export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
 };
 
 export const calendarExportErrorToast = (err: unknown): ToastMessage => {
-  switch (messageOf(err)) {
-    case 'Missing calendar permission':
+  switch (calendarErrorCode(err)) {
+    case 'calendarPermission':
       return { text: t('calendarExportNoCalendarPermission'), type: 'error' };
-    case 'No synced events':
+    case 'noEvents':
       return { text: t('calendarExportNoEvent'), type: 'warning' };
     default:
       return {
@@ -70,10 +65,10 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
 };
 
 export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
-  switch (messageOf(err)) {
-    case 'Missing calendar permission':
+  switch (calendarErrorCode(err)) {
+    case 'calendarPermission':
       return { text: t('deleteFailedNoCalendarPermission'), type: 'error' };
-    case 'Missing reminder permission':
+    case 'reminderPermission':
       return { text: t('deleteFailedNoReminderPermission'), type: 'error' };
     default:
       return { text: t('deleteFailed') + messageOf(err), type: 'error' };
@@ -116,13 +111,17 @@ export const upcomingAssignments = (
   now: Dayjs = dayjs(),
 ) => assignments.filter(assignment => dayjs(assignment.deadline).isAfter(now));
 
-/** Writes assignments to the calendar or reminders; a toast only on failure */
+/**
+ * Writes assignments to the calendar or reminders and deletes the entries of
+ * `removed` (archived or hidden); a toast only on failure
+ */
 export const syncAssignments = async (
   type: 'calendar' | 'reminder',
   assignments: Assignment[],
+  removed: string[] = [],
 ): Promise<ToastMessage | undefined> => {
   try {
-    await saveAssignmentsToReminderOrCalendar(type, assignments);
+    await saveAssignmentsToReminderOrCalendar(type, assignments, removed);
   } catch (err) {
     return assignmentSyncErrorToast(err);
   }

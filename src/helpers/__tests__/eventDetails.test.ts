@@ -116,6 +116,7 @@ describe('buildAssignmentReminderDetails', () => {
       title: 'Homework 1 - Calculus',
       startDate: new Date('2026-03-10T08:00:00+08:00'),
       dueDate: new Date('2026-03-20T23:59:00+08:00'),
+      alarms: [],
       timeZone: 'Asia/Shanghai',
       completed: true,
       completionDate: completionDate.toDate(),
@@ -123,13 +124,14 @@ describe('buildAssignmentReminderDetails', () => {
     });
   });
 
-  it('moves the due date earlier by the alarm offset, a day by default', () => {
-    expect(
-      buildAssignmentReminderDetails(
-        settingsWith({}, { assignmentReminderAlarm: true }),
-        input(),
-      ).dueDate,
-    ).toEqual(new Date('2026-03-19T23:59:00+08:00'));
+  it('keeps the deadline and alerts the offset before it, a day by default', () => {
+    const at = (iso: string) => [{ absoluteDate: new Date(iso).toISOString() }];
+    const daily = buildAssignmentReminderDetails(
+      settingsWith({}, { assignmentReminderAlarm: true }),
+      input(),
+    );
+    expect(daily.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
+    expect(daily.alarms).toEqual(at('2026-03-19T23:59:00+08:00'));
     expect(
       buildAssignmentReminderDetails(
         settingsWith(
@@ -137,8 +139,8 @@ describe('buildAssignmentReminderDetails', () => {
           { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
         ),
         input(),
-      ).dueDate,
-    ).toEqual(new Date('2026-03-20T22:59:00+08:00'));
+      ).alarms,
+    ).toEqual(at('2026-03-20T22:59:00+08:00'));
   });
 });
 
