@@ -57,7 +57,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
           <>
             {attachment ? <CardGlyph name="attachment" /> : null}
             {markedImportant ? (
-              <CardGlyph name="flag" color={theme.colors.status.orange} />
+              <CardGlyph name="important" color={theme.colors.status.orange} />
             ) : null}
           </>
         }

@@ -8,7 +8,7 @@ import StatusView from './StatusView';
  */
 const NotFound: React.FC = () => (
   <SafeArea testID="not-found" collapsable={false}>
-    <StatusView icon="magnify-close" message={t('itemNotFound')} />
+    <StatusView icon="notFound" message={t('itemNotFound')} />
   </SafeArea>
 );
 

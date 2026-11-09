@@ -1,13 +1,12 @@
 import { StyleSheet, View } from 'react-native';
-import Icon, {
-  type MaterialDesignIconsIconName,
-} from '@react-native-vector-icons/material-design-icons';
 import Styles from 'constants/Styles';
+import SystemIcon from 'components/SystemIcon';
 import { Text } from 'components/Text';
+import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
 export interface StatusViewProps {
-  icon: MaterialDesignIconsIconName;
+  icon: SystemIconName;
   message: string;
   /** Something to do about it, such as a button, under the message. */
   action?: React.ReactNode;
@@ -29,7 +28,7 @@ const StatusView: React.FC<StatusViewProps> = ({
 
   return (
     <View testID={testID} style={styles.root}>
-      <Icon
+      <SystemIcon
         style={Styles.spacey1}
         name={icon}
         color={theme.colors.outline}

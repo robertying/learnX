@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Platform, StyleSheet, Text as NativeText, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-design-icons';
+import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Paragraph, Text } from 'components/Text';
 import { fileTypeColor } from 'helpers/filename';
 import { t } from 'helpers/i18n';
@@ -162,12 +162,12 @@ export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
 
 /** A small glyph next to the time, in the caption color unless `color` is set. */
 export const CardGlyph: React.FC<{
-  name: 'attachment' | 'flag' | 'key-variant';
+  name: 'attachment' | 'important' | 'answer';
   color?: string;
 }> = ({ name, color }) => {
   const theme = useTheme();
   return (
-    <Icon
+    <SystemIcon
       testID={`icon-${name}`}
       name={name}
       size={15}
@@ -180,7 +180,7 @@ export const CardGlyph: React.FC<{
 export const CardPill: React.FC<{
   children: string;
   color: string;
-  icon?: 'clock-outline';
+  icon?: 'dueSoon';
   testID?: string;
 }> = ({ children, color, icon, testID }) => {
   const theme = useTheme();
@@ -191,7 +191,7 @@ export const CardPill: React.FC<{
       testID={testID}
       style={[styles.pill, { backgroundColor: withAlpha(color, 0.15) }]}
     >
-      {icon ? <Icon name={icon} size={13} color={foreground} /> : null}
+      {icon ? <SystemIcon name={icon} size={13} color={foreground} /> : null}
       <Text
         variant="footnote"
         numberOfLines={1}
@@ -229,8 +229,8 @@ export const FileTypeTile: React.FC<{ fileType?: string }> = ({ fileType }) => {
           </NativeText>
         </View>
       ) : (
-        <Icon
-          name="file-outline"
+        <SystemIcon
+          name="file"
           size={20}
           color={theme.colors.onSurfaceMedium}
         />

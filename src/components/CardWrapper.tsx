@@ -9,16 +9,17 @@ import { SharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable, {
   SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
 import { CardAction, cardActions } from 'helpers/cardActions';
 import { t } from 'helpers/i18n';
+import { systemIcons } from 'helpers/systemIcons';
 import useCardSwipe from 'hooks/useCardSwipe';
 import CardMenu from './CardMenu';
 import CardSwipeActions from './CardSwipeActions';
 import Touchable from './Touchable';
 import SelectionMark from './SelectionMark';
+import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
 import { ContextMenuView } from 'modules/menus';
 
@@ -240,9 +241,10 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           </View>
         )}
         {reorderMode && (
-          <MaterialCommunityIcons
+          <SystemIcon
+            testID="reorder-handle"
             style={styles.checkbox}
-            name="reorder-horizontal"
+            name="reorder"
             size={20}
             color={theme.colors.onSurface}
           />
@@ -281,7 +283,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           ? actions.map(a => ({
               key: a.key,
               title: a.label,
-              systemImage: a.systemImage,
+              systemImage: systemIcons[a.icon].ios,
             }))
           : // A long press on iPad drags in reorder mode, so only the Mac's
             // right-click menu offers the moves.

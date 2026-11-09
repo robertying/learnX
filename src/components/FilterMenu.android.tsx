@@ -3,7 +3,6 @@
 // filter is checked and each one shows its count; the button turns tonal
 // while a filter other than All is on.
 import { useState } from 'react';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   DropdownMenu,
   FilledTonalIconButton,
@@ -16,6 +15,7 @@ import {
 import { testID } from '@expo/ui/jetpack-compose/modifiers';
 import { useTheme } from 'theme';
 import type { FilterMenuProps } from './FilterMenu.shared';
+import SystemIcon from 'components/SystemIcon';
 import ThemedHost from 'components/ThemedHost';
 
 const FilterMenu: React.FC<FilterMenuProps> = ({
@@ -62,8 +62,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
             >
               <SelectableDropdownMenuItem.LeadingIcon>
                 <RNHostView matchContents>
-                  <MaterialDesignIcons
-                    name={option.materialIcon}
+                  <SystemIcon
+                    name={option.icon}
                     size={24}
                     color={
                       selected === option.name

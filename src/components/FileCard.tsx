@@ -64,7 +64,7 @@ const FileCard: React.FC<FileCardProps> = ({
         preview={preview}
         glyphs={
           markedImportant ? (
-            <CardGlyph name="flag" color={theme.colors.status.orange} />
+            <CardGlyph name="important" color={theme.colors.status.orange} />
           ) : null
         }
         trailing={time}

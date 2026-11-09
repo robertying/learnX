@@ -16,11 +16,11 @@ describe('cardActions', () => {
       key: 'hide',
       testID: 'card-hide',
       label: t('hide'),
-      icon: 'eye-off',
+      icon: 'hide',
     });
     expect(cardActions({ canHide: true, hidden: true })[0]).toMatchObject({
       label: t('unhide'),
-      icon: 'eye',
+      icon: 'show',
     });
   });
 
@@ -30,19 +30,19 @@ describe('cardActions', () => {
     expect(actions[0]).toMatchObject({
       testID: 'card-fav',
       label: t('favorite'),
-      icon: 'heart',
+      icon: 'favorite',
     });
     expect(actions[1]).toMatchObject({
       testID: 'card-archive',
       label: t('archive'),
-      icon: 'archive-arrow-down',
+      icon: 'archive',
     });
   });
 
   it('offers unfavorite for favorites', () => {
     expect(cardActions({ canHide: false, fav: true })[0]).toMatchObject({
       label: t('unfavorite'),
-      icon: 'heart-off',
+      icon: 'unfavorite',
     });
   });
 
@@ -51,7 +51,7 @@ describe('cardActions', () => {
     expect(keys(actions)).toEqual(['archive']);
     expect(actions[0]).toMatchObject({
       label: t('restore'),
-      icon: 'archive-arrow-up',
+      icon: 'unarchive',
     });
   });
 });

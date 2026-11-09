@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import Pdf from 'react-native-pdf';
 import dayjs from 'dayjs';
 import Styles from 'constants/Styles';
@@ -18,7 +17,7 @@ import NotFound from 'components/NotFound';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
 import useHeaderTitle from 'hooks/useHeaderTitle';
-import { Text } from 'components/Text';
+import StatusView from 'components/StatusView';
 import {
   Form,
   FormButton,
@@ -26,7 +25,6 @@ import {
   FormSection,
   FormText,
 } from 'components/Form';
-import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<FileDetailParamList, 'FileDetail'>;
 
@@ -68,8 +66,6 @@ const FileDetailContent: React.FC<{
   courseFileId?: string;
   navigation: Props['navigation'];
 }> = ({ file, courseFileId, navigation }) => {
-  const theme = useTheme();
-
   const { path, progress, error, redownload, share, copyToDownloads, open } =
     useFileDownload(file);
 
@@ -107,17 +103,11 @@ const FileDetailContent: React.FC<{
       {error ? (
         // Keys of their own: React would otherwise reuse one View for the
         // error and the loading state below.
-        <View key="error" style={styles.centered}>
-          <Icon
-            style={Styles.spacey1}
-            name="alert-circle"
-            color={theme.colors.outline}
-            size={56}
-          />
-          <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
-            {t('fileDownloadFailed')}
-          </Text>
-        </View>
+        <StatusView
+          key="error"
+          icon="error"
+          message={t('fileDownloadFailed')}
+        />
       ) : !path ? (
         <View key="loading" style={styles.centered}>
           <Spinner progress={progress} />

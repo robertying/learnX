@@ -16,7 +16,7 @@ const ErrorFallback: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => {
     <View style={[Styles.flex1, { backgroundColor: theme.colors.background }]}>
       <StatusView
         testID="error-fallback"
-        icon="alert-circle-outline"
+        icon="error"
         message={t('somethingWentWrong')}
         action={
           <>

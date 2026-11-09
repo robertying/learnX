@@ -289,6 +289,9 @@ importers:
       expo-file-system:
         specifier: 58.0.13
         version: 58.0.13(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))
+      expo-font:
+        specifier: 58.0.11
+        version: 58.0.11(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       expo-haptics:
         specifier: 58.0.7
         version: 58.0.7(expo@58.0.23)
@@ -310,6 +313,9 @@ importers:
       expo-sqlite:
         specifier: 58.0.15
         version: 58.0.15(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
+      expo-symbols:
+        specifier: 58.0.4
+        version: 58.0.4(expo-font@58.0.11(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1))(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
       expo-task-manager:
         specifier: 58.0.13
         version: 58.0.13(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))
@@ -896,6 +902,9 @@ packages:
       react: '*'
       react-native: '*'
       react-native-bottom-tabs: '*'
+
+  '@expo-google-fonts/material-symbols@0.4.53':
+    resolution: {integrity: sha512-SgCSm8rUYvwy+5ABvwlV/h7xbJkWAsenChSKlUwMLVyEw/QoUon055QixCOtGCjrSRWqFGDvR0ghVa5nA2OkIg==}
 
   '@expo/cli@58.1.19':
     resolution: {integrity: sha512-zoLhSlFnln0xn1fiW0+kb1J0lNv06HAy+FQ27HHwEEWoAClCE13FnTQBOW5bOVYc3c7hsGM8ypKcZGS7RGqjQA==}
@@ -3132,6 +3141,14 @@ packages:
     resolution: {integrity: sha512-jokbgUHPD1zvpFT/LeJaCoOTsd0QXXWzbthVPCMyMMn+/IZAMqQu79OxYzck5G5wlc+t+vTuEESGMY8r1n3VTA==}
     peerDependencies:
       expo: '*'
+      react: '*'
+      react-native: '*'
+
+  expo-symbols@58.0.4:
+    resolution: {integrity: sha512-cZeIh4bf4uUI5GhI0BK88dV1BCoWlgp1fmbPuUY/bZnonmyGS881Yvy8MkbM+R+ozo7W9TdZFpbFRWjUA+spcA==}
+    peerDependencies:
+      expo: '*'
+      expo-font: '*'
       react: '*'
       react-native: '*'
 
@@ -6007,6 +6024,8 @@ snapshots:
       react-native: 0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       react-native-bottom-tabs: 1.5.0(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
 
+  '@expo-google-fonts/material-symbols@0.4.53': {}
+
   '@expo/cli@58.1.19(3d53fb0036fd784ee2723dcebf769f2c)':
     dependencies:
       2g: 1.0.1(typescript@7.0.2)
@@ -8562,6 +8581,15 @@ snapshots:
       expo: 58.0.23(079477869cbe59be909143ed1ed2a60e)
       react: 19.3.1
       react-native: 0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
+
+  expo-symbols@58.0.4(expo-font@58.0.11(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1))(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1):
+    dependencies:
+      '@expo-google-fonts/material-symbols': 0.4.53
+      expo: 58.0.23(079477869cbe59be909143ed1ed2a60e)
+      expo-font: 58.0.11(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
+      react: 19.3.1
+      react-native: 0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
+      sf-symbols-typescript: 2.2.0
 
   expo-task-manager@58.0.13(expo@58.0.23)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)):
     dependencies:
