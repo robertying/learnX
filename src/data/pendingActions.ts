@@ -1,3 +1,4 @@
+import { ContentType } from '@robertying/thu-learn-lib';
 import type { BookmarkType } from 'data/userData';
 
 /**
@@ -31,11 +32,19 @@ export const actionKey = (action: ServerAction) =>
 
 export type ContentListName = 'notices' | 'assignments' | 'files';
 
-const lists: Record<BookmarkType, ContentListName> = {
+/** The content list each kind of bookmarkable item is in. */
+export const bookmarkLists: Record<BookmarkType, ContentListName> = {
   notice: 'notices',
   assignment: 'assignments',
   file: 'files',
 };
+
+/** How Web Learning's favorites (我的收藏) name each kind of item. */
+export const favoriteContentTypes = {
+  notice: ContentType.NOTIFICATION,
+  assignment: ContentType.HOMEWORK,
+  file: ContentType.FILE,
+} as const satisfies Record<BookmarkType, ContentType>;
 
 /** The item an action changes, and how the list shows it once it's done. */
 export const actionChange = (
@@ -44,7 +53,7 @@ export const actionChange = (
   switch (action.kind) {
     case 'favorite':
       return {
-        list: lists[action.type],
+        list: bookmarkLists[action.type],
         id: action.id,
         change: { isFavorite: action.flag },
       };

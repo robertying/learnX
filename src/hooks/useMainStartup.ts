@@ -2,12 +2,16 @@ import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { setUpBackgroundFetch } from 'helpers/background';
-import { migrateDownloads } from 'helpers/fs';
+import { migrateDownloads } from 'helpers/files/migrateDownloads';
 import { configureNotifications } from 'helpers/notifications';
 import { subscribeSurfaceErrors } from 'helpers/surfaces';
 import { toast } from 'components/Toast';
 import { useLoggedIn } from 'data/auth';
-import { latestSemesterQuery, useCourses } from 'data/queries';
+import {
+  schoolSemesterQuery,
+  selectSemesterId,
+  useCourses,
+} from 'data/queries';
 import { applyLatestSemester } from 'data/userData';
 import { flushServerActions } from 'data/serverActions';
 import useUpNext from 'hooks/useUpNext';
@@ -26,7 +30,8 @@ const useMainStartup = () => {
   // Shows the school's current semester, and moves to the next one when a
   // new term starts, unless the user picked an earlier semester.
   const { data: latestSemester } = useQuery({
-    ...latestSemesterQuery,
+    ...schoolSemesterQuery,
+    select: selectSemesterId,
     enabled: loggedIn,
   });
   useEffect(() => {

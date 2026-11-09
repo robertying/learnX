@@ -3,7 +3,6 @@ NSCalendarsWriteOnlyAccessUsageDescription = "learnX syncs your course schedule 
 NSCalendarsFullAccessUsageDescription = "learnX syncs your course schedule and assignments to Calendar. It reads your list of calendars to choose where to add events, and can delete the calendars it created.";
 NSRemindersUsageDescription = "learnX syncs assignments to Reminders, and can delete the list it created.";
 NSRemindersFullAccessUsageDescription = "learnX syncs assignments to Reminders, and can delete the list it created.";
-NSContactsUsageDescription = "Allow learnX to access your contacts.";
 NSCameraUsageDescription = "Take a photo to attach to an assignment submission.";
 NSMicrophoneUsageDescription = "Allow learnX to access your microphone.";
 NSPhotoLibraryUsageDescription = "Choose photos to attach to an assignment submission.";

@@ -1,12 +1,11 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   Badge,
   CircularProgressIndicator,
   Column,
-  Host,
   LazyColumn,
   LinearProgressIndicator,
   ListItem,
@@ -37,7 +36,8 @@ import {
   width,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
-import { useComposeColorOverrides, useTheme } from 'theme';
+import { useTheme } from 'theme';
+import { t } from 'helpers/i18n';
 import {
   parseNumberInput,
   positionRows,
@@ -60,6 +60,7 @@ import {
   type FormToggleProps,
   type FormViewProps,
 } from './Form.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export * from './Form.shared';
 
@@ -82,6 +83,26 @@ const rowShape = (position: FormRowPosition = 'only') => {
   );
 };
 
+const withTestID = (testID?: string) =>
+  testID ? [testIDModifier(testID)] : [];
+
+/** A row of a section: a list item in the section's color and corners. */
+const SectionItem: React.FC<{
+  position?: FormRowPosition;
+  testID?: string;
+  children: ReactNode;
+}> = ({ position, testID, children }) => {
+  const colors = useMaterialColors();
+  return (
+    <ListItem
+      colors={{ containerColor: colors.surfaceContainer }}
+      modifiers={[fillMaxWidth(), rowShape(position), ...withTestID(testID)]}
+    >
+      {children}
+    </ListItem>
+  );
+};
+
 const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   const colors = useMaterialColors();
   const [refreshing, setRefreshing] = useState(false);
@@ -95,7 +116,7 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
         // Shrinks the list above the keyboard, so a focused number field
         // scrolls into view.
         imePadding(),
-        ...(testID ? [testIDModifier(testID)] : []),
+        ...withTestID(testID),
       ]}
     >
       {children}
@@ -133,15 +154,12 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 
 export const Form: React.FC<FormProps> = props => {
   const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
   return (
-    <Host
+    <ThemedHost
       style={[styles.fill, { backgroundColor: theme.colors.surface }]}
-      seedColor={theme.colors.primary}
-      colorOverrides={colorOverrides}
     >
       <FormContent {...props} />
-    </Host>
+    </ThemedHost>
   );
 };
 
@@ -241,7 +259,10 @@ const FormRow: React.FC<
   const contentColor = done ? colors.outline : titleColor;
   const check = done ? (
     <RNHostView matchContents>
-      <MaterialDesignIcons name="check" size={20} color={colors.outline} />
+      {/* sized: an unsized wrapper collapses to nothing in the host */}
+      <View accessible accessibilityLabel={t('a11yDone')} style={styles.check}>
+        <MaterialDesignIcons name="check" size={20} color={colors.outline} />
+      </View>
     </RNHostView>
   ) : null;
   const ends = [
@@ -313,7 +334,7 @@ const FormRow: React.FC<
   const rowModifiers = [
     rowShape(position),
     ...(action ? [action] : []),
-    ...(testID ? [testIDModifier(testID)] : []),
+    ...withTestID(testID),
   ];
 
   if (progress === undefined) {
@@ -328,7 +349,7 @@ const FormRow: React.FC<
         rowShape(position),
         background(colors.surfaceContainer),
         ...(action ? [action] : []),
-        ...(testID ? [testIDModifier(testID)] : []),
+        ...withTestID(testID),
       ]}
     >
       {item([])}
@@ -454,11 +475,7 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
         unfocusedIndicatorColor: 'transparent',
         disabledIndicatorColor: 'transparent',
       }}
-      modifiers={[
-        fillMaxWidth(),
-        rowShape(position),
-        ...(testID ? [testIDModifier(testID)] : []),
-      ]}
+      modifiers={[fillMaxWidth(), rowShape(position), ...withTestID(testID)]}
     >
       {placeholder ? (
         <TextField.Placeholder>
@@ -476,16 +493,8 @@ export const FormProgress: React.FC<FormProgressProps> = ({
   testID,
   position,
 }) => {
-  const colors = useMaterialColors();
   return (
-    <ListItem
-      colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[
-        fillMaxWidth(),
-        rowShape(position),
-        ...(testID ? [testIDModifier(testID)] : []),
-      ]}
-    >
+    <SectionItem position={position} testID={testID}>
       <ListItem.HeadlineContent>
         <Text>{title}</Text>
       </ListItem.HeadlineContent>
@@ -495,7 +504,7 @@ export const FormProgress: React.FC<FormProgressProps> = ({
           modifiers={[fillMaxWidth(), padding(0, 8, 0, 0)]}
         />
       </ListItem.SupportingContent>
-    </ListItem>
+    </SectionItem>
   );
 };
 
@@ -557,22 +566,14 @@ export const FormParagraph: React.FC<FormParagraphProps> = ({
   testID,
   position,
 }) => {
-  const colors = useMaterialColors();
   return (
-    <ListItem
-      colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[
-        fillMaxWidth(),
-        rowShape(position),
-        ...(testID ? [testIDModifier(testID)] : []),
-      ]}
-    >
+    <SectionItem position={position} testID={testID}>
       <ListItem.HeadlineContent>
         <Text style={{ typography: headline ? 'titleMedium' : 'bodyLarge' }}>
           {text}
         </Text>
       </ListItem.HeadlineContent>
-    </ListItem>
+    </SectionItem>
   );
 };
 
@@ -585,14 +586,7 @@ export const FormTitle: React.FC<FormTitleProps> = ({
 }) => {
   const colors = useMaterialColors();
   return (
-    <ListItem
-      colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[
-        fillMaxWidth(),
-        rowShape(position),
-        ...(testID ? [testIDModifier(testID)] : []),
-      ]}
-    >
+    <SectionItem position={position} testID={testID}>
       <ListItem.HeadlineContent>
         <Text style={{ typography: 'headlineSmall' }}>{title}</Text>
       </ListItem.HeadlineContent>
@@ -601,7 +595,7 @@ export const FormTitle: React.FC<FormTitleProps> = ({
           <Text color={colors.onSurfaceVariant}>{subtitle}</Text>
         </ListItem.SupportingContent>
       ) : null}
-    </ListItem>
+    </SectionItem>
   );
 };
 
@@ -634,12 +628,8 @@ export const FormProfile: React.FC<FormProfileProps> = ({
   position,
 }) => {
   const theme = useTheme();
-  const colors = useMaterialColors();
   return (
-    <ListItem
-      colors={{ containerColor: colors.surfaceContainer }}
-      modifiers={[fillMaxWidth(), rowShape(position)]}
-    >
+    <SectionItem position={position}>
       <ListItem.HeadlineContent>
         <Text style={{ typography: 'titleLarge' }}>{name}</Text>
       </ListItem.HeadlineContent>
@@ -657,12 +647,16 @@ export const FormProfile: React.FC<FormProfileProps> = ({
           />
         </RNHostView>
       </ListItem.LeadingContent>
-    </ListItem>
+    </SectionItem>
   );
 };
 
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
+  },
+  check: {
+    width: 20,
+    height: 20,
   },
 });

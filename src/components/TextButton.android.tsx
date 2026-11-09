@@ -1,5 +1,4 @@
 import {
-  Host,
   Row,
   Text,
   TextButton as ComposeTextButton,
@@ -9,8 +8,8 @@ import {
   fillMaxWidth,
   testID as testIDModifier,
 } from '@expo/ui/jetpack-compose/modifiers';
-import { useComposeColorOverrides, useTheme } from 'theme';
 import { withGutter, type TextButtonProps } from './TextButton.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { TextButtonProps } from './TextButton.shared';
 
@@ -35,9 +34,6 @@ const TextButton: React.FC<TextButtonProps> = ({
   style,
   testID,
 }) => {
-  const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
-
   const button = (
     <ComposeTextButton
       onClick={onPress}
@@ -51,10 +47,8 @@ const TextButton: React.FC<TextButtonProps> = ({
   );
 
   return (
-    <Host
+    <ThemedHost
       matchContents={fill ? { vertical: true } : true}
-      seedColor={theme.colors.primary}
-      colorOverrides={colorOverrides}
       style={fill ? withGutter(style, androidGutter) : style}
     >
       {fill ? (
@@ -65,7 +59,7 @@ const TextButton: React.FC<TextButtonProps> = ({
       ) : (
         button
       )}
-    </Host>
+    </ThemedHost>
   );
 };
 

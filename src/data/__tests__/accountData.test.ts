@@ -15,6 +15,9 @@ jest.mock('data/source', () => ({
 jest.mock('helpers/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
+jest.mock('helpers/files/downloads', () => ({
+  removeFileDir: jest.fn(async () => {}),
+}));
 
 /** The storage keys of the `persist` stores in src/data. */
 const persistedKeys = () => {

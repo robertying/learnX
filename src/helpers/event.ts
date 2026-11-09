@@ -21,10 +21,12 @@ import {
   buildCourseEventDetails,
   courseCalendarName,
   dedupeAndSortICSEvents,
+  isSyncedCalendar,
   exportCalendarName,
   findSyncedCalendars,
   toICSEvent,
 } from './eventDetails';
+import { CalendarError } from './calendarError';
 import { buildICS } from './ics';
 
 export const getAndRequestPermission = async (
@@ -49,7 +51,9 @@ export const getAndRequestPermission = async (
 
 const requirePermission = async (type: 'calendar' | 'reminder') => {
   if (!(await getAndRequestPermission(type))) {
-    throw new Error(`Missing ${type} permission`);
+    throw new CalendarError(
+      type === 'calendar' ? 'calendarPermission' : 'reminderPermission',
+    );
   }
 };
 
@@ -67,7 +71,7 @@ const getDefaultCalendarSource = async (entityType: Calendar.EntityTypes) => {
   if (localCalendar) {
     return localCalendar.source;
   } else {
-    throw new Error('Cannot find any calendar source');
+    throw new CalendarError('noSource');
   }
 };
 
@@ -165,10 +169,6 @@ export const saveCoursesToCalendar = async (
   const settings = getSettings();
 
   await requirePermission('calendar');
-
-  if (Platform.OS === 'ios') {
-    await requirePermission('reminder');
-  }
 
   const calendarId = await getCourseCalendarId();
   const calendar = await Calendar.ExpoCalendar.get(calendarId);
@@ -270,9 +270,43 @@ export const saveAssignmentEvent = async (
   }
 };
 
+/**
+ * Deletes the synced events or reminders of these assignments (archived or
+ * hidden since) and forgets them. One that's already gone is just forgotten.
+ */
+const removeAssignmentEvents = async (
+  type: 'calendar' | 'reminder',
+  ids: string[],
+) => {
+  const settings = getSettings();
+  const synced =
+    (type === 'calendar'
+      ? settings.syncedCalendarAssignments
+      : settings.syncedReminderAssignments) ?? {};
+  const isReminder = Platform.OS === 'ios' && type === 'reminder';
+  await Promise.all(
+    ids
+      .filter(id => synced[id])
+      .map(async id => {
+        try {
+          const item = isReminder
+            ? await Calendar.ExpoCalendarReminder.get(synced[id])
+            : await Calendar.ExpoCalendarEvent.get(synced[id]);
+          await item.delete();
+        } catch {}
+        removeEventIdForAssignment(type, id);
+      }),
+  );
+};
+
+/**
+ * Writes `assignments` to the calendar or reminders, and deletes the entries
+ * of `removed` (assignments archived or hidden since they were written).
+ */
 export const saveAssignmentsToReminderOrCalendar = async (
   type: 'calendar' | 'reminder',
   assignments: Assignment[],
+  removed: string[] = [],
 ) => {
   const settings = getSettings();
 
@@ -295,6 +329,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
       async input => await saveAssignmentEvent(type, settings, calendar, input),
     ),
   );
+  await removeAssignmentEvents(type, removed);
 };
 
 export const removeCalendars = async () => {
@@ -310,8 +345,10 @@ export const removeCalendars = async () => {
       ? await Calendar.getCalendars(Calendar.EntityTypes.REMINDER)
       : [];
 
+  // Only the ones learnX created or adopted, not every title with learnX.
+  const settings = getSettings();
   const existingCalendars = [...calendars, ...reminders].filter(c =>
-    c.title.includes('learnX'),
+    isSyncedCalendar(c, settings),
   );
 
   await Promise.all(
@@ -353,7 +390,7 @@ export const exportSyncedCalendarsToICS = async () => {
   ).flat();
 
   if (events.length === 0) {
-    throw new Error('No synced events');
+    throw new CalendarError('noEvents');
   }
 
   return buildICS(exportCalendarName, dedupeAndSortICSEvents(events));

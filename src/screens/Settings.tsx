@@ -17,8 +17,9 @@ import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { useSettings } from 'data/settings';
 import { useCredentialsStore } from 'data/credentials';
-import useDetailNavigator from 'hooks/useDetailNavigator';
+import { useShowDetail } from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
+import { mockNetworkTitle } from 'navigation/options';
 import { isMockUser } from 'helpers/mock';
 import {
   getServerWritesAllowed,
@@ -31,7 +32,7 @@ import packageJson from '../../package.json';
 type Props = NativeStackScreenProps<SettingsStackParams, 'Settings'>;
 
 const Settings: React.FC<Props> = ({ navigation }) => {
-  const detailNavigator = useDetailNavigator();
+  const show = useShowDetail(navigation);
 
   const loggedIn = useLoggedIn();
   const { data: userInfo } = useQuery({ ...userQuery, enabled: loggedIn });
@@ -49,15 +50,8 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   const update = useAvailableUpdate();
 
-  const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) => {
-    if (detailNavigator) {
-      detailNavigator.replace(name, {
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push(name);
-    }
-  };
+  const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) =>
+    show(name);
 
   const handleLogout = () => {
     Alert.alert(
@@ -178,7 +172,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             <FormLink
               testID="settings-mock-network"
               icon={{ ios: 'network', android: 'network' }}
-              title="Network Emulation"
+              title={mockNetworkTitle}
               onPress={() => handlePush('MockNetwork')}
             />
           </FormSection>

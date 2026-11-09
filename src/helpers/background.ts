@@ -3,7 +3,7 @@ import * as TaskManager from 'expo-task-manager';
 import { AppState } from 'react-native';
 import { ensureSession } from 'data/source';
 import { loadCredentials } from 'data/credentials';
-import { coursesQuery, latestSemesterQuery } from 'data/queries';
+import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { applyLatestSemester, getUserData } from 'data/userData';
 import {
@@ -48,7 +48,7 @@ export type SyncResult =
  */
 const followLatestSemester = async (shownSemester: string) => {
   try {
-    const latest = await queryClient.fetchQuery(latestSemesterQuery);
+    const { id: latest } = await queryClient.fetchQuery(schoolSemesterQuery);
     const semesterId = applyLatestSemester(latest);
     if (semesterId !== shownSemester) {
       await queryClient.ensureQueryData(coursesQuery(semesterId));

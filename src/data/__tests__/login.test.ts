@@ -14,7 +14,8 @@ import {
 } from 'data/login';
 import { mockUserData } from 'data/mock';
 import { getUserData, resetUserData, setArchived } from 'data/userData';
-import env from 'helpers/env';
+// The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
+import env from '../../../jest/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import {
   clearLoginCookies,
@@ -34,6 +35,9 @@ jest.mock('data/source', () => ({
 // One attempt, without the backoff.
 jest.mock('helpers/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
+}));
+jest.mock('helpers/files/downloads', () => ({
+  removeFileDir: jest.fn(async () => {}),
 }));
 jest.mock('helpers/retry', () => ({
   retry: (fn: () => Promise<unknown>) => fn(),
@@ -69,6 +73,21 @@ describe('login', () => {
       failure: null,
       reloginRequested: false,
     });
+  });
+
+  it('fails a login SSO captured without its fingerprint, keeping the saved one', async () => {
+    useCredentialsStore.setState({
+      credentials: { ...sso, username: 'saved' },
+    });
+    await login({ ...sso, fingerPrint: '' });
+    expect(loginWithFingerPrint).not.toHaveBeenCalled();
+    expect(getAuth()).toMatchObject({
+      loggingIn: false,
+      loggedIn: false,
+      error: FailReason.NO_CREDENTIAL,
+      failure: 'rejected',
+    });
+    expect(getCredentials()?.username).toBe('saved');
   });
 
   it('marks the login in progress, then done, and saves an SSO login', async () => {
@@ -303,5 +322,13 @@ describe('switching accounts', () => {
     await login(sso);
     await logout();
     expect(getDataOwner()).toBeNull();
+  });
+
+  it('deletes the downloaded files on logout', async () => {
+    const { removeFileDir } = require('helpers/files/downloads');
+    removeFileDir.mockClear();
+    await login(sso);
+    await logout();
+    expect(removeFileDir).toHaveBeenCalled();
   });
 });

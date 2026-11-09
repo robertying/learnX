@@ -15,9 +15,7 @@ import Urls from 'constants/Urls';
 const isOwnPage = (url: string) =>
   url.startsWith('about:') || url.replace(/\/?(#.*)?$/, '') === Urls.learn;
 
-const AutoHeightWebView: React.FC<
-  React.PropsWithChildren<WebViewProps>
-> = props => {
+const AutoHeightWebView: React.FC<WebViewProps> = props => {
   const [height, setHeight] = useState(0);
   const [cookieString, setCookieString] = useState('');
 

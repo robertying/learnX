@@ -31,37 +31,24 @@ export type FileDetailParams = (
 ) &
   ExtraParams;
 
-export type NoticeStackParams = {
-  Notices: undefined;
+/** The detail screens of items, which several stacks show. */
+export type ItemDetailParams = {
   NoticeDetail: DetailParams;
-  FileDetail: FileDetailParams;
-};
-
-export type AssignmentStackParams = {
-  Assignments: undefined;
   AssignmentDetail: DetailParams;
   FileDetail: FileDetailParams;
-};
-
-export type FileStackParams = {
-  Files: undefined;
-  FileDetail: FileDetailParams;
-};
-
-export type CourseStackParams = {
-  Courses: undefined;
   CourseDetail: DetailParams;
-  NoticeDetail: DetailParams;
-  AssignmentDetail: DetailParams;
-  FileDetail: FileDetailParams;
 };
+
+type ItemDetails<Name extends keyof ItemDetailParams> = Pick<
+  ItemDetailParams,
+  Name
+>;
 
 /**
- * Settings details are pushed without params in a stack, and replace the
- * detail pane without animation in a split.
+ * The screens Settings opens. They are pushed without params in a stack, and
+ * replace the detail pane without animation in a split.
  */
-export type SettingsStackParams = {
-  Settings: undefined;
+export type SettingDetailParams = {
   CourseInformationSharing: ExtraParams | undefined;
   CalendarEvent: ExtraParams | undefined;
   SemesterSelection: ExtraParams | undefined;
@@ -75,14 +62,25 @@ export type SettingsStackParams = {
   MockNetwork: ExtraParams | undefined;
 };
 
+export type NoticeStackParams = { Notices: undefined } & ItemDetails<
+  'NoticeDetail' | 'FileDetail'
+>;
+
+export type AssignmentStackParams = { Assignments: undefined } & ItemDetails<
+  'AssignmentDetail' | 'FileDetail'
+>;
+
+export type FileStackParams = { Files: undefined } & ItemDetails<'FileDetail'>;
+
+export type CourseStackParams = { Courses: undefined } & ItemDetailParams;
+
+export type SettingsStackParams = { Settings: undefined } & SettingDetailParams;
+
 /** Today, and on phones the settings, which open from its header. */
 export type TodayStackParams = {
   Today: undefined;
-  CourseDetail: DetailParams;
-  NoticeDetail: DetailParams;
-  AssignmentDetail: DetailParams;
-  FileDetail: FileDetailParams;
-} & SettingsStackParams;
+} & ItemDetailParams &
+  SettingsStackParams;
 
 export type MainTabParams = {
   TodayStack: NavigatorScreenParams<TodayStackParams>;
@@ -112,36 +110,18 @@ export type SearchStackParams = {
         query: string;
       }
     | undefined;
-  NoticeDetail: DetailParams;
-  AssignmentDetail: DetailParams;
-  FileDetail: FileDetailParams;
-};
+} & ItemDetails<'NoticeDetail' | 'AssignmentDetail' | 'FileDetail'>;
 
 export type AssignmentSubmissionStackParams = {
   AssignmentSubmission: { id: string };
-  FileDetail: FileDetailParams;
-};
+} & ItemDetails<'FileDetail'>;
 
 export type DetailStackParams = {
   EmptyDetail: undefined;
-  NoticeDetail: DetailParams;
-  AssignmentDetail: DetailParams;
-  FileDetail: FileDetailParams;
-  CourseDetail: DetailParams;
   AssignmentSubmission: { id: string };
   CourseX: { id: string } | undefined;
-  CourseInformationSharing: ExtraParams;
-  CalendarEvent: ExtraParams;
-  SemesterSelection: ExtraParams;
-  FileSettings: ExtraParams;
-  Downloads: ExtraParams | undefined;
-  NotificationSettings: ExtraParams;
-  Help: ExtraParams;
-  About: ExtraParams;
-  Changelog: ExtraParams;
-  Maintainer: ExtraParams;
-  MockNetwork: ExtraParams;
-};
+} & ItemDetailParams &
+  SettingDetailParams;
 
 /** The container of a split view's detail stack. */
 export type DetailNavigationContainerRef =
@@ -155,7 +135,8 @@ export type RootStackParams = {
   LoginStack: NavigatorScreenParams<LoginStackParams>;
 };
 
-export type SplitRootStackParams = {
+/** The root on Android, where the split view is drawn in JS. */
+export type AndroidRootStackParams = {
   Main: undefined;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
 };

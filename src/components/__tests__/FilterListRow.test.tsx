@@ -27,6 +27,7 @@ const actions: FilterListRowActions<Item> = {
   fav: jest.fn(),
   archive: jest.fn(),
   hide: jest.fn(),
+  move: jest.fn(),
 };
 
 const row = (data: Item, checked = false) => (

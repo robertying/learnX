@@ -109,6 +109,53 @@ describe('syncDeadlineReminders', () => {
     });
   });
 
+  it('keeps put-off reminders only while their assignment is open', async () => {
+    scheduled.mockResolvedValue([
+      { identifier: 'deadline-later:open' },
+      { identifier: 'deadline-later:submitted' },
+      { identifier: 'deadline-later:archived' },
+    ] as never);
+    await syncDeadlineReminders(
+      [
+        // Inside the offset: no reminder planned, but still open.
+        assignment('open', 0.5),
+        assignment('submitted', 5, { submitted: true }),
+        assignment('archived', 5),
+      ],
+      options(),
+    );
+    expect(cancel.mock.calls.flat().sort()).toEqual([
+      'deadline-later:archived',
+      'deadline-later:submitted',
+    ]);
+  });
+
+  it('cancels put-off reminders when reminders are turned off', async () => {
+    scheduled.mockResolvedValue([{ identifier: 'deadline-later:a' }] as never);
+    await syncDeadlineReminders(
+      [assignment('a', 5)],
+      options({ ...on, deadlineReminders: false }),
+    );
+    expect(cancel).toHaveBeenCalledWith('deadline-later:a');
+  });
+
+  it('marks reminders that Android may hold back, to redo them once allowed', async () => {
+    const { Platform } = require('react-native');
+    const os = Platform.OS;
+    Platform.OS = 'android';
+    jest
+      .mocked(Notifications.getExactAlarmPermissionsAsync)
+      .mockResolvedValueOnce({ granted: false } as never);
+    try {
+      await syncDeadlineReminders([assignment('a', 5)], options());
+      expect(schedule.mock.calls[0][0].identifier).toBe(
+        `deadline-reminder:a:${now + 5 * hour}:60:inexact`,
+      );
+    } finally {
+      Platform.OS = os;
+    }
+  });
+
   it('cancels everything without the permission', async () => {
     jest
       .mocked(Notifications.getPermissionsAsync)

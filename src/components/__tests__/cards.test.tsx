@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { act, render, screen } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { mockLocale } from '../../../jest/locale';
 import { Assignment, Course, File, Notice } from 'data/types/state';
@@ -91,6 +91,20 @@ describe('NoticeCard', () => {
     expect(screen.getByText('2 days ago')).toBeTruthy();
   });
 
+  it('keeps its age current on a list left open', async () => {
+    await render(
+      <NoticeCard
+        data={notice({
+          publishTime: dayjs(NOW).subtract(3, 'minute').toISOString(),
+        })}
+      />,
+    );
+    expect(screen.getByText('3 minutes ago')).toBeTruthy();
+
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(screen.getByText('4 minutes ago')).toBeTruthy();
+  });
+
   it('shows the publisher instead of the course inside a course', async () => {
     await render(<NoticeCard data={notice()} hideCourseName />);
     expect(screen.queryByText('Calculus')).toBeNull();
@@ -121,6 +135,32 @@ describe('NoticeCard', () => {
     expect(screen.getByTestId('icon-attachment')).toBeTruthy();
     expect(screen.getByTestId('icon-flag')).toBeTruthy();
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
+  });
+
+  it('tells screen readers the title first, then what only shows', async () => {
+    await render(
+      <NoticeCard
+        data={notice({
+          attachment: { id: 'att', name: 'room.pdf' } as Notice['attachment'],
+          markedImportant: true,
+          hasRead: false,
+        })}
+      />,
+    );
+    expect(
+      screen.getByRole('button', {
+        name: 'Unread, Midterm room change, Calculus, 2 days ago, Attachment, Important, Moved to Room 101',
+      }),
+    ).toBeTruthy();
+  });
+
+  it('shortens a long preview for screen readers', async () => {
+    await render(<NoticeCard data={notice({ content: 'x'.repeat(500) })} />);
+    expect(
+      screen.getByRole('button', {
+        name: `Midterm room change, Calculus, 2 days ago, ${'x'.repeat(120)}…`,
+      }),
+    ).toBeTruthy();
   });
 });
 
@@ -221,6 +261,11 @@ describe('AssignmentCard', () => {
     );
     expect(screen.getByTestId('icon-attachment')).toBeTruthy();
     expect(screen.getByTestId('icon-key-variant')).toBeTruthy();
+    expect(
+      screen.getByRole('button', {
+        name: /^Problem set 3, Calculus, .+, Attachment, Has answer, Chapters 4 & 5$/,
+      }),
+    ).toBeTruthy();
   });
 
   it('marks an answer that is only an attachment', async () => {
@@ -236,6 +281,20 @@ describe('AssignmentCard', () => {
 });
 
 describe('FileCard', () => {
+  it('keeps its age current on a list left open', async () => {
+    await render(
+      <FileCard
+        data={file({
+          uploadTime: dayjs(NOW).subtract(3, 'minute').toISOString(),
+        })}
+      />,
+    );
+    expect(screen.getByText('3 minutes ago')).toBeTruthy();
+
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(screen.getByText('4 minutes ago')).toBeTruthy();
+  });
+
   it('shows the type, category, size and upload age', async () => {
     await render(<FileCard data={file()} />);
     expect(screen.getByText('Lecture 5 slides')).toBeTruthy();
@@ -266,6 +325,11 @@ describe('FileCard', () => {
     );
     expect(screen.getByTestId('icon-flag')).toBeTruthy();
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
+    expect(
+      screen.getByRole('button', {
+        name: 'Unread, Lecture 5 slides, Calculus, a day ago, Important, Slides · PDF · 2.1 MB',
+      }),
+    ).toBeTruthy();
   });
 });
 
@@ -277,6 +341,11 @@ describe('CourseCard', () => {
     expect(screen.getByText('2')).toBeTruthy();
     expect(screen.getByText('1')).toBeTruthy();
     expect(screen.queryByText('0')).toBeNull();
+    expect(
+      screen.getByRole('button', {
+        name: 'Calculus, Prof. Li, 2 unread notices, 1 unfinished assignment',
+      }),
+    ).toBeTruthy();
   });
 });
 

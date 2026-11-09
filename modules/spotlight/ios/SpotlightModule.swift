@@ -20,11 +20,14 @@ struct SpotlightItem: Record {
     attributes.keywords = keywords
     attributes.contentCreationDate = date.map(Date.init(milliseconds:))
     attributes.dueDate = dueDate.map(Date.init(milliseconds:))
-    return CSSearchableItem(
+    let item = CSSearchableItem(
       uniqueIdentifier: SpotlightIdentifier(domain: domain, id: id).rawValue,
       domainIdentifier: domain,
       attributeSet: attributes
     )
+    // Items expire after 30 days by default; these stay until the app removes them.
+    item.expirationDate = Date.distantFuture
+    return item
   }
 }
 
@@ -77,6 +80,22 @@ public final class SpotlightModule: Module {
       }
       let index = CSSearchableIndex.default()
       try await index.deleteSearchableItems(withDomainIdentifiers: [domain])
+      if !items.isEmpty {
+        try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+      }
+    }
+
+    /// Indexes new and changed items and removes the ones with `removedIds`, leaving the rest of the domain alone.
+    AsyncFunction("updateItems") { (domain: String, items: [SpotlightItem], removedIds: [String]) async throws in
+      guard CSSearchableIndex.isIndexingAvailable() else {
+        return
+      }
+      let index = CSSearchableIndex.default()
+      if !removedIds.isEmpty {
+        try await index.deleteSearchableItems(
+          withIdentifiers: removedIds.map { SpotlightIdentifier(domain: domain, id: $0).rawValue }
+        )
+      }
       if !items.isEmpty {
         try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
       }

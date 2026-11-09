@@ -1,5 +1,5 @@
 import { PlatformColor } from 'react-native';
-import { Button, Host, Text } from '@expo/ui/swift-ui';
+import { Button, Text } from '@expo/ui/swift-ui';
 import {
   buttonStyle,
   contentShape,
@@ -13,8 +13,8 @@ import {
   truncationMode,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
-import { useTheme } from 'theme';
 import { withGutter, type TextButtonProps } from './TextButton.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { TextButtonProps } from './TextButton.shared';
 
@@ -72,7 +72,6 @@ const TextButton: React.FC<TextButtonProps> = ({
   style,
   testID,
 }) => {
-  const theme = useTheme();
   const isMac = DeviceInfo.isMac();
 
   const modifiers = [
@@ -87,11 +86,10 @@ const TextButton: React.FC<TextButtonProps> = ({
   ];
 
   return (
-    <Host
+    <ThemedHost
       // A filling button gets its width from React Native, so a long label
       // shortens instead of growing past the screen.
       matchContents={fill ? { vertical: true } : true}
-      seedColor={theme.colors.primary}
       style={isMac ? withGutter(style, macGutter) : style}
     >
       {isMac ? (
@@ -108,7 +106,7 @@ const TextButton: React.FC<TextButtonProps> = ({
           modifiers={modifiers}
         />
       )}
-    </Host>
+    </ThemedHost>
   );
 };
 

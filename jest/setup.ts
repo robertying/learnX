@@ -6,7 +6,7 @@ import { mockLocale } from './locale';
 // As App.tsx does at startup
 dayjs.extend(relativeTime);
 
-// helpers/env inlines the repo's .env at build time via babel preval; tests
+// helpers/env inlines the repo's .env at build time (babel/inline-env.js); tests
 // use fixed fixture values instead. Mocked by path so it covers every import
 // specifier module-resolver produces ('helpers/env', './env', '../helpers/env').
 jest.mock('../src/helpers/env', () => require('./env'));
@@ -98,6 +98,12 @@ jest.mock('expo-notifications', () => ({
   scheduleNotificationAsync: jest.fn(() => Promise.resolve('id')),
   cancelScheduledNotificationAsync: jest.fn(() => Promise.resolve()),
   getAllScheduledNotificationsAsync: jest.fn(() => Promise.resolve([])),
+  getExactAlarmPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ granted: true, canAskAgain: true }),
+  ),
+  requestExactAlarmPermissionsAsync: jest.fn(() =>
+    Promise.resolve({ granted: true, canAskAgain: true }),
+  ),
   useLastNotificationResponse: jest.fn(() => null),
   clearLastNotificationResponse: jest.fn(),
 }));
@@ -137,6 +143,8 @@ jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   animation: jest.fn(),
+  accessibilityLabel: jest.fn(),
+  accessibilityValue: jest.fn(),
   autocorrectionDisabled: jest.fn(),
   Animation: { easeInOut: jest.fn() },
   background: jest.fn(),

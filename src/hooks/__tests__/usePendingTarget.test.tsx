@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
 import { DetailStackParams } from 'screens/types';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import Numbers from 'constants/Numbers';
 import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';
 
@@ -15,7 +15,7 @@ jest.mock('constants/DeviceInfo', () => ({
   isTablet: () => mockTablet,
   isMac: () => false,
 }));
-jest.mock('components/NativeSplitView', () => ({
+jest.mock('navigation/NativeSplitView', () => ({
   useSplitLaidOut: () => mockSplitLaidOut,
 }));
 
@@ -73,7 +73,7 @@ it('waits for the detail pane of a split view', async () => {
   });
   expect(open).not.toHaveBeenCalled();
 
-  context = splitContext({});
+  context = splitContext({ isReady: () => true });
   await hook.rerender({});
   expect(open.mock.calls).toEqual([['n1', true]]);
 });
@@ -81,7 +81,7 @@ it('waits for the detail pane of a split view', async () => {
 it('waits for the split to be laid out on iPad', async () => {
   const open = jest.fn();
   mockSplitLaidOut = false;
-  const context = splitContext({});
+  const context = splitContext({ isReady: () => true });
   const wrapper = ({ children }: React.PropsWithChildren) => (
     <SplitViewContext.Provider value={context}>
       {children}
@@ -102,7 +102,7 @@ it("pushes on an iPhone, even while a tab's split hands out its hidden pane", as
   const open = jest.fn();
   mockTablet = false;
   mockSplitLaidOut = false;
-  const context = splitContext({});
+  const context = splitContext({ isReady: () => true });
   const wrapper = ({ children }: React.PropsWithChildren) => (
     <SplitViewContext.Provider value={context}>
       {children}

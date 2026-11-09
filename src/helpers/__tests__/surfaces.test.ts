@@ -124,9 +124,11 @@ it('writes shown assignments to the calendar only when the sync is on', async ()
   unsubscribe();
 
   expect(syncAssignments).toHaveBeenCalledTimes(1);
+  // The archived one's entry is removed.
   expect(syncAssignments).toHaveBeenCalledWith(
     'calendar',
     assignments.slice(1),
+    [assignments[0].id],
   );
   expect(errors).toEqual([{ text: 'failed', type: 'error' }]);
 });

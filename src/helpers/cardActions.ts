@@ -1,4 +1,4 @@
-// The actions a card offers when swiped (iOS), long-pressed (Android, WSA) or
+// The actions a card offers when swiped (iOS), long-pressed (Android) or
 // right-clicked (iPad, Mac), and as accessibility actions everywhere.
 import type { SFSymbol } from 'sf-symbols-typescript';
 import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';

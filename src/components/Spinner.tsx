@@ -7,7 +7,8 @@ import {
   tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
-import { percentLabel, type SpinnerProps } from './Spinner.shared';
+import { percentLabel } from 'helpers/progress';
+import type { SpinnerProps } from './Spinner.shared';
 
 /**
  * The system activity indicator (SwiftUI `ProgressView`, large, primary tint)

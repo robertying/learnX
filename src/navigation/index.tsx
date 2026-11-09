@@ -1,5 +1,4 @@
-import { useRef, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { useRef } from 'react';
 import {
   NavigationContainer,
   NavigationContainerRef,
@@ -13,14 +12,13 @@ import {
 import {
   DetailStackParams,
   RootStackParams,
-  SplitRootStackParams,
+  AndroidRootStackParams,
 } from 'screens/types';
 import Splash from 'components/Splash';
-import { SplitViewProvider } from 'components/SplitView';
+import { SplitViewProvider } from './SplitView';
 import Numbers from 'constants/Numbers';
-import Styles from 'constants/Styles';
-import DeviceInfo from 'constants/DeviceInfo';
 import { trackScreen } from 'helpers/crashReporting';
+import { reportDetailReady } from 'hooks/useDetailNavigator';
 import { useNavigationTheme } from 'theme';
 import { DetailStack } from './DetailStack';
 import MainTab from './MainTab';
@@ -33,7 +31,8 @@ import {
 } from './stacks';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
-const SplitRootNavigator = createNativeStackNavigator<SplitRootStackParams>();
+const AndroidRootNavigator =
+  createNativeStackNavigator<AndroidRootStackParams>();
 
 const renderMainScreens = () => (
   <>
@@ -56,25 +55,19 @@ const renderMainScreens = () => (
   </>
 );
 
-const SplitMain = () => {
+/** Android's main UI, in the split view drawn in JS (`SplitViewProvider`). */
+const AndroidMain = () => {
   const theme = useNavigationTheme();
   const frame = useSafeAreaFrame();
   const detailNavigationContainerRef =
     useRef<NavigationContainerRef<DetailStackParams>>(null);
 
-  // The master pane mounts along with the detail container, before the ref is
-  // set. Hand the ref out only once it is, so that its consumers render again.
-  const [detailReady, setDetailReady] = useState(false);
-
   const showDetail = frame.width > Numbers.splitViewMaxCollapsedWidth;
 
   return (
     <SplitViewProvider
-      splitEnabled={
-        DeviceInfo.isMac() || DeviceInfo.isTablet() || Platform.OS === 'android'
-      }
       detailNavigationContainerRef={
-        showDetail && detailReady ? detailNavigationContainerRef : null
+        showDetail ? detailNavigationContainerRef : null
       }
       showDetail={showDetail}
     >
@@ -91,7 +84,7 @@ const SplitMain = () => {
           ref={detailNavigationContainerRef}
           theme={theme}
           fallback={<Splash />}
-          onReady={() => setDetailReady(true)}
+          onReady={reportDetailReady}
           onStateChange={trackScreen}
         >
           <DetailStack />
@@ -100,16 +93,6 @@ const SplitMain = () => {
     </SplitViewProvider>
   );
 };
-
-// Login sits beside the split rather than in its master pane, so it always
-// covers the whole window and the panes never resize underneath it.
-const SplitLogin = () => (
-  // On Mac Catalyst, the native side keeps stacks under this identifier out of
-  // the view controller hierarchy, as it did when login was in the master pane.
-  <View testID="rns-split-detail" style={Styles.flex1}>
-    <LoginStack />
-  </View>
-);
 
 /**
  * The app's screens: the main UI when `showMain`, the login otherwise.
@@ -142,25 +125,29 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
             )}
           </RootNavigator.Navigator>
         ) : (
-          <SplitRootNavigator.Navigator screenOptions={{ headerShown: false }}>
+          <AndroidRootNavigator.Navigator
+            screenOptions={{ headerShown: false }}
+          >
             {showMain ? (
-              <SplitRootNavigator.Screen
+              <AndroidRootNavigator.Screen
                 name="Main"
-                component={SplitMain}
+                component={AndroidMain}
                 // Login slides away to reveal the main UI.
                 options={{ animationTypeForReplace: 'pop' }}
               />
             ) : (
-              <SplitRootNavigator.Screen
+              // Beside the split rather than in its master pane, so it always
+              // covers the whole window and the panes never resize under it.
+              <AndroidRootNavigator.Screen
                 name="LoginStack"
-                component={SplitLogin}
+                component={LoginStack}
                 options={{
                   animation: 'slide_from_bottom',
                   gestureEnabled: false,
                 }}
               />
             )}
-          </SplitRootNavigator.Navigator>
+          </AndroidRootNavigator.Navigator>
         )}
       </NavigationContainer>
     </SafeAreaProvider>

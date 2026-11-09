@@ -19,7 +19,8 @@ import {
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'helpers/event';
-import { exportTextFile } from 'helpers/fs';
+import { exportTextFile } from 'helpers/files/share';
+import { CalendarError, CalendarErrorCode } from 'helpers/calendarError';
 import { t } from 'helpers/i18n';
 
 jest.mock('data/source', () => ({
@@ -32,11 +33,11 @@ jest.mock('helpers/event', () => ({
   saveAssignmentsToReminderOrCalendar: jest.fn(),
   saveCoursesToCalendar: jest.fn(),
 }));
-jest.mock('helpers/fs', () => ({ exportTextFile: jest.fn() }));
+jest.mock('helpers/files/share', () => ({ exportTextFile: jest.fn() }));
 jest.mock('constants/DeviceInfo', () => ({ isMac: jest.fn(() => false) }));
 
-const fail = (message: string) => async () => {
-  throw new Error(message);
+const fail = (code: CalendarErrorCode) => async () => {
+  throw new CalendarError(code);
 };
 
 beforeEach(() => {
@@ -44,18 +45,14 @@ beforeEach(() => {
 });
 
 describe('error toasts', () => {
-  const error = (message: string) => new Error(message);
+  const error = (code: CalendarErrorCode) => new CalendarError(code);
 
   it('maps course sync errors', () => {
-    expect(courseSyncErrorToast(error('Missing calendar permission'))).toEqual({
+    expect(courseSyncErrorToast(error('calendarPermission'))).toEqual({
       text: t('courseScheduleSyncNoCalendarPermission'),
       type: 'error',
     });
-    expect(courseSyncErrorToast(error('Missing reminder permission'))).toEqual({
-      text: t('courseScheduleSyncNoReminderPermission'),
-      type: 'error',
-    });
-    expect(courseSyncErrorToast(error('Network'))).toEqual({
+    expect(courseSyncErrorToast(new Error('Network'))).toEqual({
       text: t('courseScheduleSyncRepetitiveError'),
       type: 'error',
     });
@@ -66,48 +63,54 @@ describe('error toasts', () => {
       text: t('assignmentSyncNoCalendarPermission'),
       type: 'error',
     };
-    expect(
-      assignmentSyncErrorToast(error('Missing calendar permission')),
-    ).toEqual(noCalendar);
-    expect(
-      assignmentSyncErrorToast(
-        error('CALENDAR permission is required to do this operation.'),
-      ),
-    ).toEqual(noCalendar);
-    expect(
-      assignmentSyncErrorToast(error('Missing reminder permission')),
-    ).toEqual({ text: t('assignmentSyncNoReminderPermission'), type: 'error' });
-    expect(
-      assignmentSyncErrorToast(error('Cannot find any calendar source')),
-    ).toEqual({ text: t('missingCalendarSource'), type: 'error' });
-    expect(assignmentSyncErrorToast(error('Boom'))).toEqual({
+    expect(assignmentSyncErrorToast(error('calendarPermission'))).toEqual(
+      noCalendar,
+    );
+    // expo-calendar's own, when the permission goes between check and write
+    for (const code of ['E_MISSING_PERMISSIONS', 'ERR_MISSING_PERMISSIONS']) {
+      expect(
+        assignmentSyncErrorToast(Object.assign(new Error('Denied'), { code })),
+      ).toEqual(noCalendar);
+    }
+    expect(assignmentSyncErrorToast(error('reminderPermission'))).toEqual({
+      text: t('assignmentSyncNoReminderPermission'),
+      type: 'error',
+    });
+    expect(assignmentSyncErrorToast(error('noSource'))).toEqual({
+      text: t('missingCalendarSource'),
+      type: 'error',
+    });
+    expect(assignmentSyncErrorToast(new Error('Boom'))).toEqual({
       text: t('assignmentSyncFailed') + 'Boom',
       type: 'error',
     });
   });
 
   it('maps export errors', () => {
-    expect(
-      calendarExportErrorToast(error('Missing calendar permission')),
-    ).toEqual({ text: t('calendarExportNoCalendarPermission'), type: 'error' });
-    expect(calendarExportErrorToast(error('No synced events'))).toEqual({
+    expect(calendarExportErrorToast(error('calendarPermission'))).toEqual({
+      text: t('calendarExportNoCalendarPermission'),
+      type: 'error',
+    });
+    expect(calendarExportErrorToast(error('noEvents'))).toEqual({
       text: t('calendarExportNoEvent'),
       type: 'warning',
     });
-    expect(calendarExportErrorToast(error('Boom'))).toEqual({
+    expect(calendarExportErrorToast(new Error('Boom'))).toEqual({
       text: t('calendarExportFailed') + 'Boom',
       type: 'error',
     });
   });
 
   it('maps delete errors', () => {
-    expect(
-      calendarDeleteErrorToast(error('Missing calendar permission')),
-    ).toEqual({ text: t('deleteFailedNoCalendarPermission'), type: 'error' });
-    expect(
-      calendarDeleteErrorToast(error('Missing reminder permission')),
-    ).toEqual({ text: t('deleteFailedNoReminderPermission'), type: 'error' });
-    expect(calendarDeleteErrorToast(error('Boom'))).toEqual({
+    expect(calendarDeleteErrorToast(error('calendarPermission'))).toEqual({
+      text: t('deleteFailedNoCalendarPermission'),
+      type: 'error',
+    });
+    expect(calendarDeleteErrorToast(error('reminderPermission'))).toEqual({
+      text: t('deleteFailedNoReminderPermission'),
+      type: 'error',
+    });
+    expect(calendarDeleteErrorToast(new Error('Boom'))).toEqual({
       text: t('deleteFailed') + 'Boom',
       type: 'error',
     });
@@ -174,7 +177,7 @@ describe('syncCourseSchedule', () => {
       .mockResolvedValue({ events: [{}], failedRanges: [] } as never);
     jest
       .mocked(saveCoursesToCalendar)
-      .mockImplementation(fail('Missing calendar permission'));
+      .mockImplementation(fail('calendarPermission'));
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
       text: t('courseScheduleSyncNoCalendarPermission'),
@@ -205,13 +208,14 @@ describe('syncAssignments', () => {
     expect(saveAssignmentsToReminderOrCalendar).toHaveBeenCalledWith(
       'reminder',
       assignments,
+      [],
     );
   });
 
   it('turns failures into toasts', async () => {
     jest
       .mocked(saveAssignmentsToReminderOrCalendar)
-      .mockImplementation(fail('Cannot find any calendar source'));
+      .mockImplementation(fail('noSource'));
     await expect(syncAssignments('calendar', [])).resolves.toEqual({
       text: t('missingCalendarSource'),
       type: 'error',
@@ -244,7 +248,7 @@ describe('exportCalendars', () => {
   it('turns failures into toasts', async () => {
     jest
       .mocked(exportSyncedCalendarsToICS)
-      .mockImplementation(fail('No synced events'));
+      .mockImplementation(fail('noEvents'));
 
     await expect(exportCalendars()).resolves.toEqual({
       text: t('calendarExportNoEvent'),
@@ -261,9 +265,7 @@ describe('deleteCalendars', () => {
       type: 'success',
     });
 
-    jest
-      .mocked(removeCalendars)
-      .mockImplementation(fail('Missing reminder permission'));
+    jest.mocked(removeCalendars).mockImplementation(fail('reminderPermission'));
     await expect(deleteCalendars()).resolves.toEqual({
       text: t('deleteFailedNoReminderPermission'),
       type: 'error',

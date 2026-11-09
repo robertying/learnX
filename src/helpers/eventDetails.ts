@@ -1,6 +1,7 @@
 // Pure builders for the calendar events, reminders and ICS entries that
 // helpers/event writes. Nothing here touches the calendar or the settings
 // store, so it can be tested without native modules.
+import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarEvent } from '@robertying/thu-learn-lib';
@@ -56,6 +57,15 @@ export function hash(text: string): string {
   return result.toString(16);
 }
 
+/** What the optional calendar settings (in minutes) are until they're set. */
+export const calendarDefaults = {
+  courseAlarmOffset: 15,
+  assignmentReminderAlarmOffset: 24 * 60,
+  assignmentCalendarAlarmOffset: 24 * 60,
+  assignmentCalendarSecondAlarmOffset: 30,
+  calendarEventLength: 30,
+};
+
 export const buildCourseEventDetails = (
   e: CalendarEvent,
   settings: SettingsState,
@@ -74,7 +84,9 @@ export const buildCourseEventDetails = (
     alarms: alarms.courseAlarm
       ? [
           {
-            relativeOffset: -(alarms.courseAlarmOffset ?? 15),
+            relativeOffset: -(
+              alarms.courseAlarmOffset ?? calendarDefaults.courseAlarmOffset
+            ),
           },
         ]
       : [],
@@ -91,7 +103,10 @@ export interface AssignmentEventInput {
   completionDate?: Dayjs;
 }
 
-/** iOS reminder for an assignment; the alarm moves the due date earlier */
+/**
+ * iOS reminder for an assignment, due at the deadline, with an alert the
+ * chosen time before it
+ */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
   {
@@ -107,11 +122,20 @@ export const buildAssignmentReminderDetails = (
   return {
     title,
     startDate: startDate.toDate(),
-    dueDate: alarms.assignmentReminderAlarm
-      ? dueDate
-          .subtract(alarms.assignmentReminderAlarmOffset ?? 24 * 60, 'minute')
-          .toDate()
-      : dueDate.toDate(),
+    dueDate: dueDate.toDate(),
+    alarms: alarms.assignmentReminderAlarm
+      ? [
+          {
+            absoluteDate: dueDate
+              .subtract(
+                alarms.assignmentReminderAlarmOffset ??
+                  calendarDefaults.assignmentReminderAlarmOffset,
+                'minute',
+              )
+              .toISOString(),
+          },
+        ]
+      : [],
     timeZone: TZ,
     completed,
     completionDate: completionDate?.toDate(),
@@ -119,22 +143,39 @@ export const buildAssignmentReminderDetails = (
   };
 };
 
+/**
+ * An alert `minutes` before the deadline, which is the event's end. Alerts
+ * count from the event's start, so the event's length is added back. Android
+ * has no alerts after the start, so one closer to the deadline than the
+ * event is long goes off at the start.
+ */
+export const alertBeforeDeadline = (minutes: number, eventLength: number) => ({
+  relativeOffset:
+    Platform.OS === 'android'
+      ? Math.min(eventLength - minutes, 0)
+      : eventLength - minutes,
+  method: Calendar.AlarmMethod.DEFAULT,
+});
+
 /** Calendar event for an assignment, ending at the deadline */
 export const buildAssignmentEventDetails = (
   settings: SettingsState,
   { title, note, dueDate, completed }: AssignmentEventInput,
 ): EventDetails => {
   const alarms = settings.alarms;
+  const eventLength =
+    settings.calendarEventLength ?? calendarDefaults.calendarEventLength;
   const shouldHaveAlarm = !(
     alarms.assignmentCalendarNoAlarmIfComplete && completed
   );
   const alerts =
     shouldHaveAlarm && alarms.assignmentCalendarAlarm
       ? [
-          {
-            relativeOffset: -(alarms.assignmentCalendarAlarmOffset ?? 24 * 60),
-            method: Calendar.AlarmMethod.DEFAULT,
-          },
+          alertBeforeDeadline(
+            alarms.assignmentCalendarAlarmOffset ??
+              calendarDefaults.assignmentCalendarAlarmOffset,
+            eventLength,
+          ),
         ]
       : [];
   if (
@@ -142,17 +183,18 @@ export const buildAssignmentEventDetails = (
     alarms.assignmentCalendarAlarm &&
     alarms.assignmentCalendarSecondAlarm
   ) {
-    alerts.push({
-      relativeOffset: -(alarms.assignmentCalendarSecondAlarmOffset ?? 30),
-      method: Calendar.AlarmMethod.DEFAULT,
-    });
+    alerts.push(
+      alertBeforeDeadline(
+        alarms.assignmentCalendarSecondAlarmOffset ??
+          calendarDefaults.assignmentCalendarSecondAlarmOffset,
+        eventLength,
+      ),
+    );
   }
 
   return {
     title: (completed ? '✅ ' : '') + title,
-    startDate: dueDate
-      .subtract(settings.calendarEventLength ?? 30, 'minute')
-      .toDate(),
+    startDate: dueDate.subtract(eventLength, 'minute').toDate(),
     endDate: dueDate.toDate(),
     timeZone: TZ,
     notes: note,
@@ -190,6 +232,22 @@ export const buildAssignmentEventInputs = (
         },
       ];
     });
+
+/** Whether learnX created or adopted this calendar or reminder list. */
+export const isSyncedCalendar = (
+  calendar: { id: string; title: string },
+  settings: Pick<
+    SettingsState,
+    'courseCalendarId' | 'assignmentCalendarId' | 'assignmentReminderId'
+  >,
+) =>
+  [
+    settings.courseCalendarId,
+    settings.assignmentCalendarId,
+    settings.assignmentReminderId,
+  ].some(id => !!id && id === calendar.id) ||
+  calendar.title === courseCalendarName ||
+  calendar.title === assignmentCalendarReminderName;
 
 /** The course and assignment calendars learnX created or adopted */
 export const findSyncedCalendars = <T extends { id: string; title: string }>(

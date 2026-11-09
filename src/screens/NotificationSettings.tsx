@@ -1,4 +1,3 @@
-import { Linking } from 'react-native';
 import dayjs from 'dayjs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -11,7 +10,6 @@ import {
 } from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import { toast } from 'components/Toast';
-import DeviceInfo from 'constants/DeviceInfo';
 import {
   assignmentsQuery,
   filesQuery,
@@ -26,6 +24,7 @@ import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
+import { openSystemSettings } from 'helpers/systemSettings';
 import { postNotification } from 'helpers/notifications';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from './types';
@@ -69,13 +68,6 @@ const contentToggles: {
   },
 ];
 
-const openSystemSettings = () =>
-  DeviceInfo.isMac()
-    ? Linking.openURL(
-        'x-apple.systempreferences:com.apple.preference.notifications',
-      )
-    : Linking.openSettings();
-
 /**
  * Debug builds: forgets a few items and grades, then syncs as the background
  * task does, so what comes back is posted as new.
@@ -109,7 +101,9 @@ const simulateNewContent = async () => {
 
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
-  const { permission, request } = useNotificationPermission();
+  const { permission, request, exactAlarms, requestExact } =
+    useNotificationPermission();
+  const showExact = notifications.deadlineReminders && exactAlarms === false;
   const { notices } = useNotices();
   const lastBackgroundSync = useSyncLogStore(state =>
     state.runs.findLast(run => !run.manual),
@@ -168,11 +162,15 @@ const NotificationSettings: React.FC<Props> = () => {
           ))}
         </FormSection>
         <FormSection
-          footer={
-            permission === 'denied' && anyOn
-              ? `${t('notifyDeadlineRemindersCaption')}\n\n${t('notificationPermissionDenied')}`
-              : t('notifyDeadlineRemindersCaption')
-          }
+          footer={[
+            t('notifyDeadlineRemindersCaption'),
+            showExact && t('exactRemindersCaption'),
+            permission === 'denied' &&
+              anyOn &&
+              t('notificationPermissionDenied'),
+          ]
+            .filter(Boolean)
+            .join('\n\n')}
         >
           <FormToggle
             testID="notifications-deadlineReminders"
@@ -188,6 +186,13 @@ const NotificationSettings: React.FC<Props> = () => {
               onValueChange={value => set('deadlineReminderOffset', value)}
             />
           )}
+          {showExact && (
+            <FormButton
+              icon={{ ios: 'alarm', android: 'alarm-check' }}
+              title={t('allowExactReminders')}
+              onPress={requestExact}
+            />
+          )}
         </FormSection>
         <FormSection
           footer={
@@ -199,26 +204,27 @@ const NotificationSettings: React.FC<Props> = () => {
           <FormButton
             icon={{ ios: 'gear', android: 'cog' }}
             title={t('configureNotifications')}
-            onPress={openSystemSettings}
+            onPress={() => openSystemSettings('notifications')}
           />
+          {/* Debug tools, so not translated. */}
           {__DEV__ && (
             <FormButton
               icon={{ ios: 'paperplane', android: 'send' }}
-              title={t('sendTestNotification')}
+              title="Send a Test Notification"
               onPress={sendTestNotification}
             />
           )}
           {__DEV__ && (
             <FormButton
               icon={{ ios: 'arrow.triangle.2.circlepath', android: 'sync' }}
-              title={t('simulateNewContent')}
+              title="Simulate New Content"
               onPress={handleSimulateNewContent}
             />
           )}
           {__DEV__ && (
             <FormButton
               icon={{ ios: 'alarm', android: 'alarm-check' }}
-              title={t('previewDeadlineReminder')}
+              title="Preview a Deadline Reminder"
               onPress={async () =>
                 toast(String(await previewDeadlineReminder()), 'success')
               }

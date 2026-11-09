@@ -24,7 +24,7 @@ import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from './types';
-import { Subheading } from 'components/Text';
+import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<SearchStackParams, 'Search'>;
@@ -171,7 +171,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             }
             renderSectionHeader={({ section: { title, data } }) =>
               data.length ? (
-                <Subheading
+                <Paragraph
                   style={[
                     styles.header,
                     {
@@ -183,7 +183,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                   ]}
                 >
                   {title}
-                </Subheading>
+                </Paragraph>
               ) : null
             }
           />

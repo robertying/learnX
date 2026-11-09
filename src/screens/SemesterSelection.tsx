@@ -2,7 +2,11 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
 import { Form, FormButton, FormSection } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import { latestSemesterQuery, semestersQuery } from 'data/queries';
+import {
+  schoolSemesterQuery,
+  selectSemesterId,
+  semestersQuery,
+} from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/parse';
@@ -16,7 +20,11 @@ const SemesterSelection: React.FC<Props> = () => {
   const loggedIn = useLoggedIn();
   const currentSemesterId = useCurrentSemester();
   const semestersResult = useQuery({ ...semestersQuery, enabled: loggedIn });
-  const latestResult = useQuery({ ...latestSemesterQuery, enabled: loggedIn });
+  const latestResult = useQuery({
+    ...schoolSemesterQuery,
+    select: selectSemesterId,
+    enabled: loggedIn,
+  });
 
   const semesters = semestersResult.data ?? noSemesters;
   const latestSemester = latestResult.data;

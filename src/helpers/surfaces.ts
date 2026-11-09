@@ -38,10 +38,16 @@ interface Inputs {
   archived: string[];
   /** Archived and hidden assignments left out, as the Assignments tab shows. */
   shownAssignments: Assignment[] | undefined;
+  /** Ids of the archived and hidden ones, whose calendar entries go. */
+  leftOutAssignments: string[];
   settings: ReturnType<typeof getSettings>;
   /** This and next week's classes still ahead (JSON); empty until known. */
   classes: string;
+  /** How many times the app came back to the foreground. */
+  resumes: number;
 }
+
+let resumes = 0;
 
 const readInputs = (): Inputs => {
   const { currentSemester, hiddenCourses, archived } = getUserData();
@@ -67,6 +73,9 @@ const readInputs = (): Inputs => {
     shownAssignments: assignments?.filter(
       a => !archivedIds.has(a.id) && !hidden.has(a.courseId),
     ),
+    leftOutAssignments: (assignments ?? [])
+      .filter(a => archivedIds.has(a.id) || hidden.has(a.courseId))
+      .map(a => a.id),
     settings: getSettings(),
     classes:
       thisWeekSchedule.source === 'none'
@@ -77,6 +86,7 @@ const readInputs = (): Inputs => {
               ...nextWeekSchedule.sessions,
             ]),
           ),
+    resumes,
   };
 };
 
@@ -98,6 +108,7 @@ export const subscribeSurfaceErrors = (listener: ErrorListener) => {
 const syncCalendar = async (
   type: 'calendar' | 'reminder',
   assignments: Assignment[],
+  leftOut: string[],
 ) => {
   // Loaded when needed: it brings in the file helpers, which only the app
   // needs (and Jest can't load).
@@ -106,6 +117,7 @@ const syncCalendar = async (
   const message = await syncAssignments(
     type,
     upcomingAssignments(assignments, dayjs()),
+    leftOut,
   );
   if (message) {
     errorListeners.forEach(listener => listener(message));
@@ -141,6 +153,9 @@ const surfaces: Surface[] = [
       i.archived,
       i.settings.notifications.deadlineReminders,
       i.settings.notifications.deadlineReminderOffset,
+      // The notification or exact alarm permission may have changed in the
+      // system settings.
+      i.resumes,
     ],
     update: ({ assignments, hiddenCourses, archived, settings }) =>
       assignments &&
@@ -186,10 +201,11 @@ const surfaces: Surface[] = [
       i.shownAssignments,
       i.settings.assignmentCalendarSync,
       i.settings.alarms,
+      i.settings.calendarEventLength,
     ],
-    update: ({ shownAssignments, settings }) =>
+    update: ({ shownAssignments, leftOutAssignments, settings }) =>
       settings.assignmentCalendarSync && shownAssignments
-        ? syncCalendar('calendar', shownAssignments)
+        ? syncCalendar('calendar', shownAssignments, leftOutAssignments)
         : undefined,
   },
   {
@@ -199,9 +215,9 @@ const surfaces: Surface[] = [
       i.settings.assignmentReminderSync,
       i.settings.alarms,
     ],
-    update: ({ shownAssignments, settings }) =>
+    update: ({ shownAssignments, leftOutAssignments, settings }) =>
       settings.assignmentReminderSync && shownAssignments
-        ? syncCalendar('reminder', shownAssignments)
+        ? syncCalendar('reminder', shownAssignments, leftOutAssignments)
         : undefined,
   },
 ];
@@ -306,6 +322,7 @@ export const watchSurfaces = () => {
   useSettingsStore.subscribe(schedule);
   AppState.addEventListener('change', state => {
     if (state === 'active') {
+      resumes += 1;
       schedule();
     }
   });

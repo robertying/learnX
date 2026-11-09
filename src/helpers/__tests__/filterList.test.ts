@@ -3,7 +3,6 @@ import {
   areRowPropsEqual,
   shallowEqual,
   checkedIds,
-  emptySelection,
   filterSubtitle,
   listForFilter,
   selectedCountLabel,
@@ -53,23 +52,26 @@ describe('filterSubtitle', () => {
 describe('selection', () => {
   const items = [{ id: 'a' }, { id: 'b' }];
 
-  it('starts with nothing checked', () => {
-    expect(emptySelection(items)).toEqual({ a: false, b: false });
-  });
-
-  it('lists checked ids', () => {
-    expect(checkedIds({ a: true, b: false, c: true })).toEqual(['a', 'c']);
+  it('lists checked ids of the items still shown, in list order', () => {
+    expect(checkedIds({ b: true, a: true, gone: true }, items)).toEqual([
+      'a',
+      'b',
+    ]);
+    expect(checkedIds({ a: false }, items)).toEqual([]);
   });
 
   it('checks all, or unchecks all when all are checked', () => {
-    expect(toggleAllSelection({ a: true, b: false }, items)).toEqual({
+    expect(toggleAllSelection({ a: true }, items)).toEqual({
       a: true,
       b: true,
     });
-    expect(toggleAllSelection({ a: true, b: true }, items)).toEqual({
-      a: false,
-      b: false,
-    });
+    expect(toggleAllSelection({ a: true, b: true }, items)).toEqual({});
+  });
+
+  it('checks all when an item came in after the others were checked', () => {
+    expect(
+      toggleAllSelection({ a: true, b: true }, [...items, { id: 'c' }]),
+    ).toEqual({ a: true, b: true, c: true });
   });
 
   it('labels the count by locale', () => {

@@ -14,10 +14,7 @@ export interface HeaderTitleProps {
 const allowFontScaling = Platform.OS !== 'ios';
 const maxFontSizeMultiplier = 1.3;
 
-const HeaderTitle: React.FC<React.PropsWithChildren<HeaderTitleProps>> = ({
-  title,
-  subtitle,
-}) => {
+const HeaderTitle: React.FC<HeaderTitleProps> = ({ title, subtitle }) => {
   const { width } = useWindowDimensions();
   // Wide windows (tablets, unfolded foldables) get the roomy header, like the split view.
   const isWide =

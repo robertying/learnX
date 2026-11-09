@@ -1,11 +1,7 @@
 import { StyleSheet } from 'react-native';
-import {
-  HorizontalDivider,
-  Host,
-  VerticalDivider,
-} from '@expo/ui/jetpack-compose';
-import { useTheme } from 'theme';
+import { HorizontalDivider, VerticalDivider } from '@expo/ui/jetpack-compose';
 import type { DividerProps } from './Divider.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { DividerProps } from './Divider.shared';
 
@@ -14,16 +10,13 @@ export type { DividerProps } from './Divider.shared';
  * the outline variant role of the palette seeded from the primary color.
  */
 const Divider: React.FC<DividerProps> = ({ vertical, style }) => {
-  const theme = useTheme();
-
   return (
-    <Host
+    <ThemedHost
       matchContents={vertical ? { horizontal: true } : { vertical: true }}
-      seedColor={theme.colors.primary}
       style={[styles.stretch, style]}
     >
       {vertical ? <VerticalDivider /> : <HorizontalDivider />}
-    </Host>
+    </ThemedHost>
   );
 };
 

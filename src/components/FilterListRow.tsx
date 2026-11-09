@@ -18,11 +18,13 @@ export interface FilterListRowActions<T> {
   fav: (item: T, isFav: boolean) => void;
   archive: (id: string, isArchived: boolean) => void;
   hide: (id: string, isHidden: boolean) => void;
+  /** Moves a course one place, in reorder mode. */
+  move: (id: string, offset: -1 | 1) => void;
 }
 
 interface FilterListRowProps<T extends { id: string }> {
   data: T;
-  component: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+  component: React.FC<ItemComponentProps<T>>;
   actions: FilterListRowActions<T>;
   /** Courses: rows can be hidden and dragged to reorder */
   isCourse: boolean;
@@ -32,6 +34,9 @@ interface FilterListRowProps<T extends { id: string }> {
   fav: boolean;
   archived: boolean;
   hidden: boolean;
+  /** Reorder mode: whether the row isn't first / last */
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
 }
 
 /** A row inside `ReorderableList`, the only place its drag handle exists. */
@@ -39,7 +44,7 @@ const ReorderableItem = <T,>({
   component: Component,
   ...props
 }: ItemComponentProps<T> & {
-  component: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+  component: React.FC<ItemComponentProps<T>>;
 }) => {
   const drag = useReorderableDrag();
   return <Component {...props} onDrag={drag} />;
@@ -56,6 +61,8 @@ const FilterListRow = <T extends { id: string }>({
   fav,
   archived,
   hidden,
+  canMoveUp,
+  canMoveDown,
 }: FilterListRowProps<T>) => {
   const itemProps: ItemComponentProps<T> = {
     data,
@@ -71,6 +78,9 @@ const FilterListRow = <T extends { id: string }>({
     onArchive: () => actions.archive(data.id, archived),
     hidden,
     onHide: isCourse ? () => actions.hide(data.id, hidden) : undefined,
+    onMove: isCourse ? offset => actions.move(data.id, offset) : undefined,
+    canMoveUp,
+    canMoveDown,
   };
   return isCourse ? (
     <ReorderableItem component={Component} {...itemProps} />

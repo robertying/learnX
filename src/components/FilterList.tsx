@@ -21,7 +21,7 @@ import useListSelection from 'hooks/useListSelection';
 import { RootStackParams } from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { checkedIds, listForFilter } from 'helpers/filterList';
+import { listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
 import { filterOptions, type FilterSelection } from 'helpers/filterOptions';
 import Empty from './Empty';
@@ -46,7 +46,7 @@ export interface FilterListProps<T> {
   fav?: T[];
   archived?: T[];
   hidden: T[];
-  itemComponent: React.FC<React.PropsWithChildren<ItemComponentProps<T>>>;
+  itemComponent: React.FC<ItemComponentProps<T>>;
   /** The list screen's navigation, for its header and to open root stacks. */
   navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'setOptions'> &
     Pick<NativeStackNavigationProp<RootStackParams>, 'navigate'>;
@@ -117,7 +117,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const {
     selectionMode,
     selection,
-    selectionRef,
+    checkedIdsRef,
     selectedCount,
     toggleSelectionMode,
     checkAll,
@@ -138,6 +138,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const handleReorderDone = ({ from, to }: ReorderableListReorderEvent) => {
     const reorderedData = reorderItems(data, from, to);
     setCourseOrder(reorderedData.map(i => i.id));
+  };
+
+  const handleMove = (id: string, offset: -1 | 1) => {
+    const from = data.findIndex(i => i.id === id);
+    const to = from + offset;
+    if (from === -1 || to < 0 || to >= data.length) {
+      return;
+    }
+    setCourseOrder(reorderItems(data, from, to).map(i => i.id));
   };
 
   const handleDragChange = () => {
@@ -182,10 +191,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   };
 
   const handleArchiveSelected = () =>
-    handleArchive(
-      filterSelected === 'archived',
-      checkedIds(selectionRef.current),
-    );
+    handleArchive(filterSelected === 'archived', checkedIdsRef.current);
 
   const handleHide = (isHidden: boolean, id: string) => {
     setCourseHidden(id, !isHidden);
@@ -240,6 +246,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     fav: handleFav,
     archive: (id, isArchived) => handleArchive(isArchived, [id]),
     hide: (id, isHidden) => handleHide(isHidden, id),
+    move: handleMove,
   };
   // Menu bar commands and their shortcuts on iPad and Mac, for the list on
   // screen. Every tab's list stays mounted.
@@ -287,9 +294,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     fav: (item, isFav) => rowHandlersRef.current.fav(item, isFav),
     archive: (id, isArchived) => rowHandlersRef.current.archive(id, isArchived),
     hide: (id, isHidden) => rowHandlersRef.current.hide(id, isHidden),
+    move: (id, offset) => rowHandlersRef.current.move(id, offset),
   }));
 
-  const renderItem = ({ item }: { item: T }) => (
+  const renderItem = ({ item, index }: { item: T; index: number }) => (
     <FilterListRow
       data={item}
       component={Component}
@@ -297,10 +305,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       isCourse={isCourse}
       selectionMode={selectionMode}
       reorderMode={reorderMode}
-      checked={selection[item.id]}
+      checked={!!selection[item.id]}
       fav={favIdSet.has(item.id)}
       archived={archivedIdSet.has(item.id)}
       hidden={hiddenIdSet.has(item.id)}
+      canMoveUp={reorderMode && index > 0}
+      canMoveDown={reorderMode && index < data.length - 1}
     />
   );
 

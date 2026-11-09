@@ -5,7 +5,7 @@ import { t } from 'helpers/i18n';
 import { Text } from 'components/Text';
 import { useTheme } from 'theme';
 
-const Empty: React.FC<React.PropsWithChildren<unknown>> = () => {
+const Empty: React.FC = () => {
   const theme = useTheme();
 
   return (
@@ -16,7 +16,7 @@ const Empty: React.FC<React.PropsWithChildren<unknown>> = () => {
         color={theme.colors.outline}
         size={56}
       />
-      <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
+      <Text style={[Styles.spacey1, { color: theme.colors.onSurfaceMedium }]}>
         {t('empty')}
       </Text>
     </View>

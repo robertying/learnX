@@ -2,7 +2,6 @@ import {
   ApiError,
   CalendarResult,
   ContentType,
-  type FavoriteItem,
   DetailSelector,
   FailReason,
   Language,
@@ -10,6 +9,7 @@ import {
   SemesterType,
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
+import { favoriteContentTypes } from 'data/pendingActions';
 import type { AppSource } from 'data/source';
 import { sessionsFromCourses } from 'helpers/schedule';
 import { beijingClock, beijingDate } from 'helpers/serverTime';
@@ -24,7 +24,7 @@ const mock = (): typeof import('data/mock') => require('data/mock');
  * refreshes, spinners, errors and the re-login flow can be exercised without a
  * real account. Dev builds change the behavior from Settings › Network
  * emulation (`screens/MockNetwork.tsx`), which also applies to file downloads
- * (`helpers/fs.ts`).
+ * (`helpers/files/downloads.ts`).
  */
 
 export type MockLatency = 'none' | 'normal' | 'slow';
@@ -240,12 +240,6 @@ const semesterInfo = (id: string): SemesterInfo => {
   };
 };
 
-const favoriteTypes = {
-  notice: ContentType.NOTIFICATION,
-  assignment: ContentType.HOMEWORK,
-  file: ContentType.FILE,
-} as const;
-
 /**
  * The emulated account's favorites, by item id: seeded from `mockFavorites`
  * and changed by add and remove. Kept in memory, so they start over when the
@@ -254,11 +248,12 @@ const favoriteTypes = {
 let favorites: Map<string, ContentType> | undefined;
 const mockFavoriteIds = () =>
   (favorites ??= new Map(
-    (Object.keys(favoriteTypes) as (keyof typeof favoriteTypes)[]).flatMap(
-      type =>
-        mock().mockFavorites[type].map(
-          id => [id, favoriteTypes[type]] as const,
-        ),
+    (
+      Object.keys(favoriteContentTypes) as (keyof typeof favoriteContentTypes)[]
+    ).flatMap(type =>
+      mock().mockFavorites[type].map(
+        id => [id, favoriteContentTypes[type]] as const,
+      ),
     ),
   ));
 
@@ -267,17 +262,14 @@ const favoritable = () => [
   ...mock().mockNotices.map(item => ({
     item,
     type: ContentType.NOTIFICATION,
-    time: item.publishTime,
   })),
   ...mock().mockAssignments.map(item => ({
     item,
     type: ContentType.HOMEWORK,
-    time: item.deadline,
   })),
   ...mock().mockFiles.map(item => ({
     item,
     type: ContentType.FILE,
-    time: item.uploadTime,
   })),
 ];
 
@@ -327,15 +319,6 @@ export const mockSource: AppSource = {
           ),
         ) as any,
     ),
-  getNotificationAttachment: notification =>
-    request(
-      () =>
-        mock().mockNotices.find(
-          notice =>
-            notice.url === notification.url &&
-            notice.attachment?.name === notification.attachmentName,
-        )?.attachment,
-    ),
   getHomeworkList: ((courseId: string, _courseType?: unknown, options?: any) =>
     request(
       () =>
@@ -347,15 +330,6 @@ export const mockSource: AppSource = {
             ),
         ) as any,
     )) as AppSource['getHomeworkList'],
-  getHomeworkDetail: homework =>
-    request(() =>
-      pick(
-        mock().mockAssignments.find(
-          assignment => assignment.id === homework.baseId,
-        ) ?? {},
-        homeworkDetailFields,
-      ),
-    ),
   // The app passes the whole item; the mock tells them apart by id.
   getExcellentHomeworkDetail: homework =>
     request(() =>
@@ -391,30 +365,6 @@ export const mockSource: AppSource = {
     request(() => {
       mockFavoriteIds().delete(id);
     }),
-  getFavorites: (courseId, type) =>
-    request(() =>
-      favoritable()
-        .filter(
-          f =>
-            mockFavoriteIds().get(f.item.id) === f.type &&
-            (!type || f.type === type) &&
-            (!courseId || f.item.courseId === courseId),
-        )
-        .map(({ item, type: itemType, time }): FavoriteItem => ({
-          id: item.id,
-          type: itemType,
-          title: item.title,
-          time,
-          state: '',
-          semesterId:
-            mock().mockCourses.find(course => course.id === item.courseId)
-              ?.semesterId ?? mock().mockCurrentSemester,
-          courseId: item.courseId,
-          pinned: false,
-          addedTime: time,
-          itemId: `favorite-${item.id}`,
-        })),
-    ),
   // The registrar's calendar, worked out from the courses' times.
   getCalendar: (start, end) =>
     request((): CalendarResult => {
@@ -440,8 +390,7 @@ export const mockSource: AppSource = {
     }),
   // The requests the app sends itself.
   markNoticeRead: () => mockMarkNoticeRead(),
-  submitAssignment: (_id, _content, _attachment, onProgress) =>
-    mockSubmitAssignment(onProgress),
+  submitAssignment: (_id, { onProgress }) => mockSubmitAssignment(onProgress),
   prepareFileDownload: () => mockDownloadFile(),
 };
 

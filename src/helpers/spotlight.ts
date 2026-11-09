@@ -42,9 +42,13 @@ export const assignmentSpotlightItem = (
   dueDate: time(assignment.deadline),
 });
 
-/** What each domain was last indexed with, so unchanged lists are skipped. */
-let indexed: Partial<Record<SpotlightDomain, string>> = {};
-/** Index changes run one at a time, as each one deletes, then adds. */
+/**
+ * What each domain was last indexed with, by item id, so only the items that
+ * changed are sent. Empty in a new JS runtime, whose first update replaces
+ * the domain.
+ */
+let indexed: Partial<Record<SpotlightDomain, Map<string, string>>> = {};
+/** Index changes run one at a time, in order. */
 let queue = Promise.resolve();
 
 const enqueue = (work: () => Promise<void>) => {
@@ -57,16 +61,26 @@ const enqueue = (work: () => Promise<void>) => {
 };
 
 const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
-  const key = JSON.stringify(items);
-  if (indexed[domain] === key) {
+  const before = indexed[domain];
+  const after = new Map(items.map(item => [item.id, JSON.stringify(item)]));
+  const changed = items.filter(
+    item => before?.get(item.id) !== after.get(item.id),
+  );
+  const removed = before ? [...before.keys()].filter(id => !after.has(id)) : [];
+  if (before && changed.length === 0 && removed.length === 0) {
     return;
   }
-  indexed[domain] = key;
+  indexed[domain] = after;
   enqueue(async () => {
     try {
-      await Spotlight!.replaceItems(domain, items);
+      // An app built before updateItems replaces the whole domain.
+      if (before && Spotlight!.updateItems) {
+        await Spotlight!.updateItems(domain, changed, removed);
+      } else {
+        await Spotlight!.replaceItems(domain, items);
+      }
     } catch (error) {
-      // Tried again with the next change.
+      // The next change replaces the whole domain.
       delete indexed[domain];
       throw error;
     }
@@ -75,8 +89,8 @@ const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
 
 /**
  * Makes the notices and assignments findable in Spotlight, without hidden
- * courses. A list that isn't loaded keeps what was indexed. Resolves once the index is
- * updated; it never rejects.
+ * courses. A list that isn't loaded keeps what was indexed. Resolves once the
+ * index is updated; it never rejects.
  */
 export async function updateSpotlight(
   { notices, assignments }: { notices?: Notice[]; assignments?: Assignment[] },

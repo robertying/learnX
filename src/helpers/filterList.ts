@@ -59,21 +59,28 @@ export const filterSubtitle = (
   }
 };
 
-/** Ids checked in selection mode, in insertion order */
-export const checkedIds = (selection: Record<string, boolean>) =>
-  Object.keys(selection).filter(id => selection[id] === true);
+/**
+ * The ids checked in selection mode among `items`, in list order. Ids of items
+ * no longer in the list (archived or refreshed away) don't count.
+ */
+export const checkedIds = (
+  selection: Record<string, boolean>,
+  items: { id: string }[],
+) => items.filter(item => selection[item.id]).map(item => item.id);
 
-/** A selection with every item unchecked */
-export const emptySelection = (items: { id: string }[]) =>
-  Object.fromEntries(items.map(item => [item.id, false]));
-
-/** Checks every item, or unchecks every item when all are already checked */
+/**
+ * Checks every item, or unchecks every item when all are already checked.
+ * Decided from `items`, so an item added since selection mode turned on
+ * counts as unchecked.
+ */
 export const toggleAllSelection = (
   prev: Record<string, boolean>,
   items: { id: string }[],
 ) => {
-  const allChecked = Object.values(prev).every(Boolean);
-  return Object.fromEntries(items.map(item => [item.id, !allChecked]));
+  const allChecked = items.length > 0 && items.every(item => prev[item.id]);
+  return allChecked
+    ? {}
+    : Object.fromEntries(items.map(item => [item.id, true]));
 };
 
 export const selectedCountLabel = (count: number) =>

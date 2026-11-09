@@ -2,7 +2,9 @@ import { ReactNode } from 'react';
 import { Platform, StyleSheet, Text as NativeText, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { Caption, Headline, Paragraph, textStyles } from 'components/Text';
-import { useTheme, withAlpha } from 'theme';
+import { fileTypeColor } from 'helpers/filename';
+import { t } from 'helpers/i18n';
+import { shade, textOn, useTheme, withAlpha } from 'theme';
 
 const isAndroid = Platform.OS === 'android';
 // Mail's first line is Subheadline; a Material three-line item's overline is
@@ -108,6 +110,43 @@ const CardRow: React.FC<CardRowProps> = ({
   );
 };
 
+const previewLength = 120;
+
+/**
+ * What a screen reader says for a row: its title first, then whose it is and
+ * when, then the states and glyphs it shows only visually (the unread dot or
+ * bold title, a flag, a paperclip), then the preview.
+ */
+export const cardAccessibilityLabel = ({
+  unread,
+  title,
+  overline,
+  status,
+  flags = [],
+  preview,
+}: {
+  unread?: boolean;
+  title: string;
+  overline?: string;
+  status?: string;
+  /** Spoken names of the glyphs shown, such as "Attachment". */
+  flags?: (string | false | undefined)[];
+  preview?: string;
+}) =>
+  [
+    unread ? t('unread') : undefined,
+    title,
+    overline,
+    status,
+    ...flags,
+    // The row shows two lines of it; a whole notice is too long to listen to.
+    preview && preview.length > previewLength
+      ? `${preview.slice(0, previewLength)}…`
+      : preview,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
 /** A small glyph next to the time, in the caption color unless `color` is set. */
 export const CardGlyph: React.FC<{
   name: 'attachment' | 'flag' | 'key-variant';
@@ -130,42 +169,24 @@ export const CardPill: React.FC<{
   color: string;
   icon?: 'clock-outline';
   testID?: string;
-}> = ({ children, color, icon, testID }) => (
-  <View
-    testID={testID}
-    style={[styles.pill, { backgroundColor: withAlpha(color, 0.15) }]}
-  >
-    {icon ? <Icon name={icon} size={13} color={color} /> : null}
-    <NativeText
-      numberOfLines={1}
-      style={[textStyles.footnote, styles.pillText, { color }]}
+}> = ({ children, color, icon, testID }) => {
+  const theme = useTheme();
+  // On the light tint the color itself is too faint for small text.
+  const foreground = theme.dark ? color : shade(color, 0.8);
+  return (
+    <View
+      testID={testID}
+      style={[styles.pill, { backgroundColor: withAlpha(color, 0.15) }]}
     >
-      {children}
-    </NativeText>
-  </View>
-);
-
-const fileTypeColor = (
-  type: string,
-  status: ReturnType<typeof useTheme>['colors']['status'],
-) => {
-  switch (type) {
-    case 'pdf':
-      return status.red;
-    case 'doc':
-    case 'docx':
-      return status.blue;
-    case 'ppt':
-    case 'pptx':
-    case 'key':
-      return status.orange;
-    case 'xls':
-    case 'xlsx':
-    case 'csv':
-      return status.green;
-    default:
-      return status.grey;
-  }
+      {icon ? <Icon name={icon} size={13} color={foreground} /> : null}
+      <NativeText
+        numberOfLines={1}
+        style={[textStyles.footnote, styles.pillText, { color: foreground }]}
+      >
+        {children}
+      </NativeText>
+    </View>
+  );
 };
 
 /** A file's type as a small page with its extension, for file rows. */
@@ -173,22 +194,18 @@ export const FileTypeTile: React.FC<{ fileType?: string }> = ({ fileType }) => {
   const theme = useTheme();
   const type = (fileType ?? '').toLowerCase();
   const label = type.slice(0, 4).toUpperCase();
+  const color = theme.colors.status[fileTypeColor(type)];
   return (
     <View
       testID="file-type"
       style={[styles.tile, { backgroundColor: theme.colors.surfaceVariant }]}
     >
       {label ? (
-        <View
-          style={[
-            styles.tileLabel,
-            { backgroundColor: fileTypeColor(type, theme.colors.status) },
-          ]}
-        >
+        <View style={[styles.tileLabel, { backgroundColor: color }]}>
           {/* four letters (DOCX, PPTX) are about as wide as the tile: shrink
               rather than wrap */}
           <NativeText
-            style={styles.tileText}
+            style={[styles.tileText, { color: textOn(color) }]}
             allowFontScaling={false}
             numberOfLines={1}
             adjustsFontSizeToFit
@@ -278,7 +295,6 @@ const styles = StyleSheet.create({
     paddingVertical: 1,
   },
   tileText: {
-    color: 'white',
     fontSize: 9,
     fontWeight: '700',
   },

@@ -1,4 +1,5 @@
 require "digest"
+require "dotenv"
 require "fileutils"
 require "json"
 require "shellwords"
@@ -282,6 +283,29 @@ def print_notes(path)
 end
 
 # ---------------------------------------------------------------------------
+# .env secrets
+
+# babel/inline-env.js only inlines the mock logins as plain text. Fail the
+# build if a release bundle contains any other .env value as is: a LIVE_* test
+# login, the unmasked courseX token, or anything added later.
+def check_bundle_for_env_secrets!(bundles)
+  UI.user_error!("Found no JS bundle to check for .env values") if bundles.empty?
+
+  env_file = File.join(ROOT, ".env")
+  return unless File.exist?(env_file)
+
+  secrets = Dotenv.parse(env_file).reject { |key, value| key.start_with?("DUMMY_") || value.to_s.length < 4 }
+  bundles.each do |bundle|
+    data = File.binread(bundle)
+    leaked = secrets.select { |_, value| data.include?(value.b) }.keys
+    next if leaked.empty?
+
+    UI.user_error!("#{bundle} contains the .env value of #{leaked.join(', ')}. Release bundles must not include it; see babel/inline-env.js.")
+  end
+  UI.success(".env check passed for #{bundles.map { |b| File.basename(b) }.join(', ')}")
+end
+
+# ---------------------------------------------------------------------------
 # App Store Connect
 
 # Uses an App Store Connect API key when APP_STORE_CONNECT_API_KEY_KEY_ID,
@@ -324,6 +348,9 @@ def build_apple(platform)
   }
   options[:catalyst_platform] = "macos" if platform == "macos"
   path = build_app(options)
+
+  archive = lane_context[SharedValues::XCODEBUILD_ARCHIVE]
+  check_bundle_for_env_secrets!(Dir[File.join(archive.to_s, "Products/Applications/*.app/**/main.jsbundle")])
 
   UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
   UI.success("Source map: #{map}")
@@ -376,6 +403,8 @@ def build_android
     project_dir: File.join(ROOT, "android"),
     tasks: ["app:bundleRelease", "app:assembleRelease", "app:uploadCrashlyticsSymbolFileRelease"],
   )
+
+  check_bundle_for_env_secrets!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/release/index.android.bundle")])
 
   FileUtils.rm_rf(android_out_dir)
   FileUtils.mkdir_p(android_out_dir)

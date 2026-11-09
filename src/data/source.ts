@@ -12,7 +12,7 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import { getCredentials, loadCredentials } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import Urls from 'constants/Urls';
-import { addCSRFTokenToLearnUrl } from 'helpers/learnUrl';
+import { addCSRFTokenToLearnUrl, isLearnUrl } from 'helpers/learnUrl';
 import { isMockUser } from 'helpers/mock';
 import {
   assertServerWritesAllowed,
@@ -32,16 +32,23 @@ export type DataSource = Pick<
   | 'getCurrentSemester'
   | 'getCourseList'
   | 'getNotificationList'
-  | 'getNotificationAttachment'
   | 'getHomeworkList'
-  | 'getHomeworkDetail'
   | 'getExcellentHomeworkDetail'
   | 'getFileList'
   | 'getCalendar'
   | 'addToFavorites'
   | 'removeFromFavorites'
-  | 'getFavorites'
 >;
+
+/** What an assignment submission sends. */
+export interface Submission {
+  /** The whole answer as HTML, which replaces the submitted one. */
+  content?: string;
+  attachment?: { uri: string; name: string };
+  /** Deletes the submitted attachment. */
+  remove?: boolean;
+  onProgress?: (progress: number) => void;
+}
 
 /**
  * Everything the app asks of the school's server: thu-learn-lib's calls, and
@@ -56,10 +63,7 @@ export interface AppSource extends DataSource {
   /** See `submitAssignment` below. */
   submitAssignment: (
     studentHomeworkId: string,
-    content: string | undefined,
-    attachment: { uri: string; name: string } | undefined,
-    onProgress: ((progress: number) => void) | undefined,
-    remove: boolean,
+    submission: Submission,
   ) => Promise<void>;
   /** Runs before a file is downloaded from the server. */
   prepareFileDownload: () => Promise<void>;
@@ -69,23 +73,55 @@ let helper: Learn2018Helper;
 
 const isMockSession = () => isMockUser(getCredentials()?.username);
 
+/** Web Learning's login pages are short; a notice's page never is. */
+const MAX_LOGIN_PAGE_LENGTH = 4096;
+
+/**
+ * Whether a page load found the session expired: Web Learning answers with
+ * its "login timeout" page, or redirects to it or to the SSO login, with
+ * status 200 (403 for some pages), the way thu-learn-lib tells. Throws for any
+ * other failed status.
+ */
+const isSessionExpired = async (response: Response) => {
+  if (response.status === 403 || response.url.includes('login_timeout')) {
+    return true;
+  }
+  if (!response.ok) {
+    throw {
+      reason: FailReason.UNEXPECTED_STATUS,
+      extra: response.status,
+    } satisfies ApiError;
+  }
+  const text = await response.text();
+  return (
+    text.length < MAX_LOGIN_PAGE_LENGTH &&
+    /登录超时|您未登录或登录失效|log_fail\.png|login_timeout|id\.tsinghua\.edu\.cn\/do\/off\/ui\/auth\/login|j_spring_security_thauth_roaming_entry/.test(
+      text,
+    )
+  );
+};
+
 /** The requests the app sends to learn.tsinghua.edu.cn itself. */
 const realRequests: Omit<AppSource, keyof DataSource> = {
   markNoticeRead: async url => {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw {
-        reason: FailReason.UNEXPECTED_STATUS,
-        extra: response.status,
-      } satisfies ApiError;
+    // Only Web Learning's own pages: the session cookies go with the request.
+    if (!isLearnUrl(url)) {
+      return;
+    }
+    if (await isSessionExpired(await fetch(url))) {
+      // The page was the login page, so the notice isn't marked read yet.
+      // Log in again if the session has expired, and load it once more.
+      await helper.ensureSession();
+      if (await isSessionExpired(await fetch(url))) {
+        throw {
+          reason: FailReason.NOT_LOGGED_IN,
+        } satisfies ApiError;
+      }
     }
   },
   submitAssignment: async (
     studentHomeworkId,
-    content,
-    attachment,
-    onProgress,
-    remove,
+    { content, attachment, onProgress, remove = false },
   ) => {
     assertServerWritesAllowed('Assignment submission');
 
@@ -110,7 +146,7 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
       responseType: 'text',
       transformResponse: data => data,
       onUploadProgress: e => {
-        // New architecture doesn't like native floats
+        // Two decimals are plenty for a progress bar.
         onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
       },
     });
@@ -191,6 +227,12 @@ export const ensureSession = async () => {
 
 export const resetDataSource = () => {
   helper = new Learn2018Helper({
+    // React Native's fetch keeps cookies in the system's store, which the
+    // web views, file downloads and the submission upload use too. Handing
+    // it over directly keeps that the only cookie jar: without it,
+    // thu-learn-lib wraps fetch with a jar of its own (fetch-cookie), and the
+    // two only agree because native fetch saves the cookies as well.
+    fetch: (input, init) => fetch(input, init),
     provider: () => {
       const credentials = getCredentials();
       return {
@@ -215,22 +257,11 @@ export const addCSRF = (url: string) =>
  */
 export const submitAssignment = async (
   studentHomeworkId: string,
-  content?: string,
-  attachment?: {
-    uri: string;
-    name: string;
-  },
-  onProgress?: (progress: number) => void,
-  remove: boolean = false,
+  submission: Submission,
 ) => {
+  const { content, attachment, remove } = submission;
   if (!content && !attachment && !remove) {
     return;
   }
-  await dataSource.submitAssignment(
-    studentHomeworkId,
-    content,
-    attachment,
-    onProgress,
-    remove,
-  );
+  await dataSource.submitAssignment(studentHomeworkId, submission);
 };

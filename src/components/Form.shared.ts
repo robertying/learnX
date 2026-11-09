@@ -4,11 +4,12 @@ import {
   Fragment,
   isValidElement,
   useEffect,
+  useEffectEvent,
   useRef,
 } from 'react';
 import { scheduleOnRN } from 'react-native-worklets';
 import type { ReactElement, ReactNode } from 'react';
-import { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
+import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
 import type { SFSymbol } from 'sf-symbols-typescript';
 
 // Props and helpers shared by Form.tsx (SwiftUI) and Form.android.tsx (Compose).
@@ -296,7 +297,7 @@ export const useFieldText = (
     }
   }, [text, value]);
 
-  const handleChange = (typed: string) => {
+  const handleChange = useEffectEvent((typed: string) => {
     if (typed === written.current) {
       // Our own write coming back: not a key to wait for.
       written.current = null;
@@ -305,14 +306,10 @@ export const useFieldText = (
     }
     reported.current.push(typed);
     onChangeText(typed);
-  };
-  const latestHandler = useRef(handleChange);
-  useEffect(() => {
-    latestHandler.current = handleChange;
   });
 
   useEffect(() => {
-    const report = (typed: string) => latestHandler.current(typed);
+    const report = (typed: string) => handleChange(typed);
     listenToText(text, typed => {
       'worklet';
       const next = format ? format(typed) : typed;

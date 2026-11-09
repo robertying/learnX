@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { gql, GraphQLClient } from 'graphql-request';
 import { Course } from 'data/types/state';
-import env from './env';
+import { getCourseXRefreshToken } from './env';
 import { assertServerWritesAllowed } from './serverWrites';
 
 const graphQLClient = new GraphQLClient('https://api.tsinghua.app/v1/graphql');
@@ -9,7 +9,7 @@ const graphQLClient = new GraphQLClient('https://api.tsinghua.app/v1/graphql');
 export const uploadCourses = async (courses: Course[]) => {
   assertServerWritesAllowed('Course information sharing');
   const response = await axios.post('https://tsinghua.app/api/auth/session', {
-    refreshToken: env.COURSEX_REFRESH_TOKEN,
+    refreshToken: getCourseXRefreshToken(),
   });
 
   const accessToken = response.data.accessToken;

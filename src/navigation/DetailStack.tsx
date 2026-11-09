@@ -7,26 +7,27 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import { trackScreen } from 'helpers/crashReporting';
-import NoticeDetail from 'screens/NoticeDetail';
+import { reportDetailReady } from 'hooks/useDetailNavigator';
 import {
   DetailNavigationContainerRef,
   DetailStackParams,
   ExtraParams,
 } from 'screens/types';
-import AssignmentDetail from 'screens/AssignmentDetail';
-import FileDetail from 'screens/FileDetail';
-import CourseDetail from 'screens/CourseDetail';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
 import { getTitleOptions } from 'components/HeaderTitle';
 import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
-import NativeSplitViewProvider from 'components/NativeSplitView';
+import NativeSplitViewProvider from './NativeSplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useNavigationTheme } from 'theme';
 import { nativeSplit } from './layout';
 import { getDetailScreenOptions } from './options';
-import { renderSettingDetails } from './stacks';
+import {
+  allItemDetails,
+  renderItemDetails,
+  renderSettingDetails,
+} from './stacks';
 
 const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
 
@@ -55,26 +56,7 @@ export const DetailStack = () => (
         headerShown: !nativeSplit || DeviceInfo.isIPad(),
       }}
     />
-    <DetailNavigator.Screen
-      name="NoticeDetail"
-      component={NoticeDetail}
-      options={getDetailScreenOptions()}
-    />
-    <DetailNavigator.Screen
-      name="AssignmentDetail"
-      component={AssignmentDetail}
-      options={getDetailScreenOptions()}
-    />
-    <DetailNavigator.Screen
-      name="FileDetail"
-      component={FileDetail}
-      options={getDetailScreenOptions()}
-    />
-    <DetailNavigator.Screen
-      name="CourseDetail"
-      component={CourseDetail}
-      options={getDetailScreenOptions()}
-    />
+    {renderItemDetails(allItemDetails)}
     <DetailNavigator.Screen
       name="AssignmentSubmission"
       component={AssignmentSubmission}
@@ -99,6 +81,7 @@ const DetailContainer: React.FC<{
       <NavigationContainer
         ref={navigationContainerRef}
         theme={theme}
+        onReady={reportDetailReady}
         onStateChange={trackScreen}
       >
         <DetailStack />

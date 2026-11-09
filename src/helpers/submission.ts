@@ -4,7 +4,7 @@ import mime from 'mime';
 import { RemoteFile, homeworkContentHtml } from '@robertying/thu-learn-lib';
 import { submitAssignment } from 'data/source';
 import { Assignment } from 'data/types/state';
-import { getExtension, stripExtension } from './filename';
+import { getExtension, stripExtension, withExtension } from './filename';
 import { interpolate, translationsFor } from './i18n';
 import { removeTags } from './text';
 
@@ -68,7 +68,7 @@ export const uploadAttachment = (
   const name = customName.trim();
   return {
     uri: picked.uri,
-    name: name ? `${name}.${getExtension(picked.name)}` : picked.name,
+    name: name ? withExtension(name, getExtension(picked.name)) : picked.name,
   };
 };
 
@@ -109,13 +109,12 @@ export const sendSubmission = async ({
   if (!content && !attachment && !removeAttachment) {
     return;
   }
-  await submitAssignment(
-    studentHomeworkId,
-    submissionHtml(content, submittedContent),
+  await submitAssignment(studentHomeworkId, {
+    content: submissionHtml(content, submittedContent),
     attachment,
     onProgress,
-    removeAttachment,
-  );
+    remove: removeAttachment,
+  });
 };
 
 /** A picked file shaped like a remote one, so it opens in file detail */

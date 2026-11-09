@@ -3,7 +3,6 @@ NSCalendarsWriteOnlyAccessUsageDescription = "learnX 会将课表和作业同步
 NSCalendarsFullAccessUsageDescription = "learnX 会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。";
 NSRemindersUsageDescription = "learnX 会将作业同步到提醒事项，并可删除它创建的列表。";
 NSRemindersFullAccessUsageDescription = "learnX 会将作业同步到提醒事项，并可删除它创建的列表。";
-NSContactsUsageDescription = "允许 learnX 访问你的联系人。";
 NSCameraUsageDescription = "拍摄照片作为作业附件。";
 NSMicrophoneUsageDescription = "允许 learnX 访问你的麦克风。";
 NSPhotoLibraryUsageDescription = "选择照片作为作业附件。";

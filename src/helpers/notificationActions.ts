@@ -93,8 +93,8 @@ const handle = (response: Notifications.NotificationResponse) =>
 
 const NOTIFICATION_ACTION_TASK = 'NOTIFICATION_ACTION_TASK';
 
-// Android runs this for an action button while the app is in the background
-// or not running, in a JS runtime of its own.
+// Android runs this for an action button pressed while the app is in the
+// background (in its JS runtime) or not running (in a headless one).
 TaskManager.defineTask<Notifications.NotificationTaskPayload>(
   NOTIFICATION_ACTION_TASK,
   async ({ data }) => {
