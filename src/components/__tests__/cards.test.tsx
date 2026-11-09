@@ -139,7 +139,7 @@ describe('AssignmentCard', () => {
     expect(screen.getByText('Prof. Li')).toBeTruthy();
   });
 
-  it('highlights a deadline within a day', async () => {
+  it('highlights a deadline due by the end of tomorrow', async () => {
     await render(
       <AssignmentCard
         data={assignment({
@@ -149,6 +149,17 @@ describe('AssignmentCard', () => {
     );
     expect(screen.getByTestId('due-soon')).toBeTruthy();
     expect(screen.getByText('due in 5 hours')).toBeTruthy();
+  });
+
+  it('highlights a deadline late tomorrow, as Today does', async () => {
+    await render(
+      <AssignmentCard
+        data={assignment({
+          deadline: dayjs(NOW).add(1, 'day').hour(23).minute(59).toISOString(),
+        } as Partial<Assignment>)}
+      />,
+    );
+    expect(screen.getByTestId('due-soon')).toBeTruthy();
   });
 
   it('says when a past deadline closed', async () => {

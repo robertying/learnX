@@ -12,6 +12,16 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
 };
 
 /**
+ * Whether an assignment is still open and due by the end of tomorrow: what
+ * Today lists as due soon, and what cards and details mark in red or orange.
+ */
+export const isDueSoon = (deadline: string, now?: dayjs.ConfigType) => {
+  const n = dayjs(now);
+  const dl = dayjs(deadline);
+  return dl.isAfter(n) && !dl.isAfter(n.add(1, 'day').endOf('day'));
+};
+
+/**
  * Upcoming assignments first, earliest deadline first, followed by past
  * assignments, latest deadline first. Ties are broken by id for stability.
  */

@@ -19,7 +19,7 @@ import {
   getAssignmentGradeLevelDescription,
   t,
 } from 'helpers/i18n';
-import { deadlineText } from 'helpers/assignments';
+import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
 import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
@@ -187,7 +187,6 @@ const AssignmentDetailContent: React.FC<{
   }, [submissionType, closed, handleSubmit, navigation]);
 
   const fileIcon = { ios: 'doc', android: 'file-document-outline' } as const;
-  const hoursLeft = dayjs(deadline).diff(now, 'hour', true);
   const submittedText = removeTags(submittedContent);
   const gradeText = removeTags(gradeContent);
   const answerText = removeTags(answerContent);
@@ -213,9 +212,7 @@ const AssignmentDetailContent: React.FC<{
             title={t('deadline')}
             subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
             detail={deadlineText(deadline, now)}
-            detailTint={
-              hoursLeft > 0 && hoursLeft <= 24 ? 'warning' : undefined
-            }
+            detailTint={isDueSoon(deadline, now) ? 'warning' : undefined}
             icon={{ ios: 'clock', android: 'clock-outline' }}
           />
           {lateSubmissionDeadline ? (

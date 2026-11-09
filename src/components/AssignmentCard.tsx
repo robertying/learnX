@@ -1,7 +1,6 @@
-import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import { deadlineText } from 'helpers/assignments';
+import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import useMinute from 'hooks/useMinute';
 import { useTheme } from 'theme';
@@ -36,8 +35,7 @@ const AssignmentCard: React.FC<
   const theme = useTheme();
   const now = useMinute();
   const dueText = deadlineText(deadline, now);
-  const hoursLeft = dayjs(deadline).diff(now, 'hour', true);
-  const dueSoon = hoursLeft > 0 && hoursLeft <= 24;
+  const dueSoon = isDueSoon(deadline, now);
 
   const status = graded ? (
     <CardPill testID="grade" color={theme.colors.primary}>
