@@ -43,6 +43,26 @@ jest.mock('expo-secure-store', () => require('./mocks/secureStore'));
 jest.mock('expo-sqlite/kv-store', () => require('./mocks/sqliteKvStore'));
 jest.mock('expo-widgets', () => require('./mocks/widgets'));
 jest.mock('../modules/menus', () => require('./mocks/menus'));
+// The system cookie store, empty.
+jest.mock('@preeternal/react-native-cookie-manager', () => ({
+  __esModule: true,
+  default: {
+    get: jest.fn(() => Promise.resolve({})),
+    set: jest.fn(() => Promise.resolve(true)),
+    setFromResponse: jest.fn(() => Promise.resolve(true)),
+    clearByName: jest.fn(() => Promise.resolve(true)),
+    clearAll: jest.fn(() => Promise.resolve(true)),
+    flush: jest.fn(() => Promise.resolve()),
+  },
+}));
+jest.mock('react-native-share-menu', () => ({
+  __esModule: true,
+  default: {
+    getSharedCacheDirectory: jest.fn(),
+    getInitialShare: jest.fn(),
+    addNewShareListener: jest.fn(() => ({ remove: jest.fn() })),
+  },
+}));
 // Spotlight is native only (iOS and Mac), as on Android.
 jest.mock('../modules/spotlight', () => ({ __esModule: true, default: null }));
 

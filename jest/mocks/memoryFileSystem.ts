@@ -1,14 +1,15 @@
 /**
  * An in-memory `expo-file-system` for tests of code that keeps files
- * (helpers/fs). Opt in per test file:
+ * (helpers/files). Opt in per test file:
  *
  *   jest.mock('expo-file-system', () =>
- *     require('../../../jest/mocks/memoryFileSystem'),
+ *     require('../../../../jest/mocks/memoryFileSystem'),
  *   );
  *
- * Seed it with `__fs.write` / `__fs.mkdir`, read it back with `__fs.paths`,
+ * Seed it with `__fs.write` / `__fs.mkdir`, read it back with `__fs.files`,
  * and empty it with `__fs.reset` between cases. `DownloadTask` "downloads" by
- * calling `__fs.download`, which tests replace to write a body or fail.
+ * calling `__fs.download`, which tests replace to write a body or fail, and
+ * fails when its `signal` is aborted.
  */
 type Node = { kind: 'file'; content: string } | { kind: 'dir' };
 
@@ -135,6 +136,7 @@ export class Directory extends Entry {
 
 export interface DownloadOptions {
   headers?: Record<string, string>;
+  signal?: AbortSignal;
   onProgress?: (event: {
     bytesWritten: number | bigint;
     totalBytes: number | bigint;
@@ -149,7 +151,12 @@ export class DownloadTask {
   ) {
     __fs.tasks.push(this);
   }
-  downloadAsync = jest.fn(async () => __fs.download(this));
+  downloadAsync = jest.fn(async () => {
+    if (this.options.signal?.aborted) {
+      throw new Error('Download canceled');
+    }
+    return __fs.download(this);
+  });
   release = jest.fn();
 }
 

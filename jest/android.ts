@@ -1,8 +1,8 @@
 // The Android run (see jest.config.js): Compose stand-ins in place of the
 // empty modules jest/setup.ts gives the widgets.
-jest.mock('@expo/ui/jetpack-compose', () => require('./expoCompose'));
+jest.mock('@expo/ui/jetpack-compose', () => require('./mocks/expoCompose'));
 jest.mock('@expo/ui/jetpack-compose/modifiers', () =>
-  require('./expoComposeModifiers'),
+  require('./mocks/expoComposeModifiers'),
 );
 
 // The system toast's native module, which only the Android build of React

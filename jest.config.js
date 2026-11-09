@@ -10,12 +10,6 @@ const base = {
   setupFiles: ['<rootDir>/jest/setup.ts'],
   // Every test starts with fresh call records on every mock.
   clearMocks: true,
-  // Count every source file, not only the ones some test imports.
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    '!src/**/__tests__/**',
-    '!src/**/*.d.ts',
-  ],
   transform: {
     '^.+\\.mjs$': 'babel-jest',
   },
@@ -31,11 +25,17 @@ const base = {
 /**
  * Two runs: everything with each split component's iOS file (Jest's default
  * platform here), and the component tests under `__tests__/android` with the
- * `.android.tsx` files, Compose stand-ins (`jest/expoCompose.tsx`) and
+ * `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`) and
  * `Platform.OS` 'android'.
  */
 /** @type {import('jest').Config} */
 module.exports = {
+  // Count every source file, not only the ones some test imports.
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/__tests__/**',
+    '!src/**/*.d.ts',
+  ],
   projects: [
     {
       ...base,
@@ -51,7 +51,7 @@ module.exports = {
       },
       setupFiles: [...base.setupFiles, '<rootDir>/jest/android.ts'],
       // Material Symbols, which Compose draws from vector drawables
-      moduleNameMapper: { '\\.xml$': '<rootDir>/jest/drawable.ts' },
+      moduleNameMapper: { '\\.xml$': '<rootDir>/jest/mocks/drawable.ts' },
       testMatch: ['<rootDir>/src/**/__tests__/android/**/*.test.ts?(x)'],
     },
   ],
