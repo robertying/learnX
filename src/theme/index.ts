@@ -6,8 +6,10 @@ import {
 
 /**
  * The brand color: Tsinghua purple, and the lighter tone of it used in dark
- * mode. The iOS `ThemeColor` asset, Android's `colors.xml`, `Colors.theme` and
- * the widgets use these same two values (checked by `brand.test.ts`).
+ * mode. The iOS `ThemeColor` asset, Android's `colors.xml`, `Colors.theme`,
+ * the widgets and the logo mark on the splash and login screens (iOS
+ * `MaskedAppIcon` images, Android `splash_screen_icon`) use these same two
+ * values (checked by `brand.test.ts`, except the iOS images).
  */
 export const brandColors = { light: '#660874', dark: '#F4ABFF' } as const;
 
