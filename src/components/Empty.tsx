@@ -1,34 +1,9 @@
-import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-design-icons';
-import Styles from 'constants/Styles';
 import { t } from 'helpers/i18n';
-import { Text } from 'components/Text';
-import { useTheme } from 'theme';
+import StatusView from './StatusView';
 
-const Empty: React.FC = () => {
-  const theme = useTheme();
-
-  return (
-    <View style={styles.root}>
-      <Icon
-        style={Styles.spacey1}
-        name="check-circle"
-        color={theme.colors.outline}
-        size={56}
-      />
-      <Text style={[Styles.spacey1, { color: theme.colors.onSurfaceMedium }]}>
-        {t('empty')}
-      </Text>
-    </View>
-  );
-};
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+/** A list or pane with nothing in it. */
+const Empty: React.FC = () => (
+  <StatusView icon="check-circle" message={t('empty')} />
+);
 
 export default Empty;

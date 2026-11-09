@@ -213,7 +213,6 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const touchable = (
     <Touchable
       type="highlight"
-      highlightColorOpacity={0.125}
       style={{ backgroundColor: theme.colors.surface }}
       onPress={
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress

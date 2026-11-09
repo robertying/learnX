@@ -1,7 +1,7 @@
 import { ReactNode } from 'react';
 import { Platform, StyleSheet, Text as NativeText, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
-import { Caption, Headline, Paragraph, textStyles } from 'components/Text';
+import { Caption, Headline, Paragraph, Text } from 'components/Text';
 import { fileTypeColor } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { shade, textOn, useTheme, withAlpha } from 'theme';
@@ -59,18 +59,9 @@ const CardRow: React.FC<CardRowProps> = ({
     </View>
   );
 
-  const dot = (
-    <View
-      testID="unread-dot"
-      style={[styles.dot, { backgroundColor: theme.colors.primary }]}
-    />
-  );
-
   return (
     <View style={styles.root}>
-      {!isAndroid ? (
-        <View style={styles.gutter}>{unread ? dot : null}</View>
-      ) : null}
+      <CardGutter unread={unread} />
       {leading}
       <View style={styles.content}>
         {overline ? (
@@ -147,6 +138,28 @@ export const cardAccessibilityLabel = ({
     .filter(Boolean)
     .join(', ');
 
+/**
+ * The leading gutter of an iOS and Mac list row, with the unread dot in it.
+ * Every row has one, so the text of all lists lines up. Nothing on Android.
+ * Goes first in a row whose children are 10 apart.
+ */
+export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
+  const theme = useTheme();
+  if (isAndroid) {
+    return null;
+  }
+  return (
+    <View style={styles.gutter}>
+      {unread ? (
+        <View
+          testID="unread-dot"
+          style={[styles.dot, { backgroundColor: theme.colors.primary }]}
+        />
+      ) : null}
+    </View>
+  );
+};
+
 /** A small glyph next to the time, in the caption color unless `color` is set. */
 export const CardGlyph: React.FC<{
   name: 'attachment' | 'flag' | 'key-variant';
@@ -179,12 +192,13 @@ export const CardPill: React.FC<{
       style={[styles.pill, { backgroundColor: withAlpha(color, 0.15) }]}
     >
       {icon ? <Icon name={icon} size={13} color={foreground} /> : null}
-      <NativeText
+      <Text
+        variant="footnote"
         numberOfLines={1}
-        style={[textStyles.footnote, styles.pillText, { color: foreground }]}
+        style={[styles.pillText, { color: foreground }]}
       >
         {children}
-      </NativeText>
+      </Text>
     </View>
   );
 };

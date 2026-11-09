@@ -2,6 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { Course } from 'data/types/state';
 import { t } from 'helpers/i18n';
+import { CardGutter } from './CardRow';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { Caption, Headline } from 'components/Text';
 import { useTheme } from 'theme';
@@ -76,6 +77,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
       .join(', ')}
   >
     <View style={styles.root}>
+      <CardGutter />
       <View style={styles.names}>
         <Headline>{name}</Headline>
         <Caption variant="subheadline" numberOfLines={1}>
@@ -99,7 +101,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   names: {
     flex: 1,

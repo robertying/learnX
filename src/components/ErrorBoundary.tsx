@@ -1,10 +1,9 @@
 import { Component } from 'react';
 import type { ErrorInfo } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-design-icons';
+import { View } from 'react-native';
 import { reloadAppAsync } from 'expo';
 import TextButton from 'components/TextButton';
-import { Text } from 'components/Text';
+import StatusView from 'components/StatusView';
 import Styles from 'constants/Styles';
 import { recordError } from 'helpers/crashReporting';
 import { t } from 'helpers/i18n';
@@ -14,30 +13,27 @@ const ErrorFallback: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => {
   const theme = useTheme();
 
   return (
-    <View
-      testID="error-fallback"
-      style={[styles.root, { backgroundColor: theme.colors.background }]}
-    >
-      <Icon
-        style={Styles.spacey1}
-        name="alert-circle-outline"
-        color={theme.colors.outline}
-        size={56}
+    <View style={[Styles.flex1, { backgroundColor: theme.colors.background }]}>
+      <StatusView
+        testID="error-fallback"
+        icon="alert-circle-outline"
+        message={t('somethingWentWrong')}
+        action={
+          <>
+            {onRetry ? (
+              <TextButton style={Styles.spacey1} onPress={onRetry}>
+                {t('tryAgain')}
+              </TextButton>
+            ) : null}
+            <TextButton
+              style={Styles.spacey1}
+              onPress={() => reloadAppAsync('Error boundary')}
+            >
+              {t('reloadApp')}
+            </TextButton>
+          </>
+        }
       />
-      <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
-        {t('somethingWentWrong')}
-      </Text>
-      {onRetry ? (
-        <TextButton style={Styles.spacey1} onPress={onRetry}>
-          {t('tryAgain')}
-        </TextButton>
-      ) : null}
-      <TextButton
-        style={Styles.spacey1}
-        onPress={() => reloadAppAsync('Error boundary')}
-      >
-        {t('reloadApp')}
-      </TextButton>
     </View>
   );
 };
@@ -77,12 +73,3 @@ export default class ErrorBoundary extends Component<
     );
   }
 }
-
-const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 16,
-  },
-});
