@@ -1,4 +1,9 @@
-import { StyleSheet } from 'react-native';
+import {
+  StyleSheet,
+  type DimensionValue,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import {
   Host,
   Row,
@@ -56,7 +61,7 @@ const TextButton: React.FC<TextButtonProps> = ({
       matchContents={fill ? { vertical: true } : true}
       seedColor={theme.colors.primary}
       colorOverrides={colorOverrides}
-      style={[fill && styles.fill, style]}
+      style={fill ? withGutter(style) : style}
     >
       {fill ? (
         // The host is as wide as React Native makes it. Measured at that exact
@@ -94,14 +99,38 @@ const Label: React.FC<
 
 const rowModifiers = [fillMaxWidth()];
 
-const styles = StyleSheet.create({
-  fill: {
-    // The button's padding and its 40 dp minimum height sit in the gutter, so
-    // the label lines up with the text around it (as the iOS label does) and
-    // the row keeps its height.
-    marginStart: -12,
-    marginVertical: -8,
-  },
-});
+type Margin = DimensionValue | undefined;
+
+const points = (...values: Margin[]) => {
+  const value = values.find(margin => margin !== undefined);
+  return typeof value === 'number' ? value : 0;
+};
+
+/**
+ * Moves the button's 12 dp padding and its 40 dp minimum height into the
+ * gutter, so the label lines up with the text around it (as the iOS label
+ * does) and the row keeps its height. The offsets add to the caller's margins
+ * rather than being replaced by them.
+ */
+const withGutter = (style: StyleProp<ViewStyle>): StyleProp<ViewStyle> => {
+  const {
+    margin,
+    marginVertical,
+    marginHorizontal,
+    marginTop,
+    marginBottom,
+    marginStart,
+    marginLeft,
+  } = StyleSheet.flatten(style) ?? {};
+  return [
+    style,
+    {
+      marginTop: points(marginTop, marginVertical, margin) - 8,
+      marginBottom: points(marginBottom, marginVertical, margin) - 8,
+      marginStart:
+        points(marginStart, marginLeft, marginHorizontal, margin) - 12,
+    },
+  ];
+};
 
 export default TextButton;
