@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import type {
   NativeStackHeaderItem,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import FilterMenu from 'components/FilterMenu';
 import HeaderTitle from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
@@ -121,9 +120,10 @@ const useFilterListHeader = ({
         headerLeft: () => (
           <IconButton
             accessibilityLabel={t('reorder')}
-            icon={props => <MaterialCommunityIcons {...props} name="sort" />}
+            icon="reorder"
             onPress={onReorder}
             mode="contained"
+            style={styles.headerLeft}
           />
         ),
         headerRight: () => <View />,
@@ -168,26 +168,19 @@ const useFilterListHeader = ({
         ],
 
         headerLeft: () => (
-          <>
+          <View style={styles.headerLeft}>
             <IconButton
               accessibilityLabel={t('select')}
               onPress={onSelect}
-              icon={props => (
-                <MaterialCommunityIcons
-                  {...props}
-                  name="format-list-bulleted"
-                />
-              )}
+              icon="select"
               mode="contained"
             />
             <IconButton
               accessibilityLabel={t('checkAll')}
               onPress={onCheckAll}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="check-all" />
-              )}
+              icon="checkAll"
             />
-          </>
+          </View>
         ),
         headerRight: () => (
           <IconButton
@@ -195,16 +188,7 @@ const useFilterListHeader = ({
               filterSelected === 'archived' ? t('restore') : t('archive')
             }
             onPress={onArchiveSelected}
-            icon={props => (
-              <MaterialCommunityIcons
-                {...props}
-                name={
-                  filterSelected === 'archived'
-                    ? 'archive-arrow-up'
-                    : 'archive-arrow-down'
-                }
-              />
-            )}
+            icon={filterSelected === 'archived' ? 'restore' : 'archive'}
           />
         ),
         ...getHeaderTitleOptions(
@@ -296,25 +280,18 @@ const useFilterListHeader = ({
         ],
 
         headerLeft: () => (
-          <>
+          <View style={styles.headerLeft}>
             {isCourse ? (
               <IconButton
                 accessibilityLabel={t('reorder')}
-                icon={props => (
-                  <MaterialCommunityIcons {...props} name="sort" />
-                )}
+                icon="reorder"
                 onPress={onReorder}
               />
             ) : (
               <IconButton
                 accessibilityLabel={t('select')}
                 onPress={onSelect}
-                icon={props => (
-                  <MaterialCommunityIcons
-                    {...props}
-                    name="format-list-bulleted"
-                  />
-                )}
+                icon="select"
               />
             )}
             <FilterMenu
@@ -326,16 +303,11 @@ const useFilterListHeader = ({
             {isCourse && (
               <IconButton
                 accessibilityLabel={t('courseX')}
-                icon={props => (
-                  <MaterialCommunityIcons
-                    {...props}
-                    name="information-outline"
-                  />
-                )}
+                icon="info"
                 onPress={onCourseX}
               />
             )}
-          </>
+          </View>
         ),
         headerRight: () => (
           <>
@@ -344,17 +316,13 @@ const useFilterListHeader = ({
                 accessibilityLabel={t('refresh')}
                 disabled={refreshing}
                 onPress={onRefresh}
-                icon={props => (
-                  <MaterialCommunityIcons {...props} name="refresh" />
-                )}
+                icon="refresh"
               />
             )}
             <IconButton
               accessibilityLabel={t('search')}
               onPress={() => navigation.navigate('SearchStack')}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="magnify" />
-              )}
+              icon="search"
             />
           </>
         ),
@@ -384,5 +352,13 @@ const useFilterListHeader = ({
     type,
   ]);
 };
+
+// Android: a gap between the last header button and the title.
+const styles = StyleSheet.create({
+  headerLeft: {
+    flexDirection: 'row',
+    marginEnd: 4,
+  },
+});
 
 export default useFilterListHeader;

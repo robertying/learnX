@@ -1,8 +1,6 @@
 import { useLayoutEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
 import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
-import Badge from 'components/Badge';
 import {
   Form,
   FormLink,
@@ -175,15 +173,13 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ],
       headerRight: showSettings
         ? () => (
-            <View>
-              <IconButton
-                testID="today-settings"
-                accessibilityLabel={t('settings')}
-                icon="cog-outline"
-                onPress={openSettings}
-              />
-              {settingsBadge && <Badge size={8} style={styles.badge} />}
-            </View>
+            <IconButton
+              testID="today-settings"
+              accessibilityLabel={t('settings')}
+              icon="settings"
+              badge={settingsBadge}
+              onPress={openSettings}
+            />
           )
         : undefined,
     });
@@ -310,13 +306,5 @@ const Today: React.FC<Props> = ({ navigation }) => {
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  badge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-  },
-});
 
 export default Today;

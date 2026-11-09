@@ -140,6 +140,7 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   autocorrectionDisabled: jest.fn(),
   Animation: { easeInOut: jest.fn() },
   background: jest.fn(),
+  buttonBorderShape: jest.fn(),
   buttonStyle: jest.fn(),
   controlSize: jest.fn(),
   // Read by the Button stand-in, so tests can tell a disabled row.
@@ -148,6 +149,7 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   foregroundStyle: jest.fn(),
   frame: jest.fn(),
   headerProminence: jest.fn(),
+  labelStyle: jest.fn(),
   labelsHidden: jest.fn(),
   lineLimit: jest.fn(),
   listRowBackground: jest.fn(),
