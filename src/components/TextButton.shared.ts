@@ -1,4 +1,9 @@
-import type { StyleProp, ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  type DimensionValue,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 export interface TextButtonProps {
   /** The label. */
@@ -26,3 +31,46 @@ export interface TextButtonProps {
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
+
+type Margin = DimensionValue | undefined;
+
+const points = (...values: Margin[]) => {
+  const value = values.find(margin => margin !== undefined);
+  return typeof value === 'number' ? value : 0;
+};
+
+/**
+ * Pulls a button's touch padding into the gutter, overlapping its neighbors
+ * like an inline link, so the label lines up with the text around it and the
+ * row keeps its height. The offsets add to the caller's margins rather than
+ * being replaced by them.
+ */
+export const withGutter = (
+  style: StyleProp<ViewStyle>,
+  gutter: { vertical: number; start?: number },
+): StyleProp<ViewStyle> => {
+  const {
+    margin,
+    marginVertical,
+    marginHorizontal,
+    marginTop,
+    marginBottom,
+    marginStart,
+    marginLeft,
+  } = StyleSheet.flatten(style) ?? {};
+  return [
+    style,
+    {
+      marginTop: points(marginTop, marginVertical, margin) - gutter.vertical,
+      marginBottom:
+        points(marginBottom, marginVertical, margin) - gutter.vertical,
+      ...(gutter.start
+        ? {
+            marginStart:
+              points(marginStart, marginLeft, marginHorizontal, margin) -
+              gutter.start,
+          }
+        : null),
+    },
+  ];
+};

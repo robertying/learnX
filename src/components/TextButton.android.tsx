@@ -1,10 +1,4 @@
 import {
-  StyleSheet,
-  type DimensionValue,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
-import {
   Host,
   Row,
   Text,
@@ -16,7 +10,7 @@ import {
   testID as testIDModifier,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { useComposeColorOverrides, useTheme } from 'theme';
-import type { TextButtonProps } from './TextButton.shared';
+import { withGutter, type TextButtonProps } from './TextButton.shared';
 
 export type { TextButtonProps } from './TextButton.shared';
 
@@ -61,7 +55,7 @@ const TextButton: React.FC<TextButtonProps> = ({
       matchContents={fill ? { vertical: true } : true}
       seedColor={theme.colors.primary}
       colorOverrides={colorOverrides}
-      style={fill ? withGutter(style) : style}
+      style={fill ? withGutter(style, androidGutter) : style}
     >
       {fill ? (
         // The host is as wide as React Native makes it. Measured at that exact
@@ -99,39 +93,11 @@ const Label: React.FC<
 
 const rowModifiers = [fillMaxWidth()];
 
-type Margin = DimensionValue | undefined;
-
-const points = (...values: Margin[]) => {
-  const value = values.find(margin => margin !== undefined);
-  return typeof value === 'number' ? value : 0;
-};
-
 /**
- * Moves the button's 12 dp padding and its 48 dp minimum touch height into
- * the gutter, overlapping its neighbors like an inline link, so the label
- * lines up with the text around it (as the iOS label does) and the row keeps
- * its height. The offsets add to the caller's margins rather than being
- * replaced by them.
+ * The button's 12 dp padding and its 48 dp minimum touch height go into the
+ * gutter, so the label lines up with the text around it (as the iOS label
+ * does).
  */
-const withGutter = (style: StyleProp<ViewStyle>): StyleProp<ViewStyle> => {
-  const {
-    margin,
-    marginVertical,
-    marginHorizontal,
-    marginTop,
-    marginBottom,
-    marginStart,
-    marginLeft,
-  } = StyleSheet.flatten(style) ?? {};
-  return [
-    style,
-    {
-      marginTop: points(marginTop, marginVertical, margin) - 14,
-      marginBottom: points(marginBottom, marginVertical, margin) - 14,
-      marginStart:
-        points(marginStart, marginLeft, marginHorizontal, margin) - 12,
-    },
-  ];
-};
+const androidGutter = { vertical: 14, start: 12 };
 
 export default TextButton;

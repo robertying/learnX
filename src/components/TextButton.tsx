@@ -1,16 +1,20 @@
 import { PlatformColor } from 'react-native';
-import { Button, Host } from '@expo/ui/swift-ui';
+import { Button, Host, Text } from '@expo/ui/swift-ui';
 import {
   buttonStyle,
+  contentShape,
   disabled as disabledModifier,
   font,
   foregroundStyle,
   lineLimit,
+  padding,
+  shapes,
   strikethrough,
   truncationMode,
 } from '@expo/ui/swift-ui/modifiers';
+import DeviceInfo from 'constants/DeviceInfo';
 import { useTheme } from 'theme';
-import type { TextButtonProps } from './TextButton.shared';
+import { withGutter, type TextButtonProps } from './TextButton.shared';
 
 export type { TextButtonProps } from './TextButton.shared';
 
@@ -20,11 +24,36 @@ const textStyles = {
   large: 'body',
 } as const;
 
+/**
+ * Point sizes on a Mac. "Optimize for Mac" maps text styles to the macOS
+ * scale (subheadline 11 pt, footnote 10 pt), which is far smaller than the
+ * React Native text around the button, and the Mac has no Dynamic Type to
+ * follow anyway.
+ */
+const macSizes = {
+  small: 13,
+  regular: 14,
+  large: 17,
+} as const;
+
+/**
+ * Vertical padding inside the label on a Mac, so the click target is about
+ * as tall as a regular Mac control (22 pt) instead of one line of text. It
+ * goes into the gutter, so rows keep their height.
+ */
+const macPadding = 4;
+const macGutter = { vertical: macPadding };
+
 const oneLine = [lineLimit(1), truncationMode('middle')];
 
 const struckModifiers = [
   foregroundStyle(PlatformColor('secondaryLabel')),
   strikethrough({ isActive: true, pattern: 'solid' }),
+];
+
+const macLabelModifiers = [
+  padding({ vertical: macPadding }),
+  contentShape(shapes.rectangle()),
 ];
 
 /**
@@ -43,6 +72,18 @@ const TextButton: React.FC<TextButtonProps> = ({
   testID,
 }) => {
   const theme = useTheme();
+  const isMac = DeviceInfo.isMac();
+
+  const modifiers = [
+    buttonStyle('borderless'),
+    font({
+      ...(isMac ? { size: macSizes[size] } : { textStyle: textStyles[size] }),
+      weight: bold ? 'semibold' : undefined,
+    }),
+    ...oneLine,
+    ...(struck ? struckModifiers : []),
+    ...(disabled ? [disabledModifier(true)] : []),
+  ];
 
   return (
     <Host
@@ -50,23 +91,22 @@ const TextButton: React.FC<TextButtonProps> = ({
       // shortens instead of growing past the screen.
       matchContents={fill ? { vertical: true } : true}
       seedColor={theme.colors.primary}
-      style={style}
+      style={isMac ? withGutter(style, macGutter) : style}
     >
-      <Button
-        label={children}
-        onPress={onPress}
-        testID={testID}
-        modifiers={[
-          buttonStyle('borderless'),
-          font({
-            textStyle: textStyles[size],
-            weight: bold ? 'semibold' : undefined,
-          }),
-          ...oneLine,
-          ...(struck ? struckModifiers : []),
-          ...(disabled ? [disabledModifier(true)] : []),
-        ]}
-      />
+      {isMac ? (
+        // A label view, so the padding (and the click target) sits inside the
+        // button.
+        <Button onPress={onPress} testID={testID} modifiers={modifiers}>
+          <Text modifiers={macLabelModifiers}>{children}</Text>
+        </Button>
+      ) : (
+        <Button
+          label={children}
+          onPress={onPress}
+          testID={testID}
+          modifiers={modifiers}
+        />
+      )}
     </Host>
   );
 };
