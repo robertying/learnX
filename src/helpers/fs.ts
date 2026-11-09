@@ -5,11 +5,7 @@ import Share from 'react-native-share';
 import ShareMenu from 'react-native-share-menu';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import mime from 'mime';
-import {
-  addCSRF,
-  emulateFileDownload,
-  loginWithFingerPrint,
-} from 'data/source';
+import { addCSRF, emulateFileDownload, ensureSession } from 'data/source';
 import { getSettings } from 'data/settings';
 import { SUBMISSION_DRAFTS_DIR } from 'data/submissionDrafts';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
@@ -113,7 +109,7 @@ export const downloadFile = async (
 
   if (refresh) {
     try {
-      await loginWithFingerPrint();
+      await ensureSession();
     } catch {}
   }
   // Only a real download is emulated; a file already on the device is not.

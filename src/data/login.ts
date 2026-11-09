@@ -1,6 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
-import { dataSource, loginWithFingerPrint, resetDataSource } from 'data/source';
+import {
+  clearLoginCookies,
+  dataSource,
+  loginWithFingerPrint,
+  resetDataSource,
+} from 'data/source';
 import {
   clearCredentials,
   Credentials,
@@ -171,14 +176,19 @@ export function loginWithMockAccount(username: string) {
 }
 
 /**
- * Logs out: forgets the login, the server data and the user's own data,
- * submission drafts included.
+ * Logs out: sends what's waiting, ends the session on the server, and forgets
+ * the login, the server data and the user's own data, submission drafts
+ * included.
  */
 export async function logout() {
-  // Favorites not sent yet are lost with the rest; give them one quick try.
+  // Favorites not sent yet are lost with the rest; give them one quick try
+  // while the session is still open.
   await flushServerActionsWithin(3_000);
   useAuthStore.setState(initialAuth);
+  // Not waited for: the account's data goes whether or not the server hears.
+  dataSource.logout().catch(() => {});
   await Promise.all([
+    clearLoginCookies().catch(() => {}),
     clearAccountData(),
     clearCredentials(),
     // Only left behind if the one-time import failed; they must not come

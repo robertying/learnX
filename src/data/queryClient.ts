@@ -1,6 +1,7 @@
-import { QueryClient } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
 import { SQLiteStorage } from 'expo-sqlite/kv-store';
+import { noteRequestError } from 'data/auth';
 
 /**
  * Bump to drop every cached response, e.g. when the shape the app keeps of a
@@ -36,6 +37,9 @@ export const queryPersister = experimental_createQueryPersister({
 });
 
 export const queryClient = new QueryClient({
+  // A login turned down while refreshing ends the session (data/auth).
+  queryCache: new QueryCache({ onError: noteRequestError }),
+  mutationCache: new MutationCache({ onError: noteRequestError }),
   defaultOptions: {
     queries: {
       // Writes each response to storage once it arrives.

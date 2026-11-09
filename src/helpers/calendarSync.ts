@@ -3,7 +3,7 @@
 import dayjs, { Dayjs } from 'dayjs';
 import type { ToastType } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
-import { dataSource, loginWithFingerPrint } from 'data/source';
+import { dataSource, ensureSession } from 'data/source';
 import { Assignment } from 'data/types/state';
 import {
   exportSyncedCalendarsToICS,
@@ -87,7 +87,7 @@ export const syncCourseSchedule = async (
   graduate: boolean,
 ): Promise<ToastMessage> => {
   try {
-    await loginWithFingerPrint();
+    await ensureSession();
 
     // Long ranges are fetched a few weeks at a time; it rejects only when
     // every window failed.

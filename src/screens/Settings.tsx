@@ -17,7 +17,6 @@ import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { setSetting, useSettings } from 'data/settings';
-import { clearLoginCookies, dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
@@ -76,8 +75,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           text: t('logout'),
           style: 'destructive',
           onPress: () => {
-            void dataSource.logout();
-            void clearLoginCookies();
             void logout();
           },
         },
