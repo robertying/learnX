@@ -149,7 +149,6 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   font: jest.fn(),
   foregroundStyle: jest.fn(),
   frame: jest.fn(),
-  headerProminence: jest.fn(),
   labelStyle: jest.fn(),
   labelsHidden: jest.fn(),
   lineLimit: jest.fn(),

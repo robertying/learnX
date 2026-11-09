@@ -28,6 +28,7 @@ import {
   sectionRows,
   useFieldText,
 } from 'components/Form';
+import DeviceInfo from 'constants/DeviceInfo';
 
 describe('Form', () => {
   it('opens a page from a link row with a chevron', async () => {
@@ -48,6 +49,17 @@ describe('Form', () => {
     expect(screen.getByTestId('icon-chevron.right')).toBeTruthy();
     await userEvent.setup().press(screen.getByText('Semester'));
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('titles a section on the Mac with its own header', async () => {
+    const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    await render(
+      <FormSection title="Content">
+        <FormText title="Total" />
+      </FormSection>,
+    );
+    expect(screen.getByText('Content')).toBeTruthy();
+    isMac.mockRestore();
   });
 
   it('shows a detail at the end of a row', async () => {

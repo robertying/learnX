@@ -63,15 +63,18 @@ export const ProgressView = ({
 
 export const Section = ({
   title,
+  header,
   footer,
   children,
 }: {
   title?: string;
+  header?: ReactNode;
   footer?: ReactNode;
   children?: ReactNode;
 }) => (
   <View>
     {title ? <RNText>{title}</RNText> : null}
+    {header}
     {children}
     {footer}
   </View>

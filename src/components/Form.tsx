@@ -28,7 +28,6 @@ import {
   foregroundStyle,
   frame,
   background,
-  headerProminence,
   lineLimit,
   listRowBackground,
   opacity,
@@ -135,32 +134,35 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 const macRowBackground = listRowBackground(
   PlatformColor('quaternarySystemFill'),
 );
-// System Settings on the Mac: bold section titles above the group.
-const macTitledSectionModifiers = [
-  headerProminence('increased'),
-  macRowBackground,
-];
 const macSectionModifiers = [macRowBackground];
+// System Settings on the Mac: bold titles in the label color above the
+// group. (Catalyst ignores headerProminence, so the title is our own Text.)
+const macHeaderModifiers = [
+  font({ textStyle: 'headline', weight: 'bold' }),
+  primaryText,
+];
 
 export const FormSection: React.FC<FormSectionProps> = ({
   children,
   title,
   footer,
-}) => (
-  <Section
-    title={title}
-    footer={footer ? <Text>{footer}</Text> : undefined}
-    modifiers={
-      DeviceInfo.isMac()
-        ? title
-          ? macTitledSectionModifiers
-          : macSectionModifiers
-        : undefined
-    }
-  >
-    {sectionRows(children)}
-  </Section>
-);
+}) => {
+  const isMac = DeviceInfo.isMac();
+  return (
+    <Section
+      title={isMac ? undefined : title}
+      header={
+        isMac && title ? (
+          <Text modifiers={macHeaderModifiers}>{title}</Text>
+        ) : undefined
+      }
+      footer={footer ? <Text>{footer}</Text> : undefined}
+      modifiers={isMac ? macSectionModifiers : undefined}
+    >
+      {sectionRows(children)}
+    </Section>
+  );
+};
 
 const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
@@ -402,7 +404,10 @@ export const FormFile: React.FC<FormFileProps> = ({
 );
 
 // Starts a few lines tall, as a box to write in, and grows with the text.
+// Mac rows are tight, so the box gets the room above and below its text
+// that the row's side inset gives it.
 const multilineModifiers = [lineLimit({ min: 6, max: 20 })];
+const macMultilineModifiers = [...multilineModifiers, padding({ vertical: 6 })];
 const plainTextModifiers = [
   textInputAutocapitalization('never'),
   autocorrectionDisabled(true),
@@ -421,7 +426,11 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
       axis={multiline ? 'vertical' : 'horizontal'}
       testID={testID}
       modifiers={[
-        ...(multiline ? multilineModifiers : []),
+        ...(multiline
+          ? DeviceInfo.isMac()
+            ? macMultilineModifiers
+            : multilineModifiers
+          : []),
         ...(plain ? plainTextModifiers : []),
         ...(isDisabled ? [disabled(true)] : []),
       ]}
