@@ -9,11 +9,13 @@ import {
 import {
   clearCredentials,
   Credentials,
+  getCredentials,
   saveCredentials,
 } from 'data/credentials';
+import { getDataOwner, setDataOwner } from 'data/dataOwner';
 import { LEGACY_ROOT_KEY, LEGACY_SETTINGS_KEY } from 'data/legacy';
 import { resetSettings } from 'data/settings';
-import { resetUserData } from 'data/userData';
+import { resetUserData, UserData } from 'data/userData';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
 import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
@@ -24,6 +26,37 @@ import { resetNotified } from 'data/notified';
 import { resetSyncLog } from 'data/syncLog';
 import { clearSubmissionDrafts } from 'data/submissionDrafts';
 import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
+
+/**
+ * Forgets everything kept for the account whose data this is: the server
+ * data, the user's own data, settings, submission drafts and what the widgets,
+ * Spotlight and reminders show. The login itself is left alone.
+ */
+function clearAccountData(userData?: UserData) {
+  resetSettings();
+  resetUserData(userData);
+  resetNotified();
+  resetSyncLog();
+  clearSubmissionDrafts();
+  clearQueryCache();
+  setDataOwner(null);
+  updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
+  updateUpNextWidget();
+  clearSpotlight();
+  return cancelDeadlineReminders().catch(() => {});
+}
+
+/**
+ * Makes the saved data `username`'s: when it belonged to someone else, or to
+ * nobody known, it is dropped first, so a new account never starts with the
+ * previous one's courses, lists or timetable.
+ */
+function claimData(previousOwner: string | null, username: string) {
+  if (previousOwner !== username) {
+    void clearAccountData();
+  }
+  setDataOwner(username);
+}
 
 const loggedIn = () =>
   useAuthStore.setState({
@@ -57,6 +90,9 @@ export async function login({
   }
 
   useAuthStore.setState({ loggingIn: true, error: null });
+  // Before the saved login is replaced: data saved before owners were
+  // recorded belongs to the saved login.
+  const previousOwner = getDataOwner() ?? getCredentials()?.username ?? null;
   if (username && password && !fingerPrint) {
     await clearCredentials().catch(() => undefined);
   }
@@ -95,6 +131,10 @@ export async function login({
         fingerGenPrint3,
       }).catch(() => undefined);
     }
+    const account = username ?? getCredentials()?.username;
+    if (account) {
+      claimData(previousOwner, account);
+    }
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
@@ -121,14 +161,10 @@ export async function login({
 export const loginWithOfflineMode = cancelRelogin;
 
 /** Loads the mock account's data, replacing whatever was there. */
-export function loginWithMockAccount() {
+export function loginWithMockAccount(username: string) {
   const { mockUserData } = require('data/mock') as typeof import('data/mock');
-  resetSettings();
-  resetUserData(mockUserData);
-  resetNotified();
-  resetSyncLog();
-  clearSubmissionDrafts();
-  clearQueryCache();
+  void clearAccountData(mockUserData);
+  setDataOwner(username);
   loggedIn();
 }
 
@@ -138,17 +174,8 @@ export function loginWithMockAccount() {
  */
 export async function logout() {
   useAuthStore.setState(initialAuth);
-  resetSettings();
-  resetUserData();
-  resetNotified();
-  resetSyncLog();
-  clearSubmissionDrafts();
-  clearQueryCache();
-  updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
-  updateUpNextWidget();
-  clearSpotlight();
   await Promise.all([
-    cancelDeadlineReminders().catch(() => {}),
+    clearAccountData(),
     clearCredentials(),
     // Only left behind if the one-time import failed; they must not come
     // back after logging out.

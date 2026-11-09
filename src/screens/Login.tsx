@@ -67,7 +67,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
       (username === env.DUMMY_PERSIST_USERNAME &&
         password === env.DUMMY_PERSIST_PASSWORD)
     ) {
-      loginWithMockAccount();
+      loginWithMockAccount(username);
       if (username === env.DUMMY_PERSIST_USERNAME) {
         // Goes through the emulated server and saves the login, so it
         // survives relaunch.
