@@ -11,6 +11,7 @@ import { Notice } from 'data/types/state';
 import { markNoticeRead, useNotice } from 'data/content';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
+import useMinute from 'hooks/useMinute';
 import {
   Form,
   FormFile,
@@ -39,6 +40,7 @@ const NoticeDetailContent: React.FC<{
   navigation: Props['navigation'];
 }> = ({ notice, navigation }) => {
   const theme = useTheme();
+  const now = useMinute();
 
   const {
     id,
@@ -85,7 +87,13 @@ const NoticeDetailContent: React.FC<{
     [publisher, dayjs(publishTime).format(t('dateTimeFormat'))]
       .filter(Boolean)
       .join(' · '),
-    expireTime ? dayjs(expireTime).format(t('noticeExpireTimeFormat')) : null,
+    expireTime
+      ? dayjs(expireTime).format(
+          dayjs(expireTime).isAfter(now)
+            ? t('noticeExpireTimeFormat')
+            : t('noticeExpiredTimeFormat'),
+        )
+      : null,
   ]
     .filter(Boolean)
     .join('\n');

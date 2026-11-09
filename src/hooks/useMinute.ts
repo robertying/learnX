@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { beijingDate } from 'helpers/serverTime';
 
 const listeners = new Set<() => void>();
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -38,3 +39,12 @@ const getDay = () => {
  * re-render when the day has changed.
  */
 export const useToday = () => useSyncExternalStore(subscribe, getDay);
+
+const getBeijingDay = () => beijingDate(getMinute());
+
+/**
+ * The day it is in Beijing (YYYY-MM-DD), which the timetable follows, also on
+ * a phone in another time zone. Re-renders when that day changes.
+ */
+export const useBeijingDay = () =>
+  useSyncExternalStore(subscribe, getBeijingDay);

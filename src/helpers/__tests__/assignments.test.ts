@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
 import { deadlineText, sortAssignments } from 'helpers/assignments';
 
@@ -86,5 +87,14 @@ describe('deadlineText', () => {
     expect(deadlineText(deadline, '2026-03-15T12:45:00Z')).toBe(
       'closed 15 minutes ago',
     );
+  });
+});
+
+describe('deadlineText for a deadline far away', () => {
+  it('shows the date instead of "due in 73 years"', () => {
+    const now = dayjs('2026-11-09T12:00:00+08:00');
+    expect(deadlineText('2099-12-31T23:59:00+08:00', now)).not.toMatch(/year/);
+    expect(deadlineText('2099-12-31T23:59:00+08:00', now)).toMatch(/2099/);
+    expect(deadlineText('2027-03-01T23:59:00+08:00', now)).toMatch(/month/);
   });
 });

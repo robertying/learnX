@@ -20,6 +20,7 @@ import { Assignment } from 'data/types/state';
 import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
+import { beijingDate } from 'helpers/serverTime';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
 import usePullToRefresh from 'hooks/usePullToRefresh';
@@ -48,9 +49,9 @@ const where = (session: ClassSession) => session.location.trim() || undefined;
 const Today: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
   const now = useMinute();
-  const today = dayjs(now);
 
-  const schedule = useWeekSchedule(now);
+  // the timetable follows Beijing days, also on a phone in another time zone
+  const schedule = useWeekSchedule(beijingDate(now));
   const classes = sessionsOn(schedule.sessions, now);
   const { current, next } = currentAndNext(classes, now);
 
@@ -120,7 +121,8 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
-  const dateText = today.format(t('todayDate'));
+  // the timetable's day (Beijing), so the date matches the week and the classes
+  const dateText = dayjs(beijingDate(now)).format(t('todayDate'));
   const subtitle =
     schedule.week && schedule.week > 0
       ? `${dateText} · ${t('todayWeek', { week: schedule.week })}`
