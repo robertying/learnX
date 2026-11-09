@@ -9,6 +9,7 @@ import {
   refreshCourseAssignments,
   refreshCourseFiles,
   refreshCourseNotices,
+  useNotice,
 } from 'data/content';
 import {
   mockAssignments,
@@ -24,6 +25,10 @@ import {
 } from 'data/mockSource';
 import { clearQueryCache, queryClient, queryPersister } from 'data/queryClient';
 import { Notice } from 'data/types/state';
+import { createElement, type ReactNode } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { act, renderHook } from '@testing-library/react-native';
+import { useAuthStore } from 'data/auth';
 import { resetUserData, setCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 
@@ -333,5 +338,23 @@ describe('marking items read', () => {
     expect(
       queryClient.getQueryData(noticesQuery(semesterId).queryKey),
     ).toBeUndefined();
+  });
+});
+
+describe('a detail screen left open', () => {
+  it('keeps its item after the semester is switched', async () => {
+    useAuthStore.setState({ loggedIn: true });
+    setCurrentSemester(semesterId);
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const id = notices[0].id;
+    const wrapper = ({ children }: { children: ReactNode }) =>
+      createElement(QueryClientProvider, { client: queryClient }, children);
+    const { result } = await renderHook(() => useNotice(id), { wrapper });
+    expect(result.current?.id).toBe(id);
+
+    await act(async () => {
+      setCurrentSemester('2025-2026-2');
+    });
+    expect(result.current?.id).toBe(id);
   });
 });

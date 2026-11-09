@@ -23,7 +23,13 @@ const Files: React.FC<Props> = ({ navigation }) => {
   const hiddenCourseIds = useUserData(data => data.hiddenCourses);
   const favoriteIds = useUserData(data => data.favorites.file);
   const archivedIds = useUserData(data => data.archived.file);
-  const { files, isFetching: fetching, refetch, dataUpdatedAt } = useFiles();
+  const {
+    files,
+    isFetching: fetching,
+    isPending,
+    refetch,
+    dataUpdatedAt,
+  } = useFiles();
 
   const { all, unread, fav, archived, hidden } = useFilteredData({
     data: files,
@@ -72,6 +78,7 @@ const Files: React.FC<Props> = ({ navigation }) => {
         navigation={navigation}
         onItemPress={handlePush}
         refreshing={pullToRefresh.refreshing}
+        loading={isPending && fetching}
         onRefresh={pullToRefresh.onRefresh}
         updatedAt={dataUpdatedAt}
       />

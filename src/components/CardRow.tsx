@@ -185,7 +185,15 @@ export const FileTypeTile: React.FC<{ fileType?: string }> = ({ fileType }) => {
             { backgroundColor: fileTypeColor(type, theme.colors.status) },
           ]}
         >
-          <NativeText style={styles.tileText} allowFontScaling={false}>
+          {/* four letters (DOCX, PPTX) are about as wide as the tile: shrink
+              rather than wrap */}
+          <NativeText
+            style={styles.tileText}
+            allowFontScaling={false}
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.75}
+          >
             {label}
           </NativeText>
         </View>
@@ -264,8 +272,9 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
   },
   tileLabel: {
+    maxWidth: 30,
     borderRadius: 3,
-    paddingHorizontal: 3,
+    paddingHorizontal: 2,
     paddingVertical: 1,
   },
   tileText: {
