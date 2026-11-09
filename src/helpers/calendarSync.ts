@@ -12,7 +12,7 @@ import {
   saveCoursesToCalendar,
 } from './event';
 import { calendarErrorCode } from './calendarError';
-import { exportTextFile } from './fs';
+import { exportTextFile } from './files/share';
 import { t } from './i18n';
 
 export interface ToastMessage {
