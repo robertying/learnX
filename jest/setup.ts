@@ -136,8 +136,12 @@ jest.mock('expo-application', () => ({ nativeBuildVersion: '1' }));
 jest.mock('@expo/ui', () => require('./expoUi'));
 jest.mock('@expo/ui/swift-ui', () => require('./expoSwiftUi'));
 jest.mock('@expo/ui/swift-ui/modifiers', () => ({
+  animation: jest.fn(),
+  autocorrectionDisabled: jest.fn(),
+  Animation: { easeInOut: jest.fn() },
   background: jest.fn(),
   buttonStyle: jest.fn(),
+  controlSize: jest.fn(),
   // Read by the Button stand-in, so tests can tell a disabled button.
   disabled: jest.fn((isDisabled: boolean) => ({ disabled: isDisabled })),
   font: jest.fn(),
@@ -147,9 +151,15 @@ jest.mock('@expo/ui/swift-ui/modifiers', () => ({
   labelsHidden: jest.fn(),
   lineLimit: jest.fn(),
   listRowBackground: jest.fn(),
+  monospacedDigit: jest.fn(),
+  opacity: jest.fn(),
   refreshable: jest.fn(),
   scrollContentBackground: jest.fn(),
+  textSelection: jest.fn(),
+  scrollDismissesKeyboard: jest.fn(),
   strikethrough: jest.fn(),
+  textInputAutocapitalization: jest.fn(),
+  tint: jest.fn(),
   toggleStyle: jest.fn(),
   truncationMode: jest.fn(),
 }));

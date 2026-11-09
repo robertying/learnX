@@ -1,12 +1,17 @@
-import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useTheme } from 'theme';
+import type { ChipProps } from './Chip.shared';
 
-export interface ChipProps {
-  children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;
-}
+export type { ChipProps } from './Chip.shared';
 
-/** A small outlined label, like Material's compact outlined chip. Display only. */
+/**
+ * A small outlined label. Display only.
+ *
+ * Android draws a Material 3 chip (`Chip.android.tsx`). iOS, iPadOS and Mac
+ * have no chip control in UIKit or SwiftUI, so this stays a React Native
+ * view: a SwiftUI version would be the same text and border inside a `Host`,
+ * with no system behavior gained.
+ */
 const Chip: React.FC<ChipProps> = ({ children, style }) => {
   const theme = useTheme();
 

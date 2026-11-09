@@ -6,6 +6,7 @@ import type {
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import FilterMenu from 'components/FilterMenu';
 import HeaderTitle from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -39,8 +40,6 @@ export interface FilterListHeaderOptions {
   selectedCount: number;
   refreshing: boolean;
   onRefresh?: () => void;
-  /** Opens the filter dropdown (Android) */
-  onFilter: () => void;
   /** The choices in the filter menu */
   filterOptions: FilterOption[];
   onFilterSelect: (selected: FilterSelection) => void;
@@ -67,7 +66,6 @@ const useFilterListHeader = ({
   selectedCount,
   refreshing,
   onRefresh,
-  onFilter,
   filterOptions,
   onFilterSelect,
   onReorder,
@@ -319,12 +317,11 @@ const useFilterListHeader = ({
                 )}
               />
             )}
-            <IconButton
-              accessibilityLabel={t('filter')}
-              onPress={onFilter}
-              icon={props => (
-                <MaterialCommunityIcons {...props} name="filter-variant" />
-              )}
+            <FilterMenu
+              label={t('filter')}
+              options={filterOptions}
+              selected={filterSelected}
+              onSelectionChange={onFilterSelect}
             />
             {isCourse && (
               <IconButton
@@ -376,7 +373,6 @@ const useFilterListHeader = ({
     onArchiveSelected,
     onCheckAll,
     onCourseX,
-    onFilter,
     onFilterSelect,
     onRefresh,
     onReorder,
