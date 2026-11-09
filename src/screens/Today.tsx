@@ -21,7 +21,7 @@ import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
-import useDetailNavigator from 'hooks/useDetailNavigator';
+import { useShowDetail } from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
@@ -47,7 +47,7 @@ const itemRow = ({ key, onPress, ...row }: ItemRowProps) =>
 const where = (session: ClassSession) => session.location.trim() || undefined;
 
 const Today: React.FC<Props> = ({ navigation }) => {
-  const detailNavigator = useDetailNavigator();
+  const show = useShowDetail(navigation);
   const now = useMinute();
 
   // the timetable follows Beijing days, also on a phone in another time zone
@@ -98,26 +98,10 @@ const Today: React.FC<Props> = ({ navigation }) => {
   };
   const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
-  const openCourse = (courseId: string) => {
-    if (detailNavigator) {
-      detailNavigator.replace('CourseDetail', {
-        id: courseId,
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push('CourseDetail', { id: courseId });
-    }
-  };
-  const openAssignment = (assignment: Assignment) => {
-    if (detailNavigator) {
-      detailNavigator.replace('AssignmentDetail', {
-        id: assignment.id,
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push('AssignmentDetail', { id: assignment.id });
-    }
-  };
+  const openCourse = (courseId: string) =>
+    show('CourseDetail', { id: courseId });
+  const openAssignment = (assignment: Assignment) =>
+    show('AssignmentDetail', { id: assignment.id });
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 

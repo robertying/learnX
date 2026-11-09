@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import { Platform, View } from 'react-native';
 import {
   NavigationContainer,
@@ -21,6 +21,7 @@ import Numbers from 'constants/Numbers';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import { trackScreen } from 'helpers/crashReporting';
+import { reportDetailReady } from 'hooks/useDetailNavigator';
 import { useNavigationTheme } from 'theme';
 import { DetailStack } from './DetailStack';
 import MainTab from './MainTab';
@@ -62,10 +63,6 @@ const SplitMain = () => {
   const detailNavigationContainerRef =
     useRef<NavigationContainerRef<DetailStackParams>>(null);
 
-  // The master pane mounts along with the detail container, before the ref is
-  // set. Hand the ref out only once it is, so that its consumers render again.
-  const [detailReady, setDetailReady] = useState(false);
-
   const showDetail = frame.width > Numbers.splitViewMaxCollapsedWidth;
 
   return (
@@ -74,7 +71,7 @@ const SplitMain = () => {
         DeviceInfo.isMac() || DeviceInfo.isTablet() || Platform.OS === 'android'
       }
       detailNavigationContainerRef={
-        showDetail && detailReady ? detailNavigationContainerRef : null
+        showDetail ? detailNavigationContainerRef : null
       }
       showDetail={showDetail}
     >
@@ -91,7 +88,7 @@ const SplitMain = () => {
           ref={detailNavigationContainerRef}
           theme={theme}
           fallback={<Splash />}
-          onReady={() => setDetailReady(true)}
+          onReady={reportDetailReady}
           onStateChange={trackScreen}
         >
           <DetailStack />
