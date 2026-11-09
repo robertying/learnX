@@ -8,7 +8,7 @@ import {
   type HomeworkDetail,
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
-import { queryClient, queryPersister } from 'data/queryClient';
+import { queryClient, queryPersister, saveQuerySoon } from 'data/queryClient';
 import { coursesQuery, getCourseNames } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
@@ -268,7 +268,7 @@ const createContent = <T extends { id: string; courseId: string }>({
     queryClient.setQueryData<T[]>(queryKey, old =>
       old?.map(item => (item.id === id ? { ...item, ...change } : item)),
     );
-    queryPersister.persistQueryByKey(queryKey, queryClient).catch(() => {});
+    saveQuerySoon(queryKey);
   };
 
   const empty: T[] = [];

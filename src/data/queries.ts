@@ -10,7 +10,8 @@ import { isLocaleChinese } from 'helpers/i18n';
 
 export const queryKeys = {
   semesters: ['semesters'] as const,
-  latestSemester: ['latestSemester'] as const,
+  // Its key from when only the timetable asked for the dates.
+  schoolSemester: ['semesterDates'] as const,
   user: ['user'] as const,
   coursesAll: ['courses'] as const,
   courses: (semesterId: string) => ['courses', semesterId] as const,
@@ -30,11 +31,29 @@ export const semestersQuery = queryOptions({
   queryFn: async () => (await dataSource.getSemesterIdList()).sort().reverse(),
 });
 
-/** The school's current semester, which may not be the one being shown. */
-export const latestSemesterQuery = queryOptions({
-  queryKey: queryKeys.latestSemester,
-  queryFn: async () => (await dataSource.getCurrentSemester()).id,
+/** A semester with its first and last day. */
+export interface SemesterDates {
+  id: string;
+  /** As the server gives it, e.g. 2026-09-14; may be empty. */
+  startDate: string;
+  endDate: string;
+}
+
+/**
+ * The school's current semester, which may not be the one being shown, with
+ * its first and last day. One query for the semester check at launch, the
+ * semester list and the timetable's teaching weeks.
+ */
+export const schoolSemesterQuery = queryOptions({
+  queryKey: queryKeys.schoolSemester,
+  queryFn: async (): Promise<SemesterDates> => {
+    const { id, startDate, endDate } = await dataSource.getCurrentSemester();
+    return { id, startDate, endDate };
+  },
 });
+
+/** Picks the id out of `schoolSemesterQuery`'s data. */
+export const selectSemesterId = (semester: SemesterDates) => semester.id;
 
 export const userQuery = queryOptions({
   queryKey: queryKeys.user,

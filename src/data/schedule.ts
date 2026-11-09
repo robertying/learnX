@@ -1,7 +1,7 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { semesterWeek } from '@robertying/thu-learn-lib';
-import { coursesQuery } from 'data/queries';
+import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { queryClient } from 'data/queryClient';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
@@ -18,30 +18,12 @@ import {
   startOfWeek,
 } from 'helpers/schedule';
 
-export interface SemesterDates {
-  id: string;
-  /** As the server gives it, e.g. 2026-09-14; may be empty. */
-  startDate: string;
-  endDate: string;
-}
-
 export const scheduleKeys = {
-  semesterDates: ['semesterDates'] as const,
   calendar: (weekStart: string, graduate: boolean) =>
     ['calendar', weekStart, graduate ? 'graduate' : 'undergraduate'] as const,
 };
 
 const DAY = 24 * 60 * 60 * 1000;
-
-/** The school's current semester with its first and last day. */
-export const semesterDatesQuery = queryOptions({
-  queryKey: scheduleKeys.semesterDates,
-  staleTime: DAY,
-  queryFn: async (): Promise<SemesterDates> => {
-    const { id, startDate, endDate } = await dataSource.getCurrentSemester();
-    return { id, startDate, endDate };
-  },
-});
 
 /**
  * The registrar's calendar fails for some ranges, often for long ones and
@@ -161,7 +143,7 @@ export const weekSessions = ({
  */
 export const getCachedWeekSessions = (date: dayjs.ConfigType) => {
   const weekStart = startOfWeek(date).format('YYYY-MM-DD');
-  const semester = queryClient.getQueryData(semesterDatesQuery.queryKey);
+  const semester = queryClient.getQueryData(schoolSemesterQuery.queryKey);
   return weekSessions({
     calendar: queryClient.getQueryData(
       calendarWeekQuery(weekStart, getSettings().graduate).queryKey,
@@ -183,7 +165,7 @@ export const useWeekSchedule = (date: dayjs.ConfigType): WeekSchedule => {
   const hiddenCourses = useUserData(data => data.hiddenCourses);
   const weekStart = startOfWeek(date).format('YYYY-MM-DD');
 
-  const semester = useQuery({ ...semesterDatesQuery, enabled: loggedIn });
+  const semester = useQuery({ ...schoolSemesterQuery, enabled: loggedIn });
   const semesterId = semester.data?.id ?? '';
   const courses = useQuery({
     ...coursesQuery(semesterId),

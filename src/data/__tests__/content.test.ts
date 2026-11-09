@@ -24,7 +24,12 @@ import {
   mockSource,
   setMockNetworkConfig,
 } from 'data/mockSource';
-import { clearQueryCache, queryClient, queryPersister } from 'data/queryClient';
+import {
+  clearQueryCache,
+  queryClient,
+  queryPersister,
+  saveChangedQueries,
+} from 'data/queryClient';
 import { Notice } from 'data/types/state';
 import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -355,12 +360,14 @@ describe('marking items read', () => {
     const persist = jest.spyOn(queryPersister, 'persistQueryByKey');
 
     markNoticeRead(unread.id);
+    // Another change right after shares the save.
+    markNoticeRead(notices.find(n => n.id !== unread.id)!.id);
+    expect(persist).not.toHaveBeenCalled();
 
     const after = queryClient.getQueryData(noticesQuery(semesterId).queryKey)!;
     expect(after.find(n => n.id === unread.id)?.hasRead).toBe(true);
-    expect(after.filter(n => n.id !== unread.id)).toEqual(
-      notices.filter(n => n.id !== unread.id),
-    );
+    await saveChangedQueries();
+    expect(persist).toHaveBeenCalledTimes(1);
     expect(persist).toHaveBeenCalledWith(
       noticesQuery(semesterId).queryKey,
       queryClient,
