@@ -1,63 +1,49 @@
-import { Linking, StyleSheet } from 'react-native';
+import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
+import { Form, FormButton, FormParagraph, FormSection } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { useTheme } from 'theme';
 import { SettingsStackParams } from './types';
-import { Text, Title } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
 
-const Help: React.FC<Props> = () => {
-  const theme = useTheme();
-  const link = { color: theme.colors.primary };
+// The template's lines, without the indentation of the translation file.
+const issueTemplate = () =>
+  t('issueTemplateContent')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .join('\n');
 
-  return (
-    <SafeArea>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewPaddings}
-      >
-        <Title>{t('githubRecommended')}</Title>
-        <Text
-          style={[styles.text, link]}
+const Help: React.FC<Props> = () => (
+  <SafeArea>
+    <Form>
+      <FormSection title={t('githubRecommended')}>
+        <FormButton
+          icon={{ ios: 'exclamationmark.bubble', android: 'github' }}
+          title={t('createNewGitHubIssue')}
           onPress={() =>
             Linking.openURL(
               'https://github.com/robertying/learnX/issues/new/choose',
             )
           }
-        >
-          {t('createNewGitHubIssue')}
-        </Text>
-        <Title style={styles.marginTop}>{t('emailNotRecommended')}</Title>
-        <Text
-          style={[styles.text, link]}
+        />
+      </FormSection>
+      <FormSection title={t('emailNotRecommended')}>
+        <FormButton
+          icon={{ ios: 'envelope', android: 'email-outline' }}
+          title="learnX@ruiying.io"
           onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
-        >
-          learnX@ruiying.io
-        </Text>
-        <Title style={styles.marginTop}>{t('issueTemplate')}</Title>
-        <Text style={styles.text}>{t('issueTemplateDescription')}</Text>
-        <Text>{t('issueTemplateContent')}</Text>
-      </ScrollView>
-    </SafeArea>
-  );
-};
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollView: {
-    paddingHorizontal: 24,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  text: {
-    marginTop: 8,
-  },
-});
+        />
+      </FormSection>
+      <FormSection
+        title={t('issueTemplate')}
+        footer={t('issueTemplateDescription')}
+      >
+        <FormParagraph text={issueTemplate()} />
+      </FormSection>
+    </Form>
+  </SafeArea>
+);
 
 export default Help;

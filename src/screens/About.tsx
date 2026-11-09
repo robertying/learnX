@@ -1,111 +1,80 @@
-import { Linking, StyleSheet } from 'react-native';
+import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DeviceInfo from 'constants/DeviceInfo';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
+import { Form, FormButton, FormSection, FormText } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { useTheme } from 'theme';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
-import { Text, Title } from 'components/Text';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'About'>;
 
-const About: React.FC<Props> = () => {
-  const theme = useTheme();
-  const link = { color: theme.colors.primary };
+const contributors = [
+  { name: 'Rui Ying', github: 'robertying' },
+  { name: 'HeziCyan', github: 'hezicyan' },
+  { name: 'Yinuo Chen', github: 'Brunch-Life' },
+  { name: 'Junbo Niu', github: 'lyrenius' },
+];
 
-  return (
-    <SafeArea>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollViewPaddings}
-      >
-        <Title>{t('versionInformation')}</Title>
-        <Text style={styles.text}>
-          {`v${packageJson.version} (build ${DeviceInfo.buildNo()})`}
-        </Text>
-        <Text style={styles.text}>© 2026 Rui Ying</Text>
-        <Text
-          style={[styles.text, link]}
+const openGitHub = (path: string) =>
+  Linking.openURL(`https://github.com/${path}`);
+
+const About: React.FC<Props> = () => (
+  <SafeArea>
+    <Form>
+      <FormSection footer="© 2026 Rui Ying">
+        <FormText
+          icon={{ ios: 'info.circle', android: 'information-outline' }}
+          title={t('versionInformation')}
+          detail={`${packageJson.version} (${DeviceInfo.buildNo()})`}
+        />
+        <FormButton
+          icon={{
+            ios: 'chevron.left.forwardslash.chevron.right',
+            android: 'code-tags',
+          }}
+          title={t('sourceCode')}
+          detail="robertying/learnX"
+          onPress={() => openGitHub('robertying/learnX')}
+        />
+        <FormButton
+          icon={{ ios: 'checkmark.shield', android: 'shield-check-outline' }}
+          // oxlint-disable-next-line learnx/no-han-outside-translations -- ICP filing number, shown as filed
+          title="浙ICP备20024838号-2A"
           onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}
-        >
-          {/* oxlint-disable-next-line learnx/no-han-outside-translations -- ICP filing number, shown as filed */}
-          浙ICP备20024838号-2A
-        </Text>
-        <Title style={styles.marginTop}>{t('contributors')}</Title>
-        <Text
-          style={[styles.text, link]}
-          onPress={() => Linking.openURL('https://github.com/robertying')}
-        >
-          Rui Ying (robertying)
-        </Text>
-        <Text
-          style={[styles.text, link]}
-          onPress={() => Linking.openURL('https://github.com/hezicyan')}
-        >
-          HeziCyan (hezicyan)
-        </Text>
-        <Text
-          style={[styles.text, link]}
-          onPress={() => Linking.openURL('https://github.com/Brunch-Life')}
-        >
-          Yinuo Chen (Brunch-Life)
-        </Text>
-        <Text
-          style={[styles.text, link]}
-          onPress={() => Linking.openURL('https://github.com/lyrenius')}
-        >
-          Junbo Niu (lyrenius)
-        </Text>
-        <Text style={styles.text}>
-          {t('opensourceAt')}{' '}
-          <Text
-            style={link}
-            onPress={() =>
-              Linking.openURL('https://github.com/robertying/learnX')
-            }
-          >
-            robertying/learnX
-          </Text>
-        </Text>
-        <Title style={styles.marginTop}>{t('specialThanks')}</Title>
-        <Text style={styles.text}>
-          {t('harryChen')}{' '}
-          <Text
-            style={link}
-            onPress={() =>
-              Linking.openURL('https://github.com/Harry-Chen/thu-learn-lib')
-            }
-          >
-            Harry-Chen/thu-learn-lib
-          </Text>
-        </Text>
-        <Text style={styles.text}>{t('yayuXiao')}</Text>
-        <Title style={styles.marginTop}>{t('opensourceDependencies')}</Title>
-        {Object.keys(packageJson.dependencies).map(name => (
-          <Text key={name} style={styles.text}>
-            {name}
-          </Text>
+        />
+      </FormSection>
+      <FormSection title={t('contributors')}>
+        {contributors.map(({ name, github }) => (
+          <FormButton
+            key={github}
+            icon={{ ios: 'person', android: 'account-outline' }}
+            title={name}
+            detail={github}
+            onPress={() => openGitHub(github)}
+          />
         ))}
-      </ScrollView>
-    </SafeArea>
-  );
-};
-
-const styles = StyleSheet.create({
-  marginTop: {
-    marginTop: 32,
-  },
-  scrollView: {
-    paddingHorizontal: 24,
-  },
-  scrollViewPaddings: {
-    paddingVertical: 32,
-  },
-  text: {
-    marginTop: 8,
-  },
-});
+      </FormSection>
+      <FormSection title={t('specialThanks')}>
+        <FormButton
+          icon={{ ios: 'books.vertical', android: 'bookshelf' }}
+          title="Harry Chen"
+          detail="thu-learn-lib"
+          onPress={() => openGitHub('Harry-Chen/thu-learn-lib')}
+        />
+        <FormText
+          icon={{ ios: 'paintbrush', android: 'brush-outline' }}
+          title="Yayu Xiao"
+          detail={t('appIcon')}
+        />
+      </FormSection>
+      <FormSection title={t('opensourceDependencies')}>
+        {Object.keys(packageJson.dependencies).map(name => (
+          <FormText key={name} title={name} />
+        ))}
+      </FormSection>
+    </Form>
+  </SafeArea>
+);
 
 export default About;

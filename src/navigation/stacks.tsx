@@ -47,6 +47,7 @@ import {
   getModalScreenOptions,
   mockNetworkTitle,
 } from './options';
+import { screenLayout } from './screenLayout';
 
 const TodayStackNavigator = createNativeStackNavigator<TodayStackParams>();
 const NoticeStackNavigator = createNativeStackNavigator<NoticeStackParams>();
@@ -152,7 +153,7 @@ export const renderSettingDetails = () => (
 );
 
 export const NoticeStack = () => (
-  <NoticeStackNavigator.Navigator>
+  <NoticeStackNavigator.Navigator screenLayout={screenLayout}>
     <NoticeStackNavigator.Screen
       name="Notices"
       component={Notices}
@@ -163,7 +164,7 @@ export const NoticeStack = () => (
 );
 
 export const AssignmentStack = () => (
-  <AssignmentStackNavigator.Navigator>
+  <AssignmentStackNavigator.Navigator screenLayout={screenLayout}>
     <AssignmentStackNavigator.Screen
       name="Assignments"
       component={Assignments}
@@ -174,7 +175,7 @@ export const AssignmentStack = () => (
 );
 
 export const FileStack = () => (
-  <FileStackNavigator.Navigator>
+  <FileStackNavigator.Navigator screenLayout={screenLayout}>
     <FileStackNavigator.Screen
       name="Files"
       component={Files}
@@ -192,7 +193,7 @@ export const allItemDetails = [
 ] as const;
 
 export const CourseStack = () => (
-  <CourseStackNavigator.Navigator>
+  <CourseStackNavigator.Navigator screenLayout={screenLayout}>
     <CourseStackNavigator.Screen
       name="Courses"
       component={Courses}
@@ -203,7 +204,7 @@ export const CourseStack = () => (
 );
 
 export const SettingStack = () => (
-  <SettingStackNavigator.Navigator>
+  <SettingStackNavigator.Navigator screenLayout={screenLayout}>
     <SettingStackNavigator.Screen
       name="Settings"
       component={Settings}
@@ -215,7 +216,7 @@ export const SettingStack = () => (
 
 // Settings open from Today's header where there's no Settings tab.
 export const TodayStack = () => (
-  <TodayStackNavigator.Navigator>
+  <TodayStackNavigator.Navigator screenLayout={screenLayout}>
     <TodayStackNavigator.Screen
       name="Today"
       component={Today}
@@ -232,7 +233,7 @@ export const TodayStack = () => (
 );
 
 export const LoginStack = () => (
-  <LoginNavigator.Navigator>
+  <LoginNavigator.Navigator screenLayout={screenLayout}>
     <LoginNavigator.Screen
       name="Login"
       component={Login}
@@ -255,7 +256,7 @@ export const LoginStack = () => (
 );
 
 export const CourseXStack = () => (
-  <CourseXNavigator.Navigator>
+  <CourseXNavigator.Navigator screenLayout={screenLayout}>
     <CourseXNavigator.Screen
       name="CourseX"
       component={CourseX}
@@ -265,7 +266,7 @@ export const CourseXStack = () => (
 );
 
 export const SearchStack = () => (
-  <SearchNavigator.Navigator>
+  <SearchNavigator.Navigator screenLayout={screenLayout}>
     <SearchNavigator.Screen
       name="Search"
       component={Search}
@@ -276,7 +277,7 @@ export const SearchStack = () => (
 );
 
 export const AssignmentSubmissionStack = () => (
-  <AssignmentSubmissionNavigator.Navigator>
+  <AssignmentSubmissionNavigator.Navigator screenLayout={screenLayout}>
     <AssignmentSubmissionNavigator.Screen
       name="AssignmentSubmission"
       component={AssignmentSubmission}
