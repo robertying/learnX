@@ -10,7 +10,7 @@ import { useSettings } from 'data/settings';
 import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
-import useDetailNavigator from 'hooks/useDetailNavigator';
+import { useShowDetail } from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/parse';
 import { uploadCourses } from 'helpers/coursex';
 import { sortByOrder } from 'helpers/reorder';
@@ -19,7 +19,7 @@ import { CourseStackParams, MainStackScreenProps } from './types';
 type Props = MainStackScreenProps<CourseStackParams, 'Courses'>;
 
 const Courses: React.FC<Props> = ({ navigation }) => {
-  const detailNavigator = useDetailNavigator();
+  const show = useShowDetail(navigation);
 
   const currentSemesterId = useCurrentSemester();
   const courseInformationSharing = useSettings(
@@ -65,16 +65,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
 
   const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
-  const handlePush = (item: Course) => {
-    if (detailNavigator) {
-      detailNavigator.replace('CourseDetail', {
-        id: item.id,
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push('CourseDetail', { id: item.id });
-    }
-  };
+  const handlePush = (item: Course) => show('CourseDetail', { id: item.id });
 
   useEffect(() => {
     if (courseInformationSharing) {

@@ -1,72 +1,25 @@
-import { useEffect, useEffectEvent } from 'react';
 import FileCard from 'components/FileCard';
-import SafeArea from 'components/SafeArea';
 import FilterList from 'components/FilterList';
+import SafeArea from 'components/SafeArea';
 import { useFiles } from 'data/content';
-import { useLoggedIn } from 'data/auth';
-import { useUserData } from 'data/userData';
-import { useCourseIds } from 'data/queries';
-import { File } from 'data/types/state';
-import usePullToRefresh from 'hooks/usePullToRefresh';
-import useFilteredData from 'hooks/useFilteredData';
-import useDetailNavigator from 'hooks/useDetailNavigator';
-import usePendingTarget from 'hooks/usePendingTarget';
+import useContentList from 'hooks/useContentList';
 import { FileStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<FileStackParams, 'Files'>;
 
 const Files: React.FC<Props> = ({ navigation }) => {
-  const detailNavigator = useDetailNavigator();
-
-  const loggedIn = useLoggedIn();
-  const courseIds = useCourseIds();
-  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const archivedIds = useUserData(data => data.archived.file);
-  const {
+  const { files, ...query } = useFiles();
+  const { all, unread, fav, archived, hidden, listProps } = useContentList(
+    'file',
     files,
-    isFetching: fetching,
-    isPending,
-    refetch,
-    dataUpdatedAt,
-  } = useFiles();
-
-  const { all, unread, fav, archived, hidden } = useFilteredData({
-    data: files,
-    archived: archivedIds,
-    hidden: hiddenCourseIds,
-  });
-
-  const handleRefresh = () =>
-    loggedIn ? refetch({ cancelRefetch: false }) : undefined;
-
-  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
-
-  const refresh = useEffectEvent(handleRefresh);
-
-  const handlePush = (item: Pick<File, 'id'>) => {
-    if (detailNavigator) {
-      detailNavigator.replace('FileDetail', {
-        id: item.id,
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push('FileDetail', { id: item.id });
-    }
-  };
-
-  usePendingTarget('file', (id, inDetail) =>
-    inDetail ? handlePush({ id }) : navigation.push('FileDetail', { id }),
+    query,
+    navigation,
   );
-
-  // Fetch on mount and again when the user signs in or the courses change.
-  useEffect(() => {
-    void refresh();
-  }, [courseIds, loggedIn]);
 
   return (
     <SafeArea>
       <FilterList
-        type="file"
+        {...listProps}
         all={all}
         unread={unread}
         fav={fav}
@@ -74,11 +27,6 @@ const Files: React.FC<Props> = ({ navigation }) => {
         hidden={hidden}
         itemComponent={FileCard}
         navigation={navigation}
-        onItemPress={handlePush}
-        refreshing={pullToRefresh.refreshing}
-        loading={isPending && fetching}
-        onRefresh={pullToRefresh.onRefresh}
-        updatedAt={dataUpdatedAt}
       />
     </SafeArea>
   );

@@ -7,6 +7,7 @@ import {
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import { trackScreen } from 'helpers/crashReporting';
+import { reportDetailReady } from 'hooks/useDetailNavigator';
 import NoticeDetail from 'screens/NoticeDetail';
 import {
   DetailNavigationContainerRef,
@@ -99,6 +100,7 @@ const DetailContainer: React.FC<{
       <NavigationContainer
         ref={navigationContainerRef}
         theme={theme}
+        onReady={reportDetailReady}
         onStateChange={trackScreen}
       >
         <DetailStack />
