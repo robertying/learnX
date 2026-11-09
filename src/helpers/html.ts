@@ -26,7 +26,8 @@ export interface WebViewTemplateColors {
 
 /**
  * Wraps course-site HTML (notice and assignment descriptions) into a page for
- * AutoHeightWebView. KaTeX (~300 KB) is only inlined when the content has
+ * AutoHeightWebView, without margins of its own: the page sits in a form row,
+ * which has them. KaTeX (~300 KB) is only inlined when the content has
  * math, and dark mode is a small script instead of Dark Reader.
  */
 export const getWebViewTemplate = (
@@ -45,7 +46,7 @@ export const getWebViewTemplate = (
       <style>
         body {
           margin: 0px;
-          padding: 1rem;${
+          padding: 0px;${
             // The Body text style, which follows Dynamic Type like the rest
             // of the app. Android's WebView follows the font scale itself.
             Platform.OS === 'ios' ? '\n          font: -apple-system-body;' : ''

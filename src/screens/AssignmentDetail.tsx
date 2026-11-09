@@ -1,20 +1,14 @@
 import { useCallback, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
-import Chip from 'components/Chip';
 import dayjs from 'dayjs';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import {
   ExcellentHomework,
   HomeworkCompletionType,
   HomeworkSubmissionType,
   RemoteFile,
 } from '@robertying/thu-learn-lib';
-import TextButton from 'components/TextButton';
 import AutoHeightWebView from 'components/AutoHeightWebView';
 import SafeArea from 'components/SafeArea';
 import IconButton from 'components/IconButton';
-import ScrollView from 'components/ScrollView';
-import Styles from 'constants/Styles';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
@@ -31,8 +25,17 @@ import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
-import { Caption, Text, Title } from 'components/Text';
-import Divider from 'components/Divider';
+import {
+  Form,
+  FormFile,
+  FormLink,
+  FormParagraph,
+  FormSection,
+  FormText,
+  FormTitle,
+  FormView,
+  type FormRowPosition,
+} from 'components/Form';
 import { useTheme } from 'theme';
 
 type Props = MainStackScreenProps<
@@ -62,36 +65,22 @@ const AssignmentDetail: React.FC<Props> = ({ route, navigation }) => {
 const ExcellentHomeworkRow: React.FC<{
   homework: ExcellentHomework;
   onFileOpen: (file?: RemoteFile) => void;
-}> = ({ homework, onFileOpen }) => {
-  const theme = useTheme();
+  /** Set by `FormSection` on Android, for the row's corners. */
+  position?: FormRowPosition;
+}> = ({ homework, onFileOpen, position }) => {
   const { gradeAttachment, submittedAttachment, author } =
     useExcellentHomeworkDetail(homework);
   const homeworkAttachment = gradeAttachment || submittedAttachment;
   const authorName = author.anonymous ? t('anonymous') : author.name;
   return (
-    <>
-      <View style={[styles.section, styles.iconButton]}>
-        <MaterialCommunityIcons
-          style={styles.icon}
-          name="medal"
-          color={theme.colors.primary}
-          size={17}
-        />
-        <View style={Styles.flex1}>
-          {homeworkAttachment && (
-            <TextButton
-              fill
-              style={[Styles.spacey1, styles.buttonEnd]}
-              onPress={() => onFileOpen(homeworkAttachment)}
-            >
-              {homeworkAttachment.name}
-            </TextButton>
-          )}
-          <Caption>{t('excellentHomeworkBy', { name: authorName })}</Caption>
-        </View>
-      </View>
-      <Divider />
-    </>
+    <FormFile
+      title={homeworkAttachment?.name ?? homework.title}
+      subtitle={t('excellentHomeworkBy', { name: authorName })}
+      icon={{ ios: 'medal', android: 'medal-outline' }}
+      disabled={!homeworkAttachment}
+      onPress={() => onFileOpen(homeworkAttachment)}
+      position={position}
+    />
   );
 };
 
@@ -138,7 +127,8 @@ const AssignmentDetailContent: React.FC<{
     description || `<p>${t('noAssignmentDescription')}</p>`,
     {
       dark: theme.dark,
-      backgroundColor: theme.colors.surface,
+      // The form row's own color shows through.
+      backgroundColor: 'transparent',
       textColor: theme.colors.onSurfaceHigh,
     },
   );
@@ -196,230 +186,189 @@ const AssignmentDetailContent: React.FC<{
     }
   }, [submissionType, closed, handleSubmit, navigation]);
 
+  const fileIcon = { ios: 'doc', android: 'file-document-outline' } as const;
+  const hoursLeft = dayjs(deadline).diff(now, 'hour', true);
+  const submittedText = removeTags(submittedContent);
+  const gradeText = removeTags(gradeContent);
+  const answerText = removeTags(answerContent);
+
   return (
     <SafeArea testID="assignment-detail" collapsable={false}>
-      <ScrollView style={{ backgroundColor: theme.colors.surface }}>
-        <View style={styles.section}>
-          <View style={styles.chips}>
-            <Chip style={styles.chip}>
-              {completionType === HomeworkCompletionType.GROUP
+      <Form>
+        <FormSection>
+          <FormTitle
+            title={title}
+            subtitle={[
+              completionType === HomeworkCompletionType.GROUP
                 ? t('assignmentGroupCompletion')
-                : t('assignmentIndividualCompletion')}
-            </Chip>
-            <Chip style={styles.chip}>
-              {submissionType === HomeworkSubmissionType.OFFLINE
+                : t('assignmentIndividualCompletion'),
+              submissionType === HomeworkSubmissionType.OFFLINE
                 ? t('assignmentOfflineSubmission')
-                : t('assignmentOnlineSubmission')}
-            </Chip>
-          </View>
-          <Title>{title}</Title>
-          <View style={Styles.metaRow}>
-            <Caption>{deadlineText(deadline, now)}</Caption>
-            <Caption>{dayjs(deadline).format(t('fullDateTimeFormat'))}</Caption>
-          </View>
-          {lateSubmissionDeadline && (
-            <Caption style={Styles.flexRowCenter}>
-              {dayjs(lateSubmissionDeadline).format(
-                t('lateSubmissionDeadlineFormat'),
+                : t('assignmentOnlineSubmission'),
+            ].join(' · ')}
+          />
+        </FormSection>
+        <FormSection>
+          <FormText
+            title={t('deadline')}
+            subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
+            detail={deadlineText(deadline, now)}
+            detailTint={
+              hoursLeft > 0 && hoursLeft <= 24 ? 'warning' : undefined
+            }
+            icon={{ ios: 'clock', android: 'clock-outline' }}
+          />
+          {lateSubmissionDeadline ? (
+            <FormText
+              title={t('lateSubmission')}
+              subtitle={dayjs(lateSubmissionDeadline).format(
+                t('fullDateTimeFormat'),
               )}
-            </Caption>
+              icon={{
+                ios: 'clock.badge.exclamationmark',
+                android: 'clock-alert-outline',
+              }}
+            />
+          ) : null}
+          {graded ? (
+            <FormText
+              title={t('grade')}
+              subtitle={dayjs(gradeTime).format(
+                graderName
+                  ? t('gradedByAtFormat', {
+                      grader: formatLiteral(graderName),
+                    })
+                  : t('gradedAtFormat'),
+              )}
+              detail={
+                gradeLevel
+                  ? getAssignmentGradeLevelDescription(gradeLevel)
+                  : grade !== undefined
+                    ? String(grade)
+                    : t('graded')
+              }
+              detailTint="accent"
+              icon={{ ios: 'star', android: 'star-outline' }}
+            />
+          ) : (
+            <FormText
+              title={
+                submitted
+                  ? isLateSubmission
+                    ? t('submittedLate')
+                    : t('submitted')
+                  : t('notSubmitted')
+              }
+              subtitle={
+                submitted && submitTime
+                  ? dayjs(submitTime).format(
+                      isLateSubmission
+                        ? t('submittedLateAtFormat')
+                        : t('submittedAtFormat'),
+                    )
+                  : undefined
+              }
+              icon={
+                submitted
+                  ? { ios: 'checkmark.circle', android: 'check-circle-outline' }
+                  : { ios: 'circle', android: 'checkbox-blank-circle-outline' }
+              }
+            />
           )}
-        </View>
-        <Divider />
-        {attachment && (
-          <>
-            <View style={[styles.section, styles.iconButton]}>
-              <MaterialCommunityIcons
-                style={styles.icon}
-                name="attachment"
-                color={theme.colors.primary}
-                size={17}
+          {hasDraft ? (
+            <FormLink
+              title={t('unsentDraft')}
+              icon={{ ios: 'pencil', android: 'pencil-outline' }}
+              onPress={handleSubmit}
+            />
+          ) : null}
+        </FormSection>
+        {graded && (gradeText || gradeAttachment) ? (
+          <FormSection title={t('feedback')}>
+            {gradeText ? <FormParagraph text={gradeText} /> : null}
+            {gradeAttachment ? (
+              <FormFile
+                title={gradeAttachment.name}
+                detail={gradeAttachment.size}
+                icon={fileIcon}
+                onPress={() => handleFileOpen(gradeAttachment)}
               />
-              <TextButton
-                fill
-                style={[Styles.flex1, styles.buttonEnd]}
-                onPress={() => handleFileOpen(attachment)}
-              >
-                {attachment.name}
-              </TextButton>
-            </View>
-            <Divider />
-          </>
-        )}
-        {hasDraft && (
-          <>
-            <View style={[styles.section, styles.iconButton]}>
-              <MaterialCommunityIcons
-                style={styles.icon}
-                name="pencil-outline"
-                color={theme.colors.primary}
-                size={17}
-              />
-              <TextButton
-                fill
-                style={[Styles.flex1, styles.buttonEnd]}
-                onPress={handleSubmit}
-              >
-                {t('assignmentDraft')}
-              </TextButton>
-            </View>
-            <Divider />
-          </>
-        )}
-        {submitted && (
-          <>
-            <View style={[styles.section, styles.iconButton]}>
-              <MaterialCommunityIcons
-                style={styles.icon}
-                name="check"
-                color={theme.colors.primary}
-                size={17}
-              />
-              <View style={Styles.flex1}>
-                {submittedAttachment && (
-                  <TextButton
-                    fill
-                    style={[Styles.spacey1, styles.buttonEnd]}
-                    onPress={() => handleFileOpen(submittedAttachment)}
-                  >
-                    {submittedAttachment.name}
-                  </TextButton>
-                )}
-                {removeTags(submittedContent) ? (
-                  <Text style={Styles.spacey1}>
-                    {removeTags(submittedContent)}
-                  </Text>
-                ) : null}
-                <Caption>
-                  {submitTime
+            ) : null}
+          </FormSection>
+        ) : null}
+        {submitted && (submittedText || submittedAttachment || graded) ? (
+          <FormSection title={t('yourSubmission')}>
+            {graded ? (
+              <FormText
+                title={isLateSubmission ? t('submittedLate') : t('submitted')}
+                subtitle={
+                  submitTime
                     ? dayjs(submitTime).format(
                         isLateSubmission
                           ? t('submittedLateAtFormat')
                           : t('submittedAtFormat'),
                       )
-                    : t('submitted')}
-                </Caption>
-              </View>
-            </View>
-            <Divider />
-          </>
-        )}
-        {graded && (
-          <>
-            <View style={[styles.section, styles.iconButton]}>
-              <MaterialCommunityIcons
-                style={styles.icon}
-                name="star"
-                color={theme.colors.primary}
-                size={17}
+                    : undefined
+                }
+                icon={{
+                  ios: 'checkmark.circle',
+                  android: 'check-circle-outline',
+                }}
               />
-              <View style={Styles.flex1}>
-                {gradeLevel || grade ? (
-                  <Text style={Styles.spacey1}>
-                    {gradeLevel
-                      ? getAssignmentGradeLevelDescription(gradeLevel)
-                      : grade}
-                  </Text>
-                ) : null}
-                {gradeAttachment && (
-                  <TextButton
-                    fill
-                    style={[Styles.spacey1, styles.buttonEnd]}
-                    onPress={() => handleFileOpen(gradeAttachment)}
-                  >
-                    {gradeAttachment.name}
-                  </TextButton>
-                )}
-                {removeTags(gradeContent) ? (
-                  <Text style={Styles.spacey1} selectable>
-                    {removeTags(gradeContent)}
-                  </Text>
-                ) : null}
-                <Caption>
-                  {dayjs(gradeTime).format(
-                    graderName
-                      ? t('gradedByAtFormat', {
-                          grader: formatLiteral(graderName),
-                        })
-                      : t('gradedAtFormat'),
-                  )}
-                </Caption>
-              </View>
-            </View>
-            <Divider />
-          </>
-        )}
-        {(answerAttachment || answerContent) && (
-          <>
-            <View style={[styles.section, styles.iconButton]}>
-              <MaterialCommunityIcons
-                style={styles.icon}
-                name="key-variant"
-                color={theme.colors.primary}
-                size={17}
+            ) : null}
+            {submittedText ? <FormParagraph text={submittedText} /> : null}
+            {submittedAttachment ? (
+              <FormFile
+                title={submittedAttachment.name}
+                detail={submittedAttachment.size}
+                icon={fileIcon}
+                onPress={() => handleFileOpen(submittedAttachment)}
               />
-              <View style={Styles.flex1}>
-                {answerAttachment && (
-                  <TextButton
-                    fill
-                    style={[Styles.spacey1, styles.buttonEnd]}
-                    onPress={() => handleFileOpen(answerAttachment)}
-                  >
-                    {answerAttachment.name}
-                  </TextButton>
-                )}
-                {removeTags(answerContent) ? (
-                  <Text style={Styles.spacey1}>
-                    {removeTags(answerContent)}
-                  </Text>
-                ) : null}
-              </View>
-            </View>
-            <Divider />
-          </>
-        )}
-        {excellentHomeworkList?.map(excellentHomework => (
-          <ExcellentHomeworkRow
-            key={excellentHomework.id}
-            homework={excellentHomework}
-            onFileOpen={handleFileOpen}
-          />
-        ))}
-        <AutoHeightWebView
-          source={{
-            html,
-          }}
-        />
-      </ScrollView>
+            ) : null}
+          </FormSection>
+        ) : null}
+        {attachment ? (
+          <FormSection title={t('attachment')}>
+            <FormFile
+              title={attachment.name}
+              detail={attachment.size}
+              icon={fileIcon}
+              onPress={() => handleFileOpen(attachment)}
+            />
+          </FormSection>
+        ) : null}
+        {answerText || answerAttachment ? (
+          <FormSection title={t('answer')}>
+            {answerText ? <FormParagraph text={answerText} /> : null}
+            {answerAttachment ? (
+              <FormFile
+                title={answerAttachment.name}
+                detail={answerAttachment.size}
+                icon={{ ios: 'key', android: 'key-variant' }}
+                onPress={() => handleFileOpen(answerAttachment)}
+              />
+            ) : null}
+          </FormSection>
+        ) : null}
+        {excellentHomeworkList?.length ? (
+          <FormSection title={t('excellentHomework')}>
+            {excellentHomeworkList.map(excellentHomework => (
+              <ExcellentHomeworkRow
+                key={excellentHomework.id}
+                homework={excellentHomework}
+                onFileOpen={handleFileOpen}
+              />
+            ))}
+          </FormSection>
+        ) : null}
+        <FormSection title={t('description')}>
+          <FormView>
+            <AutoHeightWebView source={{ html }} />
+          </FormView>
+        </FormSection>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  section: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  buttonEnd: {
-    marginEnd: 16,
-  },
-  icon: {
-    marginRight: 8,
-  },
-  iconButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    alignItems: 'center',
-  },
-  chip: {
-    flexShrink: 1,
-    marginBottom: 8,
-    marginRight: 8,
-  },
-});
 
 export default AssignmentDetail;
