@@ -8,7 +8,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { Caption } from 'components/Text';
+import { Caption, textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 
 export interface TextFieldProps extends Omit<TextInputProps, 'style'> {
@@ -77,7 +77,9 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: 48,
-    fontSize: 16,
+    fontFamily: textStyles.body.fontFamily,
+    fontSize: textStyles.body.fontSize,
+    letterSpacing: textStyles.body.letterSpacing,
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderWidth: StyleSheet.hairlineWidth * 2,

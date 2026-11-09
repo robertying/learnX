@@ -1,45 +1,73 @@
-import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
-import Styles from 'constants/Styles';
-import { Text, type TextProps } from 'components/Text';
+import { PlatformColor } from 'react-native';
+import { Button, Host } from '@expo/ui/swift-ui';
+import {
+  buttonStyle,
+  disabled as disabledModifier,
+  font,
+  foregroundStyle,
+  lineLimit,
+  strikethrough,
+  truncationMode,
+} from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
+import type { TextButtonProps } from './TextButton.shared';
 
-export interface TextButtonProps extends TextProps {
-  disabled?: boolean;
-  containerStyle?: TouchableOpacityProps['style'];
-  onPress?: TouchableOpacityProps['onPress'];
-}
+export type { TextButtonProps } from './TextButton.shared';
 
-const TextButton: React.FC<React.PropsWithChildren<TextButtonProps>> = ({
-  containerStyle,
+const textStyles = {
+  small: 'footnote',
+  regular: 'subheadline',
+  large: 'body',
+} as const;
+
+const oneLine = [lineLimit(1), truncationMode('middle')];
+
+const struckModifiers = [
+  foregroundStyle(PlatformColor('secondaryLabel')),
+  strikethrough({ isActive: true, pattern: 'solid' }),
+];
+
+/**
+ * A borderless SwiftUI `Button`: a label in the tint color that dims while
+ * pressed, grays out when disabled and follows Dynamic Type.
+ */
+const TextButton: React.FC<TextButtonProps> = ({
+  children,
   onPress,
-  style,
-  ellipsizeMode,
   disabled,
-  ...restProps
+  size = 'regular',
+  bold,
+  struck,
+  fill,
+  style,
+  testID,
 }) => {
   const theme = useTheme();
 
   return (
-    <TouchableOpacity
-      style={[Styles.flexRowCenter, containerStyle]}
-      activeOpacity={0.6}
-      onPress={onPress}
-      disabled={disabled}
+    <Host
+      // A filling button gets its width from React Native, so a long label
+      // shortens instead of growing past the screen.
+      matchContents={fill ? { vertical: true } : true}
+      seedColor={theme.colors.primary}
+      style={style}
     >
-      <Text
-        style={[
-          {
-            color: disabled
-              ? theme.colors.onSurfaceDisabled
-              : theme.colors.primary,
-          },
-          style,
+      <Button
+        label={children}
+        onPress={onPress}
+        testID={testID}
+        modifiers={[
+          buttonStyle('borderless'),
+          font({
+            textStyle: textStyles[size],
+            weight: bold ? 'semibold' : undefined,
+          }),
+          ...oneLine,
+          ...(struck ? struckModifiers : []),
+          ...(disabled ? [disabledModifier(true)] : []),
         ]}
-        numberOfLines={1}
-        ellipsizeMode={ellipsizeMode ?? 'middle'}
-        {...restProps}
       />
-    </TouchableOpacity>
+    </Host>
   );
 };
 

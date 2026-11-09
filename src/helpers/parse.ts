@@ -30,12 +30,16 @@ export const serializeError = (err: any) => {
 
 /**
  * Whether an error is React Native's fetch failing for lack of a connection
- * ("Network request failed" / "timed out"), also when thu-learn-lib wrapped
- * it in an ApiError's `extra`.
+ * ("Network request failed" / "timed out") or thu-learn-lib giving up on a
+ * request that got no answer in time (`REQUEST_TIMEOUT`), also when
+ * thu-learn-lib wrapped it in an ApiError's `extra` (as login does).
  */
 export const isNetworkError = (err: unknown): boolean => {
   const isFetchFailure = (value: unknown) =>
-    value instanceof Error && /network request/i.test(value.message);
+    (value instanceof Error && /network request/i.test(value.message)) ||
+    (!!value &&
+      typeof value === 'object' &&
+      (value as Partial<ApiError>).reason === FailReason.REQUEST_TIMEOUT);
   return (
     isFetchFailure(err) ||
     (!!err &&
@@ -43,3 +47,9 @@ export const isNetworkError = (err: unknown): boolean => {
       isFetchFailure((err as { extra?: unknown }).extra))
   );
 };
+
+/** Whether thu-learn-lib rejected a login for a wrong username or password. */
+export const isBadCredential = (err: unknown): boolean =>
+  !!err &&
+  typeof err === 'object' &&
+  (err as Partial<ApiError>).reason === FailReason.BAD_CREDENTIAL;

@@ -1,8 +1,22 @@
 import { useState } from 'react';
-import { Modal, StyleSheet, View } from 'react-native';
-import { DatePicker, Form, Host, Section } from '@expo/ui/swift-ui';
-import TextButton from 'components/TextButton';
-import { Text } from 'components/Text';
+import { StyleSheet } from 'react-native';
+import {
+  BottomSheet,
+  Button,
+  DatePicker,
+  Form,
+  Host,
+  NavigationStack,
+  Section,
+  Toolbar,
+  ToolbarItem,
+} from '@expo/ui/swift-ui';
+import {
+  navigationBarTitleDisplayMode,
+  navigationTitle,
+  presentationDetents,
+  tint,
+} from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
 
 export interface DateRangePickerProps {
@@ -19,22 +33,30 @@ export interface DateRangePickerProps {
 }
 
 /**
- * Picks a date range. iOS and Mac show a sheet with two system date pickers
- * (SwiftUI has no range picker); Android shows Material's date range picker
- * dialog (DateRangePicker.android.tsx).
+ * Picks a date range. iOS and Mac present a SwiftUI sheet with Cancel and Save
+ * in its navigation bar over two system date pickers (SwiftUI has no range
+ * picker); Android shows Material's date range picker dialog
+ * (DateRangePicker.android.tsx).
  */
 const DateRangePicker: React.FC<DateRangePickerProps> = props => {
   const { visible, onDismiss } = props;
 
+  // SwiftUI presents the sheet over the whole window, wherever this sits.
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      presentationStyle="formSheet"
-      onRequestClose={onDismiss}
-    >
-      {visible ? <DateRangeSheet {...props} /> : null}
-    </Modal>
+    <Host style={styles.anchor}>
+      <BottomSheet
+        isPresented={visible}
+        onIsPresentedChange={isPresented => {
+          // Swiped down: Save closes it through `visible` instead.
+          if (!isPresented && visible) {
+            onDismiss();
+          }
+        }}
+      >
+        {/* Mounted per presentation, so each opening starts from the props. */}
+        <DateRangeSheet {...props} />
+      </BottomSheet>
+    </Host>
   );
 };
 
@@ -63,23 +85,18 @@ const DateRangeSheet: React.FC<DateRangePickerProps> = ({
   };
 
   return (
-    <View style={[styles.root, { backgroundColor: theme.colors.background }]}>
-      <View style={styles.header}>
-        <TextButton containerStyle={styles.headerButton} onPress={onDismiss}>
-          {cancelLabel}
-        </TextButton>
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
-        <TextButton
-          containerStyle={styles.headerButton}
-          style={styles.save}
-          onPress={() => onConfirm({ startDate, endDate })}
-        >
-          {saveLabel}
-        </TextButton>
-      </View>
-      <Host style={styles.form}>
+    <NavigationStack
+      modifiers={[
+        presentationDetents(['medium', 'large']),
+        tint(theme.colors.primary),
+      ]}
+    >
+      <Toolbar
+        modifiers={[
+          navigationTitle(title),
+          navigationBarTitleDisplayMode('inline'),
+        ]}
+      >
         <Form>
           <Section>
             <DatePicker
@@ -97,37 +114,28 @@ const DateRangeSheet: React.FC<DateRangePickerProps> = ({
             />
           </Section>
         </Form>
-      </Host>
-    </View>
+        <Toolbar.Content>
+          <ToolbarItem placement="cancellationAction">
+            <Button label={cancelLabel} role="cancel" onPress={onDismiss} />
+          </ToolbarItem>
+          <ToolbarItem placement="confirmationAction">
+            <Button
+              label={saveLabel}
+              onPress={() => onConfirm({ startDate, endDate })}
+            />
+          </ToolbarItem>
+        </Toolbar.Content>
+      </Toolbar>
+    </NavigationStack>
   );
 };
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingTop: 12,
-    minHeight: 56,
-  },
-  headerButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-  },
-  title: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 17,
-    fontWeight: '600',
-  },
-  save: {
-    fontWeight: '600',
-  },
-  form: {
-    flex: 1,
+  // Holds only the sheet's zero-size anchor.
+  anchor: {
+    position: 'absolute',
+    width: 0,
+    height: 0,
   },
 });
 

@@ -84,7 +84,7 @@ const NoticeDetailContent: React.FC<{
       <ScrollView style={{ backgroundColor: theme.colors.surface }}>
         <View style={styles.section}>
           <Title>{title}</Title>
-          <View style={Styles.flexRowCenter}>
+          <View style={Styles.metaRow}>
             <Caption>{publisher}</Caption>
             <Caption>{dayjs(publishTime).format(t('dateTimeFormat'))}</Caption>
           </View>
@@ -104,7 +104,8 @@ const NoticeDetailContent: React.FC<{
               size={17}
             />
             <TextButton
-              style={styles.textPaddingRight}
+              fill
+              style={[Styles.flex1, styles.buttonEnd]}
               onPress={handleFileOpen}
             >
               {attachment.name}
@@ -127,8 +128,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  textPaddingRight: {
-    paddingRight: 16,
+  buttonEnd: {
+    marginEnd: 16,
   },
   icon: {
     marginRight: 8,

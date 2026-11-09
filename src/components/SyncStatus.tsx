@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import dayjs from 'dayjs';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { requestRelogin, useAuthStore } from 'data/auth';
@@ -20,6 +20,9 @@ export interface SyncStatusProps {
  */
 const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   const theme = useTheme();
+  // At large font sizes the button gets its own line, so the message isn't
+  // squeezed into a few characters.
+  const stacked = useWindowDimensions().fontScale >= 1.5;
   const loggedIn = useAuthStore(state => state.loggedIn);
   const loggingIn = useAuthStore(state => state.loggingIn);
   const failure = useAuthStore(state => state.failure);
@@ -51,7 +54,11 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   return (
     <View
       testID="sync-status"
-      style={[styles.root, { backgroundColor: theme.colors.surfaceVariant }]}
+      style={[
+        styles.root,
+        stacked && styles.stacked,
+        { backgroundColor: theme.colors.surfaceVariant },
+      ]}
       accessibilityLiveRegion="polite"
     >
       <Icon
@@ -69,14 +76,16 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
         {updated ? `${status} · ${updated}` : status}
       </Caption>
       {failure === 'rejected' && !loggingIn && (
-        <TextButton
-          testID="sync-status-relogin"
-          containerStyle={styles.button}
-          style={styles.buttonLabel}
-          onPress={requestRelogin}
-        >
-          {t('syncStatusLogInAgain')}
-        </TextButton>
+        <View style={stacked ? styles.stackedButton : styles.button}>
+          <TextButton
+            testID="sync-status-relogin"
+            size="small"
+            bold
+            onPress={requestRelogin}
+          >
+            {t('syncStatusLogInAgain')}
+          </TextButton>
+        </View>
       )}
     </View>
   );
@@ -97,11 +106,14 @@ const styles = StyleSheet.create({
   },
   button: {
     marginLeft: 8,
-    paddingVertical: 4,
   },
-  buttonLabel: {
-    fontSize: 13,
-    fontWeight: '500',
+  stacked: {
+    flexWrap: 'wrap',
+  },
+  stackedButton: {
+    flexBasis: '100%',
+    alignItems: 'flex-start',
+    paddingLeft: 24,
   },
 });
 

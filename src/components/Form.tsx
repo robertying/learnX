@@ -1,5 +1,5 @@
 import { useContext, useLayoutEffect } from 'react';
-import { PlatformColor, StyleSheet } from 'react-native';
+import { PlatformColor, StyleSheet, useWindowDimensions } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { TextInput } from '@expo/ui';
 import {
@@ -15,7 +15,9 @@ import {
   Section,
   Spacer,
   Text,
+  TextField,
   Toggle,
+  useNativeState,
   VStack,
   ZStack,
 } from '@expo/ui/swift-ui';
@@ -26,9 +28,16 @@ import {
   frame,
   background,
   headerProminence,
+  lineLimit,
   listRowBackground,
+  opacity,
   refreshable,
   scrollContentBackground,
+  textSelection,
+  scrollDismissesKeyboard,
+  strikethrough,
+  textInputAutocapitalization,
+  autocorrectionDisabled,
   toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -36,13 +45,19 @@ import { useTheme } from 'theme';
 import {
   parseNumberInput,
   sectionRows,
+  useFieldText,
   type FormButtonProps,
+  type FormFileProps,
   type FormIcon,
+  type FormItemRowProps,
   type FormLinkProps,
   type FormNumberFieldProps,
+  type FormParagraphProps,
   type FormProfileProps,
+  type FormProgressProps,
   type FormProps,
   type FormSectionProps,
+  type FormTextFieldProps,
   type FormTextProps,
   type FormToggleProps,
 } from './Form.shared';
@@ -88,12 +103,21 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
           : groupedBackground.light,
       },
     });
+    // The default header again for a screen that shows something else after
+    // its Form (file detail's preview).
+    return () =>
+      navigation?.setOptions({
+        headerShadowVisible: undefined,
+        headerStyle: undefined,
+      });
   }, [navigation, theme.dark]);
 
   return (
     <Host style={styles.fill} seedColor={theme.colors.primary} testID={testID}>
       <SwiftUIForm
         modifiers={[
+          // Dragging the form down pulls the keyboard away, as in Notes.
+          scrollDismissesKeyboard('interactively'),
           ...(DeviceInfo.isMac() ? macFormModifiers : []),
           ...(onRefresh ? [refreshable(onRefresh)] : []),
         ]}
@@ -134,64 +158,138 @@ export const FormSection: React.FC<FormSectionProps> = ({
   </Section>
 );
 
+const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
+const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
+const struckText = [
+  secondaryText,
+  strikethrough({ isActive: true, pattern: 'solid' }),
+];
+
 const RowLabel: React.FC<{
   title: string;
+  subtitle?: string;
   icon?: FormIcon;
   plain?: boolean;
-}> = ({ title, icon, plain }) => {
+  struck?: boolean;
+}> = ({ title, subtitle, icon, plain, struck }) => {
   const text = (
-    <Text modifiers={plain ? [primaryText] : undefined}>{title}</Text>
+    <Text modifiers={struck ? struckText : plain ? [primaryText] : undefined}>
+      {title}
+    </Text>
+  );
+  const label = subtitle ? (
+    <VStack alignment="leading" spacing={2}>
+      {text}
+      <Text modifiers={subtitleModifiers}>{subtitle}</Text>
+    </VStack>
+  ) : (
+    text
   );
   // The system draws the symbol at the row's text size. (@expo/ui's Image
   // would draw it at a fixed 24 pt.)
-  return icon ? <Label systemImage={icon.ios}>{text}</Label> : text;
+  return icon ? <Label systemImage={icon.ios}>{label}</Label> : label;
 };
 
-const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
+/**
+ * At accessibility text sizes the detail goes under the subtitle instead of
+ * at the end of the row, which would squeeze the title into a narrow column.
+ */
+const useStackedDetail = (subtitle?: string, detail?: string) => {
+  const { fontScale } = useWindowDimensions();
+  return detail && fontScale >= 1.5
+    ? {
+        subtitle: [subtitle, detail].filter(Boolean).join('\n'),
+        detail: undefined,
+      }
+    : { subtitle, detail };
+};
 
 const RowDetail: React.FC<{ detail?: string }> = ({ detail }) =>
   detail ? <Text modifiers={[secondaryText]}>{detail}</Text> : null;
 
-export const FormText: React.FC<FormTextProps> = ({
-  title,
-  icon,
-  testID,
-  detail,
-}) => (
-  <LabeledContent
-    label={<RowLabel title={title} icon={icon} plain />}
-    testID={testID}
-  >
-    <RowDetail detail={detail} />
-  </LabeledContent>
-);
+const doneModifiers = [opacity(0.5)];
+const doneCheckModifiers = [
+  font({ textStyle: 'footnote', weight: 'semibold' }),
+  secondaryText,
+];
+
+/**
+ * The inside of a text or link row: the label, the detail, a checkmark when
+ * it's done, `trailing`, and a progress bar under it all.
+ */
+const ItemRow: React.FC<
+  FormItemRowProps & {
+    trailing?: React.ReactNode;
+    badge?: React.ReactNode;
+  }
+> = ({ title, icon, done, progress, badge, trailing, ...rest }) => {
+  const { subtitle, detail } = useStackedDetail(rest.subtitle, rest.detail);
+  const row = (
+    <HStack modifiers={done ? doneModifiers : undefined}>
+      <RowLabel title={title} subtitle={subtitle} icon={icon} plain />
+      <Spacer />
+      <RowDetail detail={detail} />
+      {badge}
+      {done ? (
+        <Image systemName="checkmark" modifiers={doneCheckModifiers} />
+      ) : null}
+      {trailing}
+    </HStack>
+  );
+  return progress === undefined ? (
+    row
+  ) : (
+    <VStack alignment="leading" spacing={8}>
+      {row}
+      <ProgressView value={progress} />
+    </VStack>
+  );
+};
+
+export const FormText: React.FC<FormTextProps> = ({ testID, ...row }) => {
+  const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
+  return row.done || row.progress !== undefined ? (
+    <VStack testID={testID}>
+      <ItemRow {...row} />
+    </VStack>
+  ) : (
+    <LabeledContent
+      label={
+        <RowLabel title={row.title} subtitle={subtitle} icon={row.icon} plain />
+      }
+      testID={testID}
+    >
+      <RowDetail detail={detail} />
+    </LabeledContent>
+  );
+};
 
 /** A row that opens another page, with the chevron. */
 export const FormLink: React.FC<FormLinkProps> = ({
-  title,
-  icon,
   testID,
-  detail,
   onPress,
   badge,
+  ...row
 }) => {
   const theme = useTheme();
   return (
     <Button onPress={onPress} testID={testID}>
-      <HStack>
-        <RowLabel title={title} icon={icon} plain />
-        <Spacer />
-        <RowDetail detail={detail} />
-        {badge ? (
-          <Circle
-            modifiers={[
-              foregroundStyle(theme.colors.status.red),
-              frame({ width: 10, height: 10 }),
-            ]}
-          />
-        ) : null}
-        <Image systemName="chevron.right" modifiers={chevronModifiers} />
-      </HStack>
+      <ItemRow
+        {...row}
+        badge={
+          badge ? (
+            <Circle
+              modifiers={[
+                foregroundStyle(theme.colors.status.red),
+                frame({ width: 10, height: 10 }),
+              ]}
+            />
+          ) : null
+        }
+        trailing={
+          <Image systemName="chevron.right" modifiers={chevronModifiers} />
+        }
+      />
     </Button>
   );
 };
@@ -199,12 +297,14 @@ export const FormLink: React.FC<FormLinkProps> = ({
 /** A row that does something right away. */
 export const FormButton: React.FC<FormButtonProps> = ({
   title,
+  subtitle,
   icon,
   testID,
   detail,
   onPress,
   destructive,
   loading,
+  disabled: isDisabled,
   selected,
 }) => {
   const choice = selected !== undefined;
@@ -213,11 +313,12 @@ export const FormButton: React.FC<FormButtonProps> = ({
       onPress={onPress}
       role={destructive ? 'destructive' : undefined}
       testID={testID}
-      modifiers={loading ? [disabled(true)] : undefined}
+      modifiers={loading || isDisabled ? [disabled(true)] : undefined}
     >
       <HStack>
         <RowLabel
           title={title}
+          subtitle={subtitle}
           icon={icon}
           // Mac forms don't tint action rows; only choices and the Mac use
           // the label color, and destructive rows stay red.
@@ -233,6 +334,69 @@ export const FormButton: React.FC<FormButtonProps> = ({
     </Button>
   );
 };
+
+/** A file that opens on tap, with the chevron of a link. */
+export const FormFile: React.FC<FormFileProps> = ({
+  title,
+  icon,
+  testID,
+  detail,
+  onPress,
+  struck,
+  disabled: isDisabled,
+}) => (
+  <Button
+    onPress={onPress}
+    testID={testID}
+    modifiers={isDisabled ? [disabled(true)] : undefined}
+  >
+    <HStack>
+      <RowLabel title={title} icon={icon} plain struck={struck} />
+      <Spacer />
+      <RowDetail detail={detail} />
+      <Image systemName="chevron.right" modifiers={chevronModifiers} />
+    </HStack>
+  </Button>
+);
+
+// Starts a few lines tall, as a box to write in, and grows with the text.
+const multilineModifiers = [lineLimit({ min: 6, max: 20 })];
+const plainTextModifiers = [
+  textInputAutocapitalization('never'),
+  autocorrectionDisabled(true),
+];
+
+/** Text the user writes, the whole width of the row. */
+export const FormTextField: React.FC<FormTextFieldProps> = props => {
+  const { placeholder, multiline, plain, disabled: isDisabled, testID } = props;
+  const text = useNativeState(props.value);
+  useFieldText(text, props);
+
+  return (
+    <TextField
+      text={text}
+      placeholder={placeholder}
+      axis={multiline ? 'vertical' : 'horizontal'}
+      testID={testID}
+      modifiers={[
+        ...(multiline ? multilineModifiers : []),
+        ...(plain ? plainTextModifiers : []),
+        ...(isDisabled ? [disabled(true)] : []),
+      ]}
+    />
+  );
+};
+
+/** A bar under its title, as for a download in progress. */
+export const FormProgress: React.FC<FormProgressProps> = ({
+  title,
+  value,
+  testID,
+}) => (
+  <ProgressView value={value} testID={testID}>
+    <Text>{title}</Text>
+  </ProgressView>
+);
 
 // A switch at the end of the row, as in System Settings. (The Mac's default
 // toggle is a checkbox before the label.)
@@ -284,8 +448,27 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
   </LabeledContent>
 );
 
-/** The account at the top of Settings, as in the Settings app. */
+const paragraphModifiers = [primaryText, textSelection(true)];
+const headlineModifiers = [
+  font({ textStyle: 'headline' }),
+  ...paragraphModifiers,
+];
 
+/** Text over several lines, filling the row. */
+export const FormParagraph: React.FC<FormParagraphProps> = ({
+  text,
+  headline,
+  testID,
+}) => (
+  <Text
+    modifiers={headline ? headlineModifiers : paragraphModifiers}
+    testID={testID}
+  >
+    {text}
+  </Text>
+);
+
+/** The account at the top of Settings, as in the Settings app. */
 export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
   const theme = useTheme();
   // Smaller on the Mac, as the account row in System Settings.

@@ -280,7 +280,7 @@ const CourseDetailContent: React.FC<{
           name="information-outline"
           size={20}
         />
-        <Text style={styles.textButton}>{t('courseInformation')}</Text>
+        <Text>{t('courseInformation')}</Text>
       </TouchableOpacity>
       <Divider />
       <TabView
@@ -311,9 +311,6 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginHorizontal: 4,
-  },
-  textButton: {
-    fontSize: 16,
   },
 });
 

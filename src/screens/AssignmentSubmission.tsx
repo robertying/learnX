@@ -1,22 +1,18 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-  ActionSheetIOS,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  View,
-} from 'react-native';
-import TextField from 'components/TextField';
+import { ActionSheetIOS, Alert, Platform } from 'react-native';
 import { toast } from 'components/Toast';
-import ProgressBar from 'components/ProgressBar';
+import {
+  Form,
+  FormButton,
+  FormFile,
+  FormProgress,
+  FormSection,
+  FormTextField,
+} from 'components/Form';
 import dayjs from 'dayjs';
 import { RemoteFile } from '@robertying/thu-learn-lib';
-import SafeArea from 'components/SafeArea';
-import ContainedButton from 'components/ContainedButton';
 import TextButton from 'components/TextButton';
-import Styles from 'constants/Styles';
 import { t } from 'helpers/i18n';
 import {
   attachmentForFileDetail,
@@ -39,8 +35,6 @@ import {
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
 import { AssignmentSubmissionParamList } from './types';
-import { Caption } from 'components/Text';
-import { useTheme } from 'theme';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,
@@ -68,8 +62,6 @@ const AssignmentSubmissionContent: React.FC<{
   assignment: Assignment;
   navigation: Props['navigation'];
 }> = ({ assignment, navigation }) => {
-  const theme = useTheme();
-
   const { title, submitTime, submittedAttachment, submittedContent } =
     assignment;
 
@@ -195,10 +187,6 @@ const AssignmentSubmissionContent: React.FC<{
     }
   }, [uploadError]);
 
-  const handleCustomAttachmentNameChange = (text: string) => {
-    setCustomAttachmentName(sanitizeCustomAttachmentName(text));
-  };
-
   const handleUploadedAttachmentRemove = () => {
     setRemoveAttachment(!removeAttachment);
   };
@@ -225,7 +213,8 @@ const AssignmentSubmissionContent: React.FC<{
       headerRight: () => (
         <TextButton
           disabled={submitDisabled}
-          style={{ fontSize: 17, fontWeight: 'bold' }}
+          size="large"
+          bold
           onPress={confirmSubmit}
         >
           {t('submit')}
@@ -247,166 +236,123 @@ const AssignmentSubmissionContent: React.FC<{
     });
   }, [confirmSubmit, navigation, submitDisabled]);
 
+  const pickLabel = attachmentResult
+    ? t('reUploadAttachment')
+    : submittedAttachment
+      ? t('overwriteAttachment')
+      : t('pickAttachment');
+
   return (
-    <SafeArea>
-      <View style={Styles.flex1}>
-        <KeyboardAvoidingView style={Styles.flex1} behavior="height">
-          {progress ? <ProgressBar progress={progress} /> : null}
-          <View style={styles.inputs}>
-            <TextField
-              style={styles.contentInput}
-              inputStyle={styles.contentInputField}
-              disabled={removeAttachment || uploading}
-              multiline
-              placeholder={t('assignmentSubmissionContentPlaceholder')}
-              value={content}
-              onChangeText={setContent}
+    <Form testID="assignmentSubmission">
+      {uploading ? (
+        <FormSection>
+          <FormProgress
+            title={t('uploadingSubmission')}
+            value={progress}
+            testID="uploadProgress"
+          />
+        </FormSection>
+      ) : null}
+      <FormSection
+        title={t('submissionContent')}
+        footer={hasDraft ? t('draftSaved') : undefined}
+      >
+        <FormTextField
+          multiline
+          disabled={removeAttachment || uploading}
+          placeholder={t('assignmentSubmissionContentPlaceholder')}
+          value={content}
+          onChangeText={setContent}
+          testID="submissionContent"
+        />
+      </FormSection>
+      <FormSection
+        title={t('submissionAttachment')}
+        footer={
+          submitTime
+            ? dayjs(submitTime).format(t('lastSubmittedAtFormat'))
+            : undefined
+        }
+      >
+        {submittedAttachment ? (
+          <FormFile
+            title={submittedAttachment.name}
+            icon={{ ios: 'doc', android: 'file-outline' }}
+            struck={!!attachmentResult || removeAttachment}
+            disabled={uploading}
+            onPress={() => handleFileOpen(submittedAttachment)}
+          />
+        ) : null}
+        {attachmentResult && !removeAttachment ? (
+          <FormFile
+            title={attachmentResult.name}
+            icon={{ ios: 'paperclip', android: 'paperclip' }}
+            detail={isShared ? t('previouslyShared') : undefined}
+            disabled={uploading}
+            onPress={() => handleFileOpen(pickedAsRemoteFile(attachmentResult))}
+          />
+        ) : null}
+        {attachmentResult && !removeAttachment ? (
+          <FormTextField
+            plain
+            disabled={uploading}
+            placeholder={t('assignmentSubmissionFilenamePlaceholder')}
+            value={customAttachmentName}
+            onChangeText={setCustomAttachmentName}
+            format={sanitizeCustomAttachmentName}
+            testID="submissionFilename"
+          />
+        ) : null}
+        {!removeAttachment ? (
+          <FormButton
+            title={pickLabel}
+            icon={{ ios: 'doc.badge.plus', android: 'paperclip-plus' }}
+            disabled={uploading}
+            onPress={handlePickerOpen}
+            testID="pickAttachment"
+          />
+        ) : null}
+        {attachmentResult && !removeAttachment ? (
+          <FormButton
+            title={t('removePickedAttachment')}
+            icon={{ ios: 'xmark.circle', android: 'close-circle-outline' }}
+            destructive
+            disabled={uploading}
+            onPress={handlePickedAttachmentRemove}
+          />
+        ) : null}
+        {submittedAttachment ? (
+          removeAttachment ? (
+            <FormButton
+              title={t('undoRemoveUploadedAttachment')}
+              icon={{ ios: 'arrow.uturn.backward', android: 'undo' }}
+              disabled={uploading}
+              onPress={handleUploadedAttachmentRemove}
             />
-            {attachmentResult && (
-              <TextField
-                style={styles.nameInput}
-                disabled={removeAttachment || uploading}
-                placeholder={t('assignmentSubmissionFilenamePlaceholder')}
-                value={customAttachmentName}
-                onChangeText={handleCustomAttachmentNameChange}
-              />
-            )}
-          </View>
-          <View style={styles.submissionDetail}>
-            {submittedAttachment ? (
-              <TextButton
-                disabled={uploading}
-                style={
-                  attachmentResult || removeAttachment
-                    ? {
-                        textDecorationLine: 'line-through',
-                        color: theme.colors.onSurfaceDisabled,
-                      }
-                    : undefined
-                }
-                containerStyle={[styles.attachmentButton, Styles.spacey1]}
-                onPress={() => handleFileOpen(submittedAttachment)}
-              >
-                {submittedAttachment.name}
-              </TextButton>
-            ) : undefined}
-            {!removeAttachment && attachmentResult ? (
-              <TextButton
-                containerStyle={[styles.attachmentButton, Styles.spacey1]}
-                disabled={uploading}
-                onPress={() =>
-                  handleFileOpen(pickedAsRemoteFile(attachmentResult))
-                }
-              >
-                {attachmentResult.name} {isShared ? t('previouslyShared') : ''}
-              </TextButton>
-            ) : undefined}
-            <View style={styles.attachmentActionButtons}>
-              {submittedAttachment ? (
-                <ContainedButton
-                  style={styles.submitButton}
-                  label={
-                    removeAttachment
-                      ? t('undoRemoveUploadedAttachment')
-                      : t('removeUploadedAttachment')
-                  }
-                  disabled={uploading}
-                  onPress={handleUploadedAttachmentRemove}
-                />
-              ) : undefined}
-              {attachmentResult && !removeAttachment ? (
-                <ContainedButton
-                  style={styles.submitButton}
-                  label={t('removePickedAttachment')}
-                  disabled={uploading}
-                  onPress={handlePickedAttachmentRemove}
-                />
-              ) : undefined}
-              {!removeAttachment ? (
-                <>
-                  <ContainedButton
-                    style={styles.submitButton}
-                    label={
-                      attachmentResult
-                        ? t('reUploadAttachment')
-                        : submittedAttachment
-                          ? t('overwriteAttachment')
-                          : t('pickAttachment')
-                    }
-                    disabled={uploading}
-                    onPress={handlePickerOpen}
-                  />
-                </>
-              ) : undefined}
-            </View>
-            {hasDraft && (
-              <View style={[styles.draftRow, Styles.spacey1]}>
-                <Caption>{t('draftSaved')}</Caption>
-                <TextButton
-                  disabled={uploading}
-                  style={styles.draftDiscard}
-                  onPress={handleDraftDiscard}
-                >
-                  {t('discardDraft')}
-                </TextButton>
-              </View>
-            )}
-            {submitTime && (
-              <Caption style={Styles.spacey1}>
-                {dayjs(submitTime).format(t('lastSubmittedAtFormat'))}
-              </Caption>
-            )}
-          </View>
-        </KeyboardAvoidingView>
-      </View>
-    </SafeArea>
+          ) : (
+            <FormButton
+              title={t('removeUploadedAttachment')}
+              icon={{ ios: 'trash', android: 'delete-outline' }}
+              destructive
+              disabled={uploading}
+              onPress={handleUploadedAttachmentRemove}
+            />
+          )
+        ) : null}
+      </FormSection>
+      {hasDraft ? (
+        <FormSection>
+          <FormButton
+            title={t('discardDraft')}
+            icon={{ ios: 'trash', android: 'delete-outline' }}
+            destructive
+            disabled={uploading}
+            onPress={handleDraftDiscard}
+          />
+        </FormSection>
+      ) : null}
+    </Form>
   );
 };
-
-const styles = StyleSheet.create({
-  inputs: {
-    flex: 1,
-  },
-  contentInput: {
-    flex: 1,
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  contentInputField: {
-    flex: 1,
-  },
-  nameInput: {
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  submissionDetail: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginBottom: 96,
-  },
-  draftRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  draftDiscard: {
-    fontSize: 12,
-  },
-  attachmentButton: {
-    flex: 0,
-  },
-  submitButton: {
-    alignSelf: 'flex-start',
-    marginRight: 8,
-  },
-  attachmentActionButtons: {
-    flexWrap: 'wrap',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 8,
-    marginBottom: 60,
-  },
-});
 
 export default AssignmentSubmission;

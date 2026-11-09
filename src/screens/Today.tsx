@@ -1,23 +1,23 @@
 import { useLayoutEffect } from 'react';
-import { Platform, RefreshControl, StyleSheet, View } from 'react-native';
 import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
 import dayjs from 'dayjs';
-import AssignmentCard from 'components/AssignmentCard';
-import Badge from 'components/Badge';
-import Divider from 'components/Divider';
+import {
+  Form,
+  FormLink,
+  FormSection,
+  FormText,
+  type FormTextProps,
+} from 'components/Form';
 import IconButton from 'components/IconButton';
 import SafeArea from 'components/SafeArea';
-import ScrollView from 'components/ScrollView';
 import SyncStatus from 'components/SyncStatus';
-import { Caption, Paragraph, Subheading, Text, Title } from 'components/Text';
-import Touchable from 'components/Touchable';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
 import { Assignment } from 'data/types/state';
+import { deadlineText } from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { sanitizeLocation } from 'helpers/eventDetails';
@@ -26,152 +26,24 @@ import useMinute from 'hooks/useMinute';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { sidebarSplit } from 'navigation/layout';
-import { useTheme } from 'theme';
 import { MainStackScreenProps, TodayStackParams } from './types';
 
 type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
 
 const time = (ms: number) => dayjs(ms).format('HH:mm');
 
-const SectionHeader: React.FC<{ title: string }> = ({ title }) => (
-  <Subheading style={styles.sectionHeader} accessibilityRole="header">
-    {title}
-  </Subheading>
-);
+type ItemRowProps = FormTextProps & { key: string; onPress?: () => void };
 
-/** The class going on now or coming up next, with how long until it changes. */
-const Highlight: React.FC<{
-  session: ClassSession;
-  current: boolean;
-  now: number;
-  onPress?: () => void;
-}> = ({ session, current, now, onPress }) => {
-  const theme = useTheme();
-  const when = current
-    ? t('todayEndsIn', { time: dayjs(now).to(session.end) })
-    : t('todayStartsIn', { time: dayjs(now).to(session.start) });
-  const progress = current
-    ? (now - session.start) / (session.end - session.start)
-    : 0;
-
-  return (
-    <Touchable
-      style={[
-        styles.highlight,
-        { backgroundColor: theme.colors.surfaceVariant },
-      ]}
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}
-    >
-      {/* TouchableHighlight on iOS takes a single child. */}
-      <View>
-        <Caption style={{ color: theme.colors.primary }}>
-          {current ? t('todayNow') : t('todayNext')}
-        </Caption>
-        <Title numberOfLines={1}>{session.courseName}</Title>
-        <Paragraph numberOfLines={1}>
-          {`${time(session.start)}–${time(session.end)}`}
-          {session.location ? ` · ${sanitizeLocation(session.location)}` : ''}
-        </Paragraph>
-        <Caption>{when}</Caption>
-        {current && (
-          <View
-            style={[
-              styles.progressTrack,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          >
-            <View
-              style={[
-                styles.progressBar,
-                {
-                  backgroundColor: theme.colors.primary,
-                  width: `${Math.round(progress * 100)}%`,
-                },
-              ]}
-            />
-          </View>
-        )}
-      </View>
-    </Touchable>
+/** A link row when there's somewhere to go, and a plain row otherwise. */
+const itemRow = ({ key, onPress, ...row }: ItemRowProps) =>
+  onPress ? (
+    <FormLink key={key} {...row} onPress={onPress} />
+  ) : (
+    <FormText key={key} {...row} />
   );
-};
 
-const ClassRow: React.FC<{
-  session: ClassSession;
-  now: number;
-  onPress?: () => void;
-}> = ({ session, now, onPress }) => {
-  const theme = useTheme();
-  const over = session.end <= now;
-
-  return (
-    <Touchable
-      style={over && styles.over}
-      onPress={onPress}
-      disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}
-    >
-      <View style={styles.row}>
-        <View style={styles.rowTime}>
-          <Text style={{ color: theme.colors.onSurfaceHigh }}>
-            {time(session.start)}
-          </Text>
-          <Caption>{time(session.end)}</Caption>
-        </View>
-        <View style={styles.rowBody}>
-          <Text
-            numberOfLines={1}
-            style={[styles.rowTitle, { color: theme.colors.onSurfaceHigh }]}
-          >
-            {session.courseName}
-          </Text>
-          {session.location ? (
-            <Caption numberOfLines={1}>
-              {sanitizeLocation(session.location)}
-            </Caption>
-          ) : null}
-        </View>
-        {over && (
-          <MaterialCommunityIcons
-            name="check"
-            size={18}
-            color={theme.colors.onSurfaceMedium}
-          />
-        )}
-      </View>
-    </Touchable>
-  );
-};
-
-const LinkRow: React.FC<{
-  icon: React.ComponentProps<typeof MaterialCommunityIcons>['name'];
-  title: string;
-  onPress: () => void;
-}> = ({ icon, title, onPress }) => {
-  const theme = useTheme();
-  return (
-    <Touchable onPress={onPress} accessibilityRole="button">
-      <View style={styles.row}>
-        <MaterialCommunityIcons
-          name={icon}
-          size={20}
-          color={theme.colors.primary}
-          style={styles.rowIcon}
-        />
-        <Text style={[styles.rowBody, { color: theme.colors.onSurfaceHigh }]}>
-          {title}
-        </Text>
-        <MaterialCommunityIcons
-          name="chevron-right"
-          size={20}
-          color={theme.colors.onSurfaceMedium}
-        />
-      </View>
-    </Touchable>
-  );
-};
+const where = (session: ClassSession) =>
+  session.location ? sanitizeLocation(session.location) : undefined;
 
 const Today: React.FC<Props> = ({ navigation }) => {
   const detailNavigator = useDetailNavigator();
@@ -301,15 +173,13 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ],
       headerRight: showSettings
         ? () => (
-            <View>
-              <IconButton
-                testID="today-settings"
-                accessibilityLabel={t('settings')}
-                icon="cog-outline"
-                onPress={openSettings}
-              />
-              {settingsBadge && <Badge size={8} style={styles.badge} />}
-            </View>
+            <IconButton
+              testID="today-settings"
+              accessibilityLabel={t('settings')}
+              icon="settings"
+              badge={settingsBadge}
+              onPress={openSettings}
+            />
           )
         : undefined,
     });
@@ -317,88 +187,90 @@ const Today: React.FC<Props> = ({ navigation }) => {
   }, [navigation, subtitle, settingsBadge, refreshing, showSettings]);
 
   const remaining = classes.filter(s => s.end > now);
+  const note =
+    schedule.source === 'courses'
+      ? t('todayFromCourses')
+      : schedule.source === 'calendar' && schedule.failed
+        ? t('todayCalendarFailed', {
+            time: dayjs(schedule.updatedAt).fromNow(),
+          })
+        : undefined;
+  const span = (session: ClassSession) =>
+    `${time(session.start)}–${time(session.end)}`;
 
   return (
     <SafeArea>
-      <ScrollView
-        testID="today"
-        contentContainerStyle={styles.content}
-        refreshControl={
-          <RefreshControl
-            refreshing={pullToRefresh.refreshing}
-            onRefresh={pullToRefresh.onRefresh}
-          />
-        }
-      >
-        <SyncStatus updatedAt={schedule.updatedAt} />
-        {schedule.source === 'courses' ? (
-          <Caption style={styles.note}>{t('todayFromCourses')}</Caption>
-        ) : schedule.source === 'calendar' && schedule.failed ? (
-          <Caption style={styles.note}>
-            {t('todayCalendarFailed', {
-              time: dayjs(schedule.updatedAt).fromNow(),
-            })}
-          </Caption>
-        ) : null}
-
+      <SyncStatus updatedAt={schedule.updatedAt} />
+      <Form testID="today" onRefresh={pullToRefresh.onRefresh}>
         {current && (
-          <Highlight
-            session={current}
-            current
-            now={now}
-            onPress={pressOf(current)}
-          />
+          <FormSection title={t('todayNow')}>
+            {itemRow({
+              key: current.key,
+              title: current.courseName,
+              subtitle: [span(current), where(current)]
+                .filter(Boolean)
+                .join(' · '),
+              detail: t('todayEndsIn', { time: dayjs(now).to(current.end) }),
+              progress: (now - current.start) / (current.end - current.start),
+              onPress: pressOf(current),
+            })}
+          </FormSection>
         )}
         {next && (
-          <Highlight
-            session={next}
-            current={false}
-            now={now}
-            onPress={pressOf(next)}
-          />
+          <FormSection title={t('todayNext')}>
+            {itemRow({
+              key: next.key,
+              title: next.courseName,
+              subtitle: [span(next), where(next)].filter(Boolean).join(' · '),
+              detail: t('todayStartsIn', { time: dayjs(now).to(next.start) }),
+              onPress: pressOf(next),
+            })}
+          </FormSection>
         )}
 
-        <SectionHeader title={t('todayClasses')} />
-        {classes.length === 0 ? (
-          <Caption style={styles.empty}>{t('todayNoClasses')}</Caption>
-        ) : (
-          <>
-            {remaining.length === 0 && (
-              <Caption style={styles.empty}>{t('todayNoMoreClasses')}</Caption>
-            )}
-            {classes.map((session, i) => (
-              <View key={session.key}>
-                {i > 0 && <Divider />}
-                <ClassRow
-                  session={session}
-                  now={now}
-                  onPress={pressOf(session)}
-                />
-              </View>
-            ))}
-          </>
-        )}
+        <FormSection title={t('todayClasses')} footer={note}>
+          {classes.length === 0 ? (
+            <FormText title={t('todayNoClasses')} />
+          ) : (
+            <>
+              {remaining.length === 0 && (
+                <FormText title={t('todayNoMoreClasses')} />
+              )}
+              {classes.map(session =>
+                itemRow({
+                  key: session.key,
+                  title: session.courseName,
+                  subtitle: where(session),
+                  detail: span(session),
+                  done: session.end <= now,
+                  onPress: pressOf(session),
+                }),
+              )}
+            </>
+          )}
+        </FormSection>
 
-        <SectionHeader title={t('todayDueSoon')} />
-        {dueSoon.length === 0 ? (
-          <Caption style={styles.empty}>{t('todayNothingDue')}</Caption>
-        ) : (
-          dueSoon.map(assignment => (
-            <AssignmentCard
-              key={assignment.id}
-              data={assignment}
-              disableSwipe
-              onPress={() => openAssignment(assignment)}
-            />
-          ))
-        )}
+        <FormSection title={t('todayDueSoon')}>
+          {dueSoon.length === 0 ? (
+            <FormText title={t('todayNothingDue')} />
+          ) : (
+            dueSoon.map(assignment => (
+              <FormLink
+                key={assignment.id}
+                title={assignment.title}
+                subtitle={assignment.courseName}
+                detail={deadlineText(assignment.deadline, now)}
+                onPress={() => openAssignment(assignment)}
+              />
+            ))
+          )}
+        </FormSection>
 
         {(unreadNotices > 0 || newFiles > 0) && (
-          <>
-            <SectionHeader title={t('todayNew')} />
+          <FormSection title={t('todayNew')}>
             {unreadNotices > 0 && (
-              <LinkRow
-                icon="bell-outline"
+              <FormLink
+                icon={{ ios: 'bell', android: 'bell-outline' }}
                 title={
                   unreadNotices === 1
                     ? t('todayOneUnreadNotice')
@@ -412,10 +284,9 @@ const Today: React.FC<Props> = ({ navigation }) => {
                 }
               />
             )}
-            {unreadNotices > 0 && newFiles > 0 && <Divider />}
             {newFiles > 0 && (
-              <LinkRow
-                icon="file-outline"
+              <FormLink
+                icon={{ ios: 'doc', android: 'file-outline' }}
                 title={
                   newFiles === 1
                     ? t('todayOneNewFile')
@@ -429,72 +300,11 @@ const Today: React.FC<Props> = ({ navigation }) => {
                 }
               />
             )}
-          </>
+          </FormSection>
         )}
-      </ScrollView>
+      </Form>
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  content: {
-    paddingBottom: 24,
-  },
-  note: {
-    marginHorizontal: 16,
-    marginTop: 8,
-  },
-  highlight: {
-    marginHorizontal: 16,
-    marginTop: 12,
-    padding: 16,
-    borderRadius: 16,
-  },
-  progressTrack: {
-    height: 4,
-    borderRadius: 2,
-    marginTop: 8,
-    overflow: 'hidden',
-  },
-  progressBar: {
-    height: 4,
-  },
-  sectionHeader: {
-    marginHorizontal: 16,
-    marginTop: 20,
-    marginBottom: 4,
-    fontWeight: Platform.OS === 'ios' ? '700' : 'bold',
-  },
-  empty: {
-    marginHorizontal: 16,
-    marginVertical: 8,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-  },
-  over: {
-    opacity: 0.5,
-  },
-  rowTime: {
-    width: 56,
-  },
-  rowBody: {
-    flex: 1,
-  },
-  rowTitle: {
-    fontSize: 16,
-  },
-  rowIcon: {
-    marginRight: 12,
-  },
-  badge: {
-    position: 'absolute',
-    top: 8,
-    right: 8,
-  },
-});
 
 export default Today;

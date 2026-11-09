@@ -145,9 +145,15 @@ const buildColors = (dark: boolean) => {
     card: Platform.OS === 'ios' ? colors.background : colors.surfaceContainer,
     border: colors.outlineVariant,
     notification: colors.error,
-    // Titles and body text, and captions
-    onSurfaceHigh: withAlpha(colors.onSurface, 0.87),
-    onSurfaceMedium: withAlpha(colors.onSurface, 0.54),
+    // Titles and body text, and captions: iOS's label and secondaryLabel,
+    // Material 3's onSurface and onSurfaceVariant
+    onSurfaceHigh: colors.onSurface,
+    onSurfaceMedium:
+      Platform.OS === 'ios'
+        ? dark
+          ? 'rgba(235, 235, 245, 0.6)'
+          : 'rgba(60, 60, 67, 0.6)'
+        : colors.onSurfaceVariant,
     surfaceDisabled: withAlpha(colors.onSurface, 0.12),
     onSurfaceDisabled: withAlpha(colors.onSurface, 0.38),
     status: dark ? statusColors.dark : statusColors.light,

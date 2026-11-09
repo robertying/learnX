@@ -6,7 +6,7 @@ import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { Caption, Paragraph, Subheading, Title } from 'components/Text';
+import { Caption, Paragraph, Subheading, Headline } from 'components/Text';
 
 export interface NoticeCardProps extends CardWrapperProps {
   data: Notice;
@@ -39,7 +39,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
             {hideCourseName ? null : (
               <Subheading numberOfLines={1}>{courseName}</Subheading>
             )}
-            <Title numberOfLines={1}>{title}</Title>
+            <Headline numberOfLines={1}>{title}</Headline>
           </View>
           <View style={[Styles.flexRowCenter, styles.icons]}>
             {attachment && (
@@ -70,7 +70,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
         {strippedContent ? (
           <Paragraph numberOfLines={2}>{strippedContent}</Paragraph>
         ) : null}
-        <View style={Styles.flexRowCenter}>
+        <View style={Styles.metaRow}>
           <Caption>{publisher}</Caption>
           <Caption>{timeAgo}</Caption>
         </View>
