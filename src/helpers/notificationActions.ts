@@ -1,11 +1,10 @@
 import { AppState, Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as TaskManager from 'expo-task-manager';
-import { assignmentsQuery } from 'data/content';
-import { queryClient, restoreQueryCache } from 'data/queryClient';
+import { restoreQueryCache } from 'data/queryClient';
 import { getAuth } from 'data/auth';
 import { flushServerActions, setFavorite } from 'data/serverActions';
-import { getUserData, setArchived } from 'data/userData';
+import { setArchived } from 'data/userData';
 import { recordError } from 'helpers/crashReporting';
 import {
   cancelDeadlineRemindersOf,
@@ -15,28 +14,18 @@ import {
   getNotificationData,
   notificationActions,
 } from 'helpers/notifications';
-import { updateDeadlineWidget } from 'widgets';
+import { refreshSurfaces } from 'helpers/surfaces';
 
 /**
- * Keeps the widget and the reminders in step with archived assignments. The
- * app's hooks do this while it runs; this covers an action handled while it
- * doesn't. iOS gives an app it launches for an action only a few seconds, so
- * this may not finish there; the next sync or app launch then cancels the
- * reminders instead.
+ * Keeps the widgets, Spotlight and the reminders in step with archived
+ * assignments, as the app does by itself, but waiting for it: iOS gives an
+ * app it launches for an action only a few seconds. The reminders go first;
+ * if the rest doesn't finish, the next sync or app launch does it.
  */
 const afterArchivingAssignments = async (ids: string[]) => {
   await cancelDeadlineRemindersOf(ids);
   await restoreQueryCache();
-  const { currentSemester, hiddenCourses, archived } = getUserData();
-  const assignments =
-    currentSemester &&
-    queryClient.getQueryData(assignmentsQuery(currentSemester).queryKey);
-  if (assignments) {
-    updateDeadlineWidget(assignments, {
-      hiddenCourses,
-      archived: archived.assignment,
-    });
-  }
+  await refreshSurfaces();
 };
 
 /**
