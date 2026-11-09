@@ -1,15 +1,6 @@
-// On iOS and Mac the filter menu is the header filter button's own UIMenu
-// (hooks/useFilterListHeader), so nothing renders in the list.
-import type { FilterSelection } from 'helpers/filterOptions';
-import type { FilterOption } from 'helpers/filterOptions';
-
-export interface FilterMenuProps {
-  visible: boolean;
-  options: FilterOption[];
-  selected: FilterSelection;
-  onSelectionChange: (selected: FilterSelection) => void;
-  onDismiss: () => void;
-}
+// On iOS and Mac the filter button and its menu are a native header menu item
+// (hooks/useFilterListHeader), so this Android header button renders nothing.
+import type { FilterMenuProps } from './FilterMenu.shared';
 
 const FilterMenu: React.FC<FilterMenuProps> = () => null;
 
