@@ -13,6 +13,7 @@ import MaterialCommunityIcons from '@react-native-vector-icons/material-design-i
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
 import { CardAction, cardActions } from 'helpers/cardActions';
+import { t } from 'helpers/i18n';
 import useCardSwipe from 'hooks/useCardSwipe';
 import CardMenu from './CardMenu';
 import CardSwipeActions from './CardSwipeActions';
@@ -38,6 +39,15 @@ export interface CardWrapperProps {
   reorderMode?: boolean;
   /** Starts dragging the card; set only inside a reorderable list. */
   onDrag?: () => void;
+  /**
+   * Moves the card one place up or down in reorder mode: the way to reorder
+   * without dragging (VoiceOver, TalkBack, Switch Control, keyboards).
+   */
+  onMove?: (offset: -1 | 1) => void;
+  canMoveUp?: boolean;
+  canMoveDown?: boolean;
+  /** What screen readers say for the card, in place of its texts in order. */
+  accessibilityLabel?: string;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
   disableSwipe?: boolean;
@@ -57,6 +67,10 @@ const CardWrapper: React.FC<
   selectionMode,
   reorderMode,
   onDrag,
+  onMove,
+  canMoveUp,
+  canMoveDown,
+  accessibilityLabel,
   checked,
   onCheck,
   disableSwipe,
@@ -70,6 +84,31 @@ const CardWrapper: React.FC<
 
   const actions = cardActions({ fav, archived, hidden, canHide: !!onHide });
   const actionsEnabled = !disableSwipe && !selectionMode && !reorderMode;
+  const moveActions =
+    reorderMode && onMove
+      ? [
+          ...(canMoveUp
+            ? [
+                {
+                  key: 'moveUp',
+                  label: t('moveUp'),
+                  systemImage: 'arrow.up' as const,
+                  offset: -1 as const,
+                },
+              ]
+            : []),
+          ...(canMoveDown
+            ? [
+                {
+                  key: 'moveDown',
+                  label: t('moveDown'),
+                  systemImage: 'arrow.down' as const,
+                  offset: 1 as const,
+                },
+              ]
+            : []),
+        ]
+      : [];
 
   const runAction = (action: CardAction) => {
     switch (action.key) {
@@ -85,9 +124,21 @@ const CardWrapper: React.FC<
     }
   };
 
+  const runMove = (key: string) => {
+    const move = moveActions.find(m => m.key === key);
+    if (move) {
+      onMove?.(move.offset);
+      return true;
+    }
+    return false;
+  };
+
   const handleAccessibilityAction = ({
     nativeEvent,
   }: AccessibilityActionEvent) => {
+    if (runMove(nativeEvent.actionName)) {
+      return;
+    }
     const action = actions.find(a => a.key === nativeEvent.actionName);
     if (action && actionsEnabled) {
       runAction(action);
@@ -99,6 +150,9 @@ const CardWrapper: React.FC<
   }: {
     nativeEvent: { key: string };
   }) => {
+    if (runMove(nativeEvent.key)) {
+      return;
+    }
     const action = actions.find(a => a.key === nativeEvent.key);
     if (action) {
       runAction(action);
@@ -167,13 +221,18 @@ const CardWrapper: React.FC<
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress
       }
       onLongPress={handleLongPress}
-      accessibilityRole={selectionMode ? 'checkbox' : 'button'}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole={
+        selectionMode ? 'checkbox' : reorderMode ? undefined : 'button'
+      }
       accessibilityState={selectionMode ? { checked: !!checked } : undefined}
-      // Swipe and long press aren't reachable with VoiceOver or TalkBack.
+      // Swipe, long press and drag aren't reachable with VoiceOver or TalkBack.
       accessibilityActions={
         actionsEnabled
           ? actions.map(a => ({ name: a.key, label: a.label }))
-          : undefined
+          : moveActions.length
+            ? moveActions.map(m => ({ name: m.key, label: m.label }))
+            : undefined
       }
       onAccessibilityAction={handleAccessibilityAction}
     >
@@ -227,7 +286,15 @@ const CardWrapper: React.FC<
               title: a.label,
               systemImage: a.systemImage,
             }))
-          : []
+          : // A long press on iPad drags in reorder mode, so only the Mac's
+            // right-click menu offers the moves.
+            DeviceInfo.isMac()
+            ? moveActions.map(m => ({
+                key: m.key,
+                title: m.label,
+                systemImage: m.systemImage,
+              }))
+            : []
       }
       onAction={handleContextMenuAction}
     >

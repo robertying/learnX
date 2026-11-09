@@ -140,6 +140,15 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     setCourseOrder(reorderedData.map(i => i.id));
   };
 
+  const handleMove = (id: string, offset: -1 | 1) => {
+    const from = data.findIndex(i => i.id === id);
+    const to = from + offset;
+    if (from === -1 || to < 0 || to >= data.length) {
+      return;
+    }
+    setCourseOrder(reorderItems(data, from, to).map(i => i.id));
+  };
+
   const handleDragChange = () => {
     'worklet';
     runOnJS(Haptics.selectionAsync)();
@@ -240,6 +249,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     fav: handleFav,
     archive: (id, isArchived) => handleArchive(isArchived, [id]),
     hide: (id, isHidden) => handleHide(isHidden, id),
+    move: handleMove,
   };
   // Menu bar commands and their shortcuts on iPad and Mac, for the list on
   // screen. Every tab's list stays mounted.
@@ -287,9 +297,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     fav: (item, isFav) => rowHandlersRef.current.fav(item, isFav),
     archive: (id, isArchived) => rowHandlersRef.current.archive(id, isArchived),
     hide: (id, isHidden) => rowHandlersRef.current.hide(id, isHidden),
+    move: (id, offset) => rowHandlersRef.current.move(id, offset),
   }));
 
-  const renderItem = ({ item }: { item: T }) => (
+  const renderItem = ({ item, index }: { item: T; index: number }) => (
     <FilterListRow
       data={item}
       component={Component}
@@ -301,6 +312,8 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       fav={favIdSet.has(item.id)}
       archived={archivedIdSet.has(item.id)}
       hidden={hiddenIdSet.has(item.id)}
+      canMoveUp={reorderMode && index > 0}
+      canMoveDown={reorderMode && index < data.length - 1}
     />
   );
 

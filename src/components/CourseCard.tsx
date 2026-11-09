@@ -17,17 +17,16 @@ export interface CourseCardProps extends CardWrapperProps {
 type CountIcon = 'bell-outline' | 'calendar-blank-outline' | 'folder-outline';
 
 /** A count with its icon, left out when there is nothing new. */
-const Count: React.FC<{ icon: CountIcon; count: number; label: string }> = ({
+const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   icon,
   count,
-  label,
 }) => {
   const theme = useTheme();
   if (!count) {
     return null;
   }
   return (
-    <View style={styles.count} accessible accessibilityLabel={label}>
+    <View style={styles.count}>
       <Icon name={icon} size={15} color={theme.colors.primary} />
       <Caption
         variant="subheadline"
@@ -39,6 +38,9 @@ const Count: React.FC<{ icon: CountIcon; count: number; label: string }> = ({
   );
 };
 
+const countText = (count: number, one: string, many: string) =>
+  count === 0 ? undefined : count === 1 ? one : many;
+
 const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
   data: {
     name,
@@ -49,7 +51,30 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
   },
   ...restProps
 }) => (
-  <CardWrapper {...restProps}>
+  <CardWrapper
+    {...restProps}
+    accessibilityLabel={[
+      name,
+      teacherName,
+      countText(
+        unreadNoticeCount,
+        t('todayOneUnreadNotice'),
+        t('todayUnreadNotices', { count: unreadNoticeCount }),
+      ),
+      countText(
+        unfinishedAssignmentCount,
+        t('courseOneUnfinishedAssignment'),
+        t('courseUnfinishedAssignments', { count: unfinishedAssignmentCount }),
+      ),
+      countText(
+        unreadFileCount,
+        t('todayOneNewFile'),
+        t('todayNewFiles', { count: unreadFileCount }),
+      ),
+    ]
+      .filter(Boolean)
+      .join(', ')}
+  >
     <View style={styles.root}>
       <View style={styles.names}>
         <Headline>{name}</Headline>
@@ -58,21 +83,12 @@ const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
         </Caption>
       </View>
       <View style={styles.counts}>
-        <Count
-          icon="bell-outline"
-          count={unreadNoticeCount}
-          label={`${t('notices')} ${unreadNoticeCount}`}
-        />
+        <Count icon="bell-outline" count={unreadNoticeCount} />
         <Count
           icon="calendar-blank-outline"
           count={unfinishedAssignmentCount}
-          label={`${t('assignments')} ${unfinishedAssignmentCount}`}
         />
-        <Count
-          icon="folder-outline"
-          count={unreadFileCount}
-          label={`${t('files')} ${unreadFileCount}`}
-        />
+        <Count icon="folder-outline" count={unreadFileCount} />
       </View>
     </View>
   </CardWrapper>

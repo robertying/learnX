@@ -356,4 +356,13 @@ export default {
     "Couldn't update the schedule; showing the one from {time}.",
   forward: 'Forward',
   openInBrowser: 'Open in Browser',
+  a11yImportant: 'Important',
+  a11yHasAnswer: 'Has answer',
+  a11yNewBadge: 'New',
+  a11yDone: 'Ended',
+  a11yStruck: 'Will be replaced or removed',
+  moveUp: 'Move Up',
+  moveDown: 'Move Down',
+  courseUnfinishedAssignments: '{count} unfinished assignments',
+  courseOneUnfinishedAssignment: '1 unfinished assignment',
 };

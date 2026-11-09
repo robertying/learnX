@@ -10,6 +10,7 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import Badge from 'components/Badge';
+import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
 import {
   PADDING,
@@ -56,14 +57,23 @@ const IconButton: React.FC<IconButtonProps> = ({
   style,
 }) => {
   const theme = useTheme();
-  const buttonSize = size + 2 * PADDING;
+  // A borderless button reaches 44 pt, Apple's smallest tap target, beyond
+  // its padding; a contained one is drawn at its size.
+  const buttonSize = Math.max(
+    size + 2 * PADDING,
+    mode === 'contained' ? 0 : MIN_TARGET,
+  );
+  const badgeInset = (buttonSize - size) / 2 - 2;
+  const label = badge
+    ? `${accessibilityLabel ?? ''}, ${t('a11yNewBadge')}`
+    : (accessibilityLabel ?? '');
 
   return (
     <View style={style}>
       <Host matchContents seedColor={theme.colors.primary}>
         <Button
           systemImage={symbols[icon]}
-          label={accessibilityLabel ?? ''}
+          label={label}
           onPress={onPress}
           testID={testID}
           modifiers={[
@@ -78,16 +88,21 @@ const IconButton: React.FC<IconButtonProps> = ({
           ]}
         />
       </Host>
-      {badge && <Badge size={8} style={styles.badge} />}
+      {badge && (
+        <Badge
+          size={8}
+          style={[styles.badge, { top: badgeInset, right: badgeInset }]}
+        />
+      )}
     </View>
   );
 };
 
+const MIN_TARGET = 44;
+
 const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
-    top: PADDING - 2,
-    right: PADDING - 2,
   },
 });
 

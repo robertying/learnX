@@ -5,7 +5,11 @@ import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import useMinute from 'hooks/useMinute';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import CardRow, { CardGlyph, CardPill } from 'components/CardRow';
+import CardRow, {
+  CardGlyph,
+  CardPill,
+  cardAccessibilityLabel,
+} from 'components/CardRow';
 
 export interface AssignmentCardProps extends CardWrapperProps {
   data: Assignment;
@@ -37,13 +41,19 @@ const AssignmentCard: React.FC<
   const dueText = deadlineText(deadline, now);
   const dueSoon = isDueSoon(deadline, now);
 
+  const gradeText = gradeLevel
+    ? getAssignmentGradeLevelDescription(gradeLevel)
+    : grade !== undefined
+      ? String(grade)
+      : t('graded');
+  const statusText = graded ? gradeText : submitted ? t('submitted') : dueText;
+  const overline = hideCourseName ? courseTeacherName : courseName;
+  const preview = removeTags(description);
+  const hasAnswer = !!(answerContent || answerAttachment);
+
   const status = graded ? (
     <CardPill testID="grade" color={theme.colors.primary}>
-      {gradeLevel
-        ? getAssignmentGradeLevelDescription(gradeLevel)
-        : grade !== undefined
-          ? String(grade)
-          : t('graded')}
+      {gradeText}
     </CardPill>
   ) : submitted ? (
     <CardPill testID="submitted" color={theme.colors.status.green}>
@@ -62,17 +72,24 @@ const AssignmentCard: React.FC<
   );
 
   return (
-    <CardWrapper {...restProps}>
+    <CardWrapper
+      {...restProps}
+      accessibilityLabel={cardAccessibilityLabel({
+        title,
+        overline,
+        status: statusText,
+        flags: [attachment && t('attachment'), hasAnswer && t('a11yHasAnswer')],
+        preview,
+      })}
+    >
       <CardRow
-        overline={hideCourseName ? courseTeacherName : courseName}
+        overline={overline}
         title={title}
-        preview={removeTags(description)}
+        preview={preview}
         glyphs={
           <>
             {attachment ? <CardGlyph name="attachment" /> : null}
-            {answerContent || answerAttachment ? (
-              <CardGlyph name="key-variant" />
-            ) : null}
+            {hasAnswer ? <CardGlyph name="key-variant" /> : null}
           </>
         }
         trailing={status}
