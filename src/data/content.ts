@@ -9,7 +9,7 @@ import {
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { queryClient, queryPersister, saveQuerySoon } from 'data/queryClient';
-import { coursesQuery, getCourseNames } from 'data/queries';
+import { coursesQuery, getCourseNames, queryKeys } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import { Assignment, File, Notice } from 'data/types/state';
@@ -103,9 +103,9 @@ const createContent = <T extends { id: string; courseId: string }>({
   const fetchCourse = (semesterId: string, courseId: string) =>
     fetchFromServer(
       courseId,
-      (queryClient.getQueryData<T[]>([name, semesterId]) ?? []).filter(
-        item => item.courseId === courseId,
-      ),
+      (
+        queryClient.getQueryData<T[]>(queryKeys.content(name, semesterId)) ?? []
+      ).filter(item => item.courseId === courseId),
     );
 
   /**
@@ -163,7 +163,7 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   const query = (semesterId: string) =>
     queryOptions({
-      queryKey: [name, semesterId] as const,
+      queryKey: queryKeys.content(name, semesterId),
       queryFn: async (): Promise<T[]> => {
         const startedAt = Date.now();
         const courseIds = await courseIdsOf(semesterId);
@@ -189,7 +189,8 @@ const createContent = <T extends { id: string; courseId: string }>({
     startedAt: number,
     keep: (courseId: string) => boolean,
   ) => {
-    const cached = queryClient.getQueryData<T[]>([name, semesterId]) ?? [];
+    const cached =
+      queryClient.getQueryData<T[]>(queryKeys.content(name, semesterId)) ?? [];
     return sort(
       withOverrides(
         [
@@ -306,7 +307,7 @@ const createContent = <T extends { id: string; courseId: string }>({
   const useItem = (id: string) =>
     useList().items.find(item => item.id === id) ??
     queryClient
-      .getQueriesData<T[]>({ queryKey: [name] })
+      .getQueriesData<T[]>({ queryKey: queryKeys.contentAll(name) })
       .flatMap(([, items]) => items ?? [])
       .find(item => item.id === id);
 
@@ -320,6 +321,7 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   return {
     query,
+    resetOverrides: () => overrides.clear(),
     fetchCourses,
     putCourses,
     refreshCourse,
@@ -491,7 +493,7 @@ export const useExcellentHomeworkDetail = (homework: ExcellentHomework) => {
   const loggedIn = useLoggedIn();
   const listed = !!(homework.gradeAttachment || homework.submittedAttachment);
   const { data } = useQuery({
-    queryKey: ['excellentHomework', homework.id] as const,
+    queryKey: queryKeys.excellentHomework(homework.id),
     queryFn: () => dataSource.getExcellentHomeworkDetail(homework),
     // An excellent homework doesn't change once it's picked.
     staleTime: Infinity,
@@ -512,6 +514,13 @@ export const showFavorite = (
   ({ notices, assignments, files })[list].updateItem(id, change, {
     keep: false,
   });
+};
+
+/** Forgets the items marked read or seen this session, e.g. on logout. */
+export const resetContentOverrides = () => {
+  notices.resetOverrides();
+  assignments.resetOverrides();
+  files.resetOverrides();
 };
 
 /**

@@ -1,5 +1,5 @@
-import dayjs from 'dayjs';
 import { Assignment, File, Notice } from 'data/types/state';
+import { sameServerTime } from 'helpers/serverTime';
 
 /** An item that is in both lists, as it was and as it is now. */
 export interface Change<T> {
@@ -41,10 +41,6 @@ export const diffById = <T extends { id: string }>(
   };
 };
 
-/** Compares times by the moment they name, whatever their format. */
-const sameTime = (a?: string, b?: string) =>
-  a === b || (!!a && !!b && dayjs(a).valueOf() === dayjs(b).valueOf());
-
 /** Graded since, or its grade changed. */
 const isNewlyGraded = (before: Assignment, after: Assignment) =>
   after.graded &&
@@ -53,8 +49,8 @@ const isNewlyGraded = (before: Assignment, after: Assignment) =>
     before.gradeLevel !== after.gradeLevel);
 
 const isDeadlineChanged = (before: Assignment, after: Assignment) =>
-  !sameTime(before.deadline, after.deadline) ||
-  !sameTime(before.lateSubmissionDeadline, after.lateSubmissionDeadline);
+  !sameServerTime(before.deadline, after.deadline) ||
+  !sameServerTime(before.lateSubmissionDeadline, after.lateSubmissionDeadline);
 
 /** What a sync found that the user may want to hear about. */
 export interface ContentDiff {

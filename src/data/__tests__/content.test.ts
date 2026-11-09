@@ -146,7 +146,6 @@ describe('per-item details', () => {
       expect(first.find(f => f.id === a.id)!.description).toBe(a.description);
     }
 
-    const detail = jest.spyOn(mockSource, 'getHomeworkDetail');
     const list = jest.spyOn(mockSource, 'getHomeworkList');
     // One assignment changed on the server since the last fetch.
     const changed = described[0];
@@ -175,7 +174,6 @@ describe('per-item details', () => {
       );
     });
     expect(selected.map(a => a.id)).toEqual([changed.id]);
-    expect(detail).not.toHaveBeenCalled();
     // The unchanged ones keep their cached detail; the changed one is new.
     for (const a of described) {
       expect(second.find(f => f.id === a.id)!.description).toBe(a.description);

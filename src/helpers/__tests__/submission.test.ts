@@ -109,13 +109,12 @@ describe('sendSubmission', () => {
       removeAttachment: true,
       onProgress,
     });
-    expect(submitAssignment).toHaveBeenCalledWith(
-      'hw',
-      '<p>my answer</p>',
-      undefined,
+    expect(submitAssignment).toHaveBeenCalledWith('hw', {
+      content: '<p>my answer</p>',
+      attachment: undefined,
       onProgress,
-      true,
-    );
+      remove: true,
+    });
   });
 
   it('sends content and the attachment', async () => {
@@ -126,13 +125,12 @@ describe('sendSubmission', () => {
       removeAttachment: false,
       onProgress,
     });
-    expect(submitAssignment).toHaveBeenCalledWith(
-      'hw',
-      '<p>answer</p>',
-      attachment,
+    expect(submitAssignment).toHaveBeenCalledWith('hw', {
+      content: '<p>answer</p>',
+      attachment: attachment,
       onProgress,
-      false,
-    );
+      remove: false,
+    });
   });
 
   it('sends nothing when there is nothing to send', async () => {
