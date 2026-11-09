@@ -63,6 +63,24 @@ describe('Form', () => {
     ).toBeTruthy();
   });
 
+  it('shows a subtitle, a done check and progress', async () => {
+    await render(
+      <FormSection>
+        <FormText title="Calculus" subtitle="Room 101" done />
+        <FormLink
+          title="Physics"
+          subtitle="08:00–09:35"
+          progress={0.5}
+          onPress={jest.fn()}
+        />
+      </FormSection>,
+    );
+    expect(screen.getByText('Room 101')).toBeTruthy();
+    expect(screen.getByText('08:00–09:35')).toBeTruthy();
+    expect(screen.getByTestId('icon-checkmark')).toBeTruthy();
+    expect(screen.getByTestId('progress')).toBeTruthy();
+  });
+
   it('makes a toggle row one switch', async () => {
     const onValueChange = jest.fn();
     await render(

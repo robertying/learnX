@@ -27,6 +27,7 @@ import {
   background,
   headerProminence,
   listRowBackground,
+  opacity,
   refreshable,
   scrollContentBackground,
   textSelection,
@@ -39,6 +40,7 @@ import {
   sectionRows,
   type FormButtonProps,
   type FormIcon,
+  type FormItemRowProps,
   type FormLinkProps,
   type FormNumberFieldProps,
   type FormParagraphProps,
@@ -143,64 +145,119 @@ export const FormSection: React.FC<FormSectionProps> = ({
   </Section>
 );
 
+const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
+const subtitleModifiers = [font({ textStyle: 'subheadline' }), secondaryText];
+
 const RowLabel: React.FC<{
   title: string;
+  subtitle?: string;
   icon?: FormIcon;
   plain?: boolean;
-}> = ({ title, icon, plain }) => {
+}> = ({ title, subtitle, icon, plain }) => {
   const text = (
     <Text modifiers={plain ? [primaryText] : undefined}>{title}</Text>
   );
+  const label = subtitle ? (
+    <VStack alignment="leading" spacing={2}>
+      {text}
+      <Text modifiers={subtitleModifiers}>{subtitle}</Text>
+    </VStack>
+  ) : (
+    text
+  );
   // The system draws the symbol at the row's text size. (@expo/ui's Image
   // would draw it at a fixed 24 pt.)
-  return icon ? <Label systemImage={icon.ios}>{text}</Label> : text;
+  return icon ? <Label systemImage={icon.ios}>{label}</Label> : label;
 };
-
-const secondaryText = foregroundStyle(PlatformColor('secondaryLabel'));
 
 const RowDetail: React.FC<{ detail?: string }> = ({ detail }) =>
   detail ? <Text modifiers={[secondaryText]}>{detail}</Text> : null;
 
-export const FormText: React.FC<FormTextProps> = ({
-  title,
-  icon,
-  testID,
-  detail,
-}) => (
-  <LabeledContent
-    label={<RowLabel title={title} icon={icon} plain />}
-    testID={testID}
-  >
-    <RowDetail detail={detail} />
-  </LabeledContent>
-);
+const doneModifiers = [opacity(0.5)];
+const doneCheckModifiers = [
+  font({ textStyle: 'footnote', weight: 'semibold' }),
+  secondaryText,
+];
+
+/**
+ * The inside of a text or link row: the label, the detail, a checkmark when
+ * it's done, `trailing`, and a progress bar under it all.
+ */
+const ItemRow: React.FC<
+  FormItemRowProps & {
+    trailing?: React.ReactNode;
+    badge?: React.ReactNode;
+  }
+> = ({ title, subtitle, icon, detail, done, progress, badge, trailing }) => {
+  const row = (
+    <HStack modifiers={done ? doneModifiers : undefined}>
+      <RowLabel title={title} subtitle={subtitle} icon={icon} plain />
+      <Spacer />
+      <RowDetail detail={detail} />
+      {badge}
+      {done ? (
+        <Image systemName="checkmark" modifiers={doneCheckModifiers} />
+      ) : null}
+      {trailing}
+    </HStack>
+  );
+  return progress === undefined ? (
+    row
+  ) : (
+    <VStack alignment="leading" spacing={8}>
+      {row}
+      <ProgressView value={progress} />
+    </VStack>
+  );
+};
+
+export const FormText: React.FC<FormTextProps> = ({ testID, ...row }) =>
+  row.done || row.progress !== undefined ? (
+    <VStack testID={testID}>
+      <ItemRow {...row} />
+    </VStack>
+  ) : (
+    <LabeledContent
+      label={
+        <RowLabel
+          title={row.title}
+          subtitle={row.subtitle}
+          icon={row.icon}
+          plain
+        />
+      }
+      testID={testID}
+    >
+      <RowDetail detail={row.detail} />
+    </LabeledContent>
+  );
 
 /** A row that opens another page, with the chevron. */
 export const FormLink: React.FC<FormLinkProps> = ({
-  title,
-  icon,
   testID,
-  detail,
   onPress,
   badge,
+  ...row
 }) => {
   const theme = useTheme();
   return (
     <Button onPress={onPress} testID={testID}>
-      <HStack>
-        <RowLabel title={title} icon={icon} plain />
-        <Spacer />
-        <RowDetail detail={detail} />
-        {badge ? (
-          <Circle
-            modifiers={[
-              foregroundStyle(theme.colors.status.red),
-              frame({ width: 10, height: 10 }),
-            ]}
-          />
-        ) : null}
-        <Image systemName="chevron.right" modifiers={chevronModifiers} />
-      </HStack>
+      <ItemRow
+        {...row}
+        badge={
+          badge ? (
+            <Circle
+              modifiers={[
+                foregroundStyle(theme.colors.status.red),
+                frame({ width: 10, height: 10 }),
+              ]}
+            />
+          ) : null
+        }
+        trailing={
+          <Image systemName="chevron.right" modifiers={chevronModifiers} />
+        }
+      />
     </Button>
   );
 };
@@ -208,6 +265,7 @@ export const FormLink: React.FC<FormLinkProps> = ({
 /** A row that does something right away. */
 export const FormButton: React.FC<FormButtonProps> = ({
   title,
+  subtitle,
   icon,
   testID,
   detail,
@@ -227,6 +285,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
       <HStack>
         <RowLabel
           title={title}
+          subtitle={subtitle}
           icon={icon}
           // Mac forms don't tint action rows; only choices and the Mac use
           // the label color, and destructive rows stay red.
