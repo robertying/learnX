@@ -100,6 +100,9 @@ const legacyRoot = serialize({
 
 /** data/login, talking to the emulated server instead of the real one. */
 const loginModule = (): typeof import('data/login') => {
+  jest.doMock('helpers/surfaces', () => ({
+    clearSurfaces: jest.fn(async () => {}),
+  }));
   jest.doMock('data/source', () => ({
     dataSource: require('data/mockSource').mockSource,
     clearLoginCookies: jest.fn(async () => {}),

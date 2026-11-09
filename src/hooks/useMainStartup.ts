@@ -1,32 +1,24 @@
 import { useEffect } from 'react';
-import { AppState, Platform } from 'react-native';
+import { AppState } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
-import semverGt from 'semver/functions/gt';
-import { getLatestRelease } from 'helpers/update';
 import { setUpBackgroundFetch } from 'helpers/background';
 import { migrateDownloads } from 'helpers/fs';
 import { configureNotifications } from 'helpers/notifications';
-import useNotificationTaps from 'hooks/useNotificationTaps';
-import useLinkTaps from 'hooks/useLinkTaps';
-import { setSetting } from 'data/settings';
+import { subscribeSurfaceErrors } from 'helpers/surfaces';
+import { toast } from 'components/Toast';
 import { useLoggedIn } from 'data/auth';
 import { latestSemesterQuery, useCourses } from 'data/queries';
 import { applyLatestSemester } from 'data/userData';
 import { flushServerActions } from 'data/serverActions';
-import useDeadlineWidget from 'hooks/useDeadlineWidget';
-import useDeadlineReminders from 'hooks/useDeadlineReminders';
-import useSpotlight from 'hooks/useSpotlight';
 import useUpNext from 'hooks/useUpNext';
-import packageJson from '../../package.json';
+import useIncomingTargets from 'hooks/useIncomingTargets';
 
 /**
- * What the main UI starts once logged in: picks the semester, keeps its
- * courses fetched, schedules background fetch, keeps the deadline and Up
- * Next widgets, reminders and Spotlight current, sets up notifications and
- * opens their
- * taps and widget rows' links, moves downloads from the old folder layout,
- * and checks
- * for an Android update.
+ * What the main UI starts once logged in: picks the semester and keeps its
+ * courses and timetable fetched, schedules the background sync, sends the
+ * waiting server actions, opens what was tapped outside the app, sets up
+ * notifications, and moves downloads from the old folder layout. The widgets,
+ * reminders and Spotlight follow the data by themselves (helpers/surfaces).
  */
 const useMainStartup = () => {
   const loggedIn = useLoggedIn();
@@ -46,10 +38,13 @@ const useMainStartup = () => {
   // Keeps the semester's courses fetched for every tab.
   useCourses();
 
-  useDeadlineWidget();
-  useDeadlineReminders();
-  useSpotlight();
+  // Keeps this and next week's timetable fetched for Up Next, and shows the
+  // calendar writes that failed.
   useUpNext();
+  useEffect(
+    () => subscribeSurfaceErrors(({ text, type }) => toast(text, type)),
+    [],
+  );
 
   useEffect(() => {
     if (loggedIn) {
@@ -72,26 +67,12 @@ const useMainStartup = () => {
     return () => subscription.remove();
   }, [loggedIn]);
 
+  useIncomingTargets();
+
   useEffect(() => {
     void configureNotifications();
     void migrateDownloads();
   }, []);
-  useNotificationTaps();
-  useLinkTaps();
-
-  useEffect(() => {
-    if (loggedIn && Platform.OS === 'android') {
-      getLatestRelease().then(
-        ({ version }) => {
-          if (semverGt(version, packageJson.version)) {
-            setSetting('newUpdate', true);
-          }
-        },
-        // Offline or the mirror is down; checked again on the next launch.
-        () => {},
-      );
-    }
-  }, [loggedIn]);
 };
 
 export default useMainStartup;

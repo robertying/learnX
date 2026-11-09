@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import type { HomeworkListOptions } from '@robertying/thu-learn-lib';
 import {
   assignmentsQuery,
+  contentLists,
   filesQuery,
   markFileSeen,
   markNoticeRead,
@@ -291,6 +292,31 @@ describe('fetching course by course', () => {
     await expect(
       queryClient.fetchQuery({ ...filesQuery(semesterId), staleTime: 0 }),
     ).rejects.toThrow('server error');
+  });
+  it('stops at a deadline, leaving out the courses still running', async () => {
+    const ids = [...courseIds];
+    const slow = ids[0];
+    const getFileList = mockSource.getFileList;
+    jest
+      .spyOn(mockSource, 'getFileList')
+      .mockImplementation(((id: string, ...rest: unknown[]) =>
+        id === slow
+          ? new Promise(() => {})
+          : (getFileList as (...args: unknown[]) => Promise<unknown>)(
+              id,
+              ...rest,
+            )) as typeof getFileList);
+
+    const { fetched, failed, timedOut } = await contentLists.files.fetchCourses(
+      semesterId,
+      ids,
+      { deadline: Date.now() + 200 },
+    );
+
+    expect(timedOut).toBe(true);
+    expect(fetched.has(slow)).toBe(false);
+    expect(failed.size).toBe(0);
+    expect(fetched.size).toBe(ids.length - 1);
   });
 });
 

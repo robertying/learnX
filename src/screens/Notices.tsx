@@ -10,7 +10,7 @@ import { Notice } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useFilteredData from 'hooks/useFilteredData';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import useNotificationTarget from 'hooks/useNotificationTarget';
+import usePendingTarget from 'hooks/usePendingTarget';
 import { NoticeStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<NoticeStackParams, 'Notices'>;
@@ -54,7 +54,7 @@ const Notices: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  useNotificationTarget('notice', (id, inDetail) =>
+  usePendingTarget('notice', (id, inDetail) =>
     inDetail ? handlePush({ id }) : navigation.push('NoticeDetail', { id }),
   );
 

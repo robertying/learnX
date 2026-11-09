@@ -51,7 +51,6 @@ export interface SettingsState {
   graduate: boolean;
   fileUseDocumentDir: boolean;
   fileOmitCourseName: boolean;
-  newUpdate: boolean;
   courseInformationSharing: boolean;
   courseInformationSharingBadgeShown: boolean;
   lastShowChangelogVersion: string | null;

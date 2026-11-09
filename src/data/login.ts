@@ -14,42 +14,12 @@ import {
 } from 'data/credentials';
 import { getDataOwner, setDataOwner } from 'data/dataOwner';
 import { LEGACY_ROOT_KEY, LEGACY_SETTINGS_KEY } from 'data/legacy';
-import { resetSettings } from 'data/settings';
-import { resetUserData, UserData } from 'data/userData';
-import {
-  flushServerActionsWithin,
-  resetServerActions,
-} from 'data/serverActions';
-import { clearQueryCache, queryClient } from 'data/queryClient';
+import { flushServerActionsWithin } from 'data/serverActions';
+import { queryClient } from 'data/queryClient';
+import { clearAccountData } from 'data/accountData';
 import { userQuery } from 'data/queries';
 import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
 import { retry } from 'helpers/retry';
-import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
-import { clearSpotlight } from 'helpers/spotlight';
-import { resetNotified } from 'data/notified';
-import { resetSyncLog } from 'data/syncLog';
-import { clearSubmissionDrafts } from 'data/submissionDrafts';
-import { cancelDeadlineReminders } from 'helpers/deadlineReminders';
-
-/**
- * Forgets everything kept for the account whose data this is: the server
- * data, the user's own data, settings, submission drafts and what the widgets,
- * Spotlight and reminders show. The login itself is left alone.
- */
-function clearAccountData(userData?: UserData) {
-  resetSettings();
-  resetUserData(userData);
-  resetServerActions();
-  resetNotified();
-  resetSyncLog();
-  clearSubmissionDrafts();
-  clearQueryCache();
-  setDataOwner(null);
-  updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
-  updateUpNextWidget();
-  clearSpotlight();
-  return cancelDeadlineReminders().catch(() => {});
-}
 
 /**
  * Makes the saved data `username`'s: when it belonged to someone else, or to

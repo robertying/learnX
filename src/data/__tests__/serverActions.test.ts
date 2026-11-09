@@ -10,8 +10,8 @@ jest.mock('data/source', () => {
     dataSource: {
       addToFavorites: jest.fn(() => Promise.resolve()),
       removeFromFavorites: () => mockRemoveFromFavorites(),
+      markNoticeRead: jest.fn(() => Promise.resolve()),
     },
-    markNoticeReadOnServer: jest.fn(() => Promise.resolve()),
     serverWritesBlocked: () => !writes.getServerWritesAllowed(),
   };
 });

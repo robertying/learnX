@@ -27,14 +27,11 @@ import {
   pickContentItems,
 } from 'helpers/contentNotifications';
 import { recordError, setCustomKey } from 'helpers/crashReporting';
-import { runUntil } from 'helpers/runUntil';
 import {
   getNotificationPermission,
   postNotification,
 } from 'helpers/notifications';
-import { updateDeadlineWidget } from 'widgets';
-import { syncDeadlineReminders } from 'helpers/deadlineReminders';
-import { updateSpotlight } from 'helpers/spotlight';
+import { refreshSurfaces } from 'helpers/surfaces';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -70,13 +67,7 @@ const followLatestSemester = async (shownSemester: string) => {
  */
 export const SYNC_BUDGET_MS = 25_000;
 
-/**
- * Courses fetched at once. A course's assignments take a few requests plus
- * two per assignment, so a few courses already keep the connections busy.
- */
-const COURSE_CONCURRENCY = 3;
-
-/** Fetched in this order, deadlines first, so they're in if time runs out. */
+/** The lists the sync fetches. */
 const SYNC_LISTS: readonly SyncListName[] = ['assignments', 'notices', 'files'];
 
 /**
@@ -171,18 +162,17 @@ export const syncContent = async ({
     files: queryClient.getQueryData(queries.files.queryKey),
   };
 
+  // The three lists share the screens' limiter, which starts assignments
+  // first, so deadlines are in if time runs out.
   const fetchStartedAt = Date.now();
-  const jobs = SYNC_LISTS.flatMap(list =>
-    courseIds.map(courseId => ({ list, courseId })),
-  );
-  const results = await runUntil(
-    jobs.map(
-      ({ list, courseId }) =>
-        () =>
-          contentLists[list].fetchCourse(semesterId, courseId),
+  const runs = await Promise.all(
+    SYNC_LISTS.map(list =>
+      contentLists[list].fetchCourses(semesterId, courseIds, { deadline }),
     ),
-    { concurrency: COURSE_CONCURRENCY, deadline },
   );
+  const results = Object.fromEntries(
+    SYNC_LISTS.map((list, i) => [list, runs[i]]),
+  ) as Record<SyncListName, (typeof runs)[number]>;
 
   const counts = {} as NonNullable<SyncRun['courses']>;
   /** Saves the courses of `list` that came back; undefined if none did. */
@@ -194,13 +184,7 @@ export const syncContent = async ({
       options: { complete: boolean; startedAt: number },
     ) => Promise<T[]>,
   ) => {
-    const fetched = new Map<string, object[]>();
-    jobs.forEach((job, index) => {
-      const result = results[index];
-      if (job.list === list && result?.status === 'fulfilled') {
-        fetched.set(job.courseId, result.value);
-      }
-    });
+    const { fetched } = results[list];
     counts[list] = { fetched: fetched.size, total: courseIds.length };
     return fetched.size > 0
       ? putCourses(semesterId, fetched, {
@@ -216,32 +200,15 @@ export const syncContent = async ({
   };
   const details = {
     courses: counts,
-    timedOut: results.some(result => result === undefined),
+    timedOut: runs.some(run => run.timedOut),
   };
 
   if (!after.notices && !after.assignments && !after.files) {
     return record({ status: 'failed' }, details);
   }
-  const { hiddenCourses, archived } = getUserData();
-  await updateSpotlight(after, {
-    hiddenCourses,
-    archived: archived.assignment,
-  });
-  if (after.assignments) {
-    updateDeadlineWidget(after.assignments, {
-      hiddenCourses,
-      archived: archived.assignment,
-    });
-    try {
-      await syncDeadlineReminders(after.assignments, {
-        settings: getSettings().notifications,
-        hiddenCourses,
-        archived: archived.assignment,
-      });
-    } catch (error) {
-      recordError(error, 'Scheduling deadline reminders');
-    }
-  }
+  // The lists saved above update the widgets, reminders and Spotlight
+  // (helpers/surfaces); wait for that before the system ends the task.
+  await refreshSurfaces();
   return record(
     { status: 'synced', diff: diffContent(before, after) },
     details,

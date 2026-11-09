@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
 import { t } from 'helpers/i18n';
-import { getTargetUrl } from 'helpers/notifications';
+import { getTargetUrl } from 'helpers/openTarget';
 import { UpcomingClass, upNextTimes } from 'helpers/upNext';
 import {
   deadlineTimeline,

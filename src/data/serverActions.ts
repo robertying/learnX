@@ -13,7 +13,6 @@ import {
 import {
   dataSource,
   ensureSession as openSession,
-  markNoticeReadOnServer,
   serverWritesBlocked,
 } from 'data/source';
 import {
@@ -64,7 +63,7 @@ const handlers: { [K in ServerActionKind]: Handler<K> } = {
   },
   noticeRead: {
     write: false,
-    send: ({ url }) => markNoticeReadOnServer(url),
+    send: ({ url }) => dataSource.markNoticeRead(url),
   },
 };
 

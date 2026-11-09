@@ -4,17 +4,19 @@ import { SplitViewContext } from 'components/SplitView';
 import { useSplitLaidOut } from 'components/NativeSplitView';
 import { nativeSplit } from 'navigation/layout';
 import DeviceInfo from 'constants/DeviceInfo';
-import { NotificationTarget } from 'helpers/notifications';
+import { ItemTarget } from 'helpers/openTarget';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 
-/** The item of a tapped notification, until its list screen opens it. */
-const usePendingTargetStore = create<{ target: NotificationTarget | null }>(
-  () => ({ target: null }),
-);
+/**
+ * The item a tapped notification, widget row, learnx:// link or Spotlight
+ * result points to, until its list screen opens it (`useOpenTarget`).
+ */
+const usePendingTargetStore = create<{ target: ItemTarget | null }>(() => ({
+  target: null,
+}));
 
-export const setPendingNotificationTarget = (
-  target: NotificationTarget | null,
-) => usePendingTargetStore.setState({ target });
+export const setPendingTarget = (target: ItemTarget | null) =>
+  usePendingTargetStore.setState({ target });
 
 /**
  * An iPhone's tabs are native splits that stay collapsed, but until UIKit
@@ -25,12 +27,12 @@ const phoneSplit = () =>
   nativeSplit && !DeviceInfo.isTablet() && !DeviceInfo.isMac();
 
 /**
- * Lets a list screen open the item of a tapped notification: in the detail
+ * Lets a list screen open the pending item (`setPendingTarget`): in the detail
  * pane of its split view once the split is laid out and the pane is ready
  * (`inDetail`), or else pushed on the list.
  */
-const useNotificationTarget = (
-  type: NotificationTarget['type'],
+const usePendingTarget = (
+  type: ItemTarget['type'],
   open: (id: string, inDetail: boolean) => void,
 ) => {
   const target = usePendingTargetStore(state => state.target);
@@ -49,9 +51,9 @@ const useNotificationTarget = (
     if (target?.type !== type || !target.id || waitingForDetail) {
       return;
     }
-    setPendingNotificationTarget(null);
+    setPendingTarget(null);
     openTarget(target.id, inDetail);
   }, [target, type, waitingForDetail, inDetail]);
 };
 
-export default useNotificationTarget;
+export default usePendingTarget;

@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Alert, Linking, Platform } from 'react-native';
+import { useSyncExternalStore } from 'react';
+import { Alert, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import semverGt from 'semver/functions/gt';
 import SafeArea from 'components/SafeArea';
 import {
   Form,
@@ -12,11 +11,11 @@ import {
   FormSection,
   FormToggle,
 } from 'components/Form';
-import { getLatestRelease } from 'helpers/update';
+import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
-import { setSetting, useSettings } from 'data/settings';
+import { useSettings } from 'data/settings';
 import { useCredentialsStore } from 'data/credentials';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
@@ -48,9 +47,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     settings => settings.courseInformationSharingBadgeShown,
   );
 
-  const [update, setUpdate] = useState<{ version: string; url: string } | null>(
-    null,
-  );
+  const update = useAvailableUpdate();
 
   const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) => {
     if (detailNavigator) {
@@ -82,24 +79,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
       { cancelable: true },
     );
   };
-
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      getLatestRelease().then(
-        ({ version, url }) => {
-          if (semverGt(version, packageJson.version)) {
-            setUpdate({
-              version,
-              url,
-            });
-            setSetting('newUpdate', true);
-          }
-        },
-        // Offline or the mirror is down; the update row stays hidden.
-        () => {},
-      );
-    }
-  }, []);
 
   return (
     <SafeArea>

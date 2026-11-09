@@ -108,44 +108,100 @@ const createContent = <T extends { id: string; courseId: string }>({
       ),
     );
 
+  /**
+   * Fetches these courses' items through the limiter shared by every list,
+   * the screens' refreshes and the background sync alike. With a `deadline`
+   * (a `Date.now()` time), courses not started by then aren't fetched, and
+   * it resolves at the deadline at the latest; a course still running is
+   * left out of `fetched` and `failed` and counts as timed out.
+   */
+  const fetchCourses = async (
+    semesterId: string,
+    courseIds: readonly string[],
+    { deadline }: { deadline?: number } = {},
+  ) => {
+    const fetched = new Map<string, object[]>();
+    const failed = new Map<string, unknown>();
+    let done = false;
+    const late = () => deadline !== undefined && Date.now() >= deadline;
+    const runs = courseIds.map(courseId =>
+      courseFetches(async () => {
+        if (late()) {
+          return;
+        }
+        try {
+          const items = await fetchCourse(semesterId, courseId);
+          if (!done) {
+            fetched.set(courseId, items);
+          }
+        } catch (error) {
+          if (!done) {
+            failed.set(courseId, error);
+          }
+        }
+      }, priority),
+    );
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    await Promise.race([
+      Promise.all(runs),
+      ...(deadline === undefined
+        ? []
+        : [
+            new Promise<void>(resolve => {
+              timer = setTimeout(resolve, Math.max(0, deadline - Date.now()));
+            }),
+          ]),
+    ]);
+    clearTimeout(timer);
+    done = true;
+    return {
+      fetched,
+      failed,
+      timedOut: fetched.size + failed.size < courseIds.length,
+    };
+  };
+
   const query = (semesterId: string) =>
     queryOptions({
       queryKey: [name, semesterId] as const,
       queryFn: async (): Promise<T[]> => {
         const startedAt = Date.now();
         const courseIds = await courseIdsOf(semesterId);
-        const results = await Promise.allSettled(
-          courseIds.map(courseId =>
-            courseFetches(() => fetchCourse(semesterId, courseId), priority),
-          ),
-        );
-        const failure = results.find(r => r.status === 'rejected');
-        if (failure && results.every(r => r.status === 'rejected')) {
-          throw failure.reason;
+        const { fetched, failed } = await fetchCourses(semesterId, courseIds);
+        if (fetched.size === 0 && failed.size > 0) {
+          throw failed.values().next().value;
         }
-        // A course that failed keeps what was cached for it.
-        const failed = new Set(
-          courseIds.filter((_, i) => results[i].status === 'rejected'),
-        );
-        const cached =
-          failed.size > 0
-            ? (queryClient.getQueryData<T[]>([name, semesterId]) ?? [])
-            : [];
-        return sort(
-          withOverrides(
-            [
-              ...cached.filter(item => failed.has(item.courseId)),
-              ...results.flatMap((result, i) =>
-                result.status === 'fulfilled'
-                  ? tag<T>(courseIds[i], result.value)
-                  : [],
-              ),
-            ],
-            startedAt,
-          ),
+        // A course that failed keeps what was cached for it; a course no
+        // longer listed goes.
+        return merge(semesterId, fetched, startedAt, courseId =>
+          failed.has(courseId),
         );
       },
     });
+
+  /**
+   * The semester's list with `fetched` courses' items in place of the cached
+   * ones, keeping the cached items of the courses `keep` names.
+   */
+  const merge = (
+    semesterId: string,
+    fetched: ReadonlyMap<string, object[]>,
+    startedAt: number,
+    keep: (courseId: string) => boolean,
+  ) => {
+    const cached = queryClient.getQueryData<T[]>([name, semesterId]) ?? [];
+    return sort(
+      withOverrides(
+        [
+          ...cached.filter(
+            item => !fetched.has(item.courseId) && keep(item.courseId),
+          ),
+          ...[...fetched].flatMap(([courseId, list]) => tag<T>(courseId, list)),
+        ],
+        startedAt,
+      ),
+    );
+  };
 
   /**
    * Replaces one course's items in the semester list and saves it. Every item
@@ -177,16 +233,7 @@ const createContent = <T extends { id: string; courseId: string }>({
     { complete, startedAt }: { complete: boolean; startedAt: number },
   ) => {
     const { queryKey } = query(semesterId);
-    const cached = queryClient.getQueryData<T[]>(queryKey) ?? [];
-    const items = sort(
-      withOverrides(
-        [
-          ...cached.filter(item => !fetched.has(item.courseId)),
-          ...[...fetched].flatMap(([courseId, list]) => tag<T>(courseId, list)),
-        ],
-        startedAt,
-      ),
-    );
+    const items = merge(semesterId, fetched, startedAt, () => true);
     queryClient.setQueryData<T[]>(queryKey, items, {
       updatedAt: complete
         ? Date.now()
@@ -273,7 +320,7 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   return {
     query,
-    fetchCourse,
+    fetchCourses,
     putCourses,
     refreshCourse,
     updateItem,
@@ -467,15 +514,18 @@ export const showFavorite = (
   });
 };
 
-/** Fetching the lists a course at a time, as background sync does. */
+/**
+ * Fetching some of a list's courses and saving them into it, as the
+ * background sync does; the same fetches the screens' refreshes run.
+ */
 export const contentLists = {
   notices: {
-    fetchCourse: notices.fetchCourse,
+    fetchCourses: notices.fetchCourses,
     putCourses: notices.putCourses,
   },
   assignments: {
-    fetchCourse: assignments.fetchCourse,
+    fetchCourses: assignments.fetchCourses,
     putCourses: assignments.putCourses,
   },
-  files: { fetchCourse: files.fetchCourse, putCourses: files.putCourses },
+  files: { fetchCourses: files.fetchCourses, putCourses: files.putCourses },
 };
