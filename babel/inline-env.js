@@ -24,7 +24,7 @@ const PUBLIC_KEYS = [
 ];
 const MASKED_KEYS = ['COURSEX_REFRESH_TOKEN'];
 const DEV_KEY = /^LIVE_[A-Z0-9_]+$/;
-const DEV_ENVS = ['development', 'test'];
+const DEV_ENVS = new Set(['development', 'test']);
 
 const readEnv = () =>
   fs.existsSync(ENV_FILE) ? dotenv.parse(fs.readFileSync(ENV_FILE)) : {};
@@ -58,7 +58,7 @@ const buildEnv = includeDev => {
 
 module.exports = function inlineEnv(api) {
   // Also makes Babel cache this plugin's config per env name.
-  const includeDev = DEV_ENVS.includes(api.env());
+  const includeDev = DEV_ENVS.has(api.env());
   const t = api.types;
 
   return {
