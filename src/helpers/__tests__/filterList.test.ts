@@ -76,7 +76,7 @@ describe('selection', () => {
     expect(selectedCountLabel(3)).toBe('3 selected');
     mockLocale.current = 'zh-CN';
     try {
-      expect(selectedCountLabel(3)).toBe('已选中 3 个');
+      expect(selectedCountLabel(3)).toBe('已选择 3 项');
     } finally {
       mockLocale.current = 'en-US';
     }

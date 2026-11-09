@@ -3,7 +3,7 @@
 # label), from the filter button's pull-down menu.
 appId: ${APP_ID}
 ---
-- tapOn: 'Filter|过滤'
+- tapOn: 'Filter|筛选'
 - waitForAnimationToEnd
 - tapOn: ${LABEL}
 - waitForAnimationToEnd

@@ -149,7 +149,8 @@ export const confirmDeleteCalendars = () => {
         style: 'cancel',
       },
       {
-        text: t('ok'),
+        text: t('delete'),
+        style: 'destructive',
         onPress: async () => {
           show(await deleteCalendars());
         },

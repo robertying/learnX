@@ -200,13 +200,13 @@ describe('groupContentItems', () => {
     const notifications = groupContentItems(pickContentItems(diff, context()));
     expect(notifications).toEqual([
       {
-        title: 'Calculus · New notices',
+        title: 'Calculus · New Notices',
         body: 'Notice n1',
         target: { type: 'notice', id: 'n1' },
         keys: ['notice:n1'],
       },
       {
-        title: 'Calculus · New files',
+        title: 'Calculus · New Files',
         body: 'File f1\nFile f2',
         target: { type: 'file' },
         ids: ['f1', 'f2'],

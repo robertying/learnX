@@ -94,7 +94,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
           style: 'cancel',
         },
         {
-          text: t('ok'),
+          text: t('continue'),
           onPress: async () => {
             setSSOInProgress(true);
 

@@ -94,8 +94,8 @@ afterEach(() => {
 describe('Search', () => {
   it('starts empty with the system search bar in the header', async () => {
     const { options } = await setup();
-    expect(options().placeholder).toBe('Notices, assignments & files...');
-    expect(screen.getByText('No Content')).toBeTruthy();
+    expect(options().placeholder).toBe('Notices, assignments and files');
+    expect(screen.getByText('Nothing Here')).toBeTruthy();
   });
 
   it('groups matches by kind under section headers', async () => {
@@ -124,7 +124,7 @@ describe('Search', () => {
     await type('calculus');
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     await act(() => options().onClose!());
-    expect(screen.getByText('No Content')).toBeTruthy();
+    expect(screen.getByText('Nothing Here')).toBeTruthy();
   });
 
   it('searches for a query it was opened with and fills it in the bar', async () => {

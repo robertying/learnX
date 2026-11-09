@@ -43,10 +43,10 @@ name: Favorite and archive a notice
 - runFlow:
     file: subflows/filter.yaml
     env:
-      LABEL: 'Archived(, .*)?|归档(, .*)?'
+      LABEL: 'Archived(, .*)?|已归档(, .*)?'
 - assertVisible: '.*请按照助教的安排交作业.*'
 
-# Restore it
+# Unarchive it
 - runFlow:
     file: subflows/card_actions.yaml
     env:
