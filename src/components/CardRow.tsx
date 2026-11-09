@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Platform, StyleSheet, Text as NativeText, View } from 'react-native';
 import Icon from '@react-native-vector-icons/material-design-icons';
 import { Caption, Headline, Paragraph, textStyles } from 'components/Text';
+import { fileTypeColor } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { shade, textOn, useTheme, withAlpha } from 'theme';
 
@@ -188,35 +189,12 @@ export const CardPill: React.FC<{
   );
 };
 
-const fileTypeColor = (
-  type: string,
-  status: ReturnType<typeof useTheme>['colors']['status'],
-) => {
-  switch (type) {
-    case 'pdf':
-      return status.red;
-    case 'doc':
-    case 'docx':
-      return status.blue;
-    case 'ppt':
-    case 'pptx':
-    case 'key':
-      return status.orange;
-    case 'xls':
-    case 'xlsx':
-    case 'csv':
-      return status.green;
-    default:
-      return status.grey;
-  }
-};
-
 /** A file's type as a small page with its extension, for file rows. */
 export const FileTypeTile: React.FC<{ fileType?: string }> = ({ fileType }) => {
   const theme = useTheme();
   const type = (fileType ?? '').toLowerCase();
   const label = type.slice(0, 4).toUpperCase();
-  const color = fileTypeColor(type, theme.colors.status);
+  const color = theme.colors.status[fileTypeColor(type)];
   return (
     <View
       testID="file-type"

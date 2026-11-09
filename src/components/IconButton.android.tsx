@@ -3,7 +3,6 @@ import {
   Badge,
   BadgedBox,
   FilledTonalIconButton,
-  Host,
   Icon,
   IconButton as ComposeIconButton,
 } from '@expo/ui/jetpack-compose';
@@ -12,12 +11,12 @@ import {
   testID as testIDModifier,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { t } from 'helpers/i18n';
-import { useComposeColorOverrides, useTheme } from 'theme';
 import {
   PADDING,
   type IconButtonIcon,
   type IconButtonProps,
 } from './IconButton.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
 
@@ -60,8 +59,6 @@ const IconButton: React.FC<IconButtonProps> = ({
   testID,
   style,
 }) => {
-  const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
   const Button =
     mode === 'contained' ? FilledTonalIconButton : ComposeIconButton;
 
@@ -79,11 +76,7 @@ const IconButton: React.FC<IconButtonProps> = ({
 
   return (
     <View style={style}>
-      <Host
-        matchContents
-        seedColor={theme.colors.primary}
-        colorOverrides={colorOverrides}
-      >
+      <ThemedHost matchContents>
         <Button
           enabled={!disabled}
           onClick={onPress}
@@ -106,7 +99,7 @@ const IconButton: React.FC<IconButtonProps> = ({
             glyph
           )}
         </Button>
-      </Host>
+      </ThemedHost>
     </View>
   );
 };

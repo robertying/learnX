@@ -1,17 +1,8 @@
-import { DateRangePickerDialog, Host } from '@expo/ui/jetpack-compose';
+import { DateRangePickerDialog } from '@expo/ui/jetpack-compose';
+import { fromPickerDay, toPickerDay } from 'helpers/pickerDay';
 import type { DateRangePickerProps } from './DateRangePicker.shared';
 import { useTheme } from 'theme';
-
-// Compose's date pickers work in UTC-midnight days: send each local day as that
-// day's UTC midnight and read the picked days back as local midnights.
-const toPickerDay = (date: Date | undefined) =>
-  date
-    ? new Date(
-        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()),
-      ).toISOString()
-    : undefined;
-const fromPickerDay = (date: Date) =>
-  new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+import ThemedHost from 'components/ThemedHost';
 
 /**
  * Material 3's date range picker dialog. Compose doesn't take a custom title,
@@ -34,7 +25,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   }
 
   return (
-    <Host>
+    <ThemedHost>
       <DateRangePickerDialog
         initialStartDate={toPickerDay(startDate)}
         initialEndDate={toPickerDay(endDate)}
@@ -54,7 +45,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
         }}
         onDismissRequest={onDismiss}
       />
-    </Host>
+    </ThemedHost>
   );
 };
 
