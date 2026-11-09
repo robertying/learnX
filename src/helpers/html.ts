@@ -58,6 +58,8 @@ export const getWebViewTemplate = (
           height: 100%;
           width: 100%;
           overflow: auto;
+          /* A long URL wraps instead of running off the edge. */
+          overflow-wrap: anywhere;
         }
         #root > p:first-child {
           margin-top: 0px;
