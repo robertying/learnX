@@ -1,4 +1,4 @@
-import { CourseType, FailReason } from '@robertying/thu-learn-lib';
+import { CourseType, FailReason, Language } from '@robertying/thu-learn-lib';
 import {
   defaultMockNetworkConfig,
   MOCK_TIMEOUT_MS,
@@ -115,6 +115,22 @@ describe('mockSource', () => {
     expect(withTimes.timeAndLocation).toEqual(
       mockCourses.find(c => c.id === withTimes.id)!.timeAndLocation,
     );
+  });
+
+  it('names courses in the language asked for', async () => {
+    const [chinese] = await mockSource.getCourseList(
+      mockCurrentSemester,
+      CourseType.STUDENT,
+      Language.ZH,
+    );
+    const [english] = await mockSource.getCourseList(
+      mockCurrentSemester,
+      CourseType.STUDENT,
+      Language.EN,
+    );
+    const course = mockCourses.find(c => c.id === chinese.id)!;
+    expect(chinese.name).toBe(course.chineseName);
+    expect(english.name).toBe(course.englishName);
   });
 
   it('returns a fresh copy for every response', async () => {

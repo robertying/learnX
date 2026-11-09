@@ -3,6 +3,7 @@ import {
   CalendarResult,
   DetailSelector,
   FailReason,
+  Language,
   SemesterInfo,
   SemesterType,
 } from '@robertying/thu-learn-lib';
@@ -241,14 +242,17 @@ export const mockSource: DataSource = {
   getSemesterIdList: () => request(() => mock().mockSemesters),
   getCurrentSemester: () =>
     request(() => semesterInfo(mock().mockCurrentSemester)),
-  getCourseList: (semesterId, _courseType, _lang, options) =>
+  // Names come in the language asked for, as the server does.
+  getCourseList: (semesterId, _courseType, lang, options) =>
     request(
       () =>
         mock()
           .mockCourses.filter(course => course.semesterId === semesterId)
           .map(course =>
             omit(
-              course,
+              lang === Language.EN
+                ? { ...course, name: course.englishName }
+                : course,
               options?.timeAndLocation
                 ? ['semesterId']
                 : ['semesterId', 'timeAndLocation'],

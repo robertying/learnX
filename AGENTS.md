@@ -56,6 +56,8 @@ The app can be used without a real Tsinghua account: enter `DUMMY_USERNAME` / `D
 ### Mock data
 
 - `src/data/mock.ts` computes dates relative to now: keep new entries relative and free of sensitive info (emails, phone numbers, student IDs, URLs).
+- It is meant to cover every UI state and to be good enough for store screenshots: real course names (with English names, which the emulated server returns when the app asks in English), made-up but plausible people's names (never real people), and notices and assignments with attachments, links, wide tables, an image and math, in every assignment state. Keep it that way when adding entries.
+- Attachments and files download real sample files from `mock-files/` in this repo (via raw.githubusercontent.com on `main`, so a new sample only works once merged). `mock-files/generate.py` rebuilds them; add a sample there rather than linking to outside files.
 - Assignment submission is disabled after the deadline, so keep some mock deadlines in the future.
 - The mock courses have class times, and the mock semester began on the Monday eight weeks ago (`mockSemesterStart`), so it's always week 9; the emulated `getCalendar` works the week out from those times.
 

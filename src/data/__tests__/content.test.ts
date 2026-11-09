@@ -60,7 +60,8 @@ describe('notices', () => {
     expect(isNewestFirst(notices)).toBe(true);
     for (const notice of notices) {
       const course = mockCourses.find(c => c.id === notice.courseId)!;
-      expect(notice.courseName).toBe(course.name);
+      // Tests run in English, so courses come with their English names.
+      expect(notice.courseName).toBe(course.englishName);
       expect(notice.courseTeacherName).toBe(course.teacherName);
     }
   });
@@ -98,7 +99,7 @@ describe('assignments', () => {
     expect(ids(assignments).sort()).toEqual(ids(expected).sort());
     expect(ids(assignments)).toEqual(ids(sortAssignments(assignments)));
     const course = mockCourses.find(c => c.id === assignments[0].courseId)!;
-    expect(assignments[0].courseName).toBe(course.name);
+    expect(assignments[0].courseName).toBe(course.englishName);
   });
 
   it("refreshes one course's assignments and keeps the order", async () => {
