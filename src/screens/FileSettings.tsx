@@ -4,10 +4,10 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
 import {
-  ensureLearnXFilesDir,
+  ensureDownloadsDirectory,
   listDownloads,
   moveDownloadsToCurrentDirectory,
-} from 'helpers/fs';
+} from 'helpers/files/downloads';
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
@@ -46,7 +46,7 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
 
   const openDownloadDirectory = async () => {
     try {
-      const dir = await ensureLearnXFilesDir();
+      const dir = ensureDownloadsDirectory();
       await Linking.openURL(dir);
     } catch (e) {
       toast(

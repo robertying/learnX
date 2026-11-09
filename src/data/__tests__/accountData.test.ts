@@ -15,7 +15,7 @@ jest.mock('data/source', () => ({
 jest.mock('helpers/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
-jest.mock('helpers/fs', () => ({
+jest.mock('helpers/files/downloads', () => ({
   removeFileDir: jest.fn(async () => {}),
 }));
 

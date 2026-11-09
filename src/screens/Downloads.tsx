@@ -7,7 +7,7 @@ import {
   listDownloads,
   removeCourseDownloads,
   removeFileDir,
-} from 'helpers/fs';
+} from 'helpers/files/downloads';
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';

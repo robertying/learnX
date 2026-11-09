@@ -1,14 +1,20 @@
-import { useCallback, useEffect, useEffectEvent, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from 'react';
 import { Linking, Platform } from 'react-native';
 import { toast } from 'components/Toast';
 import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
+import { downloadFile } from 'helpers/files/downloads';
 import {
   copyFileToMacDownloads,
-  downloadFile,
   openFile,
   shareFile,
-} from 'helpers/fs';
+} from 'helpers/files/share';
 import { t } from 'helpers/i18n';
 
 /**
@@ -36,19 +42,34 @@ const useFileDownload = (file: DownloadableFile) => {
     downloadUrl: file.downloadUrl,
   }));
 
+  // The download under way, cancelled when another starts or the screen
+  // closes.
+  const downloadRef = useRef<AbortController | null>(null);
+
   const download = useCallback(
-    (refresh: boolean) =>
-      downloadFile(downloadable, refresh, setProgress).then(
+    (refresh: boolean) => {
+      downloadRef.current?.abort();
+      const controller = new AbortController();
+      downloadRef.current = controller;
+      return downloadFile(downloadable, {
+        refresh,
+        onProgress: setProgress,
+        signal: controller.signal,
+      }).then(
         downloadedPath => {
           setPath(downloadedPath);
           setProgress(0);
         },
         () => {
+          if (controller.signal.aborted) {
+            return;
+          }
           setProgress(0);
           setError(true);
           toast(t('fileDownloadFailed'), 'error');
         },
-      ),
+      );
+    },
     [downloadable],
   );
 
@@ -60,7 +81,11 @@ const useFileDownload = (file: DownloadableFile) => {
   }, [download]);
 
   const share = useCallback(async () => {
-    await shareFile(downloadable);
+    try {
+      await shareFile(downloadable);
+    } catch {
+      toast(t('fileDownloadFailed'), 'error');
+    }
   }, [downloadable]);
 
   const copyToDownloads = useCallback(async () => {
@@ -84,9 +109,14 @@ const useFileDownload = (file: DownloadableFile) => {
     }
   }, [downloadable.fileType, path]);
 
-  useEffect(() => {
+  const downloadOnMount = useEffectEvent(() => {
     void download(false);
-  }, [download]);
+  });
+
+  useEffect(() => {
+    downloadOnMount();
+    return () => downloadRef.current?.abort();
+  }, []);
 
   const openAfterDownload = useEffectEvent(() => {
     if (

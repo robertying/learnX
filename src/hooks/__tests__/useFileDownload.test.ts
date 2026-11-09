@@ -3,18 +3,18 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
 import { setSetting } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
+import { downloadFile } from 'helpers/files/downloads';
 import {
   copyFileToMacDownloads,
-  downloadFile,
   openFile,
   shareFile,
-} from 'helpers/fs';
+} from 'helpers/files/share';
 import useFileDownload from 'hooks/useFileDownload';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
-jest.mock('helpers/fs', () => ({
+jest.mock('helpers/files/downloads', () => ({ downloadFile: jest.fn() }));
+jest.mock('helpers/files/share', () => ({
   copyFileToMacDownloads: jest.fn(),
-  downloadFile: jest.fn(),
   openFile: jest.fn(),
   shareFile: jest.fn(),
 }));
@@ -46,25 +46,23 @@ describe('useFileDownload', () => {
     const { result } = await setup();
     await waitFor(() => expect(result.current.path).toBe(PATH));
     expect(downloadFile).toHaveBeenCalledTimes(1);
-    expect(downloadFile).toHaveBeenCalledWith(
-      file,
-      false,
-      expect.any(Function),
-    );
+    expect(downloadFile).toHaveBeenCalledWith(file, {
+      refresh: false,
+      onProgress: expect.any(Function),
+      signal: expect.any(AbortSignal),
+    });
     expect(result.current.error).toBe(false);
   });
 
   it('reports progress, then resets it when done', async () => {
     let finish: (path: string) => void = () => {};
     let report: (progress: number) => void = () => {};
-    jest
-      .mocked(downloadFile)
-      .mockImplementationOnce((_file, _refresh, onProgress) => {
-        report = onProgress!;
-        return new Promise(resolve => {
-          finish = resolve;
-        });
+    jest.mocked(downloadFile).mockImplementationOnce((_file, options) => {
+      report = options!.onProgress!;
+      return new Promise(resolve => {
+        finish = resolve;
       });
+    });
     const { result } = await setup();
 
     await act(() => report(0.5));
@@ -89,11 +87,11 @@ describe('useFileDownload', () => {
     await waitFor(() => expect(result.current.error).toBe(true));
 
     await act(() => result.current.redownload());
-    expect(downloadFile).toHaveBeenLastCalledWith(
-      file,
-      true,
-      expect.any(Function),
-    );
+    expect(downloadFile).toHaveBeenLastCalledWith(file, {
+      refresh: true,
+      onProgress: expect.any(Function),
+      signal: expect.any(AbortSignal),
+    });
     await waitFor(() => expect(result.current.path).toBe(PATH));
     expect(result.current.error).toBe(false);
   });
@@ -109,6 +107,28 @@ describe('useFileDownload', () => {
     const { result } = await setup();
     await act(() => result.current.share());
     expect(shareFile).toHaveBeenCalledWith(file);
+  });
+
+  it('says so when sharing fails', async () => {
+    jest.mocked(shareFile).mockRejectedValueOnce(new Error('Network'));
+    const { result } = await setup();
+    await act(() => result.current.share());
+    expect(toast).toHaveBeenLastCalledWith(expect.any(String), 'error');
+  });
+
+  it('cancels the download when the screen closes, without an error', async () => {
+    let signal: AbortSignal | undefined;
+    jest.mocked(downloadFile).mockImplementationOnce((_file, options) => {
+      signal = options!.signal;
+      return new Promise((_resolve, reject) =>
+        signal!.addEventListener('abort', () => reject(new Error('Abort'))),
+      );
+    });
+    const { unmount } = await setup();
+    await unmount();
+    expect(signal?.aborted).toBe(true);
+    await act(async () => {});
+    expect(toast).not.toHaveBeenCalled();
   });
 
   it('copies to Downloads and says how it went', async () => {

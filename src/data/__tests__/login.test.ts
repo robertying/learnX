@@ -35,7 +35,7 @@ jest.mock('data/source', () => ({
 jest.mock('helpers/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
-jest.mock('helpers/fs', () => ({
+jest.mock('helpers/files/downloads', () => ({
   removeFileDir: jest.fn(async () => {}),
 }));
 jest.mock('helpers/retry', () => ({
@@ -324,7 +324,7 @@ describe('switching accounts', () => {
   });
 
   it('deletes the downloaded files on logout', async () => {
-    const { removeFileDir } = require('helpers/fs');
+    const { removeFileDir } = require('helpers/files/downloads');
     removeFileDir.mockClear();
     await login(sso);
     await logout();
