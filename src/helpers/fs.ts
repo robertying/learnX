@@ -461,5 +461,3 @@ export const copyFileToCache = async (uri: string) => {
   await from.copy(to, { overwrite: true });
   return to.uri;
 };
-
-export { getExtension, stripExtension } from './filename';

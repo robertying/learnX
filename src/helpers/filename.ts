@@ -1,22 +1,35 @@
-/** Text after the last dot; the whole name when there is no dot */
+/**
+ * Where the extension's dot is, or -1 when there is none. A leading dot
+ * (`.bashrc`) starts a hidden name, not an extension.
+ */
+const extensionDot = (filename: string) => filename.lastIndexOf('.');
+
+/** Text after the last dot; empty when the name has no extension */
 export const getExtension = (filename: string) => {
-  return filename ? filename.split('.').pop() : '';
+  const dot = extensionDot(filename);
+  return dot > 0 ? filename.slice(dot + 1) : '';
 };
 
 /** The name without its last extension */
 export const stripExtension = (filename: string) => {
-  return filename ? filename.replace(/\.[^/.]+$/, '') : '';
+  const dot = extensionDot(filename);
+  return dot > 0 ? filename.slice(0, dot) : filename;
 };
+
+/** `name` with `.extension` added, or just `name` when there is none */
+export const withExtension = (name: string, extension?: string | null) =>
+  extension ? `${name}.${extension}` : name;
 
 /** Bytes a file system allows in one name; most allow 255. */
 const MAX_NAME_BYTES = 255;
 
 /** Cuts a string to at most `bytes` UTF-8 bytes without splitting a character. */
 const truncateBytes = (text: string, bytes: number) => {
+  const encoder = new TextEncoder();
   let result = '';
   let used = 0;
   for (const char of text) {
-    const size = new TextEncoder().encode(char).length;
+    const size = encoder.encode(char).length;
     if (used + size > bytes) {
       break;
     }
