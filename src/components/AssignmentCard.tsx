@@ -93,7 +93,7 @@ const AssignmentCard: React.FC<
         {strippedDescription ? (
           <Paragraph numberOfLines={2}>{strippedDescription}</Paragraph>
         ) : null}
-        <View style={Styles.flexRowCenter}>
+        <View style={Styles.metaRow}>
           <Caption>{courseTeacherName}</Caption>
           <Caption>{dueText}</Caption>
         </View>

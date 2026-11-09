@@ -63,7 +63,7 @@ const FileCard: React.FC<React.PropsWithChildren<FileCardProps>> = ({
         {strippedDescription ? (
           <Paragraph numberOfLines={2}>{strippedDescription}</Paragraph>
         ) : null}
-        <View style={Styles.flexRowCenter}>
+        <View style={Styles.metaRow}>
           <Caption>
             {`${category?.title ?? ''} ${fileType?.toUpperCase() ?? ''} ${size}`.trim()}
           </Caption>

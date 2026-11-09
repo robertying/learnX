@@ -70,7 +70,7 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
         {strippedContent ? (
           <Paragraph numberOfLines={2}>{strippedContent}</Paragraph>
         ) : null}
-        <View style={Styles.flexRowCenter}>
+        <View style={Styles.metaRow}>
           <Caption>{publisher}</Caption>
           <Caption>{timeAgo}</Caption>
         </View>

@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { dataSource } from 'data/source';
 
 export { removeTags } from './text';
@@ -44,7 +45,11 @@ export const getWebViewTemplate = (
       <style>
         body {
           margin: 0px;
-          padding: 1rem;
+          padding: 1rem;${
+            // The Body text style, which follows Dynamic Type like the rest
+            // of the app. Android's WebView follows the font scale itself.
+            Platform.OS === 'ios' ? '\n          font: -apple-system-body;' : ''
+          }
         }
         #root {
           height: 100%;
