@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { FailReason } from '@robertying/thu-learn-lib';
-import { submitAssignment } from 'data/source';
+import { dataSource, submitAssignment } from 'data/source';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
 jest.mock('axios', () => ({ post: jest.fn() }));
@@ -9,6 +9,7 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
   setFromResponse: jest.fn(),
   flush: jest.fn(),
 }));
+const mockEnsureSession = jest.fn(() => Promise.resolve());
 const mockGetSubmitRequest = jest.fn(
   async (
     id: string,
@@ -28,6 +29,7 @@ jest.mock('@robertying/thu-learn-lib', () => ({
   ...jest.requireActual('@robertying/thu-learn-lib'),
   Learn2018Helper: class {
     getCSRFToken = () => 'token';
+    ensureSession = () => mockEnsureSession();
     // the helper is made when data/source loads, before this file's consts
     getHomeworkSubmitRequest = (
       ...args: Parameters<typeof mockGetSubmitRequest>
@@ -106,5 +108,63 @@ describe('submitAssignment', () => {
     post.mockClear();
     await submitAssignment('homework-id');
     expect(post).not.toHaveBeenCalled();
+  });
+});
+
+describe('markNoticeRead', () => {
+  const url =
+    'https://learn.tsinghua.edu.cn/f/wlxt/kcgg/wlkc_ggb/student/beforeViewXs?wlkcid=c&id=n';
+  const notice = `<html>${'notice '.repeat(1000)}</html>`;
+  const loginPage = '<html><title>登录超时</title></html>';
+  const page = (text: string, init: { status?: number; url?: string } = {}) => {
+    const response = new Response(text, { status: init.status ?? 200 });
+    Object.defineProperty(response, 'url', { value: init.url ?? url });
+    return response;
+  };
+  const fetchMock = jest.fn<Promise<Response>, [string]>();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    mockEnsureSession.mockClear();
+    globalThis.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  it('loads the notice page once when the session is good', async () => {
+    fetchMock.mockResolvedValue(page(notice));
+    await dataSource.markNoticeRead(url);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(mockEnsureSession).not.toHaveBeenCalled();
+  });
+
+  it('logs in again and loads it once more when it gets the login page', async () => {
+    fetchMock
+      .mockResolvedValueOnce(page(loginPage))
+      .mockResolvedValueOnce(page(notice));
+    await dataSource.markNoticeRead(url);
+    expect(mockEnsureSession).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('treats a redirect to the login timeout page as an expired session', async () => {
+    fetchMock.mockResolvedValue(
+      page('', { url: 'https://learn.tsinghua.edu.cn/f/login_timeout' }),
+    );
+    await expect(dataSource.markNoticeRead(url)).rejects.toMatchObject({
+      reason: FailReason.NOT_LOGGED_IN,
+    });
+    expect(mockEnsureSession).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails with the status of an error page', async () => {
+    fetchMock.mockResolvedValue(page('', { status: 500 }));
+    await expect(dataSource.markNoticeRead(url)).rejects.toMatchObject({
+      reason: FailReason.UNEXPECTED_STATUS,
+      extra: 500,
+    });
+  });
+
+  it('does not load a page outside Web Learning', async () => {
+    await dataSource.markNoticeRead('https://example.com/notice');
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

@@ -53,8 +53,8 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
         return true;
       }
 
-      if (!formData.current) {
-        // Something went wrong
+      if (!formData.current?.fingerPrint) {
+        // The login form wasn't captured, or without the device fingerprint
         toast(t('ssoFailed'), 'error');
       } else {
         void login(formData.current);

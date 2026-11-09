@@ -74,6 +74,21 @@ describe('login', () => {
     });
   });
 
+  it('fails a login SSO captured without its fingerprint, keeping the saved one', async () => {
+    useCredentialsStore.setState({
+      credentials: { ...sso, username: 'saved' },
+    });
+    await login({ ...sso, fingerPrint: '' });
+    expect(loginWithFingerPrint).not.toHaveBeenCalled();
+    expect(getAuth()).toMatchObject({
+      loggingIn: false,
+      loggedIn: false,
+      error: FailReason.NO_CREDENTIAL,
+      failure: 'rejected',
+    });
+    expect(getCredentials()?.username).toBe('saved');
+  });
+
   it('marks the login in progress, then done, and saves an SSO login', async () => {
     useAuthStore.setState({ error: FailReason.BAD_CREDENTIAL });
     const done = login(sso);
