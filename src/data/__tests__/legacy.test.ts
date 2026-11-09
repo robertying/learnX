@@ -308,7 +308,7 @@ describe('the mock account', () => {
 
     const { loginWithMockAccount } = loginModule();
     const { mockUserData } = require('data/mock');
-    loginWithMockAccount();
+    loginWithMockAccount('mock-user');
 
     expect(require('data/auth').getAuth().loggedIn).toBe(true);
     expect(m.userData.getUserData()).toEqual(mockUserData);

@@ -122,6 +122,7 @@ describe('Login', () => {
     await pressLogin();
 
     expect(loginWithMockAccount).toHaveBeenCalledTimes(1);
+    expect(loginWithMockAccount).toHaveBeenCalledWith(env.DUMMY_USERNAME);
     expect(login).not.toHaveBeenCalled();
     expect(alert).not.toHaveBeenCalled();
     expect(getCredentials()).toMatchObject({
@@ -137,6 +138,9 @@ describe('Login', () => {
     await pressLogin();
 
     expect(loginWithMockAccount).toHaveBeenCalledTimes(1);
+    expect(loginWithMockAccount).toHaveBeenCalledWith(
+      env.DUMMY_PERSIST_USERNAME,
+    );
     expect(login).toHaveBeenCalledWith({
       username: env.DUMMY_PERSIST_USERNAME,
       password: env.DUMMY_PERSIST_PASSWORD,

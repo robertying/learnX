@@ -1,7 +1,21 @@
 import { FailReason } from '@robertying/thu-learn-lib';
-import { getAuth, initialAuth, useAuthStore } from 'data/auth';
-import { getCredentials } from 'data/credentials';
-import { login, loginWithOfflineMode, logout } from 'data/login';
+import { getAuth, initialAuth, requestRelogin, useAuthStore } from 'data/auth';
+import {
+  getCredentials,
+  saveCredentials,
+  useCredentialsStore,
+} from 'data/credentials';
+import { getDataOwner, setDataOwner } from 'data/dataOwner';
+import {
+  login,
+  loginWithMockAccount,
+  loginWithOfflineMode,
+  logout,
+} from 'data/login';
+import { mockUserData } from 'data/mock';
+import { getUserData, resetUserData, setFavorite } from 'data/userData';
+import env from 'helpers/env';
+import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import {
   dataSource,
   isServerReachable,
@@ -32,6 +46,10 @@ const sso = {
 
 beforeEach(() => {
   useAuthStore.setState(initialAuth);
+  useCredentialsStore.setState({ credentials: null });
+  setDataOwner(null);
+  resetUserData();
+  queryClient.clear();
   // The user's name is fetched after a login; it isn't what's tested here.
   jest.spyOn(queryClient, 'prefetchQuery').mockResolvedValue();
   jest.mocked(loginWithFingerPrint).mockClear();
@@ -180,5 +198,109 @@ describe('login', () => {
     await logout();
     expect(getAuth()).toEqual(initialAuth);
     expect(getCredentials()).toBeNull();
+  });
+});
+
+describe('switching accounts', () => {
+  const cachedKey = ['courses', 'semester'];
+
+  /** Data the previous account left behind. */
+  const leaveData = () => {
+    setFavorite('notice', 'old-notice', true);
+    queryClient.setQueryData(cachedKey, ['old-course']);
+  };
+
+  const dataKept = () =>
+    getUserData().favorites.notice.includes('old-notice') &&
+    queryClient.getQueryData(cachedKey) !== undefined;
+
+  it('drops the ephemeral mock account’s data on a real login after a relaunch', async () => {
+    loginWithMockAccount(env.DUMMY_USERNAME);
+    await saveCredentials({
+      username: env.DUMMY_USERNAME,
+      password: env.DUMMY_PASSWORD,
+      fingerPrint: MOCK_FINGER_PRINT,
+      fingerGenPrint: '',
+      fingerGenPrint3: '',
+    });
+    expect(getUserData()).toEqual(mockUserData);
+    leaveData();
+    // A relaunch forgets the ephemeral login but keeps its data.
+    useAuthStore.setState(initialAuth);
+    useCredentialsStore.setState({ credentials: null });
+
+    await login(sso);
+
+    expect(getAuth().loggedIn).toBe(true);
+    expect(dataKept()).toBe(false);
+    expect(getUserData().favorites.notice).toEqual([]);
+    expect(getUserData().currentSemester).toBeNull();
+    expect(getDataOwner()).toBe('student');
+  });
+
+  it('drops the data when "Log in again" signs in as someone else', async () => {
+    await login(sso);
+    leaveData();
+    useAuthStore.setState({ loggedIn: false, failure: 'rejected' });
+    requestRelogin();
+
+    await login({ ...sso, username: 'someone-else' });
+
+    expect(dataKept()).toBe(false);
+    expect(getDataOwner()).toBe('someone-else');
+    expect(getCredentials()?.username).toBe('someone-else');
+  });
+
+  it('keeps the data when the same user logs in again', async () => {
+    await login(sso);
+    leaveData();
+    useAuthStore.setState({ loggedIn: false, failure: 'rejected' });
+    requestRelogin();
+
+    await login(sso);
+    expect(dataKept()).toBe(true);
+
+    // A relaunch or a resume signs in with the saved login.
+    await login({ reset: true });
+    await login({ resume: true });
+    expect(dataKept()).toBe(true);
+    expect(getDataOwner()).toBe('student');
+  });
+
+  it('keeps the persistent mock account’s data when it logs in', async () => {
+    loginWithMockAccount(env.DUMMY_PERSIST_USERNAME);
+    leaveData();
+    await login({
+      username: env.DUMMY_PERSIST_USERNAME,
+      password: env.DUMMY_PERSIST_PASSWORD,
+      fingerPrint: MOCK_FINGER_PRINT,
+    });
+    expect(dataKept()).toBe(true);
+    expect(getDataOwner()).toBe(env.DUMMY_PERSIST_USERNAME);
+  });
+
+  it('takes data saved before its owner was recorded as the saved login’s', async () => {
+    await saveCredentials(sso);
+    leaveData();
+    await login({ reset: true });
+    expect(dataKept()).toBe(true);
+    expect(getDataOwner()).toBe('student');
+  });
+
+  it('keeps the data when a login as someone else fails', async () => {
+    await login(sso);
+    leaveData();
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.BAD_CREDENTIAL });
+    await login({ ...sso, username: 'someone-else' });
+    expect(dataKept()).toBe(true);
+    expect(getDataOwner()).toBe('student');
+  });
+
+  it('forgets the owner on logout', async () => {
+    await login(sso);
+    await logout();
+    expect(getDataOwner()).toBeNull();
   });
 });
