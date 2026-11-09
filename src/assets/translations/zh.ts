@@ -62,6 +62,9 @@ const zh: typeof en = {
   reUploadAttachment: '选择新附件',
   overwriteAttachment: '覆盖已上传的附件',
   pickAttachment: '选择附件',
+  submissionContent: '内容',
+  submissionAttachment: '附件',
+  uploadingSubmission: '正在上传…',
   courseScheduleSyncSucceeded: '课表同步成功',
   courseScheduleSyncPartial:
     '课表已部分同步：部分周的课表获取失败，已保留原有日程，请稍后重试',

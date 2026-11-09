@@ -1,38 +1,54 @@
+import { StyleSheet, View } from 'react-native';
+import { Button, Host } from '@expo/ui/swift-ui';
 import {
-  Platform,
-  Pressable,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native';
-import MaterialCommunityIcons, {
-  MaterialDesignIconsIconName,
-} from '@react-native-vector-icons/material-design-icons';
-import { useTheme, withAlpha } from 'theme';
+  buttonBorderShape,
+  buttonStyle,
+  disabled as disabledModifier,
+  font,
+  frame,
+  labelStyle,
+} from '@expo/ui/swift-ui/modifiers';
+import type { SFSymbol } from 'sf-symbols-typescript';
+import Badge from 'components/Badge';
+import { useTheme } from 'theme';
+import {
+  PADDING,
+  type IconButtonIcon,
+  type IconButtonProps,
+} from './IconButton.shared';
 
-export interface IconButtonProps {
-  /** A Material Design Icons name, or a render function for another icon set. */
-  icon:
-    | MaterialDesignIconsIconName
-    | ((props: { size: number; color: string }) => React.ReactNode);
-  size?: number;
-  /** `contained` puts the icon on a filled circle, to show a mode is on. */
-  mode?: 'contained';
-  disabled?: boolean;
-  onPress?: () => void;
-  accessibilityLabel?: string;
-  testID?: string;
-  style?: StyleProp<ViewStyle>;
-}
+export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
 
-const PADDING = 8;
+// The same symbols as the native header items.
+const symbols: Record<IconButtonIcon, SFSymbol> = {
+  archive: 'archivebox',
+  back: 'chevron.backward',
+  checkAll: 'checkmark.circle.fill',
+  close: 'xmark',
+  download: 'arrow.down.to.line',
+  exitFullscreen: 'arrow.down.right.and.arrow.up.left',
+  filter: 'line.3.horizontal.decrease.circle',
+  forward: 'chevron.forward',
+  fullscreen: 'arrow.up.left.and.arrow.down.right',
+  info: 'info.circle',
+  openInNew: 'arrow.up.forward.app',
+  preview: 'eye',
+  refresh: 'arrow.clockwise',
+  reorder: 'arrow.up.and.down',
+  restore: 'arrow.up.bin',
+  search: 'magnifyingglass',
+  select: 'checklist',
+  settings: 'gearshape',
+  share: 'square.and.arrow.up',
+  upload: 'arrow.up.circle',
+};
 
-/** A round icon-only button (Material 3 standard icon button). */
+/** An icon-only SwiftUI button with an SF Symbol, tinted with the theme. */
 const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size = 24,
   mode,
+  badge,
   disabled,
   onPress,
   accessibilityLabel,
@@ -40,70 +56,38 @@ const IconButton: React.FC<IconButtonProps> = ({
   style,
 }) => {
   const theme = useTheme();
-
-  const color = disabled
-    ? theme.colors.onSurfaceDisabled
-    : theme.colors.onSurfaceVariant;
-  const backgroundColor =
-    mode === 'contained'
-      ? disabled
-        ? theme.colors.surfaceDisabled
-        : theme.colors.surfaceVariant
-      : undefined;
-  const rippleColor = withAlpha(theme.colors.onSurfaceVariant, 0.12);
   const buttonSize = size + 2 * PADDING;
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          width: buttonSize,
-          height: buttonSize,
-          borderRadius: buttonSize / 2,
-          backgroundColor,
-        },
-        style,
-      ]}
-    >
-      <Pressable
-        style={({ pressed }) => [
-          styles.touchable,
-          Platform.OS !== 'android' && pressed
-            ? { backgroundColor: rippleColor }
-            : undefined,
-        ]}
-        android_ripple={{ color: rippleColor, borderless: true }}
-        disabled={disabled}
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel}
-        accessibilityState={{ disabled }}
-        testID={testID}
-      >
-        {typeof icon === 'function' ? (
-          icon({ size, color })
-        ) : (
-          <MaterialCommunityIcons name={icon} size={size} color={color} />
-        )}
-      </Pressable>
+    <View style={style}>
+      <Host matchContents seedColor={theme.colors.primary}>
+        <Button
+          systemImage={symbols[icon]}
+          label={accessibilityLabel ?? ''}
+          onPress={onPress}
+          testID={testID}
+          modifiers={[
+            labelStyle('iconOnly'),
+            ...(mode === 'contained'
+              ? [buttonStyle('bordered'), buttonBorderShape('circle')]
+              : [buttonStyle('borderless')]),
+            // SF Symbols size with the font; this one draws about `size` tall.
+            font({ size: Math.round(size * 0.85) }),
+            frame({ width: buttonSize, height: buttonSize }),
+            disabledModifier(!!disabled),
+          ]}
+        />
+      </Host>
+      {badge && <Badge size={8} style={styles.badge} />}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    overflow: 'hidden',
-    margin: 6,
-    // Keeps the old wrapper's compact look in headers.
-    marginVertical: -2,
-    marginHorizontal: 0,
-    transform: [{ scale: 0.8 }],
-  },
-  touchable: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+  badge: {
+    position: 'absolute',
+    top: PADDING - 2,
+    right: PADDING - 2,
   },
 });
 

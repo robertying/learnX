@@ -80,7 +80,8 @@ const ExcellentHomeworkRow: React.FC<{
         <View style={Styles.flex1}>
           {homeworkAttachment && (
             <TextButton
-              style={[Styles.spacey1, styles.textPaddingRight]}
+              fill
+              style={[Styles.spacey1, styles.buttonEnd]}
               onPress={() => onFileOpen(homeworkAttachment)}
             >
               {homeworkAttachment.name}
@@ -175,9 +176,7 @@ const AssignmentDetailContent: React.FC<{
             disabled={closed}
             onPress={handleSubmit}
             accessibilityLabel={t('submit')}
-            icon={props => (
-              <MaterialCommunityIcons {...props} name="file-upload" />
-            )}
+            icon="upload"
           />
         ),
         unstable_headerRightItems: () => [
@@ -237,7 +236,8 @@ const AssignmentDetailContent: React.FC<{
                 size={17}
               />
               <TextButton
-                style={styles.textPaddingRight}
+                fill
+                style={[Styles.flex1, styles.buttonEnd]}
                 onPress={() => handleFileOpen(attachment)}
               >
                 {attachment.name}
@@ -256,7 +256,8 @@ const AssignmentDetailContent: React.FC<{
                 size={17}
               />
               <TextButton
-                style={styles.textPaddingRight}
+                fill
+                style={[Styles.flex1, styles.buttonEnd]}
                 onPress={handleSubmit}
               >
                 {t('assignmentDraft')}
@@ -277,7 +278,8 @@ const AssignmentDetailContent: React.FC<{
               <View style={Styles.flex1}>
                 {submittedAttachment && (
                   <TextButton
-                    style={[Styles.spacey1, styles.textPaddingRight]}
+                    fill
+                    style={[Styles.spacey1, styles.buttonEnd]}
                     onPress={() => handleFileOpen(submittedAttachment)}
                   >
                     {submittedAttachment.name}
@@ -321,7 +323,8 @@ const AssignmentDetailContent: React.FC<{
                 ) : null}
                 {gradeAttachment && (
                   <TextButton
-                    style={[Styles.spacey1, styles.textPaddingRight]}
+                    fill
+                    style={[Styles.spacey1, styles.buttonEnd]}
                     onPress={() => handleFileOpen(gradeAttachment)}
                   >
                     {gradeAttachment.name}
@@ -358,7 +361,8 @@ const AssignmentDetailContent: React.FC<{
               <View style={Styles.flex1}>
                 {answerAttachment && (
                   <TextButton
-                    style={[Styles.spacey1, styles.textPaddingRight]}
+                    fill
+                    style={[Styles.spacey1, styles.buttonEnd]}
                     onPress={() => handleFileOpen(answerAttachment)}
                   >
                     {answerAttachment.name}
@@ -396,8 +400,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  textPaddingRight: {
-    paddingRight: 16,
+  buttonEnd: {
+    marginEnd: 16,
   },
   icon: {
     marginRight: 8,

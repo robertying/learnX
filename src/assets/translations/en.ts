@@ -63,6 +63,9 @@ export default {
   reUploadAttachment: 'Pick new attachment',
   overwriteAttachment: 'Overwrite uploaded attachment',
   pickAttachment: 'Pick attachment',
+  submissionContent: 'Content',
+  submissionAttachment: 'Attachment',
+  uploadingSubmission: 'Uploading…',
   courseScheduleSyncSucceeded: 'Successfully synced course schedule',
   courseScheduleSyncPartial:
     'Synced part of the course schedule. Some weeks could not be fetched and were left as they were; try syncing again later.',

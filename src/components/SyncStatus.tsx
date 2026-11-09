@@ -71,8 +71,9 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       {failure === 'rejected' && !loggingIn && (
         <TextButton
           testID="sync-status-relogin"
-          containerStyle={styles.button}
-          style={styles.buttonLabel}
+          style={styles.button}
+          size="small"
+          bold
           onPress={requestRelogin}
         >
           {t('syncStatusLogInAgain')}
@@ -97,11 +98,6 @@ const styles = StyleSheet.create({
   },
   button: {
     marginLeft: 8,
-    paddingVertical: 4,
-  },
-  buttonLabel: {
-    fontSize: 13,
-    fontWeight: '500',
   },
 });
 

@@ -189,15 +189,13 @@ const Login: React.FC<Props> = ({ navigation }) => {
           {hasCredential && (
             <>
               <TextButton
-                containerStyle={[styles.button, styles.textButton]}
-                style={styles.textButtonLabel}
+                style={[styles.button, styles.textButton]}
                 onPress={handleRetryLogin}
               >
                 {t('retryLogin')}
               </TextButton>
               <TextButton
-                containerStyle={styles.textButton}
-                style={styles.textButtonLabel}
+                style={styles.textButton}
                 onPress={handleLoginWithOfflineMode}
               >
                 {t('offlineMode')}
@@ -207,8 +205,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
           {__DEV__ && isMockUser(savedUsername) && (
             <TextButton
               testID="login-mock-network"
-              containerStyle={styles.textButton}
-              style={styles.textButtonLabel}
+              style={styles.textButton}
               onPress={() => navigation.navigate('MockNetwork')}
             >
               Network emulation
@@ -249,12 +246,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   textButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  textButtonLabel: {
-    fontSize: 14,
-    fontWeight: '500',
+    marginVertical: 10,
   },
   noteContainer: {
     alignItems: 'center',

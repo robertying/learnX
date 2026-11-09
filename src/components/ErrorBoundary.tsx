@@ -28,7 +28,7 @@ const ErrorFallback: React.FC = () => {
         {t('somethingWentWrong')}
       </Text>
       <TextButton
-        containerStyle={Styles.spacey1}
+        style={Styles.spacey1}
         onPress={() => reloadAppAsync('Error boundary')}
       >
         {t('reloadApp')}
