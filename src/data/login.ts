@@ -1,3 +1,4 @@
+import { FailReason } from '@robertying/thu-learn-lib';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
 import {
@@ -43,9 +44,9 @@ const loggedIn = () =>
   });
 
 /**
- * Signs in with the given login, or the saved one when none is given. A login
- * with a fingerprint (from SSO) is saved; a username and password alone first
- * forget the saved one. With `resume`, it keeps the current session when the
+ * Signs in with the given login, or the saved one when none is given. A given
+ * login needs the fingerprint SSO captured, and is saved once it works; one
+ * without it fails without touching the saved login. With `resume`, it keeps the current session when the
  * server still accepts it (one request) and only signs in again when it has
  * expired, as when the app comes back from the background.
  */
@@ -58,19 +59,25 @@ export async function login({
   reset = false,
   resume = false,
 }: Partial<Credentials> & { reset?: boolean; resume?: boolean }) {
-  if (!username || !password || !fingerPrint) {
-    if (getAuth().loggingIn) {
-      return;
-    }
+  if (username && (!password || !fingerPrint)) {
+    // SSO didn't capture the login: signing in with the saved one instead
+    // would log in as someone else, so this login just fails.
+    useAuthStore.setState({
+      loggingIn: false,
+      loggedIn: false,
+      error: FailReason.NO_CREDENTIAL,
+      failure: 'rejected',
+    });
+    return;
+  }
+  if (!username && getAuth().loggingIn) {
+    return;
   }
 
   useAuthStore.setState({ loggingIn: true, error: null });
   // Before the saved login is replaced: data saved before owners were
   // recorded belongs to the saved login.
   const previousOwner = getDataOwner() ?? getCredentials()?.username ?? null;
-  if (username && password && !fingerPrint) {
-    await clearCredentials().catch(() => undefined);
-  }
 
   try {
     if (reset) {

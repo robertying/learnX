@@ -1,10 +1,11 @@
-import { ContentType, FailReason } from '@robertying/thu-learn-lib';
+import { FailReason } from '@robertying/thu-learn-lib';
 import { getAuth } from 'data/auth';
 import { markNoticeRead, showFavorite } from 'data/content';
 import {
   actionChange,
   actionKey,
   clearSettled,
+  favoriteContentTypes,
   recordSettled,
   type PendingAction,
   type ServerAction,
@@ -39,12 +40,6 @@ import {
  * it in `actionChange`, and a handler here.
  */
 
-const favoriteTypes: Record<BookmarkType, ContentType> = {
-  notice: ContentType.NOTIFICATION,
-  assignment: ContentType.HOMEWORK,
-  file: ContentType.FILE,
-};
-
 type Handler<K extends ServerActionKind> = {
   /** Changes the account; a debug build may keep these on the phone. */
   write: boolean;
@@ -58,7 +53,7 @@ const handlers: { [K in ServerActionKind]: Handler<K> } = {
     write: true,
     send: ({ type, id, flag }) =>
       flag
-        ? dataSource.addToFavorites(favoriteTypes[type], id)
+        ? dataSource.addToFavorites(favoriteContentTypes[type], id)
         : dataSource.removeFromFavorites(id),
   },
   noticeRead: {

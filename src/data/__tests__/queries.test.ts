@@ -8,7 +8,7 @@ import {
   coursesQuery,
   getCachedCourses,
   getCourseNames,
-  latestSemesterQuery,
+  schoolSemesterQuery,
   semestersQuery,
   userQuery,
 } from 'data/queries';
@@ -30,10 +30,10 @@ describe('server queries', () => {
     );
   });
 
-  it("knows the school's current semester", async () => {
-    expect(await queryClient.fetchQuery(latestSemesterQuery)).toBe(
-      mockCurrentSemester,
-    );
+  it("knows the school's current semester and its dates", async () => {
+    const semester = await queryClient.fetchQuery(schoolSemesterQuery);
+    expect(semester.id).toBe(mockCurrentSemester);
+    expect(semester.startDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it('reads the user', async () => {

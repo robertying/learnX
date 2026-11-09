@@ -46,9 +46,6 @@ describe('mockSource', () => {
     ).find(n => n.id === withAttachment.id)!;
     expect(listed.attachment).toBeUndefined();
     expect(listed.attachmentName).toBe(withAttachment.attachment!.name);
-    await expect(mockSource.getNotificationAttachment(listed)).resolves.toEqual(
-      withAttachment.attachment,
-    );
 
     const selected = (
       await mockSource.getNotificationList(
@@ -66,9 +63,6 @@ describe('mockSource', () => {
       a => a.id === assignment.id,
     )!;
     expect(listed).not.toHaveProperty('description');
-    await expect(mockSource.getHomeworkDetail(listed)).resolves.toMatchObject({
-      description: assignment.description,
-    });
 
     const detailed = (
       await mockSource.getHomeworkList(

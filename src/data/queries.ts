@@ -1,4 +1,3 @@
-import {} from 'react';
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import { CourseType, Language } from '@robertying/thu-learn-lib';
 import { queryClient } from 'data/queryClient';
@@ -7,13 +6,21 @@ import { useLoggedIn } from 'data/auth';
 import { Course, User } from 'data/types/state';
 import { useCurrentSemester } from 'data/userData';
 import { isLocaleChinese } from 'helpers/i18n';
+import type { ContentListName } from 'data/pendingActions';
 
 export const queryKeys = {
   semesters: ['semesters'] as const,
-  latestSemester: ['latestSemester'] as const,
+  // Its key from when only the timetable asked for the dates.
+  schoolSemester: ['semesterDates'] as const,
   user: ['user'] as const,
   coursesAll: ['courses'] as const,
   courses: (semesterId: string) => ['courses', semesterId] as const,
+  /** Every semester's list of notices, assignments or files. */
+  contentAll: (list: ContentListName) => [list] as const,
+  /** A semester's notices, assignments or files (`data/content`). */
+  content: (list: ContentListName, semesterId: string) =>
+    [list, semesterId] as const,
+  excellentHomework: (id: string) => ['excellentHomework', id] as const,
 };
 
 /** Asks for names in the app's language; the answer doesn't matter. */
@@ -30,11 +37,29 @@ export const semestersQuery = queryOptions({
   queryFn: async () => (await dataSource.getSemesterIdList()).sort().reverse(),
 });
 
-/** The school's current semester, which may not be the one being shown. */
-export const latestSemesterQuery = queryOptions({
-  queryKey: queryKeys.latestSemester,
-  queryFn: async () => (await dataSource.getCurrentSemester()).id,
+/** A semester with its first and last day. */
+export interface SemesterDates {
+  id: string;
+  /** As the server gives it, e.g. 2026-09-14; may be empty. */
+  startDate: string;
+  endDate: string;
+}
+
+/**
+ * The school's current semester, which may not be the one being shown, with
+ * its first and last day. One query for the semester check at launch, the
+ * semester list and the timetable's teaching weeks.
+ */
+export const schoolSemesterQuery = queryOptions({
+  queryKey: queryKeys.schoolSemester,
+  queryFn: async (): Promise<SemesterDates> => {
+    const { id, startDate, endDate } = await dataSource.getCurrentSemester();
+    return { id, startDate, endDate };
+  },
 });
+
+/** Picks the id out of `schoolSemesterQuery`'s data. */
+export const selectSemesterId = (semester: SemesterDates) => semester.id;
 
 export const userQuery = queryOptions({
   queryKey: queryKeys.user,
@@ -84,7 +109,11 @@ export const useCourses = () => {
   return { ...query, courses: query.data ?? noCourses };
 };
 
-/** Ids of the semester's courses; a new array only when the set changes. */
+/**
+ * Ids of the semester's courses, sorted. A new array only when the set changes:
+ * the React Compiler memoizes the split on the joined key, so effects can
+ * depend on it.
+ */
 export const useCourseIds = () => {
   const { courses } = useCourses();
   const key = courses

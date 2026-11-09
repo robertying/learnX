@@ -4,10 +4,10 @@ import {
   mergeSettings,
   useSettingsStore,
 } from 'data/settings';
+import { bookmarkLists } from 'data/pendingActions';
 import { kvStorage } from 'data/storage';
 import { SettingsState } from 'data/types/state';
 import {
-  BookmarkType,
   bookmarkTypes,
   emptyUserData,
   favoritesToActions,
@@ -125,13 +125,9 @@ export const legacyUserData = (root: Json): Partial<UserData> => {
     }
   }
 
-  const slices: Record<BookmarkType, string> = {
-    notice: 'notices',
-    assignment: 'assignments',
-    file: 'files',
-  };
   for (const type of bookmarkTypes) {
-    const slice = root[slices[type]];
+    // The slices were named like the lists.
+    const slice = root[bookmarkLists[type]];
     if (!isObject(slice)) {
       continue;
     }
