@@ -191,6 +191,12 @@ export const ensureSession = async () => {
 
 export const resetDataSource = () => {
   helper = new Learn2018Helper({
+    // React Native's fetch keeps cookies in the system's store, which the
+    // web views, file downloads and the submission upload use too. Handing
+    // it over directly keeps that the only cookie jar: without it,
+    // thu-learn-lib wraps fetch with a jar of its own (fetch-cookie), and the
+    // two only agree because native fetch saves the cookies as well.
+    fetch: (input, init) => fetch(input, init),
     provider: () => {
       const credentials = getCredentials();
       return {
