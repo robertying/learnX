@@ -8,6 +8,7 @@ import {
   pickedAsRemoteFile,
   sanitizeCustomAttachmentName,
   sendSubmission,
+  submissionHtml,
   uploadAttachment,
 } from 'helpers/submission';
 
@@ -100,17 +101,17 @@ describe('sendSubmission', () => {
   const onProgress = jest.fn();
   const attachment = { uri: picked.uri, name: 'scan.pdf' };
 
-  it('removes the uploaded attachment, ignoring new content', async () => {
+  it('keeps the answer when removing the attachment, as the website does', async () => {
     await sendSubmission({
       studentHomeworkId: 'hw',
-      content: 'ignored',
-      attachment,
+      content: 'my answer',
+      submittedContent: '<p>my answer</p>',
       removeAttachment: true,
       onProgress,
     });
     expect(submitAssignment).toHaveBeenCalledWith(
       'hw',
-      '',
+      '<p>my answer</p>',
       undefined,
       onProgress,
       true,
@@ -127,9 +128,10 @@ describe('sendSubmission', () => {
     });
     expect(submitAssignment).toHaveBeenCalledWith(
       'hw',
-      'answer',
+      '<p>answer</p>',
       attachment,
       onProgress,
+      false,
     );
   });
 
@@ -189,5 +191,24 @@ describe('file detail params', () => {
       }).fileType,
     ).toBe('docx');
     expect(pickedAsRemoteFile({ ...picked, size: 0 }).size).toBe('');
+  });
+});
+
+describe('submissionHtml', () => {
+  it('sends an edited answer as HTML, one paragraph per line', () => {
+    expect(submissionHtml('first line\n\n<b> & "quotes"')).toBe(
+      '<p>first line</p><p>&nbsp;</p><p>&lt;b&gt; &amp; &quot;quotes&quot;</p>',
+    );
+  });
+
+  it('sends the submitted HTML back as it is when the answer was not edited', () => {
+    const submitted = '<p>Answer with <strong>bold</strong> text</p>';
+    expect(submissionHtml('Answer with bold text', submitted)).toBe(submitted);
+    expect(submissionHtml('Changed', submitted)).toBe('<p>Changed</p>');
+  });
+
+  it('sends nothing for an empty answer', () => {
+    expect(submissionHtml('  ')).toBe('');
+    expect(submissionHtml('')).toBe('');
   });
 });

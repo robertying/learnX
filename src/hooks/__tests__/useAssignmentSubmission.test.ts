@@ -221,9 +221,10 @@ describe('useSubmitAssignment', () => {
 
     expect(submitAssignment).toHaveBeenCalledWith(
       'hw1',
-      'answer',
+      '<p>answer</p>',
       { uri: picked.uri, name: 'Final.pdf' },
       expect.any(Function),
+      false,
     );
     expect(refreshCourseAssignments).toHaveBeenCalledWith('2026-2027-1', 'c1');
     expect(toast).toHaveBeenCalledWith(expect.any(String), 'success');
@@ -241,9 +242,10 @@ describe('useSubmitAssignment', () => {
   it('removes the uploaded attachment when asked', async () => {
     const { result } = await setup({ removeAttachment: true });
     await confirm(result.current.confirmSubmit);
+    // the answer stays: the server replaces the submitted one with what's sent
     expect(submitAssignment).toHaveBeenCalledWith(
       'hw1',
-      '',
+      '<p>answer</p>',
       undefined,
       expect.any(Function),
       true,

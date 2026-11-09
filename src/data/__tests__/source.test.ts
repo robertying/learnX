@@ -31,6 +31,14 @@ describe('submitAssignment', () => {
     expect(post).not.toHaveBeenCalled();
   });
 
+  it('sends fileupload as the text "undefined" without a file, like the website', async () => {
+    post.mockResolvedValueOnce({ status: 200, data: { result: 'success' } });
+    await submit();
+    const body = post.mock.calls[0][1] as FormData;
+    expect(body.getAll('fileupload')).toEqual(['undefined']);
+    expect(body.get('isDeleted')).toBe('0');
+  });
+
   it('resolves when the server says it succeeded', async () => {
     post.mockResolvedValueOnce({ status: 200, data: { result: 'success' } });
     await expect(submit()).resolves.toBeUndefined();
