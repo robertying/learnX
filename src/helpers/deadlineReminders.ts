@@ -4,6 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import {
+  canScheduleExactAlarms,
   getNotificationPermission,
   notificationCategories,
   notificationChannels,
@@ -29,7 +30,10 @@ const LATER_MINUTES = 60;
 const LATER_MARGIN_MINUTES = 5;
 
 export interface PlannedReminder {
-  /** Changes with the deadline and the offset, so either reschedules it. */
+  /**
+   * Changes with the deadline, the offset and whether it can be exact, so
+   * any of them reschedules it.
+   */
   identifier: string;
   date: number;
   deadline: WidgetDeadline;
@@ -47,6 +51,7 @@ export const planDeadlineReminders = (
     hiddenCourses,
     archived,
     now = Date.now(),
+    inexact = false,
   }: {
     settings: Pick<
       NotificationSettings,
@@ -55,6 +60,12 @@ export const planDeadlineReminders = (
     hiddenCourses: string[];
     archived: string[];
     now?: number;
+    /**
+     * Android without the exact alarm permission, where reminders may be
+     * late. Marked in the identifier, so they're scheduled again once it's
+     * allowed.
+     */
+    inexact?: boolean;
   },
 ): PlannedReminder[] => {
   if (!settings.deadlineReminders) {
@@ -68,7 +79,7 @@ export const planDeadlineReminders = (
     limit: MAX_REMINDERS,
   });
   return deadlines.map(deadline => ({
-    identifier: `${PREFIX}${deadline.id}:${deadline.deadline}:${settings.deadlineReminderOffset}`,
+    identifier: `${PREFIX}${deadline.id}:${deadline.deadline}:${settings.deadlineReminderOffset}${inexact ? ':inexact' : ''}`,
     date: deadline.deadline - offset,
     deadline,
   }));
@@ -91,25 +102,45 @@ const reminderContent = ({
 /**
  * Makes the scheduled reminders match the plan: cancels the ones no longer
  * wanted (submitted, archived, deadline moved, turned off) and schedules the
- * new ones. Without the permission, cancels them all.
+ * new ones. A reminder put off with Remind Later is kept while its assignment
+ * is still open and reminders are on. Without the permission, cancels them
+ * all.
  */
 export const syncDeadlineReminders = async (
-  ...args: Parameters<typeof planDeadlineReminders>
+  assignments: Assignment[],
+  options: Omit<Parameters<typeof planDeadlineReminders>[1], 'inexact'>,
 ) => {
-  const plan =
-    (await getNotificationPermission()) === 'granted'
-      ? planDeadlineReminders(...args)
-      : [];
+  const granted = (await getNotificationPermission()) === 'granted';
+  const plan = granted
+    ? planDeadlineReminders(assignments, {
+        ...options,
+        inexact: !(await canScheduleExactAlarms()),
+      })
+    : [];
   const wanted = new Set(plan.map(r => r.identifier));
-  const scheduled = (await Notifications.getAllScheduledNotificationsAsync())
-    .map(n => n.identifier)
-    .filter(id => id.startsWith(PREFIX));
+  const open =
+    granted && options.settings.deadlineReminders
+      ? upcomingDeadlines(assignments, {
+          hiddenCourses: options.hiddenCourses,
+          archived: options.archived,
+          now: options.now,
+          limit: Infinity,
+        }).deadlines.map(d => `${LATER_PREFIX}${d.id}`)
+      : [];
+  const wantedLater = new Set(open);
+
+  const all = (await Notifications.getAllScheduledNotificationsAsync()).map(
+    n => n.identifier,
+  );
+  const scheduled = all.filter(id => id.startsWith(PREFIX));
   const existing = new Set(scheduled);
+  const unwanted = [
+    ...scheduled.filter(id => !wanted.has(id)),
+    ...all.filter(id => id.startsWith(LATER_PREFIX) && !wantedLater.has(id)),
+  ];
 
   await Promise.all([
-    ...scheduled
-      .filter(id => !wanted.has(id))
-      .map(id => Notifications.cancelScheduledNotificationAsync(id)),
+    ...unwanted.map(id => Notifications.cancelScheduledNotificationAsync(id)),
     ...plan
       .filter(r => !existing.has(r.identifier))
       .map(r =>

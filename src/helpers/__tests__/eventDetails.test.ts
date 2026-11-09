@@ -4,6 +4,7 @@ import { defaultSettings } from 'data/settings';
 import { Assignment, Course, SettingsState } from 'data/types/state';
 import {
   AssignmentEventInput,
+  alertBeforeDeadline,
   buildAssignmentEventDetails,
   buildAssignmentEventInputs,
   buildAssignmentReminderDetails,
@@ -171,9 +172,10 @@ describe('buildAssignmentEventDetails', () => {
 
   it('adds the first and second alarms with their defaults', () => {
     const alarms = { assignmentCalendarAlarm: true };
+    // Alerts count from the start, half an hour before the deadline.
     expect(
       buildAssignmentEventDetails(settingsWith({}, alarms), input()).alarms,
-    ).toEqual([{ relativeOffset: -24 * 60, method: AlarmMethod.DEFAULT }]);
+    ).toEqual([{ relativeOffset: -24 * 60 + 30, method: AlarmMethod.DEFAULT }]);
     expect(
       buildAssignmentEventDetails(
         settingsWith(
@@ -187,9 +189,39 @@ describe('buildAssignmentEventDetails', () => {
         input(),
       ).alarms,
     ).toEqual([
-      { relativeOffset: -120, method: AlarmMethod.DEFAULT },
-      { relativeOffset: -30, method: AlarmMethod.DEFAULT },
+      { relativeOffset: -90, method: AlarmMethod.DEFAULT },
+      { relativeOffset: 0, method: AlarmMethod.DEFAULT },
     ]);
+  });
+
+  it('times alerts from the deadline whatever the event length', () => {
+    const settings = settingsWith(
+      { calendarEventLength: 60 },
+      {
+        assignmentCalendarAlarm: true,
+        assignmentCalendarAlarmOffset: 120,
+        assignmentCalendarSecondAlarm: true,
+        assignmentCalendarSecondAlarmOffset: 15,
+      },
+    );
+    // 15 minutes before the deadline is 45 minutes after the start.
+    expect(
+      buildAssignmentEventDetails(settings, input()).alarms?.map(
+        a => a.relativeOffset,
+      ),
+    ).toEqual([-60, 45]);
+  });
+
+  it('keeps Android alerts at or before the start', () => {
+    const { Platform } = require('react-native');
+    const os = Platform.OS;
+    Platform.OS = 'android';
+    try {
+      expect(alertBeforeDeadline(15, 60).relativeOffset).toBe(0);
+      expect(alertBeforeDeadline(120, 60).relativeOffset).toBe(-60);
+    } finally {
+      Platform.OS = os;
+    }
   });
 
   it('skips the second alarm without the first', () => {

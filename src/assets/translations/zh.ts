@@ -269,6 +269,9 @@ const zh: typeof en = {
     '在未提交的作业截止前提醒你，可与日历和提醒事项的提醒同时使用。',
   deadlineReminderDue: '截止于',
   deadlineReminderOffset: '提前提醒（分钟）',
+  allowExactReminders: '允许准时提醒',
+  exactRemindersCaption:
+    '手机空闲时，Android 可能会推迟提醒。允许 learnX 设置闹钟和提醒，提醒才能准时送达。',
   notificationPermissionDenied: '系统设置中已关闭 learnX 的通知。',
   configureNotifications: '打开系统设置',
   notificationArchiveAll: '全部归档',

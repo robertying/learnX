@@ -275,6 +275,9 @@ export default {
     "Reminds you of unsubmitted assignments before they're due. Works alongside calendar and Reminders alerts.",
   deadlineReminderDue: 'Due',
   deadlineReminderOffset: 'Remind Before (Minutes)',
+  allowExactReminders: 'Allow Exact Reminder Times',
+  exactRemindersCaption:
+    'Android may hold reminders back while your phone is idle. Allow alarms and reminders for learnX so they arrive on time.',
   notificationPermissionDenied:
     'Notifications for learnX are turned off in system settings.',
   configureNotifications: 'Open System Settings',

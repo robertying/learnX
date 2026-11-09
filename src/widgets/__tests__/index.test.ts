@@ -68,6 +68,21 @@ describe('updateDeadlineWidget', () => {
     expect(iosWidget.updateTimeline).not.toHaveBeenCalled();
   });
 
+  it('gives Android more deadlines than it shows, to drop passed ones', () => {
+    Platform.OS = 'android';
+    const many = Array.from({ length: 12 }, (_, i) =>
+      assignment(
+        `a${i}`,
+        `2026-03-${String(16 + i).padStart(2, '0')}T00:00:00Z`,
+      ),
+    );
+    updateDeadlineWidget(many, options);
+
+    const [props] = jest.mocked(androidWidget.updateSnapshot).mock.calls[0];
+    expect(props.deadlines).toHaveLength(10);
+    expect(props.total).toBe(12);
+  });
+
   it('empties the widget when there are no assignments', () => {
     Platform.OS = 'android';
     updateDeadlineWidget([], options);

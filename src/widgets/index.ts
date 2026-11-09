@@ -45,6 +45,9 @@ const toProps = ({
   url: getTargetUrl({ type: 'assignment' }),
 });
 
+/** Deadlines in the Android widget's props; it shows the first four. */
+const ANDROID_DEADLINES = 10;
+
 /**
  * Shows the open assignments' deadlines in the home screen widget. Pass no
  * assignments (e.g. after logging out) to empty it.
@@ -67,7 +70,17 @@ export function updateDeadlineWidget(
         })),
       );
     } else {
-      widget.updateSnapshot(toProps(timeline[0].deadlines));
+      // No timelines: the layout drops what has passed by its own clock as
+      // it's redrawn, so it gets a few more than it shows.
+      widget.updateSnapshot(
+        toProps(
+          upcomingDeadlines(assignments, {
+            hiddenCourses,
+            archived,
+            limit: ANDROID_DEADLINES,
+          }),
+        ),
+      );
     }
   } catch (error) {
     // A widget that can't update shouldn't break a refresh or the sync.

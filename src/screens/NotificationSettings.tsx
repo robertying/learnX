@@ -109,7 +109,9 @@ const simulateNewContent = async () => {
 
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
-  const { permission, request } = useNotificationPermission();
+  const { permission, request, exactAlarms, requestExact } =
+    useNotificationPermission();
+  const showExact = notifications.deadlineReminders && exactAlarms === false;
   const { notices } = useNotices();
   const lastBackgroundSync = useSyncLogStore(state =>
     state.runs.findLast(run => !run.manual),
@@ -168,11 +170,15 @@ const NotificationSettings: React.FC<Props> = () => {
           ))}
         </FormSection>
         <FormSection
-          footer={
-            permission === 'denied' && anyOn
-              ? `${t('notifyDeadlineRemindersCaption')}\n\n${t('notificationPermissionDenied')}`
-              : t('notifyDeadlineRemindersCaption')
-          }
+          footer={[
+            t('notifyDeadlineRemindersCaption'),
+            showExact && t('exactRemindersCaption'),
+            permission === 'denied' &&
+              anyOn &&
+              t('notificationPermissionDenied'),
+          ]
+            .filter(Boolean)
+            .join('\n\n')}
         >
           <FormToggle
             testID="notifications-deadlineReminders"
@@ -186,6 +192,13 @@ const NotificationSettings: React.FC<Props> = () => {
               title={t('deadlineReminderOffset')}
               value={notifications.deadlineReminderOffset}
               onValueChange={value => set('deadlineReminderOffset', value)}
+            />
+          )}
+          {showExact && (
+            <FormButton
+              icon={{ ios: 'alarm', android: 'alarm-check' }}
+              title={t('allowExactReminders')}
+              onPress={requestExact}
             />
           )}
         </FormSection>
