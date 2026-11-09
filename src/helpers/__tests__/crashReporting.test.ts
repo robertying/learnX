@@ -91,12 +91,34 @@ describe('recordError', () => {
     ]);
   });
 
-  it('wraps values that are not errors', () => {
-    recordError({ code: 1 });
+  it('wraps values that are not errors, without their values', () => {
+    recordError({ code: 1, name: 'someone' });
 
     expect(native.recordError).toHaveBeenCalledWith(
       'NonError',
-      '{"code":1}',
+      '{code, name}',
+      expect.any(Array),
+    );
+  });
+
+  it('sends only the reason of a thu-learn-lib error', () => {
+    recordError({ reason: 'invalid response', extra: { name: 'someone' } });
+
+    expect(native.recordError).toHaveBeenCalledWith(
+      'ApiError',
+      'invalid response',
+      expect.any(Array),
+    );
+  });
+
+  it('leaves URL queries out of the message', () => {
+    recordError(
+      new Error('GET https://learn.tsinghua.edu.cn/b/x?_csrf=secret#a failed'),
+    );
+
+    expect(native.recordError).toHaveBeenCalledWith(
+      'Error',
+      'GET https://learn.tsinghua.edu.cn/b/x failed',
       expect.any(Array),
     );
   });

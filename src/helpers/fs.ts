@@ -11,7 +11,8 @@ import { SUBMISSION_DRAFTS_DIR } from 'data/submissionDrafts';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
-import { sanitizeFileName } from './filename';
+import { fileNameOf, sanitizeFileName } from './filename';
+import { isLearnUrl } from './learnUrl';
 import { fileDownloadCheckUrl } from './fileDownloadCheck';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from './i18n';
@@ -24,10 +25,10 @@ const getMacDownloadDirectory = () =>
   new Directory(Paths.document.parentDirectory, 'Downloads');
 
 export const copyFileToMacDownloads = async (
-  { title, fileType }: { title: string; fileType: string },
+  file: { title: string; fileType: string },
   fromPath: string,
 ) => {
-  const to = new File(getMacDownloadDirectory(), `${title}.${fileType}`);
+  const to = new File(getMacDownloadDirectory(), fileNameOf(file));
   await new File(fromPath).copy(to, { overwrite: true });
   return to.uri;
 };
@@ -75,8 +76,7 @@ const deleteQuietly = (file: File) => {
 
 export const getDownloadedFile = (file: DownloadableFile) => {
   const settings = getSettings();
-  const extension = file.fileType ? `.${file.fileType}` : '';
-  const name = settings.fileOmitCourseName
+  const title = settings.fileOmitCourseName
     ? file.title
     : `${file.courseName}-${file.title}`;
 
@@ -84,7 +84,7 @@ export const getDownloadedFile = (file: DownloadableFile) => {
     getDownloadsDirectory(),
     sanitizeFileName(file.courseName),
     sanitizeFileName(file.id),
-    sanitizeFileName(name, extension),
+    fileNameOf({ title, fileType: file.fileType }),
   );
 };
 
@@ -128,9 +128,10 @@ export const downloadFile = async (
   target.parentDirectory.create({ intermediates: true, idempotent: true });
 
   // iOS sends the login cookies from the shared cookie store by itself;
-  // Android's download client has no cookie jar, so they go in a header.
+  // Android's download client has no cookie jar, so they go in a header, and
+  // only to Web Learning.
   let headers: Record<string, string> | undefined;
-  if (Platform.OS === 'android') {
+  if (Platform.OS === 'android' && isLearnUrl(url)) {
     const cookies = await CookieManager.get(Urls.learn);
     headers = {
       Cookie: Object.values(cookies).reduce(
@@ -183,7 +184,7 @@ export const shareFile = async (file: DownloadableFile) => {
   const path = await downloadFile(file, false);
 
   await Share.open({
-    filename: `${file.title}.${file.fileType}`,
+    filename: fileNameOf(file),
     url: path,
     type:
       (file.fileType && mime.getType(file.fileType)) ||
@@ -199,16 +200,17 @@ export const exportTextFile = async (
   content: string,
   type: string,
 ) => {
+  const name = sanitizeFileName(filename);
   if (DeviceInfo.isMac()) {
-    await new File(getMacDownloadDirectory(), filename).write(content);
+    await new File(getMacDownloadDirectory(), name).write(content);
     return;
   }
 
-  const file = new File(Paths.cache, filename);
+  const file = new File(Paths.cache, name);
   await file.write(content);
 
   await Share.open({
-    filename,
+    filename: name,
     url: file.uri,
     type,
     showAppsToView: true,
@@ -455,7 +457,7 @@ export const copyFileToCache = async (uri: string) => {
   const from = new File(uri);
   const dir = new Directory(Paths.cache, SHARED_DIR);
   dir.create({ intermediates: true, idempotent: true });
-  const to = new File(dir, from.name);
+  const to = new File(dir, sanitizeFileName(from.name));
   await from.copy(to, { overwrite: true });
   return to.uri;
 };

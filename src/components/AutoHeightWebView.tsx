@@ -11,6 +11,10 @@ import CookieManager from '@preeternal/react-native-cookie-manager';
 import { recordError } from 'helpers/crashReporting';
 import Urls from 'constants/Urls';
 
+/** Whether a load is the web view's own page: HTML at Web Learning's root. */
+const isOwnPage = (url: string) =>
+  url.startsWith('about:') || url.replace(/\/?(#.*)?$/, '') === Urls.learn;
+
 const AutoHeightWebView: React.FC<
   React.PropsWithChildren<WebViewProps>
 > = props => {
@@ -27,17 +31,19 @@ const AutoHeightWebView: React.FC<
     setHeight(measuredHeight);
   };
 
-  // A tapped link opens outside the app instead of replacing the content.
-  // iOS asks about every load, the first one too, and says which came from a
-  // tap; Android asks only about loads the page starts, so all of those are
-  // links (and never reports `navigationType`, which `onNavigationStateChange`
-  // relied on).
+  // A tapped link opens outside the app instead of replacing the content, and
+  // nothing else replaces it either. iOS asks about every load, the page's own
+  // too, and says which came from a tap; Android asks only about loads the
+  // page starts, so all of those are links (and never reports
+  // `navigationType`, which `onNavigationStateChange` relied on).
   const onShouldStartLoadWithRequest = (request: ShouldStartLoadRequest) => {
-    if (Platform.OS === 'ios' && request.navigationType !== 'click') {
-      return true;
-    }
     if (request.isTopFrame === false) {
       return true;
+    }
+    if (Platform.OS === 'ios' && request.navigationType !== 'click') {
+      // The HTML loads at its base URL; a redirect, form or refresh in the
+      // content must not take its place.
+      return isOwnPage(request.url);
     }
     // Course content is written by teachers; only open web and mail links.
     if (/^(https?|mailto):/i.test(request.url)) {

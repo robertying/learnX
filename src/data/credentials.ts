@@ -20,8 +20,9 @@ export const CREDENTIALS_KEY = 'credentials';
 export const LEGACY_AUTH_KEY = 'persist_auth';
 
 const options: SecureStore.SecureStoreOptions = {
-  // Lets the background refresh read them while the device is locked.
-  keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK,
+  // Lets the background refresh read them while the device is locked. Kept
+  // out of backups and off other devices: a restored phone signs in again.
+  keychainAccessible: SecureStore.AFTER_FIRST_UNLOCK_THIS_DEVICE_ONLY,
 };
 
 interface CredentialsState {
@@ -106,6 +107,10 @@ export const parseLegacyAuth = (raw: string | null): Credentials | null => {
 const read = async (): Promise<Credentials | null> => {
   const current = await SecureStore.getItemAsync(CREDENTIALS_KEY, options);
   if (current) {
+    // 18.0.3 and earlier saved it without THIS_DEVICE_ONLY; writing it
+    // again moves it to the current accessibility. A failed write keeps the
+    // old one, which still works.
+    SecureStore.setItemAsync(CREDENTIALS_KEY, current, options).catch(() => {});
     return parse(current);
   }
 
