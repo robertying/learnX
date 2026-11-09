@@ -130,6 +130,7 @@ const AssignmentDetailContent: React.FC<{
       // The form row's own color shows through.
       backgroundColor: 'transparent',
       textColor: theme.colors.onSurfaceHigh,
+      linkColor: theme.colors.primary,
     },
   );
 

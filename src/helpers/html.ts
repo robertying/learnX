@@ -22,6 +22,8 @@ export interface WebViewTemplateColors {
   dark: boolean;
   backgroundColor: string;
   textColor: string;
+  /** Links, in the app's tint instead of the browser's blue. */
+  linkColor?: string;
 }
 
 /**
@@ -62,6 +64,13 @@ export const getWebViewTemplate = (
         }
         #root > p:last-child {
           margin-bottom: 0px;
+        }${
+          colors?.linkColor
+            ? `
+        a {
+          color: ${colors.linkColor};
+        }`
+            : ''
         }
       </style>
       ${

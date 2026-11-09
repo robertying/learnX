@@ -30,7 +30,8 @@ export interface CardRowProps {
  * three-line list item on Android: who it's from and when on a small first
  * line, then the title and a preview. Unread items get a dot in a gutter on
  * the leading edge on iOS and Mac (Mail, Messages), and a bolder title on
- * Android (Gmail), where read titles are regular weight.
+ * Android (Gmail), where read titles are regular weight. The gutter is there
+ * on every iOS and Mac row, so the text of all lists lines up.
  */
 const CardRow: React.FC<CardRowProps> = ({
   overline,
@@ -65,7 +66,7 @@ const CardRow: React.FC<CardRowProps> = ({
 
   return (
     <View style={styles.root}>
-      {!isAndroid && unread !== undefined ? (
+      {!isAndroid ? (
         <View style={styles.gutter}>{unread ? dot : null}</View>
       ) : null}
       {leading}
