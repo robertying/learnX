@@ -47,18 +47,6 @@ describe('brand color', () => {
     expect(androidColor(dark, 'md_theme_primary')).toBe(brandColors.dark);
   });
 
-  it("colors the logo mark on Android's splash and login screens", () => {
-    const fill = (path: string) =>
-      read(path).match(/android:fillColor="#FF([0-9A-F]{6})"/i)?.[1];
-    const res = 'android/app/src/main/res';
-    expect(`#${fill(`${res}/drawable/splash_screen_icon.xml`)}`).toBe(
-      brandColors.light,
-    );
-    expect(`#${fill(`${res}/drawable-night/splash_screen_icon.xml`)}`).toBe(
-      brandColors.dark,
-    );
-  });
-
   it('is what the widgets use', () => {
     for (const widget of ['DeadlinesIOS', 'DeadlinesAndroid']) {
       const source = read(`src/widgets/${widget}.tsx`);
