@@ -12,8 +12,9 @@ import IconButton from 'components/IconButton';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
-import { getWebViewTemplate, removeTags } from 'helpers/html';
-import { getExtension, stripExtension } from 'helpers/fs';
+import { getWebViewTemplate } from 'helpers/html';
+import { removeTags } from 'helpers/text';
+import { getExtension, stripExtension } from 'helpers/filename';
 import {
   formatLiteral,
   getAssignmentGradeLevelDescription,
@@ -142,7 +143,7 @@ const AssignmentDetailContent: React.FC<{
           courseName,
           title: stripExtension(remoteFile.name),
           downloadUrl: remoteFile.downloadUrl,
-          fileType: getExtension(remoteFile.name) ?? '',
+          fileType: getExtension(remoteFile.name),
         },
       });
     }
