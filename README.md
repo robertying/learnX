@@ -58,7 +58,7 @@ You can run the [Android](#android) version of the App on Windows using Windows 
 
 ### 基础功能 Basic
 
-- 第一时间看到老师最新发布的通知及其附件。
+- 第一时间看到老师最新发布的公告及其附件。
 
   Get a glance of the newest notices published by teachers.
 

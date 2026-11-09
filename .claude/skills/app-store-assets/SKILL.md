@@ -71,7 +71,7 @@ File names follow one pattern everywhere:
 
 ### iPhone 18 Pro (402x874 pt)
 
-- Tab bar y≈824: 通知 63, 作业 132, 文件 200, 课程 270, 设置 337. Back (55,85), close X (40,85), top-right action (363,85), filter button (100,85), search magnifier (363,85 on lists).
+- Tab bar y≈824: 公告 63, 作业 132, 文件 200, 课程 270, 设置 337. Back (55,85), close X (40,85), top-right action (363,85), filter button (100,85), search magnifier (363,85 on lists).
 - Login: username (201,421), password (201,500), then check key (349,780) and 登录 (201,621). Paste bubble (fallback) sits ~40 pt above the field.
 - Row swipe: notices `swipe` (340,y)→(120,y) 0.4 s; **courses need `touch_path`** (330→215, ~6 points, 40 ms, last dt 300 ms). Reverse swipe closes it.
 - Filter menu: tap the entry (Assignments 全部 ≈ (85,263)).
@@ -83,7 +83,7 @@ File names follow one pattern everywhere:
 
 - **Cannot be rotated from the shell** (no Simulator.app, no `simctl` rotate): ask the user to rotate to landscape and wait; `simctl io` then returns 2752x2064.
 - Control tool space 1376x1032 pt landscape; scale from a downsized screenshot by pts/px.
-- Landscape: sidebar 通知 (86,117), 作业 (86,162), 文件 (86,205), 课程 (86,249), 设置 (86,294); list header filter (373,55), search (528,55); first filter entry (358,115); submit arrow (1336,55); search key (1291,790). Row swipes need `touch_path` (x 540→365, ~7 points); do it on a non-selected row.
+- Landscape: sidebar 公告 (86,117), 作业 (86,162), 文件 (86,205), 课程 (86,249), 设置 (86,294); list header filter (373,55), search (528,55); first filter entry (358,115); submit arrow (1336,55); search key (1291,790). Row swipes need `touch_path` (x 540→365, ~7 points); do it on a non-selected row.
 - The master pane opens narrow: drag the divider (x≈561 pt, y 600-700) in small `touch_path` steps; verify by scanning pixels, not by eye. The UIKit divider snaps, ~360 pt is reachable.
 - Search: the keyboard offers a pasteboard suggestion; use either it or paste, not both.
 - Windowed Apps: corner drag (1372,1022) resizes, top-edge drag moves.
@@ -102,7 +102,7 @@ File names follow one pattern everywhere:
 - Needs macOS Screen Recording + Accessibility for the shell host (`AXIsProcessTrusted()`); restart the host app after granting. Launch: `open <DerivedData>/.../Debug-maccatalyst/learnX.app --args -AppleLanguages '(zh-Hans)'`.
 - Helpers: `scripts/click.swift` (CGEvent click), `mouse.swift` (press / drag), `scroll.swift`, `bounds.swift` (window x y w h), `window-id.swift`. Click at window-relative points.
 - Login fields (548,359) / (548,438), 登录 (548,538), paste with System Events Cmd+V after `pbcopy`.
-- Points: sidebar 通知 (61,70) 作业 (61,100) 文件 (61,132) 课程 (61,164) 设置 (61,196); notice row 3 (310,463); filter (302,71); submit (1068,70); search (530,70); 日历与提醒事项 (329,323). A mis-click on 退出登录 opens a confirm that only Escape dismisses.
+- Points: sidebar 公告 (61,70) 作业 (61,100) 文件 (61,132) 课程 (61,164) 设置 (61,196); notice row 3 (310,463); filter (302,71); submit (1068,70); search (530,70); 日历与提醒事项 (329,323). A mis-click on 退出登录 opens a confirm that only Escape dismisses.
 - Row swipes: `mouse drag` 0.4-0.5 s. PDF: `scroll x y 60 80` down then `-60 40` up.
 - Capture: `screencapture -x -o -l <CGWindowID> window.png` into the scratch dir (2192x1482, transparent corners).
 - Compose: `compose-mac window.png <icon.png> macos/NN-<slug>.png 2880 1800 store` (`store` = the layout kind, see Mac header and search results).
