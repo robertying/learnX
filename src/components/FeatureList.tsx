@@ -1,7 +1,14 @@
 import { useRef, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ActionBar, { BarAction } from 'components/ActionBar';
+import Divider from 'components/Divider';
 import Logo from 'components/Logo';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Title } from 'components/Text';
@@ -52,11 +59,17 @@ const FeatureList: React.FC<FeatureListProps> = ({
   // whether content is hidden under the buttons.
   const scroll = useRef({ height: 0, content: 0, offset: 0 });
   const [scrolledUnder, setScrolledUnder] = useState(false);
+  const [scrolledPast, setScrolledPast] = useState(false);
   const measure = (change: Partial<typeof scroll.current>) => {
     scroll.current = { ...scroll.current, ...change };
     const { height, content, offset } = scroll.current;
     setScrolledUnder(height > 0 && content - offset - height > 1);
+    setScrolledPast(offset > 1);
   };
+  // Symbols grow with the text (Dynamic Type, Android font scale), up to
+  // about the size of the title's line.
+  const { fontScale } = useWindowDimensions();
+  const iconScale = Math.min(Math.max(fontScale, 1), 1.6);
 
   return (
     <View
@@ -82,6 +95,16 @@ const FeatureList: React.FC<FeatureListProps> = ({
             {title}
           </Title>
         </View>
+        {/* Under the title once the features scroll up under it; kept in
+            the layout, so they don't move when it shows. */}
+        <View
+          testID={testID && `${testID}-title-divider`}
+          style={!scrolledPast && styles.hidden}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <Divider />
+        </View>
         <ScrollView
           testID={testID && `${testID}-scroll`}
           style={styles.scroll}
@@ -105,8 +128,10 @@ const FeatureList: React.FC<FeatureListProps> = ({
                 accessibilityLabel={`${feature.title}, ${feature.body}`}
               >
                 <View
+                  testID="feature-icon"
                   style={[
                     styles.iconBox,
+                    apple && { width: 40 * iconScale, height: 22 * iconScale },
                     !apple && {
                       backgroundColor: theme.colors.primaryContainer,
                     },
@@ -114,7 +139,7 @@ const FeatureList: React.FC<FeatureListProps> = ({
                 >
                   <SystemIcon
                     name={feature.icon}
-                    size={apple ? 30 : 24}
+                    size={(apple ? 30 : 24) * iconScale}
                     color={
                       apple
                         ? theme.colors.primary
@@ -143,6 +168,9 @@ const FeatureList: React.FC<FeatureListProps> = ({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  hidden: {
+    opacity: 0,
   },
   middle: {
     flex: 1,
@@ -195,7 +223,7 @@ const styles = StyleSheet.create({
   // symbol is centered on it.
   iconBox: {
     width: 40,
-    height: apple ? 22 : 40,
+    height: 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
