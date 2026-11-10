@@ -1,7 +1,7 @@
-import dayjs from 'dayjs';
 import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import { useMinute } from 'hooks/useClock';
+import { listTime } from 'helpers/listTime';
+import { useToday } from 'hooks/useClock';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { t } from 'helpers/i18n';
@@ -27,11 +27,11 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
   ...restProps
 }) => {
   const theme = useTheme();
-  // Re-renders the row each minute, past the list's row memoization.
-  const now = useMinute();
+  // Re-renders the row at midnight, past the list's row memoization.
+  const today = useToday();
   const overline = hideCourseName ? publisher : courseName;
   const preview = removeTags(content);
-  const time = dayjs(publishTime).from(now);
+  const time = listTime(publishTime, today);
 
   return (
     <CardWrapper

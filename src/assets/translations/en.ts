@@ -300,6 +300,9 @@ export default {
   /** a deadline more than a year away, which a relative time would make absurd */
   deadlineOn: 'due {date}',
   deadlineDateFormat: 'MMM D, YYYY',
+  listYesterday: 'Yesterday',
+  listWeekdayFormat: 'dddd',
+  listDateFormat: 'M/D/YY',
   excellentHomeworkBy: 'excellent homework by {name}',
   previouslyShared: '(previously shared)',
   selectedCount: '{count} selected',

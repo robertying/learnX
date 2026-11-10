@@ -83,15 +83,15 @@ afterEach(() => {
 });
 
 describe('NoticeCard', () => {
-  it('shows the course, title, plain-text content and age', async () => {
+  it('shows the course, title, plain-text content and weekday', async () => {
     await render(<NoticeCard data={notice()} />);
     expect(screen.getByText('Calculus')).toBeTruthy();
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     expect(screen.getByText('Moved to Room 101')).toBeTruthy();
-    expect(screen.getByText('2 days ago')).toBeTruthy();
+    expect(screen.getByText('Sunday')).toBeTruthy();
   });
 
-  it('keeps its age current on a list left open', async () => {
+  it('shows the time today and turns to yesterday at midnight', async () => {
     await render(
       <NoticeCard
         data={notice({
@@ -99,10 +99,11 @@ describe('NoticeCard', () => {
         })}
       />,
     );
-    expect(screen.getByText('3 minutes ago')).toBeTruthy();
+    expect(screen.getByText('11:57')).toBeTruthy();
 
-    await act(() => jest.advanceTimersByTime(60_000));
-    expect(screen.getByText('4 minutes ago')).toBeTruthy();
+    // past midnight
+    await act(() => jest.advanceTimersByTime(12 * 60 * 60_000 + 60_000));
+    expect(screen.getByText('Yesterday')).toBeTruthy();
   });
 
   it('shows the publisher instead of the course inside a course', async () => {
@@ -149,7 +150,7 @@ describe('NoticeCard', () => {
     );
     expect(
       screen.getByRole('button', {
-        name: 'Unread, Midterm room change, Calculus, 2 days ago, Attachment, Important, Moved to Room 101',
+        name: 'Unread, Midterm room change, Calculus, Sunday, Attachment, Important, Moved to Room 101',
       }),
     ).toBeTruthy();
   });
@@ -158,7 +159,7 @@ describe('NoticeCard', () => {
     await render(<NoticeCard data={notice({ content: 'x'.repeat(500) })} />);
     expect(
       screen.getByRole('button', {
-        name: `Midterm room change, Calculus, 2 days ago, ${'x'.repeat(120)}…`,
+        name: `Midterm room change, Calculus, Sunday, ${'x'.repeat(120)}…`,
       }),
     ).toBeTruthy();
   });
@@ -281,7 +282,7 @@ describe('AssignmentCard', () => {
 });
 
 describe('FileCard', () => {
-  it('keeps its age current on a list left open', async () => {
+  it('shows the time today and turns to yesterday at midnight', async () => {
     await render(
       <FileCard
         data={file({
@@ -289,18 +290,19 @@ describe('FileCard', () => {
         })}
       />,
     );
-    expect(screen.getByText('3 minutes ago')).toBeTruthy();
+    expect(screen.getByText('11:57')).toBeTruthy();
 
-    await act(() => jest.advanceTimersByTime(60_000));
-    expect(screen.getByText('4 minutes ago')).toBeTruthy();
+    // past midnight
+    await act(() => jest.advanceTimersByTime(12 * 60 * 60_000 + 60_000));
+    expect(screen.getByText('Yesterday')).toBeTruthy();
   });
 
-  it('shows the type, category, size and upload age', async () => {
+  it('shows the type, category, size and upload day', async () => {
     await render(<FileCard data={file()} />);
     expect(screen.getByText('Lecture 5 slides')).toBeTruthy();
     expect(screen.getByText('Slides · PDF · 2.1 MB')).toBeTruthy();
     expect(screen.getByText('PDF')).toBeTruthy();
-    expect(screen.getByText('a day ago')).toBeTruthy();
+    expect(screen.getByText('Yesterday')).toBeTruthy();
   });
 
   it('drops a missing category or type from the details', async () => {
@@ -327,7 +329,7 @@ describe('FileCard', () => {
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
     expect(
       screen.getByRole('button', {
-        name: 'Unread, Lecture 5 slides, Calculus, a day ago, Important, Slides · PDF · 2.1 MB',
+        name: 'Unread, Lecture 5 slides, Calculus, Yesterday, Important, Slides · PDF · 2.1 MB',
       }),
     ).toBeTruthy();
   });
