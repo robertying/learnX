@@ -40,10 +40,6 @@ const fail = (code: CalendarErrorCode) => async () => {
   throw new CalendarError(code);
 };
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('error toasts', () => {
   const error = (code: CalendarErrorCode) => new CalendarError(code);
 

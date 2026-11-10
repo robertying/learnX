@@ -1,5 +1,5 @@
 // Stand-ins for `@expo/ui/jetpack-compose/modifiers`. The ones that change
-// what a row does return what the stand-in views read (jest/expoCompose.tsx):
+// what a row does return what the stand-in views read (jest/mocks/expoCompose.tsx):
 // a testID, a tap, and the accessibility role and state Compose would give.
 
 export const testID = (id: string) => ({ testID: id });

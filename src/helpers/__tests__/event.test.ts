@@ -18,7 +18,7 @@ jest.mock('data/queries', () => ({
 }));
 
 const mocked = Calendar as unknown as {
-  [K in keyof typeof import('../../../jest/expoCalendar')]: jest.Mock & {
+  [K in keyof typeof import('../../../jest/mocks/expoCalendar')]: jest.Mock & {
     get: jest.Mock;
   };
 };
@@ -41,7 +41,6 @@ const grant = (status = 'granted') => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
   resetSettings();
   grant();
   mocked.getCalendars.mockResolvedValue([]);

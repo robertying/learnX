@@ -6,7 +6,7 @@ import {
   userEvent,
 } from '@testing-library/react-native';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import { mockSwipeableMethods } from '../../../jest/swipeable';
+import { mockSwipeableMethods } from '../../../jest/mocks/swipeable';
 
 const card = (props: CardWrapperProps = {}) => (
   <CardWrapper accessibilityLabel="Card label" {...props}>
@@ -32,7 +32,6 @@ const actionNames = () =>
 
 beforeEach(() => {
   jest.useFakeTimers();
-  jest.clearAllMocks();
 });
 
 afterEach(() => {

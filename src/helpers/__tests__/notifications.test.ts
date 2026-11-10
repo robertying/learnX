@@ -21,7 +21,6 @@ const originalOS = Platform.OS;
 
 afterEach(() => {
   setOS(originalOS);
-  jest.clearAllMocks();
 });
 
 describe('getNotificationTarget', () => {

@@ -3,11 +3,6 @@ import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
 import Search from 'screens/Search';
 
-jest.mock('react-native-screens/experimental', () => {
-  const { View } = require('react-native');
-  return { SafeAreaView: View };
-});
-
 const mockNotices: Notice[] = [
   {
     id: 'n1',

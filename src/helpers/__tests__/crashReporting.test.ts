@@ -1,7 +1,7 @@
 import Crashlytics from 'modules/crashlytics';
 import { useCredentialsStore } from 'data/credentials';
 // The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
-import env from '../../../jest/env';
+import env from '../../../jest/mocks/env';
 import {
   installGlobalErrorHandler,
   parseStack,
@@ -28,7 +28,6 @@ const setUsername = (username: string) =>
   });
 
 beforeEach(() => {
-  jest.clearAllMocks();
   (globalThis as any).__DEV__ = false;
   setUsername('2020000000');
 });

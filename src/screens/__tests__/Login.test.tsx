@@ -18,7 +18,7 @@ import { getSettings, resetSettings } from 'data/settings';
 import { clearLoginCookies } from 'data/source';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import Login from 'screens/Login';
-import env from '../../../jest/env';
+import env from '../../../jest/mocks/env';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/login', () => ({
@@ -29,10 +29,6 @@ jest.mock('data/login', () => ({
 jest.mock('data/source', () => ({
   clearLoginCookies: jest.fn(() => Promise.resolve()),
 }));
-jest.mock('react-native-screens/experimental', () => {
-  const { View } = require('react-native');
-  return { SafeAreaView: View };
-});
 
 const saved: Credentials = {
   username: 'student',
@@ -64,7 +60,6 @@ const pressLogin = () =>
   user.press(screen.getByRole('button', { name: 'Log In' }));
 
 beforeEach(() => {
-  jest.clearAllMocks();
   useAuthStore.setState(initialAuth);
   useCredentialsStore.setState({ credentials: null });
   resetSettings();

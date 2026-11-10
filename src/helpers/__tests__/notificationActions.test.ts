@@ -41,7 +41,6 @@ const response = (actionIdentifier: string, data: object) =>
 const os = Platform.OS;
 
 beforeEach(() => {
-  jest.clearAllMocks();
   resetUserData();
 });
 

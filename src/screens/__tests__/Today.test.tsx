@@ -5,10 +5,6 @@ import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
 import Today from 'screens/Today';
 
-jest.mock('react-native-screens/experimental', () => {
-  const { View } = require('react-native');
-  return { SafeAreaView: View };
-});
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
 

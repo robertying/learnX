@@ -21,10 +21,6 @@ const picked: PickedAttachment = {
   size: 2048,
 };
 
-beforeEach(() => {
-  jest.clearAllMocks();
-});
-
 describe('initialSubmissionContent', () => {
   it('strips tags and the stray comment end', () => {
     expect(initialSubmissionContent('<p>My <b>answer</b></p>-->')).toBe(
