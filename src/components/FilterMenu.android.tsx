@@ -26,6 +26,12 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
 }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
+  const selectedColors = {
+    selectedContainerColor: theme.colors.secondaryContainer,
+    selectedTextColor: theme.colors.onSecondaryContainer,
+    selectedLeadingIconColor: theme.colors.onSecondaryContainer,
+    selectedTrailingContentColor: theme.colors.onSecondaryContainer,
+  };
 
   const Button = selected === 'all' ? IconButton : FilledTonalIconButton;
 
@@ -54,6 +60,10 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               key={option.name}
               selected={selected === option.name}
               shapes={{ index, count: options.length }}
+              // Compose's expressive menu marks the selected item with the
+              // tertiary container, which the brand seed turns peach; use the
+              // filled tonal button's secondary container instead.
+              colors={selectedColors}
               onClick={() => {
                 setExpanded(false);
                 onSelectionChange(option.name);
