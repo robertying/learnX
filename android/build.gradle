@@ -26,7 +26,7 @@ plugins {
     id "expo-root-project" apply false
     id "com.google.gms.google-services" version "4.5.0" apply false
     id "com.google.firebase.crashlytics" version "3.0.8" apply false
-    id 'com.android.application' version '9.5.0' apply false
+    id 'com.android.application' version '9.5.1' apply false
 }
 
 // Libraries read compileSdk, minSdk and targetSdk from the ext block above.
