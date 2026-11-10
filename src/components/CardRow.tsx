@@ -1,10 +1,16 @@
 import { ReactNode } from 'react';
-import { Platform, StyleSheet, Text as NativeText, View } from 'react-native';
+import {
+  ColorValue,
+  Platform,
+  StyleSheet,
+  Text as NativeText,
+  View,
+} from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Paragraph, Text } from 'components/Text';
 import { fileTypeColor } from 'helpers/filename';
 import { t } from 'helpers/i18n';
-import { shade, textOn, useTheme, withAlpha } from 'theme';
+import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
 
 const isAndroid = Platform.OS === 'android';
 // Mail's first line is Subheadline; a Material three-line item's overline is
@@ -161,7 +167,7 @@ export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
 /** A small glyph next to the time, in the caption color unless `color` is set. */
 export const CardGlyph: React.FC<{
   name: 'attachment' | 'important' | 'answer';
-  color?: string;
+  color?: ColorValue;
 }> = ({ name, color }) => {
   const theme = useTheme();
   return (
@@ -174,21 +180,33 @@ export const CardGlyph: React.FC<{
   );
 };
 
-/** A short status in a tinted capsule, such as "Submitted" or a grade. */
+/**
+ * A short status in a tinted capsule, such as "Submitted" or a grade: a
+ * status hue, or the brand color. Material draws it in the hue's container
+ * colors; iOS and Mac in the system color over a light tint of it.
+ */
 export const CardPill: React.FC<{
   children: string;
-  color: string;
+  tone: StatusTone | 'primary';
   icon?: 'dueSoon';
   testID?: string;
-}> = ({ children, color, icon, testID }) => {
-  const theme = useTheme();
-  // On the light tint the color itself is too faint for small text.
-  const foreground = theme.dark ? color : shade(color, 0.8);
+}> = ({ children, tone, icon, testID }) => {
+  const { colors } = useTheme();
+  const [container, foreground] =
+    tone === 'primary'
+      ? [colors.primaryContainer, colors.onPrimaryContainer]
+      : [colors.statusContainer[tone], colors.onStatusContainer[tone]];
+  // iOS tints with the brand color itself, as with the status hues.
+  const tint = tone === 'primary' && !isAndroid ? colors.primary : container;
   return (
-    <View
-      testID={testID}
-      style={[styles.pill, { backgroundColor: withAlpha(color, 0.15) }]}
-    >
+    <View testID={testID} style={styles.pill}>
+      <View
+        testID="pill-tint"
+        style={[
+          StyleSheet.absoluteFill,
+          { backgroundColor: tint, opacity: statusContainerOpacity },
+        ]}
+      />
       {icon ? <SystemIcon name={icon} size={13} color={foreground} /> : null}
       <Text
         variant="footnote"
@@ -206,18 +224,23 @@ export const FileTypeTile: React.FC<{ fileType?: string }> = ({ fileType }) => {
   const theme = useTheme();
   const type = (fileType ?? '').toLowerCase();
   const label = type.slice(0, 4).toUpperCase();
-  const color = theme.colors.status[fileTypeColor(type)];
+  const tone = fileTypeColor(type);
   return (
     <View
       testID="file-type"
       style={[styles.tile, { backgroundColor: theme.colors.surfaceVariant }]}
     >
       {label ? (
-        <View style={[styles.tileLabel, { backgroundColor: color }]}>
+        <View
+          style={[
+            styles.tileLabel,
+            { backgroundColor: theme.colors.status[tone] },
+          ]}
+        >
           {/* four letters (DOCX, PPTX) are about as wide as the tile: shrink
               rather than wrap */}
           <NativeText
-            style={[styles.tileText, { color: textOn(color) }]}
+            style={[styles.tileText, { color: theme.colors.onStatus[tone] }]}
             allowFontScaling={false}
             numberOfLines={1}
             adjustsFontSizeToFit
@@ -282,6 +305,7 @@ const styles = StyleSheet.create({
     marginVertical: 0,
   },
   pill: {
+    overflow: 'hidden',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,

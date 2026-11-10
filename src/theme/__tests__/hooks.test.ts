@@ -1,34 +1,16 @@
 import type * as ReactNative from 'react-native';
-import { act, renderHook } from '@testing-library/react-native';
+import { PlatformColor } from 'react-native';
+import { renderHook } from '@testing-library/react-native';
+import * as theme from 'theme';
 
-/**
- * The theme hooks, following the system appearance and iOS's Increase
- * Contrast. The module subscribes to Increase Contrast as it loads, so the
- * listener is caught before it is required.
- */
+/** The theme hooks, following the system appearance. */
 
 const RN: typeof ReactNative = require('react-native');
-let contrastListener: (enabled: boolean) => void = () => {};
-jest.spyOn(RN.AccessibilityInfo, 'addEventListener').mockImplementation(((
-  _: string,
-  listener: (enabled: boolean) => void,
-) => {
-  contrastListener = listener;
-  return { remove: () => {} };
-}) as never);
-jest
-  .spyOn(RN.AccessibilityInfo, 'isDarkerSystemColorsEnabled')
-  .mockResolvedValue(false);
-
-const theme: typeof import('theme') = require('theme');
 
 const scheme = (value: 'light' | 'dark') =>
   jest.spyOn(RN, 'useColorScheme').mockReturnValue(value);
 
-afterEach(async () => {
-  await act(() => contrastListener(false));
-  jest.mocked(RN.useColorScheme).mockRestore?.();
-});
+afterEach(() => jest.restoreAllMocks());
 
 it('follows the system appearance', async () => {
   scheme('dark');
@@ -45,28 +27,45 @@ it('follows the system appearance', async () => {
   expect(light.result.current).not.toEqual(darkOverrides);
 });
 
-it('switches to darker colors with Increase Contrast, live', async () => {
-  scheme('light');
-  const { result } = await renderHook(() => theme.useTheme());
-  expect(result.current).toBe(theme.BrandLightTheme);
+describe('on iOS and Mac', () => {
+  const { colors } = theme.BrandLightTheme;
 
-  await act(() => contrastListener(true));
-  expect(result.current).not.toBe(theme.BrandLightTheme);
-  expect(result.current.dark).toBe(false);
-  // The same setting again changes nothing.
-  const contrasted = result.current;
-  await act(() => contrastListener(true));
-  expect(result.current).toBe(contrasted);
+  it('uses system colors, which follow dark mode and Increase Contrast', () => {
+    expect(colors.background).toEqual(PlatformColor('systemBackground'));
+    expect(colors.onSurfaceHigh).toEqual(PlatformColor('label'));
+    expect(colors.onSurfaceMedium).toEqual(PlatformColor('secondaryLabel'));
+    expect(colors.border).toEqual(PlatformColor('opaqueSeparator'));
+    expect(colors.status).toEqual({
+      red: PlatformColor('systemRed'),
+      orange: PlatformColor('systemOrange'),
+      yellow: PlatformColor('systemYellow'),
+      green: PlatformColor('systemGreen'),
+      blue: PlatformColor('systemBlue'),
+      grey: PlatformColor('systemGray'),
+    });
+    // The same system colors in dark mode: they adapt by themselves.
+    expect(theme.BrandDarkTheme.colors.status).toEqual(colors.status);
+  });
 
-  scheme('dark');
-  const dark = await renderHook(() => theme.useTheme());
-  expect(dark.result.current.dark).toBe(true);
-  expect(dark.result.current).not.toBe(theme.BrandDarkTheme);
-});
+  it('keeps no Material colors', () => {
+    // Plain strings are only the brand color, white on it, and React
+    // Navigation's badge color, which it parses itself.
+    const strings = Object.entries(colors).filter(
+      ([, value]) => typeof value === 'string',
+    );
+    expect(strings).toEqual([
+      ['primary', theme.brandColors.light],
+      ['onPrimary', 'white'],
+      ['onPrimaryContainer', theme.brandColors.light],
+      ['onError', 'white'],
+      ['notification', 'red'],
+    ]);
+  });
 
-it('writes white on dark colors and black on light ones', () => {
-  expect(theme.textOn('rgb(102, 8, 116)')).toBe('white');
-  expect(theme.textOn('rgb(255, 214, 10)')).toBe('black');
-  // Unreadable as a color: black, as on a light background
-  expect(theme.textOn('purple')).toBe('black');
+  it('gives web content CSS colors: WebKit text and the brand links', () => {
+    expect(theme.webContentColors(true)).toEqual({
+      textColor: 'CanvasText',
+      linkColor: theme.brandColors.dark,
+    });
+  });
 });

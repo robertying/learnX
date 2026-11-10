@@ -3,7 +3,7 @@ import {
   Column,
   Text,
 } from '@expo/ui/jetpack-compose';
-import { useTheme } from 'theme';
+import { useMaterialTheme } from 'theme';
 import { percentLabel } from 'helpers/progress';
 import type { SpinnerProps } from './Spinner.shared';
 import ThemedHost from 'components/ThemedHost';
@@ -13,7 +13,7 @@ import ThemedHost from 'components/ThemedHost';
  * with the percentage done under it.
  */
 const Spinner: React.FC<SpinnerProps> = ({ progress, style }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   const label = percentLabel(progress);
 
   return (

@@ -1,5 +1,5 @@
 import { Host, type HostProps } from '@expo/ui/jetpack-compose';
-import { useComposeColorOverrides, useTheme } from 'theme';
+import { useComposeColorOverrides, useMaterialTheme } from 'theme';
 
 export type ThemedHostProps = Omit<
   HostProps,
@@ -14,7 +14,7 @@ export type ThemedHostProps = Omit<
  * color, with the app's own color roles on top.
  */
 const ThemedHost: React.FC<ThemedHostProps> = props => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   const colorOverrides = useComposeColorOverrides();
   return (
     <Host

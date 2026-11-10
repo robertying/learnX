@@ -1,10 +1,10 @@
-import { StyleSheet } from 'react-native';
+import { PlatformColor, StyleSheet } from 'react-native';
 import type * as ReactNative from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 import { cardAccessibilityLabel, CardPill } from 'components/CardRow';
 import Splash from 'components/Splash';
 import { Headline, Paragraph, Title } from 'components/Text';
-import { BrandDarkTheme, BrandLightTheme } from 'theme';
+import { brandColors } from 'theme';
 
 const RN: typeof ReactNative = require('react-native');
 const style = (node: { props: { style?: unknown } }) =>
@@ -15,42 +15,41 @@ const scheme = (value: 'light' | 'dark') =>
 afterEach(() => jest.restoreAllMocks());
 
 describe('Splash (iOS)', () => {
-  it.each([
-    ['light', 'white'],
-    ['dark', 'black'],
-  ] as const)(
-    'matches the launch screen in %s mode',
-    async (mode, background) => {
-      scheme(mode);
-      await render(<Splash />);
-      const splash = screen.toJSON() as {
-        props: { style?: unknown };
-        children: { props: Record<string, any> }[];
-      };
-      expect(style(splash).backgroundColor).toBe(background);
-      expect(splash.children[0].props.source).toEqual({ uri: 'MaskedAppIcon' });
-      expect(style(splash.children[0])).toMatchObject({
-        width: 160,
-        height: 160,
-      });
-    },
-  );
+  it('matches the launch screen, on the system background', async () => {
+    await render(<Splash />);
+    const splash = screen.toJSON() as {
+      props: { style?: unknown };
+      children: { props: Record<string, any> }[];
+    };
+    expect(style(splash).backgroundColor).toEqual(
+      PlatformColor('systemBackground'),
+    );
+    expect(splash.children[0].props.source).toEqual({ uri: 'MaskedAppIcon' });
+    expect(style(splash.children[0])).toMatchObject({
+      width: 160,
+      height: 160,
+    });
+  });
 });
 
 describe('CardPill', () => {
-  it('uses the color itself on dark backgrounds, darker on light ones', async () => {
-    const color = BrandLightTheme.colors.status.orange;
-    scheme('light');
-    await render(<CardPill color={color}>Due soon</CardPill>);
-    const light = style(screen.getByText('Due soon')).color;
-    expect(light).not.toBe(color);
-
-    scheme('dark');
-    await render(
-      <CardPill color={BrandDarkTheme.colors.status.orange}>Due soon</CardPill>,
+  it('draws the system color over a light tint of it', async () => {
+    await render(<CardPill tone="orange">Due soon</CardPill>);
+    expect(style(screen.getByText('Due soon')).color).toEqual(
+      PlatformColor('systemOrange'),
     );
-    expect(style(screen.getByText('Due soon')).color).toBe(
-      BrandDarkTheme.colors.status.orange,
+    expect(style(screen.getByTestId('pill-tint'))).toMatchObject({
+      backgroundColor: PlatformColor('systemOrange'),
+      opacity: 0.15,
+    });
+  });
+
+  it('tints a grade with the brand color', async () => {
+    scheme('dark');
+    await render(<CardPill tone="primary">A</CardPill>);
+    expect(style(screen.getByText('A')).color).toBe(brandColors.dark);
+    expect(style(screen.getByTestId('pill-tint')).backgroundColor).toBe(
+      brandColors.dark,
     );
   });
 

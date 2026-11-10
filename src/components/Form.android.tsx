@@ -37,7 +37,7 @@ import {
   width,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
-import { useTheme } from 'theme';
+import { useMaterialTheme } from 'theme';
 import { t } from 'helpers/i18n';
 import {
   parseNumberInput,
@@ -154,7 +154,7 @@ const FormContent: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
 };
 
 export const Form: React.FC<FormProps> = props => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   return (
     <ThemedHost
       style={[styles.fill, { backgroundColor: theme.colors.surface }]}
@@ -248,7 +248,7 @@ const FormRow: React.FC<
   progress,
 }) => {
   const colors = useMaterialColors();
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   // At large font sizes the detail goes under the subtitle instead of at the
   // end, which would squeeze the title into a narrow column.
   const { fontScale } = useWindowDimensions();
@@ -386,7 +386,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
   selected,
   ...row
 }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   const colors = useMaterialColors();
   const run = () => {
     if (!loading) {
@@ -430,7 +430,7 @@ export const FormFile: React.FC<FormFileProps> = ({
   disabled,
   ...row
 }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   const colors = useMaterialColors();
   return (
     <FormRow
@@ -628,7 +628,7 @@ export const FormProfile: React.FC<FormProfileProps> = ({
   detail,
   position,
 }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   return (
     <SectionItem position={position}>
       <ListItem.HeadlineContent>

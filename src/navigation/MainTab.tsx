@@ -182,6 +182,10 @@ const MainTab = () => {
           ? { backgroundColor: theme.colors.card }
           : undefined
       }
+      // Given, so the navigator doesn't blend its own from the theme, which
+      // it can't do with system colors: secondaryLabel on iOS, and Material's
+      // onSurfaceVariant for an inactive navigation bar item
+      tabBarInactiveTintColor={theme.colors.onSurfaceVariant as string}
       tabBarHidden={keyboardShown}
     >
       {tabs.map((tab, index) => (

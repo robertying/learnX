@@ -3,7 +3,6 @@ import { removeTags } from 'helpers/text';
 import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { useMinute } from 'hooks/useClock';
-import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import CardRow, {
   CardGlyph,
@@ -34,7 +33,6 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   hideCourseName,
   ...restProps
 }) => {
-  const theme = useTheme();
   const now = useMinute();
   const dueText = deadlineText(deadline, now);
   const dueSoon = isDueSoon(deadline, now);
@@ -50,15 +48,15 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   const hasAnswer = !!(answerContent || answerAttachment);
 
   const status = graded ? (
-    <CardPill testID="grade" color={theme.colors.primary}>
+    <CardPill testID="grade" tone="primary">
       {gradeText}
     </CardPill>
   ) : submitted ? (
-    <CardPill testID="submitted" color={theme.colors.status.green}>
+    <CardPill testID="submitted" tone="green">
       {t('submitted')}
     </CardPill>
   ) : dueSoon ? (
-    <CardPill testID="due-soon" color={theme.colors.status.red} icon="dueSoon">
+    <CardPill testID="due-soon" tone="red" icon="dueSoon">
       {dueText}
     </CardPill>
   ) : (

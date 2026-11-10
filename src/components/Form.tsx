@@ -87,11 +87,10 @@ const macFormModifiers = [
   background(PlatformColor('systemBackground')),
 ];
 
-// systemGroupedBackground, behind iOS's inset grouped rows
-const groupedBackground = { light: 'rgb(242, 242, 247)', dark: 'rgb(0, 0, 0)' };
+// Behind iOS's inset grouped rows
+const groupedBackground = PlatformColor('systemGroupedBackground');
 
 export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
-  const theme = useTheme();
   // Optional: a Form outside a navigator (as in tests) has no header.
   const navigation = useContext(NavigationContext);
 
@@ -105,9 +104,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       // As in the Settings app, no hairline between the header and the Form.
       headerShadowVisible: false,
       headerStyle: {
-        backgroundColor: theme.dark
-          ? groupedBackground.dark
-          : groupedBackground.light,
+        backgroundColor: groupedBackground,
       },
     });
     // The default header again for a screen that shows something else after
@@ -117,7 +114,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
         headerShadowVisible: undefined,
         headerStyle: undefined,
       });
-  }, [navigation, theme.dark]);
+  }, [navigation]);
 
   return (
     <ThemedHost style={styles.fill} testID={testID}>

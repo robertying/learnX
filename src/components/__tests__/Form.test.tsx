@@ -8,7 +8,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { useState } from 'react';
-import { Text } from 'react-native';
+import { PlatformColor, Text } from 'react-native';
 import {
   Form,
   FormButton,
@@ -340,30 +340,22 @@ describe('Form (iOS details)', () => {
   const RN: typeof ReactNative = require('react-native');
   afterEach(() => jest.restoreAllMocks());
 
-  it('continues the grouped background into the header, light or dark, and gives it back', async () => {
+  it('continues the grouped background into the header, and gives it back', async () => {
     const navigation = { setOptions: jest.fn() };
-    const inNavigator = (
+    await render(
       <NavigationContext.Provider value={navigation as never}>
         <Form>
           <FormSection>
             <FormText title="Row" />
           </FormSection>
         </Form>
-      </NavigationContext.Provider>
+      </NavigationContext.Provider>,
     );
-    await render(inNavigator);
     expect(navigation.setOptions).toHaveBeenLastCalledWith({
       headerShadowVisible: false,
-      headerStyle: { backgroundColor: 'rgb(242, 242, 247)' },
-    });
-
-    // The Form again, as a dark screen
-    await screen.unmount();
-    jest.spyOn(RN, 'useColorScheme').mockReturnValue('dark');
-    await render(inNavigator);
-    expect(navigation.setOptions).toHaveBeenLastCalledWith({
-      headerShadowVisible: false,
-      headerStyle: { backgroundColor: 'rgb(0, 0, 0)' },
+      headerStyle: {
+        backgroundColor: PlatformColor('systemGroupedBackground'),
+      },
     });
 
     await screen.unmount();

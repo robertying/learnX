@@ -5,7 +5,7 @@ import {
   Text,
 } from '@expo/ui/jetpack-compose';
 import { fillMaxWidth, weight } from '@expo/ui/jetpack-compose/modifiers';
-import { useTheme } from 'theme';
+import { useMaterialTheme } from 'theme';
 import type { SegmentedTabsProps } from './SegmentedTabs.shared';
 import ThemedHost from 'components/ThemedHost';
 
@@ -21,7 +21,7 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
   selectedIndex,
   onSelect,
 }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
 
   return (
     <View style={[styles.bar, { backgroundColor: theme.colors.surface }]}>
