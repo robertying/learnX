@@ -1,10 +1,17 @@
-import { Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { useRef, useState } from 'react';
+import {
+  Platform,
+  ScrollView,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ContainedButton from 'components/ContainedButton';
+import ActionBar, { BarAction } from 'components/ActionBar';
+import Divider from 'components/Divider';
 import Logo from 'components/Logo';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Title } from 'components/Text';
-import TextButton from 'components/TextButton';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
@@ -20,9 +27,9 @@ export interface FeatureListProps {
   /** The app icon's X above the title, for the welcome page. */
   logo?: boolean;
   /** The filled button at the bottom. */
-  action: { label: string; onPress: () => void; testID?: string };
+  action: BarAction;
   /** A text button beside or under it, such as Full Changelog. */
-  secondaryAction?: { label: string; onPress: () => void; testID?: string };
+  secondaryAction?: BarAction;
   /** Shown in a sheet, which starts below the status bar. */
   sheet?: boolean;
   testID?: string;
@@ -48,110 +55,117 @@ const FeatureList: React.FC<FeatureListProps> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  // The scroll view's height, its content's and how far it's scrolled, for
+  // whether content is hidden under the buttons.
+  const scroll = useRef({ height: 0, content: 0, offset: 0 });
+  const [scrolledUnder, setScrolledUnder] = useState(false);
+  const [scrolledPast, setScrolledPast] = useState(false);
+  const measure = (change: Partial<typeof scroll.current>) => {
+    scroll.current = { ...scroll.current, ...change };
+    const { height, content, offset } = scroll.current;
+    setScrolledUnder(height > 0 && content - offset - height > 1);
+    setScrolledPast(offset > 1);
+  };
+  // Symbols grow with the text (Dynamic Type, Android font scale), up to
+  // about the size of the title's line.
+  const { fontScale } = useWindowDimensions();
+  const iconScale = Math.min(Math.max(fontScale, 1), 1.6);
 
   return (
-    // One ScrollView with the buttons at the end of its content: a form
-    // sheet (react-native-screens) only lays out a ScrollView that is the
-    // screen's only child, and draws the content blank otherwise.
-    <ScrollView
+    <View
       testID={testID}
       style={[styles.root, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.container}
     >
+      {/* The title stays put and only the features scroll, between it and
+          the buttons. Together they sit in the middle of the page when the
+          features fit, as on iPad, Mac or a tall phone. The views around the
+          ScrollView stay real (not flattened): a form sheet
+          (react-native-screens) stretches a ScrollView it finds at the top of
+          the screen to the whole sheet, over the title. */}
       <View
+        collapsable={false}
         style={[
-          styles.content,
-          { paddingTop: (sheet ? 0 : insets.top) + (logo ? 32 : 48) },
+          styles.middle,
+          { paddingTop: (sheet ? 0 : insets.top) + (logo ? 16 : 32) },
         ]}
       >
-        {logo && <Logo iosSize={96} style={styles.logo} />}
-        <Title
-          variant="largeTitle"
-          style={styles.title}
-          accessibilityRole="header"
+        <View collapsable={false} style={styles.header}>
+          {logo && <Logo iosSize={96} style={styles.logo} />}
+          <Title
+            variant="largeTitle"
+            style={styles.title}
+            accessibilityRole="header"
+          >
+            {title}
+          </Title>
+        </View>
+        {/* Under the title once the features scroll up under it; kept in
+            the layout, so they don't move when it shows. */}
+        <View
+          testID={testID && `${testID}-title-divider`}
+          style={!scrolledPast && styles.hidden}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
         >
-          {title}
-        </Title>
-        <View style={styles.features}>
-          {features.map(feature => (
-            <View
-              key={feature.title}
-              style={styles.feature}
-              accessible
-              accessibilityLabel={`${feature.title}, ${feature.body}`}
-            >
-              {apple ? (
-                <SystemIcon
-                  name={feature.icon}
-                  size={34}
-                  color={theme.colors.primary}
-                  style={styles.icon}
-                />
-              ) : (
+          <Divider />
+        </View>
+        <ScrollView
+          testID={testID && `${testID}-scroll`}
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          alwaysBounceVertical={false}
+          onLayout={event =>
+            measure({ height: event.nativeEvent.layout.height })
+          }
+          onContentSizeChange={(_, height) => measure({ content: height })}
+          onScroll={event =>
+            measure({ offset: event.nativeEvent.contentOffset.y })
+          }
+          scrollEventThrottle={16}
+        >
+          <View style={styles.features}>
+            {features.map(feature => (
+              <View
+                key={feature.title}
+                style={styles.feature}
+                accessible
+                accessibilityLabel={`${feature.title}, ${feature.body}`}
+              >
                 <View
+                  testID="feature-icon"
                   style={[
-                    styles.iconCircle,
-                    { backgroundColor: theme.colors.primaryContainer },
+                    styles.iconBox,
+                    apple && { width: 40 * iconScale, height: 22 * iconScale },
+                    !apple && {
+                      backgroundColor: theme.colors.primaryContainer,
+                    },
                   ]}
                 >
                   <SystemIcon
                     name={feature.icon}
-                    size={24}
-                    color={theme.colors.onPrimaryContainer}
+                    size={(apple ? 30 : 24) * iconScale}
+                    color={
+                      apple
+                        ? theme.colors.primary
+                        : theme.colors.onPrimaryContainer
+                    }
                   />
                 </View>
-              )}
-              <View style={styles.featureText}>
-                <Headline>{feature.title}</Headline>
-                <Caption variant="subheadline">{feature.body}</Caption>
+                <View style={styles.featureText}>
+                  <Headline>{feature.title}</Headline>
+                  <Caption variant="subheadline">{feature.body}</Caption>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
-      </View>
-      <View
-        style={[
-          styles.footer,
-          { paddingBottom: Math.max(insets.bottom, 16) + 8 },
-        ]}
-      >
-        {apple ? (
-          <>
-            <ContainedButton
-              style={styles.button}
-              testID={action.testID}
-              label={action.label}
-              onPress={action.onPress}
-            />
-            {secondaryAction && (
-              <TextButton
-                style={styles.button}
-                testID={secondaryAction.testID}
-                onPress={secondaryAction.onPress}
-              >
-                {secondaryAction.label}
-              </TextButton>
-            )}
-          </>
-        ) : (
-          <View style={styles.androidButtons}>
-            {secondaryAction && (
-              <TextButton
-                testID={secondaryAction.testID}
-                onPress={secondaryAction.onPress}
-              >
-                {secondaryAction.label}
-              </TextButton>
-            )}
-            <ContainedButton
-              testID={action.testID}
-              label={action.label}
-              onPress={action.onPress}
-            />
+            ))}
           </View>
-        )}
+        </ScrollView>
       </View>
-    </ScrollView>
+      <ActionBar
+        action={action}
+        secondaryAction={secondaryAction}
+        scrolledUnder={scrolledUnder}
+      />
+    </View>
   );
 };
 
@@ -159,10 +173,24 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  // Fills the page, so the buttons sit at the bottom when it's short.
-  container: {
-    flexGrow: 1,
-    justifyContent: 'space-between',
+  hidden: {
+    opacity: 0,
+  },
+  middle: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  header: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    paddingHorizontal: apple ? 40 : 24,
+  },
+  // As tall as the features, up to the room left between the title and the
+  // buttons.
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 1,
   },
   content: {
     width: '100%',
@@ -182,20 +210,22 @@ const styles = StyleSheet.create({
   title: {
     textAlign: apple ? 'center' : 'auto',
     marginTop: 8,
-    marginBottom: 40,
+    marginBottom: 32,
   },
   features: {
     gap: 28,
   },
+  // Each icon lines up with the first line of its title, however many lines
+  // the text below takes.
   feature: {
     flexDirection: 'row',
-    alignItems: apple ? 'center' : 'flex-start',
+    alignItems: 'flex-start',
     gap: 16,
   },
-  icon: {
-    width: 40,
-  },
-  iconCircle: {
+  // A column as wide as Android's tonal circle, so every title starts at the
+  // same place. On Apple platforms it's one headline line tall, and the
+  // symbol is centered on it.
+  iconBox: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -205,25 +235,7 @@ const styles = StyleSheet.create({
   featureText: {
     flex: 1,
     gap: 2,
-  },
-  footer: {
-    width: '100%',
-    maxWidth: 520,
-    alignSelf: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    alignItems: 'center',
-    gap: 8,
-  },
-  button: {
-    alignSelf: 'center',
-  },
-  androidButtons: {
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: 8,
+    paddingTop: apple ? 0 : 8,
   },
 });
 

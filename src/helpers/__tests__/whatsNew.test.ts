@@ -4,6 +4,7 @@ import {
   applicableHighlights,
   displayVersion,
   findWhatsNew,
+  maxHighlights,
   type Release,
   releases,
   whatsNewContext,
@@ -210,6 +211,7 @@ describe('releases', () => {
     expect([...versions].sort().reverse()).toEqual(versions);
     for (const { highlights } of releases) {
       expect(highlights.length).toBeGreaterThan(0);
+      expect(highlights.length).toBeLessThanOrEqual(maxHighlights);
       for (const { title, body } of highlights) {
         expect(en[title]).toBeTruthy();
         expect(en[body]).toBeTruthy();

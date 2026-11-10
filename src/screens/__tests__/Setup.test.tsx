@@ -46,16 +46,40 @@ it("marks itself and this version's What's New seen once shown", async () => {
   });
 });
 
+it("groups new content in the tabs' order, then assignments, then calendar", async () => {
+  await renderScreen();
+  const titles = screen
+    .getAllByRole('switch')
+    .map(item => item.props.accessibilityLabel);
+  expect(titles).toEqual([
+    t('notifyNewNotices'),
+    t('notifyNewAssignments'),
+    t('notifyNewFiles'),
+    t('notifyDeadlineReminders'),
+    t('notifyGrades'),
+    t('setupCalendar'),
+  ]);
+  for (const section of [
+    'setupNewContent',
+    'assignments',
+    'setupCalendarSection',
+    'setupCaption',
+  ] as const) {
+    expect(screen.getByText(t(section))).toBeTruthy();
+  }
+});
+
 it('turns on the chosen notifications once allowed, and closes', async () => {
   await renderScreen();
   await toggle(t('notifyNewFiles'), false);
+  await toggle(t('notifyGrades'), false);
   await userEvent.press(screen.getByTestId('setup-done'));
   expect(request).toHaveBeenCalled();
   expect(getSettings().notifications).toMatchObject({
     notices: true,
     files: false,
     assignments: true,
-    grades: true,
+    grades: false,
     deadlineChanges: true,
     deadlineReminders: true,
   });
@@ -79,9 +103,10 @@ it("doesn't ask with every notification off, and turns calendar sync on", async 
   await renderScreen();
   for (const label of [
     'notifyNewNotices',
+    'notifyNewAssignments',
     'notifyNewFiles',
-    'setupAssignments',
     'notifyDeadlineReminders',
+    'notifyGrades',
   ] as const) {
     await toggle(t(label), false);
   }
