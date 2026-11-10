@@ -10,7 +10,7 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 | `modules/AGENTS.md`               | Local Expo modules: Spotlight and App Intents, Crashlytics                                                                         |
 | `patches/README.md`               | Patched dependencies: what each patch fixes and how to change one (`pnpm patch`)                                                   |
 | `.maestro/AGENTS.md`              | End-to-end flows                                                                                                                   |
-| `.claude/skills/device-testing`   | Simulators, emulators, Metro, worktrees and disk space on the shared Mac                                                           |
+| `.claude/skills/device-testing`   | Building and checking the app on simulators, emulators and the Mac                                                                 |
 | `.claude/skills/release`          | Version bumps, release builds and uploads (fastlane)                                                                               |
 | `.claude/skills/release-notes`    | Release notes for the stores and GitHub                                                                                            |
 | `.claude/skills/app-store-assets` | Store screenshots and creative assets                                                                                              |
@@ -18,11 +18,10 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 ## Commands
 
 - `pnpm start` runs Metro; `pnpm ios` / `pnpm android` build and launch the app.
-- `pnpm pod` runs `pod install` and `pod update` through Bundler, with the CocoaPods version locked in `Gemfile.lock` (run `bundle install` once first). Use the Ruby in `.ruby-version` with a gem folder you can write to, such as Homebrew's (`brew install ruby`, with `$(brew --prefix ruby)/bin` first on `PATH`); Bundler installs the gems there, so every worktree shares them.
+- `pnpm pod` runs `pod install` and `pod update` through Bundler, with the CocoaPods version locked in `Gemfile.lock` (run `bundle install` once first). Use the Ruby in `.ruby-version` with a gem folder you can write to, such as Homebrew's (`brew install ruby`, with `$(brew --prefix ruby)/bin` first on `PATH`); Bundler installs the gems there.
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing. Lint is type-aware (`oxlint-tsgolint`): mark an intentionally unawaited promise with `void`.
 - User-visible text goes in `src/assets/translations` (`en.ts` and `zh.ts`), read with `t('key', { param })` from `helpers/i18n`; `{param}` placeholders are filled in, and date formats are translations too. The `learnx/no-han-outside-translations` lint rule (`lint/plugin.mjs`) rejects Chinese text elsewhere in `src`; disable it per line only for text that must not be translated, with the reason.
 - Debug builds load JS from Metro; only native changes need a rebuild.
-- Apple builds keep DerivedData outside the checkout (`~/Library/Developer/Xcode/DerivedData/learnX-<folder>`, never `ios/build`), and branches are built and checked in the reusable verify slots (`scripts/verify-slot.sh`); see the device-testing skill.
 - `android/local.properties` (git-ignored, see `android/local.properties.example`) holds the Android release signing values; debug builds don't need it.
 - `.env` (git-ignored, see `.env.example`) is inlined at build time into `helpers/env.ts` by `babel/inline-env.js`, which only passes listed keys: mock logins as is, the courseX token masked, and `LIVE_*` test logins in debug builds only. Add a key there before reading it in the app. The app can be used without a Tsinghua account through the mock login (`src/data/AGENTS.md`).
 

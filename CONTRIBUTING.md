@@ -134,7 +134,7 @@ pnpm start                        # Metro, in its own terminal
 pnpm android --active-arch-only   # builds Debug for the running emulator's ABI only, installs and launches it
 ```
 
-`--active-arch-only` builds only the emulator's ABI, which saves a lot of build time. If learnX from Google Play is installed on the device, uninstall it first: it's signed with a different key.
+`--active-arch-only` builds only the emulator's ABI, which saves a lot of build time.
 
 As on iOS, JS changes only need a reload. Rebuild after changes under `android/`, in a native package or in a patch.
 
@@ -181,5 +181,5 @@ Pull requests are squash-merged once `Check / JS` passes and the change has been
 - **Gradle fails running `node`:** Gradle runs `node` while it configures the project. Start Android Studio from a terminal that has `node` on its `PATH` (`open -a "Android Studio"`), or build from the terminal.
 - **"Signing for … requires a development team" or a provisioning error:** set your own team and bundle IDs (see [Signing](#signing-use-your-own-team-and-bundle-ids)).
 - **The app shows a red screen saying it can't connect to the development server:** start Metro (`pnpm start`). On Android, also run `adb reverse tcp:8081 tcp:8081`.
-- **`adb install` fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`:** a build signed with another key (a release build) is installed. `adb uninstall io.robertying.learnx`, then install again.
+- **Installing fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`:** learnX from Google Play or a release build is on the device. Uninstall it (`adb uninstall io.robertying.learnx`) and run `pnpm android` again.
 - **The mock login doesn't load the mock data** (the login goes to the real server and fails): the `DUMMY_*` values in `.env` are empty, or Metro hasn't picked them up. Fill them in and restart Metro.
