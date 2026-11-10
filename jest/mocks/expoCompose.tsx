@@ -83,7 +83,21 @@ export const LazyColumn = Box;
 export const CompositionLocalProvider = Box;
 export const HorizontalFloatingToolbar = Box;
 export const SingleChoiceSegmentedButtonRow = Box;
-export const PullToRefreshBox = Box;
+// Pull with `fireEvent(box, 'refresh')`; busy while refreshing.
+export const PullToRefreshBox = ({
+  isRefreshing,
+  onRefresh,
+  children,
+}: BoxProps & { isRefreshing: boolean; onRefresh: () => void }) => (
+  <View
+    testID="pull-to-refresh"
+    accessibilityState={{ busy: isRefreshing }}
+    // Not a View prop: kept on the host for fireEvent.
+    {...({ onRefresh } as object)}
+  >
+    {children}
+  </View>
+);
 export const Spacer = () => null;
 export const HorizontalDivider = () => <View testID="divider" />;
 export const VerticalDivider = () => <View testID="divider" />;
