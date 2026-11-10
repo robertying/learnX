@@ -1,7 +1,7 @@
-diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
+diff --git a/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt b/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
 index 9ae054bc..0163f14d 100644
---- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
-+++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
+--- a/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
++++ b/android/src/main/java/expo/modules/calendar/next/domain/repositories/calendar/CalendarRepository.kt
 @@ -130,7 +130,10 @@ class CalendarRepository(private val contentResolver: ContentResolver) {
        CalendarContract.Calendars.CALENDAR_COLOR,
        CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
@@ -14,10 +14,10 @@ index 9ae054bc..0163f14d 100644
        CalendarContract.Calendars.NAME,
        CalendarContract.Calendars.OWNER_ACCOUNT,
        CalendarContract.Calendars.SYNC_EVENTS,
-diff --git a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
+diff --git a/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt b/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
 index c570e729..869a6148 100644
---- a/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
-+++ b/node_modules/expo-calendar/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
+--- a/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
++++ b/android/src/main/java/expo/modules/calendar/next/domain/repositories/CursorExtensions.kt
 @@ -16,7 +16,13 @@ internal fun Cursor.getOptionalLong(columnName: String): Long? {
  }
  
@@ -33,9 +33,9 @@ index c570e729..869a6148 100644
    // getInt() returns 0 for null columns, but 0 is also the int value of AttendeeRole.NONE.
    // isNull() lets us distinguish "not set in DB" from "explicitly set to NONE".
    if (isNull(index)) {
-diff --git a/node_modules/expo-calendar/ios/CalendarUtils.swift b/node_modules/expo-calendar/ios/CalendarUtils.swift
---- a/node_modules/expo-calendar/ios/CalendarUtils.swift
-+++ b/node_modules/expo-calendar/ios/CalendarUtils.swift
+diff --git a/ios/CalendarUtils.swift b/ios/CalendarUtils.swift
+--- a/ios/CalendarUtils.swift
++++ b/ios/CalendarUtils.swift
 @@ -142,16 +142,24 @@
    return calendarEventAlarm
  }
@@ -64,9 +64,9 @@ diff --git a/node_modules/expo-calendar/ios/CalendarUtils.swift b/node_modules/e
  }
 
  func getAvailability(availability: String) -> EKEventAvailability {
-diff --git a/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift b/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift
---- a/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift
-+++ b/node_modules/expo-calendar/ios/Next/ExpoCalendarReminder.swift
+diff --git a/ios/Next/ExpoCalendarReminder.swift b/ios/Next/ExpoCalendarReminder.swift
+--- a/ios/Next/ExpoCalendarReminder.swift
++++ b/ios/Next/ExpoCalendarReminder.swift
 @@ -78,10 +78,14 @@
      let dueDate = parse(date: reminderRecord.dueDate)
      let completionDate = parse(date: reminderRecord.completionDate)

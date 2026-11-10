@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
+diff --git a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
 index fa1b7731..accd2ad3 100644
---- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
-+++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
+--- a/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
++++ b/android/src/main/java/com/swmansion/rnscreens/ScreenStackHeaderConfigViewManager.kt
 @@ -124,6 +124,11 @@ class ScreenStackHeaderConfigViewManager :
          config.setTitle(title)
      }
@@ -14,10 +14,10 @@ index fa1b7731..accd2ad3 100644
      override fun setTitleFontFamily(
          config: ScreenStackHeaderConfig,
          titleFontFamily: String?,
-diff --git a/node_modules/react-native-screens/ios/RNSScreenStack.mm b/node_modules/react-native-screens/ios/RNSScreenStack.mm
+diff --git a/ios/RNSScreenStack.mm b/ios/RNSScreenStack.mm
 index 5da11964..49fcd596 100644
---- a/node_modules/react-native-screens/ios/RNSScreenStack.mm
-+++ b/node_modules/react-native-screens/ios/RNSScreenStack.mm
+--- a/ios/RNSScreenStack.mm
++++ b/ios/RNSScreenStack.mm
 @@ -1,4 +1,5 @@
  #import "RNSScreenStack.h"
 +#import <objc/runtime.h>
@@ -258,10 +258,10 @@ index 5da11964..49fcd596 100644
    _reactSubviews = [NSMutableArray new];
  
    for (UIViewController *controller in _presentedModals) {
-diff --git a/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.h b/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.h
+diff --git a/ios/RNSScreenStackHeaderConfig.h b/ios/RNSScreenStackHeaderConfig.h
 index 8f99f5b5..2cbe5a2b 100644
---- a/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.h
-+++ b/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.h
+--- a/ios/RNSScreenStackHeaderConfig.h
++++ b/ios/RNSScreenStackHeaderConfig.h
 @@ -24,6 +24,7 @@
  NS_ASSUME_NONNULL_BEGIN
  
@@ -270,10 +270,10 @@ index 8f99f5b5..2cbe5a2b 100644
  @property (nonatomic, retain) NSString *titleFontFamily;
  @property (nonatomic, retain) NSNumber *titleFontSize;
  @property (nonatomic, retain) NSString *titleFontWeight;
-diff --git a/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.mm b/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.mm
+diff --git a/ios/RNSScreenStackHeaderConfig.mm b/ios/RNSScreenStackHeaderConfig.mm
 index 12f22720..0d912b2e 100644
---- a/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.mm
-+++ b/node_modules/react-native-screens/ios/RNSScreenStackHeaderConfig.mm
+--- a/ios/RNSScreenStackHeaderConfig.mm
++++ b/ios/RNSScreenStackHeaderConfig.mm
 @@ -765,6 +765,11 @@ + (void)updateViewController:(UIViewController *)vc
    // This assignment should be done after `navitem.titleView = ...` assignment (iOS 16.0 bug).
    // See: https://github.com/software-mansion/react-native-screens/issues/1570 (comments)
@@ -294,10 +294,10 @@ index 12f22720..0d912b2e 100644
    if (newScreenProps.titleFontFamily != oldScreenProps.titleFontFamily) {
      _titleFontFamily = RCTNSStringFromStringNilIfEmpty(newScreenProps.titleFontFamily);
    }
-diff --git a/node_modules/react-native-screens/ios/RNSSearchBar.mm b/node_modules/react-native-screens/ios/RNSSearchBar.mm
+diff --git a/ios/RNSSearchBar.mm b/ios/RNSSearchBar.mm
 index 2345734..4191a4b 100644
---- a/node_modules/react-native-screens/ios/RNSSearchBar.mm
-+++ b/node_modules/react-native-screens/ios/RNSSearchBar.mm
+--- a/ios/RNSSearchBar.mm
++++ b/ios/RNSSearchBar.mm
 @@ -14,6 +14,12 @@
  
  namespace react = facebook::react;
@@ -345,10 +345,10 @@ index 2345734..4191a4b 100644
  - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
  {
    [self emitOnSearchButtonPressEventWithText:_controller.searchBar.text];
-diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm b/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm
+diff --git a/ios/gamma/split/RNSSplitAppearanceApplicator.mm b/ios/gamma/split/RNSSplitAppearanceApplicator.mm
 index e33c804f..40cbe0dd 100644
---- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm
-+++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitAppearanceApplicator.mm
+--- a/ios/gamma/split/RNSSplitAppearanceApplicator.mm
++++ b/ios/gamma/split/RNSSplitAppearanceApplicator.mm
 @@ -72,6 +72,18 @@ - (void)updateSplitViewConfigurationFor:(RNSSplitHostComponentView *)splitHost
    splitHostController.presentsWithGesture = splitHost.presentsWithGesture;
    splitHostController.primaryEdge = splitHost.primaryEdge;
@@ -403,10 +403,10 @@ index e33c804f..40cbe0dd 100644
    }
  
    if (splitHost.minimumSupplementaryColumnWidth >= 0) {
-diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.h b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.h
+diff --git a/ios/gamma/split/RNSSplitHostComponentView.h b/ios/gamma/split/RNSSplitHostComponentView.h
 index dca7ea15..afcd704e 100644
---- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.h
-+++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.h
+--- a/ios/gamma/split/RNSSplitHostComponentView.h
++++ b/ios/gamma/split/RNSSplitHostComponentView.h
 @@ -42,6 +42,11 @@ NS_ASSUME_NONNULL_BEGIN
  #endif // !TARGET_OS_TV
  @property (nonatomic, readonly) BOOL presentsWithGesture;
@@ -419,10 +419,10 @@ index dca7ea15..afcd704e 100644
  @property (nonatomic, readonly) BOOL showInspector;
  @property (nonatomic, readonly) BOOL hasCustomTopColumnForCollapsing;
  @property (nonatomic, readonly) UISplitViewControllerColumn topColumnForCollapsingColumn;
-diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.mm b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.mm
+diff --git a/ios/gamma/split/RNSSplitHostComponentView.mm b/ios/gamma/split/RNSSplitHostComponentView.mm
 index e2d5259a..75ec291b 100644
---- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.mm
-+++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostComponentView.mm
+--- a/ios/gamma/split/RNSSplitHostComponentView.mm
++++ b/ios/gamma/split/RNSSplitHostComponentView.mm
 @@ -33,6 +33,7 @@ @implementation RNSSplitHostComponentView {
    bool _needsSplitOrientationUpdate;
    // We need this information to warn users about dynamic changes to behavior being currently unsupported.
@@ -559,10 +559,10 @@ index e2d5259a..75ec291b 100644
    if (oldComponentProps.showSecondaryToggleButton != newComponentProps.showSecondaryToggleButton) {
      _needsSplitAppearanceUpdate = true;
      _needsSplitSecondaryScreenNavBarUpdate = true;
-diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
+diff --git a/ios/gamma/split/RNSSplitHostController.mm b/ios/gamma/split/RNSSplitHostController.mm
 index c7d2db75..9fb404b9 100644
---- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
-+++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitHostController.mm
+--- a/ios/gamma/split/RNSSplitHostController.mm
++++ b/ios/gamma/split/RNSSplitHostController.mm
 @@ -41,6 +41,17 @@ @implementation RNSSplitHostController {
     * avoiding crashes when certain columns are collapsed or hidden.
     */
@@ -679,10 +679,10 @@ index c7d2db75..9fb404b9 100644
    }
  
    __weak auto weakSelf = self;
-diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.h b/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.h
+diff --git a/ios/gamma/split/RNSSplitNavigationController.h b/ios/gamma/split/RNSSplitNavigationController.h
 index 06c34c76..ad9d7586 100644
---- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.h
-+++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.h
+--- a/ios/gamma/split/RNSSplitNavigationController.h
++++ b/ios/gamma/split/RNSSplitNavigationController.h
 @@ -26,6 +26,12 @@ NS_ASSUME_NONNULL_BEGIN
                   frameOriginChangeDelegate:
                       (nullable id<RNSSplitNavigationControllerFrameOriginChangeDelegate>)frameOriginChangeDelegate;
@@ -696,10 +696,10 @@ index 06c34c76..ad9d7586 100644
  @end
  
  NS_ASSUME_NONNULL_END
-diff --git a/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.mm b/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.mm
+diff --git a/ios/gamma/split/RNSSplitNavigationController.mm b/ios/gamma/split/RNSSplitNavigationController.mm
 index 612a1c03..8a8b4918 100644
---- a/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.mm
-+++ b/node_modules/react-native-screens/ios/gamma/split/RNSSplitNavigationController.mm
+--- a/ios/gamma/split/RNSSplitNavigationController.mm
++++ b/ios/gamma/split/RNSSplitNavigationController.mm
 @@ -5,6 +5,7 @@
  @implementation RNSSplitNavigationController {
    RNSSplitNavigationControllerFrameObserver *_frameObserver;
@@ -777,10 +777,10 @@ index 612a1c03..8a8b4918 100644
  }
  
  - (void)dealloc
-diff --git a/node_modules/react-native-screens/lib/typescript/components/gamma/split/SplitHost.types.d.ts b/node_modules/react-native-screens/lib/typescript/components/gamma/split/SplitHost.types.d.ts
+diff --git a/lib/typescript/components/gamma/split/SplitHost.types.d.ts b/lib/typescript/components/gamma/split/SplitHost.types.d.ts
 index 944efd6e..90d2d08f 100644
---- a/node_modules/react-native-screens/lib/typescript/components/gamma/split/SplitHost.types.d.ts
-+++ b/node_modules/react-native-screens/lib/typescript/components/gamma/split/SplitHost.types.d.ts
+--- a/lib/typescript/components/gamma/split/SplitHost.types.d.ts
++++ b/lib/typescript/components/gamma/split/SplitHost.types.d.ts
 @@ -293,6 +293,14 @@ export interface SplitHostProps extends ViewProps {
       * @supported iOS 26 or higher
       */
@@ -796,10 +796,10 @@ index 944efd6e..90d2d08f 100644
      /**
       * @summary Determines whether a button to toggle to and from secondaryOnly display mode is visible.
       */
-diff --git a/node_modules/react-native-screens/src/components/gamma/split/SplitHost.types.ts b/node_modules/react-native-screens/src/components/gamma/split/SplitHost.types.ts
+diff --git a/src/components/gamma/split/SplitHost.types.ts b/src/components/gamma/split/SplitHost.types.ts
 index 9039e5a1..131e8cea 100644
---- a/node_modules/react-native-screens/src/components/gamma/split/SplitHost.types.ts
-+++ b/node_modules/react-native-screens/src/components/gamma/split/SplitHost.types.ts
+--- a/src/components/gamma/split/SplitHost.types.ts
++++ b/src/components/gamma/split/SplitHost.types.ts
 @@ -320,6 +320,14 @@ export interface SplitHostProps extends ViewProps {
     * @supported iOS 26 or higher
     */
@@ -815,10 +815,10 @@ index 9039e5a1..131e8cea 100644
    /**
     * @summary Determines whether a button to toggle to and from secondaryOnly display mode is visible.
     */
-diff --git a/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx b/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx
+diff --git a/src/components/gamma/split/SplitHost.tsx b/src/components/gamma/split/SplitHost.tsx
 index 7a5de71..d6e18e8 100644
---- a/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx
-+++ b/node_modules/react-native-screens/src/components/gamma/split/SplitHost.tsx
+--- a/src/components/gamma/split/SplitHost.tsx
++++ b/src/components/gamma/split/SplitHost.tsx
 @@ -30,7 +30,9 @@ const isValidDisplayModeForSplitBehavior = (
    displayMode: SplitDisplayMode,
    splitBehavior: SplitBehavior,
@@ -830,10 +830,10 @@ index 7a5de71..d6e18e8 100644
      // for automatic we cannot easily verify the compatibility, because it depends on the system preference for display mode, therefore we're assuming that 'automatic' has only valid combinations
      return true;
    }
-diff --git a/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx b/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx
+diff --git a/src/components/gamma/split/SplitScreen.tsx b/src/components/gamma/split/SplitScreen.tsx
 index 52b7d211..1ac28ef0 100644
---- a/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx
-+++ b/node_modules/react-native-screens/src/components/gamma/split/SplitScreen.tsx
+--- a/src/components/gamma/split/SplitScreen.tsx
++++ b/src/components/gamma/split/SplitScreen.tsx
 @@ -11,7 +11,7 @@ function Column(props: SplitScreenProps) {
      <SplitScreenNativeComponent
        columnType="column"
@@ -843,10 +843,10 @@ index 52b7d211..1ac28ef0 100644
        {props.children}
      </SplitScreenNativeComponent>
    );
-diff --git a/node_modules/react-native-screens/src/fabric/ScreenStackHeaderConfigNativeComponent.ts b/node_modules/react-native-screens/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
+diff --git a/src/fabric/ScreenStackHeaderConfigNativeComponent.ts b/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
 index da28c51c..ef0cb5f6 100644
---- a/node_modules/react-native-screens/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
-+++ b/node_modules/react-native-screens/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
+--- a/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
++++ b/src/fabric/ScreenStackHeaderConfigNativeComponent.ts
 @@ -66,6 +66,7 @@ export interface NativeProps extends ViewProps {
    largeTitleColor?: ColorValue | undefined;
    translucent?: boolean | undefined;
@@ -855,10 +855,10 @@ index da28c51c..ef0cb5f6 100644
    titleFontFamily?: string | undefined;
    titleFontSize?: CT.Int32 | undefined;
    titleFontWeight?: string | undefined;
-diff --git a/node_modules/react-native-screens/src/fabric/gamma/split/SplitHostNativeComponent.ts b/node_modules/react-native-screens/src/fabric/gamma/split/SplitHostNativeComponent.ts
+diff --git a/src/fabric/gamma/split/SplitHostNativeComponent.ts b/src/fabric/gamma/split/SplitHostNativeComponent.ts
 index b3dfa2d5..655c9328 100644
---- a/node_modules/react-native-screens/src/fabric/gamma/split/SplitHostNativeComponent.ts
-+++ b/node_modules/react-native-screens/src/fabric/gamma/split/SplitHostNativeComponent.ts
+--- a/src/fabric/gamma/split/SplitHostNativeComponent.ts
++++ b/src/fabric/gamma/split/SplitHostNativeComponent.ts
 @@ -74,6 +74,7 @@ interface NativeProps extends ViewProps {
    preferredSplitBehavior?: CT.WithDefault<SplitViewSplitBehavior, 'automatic'>;
    primaryEdge?: CT.WithDefault<SplitViewPrimaryEdge, 'leading'>;
@@ -867,10 +867,10 @@ index b3dfa2d5..655c9328 100644
    displayModeButtonVisibility?: CT.WithDefault<
      SplitViewDisplayModeButtonVisibility,
      'automatic'
-diff --git a/node_modules/react-native-screens/src/types.tsx b/node_modules/react-native-screens/src/types.tsx
+diff --git a/src/types.tsx b/src/types.tsx
 index 3ec38fa0..2e4417be 100644
---- a/node_modules/react-native-screens/src/types.tsx
-+++ b/node_modules/react-native-screens/src/types.tsx
+--- a/src/types.tsx
++++ b/src/types.tsx
 @@ -831,6 +831,13 @@ export interface ScreenStackHeaderConfigProps extends ViewProps {
     * String that can be displayed in the header as a fallback for `headerTitle`.
     */

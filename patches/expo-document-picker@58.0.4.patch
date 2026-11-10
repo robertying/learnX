@@ -1,7 +1,7 @@
-diff --git a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
+diff --git a/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt b/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
 index 6c2bff0..b8e9637 100644
---- a/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
-+++ b/node_modules/expo-document-picker/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
+--- a/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
++++ b/android/src/main/java/expo/modules/documentpicker/DocumentPickerModule.kt
 @@ -39,7 +39,7 @@ class DocumentPickerModule : Module() {
 
        pendingPromise = promise

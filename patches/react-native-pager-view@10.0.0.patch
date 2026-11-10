@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift b/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift
+diff --git a/ios/PagerGestureObserver.swift b/ios/PagerGestureObserver.swift
 index 78361b7..e94a5a4 100644
---- a/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift
-+++ b/node_modules/react-native-pager-view/ios/PagerGestureObserver.swift
+--- a/ios/PagerGestureObserver.swift
++++ b/ios/PagerGestureObserver.swift
 @@ -145,6 +145,12 @@ private extension PagerGestureObserver {
      // Already wearing the subclass, e.g. after a recycle.
      guard !currentName.hasSuffix(subclassSuffix) else { return }

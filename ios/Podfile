@@ -5,7 +5,7 @@ platform :ios, '17.6'
 prepare_react_native_project!
 
 # Build React Native core and its third-party deps (folly, etc.) from source:
-# patches/react-native+*.patch changes native code (RCTTextInputComponentView.mm)
+# patches/react-native@*.patch changes native code (RCTTextInputComponentView.mm)
 # that a prebuilt core would leave out.
 ENV['RCT_USE_RN_DEP'] = '0'
 ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
