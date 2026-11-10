@@ -1,4 +1,4 @@
-name: Build
+name: Native
 
 # Builds the app so a broken patch, Podfile, Gradle, R8 or native module change
 # shows up in CI, not on a Mac later, runs the native iOS tests, and runs the
@@ -6,18 +6,20 @@ name: Build
 # checks.
 #
 # When each job runs:
-# - Android (release APK, ~10 min cold): PRs and main pushes that touch Android
-#   paths (its first step checks; otherwise the rest is skipped), and by hand. A release build, because R8 and the JS bundle only run
-#   there; -PciRelease signs it with the debug key and turns off Crashlytics
-#   uploads (android/app/build.gradle).
-# - iOS (build + native tests, ~47 min cold): by hand only, with the "iOS"
-#   box ticked (the default). Run it on main to refresh the compilation cache,
-#   or on a branch to check it.
-# - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
-# - Android E2E: by hand only, with the "Run E2E" box ticked. Runs the Maestro
-#   flows (scripts/e2e.sh) in an emulator on the release APK the Android job
-#   built. The Android flows aren't maintained, so expect drift there
-#   (.maestro/AGENTS.md). No iOS E2E in CI for now.
+# - Android release build (~10 min cold): PRs and main pushes that touch
+#   Android paths (its first step checks; otherwise the rest is skipped), and
+#   by hand. A release build, because R8 and the JS bundle only run there;
+#   -PciRelease signs it with the debug key and turns off Crashlytics uploads
+#   (android/app/build.gradle).
+# - Apple (iOS), build + native tests (~47 min cold): by hand only, with the
+#   "iOS: build and native tests" box ticked (the default). Run it on main to
+#   refresh the compilation cache, or on a branch to check it.
+# - Apple (Mac), build (~35 min, uncached): by hand only, with the "Mac:
+#   build" box ticked.
+# - Android E2E tests: by hand only, with the "Android E2E tests" box ticked.
+#   Runs the Maestro flows (scripts/e2e.sh) in an emulator on the APK from the
+#   Android release build. The Android flows aren't maintained, so expect
+#   drift there (.maestro/AGENTS.md). No iOS E2E in CI for now.
 on:
   pull_request:
   push:
@@ -25,15 +27,15 @@ on:
   workflow_dispatch:
     inputs:
       ios:
-        description: Build iOS and run native tests
+        description: 'iOS: build and native tests'
         type: boolean
         default: true
       mac:
-        description: Build Mac
+        description: 'Mac: build'
         type: boolean
         default: false
       e2e:
-        description: Run E2E (Android, release build)
+        description: Android E2E tests
         type: boolean
         default: false
 
@@ -60,7 +62,7 @@ env:
 
 jobs:
   android:
-    name: Android
+    name: Android release build
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -147,7 +149,8 @@ jobs:
 
   apple:
     # A static name: a skipped matrix job can't expand ${{ matrix.name }}, so
-    # GitHub would show the raw expression. Rows show as "Apple (iOS)".
+    # GitHub would show the raw expression. Rows show as "Apple (iOS)" (build
+    # and native tests) and "Apple (Mac)" (build).
     name: Apple
     # By hand only, for the boxes ticked.
     if: github.event_name == 'workflow_dispatch' && (inputs.ios || inputs.mac)
@@ -303,7 +306,7 @@ jobs:
           if-no-files-found: ignore
 
   android-e2e:
-    name: Android E2E
+    name: Android E2E tests
     needs: android
     if: inputs.e2e
     runs-on: ubuntu-latest

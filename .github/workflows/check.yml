@@ -1,4 +1,4 @@
-name: Check
+name: CI
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ env:
 jobs:
   js:
     # Typecheck, lint, format and Jest
-    name: JS
+    name: JS checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
