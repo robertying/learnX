@@ -1,11 +1,15 @@
+import { Platform } from 'react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import {
   applicableHighlights,
   displayVersion,
   findWhatsNew,
   type Release,
   releases,
+  whatsNewContext,
   whatsNewSince,
 } from 'helpers/whatsNew';
+import packageJson from '../../../package.json';
 import en from 'assets/translations/en';
 
 const list: Release[] = [
@@ -108,6 +112,62 @@ describe('applicableHighlights', () => {
     expect(
       applicableHighlights(list[0], { nativeVersion: '20.0', platform: 'mac' }),
     ).toHaveLength(2);
+  });
+});
+
+describe('platforms', () => {
+  it('leaves out rows for other platforms', () => {
+    const android = { nativeVersion: '19.1.0', platform: 'android' as const };
+    expect(applicableHighlights(list[1], android)).toEqual([]);
+    expect(
+      applicableHighlights(list[1], { ...android, platform: 'mac' }),
+    ).toHaveLength(1);
+    // So Android falls back to the release before.
+    expect(
+      whatsNewSince('18.0.0', { version: '19.1.0', ...android }, list)?.version,
+    ).toBe('19.0.0');
+  });
+
+  it('keeps Spotlight out of the Android 19 highlights', () => {
+    const titles = (platform: 'ios' | 'android') =>
+      applicableHighlights(
+        releases.find(r => r.version === '19.0.0')!,
+        {
+          nativeVersion: '19.0.0',
+          platform,
+        },
+      ).map(h => h.title);
+    expect(titles('ios')).toContain('whatsNew19SpotlightTitle');
+    expect(titles('android')).not.toContain('whatsNew19SpotlightTitle');
+  });
+
+  it('describes this install', () => {
+    const os = Platform.OS;
+    expect(whatsNewContext()).toMatchObject({
+      version: packageJson.version,
+      platform: 'ios',
+    });
+    const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    expect(whatsNewContext().platform).toBe('mac');
+    isMac.mockRestore();
+    Platform.OS = 'android';
+    expect(whatsNewContext().platform).toBe('android');
+    Platform.OS = os;
+  });
+});
+
+describe('versions', () => {
+  it('reads short and unreadable versions', () => {
+    // "20.0" is 20.0.0
+    expect(whatsNewSince('19.1', ios('20.0'), list)?.version).toBe('20.0.0');
+    // An unreadable native version has none of the native rows.
+    expect(
+      applicableHighlights(list[0], { nativeVersion: 'beta', platform: 'ios' }),
+    ).toHaveLength(1);
+    // An unreadable seen version counts as never seen.
+    expect(whatsNewSince('unknown', ios('19.0.0'), list)?.version).toBe(
+      '19.0.0',
+    );
   });
 });
 

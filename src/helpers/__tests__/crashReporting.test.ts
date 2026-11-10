@@ -4,8 +4,10 @@ import { useCredentialsStore } from 'data/credentials';
 import env from '../../../jest/mocks/env';
 import {
   installGlobalErrorHandler,
+  installRejectionTracker,
   parseStack,
   recordError,
+  setCustomKey,
   trackScreen,
 } from 'helpers/crashReporting';
 
@@ -170,6 +172,81 @@ describe('installGlobalErrorHandler', () => {
       defaultHandler.mock.invocationCallOrder[0],
     );
     expect(defaultHandler).toHaveBeenCalledWith(error, true);
+
+    // Installing again doesn't wrap the handler twice.
+    const setGlobalHandler = jest.fn();
+    (globalThis as any).ErrorUtils.setGlobalHandler = setGlobalHandler;
+    installGlobalErrorHandler();
+    expect(setGlobalHandler).not.toHaveBeenCalled();
+  });
+});
+
+describe('setCustomKey', () => {
+  it('skips debug builds and never throws', () => {
+    (globalThis as any).__DEV__ = true;
+    setCustomKey('a', 'b');
+    expect(native.setCustomKey).not.toHaveBeenCalled();
+
+    (globalThis as any).__DEV__ = false;
+    native.setCustomKey.mockImplementationOnce(() => {
+      throw new Error('native');
+    });
+    expect(() => setCustomKey('a', 'b')).not.toThrow();
+  });
+});
+
+describe('installRejectionTracker', () => {
+  type Tracker = {
+    onUnhandled: (id: number, rejection: unknown) => void;
+  };
+  const enable = jest.fn<void, [Tracker]>();
+
+  afterAll(() => {
+    delete (globalThis as any).HermesInternal;
+  });
+
+  it('only tracks in release builds on Hermes', () => {
+    (globalThis as any).__DEV__ = true;
+    (globalThis as any).HermesInternal = {
+      enablePromiseRejectionTracker: enable,
+    };
+    installRejectionTracker();
+    expect(enable).not.toHaveBeenCalled();
+
+    (globalThis as any).__DEV__ = false;
+    delete (globalThis as any).HermesInternal;
+    installRejectionTracker();
+    expect(enable).not.toHaveBeenCalled();
+  });
+
+  it('reports each distinct rejection once, at most ten', () => {
+    (globalThis as any).HermesInternal = {
+      enablePromiseRejectionTracker: enable,
+    };
+    installRejectionTracker();
+    installRejectionTracker();
+    expect(enable).toHaveBeenCalledTimes(1);
+    const { onUnhandled } = enable.mock.calls[0][0];
+
+    onUnhandled(1, new Error('a'));
+    onUnhandled(2, new Error('a'));
+    expect(native.recordError).toHaveBeenCalledTimes(1);
+    expect(native.log).toHaveBeenCalledWith('Unhandled promise rejection');
+
+    // Values that aren't errors, kept without their contents.
+    onUnhandled(3, null);
+    onUnhandled(4, 42);
+    expect(
+      native.recordError.mock.calls.slice(1).map(c => c.slice(0, 2)),
+    ).toEqual([
+      ['NonError', 'null'],
+      ['NonError', '42'],
+    ]);
+
+    for (let i = 0; i < 20; i++) {
+      onUnhandled(10 + i, new Error(`loop ${i}`));
+    }
+    expect(native.recordError).toHaveBeenCalledTimes(10);
   });
 });
 

@@ -1,9 +1,14 @@
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { mockAssignments } from 'data/mock';
 import { Assignment } from 'data/types/state';
 import {
   cancelDeadlineReminders,
+  cancelDeadlineRemindersOf,
   planDeadlineReminders,
+  previewDeadlineReminder,
+  remindLater,
+  remindLaterDate,
   syncDeadlineReminders,
 } from 'helpers/deadlineReminders';
 
@@ -42,6 +47,11 @@ beforeEach(() => {
     .mocked(Notifications.getPermissionsAsync)
     .mockResolvedValue({ granted: true, canAskAgain: true } as never);
   scheduled.mockResolvedValue([]);
+});
+
+const os = Platform.OS;
+afterEach(() => {
+  Platform.OS = os;
 });
 
 describe('planDeadlineReminders', () => {
@@ -139,20 +149,14 @@ describe('syncDeadlineReminders', () => {
   });
 
   it('marks reminders that Android may hold back, to redo them once allowed', async () => {
-    const { Platform } = require('react-native');
-    const os = Platform.OS;
     Platform.OS = 'android';
     jest
       .mocked(Notifications.getExactAlarmPermissionsAsync)
       .mockResolvedValueOnce({ granted: false } as never);
-    try {
-      await syncDeadlineReminders([assignment('a', 5)], options());
-      expect(schedule.mock.calls[0][0].identifier).toBe(
-        `deadline-reminder:a:${now + 5 * hour}:60:inexact`,
-      );
-    } finally {
-      Platform.OS = os;
-    }
+    await syncDeadlineReminders([assignment('a', 5)], options());
+    expect(schedule.mock.calls[0][0].identifier).toBe(
+      `deadline-reminder:a:${now + 5 * hour}:60:inexact`,
+    );
   });
 
   it('cancels everything without the permission', async () => {
@@ -175,4 +179,114 @@ it('cancels only reminders', async () => {
   ] as never);
   await cancelDeadlineReminders();
   expect(cancel.mock.calls).toEqual([['deadline-reminder:a:1:60']]);
+});
+
+it('cancels the reminders of given assignments, put off or not', async () => {
+  scheduled.mockResolvedValue([
+    { identifier: 'deadline-reminder:a:1:60' },
+    { identifier: 'deadline-later:a' },
+    { identifier: 'deadline-reminder:b:1:60' },
+    { identifier: 'a' },
+  ] as never);
+  await cancelDeadlineRemindersOf(['a']);
+  expect(cancel.mock.calls).toEqual([
+    ['deadline-reminder:a:1:60'],
+    ['deadline-later:a'],
+  ]);
+});
+
+describe('remindLaterDate', () => {
+  const minute = 60 * 1000;
+
+  it('reminds again in an hour when the deadline is far', () => {
+    expect(remindLaterDate(now + 5 * hour, now)).toBe(now + hour);
+  });
+
+  it('reminds a few minutes before a deadline within the hour', () => {
+    expect(remindLaterDate(now + 30 * minute, now)).toBe(now + 25 * minute);
+  });
+
+  it('gives up when the deadline is too close or past', () => {
+    expect(remindLaterDate(now + 5 * minute, now)).toBeNull();
+    expect(remindLaterDate(now + 3 * minute, now)).toBeNull();
+    expect(remindLaterDate(now - hour, now)).toBeNull();
+  });
+});
+
+describe('remindLater', () => {
+  const notification = {
+    request: {
+      content: { title: 'Essay', body: 'Calculus', data: { extra: 1 } },
+    },
+  } as unknown as Notifications.Notification;
+
+  beforeEach(() => {
+    jest.useFakeTimers({ now });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('replaces the put-off reminder of the assignment', async () => {
+    Platform.OS = 'ios';
+    await remindLater(notification, { id: 'a', deadline: now + 5 * hour });
+    expect(schedule).toHaveBeenCalledWith({
+      identifier: 'deadline-later:a',
+      content: {
+        title: 'Essay',
+        body: 'Calculus',
+        data: {
+          extra: 1,
+          type: 'assignment',
+          id: 'a',
+          deadline: now + 5 * hour,
+        },
+        categoryIdentifier: 'deadlineReminder',
+      },
+      trigger: { type: 'date', date: now + hour },
+    });
+  });
+
+  it('posts to the deadlines channel on Android', async () => {
+    Platform.OS = 'android';
+    await remindLater(notification, { id: 'a', deadline: now + 5 * hour });
+    expect(schedule.mock.calls[0][0].trigger).toEqual({
+      type: 'date',
+      date: now + hour,
+      channelId: 'deadlines',
+    });
+  });
+
+  it('does nothing when the deadline is about to pass', async () => {
+    await remindLater(notification, { id: 'a', deadline: now + 60 * 1000 });
+    expect(schedule).not.toHaveBeenCalled();
+  });
+});
+
+describe('previewDeadlineReminder', () => {
+  it('shows the first reminder again soon and counts them', async () => {
+    scheduled.mockResolvedValue([
+      { identifier: 'other', content: { title: 'Other' } },
+      {
+        identifier: 'deadline-reminder:a:1:60',
+        content: { title: 'A', body: 'Due', data: { id: 'a' } },
+      },
+      { identifier: 'deadline-reminder:b:1:60', content: { title: 'B' } },
+    ] as never);
+    await expect(previewDeadlineReminder()).resolves.toBe(2);
+    expect(schedule).toHaveBeenCalledWith({
+      content: {
+        title: 'A',
+        body: 'Due',
+        data: { id: 'a' },
+        categoryIdentifier: 'deadlineReminder',
+      },
+      trigger: { type: 'timeInterval', seconds: 10 },
+    });
+  });
+
+  it('schedules nothing without reminders', async () => {
+    await expect(previewDeadlineReminder()).resolves.toBe(0);
+    expect(schedule).not.toHaveBeenCalled();
+  });
 });
