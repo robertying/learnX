@@ -31,11 +31,13 @@ dependencies {
   testImplementation("io.mockk:mockk:${rootProject.ext.mockkVersion}")
 }
 
-// Robolectric runs Android 15 and later only on Java 21.
+// Robolectric runs Android 15 and later only on Java 21, and Android 16 reaches
+// into the JDK's file descriptor internals.
 tasks.withType(Test).configureEach {
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = JavaLanguageVersion.of(21)
   }
+  jvmArgs "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED"
   testLogging {
     exceptionFormat = "full"
   }
