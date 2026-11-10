@@ -35,6 +35,10 @@ module.exports = {
     'src/**/*.{ts,tsx}',
     '!src/**/__tests__/**',
     '!src/**/*.d.ts',
+    // Widget layouts become source text at build time ('widget' directive),
+    // so their code never runs as itself; src/widgets/__tests__/layouts.test.ts
+    // runs that text instead.
+    '!src/widgets/*{IOS,Android}.tsx',
   ],
   projects: [
     {
