@@ -57,6 +57,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
     disableSwipe?: boolean;
     hideCourseName?: boolean;
     onPress?: () => void;
+    last?: boolean;
   }>;
   detailScreen: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail';
   /** The course's refresh of this list (`useRefreshCourseNotices`, …). */
