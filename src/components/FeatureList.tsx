@@ -171,8 +171,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: apple ? 40 : 24,
     paddingBottom: 24,
   },
+  // The icon image has room around the X: less pulled in below than Logo's
+  // default, so the X clears the title, and pulled back on Android so the X
+  // lines up with the title's start.
   logo: {
     alignSelf: apple ? 'center' : 'flex-start',
+    marginBottom: apple ? -8 : -24,
+    marginStart: apple ? 0 : -28,
   },
   title: {
     textAlign: apple ? 'center' : 'auto',
