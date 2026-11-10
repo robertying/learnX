@@ -6,6 +6,7 @@ import {
   userEvent,
 } from '@testing-library/react-native';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
+import * as menus from '../../../jest/mocks/menus';
 import { mockSwipeableMethods } from '../../../jest/mocks/swipeable';
 
 const card = (props: CardWrapperProps = {}) => (
@@ -189,5 +190,107 @@ describe('CardWrapper', () => {
       expect(onDrag).toHaveBeenCalledTimes(1);
       expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('swipe actions', () => {
+  const swipeAction = (testID: string) =>
+    screen.getByTestId(testID, { includeHiddenElements: true });
+
+  it('runs the pressed action and closes the swipe', async () => {
+    const onFav = jest.fn();
+    const onArchive = jest.fn();
+    await render(card({ onFav, onArchive, fav: true }));
+    await user.press(swipeAction('card-fav'));
+    expect(onFav).toHaveBeenCalledWith(false);
+    expect(mockSwipeableMethods.close).toHaveBeenCalled();
+    await user.press(swipeAction('card-archive'));
+    expect(onArchive).toHaveBeenCalledWith(true);
+  });
+
+  it('hides or shows a course', async () => {
+    const onHide = jest.fn();
+    await render(card({ onHide, hidden: true }));
+    await user.press(swipeAction('card-hide'));
+    expect(onHide).toHaveBeenCalledWith(false);
+  });
+});
+
+describe('on iPad and Mac', () => {
+  // Read when the module loads, so it loads again with the same React.
+  const shared = {
+    react: require('react'),
+    compilerRuntime: require('react/compiler-runtime'),
+    reactNative: require('react-native'),
+    menus: require('../../../jest/mocks/menus'),
+  };
+  const contextMenu = jest.mocked(menus.ContextMenuView);
+  const loadCard = (mac: boolean) => {
+    let Card: typeof CardWrapper = () => null;
+    jest.isolateModules(() => {
+      jest.doMock('react', () => shared.react);
+      jest.doMock('react/compiler-runtime', () => shared.compilerRuntime);
+      jest.doMock('react-native', () => shared.reactNative);
+      jest.doMock('constants/DeviceInfo', () => ({
+        ...jest.requireActual('constants/DeviceInfo').default,
+        isIPad: () => !mac,
+        isMac: () => mac,
+        hasLiquidGlass: () => false,
+        supportsNativeSubtitle: () => false,
+      }));
+      jest.doMock('../../../jest/mocks/menus', () => shared.menus);
+      Card = require('components/CardWrapper').default;
+    });
+    return Card;
+  };
+  const menu = () =>
+    contextMenu.mock.lastCall![0] as unknown as {
+      actions: { key: string; title: string }[];
+      onAction: (e: { nativeEvent: { key: string } }) => void;
+    };
+
+  it('puts the actions in the context menu instead of a long press', async () => {
+    const Card = loadCard(false);
+    const onFav = jest.fn();
+    await render(
+      <Card accessibilityLabel="Card label" onFav={onFav}>
+        <Text>Card</Text>
+      </Card>,
+    );
+    expect(menu().actions.map(a => a.key)).toEqual(['fav', 'archive']);
+    menu().onAction({ nativeEvent: { key: 'fav' } });
+    expect(onFav).toHaveBeenCalledWith(true);
+    menu().onAction({ nativeEvent: { key: 'unknown' } });
+    await longPress();
+    expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
+  });
+
+  it("offers the moves in the Mac's right-click menu while reordering", async () => {
+    const Card = loadCard(true);
+    const onMove = jest.fn();
+    await render(
+      <Card
+        accessibilityLabel="Card label"
+        reorderMode
+        canMoveUp
+        canMoveDown
+        onMove={onMove}
+      >
+        <Text>Card</Text>
+      </Card>,
+    );
+    expect(menu().actions.map(a => a.key)).toEqual(['moveUp', 'moveDown']);
+    menu().onAction({ nativeEvent: { key: 'moveDown' } });
+    expect(onMove).toHaveBeenCalledWith(1);
+  });
+
+  it('offers no moves on iPad, where a long press drags', async () => {
+    const Card = loadCard(false);
+    await render(
+      <Card accessibilityLabel="Card label" reorderMode canMoveUp>
+        <Text>Card</Text>
+      </Card>,
+    );
+    expect(menu().actions).toEqual([]);
   });
 });

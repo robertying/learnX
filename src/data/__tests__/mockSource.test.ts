@@ -1,4 +1,9 @@
-import { CourseType, FailReason, Language } from '@robertying/thu-learn-lib';
+import {
+  ContentType,
+  CourseType,
+  FailReason,
+  Language,
+} from '@robertying/thu-learn-lib';
 import {
   defaultMockNetworkConfig,
   MOCK_TIMEOUT_MS,
@@ -11,7 +16,10 @@ import {
   mockAssignments,
   mockCourses,
   mockCurrentSemester,
+  mockFavorites,
+  mockFiles,
   mockNotices,
+  mockSemesterStart,
   mockSemesters,
 } from 'data/mock';
 
@@ -215,5 +223,80 @@ describe('mockSource', () => {
     await expect(mockDownloadFile()).rejects.toEqual({
       reason: FailReason.UNEXPECTED_STATUS,
     });
+  });
+
+  describe('favorites', () => {
+    const favoriteIds = async (courseId: string) =>
+      (
+        await mockSource.getFileList(courseId, CourseType.STUDENT, {
+          favorites: true,
+        } as never)
+      )
+        .filter(file => (file as { isFavorite?: boolean }).isFavorite)
+        .map(file => file.id);
+    const file = mockFiles.find(f => !mockFavorites.file.includes(f.id))!;
+
+    it('marks the seeded favorites, and adds and removes them', async () => {
+      const favorite = mockFiles.find(f => f.id === mockFavorites.file[0])!;
+      expect(await favoriteIds(favorite.courseId)).toContain(favorite.id);
+      expect(await favoriteIds(file.courseId)).not.toContain(file.id);
+
+      await mockSource.addToFavorites(ContentType.FILE, file.id);
+      await mockSource.addToFavorites(ContentType.FILE, file.id);
+      expect(
+        (await favoriteIds(file.courseId)).filter(id => id === file.id),
+      ).toHaveLength(1);
+
+      await mockSource.removeFromFavorites(file.id);
+      await mockSource.removeFromFavorites(file.id);
+      expect(await favoriteIds(file.courseId)).not.toContain(file.id);
+    });
+
+    it("answers HTTP 500 for an item it doesn't know, or of another type", async () => {
+      await expect(
+        mockSource.addToFavorites(ContentType.FILE, 'unknown'),
+      ).rejects.toMatchObject({ reason: FailReason.UNEXPECTED_STATUS });
+      await expect(
+        mockSource.addToFavorites(ContentType.NOTIFICATION, file.id),
+      ).rejects.toMatchObject({ reason: FailReason.UNEXPECTED_STATUS });
+      await expect(
+        mockSource.addToFavorites(ContentType.HOMEWORK, mockAssignments[0].id),
+      ).resolves.toBeUndefined();
+      await mockSource.removeFromFavorites(mockAssignments[0].id);
+    });
+  });
+
+  it("works the registrar's calendar out from the courses, in Beijing time", async () => {
+    const monday = mockSemesterStart.add(1, 'week');
+    const { events, failedRanges } = await mockSource.getCalendar(
+      monday.format('YYYYMMDD'),
+      monday.add(6, 'day').format('YYYYMMDD'),
+    );
+    expect(failedRanges).toEqual([]);
+    expect(events.length).toBeGreaterThan(0);
+    const names = new Set(
+      mockCourses
+        .filter(course => course.semesterId === mockCurrentSemester)
+        .map(course => course.name),
+    );
+    for (const event of events) {
+      expect(names).toContain(event.courseName);
+      expect(event.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(event.startTime).toMatch(/^\d{2}:\d{2}$/);
+      expect(event.date >= monday.format('YYYY-MM-DD')).toBe(true);
+      expect(event.date <= monday.add(6, 'day').format('YYYY-MM-DD')).toBe(
+        true,
+      );
+    }
+  });
+
+  it('marks notices read and prepares downloads with a round trip', async () => {
+    await expect(mockSource.markNoticeRead('n')).resolves.toBeUndefined();
+    await expect(mockSource.prepareFileDownload()).resolves.toBeUndefined();
+    const onProgress = jest.fn();
+    await mockSource.submitAssignment('a', { onProgress } as never);
+    expect(onProgress).toHaveBeenCalled();
+    setMockNetworkConfig({ failure: 'offline' });
+    await expect(mockSource.markNoticeRead('n')).rejects.toBeTruthy();
   });
 });

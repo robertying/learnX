@@ -68,7 +68,7 @@ it('refreshes both lists only while logged in', async () => {
   await refresh();
   expect(dataSource.getSemesterIdList).not.toHaveBeenCalled();
 
-  useAuthStore.setState({ loggedIn: true });
+  await act(() => useAuthStore.setState({ loggedIn: true }));
   jest
     .mocked(dataSource.getSemesterIdList)
     .mockResolvedValue(['2025-2026-1', '2026-2027-1']);
@@ -81,5 +81,7 @@ it('refreshes both lists only while logged in', async () => {
   await refresh();
   expect(dataSource.getSemesterIdList).toHaveBeenCalled();
   expect(dataSource.getCurrentSemester).toHaveBeenCalled();
-  expect(screen.getByText(getSemesterTextFromId('2026-2027-1'))).toBeTruthy();
+  expect(
+    await screen.findByText(getSemesterTextFromId('2026-2027-1')),
+  ).toBeTruthy();
 });

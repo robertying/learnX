@@ -165,3 +165,34 @@ describe('clearCredentials', () => {
     expect(keychain.size).toBe(0);
   });
 });
+
+describe('parseLegacyAuth', () => {
+  it('reads nothing from an empty, corrupt or non-object entry', () => {
+    expect(m.parseLegacyAuth(null)).toBeNull();
+    expect(m.parseLegacyAuth('')).toBeNull();
+    expect(m.parseLegacyAuth('{not json')).toBeNull();
+    expect(m.parseLegacyAuth('null')).toBeNull();
+    expect(m.parseLegacyAuth('"text"')).toBeNull();
+  });
+
+  it('counts a field that is missing or not a string as empty', () => {
+    const raw = JSON.stringify({
+      username: JSON.stringify('u'),
+      password: JSON.stringify('p'),
+      fingerPrint: 42,
+      fingerGenPrint: JSON.stringify(null),
+    });
+    expect(m.parseLegacyAuth(raw)).toEqual({
+      username: 'u',
+      password: 'p',
+      fingerPrint: '',
+      fingerGenPrint: '',
+      fingerGenPrint3: '',
+    });
+  });
+
+  it('ignores a saved entry that is not a login', async () => {
+    keychain.set(m.CREDENTIALS_KEY, JSON.stringify('just text'));
+    await expect(m.loadCredentials()).resolves.toBeNull();
+  });
+});

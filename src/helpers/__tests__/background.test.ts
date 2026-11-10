@@ -20,7 +20,13 @@ import {
   setCurrentSemester,
   useUserDataStore,
 } from 'data/userData';
-import { notifyContent, syncContent } from 'helpers/background';
+import {
+  notifyContent,
+  setUpBackgroundFetch,
+  syncContent,
+} from 'helpers/background';
+import * as BackgroundTask from 'expo-background-task';
+import * as TaskManager from 'expo-task-manager';
 import { AppState } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { defaultSettings, setSetting } from 'data/settings';
@@ -56,6 +62,9 @@ let mockSavedCredentials: typeof mockCredentials | null = mockCredentials;
 jest.mock('data/credentials', () => ({
   loadCredentials: () => Promise.resolve(mockSavedCredentials),
 }));
+
+// Defined on import; read before the calls are cleared for the first test.
+const backgroundTask = jest.mocked(TaskManager.defineTask).mock.calls[0][1];
 
 const semesterId = mockCurrentSemester;
 const courseIds = new Set(
@@ -361,5 +370,75 @@ describe('notifyContent', () => {
     await notifyContent(diff());
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
     expect(getNotifiedKeys().size).toBe(0);
+  });
+});
+
+it('skips when every course is hidden', async () => {
+  await seed();
+  useUserDataStore.setState({ hiddenCourses: [...courseIds] });
+  expect(await syncContent()).toEqual({ status: 'skipped' });
+});
+
+describe('the background task', () => {
+  const setAppState = (state: string) =>
+    Object.defineProperty(AppState, 'currentState', {
+      value: state,
+      configurable: true,
+    });
+  /** Leaves an unread notice out of the cache, so the next sync finds it new. */
+  const forgetANotice = () =>
+    queryClient.setQueryData(noticesQuery(semesterId).queryKey, notices => {
+      const unread = notices!.find(n => !n.hasRead)!;
+      return notices!.filter(n => n !== unread);
+    });
+
+  beforeEach(async () => {
+    resetNotified();
+    setSetting('notifications', {
+      ...defaultSettings.notifications,
+      notices: true,
+    });
+    setAppState('background');
+    jest
+      .mocked(Notifications.getPermissionsAsync)
+      .mockResolvedValue({ granted: true, canAskAgain: true } as never);
+    await seed();
+  });
+
+  it('syncs and posts what is new', async () => {
+    forgetANotice();
+    jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+    expect(await backgroundTask({} as never)).toBe(
+      BackgroundTask.BackgroundTaskResult.Success,
+    );
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports a failed sync to the system', async () => {
+    setMockNetworkConfig({ failure: 'serverError' });
+    expect(await backgroundTask({} as never)).toBe(
+      BackgroundTask.BackgroundTaskResult.Failed,
+    );
+  });
+
+  it('still succeeds when posting fails, and records why', async () => {
+    forgetANotice();
+    const error = new Error('no permission API');
+    jest.mocked(Notifications.getPermissionsAsync).mockRejectedValue(error);
+    expect(await backgroundTask({} as never)).toBe(
+      BackgroundTask.BackgroundTaskResult.Success,
+    );
+    expect(recordError).toHaveBeenCalledWith(
+      error,
+      'Posting new content notifications',
+    );
+  });
+
+  it('runs about every 15 minutes', async () => {
+    await setUpBackgroundFetch();
+    expect(BackgroundTask.registerTaskAsync).toHaveBeenCalledWith(
+      'FETCH_ALL_CONTENT_TASK',
+      { minimumInterval: 15 },
+    );
   });
 });

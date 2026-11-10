@@ -10,7 +10,13 @@ import {
   refreshCourseAssignments,
   refreshCourseFiles,
   refreshCourseNotices,
+  showFavorite,
+  useAssignments,
+  useExcellentHomeworkDetail,
+  useFiles,
   useNotice,
+  useNotices,
+  useRefreshCourseNotices,
 } from 'data/content';
 import {
   mockAssignments,
@@ -33,7 +39,7 @@ import {
 import { assignmentFields, Notice, noticeFields } from 'data/types/state';
 import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { act, renderHook } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useAuthStore } from 'data/auth';
 import { resetUserData, setCurrentSemester } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
@@ -475,5 +481,132 @@ describe('a detail screen left open', () => {
       setCurrentSemester('2025-2026-2');
     });
     expect(result.current?.id).toBe(id);
+  });
+});
+
+describe('a deadline already passed', () => {
+  it('starts no course, and counts them all as timed out', async () => {
+    const getFileList = jest.spyOn(mockSource, 'getFileList');
+    const { fetched, failed, timedOut } = await contentLists.files.fetchCourses(
+      semesterId,
+      [...courseIds],
+      { deadline: Date.now() - 1 },
+    );
+    expect(getFileList).not.toHaveBeenCalled();
+    expect(fetched.size + failed.size).toBe(0);
+    expect(timedOut).toBe(true);
+  });
+});
+
+it('changes nothing in the cache before a semester is picked', async () => {
+  resetUserData();
+  queryClient.setQueryData(noticesQuery(semesterId).queryKey, [
+    { id: 'n', hasRead: false } as Notice,
+  ]);
+  markNoticeRead('n');
+  expect(
+    queryClient.getQueryData(noticesQuery(semesterId).queryKey)?.[0].hasRead,
+  ).toBe(false);
+});
+
+it("shows an item's favorite in the cached list", async () => {
+  resetUserData();
+  setCurrentSemester(semesterId);
+  const files = await queryClient.fetchQuery(filesQuery(semesterId));
+  showFavorite('files', files[0].id, true);
+  expect(
+    queryClient.getQueryData(filesQuery(semesterId).queryKey)![0].isFavorite,
+  ).toBe(true);
+});
+
+describe('list hooks', () => {
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(QueryClientProvider, { client: queryClient }, children);
+
+  beforeEach(() => {
+    resetUserData();
+    setCurrentSemester(semesterId);
+    useAuthStore.setState({ loggedIn: true });
+  });
+
+  it('name each list after its items', async () => {
+    const { result } = await renderHook(
+      () => ({
+        notices: useNotices().notices,
+        assignments: useAssignments().assignments,
+        files: useFiles().files,
+      }),
+      { wrapper },
+    );
+    await act(async () => {
+      await queryClient.refetchQueries();
+    });
+    expect(result.current.notices.length).toBeGreaterThan(0);
+    expect(result.current.assignments.length).toBeGreaterThan(0);
+    expect(result.current.files.length).toBeGreaterThan(0);
+  });
+
+  it("refreshes one course's notices", async () => {
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const courseId = notices[0].courseId;
+    queryClient.setQueryData(
+      noticesQuery(semesterId).queryKey,
+      notices.filter(n => n.courseId !== courseId),
+    );
+    const { result, unmount } = await renderHook(
+      () => useRefreshCourseNotices(courseId),
+      { wrapper },
+    );
+    await act(async () => {
+      result.current.mutate();
+    });
+    await waitFor(() =>
+      expect(
+        queryClient
+          .getQueryData(noticesQuery(semesterId).queryKey)!
+          .some(n => n.courseId === courseId),
+      ).toBe(true),
+    );
+    // A finished mutation keeps a timer to be collected, which clearing the
+    // cache leaves running and which would keep Jest from exiting.
+    await unmount();
+    queryClient
+      .getMutationCache()
+      .getAll()
+      .forEach(mutation => mutation.destroy());
+  });
+
+  it("fetches an excellent homework's attachments unless listed with them", async () => {
+    const homework = mockAssignments
+      .flatMap(a => a.excellentHomeworkList ?? [])
+      .find(h => h.attachment || h.gradeAttachment || h.submittedAttachment)!;
+    const bare = {
+      ...homework,
+      attachment: undefined,
+      gradeAttachment: undefined,
+      submittedAttachment: undefined,
+    };
+    const detail = jest.spyOn(mockSource, 'getExcellentHomeworkDetail');
+
+    const listed = {
+      ...bare,
+      gradeAttachment: homework.gradeAttachment ?? { id: 'g' },
+    };
+    const { result: shown } = await renderHook(
+      () => useExcellentHomeworkDetail(listed as never),
+      { wrapper },
+    );
+    expect(shown.current).toBe(listed);
+    expect(detail).not.toHaveBeenCalled();
+
+    const { result } = await renderHook(
+      () => useExcellentHomeworkDetail(bare as never),
+      { wrapper },
+    );
+    await act(async () => {
+      await queryClient.refetchQueries();
+    });
+    expect(detail).toHaveBeenCalledWith(bare);
+    expect(result.current).toMatchObject({ id: homework.id });
   });
 });
