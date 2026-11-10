@@ -68,6 +68,10 @@ jobs:
     name: Android release build
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
+      # To prune superseded caches on main
+      actions: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -142,6 +146,13 @@ jobs:
         if: always() && steps.changes.outputs.changed == 'true'
         run: ccache --show-stats || true
 
+      - name: Prune caches
+        if: always() && env.SAVE_CACHE == 'true' && steps.changes.outputs.changed == 'true'
+        continue-on-error: true
+        run: scripts/prune-caches.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: Upload APK for E2E
         if: steps.changes.outputs.changed == 'true' && env.E2E == 'true'
         uses: actions/upload-artifact@v7
@@ -161,7 +172,7 @@ jobs:
     timeout-minutes: 120
     permissions:
       contents: read
-      # To delete older compilation caches
+      # To prune superseded caches on main
       actions: write
     strategy:
       fail-fast: false
@@ -282,19 +293,13 @@ jobs:
           path: build/DerivedData/CompilationCache.noindex
           key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
 
-      # The cache is ~5.5 GB and each main commit saves its own copy, so drop
-      # the older ones before they evict Gradle and Pods from the 10 GB limit.
-      - name: Delete older compilation caches
-        if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'
+      # Each main save adds a new copy; keep only this one (and other
+      # caches' newest), so old copies don't push Gradle and Pods out of the
+      # 10 GB limit.
+      - name: Prune caches
+        if: always() && env.SAVE_CACHE == 'true'
         continue-on-error: true
-        run: |
-          gh cache list --repo "$GITHUB_REPOSITORY" --key "xcode-cas-${{ matrix.name }}-" --limit 100 --json key --jq '.[].key' |
-            grep -vx "xcode-cas-${{ matrix.name }}-$GITHUB_SHA" |
-            while read -r key; do gh cache delete --repo "$GITHUB_REPOSITORY" "$key"; done
-          # What's left, against the 10 GB limit (largest first).
-          gh cache list --repo "$GITHUB_REPOSITORY" --limit 100 --sort size_in_bytes --json key,sizeInBytes \
-            --jq '.[] | "\(.sizeInBytes / 1048576 | floor) MB  \(.key)"'
-          gh api "repos/$GITHUB_REPOSITORY/actions/cache/usage" --jq '"Total: \(.active_caches_size_in_bytes / 1048576 | floor) MB in \(.active_caches_count) caches"'
+        run: scripts/prune-caches.sh
         env:
           GH_TOKEN: ${{ github.token }}
 
