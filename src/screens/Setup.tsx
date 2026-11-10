@@ -19,9 +19,10 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
 /**
  * The page after the first login: turns on notifications of new content (in
- * the tabs' order), deadline reminders and grades (all on to start with) and
- * calendar sync (off), all of which start off in Settings, and asks for the
- * permissions they need on Done. Opened by `useLaunchSheet`, once.
+ * the tabs' order), deadline reminders and grades (all on to start with), and
+ * calendar sync and, on Apple platforms, Reminders sync (off). All of them
+ * start off in Settings; Done asks for the permissions they need. Opened by
+ * `useLaunchSheet`, once.
  */
 const Setup: React.FC<Props> = ({ navigation }) => {
   const theme = useTheme();
@@ -36,6 +37,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
     deadlineReminders: true,
     grades: true,
     calendar: false,
+    reminders: false,
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,7 +55,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
 
   const handleDone = async () => {
     setSaving(true);
-    const { calendar, ...chosen } = choices;
+    const { calendar, reminders, ...chosen } = choices;
     if (Object.values(chosen).some(Boolean)) {
       if (await request()) {
         setSetting('notifications', {
@@ -68,6 +70,9 @@ const Setup: React.FC<Props> = ({ navigation }) => {
     }
     if (calendar) {
       await setSyncEnabled('calendar', true);
+    }
+    if (reminders) {
+      await setSyncEnabled('reminder', true);
     }
     setSaving(false);
     close();
@@ -131,8 +136,14 @@ const Setup: React.FC<Props> = ({ navigation }) => {
             onValueChange={choose('grades')}
           />
         </FormSection>
+        {/* Reminders sync is only on iOS, iPadOS and Mac (Settings ›
+            Calendars & Reminders). */}
         <FormSection
-          title={t('setupCalendarSection')}
+          title={
+            Platform.OS === 'ios'
+              ? t('calendarsAndReminders')
+              : t('setupCalendarSection')
+          }
           footer={t('setupCaption')}
         >
           <FormToggle
@@ -141,6 +152,14 @@ const Setup: React.FC<Props> = ({ navigation }) => {
             value={choices.calendar}
             onValueChange={choose('calendar')}
           />
+          {Platform.OS === 'ios' && (
+            <FormToggle
+              icon={{ ios: 'checklist', android: 'calendar-check' }}
+              title={t('setupReminders')}
+              value={choices.reminders}
+              onValueChange={choose('reminders')}
+            />
+          )}
         </FormSection>
       </Form>
       <ActionBar

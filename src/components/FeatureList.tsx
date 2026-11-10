@@ -135,7 +135,7 @@ const FeatureList: React.FC<FeatureListProps> = ({
                   testID="feature-icon"
                   style={[
                     styles.iconBox,
-                    apple && { width: 40 * iconScale, height: 22 * iconScale },
+                    apple && { width: 40 * iconScale, height: undefined },
                     !apple && {
                       backgroundColor: theme.colors.primaryContainer,
                     },
@@ -223,14 +223,15 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   // A column as wide as Android's tonal circle, so every title starts at the
-  // same place. On Apple platforms it's one headline line tall, and the
-  // symbol is centered on it.
+  // same place. On Apple platforms the symbol's top lines up with the top of
+  // the title's letters, as in Apple's own welcome sheets (Reminders).
   iconBox: {
     width: 40,
     height: 40,
     borderRadius: 20,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: apple ? 'flex-start' : 'center',
+    paddingTop: apple ? 4 : 0,
   },
   featureText: {
     flex: 1,
