@@ -91,12 +91,12 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 ```bash
 pnpm install
 cp .env.example .env   # fill in the mock login values
-bundle install && pnpm pod   # iOS / Mac, once
+cd ios && LANG=en_US.UTF-8 bundle exec pod install && cd ..   # iOS / Mac
 pnpm start             # Metro
 pnpm ios               # or: pnpm android
 ```
 
-Before committing: `pnpm format`, `pnpm typecheck`, `pnpm lint` and `pnpm test`. Conventions, architecture and workflows (testing on devices, releasing) are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
+[CONTRIBUTING.md](CONTRIBUTING.md) walks through the full setup (tools, iOS signing with your own team, Android SDK and emulator, testing with the mock login, checks and pull requests). Conventions and architecture are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
 
 ## 开源协议 License
 
