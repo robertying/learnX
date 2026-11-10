@@ -59,7 +59,7 @@ These aren't real accounts. Typing them on the login screen loads the built-in m
 
 ### Ruby and CocoaPods
 
-Use Homebrew's Ruby, not the one that comes with macOS (it's old, and installing gems into it needs `sudo`):
+Install Ruby with Homebrew and put it first on your `PATH`:
 
 ```sh
 brew install ruby
@@ -76,17 +76,15 @@ LANG=en_US.UTF-8 bundle exec pod install
 cd ..
 ```
 
-Use `bundle exec pod install`, not `pnpm pod`: that script also runs `pod update`, which upgrades pods and is meant for the maintainer's dependency bumps. Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes. React Native is built from source here (a patch changes its native code), so the first build takes a while.
+Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes. React Native is built from source here (a patch changes its native code), so the first build takes a while.
 
-`pod install` may change the `ExpoWidgets` checksum in `Podfile.lock`: its podspec includes your checkout's path, so it differs on every machine. Don't commit that line.
+`pod install` may change the `ExpoWidgets` checksum in `Podfile.lock`, because its podspec includes your checkout's path. Leave that line out of your commits.
 
 ### Signing: use your own team and bundle IDs
 
-Every build has to be signed, including simulator builds. The app, its share extension and its widgets share data through an app group (`group.io.robertying.learnX`) and keep the login in a keychain access group. Both come from entitlements, and an unsigned build has none. So **never build with `CODE_SIGNING_ALLOWED=NO`** (or an empty `CODE_SIGN_IDENTITY`). It compiles, but sharing a file to learnX opens the app with nothing shared, and the login is lost on every relaunch. Both look like app bugs and aren't.
+The app, its share extension and its widgets share data through an app group and keep the login in a keychain access group, so every build is signed, simulator builds included. The project is set up for the maintainer's Apple team, so set your own team and bundle IDs once:
 
-The project is set up for the maintainer's Apple team, and the `io.robertying.learnX` IDs are registered to it, so you need your own team and your own IDs:
-
-1. Add your Apple ID in Xcode › Settings › Accounts. Note your Team ID (10 characters, shown there or on [developer.apple.com](https://developer.apple.com/account) › Membership). A paid Apple Developer Program team is the dependable choice: a free Personal Team may not be able to register the app group.
+1. Add your Apple ID in Xcode › Settings › Accounts. Note your Team ID (10 characters, shown there or on [developer.apple.com](https://developer.apple.com/account) › Membership). Use a paid Apple Developer Program team, which can register the app group.
 2. Pick your own bundle ID prefix, such as `com.yourname.learnX`, and rewrite the IDs and team in one go from the repo root:
 
    ```sh
@@ -107,9 +105,7 @@ The project is set up for the maintainer's Apple team, and the `io.robertying.le
 
 3. Leave Signing on "Automatically manage signing". Xcode registers the IDs and app group for your team on the first build.
 
-Keep these changes out of your commits (stage with `git add -p`, or `git stash` them before you switch branches). `ios/GoogleService-Info.plist` still names the original bundle ID. Firebase only logs a warning about the mismatch, and analytics and crash reports from your builds go nowhere, which is fine for development. If you rename the iOS bundle ID, also change `app_id` for `ios` in `scripts/e2e.sh` before running the end-to-end flows.
-
-A side benefit: with your own bundle ID, a debug Mac build doesn't share its sandbox, app group and keychain with the learnX from the Mac App Store, if you have it installed.
+Keep these changes local: stage your work with `git add -p`, or `git stash` them before you switch branches. Firebase logs a warning that `ios/GoogleService-Info.plist` names another bundle ID; that's expected for development builds. To run the end-to-end flows, set `app_id` for `ios` in `scripts/e2e.sh` to your bundle ID too.
 
 ### Build and run
 
@@ -119,15 +115,13 @@ pnpm ios              # builds Debug and launches it on a simulator
 pnpm ios --simulator "<name>"   # pick a simulator by name (xcrun simctl list devices)
 ```
 
-You can also open `ios/learnX.xcworkspace` (the workspace, not the `.xcodeproj`) in Xcode, pick the `learnX` scheme and a simulator, and press Run. For the Mac app, pick "My Mac (Mac Catalyst)" as the destination. To run on your own iPhone, plug it in, turn on Developer Mode, and pick it as the destination.
+You can also open `ios/learnX.xcworkspace` in Xcode, pick the `learnX` scheme and a simulator, and press Run. For the Mac app, pick "My Mac (Mac Catalyst)" as the destination. To run on your own iPhone, plug it in, turn on Developer Mode, and pick it as the destination.
 
 Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuild only after native changes (Swift, Objective-C, `ios/Podfile`, a native package or a patch).
 
-### Keep DerivedData out of the checkout
+### Build output
 
-Leave Xcode's build output in its default place (`~/Library/Developer/Xcode/DerivedData`): `pnpm ios` and Xcode both do unless told otherwise. Don't pass `--buildFolder ios/build` to `pnpm ios` or `-derivedDataPath ios/build` (or any other folder in the repo) to `xcodebuild`, and don't set Xcode › Settings › Locations › Derived Data to "Relative". The "Generate app.config" build step fingerprints the whole checkout, and a multi-gigabyte build folder inside it makes that step hang for half an hour.
-
-If you script builds with `xcodebuild`, give each checkout its own folder outside the repo:
+`pnpm ios` and Xcode put build output in Xcode's default DerivedData folder (`~/Library/Developer/Xcode/DerivedData`), outside the repo. Keep it there: the "Generate app.config" build step fingerprints the whole checkout, so it stays fast only while the checkout holds no build folder. If you script builds with `xcodebuild`, give each checkout its own folder under DerivedData:
 
 ```sh
 xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug \
@@ -149,7 +143,7 @@ For the Mac app, use `-destination 'platform=macOS,variant=Mac Catalyst'`.
    export PATH="$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH"
    ```
 
-   If Gradle still can't find the SDK, copy `android/local.properties.example` to `android/local.properties` and set `sdk.dir`. The release signing values in that file are only for the maintainer's release builds, and debug builds don't need them.
+   If Gradle still can't find the SDK, copy `android/local.properties.example` to `android/local.properties` and set `sdk.dir`. Debug builds need only `sdk.dir` from that file.
 
 3. Make sure `java -version` prints 17 or newer, or set `JAVA_HOME` to Android Studio's bundled JDK (`/Applications/Android Studio.app/Contents/jbr/Contents/Home` on a Mac).
 4. Create an emulator in Android Studio's Device Manager with Android 9 or later. On an Apple silicon Mac, use an arm64-v8a system image.
@@ -206,13 +200,13 @@ They need neither `.env` nor any native setup, so you can run them anywhere Node
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a debug build with the mock login: `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
-Native builds don't run on pull requests, so build and try the app yourself on each platform your change touches, and say in the pull request what you checked.
+Pull requests run only the JS check, so build and try the app yourself on each platform your change touches, and say in the pull request what you checked.
 
 ## Pull requests
 
 1. Fork the repo and branch off `main`.
 2. Keep each pull request to one change. Add or update tests for logic you change (see "Unit tests" in [AGENTS.md](AGENTS.md#unit-tests-jest)).
-3. Before pushing, run `pnpm format` and the checks above. Don't commit `.env`, your signing changes or the machine-specific `Podfile.lock` checksum.
+3. Before pushing, run `pnpm format` and the checks above. Commit only your change: leave `.env`, your signing changes and the `Podfile.lock` checksum out.
 4. Open the pull request against `main`. Describe what changed and why, how you tested it (platforms, simulators or devices, mock or real account), and add screenshots for visible changes.
 5. Changing a patched dependency? Follow [patches/README.md](patches/README.md) (`pnpm patch` / `pnpm patch-commit`) rather than editing `node_modules` by hand.
 
@@ -225,8 +219,8 @@ Pull requests are squash-merged once `Check / JS` passes and the change has been
 - **"The sandbox is not in sync with the Podfile.lock":** run `bundle exec pod install` in `ios/`.
 - **Xcode can't find `node`** (common with nvm, fnm or asdf): create `ios/.xcode.env.local` (git-ignored) with `export NODE_BINARY=/full/path/to/node` (from `command -v node`).
 - **Gradle fails running `node`:** Gradle runs `node` while it configures the project. Start Android Studio from a terminal that has `node` on its `PATH` (`open -a "Android Studio"`), or build from the terminal.
-- **The build hangs on "Generate app.config" (or similar Expo step):** there's a big build folder inside the checkout. Delete `ios/build` and keep DerivedData outside the repo (see above).
-- **"Signing for … requires a development team" or a provisioning error:** set your own team and bundle IDs (see [Signing](#signing-use-your-own-team-and-bundle-ids)). Don't work around it with `CODE_SIGNING_ALLOWED=NO`.
+- **The build hangs on "Generate app.config" (or similar Expo step):** there's a build folder inside the checkout. Delete `ios/build` and build into DerivedData (see [Build output](#build-output)).
+- **"Signing for … requires a development team" or a provisioning error:** set your own team and bundle IDs (see [Signing](#signing-use-your-own-team-and-bundle-ids)).
 - **The app shows a red screen saying it can't connect to the development server:** start Metro (`pnpm start`). On Android, also run `adb reverse tcp:<port> tcp:<port>` and check the debug server host in the dev menu.
 - **`adb install` fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`:** a build signed with another key (a release build) is installed. `adb uninstall io.robertying.learnx`, then install again.
 - **The mock login doesn't load the mock data** (the login goes to the real server and fails): the `DUMMY_*` values in `.env` are empty, or Metro hasn't picked them up. Fill them in and restart Metro.
