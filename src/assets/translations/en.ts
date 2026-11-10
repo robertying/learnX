@@ -377,6 +377,7 @@ export default {
   setupNewContent: 'New Content',
   setupCalendarSection: 'Calendar',
   setupCalendar: 'Add Assignments to Calendar',
+  setupReminders: 'Add Assignments to Reminders',
   setupCaption: 'You can change these any time in Settings.',
   notNow: 'Not Now',
   done: 'Done',

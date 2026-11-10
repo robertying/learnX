@@ -365,6 +365,7 @@ const zh: typeof en = {
   setupNewContent: '新内容',
   setupCalendarSection: '日历',
   setupCalendar: '将作业添加到日历',
+  setupReminders: '将作业添加到提醒事项',
   setupCaption: '之后可以随时在设置中更改。',
   notNow: '以后再说',
   done: '完成',

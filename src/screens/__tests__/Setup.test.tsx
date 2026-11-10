@@ -58,15 +58,23 @@ it("groups new content in the tabs' order, then assignments, then calendar", asy
     t('notifyDeadlineReminders'),
     t('notifyGrades'),
     t('setupCalendar'),
+    t('setupReminders'),
   ]);
   for (const section of [
     'setupNewContent',
     'assignments',
-    'setupCalendarSection',
+    'calendarsAndReminders',
     'setupCaption',
   ] as const) {
     expect(screen.getByText(t(section))).toBeTruthy();
   }
+});
+
+it('offers only calendar sync on Android, which has no Reminders', async () => {
+  Platform.OS = 'android';
+  await renderScreen();
+  expect(screen.getByText(t('setupCalendarSection'))).toBeTruthy();
+  expect(screen.queryByText(t('setupReminders'))).toBeNull();
 });
 
 it('turns on the chosen notifications once allowed, and closes', async () => {
@@ -99,7 +107,7 @@ it('keeps notifications off when the permission is denied', async () => {
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
-it("doesn't ask with every notification off, and turns calendar sync on", async () => {
+it("doesn't ask with every notification off, and turns calendar and Reminders sync on", async () => {
   await renderScreen();
   for (const label of [
     'notifyNewNotices',
@@ -111,9 +119,11 @@ it("doesn't ask with every notification off, and turns calendar sync on", async 
     await toggle(t(label), false);
   }
   await toggle(t('setupCalendar'), true);
+  await toggle(t('setupReminders'), true);
   await userEvent.press(screen.getByTestId('setup-done'));
   expect(request).not.toHaveBeenCalled();
   expect(setSyncEnabled).toHaveBeenCalledWith('calendar', true);
+  expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
 });
 
 it('closes without changes on Not Now, on either platform', async () => {
