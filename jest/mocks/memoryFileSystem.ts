@@ -92,11 +92,13 @@ export class File extends Entry {
   writeSync(content: string) {
     __fs.write(this.uri, content);
   }
-  async copy(to: File, { overwrite = false } = {}) {
-    if (to.exists && !overwrite) {
-      throw new Error(`${to.uri} exists`);
+  /** Into a folder, the copy keeps this file's name. */
+  async copy(to: File | Directory, { overwrite = false } = {}) {
+    const target = to instanceof Directory ? new File(to, this.name) : to;
+    if (target.exists && !overwrite) {
+      throw new Error(`${target.uri} exists`);
     }
-    __fs.write(to.uri, await this.text());
+    __fs.write(target.uri, await this.text());
   }
 }
 
@@ -125,14 +127,6 @@ export class Directory extends Entry {
       throw new Error(`${parentOf(this.uri)} doesn't exist`);
     }
     mkdirs(this.uri);
-  }
-  createFile(name: string) {
-    const file = new File(this, name);
-    if (!this.exists || file.exists) {
-      throw new Error(`can't create ${file.uri}`);
-    }
-    file.create();
-    return file;
   }
   createDirectory(name: string) {
     const dir = new Directory(this, name);

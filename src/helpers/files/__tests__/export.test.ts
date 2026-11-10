@@ -98,13 +98,21 @@ it("exports one course's files", async () => {
 });
 
 it('counts files it could not copy and goes on', async () => {
-  const createFile = jest
-    .spyOn(Directory.prototype, 'createFile')
-    .mockImplementationOnce(() => {
-      throw new Error('full');
-    });
+  const { File } =
+    jest.requireMock<typeof import('../../../../jest/mocks/memoryFileSystem')>(
+      'expo-file-system',
+    );
+  const copy = jest
+    .spyOn(File.prototype, 'copy')
+    .mockRejectedValueOnce(new Error('full'));
   await expect(exportDownloads()).resolves.toEqual({ exported: 2, failed: 1 });
-  createFile.mockRestore();
+  copy.mockRestore();
+});
+
+it('leaves no renamed copies behind', async () => {
+  await exportDownloads();
+  expect(__fs.files('file:///app/Caches/export')).toEqual([]);
+  expect(__fs.dirs('file:///app/Caches')).not.toContain('export');
 });
 
 it('resolves to null when the picker is cancelled', async () => {

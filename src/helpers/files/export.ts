@@ -1,9 +1,9 @@
-import { Directory, File } from 'expo-file-system';
-import mime from 'mime';
+import { Directory, File, Paths } from 'expo-file-system';
 import { sanitizeFileName } from 'helpers/filename';
 import { getSemesterTextFromId } from 'helpers/semester';
 import {
   courseNameOf,
+  deleteDirectory,
   downloadsOf,
   getDownloadsDirectory,
   readCourseInfo,
@@ -12,6 +12,8 @@ import {
 
 /** The folder Export makes in the folder people pick. */
 export const EXPORT_DIR = 'learnX';
+/** Where a file is renamed before it is copied out, under Caches. */
+const STAGING_DIR = 'export';
 
 /**
  * The child folder `name` of `dir`, made if missing. Looked up by listing,
@@ -108,25 +110,36 @@ export const exportDownloads = async (
     const key = folders.join('/');
     const taken = takenByFolder.get(key) ?? new Set<string>();
     takenByFolder.set(key, taken);
-    const existing = new Map(dir.list().map(entry => [entry.name, entry]));
 
     for (const file of files) {
       const name = uniqueName(file.name, taken);
       try {
-        const old = existing.get(name);
-        const target =
-          old instanceof File
-            ? old
-            : dir.createFile(
-                name,
-                mime.getType(name) ?? 'application/octet-stream',
-              );
-        await file.copy(target, { overwrite: true });
+        await copyInto(file, dir, name);
         result.exported++;
       } catch {
         result.failed++;
       }
     }
   }
+  try {
+    deleteDirectory(new Directory(Paths.cache, STAGING_DIR));
+  } catch {}
   return result;
+};
+
+/**
+ * Copies `file` into `dir` as `name`, replacing a file of that name. A copy
+ * into a folder keeps the file's own name, so a file that needs another one
+ * is renamed in a copy first: on Android, copying over a file in a picked
+ * folder deletes it before writing and fails.
+ */
+const copyInto = async (file: File, dir: Directory, name: string) => {
+  let source = file;
+  if (name !== file.name) {
+    const staging = new Directory(Paths.cache, STAGING_DIR);
+    staging.create({ intermediates: true, idempotent: true });
+    source = new File(staging, name);
+    await file.copy(source, { overwrite: true });
+  }
+  await source.copy(dir, { overwrite: true });
 };
