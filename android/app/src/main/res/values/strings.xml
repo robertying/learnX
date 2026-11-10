@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">learnX</string>
+<!-- The default resources are English (resources.properties: en-US). -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <string name="app_name" translatable="false">learnX</string>
     <string name="shortcut_next_class">Next class</string>
     <string name="shortcut_next_class_long">Show my next class</string>
 </resources>

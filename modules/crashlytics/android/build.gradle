@@ -7,12 +7,12 @@ group = 'io.robertying.learnx'
 version = '1.0.0'
 
 android {
-  namespace "io.robertying.learnx.crashlytics"
+  namespace = "io.robertying.learnx.crashlytics"
 
   buildTypes {
     debug {
       // createDebugUnitTestCoverageReport writes JaCoCo's report for the unit tests.
-      enableUnitTestCoverage true
+      enableUnitTestCoverage = true
     }
   }
 

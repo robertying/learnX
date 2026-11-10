@@ -83,6 +83,7 @@
              allowsEditing is ever used. -->
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
+            tools:ignore="MissingClass"
             tools:node="remove" />
         <activity
             android:name="expo.modules.imagepicker.ExpoCropImageActivity"

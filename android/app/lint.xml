@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- Versions are upgraded together with the upgrade-dependencies skill, not as lint finds them. -->
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <!-- Added by the React Native Gradle plugin and read by React Native's dev support. -->
+    <issue id="UnusedResources">
+        <ignore regexp="react_native_dev_server_(ip|port)" />
+    </issue>
+</lint>
