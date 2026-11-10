@@ -6,7 +6,7 @@
  *     require('../../../../jest/mocks/memoryFileSystem'),
  *   );
  *
- * Seed it with `__fs.write` / `__fs.mkdir`, read it back with `__fs.files`,
+ * Seed it with `__fs.write` / `__fs.mkdir`, read it back with `__fs.files` and `__fs.read`,
  * and empty it with `__fs.reset` between cases. `DownloadTask` "downloads" by
  * calling `__fs.download`, which tests replace to write a body or fail, and
  * fails when its `signal` is aborted.
@@ -77,6 +77,9 @@ export class File extends Entry {
     __fs.write(this.uri, '');
   }
   async text() {
+    return this.textSync();
+  }
+  textSync() {
     const node = nodes.get(this.uri);
     if (node?.kind !== 'file') {
       throw new Error(`${this.uri} isn't a file`);
@@ -84,6 +87,9 @@ export class File extends Entry {
     return node.content;
   }
   async write(content: string) {
+    this.writeSync(content);
+  }
+  writeSync(content: string) {
     __fs.write(this.uri, content);
   }
   async copy(to: File, { overwrite = false } = {}) {
@@ -95,6 +101,13 @@ export class File extends Entry {
 }
 
 export class Directory extends Entry {
+  /** Resolves to `__fs.pickedDirectory`, or rejects as cancelled. */
+  static pickDirectoryAsync = jest.fn(async () => {
+    if (!__fs.pickedDirectory) {
+      throw new Error('The file picker was cancelled by the user');
+    }
+    return new Directory(__fs.pickedDirectory);
+  });
   get exists() {
     return nodes.get(this.uri)?.kind === 'dir';
   }
@@ -112,6 +125,22 @@ export class Directory extends Entry {
       throw new Error(`${parentOf(this.uri)} doesn't exist`);
     }
     mkdirs(this.uri);
+  }
+  createFile(name: string) {
+    const file = new File(this, name);
+    if (!this.exists || file.exists) {
+      throw new Error(`can't create ${file.uri}`);
+    }
+    file.create();
+    return file;
+  }
+  createDirectory(name: string) {
+    const dir = new Directory(this, name);
+    if (!this.exists || nodes.has(dir.uri)) {
+      throw new Error(`can't create ${dir.uri}`);
+    }
+    mkdirs(dir.uri);
+    return dir;
   }
   list(): (File | Directory)[] {
     return under(this.uri)
@@ -166,6 +195,8 @@ export const Paths = {
 };
 
 export const __fs = {
+  /** What `Directory.pickDirectoryAsync` picks; null cancels. */
+  pickedDirectory: null as string | null,
   /** Every DownloadTask made since the last reset. */
   tasks: [] as DownloadTask[],
   /** What a DownloadTask does; by default it saves `body` to the target. */
@@ -178,6 +209,8 @@ export const __fs = {
     mkdirs(parentOf(path));
     nodes.set(path, { kind: 'file', content });
   },
+  /** The content of the file at `uri`. */
+  read: (uri: string) => new File(uri).textSync(),
   mkdir: (uri: string) => mkdirs(normalize(uri)),
   /** Paths of every folder under `uri`, relative to it. */
   dirs: (uri: string) =>
@@ -194,6 +227,7 @@ export const __fs = {
   reset: () => {
     nodes.clear();
     __fs.tasks = [];
+    __fs.pickedDirectory = null;
     __fs.download = async task => {
       __fs.write(task.target.uri, 'body');
       return task.target;

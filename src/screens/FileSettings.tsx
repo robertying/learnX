@@ -1,36 +1,18 @@
 import { useCallback, useState } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { setSetting, useSettings } from 'data/settings';
-import {
-  ensureDownloadsDirectory,
-  listDownloads,
-  moveDownloadsToCurrentDirectory,
-} from 'helpers/files/downloads';
+import { listDownloads } from 'helpers/files/downloads';
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
-import { toast } from 'components/Toast';
-import {
-  Form,
-  FormButton,
-  FormLink,
-  FormSection,
-  FormToggle,
-} from 'components/Form';
+import { Form, FormLink, FormSection, FormToggle } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import DeviceInfo from 'constants/DeviceInfo';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'FileSettings'>;
 
 const FileSettings: React.FC<Props> = ({ navigation }) => {
-  const fileUseDocumentDir = useSettings(
-    settings => settings.fileUseDocumentDir,
-  );
-  const fileOmitCourseName = useSettings(
-    settings => settings.fileOmitCourseName,
-  );
   const openFileAfterDownload = useSettings(
     settings => settings.openFileAfterDownload,
   );
@@ -44,52 +26,9 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
     }, []),
   );
 
-  const openDownloadDirectory = async () => {
-    try {
-      const dir = ensureDownloadsDirectory();
-      await Linking.openURL(dir);
-    } catch (e) {
-      toast(
-        t('openFileDownloadDirectoryFailed') + (e as Error).message,
-        'error',
-      );
-    }
-  };
-
   return (
     <SafeArea>
       <Form>
-        <FormSection
-          footer={
-            fileUseDocumentDir
-              ? t('fileUseDocumentDirOnCaption')
-              : t('fileUseDocumentDirOffCaption')
-          }
-        >
-          <FormToggle
-            icon={{ ios: 'internaldrive', android: 'cached' }}
-            title={t('fileUseDocumentDir')}
-            value={fileUseDocumentDir}
-            onValueChange={value => {
-              setSetting('fileUseDocumentDir', value);
-              moveDownloadsToCurrentDirectory();
-            }}
-          />
-        </FormSection>
-        <FormSection
-          footer={
-            fileOmitCourseName
-              ? t('fileOmitCourseNameOnCaption')
-              : t('fileOmitCourseNameOffCaption')
-          }
-        >
-          <FormToggle
-            icon={{ ios: 'character.cursor.ibeam', android: 'rename-outline' }}
-            title={t('fileOmitCourseName')}
-            value={fileOmitCourseName}
-            onValueChange={value => setSetting('fileOmitCourseName', value)}
-          />
-        </FormSection>
         {Platform.OS === 'android' && (
           <FormSection>
             <FormToggle
@@ -111,13 +50,6 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
             }
             onPress={() => navigation.push('Downloads')}
           />
-          {DeviceInfo.isMac() && (
-            <FormButton
-              icon={{ ios: 'folder', android: 'open-in-new' }}
-              title={t('openFileDownloadDirectory')}
-              onPress={openDownloadDirectory}
-            />
-          )}
         </FormSection>
       </Form>
     </SafeArea>

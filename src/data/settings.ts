@@ -14,8 +14,6 @@ export const defaultSettings: SettingsState = {
   assignmentCalendarSync: false,
   assignmentReminderSync: false,
   graduate: false,
-  fileUseDocumentDir: false,
-  fileOmitCourseName: false,
   tabFilterSelections: {
     notice: 'all',
     assignment: 'unfinished',
@@ -120,12 +118,21 @@ export const moveOutOfSettings = (saved: Record<string, unknown>) => {
 export const useSettingsStore = create<SettingsState>()(
   persist(() => defaultSettings, {
     name: SETTINGS_KEY,
-    version: 2,
+    version: 3,
     storage: persistStorage,
     migrate: (saved, version) => {
-      const data = (saved ?? {}) as Record<string, unknown>;
+      let data = (saved ?? {}) as Record<string, unknown>;
       // Version 1 also held the calendar sync's bookkeeping and the badges.
-      return version < 2 ? moveOutOfSettings(data) : data;
+      if (version < 2) {
+        data = moveOutOfSettings(data);
+      }
+      // Version 2 also chose where downloads are kept and how they are named.
+      const {
+        fileUseDocumentDir: _folder,
+        fileOmitCourseName: _naming,
+        ...rest
+      } = data;
+      return rest;
     },
     merge: (saved, current) =>
       mergeSettings(current, (saved ?? {}) as Partial<SettingsState>),

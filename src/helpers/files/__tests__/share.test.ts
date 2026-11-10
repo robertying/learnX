@@ -25,17 +25,19 @@ jest.mock('react-native-share', () => ({
   default: { open: jest.fn(() => Promise.resolve()) },
 }));
 jest.mock('data/source', () => ({}));
+jest.mock('data/queries', () => ({ getCachedCourses: () => [] }));
 jest.mock('constants/DeviceInfo', () => ({ isMac: jest.fn(() => false) }));
 
 const CACHES = 'file:///app/Caches';
 const file = {
   id: 'f1',
+  courseId: 'c1',
   courseName: 'Calculus',
   title: 'Lecture 1',
   fileType: 'pdf',
   downloadUrl: 'https://learn.tsinghua.edu.cn/f1',
 };
-const downloaded = `${CACHES}/learnX Files/Calculus/f1/Calculus-Lecture 1.pdf`;
+const downloaded = `${CACHES}/downloads/c1/f1/Lecture 1.pdf`;
 
 beforeEach(() => {
   __fs.reset();
@@ -100,7 +102,7 @@ it('opens a file in another Android app by its content URI', async () => {
 
 it('shares and opens a file of unknown type as plain bytes', async () => {
   const unknown = { ...file, fileType: 'xyz123' };
-  const path = `${CACHES}/learnX Files/Calculus/f1/Calculus-Lecture 1.xyz123`;
+  const path = `${CACHES}/downloads/c1/f1/Lecture 1.xyz123`;
   __fs.write(path, 'data');
   await shareFile(unknown);
   expect(Share.open).toHaveBeenCalledWith(

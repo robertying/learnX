@@ -122,8 +122,6 @@ const zh: typeof en = {
   clearFileCache: '删除全部已下载文件',
   clearFileCacheConfirmation: '确定删除全部已下载的文件？此操作不可撤销。',
   clearFileCacheSucceeded: '已删除全部已下载文件',
-  fileUseDocumentDir: '将下载的文件保存到“文稿”',
-  fileOmitCourseName: '文件名不包含课程名',
   fileDownloadFailed: '文件下载失败，请重试。',
   openFileFailed: '无法打开文件。请重新下载，或安装可打开此类文件的应用。',
   share: '分享',
@@ -229,8 +227,6 @@ const zh: typeof en = {
   contributors: '贡献者',
   retryLogin: '使用已保存的账号登录',
   offlineMode: '离线使用',
-  openFileDownloadDirectory: '在访达中显示',
-  openFileDownloadDirectoryFailed: '无法打开文件夹：',
   download: '下载',
   downloadToDownloadsSucceeded: '已保存到“下载”',
   downloadToDownloadsFailed: '无法保存到“下载”',
@@ -304,12 +300,6 @@ const zh: typeof en = {
   courseScheduleSyncCaption: '将{type}课表同步到日历；更改设置后请重新同步。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
-  fileUseDocumentDirOnCaption:
-    '文件保存在 App 的“文稿”文件夹中，不会被系统自动清除。',
-  fileUseDocumentDirOffCaption:
-    '文件保存在 App 的缓存中，存储空间不足时可能会被系统清除。',
-  fileOmitCourseNameOnCaption: '文件以“文件名”形式保存。',
-  fileOmitCourseNameOffCaption: '文件以“课程名-文件名”形式保存。',
   courseInformationSharingOnCaption:
     '退出课程信息共享计划后，课程信息将不再自动上传。',
   courseInformationSharingOffCaption:
@@ -318,7 +308,14 @@ const zh: typeof en = {
   downloads: '已下载文件',
   downloadsTotal: '全部已下载文件',
   downloadsCaption:
-    '在 learnX 中下载的文件，按课程分类。轻点课程可删除其文件。',
+    '在 learnX 中下载的文件，按课程分类。轻点课程可导出或删除其文件。',
+  downloadsExport: '导出全部已下载文件',
+  downloadsExportCaption:
+    '将文件复制到你选择的位置下的“learnX”文件夹，按学期和课程分类。再次导出会更新该文件夹。',
+  downloadsExportCourse: '导出',
+  downloadsExported: '已导出 {files}',
+  downloadsExportedPartly: '已导出 {files}，{failed} 个文件未能复制',
+  downloadsExportFailed: '无法导出：',
   downloadsDeleteCourse: '删除已下载的文件？',
   downloadsOneFile: '1 个文件',
   downloadsFileCount: '{count} 个文件',

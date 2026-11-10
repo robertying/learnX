@@ -6,7 +6,7 @@ import { initialAuth, useAuthStore } from 'data/auth';
 import { flushServerActions } from 'data/serverActions';
 import { applyLatestSemester } from 'data/userData';
 import { setUpBackgroundFetch } from 'helpers/background';
-import { migrateDownloads } from 'helpers/files/migrateDownloads';
+import { removeLegacyDownloads } from 'helpers/files/downloads';
 import { configureNotifications } from 'helpers/notifications';
 import { subscribeSurfaceErrors } from 'helpers/surfaces';
 import useMainStartup from 'hooks/useMainStartup';
@@ -24,8 +24,8 @@ jest.mock('data/serverActions', () => ({
 jest.mock('helpers/background', () => ({
   setUpBackgroundFetch: jest.fn(async () => {}),
 }));
-jest.mock('helpers/files/migrateDownloads', () => ({
-  migrateDownloads: jest.fn(async () => {}),
+jest.mock('helpers/files/downloads', () => ({
+  removeLegacyDownloads: jest.fn(),
 }));
 jest.mock('helpers/notifications', () => ({
   configureNotifications: jest.fn(async () => {}),
@@ -53,7 +53,7 @@ it('sets up notifications and moves old downloads once, logged in or not', async
   const hook = await renderHook(() => useMainStartup());
   await hook.rerender({});
   expect(configureNotifications).toHaveBeenCalledTimes(1);
-  expect(migrateDownloads).toHaveBeenCalledTimes(1);
+  expect(removeLegacyDownloads).toHaveBeenCalledTimes(1);
   expect(setUpBackgroundFetch).not.toHaveBeenCalled();
   expect(flushServerActions).not.toHaveBeenCalled();
   expect(semester).toHaveBeenCalledWith(

@@ -36,6 +36,7 @@ const useFileDownload = (file: DownloadableFile) => {
 
   const [downloadable] = useState<DownloadableFile>(() => ({
     id: file.id,
+    courseId: file.courseId,
     courseName: file.courseName,
     title: file.title,
     fileType: file.fileType,

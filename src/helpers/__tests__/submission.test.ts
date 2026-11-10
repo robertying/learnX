@@ -153,7 +153,7 @@ describe('sendSubmission', () => {
 });
 
 describe('file detail params', () => {
-  const assignment = { id: 'a1', courseName: 'Calculus' };
+  const assignment = { id: 'a1', courseId: 'c1', courseName: 'Calculus' };
 
   it('opens a picked file by its MIME type', () => {
     const remote = pickedAsRemoteFile(picked);
@@ -167,6 +167,7 @@ describe('file detail params', () => {
     });
     expect(attachmentForFileDetail(assignment, remote)).toEqual({
       id: 'a1',
+      courseId: 'c1',
       courseName: 'Calculus',
       title: 'scan',
       downloadUrl: picked.uri,

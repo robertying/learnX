@@ -40,8 +40,6 @@ export interface SettingsState {
   alarms: AlarmSettings;
   notifications: NotificationSettings;
   graduate: boolean;
-  fileUseDocumentDir: boolean;
-  fileOmitCourseName: boolean;
   courseInformationSharing: boolean;
   openFileAfterDownload: boolean;
   courseEventOmitLocation: boolean;
@@ -160,7 +158,7 @@ export type File = Pick<
 /** What it takes to download and share a file. */
 export type DownloadableFile = Pick<
   File,
-  'id' | 'courseName' | 'title' | 'fileType' | 'downloadUrl'
+  'id' | 'courseId' | 'courseName' | 'title' | 'fileType' | 'downloadUrl'
 >;
 export type User = {
   [key in keyof UserInfo]: UserInfo[key] | null;

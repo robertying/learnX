@@ -8,6 +8,7 @@ import {
   removeCourseDownloads,
   removeFileDir,
 } from 'helpers/files/downloads';
+import { exportDownloads } from 'helpers/files/export';
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
@@ -27,10 +28,35 @@ const summary = ({ count, size }: { count: number; size: number }) =>
 const Downloads: React.FC<Props> = () => {
   const [courses, setCourses] = useState<CourseDownloads[]>([]);
 
+  const [exporting, setExporting] = useState(false);
+
   const reload = useCallback(() => {
     setCourses(listDownloads());
   }, []);
   useFocusEffect(reload);
+
+  const exportFiles = async (courseId?: string) => {
+    setExporting(true);
+    let result: Awaited<ReturnType<typeof exportDownloads>> = null;
+    let error: unknown = null;
+    try {
+      result = await exportDownloads(courseId);
+    } catch (e) {
+      error = e;
+    }
+    setExporting(false);
+    if (error) {
+      toast(t('downloadsExportFailed') + (error as Error).message, 'error');
+    } else if (result) {
+      const files = fileCount(result.exported);
+      toast(
+        result.failed > 0
+          ? t('downloadsExportedPartly', { files, failed: result.failed })
+          : t('downloadsExported', { files }),
+        result.failed > 0 ? 'error' : 'success',
+      );
+    }
+  };
 
   const total = courses.reduce(
     (acc, course) => ({
@@ -82,22 +108,51 @@ const Downloads: React.FC<Props> = () => {
           <FormSection>
             {courses.map(course => (
               <FormButton
-                key={course.courseName}
+                key={course.courseId}
                 icon={{ ios: 'folder', android: 'folder' }}
                 title={course.courseName}
                 detail={summary(course)}
+                disabled={exporting}
                 onPress={() =>
-                  confirm(
-                    t('downloadsDeleteCourse'),
-                    `${course.courseName}\n${summary(course)}`,
-                    () => removeCourseDownloads(course.courseName),
-                    t('downloadsDeletedCourse', { course: course.courseName }),
+                  Alert.alert(
+                    course.courseName,
+                    summary(course),
+                    [
+                      {
+                        text: t('downloadsExportCourse'),
+                        onPress: () => exportFiles(course.courseId),
+                      },
+                      {
+                        text: t('delete'),
+                        style: 'destructive',
+                        onPress: () =>
+                          confirm(
+                            t('downloadsDeleteCourse'),
+                            `${course.courseName}\n${summary(course)}`,
+                            () => removeCourseDownloads(course.courseId),
+                            t('downloadsDeletedCourse', {
+                              course: course.courseName,
+                            }),
+                          ),
+                      },
+                      { text: t('cancel'), style: 'cancel' },
+                    ],
+                    { cancelable: true },
                   )
                 }
               />
             ))}
           </FormSection>
         )}
+        <FormSection footer={t('downloadsExportCaption')}>
+          <FormButton
+            icon={{ ios: 'square.and.arrow.up', android: 'export-variant' }}
+            title={t('downloadsExport')}
+            loading={exporting}
+            disabled={exporting || courses.length === 0}
+            onPress={() => exportFiles()}
+          />
+        </FormSection>
         <FormSection>
           <FormButton
             icon={{ ios: 'trash', android: 'delete' }}

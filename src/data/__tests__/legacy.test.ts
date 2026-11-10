@@ -136,7 +136,6 @@ describe('importing user data saved by 18.0.x', () => {
       assignmentCalendarSync: true,
       calendarEventLength: 45,
       graduate: true,
-      fileUseDocumentDir: true,
       tabFilterSelections: {
         notice: 'fav',
         assignment: 'all',
