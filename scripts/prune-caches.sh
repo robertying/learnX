@@ -14,6 +14,8 @@
 #   GH_TOKEN=... scripts/prune-caches.sh   (needs `actions: write`)
 set -euo pipefail
 
+# The awk program uses no {n} regex intervals: Ubuntu's awk (mawk) lacks them.
+
 repo="${GITHUB_REPOSITORY:?}"
 
 gh cache list --repo "$repo" --limit 1000 --sort last_accessed_at --order desc \
@@ -21,7 +23,6 @@ gh cache list --repo "$repo" --limit 1000 --sort last_accessed_at --order desc \
   --jq '.[] | "\(.id)\t\(.sizeInBytes)\t\(.key)"' |
   awk -F '\t' '
     {
-      # No {n} intervals: Ubuntu's awk (mawk) doesn't support them.
       group = $3
       sub(/-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9:.]+Z$/, "", group)
       if (match(group, /-[0-9a-f]+$/) && RLENGTH > 32) group = substr(group, 1, RSTART - 1)
