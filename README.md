@@ -23,6 +23,10 @@ App for Tsinghua University Web Learning, developed with React Native. ⚛️
 
 ## 下载 Download
 
+需要 iOS / iPadOS 17.6、macOS 14.6 或 Android 9 及以上版本。
+
+Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
+
 ### iOS / iPadOS / macOS
 
 <a href="https://apps.apple.com/cn/app/learnx-thu-web-learning/id1459073115?platform=iphone" target="_blank" rel="noopener noreferrer">
