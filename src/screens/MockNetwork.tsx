@@ -12,7 +12,7 @@ import SafeArea from 'components/SafeArea';
 import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
 
-// A dev-only tool for the mock accounts, so it is not translated.
+// A dev-only tool for the mock account, so it is not translated.
 
 const latencies: [MockLatency, string][] = [
   ['none', 'None'],
@@ -69,7 +69,7 @@ const MockNetwork: React.FC = () => {
         </FormSection>
         <FormSection
           title="Login"
-          footer="A failed login returns to the login screen, which links back here. The ephemeral mock account ignores login results, so use the persistent one to test logging in again. Settings reset when the app reloads."
+          footer="A failed login returns to the login screen, which links back here. Settings reset when the app reloads."
         >
           <FormToggle
             testID="mock-network-login-fails"

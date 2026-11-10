@@ -68,7 +68,7 @@ const toError = (value: unknown): Error => {
   return error;
 };
 
-// Debug builds and the mock accounts would only add noise.
+// Debug builds and the mock account would only add noise.
 const shouldReport = () =>
   !__DEV__ && !!Crashlytics && !isMockUser(getCredentials()?.username);
 

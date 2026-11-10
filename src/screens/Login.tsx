@@ -17,7 +17,7 @@ import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
 import { setSSOInProgress, useLoggingIn } from 'data/auth';
 import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
-import { saveCredentials, useCredentials } from 'data/credentials';
+import { useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
@@ -68,26 +68,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    if (
-      (username === env.DUMMY_USERNAME && password === env.DUMMY_PASSWORD) ||
-      (username === env.DUMMY_PERSIST_USERNAME &&
-        password === env.DUMMY_PERSIST_PASSWORD)
-    ) {
+    if (username === env.DUMMY_USERNAME && password === env.DUMMY_PASSWORD) {
       loginWithMockAccount(username);
-      if (username === env.DUMMY_PERSIST_USERNAME) {
-        // Goes through the emulated server and saves the login, so it
-        // survives relaunch.
-        void login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
-      } else {
-        // The ephemeral account skips the login and is kept in memory only.
-        await saveCredentials({
-          username,
-          password,
-          fingerPrint: MOCK_FINGER_PRINT,
-          fingerGenPrint: '',
-          fingerGenPrint3: '',
-        }).catch(() => undefined);
-      }
+      // Goes through the emulated server and saves the login, so it survives
+      // relaunch.
+      void login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
       return;
     }
 

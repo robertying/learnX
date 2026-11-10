@@ -1,15 +1,8 @@
 import env from 'helpers/env';
 
-/** Mock account whose data is reset on every login and not persisted. */
-export const isEphemeralMockUser = (username?: string | null) =>
+/** The mock account, which loads `data/mock.ts` from an emulated server. */
+export const isMockUser = (username?: string | null) =>
   !!username && username === env.DUMMY_USERNAME;
 
-/** Mock account whose data and login survive app restarts. */
-export const isPersistentMockUser = (username?: string | null) =>
-  !!username && username === env.DUMMY_PERSIST_USERNAME;
-
-export const isMockUser = (username?: string | null) =>
-  isEphemeralMockUser(username) || isPersistentMockUser(username);
-
-/** Stands in for the SSO device fingerprint of the mock accounts. */
+/** Stands in for the SSO device fingerprint of the mock account. */
 export const MOCK_FINGER_PRINT = 'fingerPrint';

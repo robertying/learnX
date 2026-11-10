@@ -291,7 +291,7 @@ end
 # ---------------------------------------------------------------------------
 # .env secrets
 
-# babel/inline-env.js only inlines the mock logins as plain text. Fail the
+# babel/inline-env.js only inlines the mock login as plain text. Fail the
 # build if a release bundle contains any other .env value as is: a LIVE_* test
 # login, the unmasked courseX token, or anything added later.
 def check_bundle_for_env_secrets!(bundles)

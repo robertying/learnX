@@ -6,8 +6,6 @@ type Masked = { key: number[]; data: number[] };
 type InlinedEnv = {
   DUMMY_USERNAME?: string;
   DUMMY_PASSWORD?: string;
-  DUMMY_PERSIST_USERNAME?: string;
-  DUMMY_PERSIST_PASSWORD?: string;
   COURSEX_REFRESH_TOKEN?: Masked;
 } & {
   /** Live test logins. Debug builds only; always undefined in release. */

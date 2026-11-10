@@ -60,7 +60,7 @@ beforeEach(() => {
 });
 afterEach(() => jest.restoreAllMocks());
 
-it('ships the mock logins, and only the listed keys', () => {
+it('ships the mock login, and only the listed keys', () => {
   const { env } = build('production');
   expect(env.default).toEqual({ DUMMY_USERNAME: 'mock-user' });
 });

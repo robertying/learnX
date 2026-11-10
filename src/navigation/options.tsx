@@ -106,5 +106,5 @@ export const getItemDetailOptions = ({
   route: RouteProp<ItemDetailParams>;
 }) => getDetailScreenOptions(...getItemTitle(route))({ theme });
 
-// Dev-only screen for the mock accounts; not translated.
+// Dev-only screen for the mock account; not translated.
 export const mockNetworkTitle = 'Network Emulation';

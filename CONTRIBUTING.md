@@ -35,13 +35,11 @@ pnpm also applies the patches in `patches/` ([patches/README.md](patches/README.
 cp .env.example .env
 ```
 
-Fill in the two mock logins with any non-empty values you like, for example:
+Fill in the mock login with any non-empty values you like, for example:
 
 ```sh
 DUMMY_USERNAME=appreview
 DUMMY_PASSWORD=appreview
-DUMMY_PERSIST_USERNAME=appreview-persist
-DUMMY_PERSIST_PASSWORD=appreview-persist
 ```
 
 These aren't real accounts. Typing them on the login screen loads the built-in mock data instead of talking to learn.tsinghua.edu.cn (see [Testing without a Tsinghua account](#testing-without-a-tsinghua-account)). Leave the other keys empty: without `COURSEX_REFRESH_TOKEN`, course information sharing doesn't work, and nothing else needs it.
@@ -140,9 +138,9 @@ As on iOS, JS changes only need a reload. Rebuild after changes under `android/`
 
 ## Testing without a Tsinghua account
 
-- **Mock login:** on the login screen, enter `DUMMY_USERNAME` / `DUMMY_PASSWORD` from your `.env`. The app loads `src/data/mock.ts` and answers every request from an emulated server with a realistic delay, so refreshes, spinners, file downloads and errors behave as they would with a real account. That login isn't saved, so you log in again after each relaunch. Use `DUMMY_PERSIST_USERNAME` / `DUMMY_PERSIST_PASSWORD` to stay logged in across relaunches or to test failed logins.
+- **Mock login:** on the login screen, enter `DUMMY_USERNAME` / `DUMMY_PASSWORD` from your `.env`. The app loads `src/data/mock.ts` and answers every request from an emulated server with a realistic delay, so refreshes, spinners, file downloads and errors behave as they would with a real account. The login is saved like a real one, so the app stays logged in across relaunches. Typing it again starts over from the mock data.
 - **Network emulation:** debug builds have Settings › Network Emulation (also linked from the login screen once a mock account is saved). It sets the latency, makes requests and downloads fail (offline, server error, timeout) or rejects logins. The choices reset when the JS reloads.
-- **Real accounts are protected in debug builds:** a debug build doesn't send anything that changes a real account (assignment submissions, favorites, course information sharing) until you turn on Settings › Allow Server Writes. Favorites wait in a queue until then. The switch turns off again on every JS reload. Release builds and the mock accounts aren't affected.
+- **Real accounts are protected in debug builds:** a debug build doesn't send anything that changes a real account (assignment submissions, favorites, course information sharing) until you turn on Settings › Allow Server Writes. Favorites wait in a queue until then. The switch turns off again on every JS reload. Release builds and the mock account aren't affected.
 
 Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AGENTS.md#mocks).
 

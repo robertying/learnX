@@ -8,11 +8,7 @@ import {
 } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
 import { initialAuth, useAuthStore } from 'data/auth';
-import {
-  Credentials,
-  getCredentials,
-  useCredentialsStore,
-} from 'data/credentials';
+import { Credentials, useCredentialsStore } from 'data/credentials';
 import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
 import { getSettings, resetSettings } from 'data/settings';
 import { clearLoginCookies } from 'data/source';
@@ -117,7 +113,7 @@ describe('Login', () => {
     });
   });
 
-  it('keeps the ephemeral mock account in memory without logging in', async () => {
+  it('logs the mock account in through the emulated server', async () => {
     const alert = jest.spyOn(Alert, 'alert');
     await setup();
     await fill(env.DUMMY_USERNAME, env.DUMMY_PASSWORD);
@@ -125,29 +121,12 @@ describe('Login', () => {
 
     expect(loginWithMockAccount).toHaveBeenCalledTimes(1);
     expect(loginWithMockAccount).toHaveBeenCalledWith(env.DUMMY_USERNAME);
-    expect(login).not.toHaveBeenCalled();
-    expect(alert).not.toHaveBeenCalled();
-    expect(getCredentials()).toMatchObject({
+    expect(login).toHaveBeenCalledWith({
       username: env.DUMMY_USERNAME,
       password: env.DUMMY_PASSWORD,
       fingerPrint: MOCK_FINGER_PRINT,
     });
-  });
-
-  it('logs the persistent mock account in through the emulated server', async () => {
-    await setup();
-    await fill(env.DUMMY_PERSIST_USERNAME, env.DUMMY_PERSIST_PASSWORD);
-    await pressLogin();
-
-    expect(loginWithMockAccount).toHaveBeenCalledTimes(1);
-    expect(loginWithMockAccount).toHaveBeenCalledWith(
-      env.DUMMY_PERSIST_USERNAME,
-    );
-    expect(login).toHaveBeenCalledWith({
-      username: env.DUMMY_PERSIST_USERNAME,
-      password: env.DUMMY_PERSIST_PASSWORD,
-      fingerPrint: MOCK_FINGER_PRINT,
-    });
+    expect(alert).not.toHaveBeenCalled();
   });
 
   it('turns the graduate setting on and off', async () => {

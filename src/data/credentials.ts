@@ -1,6 +1,5 @@
 import * as SecureStore from 'expo-secure-store';
 import { create } from 'zustand';
-import { isEphemeralMockUser } from 'helpers/mock';
 
 /** What a login needs to sign in again without the user. */
 export interface Credentials {
@@ -154,16 +153,9 @@ export const loadCredentials = async () => {
   return getCredentials();
 };
 
-/**
- * Saves a login. The ephemeral mock account is kept in memory only, so it is
- * gone after a relaunch.
- */
+/** Saves a login to memory and the keychain. */
 export const saveCredentials = async (credentials: Credentials) => {
   useCredentialsStore.setState({ credentials });
-  if (isEphemeralMockUser(credentials.username)) {
-    await SecureStore.deleteItemAsync(CREDENTIALS_KEY, options);
-    return;
-  }
   await SecureStore.setItemAsync(
     CREDENTIALS_KEY,
     JSON.stringify(credentials),
