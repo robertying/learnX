@@ -50,13 +50,16 @@ const FeatureList: React.FC<FeatureListProps> = ({
   const insets = useSafeAreaInsets();
 
   return (
-    <View
+    // One ScrollView with the buttons at the end of its content: a form
+    // sheet (react-native-screens) only lays out a ScrollView that is the
+    // screen's only child, and draws the content blank otherwise.
+    <ScrollView
       testID={testID}
       style={[styles.root, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={styles.container}
     >
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={[
+      <View
+        style={[
           styles.content,
           { paddingTop: (sheet ? 0 : insets.top) + (logo ? 32 : 48) },
         ]}
@@ -105,7 +108,7 @@ const FeatureList: React.FC<FeatureListProps> = ({
             </View>
           ))}
         </View>
-      </ScrollView>
+      </View>
       <View
         style={[
           styles.footer,
@@ -148,7 +151,7 @@ const FeatureList: React.FC<FeatureListProps> = ({
           </View>
         )}
       </View>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -156,8 +159,10 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  scroll: {
-    flex: 1,
+  // Fills the page, so the buttons sit at the bottom when it's short.
+  container: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
   },
   content: {
     width: '100%',

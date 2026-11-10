@@ -281,7 +281,8 @@ export const WhatsNewStack = () => (
     <WhatsNewNavigator.Screen
       name="WhatsNew"
       component={WhatsNew}
-      options={{ headerShown: false }}
+      // The title is Changelog's back button.
+      options={{ headerShown: false, title: t('whatsNew') }}
     />
     <WhatsNewNavigator.Screen
       name="Changelog"
