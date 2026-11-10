@@ -27,7 +27,15 @@ export const RNHostView = ({ children }: { children?: ReactNode }) => (
   <View>{children}</View>
 );
 export const Divider = () => <View />;
-export const Circle = () => <View />;
+type ShapeProps = {
+  modifiers?: ({ accessibilityLabel?: string } | undefined)[];
+};
+/** Findable by its accessibility label (e.g. the new-item badge). */
+const Shape = ({ modifiers }: ShapeProps) => {
+  const label = modifiers?.find(m => m?.accessibilityLabel)?.accessibilityLabel;
+  return <View accessible={!!label} accessibilityLabel={label} />;
+};
+export const Circle = Shape;
 export const RoundedRectangle = () => <View />;
 
 export const Text = ({
