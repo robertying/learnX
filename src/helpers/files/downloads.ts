@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { Directory, DownloadTask, File, Paths } from 'expo-file-system';
-import ShareMenu from 'react-native-share-menu';
+import Share from '../../../modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { addCSRF, dataSource, ensureSession } from 'data/source';
 import { getSettings } from 'data/settings';
@@ -223,17 +223,12 @@ export const removeFileDir = async () => {
     throw new Error(failed.join(', '));
   }
 
-  if (Platform.OS === 'ios') {
-    await new Promise<void>(resolve => {
-      ShareMenu.getSharedCacheDirectory(sharedDir => {
-        try {
-          if (sharedDir) {
-            deleteDirectory(toDirectory(sharedDir));
-          }
-        } catch {}
-        resolve();
-      });
-    });
+  // The iOS share extension's copies, in the app group.
+  const sharedDir = Share?.getSharedFilesDirectory();
+  if (sharedDir) {
+    try {
+      deleteDirectory(toDirectory(sharedDir));
+    } catch {}
   }
 };
 

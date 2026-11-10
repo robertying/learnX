@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["ShareModule"],
+    "appDelegateSubscribers": ["ShareAppDelegateSubscriber"]
+  },
+  "android": {
+    "modules": ["io.robertying.learnx.share.ShareModule"]
+  }
+}

@@ -54,8 +54,8 @@ target 'learnX' do
 
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
-        # The extensions link the same pods as the app, and some of them use
-        # app-only API (UIApplication.shared) in code the extensions never run.
+        # The widget extension links the same pods as the app, and some of them use
+        # app-only API (UIApplication.shared) in code the extension never runs.
         config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
         # React Native headers aren't modular; static frameworks include them anyway.
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
@@ -80,14 +80,7 @@ target 'learnX' do
   end
 end
 
-target 'ShareExtension' do
-  use_react_native!(
-    :app_path => "#{Pod::Config.instance.installation_root}/..",
-    hermes_enabled: true
-  )
-
-  pod 'RNShareMenu', :path => '../node_modules/react-native-share-menu'
-end
+# The share extension (ShareExtension/ShareViewController.swift) uses no pods.
 
 # Home screen widgets (expo-widgets). The widget extension only links Expo,
 # ExpoUI and ExpoWidgets; see `use_expo_modules_widgets!`. This mirrors what
