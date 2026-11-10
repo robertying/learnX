@@ -36,6 +36,23 @@ const RootNavigator = createNativeStackNavigator<RootStackParams>();
 const AndroidRootNavigator =
   createNativeStackNavigator<AndroidRootStackParams>();
 
+// Typed against the sheets' own params, which both roots include (as the
+// shared screens in stacks.tsx are).
+const Sheets =
+  createNativeStackNavigator<
+    Pick<RootStackParams, 'Setup' | 'WhatsNewStack'>
+  >();
+
+/** Sheets the main UI opens with (hooks/useLaunchSheet). */
+const renderSheets = () => (
+  <Sheets.Group
+    screenOptions={{ presentation: 'formSheet', sheetAllowedDetents: [1] }}
+  >
+    <Sheets.Screen name="Setup" component={Setup} />
+    <Sheets.Screen name="WhatsNewStack" component={WhatsNewStack} />
+  </Sheets.Group>
+);
+
 const renderMainScreens = () => (
   <>
     <RootNavigator.Screen name="MainTab" component={MainTab} />
@@ -54,17 +71,8 @@ const renderMainScreens = () => (
       component={AssignmentSubmissionStack}
       options={{ gestureEnabled: false }}
     />
-    {/* Sheets the main UI opens with (hooks/useLaunchSheet) */}
-    <RootNavigator.Screen
-      name="Setup"
-      component={Setup}
-      options={{ presentation: 'formSheet', sheetAllowedDetents: [1] }}
-    />
-    <RootNavigator.Screen
-      name="WhatsNewStack"
-      component={WhatsNewStack}
-      options={{ presentation: 'formSheet', sheetAllowedDetents: [1] }}
-    />
+    {/* Android shows these above its split view (AndroidRootNavigator). */}
+    {nativeSplit && renderSheets()}
   </>
 );
 
@@ -142,12 +150,16 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
             screenOptions={{ headerShown: false }}
           >
             {showMain ? (
-              <AndroidRootNavigator.Screen
-                name="Main"
-                component={AndroidMain}
-                // Login slides away to reveal the main UI.
-                options={{ animationTypeForReplace: 'pop' }}
-              />
+              <>
+                <AndroidRootNavigator.Screen
+                  name="Main"
+                  component={AndroidMain}
+                  // Login slides away to reveal the main UI.
+                  options={{ animationTypeForReplace: 'pop' }}
+                />
+                {/* Over the whole window, not inside the list's pane */}
+                {renderSheets()}
+              </>
             ) : (
               // Beside the split rather than in its master pane, so it always
               // covers the whole window and the panes never resize under it.

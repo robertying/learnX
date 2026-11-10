@@ -148,6 +148,8 @@ export type RootStackParams = {
 export type AndroidRootStackParams = {
   Main: undefined;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
+  Setup: undefined;
+  WhatsNewStack: NavigatorScreenParams<WhatsNewStackParams>;
 };
 
 /**
