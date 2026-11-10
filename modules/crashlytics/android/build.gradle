@@ -30,3 +30,10 @@ dependencies {
   testImplementation("org.robolectric:robolectric:${rootProject.ext.robolectricVersion}")
   testImplementation("io.mockk:mockk:${rootProject.ext.mockkVersion}")
 }
+
+// Robolectric runs Android 15 and later only on Java 21.
+tasks.withType(Test).configureEach {
+  javaLauncher = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(21)
+  }
+}

@@ -70,7 +70,7 @@ class TakeTest {
     val intent = Intent(Intent.ACTION_VIEW).putExtra(Intent.EXTRA_STREAM, fileUri)
     assertNull(ShareModule.take(intent))
     // Left as it was.
-    assertEquals(fileUri, intent.extras?.get(Intent.EXTRA_STREAM))
+    assertEquals(fileUri, intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java))
   }
 
   @Test
