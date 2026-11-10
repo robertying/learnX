@@ -80,10 +80,35 @@ jobs:
           path: ${{ env.JEST_CACHE_DIR }}
           key: ${{ steps.jest-cache.outputs.cache-primary-key }}
 
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      android: ${{ steps.android.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      # What the Android unit tests compile or run: the app's Gradle setup,
+      # the local modules' Android code and autolinking, patched and installed
+      # packages, and the scripts and workflow that run them.
+      - name: Android
+        id: android
+        run: >-
+          scripts/changed-files.sh
+          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(test-android\.sh|android-coverage\.mjs|changed-files\.sh)$|\.github/workflows/check\.yml$)'
+          >> "$GITHUB_OUTPUT"
+
   android-unit-tests:
-    # The local modules' JVM unit tests (scripts/test-android.sh). Not a
-    # required check.
+    # The local modules' JVM unit tests (scripts/test-android.sh). A required
+    # check: when nothing Android changed the job is skipped, which counts as
+    # passing.
     name: Android unit tests
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
