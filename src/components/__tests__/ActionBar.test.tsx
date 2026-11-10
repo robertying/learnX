@@ -76,11 +76,13 @@ describe('FeatureList', () => {
   );
   const scrollView = () => screen.getByTestId('page-scroll');
 
-  it('keeps the buttons outside the scrolling features', async () => {
+  it('scrolls only the features, between the title and the buttons', async () => {
     await render(page());
-    expect(
-      within(screen.getByTestId('page-scroll')).queryByTestId('action-bar'),
-    ).toBeNull();
+    const scrolling = within(screen.getByTestId('page-scroll'));
+    expect(scrolling.getByText('Today')).toBeTruthy();
+    expect(scrolling.queryByRole('header')).toBeNull();
+    expect(scrolling.queryByTestId('action-bar')).toBeNull();
+    expect(screen.getByRole('header', { name: "What's New" })).toBeTruthy();
     expect(screen.getByTestId('action-bar')).toBeTruthy();
   });
 

@@ -63,25 +63,16 @@ const FeatureList: React.FC<FeatureListProps> = ({
       testID={testID}
       style={[styles.root, { backgroundColor: theme.colors.background }]}
     >
-      {/* The ScrollView comes first: a form sheet (react-native-screens)
-          looks for the screen's scroll view at its first descendant. */}
-      <ScrollView
-        testID={testID && `${testID}-scroll`}
-        contentContainerStyle={styles.container}
-        alwaysBounceVertical={false}
-        onLayout={event => measure({ height: event.nativeEvent.layout.height })}
-        onContentSizeChange={(_, height) => measure({ content: height })}
-        onScroll={event =>
-          measure({ offset: event.nativeEvent.contentOffset.y })
-        }
-        scrollEventThrottle={16}
+      {/* The title stays put and only the features scroll, between it and
+          the buttons. Together they sit in the middle of the page when the
+          features fit, as on iPad, Mac or a tall phone. */}
+      <View
+        style={[
+          styles.middle,
+          { paddingTop: (sheet ? 0 : insets.top) + (logo ? 16 : 32) },
+        ]}
       >
-        <View
-          style={[
-            styles.content,
-            { paddingTop: (sheet ? 0 : insets.top) + (logo ? 32 : 48) },
-          ]}
-        >
+        <View style={styles.header}>
           {logo && <Logo iosSize={96} style={styles.logo} />}
           <Title
             variant="largeTitle"
@@ -90,6 +81,21 @@ const FeatureList: React.FC<FeatureListProps> = ({
           >
             {title}
           </Title>
+        </View>
+        <ScrollView
+          testID={testID && `${testID}-scroll`}
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          alwaysBounceVertical={false}
+          onLayout={event =>
+            measure({ height: event.nativeEvent.layout.height })
+          }
+          onContentSizeChange={(_, height) => measure({ content: height })}
+          onScroll={event =>
+            measure({ offset: event.nativeEvent.contentOffset.y })
+          }
+          scrollEventThrottle={16}
+        >
           <View style={styles.features}>
             {features.map(feature => (
               <View
@@ -123,8 +129,8 @@ const FeatureList: React.FC<FeatureListProps> = ({
               </View>
             ))}
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
       <ActionBar
         action={action}
         secondaryAction={secondaryAction}
@@ -138,10 +144,21 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  // Centers the page's content when it fits, as on iPad, Mac or a tall phone.
-  container: {
-    flexGrow: 1,
+  middle: {
+    flex: 1,
     justifyContent: 'center',
+  },
+  header: {
+    width: '100%',
+    maxWidth: 520,
+    alignSelf: 'center',
+    paddingHorizontal: apple ? 40 : 24,
+  },
+  // As tall as the features, up to the room left between the title and the
+  // buttons.
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 1,
   },
   content: {
     width: '100%',
@@ -161,7 +178,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: apple ? 'center' : 'auto',
     marginTop: 8,
-    marginBottom: 40,
+    marginBottom: 32,
   },
   features: {
     gap: 28,
