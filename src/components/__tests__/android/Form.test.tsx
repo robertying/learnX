@@ -258,7 +258,9 @@ describe('Form (Android)', () => {
     for (const text of ['Submitted', 'On time', 'Mon']) {
       expect(style(text).color).toBe('outline');
     }
-    expect(screen.getByLabelText('Ended')).toBeTruthy();
+    // read out as over, with no check drawn
+    expect(screen.getByLabelText('Submitted, Ended')).toBeTruthy();
+    expect(screen.queryByTestId('icon-check')).toBeNull();
   });
 
   it('puts the detail under the subtitle at large font sizes', async () => {

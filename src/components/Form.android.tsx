@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, useWindowDimensions } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   Badge,
@@ -29,6 +29,7 @@ import {
   imePadding,
   padding,
   selectable,
+  semantics,
   Shapes,
   size,
   testID as testIDModifier,
@@ -255,16 +256,8 @@ const FormRow: React.FC<
   const supporting = stackDetail
     ? [subtitle, detail].filter(Boolean).join('\n')
     : subtitle;
-  // Over: the text in the secondary color, with a check at the end.
+  // Over: the text in the secondary color, read out as over.
   const contentColor = done ? colors.outline : titleColor;
-  const check = done ? (
-    <RNHostView matchContents>
-      {/* sized: an unsized wrapper collapses to nothing in the host */}
-      <View accessible accessibilityLabel={t('a11yDone')} style={styles.check}>
-        <MaterialDesignIcons name="check" size={20} color={colors.outline} />
-      </View>
-    </RNHostView>
-  ) : null;
   const ends = [
     detail && !stackDetail ? (
       <Text
@@ -289,7 +282,6 @@ const FormRow: React.FC<
         {detail}
       </Text>
     ) : null,
-    check ? <Fragment key="check">{check}</Fragment> : null,
     trailing ? <Fragment key="trailing">{trailing}</Fragment> : null,
   ].filter(Boolean);
   const end =
@@ -309,6 +301,15 @@ const FormRow: React.FC<
         <Text
           color={contentColor}
           style={struck ? { textDecoration: 'lineThrough' } : undefined}
+          modifiers={
+            done
+              ? [
+                  semantics({
+                    contentDescription: `${title}, ${t('a11yDone')}`,
+                  }),
+                ]
+              : undefined
+          }
         >
           {title}
         </Text>
@@ -654,9 +655,5 @@ export const FormProfile: React.FC<FormProfileProps> = ({
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
-  },
-  check: {
-    width: 20,
-    height: 20,
   },
 });

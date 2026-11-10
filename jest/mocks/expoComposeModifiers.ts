@@ -24,6 +24,13 @@ export const selectable = (
   selected,
 });
 
+/** What TalkBack reads, as the stand-in's accessibility label. */
+export const semantics = ({
+  contentDescription,
+}: {
+  contentDescription?: string;
+}) => ({ accessibilityLabel: contentDescription });
+
 const layout = () => undefined;
 /** Read by the button stand-ins, as their style. */
 export const size = (width: number, height: number) => ({
