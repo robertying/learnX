@@ -120,7 +120,7 @@ describe('NoticeCard', () => {
   it('marks attachments, importance and unread notices', async () => {
     const view = await render(<NoticeCard data={notice()} />);
     expect(screen.queryByTestId('icon-attachment')).toBeNull();
-    expect(screen.queryByTestId('icon-flag')).toBeNull();
+    expect(screen.queryByTestId('icon-important')).toBeNull();
     expect(screen.queryByTestId('unread-dot')).toBeNull();
 
     await view.rerender(
@@ -133,7 +133,7 @@ describe('NoticeCard', () => {
       />,
     );
     expect(screen.getByTestId('icon-attachment')).toBeTruthy();
-    expect(screen.getByTestId('icon-flag')).toBeTruthy();
+    expect(screen.getByTestId('icon-important')).toBeTruthy();
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
   });
 
@@ -249,7 +249,7 @@ describe('AssignmentCard', () => {
   it('marks attachments and answers', async () => {
     const view = await render(<AssignmentCard data={assignment()} />);
     expect(screen.queryByTestId('icon-attachment')).toBeNull();
-    expect(screen.queryByTestId('icon-key-variant')).toBeNull();
+    expect(screen.queryByTestId('icon-answer')).toBeNull();
 
     await view.rerender(
       <AssignmentCard
@@ -260,7 +260,7 @@ describe('AssignmentCard', () => {
       />,
     );
     expect(screen.getByTestId('icon-attachment')).toBeTruthy();
-    expect(screen.getByTestId('icon-key-variant')).toBeTruthy();
+    expect(screen.getByTestId('icon-answer')).toBeTruthy();
     expect(
       screen.getByRole('button', {
         name: /^Problem set 3, Calculus, .+, Attachment, Has answer, Chapters 4 & 5$/,
@@ -276,7 +276,7 @@ describe('AssignmentCard', () => {
         })}
       />,
     );
-    expect(screen.getByTestId('icon-key-variant')).toBeTruthy();
+    expect(screen.getByTestId('icon-answer')).toBeTruthy();
   });
 });
 
@@ -317,13 +317,13 @@ describe('FileCard', () => {
 
   it('marks important and new files', async () => {
     const view = await render(<FileCard data={file()} />);
-    expect(screen.queryByTestId('icon-flag')).toBeNull();
+    expect(screen.queryByTestId('icon-important')).toBeNull();
     expect(screen.queryByTestId('unread-dot')).toBeNull();
 
     await view.rerender(
       <FileCard data={file({ markedImportant: true, isNew: true })} />,
     );
-    expect(screen.getByTestId('icon-flag')).toBeTruthy();
+    expect(screen.getByTestId('icon-important')).toBeTruthy();
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
     expect(
       screen.getByRole('button', {

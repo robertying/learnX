@@ -1,36 +1,54 @@
 import {
   Platform,
+  PlatformColor,
   Pressable,
   PressableProps,
-  TouchableHighlight,
-  TouchableHighlightProps,
-  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 import { useTheme, withAlpha } from 'theme';
 
-const Touchable: React.FC<
-  TouchableHighlightProps & {
-    type?: 'opacity' | 'highlight';
-    highlightColorOpacity?: number;
-  }
-> = ({ type, highlightColorOpacity, ...props }) => {
+export interface TouchableProps extends Omit<PressableProps, 'style'> {
+  /**
+   * How a press shows on iOS and Mac: `highlight` fills the row with the
+   * system's selection gray, as a table cell does; `opacity` dims the
+   * content, as a button does. Android always ripples.
+   * @default 'highlight'
+   */
+  type?: 'highlight' | 'opacity';
+  style?: StyleProp<ViewStyle>;
+}
+
+// UITableViewCell's selected background
+const highlight = Platform.OS === 'ios' ? PlatformColor('systemGray4') : null;
+
+/** A pressable area with the platform's own press feedback. */
+const Touchable: React.FC<TouchableProps> = ({
+  type = 'highlight',
+  style,
+  ...props
+}) => {
   const theme = useTheme();
 
-  return Platform.OS === 'android' ? (
+  if (Platform.OS === 'android') {
+    return (
+      <Pressable
+        android_ripple={{ color: withAlpha(theme.colors.onSurface, 0.12) }}
+        style={style}
+        {...props}
+      />
+    );
+  }
+
+  return (
     <Pressable
-      android_ripple={{ color: withAlpha(theme.colors.onSurface, 0.12) }}
-      {...(props as PressableProps)}
-    />
-  ) : type === 'opacity' ? (
-    <TouchableOpacity activeOpacity={0.5} {...props} />
-  ) : (
-    <TouchableHighlight
-      activeOpacity={1}
-      underlayColor={
-        theme.dark
-          ? `rgba(255,255,255,${highlightColorOpacity ?? 0.2})`
-          : 'rgba(0,0,0,0.125)'
-      }
+      style={({ pressed }) => [
+        style,
+        pressed &&
+          (type === 'opacity'
+            ? { opacity: 0.5 }
+            : { backgroundColor: highlight }),
+      ]}
       {...props}
     />
   );
