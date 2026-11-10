@@ -115,8 +115,7 @@ const zh: typeof en = {
   assignmentCalendarSecondAlarmOffset: '截止前第二次提醒（分钟）',
   assignmentCalendarNoAlarmIfComplete: '已提交的作业不提醒',
   assignmentReminderSync: '作业提醒事项同步',
-  assignmentReminderAlarm: '截止前提醒',
-  assignmentReminderAlarmOffset: '截止前提醒（分钟）',
+  assignmentReminderAlarm: '截止时提醒',
   assignmentSyncDescription:
     '作业会在刷新时同步；已过期的作业不会同步，已归档的作业和已屏蔽课程的作业会被移除。更改设置后请刷新作业。',
   clearFileCache: '删除全部已下载文件',

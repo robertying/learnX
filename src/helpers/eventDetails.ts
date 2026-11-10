@@ -21,6 +21,9 @@ export const assignmentCalendarReminderName = 'learnX 作业';
 export const exportCalendarName = 'learnX';
 export const TZ = 'Asia/Shanghai';
 
+const deviceTimeZone = () =>
+  Intl.DateTimeFormat().resolvedOptions().timeZone || TZ;
+
 type EventDetails = Omit<
   Partial<Calendar.ExpoCalendarEvent>,
   'id' | 'organizer'
@@ -61,7 +64,6 @@ export function hash(text: string): string {
 /** What the optional calendar settings (in minutes) are until they're set. */
 export const calendarDefaults = {
   courseAlarmOffset: 15,
-  assignmentReminderAlarmOffset: 24 * 60,
   assignmentCalendarAlarmOffset: 24 * 60,
   assignmentCalendarSecondAlarmOffset: 30,
   calendarEventLength: 30,
@@ -124,19 +126,11 @@ export const buildAssignmentReminderDetails = (
     title,
     startDate: startDate.toDate(),
     dueDate: dueDate.toDate(),
-    // Relative to the due date, which Reminders shows as an Early Reminder.
-    // An absolute alarm becomes the reminder's date in Reminders instead.
-    alarms: alarms.assignmentReminderAlarm
-      ? [
-          {
-            relativeOffset: -(
-              alarms.assignmentReminderAlarmOffset ??
-              calendarDefaults.assignmentReminderAlarmOffset
-            ),
-          },
-        ]
-      : [],
-    timeZone: TZ,
+    // Reminders folds any alarm into the reminder's own date and time, so an
+    // earlier alarm would move the deadline. The alert is at the deadline.
+    alarms: alarms.assignmentReminderAlarm ? [{ relativeOffset: 0 }] : [],
+    // The device's zone: Reminders labels any other zone (e.g. "GMT+8").
+    timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
     notes: note,
