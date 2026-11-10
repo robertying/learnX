@@ -308,6 +308,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       data.length ? null : { justifyContent: 'center' as const },
     ],
     data,
+    // In the list, so that the list is the screen's first scroll view: iOS
+    // collapses the large title as it scrolls.
+    ListHeaderComponent: <SyncStatus updatedAt={updatedAt} />,
     ListEmptyComponent: loading ? <Spinner /> : <Empty />,
     renderItem,
     keyExtractor: (item: T) => item.id,
@@ -322,7 +325,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   return (
     <View style={Styles.flex1}>
-      <SyncStatus updatedAt={updatedAt} />
       {isCourse ? (
         <ReorderableList
           key={`${filterSelected}-${reorderMode}`}

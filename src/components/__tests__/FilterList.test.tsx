@@ -1,5 +1,12 @@
 import { Pressable, Text, View } from 'react-native';
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import {
+  act,
+  render,
+  screen,
+  userEvent,
+  within,
+} from '@testing-library/react-native';
+import { initialAuth, useAuthStore } from 'data/auth';
 import FilterList, { type ItemComponentProps } from 'components/FilterList';
 import { getSettings, resetSettings } from 'data/settings';
 import { t } from 'helpers/i18n';
@@ -27,7 +34,10 @@ jest.mock('helpers/listActions', () => ({
   toggleFavorite: jest.fn(),
 }));
 // Lists render every row, as React Native's FlatList does in Jest.
-jest.mock('components/FlatList', () => require('react-native').FlatList);
+jest.mock('components/FlatList', () => {
+  const { FlatList } = require('react-native');
+  return (props: object) => <FlatList testID="filter-list" {...props} />;
+});
 jest.mock('react-native-reorderable-list', () => ({
   __esModule: true,
   default: require('react-native').FlatList,
@@ -230,6 +240,15 @@ it('shows a spinner for the first load and an empty state after', async () => {
     />,
   );
   expect(screen.getByText(t('empty'))).toBeTruthy();
+});
+
+it('shows the sync status at the top of the list, where it scrolls with it', async () => {
+  useAuthStore.setState({ loggedIn: false, failure: 'offline' });
+  await renderList();
+  const list = screen.getByTestId('filter-list');
+  expect(within(list).getByTestId('sync-status')).toBeTruthy();
+  expect(within(list).getByText(t('syncStatusOffline'))).toBeTruthy();
+  useAuthStore.setState(initialAuth);
 });
 
 it('opens Course X in the detail pane when there is one', async () => {

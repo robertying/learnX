@@ -1,12 +1,11 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { StyleSheet, ToastAndroid } from 'react-native';
+import { ToastAndroid } from 'react-native';
 import CardMenu from 'components/CardMenu';
 import DateRangePicker from 'components/DateRangePicker';
 import FilterMenu from 'components/FilterMenu';
 import IconButton from 'components/IconButton';
 import SegmentedTabs from 'components/SegmentedTabs';
 import TextButton from 'components/TextButton';
-import TextField from 'components/TextField';
 import { toast } from 'components/Toast';
 import { cardActions } from 'helpers/cardActions';
 import { filterOptions } from 'helpers/filters';
@@ -244,14 +243,5 @@ describe('toast (Android)', () => {
       ['Saved', ToastAndroid.SHORT],
       ['Failed', ToastAndroid.LONG],
     ]);
-  });
-});
-
-describe('TextField (Android)', () => {
-  it('rounds its corners less, and leaves the selection color to Android', async () => {
-    await render(<TextField placeholder="Search" />);
-    const input = screen.getByPlaceholderText('Search');
-    expect(input.props.selectionColor).toBeUndefined();
-    expect(StyleSheet.flatten(input.props.style).borderRadius).toBe(4);
   });
 });

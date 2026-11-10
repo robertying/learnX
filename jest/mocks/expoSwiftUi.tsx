@@ -1,4 +1,10 @@
-import { ReactNode, useState, useSyncExternalStore } from 'react';
+import {
+  ReactNode,
+  Ref,
+  useImperativeHandle,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import {
   Pressable,
   Text as RNText,
@@ -183,35 +189,56 @@ const nativeState = <T,>(initial: T): NativeState<T> => {
 export const useNativeState = <T,>(initial: T) =>
   useState(() => nativeState(initial))[0];
 
-/** A plain text input showing the native state's text. */
+/**
+ * A plain text input showing the native state's text. The return key runs
+ * the `onSubmit` modifier's handler, and the ref's `focus` is a `jest.fn`.
+ */
 export const TextField = ({
   text,
   placeholder,
   onTextChange,
   testID,
   modifiers,
+  ref,
+  secure,
 }: {
   text: NativeState<string>;
   placeholder?: string;
   onTextChange?: (text: string) => void;
   testID?: string;
-  modifiers?: ({ disabled?: boolean } | undefined)[];
+  modifiers?: (
+    | { disabled?: boolean; modifier?: string; args?: unknown[] }
+    | undefined
+  )[];
+  ref?: Ref<{ focus: () => void }>;
+  secure?: boolean;
 }) => {
   const value = useSyncExternalStore(text.subscribe, text.get);
+  const [focus] = useState(() => jest.fn());
+  useImperativeHandle(ref, () => ({ focus }));
+  const submit = modifiers?.find(modifier => modifier?.modifier === 'onSubmit')
+    ?.args?.[0] as (() => void) | undefined;
   return (
     <RNTextInput
       value={value}
       placeholder={placeholder}
       accessibilityLabel={placeholder}
+      secureTextEntry={secure}
       editable={!modifiers?.some(modifier => modifier?.disabled)}
       onChangeText={typed => {
         text.set(typed);
         onTextChange?.(typed);
       }}
+      onSubmitEditing={submit}
+      {...{ focus }}
       testID={testID}
     />
   );
 };
+
+export const SecureField = (props: Parameters<typeof TextField>[0]) => (
+  <TextField {...props} secure />
+);
 
 export const Toggle = ({
   isOn,

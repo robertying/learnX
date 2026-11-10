@@ -24,12 +24,17 @@ export const selectable = (
   selected,
 });
 
-/** What TalkBack reads, as the stand-in's accessibility label. */
+/**
+ * What TalkBack reads, as the stand-in's accessibility label, and the
+ * Autofill content type, which text field stand-ins pass on.
+ */
 export const semantics = ({
   contentDescription,
+  contentType,
 }: {
   contentDescription?: string;
-}) => ({ accessibilityLabel: contentDescription });
+  contentType?: string;
+}) => ({ accessibilityLabel: contentDescription, contentType });
 
 const layout = () => undefined;
 /** Read by the button stand-ins, as their style. */

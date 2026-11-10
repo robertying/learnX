@@ -2,6 +2,9 @@ import {
   Children,
   isValidElement,
   ReactNode,
+  Ref,
+  useImperativeHandle,
+  useState,
   useSyncExternalStore,
 } from 'react';
 import {
@@ -31,6 +34,7 @@ type Modifier =
       checked?: boolean;
       selected?: boolean;
       disabled?: boolean;
+      contentType?: string;
     }
   | undefined;
 
@@ -222,28 +226,46 @@ export const useNativeState = useSwiftUINativeState;
 
 type NativeState = ReturnType<typeof useSwiftUINativeState<string>>;
 
+/**
+ * A plain text input showing the native state's text. The keyboard action
+ * runs `onNext` or `onDone`, and the ref's `focus` is a `jest.fn`.
+ */
 const Field = ({
   value,
   enabled,
   singleLine,
   keyboardOptions,
+  keyboardActions,
+  visualTransformation,
   onValueChange,
   modifiers,
   children,
+  ref,
 }: BoxProps & {
   value: NativeState;
   enabled?: boolean;
   singleLine?: boolean;
-  keyboardOptions?: { capitalization?: string; autoCorrectEnabled?: boolean };
+  keyboardOptions?: {
+    capitalization?: string;
+    autoCorrectEnabled?: boolean;
+    keyboardType?: string;
+    imeAction?: string;
+  };
+  keyboardActions?: { onNext?: () => void; onDone?: () => void };
+  visualTransformation?: 'password' | 'none';
   onValueChange?: (text: string) => void;
+  ref?: Ref<{ focus: () => void }>;
 }) => {
   const text = useSyncExternalStore(value.subscribe, value.get);
+  const [focus] = useState(() => jest.fn());
+  useImperativeHandle(ref, () => ({ focus }));
   return (
     <View>
       <RNTextInput
         value={text}
         editable={enabled !== false}
         multiline={singleLine === false}
+        secureTextEntry={visualTransformation === 'password'}
         autoCapitalize={
           keyboardOptions?.capitalization === 'none' ? 'none' : 'sentences'
         }
@@ -252,6 +274,12 @@ const Field = ({
           value.set(typed);
           onValueChange?.(typed);
         }}
+        onSubmitEditing={keyboardActions?.onNext ?? keyboardActions?.onDone}
+        {...{
+          focus,
+          keyboardOptions,
+          contentType: fromModifiers(modifiers).contentType,
+        }}
         testID={fromModifiers(modifiers).testID}
       />
       {children}
@@ -259,7 +287,10 @@ const Field = ({
   );
 };
 export const TextField = Object.assign(Field, { Placeholder: slot() });
-export const OutlinedTextField = Field;
+export const OutlinedTextField = Object.assign(
+  (props: Parameters<typeof Field>[0]) => <Field {...props} />,
+  { Label: slot(), Placeholder: slot() },
+);
 
 const Trigger = slot();
 const Items = slot();
