@@ -32,4 +32,7 @@ tasks.withType(Test).configureEach {
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = JavaLanguageVersion.of(21)
   }
+  testLogging {
+    exceptionFormat = "full"
+  }
 }
