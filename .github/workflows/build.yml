@@ -3,9 +3,9 @@ name: Build
 # Builds the app so a broken patch, Podfile, Gradle, R8 or native module change
 # shows up in CI, not on a Mac later, runs the native iOS tests, and runs the
 # Android E2E flows by hand. No signing secrets, no uploads. Not required
-# checks. Android runs if Changes failed, so a broken filter can't skip it.
+# checks. Android runs if "Detect changed files" failed, so a broken filter can't skip it.
 #
-# When each job runs (the Changes job decides from the changed paths):
+# When each job runs ("Detect changed files" decides from the changed paths):
 # - Android (release APK, ~10 min cold): PRs and main pushes that touch Android
 #   paths, and by hand. A release build, because R8 and the JS bundle only run
 #   there; -PciRelease signs it with the debug key and turns off Crashlytics
@@ -60,7 +60,7 @@ env:
 
 jobs:
   changes:
-    name: Changes
+    name: Detect changed files
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
