@@ -105,7 +105,8 @@ jobs:
   android-unit-tests:
     # The local modules' JVM unit tests (scripts/test-android.sh). A required
     # check: when nothing Android changed the job is skipped, which counts as
-    # passing. It runs if "Detect changed files" failed, so a broken filter can't skip it.
+    # passing. It runs if "Detect changed files" failed, so a broken filter
+    # can't skip it.
     name: Android unit tests
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.android != 'false' }}
