@@ -18,7 +18,7 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 
 - `pnpm start` runs Metro; `pnpm ios` / `pnpm android` build and launch the app.
 - `pnpm pod` runs `pod install` and `pod update` through Bundler, with the CocoaPods version locked in `Gemfile.lock` (run `bundle install` once first). Use the Ruby in `.ruby-version` with a gem folder you can write to, such as Homebrew's (`brew install ruby`, with `$(brew --prefix ruby)/bin` first on `PATH`); Bundler installs the gems there.
-- `pnpm bump x.y.z` sets the app version in `package.json`, the Xcode project and Gradle and bumps the build number; `pnpm bump` alone is a rebuild (build number + 1). See the release skill.
+- `pnpm bump major|minor|patch` (or `pnpm bump x.y.z`) sets the app version in `package.json`, the Xcode project and Gradle and bumps the build number; `pnpm bump` alone is a rebuild (build number + 1). See the release skill.
 - Run `pnpm format` (Oxfmt) after changing files; `pnpm typecheck` and `pnpm lint` (Oxlint, config in `.oxlintrc.json`) must pass before committing. Lint is type-aware (`oxlint-tsgolint`): mark an intentionally unawaited promise with `void`.
 - User-visible text goes in `src/assets/translations` (`en.ts` and `zh.ts`), read with `t('key', { param })` from `helpers/i18n`; `{param}` placeholders are filled in, and date formats are translations too. The `learnx/no-han-outside-translations` lint rule (`lint/plugin.mjs`) rejects Chinese text elsewhere in `src`; disable it per line only for text that must not be translated, with the reason.
 - Debug builds load JS from Metro; only native changes need a rebuild.
