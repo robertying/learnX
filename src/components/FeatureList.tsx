@@ -1,10 +1,10 @@
+import { useRef, useState } from 'react';
 import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ContainedButton from 'components/ContainedButton';
+import ActionBar, { BarAction } from 'components/ActionBar';
 import Logo from 'components/Logo';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Title } from 'components/Text';
-import TextButton from 'components/TextButton';
 import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
@@ -20,9 +20,9 @@ export interface FeatureListProps {
   /** The app icon's X above the title, for the welcome page. */
   logo?: boolean;
   /** The filled button at the bottom. */
-  action: { label: string; onPress: () => void; testID?: string };
+  action: BarAction;
   /** A text button beside or under it, such as Full Changelog. */
-  secondaryAction?: { label: string; onPress: () => void; testID?: string };
+  secondaryAction?: BarAction;
   /** Shown in a sheet, which starts below the status bar. */
   sheet?: boolean;
   testID?: string;
@@ -48,110 +48,89 @@ const FeatureList: React.FC<FeatureListProps> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  // The scroll view's height, its content's and how far it's scrolled, for
+  // whether content is hidden under the buttons.
+  const scroll = useRef({ height: 0, content: 0, offset: 0 });
+  const [scrolledUnder, setScrolledUnder] = useState(false);
+  const measure = (change: Partial<typeof scroll.current>) => {
+    scroll.current = { ...scroll.current, ...change };
+    const { height, content, offset } = scroll.current;
+    setScrolledUnder(height > 0 && content - offset - height > 1);
+  };
 
   return (
-    // One ScrollView with the buttons at the end of its content: a form
-    // sheet (react-native-screens) only lays out a ScrollView that is the
-    // screen's only child, and draws the content blank otherwise.
-    <ScrollView
+    <View
       testID={testID}
       style={[styles.root, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.container}
     >
-      <View
-        style={[
-          styles.content,
-          { paddingTop: (sheet ? 0 : insets.top) + (logo ? 32 : 48) },
-        ]}
+      {/* The ScrollView comes first: a form sheet (react-native-screens)
+          looks for the screen's scroll view at its first descendant. */}
+      <ScrollView
+        testID={testID && `${testID}-scroll`}
+        contentContainerStyle={styles.container}
+        alwaysBounceVertical={false}
+        onLayout={event => measure({ height: event.nativeEvent.layout.height })}
+        onContentSizeChange={(_, height) => measure({ content: height })}
+        onScroll={event =>
+          measure({ offset: event.nativeEvent.contentOffset.y })
+        }
+        scrollEventThrottle={16}
       >
-        {logo && <Logo iosSize={96} style={styles.logo} />}
-        <Title
-          variant="largeTitle"
-          style={styles.title}
-          accessibilityRole="header"
+        <View
+          style={[
+            styles.content,
+            { paddingTop: (sheet ? 0 : insets.top) + (logo ? 32 : 48) },
+          ]}
         >
-          {title}
-        </Title>
-        <View style={styles.features}>
-          {features.map(feature => (
-            <View
-              key={feature.title}
-              style={styles.feature}
-              accessible
-              accessibilityLabel={`${feature.title}, ${feature.body}`}
-            >
-              {apple ? (
-                <SystemIcon
-                  name={feature.icon}
-                  size={34}
-                  color={theme.colors.primary}
-                  style={styles.icon}
-                />
-              ) : (
+          {logo && <Logo iosSize={96} style={styles.logo} />}
+          <Title
+            variant="largeTitle"
+            style={styles.title}
+            accessibilityRole="header"
+          >
+            {title}
+          </Title>
+          <View style={styles.features}>
+            {features.map(feature => (
+              <View
+                key={feature.title}
+                style={styles.feature}
+                accessible
+                accessibilityLabel={`${feature.title}, ${feature.body}`}
+              >
                 <View
                   style={[
-                    styles.iconCircle,
-                    { backgroundColor: theme.colors.primaryContainer },
+                    styles.iconBox,
+                    !apple && {
+                      backgroundColor: theme.colors.primaryContainer,
+                    },
                   ]}
                 >
                   <SystemIcon
                     name={feature.icon}
-                    size={24}
-                    color={theme.colors.onPrimaryContainer}
+                    size={apple ? 30 : 24}
+                    color={
+                      apple
+                        ? theme.colors.primary
+                        : theme.colors.onPrimaryContainer
+                    }
                   />
                 </View>
-              )}
-              <View style={styles.featureText}>
-                <Headline>{feature.title}</Headline>
-                <Caption variant="subheadline">{feature.body}</Caption>
+                <View style={styles.featureText}>
+                  <Headline>{feature.title}</Headline>
+                  <Caption variant="subheadline">{feature.body}</Caption>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
-      </View>
-      <View
-        style={[
-          styles.footer,
-          { paddingBottom: Math.max(insets.bottom, 16) + 8 },
-        ]}
-      >
-        {apple ? (
-          <>
-            <ContainedButton
-              style={styles.button}
-              testID={action.testID}
-              label={action.label}
-              onPress={action.onPress}
-            />
-            {secondaryAction && (
-              <TextButton
-                style={styles.button}
-                testID={secondaryAction.testID}
-                onPress={secondaryAction.onPress}
-              >
-                {secondaryAction.label}
-              </TextButton>
-            )}
-          </>
-        ) : (
-          <View style={styles.androidButtons}>
-            {secondaryAction && (
-              <TextButton
-                testID={secondaryAction.testID}
-                onPress={secondaryAction.onPress}
-              >
-                {secondaryAction.label}
-              </TextButton>
-            )}
-            <ContainedButton
-              testID={action.testID}
-              label={action.label}
-              onPress={action.onPress}
-            />
+            ))}
           </View>
-        )}
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+      <ActionBar
+        action={action}
+        secondaryAction={secondaryAction}
+        scrolledUnder={scrolledUnder}
+      />
+    </View>
   );
 };
 
@@ -159,10 +138,10 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  // Fills the page, so the buttons sit at the bottom when it's short.
+  // Centers the page's content when it fits, as on iPad, Mac or a tall phone.
   container: {
     flexGrow: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   content: {
     width: '100%',
@@ -187,17 +166,19 @@ const styles = StyleSheet.create({
   features: {
     gap: 28,
   },
+  // Each icon lines up with the first line of its title, however many lines
+  // the text below takes.
   feature: {
     flexDirection: 'row',
-    alignItems: apple ? 'center' : 'flex-start',
+    alignItems: 'flex-start',
     gap: 16,
   },
-  icon: {
+  // A column as wide as Android's tonal circle, so every title starts at the
+  // same place. On Apple platforms it's one headline line tall, and the
+  // symbol is centered on it.
+  iconBox: {
     width: 40,
-  },
-  iconCircle: {
-    width: 40,
-    height: 40,
+    height: apple ? 22 : 40,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
@@ -205,25 +186,7 @@ const styles = StyleSheet.create({
   featureText: {
     flex: 1,
     gap: 2,
-  },
-  footer: {
-    width: '100%',
-    maxWidth: 520,
-    alignSelf: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    alignItems: 'center',
-    gap: 8,
-  },
-  button: {
-    alignSelf: 'center',
-  },
-  androidButtons: {
-    alignSelf: 'stretch',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    gap: 8,
+    paddingTop: apple ? 0 : 8,
   },
 });
 

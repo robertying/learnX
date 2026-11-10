@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Platform, PlatformColor, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import ContainedButton from 'components/ContainedButton';
+import ActionBar from 'components/ActionBar';
 import { Form, FormSection, FormToggle } from 'components/Form';
 import { Title } from 'components/Text';
-import TextButton from 'components/TextButton';
 import { toast } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetupSeen, setWhatsNewSeen } from 'data/appState';
@@ -20,23 +18,23 @@ import packageJson from '../../package.json';
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
 /**
- * The page after the first login: turns on notifications and deadline
- * reminders (on to start with) and calendar sync (off), all of which start
- * off in Settings, and asks for the permissions they need on Done. Opened by
- * `useLaunchSheet`, once.
+ * The page after the first login: turns on notifications of new content (in
+ * the tabs' order), deadline reminders and grades (all on to start with) and
+ * calendar sync (off), all of which start off in Settings, and asks for the
+ * permissions they need on Done. Opened by `useLaunchSheet`, once.
  */
 const Setup: React.FC<Props> = ({ navigation }) => {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const notifications = useSettings(settings => settings.notifications);
   const { request } = useNotificationPermission();
   const { setSyncEnabled } = useAssignmentSync();
 
   const [choices, setChoices] = useState({
     notices: true,
-    files: true,
     assignments: true,
+    files: true,
     deadlineReminders: true,
+    grades: true,
     calendar: false,
   });
   const [saving, setSaving] = useState(false);
@@ -55,15 +53,14 @@ const Setup: React.FC<Props> = ({ navigation }) => {
 
   const handleDone = async () => {
     setSaving(true);
-    const { calendar, assignments, ...rest } = choices;
-    if (assignments || Object.values(rest).some(Boolean)) {
+    const { calendar, ...chosen } = choices;
+    if (Object.values(chosen).some(Boolean)) {
       if (await request()) {
         setSetting('notifications', {
           ...notifications,
-          ...rest,
-          assignments,
-          grades: assignments,
-          deadlineChanges: assignments,
+          ...chosen,
+          // A new assignment's deadline moving is news about it too.
+          deadlineChanges: chosen.assignments,
         });
       } else {
         toast(t('notificationPermissionDenied'), 'error');
@@ -99,7 +96,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         {t('setupTitle')}
       </Title>
       <Form>
-        <FormSection title={t('notifications')}>
+        <FormSection title={t('setupNewContent')}>
           <FormToggle
             testID="setup-notices"
             icon={{ ios: 'bell', android: 'bell' }}
@@ -108,66 +105,57 @@ const Setup: React.FC<Props> = ({ navigation }) => {
             onValueChange={choose('notices')}
           />
           <FormToggle
+            icon={{ ios: 'calendar', android: 'calendar' }}
+            title={t('notifyNewAssignments')}
+            value={choices.assignments}
+            onValueChange={choose('assignments')}
+          />
+          <FormToggle
             icon={{ ios: 'folder', android: 'folder' }}
             title={t('notifyNewFiles')}
             value={choices.files}
             onValueChange={choose('files')}
           />
-          <FormToggle
-            icon={{ ios: 'checkmark.seal', android: 'clipboard-check-outline' }}
-            title={t('setupAssignments')}
-            value={choices.assignments}
-            onValueChange={choose('assignments')}
-          />
+        </FormSection>
+        <FormSection title={t('assignments')}>
           <FormToggle
             icon={{ ios: 'alarm', android: 'alarm' }}
             title={t('notifyDeadlineReminders')}
             value={choices.deadlineReminders}
             onValueChange={choose('deadlineReminders')}
           />
-        </FormSection>
-        <FormSection footer={t('setupCaption')}>
           <FormToggle
-            icon={{ ios: 'calendar', android: 'calendar-range' }}
+            icon={{ ios: 'checkmark.seal', android: 'clipboard-check-outline' }}
+            title={t('notifyGrades')}
+            value={choices.grades}
+            onValueChange={choose('grades')}
+          />
+        </FormSection>
+        <FormSection
+          title={t('setupCalendarSection')}
+          footer={t('setupCaption')}
+        >
+          <FormToggle
+            icon={{ ios: 'calendar.badge.plus', android: 'calendar-range' }}
             title={t('setupCalendar')}
             value={choices.calendar}
             onValueChange={choose('calendar')}
           />
         </FormSection>
       </Form>
-      <View
-        style={[
-          styles.footer,
-          { paddingBottom: Math.max(insets.bottom, 16) + 8 },
-          Platform.OS === 'android' && styles.androidFooter,
-        ]}
-      >
-        {Platform.OS === 'android' ? (
-          <>
-            <TextButton testID="setup-not-now" onPress={close}>
-              {t('notNow')}
-            </TextButton>
-            <ContainedButton
-              testID="setup-done"
-              label={t('done')}
-              disabled={saving}
-              onPress={handleDone}
-            />
-          </>
-        ) : (
-          <>
-            <ContainedButton
-              testID="setup-done"
-              label={t('done')}
-              disabled={saving}
-              onPress={handleDone}
-            />
-            <TextButton testID="setup-not-now" onPress={close}>
-              {t('notNow')}
-            </TextButton>
-          </>
-        )}
-      </View>
+      <ActionBar
+        action={{
+          label: t('done'),
+          testID: 'setup-done',
+          disabled: saving,
+          onPress: handleDone,
+        }}
+        secondaryAction={{
+          label: t('notNow'),
+          testID: 'setup-not-now',
+          onPress: close,
+        }}
+      />
     </View>
   );
 };
@@ -181,16 +169,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 32,
     paddingBottom: 8,
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    alignItems: 'center',
-    gap: 8,
-  },
-  androidFooter: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
   },
 });
 

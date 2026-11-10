@@ -20,19 +20,23 @@ export const Icon = ({ name }: { name: string }) => (
   <View testID={`icon-${name}`} />
 );
 
+// Passes its SwiftUI modifiers on as a prop, so a test can tell which it got.
 export const Button = ({
   label,
   disabled,
   onPress,
+  modifiers,
   testID,
 }: {
   label?: string;
   disabled?: boolean;
   onPress?: () => void;
+  modifiers?: unknown[];
   testID?: string;
 }) => (
   <Pressable
     testID={testID}
+    {...{ modifiers }}
     accessibilityRole="button"
     accessibilityState={{ disabled: !!disabled }}
     disabled={disabled}

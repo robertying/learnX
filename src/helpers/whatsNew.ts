@@ -27,8 +27,18 @@ export interface Highlight {
 export interface Release {
   /** The JS version (`package.json`) that brings these. */
   version: string;
+  /**
+   * At most `maxHighlights`, the biggest changes; the rest go in the
+   * changelog.
+   */
   highlights: Highlight[];
 }
+
+/**
+ * The most rows a What's New lists, as in Apple's own sheets, so it stays
+ * short enough to read at a glance.
+ */
+export const maxHighlights = 4;
 
 /**
  * Hand-written highlights of feature releases, newest first. A release with
