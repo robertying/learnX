@@ -12,7 +12,7 @@ learnX declares versions in many places besides `package.json`. An upgrade cover
 - Go to the **latest** release of everything, including majors, Node and GitHub Actions. Do the code migration a major needs in the same change. When the latest can't work yet (an Expo SDK that doesn't support it, a peer that caps it, a regression), take the newest version that does and say why in the pull request.
 - Ask before adding a **new** dependency, including a new peer dependency a bump starts asking for. Removing one that nothing uses any more is fine; say so in the pull request.
 - `package.json` has one `dependencies` list (no `devDependencies`), with exact versions (no `^` or `~`).
-- No Dependabot or Renovate: upgrades are done by hand with this skill.
+- Upgrades are done by hand with this skill, which covers every place a version is declared.
 - Minimum OS versions are a support decision, not a dependency: leave the iOS deployment target (`ios/Podfile`, `ios/learnX.xcodeproj`, the module podspecs; Mac Catalyst follows it) and Android's `minSdkVersion` alone unless asked, unless a new React Native or Expo SDK requires a higher one (then raise every place together and update the minimum versions in `README.md` and `CONTRIBUTING.md`).
 - Likewise leave `SWIFT_VERSION` (Swift 5 language mode) and the Java toolchain (`javaVersion`, `java-version` in CI) where they are unless the React Native template moves them.
 
