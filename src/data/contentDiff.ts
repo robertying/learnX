@@ -41,12 +41,16 @@ export const diffById = <T extends { id: string }>(
   };
 };
 
-/** Graded since, or its grade changed. */
+/**
+ * Graded since, or its grade changed. A grade level is compared alone: before
+ * thu-learn-lib 7 a level also came as a negative `grade` (-99 for A+), which
+ * cached assignments may still have.
+ */
 const isNewlyGraded = (before: Assignment, after: Assignment) =>
   after.graded &&
   (!before.graded ||
-    before.grade !== after.grade ||
-    before.gradeLevel !== after.gradeLevel);
+    before.gradeLevel !== after.gradeLevel ||
+    (!after.gradeLevel && before.grade !== after.grade));
 
 const isDeadlineChanged = (before: Assignment, after: Assignment) =>
   !sameServerTime(before.deadline, after.deadline) ||

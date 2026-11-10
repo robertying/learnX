@@ -548,7 +548,6 @@ type AssignmentFields = Omit<
   Assignment,
   | 'id'
   | 'url'
-  | 'studentHomeworkId'
   | 'completionType'
   | 'submissionType'
   | 'isLateSubmission'
@@ -572,7 +571,6 @@ const assignment = (
 ): Assignment => ({
   id: assignmentId(n),
   url: assignmentUrl(assignmentId(n)),
-  studentHomeworkId: `${n}`,
   completionType: HomeworkCompletionType.INDIVIDUAL,
   submissionType: HomeworkSubmissionType.WEB_LEARNING,
   isLateSubmission: false,

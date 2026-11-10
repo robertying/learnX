@@ -100,28 +100,21 @@ describe('mockSource', () => {
   it('fetches course times only when asked', async () => {
     const [course] = await mockSource.getCourseList(mockCurrentSemester);
     expect(course).not.toHaveProperty('timeAndLocation');
-    const [withTimes] = await mockSource.getCourseList(
-      mockCurrentSemester,
-      CourseType.STUDENT,
-      undefined,
-      { timeAndLocation: true },
-    );
+    const [withTimes] = await mockSource.getCourseList(mockCurrentSemester, {
+      timeAndLocation: true,
+    });
     expect(withTimes.timeAndLocation).toEqual(
       mockCourses.find(c => c.id === withTimes.id)!.timeAndLocation,
     );
   });
 
   it('names courses in the language asked for', async () => {
-    const [chinese] = await mockSource.getCourseList(
-      mockCurrentSemester,
-      CourseType.STUDENT,
-      Language.ZH,
-    );
-    const [english] = await mockSource.getCourseList(
-      mockCurrentSemester,
-      CourseType.STUDENT,
-      Language.EN,
-    );
+    const [chinese] = await mockSource.getCourseList(mockCurrentSemester, {
+      lang: Language.ZH,
+    });
+    const [english] = await mockSource.getCourseList(mockCurrentSemester, {
+      lang: Language.EN,
+    });
     const course = mockCourses.find(c => c.id === chinese.id)!;
     expect(chinese.name).toBe(course.chineseName);
     expect(english.name).toBe(course.englishName);
