@@ -13,8 +13,7 @@ struct NextDeadlineIntent: AppIntent {
       return answer(String(localized: "You have no upcoming deadlines."))
     }
     let formatter = RelativeDateTimeFormatter()
-    // In the language of the strings around it.
-    formatter.locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
+    formatter.locale = Self.answerLocale
     formatter.unitsStyle = .full
     let due = formatter.localizedString(from: Self.timeUntil(next.deadline))
     return answer(String(localized: "\(next.title) for \(next.courseName) is due \(due)."))
@@ -42,37 +41,5 @@ struct NextDeadlineIntent: AppIntent {
       (months <= 17, DateComponents(year: 1)),
     ]
     return rules.first { $0.0 }?.1 ?? DateComponents(year: Int(years))
-  }
-
-  /// Says the sentence the app localized. A dialog built from a `LocalizedStringResource` is translated by Shortcuts
-  /// or Siri in the system language, so with a different language set for learnX the sentence and the relative time
-  /// inside it would be in two languages.
-  private func answer(_ text: String) -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-    .result(value: text, dialog: IntentDialog(stringLiteral: text))
-  }
-}
-
-struct LearnXShortcuts: AppShortcutsProvider {
-  static var appShortcuts: [AppShortcut] {
-    AppShortcut(
-      intent: NextDeadlineIntent(),
-      phrases: [
-        "What's my next deadline in \(.applicationName)",
-        "Next deadline in \(.applicationName)",
-        "\(.applicationName) next deadline",
-      ],
-      shortTitle: "Next Deadline",
-      systemImageName: "calendar.badge.clock"
-    )
-    AppShortcut(
-      intent: NextClassIntent(),
-      phrases: [
-        "What's my next class in \(.applicationName)",
-        "Next class in \(.applicationName)",
-        "\(.applicationName) next class",
-      ],
-      shortTitle: "Next Class",
-      systemImageName: "studentdesk"
-    )
   }
 }

@@ -3,8 +3,6 @@ internal import Expo
 
 @objc(SceneDelegate)
 class SceneDelegate: ExpoAppSceneDelegate {
-  // Extension point for config plugins.
-
   #if targetEnvironment(macCatalyst)
   // Wide enough for the list beside the narrowest detail pane
   // (splitViewMinDetailWidth in src/constants/Numbers.ts). Any narrower, and

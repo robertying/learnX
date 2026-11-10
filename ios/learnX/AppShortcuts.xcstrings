@@ -1,0 +1,85 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "${applicationName} next class" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}的下一节课"
+            ]
+          }
+        }
+      }
+    },
+    "${applicationName} next deadline" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}的截止日期"
+            ]
+          }
+        }
+      }
+    },
+    "Next class in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一节课"
+            ]
+          }
+        }
+      }
+    },
+    "Next deadline in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一个截止日期"
+            ]
+          }
+        }
+      }
+    },
+    "What's my next class in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一节课是什么"
+            ]
+          }
+        }
+      }
+    },
+    "What's my next deadline in ${applicationName}" : {
+      "comment" : "Siri phrases for the App Shortcuts in AppShortcuts.swift",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一个截止的作业是什么"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

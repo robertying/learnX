@@ -9,26 +9,27 @@ public enum AppCommands {
 
   private struct Command {
     let id: String
-    let title: (en: String, zh: String)
+    /// English; the app's `Localizable.xcstrings` translates it.
+    let title: String
     let systemImage: String
     let input: String
     let modifiers: UIKeyModifierFlags
   }
 
   private static let refresh = Command(
-    id: "refresh", title: ("Refresh", "刷新"), systemImage: "arrow.clockwise",
+    id: "refresh", title: "Refresh", systemImage: "arrow.clockwise",
     input: "r", modifiers: .command)
   private static let search = Command(
-    id: "search", title: ("Search", "搜索"), systemImage: "magnifyingglass",
+    id: "search", title: "Search", systemImage: "magnifyingglass",
     input: "f", modifiers: .command)
   private static let settings = Command(
-    id: "settings", title: ("Settings…", "设置…"), systemImage: "gearshape",
+    id: "settings", title: "Settings…", systemImage: "gearshape",
     input: ",", modifiers: .command)
   private static let previousItem = Command(
-    id: "previousItem", title: ("Previous Item", "上一项"), systemImage: "chevron.up",
+    id: "previousItem", title: "Previous Item", systemImage: "chevron.up",
     input: UIKeyCommand.inputUpArrow, modifiers: [.command, .alternate])
   private static let nextItem = Command(
-    id: "nextItem", title: ("Next Item", "下一项"), systemImage: "chevron.down",
+    id: "nextItem", title: "Next Item", systemImage: "chevron.down",
     input: UIKeyCommand.inputDownArrow, modifiers: [.command, .alternate])
 
   /// Call from the app delegate's `buildMenu(with:)`, after `super`.
@@ -71,13 +72,9 @@ public enum AppCommands {
     }
   }
 
-  private static var isChinese: Bool {
-    Bundle.main.preferredLocalizations.first?.hasPrefix("zh") ?? false
-  }
-
   private static func keyCommand(_ command: Command) -> UIKeyCommand {
     let keyCommand = UIKeyCommand(
-      title: isChinese ? command.title.zh : command.title.en,
+      title: NSLocalizedString(command.title, bundle: .main, comment: "A menu bar command"),
       image: UIImage(systemName: command.systemImage),
       action: #selector(UIApplication.learnXPerformAppCommand(_:)),
       input: command.input,
