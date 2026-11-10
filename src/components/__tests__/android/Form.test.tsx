@@ -6,7 +6,8 @@ import {
   userEvent,
 } from '@testing-library/react-native';
 import { useState } from 'react';
-import { Text } from 'react-native';
+import type * as ReactNative from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import {
   Form,
   FormButton,
@@ -224,5 +225,135 @@ describe('Form (Android)', () => {
       expect(screen.getByText(text)).toBeTruthy();
     }
     expect(screen.getByTestId('icon-account-circle')).toBeTruthy();
+  });
+  const style = (text: string) =>
+    StyleSheet.flatten(screen.getByText(text).props.style);
+
+  /** Jest's React Native reports a font scale of 2. */
+  const atFontScale = (fontScale: number) =>
+    jest
+      .spyOn(
+        require('react-native') as typeof ReactNative,
+        'useWindowDimensions',
+      )
+      .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('tints a detail by its kind, and grays out a row that is over', async () => {
+    atFontScale(1);
+    await render(
+      <FormSection>
+        <FormText title="Grade" detail="A" detailTint="accent" />
+        <FormText title="Due" detail="Tomorrow" detailTint="warning" />
+        <FormText title="Size" detail="2 MB" />
+        <FormText title="Submitted" subtitle="On time" detail="Mon" done />
+      </FormSection>,
+    );
+    expect(style('A').color).toBe('primary');
+    expect(screen.getByText('A').props.typography).toBe('titleLarge');
+    expect(style('Tomorrow').color).not.toMatch(/^[a-zA-Z]+$/);
+    expect(screen.getByText('Tomorrow').props.typography).toBe('labelLarge');
+    expect(style('2 MB').color).toBe('onSurfaceVariant');
+    expect(screen.getByText('2 MB').props.typography).toBeUndefined();
+    for (const text of ['Submitted', 'On time', 'Mon']) {
+      expect(style(text).color).toBe('outline');
+    }
+    expect(screen.getByLabelText('Ended')).toBeTruthy();
+  });
+
+  it('puts the detail under the subtitle at large font sizes', async () => {
+    atFontScale(1.5);
+    await render(
+      <FormSection>
+        <FormText title="Deadline" subtitle="Problem set" detail="Friday" />
+        <FormText title="Grade" detail="A" />
+      </FormSection>,
+    );
+    expect(screen.getByText('Problem set\nFriday')).toBeTruthy();
+    expect(screen.getByText('A')).toBeTruthy();
+  });
+
+  it('colors a destructive button, and a disabled one over it', async () => {
+    await render(
+      <FormSection>
+        <FormButton title="Log out" destructive onPress={jest.fn()} />
+        <FormButton title="Erase" destructive disabled onPress={jest.fn()} />
+        <FormButton title="Sync" onPress={jest.fn()} />
+      </FormSection>,
+    );
+    expect(style('Log out').color).toBe('error');
+    expect(style('Erase').color).toEqual(expect.any(String));
+    expect(style('Erase').color).not.toBe('error');
+    expect(style('Sync').color).toBeUndefined();
+  });
+
+  it('crosses out a removed file, which still opens', async () => {
+    const open = jest.fn();
+    await render(
+      <FormSection>
+        <FormFile title="old.pdf" struck onPress={open} testID="old" />
+      </FormSection>,
+    );
+    expect(style('old.pdf')).toMatchObject({
+      color: 'onSurfaceVariant',
+      textDecorationLine: 'line-through',
+    });
+    await userEvent.setup().press(screen.getByTestId('old'));
+    expect(open).toHaveBeenCalled();
+  });
+
+  it('writes several lines, or plain text without capitals or corrections', async () => {
+    await render(
+      <FormSection>
+        <FormTextField value="" onChangeText={jest.fn()} multiline testID="a" />
+        <FormTextField value="" onChangeText={jest.fn()} plain testID="b" />
+      </FormSection>,
+    );
+    expect(screen.getByTestId('a').props).toMatchObject({
+      multiline: true,
+      autoCapitalize: 'sentences',
+    });
+    expect(screen.getByTestId('b').props).toMatchObject({
+      multiline: false,
+      autoCapitalize: 'none',
+      autoCorrect: false,
+    });
+  });
+
+  it('shows a spinner in place of a switch that is loading', async () => {
+    const onValueChange = jest.fn();
+    await render(
+      <FormSection>
+        <FormToggle
+          title="Sync"
+          value
+          loading
+          onValueChange={onValueChange}
+          testID="sync"
+        />
+      </FormSection>,
+    );
+    expect(screen.getByTestId('progress')).toBeTruthy();
+    expect(screen.queryByRole('switch')).toBeNull();
+    await userEvent.setup().press(screen.getByText('Sync'));
+    expect(onValueChange).not.toHaveBeenCalled();
+  });
+
+  it('leaves out what a row, title, profile or section was not given', async () => {
+    await render(
+      <>
+        <FormSection title="Empty" />
+        <FormSection>
+          <FormTitle title="Untitled" />
+          <FormProfile name="Rui" />
+          <FormParagraph text="Body" />
+          <FormLink title="Plain link" onPress={jest.fn()} />
+        </FormSection>
+      </>,
+    );
+    expect(screen.getByText('Empty')).toBeTruthy();
+    expect(screen.getByText('Body').props.typography).toBe('bodyLarge');
+    expect(screen.queryByTestId('badge')).toBeNull();
+    expect(screen.getByText('Untitled')).toBeTruthy();
   });
 });

@@ -422,3 +422,109 @@ describe('exportSyncedCalendarsToICS', () => {
     );
   });
 });
+
+describe('more of the sync', () => {
+  const { Platform } = require('react-native') as typeof import('react-native');
+  const os = Platform.OS;
+  afterEach(() => {
+    Platform.OS = os;
+  });
+
+  it('creates the course calendar on its own local account on Android', async () => {
+    Platform.OS = 'android';
+    mocked.createCalendar.mockResolvedValue({});
+    await getCourseCalendar();
+    expect(mocked.createCalendar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: { name: 'learnX', isLocalAccount: true },
+      }),
+    );
+    // No id came back, so none is stored.
+    expect(getCalendarSync().courseCalendarId).toBeUndefined();
+  });
+
+  it('keeps the classes of weeks the registrar could not list', async () => {
+    useCalendarSyncStore.setState({ courseCalendarId: 'courses' });
+    const kept = {
+      startDate: '2026-03-10T08:00:00+08:00',
+      delete: jest.fn(async () => {}),
+    };
+    const replaced = {
+      startDate: '2026-03-20T08:00:00+08:00',
+      delete: jest.fn(async () => {}),
+    };
+    mocked.getCalendars.mockResolvedValue([
+      fakeCalendar({
+        id: 'courses',
+        listEvents: jest.fn(async () => [kept, replaced]),
+      }),
+    ]);
+    await saveCoursesToCalendar([], dayjs('2026-03-01'), dayjs('2026-03-31'), [
+      { startDate: '20260309', endDate: '20260315' },
+    ]);
+    expect(kept.delete).not.toHaveBeenCalled();
+    expect(replaced.delete).toHaveBeenCalled();
+  });
+
+  describe('reminders on iOS', () => {
+    const assignment = (id: string) =>
+      ({
+        id,
+        courseId: 'c1',
+        title: 'Homework',
+        description: '',
+        deadline: dayjs().add(1, 'day').toISOString(),
+        submitted: false,
+      }) as Assignment;
+    beforeEach(() => {
+      useCalendarSyncStore.setState({ assignmentReminderId: 'reminders' });
+      mocked.getCalendars.mockResolvedValue([
+        fakeCalendar({ id: 'reminders' }),
+      ]);
+    });
+
+    it('updates a synced reminder, and forgets one deleted in Reminders', async () => {
+      useCalendarSyncStore.setState({
+        syncedReminderAssignments: { a1: 'r1', a2: 'r2' },
+      });
+      const update = jest.fn(async () => {});
+      mocked.ExpoCalendarReminder.get.mockImplementation(async (id: string) => {
+        if (id === 'r2') {
+          throw new Error('Not found');
+        }
+        return { update };
+      });
+      await saveAssignmentsToReminderOrCalendar('reminder', [
+        assignment('a1'),
+        assignment('a2'),
+      ]);
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Homework - Calculus' }),
+      );
+      expect(getCalendarSync().syncedReminderAssignments).toEqual({ a1: 'r1' });
+    });
+
+    it('deletes the reminders of removed assignments', async () => {
+      useCalendarSyncStore.setState({
+        syncedReminderAssignments: { a1: 'r1' },
+      });
+      const remove = jest.fn(async () => {});
+      mocked.ExpoCalendarReminder.get.mockResolvedValue({ delete: remove });
+      await saveAssignmentsToReminderOrCalendar('reminder', [], ['a1']);
+      expect(mocked.ExpoCalendarReminder.get).toHaveBeenCalledWith('r1');
+      expect(remove).toHaveBeenCalled();
+      expect(getCalendarSync().syncedReminderAssignments).toEqual({});
+    });
+  });
+
+  it('removes only calendars on Android, which has no Reminders', async () => {
+    Platform.OS = 'android';
+    mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
+    useCalendarSyncStore.setState({ courseCalendarId: 'c' });
+    const course = { id: 'c', title: 'x', delete: jest.fn(async () => {}) };
+    mocked.getCalendars.mockResolvedValue([course]);
+    await removeCalendars();
+    expect(mocked.getCalendars).not.toHaveBeenCalledWith('reminder');
+    expect(course.delete).toHaveBeenCalled();
+  });
+});

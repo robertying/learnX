@@ -119,4 +119,34 @@ describe('useReLogin', () => {
     expect(login).toHaveBeenCalledWith({ resume: true });
     expect(refetch).toHaveBeenCalled();
   });
+
+  it('tries again quietly after a short break without a session', async () => {
+    await launch();
+    await fail('rejected');
+    await leaveAndComeBack(2);
+    expect(login).toHaveBeenCalledWith({ reset: true });
+  });
+
+  it('does nothing after a short break when never logged in', async () => {
+    await launch();
+    await act(() => useAuthStore.setState({ loggingIn: false }));
+    await leaveAndComeBack(2);
+    expect(login).not.toHaveBeenCalled();
+  });
+
+  it('leaves the session alone without saved credentials', async () => {
+    await clearCredentials();
+    await renderHook(useReLogin);
+    expect(login).not.toHaveBeenCalled();
+  });
+
+  it("doesn't refetch after a long break when the session didn't come back", async () => {
+    const refetch = jest
+      .spyOn(queryClient, 'refetchQueries')
+      .mockResolvedValue();
+    await launch();
+    await leaveAndComeBack(11);
+    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(refetch).not.toHaveBeenCalled();
+  });
 });

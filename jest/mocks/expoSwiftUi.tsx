@@ -141,6 +141,7 @@ export const Button = ({
       disabled={isDisabled}
       testID={testID}
       onPress={onPress}
+      {...{ modifiers }}
     >
       {label ? <RNText>{label}</RNText> : null}
       {children}

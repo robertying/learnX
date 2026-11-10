@@ -1,6 +1,8 @@
 /**
  * `@expo/ui/swift-ui/modifiers`: every modifier is a `jest.fn` returning
- * nothing, so app code can use any modifier without a change here.
+ * `{ modifier: name, args }`, so app code can use any modifier without a
+ * change here and a test can tell which a view was given (the Button
+ * stand-in passes its list on as a `modifiers` prop).
  * `disabled` returns `{ disabled }`, which the Button and TextField stand-ins
  * read so tests can tell a disabled control, and `accessibilityLabel`
  * returns `{ accessibilityLabel }`, which shapes take as their label.
@@ -20,7 +22,10 @@ declare const module: { exports: unknown };
 module.exports = new Proxy(modifiers, {
   get: (target, name) => {
     if (!(name in target) && typeof name === 'string') {
-      target[name] = jest.fn();
+      target[name] = jest.fn((...args: unknown[]) => ({
+        modifier: name,
+        args,
+      }));
     }
     return target[name];
   },

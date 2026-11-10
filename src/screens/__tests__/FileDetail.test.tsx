@@ -18,7 +18,16 @@ jest.mock('hooks/useFileDownload', () => jest.fn());
 jest.mock('hooks/useFileDetailHeader', () => jest.fn());
 jest.mock('react-native-webview', () => {
   const { View } = require('react-native');
-  return { __esModule: true, default: () => <View testID="webview" /> };
+  return {
+    __esModule: true,
+    default: (props: { style: object; decelerationRate?: string }) => (
+      <View
+        testID="webview"
+        style={props.style}
+        {...{ decelerationRate: props.decelerationRate }}
+      />
+    ),
+  };
 });
 jest.mock('react-native-pdf', () => {
   const { View } = require('react-native');
@@ -129,4 +138,30 @@ it('offers download on the Mac and open on Android', async () => {
   expect(download.open).toHaveBeenCalled();
   expect(screen.getByText(t('noFileDescription'))).toBeTruthy();
   isMac.mockRestore();
+});
+
+it('previews office documents on white, as they are drawn for paper', async () => {
+  downloaded({ path: 'file:///a.docx' });
+  await renderScreen({
+    attachment: { ...zip, fileType: 'docx', downloadUrl: 'https://x' },
+  });
+  const webView = screen.getByTestId('webview');
+  expect(webView.props.style).toEqual({ backgroundColor: 'white' });
+  expect(webView.props.decelerationRate).toBe('normal');
+});
+
+it('lists only what is known of a file', async () => {
+  mockFile = {
+    ...zip,
+    fileType: '',
+    category: undefined,
+    courseTeacherName: '',
+    uploadTime: '',
+  } as never;
+  downloaded({ path: 'file:///a' });
+  await renderScreen({ id: zip.id });
+  expect(screen.getByText(t('unknownFileType'), { exact: false })).toBeTruthy();
+  expect(screen.queryByText(t('fileCategory'))).toBeNull();
+  expect(screen.queryByText(t('fileTeacher'))).toBeNull();
+  expect(screen.queryByText(t('fileUploadTime'))).toBeNull();
 });

@@ -25,6 +25,7 @@ import { useNativeState as useSwiftUINativeState } from './expoSwiftUi';
 type Modifier =
   | {
       testID?: string;
+      size?: { width: number; height: number };
       onPress?: () => void;
       role?: string;
       checked?: boolean;
@@ -117,8 +118,31 @@ export const BadgedBox = Object.assign(
 );
 export const Badge = () => <View testID="badge" />;
 
-export const Text = ({ children }: { children?: ReactNode }) => (
-  <RNText>{children}</RNText>
+/** Its color and line-through as React Native styles, its typography by name. */
+export const Text = ({
+  children,
+  color,
+  style,
+}: {
+  children?: ReactNode;
+  color?: string;
+  style?: {
+    typography?: string;
+    textDecoration?: string;
+    fontWeight?: 'bold';
+  };
+}) => (
+  <RNText
+    style={{
+      color,
+      fontWeight: style?.fontWeight,
+      textDecorationLine:
+        style?.textDecoration === 'lineThrough' ? 'line-through' : undefined,
+    }}
+    {...{ typography: style?.typography }}
+  >
+    {children}
+  </RNText>
 );
 
 export const Icon = ({
@@ -132,9 +156,16 @@ const ComposeButton = ({
   enabled,
   modifiers,
   children,
-}: BoxProps & { onClick?: () => void; enabled?: boolean }) => (
+  variant,
+}: BoxProps & {
+  onClick?: () => void;
+  enabled?: boolean;
+  variant?: string;
+}) => (
   <Pressable
     testID={fromModifiers(modifiers).testID}
+    style={fromModifiers(modifiers).size}
+    {...{ variant }}
     accessibilityRole="button"
     accessibilityState={{ disabled: enabled === false }}
     disabled={enabled === false}
@@ -144,7 +175,9 @@ const ComposeButton = ({
   </Pressable>
 );
 export const IconButton = ComposeButton;
-export const FilledTonalIconButton = ComposeButton;
+export const FilledTonalIconButton = (
+  props: Parameters<typeof ComposeButton>[0],
+) => <ComposeButton {...props} variant="filledTonal" />;
 export const TextButton = ComposeButton;
 
 export const Switch = ({
@@ -187,12 +220,16 @@ type NativeState = ReturnType<typeof useSwiftUINativeState<string>>;
 const Field = ({
   value,
   enabled,
+  singleLine,
+  keyboardOptions,
   onValueChange,
   modifiers,
   children,
 }: BoxProps & {
   value: NativeState;
   enabled?: boolean;
+  singleLine?: boolean;
+  keyboardOptions?: { capitalization?: string; autoCorrectEnabled?: boolean };
   onValueChange?: (text: string) => void;
 }) => {
   const text = useSyncExternalStore(value.subscribe, value.get);
@@ -201,6 +238,11 @@ const Field = ({
       <RNTextInput
         value={text}
         editable={enabled !== false}
+        multiline={singleLine === false}
+        autoCapitalize={
+          keyboardOptions?.capitalization === 'none' ? 'none' : 'sentences'
+        }
+        autoCorrect={keyboardOptions?.autoCorrectEnabled}
         onChangeText={typed => {
           value.set(typed);
           onValueChange?.(typed);

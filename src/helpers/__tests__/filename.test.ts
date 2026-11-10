@@ -101,4 +101,14 @@ describe('fileTypeColor', () => {
     expect(fileTypeColor('zip')).toBe('grey');
     expect(fileTypeColor('')).toBe('grey');
   });
+
+  it.each([
+    ['doc', 'blue'],
+    ['ppt', 'orange'],
+    ['pptx', 'orange'],
+    ['xls', 'green'],
+    ['xlsx', 'green'],
+  ])('colors %s %s, as its newer or older format', (type, color) => {
+    expect(fileTypeColor(type)).toBe(color);
+  });
 });

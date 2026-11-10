@@ -3,6 +3,8 @@ import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
+import DeviceInfo from 'constants/DeviceInfo';
+import { getTitleOptions } from 'components/HeaderTitle';
 import Today from 'screens/Today';
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
@@ -15,6 +17,7 @@ const query = (data: object) => ({
   isFetching: false,
   refetch: jest.fn(() => Promise.resolve({ isError: false })),
 });
+const mockSchedule: Record<string, unknown> = {};
 jest.mock('data/schedule', () => ({
   useWeekSchedule: () => ({
     sessions: mockSessions,
@@ -24,13 +27,19 @@ jest.mock('data/schedule', () => ({
     fetching: false,
     failed: false,
     refetch: jest.fn(() => Promise.resolve({ isError: false })),
+    ...mockSchedule,
   }),
 }));
+let mockNotices = [{ id: 'n', courseId: 'a', hasRead: false }];
+let mockFiles: { id: string; courseId: string; isNew: boolean }[] = [];
 jest.mock('data/content', () => ({
   useAssignments: () => query({ assignments: mockAssignments }),
-  useNotices: () =>
-    query({ notices: [{ id: 'n', courseId: 'a', hasRead: false }] }),
-  useFiles: () => query({ files: [] }),
+  useNotices: () => query({ notices: mockNotices }),
+  useFiles: () => query({ files: mockFiles }),
+}));
+jest.mock('components/HeaderTitle', () => ({
+  ...jest.requireActual('components/HeaderTitle'),
+  getTitleOptions: jest.fn(() => ({})),
 }));
 
 const session = (
@@ -66,7 +75,13 @@ const setup = async () => {
 beforeEach(() => {
   mockSessions.length = 0;
   mockAssignments.length = 0;
+  for (const key of Object.keys(mockSchedule)) {
+    delete mockSchedule[key];
+  }
+  mockNotices = [{ id: 'n', courseId: 'a', hasRead: false }];
+  mockFiles = [];
 });
+afterEach(() => jest.restoreAllMocks());
 
 it('shows the current and next class, and opens a course', async () => {
   // Keep both on today, whatever time the test runs.
@@ -106,4 +121,74 @@ it('says when there are no classes or deadlines', async () => {
   await setup();
   expect(screen.getByText('No classes today')).toBeOnTheScreen();
   expect(screen.getByText('Nothing due today or tomorrow')).toBeOnTheScreen();
+});
+
+it('marks classes that are over, and opens none without a course', async () => {
+  jest.useFakeTimers({ now: dayjs().hour(20).minute(0).toDate() });
+  mockSessions.push({ ...session('a', '', -120, -60), location: ' ' });
+  const { navigation } = await setup();
+  expect(screen.getByText('No more classes today')).toBeOnTheScreen();
+  // Only the time: the room is blank
+  expect(screen.getByText(/^\d\d:\d\d–\d\d:\d\d$/)).toBeOnTheScreen();
+  jest.useRealTimers();
+  await userEvent.press(screen.getByText('Course a'));
+  expect(navigation.dispatch).not.toHaveBeenCalled();
+});
+
+it('says when the calendar failed, and leaves out a week before term', async () => {
+  Object.assign(mockSchedule, {
+    source: 'calendar',
+    failed: true,
+    week: 0,
+    updatedAt: dayjs().subtract(2, 'hour').valueOf(),
+  });
+  await setup();
+  expect(screen.getByText(/2 hours ago/)).toBeOnTheScreen();
+  const [, subtitle] = jest.mocked(getTitleOptions).mock.lastCall!;
+  expect(subtitle).not.toMatch(/Week/);
+});
+
+it('has no note for a calendar that loaded, and counts the week', async () => {
+  Object.assign(mockSchedule, { source: 'calendar', failed: false });
+  await setup();
+  expect(screen.queryByText(/Worked out from course times/)).toBeNull();
+  expect(jest.mocked(getTitleOptions).mock.lastCall![1]).toMatch(/Week 9$/);
+});
+
+it('counts new notices and files, and opens their lists', async () => {
+  mockNotices = [
+    { id: 'n1', courseId: 'a', hasRead: false },
+    { id: 'n2', courseId: 'a', hasRead: false },
+  ];
+  mockFiles = [
+    { id: 'f1', courseId: 'a', isNew: true },
+    { id: 'f2', courseId: 'a', isNew: true },
+  ];
+  const { navigation } = await setup();
+  await userEvent.press(screen.getByText('2 unread notices'));
+  expect(navigation.navigate).toHaveBeenCalledWith('MainTab', {
+    screen: 'NoticeStack',
+    params: { screen: 'Notices' },
+  });
+  await userEvent.press(screen.getByText('2 new files'));
+  expect(navigation.navigate).toHaveBeenCalledWith('MainTab', {
+    screen: 'FileStack',
+    params: { screen: 'Files' },
+  });
+});
+
+it('shows one new file without unread notices', async () => {
+  mockNotices = [];
+  mockFiles = [{ id: 'f1', courseId: 'a', isNew: true }];
+  await setup();
+  expect(screen.getByText('1 new file')).toBeOnTheScreen();
+  expect(screen.queryByText(/unread notice/)).toBeNull();
+});
+
+it('puts a refresh button in the header on a Mac', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  const { navigation } = await setup();
+  const options = navigation.setOptions.mock.lastCall![0];
+  const items = options.unstable_headerRightItems?.() ?? options.headerRight;
+  expect(JSON.stringify(items)).toContain('refresh');
 });
