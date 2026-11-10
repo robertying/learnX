@@ -64,6 +64,11 @@ jobs:
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pnpm format --check
 
+      # Catches shell mistakes before a script only runs on main
+      - name: Shell scripts
+        if: ${{ !cancelled() }}
+        run: shellcheck --version | head -2 && shellcheck scripts/*.sh
+
       # Jest's cache holds Babel output, mostly for node_modules. Its key
       # follows what changes that output; source files that changed since are
       # just transformed again.
@@ -91,7 +96,6 @@ jobs:
       # and Jest entries), so the repo stays under its 10 GB limit.
       - name: Prune caches
         if: always() && env.SAVE_CACHE == 'true'
-        continue-on-error: true
         run: scripts/prune-caches.sh
         env:
           GH_TOKEN: ${{ github.token }}

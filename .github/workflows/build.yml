@@ -148,7 +148,6 @@ jobs:
 
       - name: Prune caches
         if: always() && env.SAVE_CACHE == 'true' && steps.changes.outputs.changed == 'true'
-        continue-on-error: true
         run: scripts/prune-caches.sh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -228,7 +227,6 @@ jobs:
       - name: Save Pods
         if: env.SAVE_CACHE == 'true' && steps.pods.outputs.cache-hit != 'true'
         uses: actions/cache/save@v6
-        continue-on-error: true
         with:
           path: |
             ios/Pods
@@ -298,7 +296,6 @@ jobs:
       # 10 GB limit.
       - name: Prune caches
         if: always() && env.SAVE_CACHE == 'true'
-        continue-on-error: true
         run: scripts/prune-caches.sh
         env:
           GH_TOKEN: ${{ github.token }}
