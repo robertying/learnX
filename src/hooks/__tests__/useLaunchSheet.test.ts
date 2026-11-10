@@ -33,7 +33,7 @@ describe('pickLaunchSheet', () => {
 });
 
 describe('setWhatsNewSeen', () => {
-  beforeEach(() => resetAppState());
+  beforeEach(() => useAppStateStore.setState({ whatsNewSeenVersion: null }));
 
   it('only moves forward', () => {
     setWhatsNewSeen('19.0.0');
@@ -41,5 +41,23 @@ describe('setWhatsNewSeen', () => {
     expect(useAppStateStore.getState().whatsNewSeenVersion).toBe('19.0.0');
     setWhatsNewSeen('19.1.0');
     expect(useAppStateStore.getState().whatsNewSeenVersion).toBe('19.1.0');
+  });
+});
+
+describe('resetAppState', () => {
+  it("keeps what the install has seen and forgets the account's", () => {
+    useAppStateStore.setState({
+      welcomeSeen: true,
+      setupSeen: true,
+      whatsNewSeenVersion: '19.0.0',
+      courseSharingSeen: true,
+    });
+    resetAppState();
+    expect(useAppStateStore.getState()).toMatchObject({
+      welcomeSeen: true,
+      setupSeen: false,
+      whatsNewSeenVersion: '19.0.0',
+      courseSharingSeen: false,
+    });
   });
 });

@@ -68,6 +68,15 @@ export const setWhatsNewSeen = (version: string) => {
   }
 };
 
+/**
+ * Forgets what the account has seen (on logout or another login). The
+ * welcome page and What's New belong to the install, so they stay seen; the
+ * set-up page shows again, since the account's settings start over.
+ */
 export const resetAppState = () => {
-  useAppStateStore.setState(initialAppState(), true);
+  const { welcomeSeen, whatsNewSeenVersion } = useAppStateStore.getState();
+  useAppStateStore.setState(
+    { ...initialAppState(), welcomeSeen, whatsNewSeenVersion },
+    true,
+  );
 };
