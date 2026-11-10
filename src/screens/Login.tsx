@@ -234,6 +234,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: '80%',
+    // A phone's width, also in a wide iPad or Mac window.
+    maxWidth: 400,
   },
   textInput: {
     width: '100%',

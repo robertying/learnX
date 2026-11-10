@@ -55,4 +55,22 @@ describe('ErrorBoundary', () => {
     await userEvent.setup().press(screen.getByText('Reload learnX'));
     expect(reloadAppAsync).toHaveBeenCalledWith('Error boundary');
   });
+
+  it('tries a screen again from the fallback', async () => {
+    let broken = true;
+    const Flaky: React.FC = () => {
+      if (broken) {
+        throw new Error('render failed');
+      }
+      return <Text>Recovered</Text>;
+    };
+    await render(
+      <ErrorBoundary retryable>
+        <Flaky />
+      </ErrorBoundary>,
+    );
+    broken = false;
+    await userEvent.setup().press(screen.getByText('Try Again'));
+    expect(screen.getByText('Recovered')).toBeTruthy();
+  });
 });

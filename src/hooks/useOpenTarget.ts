@@ -36,6 +36,9 @@ const useOpenTarget = () => {
           screen: 'FileStack',
           params: { screen: 'Files', pop: true },
         });
+      default:
+        // A new target type needs a case here.
+        return target satisfies never;
     }
   };
 };

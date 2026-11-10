@@ -1,6 +1,8 @@
 import { useSyncExternalStore } from 'react';
 import { beijingDate } from 'helpers/serverTime';
 
+// Clocks for text that changes with time. They share one 10 s timer.
+
 const listeners = new Set<() => void>();
 let timer: ReturnType<typeof setInterval> | undefined;
 
@@ -25,20 +27,7 @@ const getMinute = () => Math.floor(Date.now() / 60_000) * 60_000;
  * The current time, to the minute, for text relative to now (such as "due in
  * 3 hours") that should keep up on a screen left open.
  */
-const useMinute = () => useSyncExternalStore(subscribe, getMinute);
-
-export default useMinute;
-
-const getDay = () => {
-  const now = new Date(getMinute());
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-};
-
-/**
- * The start of today (ms), for things that change once a day. Components only
- * re-render when the day has changed.
- */
-export const useToday = () => useSyncExternalStore(subscribe, getDay);
+export const useMinute = () => useSyncExternalStore(subscribe, getMinute);
 
 const getBeijingDay = () => beijingDate(getMinute());
 

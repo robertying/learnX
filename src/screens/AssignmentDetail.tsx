@@ -11,7 +11,7 @@ import SafeArea from 'components/SafeArea';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { headerButtons } from 'navigation/headerButtons';
-import useMinute from 'hooks/useMinute';
+import { useMinute } from 'hooks/useClock';
 import { getWebViewTemplate } from 'helpers/html';
 import { removeTags } from 'helpers/text';
 import { getExtension, stripExtension } from 'helpers/filename';

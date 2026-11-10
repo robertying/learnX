@@ -12,7 +12,7 @@ import { useNotice } from 'data/content';
 import { openNotice } from 'data/serverActions';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
-import useMinute from 'hooks/useMinute';
+import { useMinute } from 'hooks/useClock';
 import {
   Form,
   FormFile,

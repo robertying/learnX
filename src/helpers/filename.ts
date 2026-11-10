@@ -80,7 +80,8 @@ export const formatFileSize = (bytes: number) => {
   }
   let value = bytes;
   let unit = -1;
-  while (value >= 1000 && unit < units.length - 1) {
+  // 999.95 and up would print as 1000.0, so it moves to the next unit.
+  while (value >= 999.95 && unit < units.length - 1) {
     value /= 1000;
     unit++;
   }
