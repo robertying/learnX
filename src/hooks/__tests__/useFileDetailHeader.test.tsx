@@ -1,0 +1,126 @@
+import type { ReactNode } from 'react';
+import { Platform } from 'react-native';
+import { renderHook } from '@testing-library/react-native';
+import DeviceInfo from 'constants/DeviceInfo';
+import Numbers from 'constants/Numbers';
+import { t } from 'helpers/i18n';
+import useFileDetailHeader from 'hooks/useFileDetailHeader';
+import { SplitViewContext } from 'navigation/SplitView';
+
+jest.mock('components/Divider', () => () => null);
+
+const setOptions = jest.fn();
+const navigation = (routeNames = ['Files', 'FileDetail']) =>
+  ({ setOptions, getState: () => ({ routeNames }) }) as never;
+
+const handlers = {
+  onRefresh: jest.fn(),
+  onShare: jest.fn(),
+  onCopyToDownloads: jest.fn(),
+  onOpen: jest.fn(),
+  onToggleInfo: jest.fn(),
+};
+
+const props = {
+  path: 'file:///f.pdf',
+  progress: 0,
+  error: false,
+  canRender: true,
+  showInfo: false,
+  ...handlers,
+};
+
+const split = {
+  detailNavigationContainerRef: null,
+  splitEnabled: true,
+  showDetail: true,
+  showMaster: true,
+  toggleMaster: jest.fn(),
+  masterWidth: Numbers.splitViewMasterWidth,
+};
+
+const items = () =>
+  setOptions.mock.lastCall![0].unstable_headerRightItems() as {
+    identifier: string;
+    label: string;
+    disabled?: boolean;
+    onPress: () => void;
+  }[];
+
+const os = Platform.OS;
+afterEach(() => {
+  Platform.OS = os;
+});
+
+it('shows refresh, share and info for a downloaded file', async () => {
+  await renderHook(() =>
+    useFileDetailHeader({ navigation: navigation(), ...props }),
+  );
+  expect(items().map(i => [i.identifier, !!i.disabled])).toEqual([
+    ['refresh', false],
+    ['share', false],
+    ['info', false],
+  ]);
+  items()[2].onPress();
+  expect(handlers.onToggleInfo).toHaveBeenCalled();
+});
+
+it('disables the file actions until it has downloaded', async () => {
+  await renderHook(() =>
+    useFileDetailHeader({
+      navigation: navigation(),
+      ...props,
+      path: '',
+      progress: 0.5,
+    }),
+  );
+  expect(items().every(i => i.disabled)).toBe(true);
+});
+
+it('adds download on the Mac and open on Android, info only when shown inline', async () => {
+  const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  Platform.OS = 'android';
+  await renderHook(() =>
+    useFileDetailHeader({
+      navigation: navigation(),
+      ...props,
+      canRender: false,
+    }),
+  );
+  expect(items().map(i => i.identifier)).toEqual([
+    'refresh',
+    'share',
+    'download',
+    'open',
+  ]);
+  isMac.mockRestore();
+});
+
+it('toggles full screen in a split view, but not in search', async () => {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <SplitViewContext.Provider value={split}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+  await renderHook(
+    () => useFileDetailHeader({ navigation: navigation(), ...props }),
+    { wrapper },
+  );
+  expect(setOptions.mock.lastCall![0].headerBackVisible).toBe(true);
+  expect(items()[0]).toMatchObject({
+    identifier: 'toggleMaster',
+    label: t('fullscreen'),
+  });
+  items()[0].onPress();
+  expect(split.toggleMaster).toHaveBeenCalledWith(false);
+
+  await renderHook(
+    () =>
+      useFileDetailHeader({
+        navigation: navigation(['Search', 'FileDetail']),
+        ...props,
+      }),
+    { wrapper },
+  );
+  expect(items()[0].identifier).toBe('refresh');
+});
