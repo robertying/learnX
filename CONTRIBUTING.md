@@ -27,14 +27,7 @@ cd learnX
 pnpm install
 ```
 
-pnpm applies the patches in `patches/` on every install (`patchedDependencies` in `pnpm-workspace.yaml`; [patches/README.md](patches/README.md) says what each one fixes). Both native builds run `scripts/check-patches.sh` first and stop with "isn't applied to node_modules" if a patch is missing. Fix that with:
-
-```sh
-pnpm install --force
-cd ios && LANG=en_US.UTF-8 bundle exec pod install && cd ..   # iOS / Mac only
-```
-
-Run `pod install` again after every `pnpm install --force`: the reinstall wipes the `sqlite3.h` that expo-sqlite's pod copies in, and the iOS build fails without it.
+pnpm also applies the patches in `patches/` ([patches/README.md](patches/README.md) says what each one fixes).
 
 ## 2. Create `.env`
 
@@ -53,7 +46,7 @@ DUMMY_PERSIST_PASSWORD=appreview-persist
 
 These aren't real accounts. Typing them on the login screen loads the built-in mock data instead of talking to learn.tsinghua.edu.cn (see [Testing without a Tsinghua account](#testing-without-a-tsinghua-account)). Leave the other keys empty: without `COURSEX_REFRESH_TOKEN`, course information sharing doesn't work, and nothing else needs it.
 
-`.env` is read at build time (`babel/inline-env.js`), and Metro picks up a change on its own. Restart Metro if it doesn't.
+Restart Metro after changing `.env`.
 
 ## 3. iOS, iPadOS and Mac
 
@@ -77,8 +70,6 @@ cd ..
 ```
 
 Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes. React Native is built from source here (a patch changes its native code), so the first build takes a while.
-
-`pod install` may change the `ExpoWidgets` checksum in `Podfile.lock`, because its podspec includes your checkout's path. Leave that line out of your commits.
 
 ### Signing: use your own team and bundle IDs
 
@@ -105,7 +96,7 @@ The app, its share extension and its widgets share data through an app group and
 
 3. Leave Signing on "Automatically manage signing". Xcode registers the IDs and app group for your team on the first build.
 
-Keep these changes local: stage your work with `git add -p`, or `git stash` them before you switch branches. Firebase logs a warning that `ios/GoogleService-Info.plist` names another bundle ID; that's expected for development builds. To run the end-to-end flows, set `app_id` for `ios` in `scripts/e2e.sh` to your bundle ID too.
+Keep these changes local: stage your work with `git add -p`, or `git stash` them before you switch branches.
 
 ### Build and run
 
@@ -118,18 +109,6 @@ pnpm ios --simulator "<name>"   # pick a simulator by name (xcrun simctl list de
 You can also open `ios/learnX.xcworkspace` in Xcode, pick the `learnX` scheme and a simulator, and press Run. For the Mac app, pick "My Mac (Mac Catalyst)" as the destination. To run on your own iPhone, plug it in, turn on Developer Mode, and pick it as the destination.
 
 Debug builds load JavaScript from Metro, so JS changes show up on reload. Rebuild only after native changes (Swift, Objective-C, `ios/Podfile`, a native package or a patch).
-
-### Build output
-
-`pnpm ios` and Xcode put build output in Xcode's default DerivedData folder (`~/Library/Developer/Xcode/DerivedData`), outside the repo. Keep it there: the "Generate app.config" build step fingerprints the whole checkout, so it stays fast only while the checkout holds no build folder. If you script builds with `xcodebuild`, give each checkout its own folder under DerivedData:
-
-```sh
-xcodebuild -workspace ios/learnX.xcworkspace -scheme learnX -configuration Debug \
-  -destination 'platform=iOS Simulator,name=<simulator name>' \
-  -derivedDataPath ~/Library/Developer/Xcode/DerivedData/learnX-$(basename "$PWD")
-```
-
-For the Mac app, use `-destination 'platform=macOS,variant=Mac Catalyst'`.
 
 ## 4. Android
 
@@ -150,30 +129,12 @@ For the Mac app, use `-destination 'platform=macOS,variant=Mac Catalyst'`.
 
 ### Build and run
 
-The simplest way, with Metro on its default port 8081:
-
 ```sh
 pnpm start                        # Metro, in its own terminal
 pnpm android --active-arch-only   # builds Debug for the running emulator's ABI only, installs and launches it
 ```
 
-`--active-arch-only` builds just the emulator's ABI (arm64-v8a on Apple silicon) instead of all three, which saves a lot of build time. `pnpm android` also runs `adb reverse tcp:8081 tcp:8081` so the app on the emulator reaches Metro on your computer.
-
-To build and install by hand, or to use Metro on another port:
-
-```sh
-cd android
-./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a
-adb install -r -d app/build/outputs/apk/debug/app-arm64-v8a-debug.apk
-cd ..
-
-pnpm start --port 8082
-adb reverse tcp:8082 tcp:8082
-```
-
-Then open the dev menu (`adb shell input keyevent 82`, or shake a device), choose Change Bundle Location (or Settings › Debug server host & port), and enter `localhost:8082`. With the default port 8081, `adb reverse tcp:8081 tcp:8081` is enough.
-
-`-r` replaces the installed app and keeps its data. `-d` allows a lower version code, which you need when a per-ABI build (version codes above 1,000,000,000) is already installed and you install the universal APK or an older build. Debug and release builds are signed with different keys, so if learnX from Google Play or a release APK is on the device, `adb uninstall io.robertying.learnx` first.
+`--active-arch-only` builds only the emulator's ABI, which saves a lot of build time. If learnX from Google Play is installed on the device, uninstall it first: it's signed with a different key.
 
 As on iOS, JS changes only need a reload. Rebuild after changes under `android/`, in a native package or in a patch.
 
@@ -206,7 +167,7 @@ Pull requests run only the JS check, so build and try the app yourself on each p
 
 1. Fork the repo and branch off `main`.
 2. Keep each pull request to one change. Add or update tests for logic you change (see "Unit tests" in [AGENTS.md](AGENTS.md#unit-tests-jest)).
-3. Before pushing, run `pnpm format` and the checks above. Commit only your change: leave `.env`, your signing changes and the `Podfile.lock` checksum out.
+3. Before pushing, run `pnpm format` and the checks above. Commit only your change, without `.env` or your signing changes.
 4. Open the pull request against `main`. Describe what changed and why, how you tested it (platforms, simulators or devices, mock or real account), and add screenshots for visible changes.
 5. Changing a patched dependency? Follow [patches/README.md](patches/README.md) (`pnpm patch` / `pnpm patch-commit`) rather than editing `node_modules` by hand.
 
@@ -214,13 +175,11 @@ Pull requests are squash-merged once `Check / JS` passes and the change has been
 
 ## Troubleshooting
 
-- **"… isn't applied to node_modules" at the start of a build:** `pnpm install --force`, then `bundle exec pod install` in `ios/`.
-- **`'sqlite3.h' file not found` in an iOS build:** run `bundle exec pod install` in `ios/` again (usually after `pnpm install --force`).
+- **"… isn't applied to node_modules" at the start of a build:** `pnpm install --force`, then `bundle exec pod install` in `ios/` again.
 - **"The sandbox is not in sync with the Podfile.lock":** run `bundle exec pod install` in `ios/`.
 - **Xcode can't find `node`** (common with nvm, fnm or asdf): create `ios/.xcode.env.local` (git-ignored) with `export NODE_BINARY=/full/path/to/node` (from `command -v node`).
 - **Gradle fails running `node`:** Gradle runs `node` while it configures the project. Start Android Studio from a terminal that has `node` on its `PATH` (`open -a "Android Studio"`), or build from the terminal.
-- **The build hangs on "Generate app.config" (or similar Expo step):** there's a build folder inside the checkout. Delete `ios/build` and build into DerivedData (see [Build output](#build-output)).
 - **"Signing for … requires a development team" or a provisioning error:** set your own team and bundle IDs (see [Signing](#signing-use-your-own-team-and-bundle-ids)).
-- **The app shows a red screen saying it can't connect to the development server:** start Metro (`pnpm start`). On Android, also run `adb reverse tcp:<port> tcp:<port>` and check the debug server host in the dev menu.
+- **The app shows a red screen saying it can't connect to the development server:** start Metro (`pnpm start`). On Android, also run `adb reverse tcp:8081 tcp:8081`.
 - **`adb install` fails with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`:** a build signed with another key (a release build) is installed. `adb uninstall io.robertying.learnx`, then install again.
 - **The mock login doesn't load the mock data** (the login goes to the real server and fails): the `DUMMY_*` values in `.env` are empty, or Metro hasn't picked them up. Fill them in and restart Metro.
