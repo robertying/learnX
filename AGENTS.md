@@ -7,7 +7,7 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 | `CONTRIBUTING.md`                     | Setup from a fresh clone for outside contributors: tools, iOS signing with your own team, Android SDK, mock login, checks          |
 | `src/data/AGENTS.md`                  | Stores, TanStack Query, server actions and favorites, timetable, background sync, login and account data, mock login and mock data |
 | `src/widgets/AGENTS.md`               | Home screen widgets (`expo-widgets`)                                                                                               |
-| `modules/AGENTS.md`                   | Local Expo modules: Spotlight and App Intents, Crashlytics                                                                         |
+| `modules/AGENTS.md`                   | Local Expo modules: native tests, Spotlight and App Intents, crash reporting, sharing files to learnX                              |
 | `patches/README.md`                   | Patched dependencies: what each patch fixes and how to change one (`pnpm patch`)                                                   |
 | `.maestro/AGENTS.md`                  | End-to-end flows                                                                                                                   |
 | `.claude/skills/release`              | Version bumps, release builds and uploads (fastlane)                                                                               |

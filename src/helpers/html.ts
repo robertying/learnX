@@ -39,7 +39,7 @@ const getScriptNonce = () =>
  * Wraps course-site HTML (notice and assignment descriptions) into a page for
  * AutoHeightWebView, without margins of its own: the page sits in a form row,
  * which has them. KaTeX (~300 KB) is only inlined when the content has
- * math, and dark mode is a small script instead of Dark Reader.
+ * math, and dark mode is a small script (`preval/darkMode.js`).
  */
 export const getWebViewTemplate = (
   content: string,

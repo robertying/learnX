@@ -62,7 +62,6 @@ describe('getWebViewTemplate', () => {
     expect(dark).toContain(
       'applyDarkMode(document.querySelector("#root"), "rgb(30, 26, 29)")',
     );
-    expect(dark).not.toContain('DarkReader');
     expect(dark.length).toBeLessThan(10_000);
   });
 

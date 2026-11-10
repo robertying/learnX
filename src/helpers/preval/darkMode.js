@@ -1,9 +1,9 @@
 // Runs inside the notice and assignment web views (inlined as a string by
-// darkMode.preval.js), so it is plain ES2017 with no imports. It replaces
-// Dark Reader, which was ~360 KB of script inlined into every page: content
-// from the course site is short rich-text HTML whose colors come from inline
-// styles, <font color> and bgcolor, so adjusting the colors that differ from
-// what an element inherits is enough.
+// darkMode.preval.js), so it is plain ES2017 with no imports. Content from the
+// course site is short rich-text HTML whose colors come from inline styles,
+// <font color> and bgcolor, so adjusting the colors that differ from what an
+// element inherits is enough, and a general dark-mode library (hundreds of KB
+// inlined into every page) isn't needed.
 
 /** Parses `rgb(...)`/`rgba(...)` from getComputedStyle. */
 function parseColor(value) {
