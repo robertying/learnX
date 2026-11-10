@@ -117,29 +117,23 @@ describe('buildAssignmentReminderDetails', () => {
       startDate: new Date('2026-03-10T08:00:00+08:00'),
       dueDate: new Date('2026-03-20T23:59:00+08:00'),
       alarms: [],
-      timeZone: 'Asia/Shanghai',
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       completed: true,
       completionDate: completionDate.toDate(),
       notes: 'Read chapter 2',
     });
   });
 
-  it('keeps the deadline and alerts the offset before it, a day by default', () => {
-    const daily = buildAssignmentReminderDetails(
-      settingsWith({}, { assignmentReminderAlarm: true }),
+  it('keeps the deadline and alerts at it, since Reminders moves the date to the alarm', () => {
+    const details = buildAssignmentReminderDetails(
+      settingsWith(
+        {},
+        { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
+      ),
       input(),
     );
-    expect(daily.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
-    expect(daily.alarms).toEqual([{ relativeOffset: -24 * 60 }]);
-    expect(
-      buildAssignmentReminderDetails(
-        settingsWith(
-          {},
-          { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
-        ),
-        input(),
-      ).alarms,
-    ).toEqual([{ relativeOffset: -60 }]);
+    expect(details.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
+    expect(details.alarms).toEqual([{ relativeOffset: 0 }]);
   });
 });
 
