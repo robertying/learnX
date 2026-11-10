@@ -73,3 +73,6 @@ npm-debug.log
 
 # Agent worktrees
 .claude/worktrees/
+
+# Personal agent skills kept out of git
+.claude/skills/local-*/
