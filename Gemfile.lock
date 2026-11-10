@@ -102,7 +102,7 @@ GEM
     ethon (0.19.1)
       ffi (>= 1.15.0)
       logger
-    excon (1.11.0)
+    excon (1.12.0)
     faraday (2.15.1)
       faraday-net_http (>= 2.0, < 3.6)
       json
@@ -404,7 +404,7 @@ CHECKSUMS
   emoji_regex (3.2.3) sha256=ecd8be856b7691406c6bf3bb3a5e55d6ed683ffab98b4aa531bb90e1ddcc564b
   erb (6.0.7) sha256=c5ca6dc25b0ef974a44dc8f59fe847577122483b1968a38dec305c60bf91ee92
   ethon (0.19.1) sha256=f309dec67cfdefaf96b3d1ee0ed4f186eac518f131340f607bb3df3b4e13ddc4
-  excon (1.11.0) sha256=cdac81833dcb35f33864b455b8f20fc731d18fdc9ffd731d1a4cabd80c7ab1c4
+  excon (1.12.0) sha256=ce2f4f12a44278479d132a94db544e42cb0683230a467ce80529b4ac805c579e
   faraday (2.15.1) sha256=8708154deda739c5e86cc42b74960e23e8491fce0eba9e11639a6a34b1ac288f
   faraday-cookie_jar (0.0.8) sha256=0140605823f8cc63c7028fccee486aaed8e54835c360cffc1f7c8c07c4299dbb
   faraday-follow_redirects (0.5.0) sha256=5cde93c894b30943a5d2b93c2fe9284216a6b756f7af406a1e55f211d97d10ad
