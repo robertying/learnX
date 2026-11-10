@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useSyncExternalStore } from 'react';
 import { Alert, Linking } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import {
   Form,
@@ -26,10 +25,25 @@ import {
   setServerWritesAllowed,
   subscribeServerWrites,
 } from 'helpers/serverWrites';
-import { SettingsStackParams } from './types';
+import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
+import { MainStackScreenProps, SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
-type Props = NativeStackScreenProps<SettingsStackParams, 'Settings'>;
+type Props = MainStackScreenProps<SettingsStackParams, 'Settings'>;
+
+/**
+ * The newest What's New this install has. Debug builds preview the newest
+ * one with every row, since their version is usually behind it.
+ */
+const latestWhatsNew = () => {
+  const found = findWhatsNew(whatsNewContext());
+  if (found) {
+    return { version: found.version };
+  }
+  return __DEV__ && releases[0]
+    ? { version: releases[0].version, preview: true }
+    : null;
+};
 
 const Settings: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
@@ -47,6 +61,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const courseSharingSeen = useAppState(state => state.courseSharingSeen);
 
   const update = useAvailableUpdate();
+  const whatsNew = latestWhatsNew();
 
   const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) =>
     show(name);
@@ -123,6 +138,19 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
         </FormSection>
         <FormSection>
+          {whatsNew && (
+            <FormLink
+              testID="settings-whats-new"
+              icon={{ ios: 'sparkles', android: 'creation-outline' }}
+              title={t('whatsNew')}
+              onPress={() =>
+                navigation.navigate('WhatsNewStack', {
+                  screen: 'WhatsNew',
+                  params: whatsNew,
+                })
+              }
+            />
+          )}
           <FormLink
             icon={{ ios: 'note.text', android: 'note-text' }}
             badge={newChangelog}

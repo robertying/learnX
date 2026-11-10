@@ -122,6 +122,9 @@ describe('settings saved before version 2', () => {
     expect(useAppStateStore.getState()).toEqual({
       changelogSeenVersion: '18.0.3',
       courseSharingSeen: true,
+      welcomeSeen: false,
+      setupSeen: false,
+      whatsNewSeenVersion: null,
     });
   });
 });

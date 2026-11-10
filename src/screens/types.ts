@@ -92,12 +92,19 @@ export type MainTabParams = {
 };
 
 export type LoginStackParams = {
+  Welcome: undefined;
   Login: undefined;
   SSO: {
     username: string;
     password: string;
   };
   MockNetwork: undefined;
+};
+
+export type WhatsNewStackParams = {
+  /** `preview` shows every highlight, whatever this install has. */
+  WhatsNew: { version: string; preview?: boolean };
+  Changelog: undefined;
 };
 
 export type CourseXStackParams = {
@@ -133,6 +140,8 @@ export type RootStackParams = {
   SearchStack: NavigatorScreenParams<SearchStackParams> | undefined;
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
+  Setup: undefined;
+  WhatsNewStack: NavigatorScreenParams<WhatsNewStackParams>;
 };
 
 /** The root on Android, where the split view is drawn in JS. */

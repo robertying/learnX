@@ -23,11 +23,13 @@ import { useNavigationTheme } from 'theme';
 import { DetailStack } from './DetailStack';
 import MainTab from './MainTab';
 import { nativeSplit } from './layout';
+import Setup from 'screens/Setup';
 import {
   AssignmentSubmissionStack,
   CourseXStack,
   LoginStack,
   SearchStack,
+  WhatsNewStack,
 } from './stacks';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
@@ -51,6 +53,17 @@ const renderMainScreens = () => (
       name="AssignmentSubmissionStack"
       component={AssignmentSubmissionStack}
       options={{ gestureEnabled: false }}
+    />
+    {/* Sheets the main UI opens with (hooks/useLaunchSheet) */}
+    <RootNavigator.Screen
+      name="Setup"
+      component={Setup}
+      options={{ presentation: 'formSheet', sheetAllowedDetents: [1] }}
+    />
+    <RootNavigator.Screen
+      name="WhatsNewStack"
+      component={WhatsNewStack}
+      options={{ presentation: 'formSheet', sheetAllowedDetents: [1] }}
     />
   </>
 );

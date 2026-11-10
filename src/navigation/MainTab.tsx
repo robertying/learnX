@@ -12,6 +12,7 @@ import createSidebarSplitNavigator from './SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
 import useKeyboardShown from 'hooks/useKeyboardShown';
 import useMainCommands from 'hooks/useMainCommands';
+import useLaunchSheet from 'hooks/useLaunchSheet';
 import useMainStartup from 'hooks/useMainStartup';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { renderDetailContainer, TabSplit } from './DetailStack';
@@ -145,6 +146,7 @@ const MainTab = () => {
   // lift the bottom navigation bar on top of it. Material hides it instead.
   const keyboardShown = useKeyboardShown();
   useMainStartup();
+  useLaunchSheet();
   useMainCommands();
   const settingsBadge = useSettingsBadge();
 

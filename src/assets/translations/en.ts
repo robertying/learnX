@@ -363,4 +363,33 @@ export default {
   moveDown: 'Move Down',
   courseUnfinishedAssignments: '{count} unfinished assignments',
   courseOneUnfinishedAssignment: '1 unfinished assignment',
+  // Welcome, set-up and What's New
+  welcomeTitle: 'Welcome to learnX',
+  welcomeTodayTitle: 'Your Day at a Glance',
+  welcomeTodayBody:
+    "Today's classes, what's due and what's new in every course.",
+  welcomeCoursesTitle: 'All Your Courses in One Place',
+  welcomeCoursesBody: 'Notices, assignments and files, readable offline.',
+  welcomeDeadlinesTitle: 'Never Miss a Deadline',
+  welcomeDeadlinesBody: "Reminders, calendar sync and widgets for what's due.",
+  setupTitle: 'Stay on Top of Your Courses',
+  setupAssignments: 'Assignments & Grades',
+  setupCalendar: 'Add Assignments to Calendar',
+  setupCaption: 'You can change these any time in Settings.',
+  notNow: 'Not Now',
+  done: 'Done',
+  whatsNew: "What's New",
+  whatsNewTitle: "What's New in learnX {version}",
+  fullChangelog: 'Full Changelog',
+  whatsNew19TodayTitle: 'Today',
+  whatsNew19TodayBody:
+    "A new first tab with your classes, what's due and what's new.",
+  whatsNew19WidgetsTitle: 'Widgets',
+  whatsNew19WidgetsBody:
+    'See deadlines and your next class without opening learnX.',
+  whatsNew19RemindersTitle: 'Deadline Reminders',
+  whatsNew19RemindersBody: 'A notification before an assignment is due.',
+  whatsNew19SpotlightTitle: 'Spotlight and Siri',
+  whatsNew19SpotlightBody:
+    'Find notices and assignments from anywhere on your device.',
 };

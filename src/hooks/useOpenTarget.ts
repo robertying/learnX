@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { OpenTarget } from 'helpers/openTarget';
+import { noteOpenedFromOutside } from 'hooks/useLaunchSheet';
 import { setPendingTarget } from 'hooks/usePendingTarget';
 
 /**
@@ -10,6 +11,7 @@ const useOpenTarget = () => {
   const navigation = useNavigation();
 
   return (target: OpenTarget) => {
+    noteOpenedFromOutside();
     if (target.type === 'today') {
       setPendingTarget(null);
       return navigation.navigate('MainTab', {

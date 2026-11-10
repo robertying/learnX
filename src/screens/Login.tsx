@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -27,6 +27,7 @@ import env from 'helpers/env';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { mockNetworkTitle } from 'navigation/options';
+import { noteLoginShown } from 'hooks/useLaunchSheet';
 import { LoginStackParams } from './types';
 import { Caption, Text } from 'components/Text';
 
@@ -45,6 +46,10 @@ const Login: React.FC<Props> = ({ navigation }) => {
   const passwordTextInputRef = useRef<TextInputInstance>(null);
 
   const hasCredential = savedUsername && savedPassword && savedFingerPrint;
+
+  useEffect(() => {
+    noteLoginShown();
+  }, []);
 
   const handleNext = () => {
     passwordTextInputRef.current?.focus();
