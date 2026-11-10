@@ -5,6 +5,7 @@ import WebView, { WebViewNavigation } from 'react-native-webview';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import BrowserToolbar from 'components/BrowserToolbar';
+import useWebViewProgress from 'hooks/useWebViewProgress';
 import { CourseXParamList } from './types';
 
 type Props = NativeStackScreenProps<CourseXParamList, 'CourseX'>;
@@ -13,13 +14,11 @@ const CourseX: React.FC<Props> = ({ route }) => {
   const courseId = route.params?.id ?? '';
 
   const webViewRef = useRef<WebView | null>(null);
-  const [progress, setProgress] = useState(0);
+  const { progress, loading, onLoadProgress } = useWebViewProgress();
   const [currentUrl, setCurrentUrl] = useState('');
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
   const [toolbarOverlap, setToolbarOverlap] = useState(0);
-
-  const loading = progress !== 0 && progress !== 1;
 
   const handleNavigation = (e: WebViewNavigation) => {
     setCurrentUrl(e.url);
@@ -41,10 +40,7 @@ const CourseX: React.FC<Props> = ({ route }) => {
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
         // The iOS toolbar floats over the page, so the page scrolls clear of it.
         contentInset={{ bottom: toolbarOverlap }}
-        onLoadProgress={({ nativeEvent }) => {
-          // New architecture doesn't like native floats
-          setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
-        }}
+        onLoadProgress={onLoadProgress}
         onNavigationStateChange={handleNavigation}
       />
       <BrowserToolbar

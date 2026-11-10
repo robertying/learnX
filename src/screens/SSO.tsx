@@ -12,6 +12,7 @@ import { generateFingerprint } from 'helpers/fingerprint';
 import { fillSSOScript } from 'helpers/ssoScript';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
+import useWebViewProgress from 'hooks/useWebViewProgress';
 import { LoginStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -28,7 +29,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   const username = route.params.username;
   const password = route.params.password;
 
-  const [progress, setProgress] = useState(0);
+  const { progress, loading, onLoadProgress } = useWebViewProgress();
 
   const [fingerPrint] = useState(generateFingerprint);
   const formData = useRef<{
@@ -88,7 +89,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeArea>
-      {progress && progress !== 1 ? <ProgressBar progress={progress} /> : null}
+      {loading ? <ProgressBar progress={progress} /> : null}
       <WebView
         ref={webviewRef}
         style={styles.webview}
@@ -100,9 +101,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
           },
         }}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-        onLoadProgress={({ nativeEvent }) => {
-          setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
-        }}
+        onLoadProgress={onLoadProgress}
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
         injectedJavaScript={injectedJs}
         onMessage={handleMessage}

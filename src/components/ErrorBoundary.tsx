@@ -10,7 +10,7 @@ import { recordError } from 'helpers/crashReporting';
 import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
 
-const ErrorFallback: React.FC = () => {
+const ErrorFallback: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => {
   const theme = useTheme();
 
   return (
@@ -27,6 +27,11 @@ const ErrorFallback: React.FC = () => {
       <Text style={[Styles.spacey1, { color: theme.colors.outline }]}>
         {t('somethingWentWrong')}
       </Text>
+      {onRetry ? (
+        <TextButton style={Styles.spacey1} onPress={onRetry}>
+          {t('tryAgain')}
+        </TextButton>
+      ) : null}
       <TextButton
         style={Styles.spacey1}
         onPress={() => reloadAppAsync('Error boundary')}
@@ -39,10 +44,12 @@ const ErrorFallback: React.FC = () => {
 
 /**
  * Reports a render error to Crashlytics with its component stack, and shows a
- * way to reload instead of a blank screen.
+ * way to reload instead of a blank screen. Around a single screen
+ * (`navigation/screenLayout`), it can also try that screen
+ * again, and the rest of the app stays usable.
  */
 export default class ErrorBoundary extends Component<
-  React.PropsWithChildren,
+  React.PropsWithChildren<{ retryable?: boolean }>,
   { hasError: boolean }
 > {
   state = { hasError: false };
@@ -56,7 +63,18 @@ export default class ErrorBoundary extends Component<
   }
 
   render() {
-    return this.state.hasError ? <ErrorFallback /> : this.props.children;
+    if (!this.state.hasError) {
+      return this.props.children;
+    }
+    return (
+      <ErrorFallback
+        onRetry={
+          this.props.retryable
+            ? () => this.setState({ hasError: false })
+            : undefined
+        }
+      />
+    );
   }
 }
 
