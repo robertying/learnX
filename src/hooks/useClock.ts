@@ -2,6 +2,7 @@ import { useSyncExternalStore } from 'react';
 import { AppState, type NativeEventSubscription } from 'react-native';
 import dayjs from 'dayjs';
 import { beijingDate } from 'helpers/serverTime';
+import { dayPart } from 'helpers/dayPart';
 
 // Clocks for text that changes with time. They share one timer, which wakes
 // at the start of each minute, and tick again when the app comes back to the
@@ -72,3 +73,11 @@ const getBeijingDay = () => beijingDate(getMinute());
  */
 export const useBeijingDay = () =>
   useSyncExternalStore(subscribe, getBeijingDay);
+
+const getDayPart = () => dayPart(getMinute());
+
+/**
+ * The part of the day on the device's clock (`helpers/dayPart`), for the
+ * Today tab's icon. Re-renders when it changes.
+ */
+export const useDayPart = () => useSyncExternalStore(subscribe, getDayPart);

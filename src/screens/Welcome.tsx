@@ -17,7 +17,7 @@ const Welcome: React.FC<Props> = ({ navigation }) => (
     title={t('welcomeTitle')}
     features={[
       {
-        icon: 'today',
+        icon: 'afternoon',
         title: t('welcomeTodayTitle'),
         body: t('welcomeTodayBody'),
       },

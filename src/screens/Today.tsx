@@ -228,7 +228,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
           <FormSection title={t('todayNew')}>
             {unreadNotices > 0 && (
               <FormLink
-                icon={{ ios: 'bell', android: 'bell-outline' }}
+                icon="notices"
                 title={
                   unreadNotices === 1
                     ? t('todayOneUnreadNotice')
@@ -244,7 +244,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             )}
             {newFiles > 0 && (
               <FormLink
-                icon={{ ios: 'doc', android: 'file-outline' }}
+                icon="files"
                 title={
                   newFiles === 1
                     ? t('todayOneNewFile')

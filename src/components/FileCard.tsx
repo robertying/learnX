@@ -5,11 +5,7 @@ import { useToday } from 'hooks/useClock';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { t } from 'helpers/i18n';
-import CardRow, {
-  CardGlyph,
-  FileTypeTile,
-  cardAccessibilityLabel,
-} from './CardRow';
+import CardRow, { CardGlyph, cardAccessibilityLabel } from './CardRow';
 
 export interface FileCardProps extends CardWrapperProps {
   data: File;
@@ -59,7 +55,6 @@ const FileCard: React.FC<FileCardProps> = ({
       <CardRow
         overline={overline}
         unread={!!isNew}
-        leading={<FileTypeTile fileType={fileType} />}
         title={title}
         preview={preview}
         glyphs={

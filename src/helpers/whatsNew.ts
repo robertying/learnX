@@ -51,7 +51,7 @@ export const releases: Release[] = [
     version: '19.0.0',
     highlights: [
       {
-        icon: 'today',
+        icon: 'afternoon',
         title: 'whatsNew19TodayTitle',
         body: 'whatsNew19TodayBody',
       },

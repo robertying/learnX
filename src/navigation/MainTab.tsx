@@ -1,15 +1,16 @@
 import { startTransition, useEffect, useState } from 'react';
-import type { ComponentProps } from 'react';
 import { Platform } from 'react-native';
 import { createNativeBottomTabNavigator } from '@bottom-tabs/react-navigation';
-import type { AppleIcon } from 'react-native-bottom-tabs';
-import MaterialCommunityIcons from '@react-native-vector-icons/material-design-icons';
+import type { SFSymbol } from 'sf-symbols-typescript';
+import type { DayPart } from 'helpers/dayPart';
 import { t } from 'helpers/i18n';
+import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import { MainTabParams } from 'screens/types';
 import { useSplitLaidOut } from './NativeSplitView';
 import createSidebarSplitNavigator from './SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';
+import { useDayPart } from 'hooks/useClock';
 import useKeyboardShown from 'hooks/useKeyboardShown';
 import useMainCommands from 'hooks/useMainCommands';
 import useLaunchSheet from 'hooks/useLaunchSheet';
@@ -29,13 +30,36 @@ import {
 const MainNativeNavigator = createNativeBottomTabNavigator<MainTabParams>();
 const MainSidebarNavigator = createSidebarSplitNavigator<MainTabParams>();
 
-const getTabBarIcon = (
-  sfSymbol: AppleIcon['sfSymbol'],
-  materialIcon: ComponentProps<typeof MaterialCommunityIcons>['name'],
-) =>
+type TabIcon =
+  | 'notices'
+  | 'assignments'
+  | 'files'
+  | 'courses'
+  | 'settings'
+  | DayPart;
+
+// The tab bar draws each tab's icon filled, as iOS's own apps do; the Mac's
+// sidebar draws the outline (`systemIcons`), as Finder and Mail do.
+const filledSymbols: Record<TabIcon, SFSymbol> = {
+  notices: 'bell.fill',
+  assignments: 'list.bullet.clipboard.fill',
+  files: 'folder.fill',
+  courses: 'books.vertical.fill',
+  settings: 'gearshape.fill',
+  morning: 'sunrise.fill',
+  afternoon: 'sun.max.fill',
+  evening: 'sunset.fill',
+  night: 'moon.stars.fill',
+};
+
+// Android's navigation bar shows the outlined Material Symbol, and the filled
+// one on the selected tab: vector drawables in android/app/src/main/res/drawable
+// (`tab_<symbol>` and `tab_<symbol>_filled`, drawn from the Material Symbols
+// font), since the bar loads its icons as images.
+const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
   Platform.OS === 'ios'
-    ? { sfSymbol }
-    : MaterialCommunityIcons.getImageSourceSync(materialIcon, 24)!;
+    ? { sfSymbol: filledSymbols[icon] }
+    : { uri: `tab_${systemIcons[icon].android}${focused ? '_filled' : ''}` };
 
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
 // contains the split view, so each tab gets its own split.
@@ -56,8 +80,8 @@ interface Tab {
   name: keyof MainTabParams;
   component: React.ComponentType;
   title: string;
-  sfSymbol: AppleIcon['sfSymbol'];
-  materialIcon: ComponentProps<typeof MaterialCommunityIcons>['name'];
+  /** `dayPart` follows the time of day: sunrise, sun, sunset or moon. */
+  icon: TabIcon | 'dayPart';
   testID: string;
 }
 
@@ -66,40 +90,35 @@ const tabs: Tab[] = [
     name: 'TodayStack',
     component: withSplit(TodayStack),
     title: t('today'),
-    sfSymbol: 'sun.max.fill',
-    materialIcon: 'calendar-today',
+    icon: 'dayPart',
     testID: 'tab-today',
   },
   {
     name: 'NoticeStack',
     component: withSplit(NoticeStack),
     title: t('notices'),
-    sfSymbol: 'bell.fill',
-    materialIcon: 'bell',
+    icon: 'notices',
     testID: 'tab-notices',
   },
   {
     name: 'AssignmentStack',
     component: withSplit(AssignmentStack),
     title: t('assignments'),
-    sfSymbol: 'list.bullet.clipboard.fill',
-    materialIcon: 'calendar',
+    icon: 'assignments',
     testID: 'tab-assignments',
   },
   {
     name: 'FileStack',
     component: withSplit(FileStack),
     title: t('files'),
-    sfSymbol: 'doc.fill',
-    materialIcon: 'folder',
+    icon: 'files',
     testID: 'tab-files',
   },
   {
     name: 'CourseStack',
     component: withSplit(CourseStack),
     title: t('courses'),
-    sfSymbol: 'square.grid.3x3.fill',
-    materialIcon: 'apps',
+    icon: 'courses',
     testID: 'tab-courses',
   },
   ...(sidebarSplit
@@ -108,8 +127,7 @@ const tabs: Tab[] = [
           name: 'SettingStack',
           component: withSplit(SettingStack),
           title: t('settings'),
-          sfSymbol: 'gearshape.fill',
-          materialIcon: 'cog',
+          icon: 'settings',
           testID: 'tab-settings',
         },
       ] satisfies Tab[])
@@ -148,6 +166,8 @@ const MainTab = () => {
   useMainStartup();
   useLaunchSheet();
   useMainCommands();
+  const part = useDayPart();
+  const iconOf = (tab: Tab) => (tab.icon === 'dayPart' ? part : tab.icon);
   // Settings' badge is on its sidebar row on Mac, and on its button in
   // Today's header elsewhere; the tab bar shows none.
   const settingsBadge = useSettingsBadge();
@@ -163,7 +183,7 @@ const MainTab = () => {
             options={{
               lazy: mountedTabCount <= index,
               title: tab.title,
-              sfSymbol: tab.sfSymbol,
+              sfSymbol: systemIcons[iconOf(tab)].ios,
               badge: tab.name === 'SettingStack' && settingsBadge,
             }}
           />
@@ -197,7 +217,7 @@ const MainTab = () => {
             lazy: mountedTabCount <= index,
             title: tab.title,
             tabBarButtonTestID: tab.testID,
-            tabBarIcon: () => getTabBarIcon(tab.sfSymbol, tab.materialIcon),
+            tabBarIcon: ({ focused }) => getTabBarIcon(iconOf(tab), focused),
           }}
         />
       ))}

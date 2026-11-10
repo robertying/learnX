@@ -1,6 +1,5 @@
 import {
   fileNameOf,
-  fileTypeColor,
   formatFileSize,
   getExtension,
   sanitizeFileName,
@@ -89,26 +88,5 @@ describe('formatFileSize', () => {
   it('moves to the next unit instead of showing 1000.0', () => {
     expect(formatFileSize(999_950)).toBe('1.0 MB');
     expect(formatFileSize(999_940)).toBe('999.9 KB');
-  });
-});
-
-describe('fileTypeColor', () => {
-  it('colors a tile by kind of document, in any case', () => {
-    expect(fileTypeColor('PDF')).toBe('red');
-    expect(fileTypeColor('docx')).toBe('blue');
-    expect(fileTypeColor('key')).toBe('orange');
-    expect(fileTypeColor('csv')).toBe('green');
-    expect(fileTypeColor('zip')).toBe('grey');
-    expect(fileTypeColor('')).toBe('grey');
-  });
-
-  it.each([
-    ['doc', 'blue'],
-    ['ppt', 'orange'],
-    ['pptx', 'orange'],
-    ['xls', 'green'],
-    ['xlsx', 'green'],
-  ])('colors %s %s, as its newer or older format', (type, color) => {
-    expect(fileTypeColor(type)).toBe(color);
   });
 });

@@ -6,7 +6,8 @@ import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
 export interface StatusViewProps {
-  icon: SystemIconName;
+  /** Left out where the message says it all, as in an empty detail pane. */
+  icon?: SystemIconName;
   message: string;
   /** Something to do about it, such as a button, under the message. */
   action?: React.ReactNode;
@@ -15,8 +16,9 @@ export interface StatusViewProps {
 
 /**
  * A screen or list with nothing to show, and why: a large dimmed icon over a
- * line of text, centered in the space it has. `Empty`, `NotFound` and the
- * error boundary's fallback are this view.
+ * line of text, centered in the space it has. `Empty`, `NotFound`, search
+ * with no results, the empty detail pane and the error boundary's fallback
+ * are this view.
  */
 const StatusView: React.FC<StatusViewProps> = ({
   icon,
@@ -28,12 +30,14 @@ const StatusView: React.FC<StatusViewProps> = ({
 
   return (
     <View testID={testID} style={styles.root}>
-      <SystemIcon
-        style={Styles.spacey1}
-        name={icon}
-        color={theme.colors.outline}
-        size={56}
-      />
+      {icon ? (
+        <SystemIcon
+          style={Styles.spacey1}
+          name={icon}
+          color={theme.colors.outline}
+          size={56}
+        />
+      ) : null}
       <Text style={[Styles.spacey1, { color: theme.colors.onSurfaceMedium }]}>
         {message}
       </Text>

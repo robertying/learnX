@@ -56,7 +56,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
       {t('submitted')}
     </CardPill>
   ) : dueSoon ? (
-    <CardPill testID="due-soon" tone="red" icon="dueSoon">
+    <CardPill testID="due-soon" tone="red" icon="deadline">
       {dueText}
     </CardPill>
   ) : (

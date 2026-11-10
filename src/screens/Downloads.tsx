@@ -99,7 +99,7 @@ const Downloads: React.FC<Props> = () => {
       <Form>
         <FormSection footer={t('downloadsCaption')}>
           <FormText
-            icon={{ ios: 'internaldrive', android: 'harddisk' }}
+            icon="storage"
             title={t('downloadsTotal')}
             detail={summary(total)}
           />
@@ -109,7 +109,7 @@ const Downloads: React.FC<Props> = () => {
             {courses.map(course => (
               <FormButton
                 key={course.courseId}
-                icon={{ ios: 'folder', android: 'folder' }}
+                icon="folder"
                 title={course.courseName}
                 detail={summary(course)}
                 disabled={exporting}
@@ -146,7 +146,7 @@ const Downloads: React.FC<Props> = () => {
         )}
         <FormSection footer={t('downloadsExportCaption')}>
           <FormButton
-            icon={{ ios: 'square.and.arrow.up', android: 'export-variant' }}
+            icon="export"
             title={t('downloadsExport')}
             loading={exporting}
             disabled={exporting || courses.length === 0}
@@ -155,7 +155,7 @@ const Downloads: React.FC<Props> = () => {
         </FormSection>
         <FormSection>
           <FormButton
-            icon={{ ios: 'trash', android: 'delete' }}
+            icon="delete"
             title={t('clearFileCache')}
             onPress={() =>
               confirm(

@@ -206,6 +206,14 @@ export const RadioButton = ({ selected }: { selected: boolean }) => (
   <View accessibilityRole="radio" accessibilityState={{ checked: selected }} />
 );
 
+export const Checkbox = ({ value }: { value: boolean }) => (
+  <View
+    testID="checkbox"
+    accessibilityRole="checkbox"
+    accessibilityState={{ checked: value }}
+  />
+);
+
 export const CircularProgressIndicator = () => <View testID="progress" />;
 
 export const LinearProgressIndicator = ({

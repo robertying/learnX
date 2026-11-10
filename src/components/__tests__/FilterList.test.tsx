@@ -228,7 +228,7 @@ it('hides and moves courses, which have no favorites', async () => {
 
 it('shows a spinner for the first load and an empty state after', async () => {
   const view = await renderList({ all: [], loading: true });
-  expect(screen.queryByText(t('empty'))).toBeNull();
+  expect(screen.queryByText(t('noNotices'))).toBeNull();
   await view.rerender(
     <FilterList<Item>
       type="notice"
@@ -239,7 +239,7 @@ it('shows a spinner for the first load and an empty state after', async () => {
       refreshing={false}
     />,
   );
-  expect(screen.getByText(t('empty'))).toBeTruthy();
+  expect(screen.getByText(t('noNotices'))).toBeTruthy();
 });
 
 it('shows the sync status at the top of the list, where it scrolls with it', async () => {

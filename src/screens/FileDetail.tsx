@@ -173,24 +173,16 @@ const FileInfo: React.FC<{
       <FormParagraph text={file.description || t('noFileDescription')} />
     </FormSection>
     <FormSection>
-      <FormButton
-        title={t('share')}
-        icon={{ ios: 'square.and.arrow.up', android: 'share-variant' }}
-        onPress={onShare}
-      />
+      <FormButton title={t('share')} icon="share" onPress={onShare} />
       {DeviceInfo.isMac() ? (
         <FormButton
           title={t('download')}
-          icon={{ ios: 'arrow.down.circle', android: 'download' }}
+          icon="download"
           onPress={onCopyToDownloads}
         />
       ) : null}
       {Platform.OS === 'android' ? (
-        <FormButton
-          title={t('open')}
-          icon={{ ios: 'arrow.up.forward.app', android: 'open-in-new' }}
-          onPress={onOpen}
-        />
+        <FormButton title={t('open')} icon="open" onPress={onOpen} />
       ) : null}
     </FormSection>
   </Form>

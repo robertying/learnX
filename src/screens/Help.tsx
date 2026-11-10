@@ -20,7 +20,7 @@ const Help: React.FC<Props> = () => (
     <Form>
       <FormSection title={t('githubRecommended')}>
         <FormButton
-          icon={{ ios: 'exclamationmark.bubble', android: 'github' }}
+          icon="feedback"
           title={t('createNewGitHubIssue')}
           onPress={() =>
             Linking.openURL(
@@ -31,7 +31,7 @@ const Help: React.FC<Props> = () => (
       </FormSection>
       <FormSection title={t('emailNotRecommended')}>
         <FormButton
-          icon={{ ios: 'envelope', android: 'email-outline' }}
+          icon="email"
           title="learnX@ruiying.io"
           onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
         />

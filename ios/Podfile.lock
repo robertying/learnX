@@ -2600,36 +2600,6 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-vector-icons (14.0.0):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-bridging
-    - React-Core
-    - React-cxxstableapi
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Yoga
-  - react-native-vector-icons-material-design-icons (14.0.0)
   - react-native-webview (14.0.1):
     - boost
     - DoubleConversion
@@ -3751,8 +3721,6 @@ DEPENDENCIES:
   - react-native-pager-view (from `../node_modules/react-native-pager-view`)
   - react-native-pdf (from `../node_modules/react-native-pdf`)
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
-  - "react-native-vector-icons (from `../node_modules/@react-native-vector-icons/get-image`)"
-  - "react-native-vector-icons-material-design-icons (from `../node_modules/@react-native-vector-icons/material-design-icons`)"
   - react-native-webview (from `../node_modules/react-native-webview`)
   - React-NativeModulesApple (from `../node_modules/react-native/ReactCommon/react/nativemodule/core/platform/ios`)
   - React-networking (from `../node_modules/react-native/ReactCommon/react/networking`)
@@ -3991,10 +3959,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-pdf"
   react-native-safe-area-context:
     :path: "../node_modules/react-native-safe-area-context"
-  react-native-vector-icons:
-    :path: "../node_modules/@react-native-vector-icons/get-image"
-  react-native-vector-icons-material-design-icons:
-    :path: "../node_modules/@react-native-vector-icons/material-design-icons"
   react-native-webview:
     :path: "../node_modules/react-native-webview"
   React-NativeModulesApple:
@@ -4187,8 +4151,6 @@ SPEC CHECKSUMS:
   react-native-pager-view: c3cb3585b2a6289907a7a5a6f93ae4bdb5b0d130
   react-native-pdf: 6504985f75d4e3a0426638d298495405b64d28d4
   react-native-safe-area-context: bf2730548c1fc428170a180c6084360ff9d72ac1
-  react-native-vector-icons: 279d73aea8547e8991e3943c9c03a2494b3942a9
-  react-native-vector-icons-material-design-icons: 811f6c4447a60d8a66394644093dcffdc546772f
   react-native-webview: 5b569d5abb1b80f21e51736948f7795bcabf8495
   React-NativeModulesApple: 96a3744dd084a743a9feaab8a9cc5241704eeb44
   React-networking: 31d34c6f410d7a2eafcde67a54e1ac89ef762dc2

@@ -65,11 +65,11 @@ it('starts empty, with the item, submission, CourseX and settings screens', asyn
   expect(config().screenLayout).toBe(true);
 });
 
-it('shows the empty state in the empty detail pane', async () => {
+it('says nothing is selected in the empty detail pane', async () => {
   await render(<DetailStack />);
   const Empty = lastNavigatorScreens()[0].component as React.FC;
   await render(<Empty />);
-  expect(screen.getByText(t('empty'))).toBeTruthy();
+  expect(screen.getByText(t('noSelection'))).toBeTruthy();
 });
 
 it('opens a screen without animation when asked', async () => {

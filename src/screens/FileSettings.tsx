@@ -32,7 +32,7 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
         {Platform.OS === 'android' && (
           <FormSection>
             <FormToggle
-              icon={{ ios: 'arrow.up.forward.app', android: 'open-in-new' }}
+              icon="open"
               title={t('openFileAfterDownload')}
               value={openFileAfterDownload}
               onValueChange={value =>
@@ -43,7 +43,7 @@ const FileSettings: React.FC<Props> = ({ navigation }) => {
         )}
         <FormSection>
           <FormLink
-            icon={{ ios: 'arrow.down.circle', android: 'download' }}
+            icon="download"
             title={t('downloads')}
             detail={
               downloadsSize === null ? undefined : formatFileSize(downloadsSize)

@@ -24,21 +24,18 @@ const About: React.FC<Props> = () => (
     <Form>
       <FormSection footer="© 2026 Rui Ying">
         <FormText
-          icon={{ ios: 'info.circle', android: 'information-outline' }}
+          icon="info"
           title={t('versionInformation')}
           detail={`${packageJson.version} (${DeviceInfo.buildNo()})`}
         />
         <FormButton
-          icon={{
-            ios: 'chevron.left.forwardslash.chevron.right',
-            android: 'code-tags',
-          }}
+          icon="code"
           title={t('sourceCode')}
           detail="robertying/learnX"
           onPress={() => openGitHub('robertying/learnX')}
         />
         <FormButton
-          icon={{ ios: 'checkmark.shield', android: 'shield-check-outline' }}
+          icon="license"
           // oxlint-disable-next-line learnx/no-han-outside-translations -- ICP filing number, shown as filed
           title="浙ICP备20024838号-2A"
           onPress={() => Linking.openURL('https://beian.miit.gov.cn/')}
@@ -48,7 +45,7 @@ const About: React.FC<Props> = () => (
         {contributors.map(({ name, github }) => (
           <FormButton
             key={github}
-            icon={{ ios: 'person', android: 'account-outline' }}
+            icon="person"
             title={name}
             detail={github}
             onPress={() => openGitHub(github)}
@@ -57,16 +54,12 @@ const About: React.FC<Props> = () => (
       </FormSection>
       <FormSection title={t('specialThanks')}>
         <FormButton
-          icon={{ ios: 'books.vertical', android: 'bookshelf' }}
+          icon="library"
           title="Harry Chen"
           detail="thu-learn-lib"
           onPress={() => openGitHub('Harry-Chen/thu-learn-lib')}
         />
-        <FormText
-          icon={{ ios: 'paintbrush', android: 'brush-outline' }}
-          title="Yayu Xiao"
-          detail={t('appIcon')}
-        />
+        <FormText icon="design" title="Yayu Xiao" detail={t('appIcon')} />
       </FormSection>
       <FormSection title={t('opensourceDependencies')}>
         {Object.keys(packageJson.dependencies).map(name => (

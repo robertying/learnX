@@ -7,7 +7,6 @@ import AssignmentCard from 'components/AssignmentCard';
 import CourseCard from 'components/CourseCard';
 import FileCard from 'components/FileCard';
 import NoticeCard from 'components/NoticeCard';
-import { FileTypeTile } from 'components/CardRow';
 
 const NOW = new Date('2026-03-10T12:00:00+08:00');
 
@@ -307,11 +306,12 @@ describe('FileCard', () => {
     expect(screen.getByText('Yesterday')).toBeTruthy();
   });
 
-  it('shows the type, category, size and upload day', async () => {
+  it('shows the category, type, size and upload day', async () => {
     await render(<FileCard data={file()} />);
     expect(screen.getByText('Lecture 5 slides')).toBeTruthy();
     expect(screen.getByText('Slides · PDF · 2.1 MB')).toBeTruthy();
-    expect(screen.getByText('PDF')).toBeTruthy();
+    // the type is in the details: no tile repeats it
+    expect(screen.queryByText('PDF')).toBeNull();
     expect(screen.getByText('Yesterday')).toBeTruthy();
   });
 
@@ -358,12 +358,5 @@ describe('CourseCard', () => {
         name: 'Calculus, Prof. Li, 2 unread notices, 1 unfinished assignment',
       }),
     ).toBeTruthy();
-  });
-});
-
-describe('FileTypeTile', () => {
-  it('keeps a four-letter type on one line', async () => {
-    await render(<FileTypeTile fileType="docx" />);
-    expect(screen.getByText('DOCX').props.numberOfLines).toBe(1);
   });
 });
