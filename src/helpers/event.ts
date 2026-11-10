@@ -94,33 +94,31 @@ const getOrCreateCalendar = async ({
   title,
   name,
   entityType,
-  listEntityType,
   onCreate,
 }: {
   setting: SyncedCalendar;
   title: string;
   name: string;
   entityType: Calendar.EntityTypes;
-  /** Entity type passed to getCalendars; all types when undefined */
-  listEntityType?: Calendar.EntityTypes;
   /** Runs before a new calendar is created */
   onCreate?: () => void;
-}) => {
-  const calendars = listEntityType
-    ? await Calendar.getCalendars(listEntityType)
-    : await Calendar.getCalendars();
+}): Promise<Calendar.ExpoCalendar> => {
+  // Listed by type, since EventKit guards each with its own permission:
+  // Reminders sync works with only Reminders access.
+  const calendars = await Calendar.getCalendars(entityType);
 
   const storedId = getCalendarSync()[setting];
-  if (storedId) {
-    if (calendars.some(value => value.id === storedId)) {
-      return storedId;
-    }
+  const storedCalendar = storedId
+    ? calendars.find(value => value.id === storedId)
+    : undefined;
+  if (storedCalendar) {
+    return storedCalendar;
   }
 
   const existingCalendar = calendars.find(value => value.title === title);
   if (existingCalendar) {
     setSyncedCalendarId(setting, existingCalendar.id);
-    return existingCalendar.id;
+    return existingCalendar;
   }
 
   onCreate?.();
@@ -141,14 +139,13 @@ const getOrCreateCalendar = async ({
     accessLevel: Calendar.CalendarAccessLevel.OWNER,
   });
 
-  const newCalendarID = newCalendar.id;
-  if (newCalendarID) {
-    setSyncedCalendarId(setting, newCalendarID);
+  if (newCalendar.id) {
+    setSyncedCalendarId(setting, newCalendar.id);
   }
-  return newCalendarID;
+  return newCalendar;
 };
 
-export const getCourseCalendarId = () =>
+export const getCourseCalendar = () =>
   getOrCreateCalendar({
     setting: 'courseCalendarId',
     title: courseCalendarName,
@@ -170,8 +167,7 @@ export const saveCoursesToCalendar = async (
 
   await requirePermission('calendar');
 
-  const calendarId = await getCourseCalendarId();
-  const calendar = await Calendar.ExpoCalendar.get(calendarId);
+  const calendar = await getCourseCalendar();
 
   const oldEvents = await calendar.listEvents(
     startDate.toDate(),
@@ -198,24 +194,22 @@ export const saveCoursesToCalendar = async (
   );
 };
 
-export const getAssignmentCalendarId = () =>
+export const getAssignmentCalendar = () =>
   getOrCreateCalendar({
     setting: 'assignmentCalendarId',
     title: assignmentCalendarReminderName,
     // Not a typo: this calendar has always used the course calendar's name
     name: courseCalendarName,
     entityType: Calendar.EntityTypes.EVENT,
-    listEntityType: Calendar.EntityTypes.EVENT,
     onCreate: () => clearEventIds('calendar'),
   });
 
-export const getAssignmentReminderId = () =>
+export const getAssignmentReminder = () =>
   getOrCreateCalendar({
     setting: 'assignmentReminderId',
     title: assignmentCalendarReminderName,
     name: assignmentCalendarReminderName,
     entityType: Calendar.EntityTypes.REMINDER,
-    listEntityType: Calendar.EntityTypes.REMINDER,
     onCreate: () => clearEventIds('reminder'),
   });
 
@@ -309,11 +303,10 @@ export const saveAssignmentsToReminderOrCalendar = async (
     await requirePermission('calendar');
   }
 
-  const calendarId =
+  const calendar =
     Platform.OS === 'ios' && type === 'reminder'
-      ? await getAssignmentReminderId()
-      : await getAssignmentCalendarId();
-  const calendar = await Calendar.ExpoCalendar.get(calendarId);
+      ? await getAssignmentReminder()
+      : await getAssignmentCalendar();
 
   const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
 
