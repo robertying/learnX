@@ -30,7 +30,7 @@ import {
   queryPersister,
   saveChangedQueries,
 } from 'data/queryClient';
-import { Notice } from 'data/types/state';
+import { assignmentFields, Notice, noticeFields } from 'data/types/state';
 import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-native';
@@ -74,6 +74,21 @@ describe('notices', () => {
       // Tests run in English, so courses come with their English names.
       expect(notice.courseName).toBe(course.englishName);
       expect(notice.courseTeacherName).toBe(course.teacherName);
+    }
+  });
+
+  it('keeps only the fields the app uses', async () => {
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    // The list names an attachment; the app keeps the attachment itself.
+    expect(notices.some(n => 'attachmentName' in n)).toBe(false);
+    const assignments = await queryClient.fetchQuery(
+      assignmentsQuery(semesterId),
+    );
+    expect(assignments.some(a => 'baseId' in a)).toBe(false);
+    for (const item of [...notices, ...assignments]) {
+      for (const key of Object.keys(item)) {
+        expect([...noticeFields, ...assignmentFields]).toContain(key);
+      }
     }
   });
 

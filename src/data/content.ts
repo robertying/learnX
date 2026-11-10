@@ -12,7 +12,14 @@ import { queryClient, queryPersister, saveQuerySoon } from 'data/queryClient';
 import { coursesQuery, getCourseNames, queryKeys } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
-import { Assignment, File, Notice } from 'data/types/state';
+import {
+  Assignment,
+  assignmentFields,
+  File,
+  fileFields,
+  Notice,
+  noticeFields,
+} from 'data/types/state';
 import { getUserData, useCurrentSemester, useUserData } from 'data/userData';
 import { type ContentListName, localChanges } from 'data/pendingActions';
 import { sortAssignments } from 'helpers/assignments';
@@ -33,10 +40,6 @@ const assignmentTimes = [
   'submitTime',
   'gradeTime',
 ] as const;
-
-/** Adds the course's id and names to each item the server lists for it. */
-const tag = <T>(courseId: string, items: object[]) =>
-  items.map(item => ({ ...item, courseId, ...getCourseNames(courseId) }) as T);
 
 /** Newest first, then by id, so equal times keep a stable order. */
 const byNewest =
@@ -63,10 +66,13 @@ const courseIdsOf = async (semesterId: string) =>
 const createContent = <T extends { id: string; courseId: string }>({
   name,
   fetchCourse: fetchFromServer,
+  fields,
   sort,
   priority,
 }: {
   name: ContentListName;
+  /** What the app keeps of an item (`data/types/state`). */
+  fields: readonly string[];
   /**
    * Fetches a course's items. `cached` holds what the list has for the course
    * (possibly nothing), to skip the per-item requests for items that didn't
@@ -83,6 +89,24 @@ const createContent = <T extends { id: string; courseId: string }>({
    * fetch that was already under way doesn't undo them.
    */
   const overrides = new Map<string, Partial<T>>();
+
+  /**
+   * Keeps what the app uses of each item the server lists for a course, so
+   * the cache doesn't save the rest, and adds the course's id and names.
+   */
+  const tag = (courseId: string, items: object[]) => {
+    const course = { courseId, ...getCourseNames(courseId) };
+    return items.map(item => {
+      const kept: Record<string, unknown> = {};
+      for (const field of fields) {
+        const value = (item as Record<string, unknown>)[field];
+        if (value !== undefined) {
+          kept[field] = value;
+        }
+      }
+      return { ...kept, ...course } as unknown as T;
+    });
+  };
   /**
    * Lays over a response fetched since `startedAt` (ms) what the user changed
    * in the app: the session's overrides, then the server actions still
@@ -197,7 +221,7 @@ const createContent = <T extends { id: string; courseId: string }>({
           ...cached.filter(
             item => !fetched.has(item.courseId) && keep(item.courseId),
           ),
-          ...[...fetched].flatMap(([courseId, list]) => tag<T>(courseId, list)),
+          ...[...fetched].flatMap(([courseId, list]) => tag(courseId, list)),
         ],
         startedAt,
       ),
@@ -212,7 +236,7 @@ const createContent = <T extends { id: string; courseId: string }>({
   const refreshCourse = async (semesterId: string, courseId: string) => {
     const startedAt = Date.now();
     const items = withOverrides(
-      tag<T>(courseId, await fetchFromServer(courseId, [])),
+      tag(courseId, await fetchFromServer(courseId, [])),
       startedAt,
     );
     const { queryKey } = query(semesterId);
@@ -361,6 +385,7 @@ const fetchNotices = async (courseId: string, cached: Notice[]) => {
 
 const notices = createContent<Notice>({
   name: 'notices',
+  fields: noticeFields,
   priority: 1,
   fetchCourse: fetchNotices,
   sort: byNewest(notice => notice.publishTime),
@@ -444,6 +469,7 @@ const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
 
 const assignments = createContent<Assignment>({
   name: 'assignments',
+  fields: assignmentFields,
   priority: 0,
   fetchCourse: fetchAssignments,
   sort: sortAssignments,
@@ -468,6 +494,7 @@ const fetchFiles = (courseId: string) =>
 
 const files = createContent<File>({
   name: 'files',
+  fields: fileFields,
   priority: 2,
   fetchCourse: fetchFiles,
   sort: byNewest(file => file.uploadTime),
