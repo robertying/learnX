@@ -34,19 +34,21 @@ func contextMenuAction(key: String, title: String, systemImage: String = "") -> 
   @Test func offersAMenuOnlyWithActions() throws {
     let view = ContextMenuView(appContext: nil)
     let interaction = UIContextMenuInteraction(delegate: view)
-    #expect(view.interactions.isEmpty)
+    // UIKit adds helper interactions of its own beside a context menu's, so count only those.
+    func menuInteractions() -> Int { view.interactions.filter { $0 is UIContextMenuInteraction }.count }
+    #expect(menuInteractions() == 0)
     #expect(view.contextMenuInteraction(interaction, configurationForMenuAtLocation: .zero) == nil)
 
     view.setActions([contextMenuAction(key: "pin", title: "Pin", systemImage: "pin")])
-    #expect(view.interactions.count == 1)
+    #expect(menuInteractions() == 1)
     #expect(view.contextMenuInteraction(interaction, configurationForMenuAtLocation: .zero) != nil)
 
     // Setting actions again keeps the one interaction.
     view.setActions([contextMenuAction(key: "hide", title: "Hide")])
-    #expect(view.interactions.count == 1)
+    #expect(menuInteractions() == 1)
 
     view.setActions([])
-    #expect(view.interactions.isEmpty)
+    #expect(menuInteractions() == 0)
   }
 
   @Test func listsTheActions() throws {

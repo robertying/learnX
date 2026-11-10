@@ -90,8 +90,7 @@ extension SidebarView {
     // The badge turns white over the selection.
     let notices = try #require(view.cell(1))
     notices.isSelected = true
-    notices.setNeedsUpdateConfiguration()
-    notices.updateConfigurationIfNeeded()
+    notices.updateConfiguration(using: notices.configurationState)
 
     // Selecting it again changes nothing.
     view.setSelectedKey("notices")

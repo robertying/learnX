@@ -1,6 +1,6 @@
 import AppIntents
 import Foundation
-import LearnXSpotlight
+internal import LearnXSpotlight
 import Testing
 
 @testable import learnX
@@ -21,26 +21,30 @@ func upcomingClass(_ courseName: String, location: String = "", start: Date, end
   return try JSONDecoder().decode(UpcomingClass.self, from: JSONSerialization.data(withJSONObject: json))
 }
 
+/// Seconds until a deadline, and how the app rounds them. Typed up front: as an
+/// inline `@Test` argument the literal takes too long to type-check.
+let roundingCases: [(Double, DateComponents)] = [
+  (0.0, DateComponents(second: 0)),
+  (-30.0, DateComponents(second: 0)),
+  (44.0, DateComponents(second: 44)),
+  (60.0, DateComponents(minute: 1)),
+  (44 * 60.0, DateComponents(minute: 44)),
+  (60 * 60.0, DateComponents(hour: 1)),
+  (21 * 3600.0, DateComponents(hour: 21)),
+  (30 * 3600.0, DateComponents(day: 1)),
+  // dayjs rounds 5.6 days to 6; RelativeDateTimeFormatter alone would say 5.
+  (5.6 * 86400, DateComponents(day: 6)),
+  (40 * 86400.0, DateComponents(month: 1)),
+  (200 * 86400.0, DateComponents(month: 7)),
+  (400 * 86400.0, DateComponents(year: 1)),
+  (800 * 86400.0, DateComponents(year: 2)),
+]
+
 /// Answers are in the app's language, whichever the simulator uses, so they're compared with the app's own strings.
 @Suite struct NextDeadlineIntentTests {
   let now = Date(timeIntervalSince1970: 1_700_000_000)
 
-  @Test(arguments: [
-    (0.0, DateComponents(second: 0)),
-    (-30.0, DateComponents(second: 0)),
-    (44.0, DateComponents(second: 44)),
-    (60.0, DateComponents(minute: 1)),
-    (44 * 60.0, DateComponents(minute: 44)),
-    (60 * 60.0, DateComponents(hour: 1)),
-    (21 * 3600.0, DateComponents(hour: 21)),
-    (30 * 3600.0, DateComponents(day: 1)),
-    // dayjs rounds 5.6 days to 6; RelativeDateTimeFormatter alone would say 5.
-    (5.6 * 86400, DateComponents(day: 6)),
-    (40 * 86400.0, DateComponents(month: 1)),
-    (200 * 86400.0, DateComponents(month: 7)),
-    (400 * 86400.0, DateComponents(year: 1)),
-    (800 * 86400.0, DateComponents(year: 2)),
-  ])
+  @Test(arguments: roundingCases)
   func roundsAsTheAppDoes(seconds: Double, expected: DateComponents) {
     #expect(NextDeadlineIntent.timeUntil(now + seconds, from: now) == expected)
   }

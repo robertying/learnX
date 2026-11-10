@@ -79,6 +79,19 @@ target 'learnX' do
       end
     end
 
+    # The apps CocoaPods makes to host the modules' tests (AppHost-*) don't adopt
+    # scenes, and iOS 27 stops such an app at launch.
+    Dir.glob(File.join(installer.sandbox.root.to_s, 'AppHost-*', '*-Info.plist')).each do |path|
+      info = Xcodeproj::Plist.read_from_path(path)
+      info['UIApplicationSceneManifest'] = {
+        'UIApplicationSupportsMultipleScenes' => false,
+        'UISceneConfigurations' => {
+          'UIWindowSceneSessionRoleApplication' => [{ 'UISceneConfigurationName' => 'Default Configuration' }]
+        }
+      }
+      Xcodeproj::Plist.write_to_path(info, path)
+    end
+
     # Xcode's recommended project settings, so it stops offering to update the
     # Pods project; pods are signed with the app, so they need no identity.
     installer.pods_project.build_configurations.each do |config|
