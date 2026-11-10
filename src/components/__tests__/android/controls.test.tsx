@@ -8,7 +8,7 @@ import SegmentedTabs from 'components/SegmentedTabs';
 import TextButton from 'components/TextButton';
 import { toast } from 'components/Toast';
 import { cardActions } from 'helpers/cardActions';
-import { filterOptions } from 'helpers/filterOptions';
+import { filterOptions } from 'helpers/filters';
 
 describe('IconButton (Android)', () => {
   it('presses through to the Compose button, read by its label', async () => {

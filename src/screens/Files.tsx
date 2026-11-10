@@ -3,6 +3,7 @@ import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { useFiles } from 'data/content';
 import useContentList from 'hooks/useContentList';
+import { fileLists } from 'hooks/useFilteredData';
 import { FileStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<FileStackParams, 'Files'>;
@@ -14,6 +15,7 @@ const Files: React.FC<Props> = ({ navigation }) => {
     files,
     query,
     navigation,
+    fileLists,
   );
 
   return (

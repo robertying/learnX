@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { checkedIds, toggleAllSelection } from 'helpers/filterList';
+import { checkedIds, toggleAllSelection } from 'helpers/filters';
 
 /**
  * Multi-select state for a list: whether selection mode is on, which items are

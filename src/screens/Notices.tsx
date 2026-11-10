@@ -3,6 +3,7 @@ import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { useNotices } from 'data/content';
 import useContentList from 'hooks/useContentList';
+import { noticeLists } from 'hooks/useFilteredData';
 import { NoticeStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<NoticeStackParams, 'Notices'>;
@@ -14,6 +15,7 @@ const Notices: React.FC<Props> = ({ navigation }) => {
     notices,
     query,
     navigation,
+    noticeLists,
   );
 
   return (

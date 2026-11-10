@@ -8,7 +8,7 @@ import { dataSource } from 'data/source';
 import { getSettings, useSettings } from 'data/settings';
 import { getUserData, useUserData } from 'data/userData';
 import { createLimiter } from 'helpers/limiter';
-import { isNetworkError } from 'helpers/parse';
+import { isNetworkError } from 'helpers/errors';
 import { Course } from 'data/types/state';
 import {
   CalendarClass,
