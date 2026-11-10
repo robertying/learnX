@@ -5,7 +5,7 @@ Pod::Spec.new do |s|
   s.description    = 'The native sidebar list for the Mac split view'
   s.author         = ''
   s.homepage       = 'https://docs.expo.dev/modules/'
-  s.platforms      = { :ios => '16.6' }
+  s.platforms      = { :ios => '17.6' }
   s.source         = { git: '' }
   s.static_framework = true
 
