@@ -1,9 +1,25 @@
-import { pickLaunchSheet } from 'hooks/useLaunchSheet';
+import { renderHook } from '@testing-library/react-native';
+import useLaunchSheet, {
+  noteLoginShown,
+  noteOpenedFromOutside,
+  pickLaunchSheet,
+  resetLaunchNotes,
+} from 'hooks/useLaunchSheet';
+import { whatsNewSince } from 'helpers/whatsNew';
 import {
   resetAppState,
   setWhatsNewSeen,
   useAppStateStore,
 } from 'data/appState';
+
+const mockNavigate = jest.fn();
+jest.mock('@react-navigation/native', () => ({
+  useNavigation: () => ({ navigate: mockNavigate }),
+}));
+jest.mock('helpers/whatsNew', () => ({
+  whatsNewContext: () => ({}),
+  whatsNewSince: jest.fn(() => null),
+}));
 
 const base = {
   setupSeen: true,
@@ -59,5 +75,63 @@ describe('resetAppState', () => {
       whatsNewSeenVersion: '19.0.0',
       courseSharingSeen: false,
     });
+  });
+});
+
+describe('useLaunchSheet', () => {
+  const launch = async () => {
+    const hook = await renderHook(() => useLaunchSheet());
+    jest.advanceTimersByTime(1000);
+    return hook;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    resetLaunchNotes();
+    useAppStateStore.setState({ setupSeen: false, whatsNewSeenVersion: null });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('opens the set-up page a moment after the first login', async () => {
+    noteLoginShown();
+    const hook = await renderHook(() => useLaunchSheet());
+    jest.advanceTimersByTime(999);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+    expect(mockNavigate).toHaveBeenCalledWith('Setup');
+    expect(useAppStateStore.getState().setupSeen).toBe(false);
+    await hook.unmount();
+  });
+
+  it("marks set-up seen after an update and shows What's New", async () => {
+    jest
+      .mocked(whatsNewSince)
+      .mockReturnValueOnce({ version: '19.0.0', highlights: [] });
+    await launch();
+    expect(useAppStateStore.getState().setupSeen).toBe(true);
+    expect(mockNavigate).toHaveBeenCalledWith('WhatsNewStack', {
+      screen: 'WhatsNew',
+      params: { version: '19.0.0' },
+    });
+  });
+
+  it('opens nothing over what a tap from outside opened', async () => {
+    useAppStateStore.setState({ setupSeen: true });
+    jest
+      .mocked(whatsNewSince)
+      .mockReturnValueOnce({ version: '19.0.0', highlights: [] });
+    noteOpenedFromOutside();
+    await launch();
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it('opens nothing when unmounted before the delay', async () => {
+    noteLoginShown();
+    const hook = await renderHook(() => useLaunchSheet());
+    await hook.unmount();
+    jest.advanceTimersByTime(1000);
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });
