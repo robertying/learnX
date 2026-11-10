@@ -30,6 +30,8 @@ const own = path =>
   !path.includes('/Tests/') &&
   !path.startsWith('ios/learnXTests/') &&
   !path.startsWith('ios/Pods/') &&
+  // The widgets' layouts come from JS (src/widgets), which Jest tests.
+  !path.startsWith('ios/ExpoWidgetsTarget/') &&
   path.endsWith('.swift');
 
 const files = new Map();
