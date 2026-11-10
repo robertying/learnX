@@ -92,7 +92,7 @@ The app, its share extension and its widgets share data through an app group and
 
    That changes the app (`com.yourname.learnX`), the share extension (`….ShareExtension`), the widgets (`….Widgets`), the app group (`group.com.yourname.learnX`) and the keychain group together. They have to stay in step: the app looks for its files in `group.<its bundle ID>`, and extension IDs must start with the app's.
 
-   You can do the same by hand in Xcode: for each of the `learnX`, `ShareExtension` and `ExpoWidgetsTarget` targets, set the Team and Bundle Identifier under Signing & Capabilities, change the App Group there, and change `LearnXAppGroup` / `ExpoWidgetsAppGroupIdentifier` in the targets' `Info.plist`.
+   You can do the same by hand in Xcode: set Development Team once in the `learnX` project's Build Settings (every target inherits it), then for each of the `learnX`, `ShareExtension` and `ExpoWidgetsTarget` targets set the Bundle Identifier under Signing & Capabilities, change the App Group there, and change `LearnXAppGroup` / `ExpoWidgetsAppGroupIdentifier` in the targets' `Info.plist`.
 
 3. Leave Signing on "Automatically manage signing". Xcode registers the IDs and app group for your team on the first build.
 
