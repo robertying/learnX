@@ -3,12 +3,11 @@ name: Build
 # Builds the app so a broken patch, Podfile, Gradle, R8 or native module change
 # shows up in CI, not on a Mac later, runs the native iOS tests, and runs the
 # Android E2E flows by hand. No signing secrets, no uploads. Not required
-# checks. Android runs if "Detect changed files" failed, so a broken filter
-# can't skip it.
+# checks.
 #
-# When each job runs ("Detect changed files" decides from the changed paths):
+# When each job runs:
 # - Android (release APK, ~10 min cold): PRs and main pushes that touch Android
-#   paths, and by hand. A release build, because R8 and the JS bundle only run
+#   paths (its first step checks; otherwise the rest is skipped), and by hand. A release build, because R8 and the JS bundle only run
 #   there; -PciRelease signs it with the debug key and turns off Crashlytics
 #   uploads (android/app/build.gradle).
 # - iOS (build + native tests, ~47 min cold): by hand only, with the "iOS"
@@ -60,12 +59,10 @@ env:
   MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
 
 jobs:
-  changes:
-    name: Detect changed files
+  android:
+    name: Android
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      android: ${{ steps.android.outputs.changed }}
+    timeout-minutes: 90
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -73,28 +70,21 @@ jobs:
           fetch-depth: 2
 
       # The app's Gradle setup, the modules' Android code and autolinking,
-      # patched and installed packages, and app config.
-      - name: Android
-        id: android
+      # patched and installed packages, and app config. Manual runs always
+      # build.
+      - name: Detect changed files
+        id: changes
         run: >-
           scripts/changed-files.sh
           '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/workflows/build\.yml$)'
           >> "$GITHUB_OUTPUT"
 
-  android:
-    name: Android
-    needs: changes
-    if: ${{ !cancelled() && needs.changes.outputs.android != 'false' }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 90
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
       - name: Set up pnpm
+        if: steps.changes.outputs.changed == 'true'
         uses: pnpm/action-setup@v6
 
       - name: Set up Node.js
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
@@ -104,33 +94,39 @@ jobs:
           package-manager-cache: false
 
       - name: Set up Java
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
 
       - name: Set up Gradle
+        if: steps.changes.outputs.changed == 'true'
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: ${{ env.SAVE_CACHE != 'true' }}
 
       - name: Set up ccache
+        if: steps.changes.outputs.changed == 'true'
         uses: hendrikmuhs/ccache-action@v1.2.24
         with:
           key: android
           save: ${{ env.SAVE_CACHE }}
 
       - name: Install dependencies
+        if: steps.changes.outputs.changed == 'true'
         run: pnpm install --frozen-lockfile
 
       # The release bundle inlines .env; the mock login is what E2E logs in
       # with. Any non-empty values work, as they only switch to mock data.
       - name: Write .env
+        if: steps.changes.outputs.changed == 'true'
         run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
 
       # One ABI is enough to compile every native module and keeps the build
       # short. CMake (3.17+) picks up the compiler launchers from the environment.
       - name: Build release APK
+        if: steps.changes.outputs.changed == 'true'
         working-directory: android
         run: ./gradlew app:assembleRelease -PciRelease -PreactNativeArchitectures=x86_64 --build-cache --no-daemon
         env:
@@ -138,11 +134,11 @@ jobs:
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
 
       - name: Show ccache stats
-        if: always()
+        if: always() && steps.changes.outputs.changed == 'true'
         run: ccache --show-stats || true
 
       - name: Upload APK for E2E
-        if: env.E2E == 'true'
+        if: steps.changes.outputs.changed == 'true' && env.E2E == 'true'
         uses: actions/upload-artifact@v7
         with:
           name: apk
