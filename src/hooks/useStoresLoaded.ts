@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { importLegacyUserData } from 'data/legacy';
 import { loadCredentials } from 'data/credentials';
+import { forgetLoginAfterReinstall } from 'data/install';
 import { restoreQueryCache } from 'data/queryClient';
 import { recordError } from 'helpers/crashReporting';
 
@@ -8,9 +9,13 @@ import { recordError } from 'helpers/crashReporting';
  * Loads what the first screen needs: the saved login, the user data saved by
  * 18.0.x, and the cached server data. Waits for all three even when one
  * fails, so the first screen never reads a store that is still loading; a
- * failed one is reported and starts empty.
+ * failed one is reported and starts empty. A new install first drops a login
+ * the keychain kept from before the app was deleted.
  */
 const loadStores = async () => {
+  await forgetLoginAfterReinstall().catch((error: unknown) =>
+    recordError(error, 'Checking for a new install'),
+  );
   const results = await Promise.allSettled([
     loadCredentials(),
     importLegacyUserData(),

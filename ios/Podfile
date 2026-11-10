@@ -76,6 +76,12 @@ target 'learnX' do
       config.build_settings.delete 'STRIP_INSTALLED_PRODUCT'
       config.build_settings.delete 'STRIP_STYLE'
       config.build_settings.delete 'STRIP_SWIFT_SYMBOLS'
+      # Xcode's compilation cache (Swift and C-family), kept in each
+      # DerivedData's CompilationCache.noindex, as learnX.xcodeproj sets for its
+      # own targets. Debug only. ccache doesn't work here: Xcode 26 and later
+      # never call React Native's CC wrapper, and with C_COMPILER_LAUNCHER
+      # ccache can't cache explicitly built modules.
+      config.build_settings['COMPILATION_CACHE_ENABLE_CACHING'] = 'YES' if config.name == 'Debug'
     end
   end
 end

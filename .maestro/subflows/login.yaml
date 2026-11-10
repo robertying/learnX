@@ -5,10 +5,18 @@ appId: ${APP_ID}
 - launchApp:
     clearState: true
     clearKeychain: true
+# A new install opens on the welcome page.
+- extendedWaitUntil:
+    visible:
+      id: 'welcome-continue|login-username'
+    timeout: 60000
+- tapOn:
+    id: welcome-continue
+    optional: true
 - extendedWaitUntil:
     visible:
       id: login-username
-    timeout: 60000
+    timeout: 10000
 - tapOn:
     id: login-username
 - inputText: ${USERNAME}
@@ -34,6 +42,15 @@ appId: ${APP_ID}
     visible:
       id: 'tab-notices|bell\.fill'
     timeout: 30000
+# The set-up page opens over Today after the first login.
+- extendedWaitUntil:
+    visible:
+      id: setup-not-now
+    timeout: 5000
+    optional: true
+- tapOn:
+    id: setup-not-now
+    optional: true
 # The app opens on Today; the flows start from the notices.
 - runFlow:
     file: tab.yaml

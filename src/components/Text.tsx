@@ -15,6 +15,7 @@ import { useTheme } from 'theme';
  *
  * | variant       | iOS / Mac (default size)  | Android (M3)   |
  * | ------------- | ------------------------- | -------------- |
+ * | `largeTitle`  | Large Title, 34/41 bold   | headlineMedium |
  * | `title`       | Title 3, 20/25 semibold   | titleLarge     |
  * | `headline`    | Headline, 17/22 semibold  | titleMedium    |
  * | `body`        | Body, 17/22               | bodyLarge      |
@@ -29,6 +30,7 @@ import { useTheme } from 'theme';
  * (body 13 pt). Android scales them with the system font scale.
  */
 export type TextVariant =
+  | 'largeTitle'
   | 'title'
   | 'headline'
   | 'body'
@@ -42,6 +44,7 @@ type Ramp = NonNullable<NativeTextProps['dynamicTypeRamp']>;
 const fontFamily = Platform.select({ ios: 'System', default: 'sans-serif' });
 
 const iosStyles: Record<TextVariant, TextStyle> = {
+  largeTitle: { fontSize: 34, lineHeight: 41, fontWeight: '700' },
   title: { fontSize: 20, lineHeight: 25, fontWeight: '600' },
   headline: { fontSize: 17, lineHeight: 22, fontWeight: '600' },
   body: { fontSize: 17, lineHeight: 22, fontWeight: '400' },
@@ -52,6 +55,12 @@ const iosStyles: Record<TextVariant, TextStyle> = {
 };
 
 const androidStyles: Record<TextVariant, TextStyle> = {
+  largeTitle: {
+    fontSize: 28,
+    lineHeight: 36,
+    fontWeight: '400',
+    letterSpacing: 0,
+  },
   title: { fontSize: 22, lineHeight: 28, fontWeight: '400', letterSpacing: 0 },
   headline: {
     fontSize: 16,
@@ -87,6 +96,7 @@ const androidStyles: Record<TextVariant, TextStyle> = {
 };
 
 const ramps: Record<TextVariant, Ramp> = {
+  largeTitle: 'largeTitle',
   title: 'title3',
   headline: 'headline',
   body: 'body',

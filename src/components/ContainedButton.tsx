@@ -9,6 +9,7 @@ export interface ContainedButtonProps {
   disabled?: boolean;
   onPress?: () => void;
   style?: StyleProp<ViewStyle>;
+  testID?: string;
 }
 
 // Below iOS 26, @expo/ui falls back to a plain button for glass, so those keep
@@ -23,10 +24,12 @@ const ContainedButton: React.FC<ContainedButtonProps> = ({
   disabled,
   onPress,
   style,
+  testID,
 }) => {
   return (
     <ThemedHost matchContents style={style}>
       <Button
+        testID={testID}
         label={label}
         disabled={disabled}
         onPress={onPress}

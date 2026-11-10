@@ -31,6 +31,12 @@ export const systemIcons = {
   all: { ios: 'tray', android: 'inbox' },
   unread: { ios: 'envelope.badge', android: 'mark_email_unread' },
   unfinished: { ios: 'circle', android: 'radio_button_unchecked' },
+  // Welcome and What's New
+  today: { ios: 'calendar', android: 'today' },
+  content: { ios: 'tray.full', android: 'inbox' },
+  reminder: { ios: 'alarm', android: 'alarm' },
+  widgets: { ios: 'square.grid.2x2', android: 'widgets' },
+  search: { ios: 'magnifyingglass', android: 'search' },
 } as const satisfies Record<string, { ios: SFSymbol; android: AndroidSymbol }>;
 
 export type SystemIconName = keyof typeof systemIcons;
@@ -44,6 +50,7 @@ export type SystemIconAndroidName =
  * but doesn't export it; a test checks these against it.
  */
 export const materialCodepoints: Record<SystemIconAndroidName, number> = {
+  alarm: 0xe855,
   archive: 0xe149,
   attach_file: 0xe226,
   calendar_today: 0xe935,
@@ -62,8 +69,11 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   notifications: 0xe7f4,
   radio_button_unchecked: 0xe836,
   schedule: 0xe8b5,
+  search: 0xe8b6,
   search_off: 0xea76,
+  today: 0xe8df,
   unarchive: 0xe169,
   visibility: 0xe8f4,
   visibility_off: 0xe8f5,
+  widgets: 0xe1bd,
 };
