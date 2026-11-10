@@ -9,6 +9,10 @@ name: Build
 # - iOS (build + native tests, ~47 min cold): main pushes that touch iOS paths,
 #   and by hand. Too slow to gate PRs; run it by hand on a branch when needed.
 # - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
+# - E2E: by hand only, with the "Run E2E" box ticked. After the Android and
+#   iOS jobs build, they run the Maestro flows (scripts/e2e.sh) on that same
+#   debug build, with Metro on the runner and the mock login. The Android flows
+#   aren't maintained, so expect drift there (.maestro/AGENTS.md).
 on:
   pull_request:
   push:
@@ -17,6 +21,10 @@ on:
     inputs:
       mac:
         description: Build Mac
+        type: boolean
+        default: false
+      e2e:
+        description: Run E2E
         type: boolean
         default: false
 
@@ -36,6 +44,10 @@ env:
   CCACHE_MAXSIZE: 2G
   CCACHE_COMPRESS: 'true'
   SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
+  E2E: ${{ inputs.e2e == true }}
+  MAESTRO_VERSION: 2.12.1
+  MAESTRO_CLI_NO_ANALYTICS: 'true'
+  MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: 'true'
 
 jobs:
   changes:
@@ -71,7 +83,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -120,6 +132,52 @@ jobs:
       - name: Show ccache stats
         if: always()
         run: ccache --show-stats || true
+
+      # Any non-empty values work: they only switch the login to mock data.
+      - name: Write .env
+        if: env.E2E == 'true'
+        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+
+      - name: Start Metro
+        if: env.E2E == 'true'
+        run: scripts/ci-metro.sh android
+
+      - name: Install Maestro
+        if: env.E2E == 'true'
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        if: env.E2E == 'true'
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: E2E
+        if: env.E2E == 'true'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          script: |
+            adb install -r android/app/build/outputs/apk/debug/app-x86_64-debug.apk
+            adb reverse tcp:8081 tcp:8081
+            scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro
+
+      - name: Upload E2E results
+        if: always() && env.E2E == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-android
+          path: |
+            build/maestro
+            build/metro.log
+          if-no-files-found: ignore
 
   apple:
     name: ${{ matrix.name }}
@@ -203,20 +261,50 @@ jobs:
           key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
           restore-keys: xcode-cas-${{ matrix.name }}-
 
-      # iOS: the native tests (scripts/test-ios.sh) build the app and every
-      # module, so they also prove it compiles. Signed to run locally (the
-      # simulator default), which keeps the App Group entitlement the tests
-      # need; no certificates involved.
-      - name: Test
+      - name: Pick a simulator
         if: matrix.name == 'iOS'
         run: |
           device="$(xcrun simctl list devices available --json |
             jq -r '[.devices | to_entries | sort_by(.key)[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))] | last | .udid')"
           echo "Simulator: $device"
-          scripts/test-ios.sh "$device"
+          echo "SIMULATOR=$device" >> "$GITHUB_ENV"
+
+      # iOS: the native tests (scripts/test-ios.sh) build the app and every
+      # module, so they also prove it compiles. Signed to run locally (the
+      # simulator default), which keeps the App Group entitlement the tests
+      # need; no certificates involved.
+      - name: Test
+        id: test
+        if: matrix.name == 'iOS'
+        run: scripts/test-ios.sh "$SIMULATOR"
         env:
           DERIVED_DATA: build/DerivedData
           XCODEBUILD_ARGS: COMPILER_INDEX_STORE_ENABLE=NO COMPILATION_CACHE_ENABLE_CACHING=YES
+
+      # E2E reuses the debug app the tests built, even if a test failed.
+      - name: Write .env
+        id: e2e-setup
+        if: ${{ !cancelled() && matrix.name == 'iOS' && env.E2E == 'true' && hashFiles('build/DerivedData/Build/Products/Debug-iphonesimulator/learnX.app/Info.plist') != '' }}
+        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+
+      - name: Start Metro and install the app
+        if: ${{ !cancelled() && steps.e2e-setup.outcome == 'success' }}
+        run: |
+          scripts/ci-metro.sh ios
+          xcrun simctl boot "$SIMULATOR" || true
+          xcrun simctl install "$SIMULATOR" build/DerivedData/Build/Products/Debug-iphonesimulator/learnX.app
+
+      - name: Install Maestro
+        if: ${{ !cancelled() && steps.e2e-setup.outcome == 'success' }}
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: E2E
+        if: ${{ !cancelled() && steps.e2e-setup.outcome == 'success' }}
+        run: scripts/e2e.sh ios --format junit --output build/maestro/report.xml --test-output-dir build/maestro
+        env:
+          MAESTRO_DEVICE: ${{ env.SIMULATOR }}
 
       # Mac: no signing certificates on CI, so this only proves the code
       # compiles and links. Build signed when running the app.
@@ -266,4 +354,6 @@ jobs:
           path: |
             build/xcodebuild.log
             build/DerivedData/results/*.xcresult
+            build/maestro
+            build/metro.log
           if-no-files-found: ignore
