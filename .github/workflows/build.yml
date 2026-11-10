@@ -3,15 +3,16 @@ name: Build
 # Builds the app so a broken patch, Podfile, Gradle, R8 or native module change
 # shows up in CI, not on a Mac later, runs the native iOS tests, and runs the
 # Android E2E flows by hand. No signing secrets, no uploads. Not required
-# checks. The jobs run if Changes failed, so a broken filter can't skip them.
+# checks. Android runs if Changes failed, so a broken filter can't skip it.
 #
 # When each job runs (the Changes job decides from the changed paths):
 # - Android (release APK, ~10 min cold): PRs and main pushes that touch Android
 #   paths, and by hand. A release build, because R8 and the JS bundle only run
 #   there; -PciRelease signs it with the debug key and turns off Crashlytics
 #   uploads (android/app/build.gradle).
-# - iOS (build + native tests, ~47 min cold): main pushes that touch iOS paths,
-#   and by hand. Too slow to gate PRs; run it by hand on a branch when needed.
+# - iOS (build + native tests, ~47 min cold): by hand only, with the "iOS"
+#   box ticked (the default). Run it on main to refresh the compilation cache,
+#   or on a branch to check it.
 # - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
 # - Android E2E: by hand only, with the "Run E2E" box ticked. Runs the Maestro
 #   flows (scripts/e2e.sh) in an emulator on the release APK the Android job
@@ -23,6 +24,10 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
+      ios:
+        description: Build iOS and run native tests
+        type: boolean
+        default: true
       mac:
         description: Build Mac
         type: boolean
@@ -60,26 +65,19 @@ jobs:
     timeout-minutes: 5
     outputs:
       android: ${{ steps.android.outputs.changed }}
-      ios: ${{ steps.ios.outputs.changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
-      # Shared by both: patched and installed packages, autolinking, app config.
+      # The app's Gradle setup, the modules' Android code and autolinking,
+      # patched and installed packages, and app config.
       - name: Android
         id: android
         run: >-
           scripts/changed-files.sh
           '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/workflows/build\.yml$)'
-          >> "$GITHUB_OUTPUT"
-
-      - name: iOS
-        id: ios
-        run: >-
-          scripts/changed-files.sh
-          '^(ios/|modules/[^/]+/(ios/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|Gemfile(\.lock)?$|\.ruby-version$|scripts/(test-ios\.sh|native-coverage\.mjs|check-patches\.sh|changed-files\.sh)$|\.github/workflows/build\.yml$)'
           >> "$GITHUB_OUTPUT"
 
   android:
@@ -152,9 +150,8 @@ jobs:
 
   apple:
     name: ${{ matrix.name }}
-    # Never on PRs; Mac only when asked for by hand (see the matrix).
-    needs: changes
-    if: ${{ !cancelled() && github.event_name != 'pull_request' && needs.changes.outputs.ios != 'false' }}
+    # By hand only, for the boxes ticked.
+    if: github.event_name == 'workflow_dispatch' && (inputs.ios || inputs.mac)
     runs-on: macos-26
     timeout-minutes: 120
     permissions:
@@ -164,7 +161,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name: ${{ fromJSON(inputs.mac && '["iOS","Mac"]' || '["iOS"]') }}
+        name: ${{ fromJSON(inputs.ios && (inputs.mac && '["iOS","Mac"]' || '["iOS"]') || '["Mac"]') }}
     env:
       # Only iOS keeps a compilation cache (see the top of this file).
       CACHE_CAS: ${{ matrix.name == 'iOS' }}
