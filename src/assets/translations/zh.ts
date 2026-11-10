@@ -186,6 +186,7 @@ const zh: typeof en = {
   `,
   shareReceived: '已收到分享的文件，将在下次提交作业时自动添加为附件',
   shareError: '无法接收分享的文件，文件可能过大',
+  shareUnsupported: '只能将文件添加为作业附件',
   noFileSize: '未知',
   datePickerStartLabel: '开始',
   datePickerEndLabel: '结束',

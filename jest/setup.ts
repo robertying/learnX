@@ -55,12 +55,13 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
     flush: jest.fn(() => Promise.resolve()),
   },
 }));
-jest.mock('react-native-share-menu', () => ({
+// Files shared to learnX (modules/share).
+jest.mock('../modules/share', () => ({
   __esModule: true,
   default: {
-    getSharedCacheDirectory: jest.fn(),
-    getInitialShare: jest.fn(),
-    addNewShareListener: jest.fn(() => ({ remove: jest.fn() })),
+    takeSharedItem: jest.fn(() => null),
+    getSharedFilesDirectory: jest.fn(() => null),
+    addListener: jest.fn(() => ({ remove: jest.fn() })),
   },
 }));
 // Spotlight is native only (iOS and Mac), as on Android.

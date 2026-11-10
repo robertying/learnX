@@ -1,6 +1,6 @@
 # modules
 
-Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `sidebar`, `spotlight` and `toast`. They have no JS-only fallback, so a change to their native code needs a rebuild.
+Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `share`, `sidebar`, `spotlight` and `toast`. They have no JS-only fallback, so a change to their native code needs a rebuild.
 
 ## Spotlight and App Intents
 
@@ -16,3 +16,9 @@ Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, 
 - `helpers/crashReporting` installs the global handler (from `index.js`): every uncaught error is recorded as a non-fatal first, then React Native's default handler runs, so fatal ones still crash natively; the `js_fatal` key tells the two apart. `components/ErrorBoundary` wraps the app, reports render errors with their component stack, and offers a reload. Call `recordError` for other errors worth reporting.
 - Nothing is reported from debug builds or the mock accounts, and nothing if the native module isn't in the binary. Custom keys: `js_fatal`, `screen` (last route in any navigation container, set by `trackScreen`).
 - Crashlytics doesn't symbolicate JS; use `metro-symbolicate` with the source maps from the release build (the release skill, `.claude/skills/release`).
+
+## Sharing files to learnX
+
+- iOS and Mac: the share extension (`ios/ShareExtension/ShareViewController.swift`, no pods) takes the first shared file (Files, Photos; not plain text), copies it into the app group's `Library/Caches/<uuid>/<name>`, records it under `LearnXSharedFile` in the group's user defaults and opens `learnx://`. `modules/share` (`SharedFileStore`) hands it to JS once: `takeSharedItem()` for the one that launched the app, the `onShare` event (sent when a `learnx` link arrives) after that. `getSharedFilesDirectory()` is the folder `removeFileDir` clears.
+- Android: `MainActivity`'s SEND filter (files and `text/*`); the module reads `EXTRA_STREAM` from the launch intent or a new intent and removes the extras once read. Text without a file comes back as `{ kind: 'unsupported' }`, and the app says only files can be attached.
+- `hooks/useShareHandler` copies an Android content URI into the cache and keeps the file in `data/pendingAssignment` for the next submission.

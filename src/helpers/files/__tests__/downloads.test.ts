@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import ShareMenu from 'react-native-share-menu';
+import Share from '../../../../modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { dataSource, ensureSession } from 'data/source';
 import { resetSettings, setSetting } from 'data/settings';
@@ -232,8 +232,8 @@ describe('moveDownloadsToCurrentDirectory', () => {
 describe('removeFileDir', () => {
   it('deletes downloads in both folders and shared files', async () => {
     jest
-      .mocked(ShareMenu.getSharedCacheDirectory)
-      .mockImplementation(callback => callback('/group/Shared'));
+      .mocked(Share!.getSharedFilesDirectory)
+      .mockReturnValueOnce('file:///group/Shared');
     __fs.write(`${FILES}/Calculus/f1/a.pdf`, '1');
     __fs.write(`${DOCUMENTS}/learnX Files/Calculus/f2/b.pdf`, '2');
     __fs.write(`${CACHES}/learnX Shared/c.pdf`, '3');
@@ -246,9 +246,9 @@ describe('removeFileDir', () => {
     expect(__fs.files('file:///group')).toEqual([]);
   });
 
-  it("doesn't ask for the share extension's folder on Android", async () => {
-    setOS('android');
+  it('skips the share folder where there is none (Android)', async () => {
+    __fs.write(`${CACHES}/learnX Shared/c.pdf`, '3');
     await removeFileDir();
-    expect(ShareMenu.getSharedCacheDirectory).not.toHaveBeenCalled();
+    expect(__fs.files(CACHES)).toEqual([]);
   });
 });

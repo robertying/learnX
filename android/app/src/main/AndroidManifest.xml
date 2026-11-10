@@ -64,6 +64,8 @@
                 <data android:scheme="learnx" />
             </intent-filter>
 
+            <!-- Files shared to learnX, read by modules/share. text/* is for text files; a share of
+                 text alone is turned down in the app (only files can be attached). -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />

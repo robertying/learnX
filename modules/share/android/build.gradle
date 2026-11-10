@@ -1,0 +1,11 @@
+plugins {
+  id 'com.android.library'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'io.robertying.learnx'
+version = '1.0.0'
+
+android {
+  namespace "io.robertying.learnx.share"
+}

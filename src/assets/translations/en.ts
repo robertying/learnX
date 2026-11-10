@@ -192,6 +192,7 @@ export default {
   shareReceived:
     'Got it. The shared file will be attached the next time you submit an assignment.',
   shareError: "Couldn't receive the shared file. It may be too large.",
+  shareUnsupported: 'Only files can be attached to an assignment.',
   noFileSize: 'Unknown',
   datePickerStartLabel: 'Start',
   datePickerEndLabel: 'End',

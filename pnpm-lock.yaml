@@ -238,9 +238,6 @@ importers:
       '@types/react':
         specifier: 19.3.0
         version: 19.3.0
-      '@types/react-native-share-menu':
-        specifier: 5.0.5
-        version: 5.0.5
       '@types/semver':
         specifier: 7.8.0
         version: 7.8.0
@@ -391,9 +388,6 @@ importers:
       react-native-share:
         specifier: 12.3.1
         version: 12.3.1
-      react-native-share-menu:
-        specifier: 6.0.0
-        version: 6.0.0
       react-native-tab-view:
         specifier: 4.3.4
         version: 4.3.4(react-native-pager-view@10.0.0(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1))(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -2004,9 +1998,6 @@ packages:
 
   '@types/parse-json@4.0.2':
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}
-
-  '@types/react-native-share-menu@5.0.5':
-    resolution: {integrity: sha512-RhJO1UYSbS9HAjJdbpkSs7seXUopuE8O7dXNFweo0bnA/zrUamggLhCKzBmYwyYQQ5D2NPC69G3eBI44gQN5MA==}
 
   '@types/react-reconciler@0.34.1':
     resolution: {integrity: sha512-XAzeH3rARrfApMETpkcFmfJQRS3rPpXsSR/XA8H3sV8WgA0bp6UE7sLNM92l1ZbCclUKmrH28Ik2fSejh9UxRg==}
@@ -4616,9 +4607,6 @@ packages:
     peerDependencies:
       react: '*'
       react-native: '*'
-
-  react-native-share-menu@6.0.0:
-    resolution: {integrity: sha512-KdmRnqjI/B2MigSxGmhbYJ3WMJxKXj+0c47ANcVZ/PTzc2vtz6d1r4KQJgkBImXgNC+vowpuD2UGdPllxadr2A==}
 
   react-native-share@12.3.1:
     resolution: {integrity: sha512-mRVRie0qKbtj+jWqJ2POPkeSd8SxnMp6aazFZVmq8ZbkUGtQLENR/L58ky8zH4VUEF/WYRmdBiBHWHVtzOewtQ==}
@@ -7409,8 +7397,6 @@ snapshots:
       undici-types: 8.9.0
 
   '@types/parse-json@4.0.2': {}
-
-  '@types/react-native-share-menu@5.0.5': {}
 
   '@types/react-reconciler@0.34.1(@types/react@19.3.0)':
     dependencies:
@@ -10490,8 +10476,6 @@ snapshots:
       react-freeze: 1.0.4(react@19.3.1)
       react-native: 0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1)
       warn-once: 0.1.1
-
-  react-native-share-menu@6.0.0: {}
 
   react-native-share@12.3.1: {}
 
