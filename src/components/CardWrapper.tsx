@@ -52,6 +52,11 @@ export interface CardWrapperProps {
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
   disableSwipe?: boolean;
+  /**
+   * The last row of its list or section: no separator under it, which would
+   * otherwise sit on the tab bar or the next section's header.
+   */
+  last?: boolean;
 }
 
 const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
@@ -73,6 +78,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   checked,
   onCheck,
   disableSwipe,
+  last,
 }) => {
   const theme = useTheme();
 
@@ -250,8 +256,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           />
         )}
         {children}
-        {Platform.OS === 'ios' ? (
+        {Platform.OS === 'ios' && !last ? (
           <View
+            testID="card-separator"
             style={[
               styles.separator,
               { backgroundColor: theme.colors.outlineVariant },

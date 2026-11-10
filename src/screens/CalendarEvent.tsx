@@ -222,7 +222,6 @@ const CalendarEvent: React.FC<Props> = () => {
           <FormButton
             icon={{ ios: 'trash', android: 'calendar-remove' }}
             title={t('deleteSyncedCalendarsAndReminders')}
-            destructive
             onPress={confirmDeleteCalendars}
           />
           <FormButton

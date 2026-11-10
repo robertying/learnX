@@ -48,7 +48,7 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import {
-  getDetailScreenOptions,
+  getItemDetailOptions,
   getModalScreenOptions,
   mockNetworkTitle,
 } from './options';
@@ -78,7 +78,7 @@ const SettingDetails = createNativeStackNavigator<SettingDetailParams>();
 export const renderItemDetails = (
   names: readonly (keyof ItemDetailParams)[],
 ) => (
-  <ItemDetails.Group screenOptions={getDetailScreenOptions()}>
+  <ItemDetails.Group screenOptions={getItemDetailOptions}>
     {names.includes('CourseDetail') && (
       <ItemDetails.Screen name="CourseDetail" component={CourseDetail} />
     )}

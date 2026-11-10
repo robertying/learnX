@@ -346,7 +346,10 @@ const createContent = <T extends { id: string; courseId: string }>({
    * after the semester is switched.
    */
   const useItem = (id: string) =>
-    useList().items.find(item => item.id === id) ??
+    useList().items.find(item => item.id === id) ?? getItem(id);
+
+  /** The item with `id` in any semester's cached list, outside React. */
+  const getItem = (id: string) =>
     queryClient
       .getQueriesData<T[]>({ queryKey: queryKeys.contentAll(name) })
       .flatMap(([, items]) => items ?? [])
@@ -372,6 +375,7 @@ const createContent = <T extends { id: string; courseId: string }>({
     updateItem,
     useList,
     useItem,
+    getItem,
     useRefreshCourse,
   };
 };
@@ -414,6 +418,7 @@ const notices = createContent<Notice>({
 export const noticesQuery = notices.query;
 export const refreshCourseNotices = notices.refreshCourse;
 export const useNotice = notices.useItem;
+export const getNotice = notices.getItem;
 export const useRefreshCourseNotices = notices.useRefreshCourse;
 /** Opening a notice marks it read on the server; the list shows it now. */
 export const markNoticeRead = (id: string) =>
@@ -498,6 +503,7 @@ const assignments = createContent<Assignment>({
 export const assignmentsQuery = assignments.query;
 export const refreshCourseAssignments = assignments.refreshCourse;
 export const useAssignment = assignments.useItem;
+export const getAssignment = assignments.getItem;
 export const useRefreshCourseAssignments = assignments.useRefreshCourse;
 export const useAssignments = () => {
   const { items, ...result } = assignments.useList();
@@ -523,6 +529,7 @@ const files = createContent<File>({
 export const filesQuery = files.query;
 export const refreshCourseFiles = files.refreshCourse;
 export const useFile = files.useItem;
+export const getFile = files.getItem;
 export const useRefreshCourseFiles = files.useRefreshCourse;
 /** Downloading a file marks it seen on the server; the list shows it now. */
 export const markFileSeen = (id: string) =>

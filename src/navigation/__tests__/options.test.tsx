@@ -7,11 +7,31 @@ import { t } from 'helpers/i18n';
 import {
   getCloseHeaderItem,
   getDetailScreenOptions,
+  getItemDetailOptions,
+  getItemTitle,
   getModalScreenOptions,
 } from 'navigation/options';
 import { screenLayout } from 'navigation/screenLayout';
 
 jest.mock('expo', () => ({ reloadAppAsync: jest.fn() }));
+jest.mock('data/content', () => {
+  const find =
+    <T extends { id: string }>(items: T[]) =>
+    (id: string) =>
+      items.find(i => i.id === id);
+  return {
+    getNotice: find([
+      { id: 'n', courseName: 'Calculus', courseTeacherName: 'Prof. Li' },
+    ]),
+    getAssignment: find([
+      { id: 'a', courseName: 'Physics', courseTeacherName: 'Prof. Zhao' },
+    ]),
+    getFile: find([{ id: 'f', title: 'Slides', courseName: 'Calculus' }]),
+  };
+});
+jest.mock('data/queries', () => ({
+  getCachedCourses: () => [{ id: 'c', name: 'Calculus', teacherName: 'Li' }],
+}));
 jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
 
 const navigation = { goBack: jest.fn() };
@@ -51,6 +71,48 @@ it('tints detail headers on iOS, keeping a native title in the text color', () =
     DeviceInfo.supportsNativeSubtitle() ? { color: '#123456' } : undefined,
   );
   expect(getDetailScreenOptions()({ theme }).title).toBe('');
+});
+
+it('titles item detail screens from the cached item', () => {
+  const route = (name: string, params: object) =>
+    ({ key: name, name, params }) as never;
+  expect(getItemTitle(route('NoticeDetail', { id: 'n' }))).toEqual([
+    'Calculus',
+    'Prof. Li',
+  ]);
+  expect(getItemTitle(route('AssignmentDetail', { id: 'a' }))).toEqual([
+    'Physics',
+    'Prof. Zhao',
+  ]);
+  expect(getItemTitle(route('FileDetail', { id: 'f' }))).toEqual([
+    'Slides',
+    'Calculus',
+  ]);
+  expect(
+    getItemTitle(
+      route('FileDetail', {
+        attachment: { title: 'Notes', courseName: 'Physics' },
+      }),
+    ),
+  ).toEqual(['Notes', 'Physics']);
+  expect(getItemTitle(route('CourseDetail', { id: 'c' }))).toEqual([
+    'Calculus',
+    'Li',
+  ]);
+  expect(getItemTitle(route('CourseDetail', { id: 'gone' }))).toEqual([
+    undefined,
+    undefined,
+  ]);
+
+  const options = getItemDetailOptions({
+    theme,
+    route: route('NoticeDetail', { id: 'n' }),
+  });
+  expect(options.title).toBe('Calculus');
+  expect(
+    getItemDetailOptions({ theme, route: route('NoticeDetail', { id: 'x' }) })
+      .title,
+  ).toBe('');
 });
 
 it('shows a failed screen as an error in its place', async () => {

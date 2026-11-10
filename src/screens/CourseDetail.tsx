@@ -57,6 +57,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
     disableSwipe?: boolean;
     hideCourseName?: boolean;
     onPress?: () => void;
+    last?: boolean;
   }>;
   detailScreen: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail';
   /** The course's refresh of this list (`useRefreshCourseNotices`, …). */
@@ -82,9 +83,10 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   return (
     <FlatList
       data={data}
-      renderItem={({ item }) => (
+      renderItem={({ item, index }) => (
         <Card
           data={item}
+          last={index === data.length - 1}
           disableSwipe
           hideCourseName
           onPress={() => navigation.push(detailScreen, { id: item.id })}

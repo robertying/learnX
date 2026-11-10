@@ -105,6 +105,8 @@ describe('Search', () => {
     // No file matches, so no Files header
     expect(screen.queryByText('Files')).toBeNull();
     expect(screen.queryByText('Lecture 5 slides')).toBeNull();
+    // Each section's only row is its last, with no separator under it.
+    expect(screen.queryByTestId('card-separator')).toBeNull();
   });
 
   it('opens a result in the search stack', async () => {

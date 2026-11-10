@@ -57,6 +57,13 @@ describe('CardWrapper', () => {
     expect(mockSwipeableMethods.openRight).toHaveBeenCalledTimes(1);
   });
 
+  it('draws a separator under every row but the last', async () => {
+    await render(card());
+    expect(screen.getByTestId('card-separator')).toBeTruthy();
+    await render(card({ last: true }));
+    expect(screen.queryByTestId('card-separator')).toBeNull();
+  });
+
   it('turns swipe and long press off with disableSwipe', async () => {
     await render(card({ disableSwipe: true }));
     expect(swipeEnabled()).toBe(false);
