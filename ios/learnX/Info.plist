@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+		<string>com.expo.modules.backgroundtask.processing</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
