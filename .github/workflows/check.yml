@@ -105,10 +105,10 @@ jobs:
   android-unit-tests:
     # The local modules' JVM unit tests (scripts/test-android.sh). A required
     # check: when nothing Android changed the job is skipped, which counts as
-    # passing.
+    # passing. It runs if Changes failed, so a broken filter can't skip it.
     name: Android unit tests
     needs: changes
-    if: needs.changes.outputs.android == 'true'
+    if: ${{ !cancelled() && needs.changes.outputs.android != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

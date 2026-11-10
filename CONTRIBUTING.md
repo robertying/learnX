@@ -164,9 +164,9 @@ End-to-end flows use [Maestro](https://docs.maestro.dev) against a debug build w
 Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
 
 - `Check / Android unit tests` (required) runs `scripts/test-android.sh` when a pull request touches Android paths; otherwise it's skipped, which counts as passing.
-- `Build / Android` compiles a debug APK when a pull request touches Android paths. Not required.
+- `Build / Android` builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths. Not required.
 - `Build / iOS` builds the app and runs the native iOS tests (`scripts/test-ios.sh`) on `main` when iOS paths change; run it by hand from the Actions tab (Build › Run workflow) to check a branch, ticking "Build Mac" to also build Mac Catalyst.
-- End-to-end flows run by hand only, on Android: tick "Run E2E" when running Build. The Android job then builds a release APK (R8, bundled JS, debug-signed) and `Android E2E` runs the Maestro flows on it in an emulator.
+- End-to-end flows run by hand only, on Android: tick "Run E2E" when running Build, and `Android E2E` runs the Maestro flows in an emulator on the release APK that `Build / Android` made.
 
 ## Pull requests
 

@@ -1,19 +1,22 @@
 name: Build
 
-# Compiles debug builds so a broken patch, Podfile, Gradle or native module
-# change shows up in CI, not on a Mac later, and runs the native iOS tests. No
-# JS bundle, no uploads. Not required checks.
+# Builds the app so a broken patch, Podfile, Gradle, R8 or native module change
+# shows up in CI, not on a Mac later, runs the native iOS tests, and runs the
+# Android E2E flows by hand. No signing secrets, no uploads. Not required
+# checks. The jobs run if Changes failed, so a broken filter can't skip them.
 #
 # When each job runs (the Changes job decides from the changed paths):
-# - Android (~6 min): PRs and main pushes that touch Android paths, and by hand.
+# - Android (release APK, ~10 min cold): PRs and main pushes that touch Android
+#   paths, and by hand. A release build, because R8 and the JS bundle only run
+#   there; -PciRelease signs it with the debug key and turns off Crashlytics
+#   uploads (android/app/build.gradle).
 # - iOS (build + native tests, ~47 min cold): main pushes that touch iOS paths,
 #   and by hand. Too slow to gate PRs; run it by hand on a branch when needed.
 # - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
-# - Android E2E: by hand only, with the "Run E2E" box ticked. The Android job
-#   then builds a release APK instead (R8 and the bundled JS, signed with the
-#   debug key, mock login in .env), and this job runs the Maestro flows
-#   (scripts/e2e.sh) on it in an emulator. The Android flows aren't
-#   maintained, so expect drift there (.maestro/AGENTS.md).
+# - Android E2E: by hand only, with the "Run E2E" box ticked. Runs the Maestro
+#   flows (scripts/e2e.sh) in an emulator on the release APK the Android job
+#   built. The Android flows aren't maintained, so expect drift there
+#   (.maestro/AGENTS.md). No iOS E2E in CI for now.
 on:
   pull_request:
   push:
@@ -82,7 +85,7 @@ jobs:
   android:
     name: Android
     needs: changes
-    if: needs.changes.outputs.android == 'true'
+    if: ${{ !cancelled() && needs.changes.outputs.android != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -121,27 +124,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # E2E only: the release bundle inlines .env, and any non-empty values
-      # work, as they only switch the login to mock data.
+      # The release bundle inlines .env; the mock login is what E2E logs in
+      # with. Any non-empty values work, as they only switch to mock data.
       - name: Write .env
-        if: env.E2E == 'true'
         run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
 
       # One ABI is enough to compile every native module and keeps the build
       # short. CMake (3.17+) picks up the compiler launchers from the environment.
-      # For E2E it's a release build; -PciRelease signs it with the debug key and
-      # turns off Crashlytics uploads (android/app/build.gradle).
-      - name: Build APK
+      - name: Build release APK
         working-directory: android
-        run: |
-          if [ "$E2E" = true ]; then
-            task=app:assembleRelease
-            extra=-PciRelease
-          else
-            task=app:assembleDebug
-            extra=
-          fi
-          ./gradlew "$task" $extra -PreactNativeArchitectures=x86_64 --build-cache --no-daemon
+        run: ./gradlew app:assembleRelease -PciRelease -PreactNativeArchitectures=x86_64 --build-cache --no-daemon
         env:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
@@ -162,7 +154,7 @@ jobs:
     name: ${{ matrix.name }}
     # Never on PRs; Mac only when asked for by hand (see the matrix).
     needs: changes
-    if: github.event_name != 'pull_request' && needs.changes.outputs.ios == 'true'
+    if: ${{ !cancelled() && github.event_name != 'pull_request' && needs.changes.outputs.ios != 'false' }}
     runs-on: macos-26
     timeout-minutes: 120
     permissions:
@@ -297,6 +289,10 @@ jobs:
           gh cache list --repo "$GITHUB_REPOSITORY" --key "xcode-cas-${{ matrix.name }}-" --limit 100 --json key --jq '.[].key' |
             grep -vx "xcode-cas-${{ matrix.name }}-$GITHUB_SHA" |
             while read -r key; do gh cache delete --repo "$GITHUB_REPOSITORY" "$key"; done
+          # What's left, against the 10 GB limit (largest first).
+          gh cache list --repo "$GITHUB_REPOSITORY" --limit 100 --sort size_in_bytes --json key,sizeInBytes \
+            --jq '.[] | "\(.sizeInBytes / 1048576 | floor) MB  \(.key)"'
+          gh api "repos/$GITHUB_REPOSITORY/actions/cache/usage" --jq '"Total: \(.active_caches_size_in_bytes / 1048576 | floor) MB in \(.active_caches_count) caches"'
         env:
           GH_TOKEN: ${{ github.token }}
 
