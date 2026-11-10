@@ -1,7 +1,7 @@
-diff --git a/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js b/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js
+diff --git a/lib/module/views/useHeaderConfigProps.js b/lib/module/views/useHeaderConfigProps.js
 index 0000000..1111111 100644
---- a/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js
-+++ b/node_modules/@react-navigation/native-stack/lib/module/views/useHeaderConfigProps.js
+--- a/lib/module/views/useHeaderConfigProps.js
++++ b/lib/module/views/useHeaderConfigProps.js
 @@ -150,6 +150,7 @@
    headerBlurEffect,
    headerTintColor,
@@ -18,10 +18,10 @@ index 0000000..1111111 100644
      titleColor,
      titleFontFamily,
      titleFontSize,
-diff --git a/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts b/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts
+diff --git a/lib/typescript/src/types.d.ts b/lib/typescript/src/types.d.ts
 index 0000000..1111111 100644
---- a/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts
-+++ b/node_modules/@react-navigation/native-stack/lib/typescript/src/types.d.ts
+--- a/lib/typescript/src/types.d.ts
++++ b/lib/typescript/src/types.d.ts
 @@ -322,6 +322,15 @@
          tintColor?: string;
      }) => React.ReactNode);
@@ -38,10 +38,10 @@ index 0000000..1111111 100644
       * How to align the the header title.
       * Defaults to `left` on platforms other than iOS.
       *
-diff --git a/node_modules/@react-navigation/native-stack/src/types.tsx b/node_modules/@react-navigation/native-stack/src/types.tsx
+diff --git a/src/types.tsx b/src/types.tsx
 index 0000000..1111111 100644
---- a/node_modules/@react-navigation/native-stack/src/types.tsx
-+++ b/node_modules/@react-navigation/native-stack/src/types.tsx
+--- a/src/types.tsx
++++ b/src/types.tsx
 @@ -372,6 +372,15 @@
          tintColor?: string;
        }) => React.ReactNode);
@@ -58,10 +58,10 @@ index 0000000..1111111 100644
     * How to align the the header title.
     * Defaults to `left` on platforms other than iOS.
     *
-diff --git a/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx b/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx
+diff --git a/src/views/useHeaderConfigProps.tsx b/src/views/useHeaderConfigProps.tsx
 index 0000000..1111111 100644
---- a/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx
-+++ b/node_modules/@react-navigation/native-stack/src/views/useHeaderConfigProps.tsx
+--- a/src/views/useHeaderConfigProps.tsx
++++ b/src/views/useHeaderConfigProps.tsx
 @@ -211,6 +211,7 @@
    headerBlurEffect,
    headerTintColor,

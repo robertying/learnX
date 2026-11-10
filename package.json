@@ -7,7 +7,6 @@
   },
   "packageManager": "pnpm@12.18.0+sha512.9d7882d5dc82147ecfc4e062aa34834e0ad0296710a1837a1115ae012127d36b7109e321ac1598a1dd0a65597681b1e99917e12ed0d749eae91187943363beb3",
   "scripts": {
-    "postinstall": "patch-package",
     "pod": "cd ios && bundle exec pod install && bundle exec pod update && cd ..",
     "start": "react-native start --client-logs",
     "android": "react-native run-android",
@@ -81,7 +80,6 @@
     "oxfmt": "0.77.0",
     "oxlint": "1.92.0",
     "oxlint-tsgolint": "7.0.2006",
-    "patch-package": "8.0.1",
     "react": "19.3.1",
     "react-native": "0.88.1",
     "react-native-blob-util": "0.25.1",

@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-pdf/android/build.gradle b/node_modules/react-native-pdf/android/build.gradle
+diff --git a/android/build.gradle b/android/build.gradle
 index 34da324..c712401 100644
---- a/node_modules/react-native-pdf/android/build.gradle
-+++ b/node_modules/react-native-pdf/android/build.gradle
+--- a/android/build.gradle
++++ b/android/build.gradle
 @@ -143,6 +143,6 @@ dependencies {
      // The repo from zacharee is based on PdfiumAndroidKt, a much newer fork of PdfiumAndroid, with better maintenance and updated native libraries.
      implementation 'com.github.zacharee:AndroidPdfViewer:4.0.1'
@@ -11,11 +11,11 @@ index 34da324..c712401 100644
 +    implementation 'io.legere:pdfiumandroid:1.0.35'
 +    implementation 'com.google.code.gson:gson:2.14.0'
  }
-diff --git a/node_modules/react-native-pdf/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java b/node_modules/react-native-pdf/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
+diff --git a/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java b/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
 new file mode 100644
 index 0000000..9baf55a
 --- /dev/null
-+++ b/node_modules/react-native-pdf/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
++++ b/android/src/main/java/com/github/barteksc/pdfviewer/RecycleSafeRendering.java
 @@ -0,0 +1,92 @@
 +package com.github.barteksc.pdfviewer;
 +
@@ -109,10 +109,10 @@ index 0000000..9baf55a
 +        }
 +    }
 +}
-diff --git a/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java b/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
+diff --git a/android/src/main/java/org/wonday/pdf/PdfView.java b/android/src/main/java/org/wonday/pdf/PdfView.java
 index c3d3245..f992212 100644
---- a/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
-+++ b/node_modules/react-native-pdf/android/src/main/java/org/wonday/pdf/PdfView.java
+--- a/android/src/main/java/org/wonday/pdf/PdfView.java
++++ b/android/src/main/java/org/wonday/pdf/PdfView.java
 @@ -34,6 +34,7 @@ import io.legere.pdfiumandroid.DefaultLogger;
  import com.facebook.react.uimanager.ThemedReactContext;
  import com.facebook.react.uimanager.UIManagerHelper;
@@ -144,10 +144,10 @@ index c3d3245..f992212 100644
      // The base PDFView recycles the document (zoom, offset, render state) whenever
      // the view leaves the window — e.g. while another screen is stacked over this
      // one on Android. Snapshot the viewport before that happens; loadComplete
-diff --git a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm b/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
+diff --git a/ios/RNPDFPdf/RNPDFPdfView.mm b/ios/RNPDFPdf/RNPDFPdfView.mm
 index 1bc263b..870fd96 100644
---- a/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
-+++ b/node_modules/react-native-pdf/ios/RNPDFPdf/RNPDFPdfView.mm
+--- a/ios/RNPDFPdf/RNPDFPdfView.mm
++++ b/ios/RNPDFPdf/RNPDFPdfView.mm
 @@ -451,32 +451,30 @@ - (void)didSetProps:(NSArray<NSString *> *)changedProps
                  pdfPageRect = CGRectMake(0, 0, pdfPageRect.size.height, pdfPageRect.size.width);
              }

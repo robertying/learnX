@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-tab-view/lib/module/SceneView.js b/node_modules/react-native-tab-view/lib/module/SceneView.js
+diff --git a/lib/module/SceneView.js b/lib/module/SceneView.js
 index 4880e9b..cde5db9 100644
---- a/node_modules/react-native-tab-view/lib/module/SceneView.js
-+++ b/node_modules/react-native-tab-view/lib/module/SceneView.js
+--- a/lib/module/SceneView.js
++++ b/lib/module/SceneView.js
 @@ -1,7 +1,7 @@
  "use strict";
  
@@ -26,10 +26,10 @@ index 4880e9b..cde5db9 100644
      children:
      // Only render the route only if it's either focused or layout is available
      // When layout is not available, we must not render unfocused routes
-diff --git a/node_modules/react-native-tab-view/src/SceneView.tsx b/node_modules/react-native-tab-view/src/SceneView.tsx
+diff --git a/src/SceneView.tsx b/src/SceneView.tsx
 index f03cc96..81875a0 100644
---- a/node_modules/react-native-tab-view/src/SceneView.tsx
-+++ b/node_modules/react-native-tab-view/src/SceneView.tsx
+--- a/src/SceneView.tsx
++++ b/src/SceneView.tsx
 @@ -1,5 +1,11 @@
  import * as React from 'react';
 -import { type StyleProp, StyleSheet, View, type ViewStyle } from 'react-native';

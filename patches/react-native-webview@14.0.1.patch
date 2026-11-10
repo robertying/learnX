@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-webview/apple/RNCWebViewImpl.m b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+diff --git a/apple/RNCWebViewImpl.m b/apple/RNCWebViewImpl.m
 index 3890426..a84c336 100644
---- a/node_modules/react-native-webview/apple/RNCWebViewImpl.m
-+++ b/node_modules/react-native-webview/apple/RNCWebViewImpl.m
+--- a/apple/RNCWebViewImpl.m
++++ b/apple/RNCWebViewImpl.m
 @@ -1216,11 +1216,16 @@ - (void)                    webView:(WKWebView *)webView
  - (void)webView:(WKWebView *)webView runJavaScriptAlertPanelWithMessage:(NSString *)message initiatedByFrame:(WKFrameInfo *)frame completionHandler:(void (^)(void))completionHandler
  {
@@ -82,10 +82,10 @@ index 3890426..a84c336 100644
  #endif // !TARGET_OS_OSX
  
  /**
-diff --git a/node_modules/react-native-webview/index.d.ts b/node_modules/react-native-webview/index.d.ts
+diff --git a/index.d.ts b/index.d.ts
 index 10b9c14..f3268db 100644
---- a/node_modules/react-native-webview/index.d.ts
-+++ b/node_modules/react-native-webview/index.d.ts
+--- a/index.d.ts
++++ b/index.d.ts
 @@ -5,7 +5,9 @@ export { FileDownload, WebViewMessageEvent, WebViewNavigation } from './lib/WebV
  
  export type WebViewProps = IOSWebViewProps & AndroidWebViewProps & WindowsWebViewProps;

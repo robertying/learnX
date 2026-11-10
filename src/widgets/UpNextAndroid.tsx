@@ -53,7 +53,7 @@ function UpNextWidget(
     props.noClasses ||
     (zh ? '打开 learnX 以显示课程' : 'Open learnX to see your classes');
   /* oxlint-enable learnx/no-han-outside-translations */
-  // Handled by patches/expo-widgets+58.0.27.patch; other platforms ignore it.
+  // Handled by patches/expo-widgets@58.0.27.patch; other platforms ignore it.
   const openUrl = (url: string | undefined) =>
     url ? [{ $type: 'openUrl', url }] : [];
 

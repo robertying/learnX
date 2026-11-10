@@ -63,7 +63,7 @@ function DeadlinesWidget(
   const deadlines = ahead.slice(0, 4);
   const more =
     (props.total ?? 0) - (all.length - ahead.length) - deadlines.length;
-  // Handled by patches/expo-widgets+58.0.27.patch; other platforms ignore it.
+  // Handled by patches/expo-widgets@58.0.27.patch; other platforms ignore it.
   const openUrl = (url: string | undefined) =>
     url ? [{ $type: 'openUrl', url }] : [];
 

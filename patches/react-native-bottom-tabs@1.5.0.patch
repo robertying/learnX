@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift b/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift
+diff --git a/ios/TabBarFontSize.swift b/ios/TabBarFontSize.swift
 index dec5c0a..6a22852 100644
---- a/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift
-+++ b/node_modules/react-native-bottom-tabs/ios/TabBarFontSize.swift
+--- a/ios/TabBarFontSize.swift
++++ b/ios/TabBarFontSize.swift
 @@ -29,19 +29,21 @@ enum TabBarFontSize {
    ///   - color: Optional text color
    /// - Returns: Dictionary of NSAttributedString attributes
@@ -51,10 +51,10 @@ index dec5c0a..6a22852 100644
        family: fontFamily,
        weight: fontWeight,
        color: inactiveColor
-diff --git a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
+diff --git a/ios/TabItemEventModifier.swift b/ios/TabItemEventModifier.swift
 index 674e602..17ee79d 100644
---- a/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
-+++ b/node_modules/react-native-bottom-tabs/ios/TabItemEventModifier.swift
+--- a/ios/TabItemEventModifier.swift
++++ b/ios/TabItemEventModifier.swift
 @@ -8,6 +8,8 @@ import UIKit
  
  private final class TabBarDelegate: NSObject, UITabBarControllerDelegate {
@@ -188,10 +188,10 @@ index 674e602..17ee79d 100644
    }
  }
  
-diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
+diff --git a/ios/TabViewImpl.swift b/ios/TabViewImpl.swift
 index 6de510d..6e6da89 100644
---- a/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
-+++ b/node_modules/react-native-bottom-tabs/ios/TabViewImpl.swift
+--- a/ios/TabViewImpl.swift
++++ b/ios/TabViewImpl.swift
 @@ -58,7 +58,21 @@ struct TabViewImpl: View {
              onSelect(key)
              emitHapticFeedback()
@@ -233,10 +233,10 @@ index 6de510d..6e6da89 100644
        family: props.fontFamily,
        weight: props.fontWeight,
        color: props.selectedActiveTintColor
-diff --git a/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift b/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
+diff --git a/ios/TabViewProvider.swift b/ios/TabViewProvider.swift
 index e566345..ce1be79 100644
---- a/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
-+++ b/node_modules/react-native-bottom-tabs/ios/TabViewProvider.swift
+--- a/ios/TabViewProvider.swift
++++ b/ios/TabViewProvider.swift
 @@ -211,18 +211,41 @@ public final class TabInfo: NSObject {
    }
  #endif

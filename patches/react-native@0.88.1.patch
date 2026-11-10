@@ -1,7 +1,7 @@
-diff --git a/node_modules/react-native/Libraries/Network/FormData.js b/node_modules/react-native/Libraries/Network/FormData.js
+diff --git a/Libraries/Network/FormData.js b/Libraries/Network/FormData.js
 index b237b45..fcc4f4b 100644
---- a/node_modules/react-native/Libraries/Network/FormData.js
-+++ b/node_modules/react-native/Libraries/Network/FormData.js
+--- a/Libraries/Network/FormData.js
++++ b/Libraries/Network/FormData.js
 @@ -91,8 +91,9 @@ class FormData {
        // content type (cf. web Blob interface.)
        if (typeof value === 'object' && !Array.isArray(value) && value) {
@@ -14,10 +14,10 @@ index b237b45..fcc4f4b 100644
          }
          if (typeof value.type === 'string') {
            headers['content-type'] = value.type;
-diff --git a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
+diff --git a/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm b/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
 index 0000000..1111111 100644
---- a/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
-+++ b/node_modules/react-native/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
+--- a/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
++++ b/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
 @@ -388,8 +388,33 @@
    _backedTextInputView.inputAccessoryView = nil;
    _hasInputAccessoryView = false;
