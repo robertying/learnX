@@ -215,8 +215,8 @@ importers:
         specifier: 7.21.0
         version: 7.21.0(f77a16e0c783a260503e201e6864613e)
       '@robertying/thu-learn-lib':
-        specifier: 6.1.0
-        version: 6.1.0
+        specifier: 7.0.0
+        version: 7.0.0
       '@shopify/flash-list':
         specifier: 2.3.3
         version: 2.3.3(@babel/runtime@7.29.10)(react-native@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(@react-native-community/cli@20.2.0(supports-color@8.1.1)(typescript@7.0.2))(@react-native/metro-config@0.88.1(@babel/core@7.29.7(supports-color@8.1.1))(supports-color@8.1.1))(@types/react@19.3.0)(react@19.3.1)(supports-color@8.1.1))(react@19.3.1)
@@ -1898,8 +1898,8 @@ packages:
   '@react-navigation/routers@7.6.5':
     resolution: {integrity: sha512-hpvpVFt6wu3U014F/0Qy45VZCErlUvIV8kN1L6HovN5P9OpbXAzFTaRQmG7VW6czg2tSkUL5S3dZA0HIu5QirQ==}
 
-  '@robertying/thu-learn-lib@6.1.0':
-    resolution: {integrity: sha512-k5qnDLmy7kuiKBAbH837HauUKebC5pgW7CkdEmQOh1UtsNOxinkUf9DbRRXefkQJfgPwhQrjyXfIhTd8yGmg5w==}
+  '@robertying/thu-learn-lib@7.0.0':
+    resolution: {integrity: sha512-EYEsE0MZG+GTLudLLL0EmFfVHTo4Gtyo7JC47VweCh8e0zxMCqQ3N3AzcCF2VZ53rHjg3ZYma80JhQ4oNdiG4w==}
     engines: {node: '>=22'}
 
   '@shopify/flash-list@2.3.3':
@@ -4201,9 +4201,6 @@ packages:
 
   node-addon-api@7.1.1:
     resolution: {integrity: sha512-5m3bsyrjFWE1xf7nz7YXdN4udnVtXK6/Yfgn5qnahL6bCkf2yKt4k3nuTKAtT4r3IG8JNR2ncsIMdZuAzJjHQQ==}
-
-  node-fetch-native@1.6.7:
-    resolution: {integrity: sha512-g9yhqoedzIUm0nTnTqAQvueMPVOuIY16bqgAJJC8XOOubYFNwz6IER9qs0Gq2Xd0+CecCKFjtdDTMA4u4xG06Q==}
 
   node-forge@1.4.3:
     resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
@@ -7282,13 +7279,12 @@ snapshots:
     dependencies:
       nanoid: 3.3.20
 
-  '@robertying/thu-learn-lib@6.1.0':
+  '@robertying/thu-learn-lib@7.0.0':
     dependencies:
       cheerio: 1.2.0
       entities: 9.0.0
       fetch-cookie: 3.2.0
       js-base64: 3.9.6
-      node-fetch-native: 1.6.7
       sm-crypto: 0.5.8
       tough-cookie: 6.1.0
 
@@ -10028,8 +10024,6 @@ snapshots:
   nocache@3.0.4: {}
 
   node-addon-api@7.1.1: {}
-
-  node-fetch-native@1.6.7: {}
 
   node-forge@1.4.3: {}
 

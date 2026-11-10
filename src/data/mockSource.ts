@@ -293,14 +293,14 @@ export const mockSource: AppSource = {
   getCurrentSemester: () =>
     request(() => semesterInfo(mock().mockCurrentSemester)),
   // Names come in the language asked for, as the server does.
-  getCourseList: (semesterId, _courseType, lang, options) =>
+  getCourseList: (semesterId, options) =>
     request(
       () =>
         mock()
           .mockCourses.filter(course => course.semesterId === semesterId)
           .map(course =>
             omit(
-              lang === Language.EN
+              options?.lang === Language.EN
                 ? { ...course, name: course.englishName }
                 : course,
               options?.timeAndLocation

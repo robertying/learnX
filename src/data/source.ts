@@ -128,15 +128,17 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
     // Checks the session first, logging in again only if it has expired.
     const { url, body } = await helper.getHomeworkSubmitRequest(
       studentHomeworkId,
-      content,
-      attachment && {
-        filename: attachment.name,
-        content: {
-          uri: attachment.uri,
-          type: mime.getType(attachment.uri) || 'application/octet-stream',
+      {
+        content,
+        attachment: attachment && {
+          filename: attachment.name,
+          content: {
+            uri: attachment.uri,
+            type: mime.getType(attachment.uri) || 'application/octet-stream',
+          },
         },
+        removeAttachment: remove,
       },
-      remove,
     );
     const res = await axios.post<string>(url, body, {
       headers: {

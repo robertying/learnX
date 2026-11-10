@@ -155,7 +155,7 @@ describe('useAttachmentPicker', () => {
 });
 
 describe('useSubmitAssignment', () => {
-  const assignment = { courseId: 'c1', studentHomeworkId: 'hw1' };
+  const assignment = { courseId: 'c1', id: 'hw1' };
   const picked: PickedAttachment = {
     uri: 'file:///doc.pdf',
     type: 'application/pdf',
