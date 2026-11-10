@@ -27,9 +27,14 @@ def app_version
   JSON.parse(File.read(PACKAGE_JSON))["version"]
 end
 
-# CURRENT_PROJECT_VERSION, set once at the project level so the app and its extensions share it.
+# CURRENT_PROJECT_VERSION: the project level sets it for the app and the share extension, and the
+# widget target sets its own. All of them must match.
+def build_numbers
+  File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i)
+end
+
 def build_number
-  File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i).max
+  build_numbers.max
 end
 
 def android_version_code
@@ -42,8 +47,9 @@ def verify_versions!
   gradle = File.read(GRADLE)
   problems = []
   problems << "ios MARKETING_VERSION" unless pbxproj.scan(/MARKETING_VERSION = #{Regexp.escape(version)};/).size == 2
-  problems << "android versionName" unless gradle.include?(%(versionName "#{version}"))
-  problems << "android versionCode" unless gradle.include?("versionCode #{android_version_code}")
+  problems << "ios CURRENT_PROJECT_VERSION (#{build_numbers.uniq.join(', ')})" unless build_numbers.uniq.size == 1
+  problems << "android versionName" unless gradle.include?(%(versionName = "#{version}"))
+  problems << "android versionCode" unless gradle.include?("versionCode = #{android_version_code}")
   return if problems.empty?
 
   UI.user_error!("#{problems.join(', ')} out of sync with package.json #{version} (build #{build_number}). Run `bundle exec fastlane bump`.")
@@ -544,9 +550,9 @@ lane :bump do |options|
 
   replace_in_file!(PACKAGE_JSON, %("version": "#{current}"), %("version": "#{version}"), count: 1)
   replace_in_file!(PBXPROJ, "MARKETING_VERSION = #{current};", "MARKETING_VERSION = #{version};", count: 2)
-  replace_in_file!(PBXPROJ, "CURRENT_PROJECT_VERSION = #{build};", "CURRENT_PROJECT_VERSION = #{new_build};", count: 2)
-  replace_in_file!(GRADLE, %(versionName "#{current}"), %(versionName "#{version}"), count: 1)
-  replace_in_file!(GRADLE, "versionCode #{ANDROID_VERSION_CODE_BASE + build}", "versionCode #{new_code}", count: 1)
+  replace_in_file!(PBXPROJ, "CURRENT_PROJECT_VERSION = #{build};", "CURRENT_PROJECT_VERSION = #{new_build};", count: build_numbers.size)
+  replace_in_file!(GRADLE, %(versionName = "#{current}"), %(versionName = "#{version}"), count: 1)
+  replace_in_file!(GRADLE, "versionCode = #{ANDROID_VERSION_CODE_BASE + build}", "versionCode = #{new_code}", count: 1)
 
   UI.success("#{current} (#{build}) -> #{version} (#{new_build}, Android #{new_code})")
 end
