@@ -41,7 +41,11 @@ import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useAuthStore } from 'data/auth';
-import { resetUserData, setCurrentSemester } from 'data/userData';
+import {
+  resetUserData,
+  setCurrentSemester,
+  useUserDataStore,
+} from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
 
 // The emulated server, as when a mock account is logged in.
@@ -544,6 +548,21 @@ describe('list hooks', () => {
     expect(result.current.notices.length).toBeGreaterThan(0);
     expect(result.current.assignments.length).toBeGreaterThan(0);
     expect(result.current.files.length).toBeGreaterThan(0);
+  });
+
+  it('shows a read mark still waiting to be sent, on that notice only', async () => {
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const [unread, other] = notices.filter(n => !n.hasRead);
+    useUserDataStore.setState({
+      pendingActions: [
+        { kind: 'noticeRead', id: unread.id, url: '', queuedAt: 0, tries: 0 },
+      ],
+    });
+    const { result } = await renderHook(() => useNotices().notices, {
+      wrapper,
+    });
+    expect(result.current.find(n => n.id === unread.id)?.hasRead).toBe(true);
+    expect(result.current.find(n => n.id === other.id)?.hasRead).toBe(false);
   });
 
   it("refreshes one course's notices", async () => {

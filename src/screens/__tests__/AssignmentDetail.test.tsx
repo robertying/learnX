@@ -200,3 +200,92 @@ it('links an unsent draft to the submission page', async () => {
   );
   saveSubmissionDraft(open.id, null);
 });
+
+describe('what each state of the assignment shows', () => {
+  const base = find(a => a.graded);
+  /** The base assignment with only what a test gives. */
+  const assignment = (fields: Partial<Assignment>): Assignment => ({
+    ...base,
+    description: '',
+    attachment: undefined,
+    answerContent: '',
+    answerAttachment: undefined,
+    submittedContent: '',
+    submittedAttachment: undefined,
+    gradeContent: '',
+    gradeAttachment: undefined,
+    excellentHomeworkList: undefined,
+    graderName: undefined,
+    gradeLevel: undefined,
+    grade: undefined,
+    ...fields,
+  });
+
+  it('says there is no description', async () => {
+    await renderScreen(assignment({}));
+    expect(screen.getByTestId('description').props.children).toContain(
+      `<p>${t('noAssignmentDescription')}</p>`,
+    );
+  });
+
+  it('shows a grade without a grader or score as only graded, with the feedback text', async () => {
+    await renderScreen(
+      assignment({
+        graded: true,
+        submitted: true,
+        isLateSubmission: true,
+        submitTime: undefined,
+        gradeContent: 'Well done',
+        submittedContent: 'My answer',
+      }),
+    );
+    expect(screen.getByText(/^Graded /)).toBeTruthy();
+    expect(screen.getByText(new RegExp(` ${t('graded')}$`))).toBeTruthy();
+    expect(screen.getByText(t('feedback'))).toBeTruthy();
+    expect(screen.getByText('Well done')).toBeTruthy();
+    expect(screen.getByText(t('yourSubmission'))).toBeTruthy();
+    expect(screen.getByText(t('submittedLate'))).toBeTruthy();
+    expect(screen.getByText('My answer')).toBeTruthy();
+  });
+
+  it('marks a late submission, with its time, before it is graded', async () => {
+    await renderScreen(
+      assignment({
+        graded: false,
+        submitted: true,
+        isLateSubmission: true,
+        submitTime: '2026-10-01T10:00:00+08:00',
+      }),
+    );
+    expect(screen.getByText(/Submitted late Oct 1, 2026 10:00/)).toBeTruthy();
+    // Nothing submitted to show besides the status row
+    expect(screen.queryByText(t('yourSubmission'))).toBeNull();
+  });
+
+  it('shows the answer text, and the graded submission time', async () => {
+    await renderScreen(
+      assignment({
+        graded: true,
+        submitted: true,
+        isLateSubmission: false,
+        submitTime: '2026-10-01T10:00:00+08:00',
+        answerContent: 'x = 2',
+      }),
+    );
+    expect(screen.getByText('x = 2')).toBeTruthy();
+    expect(screen.getByText(/Submitted Oct 1, 2026 10:00/)).toBeTruthy();
+  });
+
+  it('names an excellent homework by its title without an attachment', async () => {
+    const withExcellent = find(a => !!a.excellentHomeworkList?.length);
+    const homework = {
+      ...withExcellent.excellentHomeworkList![0],
+      title: 'Best essay',
+      gradeAttachment: undefined,
+      submittedAttachment: undefined,
+    };
+    await renderScreen(assignment({ excellentHomeworkList: [homework] }));
+    await userEvent.press(screen.getByText(homework.title));
+    expect(navigation.push).not.toHaveBeenCalled();
+  });
+});

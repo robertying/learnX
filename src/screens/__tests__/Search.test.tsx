@@ -52,13 +52,15 @@ jest.mock('data/content', () => ({
   useFiles: () => ({ files: mockFiles }),
 }));
 
-const setup = async (query?: string) => {
+type TransitionEnd = (e: { data: { closing: boolean } }) => void;
+
+const setup = async (query?: string, parent?: object) => {
   const searchBar = { focus: jest.fn(), setText: jest.fn() };
   const navigation = {
     setOptions: jest.fn(),
     push: jest.fn(),
-    addListener: jest.fn(() => jest.fn()),
-    getParent: jest.fn(() => undefined),
+    addListener: jest.fn<() => void, [string, TransitionEnd]>(() => jest.fn()),
+    getParent: jest.fn(() => parent),
   };
   await render(
     <Search
@@ -138,5 +140,33 @@ describe('Search', () => {
     await act(() => options().onFocus!({} as never));
     await act(() => jest.advanceTimersByTime(1000));
     expect(searchBar.focus).toHaveBeenCalledTimes(2);
+  });
+
+  it("focuses the bar as its own or its stack's transition ends, not as one closes", async () => {
+    const parent = {
+      addListener: jest.fn<() => void, [string, TransitionEnd]>(() =>
+        jest.fn(),
+      ),
+    };
+    const { navigation, searchBar } = await setup(undefined, parent);
+    const [, own] = navigation.addListener.mock.calls[0];
+    const [, stack] = parent.addListener.mock.calls[0];
+    await act(() => own({ data: { closing: true } }));
+    await act(() => stack({ data: { closing: true } }));
+    expect(searchBar.focus).not.toHaveBeenCalled();
+    await act(() => stack({ data: { closing: false } }));
+    await act(() => own({ data: { closing: false } }));
+    expect(searchBar.focus).toHaveBeenCalledTimes(2);
+  });
+
+  it('opens notice and assignment results too', async () => {
+    const { type, navigation } = await setup();
+    await type('midterm');
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    await user.press(screen.getByText('Midterm room change'));
+    await user.press(screen.getByText('Midterm review problems'));
+    expect(
+      navigation.push.mock.calls.map(([screenName]) => screenName),
+    ).toEqual(['NoticeDetail', 'AssignmentDetail']);
   });
 });

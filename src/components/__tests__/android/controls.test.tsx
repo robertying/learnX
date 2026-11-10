@@ -1,11 +1,12 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { ToastAndroid } from 'react-native';
+import { StyleSheet, ToastAndroid } from 'react-native';
 import CardMenu from 'components/CardMenu';
 import DateRangePicker from 'components/DateRangePicker';
 import FilterMenu from 'components/FilterMenu';
 import IconButton from 'components/IconButton';
 import SegmentedTabs from 'components/SegmentedTabs';
 import TextButton from 'components/TextButton';
+import TextField from 'components/TextField';
 import { toast } from 'components/Toast';
 import { cardActions } from 'helpers/cardActions';
 import { filterOptions } from 'helpers/filters';
@@ -41,6 +42,29 @@ describe('IconButton (Android)', () => {
     await userEvent.setup().press(screen.getByTestId('refresh'));
     expect(onPress).not.toHaveBeenCalled();
   });
+
+  it('reads the badge with the label, and grows its touch area with the icon', async () => {
+    await render(
+      <>
+        <IconButton
+          icon="settings"
+          accessibilityLabel="Notices"
+          badge
+          size={32}
+          mode="contained"
+          testID="notices"
+          onPress={jest.fn()}
+        />
+        <IconButton icon="refresh" onPress={jest.fn()} />
+      </>,
+    );
+    expect(screen.getByLabelText('Notices, New')).toBeTruthy();
+    const button = screen.getByTestId('notices');
+    expect(button.props.variant).toBe('filledTonal');
+    // 8 dp around the icon, as around the default 24 dp one
+    expect(button.props.style).toEqual({ width: 48, height: 48 });
+    expect(screen.getAllByRole('button')[1].props.variant).toBeUndefined();
+  });
 });
 
 describe('TextButton (Android)', () => {
@@ -59,6 +83,28 @@ describe('TextButton (Android)', () => {
     await userEvent.setup().press(screen.getByTestId('go'));
     await userEvent.setup().press(screen.getByTestId('off'));
     expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
+  it('sizes, bolds or crosses out its label, and fills a row', async () => {
+    await render(
+      <>
+        <TextButton size="large" bold fill onPress={jest.fn()}>
+          Open
+        </TextButton>
+        <TextButton size="small" struck onPress={jest.fn()}>
+          old.pdf
+        </TextButton>
+      </>,
+    );
+    const open = screen.getByText('Open');
+    expect(open.props.typography).toBe('titleMedium');
+    expect(open.props.style).toMatchObject({ fontWeight: 'bold' });
+    const old = screen.getByText('old.pdf');
+    expect(old.props.typography).toBe('labelMedium');
+    expect(old.props.style).toMatchObject({
+      color: 'onSurfaceVariant',
+      textDecorationLine: 'line-through',
+    });
   });
 });
 
@@ -198,5 +244,14 @@ describe('toast (Android)', () => {
       ['Saved', ToastAndroid.SHORT],
       ['Failed', ToastAndroid.LONG],
     ]);
+  });
+});
+
+describe('TextField (Android)', () => {
+  it('rounds its corners less, and leaves the selection color to Android', async () => {
+    await render(<TextField placeholder="Search" />);
+    const input = screen.getByPlaceholderText('Search');
+    expect(input.props.selectionColor).toBeUndefined();
+    expect(StyleSheet.flatten(input.props.style).borderRadius).toBe(4);
   });
 });

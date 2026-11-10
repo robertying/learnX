@@ -136,6 +136,25 @@ it('writes shown assignments to the calendar only when the sync is on', async ()
   expect(errors).toEqual([{ text: 'failed', type: 'error' }]);
 });
 
+it('writes shown assignments to Reminders when that sync is on, quietly when it works', async () => {
+  cacheAssignments();
+  setSetting('assignmentReminderSync', true);
+  const errors: unknown[] = [];
+  const unsubscribe = subscribeSurfaceErrors(message => errors.push(message));
+  await refreshSurfaces();
+  unsubscribe();
+  expect(syncAssignments).toHaveBeenCalledWith('reminder', assignments, []);
+  expect(errors).toEqual([]);
+});
+
+it('has no lists to show without a semester', async () => {
+  cacheAssignments();
+  setCurrentSemester(undefined as never);
+  setSetting('assignmentReminderSync', true);
+  await refreshSurfaces();
+  expect(syncAssignments).not.toHaveBeenCalled();
+});
+
 it('feeds Up Next once the week is known', async () => {
   cacheAssignments();
   const start = Date.now() + 60 * 60 * 1000;

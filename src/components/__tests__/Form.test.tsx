@@ -28,6 +28,10 @@ import {
   sectionRows,
   useFieldText,
 } from 'components/Form';
+import type * as ReactNative from 'react-native';
+import { NavigationContext } from '@react-navigation/native';
+import { font } from '@expo/ui/swift-ui/modifiers';
+import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
 
 describe('Form', () => {
@@ -326,5 +330,101 @@ describe('form helpers', () => {
       ).map(row => (row.props as { position: string }).position);
     expect(rows(1)).toEqual(['only']);
     expect(rows(3)).toEqual(['first', 'middle', 'last']);
+  });
+});
+
+describe('Form (iOS details)', () => {
+  const RN: typeof ReactNative = require('react-native');
+  afterEach(() => jest.restoreAllMocks());
+
+  it('continues the grouped background into the header, light or dark, and gives it back', async () => {
+    const navigation = { setOptions: jest.fn() };
+    const inNavigator = (
+      <NavigationContext.Provider value={navigation as never}>
+        <Form>
+          <FormSection>
+            <FormText title="Row" />
+          </FormSection>
+        </Form>
+      </NavigationContext.Provider>
+    );
+    await render(inNavigator);
+    expect(navigation.setOptions).toHaveBeenLastCalledWith({
+      headerShadowVisible: false,
+      headerStyle: { backgroundColor: 'rgb(242, 242, 247)' },
+    });
+
+    // The Form again, as a dark screen
+    await screen.unmount();
+    jest.spyOn(RN, 'useColorScheme').mockReturnValue('dark');
+    await render(inNavigator);
+    expect(navigation.setOptions).toHaveBeenLastCalledWith({
+      headerShadowVisible: false,
+      headerStyle: { backgroundColor: 'rgb(0, 0, 0)' },
+    });
+
+    await screen.unmount();
+    expect(navigation.setOptions).toHaveBeenLastCalledWith({
+      headerShadowVisible: undefined,
+      headerStyle: undefined,
+    });
+  });
+
+  it('leaves the Mac header alone', async () => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    const navigation = { setOptions: jest.fn() };
+    await render(
+      <NavigationContext.Provider value={navigation as never}>
+        <Form>
+          <FormSection>
+            <FormText title="Row" />
+          </FormSection>
+        </Form>
+      </NavigationContext.Provider>,
+    );
+    expect(navigation.setOptions).not.toHaveBeenCalled();
+  });
+
+  it('sets a grade large and bold, and a warning semibold', async () => {
+    // At Jest's font scale of 2 the detail would go under the title instead.
+    jest
+      .spyOn(RN, 'useWindowDimensions')
+      .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale: 1 });
+    await render(
+      <FormSection>
+        <FormText title="Grade" detail="A" detailTint="accent" />
+        <FormText title="Due" detail="Tomorrow" detailTint="warning" />
+      </FormSection>,
+    );
+    expect(font).toHaveBeenCalledWith({ textStyle: 'title3', weight: 'bold' });
+    expect(font).toHaveBeenCalledWith({
+      textStyle: 'body',
+      weight: 'semibold',
+    });
+  });
+
+  it('shows a spinner in a button row while it works', async () => {
+    await render(
+      <FormSection>
+        <FormButton title="Sync" loading onPress={jest.fn()} />
+      </FormSection>,
+    );
+    expect(screen.getByTestId('progress')).toBeTruthy();
+  });
+
+  it('draws a smaller account row on the Mac, and a title without a subtitle', async () => {
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    await render(
+      <FormSection>
+        <FormProfile name="Rui" />
+        <FormTitle title="Problem set" />
+        <FormTextField value="" onChangeText={jest.fn()} multiline />
+      </FormSection>,
+    );
+    expect(font).toHaveBeenCalledWith({
+      textStyle: 'headline',
+      weight: 'semibold',
+    });
+    expect(screen.getByText('Problem set')).toBeTruthy();
   });
 });

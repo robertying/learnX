@@ -1,4 +1,9 @@
-import { AccessibilityInfo, ToastAndroid } from 'react-native';
+import {
+  AccessibilityInfo,
+  Keyboard,
+  StyleSheet,
+  ToastAndroid,
+} from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import * as Haptics from 'expo-haptics';
 import { Toast, toast } from 'components/Toast';
@@ -14,6 +19,7 @@ beforeEach(() => {
 afterEach(async () => {
   await act(() => toast('', 'none'));
   jest.useRealTimers();
+  jest.restoreAllMocks();
 });
 
 describe('Toast (iOS)', () => {
@@ -66,6 +72,75 @@ describe('Toast (iOS)', () => {
     await fireEvent(view, 'responderRelease', touch());
     await act(() => jest.advanceTimersByTime(exitDuration));
     expect(screen.queryByText('Saved')).toBeNull();
+  });
+
+  /** Drags the toast `dy` points down (up when negative) over 100 ms. */
+  const drag = async (dy: number, release = true) => {
+    const view = screen.getByRole('alert');
+    await fireEvent(view, 'responderGrant', touchAt(0, 1));
+    await fireEvent(view, 'responderMove', touchAt(dy, 101));
+    await fireEvent(
+      view,
+      release ? 'responderRelease' : 'responderTerminate',
+      touchAt(dy, 101),
+    );
+    await act(() => jest.advanceTimersByTime(exitDuration));
+  };
+
+  it('dismisses on a swipe down, and springs back from a short or upward one', async () => {
+    await render(<Toast />);
+    await act(() => toast('Saved', 'success'));
+    await drag(-40);
+    await drag(10);
+    await drag(40, false);
+    expect(screen.getByText('Saved')).toBeTruthy();
+    await drag(40);
+    expect(screen.queryByText('Saved')).toBeNull();
+  });
+
+  it('sits above the keyboard while it is up', async () => {
+    const listeners: Record<string, (e: unknown) => void> = {};
+    const remove = jest.fn();
+    jest.spyOn(Keyboard, 'addListener').mockImplementation(((
+      name: string,
+      listener: (e: unknown) => void,
+    ) => {
+      listeners[name] = listener;
+      return { remove };
+    }) as never);
+    await render(<Toast />);
+    await act(() => toast('Saved', 'success'));
+    const padding = () =>
+      StyleSheet.flatten(screen.getByRole('alert').parent!.props.style)
+        .paddingBottom;
+    expect(padding()).toBe(64);
+    await act(() =>
+      listeners.keyboardWillShow({ endCoordinates: { height: 300 } }),
+    );
+    expect(padding()).toBe(316);
+    await act(() => listeners.keyboardWillHide({}));
+    expect(padding()).toBe(64);
+    await screen.unmount();
+    expect(remove).toHaveBeenCalledTimes(2);
+  });
+
+  it('starts above a keyboard already up', async () => {
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(true);
+    const metrics = jest
+      .spyOn(Keyboard, 'metrics')
+      .mockReturnValue({ height: 200, width: 400, screenX: 0, screenY: 600 });
+    await render(<Toast />);
+    await act(() => toast('Saved', 'success'));
+    const padding = () =>
+      StyleSheet.flatten(screen.getByRole('alert').parent!.props.style)
+        .paddingBottom;
+    expect(padding()).toBe(216);
+
+    // Up, but not measured yet
+    metrics.mockReturnValue(undefined);
+    await screen.unmount();
+    await render(<Toast />);
+    expect(padding()).toBe(64);
   });
 
   it('shows the symbol for the type and none for plain toasts', async () => {
@@ -132,4 +207,28 @@ const touch = () => ({
     touchBank: [],
   },
   nativeEvent: { touches: [], changedTouches: [], timestamp: 0 },
+});
+
+/** One finger at `pageY`, at time `timestamp`, as PanResponder tracks it. */
+const touchAt = (pageY: number, timestamp: number) => ({
+  touchHistory: {
+    numberActiveTouches: 1,
+    indexOfSingleActiveTouch: 0,
+    mostRecentTimeStamp: timestamp,
+    touchBank: [
+      {
+        touchActive: true,
+        startPageX: 0,
+        startPageY: 0,
+        startTimeStamp: 1,
+        currentPageX: 0,
+        currentPageY: pageY,
+        currentTimeStamp: timestamp,
+        previousPageX: 0,
+        previousPageY: 0,
+        previousTimeStamp: 1,
+      },
+    ],
+  },
+  nativeEvent: { touches: [], changedTouches: [], timestamp },
 });

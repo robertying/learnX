@@ -102,6 +102,41 @@ describe('useAttachmentPicker', () => {
     expect(toast).toHaveBeenCalledWith(expect.any(String), 'error');
   });
 
+  it('names a document without a name or type, and fails on no file', async () => {
+    getDocument.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: 'file:///x', size: 3, lastModified: 0 } as never],
+    });
+    const { result } = await setup();
+    await act(() => result.current.pickDocument());
+    expect(result.current.picked).toMatchObject({
+      type: null,
+      name: expect.stringMatching(/^HW1 Submission/),
+    });
+
+    getDocument.mockRejectedValueOnce(new Error('denied'));
+    await act(() => result.current.pickDocument());
+    expect(toast).toHaveBeenCalledWith(expect.any(String), 'error');
+  });
+
+  it('keeps nothing from a canceled photo picker, and types an untyped photo as unknown', async () => {
+    launchLibrary.mockResolvedValueOnce({ canceled: true, assets: null });
+    const { result } = await setup();
+    await act(() => result.current.pickPhoto());
+    expect(result.current.picked).toBeNull();
+    expect(toast).not.toHaveBeenCalled();
+
+    launchLibrary.mockResolvedValueOnce({
+      canceled: false,
+      assets: [{ uri: 'file:///p', width: 1, height: 1 }],
+    });
+    await act(() => result.current.pickPhoto());
+    expect(result.current.picked).toMatchObject({
+      uri: 'file:///p',
+      type: null,
+    });
+  });
+
   it('attaches a file shared to the app', async () => {
     const { result } = await setup();
     expect(result.current.isShared).toBe(false);

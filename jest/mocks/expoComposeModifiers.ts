@@ -25,13 +25,16 @@ export const selectable = (
 });
 
 const layout = () => undefined;
+/** Read by the button stand-ins, as their style. */
+export const size = (width: number, height: number) => ({
+  size: { width, height },
+});
 export const background = layout;
 export const clip = layout;
 export const fillMaxSize = layout;
 export const fillMaxWidth = layout;
 export const imePadding = layout;
 export const padding = layout;
-export const size = layout;
 export const weight = layout;
 export const width = layout;
 export const Shapes = { RoundedCorner: layout };

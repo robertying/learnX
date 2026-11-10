@@ -1,9 +1,14 @@
+import { createElement, type ReactNode } from 'react';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { FailReason } from '@robertying/thu-learn-lib';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { useAuthStore } from 'data/auth';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import {
   calendarWeekQuery,
   getCachedWeekSessions,
+  useWeekSchedule,
   weekSessions,
 } from 'data/schedule';
 import { resetSettings, setSetting } from 'data/settings';
@@ -13,7 +18,7 @@ import { resetUserData, setCourseHidden } from 'data/userData';
 import type { CalendarClass } from 'helpers/schedule';
 
 jest.mock('data/source', () => ({
-  dataSource: { getCalendar: jest.fn() },
+  dataSource: { getCalendar: jest.fn(), getCurrentSemester: jest.fn() },
 }));
 
 const getCalendar = jest.mocked(dataSource.getCalendar);
@@ -184,5 +189,82 @@ describe('getCachedWeekSessions', () => {
 
     setCourseHidden('phys', true);
     expect(getCachedWeekSessions('2026-10-03').sessions).toEqual([]);
+  });
+});
+
+describe('useWeekSchedule', () => {
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(QueryClientProvider, { client: queryClient }, children);
+  const semester = {
+    id: '2026-2027-1',
+    startDate: termStart,
+    endDate: '2027-01-17',
+  };
+
+  beforeEach(() => {
+    clearQueryCache();
+    resetSettings();
+    resetUserData();
+  });
+  afterEach(() => useAuthStore.setState({ loggedIn: false }));
+
+  it('asks for nothing while logged out, and has no teaching week', async () => {
+    const { result } = await renderHook(() => useWeekSchedule('2026-09-30'), {
+      wrapper,
+    });
+    expect(result.current).toMatchObject({
+      sessions: [],
+      source: 'none',
+      week: null,
+      fetching: false,
+      failed: false,
+    });
+    expect(getCalendar).not.toHaveBeenCalled();
+  });
+
+  it("shows the week's calendar with its teaching week, and refreshes it", async () => {
+    useAuthStore.setState({ loggedIn: true });
+    queryClient.setQueryData(schoolSemesterQuery.queryKey, semester);
+    queryClient.setQueryData(coursesQuery(semester.id).queryKey, courses);
+    getCalendar.mockResolvedValue({
+      events: calendar,
+      failedRanges: [],
+    } as never);
+    jest
+      .mocked(dataSource.getCurrentSemester)
+      .mockResolvedValue(semester as never);
+
+    const { result } = await renderHook(() => useWeekSchedule('2026-09-30'), {
+      wrapper,
+    });
+    await waitFor(() => expect(result.current.source).toBe('calendar'));
+    expect(result.current.week).toBe(3);
+    expect(result.current.sessions).toHaveLength(1);
+    expect(result.current.updatedAt).toBeGreaterThan(0);
+
+    let refreshed: { isError: boolean } | undefined;
+    await act(async () => {
+      refreshed = await result.current.refetch();
+    });
+    expect(refreshed).toEqual({ isError: false });
+    expect(getCalendar).toHaveBeenCalledTimes(2);
+  });
+
+  it('works the week out from the courses when the calendar fails', async () => {
+    useAuthStore.setState({ loggedIn: true });
+    queryClient.setQueryData(schoolSemesterQuery.queryKey, semester);
+    queryClient.setQueryData(coursesQuery(semester.id).queryKey, courses);
+    getCalendar.mockRejectedValue(new Error('500'));
+    jest.useFakeTimers();
+
+    const { result } = await renderHook(() => useWeekSchedule('2026-09-30'), {
+      wrapper,
+    });
+    // Past its retries
+    await act(() => jest.advanceTimersByTimeAsync(10 * 1000));
+    jest.useRealTimers();
+    expect(result.current.failed).toBe(true);
+    expect(result.current.source).toBe('courses');
+    expect(result.current.sessions).toHaveLength(2);
   });
 });

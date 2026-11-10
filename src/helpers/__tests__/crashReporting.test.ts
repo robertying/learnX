@@ -103,6 +103,24 @@ describe('recordError', () => {
     );
   });
 
+  it('sends a thrown string as it is, and names a nameless error', () => {
+    recordError('plain text');
+    expect(native.recordError).toHaveBeenCalledWith(
+      'NonError',
+      'plain text',
+      expect.any(Array),
+    );
+
+    const nameless = new Error('boom');
+    nameless.name = '';
+    recordError(nameless);
+    expect(native.recordError).toHaveBeenLastCalledWith(
+      'Error',
+      'boom',
+      expect.any(Array),
+    );
+  });
+
   it('sends only the reason of a thu-learn-lib error', () => {
     recordError({ reason: 'invalid response', extra: { name: 'someone' } });
 
@@ -172,6 +190,11 @@ describe('installGlobalErrorHandler', () => {
       defaultHandler.mock.invocationCallOrder[0],
     );
     expect(defaultHandler).toHaveBeenCalledWith(error, true);
+
+    // A caught error isn't marked fatal.
+    native.setCustomKey.mockClear();
+    handler(new Error('caught'), false);
+    expect(native.setCustomKey).not.toHaveBeenCalled();
 
     // Installing again doesn't wrap the handler twice.
     const setGlobalHandler = jest.fn();
@@ -265,5 +288,10 @@ describe('trackScreen', () => {
     } as any);
 
     expect(native.setCustomKey).toHaveBeenCalledWith('screen', 'Search');
+  });
+
+  it('sets nothing before the first screen', () => {
+    trackScreen(undefined);
+    expect(native.setCustomKey).not.toHaveBeenCalled();
   });
 });

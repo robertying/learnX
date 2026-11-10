@@ -124,3 +124,28 @@ it('toggles full screen in a split view, but not in search', async () => {
   );
   expect(items()[0].identifier).toBe('refresh');
 });
+
+it('brings the list back from full screen, and the preview back from the info', async () => {
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <SplitViewContext.Provider value={{ ...split, showMaster: false }}>
+      {children}
+    </SplitViewContext.Provider>
+  );
+  await renderHook(
+    () =>
+      useFileDetailHeader({
+        navigation: navigation(),
+        ...props,
+        showInfo: true,
+      }),
+    { wrapper },
+  );
+  expect(setOptions.mock.lastCall![0].headerBackVisible).toBe(false);
+  const [toggle] = items();
+  expect(toggle.label).toBe(t('exitFullscreen'));
+  toggle.onPress();
+  expect(split.toggleMaster).toHaveBeenCalledWith(true);
+  expect(items().find(item => item.identifier === 'info')?.label).toBe(
+    t('preview'),
+  );
+});

@@ -97,3 +97,24 @@ it('opens a file in another Android app by its content URI', async () => {
     },
   );
 });
+
+it('shares and opens a file of unknown type as plain bytes', async () => {
+  const unknown = { ...file, fileType: 'xyz123' };
+  const path = `${CACHES}/learnX Files/Calculus/f1/Calculus-Lecture 1.xyz123`;
+  __fs.write(path, 'data');
+  await shareFile(unknown);
+  expect(Share.open).toHaveBeenCalledWith(
+    expect.objectContaining({ type: 'application/octet-stream' }),
+  );
+
+  // Already a content URI: opened as it is
+  await openFile('content://media/1', null);
+  expect(IntentLauncher.startActivityAsync).toHaveBeenLastCalledWith(
+    'android.intent.action.VIEW',
+    {
+      type: 'application/octet-stream',
+      data: 'content://media/1',
+      flags: 1,
+    },
+  );
+});

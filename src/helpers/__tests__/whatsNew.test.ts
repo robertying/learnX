@@ -184,6 +184,24 @@ describe('displayVersion', () => {
     expect(displayVersion('19.1.0')).toBe('19.1');
     expect(displayVersion('19.1.2')).toBe('19.1.2');
   });
+
+  it('reads a short version as its missing parts zero', () => {
+    expect(displayVersion('19')).toBe('19');
+    expect(displayVersion('19.2')).toBe('19.2');
+  });
+});
+
+describe('whatsNewSince the shipped releases', () => {
+  it('picks from the releases the app ships with', () => {
+    const context = {
+      version: releases[0].version,
+      nativeVersion: releases[0].version,
+      platform: 'ios' as const,
+    };
+    expect(whatsNewSince(null, context)).toEqual(
+      findWhatsNew(context, null, releases),
+    );
+  });
 });
 
 describe('releases', () => {

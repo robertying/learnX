@@ -66,4 +66,22 @@ describe('headerButtons', () => {
       expect.stringMatching(/^Settings/),
     ]);
   });
+
+  it('draws a left side, contained buttons, and skips an entry without an element', async () => {
+    const left = headerButtons('left', [
+      {
+        id: 'close',
+        label: 'Close',
+        icon: 'close',
+        onPress,
+        contained: true,
+      },
+      { id: 'nothing' },
+    ]);
+    expect(left.headerRight).toBeUndefined();
+    const HeaderLeft = left.headerLeft as () => React.ReactElement;
+    await render(<HeaderLeft />);
+    expect(screen.getAllByRole('button')).toHaveLength(1);
+    expect(screen.getByText('Close')).toBeTruthy();
+  });
 });
