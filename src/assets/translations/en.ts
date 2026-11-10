@@ -124,8 +124,6 @@ export default {
   clearFileCacheConfirmation:
     "Delete all downloaded files? This can't be undone.",
   clearFileCacheSucceeded: 'Deleted all downloads',
-  fileUseDocumentDir: 'Save Downloads to Documents',
-  fileOmitCourseName: 'Omit Course Name in Filenames',
   fileDownloadFailed: "Couldn't download the file. Try again.",
   openFileFailed:
     "Couldn't open the file. Download it again, or install an app that can open this type of file.",
@@ -235,8 +233,6 @@ export default {
   contributors: 'Contributors',
   retryLogin: 'Log In With Saved Account',
   offlineMode: 'Continue Offline',
-  openFileDownloadDirectory: 'Show in Finder',
-  openFileDownloadDirectoryFailed: "Couldn't open the folder: ",
   download: 'Download',
   downloadToDownloadsSucceeded: 'Saved to Downloads',
   downloadToDownloadsFailed: "Couldn't save to Downloads",
@@ -316,12 +312,6 @@ export default {
     'Syncs the {type} course schedule to your calendar. Sync again after changing these settings.',
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
-  fileUseDocumentDirOnCaption:
-    "Files are kept in the app's Documents folder, which the system doesn't clear.",
-  fileUseDocumentDirOffCaption:
-    "Files are kept in the app's cache, which the system may clear when space runs low.",
-  fileOmitCourseNameOnCaption: 'Files are saved as "filename".',
-  fileOmitCourseNameOffCaption: 'Files are saved as "coursename-filename".',
   courseInformationSharingOnCaption:
     'Course information stops being uploaded when you turn this off.',
   courseInformationSharingOffCaption:
@@ -330,7 +320,14 @@ export default {
   downloads: 'Downloads',
   downloadsTotal: 'All Downloads',
   downloadsCaption:
-    'Files downloaded in learnX, by course. Tap a course to delete its files.',
+    'Files downloaded in learnX, by course. Tap a course to export or delete its files.',
+  downloadsExport: 'Export All Downloads',
+  downloadsExportCaption:
+    'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
+  downloadsExportCourse: 'Export',
+  downloadsExported: 'Exported {files}',
+  downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
+  downloadsExportFailed: "Couldn't export: ",
   downloadsDeleteCourse: 'Delete Downloaded Files?',
   downloadsOneFile: '1 file',
   downloadsFileCount: '{count} files',

@@ -131,10 +131,11 @@ export const pickedAsRemoteFile = (
 
 /** File detail params for a submitted or picked attachment */
 export const attachmentForFileDetail = (
-  assignment: Pick<Assignment, 'id' | 'courseName'>,
+  assignment: Pick<Assignment, 'id' | 'courseId' | 'courseName'>,
   attachment: RemoteFile & { type?: string | null },
 ) => ({
   id: assignment.id,
+  courseId: assignment.courseId,
   courseName: assignment.courseName,
   title: stripExtension(attachment.name),
   downloadUrl: attachment.downloadUrl,

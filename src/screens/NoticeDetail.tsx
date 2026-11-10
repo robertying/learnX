@@ -46,6 +46,7 @@ const NoticeDetailContent: React.FC<{
   const {
     id,
     url,
+    courseId,
     courseName,
     title,
     publisher,
@@ -68,6 +69,7 @@ const NoticeDetailContent: React.FC<{
       navigation.push('FileDetail', {
         attachment: {
           id,
+          courseId,
           courseName,
           title: stripExtension(attachment.name),
           downloadUrl: attachment.downloadUrl,

@@ -21,6 +21,7 @@ jest.mock('helpers/files/share', () => ({
 
 const file: DownloadableFile = {
   id: 'f1',
+  courseId: 'c1',
   courseName: 'Calculus',
   title: 'Lecture 1',
   fileType: 'docx',

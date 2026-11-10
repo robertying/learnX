@@ -34,8 +34,6 @@ describe('settings', () => {
        "assignmentReminderSync": false,
        "courseEventOmitLocation": false,
        "courseInformationSharing": false,
-       "fileOmitCourseName": false,
-       "fileUseDocumentDir": false,
        "graduate": false,
        "notifications": {
          "assignments": false,
@@ -126,5 +124,23 @@ describe('settings saved before version 2', () => {
       setupSeen: false,
       whatsNewSeenVersion: null,
     });
+  });
+});
+
+describe('settings saved before version 3', () => {
+  it('drops the download folder and file name settings', async () => {
+    kv.set(
+      SETTINGS_KEY,
+      JSON.stringify({
+        state: {
+          graduate: true,
+          fileUseDocumentDir: true,
+          fileOmitCourseName: true,
+        },
+        version: 2,
+      }),
+    );
+    await useSettingsStore.persist.rehydrate();
+    expect(getSettings()).toEqual({ ...defaultSettings, graduate: true });
   });
 });

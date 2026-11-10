@@ -2,14 +2,17 @@ import { Platform } from 'react-native';
 import Share from '../../../../modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { dataSource, ensureSession } from 'data/source';
-import { resetSettings, setSetting } from 'data/settings';
+import { getCachedCourses } from 'data/queries';
+import { Directory } from 'expo-file-system';
 import {
+  courseNameOf,
   downloadFile,
   getDownloadedFile,
   listDownloads,
-  moveDownloadsToCurrentDirectory,
+  readCourseInfo,
   removeCourseDownloads,
   removeFileDir,
+  removeLegacyDownloads,
 } from 'helpers/files/downloads';
 
 jest.mock('expo-file-system', () =>
@@ -20,6 +23,8 @@ const { __fs } =
     'expo-file-system',
   );
 
+jest.mock('data/queries', () => ({ getCachedCourses: jest.fn(() => []) }));
+
 jest.mock('data/source', () => ({
   addCSRF: (url: string) => `${url}&csrf=token`,
   dataSource: { prepareFileDownload: jest.fn(() => Promise.resolve()) },
@@ -28,7 +33,8 @@ jest.mock('data/source', () => ({
 
 const DOCUMENTS = 'file:///app/Documents';
 const CACHES = 'file:///app/Caches';
-const FILES = `${CACHES}/learnX Files`;
+const FILES = `${CACHES}/downloads`;
+const LEGACY = 'learnX Files';
 
 const fetchMock = jest.fn(() => Promise.resolve(new Response()));
 globalThis.fetch = fetchMock as typeof fetch;
@@ -39,39 +45,41 @@ const setOS = (value: typeof Platform.OS) =>
 
 const file = {
   id: 'f1',
+  courseId: 'c1',
   courseName: 'Calculus',
   title: 'Lecture 1',
   fileType: 'pdf',
   downloadUrl:
     'https://learn.tsinghua.edu.cn/b/wlxt/kj/wlkc_kjxxb/student/downloadFile?sfgk=0&wjid=f1',
 };
-const target = `${FILES}/Calculus/f1/Calculus-Lecture 1.pdf`;
+const target = `${FILES}/c1/f1/Lecture 1.pdf`;
+
+const calculus = {
+  id: 'c1',
+  name: 'Calculus',
+  chineseName: '微积分',
+  englishName: 'Calculus',
+  semesterId: '2025-2026-1',
+};
 
 beforeEach(() => {
   __fs.reset();
-  resetSettings();
+  jest.mocked(getCachedCourses).mockReturnValue([]);
   setOS('ios');
 });
 
 afterAll(() => setOS(os));
 
 describe('getDownloadedFile', () => {
-  it('keeps each file in <course>/<id>/ under learnX Files in Caches', () => {
+  it('keeps each file in <course id>/<file id>/ under downloads in Caches', () => {
     expect(getDownloadedFile(file).uri).toBe(target);
   });
 
-  it('follows the folder and name settings', () => {
-    setSetting('fileUseDocumentDir', true);
-    setSetting('fileOmitCourseName', true);
-    expect(getDownloadedFile(file).uri).toBe(
-      `${DOCUMENTS}/learnX Files/Calculus/f1/Lecture 1.pdf`,
-    );
-  });
-
-  it('sanitizes the course and id folder names', () => {
+  it('sanitizes the folder and file names', () => {
     expect(
-      getDownloadedFile({ ...file, courseName: 'A/B', id: '../x' }).uri,
-    ).toBe(`${FILES}/A_B/_x/A_B-Lecture 1.pdf`);
+      getDownloadedFile({ ...file, courseId: 'A/B', id: '../x', title: 'a:b' })
+        .uri,
+    ).toBe(`${FILES}/A_B/_x/a_b.pdf`);
   });
 });
 
@@ -112,6 +120,10 @@ describe('downloadFile', () => {
     };
 
     await expect(downloadFile(file, { onProgress })).resolves.toBe(target);
+    // Without the course cached, its name is the one the file was shown with.
+    expect(JSON.parse(__fs.read(`${FILES}/c1/course.json`))).toEqual({
+      name: 'Calculus',
+    });
 
     expect(dataSource.prepareFileDownload).toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledWith(
@@ -172,10 +184,22 @@ describe('downloadFile', () => {
   });
 
   it('keeps the course folder when it holds other downloads', async () => {
-    __fs.write(`${FILES}/Calculus/f2/b.pdf`, '56');
+    __fs.write(`${FILES}/c1/f2/b.pdf`, '56');
     __fs.download = () => Promise.reject(new Error('offline'));
     await expect(downloadFile(file)).rejects.toThrow('File download failed');
-    expect(__fs.dirs(FILES)).toEqual(['Calculus', 'Calculus/f2']);
+    expect(__fs.dirs(FILES)).toEqual(['c1', 'c1/f2']);
+  });
+
+  it('keeps the folders when they cannot be deleted', async () => {
+    __fs.download = () => Promise.reject(new Error('offline'));
+    const remove = jest
+      .spyOn(Directory.prototype, 'delete')
+      .mockImplementation(() => {
+        throw new Error('busy');
+      });
+    await expect(downloadFile(file)).rejects.toThrow('File download failed');
+    remove.mockRestore();
+    expect(__fs.dirs(FILES)).toEqual(['c1', 'c1/f1']);
   });
 
   it('stops when its signal is aborted', async () => {
@@ -190,52 +214,88 @@ describe('downloadFile', () => {
   });
 });
 
+describe('course info', () => {
+  it("saves the cached course's names and semester with its downloads", async () => {
+    jest.mocked(getCachedCourses).mockReturnValue([calculus] as never);
+    await downloadFile(file);
+    expect(JSON.parse(__fs.read(`${FILES}/c1/course.json`))).toEqual({
+      name: 'Calculus',
+      chineseName: '微积分',
+      englishName: 'Calculus',
+      semesterId: '2025-2026-1',
+    });
+  });
+
+  it('reads the cached course first, then course.json', () => {
+    const dir = new Directory(`${FILES}/c1`);
+    expect(readCourseInfo(dir)).toEqual({});
+    expect(courseNameOf(dir)).toBe('c1');
+
+    __fs.write(`${FILES}/c1/course.json`, JSON.stringify(calculus));
+    expect(readCourseInfo(dir)).toEqual(calculus);
+    expect(courseNameOf(dir)).toBe('Calculus');
+
+    const cached = { ...calculus, englishName: 'Calculus I' };
+    jest.mocked(getCachedCourses).mockReturnValue([cached] as never);
+    expect(readCourseInfo(dir)).toBe(cached);
+    expect(courseNameOf(dir)).toBe('Calculus I');
+  });
+
+  it.each(['not json', 'null', '"text"'])(
+    'reads course.json holding %s as nothing',
+    content => {
+      __fs.write(`${FILES}/c1/course.json`, content);
+      expect(readCourseInfo(new Directory(`${FILES}/c1`))).toEqual({});
+    },
+  );
+
+  it('names a course by its only name', () => {
+    expect(
+      courseNameOf(new Directory(`${FILES}/c1`), { chineseName: '微积分' }),
+    ).toBe('微积分');
+  });
+});
+
 describe('downloads list', () => {
   beforeEach(() => {
-    __fs.write(`${FILES}/Calculus/f1/a.pdf`, '1234');
-    __fs.write(`${FILES}/Calculus/f2/b.pdf`, '56');
-    __fs.write(`${FILES}/Physics/f3/c.pdf`, '12345678');
-    __fs.mkdir(`${FILES}/Empty`);
-    __fs.mkdir(`${FILES}/Calculus/cancelled`);
-    __fs.mkdir(`${FILES}/Biology/cancelled`);
+    __fs.write(`${FILES}/c1/course.json`, JSON.stringify(calculus));
+    __fs.write(`${FILES}/c1/f1/a.pdf`, '1234');
+    __fs.write(`${FILES}/c1/f2/b.pdf`, '56');
+    __fs.write(`${FILES}/c2/f3/c.pdf`, '12345678');
+    __fs.mkdir(`${FILES}/empty`);
+    __fs.mkdir(`${FILES}/c1/cancelled`);
+    __fs.mkdir(`${FILES}/c3/cancelled`);
   });
 
   it('groups by course, largest first, without empty courses or folders', () => {
     expect(listDownloads()).toEqual([
-      { courseName: 'Physics', count: 1, size: 8 },
-      { courseName: 'Calculus', count: 2, size: 6 },
+      { courseId: 'c2', courseName: 'c2', count: 1, size: 8 },
+      { courseId: 'c1', courseName: 'Calculus', count: 2, size: 6 },
     ]);
+  });
+
+  it('counts a folder whose size fails as empty', () => {
+    const size = jest
+      .spyOn(Directory.prototype, 'size', 'get')
+      .mockImplementation(() => {
+        throw new Error('gone');
+      });
+    expect(listDownloads().map(course => course.size)).toEqual([0, 0]);
+    size.mockRestore();
   });
 
   it("deletes one course's downloads", () => {
-    removeCourseDownloads('Calculus');
-    expect(__fs.files(FILES)).toEqual(['Physics/f3/c.pdf']);
-  });
-});
-
-describe('moveDownloadsToCurrentDirectory', () => {
-  it('moves downloads from the other folder; a copy already there wins', () => {
-    __fs.write(`${DOCUMENTS}/learnX Files/Calculus/f1/a.pdf`, 'moved');
-    __fs.write(`${DOCUMENTS}/learnX Files/Calculus/f2/b.pdf`, 'dropped');
-    __fs.write(`${FILES}/Calculus/f2/b.pdf`, 'kept');
-
-    moveDownloadsToCurrentDirectory();
-
-    expect(__fs.files(FILES)).toEqual([
-      'Calculus/f1/a.pdf',
-      'Calculus/f2/b.pdf',
-    ]);
-    expect(__fs.files(DOCUMENTS)).toEqual([]);
+    removeCourseDownloads('c1');
+    expect(__fs.files(FILES)).toEqual(['c2/f3/c.pdf']);
   });
 });
 
 describe('removeFileDir', () => {
-  it('deletes downloads in both folders and shared files', async () => {
+  it('deletes downloads and shared files', async () => {
     jest
       .mocked(Share!.getSharedFilesDirectory)
       .mockReturnValueOnce('file:///group/Shared');
-    __fs.write(`${FILES}/Calculus/f1/a.pdf`, '1');
-    __fs.write(`${DOCUMENTS}/learnX Files/Calculus/f2/b.pdf`, '2');
+    __fs.write(`${FILES}/c1/f1/a.pdf`, '1');
     __fs.write(`${CACHES}/learnX Shared/c.pdf`, '3');
     __fs.write('file:///group/Shared/d.pdf', '4');
     __fs.write(`${CACHES}/other.txt`, '5');
@@ -246,9 +306,31 @@ describe('removeFileDir', () => {
     expect(__fs.files('file:///group')).toEqual([]);
   });
 
+  it('names the folders it could not delete', async () => {
+    __fs.write(`${FILES}/c1/f1/a.pdf`, '1');
+    const remove = jest
+      .spyOn(Directory.prototype, 'delete')
+      .mockImplementationOnce(() => {
+        throw new Error('busy');
+      });
+    await expect(removeFileDir()).rejects.toThrow('downloads');
+    remove.mockRestore();
+  });
+
   it('skips the share folder where there is none (Android)', async () => {
     __fs.write(`${CACHES}/learnX Shared/c.pdf`, '3');
     await removeFileDir();
     expect(__fs.files(CACHES)).toEqual([]);
+  });
+});
+
+describe('removeLegacyDownloads', () => {
+  it("deletes old versions' downloads in Caches and Documents", () => {
+    __fs.write(`${CACHES}/${LEGACY}/Calculus/f1/a.pdf`, '1');
+    __fs.write(`${DOCUMENTS}/${LEGACY}/Calculus/f2/b.pdf`, '2');
+    __fs.write(`${DOCUMENTS}/SQLite/db`, '3');
+    removeLegacyDownloads();
+    removeLegacyDownloads();
+    expect(__fs.files('file:///app')).toEqual(['Documents/SQLite/db']);
   });
 });

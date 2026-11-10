@@ -96,6 +96,7 @@ const AssignmentDetailContent: React.FC<{
 
   const {
     id,
+    courseId,
     courseName,
     title,
     deadline,
@@ -140,6 +141,7 @@ const AssignmentDetailContent: React.FC<{
       navigation.push('FileDetail', {
         attachment: {
           id: remoteFile.id,
+          courseId,
           courseName,
           title: stripExtension(remoteFile.name),
           downloadUrl: remoteFile.downloadUrl,

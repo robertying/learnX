@@ -3,39 +3,32 @@ import { Directory, DownloadTask, File, Paths } from 'expo-file-system';
 import Share from '../../../modules/share';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { addCSRF, dataSource, ensureSession } from 'data/source';
-import { getSettings } from 'data/settings';
-import { DownloadableFile } from 'data/types/state';
+import { getCachedCourses } from 'data/queries';
+import { localizedCourseName } from 'data/courseNames';
+import { Course, DownloadableFile } from 'data/types/state';
 import Urls from 'constants/Urls';
 import { fileNameOf, sanitizeFileName } from 'helpers/filename';
 import { isLearnUrl } from 'helpers/learnUrl';
 import { fileDownloadCheckUrl } from 'helpers/fileDownloadCheck';
 
-/** The folder downloads live in, under Documents or Caches. */
-export const DOWNLOADS_DIR = 'learnX Files';
+/** The folder downloads live in, under Caches. */
+export const DOWNLOADS_DIR = 'downloads';
 /** Where files shared into the app are copied, under Caches. */
 export const SHARED_DIR = 'learnX Shared';
+/** Where versions up to 18.x kept downloads, under Caches or Documents. */
+const LEGACY_DOWNLOADS_DIR = 'learnX Files';
+/** The course a `<course id>` folder holds files of (`CourseInfo`). */
+const COURSE_INFO_FILE = 'course.json';
 
 /**
- * The app's Documents or Caches folder, by the `fileUseDocumentDir` setting.
+ * Where downloaded files live: `downloads/<course id>/<file id>/<name>` under
+ * Caches. Ids don't change with the app's language or the course's name, so a
+ * download stays found; Export copies the files out with names people read.
+ * Keeping them in their own folder means clearing them never touches what
+ * other code keeps in Caches (WebKit, Crashlytics).
  */
-const getBaseDirectory = (useDocumentDir = getSettings().fileUseDocumentDir) =>
-  useDocumentDir ? Paths.document : Paths.cache;
-
-/**
- * Where downloaded files live: `learnX Files/<course>/<id>/<name>` under the
- * base folder. Keeping them in their own folder means clearing them never
- * touches what other code keeps in Caches or Documents (WebKit, Crashlytics,
- * SQLite).
- */
-const getDownloadsDirectory = (useDocumentDir?: boolean) =>
-  new Directory(getBaseDirectory(useDocumentDir), DOWNLOADS_DIR);
-
-/** Creates the downloads folder if needed and returns its URI. */
-export const ensureDownloadsDirectory = () => {
-  const dir = getDownloadsDirectory();
-  dir.create({ intermediates: true, idempotent: true });
-  return dir.uri;
-};
+export const getDownloadsDirectory = () =>
+  new Directory(Paths.cache, DOWNLOADS_DIR);
 
 /**
  * The server answers an expired session with a tiny HTML page that redirects
@@ -76,19 +69,62 @@ const discardDownload = (file: File) => {
   }
 };
 
-export const getDownloadedFile = (file: DownloadableFile) => {
-  const settings = getSettings();
-  const title = settings.fileOmitCourseName
-    ? file.title
-    : `${file.courseName}-${file.title}`;
-
-  return new File(
+export const getDownloadedFile = (file: DownloadableFile) =>
+  new File(
     getDownloadsDirectory(),
-    sanitizeFileName(file.courseName),
+    sanitizeFileName(file.courseId),
     sanitizeFileName(file.id),
-    fileNameOf({ title, fileType: file.fileType }),
+    fileNameOf(file),
   );
+
+/** What `course.json` keeps of a course, to name it when it isn't cached. */
+export type CourseInfo = Partial<
+  Pick<Course, 'name' | 'chineseName' | 'englishName' | 'semesterId'>
+>;
+
+/**
+ * Writes the course's names and semester next to its downloads, from the
+ * cached course or else the name the file was shown with.
+ */
+const saveCourseInfo = (dir: Directory, file: DownloadableFile) => {
+  const course = getCachedCourses().find(c => c.id === file.courseId);
+  const info: CourseInfo = course
+    ? {
+        name: course.name,
+        chineseName: course.chineseName,
+        englishName: course.englishName,
+        semesterId: course.semesterId,
+      }
+    : { name: file.courseName };
+  try {
+    new File(dir, COURSE_INFO_FILE).writeSync(JSON.stringify(info));
+  } catch {}
 };
+
+/** The course of a `<course id>` folder, cached or from its `course.json`. */
+export const readCourseInfo = (dir: Directory): CourseInfo => {
+  const course = getCachedCourses().find(c => c.id === dir.name);
+  if (course) {
+    return course;
+  }
+  try {
+    const info = JSON.parse(new File(dir, COURSE_INFO_FILE).textSync());
+    return info && typeof info === 'object' ? (info as CourseInfo) : {};
+  } catch {
+    return {};
+  }
+};
+
+/** A course's name in the app's language, or its folder's name. */
+export const courseNameOf = (dir: Directory, info = readCourseInfo(dir)) =>
+  localizedCourseName({
+    name: info.name ?? '',
+    chineseName: info.chineseName ?? '',
+    englishName: info.englishName ?? '',
+  }) ||
+  info.chineseName ||
+  info.englishName ||
+  dir.name;
 
 export interface DownloadOptions {
   /** Downloads again even when the file is already on the device. */
@@ -193,6 +229,7 @@ export const downloadFile = async (
     throw new Error('File download failed');
   }
 
+  saveCourseInfo(target.parentDirectory.parentDirectory, file);
   return downloaded.uri;
 };
 
@@ -209,8 +246,7 @@ export const deleteDirectory = (dir: Directory) => {
 export const removeFileDir = async () => {
   const failed: string[] = [];
   for (const dir of [
-    getDownloadsDirectory(true),
-    getDownloadsDirectory(false),
+    getDownloadsDirectory(),
     new Directory(Paths.cache, SHARED_DIR),
   ]) {
     try {
@@ -232,6 +268,18 @@ export const removeFileDir = async () => {
   }
 };
 
+/**
+ * Deletes the downloads versions up to 18.x kept in Caches or Documents,
+ * which the app no longer finds; they download again when opened.
+ */
+export const removeLegacyDownloads = () => {
+  for (const base of [Paths.cache, Paths.document]) {
+    try {
+      deleteDirectory(new Directory(base, LEGACY_DOWNLOADS_DIR));
+    } catch {}
+  }
+};
+
 export const subdirectories = (dir: Directory) =>
   dir.exists
     ? dir
@@ -247,25 +295,28 @@ const sizeOf = (dir: Directory) => {
   }
 };
 
+/** The `<file id>` folders of a course folder that hold a file. */
+export const downloadsOf = (course: Directory) =>
+  subdirectories(course).filter(dir => !isEmpty(dir));
+
 export interface CourseDownloads {
-  /** The course's folder name, which is its sanitized name. */
+  courseId: string;
+  /** In the app's language. */
   courseName: string;
-  /** Downloaded files, one per `<id>` folder. */
+  /** Downloaded files, one per `<file id>` folder. */
   count: number;
   /** Bytes on disk. */
   size: number;
 }
 
-/**
- * Downloads grouped by course, largest first. An empty `<id>` folder, left by a
- * download cancelled by an older version, isn't a file.
- */
+/** Downloads grouped by course, largest first. */
 export const listDownloads = (): CourseDownloads[] =>
   subdirectories(getDownloadsDirectory())
     .map(course => {
-      const downloads = subdirectories(course).filter(dir => !isEmpty(dir));
+      const downloads = downloadsOf(course);
       return {
-        courseName: course.name,
+        courseId: course.name,
+        courseName: courseNameOf(course),
         count: downloads.length,
         size: downloads.reduce((total, dir) => total + sizeOf(dir), 0),
       };
@@ -273,49 +324,8 @@ export const listDownloads = (): CourseDownloads[] =>
     .filter(course => course.count > 0)
     .sort((a, b) => b.size - a.size);
 
-/** Deletes one course's downloads; `courseName` is from `listDownloads`. */
-export const removeCourseDownloads = (courseName: string) =>
+/** Deletes one course's downloads; `courseId` is from `listDownloads`. */
+export const removeCourseDownloads = (courseId: string) =>
   deleteDirectory(
-    new Directory(getDownloadsDirectory(), sanitizeFileName(courseName)),
+    new Directory(getDownloadsDirectory(), sanitizeFileName(courseId)),
   );
-
-/**
- * Moves one downloaded file's `<id>` folder into `<downloads>/<course>/`.
- * A copy already there wins; the moved one is dropped.
- */
-export const moveDownload = (
-  from: Directory,
-  courseName: string,
-  id: string,
-) => {
-  const course = new Directory(
-    getDownloadsDirectory(),
-    sanitizeFileName(courseName),
-  );
-  course.create({ intermediates: true, idempotent: true });
-  const to = new Directory(course, sanitizeFileName(id));
-  if (to.exists) {
-    from.delete();
-  } else {
-    // Moving onto a path that doesn't exist yet renames the folder.
-    from.moveSync(to);
-  }
-};
-
-/**
- * Moves downloads from the folder the `fileUseDocumentDir` setting no longer
- * points at, so switching it keeps the files and "Clear" still finds them.
- */
-export const moveDownloadsToCurrentDirectory = () => {
-  const other = getDownloadsDirectory(!getSettings().fileUseDocumentDir);
-  for (const course of subdirectories(other)) {
-    for (const download of subdirectories(course)) {
-      try {
-        moveDownload(download, course.name, download.name);
-      } catch {}
-    }
-  }
-  try {
-    deleteDirectory(other);
-  } catch {}
-};
