@@ -4099,7 +4099,7 @@ SPEC CHECKSUMS:
   ExpoSymbols: 1260e741b35b6fd105942779895418db306645c8
   ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
   ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
-  ExpoWidgets: 18e3983798a3cfa5fcf6521e670aed55f8a86a37
+  ExpoWidgets: b9fc84462e55c60230bdd77b5e2c5b2786ab3440
   fast_float: b32c788ed9c6a8c584d114d0047beda9664e7cc6
   FBLazyVector: d2917ee70e37e91475560bf7ab916b0f60b8c14f
   FirebaseAnalytics: 6433dfd311ba78084fc93bdfc145e8cb75740eae
