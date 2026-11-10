@@ -78,7 +78,8 @@ export const moveOutOfSettings = (saved: Record<string, unknown>) => {
     assignmentReminderId,
     syncedCalendarAssignments,
     syncedReminderAssignments,
-    lastShowChangelogVersion,
+    // The changelog's badge is gone, so its version isn't kept.
+    lastShowChangelogVersion: _changelog,
     courseInformationSharingBadgeShown,
     newUpdate: _transient,
     ...rest
@@ -102,9 +103,6 @@ export const moveOutOfSettings = (saved: Record<string, unknown>) => {
   }
 
   const appState: Partial<AppState> = {};
-  if (typeof lastShowChangelogVersion === 'string') {
-    appState.changelogSeenVersion = lastShowChangelogVersion;
-  }
   if (courseInformationSharingBadgeShown === true) {
     appState.courseSharingSeen = true;
   }

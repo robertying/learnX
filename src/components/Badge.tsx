@@ -1,5 +1,24 @@
-import { StyleProp, StyleSheet, Text, TextStyle } from 'react-native';
-import { useTheme } from 'theme';
+import {
+  PlatformColor,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextStyle,
+} from 'react-native';
+
+/**
+ * The red of every badge on iOS, iPadOS and Mac: the system red, which the tab
+ * bar, the Mac sidebar and header items draw theirs in, and which adapts to
+ * dark mode and Increase Contrast. Android draws its badges with Compose and
+ * Material Components, in Material's error role.
+ */
+export const BADGE_COLOR = PlatformColor('systemRed');
+
+/**
+ * A badge without a count is a dot this many points wide, as the system draws
+ * one on the Mac sidebar and on iOS 26 header items.
+ */
+export const DOT_SIZE = 8;
 
 export interface BadgeProps {
   children?: React.ReactNode;
@@ -8,10 +27,8 @@ export interface BadgeProps {
   style?: StyleProp<TextStyle>;
 }
 
-/** A small count or dot, in the error color unless the style sets one. */
+/** A small count or dot, in the badge color unless the style sets one. */
 const Badge: React.FC<BadgeProps> = ({ children, size = 20, style }) => {
-  const theme = useTheme();
-
   return (
     <Text
       numberOfLines={1}
@@ -19,8 +36,8 @@ const Badge: React.FC<BadgeProps> = ({ children, size = 20, style }) => {
       style={[
         styles.badge,
         {
-          backgroundColor: theme.colors.error,
-          color: theme.colors.onError,
+          backgroundColor: BADGE_COLOR,
+          color: 'white',
           fontSize: size * 0.5,
           lineHeight: size,
           height: size,

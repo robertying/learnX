@@ -91,7 +91,7 @@ const iosNeutralDark: Partial<typeof materialLight> = {
 };
 
 /**
- * Status colors for icons and badges: Apple's system colors, which also read
+ * Status colors for icons: Apple's system colors, which also read
  * well next to Material components on Android. Fills, such as the swipe
  * buttons' tint, use `light` and `dark`; text and glyphs use `theme.colors.status`.
  */

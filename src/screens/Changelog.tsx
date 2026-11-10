@@ -1,21 +1,14 @@
-import { useEffect } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import WebView from 'react-native-webview';
 import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
-import { setChangelogSeen } from 'data/appState';
 import useWebViewProgress from 'hooks/useWebViewProgress';
-import packageJson from '../../package.json';
 
 const releasesUrl = 'https://github.com/robertying/learnX/releases';
 
 // In Settings and in the What's New sheet, so it takes no navigation props.
 const Changelog: React.FC = () => {
   const { progress, loading, onLoadProgress } = useWebViewProgress();
-
-  useEffect(() => {
-    setChangelogSeen(packageJson.version);
-  }, []);
 
   return (
     <SafeArea>

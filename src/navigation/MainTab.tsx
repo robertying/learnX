@@ -148,6 +148,8 @@ const MainTab = () => {
   useMainStartup();
   useLaunchSheet();
   useMainCommands();
+  // Settings' badge is on its sidebar row on Mac, and on its button in
+  // Today's header elsewhere; the tab bar shows none.
   const settingsBadge = useSettingsBadge();
 
   if (sidebarSplit) {
@@ -192,9 +194,6 @@ const MainTab = () => {
             title: tab.title,
             tabBarButtonTestID: tab.testID,
             tabBarIcon: () => getTabBarIcon(tab.sfSymbol, tab.materialIcon),
-            // Settings open from Today's header, so Today carries their badge.
-            tabBarBadge:
-              tab.name === 'TodayStack' && settingsBadge ? ' ' : undefined,
           }}
         />
       ))}

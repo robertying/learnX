@@ -10,8 +10,6 @@ export const APP_STATE_KEY = 'appState';
  * the welcome, set-up and What's New pages (`helpers/whatsNew`).
  */
 export interface AppState {
-  /** The version whose changelog was last shown. */
-  changelogSeenVersion: string | null;
   /** Course information sharing was opened once, so its badge is gone. */
   courseSharingSeen: boolean;
   /** The welcome page before the first login was closed. */
@@ -26,7 +24,6 @@ export interface AppState {
 }
 
 const initialAppState = (): AppState => ({
-  changelogSeenVersion: null,
   courseSharingSeen: false,
   welcomeSeen: false,
   setupSeen: false,
@@ -36,17 +33,21 @@ const initialAppState = (): AppState => ({
 export const useAppStateStore = create<AppState>()(
   persist(initialAppState, {
     name: APP_STATE_KEY,
-    version: 1,
+    version: 2,
     storage: persistStorage,
+    // Version 1 also kept the changelog last opened, for a badge that's
+    // gone. Only version 1 reaches here: zustand migrates older versions only.
+    migrate: saved => {
+      const { changelogSeenVersion: _dropped, ...state } = saved as AppState & {
+        changelogSeenVersion?: unknown;
+      };
+      return state;
+    },
   }),
 );
 
 export const useAppState = <T>(selector: (state: AppState) => T) =>
   useAppStateStore(selector);
-
-export const setChangelogSeen = (version: string) => {
-  useAppStateStore.setState({ changelogSeenVersion: version });
-};
 
 export const setCourseSharingSeen = () => {
   useAppStateStore.setState({ courseSharingSeen: true });
