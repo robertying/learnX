@@ -242,16 +242,11 @@ export const deleteDirectory = (dir: Directory) => {
   }
 };
 
-/**
- * Deletes downloaded files and files shared into the app, and the downloads
- * versions up to 18.x kept.
- */
+/** Deletes downloaded files and files shared into the app. */
 export const removeFileDir = async () => {
   const failed: string[] = [];
   for (const dir of [
     getDownloadsDirectory(),
-    new Directory(Paths.cache, LEGACY_DOWNLOADS_DIR),
-    new Directory(Paths.document, LEGACY_DOWNLOADS_DIR),
     new Directory(Paths.cache, SHARED_DIR),
   ]) {
     try {
@@ -274,14 +269,15 @@ export const removeFileDir = async () => {
 };
 
 /**
- * Deletes the downloads versions up to 18.x kept in Caches, which the app no
- * longer finds; they download again when opened. The ones in Documents are
- * left, since people may keep them there on purpose (they show in Files).
+ * Deletes the downloads versions up to 18.x kept in Caches or Documents,
+ * which the app no longer finds; they download again when opened.
  */
 export const removeLegacyDownloads = () => {
-  try {
-    deleteDirectory(new Directory(Paths.cache, LEGACY_DOWNLOADS_DIR));
-  } catch {}
+  for (const base of [Paths.cache, Paths.document]) {
+    try {
+      deleteDirectory(new Directory(base, LEGACY_DOWNLOADS_DIR));
+    } catch {}
+  }
 };
 
 export const subdirectories = (dir: Directory) =>

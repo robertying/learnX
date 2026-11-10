@@ -291,13 +291,11 @@ describe('downloads list', () => {
 });
 
 describe('removeFileDir', () => {
-  it("deletes downloads, old versions' downloads and shared files", async () => {
+  it('deletes downloads and shared files', async () => {
     jest
       .mocked(Share!.getSharedFilesDirectory)
       .mockReturnValueOnce('file:///group/Shared');
     __fs.write(`${FILES}/c1/f1/a.pdf`, '1');
-    __fs.write(`${CACHES}/${LEGACY}/Calculus/f1/a.pdf`, '1');
-    __fs.write(`${DOCUMENTS}/${LEGACY}/Calculus/f2/b.pdf`, '2');
     __fs.write(`${CACHES}/learnX Shared/c.pdf`, '3');
     __fs.write('file:///group/Shared/d.pdf', '4');
     __fs.write(`${CACHES}/other.txt`, '5');
@@ -327,13 +325,12 @@ describe('removeFileDir', () => {
 });
 
 describe('removeLegacyDownloads', () => {
-  it("deletes old versions' downloads in Caches and keeps the ones in Documents", () => {
+  it("deletes old versions' downloads in Caches and Documents", () => {
     __fs.write(`${CACHES}/${LEGACY}/Calculus/f1/a.pdf`, '1');
     __fs.write(`${DOCUMENTS}/${LEGACY}/Calculus/f2/b.pdf`, '2');
+    __fs.write(`${DOCUMENTS}/SQLite/db`, '3');
     removeLegacyDownloads();
     removeLegacyDownloads();
-    expect(__fs.files('file:///app')).toEqual([
-      `Documents/${LEGACY}/Calculus/f2/b.pdf`,
-    ]);
+    expect(__fs.files('file:///app')).toEqual(['Documents/SQLite/db']);
   });
 });

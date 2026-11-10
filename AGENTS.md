@@ -50,7 +50,7 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 
 ## Downloads
 
-- Downloaded files are the app's own and kept by ids, never names: `<Caches>/downloads/<course id>/<file id>/<title>.<ext>` (`helpers/files/downloads`), with a `course.json` beside each course's files (its names and semester) for when the course isn't cached. Course names follow the app's language, so a path built from one would break after a language change. People get files out through Downloads › Export (`helpers/files/export`): a folder they pick with the system picker (on Mac too, with the user-selected read-write entitlement) gets `learnX/<semester>/<course>/<title>.<ext>` in the app's language. Sharing, opening and the Mac's Save to Downloads name a file by its title alone.
+- Downloaded files are the app's own and kept by ids, never names: `<Caches>/downloads/<course id>/<file id>/<title>.<ext>` (`helpers/files/downloads`), with a `course.json` beside each course's files (its names and semester) for when the course isn't cached. Course names follow the app's language, so a path built from one would break after a language change. People get files out through Downloads › Export (`helpers/files/export`): a folder they pick with the system picker (on Mac too, with the user-selected read-write entitlement) gets `learnX/<semester>/<course>/<title>.<ext>` in the app's language. Sharing, opening and the Mac's Save to Downloads name a file by its title alone. The app's Documents folder isn't shown in Files or Finder (no `UIFileSharingEnabled`): it holds the app's databases, not files for people.
 
 ## UI components
 
