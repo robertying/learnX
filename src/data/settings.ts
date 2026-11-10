@@ -2,14 +2,17 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
 import { SettingsState } from 'data/types/state';
+import {
+  type CalendarSyncState,
+  useCalendarSyncStore,
+} from 'data/calendarSync';
+import { type AppState, useAppStateStore } from 'data/appState';
 
 export const SETTINGS_KEY = 'settings';
 
 export const defaultSettings: SettingsState = {
   assignmentCalendarSync: false,
   assignmentReminderSync: false,
-  syncedCalendarAssignments: {},
-  syncedReminderAssignments: {},
   graduate: false,
   fileUseDocumentDir: false,
   fileOmitCourseName: false,
@@ -36,8 +39,6 @@ export const defaultSettings: SettingsState = {
     deadlineReminderOffset: 24 * 60,
   },
   courseInformationSharing: false,
-  courseInformationSharingBadgeShown: false,
-  lastShowChangelogVersion: null,
   openFileAfterDownload: false,
   courseEventOmitLocation: false,
 };
@@ -60,11 +61,72 @@ export const mergeSettings = (
   notifications: { ...current.notifications, ...saved.notifications },
 });
 
+const isStringRecord = (value: unknown): value is Record<string, string> =>
+  !!value &&
+  typeof value === 'object' &&
+  !Array.isArray(value) &&
+  Object.values(value).every(item => typeof item === 'string');
+
+/**
+ * Moves what settings used to hold besides settings into its own store: the
+ * calendar sync's bookkeeping (`data/calendarSync`) and what the user has
+ * seen (`data/appState`). Values of the wrong type are dropped. Returns the
+ * rest, the settings themselves.
+ */
+export const moveOutOfSettings = (saved: Record<string, unknown>) => {
+  const {
+    courseCalendarId,
+    assignmentCalendarId,
+    assignmentReminderId,
+    syncedCalendarAssignments,
+    syncedReminderAssignments,
+    lastShowChangelogVersion,
+    courseInformationSharingBadgeShown,
+    newUpdate: _transient,
+    ...rest
+  } = saved;
+
+  const calendarSync: Partial<CalendarSyncState> = {};
+  const ids = { courseCalendarId, assignmentCalendarId, assignmentReminderId };
+  for (const [key, id] of Object.entries(ids)) {
+    if (typeof id === 'string') {
+      calendarSync[key as keyof typeof ids] = id;
+    }
+  }
+  if (isStringRecord(syncedCalendarAssignments)) {
+    calendarSync.syncedCalendarAssignments = syncedCalendarAssignments;
+  }
+  if (isStringRecord(syncedReminderAssignments)) {
+    calendarSync.syncedReminderAssignments = syncedReminderAssignments;
+  }
+  if (Object.keys(calendarSync).length > 0) {
+    useCalendarSyncStore.setState(calendarSync);
+  }
+
+  const appState: Partial<AppState> = {};
+  if (typeof lastShowChangelogVersion === 'string') {
+    appState.changelogSeenVersion = lastShowChangelogVersion;
+  }
+  if (courseInformationSharingBadgeShown === true) {
+    appState.courseSharingSeen = true;
+  }
+  if (Object.keys(appState).length > 0) {
+    useAppStateStore.setState(appState);
+  }
+
+  return rest;
+};
+
 export const useSettingsStore = create<SettingsState>()(
   persist(() => defaultSettings, {
     name: SETTINGS_KEY,
-    version: 1,
+    version: 2,
     storage: persistStorage,
+    migrate: (saved, version) => {
+      const data = (saved ?? {}) as Record<string, unknown>;
+      // Version 1 also held the calendar sync's bookkeeping and the badges.
+      return version < 2 ? moveOutOfSettings(data) : data;
+    },
     merge: (saved, current) =>
       mergeSettings(current, (saved ?? {}) as Partial<SettingsState>),
   }),
@@ -84,38 +146,4 @@ export const setSetting = <K extends keyof SettingsState>(
 
 export const resetSettings = () => {
   useSettingsStore.setState(defaultSettings, true);
-};
-
-type EventType = 'calendar' | 'reminder';
-
-const syncedKey = (type: EventType) =>
-  type === 'calendar'
-    ? 'syncedCalendarAssignments'
-    : 'syncedReminderAssignments';
-
-/** Remembers the calendar event or reminder made for an assignment. */
-export const setEventIdForAssignment = (
-  type: EventType,
-  assignmentId: string,
-  eventId: string,
-) => {
-  const key = syncedKey(type);
-  useSettingsStore.setState(state => ({
-    [key]: { ...state[key], [assignmentId]: eventId },
-  }));
-};
-
-export const removeEventIdForAssignment = (
-  type: EventType,
-  assignmentId: string,
-) => {
-  const key = syncedKey(type);
-  useSettingsStore.setState(state => {
-    const { [assignmentId]: _removed, ...synced } = state[key] ?? {};
-    return { [key]: synced };
-  });
-};
-
-export const clearEventIds = (type: EventType) => {
-  useSettingsStore.setState({ [syncedKey(type)]: {} });
 };

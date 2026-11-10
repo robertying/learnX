@@ -10,7 +10,7 @@ Reproduce the existing store screenshots with the current UI, from mock data onl
 - **Never write output into the repo**: save to `~/Downloads/learnX-app-store-assets/` for the user to review (layout in [Output](#output)). Never upload to App Store Connect (ASC) or Play Console unless asked.
 - Keep generated helper binaries in one scratch dir (`/tmp/store-tools`), built from `scripts/` with `swiftc -O`.
 - Shots are zh-Hans, light mode, mock data. Mock dates are relative to now, so rebuild first if the build is old.
-- **No red dots**: before capturing, temporarily edit `src/data/mock.ts` so no badge shows (Settings tab/sidebar entry and rows): `courseInformationSharingBadgeShown: true`, `lastShowChangelogVersion` = `version` from `package.json`, `newUpdate: false`. Reload or rebuild, check every shot, then `git checkout src/data/mock.ts` (never commit it).
+- **No red dots**: before capturing, temporarily edit `initialAppState` in `src/data/appState.ts` so no badge shows (Settings tab/sidebar entry and rows): `courseSharingSeen: true`, `changelogSeenVersion` = `version` from `package.json` (an available update also shows a badge; release builds only). Log out and in again (logout resets it) or reinstall, check every shot, then `git checkout src/data/appState.ts` (never commit it).
 
 ## Requirements
 

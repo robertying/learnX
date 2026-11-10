@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   defaultSettings,
   mergeSettings,
+  moveOutOfSettings,
   useSettingsStore,
 } from 'data/settings';
 import { bookmarkLists } from 'data/pendingActions';
@@ -64,41 +65,26 @@ export const parseLegacyPersist = (raw: string | null): Json | null => {
   }
 };
 
-const isStringRecord = (value: unknown): value is Record<string, string> =>
-  isObject(value) &&
-  Object.values(value).every(item => typeof item === 'string');
-
 /** Settings whose default is undefined, with the type they must have. */
-const optionalSettings: Partial<
-  Record<keyof SettingsState, 'string' | 'number' | 'record'>
-> = {
+const optionalSettings: Partial<Record<keyof SettingsState, 'number'>> = {
   calendarEventLength: 'number',
-  assignmentCalendarId: 'string',
-  assignmentReminderId: 'string',
-  courseCalendarId: 'string',
-  syncedCalendarAssignments: 'record',
-  syncedReminderAssignments: 'record',
 };
 
-/** Keeps the saved settings whose type matches what the app expects. */
+/**
+ * Keeps the saved settings whose type matches what the app expects. What
+ * 18.0.x kept in settings besides settings goes through `moveOutOfSettings`
+ * first.
+ */
 export const legacySettings = (saved: Json): Partial<SettingsState> => {
   const result: Json = {};
   for (const [key, value] of Object.entries(saved)) {
-    if (key === 'newUpdate') {
-      continue;
-    }
     const optional = optionalSettings[key as keyof SettingsState];
     const fallback = defaultSettings[key as keyof SettingsState];
-    const valid =
-      optional === 'record'
-        ? isStringRecord(value)
-        : optional
-          ? typeof value === optional
-          : key === 'lastShowChangelogVersion'
-            ? typeof value === 'string' || value === null
-            : isObject(fallback)
-              ? isObject(value)
-              : fallback !== undefined && typeof value === typeof fallback;
+    const valid = optional
+      ? typeof value === optional
+      : isObject(fallback)
+        ? isObject(value)
+        : fallback !== undefined && typeof value === typeof fallback;
     if (valid) {
       result[key] = value;
     }
@@ -178,9 +164,8 @@ const importLegacy = async () => {
 
   const settings = parseLegacyPersist(rawSettings);
   if (settings) {
-    useSettingsStore.setState(current =>
-      mergeSettings(current, legacySettings(settings)),
-    );
+    const rest = legacySettings(moveOutOfSettings(settings));
+    useSettingsStore.setState(current => mergeSettings(current, rest));
   }
 
   const root = parseLegacyPersist(rawRoot);

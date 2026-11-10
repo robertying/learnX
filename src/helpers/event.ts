@@ -2,13 +2,18 @@ import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarEvent, CalendarRange } from '@robertying/thu-learn-lib';
+import { getSettings } from 'data/settings';
 import {
+  type AssignmentEventType,
   clearEventIds,
-  getSettings,
-  setEventIdForAssignment,
-  setSetting,
+  getAssignmentEventIds,
+  getCalendarSync,
   removeEventIdForAssignment,
-} from 'data/settings';
+  resetCalendarSync,
+  setEventIdForAssignment,
+  setSyncedCalendarId,
+  type SyncedCalendar,
+} from 'data/calendarSync';
 import { getCachedCourses } from 'data/queries';
 import { Assignment, SettingsState } from 'data/types/state';
 import Colors from 'constants/Colors';
@@ -80,14 +85,9 @@ const androidCalendarSource = {
   isLocalAccount: true,
 } as Calendar.Source;
 
-type CalendarIdSetting =
-  | 'courseCalendarId'
-  | 'assignmentCalendarId'
-  | 'assignmentReminderId';
-
 /**
  * Returns the stored calendar if it still exists, else adopts one with the
- * same title, else creates it. The id is saved under `setting`.
+ * same title, else creates it. The id is saved in `data/calendarSync`.
  */
 const getOrCreateCalendar = async ({
   setting,
@@ -97,7 +97,7 @@ const getOrCreateCalendar = async ({
   listEntityType,
   onCreate,
 }: {
-  setting: CalendarIdSetting;
+  setting: SyncedCalendar;
   title: string;
   name: string;
   entityType: Calendar.EntityTypes;
@@ -110,7 +110,7 @@ const getOrCreateCalendar = async ({
     ? await Calendar.getCalendars(listEntityType)
     : await Calendar.getCalendars();
 
-  const storedId = getSettings()[setting];
+  const storedId = getCalendarSync()[setting];
   if (storedId) {
     if (calendars.some(value => value.id === storedId)) {
       return storedId;
@@ -119,7 +119,7 @@ const getOrCreateCalendar = async ({
 
   const existingCalendar = calendars.find(value => value.title === title);
   if (existingCalendar) {
-    setSetting(setting, existingCalendar.id);
+    setSyncedCalendarId(setting, existingCalendar.id);
     return existingCalendar.id;
   }
 
@@ -143,7 +143,7 @@ const getOrCreateCalendar = async ({
 
   const newCalendarID = newCalendar.id;
   if (newCalendarID) {
-    setSetting(setting, newCalendarID);
+    setSyncedCalendarId(setting, newCalendarID);
   }
   return newCalendarID;
 };
@@ -220,16 +220,13 @@ export const getAssignmentReminderId = () =>
   });
 
 export const saveAssignmentEvent = async (
-  type: 'calendar' | 'reminder',
+  type: AssignmentEventType,
   settings: SettingsState,
   calendar: Calendar.ExpoCalendar,
   input: AssignmentEventInput,
 ) => {
   const { assignmentId } = input;
-  const syncedAssignments =
-    type === 'calendar'
-      ? settings.syncedCalendarAssignments
-      : settings.syncedReminderAssignments;
+  const syncedAssignments = getAssignmentEventIds(type);
 
   if (Platform.OS === 'ios' && type === 'reminder') {
     const details = buildAssignmentReminderDetails(settings, input);
@@ -275,14 +272,10 @@ export const saveAssignmentEvent = async (
  * hidden since) and forgets them. One that's already gone is just forgotten.
  */
 const removeAssignmentEvents = async (
-  type: 'calendar' | 'reminder',
+  type: AssignmentEventType,
   ids: string[],
 ) => {
-  const settings = getSettings();
-  const synced =
-    (type === 'calendar'
-      ? settings.syncedCalendarAssignments
-      : settings.syncedReminderAssignments) ?? {};
+  const synced = getAssignmentEventIds(type);
   const isReminder = Platform.OS === 'ios' && type === 'reminder';
   await Promise.all(
     ids
@@ -304,7 +297,7 @@ const removeAssignmentEvents = async (
  * of `removed` (assignments archived or hidden since they were written).
  */
 export const saveAssignmentsToReminderOrCalendar = async (
-  type: 'calendar' | 'reminder',
+  type: AssignmentEventType,
   assignments: Assignment[],
   removed: string[] = [],
 ) => {
@@ -346,9 +339,9 @@ export const removeCalendars = async () => {
       : [];
 
   // Only the ones learnX created or adopted, not every title with learnX.
-  const settings = getSettings();
+  const synced = getCalendarSync();
   const existingCalendars = [...calendars, ...reminders].filter(c =>
-    isSyncedCalendar(c, settings),
+    isSyncedCalendar(c, synced),
   );
 
   await Promise.all(
@@ -357,22 +350,16 @@ export const removeCalendars = async () => {
     }),
   );
 
-  setSetting('assignmentReminderId', undefined);
-  setSetting('assignmentCalendarId', undefined);
-  setSetting('syncedCalendarAssignments', {});
-  setSetting('syncedReminderAssignments', {});
-  setSetting('courseCalendarId', undefined);
+  resetCalendarSync();
 };
 
 export const exportSyncedCalendarsToICS = async () => {
   await requirePermission('calendar');
 
-  const settings = getSettings();
-
   const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
   const { courseCalendars, assignmentCalendars } = findSyncedCalendars(
     calendars,
-    settings,
+    getCalendarSync(),
   );
 
   const startDate = dayjs().subtract(1, 'year').toDate();

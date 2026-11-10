@@ -4,7 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView, { WebViewNavigation } from 'react-native-webview';
 import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
-import { setSetting } from 'data/settings';
+import { setChangelogSeen } from 'data/appState';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
@@ -24,7 +24,7 @@ const Changelog: React.FC<Props> = () => {
   };
 
   useEffect(() => {
-    setSetting('lastShowChangelogVersion', packageJson.version);
+    setChangelogSeen(packageJson.version);
   }, []);
 
   return (

@@ -34,15 +34,6 @@ export interface SettingsState {
   assignmentCalendarSync: boolean;
   calendarEventLength?: number;
   assignmentReminderSync: boolean;
-  assignmentCalendarId?: string;
-  assignmentReminderId?: string;
-  syncedCalendarAssignments?: {
-    [assignmentId: string]: string;
-  };
-  syncedReminderAssignments?: {
-    [assignmentId: string]: string;
-  };
-  courseCalendarId?: string;
   tabFilterSelections: {
     [tab in Tab]?: FilterSelection;
   };
@@ -52,8 +43,6 @@ export interface SettingsState {
   fileUseDocumentDir: boolean;
   fileOmitCourseName: boolean;
   courseInformationSharing: boolean;
-  courseInformationSharingBadgeShown: boolean;
-  lastShowChangelogVersion: string | null;
   openFileAfterDownload: boolean;
   courseEventOmitLocation: boolean;
 }

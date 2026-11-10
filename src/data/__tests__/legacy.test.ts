@@ -4,6 +4,8 @@ type Modules = {
   legacy: typeof import('data/legacy');
   settings: typeof import('data/settings');
   userData: typeof import('data/userData');
+  calendarSync: typeof import('data/calendarSync');
+  appState: typeof import('data/appState');
 };
 
 /**
@@ -32,6 +34,8 @@ const launch = async ({
     legacy: require('data/legacy'),
     settings: require('data/settings'),
     userData: require('data/userData'),
+    calendarSync: require('data/calendarSync'),
+    appState: require('data/appState'),
   };
 };
 
@@ -130,9 +134,6 @@ describe('importing user data saved by 18.0.x', () => {
     expect(m.settings.getSettings()).toEqual({
       ...m.settings.defaultSettings,
       assignmentCalendarSync: true,
-      assignmentCalendarId: 'cal-1',
-      syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
-      courseCalendarId: 'cal-2',
       calendarEventLength: 45,
       graduate: true,
       fileUseDocumentDir: true,
@@ -152,9 +153,18 @@ describe('importing user data saved by 18.0.x', () => {
         assignmentReminderAlarm: false,
       },
       courseInformationSharing: true,
-      courseInformationSharingBadgeShown: true,
-      lastShowChangelogVersion: '18.0.3',
       openFileAfterDownload: true,
+    });
+    // What settings held besides settings moved to stores of its own.
+    expect(m.calendarSync.getCalendarSync()).toEqual({
+      assignmentCalendarId: 'cal-1',
+      courseCalendarId: 'cal-2',
+      syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
+      syncedReminderAssignments: {},
+    });
+    expect(m.appState.useAppStateStore.getState()).toEqual({
+      changelogSeenVersion: '18.0.3',
+      courseSharingSeen: true,
     });
     expect(m.userData.getUserData()).toEqual({
       pendingActions: [
@@ -293,6 +303,12 @@ describe('importing user data saved by 18.0.x', () => {
       ...m.settings.defaultSettings,
       openFileAfterDownload: true,
     });
+    expect(m.calendarSync.getCalendarSync()).toEqual(
+      m.calendarSync.emptyCalendarSync(),
+    );
+    expect(m.appState.useAppStateStore.getState().changelogSeenVersion).toBe(
+      null,
+    );
     expect(m.userData.getUserData()).toEqual({
       ...m.userData.emptyUserData(),
       pendingActions: [favorite('notice', 'n1')],
