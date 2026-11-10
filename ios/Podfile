@@ -76,6 +76,8 @@ target 'learnX' do
         # Settings Xcode no longer wants on framework targets.
         config.build_settings.delete 'EMBEDDED_CONTENT_CONTAINS_SWIFT'
         config.build_settings.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'
+        # The Pods-* targets only build an umbrella module, which verifies cleanly.
+        config.build_settings['ENABLE_MODULE_VERIFIER'] = 'YES' if target.name.start_with?('Pods-')
       end
     end
 
@@ -92,10 +94,28 @@ target 'learnX' do
       Xcodeproj::Plist.write_to_path(info, path)
     end
 
+    # The targets' Pods-* xcconfigs (also the base configurations of the app's
+    # own targets) ask to embed the Swift standard libraries, which iOS 17.6 and
+    # later ship with. Xcode recommends removing that.
+    installer.aggregate_targets.each do |aggregate|
+      aggregate.xcconfigs.each do |config_name, xcconfig|
+        xcconfig.attributes.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'
+        xcconfig.attributes.delete 'EMBEDDED_CONTENT_CONTAINS_SWIFT'
+        xcconfig.save_as(aggregate.xcconfig_path(config_name))
+      end
+    end
+
     # Xcode's recommended project settings, so it stops offering to update the
     # Pods project; pods are signed with the app, so they need no identity.
+    # Left off: user script sandboxing (React Native's, Expo's and Crashlytics'
+    # script phases write outside their declared outputs) and the module
+    # verifier on the pods themselves (CocoaPods' umbrella headers use quoted
+    # includes, which it rejects).
+    installer.pods_project.root_object.attributes['LastUpgradeCheck'] = '2720'
+    installer.pods_project.root_object.attributes['BuildIndependentTargetsInParallel'] = 'YES'
     installer.pods_project.build_configurations.each do |config|
       config.build_settings['ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS'] = 'YES'
+      config.build_settings['STRING_CATALOG_GENERATE_SYMBOLS'] = 'YES'
       config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'
       config.build_settings['CODE_SIGN_IDENTITY'] = ''
       config.build_settings.delete 'STRIP_INSTALLED_PRODUCT'
