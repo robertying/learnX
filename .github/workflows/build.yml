@@ -149,7 +149,9 @@ jobs:
           retention-days: 1
 
   apple:
-    name: ${{ matrix.name }}
+    # A static name: a skipped matrix job can't expand ${{ matrix.name }}, so
+    # GitHub would show the raw expression. Rows show as "Apple (iOS)".
+    name: Apple
     # By hand only, for the boxes ticked.
     if: github.event_name == 'workflow_dispatch' && (inputs.ios || inputs.mac)
     runs-on: macos-26
