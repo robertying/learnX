@@ -9,10 +9,11 @@ name: Build
 # - iOS (build + native tests, ~47 min cold): main pushes that touch iOS paths,
 #   and by hand. Too slow to gate PRs; run it by hand on a branch when needed.
 # - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
-# - E2E: by hand only, with the "Run E2E" box ticked. After the Android and
-#   iOS jobs build, they run the Maestro flows (scripts/e2e.sh) on that same
-#   debug build, with Metro on the runner and the mock login. The Android flows
-#   aren't maintained, so expect drift there (.maestro/AGENTS.md).
+# - E2E: by hand only, with the "Run E2E" box ticked. Separate jobs that run
+#   after the Android and iOS jobs and take the debug APK / app they built, then
+#   run the Maestro flows (scripts/e2e.sh) with Metro on the runner and the
+#   mock login. The Android flows aren't maintained, so expect drift there
+#   (.maestro/AGENTS.md).
 on:
   pull_request:
   push:
@@ -133,51 +134,13 @@ jobs:
         if: always()
         run: ccache --show-stats || true
 
-      # Any non-empty values work: they only switch the login to mock data.
-      - name: Write .env
+      - name: Upload APK for E2E
         if: env.E2E == 'true'
-        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
-
-      - name: Start Metro
-        if: env.E2E == 'true'
-        run: scripts/ci-metro.sh android
-
-      - name: Install Maestro
-        if: env.E2E == 'true'
-        run: |
-          curl -fsSL https://get.maestro.mobile.dev | bash
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-
-      - name: Enable KVM
-        if: env.E2E == 'true'
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - name: E2E
-        if: env.E2E == 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 36
-          target: google_apis
-          arch: x86_64
-          profile: pixel_7
-          disable-animations: true
-          script: |
-            adb install -r android/app/build/outputs/apk/debug/app-x86_64-debug.apk
-            adb reverse tcp:8081 tcp:8081
-            scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro
-
-      - name: Upload E2E results
-        if: always() && env.E2E == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: e2e-android
-          path: |
-            build/maestro
-            build/metro.log
-          if-no-files-found: ignore
+          name: apk
+          path: android/app/build/outputs/apk/debug/app-x86_64-debug.apk
+          retention-days: 1
 
   apple:
     name: ${{ matrix.name }}
@@ -282,29 +245,18 @@ jobs:
           XCODEBUILD_ARGS: COMPILER_INDEX_STORE_ENABLE=NO COMPILATION_CACHE_ENABLE_CACHING=YES
 
       # E2E reuses the debug app the tests built, even if a test failed.
-      - name: Write .env
-        id: e2e-setup
+      # Tarred, as artifacts don't keep the executable bit.
+      - name: Pack app for E2E
         if: ${{ !cancelled() && matrix.name == 'iOS' && env.E2E == 'true' && hashFiles('build/DerivedData/Build/Products/Debug-iphonesimulator/learnX.app/Info.plist') != '' }}
-        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+        run: tar -czf build/learnX-app.tgz -C build/DerivedData/Build/Products/Debug-iphonesimulator learnX.app
 
-      - name: Start Metro and install the app
-        if: ${{ !cancelled() && steps.e2e-setup.outcome == 'success' }}
-        run: |
-          scripts/ci-metro.sh ios
-          xcrun simctl boot "$SIMULATOR" || true
-          xcrun simctl install "$SIMULATOR" build/DerivedData/Build/Products/Debug-iphonesimulator/learnX.app
-
-      - name: Install Maestro
-        if: ${{ !cancelled() && steps.e2e-setup.outcome == 'success' }}
-        run: |
-          curl -fsSL https://get.maestro.mobile.dev | bash
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
-
-      - name: E2E
-        if: ${{ !cancelled() && steps.e2e-setup.outcome == 'success' }}
-        run: scripts/e2e.sh ios --format junit --output build/maestro/report.xml --test-output-dir build/maestro
-        env:
-          MAESTRO_DEVICE: ${{ env.SIMULATOR }}
+      - name: Upload app for E2E
+        if: ${{ !cancelled() && matrix.name == 'iOS' && env.E2E == 'true' && hashFiles('build/learnX-app.tgz') != '' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: ios-app
+          path: build/learnX-app.tgz
+          retention-days: 1
 
       # Mac: no signing certificates on CI, so this only proves the code
       # compiles and links. Build signed when running the app.
@@ -354,6 +306,136 @@ jobs:
           path: |
             build/xcodebuild.log
             build/DerivedData/results/*.xcresult
+          if-no-files-found: ignore
+
+  android-e2e:
+    name: Android E2E
+    needs: android
+    if: inputs.e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download APK
+        uses: actions/download-artifact@v8
+        with:
+          name: apk
+          path: build
+
+      # Any non-empty values work: they only switch the login to mock data.
+      - name: Write .env
+        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+
+      - name: Start Metro
+        run: scripts/ci-metro.sh android
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run flows
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 36
+          target: google_apis
+          arch: x86_64
+          profile: pixel_7
+          disable-animations: true
+          script: |
+            adb install -r build/app-x86_64-debug.apk
+            adb reverse tcp:8081 tcp:8081
+            scripts/e2e.sh android --format junit --output build/maestro/report.xml --test-output-dir build/maestro
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-android
+          path: |
+            build/maestro
+            build/metro.log
+          if-no-files-found: ignore
+
+  ios-e2e:
+    name: iOS E2E
+    needs: apple
+    # Runs even if a native test failed, as long as the app was built.
+    if: ${{ !cancelled() && inputs.e2e }}
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Download app
+        uses: actions/download-artifact@v8
+        with:
+          name: ios-app
+          path: build
+
+      - name: Write .env
+        run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env
+
+      - name: Boot a simulator and install the app
+        run: |
+          device="$(xcrun simctl list devices available --json |
+            jq -r '[.devices | to_entries | sort_by(.key)[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))] | last | .udid')"
+          echo "Simulator: $device"
+          echo "MAESTRO_DEVICE=$device" >> "$GITHUB_ENV"
+          xcrun simctl boot "$device"
+          tar -xzf build/learnX-app.tgz -C build
+          xcrun simctl install "$device" build/learnX.app
+
+      - name: Start Metro
+        run: scripts/ci-metro.sh ios
+
+      - name: Install Maestro
+        run: |
+          curl -fsSL https://get.maestro.mobile.dev | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run flows
+        run: scripts/e2e.sh ios --format junit --output build/maestro/report.xml --test-output-dir build/maestro
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: e2e-ios
+          path: |
             build/maestro
             build/metro.log
           if-no-files-found: ignore
