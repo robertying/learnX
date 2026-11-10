@@ -1,4 +1,4 @@
-name: Check
+name: CI
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ env:
 jobs:
   js:
     # Typecheck, lint, format and Jest
-    name: JS
+    name: JS checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -80,12 +80,13 @@ jobs:
           path: ${{ env.JEST_CACHE_DIR }}
           key: ${{ steps.jest-cache.outputs.cache-primary-key }}
 
-  changes:
-    name: Changes
+  android-unit-tests:
+    # The local modules' JVM unit tests (scripts/test-android.sh). A required
+    # check: when nothing Android changed, every step after the first is
+    # skipped and the job passes in seconds.
+    name: Android unit tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      android: ${{ steps.android.outputs.changed }}
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -95,51 +96,44 @@ jobs:
       # What the Android unit tests compile or run: the app's Gradle setup,
       # the local modules' Android code and autolinking, patched and installed
       # packages, and the scripts and workflow that run them.
-      - name: Android
-        id: android
+      - name: Detect changed files
+        id: changes
         run: >-
           scripts/changed-files.sh
           '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(test-android\.sh|android-coverage\.mjs|changed-files\.sh)$|\.github/workflows/check\.yml$)'
           >> "$GITHUB_OUTPUT"
 
-  android-unit-tests:
-    # The local modules' JVM unit tests (scripts/test-android.sh). A required
-    # check: when nothing Android changed the job is skipped, which counts as
-    # passing.
-    name: Android unit tests
-    needs: changes
-    if: needs.changes.outputs.android == 'true'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
       - name: Set up pnpm
+        if: steps.changes.outputs.changed == 'true'
         uses: pnpm/action-setup@v6
 
       - name: Set up Node.js
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-node@v7
         with:
           node-version-file: .node-version
           package-manager-cache: false
 
       - name: Set up Java
+        if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 17
 
       - name: Set up Gradle
+        if: steps.changes.outputs.changed == 'true'
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: ${{ env.SAVE_CACHE != 'true' }}
 
       - name: Install dependencies
+        if: steps.changes.outputs.changed == 'true'
         run: pnpm install --frozen-lockfile
 
       # The build cache lives in the Gradle home that setup-gradle restores,
       # so PRs reuse main's compiled outputs (dependency modules, Gradle
       # plugins) and only rebuild what changed.
       - name: Test
+        if: steps.changes.outputs.changed == 'true'
         run: scripts/test-android.sh --build-cache

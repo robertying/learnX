@@ -1,8 +1,8 @@
 #!/bin/bash
 # CI only: say whether this run's changes touch any of the given paths, so a
-# job can skip itself. A skipped job counts as passing, so path-filtered jobs
-# can still be required checks (a workflow-level `paths:` filter would leave
-# them pending instead).
+# job's later steps can skip themselves. The job still runs and passes, so it
+# can be a required check (a workflow-level `paths:` filter would leave it
+# pending instead).
 #
 #   scripts/changed-files.sh <extended regex> >> "$GITHUB_OUTPUT"
 #

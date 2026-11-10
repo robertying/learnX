@@ -13,7 +13,7 @@ Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, 
 ## Native tests (Android)
 
 - `modules/<name>/android/src/test` holds each module's JVM unit tests: JUnit 4, Robolectric (an `Intent` or `Uri` needs it; `src/test/resources/robolectric.properties` sets the newest Android it runs) and MockK (a module's `appContext`, `FirebaseCrashlytics.getInstance()`). Their versions are in `android/build.gradle`'s `ext`. The module's logic is in plain functions (`ShareModule.take`, `JavaScriptError.from`) that its definition calls. The tests run on Java 21 with two JDK internals opened, which Robolectric needs for Android 15 and 16 (the module's `build.gradle`).
-- `scripts/test-android.sh` runs them with JaCoCo and prints line coverage; CI runs it as "Android unit tests" in `check.yml` (not a required check). The app module's Kotlin (`MainActivity`, `MainApplication`, the widget providers) is the React Native template's startup code and is left untested.
+- `scripts/test-android.sh` runs them with JaCoCo and prints line coverage; CI runs it as "Android unit tests" in `check.yml`, a required check that skips its steps (and passes) when nothing Android changed. `build.yml` runs `scripts/test-ios.sh` by hand ("Apple (iOS)"). The app module's Kotlin (`MainActivity`, `MainApplication`, the widget providers) is the React Native template's startup code and is left untested.
 
 ## Spotlight and App Intents
 

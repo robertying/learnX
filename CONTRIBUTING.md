@@ -148,7 +148,7 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request check (`Check / JS` in `.github/workflows/check.yml`) runs these, and all of them must pass:
+The pull request check (`CI / JS checks` in `.github/workflows/check.yml`) runs these, and all of them must pass:
 
 ```sh
 pnpm typecheck           # TypeScript (tsc)
@@ -161,7 +161,12 @@ They need neither `.env` nor any native setup, so you can run them anywhere Node
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a debug build with the mock login: `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
-Pull requests run only the JS check, so build and try the app yourself on each platform your change touches, and say in the pull request what you checked.
+Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
+
+- `CI / Android unit tests` (required) runs `scripts/test-android.sh` when a pull request touches Android paths; otherwise it skips its steps and passes.
+- `Native / Android release build` builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths. Not required.
+- `Native / Apple (iOS)` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Native › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Tick "Mac: build" to also build Mac Catalyst (`Native / Apple (Mac)`).
+- End-to-end flows run by hand only, on Android: tick "Android E2E tests" when running Native, and `Native / Android E2E tests` runs the Maestro flows in an emulator on the APK from `Native / Android release build`.
 
 ## Pull requests
 
@@ -171,7 +176,7 @@ Pull requests run only the JS check, so build and try the app yourself on each p
 4. Open the pull request against `main`. Describe what changed and why, how you tested it (platforms, simulators or devices, mock or real account), and add screenshots for visible changes.
 5. Changing a patched dependency? Follow [patches/README.md](patches/README.md) (`pnpm patch` / `pnpm patch-commit`) rather than editing `node_modules` by hand.
 
-Pull requests are squash-merged once `Check / JS` passes and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
+Pull requests are squash-merged once `CI / JS checks` and `CI / Android unit tests` pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
 
 ## Troubleshooting
 
