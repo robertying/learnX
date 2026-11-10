@@ -29,7 +29,7 @@ dependencies {
 
 // Robolectric runs Android 15 and later only on Java 21, and Android 16 reaches
 // into the JDK's file descriptor internals.
-tasks.withType(Test).configureEach {
+tasks.withType(Test).configureEach { test ->
   javaLauncher = javaToolchains.launcherFor {
     languageVersion = JavaLanguageVersion.of(21)
   }
@@ -38,8 +38,8 @@ tasks.withType(Test).configureEach {
     exceptionFormat = "full"
   }
   // JaCoCo also counts the classes Robolectric's sandbox loads.
-  jacoco {
-    includeNoLocationClasses = true
-    excludes = ["jdk.internal.*"]
+  test.extensions.configure(JacocoTaskExtension) {
+    it.includeNoLocationClasses = true
+    it.excludes = ["jdk.internal.*"]
   }
 }
