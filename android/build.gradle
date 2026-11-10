@@ -37,15 +37,15 @@ subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {
             android {
-                ndkVersion rootProject.ext.ndkVersion
+                ndkVersion = rootProject.ext.ndkVersion
                 externalNativeBuild {
                     cmake {
-                        version rootProject.ext.cmakeVersion
+                        version = rootProject.ext.cmakeVersion
                     }
                 }
                 compileOptions {
-                    sourceCompatibility rootProject.ext.javaVersion
-                    targetCompatibility rootProject.ext.javaVersion
+                    sourceCompatibility = rootProject.ext.javaVersion
+                    targetCompatibility = rootProject.ext.javaVersion
                 }
                 if (subproject.plugins.hasPlugin("org.jetbrains.kotlin.android")) {
                     kotlin {

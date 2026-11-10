@@ -7,12 +7,12 @@ group = 'io.robertying.learnx'
 version = '1.0.0'
 
 android {
-  namespace "io.robertying.learnx.share"
+  namespace = "io.robertying.learnx.share"
 
   buildTypes {
     debug {
       // createDebugUnitTestCoverageReport writes JaCoCo's report for the unit tests.
-      enableUnitTestCoverage true
+      enableUnitTestCoverage = true
     }
   }
 

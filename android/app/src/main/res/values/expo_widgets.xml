@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<!-- The default resources are English (resources.properties: en-US). expo-widgets reads
+     expo_widgets_names at runtime. -->
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en"
+  tools:keep="@array/expo_widgets_names">
   <string-array name="expo_widgets_names">
     <item>Deadlines</item>
     <item>UpNext</item>

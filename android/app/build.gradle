@@ -19,38 +19,38 @@ java {
 }
 
 android {
-    ndkVersion rootProject.ext.ndkVersion
+    ndkVersion = rootProject.ext.ndkVersion
     externalNativeBuild {
         cmake {
-            version rootProject.ext.cmakeVersion
+            version = rootProject.ext.cmakeVersion
         }
     }
     compileOptions {
-        sourceCompatibility rootProject.ext.javaVersion
-        targetCompatibility rootProject.ext.javaVersion
+        sourceCompatibility = rootProject.ext.javaVersion
+        targetCompatibility = rootProject.ext.javaVersion
     }
     compileSdk = rootProject.ext.compileSdkVersion
 
-    namespace "io.robertying.learnx"
+    namespace = "io.robertying.learnx"
 
     defaultConfig {
-        applicationId "io.robertying.learnx"
-        minSdk rootProject.ext.minSdkVersion
-        targetSdk rootProject.ext.targetSdkVersion
-        versionCode 9204530
-        versionName "18.0.3"
+        applicationId = "io.robertying.learnx"
+        minSdk = rootProject.ext.minSdkVersion
+        targetSdk = rootProject.ext.targetSdkVersion
+        versionCode = 9204530
+        versionName = "18.0.3"
     }
 
     androidResources {
         localeFilters += ["en", "en-rUS", "zh", "zh-rCN"]
-        generateLocaleConfig true
+        generateLocaleConfig = true
     }
 
     splits {
         abi {
             reset()
-            enable true
-            universalApk true
+            enable = true
+            universalApk = true
             // Follows reactNativeArchitectures, so CI can build a single ABI
             include(*project.property("reactNativeArchitectures").split(","))
         }
@@ -58,10 +58,10 @@ android {
 
     signingConfigs {
         debug {
-            storeFile file("debug.keystore")
-            storePassword "android"
-            keyAlias "androiddebugkey"
-            keyPassword "android"
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
         }
 
         // Release signing values; see android/local.properties.example. Without
@@ -73,27 +73,27 @@ android {
         }
 
         release {
-            storeFile file("release.keystore")
-            storePassword properties.getProperty("LEARNX_RELEASE_STORE_PASSWORD")
-            keyAlias properties.getProperty("LEARNX_RELEASE_KEY_ALIAS")
-            keyPassword properties.getProperty("LEARNX_RELEASE_KEY_PASSWORD")
+            storeFile = file("release.keystore")
+            storePassword = properties.getProperty("LEARNX_RELEASE_STORE_PASSWORD")
+            keyAlias = properties.getProperty("LEARNX_RELEASE_KEY_ALIAS")
+            keyPassword = properties.getProperty("LEARNX_RELEASE_KEY_PASSWORD")
         }
     }
 
     buildTypes {
         debug {
-            signingConfig signingConfigs.debug
+            signingConfig = signingConfigs.debug
         }
         release {
             // -PciRelease (CI's E2E build): a real release build (R8, bundled
             // JS) signed with the debug key, and nothing uploaded to Crashlytics.
             def ciRelease = project.hasProperty("ciRelease")
-            signingConfig ciRelease ? signingConfigs.debug : signingConfigs.release
-            minifyEnabled true
+            signingConfig = ciRelease ? signingConfigs.debug : signingConfigs.release
+            minifyEnabled = true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             firebaseCrashlytics {
-                mappingFileUploadEnabled !ciRelease
-                nativeSymbolUploadEnabled !ciRelease
+                mappingFileUploadEnabled = !ciRelease
+                nativeSymbolUploadEnabled = !ciRelease
             }
         }
     }
