@@ -1,35 +1,8 @@
 import ExpoModulesCore
 
-/// The file the share extension (ios/ShareExtension) last copied into the app group, as it left it in the group's
-/// user defaults. Both sides use these keys.
-enum SharedFileStore {
-  static let key = "LearnXSharedFile"
-
-  static var appGroup: String? {
-    Bundle.main.bundleIdentifier.map { "group.\($0)" }
-  }
-
-  /// Takes the waiting file, if any, so it's handed to JS once.
-  static func take() -> [String: String]? {
-    guard let appGroup, let defaults = UserDefaults(suiteName: appGroup),
-      let file = defaults.dictionary(forKey: key) as? [String: String],
-      let uri = file["uri"]
-    else {
-      return nil
-    }
-    defaults.removeObject(forKey: key)
-    return ["kind": "file", "uri": uri, "mimeType": file["mimeType"] ?? "application/octet-stream"]
-  }
-
-  static var directory: URL? {
-    appGroup.flatMap { FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: $0) }?
-      .appendingPathComponent("Library/Caches", isDirectory: true)
-  }
-}
-
-/// Hands files shared through the share extension to JS. The extension saves the file and opens `learnx://`; the
-/// link reaches `ShareAppDelegateSubscriber`, which tells a listening module to send it. Before JS listens (the link
-/// that launched the app), the file waits in the app group until `takeSharedItem`.
+/// Hands files shared through the share extension to JS. The extension saves the file (`SharedFileInbox`) and opens
+/// `learnx://`; the link reaches `ShareAppDelegateSubscriber`, which tells a listening module to send it. Before JS
+/// listens (the link that launched the app), the file waits in the app group until `takeSharedItem`.
 public final class ShareModule: Module {
   private var observer: NSObjectProtocol?
 
@@ -38,32 +11,45 @@ public final class ShareModule: Module {
 
     Events("onShare")
 
-    OnStartObserving {
-      self.observer = NotificationCenter.default.addObserver(
-        forName: ShareAppDelegateSubscriber.notification,
-        object: nil,
-        queue: .main
-      ) { [weak self] _ in
-        if let item = SharedFileStore.take() {
-          self?.sendEvent("onShare", item)
-        }
+    OnStartObserving(nil, startObserving)
+    OnStopObserving(nil, stopObserving)
+
+    Function("takeSharedItem", Self.takeSharedItem)
+    Function("getSharedFilesDirectory", Self.getSharedFilesDirectory)
+  }
+
+  /// The app's inbox, in the group the share extension shares with it.
+  static var inbox: SharedFileInbox? {
+    Bundle.main.bundleIdentifier.flatMap { SharedFileInbox(appGroup: "group.\($0)") }
+  }
+
+  func startObserving() {
+    // The subscriber posts on the main thread, from the app delegate.
+    observer = NotificationCenter.default.addObserver(
+      forName: ShareAppDelegateSubscriber.notification,
+      object: nil,
+      queue: nil
+    ) { [weak self] _ in
+      if let item = Self.takeSharedItem() {
+        self?.sendEvent("onShare", item)
       }
     }
+  }
 
-    OnStopObserving {
-      if let observer = self.observer {
-        NotificationCenter.default.removeObserver(observer)
-        self.observer = nil
-      }
+  func stopObserving() {
+    if let observer {
+      NotificationCenter.default.removeObserver(observer)
+      self.observer = nil
     }
+  }
 
-    Function("takeSharedItem") { () -> [String: String]? in
-      SharedFileStore.take()
-    }
+  static func takeSharedItem() -> [String: String]? {
+    inbox?.take()
+  }
 
-    Function("getSharedFilesDirectory") { () -> String? in
-      SharedFileStore.directory?.absoluteString
-    }
+  /// The folder `removeFileDir` clears.
+  static func getSharedFilesDirectory() -> String? {
+    inbox?.directory.absoluteString
   }
 }
 

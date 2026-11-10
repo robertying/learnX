@@ -16,5 +16,11 @@ Pod::Spec.new do |s|
     'DEFINES_MODULE' => 'YES'
   }
 
-  s.source_files = "**/*.{h,m,mm,swift}"
+  s.source_files = "*.swift"
+
+  # Run with scripts/test-ios.sh. Hosted in an app, which some UIKit APIs need.
+  s.test_spec 'Tests' do |test_spec|
+    test_spec.requires_app_host = true
+    test_spec.source_files = 'Tests/**/*.swift'
+  end
 end

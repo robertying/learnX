@@ -30,17 +30,21 @@ final class ContextMenuView: ExpoView, UIContextMenuInteractionDelegate {
     guard !actions.isEmpty else {
       return nil
     }
-    let actions = self.actions
     return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { [weak self] _ in
-      UIMenu(
-        children: actions.map { action in
-          UIAction(
-            title: action.title,
-            image: action.systemImage.isEmpty ? nil : UIImage(systemName: action.systemImage)
-          ) { _ in
-            self?.onAction(["key": action.key])
-          }
-        })
+      self?.menu()
     }
+  }
+
+  /// The actions' menu. Choosing one sends its key.
+  func menu() -> UIMenu {
+    UIMenu(
+      children: actions.map { action in
+        UIAction(
+          title: action.title,
+          image: action.systemImage.isEmpty ? nil : UIImage(systemName: action.systemImage)
+        ) { [weak self] _ in
+          self?.onAction(["key": action.key])
+        }
+      })
   }
 }

@@ -7,7 +7,7 @@ public enum AppCommands {
   public static let notification = Notification.Name("io.robertying.learnx.AppCommand")
   public static let commandKey = "command"
 
-  private struct Command {
+  struct Command {
     let id: String
     /// English; the app's `Localizable.xcstrings` translates it.
     let title: String
@@ -16,24 +16,28 @@ public enum AppCommands {
     let modifiers: UIKeyModifierFlags
   }
 
-  private static let refresh = Command(
+  static let refresh = Command(
     id: "refresh", title: "Refresh", systemImage: "arrow.clockwise",
     input: "r", modifiers: .command)
-  private static let search = Command(
+  static let search = Command(
     id: "search", title: "Search", systemImage: "magnifyingglass",
     input: "f", modifiers: .command)
-  private static let settings = Command(
+  static let settings = Command(
     id: "settings", title: "Settings…", systemImage: "gearshape",
     input: ",", modifiers: .command)
-  private static let previousItem = Command(
+  static let previousItem = Command(
     id: "previousItem", title: "Previous Item", systemImage: "chevron.up",
     input: UIKeyCommand.inputUpArrow, modifiers: [.command, .alternate])
-  private static let nextItem = Command(
+  static let nextItem = Command(
     id: "nextItem", title: "Next Item", systemImage: "chevron.down",
     input: UIKeyCommand.inputDownArrow, modifiers: [.command, .alternate])
 
   /// Call from the app delegate's `buildMenu(with:)`, after `super`.
   public static func buildMenu(with builder: UIMenuBuilder) {
+    buildMenu(in: SystemMenuBuilder(builder: builder))
+  }
+
+  static func buildMenu(in builder: some MenuBuilding) {
     guard builder.system == .main else {
       return
     }
@@ -72,7 +76,7 @@ public enum AppCommands {
     }
   }
 
-  private static func keyCommand(_ command: Command) -> UIKeyCommand {
+  static func keyCommand(_ command: Command) -> UIKeyCommand {
     let keyCommand = UIKeyCommand(
       title: NSLocalizedString(command.title, bundle: .main, comment: "A menu bar command"),
       image: UIImage(systemName: command.systemImage),
@@ -86,9 +90,37 @@ public enum AppCommands {
     return keyCommand
   }
 
-  fileprivate static func post(_ id: String) {
+  static func post(_ id: String) {
     NotificationCenter.default.post(name: notification, object: nil, userInfo: [commandKey: id])
   }
+}
+
+/// The parts of `UIMenuBuilder` the commands use, so tests can build into a fake.
+protocol MenuBuilding {
+  var system: UIMenuSystem { get }
+  func menu(for identifier: UIMenu.Identifier) -> UIMenu?
+  func replace(menu: UIMenu.Identifier, with replacement: UIMenu)
+  func insertSibling(_ sibling: UIMenu, afterMenu: UIMenu.Identifier)
+  func insertChild(_ child: UIMenu, atStartOfMenu: UIMenu.Identifier)
+  func insertChild(_ child: UIMenu, atEndOfMenu: UIMenu.Identifier)
+  func remove(menu: UIMenu.Identifier)
+}
+
+/// The system's builder. UIKit only hands one to `buildMenu(with:)`, so tests can't reach this.
+struct SystemMenuBuilder: MenuBuilding {
+  let builder: UIMenuBuilder
+
+  var system: UIMenuSystem { builder.system }
+  func menu(for identifier: UIMenu.Identifier) -> UIMenu? { builder.menu(for: identifier) }
+  func replace(menu: UIMenu.Identifier, with replacement: UIMenu) { builder.replace(menu: menu, with: replacement) }
+  func insertSibling(_ sibling: UIMenu, afterMenu: UIMenu.Identifier) {
+    builder.insertSibling(sibling, afterMenu: afterMenu)
+  }
+  func insertChild(_ child: UIMenu, atStartOfMenu: UIMenu.Identifier) {
+    builder.insertChild(child, atStartOfMenu: atStartOfMenu)
+  }
+  func insertChild(_ child: UIMenu, atEndOfMenu: UIMenu.Identifier) { builder.insertChild(child, atEndOfMenu: atEndOfMenu) }
+  func remove(menu: UIMenu.Identifier) { builder.remove(menu: menu) }
 }
 
 extension UIApplication {

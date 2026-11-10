@@ -11,19 +11,19 @@ public struct UpcomingDeadline: Codable, Sendable {
 /// The open assignments' deadlines, saved by the app whenever its assignments change, so the "Next Deadline" App
 /// Intent can answer without starting React Native or going online.
 public enum UpcomingDeadlines {
-  private static let key = "LearnXUpcomingDeadlines"
+  static let key = "LearnXUpcomingDeadlines"
 
-  static func save(_ deadlines: [UpcomingDeadline]) {
+  static func save(_ deadlines: [UpcomingDeadline], to defaults: UserDefaults = .standard) {
     if deadlines.isEmpty {
-      UserDefaults.standard.removeObject(forKey: key)
+      defaults.removeObject(forKey: key)
     } else if let data = try? JSONEncoder().encode(deadlines) {
-      UserDefaults.standard.set(data, forKey: key)
+      defaults.set(data, forKey: key)
     }
   }
 
   /// The deadlines still ahead, earliest first.
-  public static func load(after date: Date = .now) -> [UpcomingDeadline] {
-    guard let data = UserDefaults.standard.data(forKey: key),
+  public static func load(after date: Date = .now, from defaults: UserDefaults = .standard) -> [UpcomingDeadline] {
+    guard let data = defaults.data(forKey: key),
       let deadlines = try? JSONDecoder().decode([UpcomingDeadline].self, from: data)
     else {
       return []
