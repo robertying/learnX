@@ -2361,7 +2361,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-blob-util (0.25.1):
+  - react-native-blob-util (1.1.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -4182,7 +4182,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 65540736bf8da5002f126e9b50eb56af80896aa9
   React-microtasksnativemodule: e074e5acf8915887b72cddf525d62b8136958d2d
   React-mutationobservernativemodule: 66a7c574f8f5757f990f37ab54acea859714c0cc
-  react-native-blob-util: 23fecbb55cf52dba03159559af44dfa0f27cfc56
+  react-native-blob-util: 89c7bd082a18a4d8e89afc968c0c2d8998a3e16b
   react-native-bottom-tabs: 30bcbad66f4fb9cbed23a26db7faab7a8f43e921
   react-native-pager-view: c3cb3585b2a6289907a7a5a6f93ae4bdb5b0d130
   react-native-pdf: 6504985f75d4e3a0426638d298495405b64d28d4

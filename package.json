@@ -19,8 +19,8 @@
     "e2e:android": "scripts/e2e.sh android"
   },
   "dependencies": {
-    "@babel/core": "7.29.7",
-    "@babel/runtime": "7.29.10",
+    "@babel/core": "7.29.13",
+    "@babel/runtime": "7.29.13",
     "@bottom-tabs/react-navigation": "1.5.0",
     "@expo/ui": "58.0.27",
     "@preeternal/react-native-cookie-manager": "7.0.0",
@@ -50,7 +50,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "babel-preset-expo": "58.0.24",
     "dayjs": "1.11.23",
-    "dotenv": "18.0.9",
+    "dotenv": "18.0.10",
     "expo": "58.0.23",
     "expo-application": "58.1.2",
     "expo-background-task": "58.0.12",
@@ -82,7 +82,7 @@
     "oxlint-tsgolint": "7.0.2006",
     "react": "19.3.1",
     "react-native": "0.88.1",
-    "react-native-blob-util": "0.25.1",
+    "react-native-blob-util": "1.1.1",
     "react-native-bottom-tabs": "1.5.0",
     "react-native-gesture-handler": "3.5.0",
     "react-native-pager-view": "10.0.0",
