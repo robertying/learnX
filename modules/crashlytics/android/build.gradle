@@ -11,7 +11,7 @@ android {
 }
 
 dependencies {
-  // Same BoM as the app, so this resolves to the Crashlytics it already links.
-  implementation platform("com.google.firebase:firebase-bom:35.1.0")
+  // The app's BoM (android/build.gradle), so this resolves to the Crashlytics it already links.
+  implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseBomVersion}")
   implementation("com.google.firebase:firebase-crashlytics")
 }

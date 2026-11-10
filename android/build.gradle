@@ -9,6 +9,8 @@ buildscript {
         javaVersion = JavaVersion.VERSION_17
         kotlinVersion = "2.4.20"
         kspVersion = "2.3.13"
+        // The app and modules/crashlytics link the same Firebase.
+        firebaseBomVersion = "35.1.0"
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"

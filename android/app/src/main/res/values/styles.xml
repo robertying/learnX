@@ -28,7 +28,6 @@
         <item name="colorOnSurfaceInverse">@color/md_theme_inverseOnSurface</item>
         <item name="colorSurfaceInverse">@color/md_theme_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_inversePrimary</item>
-        <item name="android:statusBarColor">@color/md_theme_surface</item>
     </style>
 
     <style name="SplashTheme" parent="Theme.SplashScreen">
