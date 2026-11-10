@@ -166,6 +166,16 @@ describe('downloadFile', () => {
       'File download failed',
     );
     expect(__fs.files(CACHES)).toEqual([]);
+    // The emptied <id> and course folders go too.
+    expect(listDownloads()).toEqual([]);
+    expect(__fs.dirs(FILES)).toEqual([]);
+  });
+
+  it('keeps the course folder when it holds other downloads', async () => {
+    __fs.write(`${FILES}/Calculus/f2/b.pdf`, '56');
+    __fs.download = () => Promise.reject(new Error('offline'));
+    await expect(downloadFile(file)).rejects.toThrow('File download failed');
+    expect(__fs.dirs(FILES)).toEqual(['Calculus', 'Calculus/f2']);
   });
 
   it('stops when its signal is aborted', async () => {
@@ -176,6 +186,7 @@ describe('downloadFile', () => {
     ).rejects.toThrow('File download failed');
     expect(__fs.tasks[0].options.signal).toBe(controller.signal);
     expect(__fs.files(CACHES)).toEqual([]);
+    expect(__fs.dirs(FILES)).toEqual([]);
   });
 });
 
@@ -185,9 +196,11 @@ describe('downloads list', () => {
     __fs.write(`${FILES}/Calculus/f2/b.pdf`, '56');
     __fs.write(`${FILES}/Physics/f3/c.pdf`, '12345678');
     __fs.mkdir(`${FILES}/Empty`);
+    __fs.mkdir(`${FILES}/Calculus/cancelled`);
+    __fs.mkdir(`${FILES}/Biology/cancelled`);
   });
 
-  it('groups by course, largest first, without empty courses', () => {
+  it('groups by course, largest first, without empty courses or folders', () => {
     expect(listDownloads()).toEqual([
       { courseName: 'Physics', count: 1, size: 8 },
       { courseName: 'Calculus', count: 2, size: 6 },

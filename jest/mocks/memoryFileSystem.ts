@@ -179,6 +179,12 @@ export const __fs = {
     nodes.set(path, { kind: 'file', content });
   },
   mkdir: (uri: string) => mkdirs(normalize(uri)),
+  /** Paths of every folder under `uri`, relative to it. */
+  dirs: (uri: string) =>
+    under(normalize(uri))
+      .filter(key => nodes.get(key)?.kind === 'dir')
+      .map(key => key.slice(normalize(uri).length + 1))
+      .sort(),
   /** Paths of every file (not folder) under `uri`, relative to it. */
   files: (uri: string) =>
     under(normalize(uri))

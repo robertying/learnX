@@ -52,6 +52,30 @@ const deleteQuietly = (file: File) => {
   } catch {}
 };
 
+const isEmpty = (dir: Directory) => dir.list().length === 0;
+
+/**
+ * Deletes a failed or cancelled download's file, then its `<id>` and course
+ * folders if that left them empty, so Downloads doesn't count them.
+ */
+const discardDownload = (file: File) => {
+  deleteQuietly(file);
+  for (
+    let dir = file.parentDirectory, depth = 0;
+    depth < 2;
+    dir = dir.parentDirectory, depth++
+  ) {
+    try {
+      if (!dir.exists || !isEmpty(dir)) {
+        return;
+      }
+      dir.delete();
+    } catch {
+      return;
+    }
+  }
+};
+
 export const getDownloadedFile = (file: DownloadableFile) => {
   const settings = getSettings();
   const title = settings.fileOmitCourseName
@@ -154,7 +178,7 @@ export const downloadFile = async (
   try {
     downloaded = await task.downloadAsync();
   } catch {
-    deleteQuietly(target);
+    discardDownload(target);
     throw new Error('File download failed');
   } finally {
     task.release();
@@ -165,7 +189,7 @@ export const downloadFile = async (
     downloaded.size === 0 ||
     (await isLoginRedirect(downloaded))
   ) {
-    deleteQuietly(target);
+    discardDownload(target);
     throw new Error('File download failed');
   }
 
@@ -237,14 +261,20 @@ export interface CourseDownloads {
   size: number;
 }
 
-/** Downloads grouped by course, largest first. */
+/**
+ * Downloads grouped by course, largest first. An empty `<id>` folder, left by a
+ * download cancelled by an older version, isn't a file.
+ */
 export const listDownloads = (): CourseDownloads[] =>
   subdirectories(getDownloadsDirectory())
-    .map(course => ({
-      courseName: course.name,
-      count: subdirectories(course).length,
-      size: sizeOf(course),
-    }))
+    .map(course => {
+      const downloads = subdirectories(course).filter(dir => !isEmpty(dir));
+      return {
+        courseName: course.name,
+        count: downloads.length,
+        size: downloads.reduce((total, dir) => total + sizeOf(dir), 0),
+      };
+    })
     .filter(course => course.count > 0)
     .sort((a, b) => b.size - a.size);
 
