@@ -116,6 +116,23 @@ describe('asking in the app language', () => {
     expect(setLanguage).toHaveBeenCalledWith(Language.ZH);
   });
 
+  it("names courses in the app's language even when asking for it fails", async () => {
+    jest
+      .spyOn(require('helpers/i18n') as typeof i18n, 'isLocaleChinese')
+      .mockReturnValue(false);
+    jest.spyOn(dataSource, 'setLanguage').mockRejectedValue(new Error());
+    // The server still answers in Chinese.
+    jest
+      .spyOn(dataSource, 'getCourseList')
+      .mockResolvedValue(
+        mockCourses.filter(c => c.semesterId === mockCurrentSemester) as never,
+      );
+    const courses = await queryClient.fetchQuery(
+      coursesQuery(mockCurrentSemester),
+    );
+    expect(courses.map(c => c.name)).toEqual(courses.map(c => c.englishName));
+  });
+
   it('reads a user the server has no details for as unnamed', async () => {
     jest.spyOn(dataSource, 'getUserInfo').mockResolvedValue(undefined as never);
     expect(await queryClient.fetchQuery(userQuery)).toEqual({

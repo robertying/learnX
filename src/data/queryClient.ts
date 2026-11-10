@@ -9,6 +9,7 @@ import {
 import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
 import { SQLiteStorage } from 'expo-sqlite/kv-store';
 import { noteRequestError } from 'data/auth';
+import { localizeCachedCourseNames } from 'data/courseNames';
 
 /**
  * Bump to drop every cached response, e.g. when the shape the app keeps of a
@@ -68,10 +69,17 @@ let restoring: Promise<void> | null = null;
 
 /**
  * Loads every saved response into memory, so lists show their last data at
- * launch, before the login finishes, and offline. Later calls share the first.
+ * launch, before the login finishes, and offline. Course names follow the
+ * app's language, which may have changed since they were fetched. Later calls
+ * share the first.
  */
 export const restoreQueryCache = () => {
-  restoring ??= queryPersister.restoreQueries(queryClient).catch(() => {});
+  restoring ??= queryPersister
+    .restoreQueries(queryClient)
+    .then(() =>
+      localizeCachedCourseNames(queryClient).forEach(key => saveQuerySoon(key)),
+    )
+    .catch(() => {});
   return restoring;
 };
 

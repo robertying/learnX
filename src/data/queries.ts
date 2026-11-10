@@ -6,22 +6,8 @@ import { useLoggedIn } from 'data/auth';
 import { Course, User } from 'data/types/state';
 import { useCurrentSemester } from 'data/userData';
 import { isLocaleChinese } from 'helpers/i18n';
-import type { ContentListName } from 'data/pendingActions';
-
-export const queryKeys = {
-  semesters: ['semesters'] as const,
-  // Its key from when only the timetable asked for the dates.
-  schoolSemester: ['semesterDates'] as const,
-  user: ['user'] as const,
-  coursesAll: ['courses'] as const,
-  courses: (semesterId: string) => ['courses', semesterId] as const,
-  /** Every semester's list of notices, assignments or files. */
-  contentAll: (list: ContentListName) => [list] as const,
-  /** A semester's notices, assignments or files (`data/content`). */
-  content: (list: ContentListName, semesterId: string) =>
-    [list, semesterId] as const,
-  excellentHomework: (id: string) => ['excellentHomework', id] as const,
-};
+import { localizedCourseName } from 'data/courseNames';
+import { queryKeys } from 'data/queryKeys';
 
 /** Asks for names in the app's language; the answer doesn't matter. */
 const setLanguage = async () => {
@@ -89,7 +75,12 @@ export const coursesQuery = (semesterId: string) =>
         timeAndLocation: true,
       });
       return results
-        .map(course => ({ ...course, semesterId }))
+        .map(course => ({
+          ...course,
+          // In the app's language even when asking for it failed.
+          name: localizedCourseName(course),
+          semesterId,
+        }))
         .sort((a, b) => a.id.localeCompare(b.id));
     },
   });
