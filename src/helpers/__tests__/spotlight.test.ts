@@ -2,7 +2,7 @@ import { mockAssignments, mockNotices } from 'data/mock';
 import { Notice } from 'data/types/state';
 import { clearSpotlight, updateSpotlight } from 'helpers/spotlight';
 
-jest.mock('../../../modules/spotlight', () => ({
+jest.mock('modules/spotlight', () => ({
   __esModule: true,
   default: {
     replaceItems: jest.fn(async () => {}),
@@ -11,7 +11,7 @@ jest.mock('../../../modules/spotlight', () => ({
   },
 }));
 
-const Spotlight = jest.requireMock('../../../modules/spotlight').default as {
+const Spotlight = jest.requireMock('modules/spotlight').default as {
   replaceItems: jest.Mock;
   updateItems: jest.Mock;
   removeAllItems: jest.Mock;

@@ -38,7 +38,6 @@ const schedule = jest.mocked(Notifications.scheduleNotificationAsync);
 const cancel = jest.mocked(Notifications.cancelScheduledNotificationAsync);
 
 beforeEach(() => {
-  jest.clearAllMocks();
   jest
     .mocked(Notifications.getPermissionsAsync)
     .mockResolvedValue({ granted: true, canAskAgain: true } as never);

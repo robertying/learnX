@@ -41,7 +41,7 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
 const countText = (count: number, one: string, many: string) =>
   count === 0 ? undefined : count === 1 ? one : many;
 
-const CourseCard: React.FC<React.PropsWithChildren<CourseCardProps>> = ({
+const CourseCard: React.FC<CourseCardProps> = ({
   data: {
     name,
     teacherName,

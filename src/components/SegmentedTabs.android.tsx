@@ -1,15 +1,15 @@
 import { StyleSheet, View } from 'react-native';
 import {
-  Host,
   SegmentedButton,
   SingleChoiceSegmentedButtonRow,
   Text,
 } from '@expo/ui/jetpack-compose';
 import { fillMaxWidth, weight } from '@expo/ui/jetpack-compose/modifiers';
-import { useComposeColorOverrides, useTheme } from 'theme';
-import type { SegmentedTabsProps } from './SegmentedTabs';
+import { useTheme } from 'theme';
+import type { SegmentedTabsProps } from './SegmentedTabs.shared';
+import ThemedHost from 'components/ThemedHost';
 
-export type { SegmentedTabsProps } from './SegmentedTabs';
+export type { SegmentedTabsProps } from './SegmentedTabs.shared';
 
 /**
  * Tabs for a pager as a Material 3 `SingleChoiceSegmentedButtonRow`, with
@@ -22,16 +22,10 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
   onSelect,
 }) => {
   const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
 
   return (
     <View style={[styles.bar, { backgroundColor: theme.colors.surface }]}>
-      <Host
-        matchContents={{ vertical: true }}
-        style={styles.host}
-        seedColor={theme.colors.primary}
-        colorOverrides={colorOverrides}
-      >
+      <ThemedHost matchContents={{ vertical: true }} style={styles.host}>
         <SingleChoiceSegmentedButtonRow modifiers={[fillMaxWidth()]}>
           {titles.map((title, i) => (
             <SegmentedButton
@@ -46,7 +40,7 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
             </SegmentedButton>
           ))}
         </SingleChoiceSegmentedButtonRow>
-      </Host>
+      </ThemedHost>
     </View>
   );
 };

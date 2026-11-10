@@ -27,7 +27,6 @@ describe('updateDeadlineWidget', () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
-    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -116,7 +115,6 @@ describe('updateUpNextWidget', () => {
 
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-03-15T20:00:00+08:00') });
-    jest.clearAllMocks();
   });
 
   afterEach(() => {

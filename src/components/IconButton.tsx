@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import { Button, Host } from '@expo/ui/swift-ui';
+import { Button } from '@expo/ui/swift-ui';
 import {
   buttonBorderShape,
   buttonStyle,
@@ -8,41 +8,16 @@ import {
   frame,
   labelStyle,
 } from '@expo/ui/swift-ui/modifiers';
-import type { SFSymbol } from 'sf-symbols-typescript';
 import Badge from 'components/Badge';
 import { t } from 'helpers/i18n';
-import { useTheme } from 'theme';
 import {
+  iconSymbols,
   PADDING,
-  type IconButtonIcon,
   type IconButtonProps,
 } from './IconButton.shared';
+import ThemedHost from 'components/ThemedHost';
 
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
-
-// The same symbols as the native header items.
-const symbols: Record<IconButtonIcon, SFSymbol> = {
-  archive: 'archivebox',
-  back: 'chevron.backward',
-  checkAll: 'checkmark.circle.fill',
-  close: 'xmark',
-  download: 'arrow.down.to.line',
-  exitFullscreen: 'arrow.down.right.and.arrow.up.left',
-  filter: 'line.3.horizontal.decrease.circle',
-  forward: 'chevron.forward',
-  fullscreen: 'arrow.up.left.and.arrow.down.right',
-  info: 'info.circle',
-  openInNew: 'arrow.up.forward.app',
-  preview: 'eye',
-  refresh: 'arrow.clockwise',
-  reorder: 'arrow.up.and.down',
-  restore: 'arrow.up.bin',
-  search: 'magnifyingglass',
-  select: 'checklist',
-  settings: 'gearshape',
-  share: 'square.and.arrow.up',
-  upload: 'arrow.up.circle',
-};
 
 /** An icon-only SwiftUI button with an SF Symbol, tinted with the theme. */
 const IconButton: React.FC<IconButtonProps> = ({
@@ -56,7 +31,6 @@ const IconButton: React.FC<IconButtonProps> = ({
   testID,
   style,
 }) => {
-  const theme = useTheme();
   // A borderless button reaches 44 pt, Apple's smallest tap target, beyond
   // its padding; a contained one is drawn at its size.
   const buttonSize = Math.max(
@@ -70,9 +44,9 @@ const IconButton: React.FC<IconButtonProps> = ({
 
   return (
     <View style={style}>
-      <Host matchContents seedColor={theme.colors.primary}>
+      <ThemedHost matchContents>
         <Button
-          systemImage={symbols[icon]}
+          systemImage={iconSymbols[icon]}
           label={label}
           onPress={onPress}
           testID={testID}
@@ -87,7 +61,7 @@ const IconButton: React.FC<IconButtonProps> = ({
             disabledModifier(!!disabled),
           ]}
         />
-      </Host>
+      </ThemedHost>
       {badge && (
         <Badge
           size={8}

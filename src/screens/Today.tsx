@@ -1,5 +1,4 @@
 import { useLayoutEffect } from 'react';
-import type { NativeStackHeaderItem } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import {
   Form,
@@ -8,7 +7,6 @@ import {
   FormText,
   type FormTextProps,
 } from 'components/Form';
-import IconButton from 'components/IconButton';
 import SafeArea from 'components/SafeArea';
 import SyncStatus from 'components/SyncStatus';
 import { getTitleOptions } from 'components/HeaderTitle';
@@ -21,10 +19,11 @@ import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
-import useDetailNavigator from 'hooks/useDetailNavigator';
+import { useShowDetail } from 'hooks/useDetailNavigator';
 import useMinute from 'hooks/useMinute';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
+import { headerButtons } from 'navigation/headerButtons';
 import { sidebarSplit } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from './types';
 
@@ -47,7 +46,7 @@ const itemRow = ({ key, onPress, ...row }: ItemRowProps) =>
 const where = (session: ClassSession) => session.location.trim() || undefined;
 
 const Today: React.FC<Props> = ({ navigation }) => {
-  const detailNavigator = useDetailNavigator();
+  const show = useShowDetail(navigation);
   const now = useMinute();
 
   // the timetable follows Beijing days, also on a phone in another time zone
@@ -98,26 +97,10 @@ const Today: React.FC<Props> = ({ navigation }) => {
   };
   const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
 
-  const openCourse = (courseId: string) => {
-    if (detailNavigator) {
-      detailNavigator.replace('CourseDetail', {
-        id: courseId,
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push('CourseDetail', { id: courseId });
-    }
-  };
-  const openAssignment = (assignment: Assignment) => {
-    if (detailNavigator) {
-      detailNavigator.replace('AssignmentDetail', {
-        id: assignment.id,
-        disableAnimation: true,
-      });
-    } else {
-      navigation.push('AssignmentDetail', { id: assignment.id });
-    }
-  };
+  const openCourse = (courseId: string) =>
+    show('CourseDetail', { id: courseId });
+  const openAssignment = (assignment: Assignment) =>
+    show('AssignmentDetail', { id: assignment.id });
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
@@ -136,48 +119,26 @@ const Today: React.FC<Props> = ({ navigation }) => {
   useLayoutEffect(() => {
     navigation.setOptions({
       ...getTitleOptions(t('today'), subtitle),
-      unstable_headerRightItems: () => [
-        ...(DeviceInfo.isMac()
-          ? ([
-              {
-                type: 'button',
-                identifier: 'refresh',
-                label: t('refresh'),
-                icon: {
-                  type: 'sfSymbol',
-                  name: refreshing
-                    ? 'arrow.trianglehead.2.clockwise.rotate.90'
-                    : 'arrow.clockwise',
-                },
-                disabled: refreshing,
-                onPress: onRefresh,
-              },
-            ] satisfies NativeStackHeaderItem[])
-          : []),
-        ...(showSettings
-          ? ([
-              {
-                type: 'button',
-                identifier: 'settings',
-                label: t('settings'),
-                icon: { type: 'sfSymbol', name: 'gearshape' },
-                badge: settingsBadge ? { value: '' } : undefined,
-                onPress: openSettings,
-              },
-            ] satisfies NativeStackHeaderItem[])
-          : []),
-      ],
-      headerRight: showSettings
-        ? () => (
-            <IconButton
-              testID="today-settings"
-              accessibilityLabel={t('settings')}
-              icon="settings"
-              badge={settingsBadge}
-              onPress={openSettings}
-            />
-          )
-        : undefined,
+      ...headerButtons('right', [
+        DeviceInfo.isMac() && {
+          id: 'refresh',
+          label: t('refresh'),
+          icon: 'refresh',
+          sfSymbol: refreshing
+            ? 'arrow.trianglehead.2.clockwise.rotate.90'
+            : undefined,
+          disabled: refreshing,
+          onPress: onRefresh,
+        },
+        showSettings && {
+          id: 'settings',
+          label: t('settings'),
+          icon: 'settings',
+          badge: settingsBadge,
+          onPress: openSettings,
+          testID: 'today-settings',
+        },
+      ]),
     });
     // oxlint-disable-next-line react-hooks/exhaustive-deps -- handlers read the latest props
   }, [navigation, subtitle, settingsBadge, refreshing, showSettings]);
@@ -188,7 +149,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? t('todayFromCourses')
       : schedule.source === 'calendar' && schedule.failed
         ? t('todayCalendarFailed', {
-            time: dayjs(schedule.updatedAt).fromNow(),
+            time: dayjs(schedule.updatedAt).from(now),
           })
         : undefined;
   const span = (session: ClassSession) =>

@@ -26,6 +26,7 @@ import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
+import { mockNetworkTitle } from 'navigation/options';
 import { LoginStackParams } from './types';
 import { Caption, Text } from 'components/Text';
 
@@ -208,7 +209,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
               style={styles.textButton}
               onPress={() => navigation.navigate('MockNetwork')}
             >
-              Network Emulation
+              {mockNetworkTitle}
             </TextButton>
           )}
         </KeyboardAvoidingView>

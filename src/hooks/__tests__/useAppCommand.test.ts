@@ -1,10 +1,10 @@
 import { act, renderHook } from '@testing-library/react-native';
 import useAppCommand from 'hooks/useAppCommand';
-import type { AppCommand } from '../../../modules/menus';
+import type { AppCommand } from 'modules/menus';
 
 // The native module's events, as AppCommands.swift sends them.
 const mockListeners = new Set<(event: { command: AppCommand }) => void>();
-jest.mock('../../../modules/menus', () => ({
+jest.mock('modules/menus', () => ({
   Menus: {
     addListener: (
       _event: 'onCommand',

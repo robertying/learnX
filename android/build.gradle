@@ -23,6 +23,10 @@ plugins {
     id 'com.android.application' version '9.5.0' apply false
 }
 
+// Every library builds with the app's SDK, NDK and Java versions. Needed:
+// react-native-share-menu sets compileSdk 29, too old for its Java 9+ source,
+// and libraries that pick their own NDK (expo-widgets: 28.2) would make
+// Gradle download a second one.
 subprojects { subproject ->
     afterEvaluate {
         if (subproject.hasProperty("android")) {

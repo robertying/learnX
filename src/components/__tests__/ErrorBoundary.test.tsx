@@ -12,7 +12,6 @@ const Broken: React.FC = () => {
 };
 
 beforeEach(() => {
-  jest.clearAllMocks();
   // React logs the caught error; keep the test output clean.
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });

@@ -48,7 +48,7 @@ const points = (...values: Margin[]) => {
 export const withGutter = (
   style: StyleProp<ViewStyle>,
   gutter: { vertical: number; start?: number },
-): StyleProp<ViewStyle> => {
+): [StyleProp<ViewStyle>, ViewStyle] => {
   const {
     margin,
     marginVertical,

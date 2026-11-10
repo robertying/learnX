@@ -184,15 +184,7 @@ export const Headline = ({ variant = 'headline', ...props }: TextProps) => (
   <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
 );
 
-/** A secondary title, such as a card's course name. */
-export const Subheading = ({
-  variant = 'subheadline',
-  ...props
-}: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
-);
-
-/** Body text in cards. */
+/** Subheadline text in the title color: card previews and list section headers. */
 export const Paragraph = ({ variant = 'subheadline', ...props }: TextProps) => (
   <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
 );

@@ -26,7 +26,7 @@ import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import { SplitViewContext } from 'components/SplitView';
+import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
@@ -49,55 +49,28 @@ type NavigationProp = MainStackNavigationProp<
   'CourseDetail'
 >;
 
-const Notices = ({ courseId, data }: { courseId: string; data: Notice[] }) => {
-  const navigation = useNavigation<NavigationProp>();
+interface CourseItemListProps<T extends Notice | Assignment | File> {
+  data: T[];
+  card: React.FC<{
+    data: T;
+    disableSwipe?: boolean;
+    hideCourseName?: boolean;
+    onPress?: () => void;
+  }>;
+  detailScreen: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail';
+  /** The course's refresh of this list (`useRefreshCourseNotices`, …). */
+  refresh: { isPending: boolean; mutate: () => void };
+}
 
-  const loggedIn = useLoggedIn();
-  const refresh = useRefreshCourseNotices(courseId);
-  const fetching = refresh.isPending;
-
-  const handleRefresh = () => {
-    if (loggedIn) {
-      refresh.mutate();
-    }
-  };
-
-  return (
-    <FlatList
-      data={data}
-      renderItem={({ item }) => (
-        <NoticeCard
-          data={item}
-          disableSwipe
-          hideCourseName
-          onPress={() => navigation.push('NoticeDetail', { id: item.id })}
-        />
-      )}
-      keyExtractor={item => item.id}
-      refreshing={fetching}
-      onRefresh={handleRefresh}
-      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-      contentContainerStyle={[
-        { flexGrow: 1 },
-        data.length ? null : { justifyContent: 'center' },
-      ]}
-      ListEmptyComponent={<Empty />}
-    />
-  );
-};
-
-const Assignments = ({
-  courseId,
+/** One of the course's notices, assignments and files tabs. */
+const CourseItemList = <T extends Notice | Assignment | File>({
   data,
-}: {
-  courseId: string;
-  data: Assignment[];
-}) => {
+  card: Card,
+  detailScreen,
+  refresh,
+}: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
-
   const loggedIn = useLoggedIn();
-  const refresh = useRefreshCourseAssignments(courseId);
-  const fetching = refresh.isPending;
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -109,57 +82,20 @@ const Assignments = ({
     <FlatList
       data={data}
       renderItem={({ item }) => (
-        <AssignmentCard
+        <Card
           data={item}
           disableSwipe
           hideCourseName
-          onPress={() => navigation.push('AssignmentDetail', { id: item.id })}
+          onPress={() => navigation.push(detailScreen, { id: item.id })}
         />
       )}
       keyExtractor={item => item.id}
-      refreshing={fetching}
+      refreshing={refresh.isPending}
       onRefresh={handleRefresh}
       contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
       contentContainerStyle={[
-        { flexGrow: 1 },
-        data.length ? null : { justifyContent: 'center' },
-      ]}
-      ListEmptyComponent={<Empty />}
-    />
-  );
-};
-
-const Files = ({ courseId, data }: { courseId: string; data: File[] }) => {
-  const navigation = useNavigation<NavigationProp>();
-
-  const loggedIn = useLoggedIn();
-  const refresh = useRefreshCourseFiles(courseId);
-  const fetching = refresh.isPending;
-
-  const handleRefresh = () => {
-    if (loggedIn) {
-      refresh.mutate();
-    }
-  };
-
-  return (
-    <FlatList
-      data={data}
-      renderItem={({ item }) => (
-        <FileCard
-          data={item}
-          disableSwipe
-          hideCourseName
-          onPress={() => navigation.push('FileDetail', { id: item.id })}
-        />
-      )}
-      keyExtractor={item => item.id}
-      refreshing={fetching}
-      onRefresh={handleRefresh}
-      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-      contentContainerStyle={[
-        { flexGrow: 1 },
-        data.length ? null : { justifyContent: 'center' },
+        styles.listContent,
+        data.length ? null : styles.emptyListContent,
       ]}
       ListEmptyComponent={<Empty />}
     />
@@ -198,6 +134,9 @@ const CourseDetailContent: React.FC<{
   const { notices } = useNotices();
   const { assignments } = useAssignments();
   const { files } = useFiles();
+  const refreshNotices = useRefreshCourseNotices(course.id);
+  const refreshAssignments = useRefreshCourseAssignments(course.id);
+  const refreshFiles = useRefreshCourseFiles(course.id);
 
   const [index, setIndex] = useState(0);
 
@@ -227,23 +166,29 @@ const CourseDetailContent: React.FC<{
     switch (sceneRoute.key) {
       case 'notice':
         return (
-          <Notices
-            courseId={course.id}
+          <CourseItemList
             data={notices.filter(i => i.courseId === course.id)}
+            card={NoticeCard}
+            detailScreen="NoticeDetail"
+            refresh={refreshNotices}
           />
         );
       case 'assignment':
         return (
-          <Assignments
-            courseId={course.id}
+          <CourseItemList
             data={assignments.filter(i => i.courseId === course.id)}
+            card={AssignmentCard}
+            detailScreen="AssignmentDetail"
+            refresh={refreshAssignments}
           />
         );
       case 'file':
         return (
-          <Files
-            courseId={course.id}
+          <CourseItemList
             data={files.filter(i => i.courseId === course.id)}
+            card={FileCard}
+            detailScreen="FileDetail"
+            refresh={refreshFiles}
           />
         );
       default:
@@ -303,6 +248,12 @@ const CourseDetailContent: React.FC<{
 };
 
 const styles = StyleSheet.create({
+  listContent: {
+    flexGrow: 1,
+  },
+  emptyListContent: {
+    justifyContent: 'center',
+  },
   courseXContainer: {
     display: 'flex',
     flexDirection: 'row',

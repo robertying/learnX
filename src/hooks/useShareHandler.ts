@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent } from 'react';
 import { Platform } from 'react-native';
 import ShareMenu from 'react-native-share-menu';
 import { t } from 'helpers/i18n';
-import { copyFileToCache } from 'helpers/fs';
+import { copyFileToCache } from 'helpers/files/share';
 import { toast } from 'components/Toast';
 import { setPendingAssignmentData } from 'data/pendingAssignment';
 

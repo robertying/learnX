@@ -281,9 +281,6 @@ export default {
   configureNotifications: 'Open System Settings',
   notificationArchiveAll: 'Archive All',
   notificationRemindLater: 'Remind Me Later',
-  simulateNewContent: 'Simulate New Content',
-  previewDeadlineReminder: 'Preview a Deadline Reminder',
-  sendTestNotification: 'Send a Test Notification',
   // dayjs formats: text in [] is printed as is
   dateTimeFormat: 'MMM D, YYYY HH:mm',
   fullDateTimeFormat: 'ddd, MMM D, YYYY HH:mm',

@@ -1,6 +1,6 @@
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Host, HStack } from '@expo/ui/swift-ui';
+import { Button, HStack } from '@expo/ui/swift-ui';
 import {
   background,
   buttonStyle,
@@ -13,12 +13,13 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import { t } from 'helpers/i18n';
-import { useTheme } from 'theme';
 import type { BrowserToolbarProps } from './BrowserToolbar.shared';
+import DeviceInfo from 'constants/DeviceInfo';
+import ThemedHost from 'components/ThemedHost';
 
 export type { BrowserToolbarProps } from './BrowserToolbar.shared';
 
-const liquidGlass = parseInt(String(Platform.Version), 10) >= 26;
+const liquidGlass = DeviceInfo.hasLiquidGlass();
 
 // A capsule of Liquid Glass on iOS 26 (bar material before), like Safari's
 // compact tab bar.
@@ -45,7 +46,6 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
   onOpenInBrowser,
   onOverlapChange,
 }) => {
-  const theme = useTheme();
   const insets = useSafeAreaInsets();
   const bottom = Math.max(insets.bottom, MARGIN);
 
@@ -78,7 +78,7 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
         onOverlapChange?.(e.nativeEvent.layout.height + bottom + MARGIN)
       }
     >
-      <Host matchContents seedColor={theme.colors.primary}>
+      <ThemedHost matchContents>
         <HStack spacing={4} modifiers={capsuleModifiers}>
           {item(
             'chevron.backward',
@@ -109,7 +109,7 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
             'courseXOpen',
           )}
         </HStack>
-      </Host>
+      </ThemedHost>
     </View>
   );
 };

@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
-import env from 'helpers/env';
+// The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
+import env from '../../../jest/mocks/env';
 
 type Module = typeof import('data/credentials');
 
@@ -26,7 +27,6 @@ const legacyAuth = (auth: Record<string, string | null>) =>
 let m: Module;
 beforeEach(() => {
   keychain.clear();
-  jest.clearAllMocks();
   jest.isolateModules(() => {
     m = require('data/credentials');
   });

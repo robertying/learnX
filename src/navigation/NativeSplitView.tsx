@@ -38,11 +38,11 @@ const masterColumn = 0;
 const detailColumn = 1;
 const sidebarColumn = 2;
 
-const displayModesWithSidebar: SplitDisplayMode[] = [
+const displayModesWithSidebar = new Set<SplitDisplayMode>([
   'twoBesideSecondary',
   'twoOverSecondary',
   'twoDisplaceSecondary',
-];
+]);
 
 // UIKit only sizes the columns and reports their safe areas once the split is in
 // the window, which a tab that hasn't been opened yet isn't. All the splits are
@@ -152,7 +152,7 @@ const NativeSplitViewProvider: React.FC<
   const sidebarHidden =
     hasSidebar &&
     displayMode !== undefined &&
-    !displayModesWithSidebar.includes(displayMode);
+    !displayModesWithSidebar.has(displayMode);
 
   // The master pane comes back with the sidebar as it was.
   const sidebarHiddenBeforeMaster = useRef(false);

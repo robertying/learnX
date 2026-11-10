@@ -18,19 +18,9 @@ import {
   tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
+import type { DateRangePickerProps } from './DateRangePicker.shared';
 
-export interface DateRangePickerProps {
-  visible: boolean;
-  title: string;
-  startLabel: string;
-  endLabel: string;
-  saveLabel: string;
-  cancelLabel: string;
-  startDate?: Date;
-  endDate?: Date;
-  onConfirm: (range: { startDate: Date; endDate: Date }) => void;
-  onDismiss: () => void;
-}
+export type { DateRangePickerProps } from './DateRangePicker.shared';
 
 /**
  * Picks a date range. iOS and Mac present a SwiftUI sheet with Cancel and Save

@@ -1,5 +1,5 @@
 import type { NavigationState, PartialState } from '@react-navigation/native';
-import Crashlytics, { type StackFrame } from '../../modules/crashlytics';
+import Crashlytics, { type StackFrame } from 'modules/crashlytics';
 import { getCredentials } from 'data/credentials';
 import { isMockUser } from 'helpers/mock';
 

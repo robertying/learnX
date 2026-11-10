@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
+import useMinute from 'hooks/useMinute';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { t } from 'helpers/i18n';
@@ -11,7 +12,7 @@ export interface NoticeCardProps extends CardWrapperProps {
   hideCourseName?: boolean;
 }
 
-const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
+const NoticeCard: React.FC<NoticeCardProps> = ({
   data: {
     title,
     content,
@@ -26,9 +27,11 @@ const NoticeCard: React.FC<React.PropsWithChildren<NoticeCardProps>> = ({
   ...restProps
 }) => {
   const theme = useTheme();
+  // Re-renders the row each minute, past the list's row memoization.
+  const now = useMinute();
   const overline = hideCourseName ? publisher : courseName;
   const preview = removeTags(content);
-  const time = dayjs(publishTime).fromNow();
+  const time = dayjs(publishTime).from(now);
 
   return (
     <CardWrapper

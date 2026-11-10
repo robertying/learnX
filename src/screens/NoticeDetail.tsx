@@ -6,7 +6,7 @@ import SafeArea from 'components/SafeArea';
 import { NoticeDetailParamList } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
-import { stripExtension, getExtension } from 'helpers/fs';
+import { getExtension, stripExtension } from 'helpers/filename';
 import { Notice } from 'data/types/state';
 import { useNotice } from 'data/content';
 import { openNotice } from 'data/serverActions';
@@ -71,7 +71,7 @@ const NoticeDetailContent: React.FC<{
           courseName,
           title: stripExtension(attachment.name),
           downloadUrl: attachment.downloadUrl,
-          fileType: getExtension(attachment.name) ?? '',
+          fileType: getExtension(attachment.name),
         },
       });
     }

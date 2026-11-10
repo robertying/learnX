@@ -1,4 +1,5 @@
 require "digest"
+require "dotenv"
 require "fileutils"
 require "json"
 require "shellwords"
@@ -15,7 +16,7 @@ ANDROID_APP = File.join(ROOT, "android/app")
 GITHUB_REPO = "robertying/learnX"
 # The Android versionCode is this plus the iOS build number (18.0.3: 4530 -> 9204530).
 ANDROID_VERSION_CODE_BASE = 9_200_000
-APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a x86 universal].freeze
+APK_ABIS = %w[x86_64 arm64-v8a armeabi-v7a universal].freeze
 
 skip_docs
 
@@ -26,7 +27,7 @@ def app_version
   JSON.parse(File.read(PACKAGE_JSON))["version"]
 end
 
-# The app target's CURRENT_PROJECT_VERSION. The share extension keeps its own (1).
+# CURRENT_PROJECT_VERSION, set once at the project level so the app and its extensions share it.
 def build_number
   File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i).max
 end
@@ -282,6 +283,29 @@ def print_notes(path)
 end
 
 # ---------------------------------------------------------------------------
+# .env secrets
+
+# babel/inline-env.js only inlines the mock logins as plain text. Fail the
+# build if a release bundle contains any other .env value as is: a LIVE_* test
+# login, the unmasked courseX token, or anything added later.
+def check_bundle_for_env_secrets!(bundles)
+  UI.user_error!("Found no JS bundle to check for .env values") if bundles.empty?
+
+  env_file = File.join(ROOT, ".env")
+  return unless File.exist?(env_file)
+
+  secrets = Dotenv.parse(env_file).reject { |key, value| key.start_with?("DUMMY_") || value.to_s.length < 4 }
+  bundles.each do |bundle|
+    data = File.binread(bundle)
+    leaked = secrets.select { |_, value| data.include?(value.b) }.keys
+    next if leaked.empty?
+
+    UI.user_error!("#{bundle} contains the .env value of #{leaked.join(', ')}. Release bundles must not include it; see babel/inline-env.js.")
+  end
+  UI.success(".env check passed for #{bundles.map { |b| File.basename(b) }.join(', ')}")
+end
+
+# ---------------------------------------------------------------------------
 # App Store Connect
 
 # Uses an App Store Connect API key when APP_STORE_CONNECT_API_KEY_KEY_ID,
@@ -324,6 +348,9 @@ def build_apple(platform)
   }
   options[:catalyst_platform] = "macos" if platform == "macos"
   path = build_app(options)
+
+  archive = lane_context[SharedValues::XCODEBUILD_ARCHIVE]
+  check_bundle_for_env_secrets!(Dir[File.join(archive.to_s, "Products/Applications/*.app/**/main.jsbundle")])
 
   UI.user_error!("The build wrote no source map to #{map}") unless File.exist?(map)
   UI.success("Source map: #{map}")
@@ -377,6 +404,8 @@ def build_android
     tasks: ["app:bundleRelease", "app:assembleRelease", "app:uploadCrashlyticsSymbolFileRelease"],
   )
 
+  check_bundle_for_env_secrets!(Dir[File.join(ANDROID_APP, "build/generated/assets/react/release/index.android.bundle")])
+
   FileUtils.rm_rf(android_out_dir)
   FileUtils.mkdir_p(android_out_dir)
   FileUtils.cp(File.join(ANDROID_APP, "build/outputs/bundle/release/app-release.aab"), aab_path)
@@ -395,6 +424,36 @@ def build_android
 
   UI.success("Android release files: #{android_out_dir}")
   UI.success("Source map: #{map}")
+end
+
+# LEARNX_RELEASE_* signing values from android/local.properties, which the
+# release build reads too.
+def android_signing
+  path = File.join(ROOT, "android/local.properties")
+  UI.user_error!("No #{path} with the LEARNX_RELEASE_* signing values.") unless File.exist?(path)
+  File.readlines(path, chomp: true).each_with_object({}) do |line, values|
+    key, value = line.split("=", 2)
+    values[key.strip] = value.strip if value && key.strip.start_with?("LEARNX_RELEASE_")
+  end
+end
+
+# Installs the AAB from `android build` on the connected device the way Google
+# Play would: bundletool picks the APKs for that device.
+def install_android_bundle
+  UI.user_error!("No AAB at #{aab_path}. Run `bundle exec fastlane android build` first.") unless File.exist?(aab_path)
+  UI.user_error!("bundletool not found: brew install bundletool") unless system("command -v bundletool > /dev/null")
+  signing = android_signing
+  apks = aab_path.sub(/\.aab\z/, ".apks")
+  sh(
+    "bundletool", "build-apks", "--connected-device", "--overwrite",
+    "--bundle=#{aab_path}", "--output=#{apks}",
+    "--ks=#{File.join(ANDROID_APP, "release.keystore")}",
+    "--ks-key-alias=#{signing["LEARNX_RELEASE_KEY_ALIAS"]}",
+    "--ks-pass=pass:#{signing["LEARNX_RELEASE_STORE_PASSWORD"]}",
+    "--key-pass=pass:#{signing["LEARNX_RELEASE_KEY_PASSWORD"]}",
+    log: false,
+  )
+  sh("bundletool", "install-apks", "--apks=#{apks}")
 end
 
 def upload_android(notes, track)
@@ -557,6 +616,11 @@ platform :android do
   desc "Build the AAB, the APKs and latest.json, upload native symbols to Crashlytics, keep the source map."
   lane :build do
     build_android
+  end
+
+  desc "Install the AAB from `android build` on the connected device through bundletool, as Google Play would."
+  lane :install_bundle do
+    install_android_bundle
   end
 
   desc "Build and upload the AAB to Google Play as a draft release."

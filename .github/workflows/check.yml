@@ -35,7 +35,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 26
+          node-version-file: .node-version
           # A cold `pnpm install` takes about 4 s, and restoring the ~200 MB
           # store cache took just as long, so it isn't cached.
           package-manager-cache: false
@@ -43,18 +43,6 @@ jobs:
       - name: Install dependencies
         id: install
         run: pnpm install --frozen-lockfile
-
-      # src/helpers/env.ts inlines .env at build time via babel preval.
-      # CI only needs placeholder values so anything that runs Babel can load it.
-      - name: Write stub .env
-        run: |
-          cat > .env <<'ENV'
-          DUMMY_USERNAME=ci-dummy-username
-          DUMMY_PASSWORD=ci-dummy-password
-          DUMMY_PERSIST_USERNAME=ci-dummy-persist-username
-          DUMMY_PERSIST_PASSWORD=ci-dummy-persist-password
-          COURSEX_REFRESH_TOKEN=ci-dummy-token
-          ENV
 
       # The checks below run even if an earlier one fails, so one push shows
       # every failure. They're skipped only when setup failed.

@@ -14,7 +14,8 @@ import {
 } from 'data/login';
 import { mockUserData } from 'data/mock';
 import { getUserData, resetUserData, setArchived } from 'data/userData';
-import env from 'helpers/env';
+// The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
+import env from '../../../jest/mocks/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import {
   clearLoginCookies,
@@ -35,7 +36,7 @@ jest.mock('data/source', () => ({
 jest.mock('helpers/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
-jest.mock('helpers/fs', () => ({
+jest.mock('helpers/files/downloads', () => ({
   removeFileDir: jest.fn(async () => {}),
 }));
 jest.mock('helpers/retry', () => ({
@@ -324,7 +325,7 @@ describe('switching accounts', () => {
   });
 
   it('deletes the downloaded files on logout', async () => {
-    const { removeFileDir } = require('helpers/fs');
+    const { removeFileDir } = require('helpers/files/downloads');
     removeFileDir.mockClear();
     await login(sso);
     await logout();

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { AppState } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { setUpBackgroundFetch } from 'helpers/background';
-import { migrateDownloads } from 'helpers/fs';
+import { migrateDownloads } from 'helpers/files/migrateDownloads';
 import { configureNotifications } from 'helpers/notifications';
 import { subscribeSurfaceErrors } from 'helpers/surfaces';
 import { toast } from 'components/Toast';

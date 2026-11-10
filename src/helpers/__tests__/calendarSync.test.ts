@@ -19,7 +19,7 @@ import {
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'helpers/event';
-import { exportTextFile } from 'helpers/fs';
+import { exportTextFile } from 'helpers/files/share';
 import { CalendarError, CalendarErrorCode } from 'helpers/calendarError';
 import { t } from 'helpers/i18n';
 
@@ -33,16 +33,12 @@ jest.mock('helpers/event', () => ({
   saveAssignmentsToReminderOrCalendar: jest.fn(),
   saveCoursesToCalendar: jest.fn(),
 }));
-jest.mock('helpers/fs', () => ({ exportTextFile: jest.fn() }));
+jest.mock('helpers/files/share', () => ({ exportTextFile: jest.fn() }));
 jest.mock('constants/DeviceInfo', () => ({ isMac: jest.fn(() => false) }));
 
 const fail = (code: CalendarErrorCode) => async () => {
   throw new CalendarError(code);
 };
-
-beforeEach(() => {
-  jest.clearAllMocks();
-});
 
 describe('error toasts', () => {
   const error = (code: CalendarErrorCode) => new CalendarError(code);

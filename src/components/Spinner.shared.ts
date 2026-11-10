@@ -5,7 +5,3 @@ export interface SpinnerProps {
   progress?: number;
   style?: StyleProp<ViewStyle>;
 }
-
-/** Formats a 0–1 progress as a whole percentage, or nothing before it starts. */
-export const percentLabel = (progress?: number) =>
-  progress ? `${Math.round(Math.min(Math.max(progress, 0), 1) * 100)}%` : '';

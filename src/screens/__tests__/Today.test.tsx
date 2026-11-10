@@ -1,14 +1,10 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
+import { StackActions } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
 import Today from 'screens/Today';
 
-jest.mock('react-native-screens/experimental', () => {
-  const { View } = require('react-native');
-  return { SafeAreaView: View };
-});
-jest.mock('hooks/useDetailNavigator', () => () => undefined);
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
 
@@ -53,6 +49,7 @@ const session = (
 
 const setup = async () => {
   const navigation = {
+    dispatch: jest.fn(),
     push: jest.fn(),
     navigate: jest.fn(),
     setOptions: jest.fn(),
@@ -99,7 +96,9 @@ it('shows the current and next class, and opens a course', async () => {
   await userEvent
     .setup({ advanceTimers: jest.advanceTimersByTime })
     .press(screen.getAllByText('Course b')[0]);
-  expect(navigation.push).toHaveBeenCalledWith('CourseDetail', { id: 'b' });
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('CourseDetail', { id: 'b' }),
+  );
   jest.useRealTimers();
 });
 

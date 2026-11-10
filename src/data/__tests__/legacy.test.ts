@@ -103,7 +103,7 @@ const loginModule = (): typeof import('data/login') => {
   jest.doMock('helpers/surfaces', () => ({
     clearSurfaces: jest.fn(async () => {}),
   }));
-  jest.doMock('helpers/fs', () => ({
+  jest.doMock('helpers/files/downloads', () => ({
     removeFileDir: jest.fn(async () => {}),
   }));
   jest.doMock('data/source', () => ({

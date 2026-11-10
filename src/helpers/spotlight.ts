@@ -1,8 +1,5 @@
 import dayjs from 'dayjs';
-import Spotlight, {
-  SpotlightDomain,
-  SpotlightItem,
-} from '../../modules/spotlight';
+import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
 import { Assignment, Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 

@@ -20,9 +20,9 @@ import CardSwipeActions from './CardSwipeActions';
 import Touchable from './Touchable';
 import SelectionMark from './SelectionMark';
 import { useTheme } from 'theme';
-import { ContextMenuView } from '../../modules/menus';
+import { ContextMenuView } from 'modules/menus';
 
-const swipeableNotSupported = DeviceInfo.isWSA() || Platform.OS === 'android';
+const swipeableNotSupported = Platform.OS === 'android';
 // A pointer's right-click, or a long press on iPad, shows the actions in a
 // menu, as everywhere else on these platforms.
 const contextMenuSupported = DeviceInfo.isIPad() || DeviceInfo.isMac();
@@ -53,9 +53,7 @@ export interface CardWrapperProps {
   disableSwipe?: boolean;
 }
 
-const CardWrapper: React.FC<
-  React.PropsWithChildren<PropsWithChildren<CardWrapperProps>>
-> = ({
+const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   fav,
   onFav,
   archived,

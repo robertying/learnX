@@ -1,8 +1,6 @@
 import { Platform } from 'react-native';
 import { dataSource } from 'data/source';
 
-export { removeTags } from './text';
-
 const darkMode = require('./preval/darkMode.preval.js');
 
 const csrfLinks = require('./preval/csrfLinks.preval.js');

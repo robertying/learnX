@@ -57,6 +57,15 @@ export function hash(text: string): string {
   return result.toString(16);
 }
 
+/** What the optional calendar settings (in minutes) are until they're set. */
+export const calendarDefaults = {
+  courseAlarmOffset: 15,
+  assignmentReminderAlarmOffset: 24 * 60,
+  assignmentCalendarAlarmOffset: 24 * 60,
+  assignmentCalendarSecondAlarmOffset: 30,
+  calendarEventLength: 30,
+};
+
 export const buildCourseEventDetails = (
   e: CalendarEvent,
   settings: SettingsState,
@@ -75,7 +84,9 @@ export const buildCourseEventDetails = (
     alarms: alarms.courseAlarm
       ? [
           {
-            relativeOffset: -(alarms.courseAlarmOffset ?? 15),
+            relativeOffset: -(
+              alarms.courseAlarmOffset ?? calendarDefaults.courseAlarmOffset
+            ),
           },
         ]
       : [],
@@ -117,7 +128,8 @@ export const buildAssignmentReminderDetails = (
           {
             absoluteDate: dueDate
               .subtract(
-                alarms.assignmentReminderAlarmOffset ?? 24 * 60,
+                alarms.assignmentReminderAlarmOffset ??
+                  calendarDefaults.assignmentReminderAlarmOffset,
                 'minute',
               )
               .toISOString(),
@@ -151,7 +163,8 @@ export const buildAssignmentEventDetails = (
   { title, note, dueDate, completed }: AssignmentEventInput,
 ): EventDetails => {
   const alarms = settings.alarms;
-  const eventLength = settings.calendarEventLength ?? 30;
+  const eventLength =
+    settings.calendarEventLength ?? calendarDefaults.calendarEventLength;
   const shouldHaveAlarm = !(
     alarms.assignmentCalendarNoAlarmIfComplete && completed
   );
@@ -159,7 +172,8 @@ export const buildAssignmentEventDetails = (
     shouldHaveAlarm && alarms.assignmentCalendarAlarm
       ? [
           alertBeforeDeadline(
-            alarms.assignmentCalendarAlarmOffset ?? 24 * 60,
+            alarms.assignmentCalendarAlarmOffset ??
+              calendarDefaults.assignmentCalendarAlarmOffset,
             eventLength,
           ),
         ]
@@ -171,7 +185,8 @@ export const buildAssignmentEventDetails = (
   ) {
     alerts.push(
       alertBeforeDeadline(
-        alarms.assignmentCalendarSecondAlarmOffset ?? 30,
+        alarms.assignmentCalendarSecondAlarmOffset ??
+          calendarDefaults.assignmentCalendarSecondAlarmOffset,
         eventLength,
       ),
     );

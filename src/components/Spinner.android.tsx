@@ -1,11 +1,12 @@
 import {
   CircularProgressIndicator,
   Column,
-  Host,
   Text,
 } from '@expo/ui/jetpack-compose';
-import { useComposeColorOverrides, useTheme } from 'theme';
-import { percentLabel, type SpinnerProps } from './Spinner.shared';
+import { useTheme } from 'theme';
+import { percentLabel } from 'helpers/progress';
+import type { SpinnerProps } from './Spinner.shared';
+import ThemedHost from 'components/ThemedHost';
 
 /**
  * The Material 3 `CircularProgressIndicator` (indeterminate, primary color)
@@ -13,16 +14,10 @@ import { percentLabel, type SpinnerProps } from './Spinner.shared';
  */
 const Spinner: React.FC<SpinnerProps> = ({ progress, style }) => {
   const theme = useTheme();
-  const colorOverrides = useComposeColorOverrides();
   const label = percentLabel(progress);
 
   return (
-    <Host
-      matchContents
-      seedColor={theme.colors.primary}
-      colorOverrides={colorOverrides}
-      style={style}
-    >
+    <ThemedHost matchContents style={style}>
       <Column
         horizontalAlignment="center"
         verticalArrangement={{ spacedBy: 12 }}
@@ -37,7 +32,7 @@ const Spinner: React.FC<SpinnerProps> = ({ progress, style }) => {
           </Text>
         ) : null}
       </Column>
-    </Host>
+    </ThemedHost>
   );
 };
 
