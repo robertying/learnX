@@ -1,7 +1,7 @@
-import dayjs from 'dayjs';
 import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import { useMinute } from 'hooks/useClock';
+import { listTime } from 'helpers/listTime';
+import { useToday } from 'hooks/useClock';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { t } from 'helpers/i18n';
@@ -32,8 +32,8 @@ const FileCard: React.FC<FileCardProps> = ({
   ...restProps
 }) => {
   const theme = useTheme();
-  // Re-renders the row each minute, past the list's row memoization.
-  const now = useMinute();
+  // Re-renders the row at midnight, past the list's row memoization.
+  const today = useToday();
   const details = [category?.title, fileType?.toUpperCase(), size]
     .filter(Boolean)
     .join(' · ');
@@ -42,7 +42,7 @@ const FileCard: React.FC<FileCardProps> = ({
   const preview = strippedDescription
     ? `${details}\n${strippedDescription}`
     : details;
-  const time = dayjs(uploadTime).from(now);
+  const time = listTime(uploadTime, today);
 
   return (
     <CardWrapper
