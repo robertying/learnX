@@ -2,7 +2,9 @@
 # Run the local modules' Android unit tests (modules/*/android/src/test, JUnit
 # with Robolectric and MockK) and print their line coverage.
 #
-#   scripts/test-android.sh
+#   scripts/test-android.sh [gradle option...]
+#
+# Extra arguments go to Gradle, e.g. --build-cache on CI.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -17,7 +19,7 @@ for project in "${projects[@]}"; do
   tasks+=(":$project:testDebugUnitTest" ":$project:createDebugUnitTestCoverageReport")
 done
 
-(cd android && ./gradlew --console=plain "${tasks[@]}")
+(cd android && ./gradlew --console=plain "$@" "${tasks[@]}")
 
 reports=()
 for project in "${projects[@]}"; do

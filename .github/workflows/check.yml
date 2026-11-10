@@ -113,5 +113,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # The build cache lives in the Gradle home that setup-gradle restores,
+      # so PRs reuse main's compiled outputs (dependency modules, Gradle
+      # plugins) and only rebuild what changed.
       - name: Test
-        run: scripts/test-android.sh
+        run: scripts/test-android.sh --build-cache
