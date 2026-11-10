@@ -1,0 +1,194 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ for %@ is due %@." : {
+      "comment" : "1: assignment title, 2: course name, 3: relative time, e.g. \"in 2 days\"",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@的“%1$@”%3$@截止。"
+          }
+        }
+      }
+    },
+    "Next Class" : {
+      "comment" : "The \"Next Class\" App Intent (NextClassIntent.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一节课"
+          }
+        }
+      }
+    },
+    "Next Deadline" : {
+      "comment" : "The \"Next Deadline\" App Intent (NextDeadlineIntent.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一个截止日期"
+          }
+        }
+      }
+    },
+    "Next Item" : {
+      "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一项"
+          }
+        }
+      }
+    },
+    "Previous Item" : {
+      "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上一项"
+          }
+        }
+      }
+    },
+    "Refresh" : {
+      "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        }
+      }
+    },
+    "Search" : {
+      "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
+          }
+        }
+      }
+    },
+    "Settings…" : {
+      "comment" : "A menu bar command (modules/menus/ios/AppCommands.swift)",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置…"
+          }
+        }
+      }
+    },
+    "Tells you when and where your next class is." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告诉你下一节课的时间和地点。"
+          }
+        }
+      }
+    },
+    "Tells you which assignment is due next." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告诉你下一个要交的作业。"
+          }
+        }
+      }
+    },
+    "You have no classes this week or next." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本周和下周没有课了。"
+          }
+        }
+      }
+    },
+    "You have no upcoming deadlines." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有即将截止的作业。"
+          }
+        }
+      }
+    },
+    "You're in %@ until %@." : {
+      "comment" : "1: course name, 2: end time, e.g. \"3:05 PM\"",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在上%1$@，%2$@下课。"
+          }
+        }
+      }
+    },
+    "Your next class is %@, %@, in %@." : {
+      "comment" : "1: course name, 2: day and time, 3: classroom",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一节课是%1$@，%2$@，在%3$@。"
+          }
+        }
+      }
+    },
+    "Your next class is %@, %@." : {
+      "comment" : "1: course name, 2: day and time, e.g. \"tomorrow at 8:00 AM\"",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一节课是%1$@，%2$@。"
+          }
+        }
+      }
+    },
+    "sentence separator" : {
+      "comment" : "Between the sentences about the class on now and the next one",
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

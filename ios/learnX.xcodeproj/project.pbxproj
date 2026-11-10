@@ -10,8 +10,9 @@
 		22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06F308A48D477954EECD356 /* ExpoModulesProvider.swift */; };
 		5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000001 /* NextDeadlineIntent.swift */; };
 		5A071000000000000000000A /* NextClassIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000009 /* NextClassIntent.swift */; };
-		5A0710000000000000000005 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000003 /* Localizable.strings */; };
-		5A0710000000000000000008 /* AppShortcuts.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000006 /* AppShortcuts.strings */; };
+		5A071000000000000000000C /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000B /* AppShortcuts.swift */; };
+		5A0710000000000000000005 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000003 /* Localizable.xcstrings */; };
+		5A0710000000000000000008 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000006 /* AppShortcuts.xcstrings */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75600012A61A4062AECAF1A7 /* SceneDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -22,7 +23,7 @@
 		D40B9F752B248C8E004BC08C /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F732B248C8E004BC08C /* MainInterface.storyboard */; };
 		D40B9F792B248C8E004BC08C /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D40B9F7F2B248D30004BC08C /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D40B9F7E2B248D30004BC08C /* ShareViewController.swift */; };
-		D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.strings */; };
+		D40B9F872B249285004BC08C /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = D40B9F832B248EF5004BC08C /* InfoPlist.xcstrings */; };
 		D4605C0D2E74F66B008F0837 /* AppIcon.icon in Resources */ = {isa = PBXBuildFile; fileRef = D4605C0C2E74F66B008F0837 /* AppIcon.icon */; };
 		D492363A2D408A2A00F625A8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D49236392D408A2A00F625A8 /* AppDelegate.swift */; };
 		D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */; };
@@ -30,7 +31,7 @@
 		E7D60000000000000000000C /* index.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000007 /* index.swift */; };
 		E7D60000000000000000000D /* Deadlines.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000008 /* Deadlines.swift */; };
 		E7D6000000000000000000F1 /* UpNext.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D6000000000000000000F0 /* UpNext.swift */; };
-		E7D600000000000000000014 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000011 /* Localizable.strings */; };
+		E7D600000000000000000014 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = E7D600000000000000000011 /* Localizable.xcstrings */; };
 		F2A5304F6571E97B5D30F690 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04A24FF361CA741CC1978F73 /* ExpoModulesProvider.swift */; };
 /* End PBXBuildFile section */
 
@@ -78,8 +79,7 @@
 		5709B34CF0A7D63546082F79 /* Pods-learnX.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-learnX.release.xcconfig"; path = "Target Support Files/Pods-learnX/Pods-learnX.release.xcconfig"; sourceTree = "<group>"; };
 		5A0710000000000000000001 /* NextDeadlineIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextDeadlineIntent.swift; path = learnX/NextDeadlineIntent.swift; sourceTree = "<group>"; };
 		5A0710000000000000000009 /* NextClassIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextClassIntent.swift; path = learnX/NextClassIntent.swift; sourceTree = "<group>"; };
-		5A0710000000000000000004 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
-		5A0710000000000000000007 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/AppShortcuts.strings"; sourceTree = "<group>"; };
+		5A071000000000000000000B /* AppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppShortcuts.swift; path = learnX/AppShortcuts.swift; sourceTree = "<group>"; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8257AB0E0F3BEAA229130429 /* Pods-ShareExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ShareExtension.debug.xcconfig"; path = "Target Support Files/Pods-ShareExtension/Pods-ShareExtension.debug.xcconfig"; sourceTree = "<group>"; };
@@ -93,8 +93,6 @@
 		D40B9F762B248C8E004BC08C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D40B9F7E2B248D30004BC08C /* ShareViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ShareViewController.swift; path = "../../node_modules/react-native-share-menu/ios/ShareViewController.swift"; sourceTree = "<group>"; };
 		D40B9F822B248ED5004BC08C /* ShareExtension.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
-		D40B9F842B248EF5004BC08C /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = learnX/en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		D40B9F862B248EFD004BC08C /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "learnX/zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		D4605C0C2E74F66B008F0837 /* AppIcon.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; name = AppIcon.icon; path = learnX/AppIcon.icon; sourceTree = "<group>"; };
 		D49236392D408A2A00F625A8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = learnX/AppDelegate.swift; sourceTree = "<group>"; };
 		D4D9200D2CA8507900790DF6 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -106,8 +104,10 @@
 		E7D600000000000000000009 /* ExpoWidgetsTarget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ExpoWidgetsTarget.entitlements; sourceTree = "<group>"; };
 		E7D60000000000000000000A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = ExpoWidgetsLayoutRegistry.config.json; sourceTree = "<group>"; };
-		E7D600000000000000000012 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		E7D600000000000000000013 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		5A0710000000000000000003 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = Localizable.xcstrings; path = learnX/Localizable.xcstrings; sourceTree = "<group>"; };
+		5A0710000000000000000006 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = AppShortcuts.xcstrings; path = learnX/AppShortcuts.xcstrings; sourceTree = "<group>"; };
+		D40B9F832B248EF5004BC08C /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = InfoPlist.xcstrings; path = learnX/InfoPlist.xcstrings; sourceTree = "<group>"; };
+		E7D600000000000000000011 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,12 +145,13 @@
 				75600012A61A4062AECAF1A7 /* SceneDelegate.swift */,
 				5A0710000000000000000001 /* NextDeadlineIntent.swift */,
 				5A0710000000000000000009 /* NextClassIntent.swift */,
+				5A071000000000000000000B /* AppShortcuts.swift */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
 				D4605C0C2E74F66B008F0837 /* AppIcon.icon */,
-				D40B9F832B248EF5004BC08C /* InfoPlist.strings */,
-				5A0710000000000000000003 /* Localizable.strings */,
-				5A0710000000000000000006 /* AppShortcuts.strings */,
+				D40B9F832B248EF5004BC08C /* InfoPlist.xcstrings */,
+				5A0710000000000000000003 /* Localizable.xcstrings */,
+				5A0710000000000000000006 /* AppShortcuts.xcstrings */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				D403DD362BCA2BCF00E5295C /* PrivacyInfo.xcprivacy */,
 				D40B9F622B248AEB004BC08C /* learnX.entitlements */,
@@ -250,7 +251,7 @@
 				E7D600000000000000000007 /* index.swift */,
 				E7D600000000000000000008 /* Deadlines.swift */,
 				E7D6000000000000000000F0 /* UpNext.swift */,
-				E7D600000000000000000011 /* Localizable.strings */,
+				E7D600000000000000000011 /* Localizable.xcstrings */,
 				E7D60000000000000000000B /* ExpoWidgetsLayoutRegistry.config.json */,
 				E7D60000000000000000000A /* Info.plist */,
 				E7D600000000000000000009 /* ExpoWidgetsTarget.entitlements */,
@@ -376,9 +377,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
-				D40B9F872B249285004BC08C /* InfoPlist.strings in Resources */,
-				5A0710000000000000000005 /* Localizable.strings in Resources */,
-				5A0710000000000000000008 /* AppShortcuts.strings in Resources */,
+				D40B9F872B249285004BC08C /* InfoPlist.xcstrings in Resources */,
+				5A0710000000000000000005 /* Localizable.xcstrings in Resources */,
+				5A0710000000000000000008 /* AppShortcuts.xcstrings in Resources */,
 				D403DD372BCA2CB600E5295C /* PrivacyInfo.xcprivacy in Resources */,
 				D40B9F682B248AEB004BC08C /* Assets.xcassets in Resources */,
 				D4D9200E2CA8507900790DF6 /* GoogleService-Info.plist in Resources */,
@@ -398,7 +399,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E7D600000000000000000014 /* Localizable.strings in Resources */,
+				E7D600000000000000000014 /* Localizable.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -661,6 +662,7 @@
 				7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */,
 				5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */,
 				5A071000000000000000000A /* NextClassIntent.swift in Sources */,
+				5A071000000000000000000C /* AppShortcuts.swift in Sources */,
 				22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -701,46 +703,12 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		5A0710000000000000000003 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5A0710000000000000000004 /* zh-Hans */,
-			);
-			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		5A0710000000000000000006 /* AppShortcuts.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				5A0710000000000000000007 /* zh-Hans */,
-			);
-			name = AppShortcuts.strings;
-			sourceTree = "<group>";
-		};
 		D40B9F732B248C8E004BC08C /* MainInterface.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				D40B9F742B248C8E004BC08C /* Base */,
 			);
 			name = MainInterface.storyboard;
-			sourceTree = "<group>";
-		};
-		D40B9F832B248EF5004BC08C /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D40B9F842B248EF5004BC08C /* en */,
-				D40B9F862B248EFD004BC08C /* zh-Hans */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		E7D600000000000000000011 /* Localizable.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				E7D600000000000000000012 /* en */,
-				E7D600000000000000000013 /* zh-Hans */,
-			);
-			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -761,6 +729,7 @@
 				INFOPLIST_FILE = learnX/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = learnX;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -784,6 +753,7 @@
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -804,6 +774,7 @@
 				INFOPLIST_FILE = learnX/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = learnX;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -826,6 +797,7 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,6";
 				VERSIONING_SYSTEM = "apple-generic";
