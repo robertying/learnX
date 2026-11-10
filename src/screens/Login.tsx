@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -6,10 +6,9 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  TextInputInstance,
   View,
 } from 'react-native';
-import TextField from 'components/TextField';
+import LoginFields from 'components/LoginFields';
 import TextButton from 'components/TextButton';
 import Switch from 'components/Switch';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -43,17 +42,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
   const [username, setUsername] = useState(savedUsername ?? '');
   const [password, setPassword] = useState(savedPassword ?? '');
-  const passwordTextInputRef = useRef<TextInputInstance>(null);
 
   const hasCredential = savedUsername && savedPassword && savedFingerPrint;
 
   useEffect(() => {
     noteLoginShown();
   }, []);
-
-  const handleNext = () => {
-    passwordTextInputRef.current?.focus();
-  };
 
   const handleLogin = async () => {
     Keyboard.dismiss();
@@ -135,38 +129,15 @@ const Login: React.FC<Props> = ({ navigation }) => {
             />
             <Text style={Styles.spacex1}>{t('graduate')}</Text>
           </View>
-          <TextField
-            testID="login-username"
+          <LoginFields
             style={styles.textInput}
-            label={t('usernameOrId')}
-            textContentType="username"
-            autoComplete="username"
-            returnKeyType="next"
-            keyboardType="ascii-capable"
-            autoCapitalize="none"
-            autoCorrect={false}
-            enablesReturnKeyAutomatically
-            submitBehavior="submit"
-            onSubmitEditing={handleNext}
-            value={username}
-            onChangeText={v => setUsername(v.trim())}
-          />
-          <TextField
-            ref={passwordTextInputRef}
-            testID="login-password"
-            style={styles.textInput}
-            label={t('password')}
-            textContentType="password"
-            autoComplete="password"
-            returnKeyType="done"
-            keyboardType="ascii-capable"
-            autoCapitalize="none"
-            autoCorrect={false}
-            secureTextEntry
-            enablesReturnKeyAutomatically
-            onSubmitEditing={handleLogin}
-            value={password}
-            onChangeText={v => setPassword(v.trim())}
+            username={username}
+            password={password}
+            onUsernameChange={setUsername}
+            onPasswordChange={setPassword}
+            onSubmit={handleLogin}
+            usernameLabel={t('usernameOrId')}
+            passwordLabel={t('password')}
           />
           <View style={styles.noteContainer}>
             <Caption style={styles.note}>{t('securityNote')}</Caption>

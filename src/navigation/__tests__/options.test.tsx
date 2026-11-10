@@ -115,6 +115,24 @@ it('titles item detail screens from the cached item', () => {
   ).toBe('');
 });
 
+it('gives tab roots a large title on iPhone and iPad from iOS 26 only', () => {
+  const tabRootOptionsOn = (ios26: boolean, mac: boolean) => {
+    let options: object = {};
+    jest.isolateModules(() => {
+      const info = require('constants/DeviceInfo').default;
+      jest.spyOn(info, 'supportsNativeSubtitle').mockReturnValue(ios26);
+      jest.spyOn(info, 'isMac').mockReturnValue(mac);
+      options = require('navigation/options').tabRootOptions;
+    });
+    return options;
+  };
+  expect(tabRootOptionsOn(true, false)).toEqual({
+    headerLargeTitleEnabled: true,
+  });
+  expect(tabRootOptionsOn(false, false)).toEqual({});
+  expect(tabRootOptionsOn(true, true)).toEqual({});
+});
+
 it('shows a failed screen as an error in its place', async () => {
   const Broken = () => {
     throw new Error('broken');

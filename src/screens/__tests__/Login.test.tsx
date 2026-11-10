@@ -80,6 +80,18 @@ describe('Login', () => {
     expect(login).not.toHaveBeenCalled();
   });
 
+  it('moves to the password on Next and logs in on Done', async () => {
+    await setup();
+    const password = screen.getByTestId('login-password');
+    await fireEvent(screen.getByTestId('login-username'), 'submitEditing');
+    expect(password.props.focus).toHaveBeenCalledTimes(1);
+    await fireEvent(password, 'submitEditing');
+    expect(toast).toHaveBeenLastCalledWith(
+      'Enter your username or student ID',
+      'error',
+    );
+  });
+
   it('names its fields for screen readers', async () => {
     await setup();
     expect(screen.getByLabelText('Username or Student ID')).toBe(

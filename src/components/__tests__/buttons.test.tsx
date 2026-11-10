@@ -1,9 +1,7 @@
-import { StyleSheet } from 'react-native';
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { buttonStyle, font, frame } from '@expo/ui/swift-ui/modifiers';
 import IconButton from 'components/IconButton';
 import TextButton from 'components/TextButton';
-import TextField from 'components/TextField';
 import DeviceInfo from 'constants/DeviceInfo';
 
 afterEach(() => jest.restoreAllMocks());
@@ -79,34 +77,5 @@ describe('IconButton (iOS)', () => {
     expect(buttonStyle).toHaveBeenCalledWith('borderless');
     expect(frame).toHaveBeenCalledWith({ width: 44, height: 44 });
     expect(screen.getByText(', New')).toBeTruthy();
-  });
-});
-
-describe('TextField', () => {
-  it('labels the field, and dims it while disabled', async () => {
-    await render(
-      <TextField
-        label="Username"
-        testID="username"
-        disabled
-        multiline
-        value=""
-      />,
-    );
-    expect(
-      screen.getByTestId('username-label', { includeHiddenElements: true }),
-    ).toHaveTextContent('Username');
-    const input = screen.getByLabelText('Username');
-    expect(input.props.editable).toBe(false);
-    expect(StyleSheet.flatten(input.props.style)).toMatchObject({
-      textAlignVertical: 'top',
-      borderRadius: 10,
-    });
-  });
-
-  it('has no label to show, and stays editable', async () => {
-    await render(<TextField placeholder="Search" />);
-    expect(screen.getByPlaceholderText('Search').props.editable).toBe(true);
-    expect(screen.queryByText('Search')).toBeNull();
   });
 });

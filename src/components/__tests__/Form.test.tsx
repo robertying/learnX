@@ -373,6 +373,24 @@ describe('Form (iOS details)', () => {
     });
   });
 
+  it('lets the Form scroll under the header from iOS 26', async () => {
+    jest.spyOn(DeviceInfo, 'hasLiquidGlass').mockReturnValue(true);
+    const navigation = { setOptions: jest.fn() };
+    await render(
+      <NavigationContext.Provider value={navigation as never}>
+        <Form>
+          <FormSection>
+            <FormText title="Row" />
+          </FormSection>
+        </Form>
+      </NavigationContext.Provider>,
+    );
+    expect(navigation.setOptions).toHaveBeenLastCalledWith({
+      headerShadowVisible: false,
+      headerStyle: { backgroundColor: 'transparent' },
+    });
+  });
+
   it('leaves the Mac header alone', async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     const navigation = { setOptions: jest.fn() };
