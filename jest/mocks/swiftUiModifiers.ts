@@ -2,13 +2,17 @@
  * `@expo/ui/swift-ui/modifiers`: every modifier is a `jest.fn` returning
  * nothing, so app code can use any modifier without a change here.
  * `disabled` returns `{ disabled }`, which the Button and TextField stand-ins
- * read so tests can tell a disabled control.
+ * read so tests can tell a disabled control, and `accessibilityLabel`
+ * returns `{ accessibilityLabel }`, which shapes take as their label.
  */
 const modifiers: Record<string | symbol, unknown> = {
   __esModule: true,
   Animation: { easeInOut: jest.fn() },
   shapes: { rectangle: jest.fn() },
   disabled: jest.fn((isDisabled: boolean) => ({ disabled: isDisabled })),
+  accessibilityLabel: jest.fn((label: string) => ({
+    accessibilityLabel: label,
+  })),
 };
 
 // CommonJS, so the whole object (spread or Proxy) is the module.

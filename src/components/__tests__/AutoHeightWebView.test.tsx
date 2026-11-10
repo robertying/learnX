@@ -1,0 +1,118 @@
+import { Linking, Platform } from 'react-native';
+import { act, render, screen } from '@testing-library/react-native';
+import type { WebViewProps } from 'react-native-webview';
+import CookieManager from '@preeternal/react-native-cookie-manager';
+import AutoHeightWebView from 'components/AutoHeightWebView';
+import { recordError } from 'helpers/crashReporting';
+
+jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+// The native web view, as a view that keeps its props.
+jest.mock('react-native-webview', () => {
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: (props: object) => <View testID="webview" {...props} />,
+  };
+});
+
+const learn = 'https://learn.tsinghua.edu.cn';
+const webView = () => screen.getByTestId('webview').props as WebViewProps;
+const height = () => (webView().style as { height: number }[]).flat()[0].height;
+
+const os = Platform.OS;
+afterEach(() => {
+  Platform.OS = os;
+});
+
+const renderView = async (props: WebViewProps = {}) => {
+  await render(<AutoHeightWebView source={{ html: '<p>Hi</p>' }} {...props} />);
+  // Lets the cookie copy finish.
+  await act(async () => {});
+};
+
+it('loads HTML at the Web Learning root, with the session cookies', async () => {
+  jest.mocked(CookieManager.get).mockResolvedValueOnce({
+    JSESSIONID: { name: 'JSESSIONID', value: 'abc', sameSite: 'none' },
+    XSRF: { name: 'XSRF', value: 'x' },
+  } as never);
+  await renderView();
+  expect(webView().source).toEqual({
+    baseUrl: learn,
+    headers: { Cookie: 'JSESSIONID=abc; XSRF=x' },
+    html: '<p>Hi</p>',
+  });
+  // A cross-site cookie must be secure for the web view to send it.
+  expect(CookieManager.set).toHaveBeenCalledWith(
+    learn,
+    expect.objectContaining({ name: 'JSESSIONID', secure: true }),
+    true,
+  );
+});
+
+it('records a cookie store failure and loads without cookies', async () => {
+  jest.mocked(CookieManager.get).mockRejectedValueOnce(new Error('store'));
+  await renderView({ source: { uri: `${learn}/page` } });
+  expect(recordError).toHaveBeenCalledWith(new Error('store'));
+  expect(webView().source).toEqual({
+    baseUrl: undefined,
+    headers: { Cookie: '' },
+    uri: `${learn}/page`,
+  });
+});
+
+it('grows to the height the page reports', async () => {
+  await renderView();
+  expect(height()).toBe(0);
+  const message = (data: string) =>
+    act(() => webView().onMessage!({ nativeEvent: { data } } as never));
+  await message('320');
+  expect(height()).toBe(320);
+  await message('nonsense');
+  await message('0');
+  expect(height()).toBe(320);
+});
+
+describe('loads', () => {
+  const open = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+  const shouldLoad = (request: object) =>
+    webView().onShouldStartLoadWithRequest!({
+      isTopFrame: true,
+      ...request,
+    } as never);
+
+  it('keeps its own page on iOS and opens tapped web and mail links outside', async () => {
+    Platform.OS = 'ios';
+    await renderView();
+    expect(shouldLoad({ url: 'about:blank', navigationType: 'other' })).toBe(
+      true,
+    );
+    expect(shouldLoad({ url: `${learn}/#top`, navigationType: 'other' })).toBe(
+      true,
+    );
+    expect(
+      shouldLoad({ url: 'https://evil.example', navigationType: 'other' }),
+    ).toBe(false);
+    expect(open).not.toHaveBeenCalled();
+
+    expect(
+      shouldLoad({ url: 'https://example.com', navigationType: 'click' }),
+    ).toBe(false);
+    expect(open).toHaveBeenCalledWith('https://example.com');
+    shouldLoad({ url: 'intent://scan', navigationType: 'click' });
+    expect(open).toHaveBeenCalledTimes(1);
+  });
+
+  it('treats every load the page starts on Android as a link', async () => {
+    Platform.OS = 'android';
+    await renderView();
+    expect(shouldLoad({ url: 'mailto:ta@example.com' })).toBe(false);
+    expect(open).toHaveBeenCalledWith('mailto:ta@example.com');
+  });
+
+  it('leaves frames inside the page alone', async () => {
+    await renderView();
+    expect(
+      shouldLoad({ url: 'https://video.example', isTopFrame: false }),
+    ).toBe(true);
+  });
+});

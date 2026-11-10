@@ -1,0 +1,126 @@
+import {
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
+import { toast } from 'components/Toast';
+import { getSettings, resetSettings, setSetting } from 'data/settings';
+import { t } from 'helpers/i18n';
+import { postNotification } from 'helpers/notifications';
+import { openSystemSettings } from 'helpers/systemSettings';
+import useNotificationPermission from 'hooks/useNotificationPermission';
+import NotificationSettings from 'screens/NotificationSettings';
+
+jest.mock('components/Toast', () => ({ toast: jest.fn() }));
+jest.mock('hooks/useNotificationPermission', () => jest.fn());
+jest.mock('helpers/systemSettings', () => ({ openSystemSettings: jest.fn() }));
+jest.mock('helpers/notifications', () => ({ postNotification: jest.fn() }));
+jest.mock('helpers/background', () => ({
+  syncContent: jest.fn(),
+  notifyContent: jest.fn(),
+}));
+jest.mock('helpers/deadlineReminders', () => ({
+  previewDeadlineReminder: jest.fn(async () => 3),
+}));
+jest.mock('data/content', () => ({
+  useNotices: () => ({
+    notices: [{ id: 'n1', courseName: 'Calculus', title: 'Midterm' }],
+  }),
+}));
+
+const request = jest.fn(async () => true);
+const requestExact = jest.fn();
+const permission = (
+  overrides: Partial<ReturnType<typeof useNotificationPermission>> = {},
+) =>
+  jest.mocked(useNotificationPermission).mockReturnValue({
+    permission: 'granted',
+    request,
+    exactAlarms: true,
+    requestExact,
+    ...overrides,
+  });
+
+const renderScreen = () =>
+  render(<NotificationSettings navigation={{} as never} route={{} as never} />);
+
+const toggle = (key: string, value: boolean) =>
+  fireEvent(screen.getByTestId(`notifications-${key}`), 'valueChange', value);
+
+beforeEach(() => {
+  resetSettings();
+  permission();
+});
+
+it('turns a notification on once the permission is granted', async () => {
+  await renderScreen();
+  await toggle('files', true);
+  expect(request).toHaveBeenCalled();
+  expect(getSettings().notifications.files).toBe(true);
+});
+
+it('leaves it off and says why when the permission is denied', async () => {
+  request.mockResolvedValueOnce(false);
+  await renderScreen();
+  await toggle('notices', true);
+  expect(getSettings().notifications.notices).toBe(false);
+  expect(toast).toHaveBeenCalledWith(
+    t('notificationPermissionDenied'),
+    'error',
+  );
+});
+
+it('turns one off without asking', async () => {
+  setSetting('notifications', { ...getSettings().notifications, grades: true });
+  await renderScreen();
+  await toggle('grades', false);
+  expect(request).not.toHaveBeenCalled();
+  expect(getSettings().notifications.grades).toBe(false);
+});
+
+it('shows the reminder offset while reminders are on', async () => {
+  await renderScreen();
+  expect(screen.queryByText(t('deadlineReminderOffset'))).toBeNull();
+  await toggle('deadlineReminders', true);
+  expect(screen.getByText(t('deadlineReminderOffset'))).toBeTruthy();
+});
+
+it('offers exact reminders when Android holds them back', async () => {
+  permission({ exactAlarms: false });
+  setSetting('notifications', {
+    ...getSettings().notifications,
+    deadlineReminders: true,
+  });
+  await renderScreen();
+  expect(
+    screen.getByText(t('exactRemindersCaption'), { exact: false }),
+  ).toBeTruthy();
+  await userEvent.press(screen.getByText(t('allowExactReminders')));
+  expect(requestExact).toHaveBeenCalled();
+});
+
+it('says the permission is off when something is on but denied', async () => {
+  permission({ permission: 'denied' });
+  setSetting('notifications', { ...getSettings().notifications, files: true });
+  await renderScreen();
+  expect(
+    screen.getByText(t('notificationPermissionDenied'), { exact: false }),
+  ).toBeTruthy();
+});
+
+it('opens the system notification settings', async () => {
+  await renderScreen();
+  await userEvent.press(screen.getByText(t('configureNotifications')));
+  expect(openSystemSettings).toHaveBeenCalledWith('notifications');
+});
+
+it('sends a test notification about the newest notice in debug builds', async () => {
+  await renderScreen();
+  await userEvent.press(screen.getByText('Send a Test Notification'));
+  expect(postNotification).toHaveBeenCalledWith({
+    title: 'Calculus',
+    body: 'Midterm',
+    target: { type: 'notice', id: 'n1' },
+  });
+});
