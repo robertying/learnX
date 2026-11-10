@@ -56,6 +56,17 @@ export const getModalScreenOptions =
 
 const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
 
+/**
+ * A tab's first screen: a large title that collapses as the list scrolls, on
+ * iPhone and iPad with iOS 26 and later, where the subtitle (the filter, the
+ * date) shows under it natively. Before iOS 26 the subtitle is our own view,
+ * which a large title would hide, and Mac apps don't use large titles.
+ */
+export const tabRootOptions: NativeStackNavigationOptions =
+  supportsNativeSubtitle && !DeviceInfo.isMac()
+    ? { headerLargeTitleEnabled: true }
+    : {};
+
 // Detail screens set their own title from the item they show.
 export const getDetailScreenOptions = (title = '', subtitle?: string) =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {

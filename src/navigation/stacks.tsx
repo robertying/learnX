@@ -51,6 +51,7 @@ import {
   getItemDetailOptions,
   getModalScreenOptions,
   mockNetworkTitle,
+  tabRootOptions,
 } from './options';
 import { screenLayout } from './screenLayout';
 
@@ -163,7 +164,7 @@ export const NoticeStack = () => (
     <NoticeStackNavigator.Screen
       name="Notices"
       component={Notices}
-      options={getTitleOptions(t('notices'))}
+      options={{ ...getTitleOptions(t('notices')), ...tabRootOptions }}
     />
     {renderItemDetails(['NoticeDetail', 'FileDetail'])}
   </NoticeStackNavigator.Navigator>
@@ -174,7 +175,7 @@ export const AssignmentStack = () => (
     <AssignmentStackNavigator.Screen
       name="Assignments"
       component={Assignments}
-      options={getTitleOptions(t('assignments'))}
+      options={{ ...getTitleOptions(t('assignments')), ...tabRootOptions }}
     />
     {renderItemDetails(['AssignmentDetail', 'FileDetail'])}
   </AssignmentStackNavigator.Navigator>
@@ -185,7 +186,7 @@ export const FileStack = () => (
     <FileStackNavigator.Screen
       name="Files"
       component={Files}
-      options={getTitleOptions(t('files'))}
+      options={{ ...getTitleOptions(t('files')), ...tabRootOptions }}
     />
     {renderItemDetails(['FileDetail'])}
   </FileStackNavigator.Navigator>
@@ -203,7 +204,7 @@ export const CourseStack = () => (
     <CourseStackNavigator.Screen
       name="Courses"
       component={Courses}
-      options={getTitleOptions(t('courses'))}
+      options={{ ...getTitleOptions(t('courses')), ...tabRootOptions }}
     />
     {renderItemDetails(allItemDetails)}
   </CourseStackNavigator.Navigator>
@@ -226,7 +227,7 @@ export const TodayStack = () => (
     <TodayStackNavigator.Screen
       name="Today"
       component={Today}
-      options={getTitleOptions(t('today'))}
+      options={{ ...getTitleOptions(t('today')), ...tabRootOptions }}
     />
     {renderItemDetails(allItemDetails)}
     <TodayStackNavigator.Screen
