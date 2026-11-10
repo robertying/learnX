@@ -116,7 +116,8 @@ export default {
   assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (Minutes)',
   assignmentCalendarNoAlarmIfComplete: 'No Alerts for Submitted Assignments',
   assignmentReminderSync: 'Assignment Reminder Sync',
-  assignmentReminderAlarm: 'Alert at Deadline',
+  assignmentReminderAlarm: 'Reminder Alert',
+  assignmentReminderAlarmOffset: 'Alert Before Deadline (Minutes)',
   assignmentSyncDescription:
     "Assignments sync when you refresh them. Past-due assignments aren't synced, and archived ones and those of hidden courses are removed. Refresh assignments after changing these settings.",
   clearFileCache: 'Delete All Downloads',

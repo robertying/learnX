@@ -17,7 +17,6 @@ export interface AlarmSettings {
   assignmentCalendarAlarmOffset?: number;
   assignmentCalendarNoAlarmIfComplete: boolean;
   assignmentReminderAlarm: boolean;
-  /** No longer used: Reminders moves the date to any earlier alarm. */
   assignmentReminderAlarmOffset?: number;
 }
 /** Which notifications the app posts; all off until the user turns them on. */

@@ -196,6 +196,18 @@ const CalendarEvent: React.FC<Props> = () => {
               }
               disabled={!assignmentReminderSync}
             />
+            {alarms.assignmentReminderAlarm && (
+              <FormNumberField
+                title={t('assignmentReminderAlarmOffset')}
+                value={
+                  alarms.assignmentReminderAlarmOffset ??
+                  calendarDefaults.assignmentReminderAlarmOffset
+                }
+                onValueChange={value =>
+                  setAlarm('assignmentReminderAlarmOffset', value)
+                }
+              />
+            )}
           </FormSection>
         )}
         <FormSection footer={t('exportSyncedCalendarsDescription')}>
