@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { useRef } from 'react';
 import {
   NavigationContainer,
@@ -46,7 +47,12 @@ const Sheets =
 /** Sheets the main UI opens with (hooks/useLaunchSheet). */
 const renderSheets = () => (
   <Sheets.Group
-    screenOptions={{ presentation: 'formSheet', sheetAllowedDetents: [1] }}
+    screenOptions={{
+      presentation: 'formSheet',
+      sheetAllowedDetents: [1],
+      // Material 3's extra-large shape; iOS keeps the system's.
+      sheetCornerRadius: Platform.OS === 'android' ? 28 : undefined,
+    }}
   >
     <Sheets.Screen name="Setup" component={Setup} />
     <Sheets.Screen name="WhatsNewStack" component={WhatsNewStack} />
