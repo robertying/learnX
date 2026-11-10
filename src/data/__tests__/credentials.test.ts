@@ -1,6 +1,4 @@
 import * as SecureStore from 'expo-secure-store';
-// The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
-import env from '../../../jest/mocks/env';
 
 type Module = typeof import('data/credentials');
 
@@ -134,14 +132,6 @@ describe('saveCredentials', () => {
     await m.saveCredentials(credentials);
     expect(m.getCredentials()).toEqual(credentials);
     expect(JSON.parse(keychain.get(m.CREDENTIALS_KEY)!)).toEqual(credentials);
-  });
-
-  it('keeps the ephemeral mock account in memory only', async () => {
-    await m.saveCredentials(credentials);
-    const mock = { ...credentials, username: env.DUMMY_USERNAME };
-    await m.saveCredentials(mock);
-    expect(m.getCredentials()).toEqual(mock);
-    expect(keychain.has(m.CREDENTIALS_KEY)).toBe(false);
   });
 
   it('notifies subscribers', async () => {

@@ -1,6 +1,6 @@
 // Replaces the `__LEARNX_ENV__` placeholder in src/helpers/env.ts with values
 // from the repo-root .env, at build time. Only listed keys reach the bundle:
-// - PUBLIC_KEYS: shipped as plain strings (the mock logins).
+// - PUBLIC_KEYS: shipped as plain strings (the mock login).
 // - MASKED_KEYS: shipped XOR'd with a key made per build, so the value doesn't
 //   show up in `strings` or a grep of the bundle. The app unmasks it when it
 //   needs it. This hides the value; it doesn't protect it.
@@ -16,12 +16,7 @@ const dotenv = require('dotenv');
 
 const ENV_FILE = path.join(__dirname, '..', '.env');
 const PLACEHOLDER = '__LEARNX_ENV__';
-const PUBLIC_KEYS = [
-  'DUMMY_USERNAME',
-  'DUMMY_PASSWORD',
-  'DUMMY_PERSIST_USERNAME',
-  'DUMMY_PERSIST_PASSWORD',
-];
+const PUBLIC_KEYS = ['DUMMY_USERNAME', 'DUMMY_PASSWORD'];
 const MASKED_KEYS = ['COURSEX_REFRESH_TOKEN'];
 const DEV_KEY = /^LIVE_[A-Z0-9_]+$/;
 const DEV_ENVS = new Set(['development', 'test']);

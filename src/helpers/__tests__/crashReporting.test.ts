@@ -143,7 +143,7 @@ describe('recordError', () => {
     );
   });
 
-  it('skips debug builds and the mock accounts', () => {
+  it('skips debug builds and the mock account', () => {
     (globalThis as any).__DEV__ = true;
     recordError(new Error('dev'));
 

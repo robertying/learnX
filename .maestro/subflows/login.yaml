@@ -38,11 +38,12 @@ appId: ${APP_ID}
       - tapOn:
           text: 'Not Now|现在不|以后'
           optional: true
+# The set-up page opens over Today after the first login, and can hide the
+# tab bar from Maestro before it is seen.
 - extendedWaitUntil:
     visible:
-      id: 'tab-notices|bell\.fill'
+      id: 'tab-notices|bell\.fill|setup-not-now'
     timeout: 30000
-# The set-up page opens over Today after the first login.
 - extendedWaitUntil:
     visible:
       id: setup-not-now

@@ -234,20 +234,15 @@ describe('switching accounts', () => {
     getUserData().archived.notice.includes('old-notice') &&
     queryClient.getQueryData(cachedKey) !== undefined;
 
-  it('drops the ephemeral mock account’s data on a real login after a relaunch', async () => {
+  it('drops the mock account’s data on a real login', async () => {
     loginWithMockAccount(env.DUMMY_USERNAME);
-    await saveCredentials({
+    await login({
       username: env.DUMMY_USERNAME,
       password: env.DUMMY_PASSWORD,
       fingerPrint: MOCK_FINGER_PRINT,
-      fingerGenPrint: '',
-      fingerGenPrint3: '',
     });
     expect(getUserData()).toEqual(mockUserData);
     leaveData();
-    // A relaunch forgets the ephemeral login but keeps its data.
-    useAuthStore.setState(initialAuth);
-    useCredentialsStore.setState({ credentials: null });
 
     await login(sso);
 
@@ -287,16 +282,22 @@ describe('switching accounts', () => {
     expect(getDataOwner()).toBe('student');
   });
 
-  it('keeps the persistent mock account’s data when it logs in', async () => {
-    loginWithMockAccount(env.DUMMY_PERSIST_USERNAME);
+  it('keeps the mock account’s data when it logs in', async () => {
+    loginWithMockAccount(env.DUMMY_USERNAME);
     leaveData();
     await login({
-      username: env.DUMMY_PERSIST_USERNAME,
-      password: env.DUMMY_PERSIST_PASSWORD,
+      username: env.DUMMY_USERNAME,
+      password: env.DUMMY_PASSWORD,
       fingerPrint: MOCK_FINGER_PRINT,
     });
     expect(dataKept()).toBe(true);
-    expect(getDataOwner()).toBe(env.DUMMY_PERSIST_USERNAME);
+    expect(getDataOwner()).toBe(env.DUMMY_USERNAME);
+
+    // A relaunch logs in with the saved login and keeps it too.
+    useAuthStore.setState(initialAuth);
+    await login({ reset: true });
+    expect(dataKept()).toBe(true);
+    expect(getCredentials()?.username).toBe(env.DUMMY_USERNAME);
   });
 
   it('takes data saved before its owner was recorded as the saved login’s', async () => {
