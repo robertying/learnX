@@ -77,7 +77,11 @@ const ActionBar: React.FC<ActionBarProps> = ({
         {apple ? (
           <>
             {primary}
-            {secondary}
+            {/* A full 44 pt row, so it reads as its own button rather than
+                a caption of the filled one. */}
+            {secondary && (
+              <View style={styles.appleSecondary}>{secondary}</View>
+            )}
           </>
         ) : (
           <>
@@ -103,7 +107,11 @@ const styles = StyleSheet.create({
   },
   appleBar: {
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
+  },
+  appleSecondary: {
+    minHeight: 44,
+    justifyContent: 'center',
   },
   androidBar: {
     flexDirection: 'row',
