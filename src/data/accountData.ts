@@ -1,5 +1,7 @@
 import { resetContentOverrides } from 'data/content';
 import { clearQueryCache } from 'data/queryClient';
+import { APP_STATE_KEY, resetAppState } from 'data/appState';
+import { CALENDAR_SYNC_KEY, resetCalendarSync } from 'data/calendarSync';
 import { setDataOwner } from 'data/dataOwner';
 import { NOTIFIED_KEY, resetNotified } from 'data/notified';
 import { resetServerActions } from 'data/serverActions';
@@ -22,6 +24,8 @@ import { clearSurfaces } from 'helpers/surfaces';
  */
 export const accountStores = {
   [SETTINGS_KEY]: resetSettings,
+  [CALENDAR_SYNC_KEY]: resetCalendarSync,
+  [APP_STATE_KEY]: resetAppState,
   [USER_DATA_KEY]: resetUserData,
   [NOTIFIED_KEY]: resetNotified,
   [SYNC_LOG_KEY]: resetSyncLog,

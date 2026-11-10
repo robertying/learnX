@@ -15,7 +15,7 @@ import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
-import { useSettings } from 'data/settings';
+import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
@@ -41,12 +41,10 @@ const Settings: React.FC<Props> = ({ navigation }) => {
     subscribeServerWrites,
     getServerWritesAllowed,
   );
-  const newChangelog = useSettings(
-    settings => settings.lastShowChangelogVersion !== packageJson.version,
+  const newChangelog = useAppState(
+    state => state.changelogSeenVersion !== packageJson.version,
   );
-  const courseInformationSharingBadgeShown = useSettings(
-    settings => settings.courseInformationSharingBadgeShown,
-  );
+  const courseSharingSeen = useAppState(state => state.courseSharingSeen);
 
   const update = useAvailableUpdate();
 
@@ -119,7 +117,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
         <FormSection>
           <FormLink
             icon={{ ios: 'info.circle', android: 'information' }}
-            badge={!courseInformationSharingBadgeShown}
+            badge={!courseSharingSeen}
             title={t('courseInformationSharing')}
             onPress={() => handlePush('CourseInformationSharing')}
           />

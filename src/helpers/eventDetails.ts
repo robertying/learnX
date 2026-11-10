@@ -6,6 +6,7 @@ import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
 import { CalendarEvent } from '@robertying/thu-learn-lib';
 import { Assignment, Course, SettingsState } from 'data/types/state';
+import type { CalendarSyncState } from 'data/calendarSync';
 import { removeTags } from './text';
 import { ICSEvent } from './ics';
 import locationMappings from '../assets/locationMappings.json';
@@ -235,15 +236,15 @@ export const buildAssignmentEventInputs = (
 /** Whether learnX created or adopted this calendar or reminder list. */
 export const isSyncedCalendar = (
   calendar: { id: string; title: string },
-  settings: Pick<
-    SettingsState,
+  synced: Pick<
+    CalendarSyncState,
     'courseCalendarId' | 'assignmentCalendarId' | 'assignmentReminderId'
   >,
 ) =>
   [
-    settings.courseCalendarId,
-    settings.assignmentCalendarId,
-    settings.assignmentReminderId,
+    synced.courseCalendarId,
+    synced.assignmentCalendarId,
+    synced.assignmentReminderId,
   ].some(id => !!id && id === calendar.id) ||
   calendar.title === courseCalendarName ||
   calendar.title === assignmentCalendarReminderName;
@@ -251,14 +252,14 @@ export const isSyncedCalendar = (
 /** The course and assignment calendars learnX created or adopted */
 export const findSyncedCalendars = <T extends { id: string; title: string }>(
   calendars: T[],
-  settings: Pick<SettingsState, 'courseCalendarId' | 'assignmentCalendarId'>,
+  synced: Pick<CalendarSyncState, 'courseCalendarId' | 'assignmentCalendarId'>,
 ) => ({
   courseCalendars: calendars.filter(
-    c => c.id === settings.courseCalendarId || c.title === courseCalendarName,
+    c => c.id === synced.courseCalendarId || c.title === courseCalendarName,
   ),
   assignmentCalendars: calendars.filter(
     c =>
-      c.id === settings.assignmentCalendarId ||
+      c.id === synced.assignmentCalendarId ||
       c.title === assignmentCalendarReminderName,
   ),
 });

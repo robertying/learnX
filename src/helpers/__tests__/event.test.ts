@@ -1,5 +1,10 @@
 import * as Calendar from 'expo-calendar';
-import { getSettings, resetSettings, setSetting } from 'data/settings';
+import { resetSettings } from 'data/settings';
+import {
+  getCalendarSync,
+  resetCalendarSync,
+  useCalendarSyncStore,
+} from 'data/calendarSync';
 import { Assignment } from 'data/types/state';
 import {
   exportSyncedCalendarsToICS,
@@ -42,6 +47,7 @@ const grant = (status = 'granted') => {
 
 beforeEach(() => {
   resetSettings();
+  resetCalendarSync();
   grant();
   mocked.getCalendars.mockResolvedValue([]);
   mocked.createCalendar.mockResolvedValue({ id: 'created' });
@@ -49,7 +55,7 @@ beforeEach(() => {
 
 describe('calendar ids', () => {
   it('returns the stored calendar while it exists', async () => {
-    setSetting('courseCalendarId', 'stored');
+    useCalendarSyncStore.setState({ courseCalendarId: 'stored' });
     mocked.getCalendars.mockResolvedValue([{ id: 'stored', title: 'Other' }]);
 
     await expect(getCourseCalendarId()).resolves.toBe('stored');
@@ -58,13 +64,13 @@ describe('calendar ids', () => {
   });
 
   it('adopts a calendar with the same title and stores its id', async () => {
-    setSetting('courseCalendarId', 'gone');
+    useCalendarSyncStore.setState({ courseCalendarId: 'gone' });
     mocked.getCalendars.mockResolvedValue([
       { id: 'found', title: 'learnX 课表' },
     ]);
 
     await expect(getCourseCalendarId()).resolves.toBe('found');
-    expect(getSettings().courseCalendarId).toBe('found');
+    expect(getCalendarSync().courseCalendarId).toBe('found');
     expect(mocked.createCalendar).not.toHaveBeenCalled();
   });
 
@@ -89,7 +95,7 @@ describe('calendar ids', () => {
       ownerAccount: 'learnX',
       accessLevel: 'owner',
     });
-    expect(getSettings().courseCalendarId).toBe('created');
+    expect(getCalendarSync().courseCalendarId).toBe('created');
   });
 
   it('throws when there is no calendar source', async () => {
@@ -99,8 +105,8 @@ describe('calendar ids', () => {
   });
 
   it('clears synced assignment events before creating their calendar', async () => {
-    setSetting('syncedCalendarAssignments', { a1: 'e1' });
-    setSetting('syncedReminderAssignments', { a1: 'r1' });
+    useCalendarSyncStore.setState({ syncedCalendarAssignments: { a1: 'e1' } });
+    useCalendarSyncStore.setState({ syncedReminderAssignments: { a1: 'r1' } });
     mocked.getCalendars.mockResolvedValue([
       { id: 'x', title: 'Local', source: local },
     ]);
@@ -115,13 +121,13 @@ describe('calendar ids', () => {
         source: local,
       }),
     );
-    expect(getSettings().assignmentCalendarId).toBe('created');
-    expect(getSettings().syncedCalendarAssignments).toEqual({});
-    expect(getSettings().syncedReminderAssignments).toEqual({ a1: 'r1' });
+    expect(getCalendarSync().assignmentCalendarId).toBe('created');
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({});
+    expect(getCalendarSync().syncedReminderAssignments).toEqual({ a1: 'r1' });
   });
 
   it('creates the reminder list from reminder sources', async () => {
-    setSetting('syncedReminderAssignments', { a1: 'r1' });
+    useCalendarSyncStore.setState({ syncedReminderAssignments: { a1: 'r1' } });
     mocked.getCalendars.mockImplementation(async (type?: string) =>
       type === 'reminder'
         ? [{ id: 'r', title: 'Reminders', source: local }]
@@ -137,14 +143,14 @@ describe('calendar ids', () => {
         source: local,
       }),
     );
-    expect(getSettings().assignmentReminderId).toBe('created');
-    expect(getSettings().syncedReminderAssignments).toEqual({});
+    expect(getCalendarSync().assignmentReminderId).toBe('created');
+    expect(getCalendarSync().syncedReminderAssignments).toEqual({});
   });
 });
 
 describe('saveCoursesToCalendar', () => {
   it('replaces the events in the range', async () => {
-    setSetting('courseCalendarId', 'courses');
+    useCalendarSyncStore.setState({ courseCalendarId: 'courses' });
     mocked.getCalendars.mockResolvedValue([{ id: 'courses', title: 'x' }]);
     const old = { delete: jest.fn(async () => {}) };
     const calendar = fakeCalendar({
@@ -185,7 +191,7 @@ describe('saveCoursesToCalendar', () => {
 
   it("doesn't ask for Reminders", async () => {
     mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
-    setSetting('courseCalendarId', 'courses');
+    useCalendarSyncStore.setState({ courseCalendarId: 'courses' });
     mocked.getCalendars.mockResolvedValue([{ id: 'courses', title: 'x' }]);
     mocked.ExpoCalendar.get.mockResolvedValue(fakeCalendar());
     await saveCoursesToCalendar([], dayjs(), dayjs());
@@ -212,8 +218,8 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     }) as Assignment;
 
   beforeEach(() => {
-    setSetting('assignmentCalendarId', 'assignments');
-    setSetting('assignmentReminderId', 'reminders');
+    useCalendarSyncStore.setState({ assignmentCalendarId: 'assignments' });
+    useCalendarSyncStore.setState({ assignmentReminderId: 'reminders' });
     mocked.getCalendars.mockImplementation(async (type?: string) => [
       { id: type === 'reminder' ? 'reminders' : 'assignments', title: 'x' },
     ]);
@@ -229,13 +235,15 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     expect(calendar.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Homework - Calculus' }),
     );
-    expect(getSettings().syncedCalendarAssignments).toEqual({
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({
       a1: 'new-event',
     });
   });
 
   it('updates synced events and forgets ones that are gone', async () => {
-    setSetting('syncedCalendarAssignments', { a1: 'e1', a2: 'e2' });
+    useCalendarSyncStore.setState({
+      syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
+    });
     const calendar = fakeCalendar();
     mocked.ExpoCalendar.get.mockResolvedValue(calendar);
     const update = jest.fn(async () => {});
@@ -255,7 +263,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       expect.objectContaining({ title: 'Homework - Calculus' }),
     );
     expect(calendar.createEvent).not.toHaveBeenCalled();
-    expect(getSettings().syncedCalendarAssignments).toEqual({ a1: 'e1' });
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({ a1: 'e1' });
   });
 
   it('creates reminders on iOS', async () => {
@@ -271,13 +279,15 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
         completed: false,
       }),
     );
-    expect(getSettings().syncedReminderAssignments).toEqual({
+    expect(getCalendarSync().syncedReminderAssignments).toEqual({
       a1: 'new-reminder',
     });
   });
 
   it('deletes and forgets the entries of removed assignments', async () => {
-    setSetting('syncedCalendarAssignments', { a1: 'e1', gone: 'e2', a3: 'e3' });
+    useCalendarSyncStore.setState({
+      syncedCalendarAssignments: { a1: 'e1', gone: 'e2', a3: 'e3' },
+    });
     mocked.ExpoCalendar.get.mockResolvedValue(fakeCalendar());
     const deleted: string[] = [];
     mocked.ExpoCalendarEvent.get.mockImplementation(async (id: string) => {
@@ -299,7 +309,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     );
 
     expect(deleted).toEqual(['e3']);
-    expect(getSettings().syncedCalendarAssignments).toEqual({ a1: 'e1' });
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({ a1: 'e1' });
   });
 
   it('needs reminder permission for reminders', async () => {
@@ -313,10 +323,10 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
 
 describe('removeCalendars', () => {
   it('deletes learnX calendars and reminder lists and resets their settings', async () => {
-    setSetting('courseCalendarId', 'c');
-    setSetting('assignmentCalendarId', 'a');
-    setSetting('assignmentReminderId', 'r');
-    setSetting('syncedCalendarAssignments', { a1: 'e1' });
+    useCalendarSyncStore.setState({ courseCalendarId: 'c' });
+    useCalendarSyncStore.setState({ assignmentCalendarId: 'a' });
+    useCalendarSyncStore.setState({ assignmentReminderId: 'r' });
+    useCalendarSyncStore.setState({ syncedCalendarAssignments: { a1: 'e1' } });
     const course = { title: 'learnX 课表', delete: jest.fn(async () => {}) };
     const personal = { title: 'Personal', delete: jest.fn(async () => {}) };
     // Has learnX in its title, but isn't one of ours.
@@ -343,10 +353,7 @@ describe('removeCalendars', () => {
     expect(course.delete).toHaveBeenCalled();
     expect(reminders.delete).toHaveBeenCalled();
     expect(personal.delete).not.toHaveBeenCalled();
-    expect(getSettings()).toMatchObject({
-      courseCalendarId: undefined,
-      assignmentCalendarId: undefined,
-      assignmentReminderId: undefined,
+    expect(getCalendarSync()).toEqual({
       syncedCalendarAssignments: {},
       syncedReminderAssignments: {},
     });

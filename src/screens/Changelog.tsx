@@ -5,7 +5,7 @@ import WebView from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
-import { setSetting } from 'data/settings';
+import { setChangelogSeen } from 'data/appState';
 import useWebViewProgress from 'hooks/useWebViewProgress';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
@@ -27,7 +27,7 @@ const Changelog: React.FC<Props> = () => {
   const { progress, loading, onLoadProgress } = useWebViewProgress();
 
   useEffect(() => {
-    setSetting('lastShowChangelogVersion', packageJson.version);
+    setChangelogSeen(packageJson.version);
   }, []);
 
   return (

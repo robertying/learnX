@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Language } from '@robertying/thu-learn-lib';
 import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
+import { setCourseSharingSeen } from 'data/appState';
 import { dataSource } from 'data/source';
 import { useCredentialsStore } from 'data/credentials';
 import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
@@ -75,7 +76,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
   };
 
   useEffect(() => {
-    setSetting('courseInformationSharingBadgeShown', true);
+    setCourseSharingSeen();
   }, []);
 
   return (
