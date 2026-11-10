@@ -5,7 +5,7 @@ import RNShareMenu
 import React
 import ReactAppDependencyProvider
 
-@UIApplicationMain
+@main
 class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {
   var window: UIWindow?
 

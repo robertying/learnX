@@ -3,10 +3,9 @@ import SwiftUI
 internal import ExpoWidgets
 
 @main
-struct ExportWidgets0: WidgetBundle {
+struct LearnXWidgets: WidgetBundle {
   var body: some Widget {
     Deadlines()
     UpNext()
-    WidgetLiveActivity()
   }
 }

@@ -4,7 +4,9 @@ require File.join(File.dirname(`node --print "require.resolve('react-native/pack
 platform :ios, '16.6'
 prepare_react_native_project!
 
-# Build React Native core and its third-party deps (folly, etc.) from source.
+# Build React Native core and its third-party deps (folly, etc.) from source:
+# patches/react-native+*.patch changes native code (RCTTextInputComponentView.mm)
+# that a prebuilt core would leave out.
 ENV['RCT_USE_RN_DEP'] = '0'
 ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
 
@@ -14,18 +16,14 @@ ENV['RNS_GAMMA_ENABLED'] = '1'
 ENV['USE_FRAMEWORKS'] = 'static'
 use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym
 
-if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
-  config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
-else
-  config_command = [
-    'npx',
-    'expo-modules-autolinking',
-    'react-native-config',
-    '--json',
-    '--platform',
-    'ios'
-  ]
-end
+config_command = [
+  'npx',
+  'expo-modules-autolinking',
+  'react-native-config',
+  '--json',
+  '--platform',
+  'ios'
+]
 
 target 'learnX' do
   use_expo_modules!
@@ -56,14 +54,21 @@ target 'learnX' do
 
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
+        # The extensions link the same pods as the app, and some of them use
+        # app-only API (UIApplication.shared) in code the extensions never run.
         config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'
+        # React Native headers aren't modular; static frameworks include them anyway.
         config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        # Pods build for the project's deployment target, not their own older ones.
         config.build_settings.delete 'IPHONEOS_DEPLOYMENT_TARGET'
+        # Settings Xcode no longer wants on framework targets.
         config.build_settings.delete 'EMBEDDED_CONTENT_CONTAINS_SWIFT'
         config.build_settings.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'
       end
     end
 
+    # Xcode's recommended project settings, so it stops offering to update the
+    # Pods project; pods are signed with the app, so they need no identity.
     installer.pods_project.build_configurations.each do |config|
       config.build_settings['ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS'] = 'YES'
       config.build_settings['DEAD_CODE_STRIPPING'] = 'YES'

@@ -15,8 +15,7 @@ struct NextClassIntent: AppIntent {
     let current = classes.first { $0.start <= now }
     let next = classes.first { $0.start > now }
 
-    // In the language of the strings around them.
-    let locale = Locale(identifier: Bundle.main.preferredLocalizations.first ?? "en")
+    let locale = Self.answerLocale
     let timeFormatter = DateFormatter()
     timeFormatter.locale = locale
     timeFormatter.dateStyle = .none
@@ -44,10 +43,5 @@ struct NextClassIntent: AppIntent {
       sentences.append(String(localized: "You have no classes this week or next."))
     }
     return answer(sentences.joined(separator: String(localized: "sentence separator", defaultValue: " ")))
-  }
-
-  /// Says the sentence the app localized, as `NextDeadlineIntent` does, so it isn't in two languages.
-  private func answer(_ text: String) -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-    .result(value: text, dialog: IntentDialog(stringLiteral: text))
   }
 }
