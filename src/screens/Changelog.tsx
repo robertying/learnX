@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
-import { Linking, Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
-import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
 import { setChangelogSeen } from 'data/appState';
@@ -13,15 +12,6 @@ import packageJson from '../../package.json';
 type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
 
 const releasesUrl = 'https://github.com/robertying/learnX/releases';
-
-// The release notes stay here; any other page opens in the browser.
-const handleRequest: OnShouldStartLoadWithRequest = request => {
-  if (request.isTopFrame === false || request.url.startsWith(releasesUrl)) {
-    return true;
-  }
-  void Linking.openURL(request.url);
-  return false;
-};
 
 const Changelog: React.FC<Props> = () => {
   const { progress, loading, onLoadProgress } = useWebViewProgress();
@@ -38,7 +28,6 @@ const Changelog: React.FC<Props> = () => {
       <WebView
         style={styles.webView}
         source={{ uri: releasesUrl }}
-        onShouldStartLoadWithRequest={handleRequest}
         onLoadProgress={onLoadProgress}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
       />
