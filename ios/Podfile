@@ -105,6 +105,22 @@ target 'learnX' do
       end
     end
 
+    # React Native's Mac Catalyst patch gives the app's own targets the
+    # iOSSupport Swift library folder for every SDK, but only the macOS SDK has
+    # it, so iOS builds warn that the search path is missing. Keep it for Mac
+    # Catalyst only.
+    installer.aggregate_targets.map(&:user_project).uniq.each do |project|
+      project.native_targets.each do |target|
+        target.build_configurations.each do |config|
+          paths = config.build_settings['LIBRARY_SEARCH_PATHS']
+          next unless paths.is_a?(Array) && paths.include?('$(SDKROOT)/System/iOSSupport/usr/lib/swift')
+          config.build_settings['LIBRARY_SEARCH_PATHS[sdk=macosx*]'] = paths
+          config.build_settings['LIBRARY_SEARCH_PATHS'] = paths - ['$(SDKROOT)/System/iOSSupport/usr/lib/swift']
+        end
+      end
+      project.save
+    end
+
     # Xcode's recommended project settings, so it stops offering to update the
     # Pods project; pods are signed with the app, so they need no identity.
     # Left off: user script sandboxing (React Native's, Expo's and Crashlytics'
@@ -123,7 +139,8 @@ target 'learnX' do
       config.build_settings.delete 'STRIP_SWIFT_SYMBOLS'
       # Xcode's compilation cache (Swift and C-family), kept in each
       # DerivedData's CompilationCache.noindex, as learnX.xcodeproj sets for its
-      # own targets. Debug only. ccache doesn't work here: Xcode 26 and later
+      # own targets (C-family only there: Swift caching needs explicit modules,
+      # which React Native's template turns off). Debug only. ccache doesn't work here: Xcode 26 and later
       # never call React Native's CC wrapper, and with C_COMPILER_LAUNCHER
       # ccache can't cache explicitly built modules.
       config.build_settings['COMPILATION_CACHE_ENABLE_CACHING'] = 'YES' if config.name == 'Debug'
