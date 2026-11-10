@@ -3,6 +3,7 @@ import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
 import { useAssignments } from 'data/content';
 import useContentList from 'hooks/useContentList';
+import { assignmentLists } from 'hooks/useFilteredData';
 import { AssignmentStackParams, MainStackScreenProps } from './types';
 
 type Props = MainStackScreenProps<AssignmentStackParams, 'Assignments'>;
@@ -10,7 +11,13 @@ type Props = MainStackScreenProps<AssignmentStackParams, 'Assignments'>;
 const Assignments: React.FC<Props> = ({ navigation }) => {
   const { assignments, ...query } = useAssignments();
   const { all, fav, archived, hidden, unfinished, finished, listProps } =
-    useContentList('assignment', assignments, query, navigation);
+    useContentList(
+      'assignment',
+      assignments,
+      query,
+      navigation,
+      assignmentLists,
+    );
 
   return (
     <SafeArea>

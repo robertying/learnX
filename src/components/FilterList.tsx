@@ -21,9 +21,12 @@ import useListSelection from 'hooks/useListSelection';
 import { RootStackParams } from 'screens/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
-import { listForFilter } from 'helpers/filterList';
 import { t } from 'helpers/i18n';
-import { filterOptions, type FilterSelection } from 'helpers/filterOptions';
+import {
+  filterOptions,
+  listForFilter,
+  type FilterSelection,
+} from 'helpers/filters';
 import Empty from './Empty';
 import Spinner from './Spinner';
 import SyncStatus from './SyncStatus';
