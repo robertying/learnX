@@ -18,7 +18,7 @@ interface ScreenConfig {
 
 export const optionsArgs = {
   navigation: { goBack: jest.fn() },
-  route: {},
+  route: { name: '', params: {} },
   theme: { colors: { text: 'text' } },
 };
 

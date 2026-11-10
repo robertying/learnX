@@ -134,7 +134,7 @@ it('titles the screens, and every screen has a component and the error layout', 
   expect(
     today.screens.find(s => s.name === 'MockNetwork')?.options?.title,
   ).toBe('Network Emulation');
-  // Detail screens title themselves from the item they show.
+  // Detail screens are titled from the cached item they show (none here).
   expect(today.screens[1].groupOptions?.title).toBe('');
 });
 
