@@ -74,7 +74,7 @@ it('puts the secondary action before the main one in a Material feature page', a
   await render(
     <FeatureList
       title="Title"
-      features={[{ icon: 'today', title: 'Today', body: 'Body' }]}
+      features={[{ icon: 'afternoon', title: 'Today', body: 'Body' }]}
       action={action}
       secondaryAction={secondaryAction}
     />,

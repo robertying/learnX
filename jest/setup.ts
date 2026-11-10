@@ -78,9 +78,6 @@ jest.mock('@expo/ui/swift-ui/modifiers', () =>
 // refreshes data updates the widget, so every test needs these.
 jest.mock('@expo/ui/jetpack-compose', () => ({}));
 jest.mock('@expo/ui/jetpack-compose/modifiers', () => ({}));
-jest.mock('@react-native-vector-icons/material-design-icons', () =>
-  require('./mocks/icons'),
-);
 jest.mock('expo-symbols', () => require('./mocks/symbols'));
 jest.mock('react-native-gesture-handler/ReanimatedSwipeable', () =>
   require('./mocks/swipeable'),

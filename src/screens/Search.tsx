@@ -20,7 +20,7 @@ import { Notice, Assignment, File } from 'data/types/state';
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
-import Empty from 'components/Empty';
+import StatusView from 'components/StatusView';
 import SafeArea from 'components/SafeArea';
 import { t } from 'helpers/i18n';
 import { SearchStackParams } from './types';
@@ -130,7 +130,10 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={Styles.flex1}
           >
-            <Empty />
+            {/* Nothing until there's something to look for */}
+            {searchQuery.trim() ? (
+              <StatusView icon="notFound" message={t('noResults')} />
+            ) : null}
           </KeyboardAvoidingView>
         ) : (
           <SectionList<Notice | Assignment | File>

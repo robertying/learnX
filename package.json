@@ -29,8 +29,6 @@
     "@react-native-community/cli": "20.2.0",
     "@react-native-community/cli-platform-android": "20.2.0",
     "@react-native-community/cli-platform-ios": "20.2.0",
-    "@react-native-vector-icons/get-image": "14.0.0",
-    "@react-native-vector-icons/material-design-icons": "14.0.0",
     "@react-native/jest-preset": "0.88.1",
     "@react-native/metro-config": "0.88.1",
     "@react-native/typescript-config": "0.88.1",

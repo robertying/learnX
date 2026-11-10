@@ -24,7 +24,7 @@ it('draws a feature page with its icons in tonal circles over the bar', async ()
     <FeatureList
       title="Welcome"
       logo
-      features={[{ icon: 'today', title: 'Today', body: 'Your day.' }]}
+      features={[{ icon: 'afternoon', title: 'Today', body: 'Your day.' }]}
       action={{ label: 'Continue', onPress: jest.fn(), testID: 'continue' }}
     />,
   );

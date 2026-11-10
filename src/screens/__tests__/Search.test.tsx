@@ -92,7 +92,13 @@ describe('Search', () => {
   it('starts empty with the system search bar in the header', async () => {
     const { options } = await setup();
     expect(options().placeholder).toBe('Notices, assignments and files');
-    expect(screen.getByText('Nothing Here')).toBeTruthy();
+    expect(screen.queryByText('No Results')).toBeNull();
+  });
+
+  it('says when nothing matches', async () => {
+    const { type } = await setup();
+    await type('zzzzzz');
+    expect(screen.getByText('No Results')).toBeTruthy();
   });
 
   it('groups matches by kind under section headers', async () => {
@@ -123,7 +129,8 @@ describe('Search', () => {
     await type('calculus');
     expect(screen.getByText('Midterm room change')).toBeTruthy();
     await act(() => options().onClose!());
-    expect(screen.getByText('Nothing Here')).toBeTruthy();
+    expect(screen.queryByText('Midterm room change')).toBeNull();
+    expect(screen.queryByText('No Results')).toBeNull();
   });
 
   it('searches for a query it was opened with and fills it in the bar', async () => {

@@ -64,19 +64,19 @@ const CalendarEvent: React.FC<Props> = () => {
           })}
         >
           <FormToggle
-            icon={{ ios: 'person.2', android: 'account-multiple' }}
+            icon="graduate"
             title={t('graduate')}
             value={graduate}
             onValueChange={value => setSetting('graduate', value)}
           />
           <FormButton
-            icon={{ ios: 'calendar', android: 'calendar' }}
+            icon="calendar"
             title={t('syncCourseSchedule')}
             onPress={picker.openPicker}
             loading={courseSyncing}
           />
           <FormToggle
-            icon={{ ios: 'alarm', android: 'alarm' }}
+            icon="reminder"
             title={t('classAlarm')}
             value={alarms.courseAlarm}
             onValueChange={value => setAlarm('courseAlarm', value)}
@@ -91,7 +91,7 @@ const CalendarEvent: React.FC<Props> = () => {
             />
           )}
           <FormToggle
-            icon={{ ios: 'mappin.slash', android: 'map-marker-off' }}
+            icon="noLocation"
             title={t('courseEventOmitLocation')}
             value={courseEventOmitLocation}
             onValueChange={value =>
@@ -103,7 +103,7 @@ const CalendarEvent: React.FC<Props> = () => {
           footer={Platform.OS === 'ios' ? undefined : assignmentSyncFooter}
         >
           <FormToggle
-            icon={{ ios: 'calendar.badge.clock', android: 'calendar-text' }}
+            icon="assignmentCalendar"
             title={t('assignmentCalendarSync')}
             value={assignmentCalendarSync}
             onValueChange={enabled => handleAssignmentSync('calendar', enabled)}
@@ -119,7 +119,7 @@ const CalendarEvent: React.FC<Props> = () => {
             />
           )}
           <FormToggle
-            icon={{ ios: 'alarm', android: 'alarm' }}
+            icon="reminder"
             title={t('assignmentCalendarAlarm')}
             value={alarms.assignmentCalendarAlarm}
             onValueChange={value => setAlarm('assignmentCalendarAlarm', value)}
@@ -139,7 +139,7 @@ const CalendarEvent: React.FC<Props> = () => {
           )}
           {alarms.assignmentCalendarAlarm && (
             <FormToggle
-              icon={{ ios: 'alarm', android: 'alarm' }}
+              icon="reminder"
               title={t('assignmentCalendarSecondAlarm')}
               value={alarms.assignmentCalendarSecondAlarm}
               onValueChange={value =>
@@ -163,10 +163,7 @@ const CalendarEvent: React.FC<Props> = () => {
             )}
           {alarms.assignmentCalendarAlarm && (
             <FormToggle
-              icon={{
-                ios: 'checkmark.circle',
-                android: 'check-circle-outline',
-              }}
+              icon="done"
               title={t('assignmentCalendarNoAlarmIfComplete')}
               value={alarms.assignmentCalendarNoAlarmIfComplete}
               onValueChange={value =>
@@ -179,7 +176,7 @@ const CalendarEvent: React.FC<Props> = () => {
         {Platform.OS === 'ios' && (
           <FormSection footer={assignmentSyncFooter}>
             <FormToggle
-              icon={{ ios: 'checklist', android: 'calendar-check' }}
+              icon="reminders"
               title={t('assignmentReminderSync')}
               value={assignmentReminderSync}
               onValueChange={enabled =>
@@ -188,7 +185,7 @@ const CalendarEvent: React.FC<Props> = () => {
               loading={assignmentReminderSyncing}
             />
             <FormToggle
-              icon={{ ios: 'alarm', android: 'alarm' }}
+              icon="reminder"
               title={t('assignmentReminderAlarm')}
               value={alarms.assignmentReminderAlarm}
               onValueChange={value =>
@@ -212,7 +209,7 @@ const CalendarEvent: React.FC<Props> = () => {
         )}
         <FormSection footer={t('exportSyncedCalendarsDescription')}>
           <FormButton
-            icon={{ ios: 'square.and.arrow.up', android: 'export-variant' }}
+            icon="export"
             title={t('exportSyncedCalendars')}
             onPress={exportToICS}
             loading={exporting}
@@ -220,12 +217,12 @@ const CalendarEvent: React.FC<Props> = () => {
         </FormSection>
         <FormSection>
           <FormButton
-            icon={{ ios: 'trash', android: 'calendar-remove' }}
+            icon="delete"
             title={t('deleteSyncedCalendarsAndReminders')}
             onPress={confirmDeleteCalendars}
           />
           <FormButton
-            icon={{ ios: 'gear', android: 'cog' }}
+            icon="settings"
             title={t('configureCalendarAndReminder')}
             onPress={() => openSystemSettings('security')}
           />

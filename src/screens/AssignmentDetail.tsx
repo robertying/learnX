@@ -77,7 +77,7 @@ const ExcellentHomeworkRow: React.FC<{
     <FormFile
       title={homeworkAttachment?.name ?? homework.title}
       subtitle={t('excellentHomeworkBy', { name: authorName })}
-      icon={{ ios: 'medal', android: 'medal-outline' }}
+      icon="excellent"
       disabled={!homeworkAttachment}
       onPress={() => onFileOpen(homeworkAttachment)}
       position={position}
@@ -177,7 +177,6 @@ const AssignmentDetailContent: React.FC<{
     }
   }, [submissionType, closed, handleSubmit, navigation]);
 
-  const fileIcon = { ios: 'doc', android: 'file-document-outline' } as const;
   const submittedText = removeTags(submittedContent);
   const gradeText = removeTags(gradeContent);
   const answerText = removeTags(answerContent);
@@ -204,7 +203,7 @@ const AssignmentDetailContent: React.FC<{
             subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
             detail={deadlineText(deadline, now)}
             detailTint={isDueSoon(deadline, now) ? 'warning' : undefined}
-            icon={{ ios: 'clock', android: 'clock-outline' }}
+            icon="deadline"
           />
           {lateSubmissionDeadline ? (
             <FormText
@@ -212,10 +211,7 @@ const AssignmentDetailContent: React.FC<{
               subtitle={dayjs(lateSubmissionDeadline).format(
                 t('fullDateTimeFormat'),
               )}
-              icon={{
-                ios: 'clock.badge.exclamationmark',
-                android: 'clock-alert-outline',
-              }}
+              icon="lateSubmission"
             />
           ) : null}
           {graded ? (
@@ -236,7 +232,7 @@ const AssignmentDetailContent: React.FC<{
                     : t('graded')
               }
               detailTint="accent"
-              icon={{ ios: 'star', android: 'star-outline' }}
+              icon="grade"
             />
           ) : (
             <FormText
@@ -256,17 +252,13 @@ const AssignmentDetailContent: React.FC<{
                     )
                   : undefined
               }
-              icon={
-                submitted
-                  ? { ios: 'checkmark.circle', android: 'check-circle-outline' }
-                  : { ios: 'circle', android: 'checkbox-blank-circle-outline' }
-              }
+              icon={submitted ? 'done' : 'unfinished'}
             />
           )}
           {hasDraft ? (
             <FormLink
               title={t('unsentDraft')}
-              icon={{ ios: 'pencil', android: 'pencil-outline' }}
+              icon="edit"
               onPress={handleSubmit}
             />
           ) : null}
@@ -278,7 +270,7 @@ const AssignmentDetailContent: React.FC<{
               <FormFile
                 title={gradeAttachment.name}
                 detail={gradeAttachment.size}
-                icon={fileIcon}
+                icon="file"
                 onPress={() => handleFileOpen(gradeAttachment)}
               />
             ) : null}
@@ -298,10 +290,7 @@ const AssignmentDetailContent: React.FC<{
                       )
                     : undefined
                 }
-                icon={{
-                  ios: 'checkmark.circle',
-                  android: 'check-circle-outline',
-                }}
+                icon="done"
               />
             ) : null}
             {submittedText ? <FormParagraph text={submittedText} /> : null}
@@ -309,7 +298,7 @@ const AssignmentDetailContent: React.FC<{
               <FormFile
                 title={submittedAttachment.name}
                 detail={submittedAttachment.size}
-                icon={fileIcon}
+                icon="file"
                 onPress={() => handleFileOpen(submittedAttachment)}
               />
             ) : null}
@@ -320,7 +309,7 @@ const AssignmentDetailContent: React.FC<{
             <FormFile
               title={attachment.name}
               detail={attachment.size}
-              icon={fileIcon}
+              icon="file"
               onPress={() => handleFileOpen(attachment)}
             />
           </FormSection>
@@ -332,7 +321,7 @@ const AssignmentDetailContent: React.FC<{
               <FormFile
                 title={answerAttachment.name}
                 detail={answerAttachment.size}
-                icon={{ ios: 'key', android: 'key-variant' }}
+                icon="answer"
                 onPress={() => handleFileOpen(answerAttachment)}
               />
             ) : null}

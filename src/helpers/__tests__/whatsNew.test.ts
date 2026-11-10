@@ -17,7 +17,7 @@ const list: Release[] = [
   {
     version: '20.0.0',
     highlights: [
-      { icon: 'today', title: 'welcomeTitle', body: 'welcomeTitle' },
+      { icon: 'afternoon', title: 'welcomeTitle', body: 'welcomeTitle' },
       {
         icon: 'widgets',
         title: 'welcomeTitle',
@@ -41,7 +41,7 @@ const list: Release[] = [
   {
     version: '19.0.0',
     highlights: [
-      { icon: 'today', title: 'welcomeTitle', body: 'welcomeTitle' },
+      { icon: 'afternoon', title: 'welcomeTitle', body: 'welcomeTitle' },
     ],
   },
 ];
@@ -83,7 +83,7 @@ describe('whatsNewSince', () => {
   it('shows an over-the-air release, leaving out what needs a newer app', () => {
     const shown = whatsNewSince('19.1.0', ios('20.0.0', '19.1.0'), list);
     expect(shown?.version).toBe('20.0.0');
-    expect(shown?.highlights.map(h => h.icon)).toEqual(['today']);
+    expect(shown?.highlights.map(h => h.icon)).toEqual(['afternoon']);
   });
 
   it('falls back to an older release when none of a newer one applies', () => {

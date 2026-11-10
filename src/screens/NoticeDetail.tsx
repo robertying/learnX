@@ -110,7 +110,7 @@ const NoticeDetailContent: React.FC<{
             <FormFile
               title={attachment.name}
               detail={attachment.size}
-              icon={{ ios: 'doc', android: 'file-document-outline' }}
+              icon="file"
               onPress={handleFileOpen}
             />
           </FormSection>

@@ -41,11 +41,7 @@ describe('Form', () => {
     await render(
       <Form>
         <FormSection footer="Pick the semester to show">
-          <FormLink
-            title="Semester"
-            icon={{ ios: 'calendar', android: 'calendar' }}
-            onPress={onPress}
-          />
+          <FormLink title="Semester" icon="calendar" onPress={onPress} />
         </FormSection>
       </Form>,
     );
@@ -221,12 +217,7 @@ describe('Form', () => {
   it('opens a file row', async () => {
     const onPress = jest.fn();
     await render(
-      <FormFile
-        title="report.pdf"
-        icon={{ ios: 'doc', android: 'file-outline' }}
-        struck
-        onPress={onPress}
-      />,
+      <FormFile title="report.pdf" icon="file" struck onPress={onPress} />,
     );
     expect(screen.getByTestId('icon-doc')).toBeTruthy();
     await userEvent.setup().press(screen.getByText('report.pdf'));

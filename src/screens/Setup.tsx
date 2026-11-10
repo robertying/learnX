@@ -104,19 +104,19 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         <FormSection title={t('setupNewContent')}>
           <FormToggle
             testID="setup-notices"
-            icon={{ ios: 'bell', android: 'bell' }}
+            icon="notices"
             title={t('notifyNewNotices')}
             value={choices.notices}
             onValueChange={choose('notices')}
           />
           <FormToggle
-            icon={{ ios: 'calendar', android: 'calendar' }}
+            icon="assignments"
             title={t('notifyNewAssignments')}
             value={choices.assignments}
             onValueChange={choose('assignments')}
           />
           <FormToggle
-            icon={{ ios: 'folder', android: 'folder' }}
+            icon="files"
             title={t('notifyNewFiles')}
             value={choices.files}
             onValueChange={choose('files')}
@@ -124,13 +124,13 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         </FormSection>
         <FormSection title={t('assignments')}>
           <FormToggle
-            icon={{ ios: 'alarm', android: 'alarm' }}
+            icon="reminder"
             title={t('notifyDeadlineReminders')}
             value={choices.deadlineReminders}
             onValueChange={choose('deadlineReminders')}
           />
           <FormToggle
-            icon={{ ios: 'checkmark.seal', android: 'clipboard-check-outline' }}
+            icon="grade"
             title={t('notifyGrades')}
             value={choices.grades}
             onValueChange={choose('grades')}
@@ -147,14 +147,14 @@ const Setup: React.FC<Props> = ({ navigation }) => {
           footer={t('setupCaption')}
         >
           <FormToggle
-            icon={{ ios: 'calendar.badge.plus', android: 'calendar-range' }}
+            icon="addToCalendar"
             title={t('setupCalendar')}
             value={choices.calendar}
             onValueChange={choose('calendar')}
           />
           {Platform.OS === 'ios' && (
             <FormToggle
-              icon={{ ios: 'checklist', android: 'calendar-check' }}
+              icon="reminders"
               title={t('setupReminders')}
               value={choices.reminders}
               onValueChange={choose('reminders')}

@@ -1,0 +1,10 @@
+<!-- Material Symbols "wb_twilight" (filled, 400 weight, 24 dp) for the navigation bar -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="960"
+    android:viewportHeight="960">
+  <path
+      android:fillColor="@android:color/white"
+      android:pathData="M734,404L678,346L764,262L820,318ZM80,800L80,720L880,720L880,800ZM440,280L440,160L520,160L520,280ZM226,402L142,316L198,260L284,346ZM297,560L663,560Q640,506 591,473Q542,440 480,440Q418,440 369,473Q320,506 297,560ZM200,640Q200,523 281.5,441.5Q363,360 480,360Q597,360 678.5,441.5Q760,523 760,640ZM297,560Q320,506 369,473Q418,440 480,440Q542,440 591,473Q640,506 663,560Z"/>
+</vector>

@@ -277,7 +277,7 @@ const AssignmentSubmissionContent: React.FC<{
         {submittedAttachment ? (
           <FormFile
             title={submittedAttachment.name}
-            icon={{ ios: 'doc', android: 'file-outline' }}
+            icon="file"
             struck={!!attachmentResult || removeAttachment}
             disabled={uploading}
             onPress={() => handleFileOpen(submittedAttachment)}
@@ -286,7 +286,7 @@ const AssignmentSubmissionContent: React.FC<{
         {attachmentResult && !removeAttachment ? (
           <FormFile
             title={attachmentResult.name}
-            icon={{ ios: 'paperclip', android: 'paperclip' }}
+            icon="file"
             detail={isShared ? t('previouslyShared') : undefined}
             disabled={uploading}
             onPress={() => handleFileOpen(pickedAsRemoteFile(attachmentResult))}
@@ -306,7 +306,7 @@ const AssignmentSubmissionContent: React.FC<{
         {!removeAttachment ? (
           <FormButton
             title={pickLabel}
-            icon={{ ios: 'doc.badge.plus', android: 'paperclip-plus' }}
+            icon="addFile"
             disabled={uploading}
             onPress={handlePickerOpen}
             testID="pickAttachment"
@@ -315,7 +315,7 @@ const AssignmentSubmissionContent: React.FC<{
         {attachmentResult && !removeAttachment ? (
           <FormButton
             title={t('removePickedAttachment')}
-            icon={{ ios: 'xmark.circle', android: 'close-circle-outline' }}
+            icon="remove"
             destructive
             disabled={uploading}
             onPress={handlePickedAttachmentRemove}
@@ -325,14 +325,14 @@ const AssignmentSubmissionContent: React.FC<{
           removeAttachment ? (
             <FormButton
               title={t('undoRemoveUploadedAttachment')}
-              icon={{ ios: 'arrow.uturn.backward', android: 'undo' }}
+              icon="undo"
               disabled={uploading}
               onPress={handleUploadedAttachmentRemove}
             />
           ) : (
             <FormButton
               title={t('removeUploadedAttachment')}
-              icon={{ ios: 'trash', android: 'delete-outline' }}
+              icon="delete"
               destructive
               disabled={uploading}
               onPress={handleUploadedAttachmentRemove}
@@ -344,7 +344,7 @@ const AssignmentSubmissionContent: React.FC<{
         <FormSection>
           <FormButton
             title={t('discardDraft')}
-            icon={{ ios: 'trash', android: 'delete-outline' }}
+            icon="delete"
             disabled={uploading}
             onPress={handleDraftDiscard}
           />

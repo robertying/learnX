@@ -1,14 +1,7 @@
 import { ReactNode } from 'react';
-import {
-  ColorValue,
-  Platform,
-  StyleSheet,
-  Text as NativeText,
-  View,
-} from 'react-native';
+import { ColorValue, Platform, StyleSheet, View } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Paragraph, Text } from 'components/Text';
-import { fileTypeColor } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
 
@@ -20,8 +13,6 @@ const metaVariant = isAndroid ? 'footnote' : 'subheadline';
 export interface CardRowProps {
   /** Whose item this is (the course, or the publisher inside a course). */
   overline?: string;
-  /** A leading view, such as a file's type. */
-  leading?: ReactNode;
   /** Marks the item unread. Leave unset for items that are never unread. */
   unread?: boolean;
   /** Next to the time: small glyphs such as a paperclip or a flag. */
@@ -44,7 +35,6 @@ export interface CardRowProps {
  */
 const CardRow: React.FC<CardRowProps> = ({
   overline,
-  leading,
   unread,
   glyphs,
   trailing,
@@ -69,7 +59,6 @@ const CardRow: React.FC<CardRowProps> = ({
   return (
     <View style={styles.root}>
       <CardGutter unread={unread} />
-      {leading}
       <View style={styles.content}>
         {overline ? (
           <View style={styles.firstLine}>
@@ -188,7 +177,7 @@ export const CardGlyph: React.FC<{
 export const CardPill: React.FC<{
   children: string;
   tone: StatusTone | 'primary';
-  icon?: 'dueSoon';
+  icon?: 'deadline';
   testID?: string;
 }> = ({ children, tone, icon, testID }) => {
   const { colors } = useTheme();
@@ -215,47 +204,6 @@ export const CardPill: React.FC<{
       >
         {children}
       </Text>
-    </View>
-  );
-};
-
-/** A file's type as a small page with its extension, for file rows. */
-export const FileTypeTile: React.FC<{ fileType?: string }> = ({ fileType }) => {
-  const theme = useTheme();
-  const type = (fileType ?? '').toLowerCase();
-  const label = type.slice(0, 4).toUpperCase();
-  const tone = fileTypeColor(type);
-  return (
-    <View
-      testID="file-type"
-      style={[styles.tile, { backgroundColor: theme.colors.surfaceVariant }]}
-    >
-      {label ? (
-        <View
-          style={[
-            styles.tileLabel,
-            { backgroundColor: theme.colors.status[tone] },
-          ]}
-        >
-          {/* four letters (DOCX, PPTX) are about as wide as the tile: shrink
-              rather than wrap */}
-          <NativeText
-            style={[styles.tileText, { color: theme.colors.onStatus[tone] }]}
-            allowFontScaling={false}
-            numberOfLines={1}
-            adjustsFontSizeToFit
-            minimumFontScale={0.75}
-          >
-            {label}
-          </NativeText>
-        </View>
-      ) : (
-        <SystemIcon
-          name="file"
-          size={20}
-          color={theme.colors.onSurfaceMedium}
-        />
-      )}
     </View>
   );
 };
@@ -315,24 +263,6 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontWeight: '600',
-  },
-  tile: {
-    width: 32,
-    height: 40,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    paddingBottom: 5,
-  },
-  tileLabel: {
-    maxWidth: 30,
-    borderRadius: 3,
-    paddingHorizontal: 2,
-    paddingVertical: 1,
-  },
-  tileText: {
-    fontSize: 9,
-    fontWeight: '700',
   },
 });
 

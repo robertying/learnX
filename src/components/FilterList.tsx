@@ -311,7 +311,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     // In the list, so that the list is the screen's first scroll view: iOS
     // collapses the large title as it scrolls.
     ListHeaderComponent: <SyncStatus updatedAt={updatedAt} />,
-    ListEmptyComponent: loading ? <Spinner /> : <Empty />,
+    ListEmptyComponent: loading ? <Spinner /> : <Empty type={type} />,
     renderItem,
     keyExtractor: (item: T) => item.id,
     refreshControl: (

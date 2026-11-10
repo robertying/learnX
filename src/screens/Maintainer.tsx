@@ -13,7 +13,7 @@ const Maintainer: React.FC<Props> = () => (
       <FormSection>
         <FormParagraph text={t('maintainerDescription')} />
         <FormButton
-          icon={{ ios: 'envelope', android: 'email-outline' }}
+          icon="email"
           title="learnX@ruiying.io"
           onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
         />

@@ -71,7 +71,7 @@ describe('FeatureList', () => {
       testID="page"
       sheet
       title="What's New"
-      features={[{ icon: 'today', title: 'Today', body: 'Your day.' }]}
+      features={[{ icon: 'afternoon', title: 'Today', body: 'Your day.' }]}
       action={{ label: 'Continue', onPress: jest.fn() }}
     />
   );
@@ -124,7 +124,7 @@ it('grows the symbols with the text size, up to a limit', async () => {
     await render(
       <FeatureList
         title="Welcome"
-        features={[{ icon: 'today', title: 'Today', body: 'Your day.' }]}
+        features={[{ icon: 'afternoon', title: 'Today', body: 'Your day.' }]}
         action={{ label: 'Continue', onPress: jest.fn() }}
       />,
     );

@@ -1,7 +1,6 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
 import { StyleSheet, useWindowDimensions } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   Badge,
   CircularProgressIndicator,
@@ -62,6 +61,7 @@ import {
   type FormViewProps,
 } from './Form.shared';
 import ThemedHost from 'components/ThemedHost';
+import SystemIcon from 'components/SystemIcon';
 
 export * from './Form.shared';
 
@@ -218,7 +218,7 @@ const RowIcon: React.FC<{ icon: FormIcon; color: string }> = ({
   color,
 }) => (
   <RNHostView matchContents>
-    <MaterialDesignIcons name={icon.android} size={24} color={color} />
+    <SystemIcon testID={`icon-${icon}`} name={icon} size={24} color={color} />
   </RNHostView>
 );
 
@@ -641,8 +641,9 @@ export const FormProfile: React.FC<FormProfileProps> = ({
       ) : null}
       <ListItem.LeadingContent>
         <RNHostView matchContents>
-          <MaterialDesignIcons
-            name="account-circle"
+          <SystemIcon
+            testID="icon-account"
+            name="account"
             size={56}
             color={theme.colors.primary}
           />

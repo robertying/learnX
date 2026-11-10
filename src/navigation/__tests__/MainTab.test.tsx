@@ -88,7 +88,17 @@ beforeEach(() => {
 });
 afterEach(() => {
   Platform.OS = os;
+  jest.restoreAllMocks();
 });
+
+// Beijing time, as Jest runs in Asia/Shanghai
+const at = (time: string) =>
+  jest.spyOn(Date, 'now').mockReturnValue(Date.parse(`${time}+08:00`));
+type TabBarIcon = (props: { focused: boolean }) => unknown;
+const tabBarIcon = (index: number, focused = false) =>
+  (lastNavigatorScreens()[index].options!.tabBarIcon as TabBarIcon)({
+    focused,
+  });
 
 const runIdle = () => act(() => idle.shift()!());
 
@@ -130,15 +140,39 @@ it('waits for a split to be laid out before mounting the other tabs', async () =
   expect(idle).toHaveLength(0);
 });
 
-it('wraps each tab in a split of its own, with SF Symbols', async () => {
+it('wraps each tab in a split of its own, with filled SF Symbols', async () => {
+  at('2026-03-15T14:00:00');
   const MainTab = loadMainTab(iPhone);
   await render(<MainTab />);
   const today = lastNavigatorScreens()[0];
   await render(<>{today.options && (today.component as React.FC)({})}</>);
   expect(screen.getByText('TodayStack')).toBeTruthy();
-  const icon = (today.options!.tabBarIcon as () => unknown)();
-  expect(icon).toEqual({ sfSymbol: 'sun.max.fill' });
+  expect([0, 1, 2, 3, 4].map(i => tabBarIcon(i))).toEqual([
+    { sfSymbol: 'sun.max.fill' },
+    { sfSymbol: 'bell.fill' },
+    { sfSymbol: 'list.bullet.clipboard.fill' },
+    { sfSymbol: 'folder.fill' },
+    { sfSymbol: 'books.vertical.fill' },
+  ]);
 });
+
+it.each([
+  ['04:59', 'moon.stars.fill', 'bedtime'],
+  ['05:00', 'sunrise.fill', 'wb_twilight'],
+  ['11:00', 'sun.max.fill', 'light_mode'],
+  ['17:00', 'sunset.fill', 'routine'],
+  ['20:00', 'moon.stars.fill', 'bedtime'],
+])(
+  'draws the Today tab for the time of day at %s',
+  async (time, ios, material) => {
+    at(`2026-03-15T${time}:00`);
+    const MainTab = loadMainTab(iPhone);
+    await render(<MainTab />);
+    expect(tabBarIcon(0)).toEqual({ sfSymbol: ios });
+    Platform.OS = 'android';
+    expect(tabBarIcon(0)).toEqual({ uri: `tab_${material}` });
+  },
+);
 
 it('leaves the Settings badge off the tab bar, and hides it for the keyboard', async () => {
   jest.mocked(useSettingsBadge).mockReturnValue(true);
@@ -151,15 +185,18 @@ it('leaves the Settings badge off the tab bar, and hides it for the keyboard', a
   expect(config().tabBarHidden).toBe(true);
 });
 
-it('uses Material icons and the card color on Android', async () => {
+it('uses Material Symbols, filled on the selected tab, and the card color on Android', async () => {
+  at('2026-03-15T22:00:00');
   Platform.OS = 'android';
   const MainTab = loadMainTab(android);
   await render(<MainTab />);
   expect(config().tabBarStyle).toEqual({ backgroundColor: expect.anything() });
-  const icon = (
-    lastNavigatorScreens()[0].options!.tabBarIcon as () => unknown
-  )();
-  expect(icon).toEqual(expect.objectContaining({ uri: expect.any(String) }));
+  expect([0, 1, 2, 3, 4].map(i => tabBarIcon(i))).toEqual(
+    ['bedtime', 'notifications', 'assignment', 'folder', 'book_2'].map(
+      name => ({ uri: `tab_${name}` }),
+    ),
+  );
+  expect(tabBarIcon(1, true)).toEqual({ uri: 'tab_notifications_filled' });
 });
 
 it('puts six tabs, Settings with its badge, in the sidebar on Mac', async () => {
@@ -176,10 +213,42 @@ it('puts six tabs, Settings with its badge, in the sidebar on Mac', async () => 
     'CourseStack',
     'SettingStack',
   ]);
+  // outline symbols, as in Finder's and Mail's sidebars
+  expect(screens.map(s => s.options?.sfSymbol)).toEqual([
+    expect.stringMatching(/^(sunrise|sun\.max|sunset|moon\.stars)$/),
+    'bell',
+    'list.bullet.clipboard',
+    'folder',
+    'books.vertical',
+    'gearshape',
+  ]);
   expect(screens[5].options).toMatchObject({
     title: t('settings'),
-    sfSymbol: 'gearshape.fill',
     badge: true,
   });
   expect(screens[0].options?.badge).toBe(false);
+});
+
+it('has an outlined and a filled drawable for each Android tab icon', () => {
+  const { existsSync } = require('fs') as {
+    existsSync: (path: string) => boolean;
+  };
+  const { systemIcons } = require('helpers/systemIcons');
+  const icons = [
+    'notices',
+    'assignments',
+    'files',
+    'courses',
+    'morning',
+    'afternoon',
+    'evening',
+    'night',
+  ] as const;
+  for (const icon of icons) {
+    const symbol = systemIcons[icon].android;
+    for (const file of [`tab_${symbol}.xml`, `tab_${symbol}_filled.xml`]) {
+      const path = `android/app/src/main/res/drawable/${file}`;
+      expect([path, existsSync(path)]).toEqual([path, true]);
+    }
+  }
 });

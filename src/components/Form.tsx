@@ -45,6 +45,7 @@ import {
 import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
+import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import {
   parseNumberInput,
@@ -218,7 +219,11 @@ const RowLabel: React.FC<{
   );
   // The system draws the symbol at the row's text size. (@expo/ui's Image
   // would draw it at a fixed 24 pt.)
-  return icon ? <Label systemImage={icon.ios}>{label}</Label> : label;
+  return icon ? (
+    <Label systemImage={systemIcons[icon].ios}>{label}</Label>
+  ) : (
+    label
+  );
 };
 
 /**
@@ -488,7 +493,7 @@ export const FormToggle: React.FC<FormToggleProps> = ({
       isOn={value}
       onIsOnChange={onValueChange}
       label={title}
-      systemImage={icon?.ios}
+      systemImage={icon ? systemIcons[icon].ios : undefined}
       testID={testID}
       modifiers={isDisabled ? [switchStyle, disabled(true)] : [switchStyle]}
     />
@@ -573,7 +578,7 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
       <ZStack modifiers={[frame({ width: avatarSize, height: avatarSize })]}>
         <Circle modifiers={[foregroundStyle(theme.colors.primary)]} />
         <Image
-          systemName="person.fill"
+          systemName={systemIcons.account.ios}
           size={avatarSize / 2}
           color={theme.colors.onPrimary}
         />

@@ -33,7 +33,7 @@ describe('Form (Android)', () => {
         <FormSection title="Content" footer="Pick the semester to show">
           <FormLink
             title="Semester"
-            icon={{ ios: 'calendar.circle', android: 'calendar' }}
+            icon="calendar"
             badge
             onPress={onPress}
             testID="semester"
@@ -224,7 +224,7 @@ describe('Form (Android)', () => {
     for (const text of ['Rui', '2020000000', 'Some notes', 'Embedded']) {
       expect(screen.getByText(text)).toBeTruthy();
     }
-    expect(screen.getByTestId('icon-account-circle')).toBeTruthy();
+    expect(screen.getByTestId('icon-account')).toBeTruthy();
   });
   const style = (text: string) =>
     StyleSheet.flatten(screen.getByText(text).props.style);

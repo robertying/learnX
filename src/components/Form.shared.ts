@@ -9,8 +9,7 @@ import {
 } from 'react';
 import { scheduleOnRN } from 'react-native-worklets';
 import type { ReactElement, ReactNode } from 'react';
-import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
-import type { SFSymbol } from 'sf-symbols-typescript';
+import type { SystemIconName } from 'helpers/systemIcons';
 
 // Props and helpers shared by Form.tsx (SwiftUI) and Form.android.tsx (Compose).
 
@@ -38,11 +37,11 @@ export interface FormSectionProps {
   footer?: string;
 }
 
-/** An icon from each platform's set: an SF Symbol and a Material one. */
-export interface FormIcon {
-  ios: SFSymbol;
-  android: MaterialDesignIconsIconName;
-}
+/**
+ * A row's icon, by meaning from `helpers/systemIcons`: an SF Symbol on iOS
+ * and Mac, a Material Symbol on Android.
+ */
+export type FormIcon = SystemIconName;
 
 interface FormRowProps {
   title: string;

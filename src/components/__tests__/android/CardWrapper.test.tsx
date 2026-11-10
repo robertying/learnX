@@ -59,3 +59,13 @@ it('closes the menu when selecting starts', async () => {
   await rerender(card({ selectionMode: true }));
   expect(screen.queryByTestId('card-archive')).toBeNull();
 });
+
+it('shows the Material checkbox in selection mode, which only shows the state', async () => {
+  // hidden from TalkBack: the card says its state
+  const mark = () =>
+    screen.getByTestId('checkbox', { includeHiddenElements: true });
+  const { rerender } = await render(card({ selectionMode: true }));
+  expect(mark().props.accessibilityState).toEqual({ checked: false });
+  await rerender(card({ selectionMode: true, checked: true }));
+  expect(mark().props.accessibilityState).toEqual({ checked: true });
+});

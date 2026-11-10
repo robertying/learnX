@@ -93,40 +93,37 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
           <FormButton
             testID="settings-logout"
-            icon={{
-              ios: 'rectangle.portrait.and.arrow.right',
-              android: 'account-remove',
-            }}
+            icon="logout"
             title={t('logout')}
             onPress={handleLogout}
           />
         </FormSection>
         <FormSection>
           <FormLink
-            icon={{ ios: 'arrow.triangle.2.circlepath', android: 'autorenew' }}
+            icon="semester"
             title={t('semesterSelection')}
             onPress={() => handlePush('SemesterSelection')}
           />
           <FormLink
-            icon={{ ios: 'calendar', android: 'calendar-range' }}
+            icon="calendar"
             title={t('calendarsAndReminders')}
             onPress={() => handlePush('CalendarEvent')}
           />
           <FormLink
-            icon={{ ios: 'folder', android: 'folder-cog' }}
+            icon="files"
             title={t('fileSettings')}
             onPress={() => handlePush('FileSettings')}
           />
           <FormLink
             testID="settings-notifications"
-            icon={{ ios: 'bell', android: 'bell' }}
+            icon="notifications"
             title={t('notifications')}
             onPress={() => handlePush('NotificationSettings')}
           />
         </FormSection>
         <FormSection>
           <FormLink
-            icon={{ ios: 'info.circle', android: 'information' }}
+            icon="info"
             badge={!courseSharingSeen}
             title={t('courseInformationSharing')}
             onPress={() => handlePush('CourseInformationSharing')}
@@ -136,7 +133,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           {whatsNew && (
             <FormLink
               testID="settings-whats-new"
-              icon={{ ios: 'sparkles', android: 'creation-outline' }}
+              icon="whatsNew"
               title={t('whatsNew')}
               onPress={() =>
                 navigation.navigate('WhatsNewStack', {
@@ -147,30 +144,30 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             />
           )}
           <FormLink
-            icon={{ ios: 'note.text', android: 'note-text' }}
+            icon="changelog"
             title={t('changelog')}
             onPress={() => handlePush('Changelog')}
           />
           {update && (
             <FormLink
-              icon={{ ios: 'arrow.down.circle', android: 'update' }}
+              icon="update"
               badge
               title={t('foundNewVersion', { version: update.version })}
               onPress={() => Linking.openURL(update.url)}
             />
           )}
           <FormLink
-            icon={{ ios: 'hammer', android: 'dev-to' }}
+            icon="maintainer"
             title={t('becomeMaintainer')}
             onPress={() => handlePush('Maintainer')}
           />
           <FormLink
-            icon={{ ios: 'questionmark.circle', android: 'help' }}
+            icon="help"
             title={t('helpAndFeedback')}
             onPress={() => handlePush('Help')}
           />
           <FormLink
-            icon={{ ios: 'c.circle', android: 'copyright' }}
+            icon="about"
             title={t('about')}
             onPress={() => handlePush('About')}
           />
@@ -180,7 +177,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormSection footer="Debug builds don't submit assignments, share course information or sync favorites until this is on. Favorites changed meanwhile wait and are sent when it's turned on. It turns off again when the app reloads.">
             <FormToggle
               testID="settings-allow-server-writes"
-              icon={{ ios: 'exclamationmark.shield', android: 'shield-alert' }}
+              icon="warning"
               title="Allow Server Writes"
               value={serverWritesAllowed}
               onValueChange={setServerWritesAllowed}
@@ -191,7 +188,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormSection>
             <FormLink
               testID="settings-mock-network"
-              icon={{ ios: 'network', android: 'network' }}
+              icon="network"
               title={mockNetworkTitle}
               onPress={() => handlePush('MockNetwork')}
             />

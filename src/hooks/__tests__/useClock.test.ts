@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { AppState } from 'react-native';
-import { useBeijingDay, useMinute, useToday } from 'hooks/useClock';
+import { useBeijingDay, useDayPart, useMinute, useToday } from 'hooks/useClock';
 
 beforeEach(() => {
   jest.useFakeTimers({ now: new Date('2026-03-15T12:00:30Z') });
@@ -121,5 +121,24 @@ describe('useBeijingDay', () => {
 
     await act(() => jest.advanceTimersByTime(30_000));
     expect(view.result.current).toBe('2026-03-16');
+  });
+});
+
+describe('useDayPart', () => {
+  it('moves on with the clock, re-rendering only when the part changes', async () => {
+    // 16:58:30 in Beijing, where Jest runs
+    jest.setSystemTime(new Date('2026-03-15T08:58:30Z'));
+    const renders = jest.fn();
+    const view = await renderHook(() => {
+      renders();
+      return useDayPart();
+    });
+    expect(view.result.current).toBe('afternoon');
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(view.result.current).toBe('afternoon');
+    expect(renders).toHaveBeenCalledTimes(1);
+    await act(() => jest.advanceTimersByTime(60_000));
+    expect(view.result.current).toBe('evening');
+    expect(renders).toHaveBeenCalledTimes(2);
   });
 });

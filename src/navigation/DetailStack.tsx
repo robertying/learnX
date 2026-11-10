@@ -16,7 +16,7 @@ import {
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
 import { getTitleOptions } from 'components/HeaderTitle';
-import Empty from 'components/Empty';
+import StatusView from 'components/StatusView';
 import SafeArea from 'components/SafeArea';
 import NativeSplitViewProvider from './NativeSplitView';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -32,10 +32,11 @@ import {
 
 const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
 
-// The detail column extends underneath the primary one.
+// The detail column extends underneath the primary one. Nothing is open in
+// it yet: a line saying so, without an icon, as in Mail and Files.
 const EmptyDetail = () => (
   <SafeArea>
-    <Empty />
+    <StatusView message={t('noSelection')} />
   </SafeArea>
 );
 

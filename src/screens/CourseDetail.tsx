@@ -24,7 +24,7 @@ import {
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
-import Empty from 'components/Empty';
+import Empty, { type EmptyType } from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import { t } from 'helpers/i18n';
@@ -60,6 +60,8 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
     last?: boolean;
   }>;
   detailScreen: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail';
+  /** What the list holds, for its empty state. */
+  type: EmptyType;
   /** The course's refresh of this list (`useRefreshCourseNotices`, …). */
   refresh: { isPending: boolean; mutate: () => void };
 }
@@ -69,6 +71,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   data,
   card: Card,
   detailScreen,
+  type,
   refresh,
 }: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
@@ -100,7 +103,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
         styles.listContent,
         data.length ? null : styles.emptyListContent,
       ]}
-      ListEmptyComponent={<Empty />}
+      ListEmptyComponent={<Empty type={type} />}
     />
   );
 };
@@ -181,6 +184,7 @@ const CourseDetailContent: React.FC<{
             data={notices.filter(i => i.courseId === course.id)}
             card={NoticeCard}
             detailScreen="NoticeDetail"
+            type="notice"
             refresh={refreshNotices}
           />
         );
@@ -190,6 +194,7 @@ const CourseDetailContent: React.FC<{
             data={assignments.filter(i => i.courseId === course.id)}
             card={AssignmentCard}
             detailScreen="AssignmentDetail"
+            type="assignment"
             refresh={refreshAssignments}
           />
         );
@@ -199,6 +204,7 @@ const CourseDetailContent: React.FC<{
             data={files.filter(i => i.courseId === course.id)}
             card={FileCard}
             detailScreen="FileDetail"
+            type="file"
             refresh={refreshFiles}
           />
         );
