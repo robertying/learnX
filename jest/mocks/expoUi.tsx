@@ -24,12 +24,15 @@ export const Button = ({
   label,
   disabled,
   onPress,
+  testID,
 }: {
   label?: string;
   disabled?: boolean;
   onPress?: () => void;
+  testID?: string;
 }) => (
   <Pressable
+    testID={testID}
     accessibilityRole="button"
     accessibilityState={{ disabled: !!disabled }}
     disabled={disabled}
