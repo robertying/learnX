@@ -9,7 +9,8 @@ import {
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { queryClient, queryPersister, saveQuerySoon } from 'data/queryClient';
-import { coursesQuery, getCourseNames, queryKeys } from 'data/queries';
+import { coursesQuery, getCourseNames } from 'data/queries';
+import { queryKeys } from 'data/queryKeys';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import {
