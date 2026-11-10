@@ -8,9 +8,6 @@ const { readFileSync } = require('fs') as {
 };
 const read = (path: string) => readFileSync(path, 'utf8');
 
-const toRgb = (hex: string) =>
-  `rgb(${[1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
-
 const androidColor = (path: string, name: string) =>
   read(path).match(new RegExp(`name="${name}">(#[0-9A-F]{6})<`, 'i'))?.[1];
 
@@ -30,8 +27,8 @@ const iosThemeColor = (dark: boolean) => {
 
 describe('brand color', () => {
   it('is the JS theme primary', () => {
-    expect(BrandLightTheme.colors.primary).toBe(toRgb(brandColors.light));
-    expect(BrandDarkTheme.colors.primary).toBe(toRgb(brandColors.dark));
+    expect(BrandLightTheme.colors.primary).toBe(brandColors.light);
+    expect(BrandDarkTheme.colors.primary).toBe(brandColors.dark);
   });
 
   it('matches the iOS ThemeColor asset', () => {

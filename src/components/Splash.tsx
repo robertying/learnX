@@ -1,9 +1,8 @@
-import { Platform, StyleSheet, useColorScheme, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Logo from 'components/Logo';
 import { useTheme } from 'theme';
 
 const Splash: React.FC = () => {
-  const colorScheme = useColorScheme();
   const theme = useTheme();
 
   return (
@@ -11,12 +10,7 @@ const Splash: React.FC = () => {
       style={[
         styles.center,
         {
-          backgroundColor:
-            Platform.OS === 'android'
-              ? theme.colors.surface
-              : colorScheme === 'dark'
-                ? 'black'
-                : 'white',
+          backgroundColor: theme.colors.surface,
         },
       ]}
     >

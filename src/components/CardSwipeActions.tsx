@@ -1,10 +1,11 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
   SharedValue,
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { CardAction } from 'helpers/cardActions';
+import { statusContainerOpacity, useTheme } from 'theme';
 import CardActionIcon from './CardActionIcon';
 import Touchable from './Touchable';
 
@@ -18,6 +19,7 @@ const CardSwipeActions: React.FC<{
   actions: CardAction[];
   onAction: (action: CardAction) => void;
 }> = ({ position, translation, swipeableMethods, actions, onAction }) => {
+  const theme = useTheme();
   const totalButtonWidth = buttonWidth * actions.length;
 
   const actionStyle = useAnimatedStyle(() => {
@@ -44,12 +46,21 @@ const CardSwipeActions: React.FC<{
           accessibilityLabel={action.label}
           accessibilityRole="button"
           type="opacity"
-          style={[styles.button, { backgroundColor: action.background }]}
+          style={styles.button}
           onPress={() => {
             onAction(action);
             swipeableMethods.close();
           }}
         >
+          <View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: theme.colors.statusContainer[action.tone],
+                opacity: statusContainerOpacity,
+              },
+            ]}
+          />
           <CardActionIcon action={action} size={40} />
         </Touchable>
       ))}

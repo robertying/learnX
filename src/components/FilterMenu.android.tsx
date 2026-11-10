@@ -13,7 +13,7 @@ import {
   Text,
 } from '@expo/ui/jetpack-compose';
 import { testID } from '@expo/ui/jetpack-compose/modifiers';
-import { useTheme } from 'theme';
+import { useMaterialTheme } from 'theme';
 import type { FilterMenuProps } from './FilterMenu.shared';
 import SystemIcon from 'components/SystemIcon';
 import ThemedHost from 'components/ThemedHost';
@@ -24,7 +24,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
   selected,
   onSelectionChange,
 }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
   const [expanded, setExpanded] = useState(false);
   const selectedColors = {
     selectedContainerColor: theme.colors.secondaryContainer,

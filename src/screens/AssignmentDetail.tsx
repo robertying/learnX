@@ -37,7 +37,7 @@ import {
   FormView,
   type FormRowPosition,
 } from 'components/Form';
-import { useTheme } from 'theme';
+import { useTheme, webContentColors } from 'theme';
 
 type Props = MainStackScreenProps<
   AssignmentDetailParamList,
@@ -131,8 +131,7 @@ const AssignmentDetailContent: React.FC<{
       dark: theme.dark,
       // The form row's own color shows through.
       backgroundColor: 'transparent',
-      textColor: theme.colors.onSurfaceHigh,
-      linkColor: theme.colors.primary,
+      ...webContentColors(theme.dark),
     },
   );
 

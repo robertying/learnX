@@ -178,9 +178,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                     styles.header,
                     {
                       color: theme.colors.outline,
-                      backgroundColor: theme.dark
-                        ? 'black'
-                        : theme.colors.background,
+                      backgroundColor: theme.colors.background,
                     },
                   ]}
                 >
