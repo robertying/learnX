@@ -1,41 +1,24 @@
 name: Build
 
 # Compiles debug builds so a broken patch, Podfile, Gradle or native module
-# change shows up in CI, not on a Mac later. No JS bundle, no signing, no
-# uploads. Not a required check.
+# change shows up in CI, not on a Mac later, and runs the native iOS tests. No
+# JS bundle, no uploads. Not required checks.
 #
-# When each job runs:
-# - Android (~6 min): PRs that touch native paths, main, and by hand.
-# - iOS (~17 min warm): main when native paths changed, and by hand. Only iOS
-#   keeps Xcode's compilation cache; a second Apple cache doesn't fit in the
-#   repo's 10 GB cache limit.
+# When each job runs (the Changes job decides from the changed paths):
+# - Android (~6 min): PRs and main pushes that touch Android paths, and by hand.
+# - iOS (build + native tests, ~47 min cold): main pushes that touch iOS paths,
+#   and by hand. Too slow to gate PRs; run it by hand on a branch when needed.
 # - Mac (~35 min, uncached): by hand only, with the "Build Mac" box ticked.
-#
-# Paused: only the manual trigger is on. To turn the rest on, uncomment the
-# pull_request and push triggers below.
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       mac:
         description: Build Mac
         type: boolean
         default: false
-  # pull_request:
-  #   paths: &native-paths
-  #     - android/**
-  #     - ios/**
-  #     - modules/**
-  #     - patches/**
-  #     - package.json
-  #     - pnpm-lock.yaml
-  #     - pnpm-workspace.yaml
-  #     - app.json
-  #     - Gemfile
-  #     - Gemfile.lock
-  #     - .github/workflows/build.yml
-  # push:
-  #   branches: [main]
-  #   paths: *native-paths
 
 concurrency:
   group: build-${{ github.event.pull_request.number || github.ref }}
@@ -44,7 +27,7 @@ concurrency:
 permissions:
   contents: read
 
-# ccache keeps compiled C/C++/Objective-C between runs. Only main saves caches
+# ccache keeps compiled C/C++ between Android runs. Only main saves caches
 # (Gradle, ccache, Pods, Xcode compilation cache), so other refs start from
 # main's and can't evict or poison them.
 env:
@@ -55,8 +38,38 @@ env:
   SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
+  changes:
+    name: Changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      android: ${{ steps.android.outputs.changed }}
+      ios: ${{ steps.ios.outputs.changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 2
+
+      # Shared by both: patched and installed packages, autolinking, app config.
+      - name: Android
+        id: android
+        run: >-
+          scripts/changed-files.sh
+          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/workflows/build\.yml$)'
+          >> "$GITHUB_OUTPUT"
+
+      - name: iOS
+        id: ios
+        run: >-
+          scripts/changed-files.sh
+          '^(ios/|modules/[^/]+/(ios/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|Gemfile(\.lock)?$|\.ruby-version$|scripts/(test-ios\.sh|native-coverage\.mjs|check-patches\.sh|changed-files\.sh)$|\.github/workflows/build\.yml$)'
+          >> "$GITHUB_OUTPUT"
+
   android:
     name: Android
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -110,16 +123,20 @@ jobs:
 
   apple:
     name: ${{ matrix.name }}
-    # iOS never runs on PRs; Mac only when asked for by hand.
-    if: github.event_name != 'pull_request'
+    # Never on PRs; Mac only when asked for by hand (see the matrix).
+    needs: changes
+    if: github.event_name != 'pull_request' && needs.changes.outputs.ios == 'true'
     runs-on: macos-26
     timeout-minutes: 120
+    permissions:
+      contents: read
+      # To delete older compilation caches
+      actions: write
     strategy:
       fail-fast: false
       matrix:
         name: ${{ fromJSON(inputs.mac && '["iOS","Mac"]' || '["iOS"]') }}
     env:
-      DESTINATION: ${{ matrix.name == 'Mac' && 'generic/platform=macOS,variant=Mac Catalyst' || 'generic/platform=iOS Simulator' }}
       # Only iOS keeps a compilation cache (see the top of this file).
       CACHE_CAS: ${{ matrix.name == 'iOS' }}
     steps:
@@ -186,27 +203,41 @@ jobs:
           key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
           restore-keys: xcode-cas-${{ matrix.name }}-
 
-      # No signing certificates on CI, so this only proves the code compiles and
-      # links. Build signed when running the app.
+      # iOS: the native tests (scripts/test-ios.sh) build the app and every
+      # module, so they also prove it compiles. Signed to run locally (the
+      # simulator default), which keeps the App Group entitlement the tests
+      # need; no certificates involved.
+      - name: Test
+        if: matrix.name == 'iOS'
+        run: |
+          device="$(xcrun simctl list devices available --json |
+            jq -r '[.devices | to_entries | sort_by(.key)[] | select(.key | contains("iOS")) | .value[] | select(.name | startswith("iPhone"))] | last | .udid')"
+          echo "Simulator: $device"
+          scripts/test-ios.sh "$device"
+        env:
+          DERIVED_DATA: build/DerivedData
+          XCODEBUILD_ARGS: COMPILER_INDEX_STORE_ENABLE=NO COMPILATION_CACHE_ENABLE_CACHING=YES
+
+      # Mac: no signing certificates on CI, so this only proves the code
+      # compiles and links. Build signed when running the app.
       - name: Build
+        if: matrix.name == 'Mac'
         run: |
           mkdir -p build
           xcodebuild build \
             -workspace ios/learnX.xcworkspace \
             -scheme learnX \
             -configuration Debug \
-            -destination "$DESTINATION" \
+            -destination "generic/platform=macOS,variant=Mac Catalyst" \
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             COMPILER_INDEX_STORE_ENABLE=NO \
-            COMPILATION_CACHE_ENABLE_CACHING=YES \
             > build/xcodebuild.log 2>&1 || {
             grep -E 'error:' build/xcodebuild.log | sort -u | head -50
             tail -n 80 build/xcodebuild.log
             exit 1
           }
           tail -n 5 build/xcodebuild.log
-          du -sh build/DerivedData/CompilationCache.noindex || true
 
       - name: Save compilation cache
         if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'
@@ -215,9 +246,24 @@ jobs:
           path: build/DerivedData/CompilationCache.noindex
           key: xcode-cas-${{ matrix.name }}-${{ github.sha }}
 
-      - name: Upload build log
+      # The cache is ~5.5 GB and each main commit saves its own copy, so drop
+      # the older ones before they evict Gradle and Pods from the 10 GB limit.
+      - name: Delete older compilation caches
+        if: always() && env.CACHE_CAS == 'true' && env.SAVE_CACHE == 'true'
+        continue-on-error: true
+        run: |
+          gh cache list --repo "$GITHUB_REPOSITORY" --key "xcode-cas-${{ matrix.name }}-" --limit 100 --json key --jq '.[].key' |
+            grep -vx "xcode-cas-${{ matrix.name }}-$GITHUB_SHA" |
+            while read -r key; do gh cache delete --repo "$GITHUB_REPOSITORY" "$key"; done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: xcodebuild-${{ matrix.name }}
-          path: build/xcodebuild.log
+          path: |
+            build/xcodebuild.log
+            build/DerivedData/results/*.xcresult
+          if-no-files-found: ignore

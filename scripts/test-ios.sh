@@ -8,7 +8,9 @@
 #
 # DerivedData goes to $DERIVED_DATA (default
 # ~/Library/Developer/Xcode/DerivedData/learnX-tests), result bundles to
-# $DERIVED_DATA/results. Run `pod install` first after adding a module's tests.
+# $DERIVED_DATA/results. Extra xcodebuild arguments (e.g. build settings) can
+# go in $XCODEBUILD_ARGS, split on spaces. Run `pod install` first after adding
+# a module's tests.
 set -euo pipefail
 
 device="${1:-}"
@@ -33,6 +35,8 @@ if [ ${#schemes[@]} -eq 0 ]; then
   schemes+=(learnX)
 fi
 
+read -ra extra_args <<<"${XCODEBUILD_ARGS:-}"
+
 rm -rf "$results"
 mkdir -p "$results"
 
@@ -47,7 +51,8 @@ for scheme in "${schemes[@]}"; do
     -derivedDataPath "$derived" \
     -enableCodeCoverage YES \
     -resultBundlePath "$results/$scheme.xcresult" \
-    -quiet; then
+    -quiet \
+    "${extra_args[@]+"${extra_args[@]}"}"; then
     failed+=("$scheme")
   fi
 done

@@ -161,7 +161,12 @@ They need neither `.env` nor any native setup, so you can run them anywhere Node
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a debug build with the mock login: `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
-Pull requests run only the JS check, so build and try the app yourself on each platform your change touches, and say in the pull request what you checked.
+Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
+
+- `Check / Android unit tests` (required) runs `scripts/test-android.sh` when a pull request touches Android paths; otherwise it's skipped, which counts as passing.
+- `Build / Android` compiles a debug APK when a pull request touches Android paths. Not required.
+- `Build / iOS` builds the app and runs the native iOS tests (`scripts/test-ios.sh`) on `main` when iOS paths change; run it by hand from the Actions tab (Build › Run workflow) to check a branch, ticking "Build Mac" to also build Mac Catalyst.
+- `E2E` runs the Maestro flows on a simulator or emulator, by hand only (E2E › Run workflow).
 
 ## Pull requests
 

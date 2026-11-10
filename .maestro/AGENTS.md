@@ -2,6 +2,7 @@
 
 - `.maestro/` holds [Maestro](https://docs.maestro.dev) flows driven by the mock login: log in and visit every tab, open a notice / assignment / file, favorite and archive, search, settings pages and logout. `.maestro/subflows/` is only reached through `runFlow`.
 - Install the CLI with `brew install mobile-dev-inc/tap/maestro`; it runs on the JDK in `JAVA_HOME` (17+). Build and install a debug app, start Metro, and boot exactly one simulator or emulator (or set `MAESTRO_DEVICE=<udid or serial>`).
+- CI: the E2E workflow (`.github/workflows/e2e.yml`, by hand only) builds a debug app, starts Metro (`scripts/ci-metro.sh`) and runs every flow on an iPhone simulator or an Android emulator, uploading Maestro's results.
 - `pnpm e2e:ios` / `pnpm e2e:android` run every flow; append a path to run one, e.g. `pnpm e2e:android .maestro/03_favorite_archive.yaml`. `scripts/e2e.sh` passes `APP_ID` (the bundle ids differ in case: `io.robertying.learnX` vs `io.robertying.learnx`) and the two mock values from `.env` with `-e`; never hard-code them in a flow.
 - Each flow starts from `clearState` and logs in with the ephemeral mock account, so flows are independent and can run in any order.
 - Select by `testID` (`id:`) first; otherwise match the visible text or accessibility label as a regex covering both languages (`'Search|搜索'`), so the flows pass in English and Chinese. Regexes must match the whole label, and iOS merges a card's texts into one label (`'课程, 标题, …'`), so match content as `'.*标题.*'`.
