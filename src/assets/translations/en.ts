@@ -42,10 +42,9 @@ export default {
   loginFailed:
     "Couldn't log in. Check your connection and that your Tsinghua ID login still works.",
   versionInformation: 'Version',
-  opensourceAt: 'Open source on',
+  sourceCode: 'Source Code',
+  appIcon: 'App icon',
   specialThanks: 'Special Thanks',
-  harryChen: "Harry Chen's",
-  yayuXiao: "Yayu Xiao's app icon",
   opensourceDependencies: 'Open Source Libraries',
   noAssignmentDescription: 'No description',
   assignmentSyncNoCalendarPermission:
@@ -230,7 +229,7 @@ export default {
   assignmentOfflineSubmission: 'Submit Offline',
   becomeMaintainer: 'Become a Maintainer',
   maintainerDescription:
-    "Do you want to become a maintainer of learnX? Let's talk! Experience in frontend development is required, preferably with React.js; experience with React Native is a plus. Send an email to",
+    "Do you want to become a maintainer of learnX? Let's talk! Experience in frontend development is required, preferably with React.js; experience with React Native is a plus. Write to us:",
   anonymous: 'Anonymous',
   contributors: 'Contributors',
   retryLogin: 'Log In With Saved Account',
@@ -257,6 +256,7 @@ export default {
   fileCategory: 'Category',
   fileDescription: 'Description',
   somethingWentWrong: 'Something went wrong',
+  tryAgain: 'Try Again',
   reloadApp: 'Reload learnX',
   notifications: 'Notifications',
   notificationsCaption:

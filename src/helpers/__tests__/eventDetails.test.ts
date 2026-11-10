@@ -125,13 +125,12 @@ describe('buildAssignmentReminderDetails', () => {
   });
 
   it('keeps the deadline and alerts the offset before it, a day by default', () => {
-    const at = (iso: string) => [{ absoluteDate: new Date(iso).toISOString() }];
     const daily = buildAssignmentReminderDetails(
       settingsWith({}, { assignmentReminderAlarm: true }),
       input(),
     );
     expect(daily.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
-    expect(daily.alarms).toEqual(at('2026-03-19T23:59:00+08:00'));
+    expect(daily.alarms).toEqual([{ relativeOffset: -24 * 60 }]);
     expect(
       buildAssignmentReminderDetails(
         settingsWith(
@@ -140,7 +139,7 @@ describe('buildAssignmentReminderDetails', () => {
         ),
         input(),
       ).alarms,
-    ).toEqual(at('2026-03-20T22:59:00+08:00'));
+    ).toEqual([{ relativeOffset: -60 }]);
   });
 });
 

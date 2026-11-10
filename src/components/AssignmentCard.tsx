@@ -2,7 +2,7 @@ import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { deadlineText, isDueSoon } from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
-import useMinute from 'hooks/useMinute';
+import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import CardRow, {

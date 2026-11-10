@@ -135,7 +135,7 @@ export const getWebViewTemplate = (
           ? `
       <script nonce="${nonce}">
         ${darkMode}
-        applyDarkMode(document.querySelector("#root"), "${colors?.backgroundColor}");
+        applyDarkMode(document.querySelector("#root"), ${JSON.stringify(colors?.backgroundColor ?? '')});
       </script>
       `
           : ''

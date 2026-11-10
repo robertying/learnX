@@ -90,7 +90,6 @@ export type Notice = Pick<
 export type Assignment = Pick<
   Homework,
   | 'id'
-  | 'studentHomeworkId'
   | 'title'
   | 'description'
   | 'deadline'

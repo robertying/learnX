@@ -1,12 +1,15 @@
-import { useContext, useState } from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import { useContext, useEffectEvent, useLayoutEffect, useState } from 'react';
+import { Platform, StyleSheet } from 'react-native';
+import {
+  useSafeAreaFrame,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import {
   SceneRendererProps,
   TabView,
   NavigationState,
 } from 'react-native-tab-view';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useCourse } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
@@ -35,10 +38,8 @@ import {
   MainStackNavigationProp,
   MainStackScreenProps,
 } from './types';
-import { Text } from 'components/Text';
-import Divider from 'components/Divider';
+import { headerButtons } from 'navigation/headerButtons';
 import SegmentedTabs from 'components/SegmentedTabs';
-import { useTheme } from 'theme';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
   ? ('never' as const)
@@ -126,10 +127,18 @@ const CourseDetailContent: React.FC<{
   course: Course;
   navigation: Props['navigation'];
 }> = ({ course, navigation }) => {
-  const theme = useTheme();
-
   const detailNavigator = useDetailNavigator();
   const { masterWidth } = useContext(SplitViewContext);
+  const frame = useSafeAreaFrame();
+  const insets = useSafeAreaInsets();
+  // The width the tabs start with, before they're laid out. iOS gives each
+  // split column its own frame, with the columns beside it as insets;
+  // Android's split is drawn in JS, in the window's frame.
+  const initialWidth =
+    frame.width -
+    insets.left -
+    insets.right -
+    (Platform.OS === 'android' && detailNavigator ? masterWidth + 1 : 0);
 
   const { notices } = useNotices();
   const { assignments } = useAssignments();
@@ -208,40 +217,31 @@ const CourseDetailContent: React.FC<{
       });
     }
   };
+  const openCourseX = useEffectEvent(handleNavigateCourseX);
+
+  // The course's page on CourseX, from the header like an item's info.
+  useLayoutEffect(() => {
+    navigation.setOptions(
+      headerButtons('right', [
+        {
+          id: 'courseInformation',
+          label: t('courseInformation'),
+          icon: 'info',
+          onPress: () => openCourseX(),
+        },
+      ]),
+    );
+  }, [navigation]);
 
   return (
     <SafeArea>
-      <TouchableOpacity
-        activeOpacity={0.6}
-        style={[
-          styles.courseXContainer,
-          { backgroundColor: theme.colors.surface },
-        ]}
-        onPress={handleNavigateCourseX}
-        accessibilityRole="button"
-      >
-        <Icon
-          style={styles.icon}
-          color={theme.colors.onSurface}
-          name="information-outline"
-          size={20}
-        />
-        <Text>{t('courseInformation')}</Text>
-      </TouchableOpacity>
-      <Divider />
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
         renderTabBar={renderTabBar}
         onIndexChange={setIndex}
         tabBarPosition="top"
-        initialLayout={{
-          width: detailNavigator
-            ? Dimensions.get('window').width -
-              masterWidth -
-              1 /* divider width */
-            : Dimensions.get('window').width,
-        }}
+        initialLayout={{ width: initialWidth }}
       />
     </SafeArea>
   );
@@ -253,16 +253,6 @@ const styles = StyleSheet.create({
   },
   emptyListContent: {
     justifyContent: 'center',
-  },
-  courseXContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
-  },
-  icon: {
-    marginHorizontal: 4,
   },
 });
 

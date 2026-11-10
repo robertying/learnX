@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Alert, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { CourseType, Language } from '@robertying/thu-learn-lib';
+import { Language } from '@robertying/thu-learn-lib';
 import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { setCourseSharingSeen } from 'data/appState';
@@ -33,11 +33,9 @@ const CourseInformationSharing: React.FC<Props> = () => {
       return [];
     }
 
-    const results = await dataSource.getCourseList(
-      currentSemesterId,
-      CourseType.STUDENT,
-      Language.ZH,
-    );
+    const results = await dataSource.getCourseList(currentSemesterId, {
+      lang: Language.ZH,
+    });
     const courses = results.map(course => ({
       ...course,
       semesterId: currentSemesterId,

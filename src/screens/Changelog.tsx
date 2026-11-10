@@ -1,27 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect } from 'react';
 import { Linking, Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import WebView, { WebViewNavigation } from 'react-native-webview';
+import WebView from 'react-native-webview';
+import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
 import { setChangelogSeen } from 'data/appState';
+import useWebViewProgress from 'hooks/useWebViewProgress';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
 
-const Changelog: React.FC<Props> = () => {
-  const webViewRef = useRef<WebView>(null);
-  const [progress, setProgress] = useState(0);
+const releasesUrl = 'https://github.com/robertying/learnX/releases';
 
-  const onNavigationStateChange = (e: WebViewNavigation) => {
-    if (e.navigationType === 'click') {
-      if (webViewRef.current) {
-        webViewRef.current.stopLoading();
-      }
-      void Linking.openURL(e.url);
-    }
-  };
+// The release notes stay here; any other page opens in the browser.
+const handleRequest: OnShouldStartLoadWithRequest = request => {
+  if (request.isTopFrame === false || request.url.startsWith(releasesUrl)) {
+    return true;
+  }
+  void Linking.openURL(request.url);
+  return false;
+};
+
+const Changelog: React.FC<Props> = () => {
+  const { progress, loading, onLoadProgress } = useWebViewProgress();
 
   useEffect(() => {
     setChangelogSeen(packageJson.version);
@@ -29,22 +32,15 @@ const Changelog: React.FC<Props> = () => {
 
   return (
     <SafeArea>
-      {progress && progress !== 1 ? (
+      {loading ? (
         <ProgressBar style={styles.progressBar} progress={progress} />
-      ) : undefined}
+      ) : null}
       <WebView
-        ref={webViewRef}
-        originWhitelist={['https://github.com']}
-        onNavigationStateChange={onNavigationStateChange}
-        onLoadProgress={({ nativeEvent }) => {
-          // New architecture doesn't like native floats
-          setProgress(parseFloat(nativeEvent.progress.toFixed(2)));
-        }}
+        style={styles.webView}
+        source={{ uri: releasesUrl }}
+        onShouldStartLoadWithRequest={handleRequest}
+        onLoadProgress={onLoadProgress}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-        source={{
-          uri: 'https://github.com/robertying/learnX/releases',
-        }}
-        style={{ backgroundColor: 'transparent' }}
       />
     </SafeArea>
   );
@@ -57,6 +53,9 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 99,
+  },
+  webView: {
+    backgroundColor: 'transparent',
   },
 });
 
