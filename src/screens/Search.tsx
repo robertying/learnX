@@ -147,22 +147,25 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
               { key: 'file', title: t('files'), data: fileResult },
             ]}
             keyExtractor={item => item.id}
-            renderItem={({ item, section: { key } }) =>
+            renderItem={({ item, index, section: { key, data } }) =>
               key === 'notice' ? (
                 <NoticeCard
                   data={item as Notice}
+                  last={index === data.length - 1}
                   disableSwipe
                   onPress={() => handlePush('NoticeDetail', item.id)}
                 />
               ) : key === 'assignment' ? (
                 <AssignmentCard
                   data={item as Assignment}
+                  last={index === data.length - 1}
                   disableSwipe
                   onPress={() => handlePush('AssignmentDetail', item.id)}
                 />
               ) : (
                 <FileCard
                   data={item as File}
+                  last={index === data.length - 1}
                   disableSwipe
                   onPress={() => handlePush('FileDetail', item.id)}
                 />

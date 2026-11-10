@@ -70,8 +70,10 @@ const Card: React.FC<ItemComponentProps<Item>> = ({
   onCheck,
   checked,
   onMove,
+  last,
 }) => (
   <View>
+    {last ? <Text>{`last ${data.id}`}</Text> : null}
     <Pressable onPress={onPress}>
       <Text>{data.title}</Text>
     </Pressable>
@@ -146,6 +148,13 @@ it('shows the filter picked for its tab, with counts in the menu', async () => {
   expect(getSettings().tabFilterSelections.notice).toBe('archived');
   expect(screen.queryByText('Item a')).toBeNull();
   expect(screen.getByText('Item z')).toBeTruthy();
+});
+
+it('tells the last row it is last', async () => {
+  await renderList();
+  expect(screen.getByText('last c')).toBeTruthy();
+  expect(screen.queryByText('last a')).toBeNull();
+  expect(screen.queryByText('last b')).toBeNull();
 });
 
 it('opens, favorites and archives items', async () => {

@@ -102,7 +102,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
               android: 'account-remove',
             }}
             title={t('logout')}
-            destructive
             onPress={handleLogout}
           />
         </FormSection>

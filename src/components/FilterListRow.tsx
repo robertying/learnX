@@ -37,6 +37,7 @@ interface FilterListRowProps<T extends { id: string }> {
   /** Reorder mode: whether the row isn't first / last */
   canMoveUp?: boolean;
   canMoveDown?: boolean;
+  last?: boolean;
 }
 
 /** A row inside `ReorderableList`, the only place its drag handle exists. */
@@ -63,6 +64,7 @@ const FilterListRow = <T extends { id: string }>({
   hidden,
   canMoveUp,
   canMoveDown,
+  last,
 }: FilterListRowProps<T>) => {
   const itemProps: ItemComponentProps<T> = {
     data,
@@ -81,6 +83,7 @@ const FilterListRow = <T extends { id: string }>({
     onMove: isCourse ? offset => actions.move(data.id, offset) : undefined,
     canMoveUp,
     canMoveDown,
+    last,
   };
   return isCourse ? (
     <ReorderableItem component={Component} {...itemProps} />

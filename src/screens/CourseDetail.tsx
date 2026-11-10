@@ -82,9 +82,10 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   return (
     <FlatList
       data={data}
-      renderItem={({ item }) => (
+      renderItem={({ item, index }) => (
         <Card
           data={item}
+          last={index === data.length - 1}
           disableSwipe
           hideCourseName
           onPress={() => navigation.push(detailScreen, { id: item.id })}

@@ -108,6 +108,10 @@ it("lists the course's notices, and its assignments and files by tab", async () 
     expect.objectContaining({ title: course.name }),
   );
   expect(screen.getByText(of(mockNotices)[0].title)).toBeTruthy();
+  // Separators between the rows, none under the last.
+  expect(screen.queryAllByTestId('card-separator')).toHaveLength(
+    of(mockNotices).length - 1,
+  );
   const other = mockNotices.find(n => n.courseId !== course.id)!;
   expect(screen.queryByText(other.title)).toBeNull();
 

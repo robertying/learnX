@@ -84,7 +84,10 @@ export interface FormLinkProps extends FormItemRowProps {
 
 export interface FormButtonProps extends FormRowProps {
   onPress: () => void;
-  /** Shown in red, for logging out and deleting. */
+  /**
+   * Shown in red, for a row that removes something right away. A row that
+   * asks first stays plain: the red is the confirmation's own button.
+   */
   destructive?: boolean;
   /** Shows a spinner instead of running again. */
   loading?: boolean;

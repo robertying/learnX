@@ -296,6 +296,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       hidden={hiddenIdSet.has(item.id)}
       canMoveUp={reorderMode && index > 0}
       canMoveDown={reorderMode && index < data.length - 1}
+      last={index === data.length - 1}
     />
   );
 

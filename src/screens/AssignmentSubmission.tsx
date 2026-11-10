@@ -345,7 +345,6 @@ const AssignmentSubmissionContent: React.FC<{
           <FormButton
             title={t('discardDraft')}
             icon={{ ios: 'trash', android: 'delete-outline' }}
-            destructive
             disabled={uploading}
             onPress={handleDraftDiscard}
           />

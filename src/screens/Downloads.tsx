@@ -102,7 +102,6 @@ const Downloads: React.FC<Props> = () => {
           <FormButton
             icon={{ ios: 'trash', android: 'delete' }}
             title={t('clearFileCache')}
-            destructive
             onPress={() =>
               confirm(
                 t('clearFileCache'),
