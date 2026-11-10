@@ -2,16 +2,17 @@
 
 learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua University's Web Learning, built on [`@robertying/thu-learn-lib`](https://github.com/robertying/thu-learn-lib). This file holds what applies everywhere. Folders with more to know have their own `AGENTS.md`, and the workflows are skills:
 
-| Where                          | What                                                                                                                               |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `CONTRIBUTING.md`              | Setup from a fresh clone for outside contributors: tools, iOS signing with your own team, Android SDK, mock login, checks          |
-| `src/data/AGENTS.md`           | Stores, TanStack Query, server actions and favorites, timetable, background sync, login and account data, mock login and mock data |
-| `src/widgets/AGENTS.md`        | Home screen widgets (`expo-widgets`)                                                                                               |
-| `modules/AGENTS.md`            | Local Expo modules: Spotlight and App Intents, Crashlytics                                                                         |
-| `patches/README.md`            | Patched dependencies: what each patch fixes and how to change one (`pnpm patch`)                                                   |
-| `.maestro/AGENTS.md`           | End-to-end flows                                                                                                                   |
-| `.claude/skills/release`       | Version bumps, release builds and uploads (fastlane)                                                                               |
-| `.claude/skills/release-notes` | Release notes for the stores and GitHub                                                                                            |
+| Where                                 | What                                                                                                                               |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `CONTRIBUTING.md`                     | Setup from a fresh clone for outside contributors: tools, iOS signing with your own team, Android SDK, mock login, checks          |
+| `src/data/AGENTS.md`                  | Stores, TanStack Query, server actions and favorites, timetable, background sync, login and account data, mock login and mock data |
+| `src/widgets/AGENTS.md`               | Home screen widgets (`expo-widgets`)                                                                                               |
+| `modules/AGENTS.md`                   | Local Expo modules: Spotlight and App Intents, Crashlytics                                                                         |
+| `patches/README.md`                   | Patched dependencies: what each patch fixes and how to change one (`pnpm patch`)                                                   |
+| `.maestro/AGENTS.md`                  | End-to-end flows                                                                                                                   |
+| `.claude/skills/release`              | Version bumps, release builds and uploads (fastlane)                                                                               |
+| `.claude/skills/release-notes`        | Release notes for the stores and GitHub                                                                                            |
+| `.claude/skills/upgrade-dependencies` | Upgrading every declared dependency (npm, patches, pods, gems, Gradle, Node, Actions) and verifying the app                        |
 
 ## Commands
 
