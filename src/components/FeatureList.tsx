@@ -78,14 +78,18 @@ const FeatureList: React.FC<FeatureListProps> = ({
     >
       {/* The title stays put and only the features scroll, between it and
           the buttons. Together they sit in the middle of the page when the
-          features fit, as on iPad, Mac or a tall phone. */}
+          features fit, as on iPad, Mac or a tall phone. The views around the
+          ScrollView stay real (not flattened): a form sheet
+          (react-native-screens) stretches a ScrollView it finds at the top of
+          the screen to the whole sheet, over the title. */}
       <View
+        collapsable={false}
         style={[
           styles.middle,
           { paddingTop: (sheet ? 0 : insets.top) + (logo ? 16 : 32) },
         ]}
       >
-        <View style={styles.header}>
+        <View collapsable={false} style={styles.header}>
           {logo && <Logo iosSize={96} style={styles.logo} />}
           <Title
             variant="largeTitle"
