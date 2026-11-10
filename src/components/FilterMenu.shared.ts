@@ -1,4 +1,4 @@
-import type { FilterOption, FilterSelection } from 'helpers/filterOptions';
+import type { FilterOption, FilterSelection } from 'helpers/filters';
 
 export interface FilterMenuProps {
   /** The button's accessibility label */

@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useReorderableDrag } from 'react-native-reorderable-list';
-import { areRowPropsEqual } from 'helpers/filterList';
+import { areRowPropsEqual } from 'helpers/rowProps';
 import { CardWrapperProps } from './CardWrapper';
 
 export interface ItemComponentProps<T> extends CardWrapperProps {

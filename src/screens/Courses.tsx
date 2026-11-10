@@ -11,7 +11,7 @@ import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import { useShowDetail } from 'hooks/useDetailNavigator';
-import { getSemesterTextFromId } from 'helpers/parse';
+import { getSemesterTextFromId } from 'helpers/semester';
 import { uploadCourses } from 'helpers/coursex';
 import { sortByOrder } from 'helpers/reorder';
 import { CourseStackParams, MainStackScreenProps } from './types';

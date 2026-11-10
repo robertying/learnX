@@ -44,10 +44,9 @@ const zh: typeof en = {
   loginFailed:
     '登录失败，请检查网络连接并确保用户电子身份服务系统的登录依旧有效',
   versionInformation: '版本',
-  opensourceAt: '本项目开源于',
+  sourceCode: '源代码',
+  appIcon: '应用图标',
   specialThanks: '特别感谢',
-  harryChen: 'Harry Chen 的',
-  yayuXiao: 'Yayu Xiao 设计的应用图标',
   opensourceDependencies: '开源依赖',
   noAssignmentDescription: '无说明',
   assignmentSyncNoCalendarPermission:
@@ -224,7 +223,7 @@ const zh: typeof en = {
   assignmentOfflineSubmission: '线下提交',
   becomeMaintainer: '成为维护者',
   maintainerDescription:
-    '你想成为 learnX 的维护者吗？让我们聊聊吧！要求有前端开发经验，最好是 React.js；有 React Native 经验者优先。请发送邮件至',
+    '你想成为 learnX 的维护者吗？让我们聊聊吧！要求有前端开发经验，最好是 React.js；有 React Native 经验者优先。欢迎来信：',
   anonymous: '匿名',
   contributors: '贡献者',
   retryLogin: '使用已保存的账号登录',
@@ -251,6 +250,7 @@ const zh: typeof en = {
   fileCategory: '分类',
   fileDescription: '描述',
   somethingWentWrong: '出错了',
+  tryAgain: '重试',
   reloadApp: '重新加载 learnX',
   notifications: '通知',
   notificationsCaption:

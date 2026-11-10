@@ -1,6 +1,6 @@
 import { FailReason } from '@robertying/thu-learn-lib';
 import { create } from 'zustand';
-import { isBadCredential } from 'helpers/parse';
+import { isBadCredential } from 'helpers/errors';
 
 /**
  * Why the saved login didn't go through: `offline` when the school's server

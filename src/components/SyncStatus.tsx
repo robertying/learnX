@@ -5,7 +5,7 @@ import { requestRelogin, useAuthStore } from 'data/auth';
 import { t } from 'helpers/i18n';
 import { Caption } from 'components/Text';
 import TextButton from 'components/TextButton';
-import useMinute from 'hooks/useMinute';
+import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
 
 export interface SyncStatusProps {

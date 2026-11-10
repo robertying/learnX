@@ -19,7 +19,7 @@ import { flushServerActionsWithin } from 'data/serverActions';
 import { queryClient } from 'data/queryClient';
 import { clearAccountData } from 'data/accountData';
 import { userQuery } from 'data/queries';
-import { isBadCredential, isNetworkError, serializeError } from 'helpers/parse';
+import { errorReason, isBadCredential, isNetworkError } from 'helpers/errors';
 import { retry } from 'helpers/retry';
 
 /**
@@ -102,10 +102,11 @@ export async function login({
                   }
                 : undefined,
             ),
-      3,
-      1000,
-      // a wrong password won't become right, and repeated tries may lock the account
-      error => !isNetworkError(error) && !isBadCredential(error),
+      {
+        // A wrong password won't become right, and repeated tries may lock
+        // the account.
+        shouldRetry: error => !isNetworkError(error) && !isBadCredential(error),
+      },
     );
 
     if (username && password && fingerPrint) {
@@ -132,7 +133,7 @@ export async function login({
     useAuthStore.setState({
       loggingIn: false,
       loggedIn: false,
-      error: serializeError(err).reason,
+      error: errorReason(err),
       failure: offline ? 'offline' : 'rejected',
     });
   }

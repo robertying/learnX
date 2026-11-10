@@ -84,12 +84,10 @@ export const coursesQuery = (semesterId: string) =>
     queryFn: async (): Promise<Course[]> => {
       const lang = await setLanguage();
       // Course sharing and the timetable use each course's time and location.
-      const results = await dataSource.getCourseList(
-        semesterId,
-        CourseType.STUDENT,
+      const results = await dataSource.getCourseList(semesterId, {
         lang,
-        { timeAndLocation: true },
-      );
+        timeAndLocation: true,
+      });
       return results
         .map(course => ({ ...course, semesterId }))
         .sort((a, b) => a.id.localeCompare(b.id));

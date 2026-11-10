@@ -1,41 +1,48 @@
 import { useEffect, useEffectEvent } from 'react';
 import { Platform } from 'react-native';
-import ShareMenu from 'react-native-share-menu';
+import ShareMenu, { type ShareData } from 'react-native-share-menu';
 import { t } from 'helpers/i18n';
 import { copyFileToCache } from 'helpers/files/share';
 import { toast } from 'components/Toast';
-import { setPendingAssignmentData } from 'data/pendingAssignment';
+import {
+  PendingAssignmentData,
+  setPendingAssignmentData,
+} from 'data/pendingAssignment';
 
 /**
  * Keeps a file shared to learnX, at launch or while running, so that it can be
  * attached to an assignment submission.
  */
 const useShareHandler = () => {
-  const handleShare = useEffectEvent(async (item: any) => {
+  const handleShare = useEffectEvent(async (item?: ShareData) => {
     if (!item) {
       return;
     }
 
-    let data: any = null;
+    let shared: PendingAssignmentData;
     if (Platform.OS === 'ios') {
-      if (!Array.isArray(item.data) || item.data.length === 0) {
+      // On iOS `data` is the list of shared files, not the strings its
+      // types say.
+      const files = item.data as unknown as PendingAssignmentData[];
+      if (!Array.isArray(files) || files.length === 0) {
         return;
       }
-      data = item.data[0];
+      shared = files[0];
     } else {
-      data = item;
+      // Android hands over a content URI that may stop working later.
       try {
-        data.data = await copyFileToCache(data.data);
+        shared = {
+          mimeType: item.mimeType,
+          data: await copyFileToCache(String(item.data)),
+        };
       } catch {
         toast(t('shareError'), 'error', 3 * 1000);
         return;
       }
     }
 
-    if (data) {
-      setPendingAssignmentData(data);
-      toast(t('shareReceived'), 'success', 5 * 1000);
-    }
+    setPendingAssignmentData(shared);
+    toast(t('shareReceived'), 'success', 5 * 1000);
   });
 
   useEffect(() => {

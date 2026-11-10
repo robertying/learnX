@@ -13,9 +13,15 @@ const mockEnsureSession = jest.fn(() => Promise.resolve());
 const mockGetSubmitRequest = jest.fn(
   async (
     id: string,
-    content?: string,
-    attachment?: { filename: string },
-    remove?: boolean,
+    {
+      content,
+      attachment,
+      removeAttachment: remove,
+    }: {
+      content?: string;
+      attachment?: { filename: string };
+      removeAttachment?: boolean;
+    } = {},
   ) => {
     const body = new FormData();
     body.append('xszyid', id);
@@ -57,15 +63,14 @@ describe('submitAssignment', () => {
       content: '<p>answer</p>',
       attachment: { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
     });
-    expect(mockGetSubmitRequest).toHaveBeenLastCalledWith(
-      'homework-id',
-      '<p>answer</p>',
-      {
+    expect(mockGetSubmitRequest).toHaveBeenLastCalledWith('homework-id', {
+      content: '<p>answer</p>',
+      attachment: {
         filename: 'Answer.pdf',
         content: { uri: 'file:///tmp/answer.pdf', type: 'application/pdf' },
       },
-      false,
-    );
+      removeAttachment: false,
+    });
     expect(post.mock.calls[0][1]).toBe(
       (await mockGetSubmitRequest.mock.results[0].value).body,
     );

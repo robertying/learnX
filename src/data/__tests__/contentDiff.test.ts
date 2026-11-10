@@ -120,6 +120,21 @@ describe('diffContent', () => {
       expect(change(graded, leveled).graded).toHaveLength(1);
     });
 
+    it('ignores the negative grade a cached grade level still has', () => {
+      // thu-learn-lib before 7 sent A+ as grade -99 next to the level
+      const before = {
+        ...graded,
+        grade: -99,
+        gradeLevel: HomeworkGradeLevel.A_PLUS,
+      };
+      const after = {
+        ...graded,
+        grade: undefined,
+        gradeLevel: HomeworkGradeLevel.A_PLUS,
+      };
+      expect(change(before, after).graded).toEqual([]);
+    });
+
     it('ignores a grade that was taken back', () => {
       const after = { ...graded, graded: false, grade: undefined };
       expect(
