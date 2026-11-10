@@ -166,7 +166,7 @@ Other CI jobs (none of them build a signed app or run on a device, so still buil
 - `Check / Android unit tests` (required) runs `scripts/test-android.sh` when a pull request touches Android paths; otherwise it's skipped, which counts as passing.
 - `Build / Android` compiles a debug APK when a pull request touches Android paths. Not required.
 - `Build / iOS` builds the app and runs the native iOS tests (`scripts/test-ios.sh`) on `main` when iOS paths change; run it by hand from the Actions tab (Build › Run workflow) to check a branch, ticking "Build Mac" to also build Mac Catalyst.
-- End-to-end flows run by hand only: tick "Run E2E" when running Build, and the `Android E2E` / `iOS E2E` jobs run the Maestro flows after the builds, on the debug APK and app those jobs made.
+- End-to-end flows run by hand only, on Android: tick "Run E2E" when running Build. The Android job then builds a release APK (R8, bundled JS, debug-signed) and `Android E2E` runs the Maestro flows on it in an emulator.
 
 ## Pull requests
 

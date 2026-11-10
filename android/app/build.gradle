@@ -85,11 +85,15 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            signingConfig signingConfigs.release
+            // -PciRelease (CI's E2E build): a real release build (R8, bundled
+            // JS) signed with the debug key, and nothing uploaded to Crashlytics.
+            def ciRelease = project.hasProperty("ciRelease")
+            signingConfig ciRelease ? signingConfigs.debug : signingConfigs.release
             minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             firebaseCrashlytics {
-                nativeSymbolUploadEnabled true
+                mappingFileUploadEnabled !ciRelease
+                nativeSymbolUploadEnabled !ciRelease
             }
         }
     }
