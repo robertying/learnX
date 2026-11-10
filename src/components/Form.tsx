@@ -183,7 +183,9 @@ const RowLabel: React.FC<{
   icon?: FormIcon;
   plain?: boolean;
   struck?: boolean;
-}> = ({ title, subtitle, icon, plain, struck }) => {
+  /** Read out as over, which the row only shows by being dimmed. */
+  done?: boolean;
+}> = ({ title, subtitle, icon, plain, struck, done }) => {
   const text = (
     <Text
       modifiers={
@@ -191,7 +193,9 @@ const RowLabel: React.FC<{
           ? // the strikethrough isn't read out
             [...struckText, accessibilityValue(t('a11yStruck'))]
           : plain
-            ? [primaryText]
+            ? done
+              ? [primaryText, accessibilityValue(t('a11yDone'))]
+              : [primaryText]
             : undefined
       }
     >
@@ -253,14 +257,10 @@ const RowDetail: React.FC<{
 };
 
 const doneModifiers = [opacity(0.5)];
-const doneCheckModifiers = [
-  font({ textStyle: 'footnote', weight: 'semibold' }),
-  secondaryText,
-];
 
 /**
- * The inside of a text or link row: the label, the detail, a checkmark when
- * it's done, `trailing`, and a progress bar under it all.
+ * The inside of a text or link row: the label, the detail, `trailing`, and a
+ * progress bar under it all. A row that's done is dimmed.
  */
 const ItemRow: React.FC<
   FormItemRowProps & {
@@ -271,16 +271,16 @@ const ItemRow: React.FC<
   const { subtitle, detail } = useStackedDetail(rest.subtitle, rest.detail);
   const row = (
     <HStack modifiers={done ? doneModifiers : undefined}>
-      <RowLabel title={title} subtitle={subtitle} icon={icon} plain />
+      <RowLabel
+        title={title}
+        subtitle={subtitle}
+        icon={icon}
+        plain
+        done={done}
+      />
       <Spacer />
       <RowDetail detail={detail} />
       {badge}
-      {done ? (
-        <Image
-          systemName="checkmark"
-          modifiers={[...doneCheckModifiers, accessibilityLabel(t('a11yDone'))]}
-        />
-      ) : null}
       {trailing}
     </HStack>
   );

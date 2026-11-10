@@ -60,7 +60,7 @@ export type FormRowPosition = 'only' | 'first' | 'middle' | 'last';
 
 /** Rows that show something about an item: what's on today, for example. */
 export interface FormItemRowProps extends FormRowProps {
-  /** Dimmed with a checkmark, for something that's over. */
+  /** Dimmed, and read out as over, for something that's over. */
   done?: boolean;
   /** A bar under the text, from 0 to 1, for how far along it is. */
   progress?: number;

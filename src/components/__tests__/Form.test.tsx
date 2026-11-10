@@ -28,6 +28,7 @@ import {
   sectionRows,
   useFieldText,
 } from 'components/Form';
+import { accessibilityValue } from '@expo/ui/swift-ui/modifiers';
 import type * as ReactNative from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { font } from '@expo/ui/swift-ui/modifiers';
@@ -90,7 +91,7 @@ describe('Form', () => {
     ).toBeTruthy();
   });
 
-  it('shows a subtitle, a done check and progress', async () => {
+  it('shows a subtitle, dims a row that is over, and progress', async () => {
     await render(
       <FormSection>
         <FormText title="Calculus" subtitle="Room 101" done />
@@ -104,7 +105,9 @@ describe('Form', () => {
     );
     expect(screen.getByText('Room 101')).toBeTruthy();
     expect(screen.getByText('08:00–09:35')).toBeTruthy();
-    expect(screen.getByTestId('icon-checkmark')).toBeTruthy();
+    // over is read out, not drawn as a checkmark
+    expect(screen.queryByTestId('icon-checkmark')).toBeNull();
+    expect(accessibilityValue).toHaveBeenCalledWith('Ended');
     expect(screen.getByTestId('progress')).toBeTruthy();
   });
 

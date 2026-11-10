@@ -123,8 +123,10 @@ export const Text = ({
   children,
   color,
   style,
+  modifiers,
 }: {
   children?: ReactNode;
+  modifiers?: { accessibilityLabel?: string }[];
   color?: string;
   style?: {
     typography?: string;
@@ -140,6 +142,9 @@ export const Text = ({
         style?.textDecoration === 'lineThrough' ? 'line-through' : undefined,
     }}
     {...{ typography: style?.typography }}
+    accessibilityLabel={
+      modifiers?.find(m => m?.accessibilityLabel)?.accessibilityLabel
+    }
   >
     {children}
   </RNText>
