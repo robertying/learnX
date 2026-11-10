@@ -16,44 +16,48 @@ class ShareModule : Module() {
 
     Events("onShare")
 
-    Function("takeSharedItem") {
-      appContext.currentActivity?.intent?.let(::take)
-    }
+    Function("takeSharedItem") { takeSharedItem() }
 
     Function("getSharedFilesDirectory") { null as String? }
 
-    OnNewIntent { intent ->
-      take(intent)?.let { sendEvent("onShare", it) }
-      // Later reads of the activity's intent see this one, already taken.
-      appContext.currentActivity?.intent = intent
-    }
+    OnNewIntent { intent -> onNewIntent(intent) }
   }
 
-  private fun take(intent: Intent): Map<String, String>? {
-    if (intent.action != Intent.ACTION_SEND) {
-      return null
-    }
-    val uri = intent.stream()
-    val hasText = intent.hasExtra(Intent.EXTRA_TEXT)
-    intent.removeExtra(Intent.EXTRA_STREAM)
-    intent.removeExtra(Intent.EXTRA_TEXT)
-    return when {
-      uri != null -> mapOf(
-        "kind" to "file",
-        "uri" to uri.toString(),
-        "mimeType" to (intent.type ?: "application/octet-stream"),
-      )
-      // learnX takes text/* shares for text files; text without a file can't be attached.
-      hasText -> mapOf("kind" to "unsupported")
-      else -> null
-    }
+  internal fun takeSharedItem(): Map<String, String>? = appContext.currentActivity?.intent?.let(::take)
+
+  internal fun onNewIntent(intent: Intent) {
+    take(intent)?.let { sendEvent("onShare", it) }
+    // Later reads of the activity's intent see this one, already taken.
+    appContext.currentActivity?.intent = intent
   }
 
-  @Suppress("DEPRECATION")
-  private fun Intent.stream(): Uri? =
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
-    } else {
-      getParcelableExtra(Intent.EXTRA_STREAM)
+  internal companion object {
+    fun take(intent: Intent): Map<String, String>? {
+      if (intent.action != Intent.ACTION_SEND) {
+        return null
+      }
+      val uri = intent.stream()
+      val hasText = intent.hasExtra(Intent.EXTRA_TEXT)
+      intent.removeExtra(Intent.EXTRA_STREAM)
+      intent.removeExtra(Intent.EXTRA_TEXT)
+      return when {
+        uri != null -> mapOf(
+          "kind" to "file",
+          "uri" to uri.toString(),
+          "mimeType" to (intent.type ?: "application/octet-stream"),
+        )
+        // learnX takes text/* shares for text files; text without a file can't be attached.
+        hasText -> mapOf("kind" to "unsupported")
+        else -> null
+      }
     }
+
+    @Suppress("DEPRECATION")
+    private fun Intent.stream(): Uri? =
+      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+      } else {
+        getParcelableExtra(Intent.EXTRA_STREAM)
+      }
+  }
 }

@@ -8,10 +8,25 @@ version = '1.0.0'
 
 android {
   namespace "io.robertying.learnx.crashlytics"
+
+  buildTypes {
+    debug {
+      // createDebugUnitTestCoverageReport writes JaCoCo's report for the unit tests.
+      enableUnitTestCoverage true
+    }
+  }
+
+  testOptions {
+    unitTests.includeAndroidResources = true
+  }
 }
 
 dependencies {
   // The app's BoM (android/build.gradle), so this resolves to the Crashlytics it already links.
   implementation platform("com.google.firebase:firebase-bom:${rootProject.ext.firebaseBomVersion}")
   implementation("com.google.firebase:firebase-crashlytics")
+
+  testImplementation("junit:junit:${rootProject.ext.junitVersion}")
+  testImplementation("org.robolectric:robolectric:${rootProject.ext.robolectricVersion}")
+  testImplementation("io.mockk:mockk:${rootProject.ext.mockkVersion}")
 }

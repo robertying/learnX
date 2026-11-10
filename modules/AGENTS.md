@@ -9,6 +9,11 @@ Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, 
 - Expo's module DSL (`Function`, `AsyncFunction`, `Prop`) only runs from JS, so a module's definition wires names to functions the tests call directly (`Function("takeOpenedItem", Self.takeOpenedItem)`), and its tests build the definition once. OS services sit behind a small protocol with a fake in the tests: `SearchableIndex` (Core Spotlight), `MenuBuilding` (the menu bar builder), `CrashReporter` (Crashlytics). Code that writes user defaults takes the suite to use.
 - Left untested: what only UIKit or Firebase can call (`SystemMenuBuilder`, `CrashlyticsModule.reporter`'s default, the share extension's view controller, the Mac-only window size in `SceneDelegate`), the bodies of `AsyncFunction` and `Prop` closures, and the `sendEvent` calls, which need a JS runtime.
 
+## Native tests (Android)
+
+- `modules/<name>/android/src/test` holds each module's JVM unit tests: JUnit 4, Robolectric (an `Intent` or `Uri` needs it; `src/test/resources/robolectric.properties` sets the newest Android it runs) and MockK (a module's `appContext`, `FirebaseCrashlytics.getInstance()`). Their versions are in `android/build.gradle`'s `ext`. The module's logic is in plain functions (`ShareModule.take`, `JavaScriptError.from`) that its definition calls.
+- `scripts/test-android.sh` runs them with JaCoCo and prints line coverage; CI runs it as "Android unit tests" in `check.yml` (not a required check). The app module's Kotlin (`MainActivity`, `MainApplication`, the widget providers) is the React Native template's startup code and is left untested.
+
 ## Spotlight and App Intents
 
 - `modules/spotlight` (iOS and Mac Catalyst; null elsewhere) indexes the current semester's notices and assignments in Core Spotlight, one domain per type (`notice`, `assignment`; unique ids `<domain>:<id>`), without hidden courses. `helpers/spotlight` (`updateSpotlight`) sends only the items that changed or went (`updateItems`), after a full `replaceItems` the first time in each JS runtime; items don't expire; `helpers/surfaces` calls it, and `clearSpotlight` on logout.

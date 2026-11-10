@@ -11,6 +11,10 @@ buildscript {
         kspVersion = "2.3.13"
         // The app and modules/crashlytics link the same Firebase.
         firebaseBomVersion = "35.1.0"
+        // Unit tests of the local modules (modules/*/android/src/test).
+        junitVersion = "4.13.2"
+        robolectricVersion = "4.17"
+        mockkVersion = "1.14.12"
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
