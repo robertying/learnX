@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import {
   AccessibilityInfo,
+  ColorValue,
   Keyboard,
   PanResponder,
+  PlatformColor,
   StyleSheet,
   Text,
   View,
@@ -54,11 +56,18 @@ const defaultDurations: Record<ToastType, number> = {
 };
 
 // The SF Symbols and system colors Apple's own HUDs use for each outcome.
-const symbols: Partial<Record<ToastType, { name: string; color: string }>> = {
-  success: { name: 'checkmark.circle.fill', color: '#34C759' },
-  warning: { name: 'exclamationmark.triangle.fill', color: '#FF9500' },
-  error: { name: 'xmark.circle.fill', color: '#FF3B30' },
-};
+const symbols: Partial<Record<ToastType, { name: string; color: ColorValue }>> =
+  {
+    success: {
+      name: 'checkmark.circle.fill',
+      color: PlatformColor('systemGreen'),
+    },
+    warning: {
+      name: 'exclamationmark.triangle.fill',
+      color: PlatformColor('systemOrange'),
+    },
+    error: { name: 'xmark.circle.fill', color: PlatformColor('systemRed') },
+  };
 
 /**
  * Shows a toast. A plain function, so it is safe to call from anywhere. An

@@ -6,7 +6,7 @@ import {
   StyleProp,
   ViewStyle,
 } from 'react-native';
-import { useTheme, withAlpha } from 'theme';
+import { MaterialColors, useTheme, withAlpha } from 'theme';
 
 export interface TouchableProps extends Omit<PressableProps, 'style'> {
   /**
@@ -33,7 +33,9 @@ const Touchable: React.FC<TouchableProps> = ({
   if (Platform.OS === 'android') {
     return (
       <Pressable
-        android_ripple={{ color: withAlpha(theme.colors.onSurface, 0.12) }}
+        android_ripple={{
+          color: withAlpha((theme.colors as MaterialColors).onSurface, 0.12),
+        }}
         style={style}
         {...props}
       />

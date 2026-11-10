@@ -1,5 +1,5 @@
 import { requireNativeView } from 'expo';
-import type { ViewProps } from 'react-native';
+import type { ColorValue, ViewProps } from 'react-native';
 
 export interface ToastBackgroundProps extends ViewProps {
   cornerRadius: number;
@@ -15,7 +15,7 @@ export interface ToastSymbolProps extends ViewProps {
   name: string;
   /** The symbol's point size. */
   size: number;
-  color: string;
+  color: ColorValue;
 }
 
 /**

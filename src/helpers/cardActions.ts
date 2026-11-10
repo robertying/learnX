@@ -1,21 +1,16 @@
 // The actions a card offers when swiped (iOS), long-pressed (Android) or
 // right-clicked (iPad, Mac), and as accessibility actions everywhere.
-import { statusColors, withAlpha } from 'theme';
+import type { StatusTone } from 'theme';
 import { t } from './i18n';
 import type { SystemIconName } from './systemIcons';
-
-// Light-mode system colors: the swipe buttons tint them at 20%, which works on
-// both light and dark cards.
-const status = statusColors.light;
 
 export interface CardAction {
   key: 'hide' | 'fav' | 'archive';
   testID: string;
   label: string;
   icon: SystemIconName;
-  color: string;
-  /** Swipe button background */
-  background: string;
+  /** The status hue of its icon and swipe button */
+  tone: StatusTone;
 }
 
 /**
@@ -40,8 +35,7 @@ export const cardActions = ({
         testID: 'card-hide',
         label: hidden ? t('unhide') : t('hide'),
         icon: hidden ? 'show' : 'hide',
-        color: status.yellow,
-        background: withAlpha(status.yellow, 0.2),
+        tone: 'yellow',
       },
     ];
   }
@@ -53,8 +47,7 @@ export const cardActions = ({
       testID: 'card-fav',
       label: fav ? t('unfavorite') : t('favorite'),
       icon: fav ? 'unfavorite' : 'favorite',
-      color: status.red,
-      background: withAlpha(status.red, 0.2),
+      tone: 'red',
     });
   }
   actions.push({
@@ -62,8 +55,7 @@ export const cardActions = ({
     testID: 'card-archive',
     label: archived ? t('restore') : t('archive'),
     icon: archived ? 'unarchive' : 'archive',
-    color: status.blue,
-    background: withAlpha(status.blue, 0.2),
+    tone: 'blue',
   });
   return actions;
 };

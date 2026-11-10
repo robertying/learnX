@@ -155,7 +155,7 @@ it('uses Material icons and the card color on Android', async () => {
   Platform.OS = 'android';
   const MainTab = loadMainTab(android);
   await render(<MainTab />);
-  expect(config().tabBarStyle).toEqual({ backgroundColor: expect.any(String) });
+  expect(config().tabBarStyle).toEqual({ backgroundColor: expect.anything() });
   const icon = (
     lastNavigatorScreens()[0].options!.tabBarIcon as () => unknown
   )();

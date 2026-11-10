@@ -1,5 +1,9 @@
-import { useSyncExternalStore } from 'react';
-import { AccessibilityInfo, Platform, useColorScheme } from 'react-native';
+import {
+  ColorValue,
+  Platform,
+  PlatformColor,
+  useColorScheme,
+} from 'react-native';
 import {
   DefaultTheme as NavigationDefaultTheme,
   DarkTheme as NavigationDarkTheme,
@@ -65,149 +69,219 @@ const materialDark: typeof materialLight = {
   inversePrimary: 'rgb(102, 8, 116)',
 };
 
-// iOS and Mac use the system's neutral backgrounds and labels instead of the
-// purple-tinted Material ones, so the JS screens match the native Form screens.
-const iosNeutralLight: Partial<typeof materialLight> = {
-  background: 'rgb(255, 255, 255)', // systemBackground
-  onBackground: 'rgb(0, 0, 0)', // label
-  surface: 'rgb(255, 255, 255)',
-  onSurface: 'rgb(0, 0, 0)',
-  surfaceVariant: 'rgb(229, 229, 234)', // systemGray5
-  onSurfaceVariant: 'rgb(108, 108, 112)',
-  surfaceContainer: 'rgb(242, 242, 247)', // secondarySystemBackground
-  outline: 'rgb(142, 142, 147)', // systemGray
-  outlineVariant: 'rgb(198, 198, 200)', // opaqueSeparator
-};
-const iosNeutralDark: Partial<typeof materialLight> = {
-  background: 'rgb(0, 0, 0)',
-  onBackground: 'rgb(255, 255, 255)',
-  surface: 'rgb(0, 0, 0)',
-  onSurface: 'rgb(255, 255, 255)',
-  surfaceVariant: 'rgb(44, 44, 46)',
-  onSurfaceVariant: 'rgb(174, 174, 178)',
-  surfaceContainer: 'rgb(28, 28, 30)',
-  outline: 'rgb(142, 142, 147)',
-  outlineVariant: 'rgb(56, 56, 58)',
-};
+/** The status hues, for flags, pills, file types and swipe actions. */
+export type StatusTone =
+  | 'red'
+  | 'orange'
+  | 'yellow'
+  | 'green'
+  | 'blue'
+  | 'grey';
+type ToneColors<C = ColorValue> = Record<StatusTone, C>;
 
 /**
- * Status colors for icons: Apple's system colors, which also read
- * well next to Material components on Android. Fills, such as the swipe
- * buttons' tint, use `light` and `dark`; text and glyphs use `theme.colors.status`.
+ * Material 3 custom colors for the status hues Material has no role for,
+ * from `@material/material-color-utilities` 0.3.0 (`customColor` with
+ * blending, harmonized to the seed #660874, from Apple's hues): color, on color, container and on
+ * container, for light and dark. Red is the error role.
  */
-export const statusColors = {
+const materialCustom = {
   light: {
-    red: 'rgb(255, 59, 48)',
-    orange: 'rgb(255, 149, 0)',
-    yellow: 'rgb(255, 204, 0)',
-    green: 'rgb(52, 199, 89)',
-    blue: 'rgb(0, 122, 255)',
-    grey: 'rgb(142, 142, 147)',
+    orange: [
+      'rgb(154, 70, 5)',
+      'rgb(255, 255, 255)',
+      'rgb(255, 219, 202)',
+      'rgb(51, 18, 0)',
+    ],
+    yellow: [
+      'rgb(128, 86, 0)',
+      'rgb(255, 255, 255)',
+      'rgb(255, 221, 176)',
+      'rgb(40, 24, 0)',
+    ],
+    green: [
+      'rgb(0, 108, 72)',
+      'rgb(255, 255, 255)',
+      'rgb(98, 253, 185)',
+      'rgb(0, 33, 19)',
+    ],
+    blue: [
+      'rgb(58, 76, 220)',
+      'rgb(255, 255, 255)',
+      'rgb(223, 224, 255)',
+      'rgb(0, 10, 99)',
+    ],
   },
   dark: {
-    red: 'rgb(255, 69, 58)',
-    orange: 'rgb(255, 159, 10)',
-    yellow: 'rgb(255, 214, 10)',
-    green: 'rgb(48, 209, 88)',
-    blue: 'rgb(10, 132, 255)',
-    grey: 'rgb(152, 152, 157)',
+    orange: [
+      'rgb(255, 182, 142)',
+      'rgb(84, 34, 0)',
+      'rgb(119, 51, 0)',
+      'rgb(255, 219, 202)',
+    ],
+    yellow: [
+      'rgb(254, 186, 75)',
+      'rgb(68, 44, 0)',
+      'rgb(97, 64, 0)',
+      'rgb(255, 221, 176)',
+    ],
+    green: [
+      'rgb(61, 224, 158)',
+      'rgb(0, 56, 35)',
+      'rgb(0, 82, 53)',
+      'rgb(98, 253, 185)',
+    ],
+    blue: [
+      'rgb(188, 194, 255)',
+      'rgb(0, 22, 156)',
+      'rgb(26, 47, 197)',
+      'rgb(223, 224, 255)',
+    ],
   },
-  // Apple's accessible (Increase Contrast) variants. The plain light ones are
-  // 2:1 to 3.5:1 on white, too faint for text and small glyphs, so light mode
-  // always uses these for `theme.colors.status`.
-  accessibleLight: {
-    red: 'rgb(215, 0, 21)',
-    orange: 'rgb(201, 52, 0)',
-    yellow: 'rgb(178, 80, 0)',
-    green: 'rgb(36, 138, 61)',
-    blue: 'rgb(0, 64, 221)',
-    grey: 'rgb(108, 108, 112)',
-  },
-  accessibleDark: {
-    red: 'rgb(255, 105, 97)',
-    orange: 'rgb(255, 179, 64)',
-    yellow: 'rgb(255, 212, 38)',
-    green: 'rgb(48, 219, 91)',
-    blue: 'rgb(64, 156, 255)',
-    grey: 'rgb(174, 174, 178)',
-  },
-};
+} as const;
 
-// iOS's Increase Contrast: darker secondary text and separators on the JS
-// screens, as the system gives its own views.
-const iosHighContrastLight: Partial<typeof materialLight> = {
-  onSurfaceVariant: 'rgb(72, 72, 76)',
-  outline: 'rgb(108, 108, 112)',
-  outlineVariant: 'rgb(142, 142, 147)',
-};
-const iosHighContrastDark: Partial<typeof materialLight> = {
-  onSurfaceVariant: 'rgb(210, 210, 214)',
-  outline: 'rgb(174, 174, 178)',
-  outlineVariant: 'rgb(110, 110, 115)',
-};
+/**
+ * How strongly a status container shows: Material draws its container colors
+ * as they are; iOS and Mac lay the system color itself over the surface at
+ * this opacity, as Apple's own tinted capsules do.
+ */
+export const statusContainerOpacity = Platform.OS === 'ios' ? 0.15 : 1;
 
-/** Adds an alpha channel to an `rgb(r, g, b)` color. */
+/** Adds an alpha channel to an `rgb(r, g, b)` color (Material colors only). */
 export const withAlpha = (rgb: string, alpha: number) =>
   rgb.replace(/^rgb\((.*)\)$/, `rgba($1, ${alpha})`);
 
-/** Darkens an `rgb(r, g, b)` color by `factor` (0.8 keeps 80%). */
-export const shade = (rgb: string, factor: number) =>
-  rgb.replace(/\d+/g, c => String(Math.round(Number(c) * factor)));
-
-const luminance = (rgb: string) => {
-  const [r, g, b] = (rgb.match(/\d+/g) ?? []).map(c => {
-    const v = Number(c) / 255;
-    return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+/** Android: Material 3 roles, and custom colors for the other status hues. */
+const buildMaterialColors = (dark: boolean) => {
+  const m = dark ? materialDark : materialLight;
+  const custom = dark ? materialCustom.dark : materialCustom.light;
+  const tones = (
+    i: 0 | 1 | 2 | 3,
+    red: string,
+    grey: string,
+  ): ToneColors<string> => ({
+    red,
+    orange: custom.orange[i],
+    yellow: custom.yellow[i],
+    green: custom.green[i],
+    blue: custom.blue[i],
+    grey,
   });
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  return {
+    primary: m.primary,
+    onPrimary: m.onPrimary,
+    primaryContainer: m.primaryContainer,
+    onPrimaryContainer: m.onPrimaryContainer,
+    secondaryContainer: m.secondaryContainer,
+    onSecondaryContainer: m.onSecondaryContainer,
+    error: m.error,
+    onError: m.onError,
+    background: m.background,
+    surface: m.surface,
+    surfaceVariant: m.surfaceVariant,
+    surfaceContainer: m.surfaceContainer,
+    onSurface: m.onSurface,
+    onSurfaceVariant: m.onSurfaceVariant,
+    outline: m.outline,
+    outlineVariant: m.outlineVariant,
+    surfaceDisabled: withAlpha(m.onSurface, 0.12),
+    onSurfaceDisabled: withAlpha(m.onSurface, 0.38),
+    // Titles and body text, and captions
+    onSurfaceHigh: m.onSurface,
+    onSurfaceMedium: m.onSurfaceVariant,
+    // React Navigation's own keys
+    text: m.onSurface,
+    card: m.surfaceContainer,
+    border: m.outlineVariant,
+    notification: m.error,
+    status: tones(0, m.error, m.onSurfaceVariant),
+    onStatus: tones(1, m.onError, m.surface),
+    statusContainer: tones(2, m.errorContainer, m.surfaceVariant),
+    onStatusContainer: tones(3, m.onErrorContainer, m.onSurfaceVariant),
+  };
 };
+
+const mapTones = (f: (tone: StatusTone) => ColorValue): ToneColors => ({
+  red: f('red'),
+  orange: f('orange'),
+  yellow: f('yellow'),
+  green: f('green'),
+  blue: f('blue'),
+  grey: f('grey'),
+});
+
+/** Android's colors: plain `rgb(…)` strings. */
+export type MaterialColors = ReturnType<typeof buildMaterialColors>;
+type Widen<T> = {
+  [K in keyof T]: T[K] extends string ? ColorValue : Widen<T[K]>;
+};
+/**
+ * The theme's color roles. On iOS and Mac they are system colors, which can't
+ * be parsed or blended in JS: give them to views as they are.
+ */
+type ColorRoles = Widen<MaterialColors>;
+
+const system = (name: string) => PlatformColor(name);
 
 /**
- * Text color on a solid `rgb(r, g, b)` background, such as a status badge:
- * white while it keeps 3:1 contrast, black otherwise.
+ * iOS, iPadOS and Mac: UIKit's dynamic system colors, which follow dark mode
+ * and Increase Contrast by themselves, and the brand color as the tint.
  */
-export const textOn = (rgb: string) =>
-  1.05 / (luminance(rgb) + 0.05) >= 3 ? 'white' : 'black';
-
-const buildColors = (dark: boolean, highContrast = false) => {
-  const material = dark ? materialDark : materialLight;
-  const colors = {
-    ...material,
-    ...(Platform.OS === 'ios' ? (dark ? iosNeutralDark : iosNeutralLight) : {}),
-    ...(Platform.OS === 'ios' && highContrast
-      ? dark
-        ? iosHighContrastDark
-        : iosHighContrastLight
-      : {}),
+const buildAppleColors = (dark: boolean): ColorRoles => {
+  const brand = dark ? brandColors.dark : brandColors.light;
+  const label = system('label');
+  const secondaryLabel = system('secondaryLabel');
+  const background = system('systemBackground');
+  const tones: ToneColors = {
+    red: system('systemRed'),
+    orange: system('systemOrange'),
+    yellow: system('systemYellow'),
+    green: system('systemGreen'),
+    blue: system('systemBlue'),
+    grey: system('systemGray'),
   };
   return {
-    ...colors,
-    // React Navigation's own keys
-    text: colors.onSurface,
-    // Header and tab bar: plain system background on iOS and Mac
-    card: Platform.OS === 'ios' ? colors.background : colors.surfaceContainer,
-    border: colors.outlineVariant,
-    notification: colors.error,
-    // Titles and body text, and captions: iOS's label and secondaryLabel,
-    // Material 3's onSurface and onSurfaceVariant
-    onSurfaceHigh: colors.onSurface,
-    onSurfaceMedium:
-      Platform.OS === 'ios' && !highContrast
-        ? dark
-          ? 'rgba(235, 235, 245, 0.6)'
-          : 'rgba(60, 60, 67, 0.6)'
-        : colors.onSurfaceVariant,
-    surfaceDisabled: withAlpha(colors.onSurface, 0.12),
-    onSurfaceDisabled: withAlpha(colors.onSurface, 0.38),
-    status: dark
-      ? highContrast
-        ? statusColors.accessibleDark
-        : statusColors.dark
-      : statusColors.accessibleLight,
+    primary: brand,
+    onPrimary: 'white',
+    primaryContainer: system('tertiarySystemFill'),
+    onPrimaryContainer: brand,
+    secondaryContainer: system('tertiarySystemFill'),
+    onSecondaryContainer: label,
+    error: tones.red,
+    onError: 'white',
+    background,
+    surface: background,
+    surfaceVariant: system('systemGray5'),
+    surfaceContainer: system('secondarySystemBackground'),
+    onSurface: label,
+    onSurfaceVariant: secondaryLabel,
+    outline: system('systemGray'),
+    outlineVariant: system('opaqueSeparator'),
+    surfaceDisabled: system('quaternarySystemFill'),
+    onSurfaceDisabled: system('tertiaryLabel'),
+    onSurfaceHigh: label,
+    onSurfaceMedium: secondaryLabel,
+    text: label,
+    card: background,
+    border: system('opaqueSeparator'),
+    // native-stack reads this with the `color` package, which can't parse a
+    // system color. It only colors header item badges with a count; the
+    // iOS 26 dot is the system's own red.
+    notification: 'red',
+    status: tones,
+    // White on the solid system colors, as Apple's own file badges, except
+    // yellow, which is too light for it.
+    onStatus: { ...mapTones(() => 'white'), yellow: 'black' } as ToneColors,
+    // Drawn at `statusContainerOpacity` over the surface.
+    statusContainer: tones,
+    onStatusContainer: tones,
   };
 };
 
-export type ThemeColors = ReturnType<typeof buildColors>;
+const buildColors = (dark: boolean): ColorRoles =>
+  Platform.OS === 'ios' ? buildAppleColors(dark) : buildMaterialColors(dark);
+
+export type ThemeColors = ColorRoles;
 
 export interface Theme {
   dark: boolean;
@@ -219,23 +293,32 @@ export const BrandLightTheme: Theme = {
   colors: buildColors(false),
 };
 export const BrandDarkTheme: Theme = { dark: true, colors: buildColors(true) };
-const highContrastLightTheme: Theme = {
-  dark: false,
-  colors: buildColors(false, true),
-};
-const highContrastDarkTheme: Theme = {
-  dark: true,
-  colors: buildColors(true, true),
-};
 
+// React Navigation types its colors as strings, but passes the ones it
+// draws with (background, card, text, border, primary) on to native views,
+// which take system colors too.
+type NavigationColors = typeof NavigationDefaultTheme.colors;
 export const BrandLightNavigationTheme = {
   ...NavigationDefaultTheme,
-  colors: BrandLightTheme.colors,
+  colors: BrandLightTheme.colors as unknown as NavigationColors,
 };
 export const BrandDarkNavigationTheme = {
   ...NavigationDarkTheme,
-  colors: BrandDarkTheme.colors,
+  colors: BrandDarkTheme.colors as unknown as NavigationColors,
 };
+
+/**
+ * Text and link colors for course-site HTML in a web view, which takes CSS
+ * strings: WebKit's own text color on iOS and Mac (the label color), the
+ * Material role on Android, and the brand color for links.
+ */
+export const webContentColors = (dark: boolean) => ({
+  textColor:
+    Platform.OS === 'ios'
+      ? 'CanvasText'
+      : (dark ? materialDark : materialLight).onSurface,
+  linkColor: dark ? brandColors.dark : brandColors.light,
+});
 
 /**
  * Compose builds its own `SchemeTonalSpot` palette from a Host's `seedColor`,
@@ -263,45 +346,16 @@ const composeOverrides = {
 export const useComposeColorOverrides = () =>
   useColorScheme() === 'dark' ? composeOverrides.dark : composeOverrides.light;
 
-// iOS's Increase Contrast ("darker system colors"), followed live.
-let increaseContrast = false;
-const contrastListeners = new Set<() => void>();
-const setIncreaseContrast = (enabled: boolean) => {
-  if (enabled !== increaseContrast) {
-    increaseContrast = enabled;
-    contrastListeners.forEach(listener => listener());
-  }
-};
-if (Platform.OS === 'ios') {
-  void AccessibilityInfo.isDarkerSystemColorsEnabled()
-    .then(setIncreaseContrast)
-    .catch(() => {});
-  AccessibilityInfo.addEventListener(
-    'darkerSystemColorsChanged',
-    setIncreaseContrast,
-  );
-}
-const subscribeContrast = (listener: () => void) => {
-  contrastListeners.add(listener);
-  return () => {
-    contrastListeners.delete(listener);
-  };
-};
-const useIncreaseContrast = () =>
-  useSyncExternalStore(subscribeContrast, () => increaseContrast);
-
 /**
- * The app's colors for the system appearance (and iOS's Increase Contrast).
- * Use this in components.
+ * The theme on Android, where its colors are plain strings, for Compose views
+ * and color math. Only in Android code (`.android.tsx` files).
  */
-export const useTheme = (): Theme => {
-  const dark = useColorScheme() === 'dark';
-  const highContrast = useIncreaseContrast();
-  if (highContrast) {
-    return dark ? highContrastDarkTheme : highContrastLightTheme;
-  }
-  return dark ? BrandDarkTheme : BrandLightTheme;
-};
+export const useMaterialTheme = () =>
+  useTheme() as { dark: boolean; colors: MaterialColors };
+
+/** The app's colors for the system appearance. Use this in components. */
+export const useTheme = (): Theme =>
+  useColorScheme() === 'dark' ? BrandDarkTheme : BrandLightTheme;
 
 /** The React Navigation theme for the system appearance. */
 export const useNavigationTheme = () =>

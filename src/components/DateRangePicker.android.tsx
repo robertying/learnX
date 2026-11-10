@@ -1,7 +1,7 @@
 import { DateRangePickerDialog } from '@expo/ui/jetpack-compose';
 import { fromPickerDay, toPickerDay } from 'helpers/pickerDay';
 import type { DateRangePickerProps } from './DateRangePicker.shared';
-import { useTheme } from 'theme';
+import { useMaterialTheme } from 'theme';
 import ThemedHost from 'components/ThemedHost';
 
 /**
@@ -18,7 +18,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = ({
   onConfirm,
   onDismiss,
 }) => {
-  const theme = useTheme();
+  const theme = useMaterialTheme();
 
   if (!visible) {
     return null;
