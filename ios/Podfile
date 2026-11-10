@@ -109,7 +109,8 @@ target 'learnX' do
     # Pods project; pods are signed with the app, so they need no identity.
     # Left off: user script sandboxing (React Native's, Expo's and Crashlytics'
     # script phases write outside their declared outputs) and the module
-    # verifier (React Native's headers aren't modular).
+    # verifier on the pods themselves (CocoaPods' umbrella headers use quoted
+    # includes, which it rejects).
     installer.pods_project.root_object.attributes['LastUpgradeCheck'] = '2720'
     installer.pods_project.root_object.attributes['BuildIndependentTargetsInParallel'] = 'YES'
     installer.pods_project.build_configurations.each do |config|
