@@ -1,23 +1,18 @@
 // The actions a card offers when swiped (iOS), long-pressed (Android) or
 // right-clicked (iPad, Mac), and as accessibility actions everywhere.
-import type { SFSymbol } from 'sf-symbols-typescript';
-import type { MaterialDesignIconsIconName } from '@react-native-vector-icons/material-design-icons';
 import { statusColors, withAlpha } from 'theme';
 import { t } from './i18n';
+import type { SystemIconName } from './systemIcons';
 
 // Light-mode system colors: the swipe buttons tint them at 20%, which works on
 // both light and dark cards.
 const status = statusColors.light;
 
-export type CardActionIconName = MaterialDesignIconsIconName;
-
 export interface CardAction {
   key: 'hide' | 'fav' | 'archive';
   testID: string;
   label: string;
-  icon: CardActionIconName;
-  /** The context menu's icon on iPad and Mac */
-  systemImage: SFSymbol;
+  icon: SystemIconName;
   color: string;
   /** Swipe button background */
   background: string;
@@ -44,8 +39,7 @@ export const cardActions = ({
         key: 'hide',
         testID: 'card-hide',
         label: hidden ? t('unhide') : t('hide'),
-        icon: hidden ? 'eye' : 'eye-off',
-        systemImage: hidden ? 'eye' : 'eye.slash',
+        icon: hidden ? 'show' : 'hide',
         color: status.yellow,
         background: withAlpha(status.yellow, 0.2),
       },
@@ -58,8 +52,7 @@ export const cardActions = ({
       key: 'fav',
       testID: 'card-fav',
       label: fav ? t('unfavorite') : t('favorite'),
-      icon: fav ? 'heart-off' : 'heart',
-      systemImage: fav ? 'heart.slash' : 'heart',
+      icon: fav ? 'unfavorite' : 'favorite',
       color: status.red,
       background: withAlpha(status.red, 0.2),
     });
@@ -68,8 +61,7 @@ export const cardActions = ({
     key: 'archive',
     testID: 'card-archive',
     label: archived ? t('restore') : t('archive'),
-    icon: archived ? 'archive-arrow-up' : 'archive-arrow-down',
-    systemImage: archived ? 'arrow.up.bin' : 'archivebox',
+    icon: archived ? 'unarchive' : 'archive',
     color: status.blue,
     background: withAlpha(status.blue, 0.2),
   });

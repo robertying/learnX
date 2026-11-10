@@ -3,7 +3,6 @@
 // filter is checked and each one shows its count; the button turns tonal
 // while a filter other than All is on.
 import { useState } from 'react';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import {
   DropdownMenu,
   FilledTonalIconButton,
@@ -16,6 +15,7 @@ import {
 import { testID } from '@expo/ui/jetpack-compose/modifiers';
 import { useTheme } from 'theme';
 import type { FilterMenuProps } from './FilterMenu.shared';
+import SystemIcon from 'components/SystemIcon';
 import ThemedHost from 'components/ThemedHost';
 
 const FilterMenu: React.FC<FilterMenuProps> = ({
@@ -26,6 +26,12 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
 }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
+  const selectedColors = {
+    selectedContainerColor: theme.colors.secondaryContainer,
+    selectedTextColor: theme.colors.onSecondaryContainer,
+    selectedLeadingIconColor: theme.colors.onSecondaryContainer,
+    selectedTrailingContentColor: theme.colors.onSecondaryContainer,
+  };
 
   const Button = selected === 'all' ? IconButton : FilledTonalIconButton;
 
@@ -54,6 +60,10 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
               key={option.name}
               selected={selected === option.name}
               shapes={{ index, count: options.length }}
+              // Compose's expressive menu marks the selected item with the
+              // tertiary container, which the brand seed turns peach; use the
+              // filled tonal button's secondary container instead.
+              colors={selectedColors}
               onClick={() => {
                 setExpanded(false);
                 onSelectionChange(option.name);
@@ -62,8 +72,8 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
             >
               <SelectableDropdownMenuItem.LeadingIcon>
                 <RNHostView matchContents>
-                  <MaterialDesignIcons
-                    name={option.materialIcon}
+                  <SystemIcon
+                    name={option.icon}
                     size={24}
                     color={
                       selected === option.name

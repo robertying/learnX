@@ -142,6 +142,8 @@ PODS:
     - ExpoModulesCore
   - ExpoSQLite (58.0.15):
     - ExpoModulesCore
+  - ExpoSymbols (58.0.4):
+    - ExpoModulesCore
   - ExpoTaskManager (58.0.13):
     - ExpoModulesCore
     - UMAppLoader
@@ -3670,6 +3672,7 @@ DEPENDENCIES:
   - ExpoNotifications (from `../node_modules/expo-notifications/ios`)
   - ExpoSecureStore (from `../node_modules/expo-secure-store/ios`)
   - ExpoSQLite (from `../node_modules/expo-sqlite/ios`)
+  - ExpoSymbols (from `../node_modules/expo-symbols/ios`)
   - ExpoTaskManager (from `../node_modules/expo-task-manager/ios`)
   - "ExpoUI (from `../node_modules/@expo/ui/ios`)"
   - ExpoWidgets (from `../node_modules/expo-widgets/ios`)
@@ -3852,6 +3855,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-secure-store/ios"
   ExpoSQLite:
     :path: "../node_modules/expo-sqlite/ios"
+  ExpoSymbols:
+    :path: "../node_modules/expo-symbols/ios"
   ExpoTaskManager:
     :path: "../node_modules/expo-task-manager/ios"
   ExpoUI:
@@ -4091,6 +4096,7 @@ SPEC CHECKSUMS:
   ExpoNotifications: d0621bf548676831247952ec23d280098391ea3c
   ExpoSecureStore: 64e1fe78b5b0a1edb61beff044bb2cad03084f9c
   ExpoSQLite: 580284867126f45f25a5a70a06a84df9664d3786
+  ExpoSymbols: 1260e741b35b6fd105942779895418db306645c8
   ExpoTaskManager: a47c4de3446e9754c6f11eef227e0b20141a19cd
   ExpoUI: 31a8539381c30cc0d1efbc111e2b384ed25b21f5
   ExpoWidgets: 18e3983798a3cfa5fcf6521e670aed55f8a86a37

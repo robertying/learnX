@@ -72,64 +72,91 @@ interface CourseExtraInfo {
   isFavorite?: boolean;
 }
 
+/** What the app keeps of each item, the rest of the server's answer dropped. */
+const courseExtraFields = [
+  'courseId',
+  'courseName',
+  'courseTeacherName',
+  'isFavorite',
+] as const satisfies readonly (keyof CourseExtraInfo)[];
+
+export const noticeFields = [
+  'id',
+  'title',
+  'publisher',
+  'publishTime',
+  'expireTime',
+  'markedImportant',
+  'content',
+  'hasRead',
+  'attachment',
+  'url',
+  ...courseExtraFields,
+] as const satisfies readonly (
+  | keyof CourseNotification
+  | keyof CourseExtraInfo
+)[];
+
 export type Notice = Pick<
   CourseNotification,
-  | 'id'
-  | 'title'
-  | 'publisher'
-  | 'publishTime'
-  | 'expireTime'
-  | 'markedImportant'
-  | 'content'
-  | 'hasRead'
-  | 'attachment'
-  | 'url'
+  Exclude<(typeof noticeFields)[number], keyof CourseExtraInfo>
 > &
   CourseExtraInfo;
+
+export const assignmentFields = [
+  'id',
+  'title',
+  'description',
+  'deadline',
+  'lateSubmissionDeadline',
+  'completionType',
+  'submissionType',
+  'attachment',
+  'submitted',
+  'isLateSubmission',
+  'submitTime',
+  'submittedContent',
+  'submittedAttachment',
+  'graded',
+  'grade',
+  'gradeLevel',
+  'graderName',
+  'gradeTime',
+  'gradeContent',
+  'gradeAttachment',
+  'answerContent',
+  'answerAttachment',
+  'url',
+  'excellentHomeworkList',
+  ...courseExtraFields,
+] as const satisfies readonly (keyof Homework | keyof CourseExtraInfo)[];
 
 export type Assignment = Pick<
   Homework,
-  | 'id'
-  | 'title'
-  | 'description'
-  | 'deadline'
-  | 'lateSubmissionDeadline'
-  | 'completionType'
-  | 'submissionType'
-  | 'attachment'
-  | 'submitted'
-  | 'isLateSubmission'
-  | 'submitTime'
-  | 'submittedContent'
-  | 'submittedAttachment'
-  | 'graded'
-  | 'grade'
-  | 'gradeLevel'
-  | 'graderName'
-  | 'gradeTime'
-  | 'gradeContent'
-  | 'gradeAttachment'
-  | 'answerContent'
-  | 'answerAttachment'
-  | 'url'
-  | 'excellentHomeworkList'
+  Exclude<(typeof assignmentFields)[number], keyof CourseExtraInfo>
 > &
   CourseExtraInfo;
 
+export const fileFields = [
+  'id',
+  'title',
+  'description',
+  'category',
+  'size',
+  'fileType',
+  'markedImportant',
+  'isNew',
+  'uploadTime',
+  'downloadUrl',
+  ...courseExtraFields,
+] as const satisfies readonly (keyof CourseFile | keyof CourseExtraInfo)[];
+
 export type File = Pick<
   CourseFile,
-  | 'id'
-  | 'title'
-  | 'description'
-  | 'category'
-  | 'size'
-  | 'fileType'
-  | 'markedImportant'
-  | 'isNew'
-  | 'uploadTime'
-  | 'downloadUrl'
+  Exclude<(typeof fileFields)[number], keyof CourseExtraInfo>
 > &
   CourseExtraInfo;
+
 /** What it takes to download and share a file. */
 export type DownloadableFile = Pick<
   File,

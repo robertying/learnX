@@ -19,3 +19,10 @@ jest.mock(
     },
   }),
 );
+
+// SystemIcon's Material Symbols font, as if already loaded
+jest.mock('expo-font', () => ({ useFonts: () => [true, null] }));
+jest.mock('expo-symbols/androidWeights/regular', () => ({
+  __esModule: true,
+  default: { name: 'MaterialSymbols_400Regular', font: 1 },
+}));

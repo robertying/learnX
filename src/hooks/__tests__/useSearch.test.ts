@@ -19,7 +19,10 @@ const filler =
 const notices = [
   notice('n1', '课程通知', `${filler}<p>期中考试改到三教 2102 教室</p>`),
   notice('n2', 'Lecture notes', `${filler}<p>Slides for chapter 7 are up</p>`),
-  notice('n3', '作业提醒', filler),
+  {
+    ...notice('n3', '作业提醒', filler),
+    attachment: { name: 'syllabus-2026.pdf' },
+  } as Notice,
 ];
 
 const assignments = [
@@ -29,6 +32,7 @@ const assignments = [
     courseName: '微积分',
     title: '第三次作业',
     description: `${filler}<div>提交时请附上 <b>手写</b> 草稿</div>`,
+    submittedAttachment: { name: 'homework-scan.pdf' },
   } as Assignment,
 ];
 
@@ -69,6 +73,11 @@ describe('useSearch', () => {
   it('searches text, not HTML markup', async () => {
     expect((await search('color')).notices).toEqual([]);
     expect((await search('style')).notices).toEqual([]);
+  });
+
+  it('finds items by their attachments’ names', async () => {
+    expect((await search('syllabus-2026')).notices).toEqual(['n3']);
+    expect((await search('homework-scan')).assignments).toEqual(['a1']);
   });
 
   it('matches nested keys like the file category', async () => {

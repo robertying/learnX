@@ -58,11 +58,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
       {t('submitted')}
     </CardPill>
   ) : dueSoon ? (
-    <CardPill
-      testID="due-soon"
-      color={theme.colors.status.red}
-      icon="clock-outline"
-    >
+    <CardPill testID="due-soon" color={theme.colors.status.red} icon="dueSoon">
       {dueText}
     </CardPill>
   ) : (
@@ -87,7 +83,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         glyphs={
           <>
             {attachment ? <CardGlyph name="attachment" /> : null}
-            {hasAnswer ? <CardGlyph name="key-variant" /> : null}
+            {hasAnswer ? <CardGlyph name="answer" /> : null}
           </>
         }
         trailing={status}

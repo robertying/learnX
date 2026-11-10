@@ -1,10 +1,8 @@
 // The filters of a list screen (components/FilterList): the choices its
 // filter menu offers, which list each shows, the header subtitle for it, and
 // the ids picked in selection mode.
-import type { ComponentProps } from 'react';
-import type MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-import type { SFSymbol } from 'sf-symbols-typescript';
 import { t } from './i18n';
+import type { SystemIconName } from './systemIcons';
 
 export type FilterSelection =
   | 'all'
@@ -28,9 +26,7 @@ export interface FilterOption {
   name: FilterSelection;
   label: string;
   count: number;
-  sfSymbol: SFSymbol;
-  /** The matching Material Design icon, for the Android dropdown */
-  materialIcon: ComponentProps<typeof MaterialDesignIcons>['name'];
+  icon: SystemIconName;
 }
 
 export const filterOptions = ({
@@ -46,50 +42,43 @@ export const filterOptions = ({
       name: 'unfinished',
       label: t('unfinished'),
       count: unfinishedCount,
-      sfSymbol: 'circle',
-      materialIcon: 'checkbox-blank-circle-outline',
+      icon: 'unfinished',
     },
     unfinishedCount !== undefined && {
       name: 'finished',
       label: t('finished'),
       count: allCount - unfinishedCount,
-      sfSymbol: 'checkmark.circle',
-      materialIcon: 'checkbox-marked-circle-outline',
+      icon: 'done',
     },
     {
       name: 'all',
       label: t('all'),
       count: allCount,
-      sfSymbol: 'tray',
-      materialIcon: 'inbox',
+      icon: 'all',
     },
     unreadCount !== undefined && {
       name: 'unread',
       label: t('unread'),
       count: unreadCount,
-      sfSymbol: 'envelope.badge',
-      materialIcon: 'email-mark-as-unread',
+      icon: 'unread',
     },
     favCount !== undefined && {
       name: 'fav',
       label: t('fav'),
       count: favCount,
-      sfSymbol: 'heart',
-      materialIcon: 'heart-outline',
+      icon: 'favorite',
     },
     archivedCount !== undefined && {
       name: 'archived',
       label: t('archived'),
       count: archivedCount,
-      sfSymbol: 'archivebox',
-      materialIcon: 'archive-outline',
+      icon: 'archive',
     },
     {
       name: 'hidden',
       label: t('hidden'),
       count: hiddenCount,
-      sfSymbol: 'eye.slash',
-      materialIcon: 'eye-off-outline',
+      icon: 'hide',
     },
   ];
   return options.filter((o): o is FilterOption => o !== false);

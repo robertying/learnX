@@ -1,6 +1,6 @@
 import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import dayjs from 'dayjs';
-import Icon from '@react-native-vector-icons/material-design-icons';
+import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
 import { t } from 'helpers/i18n';
 import { Caption } from 'components/Text';
@@ -54,10 +54,8 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       ]}
       accessibilityLiveRegion="polite"
     >
-      <Icon
-        name={
-          failure === 'offline' ? 'cloud-off-outline' : 'alert-circle-outline'
-        }
+      <SystemIcon
+        name={failure === 'offline' ? 'offline' : 'error'}
         size={16}
         color={theme.colors.onSurfaceVariant}
         style={styles.icon}

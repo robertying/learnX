@@ -15,6 +15,7 @@ import {
   type FilterSelection,
 } from 'helpers/filters';
 import { t } from 'helpers/i18n';
+import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
 import { RootStackParams } from 'screens/types';
 
@@ -141,7 +142,7 @@ const useFilterListHeader = ({
             type: 'action',
             label: option.label,
             description: String(option.count),
-            icon: { type: 'sfSymbol', name: option.sfSymbol },
+            icon: { type: 'sfSymbol', name: systemIcons[option.icon].ios },
             state: filterSelected === option.name ? 'on' : 'off',
             onPress: () => onFilterSelect(option.name),
           })),

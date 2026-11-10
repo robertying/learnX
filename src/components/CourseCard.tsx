@@ -1,7 +1,8 @@
 import { StyleSheet, View } from 'react-native';
-import Icon from '@react-native-vector-icons/material-design-icons';
 import { Course } from 'data/types/state';
 import { t } from 'helpers/i18n';
+import { CardGutter } from './CardRow';
+import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
 import { Caption, Headline } from 'components/Text';
 import { useTheme } from 'theme';
@@ -14,7 +15,7 @@ export interface CourseCardProps extends CardWrapperProps {
   };
 }
 
-type CountIcon = 'bell-outline' | 'calendar-blank-outline' | 'folder-outline';
+type CountIcon = 'notices' | 'assignments' | 'files';
 
 /** A count with its icon, left out when there is nothing new. */
 const Count: React.FC<{ icon: CountIcon; count: number }> = ({
@@ -27,7 +28,7 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   }
   return (
     <View style={styles.count}>
-      <Icon name={icon} size={15} color={theme.colors.primary} />
+      <SystemIcon name={icon} size={15} color={theme.colors.primary} />
       <Caption
         variant="subheadline"
         style={[styles.countText, { color: theme.colors.primary }]}
@@ -76,6 +77,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
       .join(', ')}
   >
     <View style={styles.root}>
+      <CardGutter />
       <View style={styles.names}>
         <Headline>{name}</Headline>
         <Caption variant="subheadline" numberOfLines={1}>
@@ -83,12 +85,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
         </Caption>
       </View>
       <View style={styles.counts}>
-        <Count icon="bell-outline" count={unreadNoticeCount} />
-        <Count
-          icon="calendar-blank-outline"
-          count={unfinishedAssignmentCount}
-        />
-        <Count icon="folder-outline" count={unreadFileCount} />
+        <Count icon="notices" count={unreadNoticeCount} />
+        <Count icon="assignments" count={unfinishedAssignmentCount} />
+        <Count icon="files" count={unreadFileCount} />
       </View>
     </View>
   </CardWrapper>
@@ -99,7 +98,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
   },
   names: {
     flex: 1,

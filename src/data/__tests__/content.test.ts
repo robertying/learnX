@@ -30,7 +30,7 @@ import {
   queryPersister,
   saveChangedQueries,
 } from 'data/queryClient';
-import { Notice } from 'data/types/state';
+import { assignmentFields, Notice, noticeFields } from 'data/types/state';
 import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook } from '@testing-library/react-native';
@@ -77,6 +77,21 @@ describe('notices', () => {
     }
   });
 
+  it('keeps only the fields the app uses', async () => {
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    // The list names an attachment; the app keeps the attachment itself.
+    expect(notices.some(n => 'attachmentName' in n)).toBe(false);
+    const assignments = await queryClient.fetchQuery(
+      assignmentsQuery(semesterId),
+    );
+    expect(assignments.some(a => 'baseId' in a)).toBe(false);
+    for (const item of [...notices, ...assignments]) {
+      for (const key of Object.keys(item)) {
+        expect([...noticeFields, ...assignmentFields]).toContain(key);
+      }
+    }
+  });
+
   it("refreshes one course's notices and saves the list", async () => {
     const key = noticesQuery(semesterId).queryKey;
     const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
@@ -96,6 +111,45 @@ describe('notices', () => {
     queryClient.clear();
     await queryPersister.restoreQueries(queryClient);
     expect(queryClient.getQueryData(key)).toEqual(refreshed);
+  });
+});
+
+describe('a course refreshed while the list is fetched', () => {
+  it('keeps the course’s refreshed items when the older list fetch lands', async () => {
+    const key = noticesQuery(semesterId).queryKey;
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const courseId = notices[0].courseId;
+
+    // The list fetch gets this course's notices before the refresh, and
+    // lands after it.
+    const getNotificationList = mockSource.getNotificationList;
+    let land: () => void = () => {};
+    const landed = new Promise<void>(resolve => (land = resolve));
+    let delayed = false;
+    jest
+      .spyOn(mockSource, 'getNotificationList')
+      .mockImplementation(async (...args) => {
+        const result = await getNotificationList(...args);
+        if (args[0] !== courseId || delayed) {
+          return result;
+        }
+        delayed = true;
+        await landed;
+        return result.map(n => ({ ...n, title: 'stale' }));
+      });
+    const refetch = queryClient.fetchQuery({
+      ...noticesQuery(semesterId),
+      staleTime: 0,
+    });
+    // Let the list fetch start before the course is refreshed.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await refreshCourseNotices(semesterId, courseId);
+    land();
+    await refetch;
+
+    const after = queryClient.getQueryData(key)!;
+    expect(after.filter(n => n.title === 'stale')).toEqual([]);
+    expect(after.map(n => n.id).sort()).toEqual(notices.map(n => n.id).sort());
   });
 });
 

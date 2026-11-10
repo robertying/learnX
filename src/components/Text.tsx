@@ -130,6 +130,13 @@ interface StyledTextProps extends TextProps {
  */
 const nonlinearFontScale = 1.3;
 
+// Only Android reads the font scale, so iOS text doesn't re-render whenever a
+// window (iPad, Mac) is resized.
+const useFontLineHeight =
+  Platform.OS === 'android'
+    ? () => useWindowDimensions().fontScale > nonlinearFontScale
+    : () => false;
+
 const StyledText = ({
   color,
   variant,
@@ -138,9 +145,7 @@ const StyledText = ({
   ...rest
 }: StyledTextProps) => {
   const theme = useTheme();
-  const { fontScale } = useWindowDimensions();
-  const fontLineHeight =
-    Platform.OS === 'android' && fontScale > nonlinearFontScale;
+  const fontLineHeight = useFontLineHeight();
   return (
     <NativeText
       dynamicTypeRamp={ramps[variant]}
