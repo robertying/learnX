@@ -114,6 +114,45 @@ describe('notices', () => {
   });
 });
 
+describe('a course refreshed while the list is fetched', () => {
+  it('keeps the course’s refreshed items when the older list fetch lands', async () => {
+    const key = noticesQuery(semesterId).queryKey;
+    const notices = await queryClient.fetchQuery(noticesQuery(semesterId));
+    const courseId = notices[0].courseId;
+
+    // The list fetch gets this course's notices before the refresh, and
+    // lands after it.
+    const getNotificationList = mockSource.getNotificationList;
+    let land: () => void = () => {};
+    const landed = new Promise<void>(resolve => (land = resolve));
+    let delayed = false;
+    jest
+      .spyOn(mockSource, 'getNotificationList')
+      .mockImplementation(async (...args) => {
+        const result = await getNotificationList(...args);
+        if (args[0] !== courseId || delayed) {
+          return result;
+        }
+        delayed = true;
+        await landed;
+        return result.map(n => ({ ...n, title: 'stale' }));
+      });
+    const refetch = queryClient.fetchQuery({
+      ...noticesQuery(semesterId),
+      staleTime: 0,
+    });
+    // Let the list fetch start before the course is refreshed.
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await refreshCourseNotices(semesterId, courseId);
+    land();
+    await refetch;
+
+    const after = queryClient.getQueryData(key)!;
+    expect(after.filter(n => n.title === 'stale')).toEqual([]);
+    expect(after.map(n => n.id).sort()).toEqual(notices.map(n => n.id).sort());
+  });
+});
+
 describe('assignments', () => {
   const ids = (items: { id: string }[]) => items.map(i => i.id);
 

@@ -89,6 +89,12 @@ const createContent = <T extends { id: string; courseId: string }>({
    * fetch that was already under way doesn't undo them.
    */
   const overrides = new Map<string, Partial<T>>();
+  /**
+   * When each course (`semesterId/courseId`) was last refreshed on its own
+   * (ms, when its fetch started), so a list fetch that started earlier and
+   * lands later doesn't put back older items.
+   */
+  const refreshedAt = new Map<string, number>();
 
   /**
    * Keeps what the app uses of each item the server lists for a course, so
@@ -209,17 +215,26 @@ const createContent = <T extends { id: string; courseId: string }>({
    */
   const merge = (
     semesterId: string,
-    fetched: ReadonlyMap<string, object[]>,
+    allFetched: ReadonlyMap<string, object[]>,
     startedAt: number,
     keep: (courseId: string) => boolean,
   ) => {
     const cached =
       queryClient.getQueryData<T[]>(queryKeys.content(name, semesterId)) ?? [];
+    // A course refreshed on its own since these fetches started has newer
+    // items in the cache than what they brought back, so it keeps those.
+    const newer = (courseId: string) =>
+      (refreshedAt.get(`${semesterId}/${courseId}`) ?? -Infinity) >= startedAt;
+    const fetched = new Map(
+      [...allFetched].filter(([courseId]) => !newer(courseId)),
+    );
     return sort(
       withOverrides(
         [
           ...cached.filter(
-            item => !fetched.has(item.courseId) && keep(item.courseId),
+            item =>
+              !fetched.has(item.courseId) &&
+              (keep(item.courseId) || newer(item.courseId)),
           ),
           ...[...fetched].flatMap(([courseId, list]) => tag(courseId, list)),
         ],
@@ -239,6 +254,7 @@ const createContent = <T extends { id: string; courseId: string }>({
       tag(courseId, await fetchFromServer(courseId, [])),
       startedAt,
     );
+    refreshedAt.set(`${semesterId}/${courseId}`, startedAt);
     const { queryKey } = query(semesterId);
     queryClient.setQueryData<T[]>(queryKey, old =>
       sort([...(old ?? []).filter(i => i.courseId !== courseId), ...items]),
@@ -345,7 +361,10 @@ const createContent = <T extends { id: string; courseId: string }>({
 
   return {
     query,
-    resetOverrides: () => overrides.clear(),
+    resetOverrides: () => {
+      overrides.clear();
+      refreshedAt.clear();
+    },
     fetchCourses,
     putCourses,
     refreshCourse,
