@@ -14,6 +14,27 @@ index fa1b7731..accd2ad3 100644
      override fun setTitleFontFamily(
          config: ScreenStackHeaderConfig,
          titleFontFamily: String?,
+diff --git a/ios/RNSBarButtonItem.mm b/ios/RNSBarButtonItem.mm
+index c435fdd1..bd8ac22d 100644
+--- a/ios/RNSBarButtonItem.mm
++++ b/ios/RNSBarButtonItem.mm
+@@ -345,8 +345,15 @@ static UIMenuOptions RNSMakeUIMenuOptionsFromConfig(NSDictionary *config);
+ - (void)setBadgeFromConfig:(NSDictionary *)badgeObj
+ {
+   if (@available(iOS 26.0, *)) {
+-    UIBarButtonItemBadge *badge = [UIBarButtonItemBadge badgeWithString:badgeObj[@"value"]];
++    NSString *value = badgeObj[@"value"];
+     NSDictionary *style = badgeObj[@"style"];
++    if (value.length == 0) {
++      // An empty value is a dot: the system's indicator badge, not an empty
++      // pill, in the system red (native-stack's style color is a fixed one).
++      self.badge = [UIBarButtonItemBadge indicatorBadge];
++      return;
++    }
++    UIBarButtonItemBadge *badge = [UIBarButtonItemBadge badgeWithString:value];
+     if (style) {
+       id colorObj = style[@"color"];
+       if (colorObj) {
 diff --git a/ios/RNSScreenStack.mm b/ios/RNSScreenStack.mm
 index 5da11964..49fcd596 100644
 --- a/ios/RNSScreenStack.mm

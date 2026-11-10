@@ -1,11 +1,9 @@
 import { Linking } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
-import { useAppStateStore } from 'data/appState';
 import { t } from 'helpers/i18n';
 import Changelog from 'screens/Changelog';
 import Help from 'screens/Help';
 import Maintainer from 'screens/Maintainer';
-import packageJson from '../../../package.json';
 
 let mockProps: Record<string, any> = {};
 jest.mock('react-native-webview', () => {
@@ -57,14 +55,10 @@ describe('Maintainer', () => {
 });
 
 describe('Changelog', () => {
-  it('shows the releases, with progress while loading, and marks them seen', async () => {
-    useAppStateStore.setState({ changelogSeenVersion: null });
+  it('shows the releases, with progress while loading', async () => {
     await render(<Changelog />);
     expect(mockProps.source.uri).toBe(
       'https://github.com/robertying/learnX/releases',
-    );
-    expect(useAppStateStore.getState().changelogSeenVersion).toBe(
-      packageJson.version,
     );
     expect(screen.queryByTestId('progress')).toBeNull();
     await act(() =>

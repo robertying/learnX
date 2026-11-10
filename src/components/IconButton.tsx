@@ -8,7 +8,7 @@ import {
   frame,
   labelStyle,
 } from '@expo/ui/swift-ui/modifiers';
-import Badge from 'components/Badge';
+import Badge, { DOT_SIZE } from 'components/Badge';
 import { t } from 'helpers/i18n';
 import {
   iconSymbols,
@@ -64,7 +64,7 @@ const IconButton: React.FC<IconButtonProps> = ({
       </ThemedHost>
       {badge && (
         <Badge
-          size={8}
+          size={DOT_SIZE}
           style={[styles.badge, { top: badgeInset, right: badgeInset }]}
         />
       )}

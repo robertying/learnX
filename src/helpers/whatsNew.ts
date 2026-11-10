@@ -42,7 +42,7 @@ export const maxHighlights = 4;
 
 /**
  * Hand-written highlights of feature releases, newest first. A release with
- * no entry here (a bug fix) shows no What's New, only the Changelog badge.
+ * no entry here (a bug fix) shows no What's New.
  * Over-the-air updates change `package.json`'s version too, so an entry for
  * one shows on the first launch of its JS.
  */

@@ -27,7 +27,6 @@ import {
 } from 'helpers/serverWrites';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
 import { MainStackScreenProps, SettingsStackParams } from './types';
-import packageJson from '../../package.json';
 
 type Props = MainStackScreenProps<SettingsStackParams, 'Settings'>;
 
@@ -54,9 +53,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const serverWritesAllowed = useSyncExternalStore(
     subscribeServerWrites,
     getServerWritesAllowed,
-  );
-  const newChangelog = useAppState(
-    state => state.changelogSeenVersion !== packageJson.version,
   );
   const courseSharingSeen = useAppState(state => state.courseSharingSeen);
 
@@ -152,7 +148,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           )}
           <FormLink
             icon={{ ios: 'note.text', android: 'note-text' }}
-            badge={newChangelog}
             title={t('changelog')}
             onPress={() => handlePush('Changelog')}
           />

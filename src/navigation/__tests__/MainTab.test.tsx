@@ -140,13 +140,14 @@ it('wraps each tab in a split of its own, with SF Symbols', async () => {
   expect(icon).toEqual({ sfSymbol: 'sun.max.fill' });
 });
 
-it('badges Today for Settings, and hides the tab bar for the keyboard', async () => {
+it('leaves the Settings badge off the tab bar, and hides it for the keyboard', async () => {
   jest.mocked(useSettingsBadge).mockReturnValue(true);
   jest.mocked(useKeyboardShown).mockReturnValue(true);
   const MainTab = loadMainTab(iPhone);
   await render(<MainTab />);
-  expect(config().screens[0].options?.tabBarBadge).toBe(' ');
-  expect(config().screens[1].options?.tabBarBadge).toBeUndefined();
+  for (const tab of config().screens) {
+    expect(tab.options?.tabBarBadge).toBeUndefined();
+  }
   expect(config().tabBarHidden).toBe(true);
 });
 

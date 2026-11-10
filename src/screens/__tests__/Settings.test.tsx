@@ -6,7 +6,7 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native';
-import { setChangelogSeen, useAppStateStore } from 'data/appState';
+import { useAppStateStore } from 'data/appState';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
 import { logout } from 'data/login';
@@ -20,7 +20,6 @@ import {
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
-import packageJson from '../../../package.json';
 
 jest.mock('data/login', () => ({ logout: jest.fn() }));
 jest.mock('hooks/useAvailableUpdate', () => jest.fn(() => null));
@@ -52,10 +51,7 @@ const credentials = (username: string) =>
 beforeEach(() => {
   clearQueryCache();
   credentials('2020000000');
-  useAppStateStore.setState({
-    changelogSeenVersion: null,
-    courseSharingSeen: false,
-  });
+  useAppStateStore.setState({ courseSharingSeen: false });
 });
 
 afterEach(() => {
@@ -118,10 +114,9 @@ it("opens What's New as a sheet", async () => {
   });
 });
 
-it('marks a changelog not seen yet and course sharing never opened', async () => {
+it('marks course sharing never opened, and not the changelog', async () => {
   await renderScreen();
-  expect(screen.getAllByLabelText(t('a11yNewBadge'))).toHaveLength(2);
-  setChangelogSeen(packageJson.version);
+  expect(screen.getAllByLabelText(t('a11yNewBadge'))).toHaveLength(1);
   useAppStateStore.setState({ courseSharingSeen: true });
   await renderScreen();
   expect(screen.queryAllByLabelText(t('a11yNewBadge'))).toHaveLength(0);

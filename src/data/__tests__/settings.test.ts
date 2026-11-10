@@ -8,7 +8,7 @@ import {
   useSettingsStore,
 } from 'data/settings';
 import { getCalendarSync, resetCalendarSync } from 'data/calendarSync';
-import { resetAppState, useAppStateStore } from 'data/appState';
+import { APP_STATE_KEY, resetAppState, useAppStateStore } from 'data/appState';
 
 const kv = (Storage as unknown as { __store: Map<string, string> }).__store;
 
@@ -117,8 +117,8 @@ describe('settings saved before version 2', () => {
       // Not a map of strings, so dropped.
       syncedReminderAssignments: {},
     });
+    // The changelog's version is dropped: its badge is gone.
     expect(useAppStateStore.getState()).toEqual({
-      changelogSeenVersion: '18.0.3',
       courseSharingSeen: true,
       welcomeSeen: false,
       setupSeen: false,
@@ -142,5 +142,31 @@ describe('settings saved before version 3', () => {
     );
     await useSettingsStore.persist.rehydrate();
     expect(getSettings()).toEqual({ ...defaultSettings, graduate: true });
+  });
+});
+
+describe('app state saved before version 2', () => {
+  it('drops the changelog version its badge kept', async () => {
+    kv.set(
+      APP_STATE_KEY,
+      JSON.stringify({
+        state: { changelogSeenVersion: '18.0.3', courseSharingSeen: true },
+        version: 1,
+      }),
+    );
+    await useAppStateStore.persist.rehydrate();
+    expect(useAppStateStore.getState()).not.toHaveProperty(
+      'changelogSeenVersion',
+    );
+    expect(useAppStateStore.getState().courseSharingSeen).toBe(true);
+  });
+
+  it('keeps what version 2 saved', async () => {
+    kv.set(
+      APP_STATE_KEY,
+      JSON.stringify({ state: { welcomeSeen: true }, version: 2 }),
+    );
+    await useAppStateStore.persist.rehydrate();
+    expect(useAppStateStore.getState().welcomeSeen).toBe(true);
   });
 });

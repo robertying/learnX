@@ -42,6 +42,7 @@ import {
   autocorrectionDisabled,
   toggleStyle,
 } from '@expo/ui/swift-ui/modifiers';
+import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
@@ -323,7 +324,6 @@ export const FormLink: React.FC<FormLinkProps> = ({
   badge,
   ...row
 }) => {
-  const theme = useTheme();
   return (
     <Button onPress={onPress} testID={testID}>
       <ItemRow
@@ -332,8 +332,8 @@ export const FormLink: React.FC<FormLinkProps> = ({
           badge ? (
             <Circle
               modifiers={[
-                foregroundStyle(theme.colors.status.red),
-                frame({ width: 10, height: 10 }),
+                foregroundStyle(BADGE_COLOR),
+                frame({ width: DOT_SIZE, height: DOT_SIZE }),
                 accessibilityLabel(t('a11yNewBadge')),
               ]}
             />

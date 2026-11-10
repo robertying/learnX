@@ -162,7 +162,6 @@ describe('importing user data saved by 18.0.x', () => {
       syncedReminderAssignments: {},
     });
     expect(m.appState.useAppStateStore.getState()).toEqual({
-      changelogSeenVersion: '18.0.3',
       courseSharingSeen: true,
       welcomeSeen: false,
       setupSeen: false,
@@ -308,8 +307,8 @@ describe('importing user data saved by 18.0.x', () => {
     expect(m.calendarSync.getCalendarSync()).toEqual(
       m.calendarSync.emptyCalendarSync(),
     );
-    expect(m.appState.useAppStateStore.getState().changelogSeenVersion).toBe(
-      null,
+    expect(m.appState.useAppStateStore.getState().courseSharingSeen).toBe(
+      false,
     );
     expect(m.userData.getUserData()).toEqual({
       ...m.userData.emptyUserData(),
