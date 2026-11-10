@@ -123,16 +123,15 @@ export const buildAssignmentReminderDetails = (
     title,
     startDate: startDate.toDate(),
     dueDate: dueDate.toDate(),
+    // Relative to the due date, which Reminders shows as an Early Reminder.
+    // An absolute alarm becomes the reminder's date in Reminders instead.
     alarms: alarms.assignmentReminderAlarm
       ? [
           {
-            absoluteDate: dueDate
-              .subtract(
-                alarms.assignmentReminderAlarmOffset ??
-                  calendarDefaults.assignmentReminderAlarmOffset,
-                'minute',
-              )
-              .toISOString(),
+            relativeOffset: -(
+              alarms.assignmentReminderAlarmOffset ??
+              calendarDefaults.assignmentReminderAlarmOffset
+            ),
           },
         ]
       : [],
