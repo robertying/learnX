@@ -169,3 +169,43 @@ describe('updateUpNextWidget', () => {
     );
   });
 });
+
+describe('a widget that is missing or fails', () => {
+  const os = Platform.OS;
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+    Platform.OS = os;
+    jest.restoreAllMocks();
+    updateUpNextWidget();
+  });
+
+  it('does nothing where there are no widgets', () => {
+    Platform.OS = 'web' as never;
+    updateDeadlineWidget(assignments, options);
+    updateUpNextWidget([], assignments, options);
+    for (const widget of [iosWidget, androidWidget, iosUpNext, androidUpNext]) {
+      expect(widget.updateSnapshot).not.toHaveBeenCalled();
+      expect(widget.updateTimeline).not.toHaveBeenCalled();
+    }
+  });
+
+  it("doesn't break the caller, and sends again next time", () => {
+    Platform.OS = 'android';
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+    jest.mocked(androidWidget.updateSnapshot).mockImplementationOnce(() => {
+      throw new Error('no widget host');
+    });
+    expect(() => updateDeadlineWidget(assignments, options)).not.toThrow();
+
+    jest.mocked(androidUpNext.updateSnapshot).mockImplementationOnce(() => {
+      throw new Error('no widget host');
+    });
+    expect(() => updateUpNextWidget([], assignments, options)).not.toThrow();
+    updateUpNextWidget([], assignments, options);
+    expect(androidUpNext.updateSnapshot).toHaveBeenCalledTimes(2);
+    expect(warn).toHaveBeenCalledTimes(2);
+  });
+});
