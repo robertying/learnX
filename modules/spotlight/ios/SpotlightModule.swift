@@ -37,6 +37,10 @@ struct UpcomingDeadlineRecord: Record {
   @Field var courseName: String = ""
   /// Milliseconds since the epoch.
   @Field var deadline: Double = 0
+
+  var upcomingDeadline: UpcomingDeadline {
+    UpcomingDeadline(id: id, title: title, courseName: courseName, deadline: Date(milliseconds: deadline))
+  }
 }
 
 struct UpcomingClassRecord: Record {
@@ -45,6 +49,54 @@ struct UpcomingClassRecord: Record {
   /// Milliseconds since the epoch.
   @Field var start: Double = 0
   @Field var end: Double = 0
+
+  var upcomingClass: UpcomingClass {
+    UpcomingClass(courseName: courseName, location: location, start: Date(milliseconds: start), end: Date(milliseconds: end))
+  }
+}
+
+/// The parts of `CSSearchableIndex` the module uses, so tests can index into a fake.
+protocol SearchableIndex {
+  func deleteSearchableItems(withDomainIdentifiers domainIdentifiers: [String]) async throws
+  func deleteSearchableItems(withIdentifiers identifiers: [String]) async throws
+  func deleteAllSearchableItems() async throws
+  func indexSearchableItems(_ items: [CSSearchableItem]) async throws
+}
+
+extension CSSearchableIndex: SearchableIndex {}
+
+/// The app's items in a Spotlight index, one domain per type.
+struct SpotlightIndex {
+  let index: SearchableIndex
+
+  /// The device's index, or nil where it can't index.
+  static var system: SpotlightIndex? {
+    CSSearchableIndex.isIndexingAvailable() ? SpotlightIndex(index: CSSearchableIndex.default()) : nil
+  }
+
+  /// Replaces the domain's items with these.
+  func replaceItems(domain: String, items: [SpotlightItem]) async throws {
+    try await index.deleteSearchableItems(withDomainIdentifiers: [domain])
+    if !items.isEmpty {
+      try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+    }
+  }
+
+  /// Indexes new and changed items and removes the ones with `removedIds`, leaving the rest of the domain alone.
+  func updateItems(domain: String, items: [SpotlightItem], removedIds: [String]) async throws {
+    if !removedIds.isEmpty {
+      try await index.deleteSearchableItems(
+        withIdentifiers: removedIds.map { SpotlightIdentifier(domain: domain, id: $0).rawValue }
+      )
+    }
+    if !items.isEmpty {
+      try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
+    }
+  }
+
+  func removeAllItems() async throws {
+    try await index.deleteAllSearchableItems()
+  }
 }
 
 /// Indexes the app's items in Spotlight, hands the item of a tapped search result to JS, and keeps the upcoming
@@ -55,84 +107,56 @@ public final class SpotlightModule: Module {
 
     Events("onOpenItem")
 
-    OnStartObserving {
-      SpotlightTaps.shared.setListener { [weak self] identifier in
-        self?.sendEvent("onOpenItem", ["domain": identifier.domain, "id": identifier.id])
-      }
-    }
+    OnStartObserving(nil, startObserving)
+    OnStopObserving(nil, Self.stopObserving)
 
-    OnStopObserving {
-      SpotlightTaps.shared.setListener(nil)
+    Function("takeOpenedItem", Self.takeOpenedItem)
+    AsyncFunction("replaceItems") { (domain: String, items: [SpotlightItem]) in
+      try await Self.replaceItems(domain: domain, items: items)
     }
+    AsyncFunction("updateItems") { (domain: String, items: [SpotlightItem], removedIds: [String]) in
+      try await Self.updateItems(domain: domain, items: items, removedIds: removedIds)
+    }
+    AsyncFunction("removeAllItems") {
+      try await Self.removeAllItems()
+    }
+    Function("setUpcomingDeadlines", Self.setUpcomingDeadlines)
+    Function("setUpcomingClasses", Self.setUpcomingClasses)
+  }
 
-    /// The item of a search result tapped before JS listened, e.g. the one that launched the app.
-    Function("takeOpenedItem") { () -> [String: String]? in
-      guard let identifier = SpotlightTaps.shared.takePending() else {
-        return nil
-      }
-      return ["domain": identifier.domain, "id": identifier.id]
+  func startObserving() {
+    SpotlightTaps.shared.setListener { [weak self] identifier in
+      self?.sendEvent("onOpenItem", identifier.payload)
     }
+  }
 
-    /// Replaces the domain's items with these.
-    AsyncFunction("replaceItems") { (domain: String, items: [SpotlightItem]) async throws in
-      guard CSSearchableIndex.isIndexingAvailable() else {
-        return
-      }
-      let index = CSSearchableIndex.default()
-      try await index.deleteSearchableItems(withDomainIdentifiers: [domain])
-      if !items.isEmpty {
-        try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
-      }
-    }
+  static func stopObserving() {
+    SpotlightTaps.shared.setListener(nil)
+  }
 
-    /// Indexes new and changed items and removes the ones with `removedIds`, leaving the rest of the domain alone.
-    AsyncFunction("updateItems") { (domain: String, items: [SpotlightItem], removedIds: [String]) async throws in
-      guard CSSearchableIndex.isIndexingAvailable() else {
-        return
-      }
-      let index = CSSearchableIndex.default()
-      if !removedIds.isEmpty {
-        try await index.deleteSearchableItems(
-          withIdentifiers: removedIds.map { SpotlightIdentifier(domain: domain, id: $0).rawValue }
-        )
-      }
-      if !items.isEmpty {
-        try await index.indexSearchableItems(items.map { $0.searchableItem(domain: domain) })
-      }
-    }
+  /// The item of a search result tapped before JS listened, e.g. the one that launched the app.
+  static func takeOpenedItem() -> [String: String]? {
+    SpotlightTaps.shared.takePending()?.payload
+  }
 
-    AsyncFunction("removeAllItems") { () async throws in
-      guard CSSearchableIndex.isIndexingAvailable() else {
-        return
-      }
-      try await CSSearchableIndex.default().deleteAllSearchableItems()
-    }
+  static func replaceItems(domain: String, items: [SpotlightItem]) async throws {
+    try await SpotlightIndex.system?.replaceItems(domain: domain, items: items)
+  }
 
-    Function("setUpcomingDeadlines") { (deadlines: [UpcomingDeadlineRecord]) in
-      UpcomingDeadlines.save(
-        deadlines.map {
-          UpcomingDeadline(
-            id: $0.id,
-            title: $0.title,
-            courseName: $0.courseName,
-            deadline: Date(milliseconds: $0.deadline)
-          )
-        }
-      )
-    }
+  static func updateItems(domain: String, items: [SpotlightItem], removedIds: [String]) async throws {
+    try await SpotlightIndex.system?.updateItems(domain: domain, items: items, removedIds: removedIds)
+  }
 
-    Function("setUpcomingClasses") { (classes: [UpcomingClassRecord]) in
-      UpcomingClasses.save(
-        classes.map {
-          UpcomingClass(
-            courseName: $0.courseName,
-            location: $0.location,
-            start: Date(milliseconds: $0.start),
-            end: Date(milliseconds: $0.end)
-          )
-        }
-      )
-    }
+  static func removeAllItems() async throws {
+    try await SpotlightIndex.system?.removeAllItems()
+  }
+
+  static func setUpcomingDeadlines(_ deadlines: [UpcomingDeadlineRecord]) {
+    UpcomingDeadlines.save(deadlines.map(\.upcomingDeadline))
+  }
+
+  static func setUpcomingClasses(_ classes: [UpcomingClassRecord]) {
+    UpcomingClasses.save(classes.map(\.upcomingClass))
   }
 }
 

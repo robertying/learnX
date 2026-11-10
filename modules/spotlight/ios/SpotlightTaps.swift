@@ -20,6 +20,11 @@ struct SpotlightIdentifier {
     domain = String(rawValue[..<separator])
     id = String(rawValue[rawValue.index(after: separator)...])
   }
+
+  /// As JS gets it.
+  var payload: [String: String] {
+    ["domain": domain, "id": id]
+  }
 }
 
 /// Passes tapped search results to JS, or keeps the last one until JS asks for it: a result that launches the app
@@ -55,6 +60,9 @@ final class SpotlightTaps: @unchecked Sendable {
 
 /// Receives the activity of a tapped search result, forwarded from the scene delegate.
 public final class SpotlightAppDelegateSubscriber: ExpoAppDelegateSubscriber {
+  /// Where taps go; tests use their own.
+  var taps = SpotlightTaps.shared
+
   public func application(
     _ application: UIApplication,
     continue userActivity: NSUserActivity,
@@ -66,7 +74,7 @@ public final class SpotlightAppDelegateSubscriber: ExpoAppDelegateSubscriber {
     else {
       return false
     }
-    SpotlightTaps.shared.open(identifier)
+    taps.open(identifier)
     // The subscriber manager waits for every subscriber that responds to call it.
     restorationHandler(nil)
     return true

@@ -2,6 +2,19 @@
 
 Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, `share`, `sidebar`, `spotlight` and `toast`. They have no JS-only fallback, so a change to their native code needs a rebuild.
 
+## Native tests (iOS)
+
+- Each module's Swift is tested in `modules/<name>/ios/Tests` with Swift Testing, as a CocoaPods test spec (`s.test_spec 'Tests'` in its podspec, hosted in an app CocoaPods makes, since some UIKit APIs need one). The Podfile adds every local module with its `Tests` spec before `use_expo_modules!`, so a new module's tests need only the spec and a `pod install`. The app's own Swift (App Intents, app delegate) is tested in `ios/learnXTests`, a target hosted in learnX (a synchronized folder: new files need no project change); the share extension's file handling is `SharedFileInbox` in `modules/share`, compiled into both, and tested there.
+- `scripts/test-ios.sh <simulator udid>` runs every `<Pod>-Unit-Tests` scheme and the `learnX` scheme, then prints line coverage per file (`scripts/native-coverage.mjs`). DerivedData goes to `$DERIVED_DATA` (default `~/Library/Developer/Xcode/DerivedData/learnX-tests`), never inside the repo.
+- Expo's module DSL (`Function`, `AsyncFunction`, `Prop`) only runs from JS, so a module's definition wires names to functions the tests call directly (`Function("takeOpenedItem", Self.takeOpenedItem)`), and its tests build the definition once. OS services sit behind a small protocol with a fake in the tests: `SearchableIndex` (Core Spotlight), `MenuBuilding` (the menu bar builder), `CrashReporter` (Crashlytics). Code that writes user defaults takes the suite to use.
+- Left untested (about 10% of the lines): what only UIKit or Firebase can call (`SystemMenuBuilder`, the menu bar and bridge parts of `AppDelegate`, the share extension's view controller, the Mac-only window size in `SceneDelegate`), the bodies of `AsyncFunction` and `Prop` closures and of menu action handlers, and the `sendEvent` calls, which need a JS runtime. The widget extension (`ios/ExpoWidgetsTarget`) is left out of the coverage: its layouts come from `src/widgets`, which Jest tests.
+- CocoaPods' test host apps don't adopt scenes, which iOS 27 requires, so the Podfile's `post_install` gives their Info.plist a scene manifest.
+
+## Native tests (Android)
+
+- `modules/<name>/android/src/test` holds each module's JVM unit tests: JUnit 4, Robolectric (an `Intent` or `Uri` needs it; `src/test/resources/robolectric.properties` sets the newest Android it runs) and MockK (a module's `appContext`, `FirebaseCrashlytics.getInstance()`). Their versions are in `android/build.gradle`'s `ext`. The module's logic is in plain functions (`ShareModule.take`, `JavaScriptError.from`) that its definition calls. The tests run on Java 21 with two JDK internals opened, which Robolectric needs for Android 15 and 16 (the module's `build.gradle`).
+- `scripts/test-android.sh` runs them with JaCoCo and prints line coverage; CI runs it as "Android unit tests" in `check.yml` (not a required check). The app module's Kotlin (`MainActivity`, `MainApplication`, the widget providers) is the React Native template's startup code and is left untested.
+
 ## Spotlight and App Intents
 
 - `modules/spotlight` (iOS and Mac Catalyst; null elsewhere) indexes the current semester's notices and assignments in Core Spotlight, one domain per type (`notice`, `assignment`; unique ids `<domain>:<id>`), without hidden courses. `helpers/spotlight` (`updateSpotlight`) sends only the items that changed or went (`updateItems`), after a full `replaceItems` the first time in each JS runtime; items don't expire; `helpers/surfaces` calls it, and `clearSpotlight` on logout.
@@ -19,6 +32,6 @@ Local Expo modules (`expo-module.config.json` in each): `crashlytics`, `menus`, 
 
 ## Sharing files to learnX
 
-- iOS and Mac: the share extension (`ios/ShareExtension/ShareViewController.swift`, no pods) takes the first shared file (Files, Photos; not plain text), copies it into the app group's `Library/Caches/<uuid>/<name>`, records it under `LearnXSharedFile` in the group's user defaults and opens `learnx://`. `modules/share` (`SharedFileStore`) hands it to JS once: `takeSharedItem()` for the one that launched the app, the `onShare` event (sent when a `learnx` link arrives) after that. `getSharedFilesDirectory()` is the folder `removeFileDir` clears.
+- iOS and Mac: the share extension (`ios/ShareExtension/ShareViewController.swift`, no pods) takes the first shared file (Files, Photos; not plain text), copies it into the app group's `Library/Caches/<uuid>/<name>`, records it under `LearnXSharedFile` in the group's user defaults and opens `learnx://`. `modules/share` (`SharedFileInbox`, which the extension compiles in too) hands it to JS once: `takeSharedItem()` for the one that launched the app, the `onShare` event (sent when a `learnx` link arrives) after that. `getSharedFilesDirectory()` is the folder `removeFileDir` clears.
 - Android: `MainActivity`'s SEND filter (files and `text/*`); the module reads `EXTRA_STREAM` from the launch intent or a new intent and removes the extras once read. Text without a file comes back as `{ kind: 'unsupported' }`, and the app says only files can be attached.
 - `hooks/useShareHandler` copies an Android content URI into the cache and keeps the file in `data/pendingAssignment` for the next submission.

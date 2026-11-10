@@ -26,6 +26,13 @@ config_command = [
 ]
 
 target 'learnX' do
+  # The local modules' unit tests (modules/*/ios/Tests) are CocoaPods test specs;
+  # scripts/test-ios.sh runs them. use_expo_modules! leaves pods added before it
+  # as they are.
+  Dir.glob('../modules/*/ios/*.podspec', base: Pod::Config.instance.installation_root).sort.each do |podspec|
+    pod File.basename(podspec, '.podspec'), :path => File.dirname(podspec), :testspecs => ['Tests']
+  end
+
   use_expo_modules!
 
   config = use_native_modules!(config_command)
@@ -38,6 +45,11 @@ target 'learnX' do
 
   pod 'FirebaseAnalytics/WithoutAdIdSupport'
   pod 'FirebaseCrashlytics'
+
+  # The app's own tests (learnXTests), hosted in the app.
+  target 'learnXTests' do
+    inherit! :search_paths
+  end
 
   post_install do |installer|
     react_native_post_install(
@@ -65,6 +77,19 @@ target 'learnX' do
         config.build_settings.delete 'EMBEDDED_CONTENT_CONTAINS_SWIFT'
         config.build_settings.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'
       end
+    end
+
+    # The apps CocoaPods makes to host the modules' tests (AppHost-*) don't adopt
+    # scenes, and iOS 27 stops such an app at launch.
+    Dir.glob(File.join(installer.sandbox.root.to_s, 'AppHost-*', '*-Info.plist')).each do |path|
+      info = Xcodeproj::Plist.read_from_path(path)
+      info['UIApplicationSceneManifest'] = {
+        'UIApplicationSupportsMultipleScenes' => false,
+        'UISceneConfigurations' => {
+          'UIWindowSceneSessionRoleApplication' => [{ 'UISceneConfigurationName' => 'Default Configuration' }]
+        }
+      }
+      Xcodeproj::Plist.write_to_path(info, path)
     end
 
     # Xcode's recommended project settings, so it stops offering to update the

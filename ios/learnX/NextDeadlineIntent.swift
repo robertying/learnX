@@ -9,20 +9,25 @@ struct NextDeadlineIntent: AppIntent {
   static let description = IntentDescription("Tells you which assignment is due next.")
 
   func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-    guard let next = UpcomingDeadlines.load().first else {
-      return answer(String(localized: "You have no upcoming deadlines."))
+    let now = Date.now
+    return answer(Self.sentence(for: UpcomingDeadlines.load(after: now).first, now: now))
+  }
+
+  static func sentence(for next: UpcomingDeadline?, now: Date) -> String {
+    guard let next else {
+      return String(localized: "You have no upcoming deadlines.")
     }
     let formatter = RelativeDateTimeFormatter()
-    formatter.locale = Self.answerLocale
+    formatter.locale = answerLocale
     formatter.unitsStyle = .full
-    let due = formatter.localizedString(from: Self.timeUntil(next.deadline))
-    return answer(String(localized: "\(next.title) for \(next.courseName) is due \(due)."))
+    let due = formatter.localizedString(from: timeUntil(next.deadline, from: now))
+    return String(localized: "\(next.title) for \(next.courseName) is due \(due).")
   }
 
   /// The time until `date`, rounded as the app's lists round it (dayjs's `relativeTime` with its default
   /// thresholds), so both say "in 6 days" where `RelativeDateTimeFormatter` alone would truncate to 5.
-  private static func timeUntil(_ date: Date) -> DateComponents {
-    let seconds = max(date.timeIntervalSinceNow, 0)
+  static func timeUntil(_ date: Date, from now: Date) -> DateComponents {
+    let seconds = max(date.timeIntervalSince(now), 0)
     let minutes = (seconds / 60).rounded()
     let hours = (seconds / 3600).rounded()
     let days = (seconds / 86400).rounded()

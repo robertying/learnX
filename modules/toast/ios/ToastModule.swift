@@ -35,7 +35,8 @@ public final class ToastModule: Module {
 /// must not fade this view or its ancestors.
 final class ToastBackgroundView: ExpoView {
   private let effectView = UIVisualEffectView(effect: nil)
-  private let usesGlass: Bool
+  /// Set once, from the OS version; tests turn it off to see the blur.
+  var usesGlass: Bool
 
   var visible = false {
     didSet {

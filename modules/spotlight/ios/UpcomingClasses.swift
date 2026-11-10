@@ -11,19 +11,19 @@ public struct UpcomingClass: Codable, Sendable {
 /// The classes still ahead (this week's and next week's), saved by the app whenever its timetable changes, so the
 /// "Next Class" App Intent can answer without starting React Native or going online.
 public enum UpcomingClasses {
-  private static let key = "LearnXUpcomingClasses"
+  static let key = "LearnXUpcomingClasses"
 
-  static func save(_ classes: [UpcomingClass]) {
+  static func save(_ classes: [UpcomingClass], to defaults: UserDefaults = .standard) {
     if classes.isEmpty {
-      UserDefaults.standard.removeObject(forKey: key)
+      defaults.removeObject(forKey: key)
     } else if let data = try? JSONEncoder().encode(classes) {
-      UserDefaults.standard.set(data, forKey: key)
+      defaults.set(data, forKey: key)
     }
   }
 
   /// The classes not over yet at `date`, the one going on included, earliest first.
-  public static func load(at date: Date = .now) -> [UpcomingClass] {
-    guard let data = UserDefaults.standard.data(forKey: key),
+  public static func load(at date: Date = .now, from defaults: UserDefaults = .standard) -> [UpcomingClass] {
+    guard let data = defaults.data(forKey: key),
       let classes = try? JSONDecoder().decode([UpcomingClass].self, from: data)
     else {
       return []

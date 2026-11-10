@@ -9,25 +9,8 @@ public final class MenusModule: Module {
 
     Events("onCommand")
 
-    OnStartObserving {
-      self.observer = NotificationCenter.default.addObserver(
-        forName: AppCommands.notification,
-        object: nil,
-        queue: .main
-      ) { [weak self] notification in
-        guard let command = notification.userInfo?[AppCommands.commandKey] as? String else {
-          return
-        }
-        self?.sendEvent("onCommand", ["command": command])
-      }
-    }
-
-    OnStopObserving {
-      if let observer = self.observer {
-        NotificationCenter.default.removeObserver(observer)
-        self.observer = nil
-      }
-    }
+    OnStartObserving(nil, startObserving)
+    OnStopObserving(nil, stopObserving)
 
     View(ContextMenuView.self) {
       Events("onAction")
@@ -35,6 +18,27 @@ public final class MenusModule: Module {
       Prop("actions") { (view: ContextMenuView, actions: [ContextMenuAction]) in
         view.setActions(actions)
       }
+    }
+  }
+
+  func startObserving() {
+    // Commands are posted on the main thread, from the menu bar or a key command.
+    observer = NotificationCenter.default.addObserver(
+      forName: AppCommands.notification,
+      object: nil,
+      queue: nil
+    ) { [weak self] notification in
+      guard let command = notification.userInfo?[AppCommands.commandKey] as? String else {
+        return
+      }
+      self?.sendEvent("onCommand", ["command": command])
+    }
+  }
+
+  func stopObserving() {
+    if let observer {
+      NotificationCenter.default.removeObserver(observer)
+      self.observer = nil
     }
   }
 }

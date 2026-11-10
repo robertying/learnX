@@ -11,11 +11,15 @@ struct NextClassIntent: AppIntent {
 
   func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
     let now = Date.now
-    let classes = UpcomingClasses.load(at: now)
+    return answer(Self.sentence(for: UpcomingClasses.load(at: now), now: now))
+  }
+
+  /// `classes` are the ones not over at `now`, earliest first.
+  static func sentence(for classes: [UpcomingClass], now: Date) -> String {
     let current = classes.first { $0.start <= now }
     let next = classes.first { $0.start > now }
 
-    let locale = Self.answerLocale
+    let locale = answerLocale
     let timeFormatter = DateFormatter()
     timeFormatter.locale = locale
     timeFormatter.dateStyle = .none
@@ -42,6 +46,6 @@ struct NextClassIntent: AppIntent {
     } else if current == nil {
       sentences.append(String(localized: "You have no classes this week or next."))
     }
-    return answer(sentences.joined(separator: String(localized: "sentence separator", defaultValue: " ")))
+    return sentences.joined(separator: String(localized: "sentence separator", defaultValue: " "))
   }
 }
