@@ -7,10 +7,13 @@ import { resetUserData, setArchived, setCurrentSemester } from 'data/userData';
 import { syncDeadlineReminders } from 'helpers/deadlineReminders';
 import { saveUpcomingClasses, saveUpcomingDeadlines } from 'helpers/shortcuts';
 import { updateSpotlight } from 'helpers/spotlight';
+import { AppState, type AppStateStatus } from 'react-native';
+import { recordError } from 'helpers/crashReporting';
 import {
   clearSurfaces,
   refreshSurfaces,
   subscribeSurfaceErrors,
+  watchSurfaces,
 } from 'helpers/surfaces';
 import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 
@@ -162,4 +165,73 @@ it('runs again after being cleared', async () => {
   await clearSurfaces();
   await refreshSurfaces();
   expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
+});
+
+it('records a failed output and tries it again on the next refresh', async () => {
+  cacheAssignments();
+  jest
+    .mocked(syncDeadlineReminders)
+    .mockRejectedValueOnce(new Error('no permission'));
+  await refreshSurfaces();
+  expect(recordError).toHaveBeenCalledWith(
+    new Error('no permission'),
+    'Updating Deadline reminders',
+  );
+  // The others still ran.
+  expect(updateSpotlight).toHaveBeenCalledTimes(1);
+
+  await refreshSurfaces();
+  expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
+  expect(updateSpotlight).toHaveBeenCalledTimes(1);
+});
+
+describe('watchSurfaces', () => {
+  const addListener = jest.spyOn(AppState, 'addEventListener');
+  // Watching starts once per runtime; beforeEach clears the call record.
+  let onChange: (state: AppStateStatus) => void;
+  /** Lets the refresh scheduled for this tick run. */
+  const settle = async () => {
+    await new Promise(resolve => setTimeout(resolve, 0));
+    await refreshSurfaces();
+  };
+
+  it('refreshes after watched lists, settings and user data change', async () => {
+    watchSurfaces();
+    watchSurfaces();
+    expect(addListener).toHaveBeenCalledTimes(1);
+    onChange = addListener.mock.calls[0][1];
+    await settle();
+
+    cacheAssignments();
+    await settle();
+    expect(updateDeadlineWidget).toHaveBeenCalledTimes(1);
+
+    setArchived('assignment', [assignments[0].id], true);
+    await settle();
+    expect(updateDeadlineWidget).toHaveBeenCalledTimes(2);
+
+    // Several changes in one tick refresh once.
+    setArchived('assignment', [assignments[1].id], true);
+    setArchived('assignment', [assignments[2].id], true);
+    await settle();
+    expect(updateDeadlineWidget).toHaveBeenCalledTimes(3);
+    expect(updateDeadlineWidget).toHaveBeenLastCalledWith(assignments, {
+      hiddenCourses: [],
+      archived: assignments.map(a => a.id),
+    });
+  });
+
+  it('syncs the reminders again when the app comes back', async () => {
+    cacheAssignments();
+    await refreshSurfaces();
+    expect(syncDeadlineReminders).toHaveBeenCalledTimes(1);
+
+    onChange('background');
+    await settle();
+    expect(syncDeadlineReminders).toHaveBeenCalledTimes(1);
+
+    onChange('active');
+    await settle();
+    expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
+  });
 });

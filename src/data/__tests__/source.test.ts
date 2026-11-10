@@ -1,6 +1,18 @@
+import { Platform } from 'react-native';
 import axios from 'axios';
+import CookieManager from '@preeternal/react-native-cookie-manager';
 import { FailReason } from '@robertying/thu-learn-lib';
-import { dataSource, submitAssignment } from 'data/source';
+import { useCredentialsStore } from 'data/credentials';
+import { mockSource } from 'data/mockSource';
+import {
+  addCSRF,
+  dataSource,
+  ensureSession,
+  loginWithFingerPrint,
+  resetDataSource,
+  serverWritesBlocked,
+  submitAssignment,
+} from 'data/source';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
 jest.mock('axios', () => ({ post: jest.fn() }));
@@ -10,6 +22,10 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
   flush: jest.fn(),
 }));
 const mockEnsureSession = jest.fn(() => Promise.resolve());
+const mockLogin = jest.fn<Promise<void>, [credential?: unknown]>(() =>
+  Promise.resolve(),
+);
+let mockHelperConfig: { provider: () => unknown } | undefined;
 const mockGetSubmitRequest = jest.fn(
   async (
     id: string,
@@ -34,7 +50,14 @@ const mockGetSubmitRequest = jest.fn(
 jest.mock('@robertying/thu-learn-lib', () => ({
   ...jest.requireActual('@robertying/thu-learn-lib'),
   Learn2018Helper: class {
+    // The first one is made on import, before this file's variables exist.
+    constructor(config: { provider: () => unknown }) {
+      try {
+        mockHelperConfig = config;
+      } catch {}
+    }
     getCSRFToken = () => 'token';
+    login = (credential?: unknown) => mockLogin(credential);
     ensureSession = () => mockEnsureSession();
     // the helper is made when data/source loads, before this file's consts
     getHomeworkSubmitRequest = (
@@ -106,6 +129,20 @@ describe('submitAssignment', () => {
     });
   });
 
+  it('reports upload progress rounded, keeping the response text as is', async () => {
+    post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
+    const onProgress = jest.fn();
+    await submitAssignment('homework-id', { content: 'a', onProgress });
+    const config = post.mock.calls[0][2] as {
+      onUploadProgress: (e: { loaded: number; total?: number }) => void;
+      transformResponse: (data: string) => string;
+    };
+    config.onUploadProgress({ loaded: 1, total: 3 });
+    config.onUploadProgress({ loaded: 5 });
+    expect(onProgress.mock.calls).toEqual([[0.33], [0]]);
+    expect(config.transformResponse('{"a":1}')).toBe('{"a":1}');
+  });
+
   it('does not call the server with nothing to submit', async () => {
     post.mockClear();
     await submitAssignment('homework-id', {});
@@ -168,5 +205,102 @@ describe('markNoticeRead', () => {
   it('does not load a page outside Web Learning', async () => {
     await dataSource.markNoticeRead('https://example.com/notice');
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('picking the server', () => {
+  const credentials = (username: string) =>
+    useCredentialsStore.setState({
+      credentials: {
+        username,
+        password: 'password',
+        fingerPrint: 'fp',
+        fingerGenPrint: 'g',
+        fingerGenPrint3: 'g3',
+      },
+    });
+  const os = Platform.OS;
+
+  afterEach(() => {
+    useCredentialsStore.setState({ credentials: null });
+    Platform.OS = os;
+  });
+
+  it('talks to the emulated server while a mock account is logged in', async () => {
+    credentials('mock-user');
+    const login = jest.spyOn(mockSource, 'login');
+    expect(dataSource.getCSRFToken()).toBe(mockSource.getCSRFToken());
+    expect(serverWritesBlocked()).toBe(false);
+
+    await loginWithFingerPrint();
+    expect(login).toHaveBeenCalled();
+    expect(mockLogin).not.toHaveBeenCalled();
+    expect(CookieManager.clearByName).not.toHaveBeenCalled();
+    login.mockRestore();
+  });
+
+  it('talks to Web Learning otherwise, keeping writes back in debug builds', () => {
+    credentials('2020000000');
+    expect(dataSource.getCSRFToken()).toBe('token');
+    expect(serverWritesBlocked()).toBe(true);
+    setServerWritesAllowed(true);
+    expect(serverWritesBlocked()).toBe(false);
+    setServerWritesAllowed(false);
+  });
+
+  it('picks by the account a new login names, not the stored one', async () => {
+    credentials('mock-user');
+    Platform.OS = 'ios';
+    const credential = { username: '2020000000', password: 'p' };
+    await loginWithFingerPrint(credential);
+    expect(mockLogin).toHaveBeenCalledWith(credential);
+    expect(CookieManager.clearByName).toHaveBeenCalledWith(
+      'https://id.tsinghua.edu.cn',
+      'JSESSIONID',
+    );
+  });
+
+  it('expires the SSO cookie by hand on Android', async () => {
+    Platform.OS = 'android';
+    await loginWithFingerPrint({ username: '2020000000', password: 'p' });
+    expect(CookieManager.setFromResponse).toHaveBeenCalledWith(
+      'https://id.tsinghua.edu.cn',
+      'JSESSIONID=; path=/; HttpOnly',
+    );
+    expect(CookieManager.flush).toHaveBeenCalled();
+  });
+
+  it('loads the saved login before making sure of a session', async () => {
+    await ensureSession();
+    expect(mockEnsureSession).toHaveBeenCalledTimes(1);
+  });
+
+  it("hands thu-learn-lib the saved login, blanks for what's missing", () => {
+    resetDataSource();
+    const provider = mockHelperConfig!.provider;
+    expect(provider()).toEqual({
+      username: undefined,
+      password: undefined,
+      fingerPrint: '',
+      fingerGenPrint: '',
+      fingerGenPrint3: '',
+    });
+    credentials('2020000000');
+    expect(provider()).toEqual({
+      username: '2020000000',
+      password: 'password',
+      fingerPrint: 'fp',
+      fingerGenPrint: 'g',
+      fingerGenPrint3: 'g3',
+    });
+  });
+
+  it('adds the CSRF token to Web Learning links only', () => {
+    expect(
+      addCSRF(
+        'https://learn.tsinghua.edu.cn/b/wlxt/kj/wlkc_kjxxb/student/downloadFile?sfgk=0&wjid=1',
+      ),
+    ).toContain('_csrf=token');
+    expect(addCSRF('https://example.com/a')).toBe('https://example.com/a');
   });
 });
