@@ -1,4 +1,5 @@
 import { act, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import { mockLocale } from '../../../jest/locale';
 import { Assignment, Course, File, Notice } from 'data/types/state';
@@ -83,6 +84,15 @@ afterEach(() => {
 });
 
 describe('NoticeCard', () => {
+  it('sets the title in regular weight, read or not; the dot marks unread', async () => {
+    await render(<NoticeCard data={notice({ hasRead: false })} />);
+    expect(
+      StyleSheet.flatten(screen.getByText('Midterm room change').props.style)
+        .fontWeight,
+    ).toBe('400');
+    expect(screen.getByTestId('unread-dot')).toBeTruthy();
+  });
+
   it('shows the course, title, plain-text content and weekday', async () => {
     await render(<NoticeCard data={notice()} />);
     expect(screen.getByText('Calculus')).toBeTruthy();

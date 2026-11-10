@@ -57,16 +57,18 @@ describe('Splash (Android)', () => {
 });
 
 describe('CardRow (Android)', () => {
-  it('sets read titles in regular weight, with no unread gutter', async () => {
+  it('sets only unread titles bolder, with no unread gutter', async () => {
     await render(
       <>
         <CardGutter unread />
         <CardRow title="Read" unread={false} trailing="10:00" />
+        <CardRow title="Never unread" />
         <CardRow title="Unread" unread />
       </>,
     );
     expect(screen.queryByTestId('unread-dot')).toBeNull();
     expect(style(screen.getByText('Read')).fontWeight).toBe('400');
+    expect(style(screen.getByText('Never unread')).fontWeight).toBe('400');
     expect(style(screen.getByText('Unread')).fontWeight).not.toBe('400');
     expect(screen.getByText('10:00')).toBeTruthy();
   });
