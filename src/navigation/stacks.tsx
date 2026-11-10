@@ -17,6 +17,7 @@ import {
   SettingDetailParams,
   SettingsStackParams,
   TodayStackParams,
+  WhatsNewStackParams,
 } from 'screens/types';
 import Assignments from 'screens/Assignments';
 import AssignmentDetail from 'screens/AssignmentDetail';
@@ -26,6 +27,8 @@ import Courses from 'screens/Courses';
 import CourseDetail from 'screens/CourseDetail';
 import Settings from 'screens/Settings';
 import Login from 'screens/Login';
+import Welcome from 'screens/Welcome';
+import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import FileSettings from 'screens/FileSettings';
@@ -42,6 +45,8 @@ import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
+import { useAppState } from 'data/appState';
+import { useCredentialsStore } from 'data/credentials';
 import {
   getDetailScreenOptions,
   getModalScreenOptions,
@@ -58,6 +63,7 @@ const CourseStackNavigator = createNativeStackNavigator<CourseStackParams>();
 const SettingStackNavigator = createNativeStackNavigator<SettingsStackParams>();
 const LoginNavigator = createNativeStackNavigator<LoginStackParams>();
 const CourseXNavigator = createNativeStackNavigator<CourseXStackParams>();
+const WhatsNewNavigator = createNativeStackNavigator<WhatsNewStackParams>();
 const SearchNavigator = createNativeStackNavigator<SearchStackParams>();
 const AssignmentSubmissionNavigator =
   createNativeStackNavigator<AssignmentSubmissionStackParams>();
@@ -232,27 +238,58 @@ export const TodayStack = () => (
   </TodayStackNavigator.Navigator>
 );
 
-export const LoginStack = () => (
-  <LoginNavigator.Navigator screenLayout={screenLayout}>
-    <LoginNavigator.Screen
-      name="Login"
-      component={Login}
-      options={{ headerShown: false }}
+export const LoginStack = () => {
+  const welcomeSeen = useAppState(state => state.welcomeSeen);
+  // Someone logged out or asked to log in again has seen the app already.
+  const hasCredentials = useCredentialsStore(state => !!state.credentials);
+
+  return (
+    <LoginNavigator.Navigator
+      screenLayout={screenLayout}
+      initialRouteName={welcomeSeen || hasCredentials ? 'Login' : 'Welcome'}
+    >
+      <LoginNavigator.Screen
+        name="Welcome"
+        component={Welcome}
+        options={{ headerShown: false }}
+      />
+      <LoginNavigator.Screen
+        name="Login"
+        component={Login}
+        options={{ headerShown: false }}
+      />
+      <LoginNavigator.Screen
+        name="SSO"
+        component={SSO}
+        options={props => ({
+          ...getModalScreenOptions(t('sso'))(props),
+          presentation: DeviceInfo.isMac() ? undefined : 'fullScreenModal',
+        })}
+      />
+      <LoginNavigator.Screen
+        name="MockNetwork"
+        component={MockNetwork}
+        options={getTitleOptions(mockNetworkTitle)}
+      />
+    </LoginNavigator.Navigator>
+  );
+};
+
+/** What's New in a sheet, with the full changelog a push away. */
+export const WhatsNewStack = () => (
+  <WhatsNewNavigator.Navigator screenLayout={screenLayout}>
+    <WhatsNewNavigator.Screen
+      name="WhatsNew"
+      component={WhatsNew}
+      // The title is Changelog's back button.
+      options={{ headerShown: false, title: t('whatsNew') }}
     />
-    <LoginNavigator.Screen
-      name="SSO"
-      component={SSO}
-      options={props => ({
-        ...getModalScreenOptions(t('sso'))(props),
-        presentation: DeviceInfo.isMac() ? undefined : 'fullScreenModal',
-      })}
+    <WhatsNewNavigator.Screen
+      name="Changelog"
+      component={Changelog}
+      options={getTitleOptions(t('changelog'))}
     />
-    <LoginNavigator.Screen
-      name="MockNetwork"
-      component={MockNetwork}
-      options={getTitleOptions(mockNetworkTitle)}
-    />
-  </LoginNavigator.Navigator>
+  </WhatsNewNavigator.Navigator>
 );
 
 export const CourseXStack = () => (

@@ -1,19 +1,16 @@
 import { useEffect } from 'react';
 import { Platform, StyleSheet } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
 import ProgressBar from 'components/ProgressBar';
 import SafeArea from 'components/SafeArea';
 import { setChangelogSeen } from 'data/appState';
 import useWebViewProgress from 'hooks/useWebViewProgress';
-import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
-
-type Props = NativeStackScreenProps<SettingsStackParams, 'Changelog'>;
 
 const releasesUrl = 'https://github.com/robertying/learnX/releases';
 
-const Changelog: React.FC<Props> = () => {
+// In Settings and in the What's New sheet, so it takes no navigation props.
+const Changelog: React.FC = () => {
   const { progress, loading, onLoadProgress } = useWebViewProgress();
 
   useEffect(() => {

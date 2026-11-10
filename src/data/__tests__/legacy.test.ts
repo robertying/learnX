@@ -165,6 +165,9 @@ describe('importing user data saved by 18.0.x', () => {
     expect(m.appState.useAppStateStore.getState()).toEqual({
       changelogSeenVersion: '18.0.3',
       courseSharingSeen: true,
+      welcomeSeen: false,
+      setupSeen: false,
+      whatsNewSeenVersion: null,
     });
     expect(m.userData.getUserData()).toEqual({
       pendingActions: [
