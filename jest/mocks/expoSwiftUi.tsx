@@ -243,3 +243,32 @@ export const Picker = ({
     {children}
   </View>
 );
+
+// The date range sheet (components/DateRangePicker): the sheet shows its
+// content only while presented (swipe it down with
+// `fireEvent(sheet, 'isPresentedChange', false)`), and a date picker is a
+// view named by its title that shows its date (pick one with
+// `fireEvent(picker, 'dateChange', date)`).
+export const BottomSheet = ({
+  isPresented,
+  children,
+}: {
+  isPresented: boolean;
+  onIsPresentedChange?: (isPresented: boolean) => void;
+  children?: ReactNode;
+}) => <View testID="bottom-sheet">{isPresented ? children : null}</View>;
+export const NavigationStack = Box;
+export const Toolbar = Object.assign(Box, { Content: Box });
+export const ToolbarItem = Box;
+export const DatePicker = ({
+  title,
+  selection,
+}: {
+  title?: string;
+  selection?: Date;
+  onDateChange?: (date: Date) => void;
+}) => (
+  <View testID={`date-picker-${title}`}>
+    <RNText>{selection?.toISOString().slice(0, 10)}</RNText>
+  </View>
+);

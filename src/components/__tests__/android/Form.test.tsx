@@ -1,9 +1,22 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
 import { useState } from 'react';
+import { Text } from 'react-native';
 import {
   Form,
   FormButton,
+  FormFile,
   FormLink,
+  FormNumberField,
+  FormParagraph,
+  FormProfile,
+  FormProgress,
+  FormView,
   FormSection,
   FormText,
   FormTextField,
@@ -123,5 +136,93 @@ describe('Form (Android)', () => {
     await render(<Field />);
     await userEvent.setup().type(screen.getByTestId('notes'), 'hi');
     expect(await screen.findByText('typed: hi')).toBeTruthy();
+  });
+
+  it('refreshes on a pull, showing the indicator until it settles', async () => {
+    let finish = () => {};
+    const onRefresh = jest.fn(
+      () => new Promise<void>(resolve => (finish = resolve)),
+    );
+    await render(
+      <Form onRefresh={onRefresh} testID="form">
+        <FormSection>
+          <FormText title="Row" />
+        </FormSection>
+      </Form>,
+    );
+    const box = screen.getByTestId('pull-to-refresh');
+    expect(box.props.accessibilityState.busy).toBe(false);
+    // Not awaited: the refresh is still running.
+    await act(async () => {
+      void box.props.onRefresh();
+    });
+    expect(onRefresh).toHaveBeenCalled();
+    expect(box.props.accessibilityState.busy).toBe(true);
+    await act(async () => finish());
+    expect(box.props.accessibilityState.busy).toBe(false);
+  });
+
+  it('shows a bar under a row in progress', async () => {
+    await render(
+      <FormSection>
+        <FormText title="Downloading" progress={0.4} />
+        <FormProgress title="Storage" value={0.25} />
+      </FormSection>,
+    );
+    expect(
+      screen
+        .getAllByTestId('progress')
+        .map(bar => bar.props.accessibilityValue.now),
+    ).toEqual([40, 25]);
+  });
+
+  it('opens a file unless it is disabled', async () => {
+    const open = jest.fn();
+    const user = userEvent.setup();
+    await render(
+      <FormSection>
+        <FormFile title="slides.pdf" onPress={open} testID="file" />
+        <FormFile title="old.pdf" onPress={open} disabled testID="disabled" />
+      </FormSection>,
+    );
+    await user.press(screen.getByTestId('disabled'));
+    expect(open).not.toHaveBeenCalled();
+    await user.press(screen.getByTestId('file'));
+    expect(open).toHaveBeenCalledTimes(1);
+  });
+
+  it('takes only positive whole numbers in a number field', async () => {
+    const onValueChange = jest.fn();
+    await render(
+      <FormSection>
+        <FormNumberField
+          title="Minutes before"
+          value={60}
+          onValueChange={onValueChange}
+        />
+      </FormSection>,
+    );
+    const field = screen.getByDisplayValue('60');
+    await fireEvent.changeText(field, '0');
+    await fireEvent.changeText(field, 'abc');
+    expect(onValueChange).not.toHaveBeenCalled();
+    await fireEvent.changeText(field, '30');
+    expect(onValueChange).toHaveBeenCalledWith(30);
+  });
+
+  it('shows paragraphs, the profile and React Native views in rows', async () => {
+    await render(
+      <FormSection>
+        <FormProfile name="Rui" detail="2020000000" />
+        <FormParagraph text="Some notes" headline />
+        <FormView>
+          <Text>Embedded</Text>
+        </FormView>
+      </FormSection>,
+    );
+    for (const text of ['Rui', '2020000000', 'Some notes', 'Embedded']) {
+      expect(screen.getByText(text)).toBeTruthy();
+    }
+    expect(screen.getByTestId('icon-account-circle')).toBeTruthy();
   });
 });
