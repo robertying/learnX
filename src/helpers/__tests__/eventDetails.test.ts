@@ -15,6 +15,7 @@ import {
   sanitizeLocation,
   toICSEvent,
 } from 'helpers/eventDetails';
+import { t } from 'helpers/i18n';
 import { ICSEvent } from 'helpers/ics';
 
 const settingsWith = (
@@ -117,23 +118,38 @@ describe('buildAssignmentReminderDetails', () => {
       startDate: new Date('2026-03-10T08:00:00+08:00'),
       dueDate: new Date('2026-03-20T23:59:00+08:00'),
       alarms: [],
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timeZone: 'Asia/Shanghai',
       completed: true,
       completionDate: completionDate.toDate(),
-      notes: 'Read chapter 2',
+      notes: `${t('deadline')}: 2026-03-20 23:59\n\nRead chapter 2`,
     });
   });
 
-  it('keeps the deadline and alerts at it, since Reminders moves the date to the alarm', () => {
-    const details = buildAssignmentReminderDetails(
+  it('dates the reminder the offset before the deadline and alerts then, a day by default', () => {
+    const daily = buildAssignmentReminderDetails(
+      settingsWith({}, { assignmentReminderAlarm: true }),
+      input(),
+    );
+    expect(daily.dueDate).toEqual(new Date('2026-03-19T23:59:00+08:00'));
+    expect(daily.alarms).toEqual([{ relativeOffset: 0 }]);
+    expect(daily.notes).toMatch(/^.+: 2026-03-20 23:59\n\nRead chapter 2$/);
+    const hourly = buildAssignmentReminderDetails(
       settingsWith(
         {},
         { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
       ),
       input(),
     );
-    expect(details.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
-    expect(details.alarms).toEqual([{ relativeOffset: 0 }]);
+    expect(hourly.dueDate).toEqual(new Date('2026-03-20T22:59:00+08:00'));
+    expect(hourly.alarms).toEqual([{ relativeOffset: 0 }]);
+  });
+
+  it('starts no later than the alert', () => {
+    const details = buildAssignmentReminderDetails(
+      settingsWith({}, { assignmentReminderAlarm: true }),
+      input({ startDate: dayjs('2026-03-20T12:00:00+08:00') }),
+    );
+    expect(details.startDate).toEqual(details.dueDate);
   });
 });
 

@@ -11,6 +11,7 @@ import { removeTags } from './text';
 import { ICSEvent } from './ics';
 import locationMappings from '../assets/locationMappings.json';
 import { beijingTime } from './serverTime';
+import { t } from './i18n';
 
 // Calendars are found by name, so translating these would orphan the ones
 // users already have.
@@ -64,6 +65,7 @@ export function hash(text: string): string {
 /** What the optional calendar settings (in minutes) are until they're set. */
 export const calendarDefaults = {
   courseAlarmOffset: 15,
+  assignmentReminderAlarmOffset: 24 * 60,
   assignmentCalendarAlarmOffset: 24 * 60,
   assignmentCalendarSecondAlarmOffset: 30,
   calendarEventLength: 30,
@@ -107,8 +109,8 @@ export interface AssignmentEventInput {
 }
 
 /**
- * iOS reminder for an assignment, due at the deadline, with an alert the
- * chosen time before it
+ * iOS reminder for an assignment. With the alert on, it's dated the chosen
+ * time before the deadline and alerts then; the deadline is in its notes.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
@@ -122,18 +124,26 @@ export const buildAssignmentReminderDetails = (
   }: AssignmentEventInput,
 ): ReminderDetails => {
   const alarms = settings.alarms;
+  // Reminders folds any alarm into the reminder's own date and time, so an
+  // early alert is the reminder's date. The real deadline goes in the notes.
+  const remindAt = alarms.assignmentReminderAlarm
+    ? dueDate.subtract(
+        alarms.assignmentReminderAlarmOffset ??
+          calendarDefaults.assignmentReminderAlarmOffset,
+        'minute',
+      )
+    : dueDate;
+  const deadline = `${t('deadline')}: ${dueDate.format('YYYY-MM-DD HH:mm')}`;
   return {
     title,
-    startDate: startDate.toDate(),
-    dueDate: dueDate.toDate(),
-    // Reminders folds any alarm into the reminder's own date and time, so an
-    // earlier alarm would move the deadline. The alert is at the deadline.
+    startDate: (startDate.isBefore(remindAt) ? startDate : remindAt).toDate(),
+    dueDate: remindAt.toDate(),
     alarms: alarms.assignmentReminderAlarm ? [{ relativeOffset: 0 }] : [],
     // The device's zone: Reminders labels any other zone (e.g. "GMT+8").
     timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
-    notes: note,
+    notes: note ? `${deadline}\n\n${note}` : deadline,
   };
 };
 
