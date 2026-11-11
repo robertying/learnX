@@ -95,6 +95,7 @@ export const systemIcons = {
   library: { ios: 'shippingbox', android: 'package_2' },
   design: { ios: 'paintbrush', android: 'brush' },
   // Debug rows
+  debug: { ios: 'ant', android: 'bug_report' },
   send: { ios: 'paperplane', android: 'send' },
   sync: { ios: 'arrow.triangle.2.circlepath', android: 'sync' },
   warning: { ios: 'exclamationmark.shield', android: 'gpp_maybe' },
@@ -176,6 +177,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   schedule: 0xe8b5,
   search: 0xe8b6,
   search_off: 0xea76,
+  bug_report: 0xe868,
   send: 0xe163,
   settings: 0xe8b8,
   share: 0xe80d,

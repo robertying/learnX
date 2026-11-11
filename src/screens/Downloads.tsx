@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -12,7 +12,14 @@ import { exportDownloads } from 'helpers/files/export';
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
-import { Form, FormButton, FormSection, FormText } from 'components/Form';
+import {
+  Form,
+  FormButton,
+  FormSection,
+  FormText,
+  FormToggle,
+} from 'components/Form';
+import { setSetting, useSettings } from 'data/settings';
 import SafeArea from 'components/SafeArea';
 import { SettingsStackParams } from './types';
 
@@ -24,9 +31,15 @@ const fileCount = (count: number) =>
 const summary = ({ count, size }: { count: number; size: number }) =>
   `${fileCount(count)} · ${formatFileSize(size)}`;
 
-/** Downloaded files by course, with their sizes, to delete per course. */
+/**
+ * Downloaded files by course, with their sizes, to export or delete per
+ * course; on Android also whether a download opens when it's done.
+ */
 const Downloads: React.FC<Props> = () => {
   const [courses, setCourses] = useState<CourseDownloads[]>([]);
+  const openFileAfterDownload = useSettings(
+    settings => settings.openFileAfterDownload,
+  );
 
   const [exporting, setExporting] = useState(false);
 
@@ -97,6 +110,18 @@ const Downloads: React.FC<Props> = () => {
   return (
     <SafeArea>
       <Form>
+        {Platform.OS === 'android' && (
+          <FormSection>
+            <FormToggle
+              icon="open"
+              title={t('openFileAfterDownload')}
+              value={openFileAfterDownload}
+              onValueChange={value =>
+                setSetting('openFileAfterDownload', value)
+              }
+            />
+          </FormSection>
+        )}
         <FormSection footer={t('downloadsCaption')}>
           <FormText
             icon="storage"

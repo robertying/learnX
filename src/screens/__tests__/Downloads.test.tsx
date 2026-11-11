@@ -1,5 +1,12 @@
-import { Alert } from 'react-native';
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { Alert, Platform } from 'react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
+import { getSettings, resetSettings } from 'data/settings';
 import {
   listDownloads,
   removeCourseDownloads,
@@ -146,4 +153,28 @@ it('cancels the course menu without doing anything', async () => {
   await pressAlertButton(t('cancel'));
   expect(exportDownloads).not.toHaveBeenCalled();
   expect(removeCourseDownloads).not.toHaveBeenCalled();
+});
+
+describe('open files after downloading', () => {
+  const os = Platform.OS;
+  beforeEach(() => resetSettings());
+  afterEach(() => {
+    Platform.OS = os;
+  });
+
+  it('is offered on Android only', async () => {
+    Platform.OS = 'ios';
+    await renderScreen();
+    expect(screen.queryByLabelText(t('openFileAfterDownload'))).toBeNull();
+
+    Platform.OS = 'android';
+    await renderScreen();
+    const value = getSettings().openFileAfterDownload;
+    await fireEvent(
+      screen.getByLabelText(t('openFileAfterDownload')),
+      'valueChange',
+      !value,
+    );
+    expect(getSettings().openFileAfterDownload).toBe(!value);
+  });
 });

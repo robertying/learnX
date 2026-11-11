@@ -27,6 +27,8 @@ export interface HeaderButton {
   badge?: boolean;
   /** Draws the `IconButton` filled, to show its mode is on. */
   contained?: boolean;
+  /** In a glass of its own from iOS 26 instead of sharing its neighbors'. */
+  ownGroup?: boolean;
   /** Leaves the button out of the native items (they put it in a menu). */
   nativeItem?: false;
   testID?: string;
@@ -71,6 +73,7 @@ const nativeItem = (
     icon: { type: 'sfSymbol', name: entry.sfSymbol ?? iconSymbols[entry.icon] },
     onPress: entry.onPress,
     disabled: entry.disabled,
+    sharesBackground: entry.ownGroup ? false : undefined,
     badge: entry.badge ? { value: '' } : undefined,
     // An empty badge isn't read out, so the label says it.
     accessibilityLabel: entry.badge

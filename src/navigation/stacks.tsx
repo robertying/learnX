@@ -33,10 +33,10 @@ import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
-import FileSettings from 'screens/FileSettings';
 import Downloads from 'screens/Downloads';
 import NotificationSettings from 'screens/NotificationSettings';
 import MockNetwork from 'screens/MockNetwork';
+import Debug from 'screens/Debug';
 import SSO from 'screens/SSO';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
 import Maintainer from 'screens/Maintainer';
@@ -53,6 +53,7 @@ import {
   getItemDetailOptions,
   getModalScreenOptions,
   hasGlassHeader,
+  debugTitle,
   mockNetworkTitle,
   stackScreenOptions,
   tabRootOptions,
@@ -133,11 +134,6 @@ export const renderSettingDetails = () => (
       options={getTitleOptions(t('semesterSelection'))}
     />
     <SettingDetails.Screen
-      name="FileSettings"
-      component={FileSettings}
-      options={getTitleOptions(t('fileSettings'))}
-    />
-    <SettingDetails.Screen
       name="Downloads"
       component={Downloads}
       options={getTitleOptions(t('downloads'))}
@@ -171,6 +167,11 @@ export const renderSettingDetails = () => (
       name="MockNetwork"
       component={MockNetwork}
       options={getTitleOptions(mockNetworkTitle)}
+    />
+    <SettingDetails.Screen
+      name="Debug"
+      component={Debug}
+      options={getTitleOptions(debugTitle)}
     />
   </SettingDetails.Group>
 );

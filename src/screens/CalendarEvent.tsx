@@ -59,6 +59,7 @@ const CalendarEvent: React.FC<Props> = () => {
     <SafeArea>
       <Form>
         <FormSection
+          title={t('schedule')}
           footer={t('courseScheduleSyncCaption', {
             type: graduate ? t('graduateSchedule') : t('undergraduateSchedule'),
           })}
@@ -68,12 +69,6 @@ const CalendarEvent: React.FC<Props> = () => {
             title={t('graduate')}
             value={graduate}
             onValueChange={value => setSetting('graduate', value)}
-          />
-          <FormButton
-            icon="calendar"
-            title={t('syncCourseSchedule')}
-            onPress={picker.openPicker}
-            loading={courseSyncing}
           />
           <FormToggle
             icon="reminder"
@@ -98,13 +93,21 @@ const CalendarEvent: React.FC<Props> = () => {
               setSetting('courseEventOmitLocation', value)
             }
           />
+          {/* Last: it writes the schedule with the settings above. */}
+          <FormButton
+            icon="calendar"
+            title={t('syncCourseSchedule')}
+            onPress={picker.openPicker}
+            loading={courseSyncing}
+          />
         </FormSection>
         <FormSection
+          title={t('setupCalendarSection')}
           footer={Platform.OS === 'ios' ? undefined : assignmentSyncFooter}
         >
           <FormToggle
             icon="assignmentCalendar"
-            title={t('assignmentCalendarSync')}
+            title={t('setupCalendar')}
             value={assignmentCalendarSync}
             onValueChange={enabled => handleAssignmentSync('calendar', enabled)}
             loading={assignmentCalendarSyncing}
@@ -174,10 +177,13 @@ const CalendarEvent: React.FC<Props> = () => {
           )}
         </FormSection>
         {Platform.OS === 'ios' && (
-          <FormSection footer={assignmentSyncFooter}>
+          <FormSection
+            title={t('remindersSection')}
+            footer={assignmentSyncFooter}
+          >
             <FormToggle
               icon="reminders"
-              title={t('assignmentReminderSync')}
+              title={t('setupReminders')}
               value={assignmentReminderSync}
               onValueChange={enabled =>
                 handleAssignmentSync('reminder', enabled)
@@ -207,15 +213,16 @@ const CalendarEvent: React.FC<Props> = () => {
             )}
           </FormSection>
         )}
-        <FormSection footer={t('exportSyncedCalendarsDescription')}>
+        <FormSection
+          title={t('syncedEventsSection')}
+          footer={t('exportSyncedCalendarsDescription')}
+        >
           <FormButton
             icon="export"
             title={t('exportSyncedCalendars')}
             onPress={exportToICS}
             loading={exporting}
           />
-        </FormSection>
-        <FormSection>
           <FormButton
             icon="delete"
             title={t('deleteSyncedCalendarsAndReminders')}

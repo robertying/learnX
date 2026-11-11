@@ -149,3 +149,6 @@ export const getItemDetailOptions = ({
 
 // Dev-only screen for the mock account; not translated.
 export const mockNetworkTitle = 'Network Emulation';
+
+// The debug build's tools (`screens/Debug`); not translated.
+export const debugTitle = 'Debug';
