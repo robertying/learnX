@@ -44,6 +44,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
         flags: [
           attachment && t('attachment'),
           markedImportant && t('a11yImportant'),
+          restProps.fav && t('a11yFavorited'),
         ],
         preview,
       })}
@@ -58,6 +59,9 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
             {attachment ? <CardGlyph name="attachment" /> : null}
             {markedImportant ? (
               <CardGlyph name="important" color={theme.colors.status.orange} />
+            ) : null}
+            {restProps.fav ? (
+              <CardGlyph name="favorited" color={theme.colors.status.red} />
             ) : null}
           </>
         }

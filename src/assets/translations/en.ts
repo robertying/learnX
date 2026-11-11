@@ -369,6 +369,7 @@ export default {
   forward: 'Forward',
   openInBrowser: 'Open in Browser',
   a11yImportant: 'Important',
+  a11yFavorited: 'Favorite',
   a11yHasAnswer: 'Has answer',
   a11yNewBadge: 'New',
   a11yDone: 'Ended',

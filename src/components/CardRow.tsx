@@ -155,7 +155,7 @@ export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
 
 /** A small glyph next to the time, in the caption color unless `color` is set. */
 export const CardGlyph: React.FC<{
-  name: 'attachment' | 'important' | 'answer';
+  name: 'attachment' | 'important' | 'favorited' | 'answer';
   color?: ColorValue;
 }> = ({ name, color }) => {
   const theme = useTheme();

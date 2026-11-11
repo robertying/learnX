@@ -358,6 +358,7 @@ const zh: typeof en = {
   forward: '前进',
   openInBrowser: '在浏览器中打开',
   a11yImportant: '重要',
+  a11yFavorited: '已收藏',
   a11yHasAnswer: '有答案',
   a11yNewBadge: '有新内容',
   a11yDone: '已结束',

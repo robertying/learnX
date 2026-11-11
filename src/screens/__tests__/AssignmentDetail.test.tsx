@@ -289,3 +289,36 @@ describe('what each state of the assignment shows', () => {
     expect(navigation.push).not.toHaveBeenCalled();
   });
 });
+
+it('shows the submission state by its icon', async () => {
+  const base = find(a => !a.submitted && !a.graded);
+  const now = dayjs();
+  await renderScreen({
+    ...base,
+    deadline: now.add(1, 'day').toISOString(),
+  });
+  expect(screen.getByTestId('icon-circle')).toBeTruthy();
+
+  await renderScreen({
+    ...base,
+    deadline: now.subtract(1, 'day').toISOString(),
+    lateSubmissionDeadline: now.add(1, 'day').toISOString(),
+  });
+  // The late submission deadline's row has it too.
+  expect(
+    screen.getAllByTestId('icon-clock.badge.exclamationmark'),
+  ).toHaveLength(2);
+
+  await renderScreen({
+    ...base,
+    deadline: now.subtract(1, 'day').toISOString(),
+    lateSubmissionDeadline: undefined,
+  });
+  expect(screen.getByTestId('icon-xmark.circle')).toBeTruthy();
+
+  await renderScreen({ ...base, submitted: true, isLateSubmission: true });
+  expect(screen.getByTestId('icon-clock.badge.checkmark')).toBeTruthy();
+
+  await renderScreen({ ...base, submitted: true, isLateSubmission: false });
+  expect(screen.getByTestId('icon-checkmark.circle')).toBeTruthy();
+});

@@ -129,6 +129,9 @@ const AssignmentDetailContent: React.FC<{
   const now = useMinute();
   const urgency = deadlineUrgency(deadline, now, submitted);
   const closed = dayjs(now).isAfter(dayjs(deadline));
+  // Past the deadline but still taking late submissions.
+  const lateOpen =
+    !!lateSubmissionDeadline && dayjs(now).isBefore(lateSubmissionDeadline);
 
   const html = getWebViewTemplate(
     description || `<p>${t('noAssignmentDescription')}</p>`,
@@ -257,7 +260,17 @@ const AssignmentDetailContent: React.FC<{
                     )
                   : undefined
               }
-              icon={submitted ? 'done' : 'unfinished'}
+              icon={
+                submitted
+                  ? isLateSubmission
+                    ? 'submittedLate'
+                    : 'done'
+                  : !closed
+                    ? 'unfinished'
+                    : lateOpen
+                      ? 'lateSubmission'
+                      : 'missed'
+              }
             />
           )}
           {hasDraft ? (

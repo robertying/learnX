@@ -282,6 +282,22 @@ describe('AssignmentCard', () => {
     expect(screen.getByText('Graded')).toBeTruthy();
   });
 
+  it('marks a late submission in orange', async () => {
+    await render(
+      <AssignmentCard
+        data={assignment({ submitted: true, isLateSubmission: true })}
+      />,
+    );
+    expect(pillColor('Submitted Late')).toEqual(PlatformColor('systemOrange'));
+  });
+
+  it('marks a favorite with a red heart', async () => {
+    const view = await render(<AssignmentCard data={assignment()} />);
+    expect(screen.queryByTestId('icon-favorited')).toBeNull();
+    await view.rerender(<AssignmentCard data={assignment()} fav />);
+    expect(screen.getByTestId('icon-favorited')).toBeTruthy();
+  });
+
   it('marks attachments and answers', async () => {
     const view = await render(<AssignmentCard data={assignment()} />);
     expect(screen.queryByTestId('icon-attachment')).toBeNull();
