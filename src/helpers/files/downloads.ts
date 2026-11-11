@@ -16,7 +16,7 @@ export const DOWNLOADS_DIR = 'downloads';
 /** Where files shared into the app are copied, under Caches. */
 export const SHARED_DIR = 'learnX Shared';
 /** Where versions up to 18.x kept downloads, under Caches or Documents. */
-const LEGACY_DOWNLOADS_DIR = 'learnX Files';
+export const LEGACY_DOWNLOADS_DIR = 'learnX Files';
 /** The course a `<course id>` folder holds files of (`CourseInfo`). */
 const COURSE_INFO_FILE = 'course.json';
 

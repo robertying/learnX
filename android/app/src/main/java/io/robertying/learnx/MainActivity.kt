@@ -27,14 +27,22 @@ class MainActivity : ReactActivity() {
                 // Test runs set the app up with launch arguments (Maestro's
                 // launchApp arguments arrive as intent extras): they become the
                 // root component's initial props (helpers/launchOptions.ts).
-                override fun getLaunchOptions(): Bundle? =
-                    intent?.getStringExtra(MOCK_LATENCY)?.let { latency ->
-                        Bundle().apply { putString(MOCK_LATENCY, latency) }
+                // Only the known ones, as strings (Maestro sends `true` as a
+                // boolean extra).
+                override fun getLaunchOptions(): Bundle? {
+                    val extras = intent?.extras ?: return null
+                    val options = Bundle()
+                    for (key in LAUNCH_OPTIONS) {
+                        val value = extras.getString(key)
+                            ?: if (extras.containsKey(key)) extras.getBoolean(key).toString() else null
+                        value?.let { options.putString(key, it) }
                     }
+                    return if (options.isEmpty) null else options
+                }
             }
         )
 
     private companion object {
-        const val MOCK_LATENCY = "mockLatency"
+        val LAUNCH_OPTIONS = listOf("mockLatency", "storeReport")
     }
 }

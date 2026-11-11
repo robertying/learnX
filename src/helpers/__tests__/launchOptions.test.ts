@@ -15,6 +15,15 @@ jest.mock('react-native/Libraries/Settings/Settings', () => ({
   default: { get: (key: string) => mockSettingsGet(key) },
 }));
 
+jest.mock('screens/StoreReport', () => {
+  const { createElement: mockCreate } = jest.requireActual('react');
+  const { Text: MockText } = jest.requireActual('react-native');
+  return {
+    __esModule: true,
+    default: () => mockCreate(MockText, null, 'report'),
+  };
+});
+
 const os = Platform.OS;
 
 afterEach(() => {
@@ -79,5 +88,30 @@ describe('withLaunchOptions', () => {
     await screen.rerender(createElement(Root, { mockLatency: 'none' }));
 
     expect(getMockNetworkConfig().latency).toBe('slow');
+  });
+});
+
+describe('store report', () => {
+  it('is on for true, as a string or a boolean', () => {
+    Platform.OS = 'android';
+    expect(applyLaunchOptions({ storeReport: 'true' }).storeReport).toBe(true);
+    expect(applyLaunchOptions({ storeReport: true }).storeReport).toBe(true);
+    expect(applyLaunchOptions({ storeReport: 'yes' }).storeReport).toBe(false);
+    expect(applyLaunchOptions().storeReport).toBe(false);
+    Platform.OS = 'ios';
+    mockSettingsGet.mockImplementation(key =>
+      key === 'storeReport' ? 'true' : undefined,
+    );
+    expect(applyLaunchOptions().storeReport).toBe(true);
+  });
+
+  it('replaces the app', async () => {
+    Platform.OS = 'android';
+    const Root = withLaunchOptions(() => createElement(Text, null, 'app'));
+
+    const screen = await render(createElement(Root, { storeReport: 'true' }));
+
+    expect(screen.queryByText('app')).toBeNull();
+    expect(screen.getByText('report')).toBeTruthy();
   });
 });
