@@ -1,17 +1,13 @@
 import { useLayoutEffect } from 'react';
 import dayjs from 'dayjs';
-import {
-  Form,
-  FormLink,
-  FormSection,
-  FormText,
-  type FormTextProps,
-} from 'components/Form';
+import { classDetails, itemRow } from 'components/ClassRow';
+import { Form, FormLink, FormSection, FormText } from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import { SyncStatusSection } from 'components/SyncStatus';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
+import { getSettings, setSetting } from 'data/settings';
 import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
 import { Assignment } from 'data/types/state';
@@ -28,22 +24,6 @@ import { sidebarSplit } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from './types';
 
 type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
-
-const time = (ms: number) => dayjs(ms).format('HH:mm');
-
-type ItemRowProps = FormTextProps & { key: string; onPress?: () => void };
-
-/** A link row when there's somewhere to go, and a plain row otherwise. */
-const itemRow = ({ key, onPress, ...row }: ItemRowProps) =>
-  onPress ? (
-    <FormLink key={key} {...row} onPress={onPress} />
-  ) : (
-    <FormText key={key} {...row} />
-  );
-
-// The room as the course lists it ("六教6A414"), which students know, not
-// the full building name the calendar export adds for maps.
-const where = (session: ClassSession) => session.location.trim() || undefined;
 
 const Today: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
@@ -101,6 +81,27 @@ const Today: React.FC<Props> = ({ navigation }) => {
     show('CourseDetail', { id: courseId });
   const openAssignment = (assignment: Assignment) =>
     show('AssignmentDetail', { id: assignment.id });
+  // The rows count the unread ones, so their tab opens on its Unread filter,
+  // which then stays, as when picked from the tab's own filter menu.
+  const showUnread = (type: 'notice' | 'file') =>
+    setSetting('tabFilterSelections', {
+      ...getSettings().tabFilterSelections,
+      [type]: 'unread',
+    });
+  const openUnreadNotices = () => {
+    showUnread('notice');
+    navigation.navigate('MainTab', {
+      screen: 'NoticeStack',
+      params: { screen: 'Notices' },
+    });
+  };
+  const openNewFiles = () => {
+    showUnread('file');
+    navigation.navigate('MainTab', {
+      screen: 'FileStack',
+      params: { screen: 'Files' },
+    });
+  };
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
@@ -152,12 +153,14 @@ const Today: React.FC<Props> = ({ navigation }) => {
             time: dayjs(schedule.updatedAt).from(now),
           })
         : undefined;
-  const span = (session: ClassSession) =>
-    `${time(session.start)}–${time(session.end)}`;
-  // Time and room on the second line, as Calendar lists events, so the
-  // course name gets the row's full width.
-  const details = (session: ClassSession) =>
-    [span(session), where(session)].filter(Boolean).join(' · ');
+  const classCount =
+    classes.length === 0
+      ? t('todayNoClasses')
+      : remaining.length === 0
+        ? t('todayNoMoreClasses')
+        : classes.length === 1
+          ? t('todayOneClass')
+          : t('todayClassCount', { count: classes.length });
 
   return (
     <SafeArea>
@@ -170,7 +173,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
             {itemRow({
               key: current.key,
               title: current.courseName,
-              subtitle: details(current),
+              subtitle: classDetails(current),
               detail: t('todayEndsIn', { time: dayjs(now).to(current.end) }),
               progress: (now - current.start) / (current.end - current.start),
               onPress: pressOf(current),
@@ -182,32 +185,24 @@ const Today: React.FC<Props> = ({ navigation }) => {
             {itemRow({
               key: next.key,
               title: next.courseName,
-              subtitle: details(next),
+              subtitle: classDetails(next),
               detail: t('todayStartsIn', { time: dayjs(now).to(next.start) }),
               onPress: pressOf(next),
             })}
           </FormSection>
         )}
 
-        <FormSection title={t('todayClasses')} footer={note}>
-          {classes.length === 0 ? (
-            <FormText title={t('todayNoClasses')} />
-          ) : (
-            <>
-              {remaining.length === 0 && (
-                <FormText title={t('todayNoMoreClasses')} />
-              )}
-              {classes.map(session =>
-                itemRow({
-                  key: session.key,
-                  title: session.courseName,
-                  subtitle: details(session),
-                  done: session.end <= now,
-                  onPress: pressOf(session),
-                }),
-              )}
-            </>
-          )}
+        {/* The whole day's classes would push what's due off the screen on
+            a busy day, and Now and Next say what matters, so they're a tap
+            away, with the rest of the week. */}
+        <FormSection footer={note}>
+          <FormLink
+            icon="calendar"
+            title={t('schedule')}
+            detail={classCount}
+            onPress={() => show('Schedule')}
+            testID="today-schedule"
+          />
         </FormSection>
 
         <FormSection title={t('todayDueSoon')}>
@@ -236,12 +231,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                     ? t('todayOneUnreadNotice')
                     : t('todayUnreadNotices', { count: unreadNotices })
                 }
-                onPress={() =>
-                  navigation.navigate('MainTab', {
-                    screen: 'NoticeStack',
-                    params: { screen: 'Notices' },
-                  })
-                }
+                onPress={openUnreadNotices}
               />
             )}
             {newFiles > 0 && (
@@ -252,12 +242,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                     ? t('todayOneNewFile')
                     : t('todayNewFiles', { count: newFiles })
                 }
-                onPress={() =>
-                  navigation.navigate('MainTab', {
-                    screen: 'FileStack',
-                    params: { screen: 'Files' },
-                  })
-                }
+                onPress={openNewFiles}
               />
             )}
           </FormSection>

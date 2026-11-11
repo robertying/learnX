@@ -76,10 +76,16 @@ export type CourseStackParams = { Courses: undefined } & ItemDetailParams;
 
 export type SettingsStackParams = { Settings: undefined } & SettingDetailParams;
 
+/** The screens Today opens besides items: the week's classes. */
+export type TodayDetailParams = {
+  Schedule: ExtraParams | undefined;
+};
+
 /** Today, and on phones the settings, which open from its header. */
 export type TodayStackParams = {
   Today: undefined;
-} & ItemDetailParams &
+} & TodayDetailParams &
+  ItemDetailParams &
   SettingsStackParams;
 
 export type MainTabParams = {
@@ -127,7 +133,8 @@ export type DetailStackParams = {
   EmptyDetail: undefined;
   AssignmentSubmission: { id: string };
   CourseX: { id: string } | undefined;
-} & ItemDetailParams &
+} & TodayDetailParams &
+  ItemDetailParams &
   SettingDetailParams;
 
 /** The container of a split view's detail stack. */
@@ -214,6 +221,9 @@ export type CourseDetailParamList = SharedParamList<
 >;
 export type AssignmentSubmissionParamList = SharedParamList<
   AssignmentSubmissionStackParams | DetailStackParams
+>;
+export type ScheduleParamList = SharedParamList<
+  TodayStackParams | DetailStackParams
 >;
 export type CourseXParamList = SharedParamList<
   CourseXStackParams | DetailStackParams

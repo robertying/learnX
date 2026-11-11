@@ -28,6 +28,7 @@ import {
   allItemDetails,
   renderItemDetails,
   renderSettingDetails,
+  renderTodayDetails,
 } from './stacks';
 
 const DetailNavigator = createNativeStackNavigator<DetailStackParams>();
@@ -60,6 +61,7 @@ export const DetailStack = () => (
         headerShown: !nativeSplit || DeviceInfo.isIPad(),
       }}
     />
+    {renderTodayDetails()}
     {renderItemDetails(allItemDetails)}
     <DetailNavigator.Screen
       name="AssignmentSubmission"

@@ -6,6 +6,7 @@ import type { ClassSession } from 'helpers/schedule';
 import DeviceInfo from 'constants/DeviceInfo';
 import { getTitleOptions } from 'components/HeaderTitle';
 import Today from 'screens/Today';
+import { getSettings, setSetting } from 'data/settings';
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
@@ -117,22 +118,32 @@ it('shows the current and next class, and opens a course', async () => {
   jest.useRealTimers();
 });
 
+it("counts the day's classes and opens the schedule", async () => {
+  jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+  mockSessions.push(session('a', 'a', -30, 30), session('b', 'b', 60, 120));
+  const { navigation } = await setup();
+  await userEvent
+    .setup({ advanceTimers: jest.advanceTimersByTime })
+    .press(screen.getByText('2 classes today'));
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('Schedule'),
+  );
+  jest.useRealTimers();
+});
+
 it('says when there are no classes or deadlines', async () => {
   await setup();
   expect(screen.getByText('No classes today')).toBeOnTheScreen();
   expect(screen.getByText('Nothing due today or tomorrow')).toBeOnTheScreen();
 });
 
-it('marks classes that are over, and opens none without a course', async () => {
+it("says when the day's classes are over", async () => {
   jest.useFakeTimers({ now: dayjs().hour(20).minute(0).toDate() });
-  mockSessions.push({ ...session('a', '', -120, -60), location: ' ' });
-  const { navigation } = await setup();
+  mockSessions.push(session('a', 'a', -120, -60));
+  await setup();
   expect(screen.getByText('No more classes today')).toBeOnTheScreen();
-  // Only the time: the room is blank
-  expect(screen.getByText(/^\d\d:\d\d–\d\d:\d\d$/)).toBeOnTheScreen();
+  expect(screen.queryByText('Course a')).toBeNull();
   jest.useRealTimers();
-  await userEvent.press(screen.getByText('Course a'));
-  expect(navigation.dispatch).not.toHaveBeenCalled();
 });
 
 it('says when the calendar failed, and leaves out a week before term', async () => {
@@ -155,7 +166,12 @@ it('has no note for a calendar that loaded, and counts the week', async () => {
   expect(jest.mocked(getTitleOptions).mock.lastCall![1]).toMatch(/Week 9$/);
 });
 
-it('counts new notices and files, and opens their lists', async () => {
+it('counts new notices and files, and opens their lists on Unread', async () => {
+  setSetting('tabFilterSelections', {
+    ...getSettings().tabFilterSelections,
+    notice: 'all',
+    file: 'fav',
+  });
   mockNotices = [
     { id: 'n1', courseId: 'a', hasRead: false },
     { id: 'n2', courseId: 'a', hasRead: false },
@@ -170,11 +186,14 @@ it('counts new notices and files, and opens their lists', async () => {
     screen: 'NoticeStack',
     params: { screen: 'Notices' },
   });
+  expect(getSettings().tabFilterSelections.notice).toBe('unread');
+  expect(getSettings().tabFilterSelections.file).toBe('fav');
   await userEvent.press(screen.getByText('2 new files'));
   expect(navigation.navigate).toHaveBeenCalledWith('MainTab', {
     screen: 'FileStack',
     params: { screen: 'Files' },
   });
+  expect(getSettings().tabFilterSelections.file).toBe('unread');
 });
 
 it('shows one new file without unread notices', async () => {
