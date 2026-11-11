@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { ActionSheetIOS, Alert, Platform } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
@@ -91,6 +92,37 @@ afterEach(() => {
 it('shows Not Found for an assignment no longer listed', async () => {
   await renderScreen(null as never);
   expect(screen.getByText(t('itemNotFound'))).toBeTruthy();
+});
+
+it('names the assignment and its deadline at the top', async () => {
+  const deadline = dayjs().add(3, 'day');
+  await renderScreen({
+    ...unsubmitted,
+    deadline: deadline.toISOString(),
+    lateSubmissionDeadline: undefined,
+  });
+  expect(screen.getByText(unsubmitted.title)).toBeTruthy();
+  expect(
+    screen.getByText(deadline.format(t('fullDateTimeFormat')), {
+      exact: false,
+    }),
+  ).toBeTruthy();
+  expect(screen.queryByText(t('lateSubmission'), { exact: false })).toBeNull();
+});
+
+it('adds the late deadline once the deadline has passed', async () => {
+  const late = dayjs().add(2, 'day');
+  await renderScreen({
+    ...unsubmitted,
+    deadline: dayjs().subtract(1, 'day').toISOString(),
+    lateSubmissionDeadline: late.toISOString(),
+  });
+  expect(
+    screen.getByText(
+      `${t('lateSubmission')} ${late.format(t('fullDateTimeFormat'))}`,
+      { exact: false },
+    ),
+  ).toBeTruthy();
 });
 
 it('submits only once there is something to send', async () => {

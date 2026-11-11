@@ -221,11 +221,45 @@ describe('what each state of the assignment shows', () => {
     ...fields,
   });
 
-  it('says there is no description', async () => {
-    await renderScreen(assignment({}));
-    expect(screen.getByTestId('description').props.children).toContain(
-      `<p>${t('noAssignmentDescription')}</p>`,
+  it('says there is no description as text, with no web view', async () => {
+    await renderScreen(assignment({ description: '  ' }));
+    expect(screen.getByText(t('noAssignmentDescription'))).toBeTruthy();
+    expect(screen.queryByTestId('description')).toBeNull();
+  });
+
+  it('shows only the attachment under Description when there is no text', async () => {
+    const file = find(a => !!a.attachment).attachment!;
+    await renderScreen(assignment({ attachment: file }));
+    expect(screen.getByText(file.name)).toBeTruthy();
+    expect(screen.queryByText(t('noAssignmentDescription'))).toBeNull();
+    expect(screen.queryByText(t('attachment'))).toBeNull();
+  });
+
+  it('orders the page as asked, sent, then returned', async () => {
+    const file = find(a => !!a.attachment).attachment!;
+    await renderScreen(
+      assignment({
+        description: '<p>Read chapter 4</p>',
+        attachment: file,
+        submitted: true,
+        submittedContent: 'My answer',
+        gradeContent: 'Well done',
+        answerContent: 'The answer',
+      }),
     );
+    const page = JSON.stringify(screen.toJSON());
+    const order = [
+      base.title,
+      t('deadline'),
+      t('description'),
+      'Read chapter 4',
+      file.name,
+      t('yourSubmission'),
+      t('feedback'),
+      t('answer'),
+    ].map(text => page.indexOf(text));
+    expect(order).not.toContain(-1);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
   });
 
   it('shows a grade without a grader or score as only graded, with the feedback text', async () => {

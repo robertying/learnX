@@ -77,9 +77,8 @@ it('says when it expires or expired, and when it has no content', async () => {
       exact: false,
     }),
   ).toBeTruthy();
-  expect(screen.getByTestId('content').props.children).toContain(
-    t('noNoticeContent'),
-  );
+  expect(screen.getByText(t('noNoticeContent'))).toBeTruthy();
+  expect(screen.queryByTestId('content')).toBeNull();
 
   const past = dayjs().subtract(3, 'day');
   await renderScreen({ ...withAttachment, expireTime: past.toISOString() });

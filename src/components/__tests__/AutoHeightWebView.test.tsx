@@ -72,6 +72,41 @@ it('grows to the height the page reports', async () => {
   expect(height()).toBe(320);
 });
 
+it('waits for the session cookies before loading', async () => {
+  let resolve!: (cookies: object) => void;
+  jest
+    .mocked(CookieManager.get)
+    .mockReturnValueOnce(new Promise(r => (resolve = r)) as never);
+  await render(<AutoHeightWebView source={{ html: '<p>Hi</p>' }} />);
+  expect(screen.queryByTestId('webview')).toBeNull();
+  await act(async () => resolve({}));
+  expect(webView().source).toMatchObject({ headers: { Cookie: '' } });
+});
+
+it('is ready once the content has a height, or once loading ends', async () => {
+  const onReady = jest.fn();
+  const onLoadEnd = jest.fn();
+  await renderView({ onReady, onLoadEnd } as WebViewProps);
+  expect(onReady).not.toHaveBeenCalled();
+  await act(() =>
+    webView().onMessage!({ nativeEvent: { data: '0' } } as never),
+  );
+  expect(onReady).not.toHaveBeenCalled();
+  await act(() =>
+    webView().onMessage!({ nativeEvent: { data: '120' } } as never),
+  );
+  expect(onReady).toHaveBeenCalledTimes(1);
+  await act(() => webView().onLoadEnd!({} as never));
+  expect(onReady).toHaveBeenCalledTimes(1);
+  expect(onLoadEnd).toHaveBeenCalled();
+
+  // A page that never reports a height, such as one that failed.
+  const failed = jest.fn();
+  await renderView({ onReady: failed } as WebViewProps);
+  await act(() => webView().onLoadEnd!({} as never));
+  expect(failed).toHaveBeenCalledTimes(1);
+});
+
 describe('loads', () => {
   const open = jest.spyOn(Linking, 'openURL').mockResolvedValue();
   const shouldLoad = (request: object) =>

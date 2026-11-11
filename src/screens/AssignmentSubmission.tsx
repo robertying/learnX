@@ -9,11 +9,14 @@ import {
   FormProgress,
   FormSection,
   FormTextField,
+  FormTitle,
 } from 'components/Form';
 import dayjs from 'dayjs';
 import { RemoteFile } from '@robertying/thu-learn-lib';
 import TextButton from 'components/TextButton';
 import { t } from 'helpers/i18n';
+import { deadlineText } from 'helpers/assignments';
+import { useMinute } from 'hooks/useClock';
 import {
   attachmentForFileDetail,
   canSubmit,
@@ -62,8 +65,25 @@ const AssignmentSubmissionContent: React.FC<{
   assignment: Assignment;
   navigation: Props['navigation'];
 }> = ({ assignment, navigation }) => {
-  const { title, submitTime, submittedAttachment, submittedContent } =
-    assignment;
+  const {
+    title,
+    deadline,
+    lateSubmissionDeadline,
+    submitTime,
+    submittedAttachment,
+    submittedContent,
+  } = assignment;
+
+  // What is being submitted and until when, as on the assignment's page.
+  const now = useMinute();
+  const deadlineSubtitle = [
+    `${dayjs(deadline).format(t('fullDateTimeFormat'))} · ${deadlineText(deadline, now)}`,
+    lateSubmissionDeadline && !dayjs(now).isBefore(deadline)
+      ? `${t('lateSubmission')} ${dayjs(lateSubmissionDeadline).format(t('fullDateTimeFormat'))}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
 
   const initialContent = initialSubmissionContent(submittedContent);
   // An unsent submission left from before, read once.
@@ -244,6 +264,13 @@ const AssignmentSubmissionContent: React.FC<{
 
   return (
     <Form testID="assignmentSubmission">
+      <FormSection>
+        <FormTitle
+          title={title}
+          subtitle={deadlineSubtitle}
+          testID="submissionTitle"
+        />
+      </FormSection>
       {uploading ? (
         <FormSection>
           <FormProgress

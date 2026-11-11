@@ -15,9 +15,29 @@ import Urls from 'constants/Urls';
 const isOwnPage = (url: string) =>
   url.startsWith('about:') || url.replace(/\/?(#.*)?$/, '') === Urls.learn;
 
-const AutoHeightWebView: React.FC<WebViewProps> = props => {
+export interface AutoHeightWebViewProps extends WebViewProps {
+  /**
+   * Called once the content has a height to show, or once loading ends
+   * without one (an error, or an empty page).
+   */
+  onReady?: () => void;
+}
+
+const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
+  onReady,
+  ...props
+}) => {
   const [height, setHeight] = useState(0);
-  const [cookieString, setCookieString] = useState('');
+  // Loading waits for the session cookies, so the page loads once with them.
+  const [cookieString, setCookieString] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  const markReady = () => {
+    if (!ready) {
+      setReady(true);
+      onReady?.();
+    }
+  };
 
   const onMessage = (e: WebViewMessageEvent) => {
     const measuredHeight = parseInt(e.nativeEvent.data, 10);
@@ -25,6 +45,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       return;
     }
     setHeight(measuredHeight);
+    markReady();
   };
 
   // A tapped link opens outside the app instead of replacing the content, and
@@ -111,6 +132,7 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
         cookies = await CookieManager.get(Urls.learn);
       } catch (error) {
         recordError(error);
+        setCookieString('');
         return;
       }
       // The page still loads with the Cookie header below if these fail.
@@ -132,6 +154,10 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
     })();
   }, []);
 
+  if (cookieString === null) {
+    return null;
+  }
+
   return (
     <WebView
       injectedJavaScriptBeforeContentLoaded={injectedScript}
@@ -149,6 +175,10 @@ const AutoHeightWebView: React.FC<WebViewProps> = props => {
       originWhitelist={['*']}
       sharedCookiesEnabled
       {...props}
+      onLoadEnd={event => {
+        markReady();
+        props.onLoadEnd?.(event);
+      }}
       source={
         {
           baseUrl: (props.source as WebViewSourceHtml | undefined)?.html

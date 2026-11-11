@@ -628,11 +628,19 @@ export const FormTitle: React.FC<FormTitleProps> = ({
   );
 };
 
-/** A React Native view in the row, as wide as the row and as tall as itself. */
-export const FormView: React.FC<FormViewProps> = ({ children, position }) => {
+/**
+ * A React Native view in the row, as wide as the row and as tall as itself.
+ * The view stays mounted under the spinner while it loads.
+ */
+export const FormView: React.FC<FormViewProps> = ({
+  children,
+  loading,
+  position,
+}) => {
   const colors = useMaterialColors();
   return (
     <Column
+      horizontalAlignment="center"
       modifiers={[
         fillMaxWidth(),
         rowShape(position),
@@ -640,6 +648,9 @@ export const FormView: React.FC<FormViewProps> = ({ children, position }) => {
         padding(16, 12, 16, 12),
       ]}
     >
+      {loading ? (
+        <CircularProgressIndicator modifiers={[size(32, 32)]} />
+      ) : null}
       <RNHostView
         matchContents={{ vertical: true }}
         modifiers={[fillMaxWidth()]}

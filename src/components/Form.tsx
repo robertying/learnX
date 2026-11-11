@@ -677,9 +677,18 @@ export const FormTitle: React.FC<FormTitleProps> = ({
   </VStack>
 );
 
-/** A React Native view in the row, as wide as the row and as tall as itself. */
-export const FormView: React.FC<FormViewProps> = ({ children }) => (
-  <RNHostView matchContents={{ vertical: true }}>{children}</RNHostView>
+// A row's height, so the row doesn't jump when the view shows up.
+const loadingModifiers = [frame({ maxWidth: Infinity, minHeight: 44 })];
+
+/**
+ * A React Native view in the row, as wide as the row and as tall as itself.
+ * The view stays mounted under the spinner while it loads.
+ */
+export const FormView: React.FC<FormViewProps> = ({ children, loading }) => (
+  <VStack spacing={0}>
+    {loading ? <ProgressView modifiers={loadingModifiers} /> : null}
+    <RNHostView matchContents={{ vertical: true }}>{children}</RNHostView>
+  </VStack>
 );
 
 /** The account at the top of Settings, as in the Settings app. */
