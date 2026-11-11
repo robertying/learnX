@@ -118,6 +118,30 @@ const deadline = (
 
 const DAY = 86400000;
 
+/** Three deadlines turning red, turning orange and not yet colored at `now`. */
+const coloredDeadlines = [
+  { ...deadline('red', at('20:00')), soonFrom: 0, urgentFrom: now - 1 },
+  {
+    ...deadline('orange', at('20:00') + DAY),
+    soonFrom: now,
+    urgentFrom: now + 10 * 3600000,
+  },
+  {
+    ...deadline('plain', at('20:00') + 3 * DAY),
+    soonFrom: now + DAY,
+    urgentFrom: now + 2 * DAY,
+  },
+];
+
+/** The Text that shows a deadline's due time, relative or formatted. */
+const dueText = (node: Node, ms: number, due: string) =>
+  all(node).find(
+    n =>
+      n.type === 'Text' &&
+      ((n.props.date as Date | undefined)?.getTime() === ms ||
+        n.props.children === due),
+  )!;
+
 const upNextProps: UpNextWidgetProps = {
   classes: [
     klass('past', at('08:00'), at('09:35')),
@@ -263,6 +287,21 @@ describe('Deadlines on iOS', () => {
   const render = (widgetFamily?: string, props = deadlineProps) =>
     layout(props, { widgetFamily, colorScheme: 'dark' });
 
+  it('colors due dates red under a day and orange by tomorrow, by its clock', () => {
+    const widget = layout(
+      { ...deadlineProps, deadlines: coloredDeadlines },
+      { widgetFamily: 'systemLarge', date: new Date(now) },
+    );
+    const color = (i: number) =>
+      modifier(
+        dueText(widget, coloredDeadlines[i].deadline, ''),
+        'foregroundStyle',
+      );
+    expect(color(0)).toBe('PlatformColor(systemRed)');
+    expect(color(1)).toBe('PlatformColor(systemOrange)');
+    expect(color(2)).toEqual({ type: 'hierarchical', style: 'secondary' });
+  });
+
   it('opens the next assignment from the Lock Screen', () => {
     const widget = render('accessoryRectangular');
     expect(texts(widget)).toEqual([
@@ -359,7 +398,8 @@ describe('Deadlines on Android', () => {
       '  +5',
       ...[1, 2, 3, 4].flatMap(i => [
         `Assignment d${i}`,
-        `d${i}-due · Course of d${i}`,
+        `d${i}-due`,
+        ` · Course of d${i}`,
       ]),
     ]);
     expect(openUrls(widget)).toEqual([
@@ -367,6 +407,17 @@ describe('Deadlines on Android', () => {
       ...[1, 2, 3, 4].map(i => `learnx://assignment/d${i}`),
     ]);
     expect(modifier(widget, 'background')).toBe('#171216');
+  });
+
+  it('colors due times red under a day and orange by tomorrow', () => {
+    const widget = layout(
+      { ...deadlineProps, deadlines: coloredDeadlines },
+      { colorScheme: 'light' },
+    );
+    const color = (id: string) => dueText(widget, -1, `${id}-due`).props.color;
+    expect(color('red')).toBe('#BA1A1A');
+    expect(color('orange')).toBe('#9A4605');
+    expect(color('plain')).toBe('#4D444C');
   });
 
   it('asks to open the app before it has sent anything, in the system language', () => {

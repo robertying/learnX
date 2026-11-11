@@ -42,6 +42,17 @@ function UpNextWidget(
   const now = date.getTime();
   const classes = (props.classes ?? []).filter(c => c.end > now);
   const deadlines = (props.deadlines ?? []).filter(d => d.deadline > now);
+  // The deadline's color by the app's rule (deadlineUrgency in
+  // helpers/assignments): red under a day left, orange when it's due by the
+  // end of tomorrow. The timeline has an entry at each change.
+  const dueColor = (d: UpNextWidgetProps['deadlines'][number]) =>
+    foregroundStyle(
+      d.urgentFrom !== undefined && now > d.urgentFrom
+        ? PlatformColor('systemRed')
+        : d.soonFrom !== undefined && now >= d.soonFrom
+          ? PlatformColor('systemOrange')
+          : { type: 'hierarchical', style: 'secondary' },
+    );
   const featured = classes[0];
   const current = !!featured && featured.start <= now;
 
@@ -220,7 +231,7 @@ function UpNextWidget(
               dateStyle="relative"
               modifiers={[
                 font({ textStyle: 'caption' }),
-                foregroundStyle(accent),
+                dueColor(item),
                 lineLimit(1),
               ]}
             />

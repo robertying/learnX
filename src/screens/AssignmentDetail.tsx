@@ -20,7 +20,11 @@ import {
   getAssignmentGradeLevelDescription,
   t,
 } from 'helpers/i18n';
-import { deadlineText, isDueSoon } from 'helpers/assignments';
+import {
+  deadlineText,
+  deadlineTone,
+  deadlineUrgency,
+} from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
 import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
@@ -123,7 +127,11 @@ const AssignmentDetailContent: React.FC<{
   } = assignment;
 
   const now = useMinute();
+  const urgency = deadlineUrgency(deadline, now, submitted);
   const closed = dayjs(now).isAfter(dayjs(deadline));
+  // Past the deadline but still taking late submissions.
+  const lateOpen =
+    !!lateSubmissionDeadline && dayjs(now).isBefore(lateSubmissionDeadline);
 
   const html = getWebViewTemplate(
     description || `<p>${t('noAssignmentDescription')}</p>`,
@@ -202,7 +210,7 @@ const AssignmentDetailContent: React.FC<{
             title={t('deadline')}
             subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
             detail={deadlineText(deadline, now)}
-            detailTint={isDueSoon(deadline, now) ? 'warning' : undefined}
+            detailTint={urgency && deadlineTone[urgency]}
             icon="deadline"
           />
           {lateSubmissionDeadline ? (
@@ -252,7 +260,17 @@ const AssignmentDetailContent: React.FC<{
                     )
                   : undefined
               }
-              icon={submitted ? 'done' : 'unfinished'}
+              icon={
+                submitted
+                  ? isLateSubmission
+                    ? 'submittedLate'
+                    : 'done'
+                  : !closed
+                    ? 'unfinished'
+                    : lateOpen
+                      ? 'lateSubmission'
+                      : 'missed'
+              }
             />
           )}
           {hasDraft ? (

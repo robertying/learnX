@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
+import { deadlineUrgencyTimes } from 'helpers/assignments';
 
 export interface WidgetDeadline {
   id: string;
@@ -52,8 +53,23 @@ export function upcomingDeadlines(
 }
 
 /**
- * The deadlines as of now and as of each of the next deadlines, so a widget
- * drops an assignment once it's due without the app running.
+ * The times after `now` at which a widget showing these deadlines changes:
+ * each deadline, when it drops off, and when it turns orange and red
+ * (`deadlineUrgencyTimes`), earliest first.
+ */
+export function deadlineChangeTimes(deadlines: number[], now: number) {
+  const times = new Set<number>();
+  for (const deadline of deadlines) {
+    const { soonFrom, urgentFrom } = deadlineUrgencyTimes(deadline);
+    times.add(soonFrom).add(urgentFrom).add(deadline);
+  }
+  return [...times].filter(time => time > now).sort((a, b) => a - b);
+}
+
+/**
+ * The deadlines as of now and as of each time they change, so a widget
+ * colors a deadline as it nears and drops it once it's due without the app
+ * running.
  */
 export function deadlineTimeline(
   assignments: Assignment[],
@@ -66,18 +82,19 @@ export function deadlineTimeline(
     entries?: number;
   },
 ): { date: number; deadlines: UpcomingDeadlines }[] {
-  const { now = Date.now(), entries = 10 } = options;
+  const { now = Date.now(), entries = 24 } = options;
   const first = upcomingDeadlines(assignments, { ...options, now });
   const times = [
     now,
-    ...new Set(
+    ...deadlineChangeTimes(
       upcomingDeadlines(assignments, {
         ...options,
         now,
         limit: entries - 1,
       }).deadlines.map(d => d.deadline),
+      now,
     ),
-  ];
+  ].slice(0, entries);
   return times.map((date, i) => ({
     date,
     deadlines:

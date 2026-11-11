@@ -112,6 +112,7 @@ describe('syncDeadlineReminders', () => {
       identifier: `deadline-reminder:new:${now + 10 * hour}:60`,
       content: {
         title: 'Assignment new',
+        body: expect.stringMatching(/ · due (today|tomorrow) at \d\d:\d\d$/),
         data: { type: 'assignment', id: 'new' },
       },
       trigger: { type: 'date', date: now + 9 * hour },

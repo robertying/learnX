@@ -273,7 +273,6 @@ export default {
   notifyDeadlineReminders: 'Deadline Reminders',
   notifyDeadlineRemindersCaption:
     "Reminds you of unsubmitted assignments before they're due. Works alongside calendar and Reminders alerts.",
-  deadlineReminderDue: 'Due',
   deadlineReminderOffset: 'Remind Before (Minutes)',
   allowExactReminders: 'Allow Exact Reminder Times',
   exactRemindersCaption:
@@ -298,6 +297,15 @@ export default {
   gradedByAtFormat: '[Graded by] {grader}[,] MMM D, YYYY HH:mm',
   deadlinePassed: 'closed {time}',
   deadlineIn: 'due in {time}',
+  deadlineInOneMinute: 'due in 1 minute',
+  deadlineInMinutes: 'due in {count} minutes',
+  deadlineInOneHour: 'due in 1 hour',
+  deadlineInHours: 'due in {count} hours',
+  deadlineInOneDay: 'due in 1 day',
+  deadlineInDays: 'due in {count} days',
+  deadlineToday: 'due today at {time}',
+  deadlineTomorrow: 'due tomorrow at {time}',
+  deadlineAt: 'due {date}',
   /** a deadline more than a year away, which a relative time would make absurd */
   deadlineOn: 'due {date}',
   deadlineDateFormat: 'MMM D, YYYY',
@@ -366,6 +374,7 @@ export default {
   forward: 'Forward',
   openInBrowser: 'Open in Browser',
   a11yImportant: 'Important',
+  a11yFavorited: 'Favorite',
   a11yHasAnswer: 'Has answer',
   a11yNewBadge: 'New',
   a11yDone: 'Ended',

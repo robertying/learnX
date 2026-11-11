@@ -1,5 +1,5 @@
 import { act, render, screen } from '@testing-library/react-native';
-import { StyleSheet } from 'react-native';
+import { PlatformColor, StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import { mockLocale } from '../../../jest/locale';
 import { Assignment, Course, File, Notice } from 'data/types/state';
@@ -9,6 +9,10 @@ import FileCard from 'components/FileCard';
 import NoticeCard from 'components/NoticeCard';
 
 const NOW = new Date('2026-03-10T12:00:00+08:00');
+
+/** The color of a pill's text. */
+const pillColor = (text: string) =>
+  StyleSheet.flatten(screen.getByText(text).props.style).color;
 
 const daysFromNow = (days: number) => dayjs(NOW).add(days, 'day').toISOString();
 
@@ -190,7 +194,7 @@ describe('AssignmentCard', () => {
     expect(screen.getByText('Prof. Li')).toBeTruthy();
   });
 
-  it('highlights a deadline due by the end of tomorrow', async () => {
+  it('marks a deadline under a day away in red', async () => {
     await render(
       <AssignmentCard
         data={assignment({
@@ -199,10 +203,10 @@ describe('AssignmentCard', () => {
       />,
     );
     expect(screen.getByTestId('due-soon')).toBeTruthy();
-    expect(screen.getByText('due in 5 hours')).toBeTruthy();
+    expect(pillColor('due in 5 hours')).toEqual(PlatformColor('systemRed'));
   });
 
-  it('highlights a deadline late tomorrow, as Today does', async () => {
+  it('marks a deadline later tomorrow in orange, as Today does', async () => {
     await render(
       <AssignmentCard
         data={assignment({
@@ -210,7 +214,29 @@ describe('AssignmentCard', () => {
         } as Partial<Assignment>)}
       />,
     );
-    expect(screen.getByTestId('due-soon')).toBeTruthy();
+    expect(pillColor('due in 1 day')).toEqual(PlatformColor('systemOrange'));
+  });
+
+  it('leaves a deadline after tomorrow and a submitted one unmarked', async () => {
+    const view = await render(
+      <AssignmentCard
+        data={assignment({
+          deadline: dayjs(NOW).add(2, 'day').hour(0).minute(30).toISOString(),
+        } as Partial<Assignment>)}
+      />,
+    );
+    expect(screen.getByText('due in 2 days')).toBeTruthy();
+    expect(screen.queryByTestId('due-soon')).toBeNull();
+
+    await view.rerender(
+      <AssignmentCard
+        data={assignment({
+          deadline: dayjs(NOW).add(5, 'hour').toISOString(),
+          submitted: true,
+        } as Partial<Assignment>)}
+      />,
+    );
+    expect(screen.queryByTestId('due-soon')).toBeNull();
   });
 
   it('says when a past deadline closed', async () => {
@@ -254,6 +280,22 @@ describe('AssignmentCard', () => {
       <AssignmentCard data={assignment({ submitted: true, graded: true })} />,
     );
     expect(screen.getByText('Graded')).toBeTruthy();
+  });
+
+  it('marks a late submission in orange', async () => {
+    await render(
+      <AssignmentCard
+        data={assignment({ submitted: true, isLateSubmission: true })}
+      />,
+    );
+    expect(pillColor('Submitted Late')).toEqual(PlatformColor('systemOrange'));
+  });
+
+  it('marks a favorite with a red heart', async () => {
+    const view = await render(<AssignmentCard data={assignment()} />);
+    expect(screen.queryByTestId('icon-favorited')).toBeNull();
+    await view.rerender(<AssignmentCard data={assignment()} fav />);
+    expect(screen.getByTestId('icon-favorited')).toBeTruthy();
   });
 
   it('marks attachments and answers', async () => {

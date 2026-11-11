@@ -37,12 +37,17 @@ function UpNextWidget(
         title: '#EBDFE6',
         caption: '#D0C3CC',
         accent: '#F4ABFF',
+        // The error role and the orange custom color.
+        red: '#FFB4AB',
+        orange: '#FFB68E',
       }
     : {
         background: '#FFF7FA',
         title: '#1F1A1F',
         caption: '#4D444C',
         accent: '#660874',
+        red: '#BA1A1A',
+        orange: '#9A4605',
       };
   // Fallbacks for before the app first sends its strings. Widget layouts run
   // in their own runtime without the app's translations.
@@ -58,6 +63,15 @@ function UpNextWidget(
     url ? [{ $type: 'openUrl', url }] : [];
 
   const now = Date.now();
+  // The deadline's color by the app's rule (deadlineUrgency in
+  // helpers/assignments): red under a day left, orange when it's due by the
+  // end of tomorrow.
+  const dueColor = (d: UpNextWidgetProps['deadlines'][number]) =>
+    d.urgentFrom !== undefined && now > d.urgentFrom
+      ? colors.red
+      : d.soonFrom !== undefined && now >= d.soonFrom
+        ? colors.orange
+        : undefined;
   const classes = (props.classes ?? []).filter(c => c.end > now);
   const deadline = (props.deadlines ?? []).find(d => d.deadline > now);
   const featured = classes[0];
@@ -135,7 +149,7 @@ function UpNextWidget(
         >
           <Row modifiers={[fillMaxWidth()]}>
             <Text
-              color={colors.accent}
+              color={dueColor(deadline) ?? colors.accent}
               style={{ fontSize: 12, fontWeight: 'bold' }}
               maxLines={1}
             >

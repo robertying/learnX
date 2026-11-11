@@ -10,6 +10,7 @@ export const systemIcons = {
   // Card glyphs and pills
   attachment: { ios: 'paperclip', android: 'attach_file' },
   important: { ios: 'flag.fill', android: 'flag' },
+  favorited: { ios: 'heart.fill', android: 'favorite' },
   answer: { ios: 'key', android: 'key' },
   deadline: { ios: 'clock', android: 'schedule' },
   lateSubmission: { ios: 'clock.badge.exclamationmark', android: 'more_time' },
@@ -29,6 +30,8 @@ export const systemIcons = {
   offline: { ios: 'icloud.slash', android: 'cloud_off' },
   error: { ios: 'exclamationmark.circle', android: 'error' },
   done: { ios: 'checkmark.circle', android: 'check_circle' },
+  submittedLate: { ios: 'clock.badge.checkmark', android: 'alarm_on' },
+  missed: { ios: 'xmark.circle', android: 'cancel' },
   notFound: { ios: 'magnifyingglass', android: 'search_off' },
   // Card actions and filters
   favorite: { ios: 'heart', android: 'favorite' },
@@ -113,6 +116,7 @@ export type SystemIconAndroidName =
 export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   account_circle: 0xe853,
   alarm: 0xe855,
+  alarm_on: 0xe858,
   archive: 0xe149,
   article: 0xef42,
   assignment: 0xe85d,

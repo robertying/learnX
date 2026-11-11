@@ -41,12 +41,17 @@ function DeadlinesWidget(
         title: '#EBDFE6',
         caption: '#D0C3CC',
         accent: '#F4ABFF',
+        // The error role and the orange custom color.
+        red: '#FFB4AB',
+        orange: '#FFB68E',
       }
     : {
         background: '#FFF7FA',
         title: '#1F1A1F',
         caption: '#4D444C',
         accent: '#660874',
+        red: '#BA1A1A',
+        orange: '#9A4605',
       };
   // Fallbacks for before the app first sends its strings. Widget layouts run
   // in their own runtime without the app's translations.
@@ -58,6 +63,15 @@ function DeadlinesWidget(
     (zh ? '打开 learnX 以显示作业' : 'Open learnX to see deadlines');
   /* oxlint-enable learnx/no-han-outside-translations */
   const now = Date.now();
+  // The deadline's color by the app's rule (deadlineUrgency in
+  // helpers/assignments): red under a day left, orange when it's due by the
+  // end of tomorrow.
+  const dueColor = (d: DeadlineWidgetProps['deadlines'][number]) =>
+    d.urgentFrom !== undefined && now > d.urgentFrom
+      ? colors.red
+      : d.soonFrom !== undefined && now >= d.soonFrom
+        ? colors.orange
+        : undefined;
   const all = props.deadlines ?? [];
   const ahead = all.filter(d => d.deadline > now);
   const deadlines = ahead.slice(0, 4);
@@ -109,9 +123,18 @@ function DeadlinesWidget(
           >
             {item.title}
           </Text>
-          <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
-            {`${item.due} · ${item.courseName}`}
-          </Text>
+          <Row>
+            <Text
+              color={dueColor(item) ?? colors.caption}
+              style={{ fontSize: 12 }}
+              maxLines={1}
+            >
+              {item.due}
+            </Text>
+            <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
+              {` · ${item.courseName}`}
+            </Text>
+          </Row>
         </Column>
       ))}
     </Column>

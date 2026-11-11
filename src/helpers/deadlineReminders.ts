@@ -1,8 +1,7 @@
 import { Platform } from 'react-native';
-import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
-import { t } from 'helpers/i18n';
+import { deadlineDayTime } from 'helpers/assignments';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
@@ -85,16 +84,13 @@ export const planDeadlineReminders = (
   }));
 };
 
-const reminderContent = ({
-  id,
+/** A reminder's text, with the deadline's day as of when it shows. */
+const reminderContent = (
+  { id, title, courseName, deadline }: WidgetDeadline,
+  showsAt: number,
+) => ({
   title,
-  courseName,
-  deadline,
-}: WidgetDeadline) => ({
-  title,
-  body: `${courseName} · ${t('deadlineReminderDue')} ${dayjs(deadline).format(
-    t('shortDateTimeFormat'),
-  )}`,
+  body: `${courseName} · ${deadlineDayTime(deadline, showsAt)}`,
   data: { type: 'assignment', id, deadline },
   categoryIdentifier: notificationCategories.deadline,
 });
@@ -146,7 +142,7 @@ export const syncDeadlineReminders = async (
       .map(r =>
         Notifications.scheduleNotificationAsync({
           identifier: r.identifier,
-          content: reminderContent(r.deadline),
+          content: reminderContent(r.deadline, r.date),
           trigger: {
             type: Notifications.SchedulableTriggerInputTypes.DATE,
             date: r.date,

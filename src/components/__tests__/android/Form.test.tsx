@@ -244,7 +244,13 @@ describe('Form (Android)', () => {
     await render(
       <FormSection>
         <FormText title="Grade" detail="A" detailTint="accent" />
-        <FormText title="Due" detail="Tomorrow" detailTint="warning" />
+        <FormText title="Due" detail="Tomorrow" detailTint="orange" />
+        <FormLink
+          title="Essay"
+          detail="Today"
+          detailTint="red"
+          onPress={jest.fn()}
+        />
         <FormText title="Size" detail="2 MB" />
         <FormText title="Submitted" subtitle="On time" detail="Mon" done />
       </FormSection>,
@@ -253,6 +259,8 @@ describe('Form (Android)', () => {
     expect(screen.getByText('A').props.typography).toBe('titleLarge');
     expect(style('Tomorrow').color).not.toMatch(/^[a-zA-Z]+$/);
     expect(screen.getByText('Tomorrow').props.typography).toBe('labelLarge');
+    expect(style('Today').color).not.toMatch(/^[a-zA-Z]+$/);
+    expect(style('Today').color).not.toBe(style('Tomorrow').color);
     expect(style('2 MB').color).toBe('onSurfaceVariant');
     expect(screen.getByText('2 MB').props.typography).toBeUndefined();
     for (const text of ['Submitted', 'On time', 'Mon']) {

@@ -242,7 +242,7 @@ const useStackedDetail = (subtitle?: string, detail?: string) => {
 
 const RowDetail: React.FC<{
   detail?: string;
-  tint?: FormTextProps['detailTint'];
+  tint?: FormItemRowProps['detailTint'];
 }> = ({ detail, tint }) => {
   const theme = useTheme();
   if (!detail) {
@@ -254,10 +254,10 @@ const RowDetail: React.FC<{
           font({ textStyle: 'title3', weight: 'bold' }),
           foregroundStyle(theme.colors.primary),
         ]
-      : tint === 'warning'
+      : tint
         ? [
             font({ textStyle: 'body', weight: 'semibold' }),
-            foregroundStyle(theme.colors.status.orange),
+            foregroundStyle(theme.colors.status[tint]),
           ]
         : [secondaryText];
   return <Text modifiers={modifiers}>{detail}</Text>;
@@ -274,7 +274,7 @@ const ItemRow: React.FC<
     trailing?: React.ReactNode;
     badge?: React.ReactNode;
   }
-> = ({ title, icon, done, progress, badge, trailing, ...rest }) => {
+> = ({ title, icon, done, progress, detailTint, badge, trailing, ...rest }) => {
   const { subtitle, detail } = useStackedDetail(rest.subtitle, rest.detail);
   const row = (
     <HStack modifiers={done ? doneModifiers : undefined}>
@@ -286,7 +286,7 @@ const ItemRow: React.FC<
         done={done}
       />
       <Spacer />
-      <RowDetail detail={detail} />
+      <RowDetail detail={detail} tint={done ? undefined : detailTint} />
       {badge}
       {trailing}
     </HStack>
@@ -309,7 +309,7 @@ export const FormText: React.FC<FormTextProps> = ({
   const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
   return row.done || row.progress !== undefined ? (
     <VStack testID={testID}>
-      <ItemRow {...row} />
+      <ItemRow {...row} detailTint={detailTint} />
     </VStack>
   ) : (
     <LabeledContent

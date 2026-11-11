@@ -1,8 +1,13 @@
 import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import { deadlineText, isDueSoon } from 'helpers/assignments';
+import {
+  deadlineText,
+  deadlineTone,
+  deadlineUrgency,
+} from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { useMinute } from 'hooks/useClock';
+import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import CardRow, {
   CardGlyph,
@@ -29,20 +34,23 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     gradeLevel,
     answerContent,
     answerAttachment,
+    isLateSubmission,
   },
   hideCourseName,
   ...restProps
 }) => {
+  const theme = useTheme();
   const now = useMinute();
   const dueText = deadlineText(deadline, now);
-  const dueSoon = isDueSoon(deadline, now);
+  const urgency = deadlineUrgency(deadline, now, submitted);
 
   const gradeText = gradeLevel
     ? getAssignmentGradeLevelDescription(gradeLevel)
     : grade !== undefined
       ? String(grade)
       : t('graded');
-  const statusText = graded ? gradeText : submitted ? t('submitted') : dueText;
+  const submittedText = isLateSubmission ? t('submittedLate') : t('submitted');
+  const statusText = graded ? gradeText : submitted ? submittedText : dueText;
   const overline = hideCourseName ? courseTeacherName : courseName;
   const preview = removeTags(description);
   const hasAnswer = !!(answerContent || answerAttachment);
@@ -52,11 +60,11 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
       {gradeText}
     </CardPill>
   ) : submitted ? (
-    <CardPill testID="submitted" tone="green">
-      {t('submitted')}
+    <CardPill testID="submitted" tone={isLateSubmission ? 'orange' : 'green'}>
+      {submittedText}
     </CardPill>
-  ) : dueSoon ? (
-    <CardPill testID="due-soon" tone="red" icon="deadline">
+  ) : urgency ? (
+    <CardPill testID="due-soon" tone={deadlineTone[urgency]} icon="deadline">
       {dueText}
     </CardPill>
   ) : (
@@ -70,7 +78,11 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         title,
         overline,
         status: statusText,
-        flags: [attachment && t('attachment'), hasAnswer && t('a11yHasAnswer')],
+        flags: [
+          attachment && t('attachment'),
+          hasAnswer && t('a11yHasAnswer'),
+          restProps.fav && t('a11yFavorited'),
+        ],
         preview,
       })}
     >
@@ -82,6 +94,9 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
           <>
             {attachment ? <CardGlyph name="attachment" /> : null}
             {hasAnswer ? <CardGlyph name="answer" /> : null}
+            {restProps.fav ? (
+              <CardGlyph name="favorited" color={theme.colors.status.red} />
+            ) : null}
           </>
         }
         trailing={status}

@@ -48,7 +48,10 @@ const FileCard: React.FC<FileCardProps> = ({
         title,
         overline,
         status: time,
-        flags: [markedImportant && t('a11yImportant')],
+        flags: [
+          markedImportant && t('a11yImportant'),
+          restProps.fav && t('a11yFavorited'),
+        ],
         preview,
       })}
     >
@@ -58,9 +61,14 @@ const FileCard: React.FC<FileCardProps> = ({
         title={title}
         preview={preview}
         glyphs={
-          markedImportant ? (
-            <CardGlyph name="important" color={theme.colors.status.orange} />
-          ) : null
+          <>
+            {markedImportant ? (
+              <CardGlyph name="important" color={theme.colors.status.orange} />
+            ) : null}
+            {restProps.fav ? (
+              <CardGlyph name="favorited" color={theme.colors.status.red} />
+            ) : null}
+          </>
         }
         trailing={time}
       />
