@@ -25,8 +25,8 @@
 # Devices, by simulator name or UDID and by AVD name:
 #   E2E_IPHONE (learnX iPhone 18 Pro), E2E_IPAD (learnX iPad Pro 11),
 #   E2E_DUO (learnX iPhone Duo), E2E_AVD (Pixel_10_Pro_Fold)
-# E2E_HINGE is the command that sets the iPhone Duo's hinge (`hinge`,
-# brew install artemnovichkov/tap/hinge).
+# The iPhone Duo profiles fold it with setFoldPosture, which only the patched
+# Maestro has (scripts/maestro/build.sh): put its bin folder first on PATH.
 #
 # Results, with Maestro's output and a JUnit report: build/e2e/<profile>/
 set -euo pipefail
@@ -40,7 +40,6 @@ iphone="${E2E_IPHONE:-learnX iPhone 18 Pro}"
 ipad="${E2E_IPAD:-learnX iPad Pro 11}"
 duo="${E2E_DUO:-learnX iPhone Duo}"
 avd="${E2E_AVD:-Pixel_10_Pro_Fold}"
-hinge="${E2E_HINGE:-hinge}"
 build="${E2E_BUILD:-0}"
 max_booted="${E2E_MAX_BOOTED:-3}"
 ios_app_id="io.robertying.learnX"
@@ -107,7 +106,7 @@ release_device() {
 
 cleanup() {
   if [ -n "$hinge_moved" ]; then
-    "$hinge" -d "$hinge_moved" close >/dev/null 2>&1 || true
+    set_hinge "$hinge_moved" closed >/dev/null 2>&1 || true
   fi
   release_device
 }
@@ -171,21 +170,19 @@ use_sim() {
   fi
 }
 
+# Set the iPhone Duo $1's hinge to $2 (closed, halfFold or flat). The flows
+# after it wait for the app's new layout themselves.
 set_hinge() {
   local udid="$1" posture="$2"
-  if ! command -v "$hinge" >/dev/null; then
-    echo "\"$hinge\" not found: brew install artemnovichkov/tap/hinge (or set E2E_HINGE)" >&2
-    return 1
-  fi
   log "Hinge: $posture"
-  "$hinge" -d "$udid" "$posture" || return 1
-  if [ "$posture" = close ]; then
+  MAESTRO_DEVICE="$udid" scripts/e2e.sh ios -e POSTURE="$posture" \
+    --test-output-dir "$out_root/fold" .maestro/subflows/fold.yaml >/dev/null ||
+    return 1
+  if [ "$posture" = closed ]; then
     hinge_moved=""
   else
     hinge_moved="$udid"
   fi
-  # The app moves to the other display a few seconds after the hinge does.
-  sleep 10
 }
 
 app_running() {
@@ -204,7 +201,7 @@ run_ios_suite() {
 # screen on the inner display, saving a screenshot of each.
 run_duo_postures() {
   local udid="$1" posture="$2" out="$3" flow name status=0
-  set_hinge "$udid" close || return 1
+  set_hinge "$udid" closed || return 1
   MAESTRO_DEVICE="$udid" scripts/e2e.sh ios --test-output-dir "$out/login" \
     .maestro/subflows/login.yaml || return 1
   set_hinge "$udid" "$posture" || return 1
@@ -224,7 +221,7 @@ run_duo_postures() {
       return 1
     fi
   done
-  set_hinge "$udid" close || return 1
+  set_hinge "$udid" closed || return 1
   return "$status"
 }
 
@@ -307,16 +304,16 @@ run_profile() {
     ;;
   duo-folded)
     use_sim "$duo" || return 1
-    set_hinge "$device" close || return 1
+    set_hinge "$device" closed || return 1
     run_ios_suite "$device" PORTRAIT "$out"
     ;;
   duo-half)
     use_sim "$duo" || return 1
-    run_duo_postures "$device" half "$out"
+    run_duo_postures "$device" halfFold "$out"
     ;;
   duo-open)
     use_sim "$duo" || return 1
-    run_duo_postures "$device" open "$out"
+    run_duo_postures "$device" flat "$out"
     ;;
   fold-folded)
     use_emulator "$avd" || return 1
