@@ -1,7 +1,8 @@
 #!/bin/bash
 # Build the Release app for the E2E flows and install it on a simulator or
-# emulator. A Release build bundles the JS (no Metro), starts faster than a
-# debug build and is what ships, so the flows run on what R8 and Hermes made.
+# emulator. E2E runs always use Release, never a debug build: it bundles the
+# JS (no Metro), starts faster and is what ships, so the flows run on what R8
+# and Hermes made.
 # The bundle inlines .env, so its mock login works as in debug builds.
 #
 #   scripts/e2e-build.sh ios <simulator udid>
