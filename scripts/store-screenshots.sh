@@ -86,6 +86,7 @@ if [ "$platform" = mac ]; then
   export_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store-mac.XXXXXX")"
   xcrun xcresulttool export attachments --path build/e2e/mac.xcresult \
     --output-path "$export_dir"
+  # shellcheck disable=SC2016 # JavaScript, not shell
   node -e '
     const fs = require("fs");
     const [dir, out] = process.argv.slice(1);
