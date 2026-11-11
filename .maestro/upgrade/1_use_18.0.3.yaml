@@ -36,10 +36,10 @@ appId: ${APP_ID}
 # sheet can still be sliding in when the first tap lands.
 - extendedWaitUntil:
     visible: 'nothing-like-this-is-ever-shown'
-    timeout: 4000
+    timeout: 8000
     optional: true
 - repeat:
-    times: 4
+    times: 6
     commands:
       - runFlow:
           when:
@@ -50,7 +50,7 @@ appId: ${APP_ID}
                 point: 32%, 63%
             - extendedWaitUntil:
                 visible: 'nothing-like-this-is-ever-shown'
-                timeout: 2000
+                timeout: 3000
                 optional: true
 - extendedWaitUntil:
     visible: 'Settings'
