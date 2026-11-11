@@ -8,7 +8,14 @@ setups:
 - iPadOS windowed apps, where the app is in a window smaller than the screen.
 
 `maestro-display.patch` fixes the driver (upstream issue
-mobile-dev-inc/Maestro#3623). Until a Maestro release includes the fix, build
+mobile-dev-inc/Maestro#3623). `maestro-fold-posture.patch` adds the
+`setFoldPosture` command from upstream PR mobile-dev-inc/Maestro#3621, so a
+flow can set the iPhone Duo's hinge:
+
+```yaml
+- setFoldPosture: halfFold # closed, halfFold or flat
+```
+ Until a Maestro release includes both, build
 it from source and put it first on `PATH`:
 
 ```sh

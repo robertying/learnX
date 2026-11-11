@@ -1,11 +1,15 @@
 #!/bin/bash
-# Build Maestro from source with the iOS driver patch in this folder, which
-# fixes element positions, taps and screenshots when the app is on another
-# display (iPhone Duo open) or in a window (iPadOS windowed apps).
+# Build Maestro from source with the patches in this folder:
+#   maestro-display.patch       element positions, taps and screenshots when
+#                               the app is on another display (iPhone Duo
+#                               open) or in a window (iPadOS windowed apps)
+#   maestro-fold-posture.patch  the setFoldPosture command (closed, halfFold,
+#                               flat) for foldable simulators, from upstream
+#                               PR mobile-dev-inc/Maestro#3621
 #
 #   scripts/maestro/build.sh [maestro checkout]   (default: ~/repos/Maestro)
 #
-# Needs Xcode and JDK 17. Resets the checkout to the patched commit unless
+# Needs Xcode and JDK 17. Resets the checkout to the patched commits unless
 # MAESTRO_KEEP=1. Prints the folder to put first on PATH:
 #   PATH="$(scripts/maestro/build.sh | tail -n 1):$PATH" scripts/e2e.sh ios
 set -euo pipefail
@@ -24,7 +28,8 @@ cd "$dir"
 if [ "${MAESTRO_KEEP:-}" != 1 ]; then
   git fetch origin main >&2
   git checkout -q -B learnx-patched "$base" >&2
-  git -c commit.gpgsign=false am -q "$here/maestro-display.patch" >&2
+  git -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
+    "$here/maestro-fold-posture.patch" >&2
 fi
 
 if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then
