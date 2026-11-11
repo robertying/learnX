@@ -101,10 +101,10 @@ const macFormModifiers = [
 const groupedBackground = PlatformColor('systemGroupedBackground');
 
 // The last section's footer would otherwise end right at the floating tab
-// bar's top edge when scrolled to the end. (Android's list has its own
-// bottom padding.)
+// bar's top edge when scrolled to the end; with this it keeps the rows' side
+// margin (16 pt) from it. (Android's list has its own bottom padding.)
 const lastSectionModifiers = [
-  listSectionMargins({ edges: 'bottom', length: 32 }),
+  listSectionMargins({ edges: 'bottom', length: 8 }),
 ];
 
 const lastSectionMarked = (children: ReactNode) =>
