@@ -47,7 +47,8 @@ describe('headerButtons', () => {
       expect.objectContaining({
         identifier: 'settings',
         badge: { value: '' },
-        accessibilityLabel: 'Settings, New',
+        // UIKit reads the badge out itself.
+        accessibilityLabel: undefined,
       }),
     ]);
   });

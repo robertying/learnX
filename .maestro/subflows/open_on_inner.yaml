@@ -1,0 +1,29 @@
+# Open LINK (a learnx:// link) on the closed iPhone Duo, then open it to
+# OPEN_POSTURE and wait for ID on the inner display. iOS asks before opening
+# the link, and nothing can tap on the inner display (Maestro or the
+# Simulator), so the link opens while the Duo is closed. Run by the flows in
+# .maestro/postures/ (scripts/e2e-devices.sh passes OPEN_POSTURE).
+appId: ${APP_ID}
+---
+- runFlow:
+    file: fold.yaml
+    env:
+      POSTURE: closed
+- openLink: ${LINK}
+# The system's "Open in “learnX”?" prompt; its button isn't the app's text.
+- tapOn:
+    text: 'Open|打开'
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: ${ID}
+    timeout: 15000
+- runFlow:
+    file: fold.yaml
+    env:
+      POSTURE: ${OPEN_POSTURE}
+# The app moves to the inner display and lays the screen out again.
+- extendedWaitUntil:
+    visible:
+      id: ${ID}
+    timeout: 15000

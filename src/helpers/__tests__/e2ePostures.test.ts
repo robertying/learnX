@@ -27,12 +27,11 @@ describe('posture flows', () => {
   it.each(flows)('%s opens a learnx:// link to a mock item', name => {
     const links =
       readFileSync(`${dir}/${name}`, 'utf8').match(
-        /openLink: '(learnx:\/\/[^']+)'/g,
+        /LINK: '(learnx:\/\/[^']+)'/g,
       ) ?? [];
     expect(links).toHaveLength(1);
     const [link = ''] = links;
-    const { type, id } =
-      getUrlTarget(link.slice("openLink: '".length, -1)) ?? {};
+    const { type, id } = getUrlTarget(link.slice("LINK: '".length, -1)) ?? {};
     // Today has no id; an unknown type has no items.
     const known =
       type === 'today'

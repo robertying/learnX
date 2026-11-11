@@ -203,8 +203,9 @@ run_ios_suite() {
     --format junit --output "$out/report.xml" --test-output-dir "$out"
 }
 
-# Log in on the closed Duo, open it to $2 and open each posture flow's
-# screen on the inner display, saving a screenshot of each.
+# Log in on the closed Duo, then run each posture flow: it opens its screen
+# while closed (iOS asks before opening a link, and nothing can tap on the
+# inner display) and opens the Duo to $2. Saves the inner display after each.
 run_duo_postures() {
   local udid="$1" posture="$2" out="$3" flow name status=0
   set_hinge "$udid" closed || return 1
@@ -215,11 +216,11 @@ run_duo_postures() {
   fi
   MAESTRO_DEVICE="$udid" scripts/e2e.sh ios --test-output-dir "$out/login" \
     .maestro/subflows/login.yaml || return 1
-  set_hinge "$udid" "$posture" || return 1
+  hinge_moved="$udid"
   for flow in .maestro/postures/*.yaml; do
     name="$(basename "$flow" .yaml)"
     log "$name"
-    if ! MAESTRO_DEVICE="$udid" scripts/e2e.sh ios \
+    if ! MAESTRO_DEVICE="$udid" scripts/e2e.sh ios -e OPEN_POSTURE="$posture" \
       --test-output-dir "$out/$name" "$flow"; then
       status=1
     fi

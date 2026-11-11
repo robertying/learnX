@@ -1,0 +1,20 @@
+# Run one of the actions subflows/card_actions.yaml revealed: tap the swipe
+# action or Android menu item by its id (ID, e.g. card-fav), or, where a long
+# press opens the native context menu instead (iPad), its item by its label
+# (LABEL, e.g. '${T_favorite}').
+appId: ${APP_ID}
+---
+# The menu first: once the id is tapped, it's gone and this would tap again.
+- runFlow:
+    when:
+      notVisible:
+        id: ${ID}
+    commands:
+      - tapOn: ${LABEL}
+- runFlow:
+    when:
+      visible:
+        id: ${ID}
+    commands:
+      - tapOn:
+          id: ${ID}

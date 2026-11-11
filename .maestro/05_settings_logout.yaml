@@ -11,10 +11,13 @@ name: Open settings pages and log out
     env:
       LIST: '.*(${T_logout}).*'
 # Settings is a native lazy list, and on phones About is near the bottom,
-# under the floating tab bar: scroll it to the middle first.
+# under the floating tab bar: scroll it to the middle first. Not when it's on
+# screen already (iPad): centerElement swipes the middle of the screen, which
+# is the detail pane there, and never gets it to the middle.
 - runFlow:
     when:
       platform: iOS
+      notVisible: '.*(${T_about}).*'
     commands:
       - scrollUntilVisible:
           element: '.*(${T_about}).*'
@@ -45,6 +48,8 @@ name: Open settings pages and log out
 - runFlow:
     when:
       platform: iOS
+      notVisible:
+        id: settings-logout
     commands:
       - scrollUntilVisible:
           element:

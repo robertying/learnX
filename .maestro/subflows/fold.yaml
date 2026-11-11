@@ -1,7 +1,22 @@
 # Set the iPhone Duo's hinge to POSTURE: closed, halfFold or flat (0°, 90°,
 # 180°). setFoldPosture is in the patched Maestro (scripts/maestro), not yet
 # upstream (mobile-dev-inc/Maestro#3621); it returns once the simulator reports
-# the new angle. Run by scripts/e2e-devices.sh.
+# the new angle. Maestro checks its value before filling in variables, so each
+# posture is written out.
 appId: ${APP_ID}
 ---
-- setFoldPosture: ${POSTURE}
+- runFlow:
+    when:
+      true: ${POSTURE == 'closed'}
+    commands:
+      - setFoldPosture: closed
+- runFlow:
+    when:
+      true: ${POSTURE == 'halfFold'}
+    commands:
+      - setFoldPosture: halfFold
+- runFlow:
+    when:
+      true: ${POSTURE == 'flat'}
+    commands:
+      - setFoldPosture: flat

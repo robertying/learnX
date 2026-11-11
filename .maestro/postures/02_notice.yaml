@@ -1,12 +1,11 @@
 appId: ${APP_ID}
 name: Open a notice on the open iPhone Duo
 ---
-# Run by scripts/e2e-devices.sh on the open iPhone Duo, already logged in.
-# Maestro can't tap on the inner display (mobile-dev-inc/Maestro#3623), so
-# the screen opens from its learnx:// link (mock data ids, checked by
-# src/helpers/__tests__/e2ePostures.test.ts) and only its id is checked.
-- openLink: 'learnx://notice/26ef84e76d60efc1016d000000000001'
-- extendedWaitUntil:
-    visible:
-      id: notice-detail
-    timeout: 15000
+# Run by scripts/e2e-devices.sh on the iPhone Duo, already logged in: opens
+# the screen from its learnx:// link (mock data ids, checked by
+# src/helpers/__tests__/e2ePostures.test.ts) and checks it on the inner display.
+- runFlow:
+    file: ../subflows/open_on_inner.yaml
+    env:
+      LINK: 'learnx://notice/26ef84e76d60efc1016d000000000001'
+      ID: notice-detail
