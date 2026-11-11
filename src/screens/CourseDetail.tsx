@@ -1,5 +1,5 @@
 import { useContext, useEffectEvent, useLayoutEffect, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, View } from 'react-native';
 import {
   useSafeAreaFrame,
   useSafeAreaInsets,
@@ -27,10 +27,12 @@ import FileCard from 'components/FileCard';
 import Empty, { type EmptyType } from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
+import ListBackground from 'components/ListBackground';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { SplitViewContext } from 'navigation/SplitView';
 import DeviceInfo from 'constants/DeviceInfo';
+import Styles from 'constants/Styles';
 import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import {
@@ -84,27 +86,29 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   };
 
   return (
-    <FlatList
-      data={data}
-      renderItem={({ item, index }) => (
-        <Card
-          data={item}
-          last={index === data.length - 1}
-          disableSwipe
-          hideCourseName
-          onPress={() => navigation.push(detailScreen, { id: item.id })}
-        />
+    <View style={Styles.flex1}>
+      {data.length ? null : (
+        <ListBackground>
+          <Empty type={type} />
+        </ListBackground>
       )}
-      keyExtractor={item => item.id}
-      refreshing={refresh.isPending}
-      onRefresh={handleRefresh}
-      contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
-      contentContainerStyle={[
-        styles.listContent,
-        data.length ? null : styles.emptyListContent,
-      ]}
-      ListEmptyComponent={<Empty type={type} />}
-    />
+      <FlatList
+        data={data}
+        renderItem={({ item, index }) => (
+          <Card
+            data={item}
+            last={index === data.length - 1}
+            disableSwipe
+            hideCourseName
+            onPress={() => navigation.push(detailScreen, { id: item.id })}
+          />
+        )}
+        keyExtractor={item => item.id}
+        refreshing={refresh.isPending}
+        onRefresh={handleRefresh}
+        contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+      />
+    </View>
   );
 };
 
@@ -254,14 +258,5 @@ const CourseDetailContent: React.FC<{
     </SafeArea>
   );
 };
-
-const styles = StyleSheet.create({
-  listContent: {
-    flexGrow: 1,
-  },
-  emptyListContent: {
-    justifyContent: 'center',
-  },
-});
 
 export default CourseDetail;

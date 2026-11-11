@@ -36,6 +36,7 @@ import FilterListRow, {
   ItemComponentProps,
 } from './FilterListRow';
 import FlatList from './FlatList';
+import ListBackground from './ListBackground';
 
 export type { ItemComponentProps };
 
@@ -303,15 +304,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   const listProps = {
     style: { height: '100%' as const },
     contentInsetAdjustmentBehavior: 'automatic' as const,
-    contentContainerStyle: [
-      { flexGrow: 1 },
-      data.length ? null : { justifyContent: 'center' as const },
-    ],
     data,
     // In the list, so that the list is the screen's first scroll view: iOS
     // collapses the large title as it scrolls.
     ListHeaderComponent: <SyncStatus updatedAt={updatedAt} />,
-    ListEmptyComponent: loading ? <Spinner /> : <Empty type={type} />,
     renderItem,
     keyExtractor: (item: T) => item.id,
     refreshControl: (
@@ -325,6 +321,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
 
   return (
     <View style={Styles.flex1}>
+      {data.length ? null : (
+        <ListBackground>
+          {loading ? <Spinner /> : <Empty type={type} />}
+        </ListBackground>
+      )}
       {isCourse ? (
         <ReorderableList
           key={`${filterSelected}-${reorderMode}`}
