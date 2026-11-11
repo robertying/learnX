@@ -15,7 +15,8 @@ flow can set the iPhone Duo's hinge:
 ```yaml
 - setFoldPosture: halfFold # closed, halfFold or flat
 ```
- Until a Maestro release includes both, build
+
+Until a Maestro release includes both, build
 it from source and put it first on `PATH`:
 
 ```sh
