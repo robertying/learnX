@@ -1,0 +1,114 @@
+appId: ${APP_ID}
+name: App Store screenshots on the iPad
+---
+# Run by scripts/store-screenshots.sh (ipad): the iPad shots of the store
+# listing in landscape, as STORE_OUT/NN-<slug>.png. Details open beside the
+# lists.
+- setOrientation: LANDSCAPE_LEFT
+- runFlow: subflows/start.yaml
+
+# 1 Notices with a notice open
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_NOTICE}).*'
+      DETAIL: notice-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 01-notices
+
+# 2 Another row's swipe actions with the filter menu open
+- runFlow:
+    file: ../subflows/card_actions.yaml
+    env:
+      CARD: '.*(${MOCK_NOTICE}).*'
+- tapOn: '${T_filter}'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-notices-actions
+- tapOn: '(${T_all})(, .*)?'
+- waitForAnimationToEnd
+
+# 3 All assignments with one open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- runFlow:
+    file: ../subflows/filter.yaml
+    env:
+      LABEL: '(${T_all})(, .*)?'
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      DETAIL: assignment-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 03-assignments
+
+# 4 Submitting it
+- runFlow: subflows/submission.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 04-submission
+
+# 5 Files with a PDF open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-files|folder\.fill'
+- runFlow: subflows/file.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 05-files
+
+# 6 Courses with one open and another's swipe actions
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-courses|books\.vertical\.fill'
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_COURSE}).*'
+      DETAIL: course-detail
+- runFlow:
+    file: ../subflows/card_actions.yaml
+    env:
+      CARD: '.*(${MOCK_COURSE}).*'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 06-courses
+
+# 7 Search
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'
+- runFlow:
+    file: ../subflows/search.yaml
+    env:
+      TERM: ${STORE_SEARCH_TERM}
+      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+- pressKey: Enter
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 07-search
+- tapOn: '${T_close}'
+- waitForAnimationToEnd
+
+# 8 Settings with the calendar page open
+- runFlow: subflows/calendar.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 08-calendar
+- setOrientation: PORTRAIT

@@ -1,0 +1,13 @@
+# Open the store PDF from the files list and wait until it has downloaded
+# and rendered.
+appId: ${APP_ID}
+---
+- runFlow:
+    file: ../../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_FILE}).*'
+      DETAIL: file-detail
+- extendedWaitUntil:
+    notVisible:
+      id: file-loading
+    timeout: 60000

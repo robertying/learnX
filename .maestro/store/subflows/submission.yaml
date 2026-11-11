@@ -1,0 +1,8 @@
+# From the store assignment's detail, open its submission screen.
+appId: ${APP_ID}
+---
+- tapOn: '${T_submit}'
+- extendedWaitUntil:
+    visible:
+      id: assignmentSubmission
+    timeout: 10000

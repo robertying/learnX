@@ -5,6 +5,7 @@
 #   scripts/e2e.sh ios|android [extra maestro test args, e.g. a single flow]
 #
 # Boot one simulator/emulator first (or pass --device <id> via MAESTRO_DEVICE).
+# E2E_LANGUAGE (e.g. zh-Hans) launches the iOS app in that language.
 set -euo pipefail
 
 platform="${1:-}"
@@ -68,5 +69,6 @@ exec maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test
   -e APP_ID="$app_id" \
   -e USERNAME="$username" \
   -e PASSWORD="$password" \
+  -e APP_LANGUAGE="${E2E_LANGUAGE:-}" \
   "${env_args[@]}" \
   "$@"

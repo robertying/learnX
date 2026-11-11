@@ -1,0 +1,9 @@
+# Open search from the current list's header, type TERM and wait for a result
+# matching RESULT. The search field is focused on open.
+appId: ${APP_ID}
+---
+- tapOn: '${T_search}'
+- inputText: ${TERM}
+- extendedWaitUntil:
+    visible: ${RESULT}
+    timeout: 5000

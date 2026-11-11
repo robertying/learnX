@@ -1,0 +1,95 @@
+appId: ${APP_ID}
+name: Google Play screenshots on an Android tablet
+---
+# Run by scripts/store-screenshots.sh (android-tablet): the tablet shots of
+# the Play listing, as STORE_OUT/NN-<slug>.png. Details open beside the
+# lists.
+- runFlow: subflows/start.yaml
+
+# 1 Notices with a notice open
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_NOTICE}).*'
+      DETAIL: notice-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 01-notices
+
+# 2 All assignments with one open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments'
+- runFlow:
+    file: ../subflows/filter.yaml
+    env:
+      LABEL: '(${T_all})(, .*)?'
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      DETAIL: assignment-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-assignments
+
+# 3 Submitting it
+- runFlow: subflows/submission.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 03-submission
+
+# 4 Files with a PDF open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-files'
+- runFlow: subflows/file.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 04-file
+
+# 5 Courses with one open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-courses'
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_COURSE}).*'
+      DETAIL: course-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 05-courses
+
+# 6 Search
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices'
+- runFlow:
+    file: ../subflows/search.yaml
+    env:
+      TERM: ${STORE_SEARCH_TERM}
+      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+- hideKeyboard
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 06-search
+- back
+- waitForAnimationToEnd
+
+# 7 Settings with the calendar page open
+- runFlow: subflows/calendar.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 07-calendar

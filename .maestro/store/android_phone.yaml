@@ -1,0 +1,103 @@
+appId: ${APP_ID}
+name: Google Play screenshots on an Android phone
+---
+# Run by scripts/store-screenshots.sh (android-phone): the phone shots of
+# the Play listing, as STORE_OUT/NN-<slug>.png.
+- runFlow: subflows/start.yaml
+
+# 1 Notices
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 01-notices
+
+# 2 A notice with an attachment
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_NOTICE}).*'
+      DETAIL: notice-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-notice-detail
+- back
+- waitForAnimationToEnd
+
+# 3 Assignments, all of them
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments'
+- runFlow:
+    file: ../subflows/filter.yaml
+    env:
+      LABEL: '(${T_all})(, .*)?'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 03-assignments
+
+# 4 Submitting an assignment
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      DETAIL: assignment-detail
+- runFlow: subflows/submission.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 04-submission
+- back
+- waitForAnimationToEnd
+- back
+- waitForAnimationToEnd
+
+# 5 A PDF
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-files'
+- runFlow: subflows/file.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 05-file
+- back
+- waitForAnimationToEnd
+
+# 6 Courses
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-courses'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 06-courses
+
+# 7 Search
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices'
+- runFlow:
+    file: ../subflows/search.yaml
+    env:
+      TERM: ${STORE_SEARCH_TERM}
+      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+- hideKeyboard
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 07-search
+- back
+- waitForAnimationToEnd
+
+# 8 Calendar settings
+- runFlow: subflows/calendar.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 08-calendar

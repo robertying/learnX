@@ -1,0 +1,138 @@
+appId: ${APP_ID}
+name: App Store screenshots on the iPhone
+---
+# Run by scripts/store-screenshots.sh (iphone, duo-folded): the iPhone shots
+# of the store listing, as STORE_OUT/NN-<slug>.png.
+- runFlow: subflows/start.yaml
+
+# 1 Notices
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 01-notices
+
+# 2 A row's swipe actions with the filter menu open
+- runFlow:
+    file: ../subflows/card_actions.yaml
+    env:
+      CARD: '.*(${MOCK_NOTICE}).*'
+- tapOn: '${T_filter}'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-notices-actions
+- tapOn: '(${T_all})(, .*)?'
+- waitForAnimationToEnd
+
+# 3 A notice with an attachment
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_NOTICE}).*'
+      DETAIL: notice-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 03-notice-detail
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# 4 Assignments, all of them
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- runFlow:
+    file: ../subflows/filter.yaml
+    env:
+      LABEL: '(${T_all})(, .*)?'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 04-assignments
+
+# 5 Submitting an assignment
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      DETAIL: assignment-detail
+- runFlow: subflows/submission.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 05-submission
+- tapOn: '${T_close}'
+- waitForAnimationToEnd
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# 6 Files
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-files|folder\.fill'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 06-files
+
+# 7 A PDF
+- runFlow: subflows/file.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 07-file
+- runFlow:
+    file: ../subflows/back.yaml
+    env:
+      LIST: '${T_filter}'
+
+# 8 Courses, plain (for the search results asset) and with a row's swipe
+# actions
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-courses|books\.vertical\.fill'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 08-courses-plain
+- runFlow:
+    file: ../subflows/card_actions.yaml
+    env:
+      CARD: '.*(${MOCK_COURSE}).*'
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 08-courses
+
+# 9 Search
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'
+- runFlow:
+    file: ../subflows/search.yaml
+    env:
+      TERM: ${STORE_SEARCH_TERM}
+      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+# The search key hides the keyboard.
+- pressKey: Enter
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 09-search
+- tapOn: '${T_close}'
+- waitForAnimationToEnd
+
+# 10 Calendar settings
+- runFlow: subflows/calendar.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 10-calendar
