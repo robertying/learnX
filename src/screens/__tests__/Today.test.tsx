@@ -6,6 +6,7 @@ import type { ClassSession } from 'helpers/schedule';
 import DeviceInfo from 'constants/DeviceInfo';
 import { getTitleOptions } from 'components/HeaderTitle';
 import Today from 'screens/Today';
+import { getSettings, setSetting } from 'data/settings';
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
@@ -155,7 +156,12 @@ it('has no note for a calendar that loaded, and counts the week', async () => {
   expect(jest.mocked(getTitleOptions).mock.lastCall![1]).toMatch(/Week 9$/);
 });
 
-it('counts new notices and files, and opens their lists', async () => {
+it('counts new notices and files, and opens their lists on Unread', async () => {
+  setSetting('tabFilterSelections', {
+    ...getSettings().tabFilterSelections,
+    notice: 'all',
+    file: 'fav',
+  });
   mockNotices = [
     { id: 'n1', courseId: 'a', hasRead: false },
     { id: 'n2', courseId: 'a', hasRead: false },
@@ -170,11 +176,14 @@ it('counts new notices and files, and opens their lists', async () => {
     screen: 'NoticeStack',
     params: { screen: 'Notices' },
   });
+  expect(getSettings().tabFilterSelections.notice).toBe('unread');
+  expect(getSettings().tabFilterSelections.file).toBe('fav');
   await userEvent.press(screen.getByText('2 new files'));
   expect(navigation.navigate).toHaveBeenCalledWith('MainTab', {
     screen: 'FileStack',
     params: { screen: 'Files' },
   });
+  expect(getSettings().tabFilterSelections.file).toBe('unread');
 });
 
 it('shows one new file without unread notices', async () => {

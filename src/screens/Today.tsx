@@ -12,6 +12,7 @@ import { SyncStatusSection } from 'components/SyncStatus';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
+import { getSettings, setSetting } from 'data/settings';
 import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
 import { Assignment } from 'data/types/state';
@@ -101,6 +102,27 @@ const Today: React.FC<Props> = ({ navigation }) => {
     show('CourseDetail', { id: courseId });
   const openAssignment = (assignment: Assignment) =>
     show('AssignmentDetail', { id: assignment.id });
+  // The rows count the unread ones, so their tab opens on its Unread filter,
+  // which then stays, as when picked from the tab's own filter menu.
+  const showUnread = (type: 'notice' | 'file') =>
+    setSetting('tabFilterSelections', {
+      ...getSettings().tabFilterSelections,
+      [type]: 'unread',
+    });
+  const openUnreadNotices = () => {
+    showUnread('notice');
+    navigation.navigate('MainTab', {
+      screen: 'NoticeStack',
+      params: { screen: 'Notices' },
+    });
+  };
+  const openNewFiles = () => {
+    showUnread('file');
+    navigation.navigate('MainTab', {
+      screen: 'FileStack',
+      params: { screen: 'Files' },
+    });
+  };
   const pressOf = (session: ClassSession) =>
     session.courseId ? () => openCourse(session.courseId!) : undefined;
 
@@ -236,12 +258,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                     ? t('todayOneUnreadNotice')
                     : t('todayUnreadNotices', { count: unreadNotices })
                 }
-                onPress={() =>
-                  navigation.navigate('MainTab', {
-                    screen: 'NoticeStack',
-                    params: { screen: 'Notices' },
-                  })
-                }
+                onPress={openUnreadNotices}
               />
             )}
             {newFiles > 0 && (
@@ -252,12 +269,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
                     ? t('todayOneNewFile')
                     : t('todayNewFiles', { count: newFiles })
                 }
-                onPress={() =>
-                  navigation.navigate('MainTab', {
-                    screen: 'FileStack',
-                    params: { screen: 'Files' },
-                  })
-                }
+                onPress={openNewFiles}
               />
             )}
           </FormSection>
