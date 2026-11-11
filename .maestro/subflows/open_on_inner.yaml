@@ -10,10 +10,12 @@ appId: ${APP_ID}
     env:
       POSTURE: closed
 - openLink: ${LINK}
-# The system's "Open in “learnX”?" prompt; its button isn't the app's text.
+# iOS asks "Open in “learnX”?" first. The prompt belongs to SpringBoard, which
+# isn't in Maestro's view hierarchy while learnX is in front, so tap its Open
+# button by position on the closed Duo's outer display.
+- waitForAnimationToEnd
 - tapOn:
-    text: 'Open|打开'
-    optional: true
+    point: 57%,51%
 - extendedWaitUntil:
     visible:
       id: ${ID}

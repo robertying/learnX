@@ -234,6 +234,13 @@ run_duo_postures() {
     fi
   done
   set_hinge "$udid" closed || return 1
+  # A failed flow can leave the system's "Open in learnX?" prompt up, which
+  # Maestro can't see; restart the simulator so the next run starts clean.
+  if [ "$status" != 0 ]; then
+    xcrun simctl shutdown "$udid" || true
+    xcrun simctl boot "$udid" || return 1
+    xcrun simctl bootstatus "$udid" >/dev/null || return 1
+  fi
   return "$status"
 }
 
