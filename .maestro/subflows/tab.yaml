@@ -3,43 +3,30 @@
 # Maestro's snapshot after a clearState launch).
 appId: ${APP_ID}
 ---
-# Phones, Android and Mac: one tap. IPAD comes from scripts/e2e.sh; checking
-# for the iPad page buttons instead would cost Maestro's 7 s optional lookup
-# on every other device.
+# iPad (IPAD from scripts/e2e.sh): the tab bar pages only when its labels
+# don't fit (English, portrait). Then page 1 shows Today to Files with a Next
+# Page button over Courses, and page 2 a Previous Page button with Notices to
+# Courses, so only Today and Courses may need a page turn first. Checking for
+# a page button that isn't there costs Maestro's 7 s lookup, so other tabs and
+# other devices skip it. The buttons are UIKit's, so their labels aren't in
+# the app's translations.
 - runFlow:
     when:
-      true: ${IPAD != 'true'}
+      true: ${IPAD == 'true' && /tab-today/.test(TAB)}
     commands:
-      - tapOn:
-          id: ${TAB}
-# On iPad the tabs sit in a paged top bar, and a tab on the other page is
-# laid out outside it: turn the page and tap again. The page buttons are
-# UIKit's, so their labels aren't in the app's translations.
-- runFlow:
-    when:
-      true: ${IPAD == 'true'}
-    commands:
-      - tapOn:
-          id: ${TAB}
-          # Absent from the snapshot while it's on the other page.
-          optional: true
-      - runFlow:
-          when:
-            visible: 'Next Page|下一页'
-            notVisible:
-              id: ${TAB}
-              selected: true
-          commands:
-            - tapOn: 'Next Page|下一页'
-            - tapOn:
-                id: ${TAB}
       - runFlow:
           when:
             visible: 'Previous Page|上一页'
-            notVisible:
-              id: ${TAB}
-              selected: true
           commands:
             - tapOn: 'Previous Page|上一页'
-            - tapOn:
-                id: ${TAB}
+- runFlow:
+    when:
+      true: ${IPAD == 'true' && /tab-courses/.test(TAB)}
+    commands:
+      - runFlow:
+          when:
+            visible: 'Next Page|下一页'
+          commands:
+            - tapOn: 'Next Page|下一页'
+- tapOn:
+    id: ${TAB}
