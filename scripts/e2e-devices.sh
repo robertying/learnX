@@ -208,6 +208,11 @@ run_ios_suite() {
 run_duo_postures() {
   local udid="$1" posture="$2" out="$3" flow name status=0
   set_hinge "$udid" closed || return 1
+  # A fresh install first where the login subflow doesn't make one itself.
+  if [ -f .maestro/00_reset.yaml ]; then
+    MAESTRO_DEVICE="$udid" scripts/e2e.sh ios --test-output-dir "$out/reset" \
+      .maestro/00_reset.yaml || return 1
+  fi
   MAESTRO_DEVICE="$udid" scripts/e2e.sh ios --test-output-dir "$out/login" \
     .maestro/subflows/login.yaml || return 1
   set_hinge "$udid" "$posture" || return 1
