@@ -1,0 +1,95 @@
+# Runs on 18.0.3 (scripts/e2e-upgrade.sh installs it): logs in with its
+# persistent mock account, which saves 18.0.3's mock data (favorites, archives,
+# a hidden course), then changes settings and turns on the assignment syncs so
+# 18.0.3 makes its calendar, reminders and their ids. 18.0.3 has no testIDs:
+# its English labels are matched, so run it with the simulator in English.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      calendar: allow
+      reminders: allow
+- extendedWaitUntil:
+    visible: 'Username / ID'
+    timeout: 60000
+- tapOn: 'Username / ID'
+- inputText: ${USERNAME}
+- tapOn: 'Password'
+- inputText: ${PASSWORD}
+- tapOn: 'Login'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: 'Not Now'
+          optional: true
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 30000
+
+# Settings › Calendars & Reminders. Each switch sits right of its label.
+- tapOn: 'Settings'
+- tapOn: 'Calendars & Reminders'
+- tapOn:
+    rightOf: 'Graduate'
+- tapOn:
+    rightOf: 'Class Alert'
+- tapOn:
+    rightOf: 'Omit Location'
+# Writes every assignment to a new "learnX 作业" calendar.
+- tapOn:
+    rightOf: 'Assignment Calendar Sync'
+- extendedWaitUntil:
+    notVisible: '.*[Ff]ailed.*'
+    timeout: 5000
+    optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element: 'Assignment Reminder Sync'
+      - tapOn:
+          rightOf: 'Assignment Reminder Sync'
+- back:
+    optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+
+# Settings › Files: both 18.0.3-only settings on, and open after download.
+- tapOn: 'Files'
+- tapOn:
+    rightOf: 'Save Downloaded Files to Documents'
+- tapOn:
+    rightOf: 'Omit Course Name in Filenames'
+- tapOn:
+    rightOf: 'Open downloaded files automatically'
+    optional: true
+- back:
+    optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+
+# Opening it marks its badge seen; joining asks first.
+- tapOn: 'Course Information Sharing'
+- tapOn:
+    rightOf: 'Course Information Sharing'
+    index: 0
+- tapOn: 'Ok'
+
+# Let redux-persist write, then leave 18.0.3 as a user would.
+- waitForAnimationToEnd
+- stopApp
