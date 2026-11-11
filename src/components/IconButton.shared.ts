@@ -37,7 +37,7 @@ export const iconSymbols: Record<IconButtonIcon, SFSymbol> = {
   back: 'chevron.backward',
   checkAll: 'checkmark.circle.fill',
   close: 'xmark',
-  debug: 'ant',
+  debug: 'wrench.and.screwdriver',
   download: 'arrow.down.to.line',
   exitFullscreen: 'arrow.down.right.and.arrow.up.left',
   filter: 'line.3.horizontal.decrease.circle',

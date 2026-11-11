@@ -114,11 +114,30 @@ const maxToastWidth = 420;
 // Slides up into place.
 const hiddenOffset = 24;
 
-// Above the tab bar, which is at the bottom only on iPhone (about 56pt over
-// the home indicator inset). iPad's tab bar is at the top and the Mac has a
-// sidebar, so there the toast sits just above the bottom edge.
-const bottomMargin =
-  DeviceInfo.isTablet() || DeviceInfo.isMac() ? Spacing.m : 56 + Spacing.s;
+// From iOS 26 the toast floats like the iPhone's tab bar: as far from the
+// screen's sides and bottom as the tab bar is (21 pt, measured: UIKit doesn't
+// expose it), and on iPhone just above the tab bar (62 pt tall). Before iOS 26
+// it keeps the side margin and sits above the docked tab bar (about 56 pt
+// over the home indicator inset). iPad's tab bar is at the top and the Mac
+// has a sidebar, so there the toast sits at the bottom.
+const floatingInset = 21;
+const floatingTabBarHeight = 62;
+const hasTabBarBelow = !DeviceInfo.isTablet() && !DeviceInfo.isMac();
+
+const toastInsets = (insets: { bottom: number; left: number; right: number }) =>
+  DeviceInfo.hasLiquidGlass()
+    ? {
+        bottom: hasTabBarBelow
+          ? floatingInset + floatingTabBarHeight + Spacing.s
+          : Math.max(insets.bottom, floatingInset),
+        left: Math.max(insets.left, floatingInset),
+        right: Math.max(insets.right, floatingInset),
+      }
+    : {
+        bottom: insets.bottom + (hasTabBarBelow ? 56 + Spacing.s : Spacing.m),
+        left: insets.left + Spacing.m,
+        right: insets.right + Spacing.m,
+      };
 
 /** The height of the keyboard while it is up, so the toast can sit above it. */
 const useKeyboardHeight = () => {
@@ -148,6 +167,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight();
+  const margins = toastInsets(insets);
   const progress = useSharedValue(0);
   const drag = useSharedValue(0);
 
@@ -215,11 +235,9 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         styles.wrapper,
         {
           paddingBottom:
-            keyboardHeight > 0
-              ? keyboardHeight + Spacing.m
-              : insets.bottom + bottomMargin,
-          paddingLeft: insets.left + Spacing.m,
-          paddingRight: insets.right + Spacing.m,
+            keyboardHeight > 0 ? keyboardHeight + Spacing.m : margins.bottom,
+          paddingLeft: margins.left,
+          paddingRight: margins.right,
         },
       ]}
     >
@@ -237,7 +255,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
           {
             maxWidth: Math.min(
               maxToastWidth,
-              windowWidth - insets.left - insets.right - 2 * Spacing.m,
+              windowWidth - margins.left - margins.right,
             ),
           },
           animatedStyle,
