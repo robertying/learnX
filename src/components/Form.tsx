@@ -1,4 +1,10 @@
-import { useContext, useLayoutEffect } from 'react';
+import {
+  cloneElement,
+  useContext,
+  useLayoutEffect,
+  type ReactElement,
+  type ReactNode,
+} from 'react';
 import { PlatformColor, StyleSheet, useWindowDimensions } from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { TextInput } from '@expo/ui';
@@ -32,6 +38,7 @@ import {
   background,
   lineLimit,
   listRowBackground,
+  listSectionMargins,
   opacity,
   padding,
   refreshable,
@@ -93,6 +100,20 @@ const macFormModifiers = [
 // Behind iOS's inset grouped rows
 const groupedBackground = PlatformColor('systemGroupedBackground');
 
+// The last section's footer would otherwise end right at the floating tab
+// bar's top edge when scrolled to the end. (Android's list has its own
+// bottom padding.)
+const lastSectionModifiers = [
+  listSectionMargins({ edges: 'bottom', length: 32 }),
+];
+
+const lastSectionMarked = (children: ReactNode) =>
+  sectionRows(children).map((section, index, sections) =>
+    index === sections.length - 1
+      ? cloneElement(section as ReactElement<FormSectionProps>, { last: true })
+      : section,
+  );
+
 export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   // Optional: a Form outside a navigator (as in tests) has no header.
   const navigation = useContext(NavigationContext);
@@ -128,7 +149,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
           ...(onRefresh ? [refreshable(onRefresh)] : []),
         ]}
       >
-        {children}
+        {lastSectionMarked(children)}
       </SwiftUIForm>
     </ThemedHost>
   );
@@ -154,6 +175,7 @@ export const FormSection: React.FC<FormSectionProps> = ({
   children,
   title,
   footer,
+  last,
 }) => {
   const isMac = DeviceInfo.isMac();
   return (
@@ -165,7 +187,9 @@ export const FormSection: React.FC<FormSectionProps> = ({
         ) : undefined
       }
       footer={footer ? <Text>{footer}</Text> : undefined}
-      modifiers={isMac ? macSectionModifiers : undefined}
+      modifiers={
+        isMac ? macSectionModifiers : last ? lastSectionModifiers : undefined
+      }
     >
       {sectionRows(children)}
     </Section>

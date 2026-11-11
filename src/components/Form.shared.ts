@@ -35,6 +35,8 @@ export interface FormSectionProps {
   title?: string;
   /** A caption below the rows, explaining them. */
   footer?: string;
+  /** Set by `Form` on iOS for its last section, which keeps clear of the tab bar. */
+  last?: boolean;
 }
 
 /**
