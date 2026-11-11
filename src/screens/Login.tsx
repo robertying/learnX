@@ -183,6 +183,11 @@ const Login: React.FC<Props> = ({ navigation }) => {
   );
 };
 
+const android = Platform.OS === 'android';
+
+// Centered on Apple platforms, as Apple's sign-in pages are. Start-aligned on
+// Android, as Material 3 pages and the welcome, set-up and What's New pages
+// (FeatureList, Setup) are, with the buttons at the end of a row.
 const styles = StyleSheet.create({
   // flexGrow, not flex: at large text sizes the content gets taller than the
   // screen and has to scroll.
@@ -192,13 +197,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   // A little more room under the logo than between the rest. Android's logo
-  // carries its own space below.
-  logo: {
-    marginBottom: Platform.OS === 'android' ? -24 : Spacing.s,
-  },
+  // carries its own space below, and is pulled back so the X lines up with
+  // the fields' start, as on the welcome page.
+  logo: android
+    ? { alignSelf: 'flex-start', marginBottom: -24, marginStart: -28 }
+    : { marginBottom: Spacing.s },
   inputs: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: android ? 'stretch' : 'center',
     justifyContent: 'center',
     width: '80%',
     // A phone's width, also in a wide iPad or Mac window.
@@ -209,21 +215,31 @@ const styles = StyleSheet.create({
   textInput: {
     width: '100%',
   },
-  buttons: {
-    alignItems: 'center',
-    gap: Spacing.m,
-  },
+  // Android: the filled button at the end, with the text buttons before it
+  // (wrapping when they don't fit), as in the What's New bar.
+  buttons: android
+    ? {
+        flexDirection: 'row-reverse',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        gap: Spacing.s,
+      }
+    : {
+        alignItems: 'center',
+        gap: Spacing.m,
+      },
   switchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: android ? 'flex-start' : 'auto',
     gap: Spacing.s,
   },
   noteContainer: {
-    alignItems: 'center',
-    width: '60%',
+    alignItems: android ? 'stretch' : 'center',
+    width: android ? '100%' : '60%',
   },
   note: {
-    textAlign: 'center',
+    textAlign: android ? 'auto' : 'center',
   },
 });
 
