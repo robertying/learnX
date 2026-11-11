@@ -23,19 +23,29 @@ appId: ${APP_ID}
     visible: 'Settings'
     timeout: 15000
     optional: true
-- waitForAnimationToEnd:
-    timeout: 5000
 # Not 18.0.3's: iOS's own offer to save the password, which comes up a moment
 # after the login and covers the app. It is not in the view hierarchy (the
 # app's elements are gone while it shows, so Settings isn't visible), but its
-# Not Now button can be tapped by position.
-- runFlow:
-    when:
-      platform: iOS
-      notVisible: 'Settings'
+# Not Now button can be tapped by position. Looked for a few times, since the
+# sheet can still be sliding in when the first tap lands.
+- extendedWaitUntil:
+    visible: 'nothing-like-this-is-ever-shown'
+    timeout: 4000
+    optional: true
+- repeat:
+    times: 4
     commands:
-      - tapOn:
-          point: 32%, 63%
+      - runFlow:
+          when:
+            platform: iOS
+            notVisible: 'Settings'
+          commands:
+            - tapOn:
+                point: 32%, 63%
+            - extendedWaitUntil:
+                visible: 'nothing-like-this-is-ever-shown'
+                timeout: 2000
+                optional: true
 - extendedWaitUntil:
     visible: 'Settings'
     timeout: 30000
@@ -131,10 +141,12 @@ appId: ${APP_ID}
     end: 50%, 70%
 - waitForAnimationToEnd:
     timeout: 10000
-# It writes one event at a time.
+# It writes the events one at a time (a wait for something that never shows is
+# a sleep).
 - extendedWaitUntil:
-    notVisible: 'sync-done-never-shown'
+    visible: 'nothing-like-this-is-ever-shown'
     timeout: 15000
+    optional: true
 
 # Let redux-persist write, then leave 18.0.3 as a user would.
 - waitForAnimationToEnd
