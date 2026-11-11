@@ -77,6 +77,23 @@ describe('useCardSwipe', () => {
     expect(methods.close).toHaveBeenCalledTimes(2);
   });
 
+  it('closes the card left open when another starts swiping, as in Mail', async () => {
+    const first = await setup();
+    const second = await setup();
+    first.result.current.onWillOpen(left);
+    expect(first.methods.close).not.toHaveBeenCalled();
+
+    second.result.current.onStartDrag();
+    expect(first.methods.close).toHaveBeenCalledTimes(1);
+    second.result.current.onWillOpen(left);
+    expect(second.methods.close).not.toHaveBeenCalled();
+
+    // once closed, it's left alone
+    second.result.current.onWillClose();
+    first.result.current.onStartDrag();
+    expect(second.methods.close).not.toHaveBeenCalled();
+  });
+
   describe('on iOS', () => {
     it('rests open on the button when let go short of a full swipe', async () => {
       const { result, methods, onSwipe } = await setup();

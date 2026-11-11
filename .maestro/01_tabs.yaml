@@ -2,27 +2,27 @@ appId: ${APP_ID}
 name: Log in and visit every tab
 ---
 - runFlow: subflows/login.yaml
-- assertVisible: '.*请按照助教的安排交作业.*'
+- assertVisible: '.*(${MOCK_NOTICE}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-today|sun\.max\.fill'
-- assertVisible: '(?i)(Due Soon|即将截止)'
+      TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+- assertVisible: '${T_todayDueSoon}'
 - runFlow:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
-- assertVisible: '.*大作业1.*'
+- assertVisible: '.*(${MOCK_ASSIGNMENT}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-files|doc(ument)?\.fill'
-- assertVisible: '.*深度学习框架.*'
+      TAB: 'tab-files|folder\.fill'
+- assertVisible: '.*(${MOCK_FILE}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-courses|square\.grid\.3x3\.fill'
-- assertVisible: '.*量子与统计.*'
+      TAB: 'tab-courses|books\.vertical\.fill'
+- assertVisible: '.*(${MOCK_COURSE}).*'
 - runFlow: subflows/settings.yaml
 - assertVisible:
     id: settings-logout
@@ -30,4 +30,4 @@ name: Log in and visit every tab
     file: subflows/tab.yaml
     env:
       TAB: 'tab-notices|bell\.fill'
-- assertVisible: '.*请按照助教的安排交作业.*'
+- assertVisible: '.*(${MOCK_NOTICE}).*'

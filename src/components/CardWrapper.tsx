@@ -177,6 +177,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     snapRef,
     close,
     onArmedChange,
+    onStartDrag,
     onWillOpen,
     onOpen,
     onWillClose,
@@ -343,6 +344,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       enabled={
         actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
       }
+      onSwipeableOpenStartDrag={onStartDrag}
       onSwipeableWillOpen={onWillOpen}
       onSwipeableOpen={onOpen}
       onSwipeableWillClose={onWillClose}

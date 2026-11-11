@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
@@ -45,20 +45,27 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
     transform: [{ scale: 1 + 0.25 * armedProgress.get() }],
   }));
 
+  // Both sides' panels fill the card, the trailing one over the leading one,
+  // so only the side the card is moving away from shows.
+  const rootStyle = useAnimatedStyle(() => ({
+    opacity: swipedShare(side, translation.get(), rowWidth.get()) > 0 ? 1 : 0,
+  }));
+
   return (
-    <View
+    <Animated.View
       testID={action.testID}
       importantForAccessibility="no-hide-descendants"
       style={[
         styles.root,
         side === 'leading' ? styles.leading : styles.trailing,
         { backgroundColor: theme.colors.statusContainer[action.tone] },
+        rootStyle,
       ]}
     >
       <Animated.View style={iconStyle}>
         <CardActionIcon action={action} size={24} />
       </Animated.View>
-    </View>
+    </Animated.View>
   );
 };
 

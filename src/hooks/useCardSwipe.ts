@@ -8,6 +8,9 @@ import * as Haptics from 'expo-haptics';
 import type { SwipeSide } from 'components/CardSwipeAction';
 import { pressWhileSwiped } from 'helpers/cardActions';
 
+/** Closes the card whose actions are open, so only one is open at a time, as in Mail */
+let closeOpenCard: (() => void) | null = null;
+
 const sideOf = (direction: SwipeDirection): SwipeSide =>
   direction === SwipeDirection.RIGHT ? 'leading' : 'trailing';
 
@@ -40,6 +43,16 @@ const useCardSwipe = ({
   const close = () => {
     snapRef.current?.close();
   };
+  // Stable, so the open card can be told apart from the others
+  const closeSelfRef = useRef(() => snapRef.current?.close());
+
+  /** Another card starts swiping: close this one's if open */
+  const closeOthers = () => {
+    if (closeOpenCard && closeOpenCard !== closeSelfRef.current) {
+      closeOpenCard();
+    }
+    closeOpenCard = closeSelfRef.current;
+  };
 
   const commit = (side: SwipeSide) => {
     armedRef.current[side] = false;
@@ -55,6 +68,7 @@ const useCardSwipe = ({
   };
 
   const onWillOpen = (direction: SwipeDirection) => {
+    closeOthers();
     openRef.current = true;
     openedAtRef.current = Date.now();
     const side = sideOf(direction);
@@ -71,6 +85,9 @@ const useCardSwipe = ({
 
   const onWillClose = () => {
     openRef.current = false;
+    if (closeOpenCard === closeSelfRef.current) {
+      closeOpenCard = null;
+    }
   };
 
   /** True when the press was handled here and should go no further */
@@ -102,6 +119,7 @@ const useCardSwipe = ({
     snapRef,
     close,
     onArmedChange,
+    onStartDrag: closeOthers,
     onWillOpen,
     onOpen,
     onWillClose,

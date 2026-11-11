@@ -15,6 +15,7 @@ import { setUpNotificationActions } from './src/helpers/notificationActions';
 // (useMainStartup) would load the module only once the app has mounted.
 import './src/helpers/background';
 import { watchSurfaces } from './src/helpers/surfaces';
+import { withLaunchOptions } from './src/helpers/launchOptions';
 
 // Keep LogBox off: its "Open debugger to view warnings" toast covers the tab
 // bar and opens a React Native DevTools window when tapped. Read warnings in
@@ -30,4 +31,5 @@ setUpNotificationActions();
 // data, in this runtime whether or not the app renders.
 watchSurfaces();
 
-AppRegistry.registerComponent(appName, () => App);
+// Test runs set the app up with launch arguments (helpers/launchOptions).
+AppRegistry.registerComponent(appName, () => withLaunchOptions(App));

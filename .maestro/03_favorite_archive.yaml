@@ -10,47 +10,47 @@ name: Favorite and archive a notice
 - runFlow:
     file: subflows/card_actions.yaml
     env:
-      CARD: '.*请按照助教的安排交作业.*'
-- tapOn: 'Favorite|收藏'
+      CARD: '.*(${MOCK_NOTICE}).*'
+- tapOn: '${T_favorite}'
 - runFlow:
     file: subflows/filter.yaml
     env:
-      LABEL: 'Favorites(, .*)?|收藏(, .*)?'
-- assertVisible: '.*请按照助教的安排交作业.*'
+      LABEL: '(${T_fav})(, .*)?'
+- assertVisible: '.*(${MOCK_NOTICE}).*'
 
 # Unfavorite from the favorites list
 - runFlow:
     file: subflows/card_actions.yaml
     env:
-      CARD: '.*请按照助教的安排交作业.*'
-- tapOn: 'Unfavorite|取消收藏'
-- assertNotVisible: '.*请按照助教的安排交作业.*'
+      CARD: '.*(${MOCK_NOTICE}).*'
+- tapOn: '${T_unfavorite}'
+- assertNotVisible: '.*(${MOCK_NOTICE}).*'
 
 # Archive from the full list
 - runFlow:
     file: subflows/filter.yaml
     env:
-      LABEL: 'All(, .*)?|全部(, .*)?'
+      LABEL: '(${T_all})(, .*)?'
 - runFlow:
     file: subflows/card_actions.yaml
     env:
-      CARD: '.*请按照助教的安排交作业.*'
-- tapOn: 'Archive|归档'
-- assertNotVisible: '.*请按照助教的安排交作业.*'
+      CARD: '.*(${MOCK_NOTICE}).*'
+- tapOn: '${T_archive}'
+- assertNotVisible: '.*(${MOCK_NOTICE}).*'
 - runFlow:
     file: subflows/filter.yaml
     env:
-      LABEL: 'Archived(, .*)?|已归档(, .*)?'
-- assertVisible: '.*请按照助教的安排交作业.*'
+      LABEL: '(${T_archived})(, .*)?'
+- assertVisible: '.*(${MOCK_NOTICE}).*'
 
 # Unarchive it
 - runFlow:
     file: subflows/card_actions.yaml
     env:
-      CARD: '.*请按照助教的安排交作业.*'
-- tapOn: 'Unarchive|取消归档'
+      CARD: '.*(${MOCK_NOTICE}).*'
+- tapOn: '${T_restore}'
 - runFlow:
     file: subflows/filter.yaml
     env:
-      LABEL: 'All(, .*)?|全部(, .*)?'
-- assertVisible: '.*请按照助教的安排交作业.*'
+      LABEL: '(${T_all})(, .*)?'
+- assertVisible: '.*(${MOCK_NOTICE}).*'
