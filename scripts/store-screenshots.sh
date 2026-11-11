@@ -105,6 +105,10 @@ else
   # "Locales for <app> for user 0 are [zh-CN]": keep what's in the brackets.
   restore_locales="$(adb -s "$device" shell cmd locale get-app-locales "$android_app_id" |
     sed -n 's/.*\[\(.*\)\].*/\1/p' | tr -d ' ')"
+  # Clearing the app's data (the flows' fresh start) also clears its locale:
+  # clear it here, before setting the locale, and have the flows keep it.
+  adb -s "$device" shell pm clear "$android_app_id" >/dev/null
+  export E2E_STATE_CLEARED=1
   adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
   adb -s "$device" shell wm size "$size"

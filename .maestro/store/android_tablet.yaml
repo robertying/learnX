@@ -30,10 +30,24 @@ name: Google Play screenshots on an Android tablet
     file: ../subflows/filter.yaml
     env:
       LABEL: '(${T_all})(, .*)?'
+# Its card is below the list pane's end, and the notice open beside the list
+# has the same title: match the card by its label (the title, then a comma)
+# and scroll the list pane itself (scrollUntilVisible swipes the middle of
+# the screen, which is the detail pane).
+- repeat:
+    times: 4
+    while:
+      notVisible: '(.*, )?(${MOCK_STORE_ASSIGNMENT}), .*'
+    commands:
+      - swipe:
+          start: 4%,75%
+          end: 4%,35%
+          duration: 600
+      - waitForAnimationToEnd
 - runFlow:
     file: ../subflows/open.yaml
     env:
-      CARD: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+      CARD: '(.*, )?(${MOCK_STORE_ASSIGNMENT}), .*'
       DETAIL: assignment-detail
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -88,8 +102,21 @@ name: Google Play screenshots on an Android tablet
     file: ../subflows/screenshot.yaml
     env:
       NAME: 06-search
+# The first back clears the query and brings the keyboard back: go back
+# until search is closed, or Settings below would match Gboard's gear.
 - back
 - waitForAnimationToEnd
+- repeat:
+    times: 3
+    while:
+      visible: '${T_searchPrompt}'
+    commands:
+      - back
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: tab-notices
+    timeout: 10000
 
 # 7 Settings with the calendar page open
 - runFlow: subflows/calendar.yaml

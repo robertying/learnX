@@ -3,11 +3,18 @@
 appId: ${APP_ID}
 ---
 # APP_LANGUAGE (from scripts/e2e.sh, empty by default) launches iOS in that
-# language, e.g. zh-Hans; Android takes the app's locale from
-# `cmd locale set-app-locales` instead (scripts/store-screenshots.sh).
+# language, e.g. zh-Hans. Android takes the app's locale from
+# `cmd locale set-app-locales`, which clearing the app's data also clears, so
+# scripts/store-screenshots.sh clears it before setting the locale and passes
+# STATE_CLEARED to launch the app as it is.
 - runFlow:
     when:
-      true: ${!APP_LANGUAGE}
+      true: ${!!STATE_CLEARED}
+    commands:
+      - launchApp
+- runFlow:
+    when:
+      true: ${!APP_LANGUAGE && !STATE_CLEARED}
     commands:
       - launchApp:
           clearState: true

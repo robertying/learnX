@@ -7,6 +7,8 @@
 #
 # Boot one simulator/emulator first (or pass --device <id> via MAESTRO_DEVICE).
 # E2E_LANGUAGE (e.g. zh-Hans) launches the iOS app in that language.
+# E2E_STATE_CLEARED=1 launches the app without clearing its data first, for a
+# caller that cleared it itself (scripts/store-screenshots.sh on Android).
 set -euo pipefail
 
 platform="${1:-}"
@@ -71,5 +73,6 @@ exec maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test
   -e USERNAME="$username" \
   -e PASSWORD="$password" \
   -e APP_LANGUAGE="${E2E_LANGUAGE:-}" \
+  -e STATE_CLEARED="${E2E_STATE_CLEARED:-}" \
   "${env_args[@]}" \
   "$@"
