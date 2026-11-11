@@ -39,6 +39,16 @@ if [ -z "$username" ] || [ -z "$password" ]; then
   exit 1
 fi
 
+# Labels and mock texts the flows match, from the translations and mock data.
+env_args=()
+while IFS= read -r line; do
+  env_args+=(-e "$line")
+done < <(node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/e2e-env.mjs)
+if [ "${#env_args[@]}" -eq 0 ]; then
+  echo "scripts/e2e-env.mjs failed" >&2
+  exit 1
+fi
+
 device_args=()
 if [ -n "${MAESTRO_DEVICE:-}" ]; then
   device_args=(--device "$MAESTRO_DEVICE")
@@ -61,4 +71,5 @@ exec maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test
   -e USERNAME="$username" \
   -e PASSWORD="$password" \
   -e ORIENTATION="${E2E_ORIENTATION:-PORTRAIT}" \
+  "${env_args[@]}" \
   "$@"
