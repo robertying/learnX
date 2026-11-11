@@ -78,8 +78,12 @@ export const hasGlassHeader =
  *   keeps clear of the header by itself (`contentInsetAdjustmentBehavior`
  *   "automatic": our `FlatList` and `ScrollView`, `Form`, the web views and
  *   the PDF view). An opaque header would instead have react-native-screens
- *   push the content below it, onto a plain bar. Content that doesn't scroll
- *   from the top keeps clear of the header with `SafeArea`'s `top`.
+ *   push the content below it, onto a plain bar. Content over the top of a
+ *   screen keeps clear of the header with react-native-screens'
+ *   `SafeAreaView` and its top edge (`PageProgressBar`, Course detail's
+ *   floating tabs). The header blurs what scrolls under it only for the
+ *   screen's first scroll view (UIKit's content scroll view), so a pager's
+ *   own scroll view would hide it.
  * - The back button is the chevron alone, as SwiftUI, Settings and Files show
  *   it (the long-press menu still lists the titles). UIKit shows the previous
  *   screen's title only when asked, and on iOS 27 that titled button fades

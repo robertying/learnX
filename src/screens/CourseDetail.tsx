@@ -1,5 +1,11 @@
-import { useContext, useEffectEvent, useLayoutEffect, useState } from 'react';
-import { Platform, View } from 'react-native';
+import {
+  Fragment,
+  useContext,
+  useEffectEvent,
+  useLayoutEffect,
+  useState,
+} from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 import {
   useSafeAreaFrame,
   useSafeAreaInsets,
@@ -42,6 +48,8 @@ import {
 } from './types';
 import { headerButtons } from 'navigation/headerButtons';
 import SegmentedTabs from 'components/SegmentedTabs';
+import { SafeAreaView } from 'react-native-screens/experimental';
+import { hasGlassHeader } from 'navigation/options';
 
 const listContentInsetAdjustmentBehavior = DeviceInfo.isMac()
   ? ('never' as const)
@@ -66,6 +74,8 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
   type: EmptyType;
   /** The course's refresh of this list (`useRefreshCourseNotices`, …). */
   refresh: { isPending: boolean; mutate: () => void };
+  /** The height of the tabs floating over the top of the list. */
+  topInset: number;
 }
 
 /** One of the course's notices, assignments and files tabs. */
@@ -75,6 +85,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   detailScreen,
   type,
   refresh,
+  topInset,
 }: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
   const loggedIn = useLoggedIn();
@@ -107,6 +118,8 @@ const CourseItemList = <T extends Notice | Assignment | File>({
         refreshing={refresh.isPending}
         onRefresh={handleRefresh}
         contentInsetAdjustmentBehavior={listContentInsetAdjustmentBehavior}
+        contentInset={{ top: topInset }}
+        scrollIndicatorInsets={{ top: topInset }}
       />
     </View>
   );
@@ -157,6 +170,8 @@ const CourseDetailContent: React.FC<{
   const refreshFiles = useRefreshCourseFiles(course.id);
 
   const [index, setIndex] = useState(0);
+  // The floating tabs' height, which the lists scroll clear of.
+  const [tabsHeight, setTabsHeight] = useState(0);
 
   const renderTabBar = ({
     navigationState,
@@ -190,6 +205,7 @@ const CourseDetailContent: React.FC<{
             detailScreen="NoticeDetail"
             type="notice"
             refresh={refreshNotices}
+            topInset={tabsHeight}
           />
         );
       case 'assignment':
@@ -200,6 +216,7 @@ const CourseDetailContent: React.FC<{
             detailScreen="AssignmentDetail"
             type="assignment"
             refresh={refreshAssignments}
+            topInset={tabsHeight}
           />
         );
       case 'file':
@@ -210,6 +227,7 @@ const CourseDetailContent: React.FC<{
             detailScreen="FileDetail"
             type="file"
             refresh={refreshFiles}
+            topInset={tabsHeight}
           />
         );
       default:
@@ -245,9 +263,41 @@ const CourseDetailContent: React.FC<{
     );
   }, [navigation]);
 
+  // From iOS 26 the tabs float under the header as a glass capsule over the
+  // selected list, which scrolls under both. It has to be the screen's first
+  // view for the header to blur what scrolls under it, which a pager's own
+  // scroll view would be, so the lists don't swipe there (as with the system
+  // segmented controls).
+  if (hasGlassHeader) {
+    return (
+      <SafeArea>
+        {/* Once the tabs are laid out: a list starts at its top inset only
+            when it has it from the start. */}
+        {tabsHeight ? (
+          <Fragment key={routes[index].key}>
+            {renderScene({ route: routes[index] })}
+          </Fragment>
+        ) : null}
+        <SafeAreaView
+          edges={{ top: true }}
+          style={styles.floatingTabs}
+          pointerEvents="box-none"
+        >
+          <View onLayout={e => setTabsHeight(e.nativeEvent.layout.height)}>
+            <SegmentedTabs
+              titles={routes.map(r => r.title)}
+              selectedIndex={index}
+              onSelect={setIndex}
+              floating
+            />
+          </View>
+        </SafeAreaView>
+      </SafeArea>
+    );
+  }
+
   return (
-    // The tab strip stays below the header; the lists under it scroll.
-    <SafeArea top>
+    <SafeArea>
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}
@@ -259,5 +309,16 @@ const CourseDetailContent: React.FC<{
     </SafeArea>
   );
 };
+
+const styles = StyleSheet.create({
+  floatingTabs: {
+    position: 'absolute',
+    // Its own height, not the screen's (SafeAreaView flexes by default).
+    flex: 0,
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+});
 
 export default CourseDetail;
