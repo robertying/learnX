@@ -162,6 +162,8 @@ export interface FormTitleProps {
  */
 export interface FormViewProps {
   children: ReactElement;
+  /** Shows a spinner in the row while the view gets ready. */
+  loading?: boolean;
   /** Set by `FormSection` on Android, for the row's corners. */
   position?: FormRowPosition;
 }

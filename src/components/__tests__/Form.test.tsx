@@ -275,6 +275,20 @@ describe('Form', () => {
     expect(screen.getByText('By Anonymous')).toBeTruthy();
     expect(screen.getByText('Chapters 4 and 5')).toBeTruthy();
   });
+
+  it('shows a spinner over a view that is still loading, keeping it mounted', async () => {
+    const view = (loading: boolean) => (
+      <FormView loading={loading}>
+        <Text>Chapters 4 and 5</Text>
+      </FormView>
+    );
+    await render(view(true));
+    expect(screen.getByTestId('progress')).toBeTruthy();
+    expect(screen.getByText('Chapters 4 and 5')).toBeTruthy();
+    await screen.rerender(view(false));
+    expect(screen.queryByTestId('progress')).toBeNull();
+    expect(screen.getByText('Chapters 4 and 5')).toBeTruthy();
+  });
 });
 
 describe('form helpers', () => {

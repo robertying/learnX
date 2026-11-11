@@ -263,6 +263,20 @@ describe('Form (Android)', () => {
     }
     expect(screen.getByTestId('icon-account')).toBeTruthy();
   });
+
+  it('shows a spinner over a view that is still loading, keeping it mounted', async () => {
+    const view = (loading: boolean) => (
+      <FormView loading={loading}>
+        <Text>Embedded</Text>
+      </FormView>
+    );
+    await render(view(true));
+    expect(screen.getByTestId('progress')).toBeTruthy();
+    expect(screen.getByText('Embedded')).toBeTruthy();
+    await screen.rerender(view(false));
+    expect(screen.queryByTestId('progress')).toBeNull();
+    expect(screen.getByText('Embedded')).toBeTruthy();
+  });
   const style = (text: string) =>
     StyleSheet.flatten(screen.getByText(text).props.style);
 

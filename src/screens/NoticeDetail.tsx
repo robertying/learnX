@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
-import AutoHeightWebView from 'components/AutoHeightWebView';
+import FormWebView from 'components/FormWebView';
 import { NoticeDetailParamList } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
@@ -17,8 +17,8 @@ import {
   FormFile,
   FormScreen,
   FormSection,
+  FormParagraph,
   FormTitle,
-  FormView,
 } from 'components/Form';
 import { useTheme, webContentColors } from 'theme';
 
@@ -56,7 +56,7 @@ const NoticeDetailContent: React.FC<{
     attachment,
   } = notice;
 
-  const html = getWebViewTemplate(content || `<p>${t('noNoticeContent')}</p>`, {
+  const html = getWebViewTemplate(content ?? '', {
     dark: theme.dark,
     // The form row's own color shows through.
     backgroundColor: 'transparent',
@@ -116,9 +116,11 @@ const NoticeDetailContent: React.FC<{
           </FormSection>
         ) : null}
         <FormSection>
-          <FormView>
-            <AutoHeightWebView source={{ html }} />
-          </FormView>
+          {content?.trim() ? (
+            <FormWebView html={html} />
+          ) : (
+            <FormParagraph text={t('noNoticeContent')} />
+          )}
         </FormSection>
       </Form>
     </FormScreen>

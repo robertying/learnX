@@ -6,7 +6,7 @@ import {
   HomeworkSubmissionType,
   RemoteFile,
 } from '@robertying/thu-learn-lib';
-import AutoHeightWebView from 'components/AutoHeightWebView';
+import FormWebView from 'components/FormWebView';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { headerButtons } from 'navigation/headerButtons';
@@ -39,7 +39,6 @@ import {
   FormSection,
   FormText,
   FormTitle,
-  FormView,
 } from 'components/Form';
 import { useTheme, webContentColors } from 'theme';
 
@@ -133,15 +132,14 @@ const AssignmentDetailContent: React.FC<{
   const lateOpen =
     !!lateSubmissionDeadline && dayjs(now).isBefore(lateSubmissionDeadline);
 
-  const html = getWebViewTemplate(
-    description || `<p>${t('noAssignmentDescription')}</p>`,
-    {
-      dark: theme.dark,
-      // The form row's own color shows through.
-      backgroundColor: 'transparent',
-      ...webContentColors(theme.dark),
-    },
-  );
+  // An empty description shows as text, with no web view to wait for.
+  const hasDescription = !!description?.trim();
+  const html = getWebViewTemplate(description ?? '', {
+    dark: theme.dark,
+    // The form row's own color shows through.
+    backgroundColor: 'transparent',
+    ...webContentColors(theme.dark),
+  });
 
   const handleFileOpen = (remoteFile?: RemoteFile) => {
     if (remoteFile) {
@@ -281,19 +279,21 @@ const AssignmentDetailContent: React.FC<{
             />
           ) : null}
         </FormSection>
-        {graded && (gradeText || gradeAttachment) ? (
-          <FormSection title={t('feedback')}>
-            {gradeText ? <FormParagraph text={gradeText} /> : null}
-            {gradeAttachment ? (
-              <FormFile
-                title={gradeAttachment.name}
-                detail={gradeAttachment.size}
-                icon="file"
-                onPress={() => handleFileOpen(gradeAttachment)}
-              />
-            ) : null}
-          </FormSection>
-        ) : null}
+        <FormSection title={t('description')}>
+          {hasDescription ? (
+            <FormWebView html={html} />
+          ) : !attachment ? (
+            <FormParagraph text={t('noAssignmentDescription')} />
+          ) : null}
+          {attachment ? (
+            <FormFile
+              title={attachment.name}
+              detail={attachment.size}
+              icon="file"
+              onPress={() => handleFileOpen(attachment)}
+            />
+          ) : null}
+        </FormSection>
         {submitted && (submittedText || submittedAttachment || graded) ? (
           <FormSection title={t('yourSubmission')}>
             {graded ? (
@@ -322,14 +322,17 @@ const AssignmentDetailContent: React.FC<{
             ) : null}
           </FormSection>
         ) : null}
-        {attachment ? (
-          <FormSection title={t('attachment')}>
-            <FormFile
-              title={attachment.name}
-              detail={attachment.size}
-              icon="file"
-              onPress={() => handleFileOpen(attachment)}
-            />
+        {graded && (gradeText || gradeAttachment) ? (
+          <FormSection title={t('feedback')}>
+            {gradeText ? <FormParagraph text={gradeText} /> : null}
+            {gradeAttachment ? (
+              <FormFile
+                title={gradeAttachment.name}
+                detail={gradeAttachment.size}
+                icon="file"
+                onPress={() => handleFileOpen(gradeAttachment)}
+              />
+            ) : null}
           </FormSection>
         ) : null}
         {answerText || answerAttachment ? (
@@ -356,11 +359,6 @@ const AssignmentDetailContent: React.FC<{
             ))}
           </FormSection>
         ) : null}
-        <FormSection title={t('description')}>
-          <FormView>
-            <AutoHeightWebView source={{ html }} />
-          </FormView>
-        </FormSection>
       </Form>
     </FormScreen>
   );
