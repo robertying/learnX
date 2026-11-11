@@ -7,6 +7,8 @@
 #   iphone          every flow on the iPhone
 #   ipad            every flow on the iPad, portrait
 #   ipad-landscape  every flow on the iPad, landscape
+#   ipad-windowed   every flow on an iPad set to Windowed Apps, in the
+#                   app's default window
 #   duo-folded      every flow on the iPhone Duo, closed (outer display)
 #   duo-half        the posture flows on the iPhone Duo, half open (90°)
 #   duo-open        the posture flows on the iPhone Duo, fully open (180°)
@@ -24,20 +26,24 @@
 #
 # Devices, by simulator name or UDID and by AVD name:
 #   E2E_IPHONE (learnX iPhone 18 Pro), E2E_IPAD (learnX iPad Pro 11),
-#   E2E_DUO (learnX iPhone Duo), E2E_AVD (Pixel_10_Pro_Fold)
-# The iPhone Duo profiles fold it with setFoldPosture, which only the patched
-# Maestro has (scripts/maestro/build.sh): put its bin folder first on PATH.
+#   E2E_IPAD_WINDOWED (learnX iPad Pro 11 Windowed), E2E_DUO (learnX iPhone
+#   Duo), E2E_AVD (Pixel_10_Pro_Fold)
+# The ipad-windowed and iPhone Duo profiles need the patched Maestro
+# (scripts/maestro/build.sh: it finds an app outside the full screen and folds
+# the Duo with setFoldPosture): put its bin folder first on PATH.
 #
 # Results, with Maestro's output and a JUnit report: build/e2e/<profile>/
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-all_profiles="iphone ipad ipad-landscape duo-folded duo-half duo-open fold-folded fold-unfolded"
+all_profiles="iphone ipad ipad-landscape ipad-windowed duo-folded duo-half duo-open fold-folded fold-unfolded"
 profiles="${*:-$all_profiles}"
 
 iphone="${E2E_IPHONE:-learnX iPhone 18 Pro}"
 ipad="${E2E_IPAD:-learnX iPad Pro 11}"
+# A second iPad, set to Settings › Multitasking & Gestures › Windowed Apps.
+ipad_windowed="${E2E_IPAD_WINDOWED:-learnX iPad Pro 11 Windowed}"
 duo="${E2E_DUO:-learnX iPhone Duo}"
 avd="${E2E_AVD:-Pixel_10_Pro_Fold}"
 build="${E2E_BUILD:-0}"
@@ -298,6 +304,10 @@ run_profile() {
     ;;
   ipad)
     use_sim "$ipad" || return 1
+    run_ios_suite "$device" PORTRAIT "$out"
+    ;;
+  ipad-windowed)
+    use_sim "$ipad_windowed" || return 1
     run_ios_suite "$device" PORTRAIT "$out"
     ;;
   ipad-landscape)
