@@ -99,8 +99,8 @@ it('shows the current and next class, and opens a course', async () => {
   });
   const { navigation } = await setup();
 
-  expect(screen.getByText('Now')).toBeOnTheScreen();
-  expect(screen.getByText('Next Class')).toBeOnTheScreen();
+  expect(screen.getByText(/^Now · ends in \d+ minutes$/)).toBeOnTheScreen();
+  expect(screen.getByText('Next Class · starts in an hour')).toBeOnTheScreen();
   expect(screen.getByText('Homework')).toBeOnTheScreen();
   expect(screen.getByText('1 unread notice')).toBeOnTheScreen();
   expect(

@@ -109,6 +109,7 @@ export const VerticalDivider = () => <View testID="divider" />;
 
 export const ListItem = Object.assign((props: BoxProps) => <Box {...props} />, {
   HeadlineContent: slot(),
+  OverlineContent: slot(),
   SupportingContent: slot(),
   LeadingContent: slot(),
   TrailingContent: slot(),

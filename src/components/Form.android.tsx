@@ -235,6 +235,7 @@ const FormRow: React.FC<
 > = ({
   title,
   subtitle,
+  overline,
   icon,
   testID,
   position,
@@ -314,6 +315,11 @@ const FormRow: React.FC<
           {title}
         </Text>
       </ListItem.HeadlineContent>
+      {overline ? (
+        <ListItem.OverlineContent>
+          <Text color={done ? colors.outline : colors.primary}>{overline}</Text>
+        </ListItem.OverlineContent>
+      ) : null}
       {supporting ? (
         <ListItem.SupportingContent>
           <Text color={done ? colors.outline : colors.onSurfaceVariant}>

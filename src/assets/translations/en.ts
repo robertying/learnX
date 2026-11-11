@@ -352,6 +352,7 @@ export default {
   todayNext: 'Next Class',
   todayStartsIn: 'starts {time}',
   todayEndsIn: 'ends {time}',
+  todayClasses: 'Classes',
   todayNoClasses: 'No classes today',
   todayNoMoreClasses: 'No more classes today',
   todayClassCount: '{count} classes today',

@@ -185,15 +185,19 @@ const struckText = [
   strikethrough({ isActive: true, pattern: 'solid' }),
 ];
 
+const overlineModifiers = [font({ textStyle: 'caption', weight: 'semibold' })];
+
 const RowLabel: React.FC<{
   title: string;
   subtitle?: string;
+  overline?: string;
   icon?: FormIcon;
   plain?: boolean;
   struck?: boolean;
   /** Read out as over, which the row only shows by being dimmed. */
   done?: boolean;
-}> = ({ title, subtitle, icon, plain, struck, done }) => {
+}> = ({ title, subtitle, overline, icon, plain, struck, done }) => {
+  const theme = useTheme();
   const text = (
     <Text
       modifiers={
@@ -210,18 +214,31 @@ const RowLabel: React.FC<{
       {title}
     </Text>
   );
-  const label = subtitle ? (
-    <VStack
-      alignment="leading"
-      spacing={2}
-      modifiers={DeviceInfo.isMac() ? macTwoLineModifiers : undefined}
-    >
-      {text}
-      <Text modifiers={subtitleModifiers}>{subtitle}</Text>
-    </VStack>
-  ) : (
-    text
-  );
+  const label =
+    subtitle || overline ? (
+      <VStack
+        alignment="leading"
+        spacing={2}
+        modifiers={DeviceInfo.isMac() ? macTwoLineModifiers : undefined}
+      >
+        {overline ? (
+          <Text
+            modifiers={[
+              ...overlineModifiers,
+              foregroundStyle(theme.colors.primary),
+            ]}
+          >
+            {overline}
+          </Text>
+        ) : null}
+        {text}
+        {subtitle ? (
+          <Text modifiers={subtitleModifiers}>{subtitle}</Text>
+        ) : null}
+      </VStack>
+    ) : (
+      text
+    );
   // The system draws the symbol at the row's text size. (@expo/ui's Image
   // would draw it at a fixed 24 pt.)
   return icon ? (
@@ -279,13 +296,24 @@ const ItemRow: React.FC<
     trailing?: React.ReactNode;
     badge?: React.ReactNode;
   }
-> = ({ title, icon, done, progress, detailTint, badge, trailing, ...rest }) => {
+> = ({
+  title,
+  overline,
+  icon,
+  done,
+  progress,
+  detailTint,
+  badge,
+  trailing,
+  ...rest
+}) => {
   const { subtitle, detail } = useStackedDetail(rest.subtitle, rest.detail);
   const row = (
     <HStack modifiers={done ? doneModifiers : undefined}>
       <RowLabel
         title={title}
         subtitle={subtitle}
+        overline={overline}
         icon={icon}
         plain
         done={done}
@@ -336,7 +364,13 @@ export const FormText: React.FC<FormTextProps> = ({
   ) : (
     <LabeledContent
       label={
-        <RowLabel title={row.title} subtitle={subtitle} icon={row.icon} plain />
+        <RowLabel
+          title={row.title}
+          subtitle={subtitle}
+          overline={row.overline}
+          icon={row.icon}
+          plain
+        />
       }
       testID={testID}
     >
