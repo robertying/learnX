@@ -95,6 +95,13 @@ export default {
     "Couldn't delete. Give learnX access to Reminders in Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: ",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
+  turnOnNotifications: 'Turn On Notifications',
+  notificationsOffCaption:
+    "Notifications for learnX are off in system settings, so the ones turned on below can't show.",
+  allowCalendarAccess: 'Allow Calendar Access',
+  allowRemindersAccess: 'Allow Reminders Access',
+  calendarOffCaption:
+    "learnX can't update the synced assignments below until it's allowed.",
   notificationAccessCaption:
     "If learnX can't send you notifications, allow it in System Settings.",
   calendarAccessCaption:

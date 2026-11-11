@@ -51,6 +51,11 @@ export const systemIcons = {
   search: { ios: 'magnifyingglass', android: 'search' },
   // Form rows: notifications and calendars
   notifications: { ios: 'bell.badge', android: 'notifications_active' },
+  notificationsOff: { ios: 'bell.slash', android: 'notifications_off' },
+  calendarOff: {
+    ios: 'calendar.badge.exclamationmark',
+    android: 'event_busy',
+  },
   grade: { ios: 'star', android: 'grade' },
   deadlineChange: { ios: 'clock.arrow.circlepath', android: 'update' },
   groupSubmission: { ios: 'person.3', android: 'groups' },
@@ -143,6 +148,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   drag_handle: 0xe25d,
   edit: 0xe3c9,
   error: 0xe000,
+  event_busy: 0xe615,
   event_upcoming: 0xf238,
   favorite: 0xe87d,
   feedback: 0xe87f,
@@ -170,6 +176,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   note_add: 0xe89c,
   notifications: 0xe7f4,
   notifications_active: 0xe7f7,
+  notifications_off: 0xe7f6,
   open_in_browser: 0xe89d,
   open_in_new: 0xe89e,
   package_2: 0xf569,

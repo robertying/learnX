@@ -22,6 +22,7 @@ import {
   useCalendarExport,
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
+import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
@@ -79,9 +80,40 @@ const CalendarEvent: React.FC<Props> = () => {
 
   const assignmentSyncFooter = t('assignmentSyncDescription');
 
+  // A sync that's on but can't write is said first, with a way to fix it:
+  // asking while the system still lets the app, else its settings.
+  const access = useCalendarAccess();
+  const blocked = (on: boolean, state: CalendarAccess | null) =>
+    on && state !== null && state !== 'granted';
+  const calendarBlocked = blocked(assignmentCalendarSync, access.calendar);
+  const remindersBlocked =
+    Platform.OS === 'ios' && blocked(assignmentReminderSync, access.reminders);
+  const allow = (type: 'calendar' | 'reminder', state: CalendarAccess | null) =>
+    state === 'denied' ? openSystemSettings('security') : access.request(type);
+
   return (
     <FormScreen>
       <Form>
+        {(calendarBlocked || remindersBlocked) && (
+          <FormSection footer={t('calendarOffCaption')}>
+            {calendarBlocked && (
+              <FormButton
+                testID="calendar-allow-access"
+                icon="calendarOff"
+                title={t('allowCalendarAccess')}
+                onPress={() => allow('calendar', access.calendar)}
+              />
+            )}
+            {remindersBlocked && (
+              <FormButton
+                testID="reminders-allow-access"
+                icon="calendarOff"
+                title={t('allowRemindersAccess')}
+                onPress={() => allow('reminder', access.reminders)}
+              />
+            )}
+          </FormSection>
+        )}
         <FormSection
           title={t('schedule')}
           footer={footer(

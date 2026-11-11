@@ -108,9 +108,30 @@ const NotificationSettings: React.FC<Props> = () => {
       notifications[key],
   );
 
+  /**
+   * Something is on that can't show: said first, with a way to fix it. While
+   * the system still lets the app ask, the button asks; otherwise it opens
+   * the system settings.
+   */
+  const blocked = permission !== null && permission !== 'granted' && anyOn;
+
   return (
     <FormScreen>
       <Form>
+        {blocked && (
+          <FormSection footer={t('notificationsOffCaption')}>
+            <FormButton
+              testID="notifications-turn-on"
+              icon="notificationsOff"
+              title={t('turnOnNotifications')}
+              onPress={() =>
+                permission === 'denied'
+                  ? openSystemSettings('notifications')
+                  : request()
+              }
+            />
+          </FormSection>
+        )}
         <FormSection
           title={t('setupNewContent')}
           footer={t('notificationsCaption')}
@@ -142,10 +163,6 @@ const NotificationSettings: React.FC<Props> = () => {
           footer={[
             t('notifyDeadlineRemindersCaption'),
             showExact && t('exactRemindersCaption'),
-            permission !== null &&
-              permission !== 'granted' &&
-              anyOn &&
-              t('notificationPermissionDenied'),
           ]
             .filter(Boolean)
             .join('\n\n')}

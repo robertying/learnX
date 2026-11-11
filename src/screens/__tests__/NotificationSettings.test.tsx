@@ -86,22 +86,26 @@ it('offers exact reminders when Android holds them back', async () => {
   expect(requestExact).toHaveBeenCalled();
 });
 
-it('says the permission is off while it can still be asked for', async () => {
+it('says first when something on is blocked, and asks while it can', async () => {
   permission({ permission: 'undetermined' });
+  await renderScreen();
+  expect(screen.queryByText(t('turnOnNotifications'))).toBeNull();
+  await screen.unmount();
   setSetting('notifications', { ...getSettings().notifications, files: true });
   await renderScreen();
-  expect(
-    screen.getByText(t('notificationPermissionDenied'), { exact: false }),
-  ).toBeTruthy();
+  expect(screen.getByText(t('notificationsOffCaption'))).toBeTruthy();
+  await userEvent.press(screen.getByText(t('turnOnNotifications')));
+  expect(request).toHaveBeenCalled();
+  expect(openSystemSettings).not.toHaveBeenCalled();
 });
 
-it('says the permission is off when something is on but denied', async () => {
+it('opens the system settings once it can no longer ask', async () => {
   permission({ permission: 'denied' });
   setSetting('notifications', { ...getSettings().notifications, files: true });
   await renderScreen();
-  expect(
-    screen.getByText(t('notificationPermissionDenied'), { exact: false }),
-  ).toBeTruthy();
+  await userEvent.press(screen.getByText(t('turnOnNotifications')));
+  expect(openSystemSettings).toHaveBeenCalledWith('notifications');
+  expect(request).not.toHaveBeenCalled();
 });
 
 it('opens the system notification settings', async () => {
