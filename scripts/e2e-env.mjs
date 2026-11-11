@@ -101,6 +101,13 @@ const mock = {
   MOCK_SEARCH_NOTICE: both('mockNotices', searchNotice),
   MOCK_SEARCH_ASSIGNMENT: both('mockAssignments', searchAssignment),
   MOCK_STORE_NOTICE: both('mockNotices', storeNotice.id),
+  // The start of its body, to wait for its web view to render.
+  MOCK_STORE_NOTICE_BODY: both('mockNotices', storeNotice.id, n => {
+    const text = n.content.replace(/<[^>]+>/g, ' ').trim();
+    return /\p{Script=Han}/u.test(text)
+      ? text.slice(0, 8)
+      : text.split(/\s+/).slice(0, 3).join(' ');
+  }),
   MOCK_STORE_COURSE: courseName(storeCourse),
   MOCK_STORE_ASSIGNMENT: both('mockAssignments', storeAssignment),
   MOCK_STORE_FILE: both('mockFiles', storeFile),

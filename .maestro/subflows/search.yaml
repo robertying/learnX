@@ -4,6 +4,15 @@ appId: ${APP_ID}
 ---
 - tapOn: '${T_search}'
 - inputText: ${TERM}
+# Maestro can drop a CJK character while typing: retype until the field
+# holds all of TERM.
+- repeat:
+    times: 2
+    while:
+      notVisible: ${TERM}
+    commands:
+      - eraseText
+      - inputText: ${TERM}
 - extendedWaitUntil:
     visible: ${RESULT}
     timeout: 5000

@@ -13,6 +13,10 @@ name: App Store screenshots on the iPad
     env:
       CARD: '.*(${MOCK_STORE_NOTICE}).*'
       DETAIL: notice-detail
+# Its body is a web view that renders after the screen shows.
+- extendedWaitUntil:
+    visible: '.*(${MOCK_STORE_NOTICE_BODY}).*'
+    timeout: 15000
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
