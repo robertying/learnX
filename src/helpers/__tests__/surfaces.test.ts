@@ -140,6 +140,7 @@ it('writes shown assignments to the calendar only when the sync is on', async ()
     'calendar',
     assignments.slice(1),
     [assignments[0].id],
+    { automatic: true },
   );
   expect(errors).toEqual([{ text: 'failed', type: 'error' }]);
 });
@@ -151,7 +152,9 @@ it('writes shown assignments to Reminders when that sync is on, quietly when it 
   const unsubscribe = subscribeSurfaceErrors(message => errors.push(message));
   await refreshSurfaces();
   unsubscribe();
-  expect(syncAssignments).toHaveBeenCalledWith('reminder', assignments, []);
+  expect(syncAssignments).toHaveBeenCalledWith('reminder', assignments, [], {
+    automatic: true,
+  });
   expect(errors).toEqual([]);
 });
 

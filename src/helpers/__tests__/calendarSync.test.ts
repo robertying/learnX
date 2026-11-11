@@ -211,6 +211,7 @@ describe('syncAssignments', () => {
       'reminder',
       assignments,
       [],
+      { ask: true },
     );
     expect(useCalendarSyncStore.getState().lastSynced).toEqual({
       reminder: expect.any(Number),
@@ -226,6 +227,28 @@ describe('syncAssignments', () => {
       type: 'error',
     });
     expect(useCalendarSyncStore.getState().lastSynced).toBeUndefined();
+  });
+
+  it("skips quietly without access when the app started it, and doesn't ask", async () => {
+    jest
+      .mocked(saveAssignmentsToReminderOrCalendar)
+      .mockImplementation(fail('calendarPermission'));
+    await expect(
+      syncAssignments('calendar', [], [], { automatic: true }),
+    ).resolves.toBeUndefined();
+    expect(saveAssignmentsToReminderOrCalendar).toHaveBeenLastCalledWith(
+      'calendar',
+      [],
+      [],
+      { ask: false },
+    );
+    // Other failures still show.
+    jest
+      .mocked(saveAssignmentsToReminderOrCalendar)
+      .mockImplementation(fail('noSource'));
+    await expect(
+      syncAssignments('calendar', [], [], { automatic: true }),
+    ).resolves.toMatchObject({ type: 'error' });
   });
 });
 
