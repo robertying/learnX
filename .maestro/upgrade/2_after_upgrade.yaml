@@ -29,7 +29,7 @@ appId: ${APP_ID}
       mockLatency: none
 - extendedWaitUntil:
     visible:
-      id: 'tab-today|sun\.max\.fill'
+      id: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
     timeout: 30000
 - assertNotVisible:
     id: 'welcome-continue|login-username'
