@@ -298,6 +298,12 @@ export default {
   lateClosesTomorrow: 'late submission closes tomorrow at {time}',
   lateClosesAt: 'late submission closes {date}',
   sampleGradeComment: 'Well done. Part 2 misses the empty-tree case.',
+  notificationChannelClasses: 'Class reminders',
+  notifyClassReminders: 'Class Reminders',
+  classReminderOffset: 'Remind Before (Minutes)',
+  classStartsAt: 'Starts at {time}',
+  notifyClassRemindersCaption:
+    'Reminds you before each class on your timetable. Opening learnX keeps them up to date for the next week or so.',
   notifySummary: '{count} Updates in {courses} Courses',
   notifyDeadlineRemindersCaption:
     "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside calendar and Reminders alerts.",

@@ -19,8 +19,8 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
 /**
  * The page after the first login: turns on notifications of new content (in
- * the tabs' order), deadline reminders and grades (all on to start with), and
- * calendar sync and, on Apple platforms, Reminders sync (off). All of them
+ * the tabs' order), class and deadline reminders and grades (all on to start
+ * with), and calendar sync and, on Apple platforms, Reminders sync (off). All of them
  * start off in Settings; Done asks for the permissions they need. Opened by
  * `useLaunchSheet`, once.
  */
@@ -34,6 +34,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
     notices: true,
     assignments: true,
     files: true,
+    classReminders: true,
     deadlineReminders: true,
     grades: true,
     calendar: false,
@@ -122,6 +123,15 @@ const Setup: React.FC<Props> = ({ navigation }) => {
             title={t('notifyNewFiles')}
             value={choices.files}
             onValueChange={choose('files')}
+          />
+        </FormSection>
+        {/* Classes before assignments, as in Settings › Calendar. */}
+        <FormSection title={t('schedule')}>
+          <FormToggle
+            icon="classReminder"
+            title={t('notifyClassReminders')}
+            value={choices.classReminders}
+            onValueChange={choose('classReminders')}
           />
         </FormSection>
         <FormSection title={t('assignments')}>

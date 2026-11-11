@@ -1,5 +1,6 @@
 // Debug builds only, so nothing here is translated.
 import dayjs from 'dayjs';
+import { HomeworkCompletionType } from '@robertying/thu-learn-lib';
 import { useSyncExternalStore } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
@@ -24,6 +25,7 @@ import { queryClient } from 'data/queryClient';
 import { describeSyncRun, useSyncLogStore } from 'data/syncLog';
 import { getUserData } from 'data/userData';
 import { notifyContent, syncContent } from 'helpers/background';
+import { previewClassReminder } from 'helpers/classReminders';
 import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
@@ -45,8 +47,8 @@ import { SettingsStackParams } from './types';
 type Props = NativeStackScreenProps<SettingsStackParams, 'Debug'>;
 
 /**
- * Forgets a few items and grades, then syncs as the background task does, so
- * what comes back is posted as new.
+ * Forgets a few items, grades and group submissions, then syncs as the
+ * background task does, so what comes back is posted as new.
  */
 const simulateNewContent = async () => {
   const semesterId = getUserData().currentSemester;
@@ -62,7 +64,13 @@ const simulateNewContent = async () => {
   queryClient.setQueryData(assignmentsQuery(semesterId).queryKey, old =>
     old
       ?.filter(a => a.submitted || dayjs(a.deadline).isBefore(dayjs()))
-      .map(a => (a.graded ? { ...a, graded: false } : a)),
+      .map(a => ({
+        ...a,
+        ...(a.graded && { graded: false }),
+        ...(a.completionType === HomeworkCompletionType.GROUP && {
+          submitted: false,
+        }),
+      })),
   );
   const result = await syncContent({ manual: true });
   const run = useSyncLogStore.getState().runs.at(-1);
@@ -75,12 +83,14 @@ const simulateNewContent = async () => {
   toast(`${posted.length} posted, ${summary}`, 'success');
 };
 
-const previewReminder = async () => {
-  const scheduled = await previewDeadlineReminder();
+const previewReminder = async (kind: 'deadline' | 'class') => {
+  const scheduled = await (kind === 'deadline'
+    ? previewDeadlineReminder()
+    : previewClassReminder());
   toast(
     scheduled > 0
       ? `The next of ${scheduled} scheduled reminders shows again in 10 seconds. Leave the app to see it.`
-      : 'No deadline reminders are scheduled.',
+      : `No ${kind} reminders are scheduled.`,
     scheduled > 0 ? 'success' : 'warning',
   );
 };
@@ -181,9 +191,14 @@ const Debug: React.FC<Props> = ({ navigation }) => {
             onPress={withPermission(simulateNewContent)}
           />
           <FormButton
+            icon="classReminder"
+            title="Preview a Class Reminder"
+            onPress={() => previewReminder('class')}
+          />
+          <FormButton
             icon="reminder"
             title="Preview a Deadline Reminder"
-            onPress={previewReminder}
+            onPress={() => previewReminder('deadline')}
           />
         </FormSection>
       </Form>

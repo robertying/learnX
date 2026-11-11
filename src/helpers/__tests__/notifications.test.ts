@@ -38,6 +38,12 @@ describe('getNotificationTarget', () => {
     });
   });
 
+  it('opens Today from a class reminder', () => {
+    expect(getNotificationTarget(response({ type: 'today' }))).toEqual({
+      type: 'today',
+    });
+  });
+
   it("ignores notifications that aren't ours", () => {
     expect(getNotificationTarget(response(null))).toBeNull();
     expect(
@@ -89,7 +95,7 @@ describe('permission', () => {
     const channels = jest
       .mocked(Notifications.setNotificationChannelAsync)
       .mock.calls.map(([id]) => id);
-    expect(channels).toEqual(['content', 'deadlines']);
+    expect(channels).toEqual(['content', 'deadlines', 'classes']);
     expect(
       jest.mocked(Notifications.setNotificationChannelAsync).mock
         .invocationCallOrder[0],
@@ -276,6 +282,6 @@ describe('configureNotifications', () => {
       jest
         .mocked(Notifications.setNotificationChannelAsync)
         .mock.calls.map(([id]) => id),
-    ).toEqual(['content', 'deadlines']);
+    ).toEqual(['content', 'deadlines', 'classes']);
   });
 });

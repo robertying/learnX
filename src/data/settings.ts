@@ -36,6 +36,8 @@ export const defaultSettings: SettingsState = {
     groupSubmissions: false,
     deadlineReminders: false,
     deadlineReminderOffset: 24 * 60,
+    classReminders: false,
+    classReminderOffset: 15,
   },
   courseInformationSharing: false,
   openFileAfterDownload: false,

@@ -16,6 +16,9 @@ import { upcomingDeadlines, WidgetDeadline } from 'helpers/widgetDeadlines';
 /** iOS keeps at most 64 pending notifications per app; leave some room. */
 const MAX_REMINDERS = 48;
 
+/** With class reminders on, they get the rest (`MAX_CLASS_REMINDERS`). */
+export const DEADLINE_REMINDERS_WITH_CLASSES = 24;
+
 /** Identifiers of reminders start with this, so others are left alone. */
 const PREFIX = 'deadline-reminder:';
 
@@ -96,7 +99,7 @@ const lateWindows = (
 
 /**
  * The reminders to have scheduled, the earliest first, at most
- * `MAX_REMINDERS`: one per open assignment `offset` minutes before its
+ * `MAX_REMINDERS` (fewer with class reminders on): one per open assignment `offset` minutes before its
  * deadline; and for one that takes late submissions, one when its deadline
  * passes and one `offset` minutes before the late submission deadline (if
  * that's after the deadline). Reminders whose time has passed are left out.
@@ -113,7 +116,8 @@ export const planDeadlineReminders = (
     settings: Pick<
       NotificationSettings,
       'deadlineReminders' | 'deadlineReminderOffset'
-    >;
+    > &
+      Partial<Pick<NotificationSettings, 'classReminders'>>;
     hiddenCourses: string[];
     archived: string[];
     now?: number;
@@ -129,11 +133,14 @@ export const planDeadlineReminders = (
     return [];
   }
   const offset = settings.deadlineReminderOffset * 60 * 1000;
+  const max = settings.classReminders
+    ? DEADLINE_REMINDERS_WITH_CLASSES
+    : MAX_REMINDERS;
   const { deadlines } = upcomingDeadlines(assignments, {
     hiddenCourses,
     archived,
     now: now + offset,
-    limit: MAX_REMINDERS,
+    limit: max,
   });
   const suffix = inexact ? ':inexact' : '';
   const due = deadlines.map((deadline): PlannedReminder => ({
@@ -174,7 +181,7 @@ export const planDeadlineReminders = (
   });
   return [...due, ...late]
     .sort((a, b) => a.date - b.date || a.identifier.localeCompare(b.identifier))
-    .slice(0, MAX_REMINDERS);
+    .slice(0, max);
 };
 
 /** When late submission closes, as of `now`: "today at 23:59". */

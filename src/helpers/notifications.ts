@@ -1,7 +1,7 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { t } from 'helpers/i18n';
-import { isItemType, ItemTarget } from 'helpers/openTarget';
+import { isItemType, ItemTarget, OpenTarget } from 'helpers/openTarget';
 
 /**
  * Action buttons a notification shows, by what it is about. Identifiers
@@ -26,6 +26,7 @@ export const notificationActions = {
 export const notificationChannels = {
   content: 'content',
   deadlines: 'deadlines',
+  classes: 'classes',
 } as const;
 
 export type NotificationPermission = 'granted' | 'undetermined' | 'denied';
@@ -57,6 +58,10 @@ const setUpChannels = async () => {
     }),
     Notifications.setNotificationChannelAsync(notificationChannels.deadlines, {
       name: t('notificationChannelDeadlines'),
+      importance: Notifications.AndroidImportance.HIGH,
+    }),
+    Notifications.setNotificationChannelAsync(notificationChannels.classes, {
+      name: t('notificationChannelClasses'),
       importance: Notifications.AndroidImportance.HIGH,
     }),
   ]);
@@ -245,7 +250,11 @@ export const getNotificationData = (
 /** The target a notification carries, if it is one of ours. */
 export const getNotificationTarget = (
   response: Notifications.NotificationResponse,
-): ItemTarget | null => {
+): OpenTarget | null => {
+  // A class reminder opens Today.
+  if (responseData(response)?.type === 'today') {
+    return { type: 'today' };
+  }
   const data = getNotificationData(response);
   return data ? { type: data.type, id: data.id } : null;
 };

@@ -31,7 +31,7 @@ const assignment = (
 });
 
 const on = { deadlineReminders: true, deadlineReminderOffset: 60 };
-const options = (settings = on) => ({
+const options = (settings: typeof on & { classReminders?: boolean } = on) => ({
   settings,
   hiddenCourses: ['hidden'],
   archived: ['archived'],
@@ -89,6 +89,15 @@ describe('planDeadlineReminders', () => {
       assignment(`a${i}`, 2 + i),
     );
     expect(planDeadlineReminders(many, options())).toHaveLength(48);
+  });
+
+  it('leaves room for class reminders when they are on', () => {
+    const many = Array.from({ length: 80 }, (_, i) =>
+      assignment(`a${i}`, 2 + i),
+    );
+    expect(
+      planDeadlineReminders(many, options({ ...on, classReminders: true })),
+    ).toHaveLength(24);
   });
 
   const late = (dueIn: number, lateIn: number, overrides = {}) =>

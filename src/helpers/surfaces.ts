@@ -1,6 +1,6 @@
 // Keeps what learnX shows outside the app in step with its data: the
-// Deadlines and Up Next widgets, deadline reminders, Spotlight, the App
-// Intents' data, and the assignments written to the system calendar or
+// Deadlines and Up Next widgets, deadline and class reminders, Spotlight, the
+// App Intents' data, and the assignments written to the system calendar or
 // Reminders. Each is worked out from the cached lists, the user data and the
 // settings whenever those change, in whichever JS runtime that happens: the
 // app, the background sync, or a notification action handled without the app.
@@ -14,6 +14,10 @@ import { getUserData, useUserDataStore } from 'data/userData';
 import { Assignment, Notice } from 'data/types/state';
 import type { ToastMessage } from 'helpers/calendarSync';
 import { recordError } from 'helpers/crashReporting';
+import {
+  cancelClassReminders,
+  syncClassReminders,
+} from 'helpers/classReminders';
 import {
   cancelDeadlineReminders,
   syncDeadlineReminders,
@@ -153,6 +157,8 @@ const surfaces: Surface[] = [
       i.archived,
       i.settings.notifications.deadlineReminders,
       i.settings.notifications.deadlineReminderOffset,
+      // Class reminders take part of the room.
+      i.settings.notifications.classReminders,
       // The notification or exact alarm permission may have changed in the
       // system settings.
       i.resumes,
@@ -164,6 +170,22 @@ const surfaces: Surface[] = [
         hiddenCourses,
         archived,
       }),
+  },
+  {
+    name: 'Class reminders',
+    deps: i => [
+      i.classes,
+      i.settings.notifications.classReminders,
+      i.settings.notifications.classReminderOffset,
+      i.resumes,
+    ],
+    // Until this week's classes are known, the scheduled ones stay.
+    update: ({ classes, settings }) =>
+      classes
+        ? syncClassReminders(JSON.parse(classes) as UpcomingClass[], {
+            settings: settings.notifications,
+          })
+        : undefined,
   },
   {
     name: 'Spotlight',
@@ -270,7 +292,10 @@ export const clearSurfaces = () => {
   updateUpNextWidget();
   clearSpotlight();
   clearShortcuts();
-  return cancelDeadlineReminders().catch(() => {});
+  return Promise.all([
+    cancelDeadlineReminders().catch(() => {}),
+    cancelClassReminders().catch(() => {}),
+  ]).then(() => {});
 };
 
 /** Lists whose changes the surfaces follow, by the first part of their key. */

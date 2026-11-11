@@ -37,6 +37,8 @@ describe('settings', () => {
        "graduate": false,
        "notifications": {
          "assignments": false,
+         "classReminderOffset": 15,
+         "classReminders": false,
          "deadlineChanges": false,
          "deadlineReminderOffset": 1440,
          "deadlineReminders": false,

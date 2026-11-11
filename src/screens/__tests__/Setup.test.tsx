@@ -46,7 +46,7 @@ it("marks itself and this version's What's New seen once shown", async () => {
   });
 });
 
-it("groups new content in the tabs' order, then assignments, then calendar", async () => {
+it("groups new content in the tabs' order, then classes, assignments and calendar", async () => {
   await renderScreen();
   const titles = screen
     .getAllByRole('switch')
@@ -55,6 +55,7 @@ it("groups new content in the tabs' order, then assignments, then calendar", asy
     t('notifyNewNotices'),
     t('notifyNewAssignments'),
     t('notifyNewFiles'),
+    t('notifyClassReminders'),
     t('notifyDeadlineReminders'),
     t('notifyGrades'),
     t('setupCalendar'),
@@ -62,6 +63,7 @@ it("groups new content in the tabs' order, then assignments, then calendar", asy
   ]);
   for (const section of [
     'setupNewContent',
+    'schedule',
     'assignments',
     'calendarsAndReminders',
     'setupCaption',
@@ -89,6 +91,8 @@ it('turns on the chosen notifications once allowed, and closes', async () => {
     assignments: true,
     grades: false,
     deadlineChanges: true,
+    groupSubmissions: true,
+    classReminders: true,
     deadlineReminders: true,
   });
   expect(setSyncEnabled).not.toHaveBeenCalled();
@@ -113,6 +117,7 @@ it("doesn't ask with every notification off, and turns calendar and Reminders sy
     'notifyNewNotices',
     'notifyNewAssignments',
     'notifyNewFiles',
+    'notifyClassReminders',
     'notifyDeadlineReminders',
     'notifyGrades',
   ] as const) {

@@ -32,6 +32,9 @@ export interface NotificationSettings {
   deadlineReminders: boolean;
   /** Minutes before an assignment's deadline to remind the user. */
   deadlineReminderOffset: number;
+  classReminders: boolean;
+  /** Minutes before a class starts to remind the user. */
+  classReminderOffset: number;
 }
 export interface SettingsState {
   assignmentCalendarSync: boolean;
