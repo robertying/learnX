@@ -71,8 +71,17 @@ export interface FormItemRowProps extends FormRowProps {
   detailTint?: 'accent' | 'red' | 'orange';
 }
 
-/** A row that only shows something. */
-export type FormTextProps = FormItemRowProps;
+/** A borderless button at the end of a row, as Log In on a status row. */
+export interface FormRowAction {
+  title: string;
+  onPress: () => void;
+  testID?: string;
+}
+
+/** A row that only shows something, with an optional button at its end. */
+export interface FormTextProps extends FormItemRowProps {
+  action?: FormRowAction;
+}
 
 export interface FormLinkProps extends FormItemRowProps {
   /** Opens another page. */

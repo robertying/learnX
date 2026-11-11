@@ -1,10 +1,10 @@
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import dayjs from 'dayjs';
 import SystemIcon from 'components/SystemIcon';
 import { requestRelogin, useAuthStore } from 'data/auth';
 import { t } from 'helpers/i18n';
-import { Caption } from 'components/Text';
-import { FormButton, FormSection, FormText } from 'components/Form';
+import { Caption, Text } from 'components/Text';
+import { FormSection, FormText } from 'components/Form';
 import TextButton from 'components/TextButton';
 import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
@@ -47,14 +47,13 @@ const useSyncStatus = (updatedAt?: number) => {
 };
 
 /**
- * A line at the top of a list (its header, so it scrolls with the list)
- * while there's no session; see `useSyncStatus`.
+ * One row at the top of a list (its header, so it scrolls with the list)
+ * while there's no session: the status with how old the data is under it,
+ * and Log In at the end after a rejected login. Today shows the same row in
+ * its Form (`SyncStatusSection`).
  */
 const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   const theme = useTheme();
-  // At large font sizes the button gets its own line, so the message isn't
-  // squeezed into a few characters.
-  const stacked = useWindowDimensions().fontScale >= 1.5;
   const sync = useSyncStatus(updatedAt);
 
   if (!sync) {
@@ -65,36 +64,23 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
   return (
     <View
       testID="sync-status"
-      style={[
-        styles.root,
-        stacked && styles.stacked,
-        { backgroundColor: theme.colors.surfaceVariant },
-      ]}
+      style={[styles.root, { backgroundColor: theme.colors.surfaceVariant }]}
       accessibilityLiveRegion="polite"
     >
       <SystemIcon
         name={icon}
-        size={16}
-        color={theme.colors.onSurfaceVariant}
+        size={20}
+        color={theme.colors.primary}
         style={styles.icon}
       />
-      <Caption
-        style={[styles.text, { color: theme.colors.onSurfaceVariant }]}
-        numberOfLines={2}
-      >
-        {updated ? `${status} · ${updated}` : status}
-      </Caption>
+      <View style={styles.text}>
+        <Text variant="subheadline">{status}</Text>
+        {updated ? <Caption>{updated}</Caption> : null}
+      </View>
       {canLogIn && (
-        <View style={stacked ? styles.stackedButton : styles.button}>
-          <TextButton
-            testID="sync-status-relogin"
-            size="small"
-            bold
-            onPress={requestRelogin}
-          >
-            {t('syncStatusLogInAgain')}
-          </TextButton>
-        </View>
+        <TextButton testID="sync-status-relogin" bold onPress={requestRelogin}>
+          {t('syncStatusLogIn')}
+        </TextButton>
       )}
     </View>
   );
@@ -105,29 +91,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   icon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   text: {
     flex: 1,
-  },
-  button: {
-    marginLeft: 8,
-  },
-  stacked: {
-    flexWrap: 'wrap',
-  },
-  stackedButton: {
-    flexBasis: '100%',
-    alignItems: 'flex-start',
-    paddingLeft: 24,
+    marginRight: 8,
   },
 });
 
 /**
- * The same status as the first section of a `Form`, which scrolls under the
+ * The same row as the first section of a `Form`, which scrolls under the
  * header like the rest of the Form (Today).
  */
 export const SyncStatusSection: React.FC<SyncStatusProps> = ({ updatedAt }) => {
@@ -144,14 +120,16 @@ export const SyncStatusSection: React.FC<SyncStatusProps> = ({ updatedAt }) => {
         icon={sync.icon}
         title={sync.status}
         subtitle={sync.updated ?? undefined}
+        action={
+          sync.canLogIn
+            ? {
+                title: t('syncStatusLogIn'),
+                onPress: requestRelogin,
+                testID: 'sync-status-relogin',
+              }
+            : undefined
+        }
       />
-      {sync.canLogIn && (
-        <FormButton
-          testID="sync-status-relogin"
-          title={t('syncStatusLogInAgain')}
-          onPress={requestRelogin}
-        />
-      )}
     </FormSection>
   );
 };

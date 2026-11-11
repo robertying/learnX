@@ -23,6 +23,7 @@ import {
 } from '@expo/ui/swift-ui';
 import {
   accessibilityLabel,
+  buttonStyle,
   accessibilityValue,
   disabled,
   font,
@@ -305,15 +306,32 @@ const ItemRow: React.FC<
   );
 };
 
+// Borderless, so that only the button takes taps and not the whole row.
+const actionModifiers = [buttonStyle('borderless')];
+
 export const FormText: React.FC<FormTextProps> = ({
   testID,
   detailTint,
+  action,
   ...row
 }) => {
   const { subtitle, detail } = useStackedDetail(row.subtitle, row.detail);
-  return row.done || row.progress !== undefined ? (
+  return row.done || row.progress !== undefined || action ? (
     <VStack testID={testID}>
-      <ItemRow {...row} detailTint={detailTint} />
+      <ItemRow
+        {...row}
+        detailTint={detailTint}
+        trailing={
+          action ? (
+            <Button
+              label={action.title}
+              onPress={action.onPress}
+              testID={action.testID}
+              modifiers={actionModifiers}
+            />
+          ) : undefined
+        }
+      />
     </VStack>
   ) : (
     <LabeledContent

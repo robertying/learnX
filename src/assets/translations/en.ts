@@ -214,7 +214,7 @@ export default {
   syncStatusLoginFailed: "Couldn't log in",
   syncStatusReconnecting: 'Reconnecting…',
   syncStatusUpdated: 'updated {time}',
-  syncStatusLogInAgain: 'Log In Again',
+  syncStatusLogIn: 'Log In',
   refreshFailed: "Couldn't refresh. Showing saved data.",
   archive: 'Archive',
   restore: 'Unarchive',
