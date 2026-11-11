@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import WebView from 'react-native-webview';
@@ -18,6 +18,7 @@ import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import StatusView from 'components/StatusView';
+import { hasGlassHeader } from 'navigation/options';
 import {
   Form,
   FormButton,
@@ -80,6 +81,15 @@ const FileDetailContent: React.FC<{
 
   const canRender = !!path && canPreviewInline(file.fileType);
 
+  // From iOS 26 the preview scrolls under the header's glass, which needs a
+  // transparent header. The file's info is a Form, which sets the header
+  // itself and resets it when it goes, so this sets it again after that.
+  useLayoutEffect(() => {
+    if (hasGlassHeader && !showInfo) {
+      navigation.setOptions({ headerTransparent: true });
+    }
+  }, [navigation, showInfo]);
+
   const handleShowInfo = useCallback(() => {
     setShowInfo(shown => !shown);
   }, []);
@@ -127,6 +137,7 @@ const FileDetailContent: React.FC<{
             }}
             originWhitelist={['*']}
             decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+            contentInsetAdjustmentBehavior="automatic"
           />
         )
       ) : (

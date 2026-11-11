@@ -67,16 +67,29 @@ export const tabRootOptions: NativeStackNavigationOptions =
     ? { headerLargeTitleEnabled: true }
     : {};
 
+/** From iOS 26 content scrolls under the header's glass; the Mac keeps an opaque header. */
+export const hasGlassHeader =
+  DeviceInfo.hasLiquidGlass() && !DeviceInfo.isMac();
+
+/**
+ * A screen whose scroll view insets itself from the header
+ * (`contentInsetAdjustmentBehavior="automatic"`, as lists and Forms do), so
+ * that it scrolls under the glass: the header has to be transparent for the
+ * content to be laid out under it at all.
+ */
+export const glassHeaderOptions: NativeStackNavigationOptions = hasGlassHeader
+  ? { headerTransparent: true }
+  : {};
+
 /**
  * Every stack's screens: from iOS 26 the back button is the chevron alone,
  * as in Settings and Files. A back button with the previous screen's title
  * fades out and in again once a push has finished (iOS rebuilds it), which
  * the chevron alone doesn't. The Mac keeps the title.
  */
-export const stackScreenOptions: NativeStackNavigationOptions =
-  DeviceInfo.hasLiquidGlass() && !DeviceInfo.isMac()
-    ? { headerBackButtonDisplayMode: 'minimal' }
-    : {};
+export const stackScreenOptions: NativeStackNavigationOptions = hasGlassHeader
+  ? { headerBackButtonDisplayMode: 'minimal' }
+  : {};
 
 // Detail screens set their own title from the item they show.
 export const getDetailScreenOptions = (title = '', subtitle?: string) =>
