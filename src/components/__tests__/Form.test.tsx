@@ -360,7 +360,6 @@ describe('Form (iOS details)', () => {
     );
     expect(navigation.setOptions).toHaveBeenLastCalledWith({
       headerShadowVisible: false,
-      headerTransparent: false,
       headerStyle: {
         backgroundColor: PlatformColor('systemGroupedBackground'),
       },
@@ -369,12 +368,11 @@ describe('Form (iOS details)', () => {
     await screen.unmount();
     expect(navigation.setOptions).toHaveBeenLastCalledWith({
       headerShadowVisible: undefined,
-      headerTransparent: undefined,
       headerStyle: undefined,
     });
   });
 
-  it('lets the Form scroll under the header from iOS 26', async () => {
+  it('leaves the iOS 26 header to the stack, where it is glass', async () => {
     jest.spyOn(DeviceInfo, 'hasLiquidGlass').mockReturnValue(true);
     const navigation = { setOptions: jest.fn() };
     await render(
@@ -386,13 +384,7 @@ describe('Form (iOS details)', () => {
         </Form>
       </NavigationContext.Provider>,
     );
-    // A transparent header lets the Form lay out under it; a clear
-    // background alone leaves it below a white strip.
-    expect(navigation.setOptions).toHaveBeenLastCalledWith({
-      headerShadowVisible: false,
-      headerTransparent: true,
-      headerStyle: { backgroundColor: 'transparent' },
-    });
+    expect(navigation.setOptions).not.toHaveBeenCalled();
   });
 
   it('shows an overline above the title and its subtitle', async () => {

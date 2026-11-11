@@ -246,7 +246,8 @@ const CourseDetailContent: React.FC<{
   }, [navigation]);
 
   return (
-    <SafeArea>
+    // The tab strip stays below the header; the lists under it scroll.
+    <SafeArea top>
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}

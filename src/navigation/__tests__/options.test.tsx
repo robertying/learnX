@@ -133,7 +133,7 @@ it('gives tab roots a large title on iPhone and iPad from iOS 26 only', () => {
   expect(tabRootOptionsOn(true, true)).toEqual({});
 });
 
-it('shows the back chevron alone on iPhone and iPad from iOS 26 only', () => {
+it('gives iPhone and iPad from iOS 26 a glass header with the back chevron alone', () => {
   const stackOptionsOn = (ios26: boolean, mac: boolean) => {
     let options: object = {};
     jest.isolateModules(() => {
@@ -145,6 +145,7 @@ it('shows the back chevron alone on iPhone and iPad from iOS 26 only', () => {
     return options;
   };
   expect(stackOptionsOn(true, false)).toEqual({
+    headerTransparent: true,
     headerBackButtonDisplayMode: 'minimal',
   });
   expect(stackOptionsOn(false, false)).toEqual({});

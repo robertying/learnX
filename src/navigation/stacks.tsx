@@ -52,7 +52,6 @@ import { useCredentialsStore } from 'data/credentials';
 import {
   getItemDetailOptions,
   getModalScreenOptions,
-  glassHeaderOptions,
   mockNetworkTitle,
   stackScreenOptions,
   tabRootOptions,
@@ -165,7 +164,7 @@ export const renderSettingDetails = () => (
     <SettingDetails.Screen
       name="Changelog"
       component={Changelog}
-      options={{ ...getTitleOptions(t('changelog')), ...glassHeaderOptions }}
+      options={getTitleOptions(t('changelog'))}
     />
     <SettingDetails.Screen
       name="MockNetwork"
@@ -327,7 +326,7 @@ export const WhatsNewStack = () => (
     <WhatsNewNavigator.Screen
       name="Changelog"
       component={Changelog}
-      options={{ ...getTitleOptions(t('changelog')), ...glassHeaderOptions }}
+      options={getTitleOptions(t('changelog'))}
     />
   </WhatsNewNavigator.Navigator>
 );
@@ -340,10 +339,7 @@ export const CourseXStack = () => (
     <CourseXNavigator.Screen
       name="CourseX"
       component={CourseX}
-      options={props => ({
-        ...getModalScreenOptions(t('courseX'))(props),
-        ...glassHeaderOptions,
-      })}
+      options={getModalScreenOptions(t('courseX'))}
     />
   </CourseXNavigator.Navigator>
 );

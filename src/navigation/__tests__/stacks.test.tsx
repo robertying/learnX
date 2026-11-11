@@ -15,6 +15,7 @@ import {
   TodayStack,
   WhatsNewStack,
 } from 'navigation/stacks';
+import { stackScreenOptions } from 'navigation/options';
 import { navigatorConfig, optionsArgs } from '../../../jest/mocks/navigator';
 
 jest.mock('@react-navigation/native-stack', () => ({
@@ -138,6 +139,33 @@ it('titles the screens, and every screen has a component and the error layout', 
   ).toBe('Network Emulation');
   // Detail screens are titled from the cached item they show (none here).
   expect(today.screens[2].groupOptions?.title).toBe('');
+});
+
+it('leaves the glass header to every stack, with no screen of its own', async () => {
+  // A screen setting its own header background or transparency would lose
+  // the iOS 26 glass, or put content that doesn't scroll under the header.
+  for (const Stack of [
+    NoticeStack,
+    AssignmentStack,
+    FileStack,
+    CourseStack,
+    SettingStack,
+    TodayStack,
+    LoginStack,
+    WhatsNewStack,
+    CourseXStack,
+    SearchStack,
+    AssignmentSubmissionStack,
+  ]) {
+    const config = await configOf(Stack);
+    expect(config.screenOptions).toEqual(stackScreenOptions);
+    for (const s of config.screens) {
+      for (const options of [s.options ?? {}, s.groupOptions ?? {}]) {
+        expect(options).not.toHaveProperty('headerTransparent');
+        expect(options).not.toHaveProperty('headerStyle');
+      }
+    }
+  }
 });
 
 it('opens the modal stacks with a close button', async () => {
