@@ -17,6 +17,11 @@
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
 #   android-phone   .maestro/store/android_phone.yaml   android/phone/
 #   android-tablet  .maestro/store/android_tablet.yaml  android/tablet/
+#   mac             ios/learnXUITests/StoreScreenshots.swift  macos/windows/
+#
+# mac runs the Mac app's XCUITest (scripts/e2e-mac.sh: it takes over the
+# pointer and keyboard, so start it by hand and leave the Mac alone) and saves
+# the window shots, to be composed onto the store background.
 #
 # device: the simulator UDID or emulator serial. Defaults to MAESTRO_DEVICE,
 # else the one booted simulator (iOS) or connected emulator (Android).
@@ -40,7 +45,7 @@ target="${1:-}"
 device="${2:-${MAESTRO_DEVICE:-}}"
 
 usage() {
-  echo "usage: $0 iphone|duo-folded|duo-half-open|duo-open|ipad|android-phone|android-tablet [device]" >&2
+  echo "usage: $0 mac|iphone|duo-folded|duo-half-open|duo-open|ipad|android-phone|android-tablet [device]" >&2
   exit 1
 }
 
@@ -55,6 +60,7 @@ duo-half-open)
   ;;
 duo-open) platform=ios flow=iphone folder=ios/iphone-duo suffix=-open posture=flat ;;
 ipad) platform=ios flow=ipad folder=ios/ipad ;;
+mac) platform=mac folder=macos/windows ;;
 android-phone)
   platform=android flow=android_phone folder=android/phone
   size="${STORE_ANDROID_SIZE:-1080x1920}" density="${STORE_ANDROID_DENSITY:-420}"
@@ -71,6 +77,30 @@ cd "$(dirname "$0")/.."
 out_root="${STORE_OUT_DIR:-build/store-screenshots}"
 mkdir -p "$out_root/$folder"
 out="$(cd "$out_root/$folder" && pwd)"
+
+if [ "$platform" = mac ]; then
+  status=0
+  scripts/e2e-mac.sh -only-testing:learnXUITests/StoreScreenshots || status=$?
+  # The shots are the test's attachments; name each file after its
+  # attachment ("01-notices_0_<uuid>.png" -> 01-notices.png).
+  export_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store-mac.XXXXXX")"
+  xcrun xcresulttool export attachments --path build/e2e/mac.xcresult \
+    --output-path "$export_dir"
+  node -e '
+    const fs = require("fs");
+    const [dir, out] = process.argv.slice(1);
+    const tests = JSON.parse(fs.readFileSync(`${dir}/manifest.json`, "utf8"));
+    for (const test of tests) {
+      for (const a of test.attachments) {
+        const name = a.suggestedHumanReadableName.split("_")[0];
+        fs.copyFileSync(`${dir}/${a.exportedFileName}`, `${out}/${name}.png`);
+      }
+    }
+  ' "$export_dir" "$out"
+  rm -rf "$export_dir"
+  echo "Screenshots: $out"
+  exit "$status"
+fi
 
 if [ -z "$device" ]; then
   if [ "$platform" = ios ]; then

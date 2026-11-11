@@ -36,6 +36,13 @@ result="build/e2e/mac.xcresult"
 rm -rf "$result"
 mkdir -p build/e2e
 
+# The store screenshots (StoreScreenshots, scripts/store-screenshots.sh mac)
+# only run when asked for with -only-testing.
+case " $* " in
+*" -only-testing"*) ;;
+*) set -- -skip-testing:learnXUITests/StoreScreenshots "$@" ;;
+esac
+
 # TEST_RUNNER_-prefixed variables reach the test runner without the prefix.
 TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
   xcodebuild test \
