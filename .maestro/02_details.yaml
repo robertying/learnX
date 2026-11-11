@@ -3,7 +3,7 @@ name: Open a notice, an assignment and a file
 ---
 - runFlow: subflows/login.yaml
 
-- tapOn: '.*请按照助教的安排交作业.*'
+- tapOn: '.*(${MOCK_NOTICE}).*'
 - extendedWaitUntil:
     visible:
       id: notice-detail
@@ -11,28 +11,28 @@ name: Open a notice, an assignment and a file
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: 'Filter|筛选'
+      LIST: '${T_filter}'
 
 - runFlow:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
-- tapOn: '.*大作业1.*'
+- tapOn: '.*(${MOCK_ASSIGNMENT}).*'
 - extendedWaitUntil:
     visible:
       id: assignment-detail
     timeout: 10000
-- assertVisible: '.*附件1.*'
+- assertVisible: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: 'Filter|筛选'
+      LIST: '${T_filter}'
 
 - runFlow:
     file: subflows/tab.yaml
     env:
-      TAB: 'tab-files|doc(ument)?\.fill'
-- tapOn: '.*深度学习框架.*'
+      TAB: 'tab-files|folder\.fill'
+- tapOn: '.*(${MOCK_FILE}).*'
 # The screen shows right away; the file itself downloads in the background.
 - extendedWaitUntil:
     visible:
@@ -41,4 +41,4 @@ name: Open a notice, an assignment and a file
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: 'Filter|筛选'
+      LIST: '${T_filter}'

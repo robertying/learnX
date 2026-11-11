@@ -5,6 +5,7 @@ appId: ${APP_ID}
 - runFlow:
     file: tab.yaml
     env:
-      TAB: 'tab-today|sun\.max\.fill'
+      TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
 # The iOS header button only exposes its label; Android's has the same one.
-- tapOn: 'Settings|设置'
+# iOS reads a badge after the label ('Settings, New').
+- tapOn: '(${T_settings})(, .*)?'
