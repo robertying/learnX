@@ -262,6 +262,8 @@ use_emulator() {
     booted="android $serial"
   fi
   device="$serial"
+  # Expanded on the device, not here.
+  # shellcheck disable=SC2016
   adb -s "$serial" wait-for-device shell \
     'while [ "$(getprop sys.boot_completed)" != 1 ]; do sleep 1; done' ||
     return 1
