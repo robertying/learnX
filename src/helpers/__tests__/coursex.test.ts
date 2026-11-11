@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { GraphQLClient } from 'graphql-request';
+import { useCredentialsStore } from 'data/credentials';
 import type { Course } from 'data/types/state';
 import { uploadCourses } from 'helpers/coursex';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
@@ -13,6 +14,8 @@ jest.mock('graphql-request', () => {
   };
 });
 jest.mock('helpers/env', () => ({
+  __esModule: true,
+  default: { DUMMY_USERNAME: 'mock-user' },
   getCourseXRefreshToken: () => 'refresh-token',
 }));
 
@@ -35,6 +38,22 @@ const course: Course = {
 
 beforeEach(() => setServerWritesAllowed(true));
 afterEach(() => setServerWritesAllowed(false));
+
+it("never uploads the mock account's courses", async () => {
+  useCredentialsStore.setState({
+    credentials: {
+      username: 'mock-user',
+      password: 'p',
+      fingerPrint: '',
+      fingerGenPrint: '',
+      fingerGenPrint3: '',
+    },
+  });
+  await uploadCourses([course]);
+  useCredentialsStore.setState({ credentials: null });
+  expect(post).not.toHaveBeenCalled();
+  expect(request).not.toHaveBeenCalled();
+});
 
 it('is blocked in debug builds until server writes are allowed', async () => {
   setServerWritesAllowed(false);

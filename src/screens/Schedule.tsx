@@ -51,10 +51,7 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
     const results = await Promise.all([thisWeek.refetch(), nextWeek.refetch()]);
     return { isError: results.some(r => r.isError) };
   };
-  const pullToRefresh = usePullToRefresh(
-    handleRefresh,
-    thisWeek.fetching || nextWeek.fetching,
-  );
+  const pullToRefresh = usePullToRefresh(handleRefresh);
 
   const note =
     thisWeek.source === 'courses' || nextWeek.source === 'courses'

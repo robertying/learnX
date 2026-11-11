@@ -90,15 +90,6 @@ it("joins once confirmed, sharing this semester's courses", async () => {
   ).toBeTruthy();
 });
 
-it('joins without uploading anything for the mock account', async () => {
-  signIn('mock-user');
-  await renderScreen();
-  await toggle(true);
-  await join();
-  expect(getSettings().courseInformationSharing).toBe(true);
-  expect(uploadCourses).not.toHaveBeenCalled();
-});
-
 it('uploads nothing before a semester, and keeps joined if the upload fails', async () => {
   resetUserData();
   await renderScreen();

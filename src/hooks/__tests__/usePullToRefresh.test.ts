@@ -17,16 +17,8 @@ afterEach(() => {
   useAuthStore.setState(initialAuth);
 });
 
-const render = (
-  refresh: () => Promise<{ isError: boolean } | void>,
-  fetching = false,
-) =>
-  renderHook(
-    ({ fetching: f }: { fetching: boolean }) => usePullToRefresh(refresh, f),
-    {
-      initialProps: { fetching },
-    },
-  );
+const render = (refresh: () => Promise<{ isError: boolean } | void>) =>
+  renderHook(() => usePullToRefresh(refresh));
 
 it('refetches while logged in, saying so when it fails', async () => {
   useAuthStore.setState({ loggedIn: true });
@@ -43,11 +35,35 @@ it('refetches while logged in, saying so when it fails', async () => {
   expect(login).not.toHaveBeenCalled();
 });
 
-it('spins while the list fetches', async () => {
-  const hook = await render(jest.fn(), true);
-  expect(hook.result.current.refreshing).toBe(true);
-  await hook.rerender({ fetching: false });
-  expect(hook.result.current.refreshing).toBe(false);
+it('spins only while a refresh the user started runs', async () => {
+  useAuthStore.setState({ loggedIn: true });
+  let finish: (value: { isError: boolean }) => void = () => {};
+  const refresh = jest.fn(
+    () =>
+      new Promise<{ isError: boolean }>(resolve => {
+        finish = resolve;
+      }),
+  );
+  const { result } = await render(refresh);
+  expect(result.current.refreshing).toBe(false);
+
+  let pull: Promise<void> = Promise.resolve();
+  await act(async () => {
+    pull = result.current.onRefresh();
+  });
+  expect(result.current.refreshing).toBe(true);
+  await act(async () => {
+    finish({ isError: false });
+    await pull;
+  });
+  expect(result.current.refreshing).toBe(false);
+});
+
+it('stops spinning when the refresh throws', async () => {
+  useAuthStore.setState({ loggedIn: true });
+  const { result } = await render(() => Promise.reject(new Error('boom')));
+  await act(() => expect(result.current.onRefresh()).rejects.toThrow('boom'));
+  expect(result.current.refreshing).toBe(false);
 });
 
 it('logs in again without a session, spinning until the login ends', async () => {

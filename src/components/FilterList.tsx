@@ -12,7 +12,6 @@ import { getSettings, setSetting, useSettings } from 'data/settings';
 import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
-import useInitialRefreshHidden from 'hooks/useInitialRefreshHidden';
 import useListSelection from 'hooks/useListSelection';
 import { RootStackParams } from 'screens/types';
 import Styles from 'constants/Styles';
@@ -216,8 +215,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     onCourseX: handleNavigateCourseX,
   });
 
-  const refreshControlRefreshing = useInitialRefreshHidden(refreshing);
-
   const lastOpenedIdRef = useRef<string | undefined>(undefined);
 
   // Rows get one actions object that never changes, and call the latest
@@ -313,7 +310,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     refreshControl: (
       <RefreshControl
         enabled={!selectionMode && !reorderMode}
-        refreshing={refreshControlRefreshing}
+        refreshing={refreshing}
         onRefresh={onRefresh}
       />
     ),

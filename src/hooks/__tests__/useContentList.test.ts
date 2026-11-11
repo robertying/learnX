@@ -84,10 +84,10 @@ it('refreshes once the courses are known and on each sign-in', async () => {
   expect(q.refetch).toHaveBeenCalledTimes(2);
 });
 
-it('shows the loading state only for the first fetch', async () => {
+it('shows the loading state, not the pull spinner, for a fetch the app starts', async () => {
   const { result } = await render(query({ isPending: true, isFetching: true }));
   expect(result.current.listProps.loading).toBe(true);
-  expect(result.current.listProps.refreshing).toBe(true);
+  expect(result.current.listProps.refreshing).toBe(false);
 });
 
 it('opens a tapped item in the detail view', async () => {
