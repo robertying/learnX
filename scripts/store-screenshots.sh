@@ -8,6 +8,12 @@
 # Targets (each runs one flow; the folder is under STORE_OUT_DIR):
 #   iphone          .maestro/store/iphone.yaml       ios/iphone/
 #   duo-folded      .maestro/store/iphone.yaml       ios/iphone-duo/ (-folded)
+#   duo-half-open   .maestro/store/iphone.yaml       ios/iphone-duo/ (-half-open)
+#   duo-open        .maestro/store/iphone.yaml       ios/iphone-duo/ (-open)
+#
+# duo-half-open and duo-open set each screen up on the closed Duo (nothing
+# can tap on its inner display yet) and open the hinge for each shot, so they
+# need the patched Maestro (scripts/maestro/build.sh) first on PATH.
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
 #   android-phone   .maestro/store/android_phone.yaml   android/phone/
 #   android-tablet  .maestro/store/android_tablet.yaml  android/tablet/
@@ -34,14 +40,20 @@ target="${1:-}"
 device="${2:-${MAESTRO_DEVICE:-}}"
 
 usage() {
-  echo "usage: $0 iphone|duo-folded|ipad|android-phone|android-tablet [device]" >&2
+  echo "usage: $0 iphone|duo-folded|duo-half-open|duo-open|ipad|android-phone|android-tablet [device]" >&2
   exit 1
 }
 
 suffix=""
+posture=""
 case "$target" in
 iphone) platform=ios flow=iphone folder=ios/iphone ;;
 duo-folded) platform=ios flow=iphone folder=ios/iphone-duo suffix=-folded ;;
+duo-half-open)
+  platform=ios flow=iphone folder=ios/iphone-duo suffix=-half-open
+  posture=halfFold
+  ;;
+duo-open) platform=ios flow=iphone folder=ios/iphone-duo suffix=-open posture=flat ;;
 ipad) platform=ios flow=ipad folder=ios/ipad ;;
 android-phone)
   platform=android flow=android_phone folder=android/phone
@@ -78,6 +90,7 @@ android_app_id="io.robertying.learnx"
 restore_locales=""
 restore_appearance=""
 
+# shellcheck disable=SC2329 # run by the EXIT trap
 cleanup() {
   if [ "$platform" = ios ]; then
     xcrun simctl status_bar "$device" clear || true
@@ -124,12 +137,26 @@ run_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store.XXXXXX")"
 copy_shots() {
   find "$run_dir" -path '*takeScreenshot*' -name '*.png' -exec cp {} "$out"/ \;
 }
+flows=.maestro
+if [ -n "$posture" ]; then
+  # A copy of the flows whose shots open the hinge (see
+  # .maestro/store/subflows/screenshot_posture.yaml).
+  flows="$run_dir/flows"
+  cp -R .maestro "$flows"
+  cp .maestro/store/subflows/screenshot_posture.yaml "$flows/subflows/screenshot.yaml"
+fi
 status=0
 MAESTRO_DEVICE="$device" scripts/e2e.sh "$platform" \
   --test-output-dir "$run_dir" \
   -e STORE_OUT=store \
   -e STORE_SUFFIX="$suffix" \
-  ".maestro/store/$flow.yaml" || status=$?
+  -e STORE_POSTURE="$posture" \
+  "$flows/store/$flow.yaml" || status=$?
+if [ -n "$posture" ]; then
+  # Leave the Duo closed, as the next run expects.
+  MAESTRO_DEVICE="$device" scripts/e2e.sh ios -e POSTURE=closed \
+    --test-output-dir "$run_dir/close" .maestro/subflows/fold.yaml || true
+fi
 copy_shots
 if [ "$flow" = ipad ]; then
   # Maestro saves a landscape iPad shot as portrait pixels with an EXIF
