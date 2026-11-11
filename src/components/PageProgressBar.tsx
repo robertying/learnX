@@ -25,6 +25,8 @@ const PageProgressBar: React.FC<{ progress: number }> = ({ progress }) =>
 const styles = StyleSheet.create({
   overlay: {
     position: 'absolute',
+    // Its own height, not the screen's (SafeAreaView flexes by default).
+    flex: 0,
     top: 0,
     left: 0,
     right: 0,

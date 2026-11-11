@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Picker, Text } from '@expo/ui/swift-ui';
-import { pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
+import { glassEffect, pickerStyle, tag } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
 import type { SegmentedTabsProps } from './SegmentedTabs.shared';
 import ThemedHost from 'components/ThemedHost';
@@ -17,17 +17,26 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
   selectedIndex,
   onSelect,
   accessibilityLabel,
+  floating,
 }) => {
   const theme = useTheme();
 
   return (
-    <View style={[styles.bar, { backgroundColor: theme.colors.surface }]}>
+    <View
+      style={[
+        styles.bar,
+        floating ? null : { backgroundColor: theme.colors.surface },
+      ]}
+    >
       <ThemedHost matchContents={{ vertical: true }} style={styles.host}>
         <Picker
           label={accessibilityLabel}
           selection={selectedIndex}
           onSelectionChange={onSelect}
-          modifiers={[pickerStyle('segmented')]}
+          modifiers={[
+            pickerStyle('segmented'),
+            ...(floating ? floatingModifiers : []),
+          ]}
         >
           {titles.map((title, i) => (
             <Text key={title} modifiers={[tag(i)]}>
@@ -39,6 +48,10 @@ const SegmentedTabs: React.FC<SegmentedTabsProps> = ({
     </View>
   );
 };
+
+const floatingModifiers = [
+  glassEffect({ glass: { variant: 'regular' }, shape: 'capsule' }),
+];
 
 const styles = StyleSheet.create({
   bar: {
