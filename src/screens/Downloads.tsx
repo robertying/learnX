@@ -15,12 +15,12 @@ import { toast } from 'components/Toast';
 import {
   Form,
   FormButton,
+  FormScreen,
   FormSection,
   FormText,
   FormToggle,
 } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
-import SafeArea from 'components/SafeArea';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
@@ -108,7 +108,7 @@ const Downloads: React.FC<Props> = () => {
     );
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         {Platform.OS === 'android' && (
           <FormSection>
@@ -193,7 +193,7 @@ const Downloads: React.FC<Props> = () => {
           />
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

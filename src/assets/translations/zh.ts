@@ -84,7 +84,7 @@ const zh: typeof en = {
   courseScheduleSyncRepetitiveError:
     '课表同步失败：请确保已连接校园网后重试；如果仍然失败，请缩短同步的日期范围',
   courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表',
-  configureCalendarAndReminder: '打开系统设置',
+  openSystemSettings: '打开系统设置',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
   deleteSyncedCalendarsAndRemindersConfirmation:
     '确定删除 learnX 创建的日历和提醒事项列表？此操作不可撤销。',
@@ -95,6 +95,10 @@ const zh: typeof en = {
     '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX',
   deleteFailed: '删除失败：',
   exportSyncedCalendars: '导出已同步的日程（.ics）',
+  notificationAccessCaption: '如果 learnX 无法发送通知，请在系统设置中允许。',
+  calendarAccessCaption: '如果 learnX 无法访问日历，请在系统设置中允许。',
+  calendarAndReminderAccessCaption:
+    '如果 learnX 无法访问日历或提醒事项，请在系统设置中允许。',
   exportSyncedCalendarsDescription:
     '将已同步到日历的课表与作业导出为 .ics 文件，可导入其他日历应用；不包含提醒事项。',
   calendarExportSavedToDownloads: '已将 learnX.ics 导出到“下载”文件夹',
@@ -282,7 +286,6 @@ const zh: typeof en = {
   exactRemindersCaption:
     '手机空闲时，Android 可能会推迟提醒。允许 learnX 设置闹钟和提醒，提醒才能准时送达。',
   notificationPermissionDenied: '系统设置中已关闭 learnX 的通知。',
-  configureNotifications: '打开系统设置',
   notificationArchiveAll: '全部归档',
   notificationRemindLater: '稍后提醒',
   // dayjs formats: text in [] is printed as is

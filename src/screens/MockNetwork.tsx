@@ -7,8 +7,13 @@ import {
   setMockNetworkConfig,
   subscribeMockNetworkConfig,
 } from 'data/mockSource';
-import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
-import SafeArea from 'components/SafeArea';
+import {
+  Form,
+  FormButton,
+  FormScreen,
+  FormSection,
+  FormToggle,
+} from 'components/Form';
 import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
 
@@ -40,7 +45,7 @@ const MockNetwork: React.FC = () => {
   };
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         <FormSection title="Latency">
           {latencies.map(([value, label]) => (
@@ -86,7 +91,7 @@ const MockNetwork: React.FC = () => {
           />
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

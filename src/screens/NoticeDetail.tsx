@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import AutoHeightWebView from 'components/AutoHeightWebView';
-import SafeArea from 'components/SafeArea';
 import { NoticeDetailParamList } from 'screens/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
@@ -16,6 +15,7 @@ import { useMinute } from 'hooks/useClock';
 import {
   Form,
   FormFile,
+  FormScreen,
   FormSection,
   FormTitle,
   FormView,
@@ -100,7 +100,7 @@ const NoticeDetailContent: React.FC<{
     .join('\n');
 
   return (
-    <SafeArea testID="notice-detail" collapsable={false}>
+    <FormScreen testID="notice-detail" collapsable={false}>
       <Form>
         <FormSection>
           <FormTitle title={title} subtitle={subtitle} />
@@ -121,7 +121,7 @@ const NoticeDetailContent: React.FC<{
           </FormView>
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

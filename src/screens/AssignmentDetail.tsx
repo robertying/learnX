@@ -7,7 +7,6 @@ import {
   RemoteFile,
 } from '@robertying/thu-learn-lib';
 import AutoHeightWebView from 'components/AutoHeightWebView';
-import SafeArea from 'components/SafeArea';
 import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { headerButtons } from 'navigation/headerButtons';
@@ -35,11 +34,12 @@ import {
   FormFile,
   FormLink,
   FormParagraph,
+  type FormRowPosition,
+  FormScreen,
   FormSection,
   FormText,
   FormTitle,
   FormView,
-  type FormRowPosition,
 } from 'components/Form';
 import { useTheme, webContentColors } from 'theme';
 
@@ -190,7 +190,7 @@ const AssignmentDetailContent: React.FC<{
   const answerText = removeTags(answerContent);
 
   return (
-    <SafeArea testID="assignment-detail" collapsable={false}>
+    <FormScreen testID="assignment-detail" collapsable={false}>
       <Form>
         <FormSection>
           <FormTitle
@@ -362,7 +362,7 @@ const AssignmentDetailContent: React.FC<{
           </FormView>
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

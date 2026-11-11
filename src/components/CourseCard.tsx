@@ -79,7 +79,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
     <View style={styles.root}>
       <CardGutter />
       <View style={styles.names}>
-        <Headline>{name}</Headline>
+        <Headline style={styles.name}>{name}</Headline>
         <Caption variant="subheadline" numberOfLines={1}>
           {teacherName}
         </Caption>
@@ -102,6 +102,11 @@ const styles = StyleSheet.create({
   },
   names: {
     flex: 1,
+  },
+  // Regular weight, as the other lists' titles (`CardRow`): a course has
+  // nothing unread for weight to stand for.
+  name: {
+    fontWeight: '400',
   },
   counts: {
     flexDirection: 'row',

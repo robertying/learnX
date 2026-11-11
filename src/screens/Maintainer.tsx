@@ -1,14 +1,19 @@
 import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import SafeArea from 'components/SafeArea';
-import { Form, FormButton, FormParagraph, FormSection } from 'components/Form';
+import {
+  Form,
+  FormButton,
+  FormParagraph,
+  FormScreen,
+  FormSection,
+} from 'components/Form';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Maintainer'>;
 
 const Maintainer: React.FC<Props> = () => (
-  <SafeArea>
+  <FormScreen>
     <Form>
       <FormSection>
         <FormParagraph text={t('maintainerDescription')} />
@@ -19,7 +24,7 @@ const Maintainer: React.FC<Props> = () => (
         />
       </FormSection>
     </Form>
-  </SafeArea>
+  </FormScreen>
 );
 
 export default Maintainer;

@@ -1,8 +1,13 @@
 import { useLayoutEffect } from 'react';
 import dayjs from 'dayjs';
 import { classDetails, itemRow } from 'components/ClassRow';
-import { Form, FormLink, FormSection, FormText } from 'components/Form';
-import SafeArea from 'components/SafeArea';
+import {
+  Form,
+  FormLink,
+  FormScreen,
+  FormSection,
+  FormText,
+} from 'components/Form';
 import { SyncStatusSection } from 'components/SyncStatus';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -173,7 +178,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
           : t('todayClassCount', { count: classes.length });
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form testID="today" onRefresh={pullToRefresh.onRefresh}>
         {/* In the Form, which scrolls under the header and collapses the
             large title; a view above it would sit behind the header. */}
@@ -260,7 +265,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
           </FormSection>
         )}
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

@@ -97,7 +97,8 @@ it('says the permission is off when something is on but denied', async () => {
 
 it('opens the system notification settings', async () => {
   await renderScreen();
-  await userEvent.press(screen.getByText(t('configureNotifications')));
+  expect(screen.getByText(t('notificationAccessCaption'))).toBeTruthy();
+  await userEvent.press(screen.getByText(t('openSystemSettings')));
   expect(openSystemSettings).toHaveBeenCalledWith('notifications');
 });
 

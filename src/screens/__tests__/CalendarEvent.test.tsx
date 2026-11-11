@@ -133,6 +133,12 @@ it('leaves the Reminders section out on Android', async () => {
   await renderScreen();
   expect(screen.queryByText(t('setupReminders'))).toBeNull();
   expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
+  expect(screen.getByText(t('calendarAccessCaption'))).toBeTruthy();
+});
+
+it('explains the system settings row with calendars and reminders on iOS', async () => {
+  await renderScreen();
+  expect(screen.getByText(t('calendarAndReminderAccessCaption'))).toBeTruthy();
 });
 
 it('exports, deletes and opens the system settings', async () => {
@@ -142,7 +148,7 @@ it('exports, deletes and opens the system settings', async () => {
   expect(exportToICS).toHaveBeenCalled();
   await user.press(screen.getByText(t('deleteSyncedCalendarsAndReminders')));
   expect(confirmDeleteCalendars).toHaveBeenCalled();
-  await user.press(screen.getByText(t('configureCalendarAndReminder')));
+  await user.press(screen.getByText(t('openSystemSettings')));
   expect(openSystemSettings).toHaveBeenCalledWith('security');
 });
 
@@ -172,4 +178,9 @@ it('says when each sync last finished, while it is on', async () => {
   setSetting('assignmentCalendarSync', true);
   await renderScreen();
   expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(2);
+  // On the caption's next line, not a paragraph of its own.
+  const caption = t('courseScheduleSyncCaption', {
+    type: t('undergraduateSchedule'),
+  });
+  expect(screen.getByText(`${caption}\n${lastSynced}`)).toBeTruthy();
 });

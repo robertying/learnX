@@ -84,7 +84,7 @@ export default {
     "Couldn't sync the course schedule. Make sure you're on the campus network and try again. If it keeps failing, pick a shorter date range.",
   courseScheduleSyncNoCourse:
     'No classes in this date range. Check Web Learning for a schedule.',
-  configureCalendarAndReminder: 'Open System Settings',
+  openSystemSettings: 'Open System Settings',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
   deleteSyncedCalendarsAndRemindersConfirmation:
     "Delete the calendars and reminder lists learnX created? This can't be undone.",
@@ -95,6 +95,12 @@ export default {
     "Couldn't delete. Give learnX access to Reminders in Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: ",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
+  notificationAccessCaption:
+    "If learnX can't send you notifications, allow it in System Settings.",
+  calendarAccessCaption:
+    "If learnX can't access your calendars, allow it in System Settings.",
+  calendarAndReminderAccessCaption:
+    "If learnX can't access your calendars or reminders, allow it in System Settings.",
   exportSyncedCalendarsDescription:
     "Saves the course schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
   calendarExportSavedToDownloads: 'Exported learnX.ics to Downloads',
@@ -289,7 +295,6 @@ export default {
     'Android may hold reminders back while your phone is idle. Allow alarms and reminders for learnX so they arrive on time.',
   notificationPermissionDenied:
     'Notifications for learnX are turned off in system settings.',
-  configureNotifications: 'Open System Settings',
   notificationArchiveAll: 'Archive All',
   notificationRemindLater: 'Remind Me Later',
   // dayjs formats: text in [] is printed as is

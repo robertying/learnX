@@ -1,7 +1,12 @@
 import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import SafeArea from 'components/SafeArea';
-import { Form, FormButton, FormParagraph, FormSection } from 'components/Form';
+import {
+  Form,
+  FormButton,
+  FormParagraph,
+  FormScreen,
+  FormSection,
+} from 'components/Form';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
 
@@ -16,7 +21,7 @@ const issueTemplate = () =>
     .join('\n');
 
 const Help: React.FC<Props> = () => (
-  <SafeArea>
+  <FormScreen>
     <Form>
       <FormSection title={t('githubRecommended')}>
         <FormButton
@@ -43,7 +48,7 @@ const Help: React.FC<Props> = () => (
         <FormParagraph text={issueTemplate()} />
       </FormSection>
     </Form>
-  </SafeArea>
+  </FormScreen>
 );
 
 export default Help;

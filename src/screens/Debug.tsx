@@ -6,10 +6,10 @@ import {
   Form,
   FormButton,
   FormLink,
+  FormScreen,
   FormSection,
   FormToggle,
 } from 'components/Form';
-import SafeArea from 'components/SafeArea';
 import { toast } from 'components/Toast';
 import {
   assignmentsQuery,
@@ -128,7 +128,7 @@ const Debug: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         {isMockUser(username) ? (
           <FormSection footer="The mock account's changes go to the emulated server and never reach the real one or CourseX, so it has no Allow Server Writes.">
@@ -187,7 +187,7 @@ const Debug: React.FC<Props> = ({ navigation }) => {
           />
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

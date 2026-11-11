@@ -5,7 +5,13 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react';
-import { PlatformColor, StyleSheet, useWindowDimensions } from 'react-native';
+import {
+  PlatformColor,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  type ViewProps,
+} from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
 import { TextInput } from '@expo/ui';
 import {
@@ -156,6 +162,16 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     </ThemedHost>
   );
 };
+
+/**
+ * The root view of a screen that is a Form, in place of `SafeArea`. A SwiftUI
+ * Form keeps its rows inside the safe area itself and draws its grouped
+ * background out to the screen's edges, as Settings does in landscape; inside
+ * `SafeArea` that background would stop at the safe area instead.
+ */
+export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
+  <View style={[styles.fill, style]} {...props} />
+);
 
 // The header's glass over what scrolls under it, as for the app's other
 // scroll views (`ScrollEdgeEffect.swift`, which SwiftUI's own style overrides):

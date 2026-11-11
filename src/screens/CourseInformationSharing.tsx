@@ -6,8 +6,13 @@ import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { setCourseSharingSeen } from 'data/appState';
 import { dataSource } from 'data/source';
-import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
-import SafeArea from 'components/SafeArea';
+import {
+  Form,
+  FormButton,
+  FormScreen,
+  FormSection,
+  FormToggle,
+} from 'components/Form';
 import { t } from 'helpers/i18n';
 import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
@@ -72,7 +77,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
   }, []);
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         <FormSection
           footer={
@@ -96,7 +101,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
           />
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

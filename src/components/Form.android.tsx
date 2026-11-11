@@ -37,6 +37,7 @@ import {
   width,
 } from '@expo/ui/jetpack-compose/modifiers';
 import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
+import SafeArea from 'components/SafeArea';
 import { useMaterialTheme } from 'theme';
 import { t } from 'helpers/i18n';
 import {
@@ -164,6 +165,13 @@ export const Form: React.FC<FormProps> = props => {
     </ThemedHost>
   );
 };
+
+/**
+ * The root view of a screen that is a Form. The list's background is the
+ * screen's own, so the screen keeps its content inside the safe area as any
+ * other does.
+ */
+export const FormScreen = SafeArea;
 
 const Caption: React.FC<{ children: string; modifiers: ModifierConfig[] }> = ({
   children,
