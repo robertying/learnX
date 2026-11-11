@@ -8,6 +8,7 @@ import {
   notificationCategories,
   notificationChannels,
 } from 'helpers/notifications';
+import { capitalize } from 'helpers/text';
 import { upcomingDeadlines, WidgetDeadline } from 'helpers/widgetDeadlines';
 
 /** iOS keeps at most 64 pending notifications per app; leave some room. */
@@ -84,13 +85,17 @@ export const planDeadlineReminders = (
   }));
 };
 
-/** A reminder's text, with the deadline's day as of when it shows. */
+/**
+ * A reminder's text: the assignment, its course and when it's due (the day as
+ * of when it shows), as a content notification about one item reads.
+ */
 export const reminderContent = (
   { id, title, courseName, deadline }: WidgetDeadline,
   showsAt: number,
 ) => ({
   title,
-  body: `${courseName} · ${deadlineDayTime(deadline, showsAt)}`,
+  subtitle: courseName,
+  body: capitalize(deadlineDayTime(deadline, showsAt)),
   data: { type: 'assignment', id, deadline },
   categoryIdentifier: notificationCategories.deadline,
 });
@@ -235,6 +240,7 @@ export const previewDeadlineReminder = async () => {
     await Notifications.scheduleNotificationAsync({
       content: {
         title: first.content.title,
+        subtitle: first.content.subtitle,
         body: first.content.body,
         data: first.content.data,
         categoryIdentifier: notificationCategories.deadline,

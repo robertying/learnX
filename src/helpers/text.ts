@@ -17,3 +17,10 @@ export const removeTags = (html?: string) => {
     return '';
   }
 };
+
+/**
+ * Starts a sentence with a phrase meant for the middle of one, such as "due
+ * today at …"; Chinese has no case, so it's unchanged.
+ */
+export const capitalize = (text: string) =>
+  text.charAt(0).toUpperCase() + text.slice(1);

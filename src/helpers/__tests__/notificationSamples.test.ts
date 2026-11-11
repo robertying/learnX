@@ -39,20 +39,22 @@ it('makes a single and a grouped notification of every kind, and the summary', (
   expect(notifications).toHaveLength(11);
   expect(notifications[0]).toEqual(
     expect.objectContaining({
-      title: 'Course 1 · New Notices',
-      body: 'Notice 1',
+      title: 'Notice 1',
+      subtitle: 'Course 1',
+      body: 'New notice',
       target: { type: 'notice', id: 'n1' },
     }),
   );
   expect(notifications[1]).toEqual(
     expect.objectContaining({
+      title: '2 New Notices',
       body: 'Notice 1\nNotice 2',
       target: { type: 'notice' },
       ids: ['n1', 'n2'],
     }),
   );
   expect(notifications.at(-1)).toEqual(
-    expect.objectContaining({ title: 'learnX' }),
+    expect.objectContaining({ title: '5 Updates in 3 Courses' }),
   );
 });
 
@@ -61,8 +63,11 @@ it('makes a deadline reminder an hour ahead', () => {
     { id: 'a1', title: 'Essay', courseName: 'Writing' } as never,
     now,
   );
-  expect(reminder.title).toBe('Essay');
-  expect(reminder.body).toMatch(/^Writing · /);
+  expect(reminder).toMatchObject({
+    title: 'Essay',
+    subtitle: 'Writing',
+    body: 'Due today at 13:00',
+  });
 });
 
 it('posts them all', async () => {

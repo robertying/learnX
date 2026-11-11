@@ -98,12 +98,13 @@ export const sampleContentNotifications = (
     now,
   });
   const kinds = [...new Set(items.map(item => item.kind))];
-  const summary = groupContentItems(items).at(-1);
+  // The summary is the one notification about several courses.
+  const summary = groupContentItems(items).find(n => !n.threadId);
   return [
     ...kinds.flatMap(kind =>
       groupContentItems(items.filter(item => item.kind === kind)),
     ),
-    ...(summary?.title === 'learnX' ? [summary] : []),
+    ...(summary ? [summary] : []),
   ];
 };
 

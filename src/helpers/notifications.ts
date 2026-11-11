@@ -164,7 +164,11 @@ export const requestExactAlarms = async () =>
 export const postNotification = (
   content: {
     title: string;
+    /** The course, between the title and the body (Android's subtext). */
+    subtitle?: string;
     body: string;
+    /** Groups notifications in the iOS notification center. */
+    threadId?: string;
     target: ItemTarget;
     ids?: string[];
   },
@@ -173,7 +177,9 @@ export const postNotification = (
   Notifications.scheduleNotificationAsync({
     content: {
       title: content.title,
+      subtitle: content.subtitle,
       body: content.body,
+      ...(content.threadId ? { threadIdentifier: content.threadId } : {}),
       data: { ...content.target, ...(content.ids ? { ids: content.ids } : {}) },
       categoryIdentifier: content.target.id
         ? notificationCategories.item

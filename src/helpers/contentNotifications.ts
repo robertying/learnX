@@ -2,8 +2,10 @@ import dayjs from 'dayjs';
 import { ContentDiff } from 'data/contentDiff';
 import { BookmarkType } from 'data/userData';
 import { Assignment, NotificationSettings } from 'data/types/state';
+import { deadlineDayTime } from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { ItemTarget } from 'helpers/openTarget';
+import { capitalize, removeTags } from 'helpers/text';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
 const RECENT_DAYS = 7;
@@ -25,14 +27,28 @@ export interface ContentItem {
   key: string;
   courseId: string;
   courseName: string;
-  /** The line shown for the item. */
-  text: string;
+  /** The item's own name, the title of a notification about it alone. */
+  title: string;
+  /** What happened to it, the body of a notification about it alone. */
+  detail: string;
+  /** Its line in a notification listing several of its kind. */
+  line: string;
   target: Required<ItemTarget>;
 }
 
+/**
+ * One notification. The title names what it's about (the item, or how many
+ * there are), the subtitle the course, and the body what happened, as in Mail
+ * and Calendar.
+ */
 export interface ContentNotification {
   title: string;
+  subtitle?: string;
   body: string;
+  /** Groups a course's notifications in the notification center. */
+  threadId?: string;
+  /** What it's about; the summary of several courses has none. */
+  kind?: ContentKind;
   target: ItemTarget;
   /** Ids of the items it covers when there are several, all of one type. */
   ids?: string[];
@@ -48,6 +64,15 @@ export interface PickContext {
   archived: Record<BookmarkType, readonly string[]>;
   now?: dayjs.Dayjs;
 }
+
+/** A notification's title for `count` items of a kind. */
+const countTitles: Record<ContentKind, (count: number) => string> = {
+  notices: count => t('notifyNoticeCount', { count }),
+  files: count => t('notifyFileCount', { count }),
+  assignments: count => t('notifyAssignmentCount', { count }),
+  grades: count => t('notifyGradeCount', { count }),
+  deadlineChanges: count => t('notifyDeadlineChangeCount', { count }),
+};
 
 const kindLabels: Record<ContentKind, () => string> = {
   notices: () => t('notifyNewNotices'),
@@ -67,6 +92,18 @@ const targetTypes: Record<ContentKind, ItemTarget['type']> = {
 
 const formatTime = (time: string) =>
   dayjs(time).format(t('shortDateTimeFormat'));
+
+/** About two lines of a notice, as a preview. */
+const PREVIEW_LENGTH = 120;
+const preview = (html?: string) => {
+  const text = removeTags(html);
+  return text.length > PREVIEW_LENGTH
+    ? `${text.slice(0, PREVIEW_LENGTH).trimEnd()}…`
+    : text;
+};
+
+const joined = (...parts: (string | null | undefined)[]) =>
+  parts.filter(Boolean).join(' · ');
 
 const gradeText = (a: Assignment) => {
   if (a.gradeLevel) {
@@ -119,14 +156,26 @@ export const pickContentItems = (
   if (settings.notices) {
     for (const n of diff.notices.added) {
       if (!n.hasRead && recent(n.publishTime)) {
-        add({ ...base('notices', n), key: `notice:${n.id}`, text: n.title });
+        add({
+          ...base('notices', n),
+          key: `notice:${n.id}`,
+          title: n.title,
+          detail: preview(n.content) || t('notifyNewNotice'),
+          line: n.title,
+        });
       }
     }
   }
   if (settings.files) {
     for (const f of diff.files.added) {
       if (recent(f.uploadTime)) {
-        add({ ...base('files', f), key: `file:${f.id}`, text: f.title });
+        add({
+          ...base('files', f),
+          key: `file:${f.id}`,
+          title: f.title,
+          detail: joined(t('notifyNewFile'), f.fileType?.toUpperCase(), f.size),
+          line: f.title,
+        });
       }
     }
   }
@@ -134,10 +183,13 @@ export const pickContentItems = (
     // Assignments have no publish time; one still open is news.
     for (const a of diff.assignments.added) {
       if (!a.submitted && upcoming(a.deadline)) {
+        const due = capitalize(deadlineDayTime(a.deadline, now));
         add({
           ...base('assignments', a),
           key: `assignment:${a.id}`,
-          text: `${a.title} (${formatTime(a.deadline)})`,
+          title: a.title,
+          detail: joined(t('notifyNewAssignment'), due),
+          line: joined(a.title, due),
         });
       }
     }
@@ -145,20 +197,30 @@ export const pickContentItems = (
   if (settings.grades) {
     for (const { after: a } of diff.assignments.graded) {
       const grade = gradeText(a);
+      const graded = grade
+        ? t('notifyGraded', { grade })
+        : t('notifyGradedNoGrade');
       add({
         ...base('grades', a),
         key: `graded:${a.id}:${a.grade ?? ''}:${a.gradeLevel ?? ''}`,
-        text: grade ? `${a.title}: ${grade}` : a.title,
+        title: a.title,
+        detail: graded,
+        line: joined(a.title, graded),
       });
     }
   }
   if (settings.deadlineChanges) {
-    for (const { after: a } of diff.assignments.deadlineChanged) {
+    for (const { before, after: a } of diff.assignments.deadlineChanged) {
       if (!a.submitted && upcoming(a.lateSubmissionDeadline ?? a.deadline)) {
         add({
           ...base('deadlineChanges', a),
           key: `deadline:${a.id}:${a.deadline}:${a.lateSubmissionDeadline ?? ''}`,
-          text: `${a.title} → ${formatTime(a.deadline)}`,
+          title: a.title,
+          detail: t('notifyDeadlineMoved', {
+            date: formatTime(a.deadline),
+            before: formatTime(before.deadline),
+          }),
+          line: `${a.title} → ${formatTime(a.deadline)}`,
         });
       }
     }
@@ -167,8 +229,9 @@ export const pickContentItems = (
 };
 
 /**
- * One notification per course and kind, e.g. "Calculus · New files" listing
- * the files. A single item opens itself; several open their list.
+ * One notification per course and kind: a single item names itself and says
+ * what happened, and opens itself; several are counted ("3 New Files") and
+ * listed, and open their list.
  */
 export const groupContentItems = (
   items: ContentItem[],
@@ -181,10 +244,14 @@ export const groupContentItems = (
 
   const notifications = [...groups.values()].map(group => {
     const [first] = group;
+    const single = group.length === 1;
     return {
-      title: `${first.courseName} · ${kindLabels[first.kind]()}`,
-      body: group.map(i => i.text).join('\n'),
-      target: group.length === 1 ? first.target : { type: first.target.type },
+      kind: first.kind,
+      title: single ? first.title : countTitles[first.kind](group.length),
+      subtitle: first.courseName,
+      body: single ? first.detail : group.map(i => i.line).join('\n'),
+      threadId: first.courseId,
+      target: single ? first.target : { type: first.target.type },
       ids: group.length === 1 ? undefined : group.map(i => i.target.id),
       keys: group.map(i => i.key),
     };
@@ -200,8 +267,13 @@ export const groupContentItems = (
   return [
     ...kept,
     {
-      title: 'learnX',
-      body: rest.map(n => n.title).join('\n'),
+      title: t('notifySummary', {
+        count: rest.reduce((sum, n) => sum + n.keys.length, 0),
+        courses: new Set(rest.map(n => n.threadId)).size,
+      }),
+      body: rest
+        .map(n => joined(n.subtitle, n.kind && kindLabels[n.kind]()))
+        .join('\n'),
       target: { type: rest[0].target.type },
       keys: rest.flatMap(n => n.keys),
     },
