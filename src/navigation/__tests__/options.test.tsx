@@ -133,6 +133,24 @@ it('gives tab roots a large title on iPhone and iPad from iOS 26 only', () => {
   expect(tabRootOptionsOn(true, true)).toEqual({});
 });
 
+it('shows the back chevron alone on iPhone and iPad from iOS 26 only', () => {
+  const stackOptionsOn = (ios26: boolean, mac: boolean) => {
+    let options: object = {};
+    jest.isolateModules(() => {
+      const info = require('constants/DeviceInfo').default;
+      jest.spyOn(info, 'hasLiquidGlass').mockReturnValue(ios26);
+      jest.spyOn(info, 'isMac').mockReturnValue(mac);
+      options = require('navigation/options').stackScreenOptions;
+    });
+    return options;
+  };
+  expect(stackOptionsOn(true, false)).toEqual({
+    headerBackButtonDisplayMode: 'minimal',
+  });
+  expect(stackOptionsOn(false, false)).toEqual({});
+  expect(stackOptionsOn(true, true)).toEqual({});
+});
+
 it('shows a failed screen as an error in its place', async () => {
   const Broken = () => {
     throw new Error('broken');

@@ -67,6 +67,17 @@ export const tabRootOptions: NativeStackNavigationOptions =
     ? { headerLargeTitleEnabled: true }
     : {};
 
+/**
+ * Every stack's screens: from iOS 26 the back button is the chevron alone,
+ * as in Settings and Files. A back button with the previous screen's title
+ * fades out and in again once a push has finished (iOS rebuilds it), which
+ * the chevron alone doesn't. The Mac keeps the title.
+ */
+export const stackScreenOptions: NativeStackNavigationOptions =
+  DeviceInfo.hasLiquidGlass() && !DeviceInfo.isMac()
+    ? { headerBackButtonDisplayMode: 'minimal' }
+    : {};
+
 // Detail screens set their own title from the item they show.
 export const getDetailScreenOptions = (title = '', subtitle?: string) =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {

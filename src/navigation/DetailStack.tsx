@@ -22,7 +22,7 @@ import NativeSplitViewProvider from './NativeSplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useNavigationTheme } from 'theme';
 import { nativeSplit } from './layout';
-import { getDetailScreenOptions } from './options';
+import { getDetailScreenOptions, stackScreenOptions } from './options';
 import { screenLayout } from './screenLayout';
 import {
   allItemDetails,
@@ -46,6 +46,7 @@ export const DetailStack = () => (
     // Has to be in place when the screen mounts; set from the screen itself, it
     // races the native transition.
     screenOptions={({ route }) => ({
+      ...stackScreenOptions,
       animation: (route.params as ExtraParams | undefined)?.disableAnimation
         ? 'none'
         : undefined,
