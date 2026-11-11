@@ -67,31 +67,30 @@ export const tabRootOptions: NativeStackNavigationOptions =
     ? { headerLargeTitleEnabled: true }
     : {};
 
-/** From iOS 26 content scrolls under the header's glass; the Mac keeps an opaque header. */
+/** iPhone and iPad from iOS 26, where the header is Liquid Glass; the Mac keeps its own. */
 export const hasGlassHeader =
   DeviceInfo.hasLiquidGlass() && !DeviceInfo.isMac();
 
 /**
- * A screen whose scroll view insets itself from the header
- * (`contentInsetAdjustmentBehavior="automatic"`, as lists and Forms do), so
- * that it scrolls under the glass: the header has to be transparent for the
- * content to be laid out under it at all.
- */
-export const glassHeaderOptions: NativeStackNavigationOptions = hasGlassHeader
-  ? { headerTransparent: true }
-  : {};
-
-/**
- * Every stack's screens: from iOS 26 the back button is the chevron alone,
- * as SwiftUI, Settings and Files show it (the long-press menu still lists the
- * titles). UIKit shows the previous screen's title only when asked, and on
- * iOS 27 that titled button fades out and in after a push in which header
- * buttons morph (a right button on both screens, or a list's left buttons
- * turning into the back button), also in plain UIKit. The Mac keeps the
- * title.
+ * Every stack's screens, from iOS 26 on iPhone and iPad:
+ * - The header is transparent, so every screen is laid out under it and its
+ *   content scrolls under the glass, as in the system apps. A scroll view
+ *   keeps clear of the header by itself (`contentInsetAdjustmentBehavior`
+ *   "automatic": our `FlatList` and `ScrollView`, `Form`, the web views and
+ *   the PDF view). An opaque header would instead have react-native-screens
+ *   push the content below it, onto a plain bar. Content that doesn't scroll
+ *   from the top keeps clear of the header with `SafeArea`'s `top`.
+ * - The back button is the chevron alone, as SwiftUI, Settings and Files show
+ *   it (the long-press menu still lists the titles). UIKit shows the previous
+ *   screen's title only when asked, and on iOS 27 that titled button fades
+ *   out and in after a push in which header buttons morph (a right button on
+ *   both screens, or a list's left buttons turning into the back button),
+ *   also in plain UIKit.
+ * The Mac keeps its own header and the titled back button. Don't set
+ * `headerTransparent` per screen: this is the one place for it.
  */
 export const stackScreenOptions: NativeStackNavigationOptions = hasGlassHeader
-  ? { headerBackButtonDisplayMode: 'minimal' }
+  ? { headerTransparent: true, headerBackButtonDisplayMode: 'minimal' }
   : {};
 
 // Detail screens set their own title from the item they show.

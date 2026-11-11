@@ -22,11 +22,7 @@ import NativeSplitViewProvider from './NativeSplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useNavigationTheme } from 'theme';
 import { nativeSplit } from './layout';
-import {
-  getDetailScreenOptions,
-  glassHeaderOptions,
-  stackScreenOptions,
-} from './options';
+import { getDetailScreenOptions, stackScreenOptions } from './options';
 import { screenLayout } from './screenLayout';
 import {
   allItemDetails,
@@ -75,10 +71,7 @@ export const DetailStack = () => (
     <DetailNavigator.Screen
       name="CourseX"
       component={CourseX}
-      options={props => ({
-        ...getDetailScreenOptions(t('courseX'))(props),
-        ...glassHeaderOptions,
-      })}
+      options={getDetailScreenOptions(t('courseX'))}
     />
     {renderSettingDetails()}
   </DetailNavigator.Navigator>

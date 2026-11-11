@@ -96,32 +96,23 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   // Optional: a Form outside a navigator (as in tests) has no header.
   const navigation = useContext(NavigationContext);
 
-  // The header continues the gray grouped background on iOS instead of
-  // sitting on it as a white bar: from iOS 26 the Form scrolls under the
-  // header's glass, and before it the header is painted gray. Mac Forms are
-  // white, like the header. Scrolling under the glass needs a transparent
-  // header: with a clear background alone, the Form starts below the header,
-  // which then shows the screen's white behind it.
+  // Before iOS 26 the header continues the gray grouped background instead
+  // of sitting on it as a white bar, with no hairline, as in the Settings
+  // app. From iOS 26 the Form scrolls under the header's glass, which every
+  // stack has (`stackScreenOptions`). Mac Forms are white, like the header.
   useLayoutEffect(() => {
-    if (DeviceInfo.isMac()) {
+    if (DeviceInfo.isMac() || DeviceInfo.hasLiquidGlass()) {
       return;
     }
     navigation?.setOptions({
-      // As in the Settings app, no hairline between the header and the Form.
       headerShadowVisible: false,
-      headerTransparent: DeviceInfo.hasLiquidGlass(),
-      headerStyle: {
-        backgroundColor: DeviceInfo.hasLiquidGlass()
-          ? 'transparent'
-          : groupedBackground,
-      },
+      headerStyle: { backgroundColor: groupedBackground },
     });
     // The default header again for a screen that shows something else after
     // its Form (file detail's preview).
     return () =>
       navigation?.setOptions({
         headerShadowVisible: undefined,
-        headerTransparent: undefined,
         headerStyle: undefined,
       });
   }, [navigation]);

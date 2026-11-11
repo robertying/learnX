@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Platform, StyleSheet } from 'react-native';
-import ProgressBar from 'components/ProgressBar';
+import PageProgressBar from 'components/PageProgressBar';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -89,7 +89,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
 
   return (
     <SafeArea>
-      {loading ? <ProgressBar progress={progress} /> : null}
+      {loading ? <PageProgressBar progress={progress} /> : null}
       <WebView
         ref={webviewRef}
         style={styles.webview}
@@ -101,6 +101,8 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
           },
         }}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+        // Below the header, and under its glass from iOS 26.
+        contentInsetAdjustmentBehavior="automatic"
         onLoadProgress={onLoadProgress}
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
         injectedJavaScript={injectedJs}
