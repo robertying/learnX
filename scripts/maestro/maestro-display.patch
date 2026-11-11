@@ -1,4 +1,4 @@
-From a8b55387e718153a96e75b73eb686c98226c4c50 Mon Sep 17 00:00:00 2001
+From c3b5bb76453492b42d85ca3d2799a00b344e1cdc Mon Sep 17 00:00:00 2001
 From: Claude <noreply@anthropic.com>
 Date: Wed, 11 Nov 2026 20:30:21 +0000
 Subject: [PATCH] fix(ios): keep frames and taps right for apps on another
@@ -7,10 +7,10 @@ Subject: [PATCH] fix(ios): keep frames and taps right for apps on another
 ---
  .../Routes/Handlers/ScreenshotHandler.swift   |   5 +-
  .../Routes/Handlers/TouchRouteHandler.swift   |   9 +-
- .../Handlers/ViewHierarchyHandler.swift       |  26 +++-
+ .../Handlers/ViewHierarchyHandler.swift       |  36 +++++-
  .../Routes/Helpers/ScreenSizeHelper.swift     | 114 +++++++++++++++++-
  .../Routes/XCTest/RunningApp.swift            |  29 ++++-
- 5 files changed, 175 insertions(+), 8 deletions(-)
+ 5 files changed, 183 insertions(+), 10 deletions(-)
 
 diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ScreenshotHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ScreenshotHandler.swift
 index 432db971..e7d46c6f 100644
@@ -49,10 +49,10 @@ index 648b7a1f..4429a1c8 100644
              NSLog("Tapping took \(duration)")
              return HTTPResponse(statusCode: .ok)
 diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
-index 1561f4dc..9951ce0e 100644
+index 1561f4dc..a47746f4 100644
 --- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
 +++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
-@@ -73,7 +73,31 @@ struct ViewHierarchyHandler: HTTPHandler {
+@@ -73,7 +73,34 @@ struct ViewHierarchyHandler: HTTPHandler {
              "Height": Double(deviceFrame.height)
          ]
          let appFrame = appHierarchy.frame
@@ -79,12 +79,33 @@ index 1561f4dc..9951ce0e 100644
 +            let offset = WindowOffset(offsetX: offsetX, offsetY: offsetY)
 +            NSLog("Moving the app's frames to its window at \(window) with offset: \(offset)")
 +            let adjustedAppHierarchy = expandElementSizes(appHierarchy, offset: offset)
-+            return AXElement(children: [adjustedAppHierarchy, AXElement(children: statusBars), safariWebViewHierarchy].compactMap { $0 })
++            // Safari's view service draws in the app's window, so it reports frames relative to
++            // the window too.
++            let adjustedSafariHierarchy = safariWebViewHierarchy.map { expandElementSizes($0, offset: offset) }
++            return AXElement(children: [adjustedAppHierarchy, AXElement(children: statusBars), adjustedSafariHierarchy].compactMap { $0 })
 +        }
 +
          if deviceAxFrame != appFrame {
              guard
                  let deviceWidth = deviceAxFrame["Width"], deviceWidth > 0,
+@@ -273,12 +300,15 @@ struct ViewHierarchyHandler: HTTPHandler {
+             return nil
+         }
+         
++        // The same service shows the Save Password alert after a login, which the app's own
++        // snapshot doesn't include.
+         let webViewCount = safariWebService.webViews.count
+-        guard webViewCount > 0 else {
++        let alertCount = webViewCount > 0 ? 0 : safariWebService.alerts.count
++        guard webViewCount > 0 || alertCount > 0 else {
+             return nil
+         }
+         
+-        NSLog("[Start] Fetching Safari WebView hierarchy (\(webViewCount) webview(s) detected)")
++        NSLog("[Start] Fetching Safari WebView hierarchy (\(webViewCount) webview(s), \(alertCount) alert(s) detected)")
+         
+         do {
+             AXClientSwizzler.overwriteDefaultParameters["maxDepth"] = snapshotMaxDepth
 diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift
 index 90fbfbc7..8829262d 100644
 --- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift
