@@ -8,6 +8,7 @@ import { FormSection, FormText } from 'components/Form';
 import TextButton from 'components/TextButton';
 import { useMinute } from 'hooks/useClock';
 import { useTheme } from 'theme';
+import Spacing from 'constants/Spacing';
 
 export interface SyncStatusProps {
   /** When the list's data was last fetched (ms), 0 if never. */
@@ -75,7 +76,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       />
       <View style={styles.text}>
         <Text variant="subheadline">{status}</Text>
-        {updated ? <Caption>{updated}</Caption> : null}
+        {updated ? <Caption style={styles.flush}>{updated}</Caption> : null}
       </View>
       {canLogIn && (
         <TextButton testID="sync-status-relogin" bold onPress={requestRelogin}>
@@ -96,9 +97,15 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 12,
   },
+  // The status and its time a fixed gap apart, as one block centered in the
+  // row: a Caption's own margins would add space under it only.
   text: {
     flex: 1,
-    marginRight: 8,
+    marginRight: Spacing.s,
+    gap: 2,
+  },
+  flush: {
+    marginVertical: 0,
   },
 });
 
