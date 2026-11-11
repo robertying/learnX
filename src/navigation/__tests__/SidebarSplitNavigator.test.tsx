@@ -72,7 +72,7 @@ const renderNavigator = () =>
         <Sidebar.Screen
           name="First"
           component={First}
-          options={{ title: 'One', sfSymbol: 'sun.max' }}
+          options={{ title: 'One', sfSymbol: 'sun.max', testID: 'tab-one' }}
         />
         <Sidebar.Screen
           name="Second"
@@ -91,12 +91,30 @@ const renderNavigator = () =>
 const select = (key: string) =>
   act(() => mockSidebar.onSelect({ nativeEvent: { key } }));
 
-it('lists the tabs in the sidebar, with their symbols and badges', async () => {
+it('lists the tabs in the sidebar, with their symbols, badges and test ids', async () => {
   await renderNavigator();
-  expect(mockSidebar.items).toEqual([
-    { key: 'First', title: 'One', systemImage: 'sun.max', badge: false },
-    { key: 'Second', title: 'Two', systemImage: 'bell', badge: true },
-    { key: 'Third', title: 'Three', systemImage: 'doc', badge: false },
+  expect(mockSidebar.items).toStrictEqual([
+    {
+      key: 'First',
+      title: 'One',
+      systemImage: 'sun.max',
+      badge: false,
+      testID: 'tab-one',
+    },
+    {
+      key: 'Second',
+      title: 'Two',
+      systemImage: 'bell',
+      badge: true,
+      testID: undefined,
+    },
+    {
+      key: 'Third',
+      title: 'Three',
+      systemImage: 'doc',
+      badge: false,
+      testID: undefined,
+    },
   ]);
   expect(mockSidebar.selectedKey).toBe('First');
 });

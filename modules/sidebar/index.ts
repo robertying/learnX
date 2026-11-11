@@ -8,6 +8,8 @@ export interface SidebarItem {
   title: string;
   systemImage: SFSymbol;
   badge: boolean;
+  /** The row's accessibility identifier, for UI tests. */
+  testID?: string;
 }
 
 export interface SidebarViewProps extends ViewProps {
