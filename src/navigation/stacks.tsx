@@ -35,6 +35,7 @@ import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
 import { calendarSettingsTitle } from 'helpers/eventDetails';
 import Downloads from 'screens/Downloads';
+import SwipeActions from 'screens/SwipeActions';
 import NotificationSettings from 'screens/NotificationSettings';
 import MockNetwork from 'screens/MockNetwork';
 import Debug from 'screens/Debug';
@@ -143,6 +144,11 @@ export const renderSettingDetails = () => (
       name="NotificationSettings"
       component={NotificationSettings}
       options={getTitleOptions(t('notifications'))}
+    />
+    <SettingDetails.Screen
+      name="SwipeActions"
+      component={SwipeActions}
+      options={getTitleOptions(t('swipeActions'))}
     />
     <SettingDetails.Screen
       name="Maintainer"

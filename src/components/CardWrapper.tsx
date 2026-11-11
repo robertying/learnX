@@ -5,28 +5,26 @@ import {
   StyleSheet,
   Platform,
 } from 'react-native';
-import { SharedValue } from 'react-native-reanimated';
-import ReanimatedSwipeable, {
-  SwipeableMethods,
-} from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { SharedValue, useSharedValue } from 'react-native-reanimated';
+import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import * as Haptics from 'expo-haptics';
 import DeviceInfo from 'constants/DeviceInfo';
-import { CardAction, cardActions } from 'helpers/cardActions';
+import { useSettings } from 'data/settings';
+import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import useCardSwipe from 'hooks/useCardSwipe';
 import CardMenu from './CardMenu';
-import CardSwipeActions from './CardSwipeActions';
+import CardSwipeAction, { SwipeSide } from './CardSwipeAction';
 import Touchable from './Touchable';
 import SelectionMark from './SelectionMark';
 import SystemIcon from './SystemIcon';
 import { useTheme } from 'theme';
 import { ContextMenuView } from 'modules/menus';
 
-const swipeableNotSupported = Platform.OS === 'android';
-// A pointer's right-click, or a long press on iPad, shows the actions in a
-// menu, as everywhere else on these platforms.
-const contextMenuSupported = DeviceInfo.isIPad() || DeviceInfo.isMac();
+// A long press (or a pointer's right-click) shows the actions in a menu: the
+// system context menu on iOS, iPadOS and Mac, a Material dropdown on Android.
+const contextMenuSupported = Platform.OS === 'ios';
 
 export interface CardWrapperProps {
   fav?: boolean;
@@ -81,14 +79,18 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   last,
 }) => {
   const theme = useTheme();
-
-  const { snapRef, openActions, onWillOpen, onWillClose, interceptPress } =
-    useCardSwipe({ selectionMode, reorderMode });
+  const swipeSettings = useSettings(settings => settings.swipeActions);
 
   const [menuVisible, setMenuVisible] = useState(false);
 
   const actions = cardActions({ fav, archived, hidden, canHide: !!onHide });
   const actionsEnabled = !disableSwipe && !selectionMode && !reorderMode;
+  // One action each way, as chosen in Settings › Swipe Actions
+  const swipeActions: Record<SwipeSide, CardAction | undefined> = {
+    leading: swipeAction(actions, swipeSettings.right),
+    trailing: swipeAction(actions, swipeSettings.left),
+  };
+  const rowWidth = useSharedValue(0);
   const moveActions =
     reorderMode && onMove
       ? [
@@ -164,6 +166,24 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     }
   };
 
+  const runSwipe = (side: SwipeSide) => {
+    const action = swipeActions[side];
+    if (action) {
+      runAction(action);
+    }
+  };
+
+  const {
+    snapRef,
+    close,
+    onArmedChange,
+    onStartDrag,
+    onWillOpen,
+    onOpen,
+    onWillClose,
+    interceptPress,
+  } = useCardSwipe({ selectionMode, reorderMode, onSwipe: runSwipe });
+
   const handleCheck = () => {
     onCheck?.(!checked);
   };
@@ -179,19 +199,24 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     setMenuVisible(false);
   }
 
-  const renderRightActions = (
-    _progress: SharedValue<number>,
-    translation: SharedValue<number>,
-    swipeableMethods: SwipeableMethods,
-  ) => (
-    <CardSwipeActions
-      position="right"
-      translation={translation}
-      swipeableMethods={swipeableMethods}
-      actions={actions}
-      onAction={runAction}
-    />
-  );
+  const renderSwipeAction =
+    (side: SwipeSide) =>
+    (_progress: SharedValue<number>, translation: SharedValue<number>) => {
+      const action = swipeActions[side];
+      return action ? (
+        <CardSwipeAction
+          side={side}
+          action={action}
+          translation={translation}
+          rowWidth={rowWidth}
+          onArmedChange={armed => onArmedChange(side, armed)}
+          onPress={() => {
+            runAction(action);
+            close();
+          }}
+        />
+      ) : null;
+    };
 
   const handlePress = () => {
     if (menuVisible) {
@@ -208,12 +233,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     if (reorderMode) {
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
-      if (swipeableNotSupported) {
-        void Haptics.selectionAsync();
-        setMenuVisible(true);
-      } else {
-        openActions();
-      }
+      void Haptics.selectionAsync();
+      setMenuVisible(true);
     }
   };
 
@@ -225,6 +246,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress
       }
       onLongPress={handleLongPress}
+      onLayout={({ nativeEvent }) => rowWidth.set(nativeEvent.layout.width)}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={
         selectionMode ? 'checkbox' : reorderMode ? undefined : 'button'
@@ -269,20 +291,6 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
     </Touchable>
   );
 
-  if (swipeableNotSupported) {
-    return (
-      <View collapsable={false}>
-        {touchable}
-        <CardMenu
-          visible={menuVisible}
-          actions={actions}
-          onAction={handleMenuAction}
-          onDismiss={closeMenu}
-        />
-      </View>
-    );
-  }
-
   const content = contextMenuSupported ? (
     <ContextMenuView
       actions={
@@ -292,8 +300,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
               title: a.label,
               systemImage: systemIcons[a.icon].ios,
             }))
-          : // A long press on iPad drags in reorder mode, so only the Mac's
-            // right-click menu offers the moves.
+          : // A long press drags in reorder mode on iPhone and iPad, so only
+            // the Mac's right-click menu offers the moves.
             DeviceInfo.isMac()
             ? moveActions.map(m => ({
                 key: m.key,
@@ -307,7 +315,15 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       {touchable}
     </ContextMenuView>
   ) : (
-    touchable
+    <View collapsable={false}>
+      {touchable}
+      <CardMenu
+        visible={menuVisible}
+        actions={actions}
+        onAction={handleMenuAction}
+        onDismiss={closeMenu}
+      />
+    </View>
   );
 
   return (
@@ -315,10 +331,22 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       ref={snapRef}
       containerStyle={{ backgroundColor: theme.colors.surface }}
       childrenContainerStyle={{ backgroundColor: theme.colors.surface }}
-      renderRightActions={renderRightActions}
-      overshootFriction={8}
-      enabled={!disableSwipe && !selectionMode && !reorderMode}
+      renderLeftActions={
+        swipeActions.leading ? renderSwipeAction('leading') : undefined
+      }
+      renderRightActions={
+        swipeActions.trailing ? renderSwipeAction('trailing') : undefined
+      }
+      // The card follows the finger past the button (iOS), as far as the
+      // full-swipe point and beyond.
+      overshootLeft={Platform.OS === 'ios'}
+      overshootRight={Platform.OS === 'ios'}
+      enabled={
+        actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
+      }
+      onSwipeableOpenStartDrag={onStartDrag}
       onSwipeableWillOpen={onWillOpen}
+      onSwipeableOpen={onOpen}
       onSwipeableWillClose={onWillClose}
     >
       {content}

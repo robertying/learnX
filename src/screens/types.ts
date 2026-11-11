@@ -54,6 +54,7 @@ export type SettingDetailParams = {
   SemesterSelection: ExtraParams | undefined;
   Downloads: ExtraParams | undefined;
   NotificationSettings: ExtraParams | undefined;
+  SwipeActions: ExtraParams | undefined;
   Help: ExtraParams | undefined;
   About: ExtraParams | undefined;
   Changelog: ExtraParams | undefined;

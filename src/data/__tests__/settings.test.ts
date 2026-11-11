@@ -48,6 +48,10 @@ describe('settings', () => {
          "notices": false,
        },
        "openFileAfterDownload": false,
+       "swipeActions": {
+         "left": "fav",
+         "right": "archive",
+       },
        "tabFilterSelections": {
          "assignment": "unfinished",
          "course": "all",
@@ -77,6 +81,7 @@ describe('settings', () => {
           graduate: true,
           alarms: { courseAlarm: true },
           tabFilterSelections: { notice: 'fav' },
+          swipeActions: { left: 'none' },
         },
         version: 1,
       }),
@@ -90,6 +95,7 @@ describe('settings', () => {
         ...defaultSettings.tabFilterSelections,
         notice: 'fav',
       },
+      swipeActions: { right: 'archive', left: 'none' },
     });
   });
 });
