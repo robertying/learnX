@@ -108,6 +108,19 @@ export const sampleContentNotifications = (
   ];
 };
 
+/** The notification a sync posts for `notice` alone, as if it were new. */
+export const sampleNoticeNotification = (notice: Notice, now = dayjs()) =>
+  sampleContentNotifications(
+    {
+      notices: {
+        added: [{ ...notice, hasRead: false, publishTime: now.toISOString() }],
+      },
+      files: { added: [] },
+      assignments: { added: [], graded: [], deadlineChanged: [] },
+    },
+    now,
+  )[0];
+
 /** A deadline reminder for `assignment`, as it shows an hour before. */
 export const sampleReminder = (assignment: Assignment, now = dayjs()) => {
   const deadline = now.add(1, 'hour');

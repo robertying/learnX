@@ -101,11 +101,15 @@ it('offers network emulation instead for the mock account', async () => {
 it('sends a test notification about the newest notice', async () => {
   await renderScreen();
   await userEvent.press(screen.getByText('Send a Test Notification'));
-  expect(postNotification).toHaveBeenCalledWith({
-    title: 'Calculus',
-    body: 'Midterm',
-    target: { type: 'notice', id: 'n1' },
-  });
+  // In the format a sync posts it in.
+  expect(postNotification).toHaveBeenCalledWith(
+    expect.objectContaining({
+      title: 'Midterm',
+      subtitle: 'Calculus',
+      body: 'New notice',
+      target: { type: 'notice', id: 'n1' },
+    }),
+  );
 });
 
 describe('Simulate New Content', () => {
