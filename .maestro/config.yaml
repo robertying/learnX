@@ -2,3 +2,15 @@
 # Only the top-level flows run; subflows/ is reached through runFlow.
 flows:
   - '*'
+# The flows share one login (subflows/login.yaml): start from a fresh install
+# and log out last. Flows not listed run after these. A failed flow doesn't
+# stop the rest.
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - Start from a fresh install
+    - Log in and visit every tab
+    - Open a notice, an assignment and a file
+    - Favorite and archive a notice
+    - Search and open a result
+    - Open settings pages and log out

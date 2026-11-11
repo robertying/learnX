@@ -1,0 +1,9 @@
+appId: ${APP_ID}
+name: Start from a fresh install
+---
+# The flows share one login: this runs first (executionOrder in config.yaml),
+# so a run starts from a fresh install whatever the last run left behind.
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- stopApp

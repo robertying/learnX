@@ -53,6 +53,19 @@ if [ -n "${MAESTRO_DEVICE:-}" ]; then
   device_args=(--device "$MAESTRO_DEVICE")
 fi
 
+# IPAD=true on an iPad simulator (the booted one, or MAESTRO_DEVICE), whose
+# paged tab bar subflows/tab.yaml handles; other devices skip that check.
+ipad=false
+if [ "$platform" = ios ]; then
+  booted="$(xcrun simctl list devices booted 2>/dev/null || true)"
+  if [ -n "${MAESTRO_DEVICE:-}" ]; then
+    booted="$(grep -F "$MAESTRO_DEVICE" <<<"$booted" || true)"
+  fi
+  if grep -q 'iPad' <<<"$booted"; then
+    ipad=true
+  fi
+fi
+
 # Run every flow unless a flow file or folder was passed (options alone, e.g.
 # --test-output-dir <dir>, still run them all).
 has_flow=false
@@ -69,5 +82,6 @@ exec maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test
   -e APP_ID="$app_id" \
   -e USERNAME="$username" \
   -e PASSWORD="$password" \
+  -e IPAD="$ipad" \
   "${env_args[@]}" \
   "$@"

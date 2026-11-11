@@ -1,57 +1,26 @@
-# Fresh install state, then log in with the mock account (see src/data/AGENTS.md, Mock login).
-# USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
+# Open the app logged in with the mock account (see src/data/AGENTS.md, Mock
+# login), on the notices. The flows share one login: the first flow of a run
+# logs in after 00_reset, the others find the app logged in and only relaunch
+# it. USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---
+# No emulated server delay (helpers/launchOptions.ts).
 - launchApp:
-    clearState: true
-    clearKeychain: true
-# A new install opens on the welcome page.
+    arguments:
+      mockLatency: none
+# A new install opens on the welcome page, a logged-out app on the login
+# page, a logged-in one on its tabs.
 - extendedWaitUntil:
     visible:
-      id: 'welcome-continue|login-username'
+      id: 'welcome-continue|login-username|tab-notices|bell\.fill'
     timeout: 60000
-- tapOn:
-    id: welcome-continue
-    optional: true
-- extendedWaitUntil:
-    visible:
-      id: login-username
-    timeout: 10000
-- tapOn:
-    id: login-username
-- inputText: ${USERNAME}
-- tapOn:
-    id: login-password
-- inputText: ${PASSWORD}
-# The password field submits the login on return.
-- pressKey: Enter
-# iOS offers to save the password to the keychain after a login; the alert
-# hides the app's accessibility tree until dismissed. The system's own labels.
+# Logged in already: an absent element costs Maestro's optional lookup (up to
+# 7 s from the launch), still far less than a login.
 - runFlow:
     when:
-      platform: iOS
-    commands:
-      - extendedWaitUntil:
-          visible: 'Save Password\??|存储密码？?|要存储密码吗？?'
-          timeout: 10000
-          optional: true
-      - tapOn:
-          text: 'Not Now|现在不|以后'
-          optional: true
-# The set-up page opens over Today after the first login, and can hide the
-# tab bar from Maestro before it is seen.
-- extendedWaitUntil:
-    visible:
-      id: 'tab-notices|bell\.fill|setup-not-now'
-    timeout: 30000
-- extendedWaitUntil:
-    visible:
-      id: setup-not-now
-    timeout: 5000
-    optional: true
-- tapOn:
-    id: setup-not-now
-    optional: true
+      visible:
+        id: 'welcome-continue|login-username'
+    file: login_form.yaml
 # The app opens on Today; the flows start from the notices.
 - runFlow:
     file: tab.yaml
