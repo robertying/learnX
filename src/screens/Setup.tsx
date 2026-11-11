@@ -8,6 +8,7 @@ import { toast } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetupSeen, setWhatsNewSeen } from 'data/appState';
 import { setSetting, useSettings } from 'data/settings';
+import { calendarSettingsTitle } from 'helpers/eventDetails';
 import { t } from 'helpers/i18n';
 import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
@@ -150,16 +151,8 @@ const Setup: React.FC<Props> = ({ navigation }) => {
             onValueChange={choose('grades')}
           />
         </FormSection>
-        {/* Reminders sync is only on iOS, iPadOS and Mac (Settings ›
-            Calendars & Reminders). */}
-        <FormSection
-          title={
-            Platform.OS === 'ios'
-              ? t('calendarsAndReminders')
-              : t('setupCalendarSection')
-          }
-          footer={t('setupCaption')}
-        >
+        {/* Reminders sync is only on iOS, iPadOS and Mac. */}
+        <FormSection title={calendarSettingsTitle()} footer={t('setupCaption')}>
           <FormToggle
             icon="assignmentCalendar"
             title={t('setupCalendar')}

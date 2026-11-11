@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
@@ -161,7 +162,9 @@ const NotificationSettings: React.FC<Props> = () => {
         <FormSection
           title={t('assignments')}
           footer={[
-            t('notifyDeadlineRemindersCaption'),
+            Platform.OS === 'ios'
+              ? t('notifyDeadlineRemindersCaption')
+              : t('notifyDeadlineRemindersCaptionAndroid'),
             showExact && t('exactRemindersCaption'),
           ]
             .filter(Boolean)

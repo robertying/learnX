@@ -47,9 +47,9 @@ export default {
   opensourceDependencies: 'Open Source Libraries',
   noAssignmentDescription: 'No description',
   assignmentSyncNoCalendarPermission:
-    "Couldn't sync assignments. Give learnX full access to Calendars in Settings. If it already has access, restart learnX.",
+    "Couldn't sync assignments. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   assignmentSyncNoReminderPermission:
-    "Couldn't sync assignments. Give learnX access to Reminders in Settings. If it already has access, restart learnX.",
+    "Couldn't sync assignments. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
   assignmentSyncFailed: "Couldn't sync assignments: ",
   filePickFailed: "Couldn't open the file",
   assignmentSubmissionSucceeded: 'Assignment submitted',
@@ -79,25 +79,28 @@ export default {
   courseScheduleSyncPartial:
     "Some weeks of the course schedule couldn't be fetched and were left as they were. Try syncing again later.",
   courseScheduleSyncNoCalendarPermission:
-    "Couldn't sync the course schedule. Give learnX full access to Calendars in Settings. If it already has access, restart learnX.",
+    "Couldn't sync the course schedule. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   courseScheduleSyncRepetitiveError:
     "Couldn't sync the course schedule. Make sure you're on the campus network and try again. If it keeps failing, pick a shorter date range.",
   courseScheduleSyncNoCourse:
     'No classes in this date range. Check Web Learning for a schedule.',
   openSystemSettings: 'Open System Settings',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
+  deleteSyncedCalendars: 'Delete Synced Calendars',
   deleteSyncedCalendarsAndRemindersConfirmation:
     "Delete the calendars and reminder lists learnX created? This can't be undone.",
+  deleteSyncedCalendarsConfirmation:
+    "Delete the calendars learnX created? This can't be undone.",
   deleteSucceeded: 'Deleted',
   deleteFailedNoCalendarPermission:
-    "Couldn't delete. Give learnX full access to Calendars in Settings. If it already has access, restart learnX.",
+    "Couldn't delete. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   deleteFailedNoReminderPermission:
-    "Couldn't delete. Give learnX access to Reminders in Settings. If it already has access, restart learnX.",
+    "Couldn't delete. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: ",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
-    "Notifications for learnX are off in system settings, so the ones turned on below can't show.",
+    "Notifications for learnX are off in System Settings, so the ones turned on below can't show.",
   allowCalendarAccess: 'Allow Calendar Access',
   allowRemindersAccess: 'Allow Reminders Access',
   calendarOffCaption:
@@ -116,7 +119,7 @@ export default {
     "Saves the course schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
   calendarExportSavedToDownloads: 'Exported learnX.ics to Downloads',
   calendarExportNoCalendarPermission:
-    "Couldn't export. Give learnX full access to Calendars in Settings. If it already has access, restart learnX.",
+    "Couldn't export. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   calendarExportNoEvent:
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export: ",
@@ -148,7 +151,7 @@ export default {
   usernameOrId: 'Username or Student ID',
   password: 'Password',
   securityNote:
-    'Your credentials are stored only on this device and protected by the system',
+    'Your credentials are stored only on this device and protected by the system.',
   login: 'Log In',
   noNoticeContent: 'No content',
   itemNotFound: 'This item is no longer available',
@@ -251,14 +254,14 @@ export default {
     "Do you want to become a maintainer of learnX? Let's talk! Experience in frontend development is required, preferably with React.js; experience with React Native is a plus. Write to us:",
   anonymous: 'Anonymous',
   contributors: 'Contributors',
-  retryLogin: 'Log In With Saved Account',
+  retryLogin: 'Log In with Saved Account',
   offlineMode: 'Continue Offline',
   download: 'Download',
   downloadToDownloadsSucceeded: 'Saved to Downloads',
   downloadToDownloadsFailed: "Couldn't save to Downloads",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
-    'Please complete the login on the webpage that will open. If you need to change the pre-filled username or password, please close the webpage and re-enter the correct username and password on the learnX login screen.\n\nIf seeing an error on trusted browser limit, please log in to https://id.tsinghua.edu.cn in your browser, go to Settings - Two-factor Authentication - Number of trusted device browsers - Manage, and delete other devices.',
+    'Finish logging in on the web page that opens. To change the prefilled username or password, close the page and enter them again on the learnX login screen.\n\nIf you see an error about the trusted browser limit, log in to https://id.tsinghua.edu.cn in a browser, go to Settings - Two-factor Authentication - Number of trusted device browsers - Manage, and delete the other devices.',
   ssoFailed: "Couldn't finish logging in. Try again.",
   courseEventOmitLocation: 'Omit Location',
   fullscreen: 'Full Screen',
@@ -317,13 +320,15 @@ export default {
     'Reminds you before each class on your timetable. Opening learnX keeps them up to date for the next week or so.',
   notifySummary: '{count} Updates in {courses} Courses',
   notifyDeadlineRemindersCaption:
-    "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside calendar and Reminders alerts.",
+    "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside Calendar and Reminders alerts.",
+  notifyDeadlineRemindersCaptionAndroid:
+    "Reminds you of unsubmitted assignments before they're due, and when they can still be submitted late. Works alongside calendar alerts.",
   deadlineReminderOffset: 'Remind Before (Minutes)',
   allowExactReminders: 'Allow Exact Reminder Times',
   exactRemindersCaption:
     'Android may hold reminders back while your phone is idle. Allow alarms and reminders for learnX so they arrive on time.',
   notificationPermissionDenied:
-    'Notifications for learnX are turned off in system settings.',
+    'Notifications for learnX are turned off in System Settings.',
   notificationArchiveAll: 'Archive All',
   notificationRemindLater: 'Remind Me Later',
   // dayjs formats: text in [] is printed as is

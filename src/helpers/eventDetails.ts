@@ -13,6 +13,12 @@ import locationMappings from '../assets/locationMappings.json';
 import { beijingTime } from './serverTime';
 import { t } from './i18n';
 
+/** Settings › Calendar's name: Reminders sync is only on iOS, iPadOS and Mac. */
+export const calendarSettingsTitle = () =>
+  Platform.OS === 'ios'
+    ? t('calendarsAndReminders')
+    : t('setupCalendarSection');
+
 // Calendars are found by name, so translating these would orphan the ones
 // users already have.
 /* oxlint-disable learnx/no-han-outside-translations */

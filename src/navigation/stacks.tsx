@@ -33,6 +33,7 @@ import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
+import { calendarSettingsTitle } from 'helpers/eventDetails';
 import Downloads from 'screens/Downloads';
 import NotificationSettings from 'screens/NotificationSettings';
 import MockNetwork from 'screens/MockNetwork';
@@ -126,7 +127,7 @@ export const renderSettingDetails = () => (
     <SettingDetails.Screen
       name="CalendarEvent"
       component={CalendarEvent}
-      options={getTitleOptions(t('calendarsAndReminders'))}
+      options={getTitleOptions(calendarSettingsTitle())}
     />
     <SettingDetails.Screen
       name="SemesterSelection"

@@ -15,6 +15,7 @@ import { useLoggedIn } from 'data/auth';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
+import { calendarSettingsTitle } from 'helpers/eventDetails';
 import { t } from 'helpers/i18n';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
 import { MainStackScreenProps, SettingsStackParams } from './types';
@@ -99,7 +100,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
           <FormLink
             icon="calendar"
-            title={t('calendarsAndReminders')}
+            title={calendarSettingsTitle()}
             onPress={() => handlePush('CalendarEvent')}
           />
           <FormLink

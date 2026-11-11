@@ -316,7 +316,11 @@ const CalendarEvent: React.FC<Props> = () => {
         <FormSection>
           <FormButton
             icon="delete"
-            title={t('deleteSyncedCalendarsAndReminders')}
+            title={
+              Platform.OS === 'ios'
+                ? t('deleteSyncedCalendarsAndReminders')
+                : t('deleteSyncedCalendars')
+            }
             onPress={confirmDeleteCalendars}
           />
         </FormSection>
