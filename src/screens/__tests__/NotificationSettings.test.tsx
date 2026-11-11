@@ -115,3 +115,43 @@ it('changes the reminder offset', async () => {
   );
   expect(getSettings().notifications.deadlineReminderOffset).toBe(30);
 });
+
+it('puts class reminders before the assignment rows, as Calendar does', async () => {
+  await renderScreen();
+  const switches = screen
+    .getAllByRole('switch')
+    .map(item => item.props.accessibilityLabel);
+  expect(switches.indexOf(t('notifyClassReminders'))).toBeLessThan(
+    switches.indexOf(t('notifyDeadlineReminders')),
+  );
+  expect(screen.getByText(t('notifyClassRemindersCaption'))).toBeTruthy();
+});
+
+it('turns class reminders on and changes their offset', async () => {
+  await renderScreen();
+  expect(screen.queryByText(t('classReminderOffset'))).toBeNull();
+  await toggle('classReminders', true);
+  expect(getSettings().notifications.classReminders).toBe(true);
+  await fireEvent(
+    screen.getByLabelText(t('classReminderOffset')),
+    'valueChange',
+    10,
+  );
+  expect(getSettings().notifications.classReminderOffset).toBe(10);
+});
+
+it('offers exact reminders for class reminders too', async () => {
+  permission({ exactAlarms: false });
+  setSetting('notifications', {
+    ...getSettings().notifications,
+    classReminders: true,
+  });
+  await renderScreen();
+  expect(screen.getByText(t('allowExactReminders'))).toBeTruthy();
+});
+
+it('toggles group submissions', async () => {
+  await renderScreen();
+  await toggle('groupSubmissions', true);
+  expect(getSettings().notifications.groupSubmissions).toBe(true);
+});

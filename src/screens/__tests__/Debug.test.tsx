@@ -33,6 +33,9 @@ jest.mock('helpers/background', () => ({
 jest.mock('helpers/deadlineReminders', () => ({
   previewDeadlineReminder: jest.fn(async () => 3),
 }));
+jest.mock('helpers/classReminders', () => ({
+  previewClassReminder: jest.fn(async () => 0),
+}));
 jest.mock('data/content', () => ({
   ...jest.requireActual('data/content'),
   useNotices: () => ({
@@ -121,6 +124,13 @@ describe('Simulate New Content', () => {
     { id: 'open', submitted: false, deadline: future, graded: false },
     { id: 'graded', submitted: true, deadline: past, graded: true },
     { id: 'missed', submitted: false, deadline: past, graded: false },
+    {
+      id: 'group',
+      submitted: true,
+      deadline: past,
+      graded: false,
+      completionType: 2,
+    },
   ];
 
   beforeEach(() => {
@@ -144,7 +154,7 @@ describe('Simulate New Content', () => {
     await userEvent.press(screen.getByText('Simulate New Content'));
   };
 
-  it('forgets some items and grades, syncs, and posts what comes back', async () => {
+  it('forgets some items, grades and group submissions, syncs, and posts what comes back', async () => {
     jest.mocked(syncContent).mockImplementation(async () => {
       addSyncRun({
         startedAt: 0,
@@ -165,6 +175,7 @@ describe('Simulate New Content', () => {
     ).toEqual([
       expect.objectContaining({ id: 'graded', graded: false }),
       expect.objectContaining({ id: 'missed' }),
+      expect.objectContaining({ id: 'group', submitted: false }),
     ]);
     expect(syncContent).toHaveBeenCalledWith({ manual: true });
     expect(notifyContent).toHaveBeenCalledWith('diff', { inForeground: true });
@@ -230,6 +241,15 @@ it('says when there is no deadline reminder to preview', async () => {
   await userEvent.press(screen.getByText('Preview a Deadline Reminder'));
   expect(toast).toHaveBeenCalledWith(
     'No deadline reminders are scheduled.',
+    'warning',
+  );
+});
+
+it('says when there is no class reminder to preview', async () => {
+  await renderScreen();
+  await userEvent.press(screen.getByText('Preview a Class Reminder'));
+  expect(toast).toHaveBeenCalledWith(
+    'No class reminders are scheduled.',
     'warning',
   );
 });

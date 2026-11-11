@@ -4,6 +4,10 @@ import { clearQueryCache, queryClient } from 'data/queryClient';
 import { getCachedWeekSessions } from 'data/schedule';
 import { resetSettings, setSetting } from 'data/settings';
 import { resetUserData, setArchived, setCurrentSemester } from 'data/userData';
+import {
+  cancelClassReminders,
+  syncClassReminders,
+} from 'helpers/classReminders';
 import { syncDeadlineReminders } from 'helpers/deadlineReminders';
 import { saveUpcomingClasses, saveUpcomingDeadlines } from 'helpers/shortcuts';
 import { updateSpotlight } from 'helpers/spotlight';
@@ -37,6 +41,10 @@ jest.mock('helpers/shortcuts', () => ({
 jest.mock('helpers/deadlineReminders', () => ({
   syncDeadlineReminders: jest.fn(async () => {}),
   cancelDeadlineReminders: jest.fn(async () => {}),
+}));
+jest.mock('helpers/classReminders', () => ({
+  syncClassReminders: jest.fn(async () => {}),
+  cancelClassReminders: jest.fn(async () => {}),
 }));
 jest.mock('helpers/calendarSync', () => ({
   syncAssignments: jest.fn(async () => undefined),
@@ -176,6 +184,24 @@ it('feeds Up Next once the week is known', async () => {
     expect.objectContaining({ courseName: 'Course', start }),
   ]);
   expect(updateUpNextWidget).toHaveBeenCalledTimes(1);
+  expect(syncClassReminders).toHaveBeenCalledWith(
+    [expect.objectContaining({ courseName: 'Course', start })],
+    { settings: expect.objectContaining({ classReminders: false }) },
+  );
+});
+
+it('keeps the class reminders until the week is known', async () => {
+  jest
+    .mocked(getCachedWeekSessions)
+    .mockReturnValue({ sessions: [], source: 'none' });
+  cacheAssignments();
+  await refreshSurfaces();
+  expect(syncClassReminders).not.toHaveBeenCalled();
+});
+
+it('cancels the class reminders when cleared', async () => {
+  await clearSurfaces();
+  expect(cancelClassReminders).toHaveBeenCalled();
 });
 
 it('runs again after being cleared', async () => {

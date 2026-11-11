@@ -290,6 +290,12 @@ const zh: typeof en = {
   lateClosesTomorrow: '明天 {time} 停止补交',
   lateClosesAt: '{date} 停止补交',
   sampleGradeComment: '完成得不错。第二问没有考虑空树的情况。',
+  notificationChannelClasses: '上课提醒',
+  notifyClassReminders: '上课提醒',
+  classReminderOffset: '提前提醒（分钟）',
+  classStartsAt: '{time} 上课',
+  notifyClassRemindersCaption:
+    '在课表上每节课开始前提醒你。打开 learnX 会更新接下来约一周的提醒。',
   notifySummary: '{courses} 门课程有 {count} 条更新',
   notifyDeadlineRemindersCaption:
     '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。可与日历和提醒事项的提醒同时使用。',

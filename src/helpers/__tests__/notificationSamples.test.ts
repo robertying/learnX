@@ -90,9 +90,9 @@ it('makes the late submission reminders', () => {
 });
 
 it('posts them all', async () => {
-  await expect(postNotificationSamples(lists)).resolves.toBe(18);
+  await expect(postNotificationSamples(lists)).resolves.toBe(19);
   expect(postNotification).toHaveBeenCalledTimes(15);
-  expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(3);
+  expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(4);
   expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
     expect.objectContaining({
       content: expect.objectContaining({ title: 'Assignment 1' }),

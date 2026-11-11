@@ -11,6 +11,7 @@ import {
 } from 'helpers/contentNotifications';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { classReminderContent } from 'helpers/classReminders';
 import { reminderContent, ReminderKind } from 'helpers/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { notificationChannels, postNotification } from 'helpers/notifications';
@@ -115,6 +116,8 @@ export const sampleContentNotifications = (
       groupSubmissions: true,
       deadlineReminders: true,
       deadlineReminderOffset: 60,
+      classReminders: true,
+      classReminderOffset: 15,
     },
     notified: new Set(),
     hiddenCourses: [],
@@ -177,9 +180,23 @@ export const sampleReminder = (
 
 const reminderKinds: ReminderKind[] = ['due', 'lateOpen', 'lateDue'];
 
+/** A class reminder for `assignment`'s course, as it shows 15 minutes ahead. */
+export const sampleClassReminder = (
+  assignment: Pick<Assignment, 'courseId' | 'courseName'>,
+  now = dayjs(),
+) =>
+  classReminderContent({
+    key: 'sample',
+    courseName: assignment.courseName,
+    courseId: assignment.courseId,
+    location: 'A301',
+    start: now.add(15, 'minute').valueOf(),
+    end: now.add(110, 'minute').valueOf(),
+  });
+
 /**
  * Posts every sample: the content notifications, then a deadline reminder of
- * each kind. Resolves to how many were posted.
+ * each kind and a class reminder. Resolves to how many were posted.
  */
 export const postNotificationSamples = async (
   lists: Parameters<typeof sampleDiff>[0],
@@ -201,5 +218,12 @@ export const postNotificationSamples = async (
           : null,
     });
   }
-  return notifications.length + reminderKinds.length;
+  await Notifications.scheduleNotificationAsync({
+    content: sampleClassReminder(assignment),
+    trigger:
+      Platform.OS === 'android'
+        ? { channelId: notificationChannels.classes }
+        : null,
+  });
+  return notifications.length + reminderKinds.length + 1;
 };

@@ -21,7 +21,8 @@ type Props = NativeStackScreenProps<
   'NotificationSettings'
 >;
 
-type Toggle = Exclude<keyof Settings, 'deadlineReminderOffset'>;
+type Offset = 'deadlineReminderOffset' | 'classReminderOffset';
+type Toggle = Exclude<keyof Settings, Offset>;
 
 interface ToggleRow {
   key: Toggle;
@@ -70,7 +71,9 @@ const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
   const { permission, request, exactAlarms, requestExact } =
     useNotificationPermission();
-  const showExact = notifications.deadlineReminders && exactAlarms === false;
+  const showExact =
+    (notifications.deadlineReminders || notifications.classReminders) &&
+    exactAlarms === false;
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setSetting('notifications', { ...notifications, [key]: value });
@@ -96,7 +99,10 @@ const NotificationSettings: React.FC<Props> = () => {
   );
 
   const anyOn = (Object.keys(notifications) as (keyof Settings)[]).some(
-    key => key !== 'deadlineReminderOffset' && notifications[key],
+    key =>
+      key !== 'deadlineReminderOffset' &&
+      key !== 'classReminderOffset' &&
+      notifications[key],
   );
 
   return (
@@ -107,6 +113,26 @@ const NotificationSettings: React.FC<Props> = () => {
           footer={t('notificationsCaption')}
         >
           {contentToggles.map(renderToggle)}
+        </FormSection>
+        {/* Classes before assignments, as in Settings › Calendar. */}
+        <FormSection
+          title={t('schedule')}
+          footer={t('notifyClassRemindersCaption')}
+        >
+          <FormToggle
+            testID="notifications-classReminders"
+            icon="classReminder"
+            title={t('notifyClassReminders')}
+            value={notifications.classReminders}
+            onValueChange={value => handleToggle('classReminders', value)}
+          />
+          {notifications.classReminders && (
+            <FormNumberField
+              title={t('classReminderOffset')}
+              value={notifications.classReminderOffset}
+              onValueChange={value => set('classReminderOffset', value)}
+            />
+          )}
         </FormSection>
         <FormSection
           title={t('assignments')}

@@ -54,6 +54,7 @@ export const systemIcons = {
   grade: { ios: 'star', android: 'grade' },
   deadlineChange: { ios: 'clock.arrow.circlepath', android: 'update' },
   groupSubmission: { ios: 'person.3', android: 'groups' },
+  classReminder: { ios: 'graduationcap', android: 'school' },
   calendar: { ios: 'calendar', android: 'calendar_month' },
   addToCalendar: { ios: 'calendar.badge.plus', android: 'calendar_add_on' },
   assignmentCalendar: {
@@ -177,6 +178,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   radio_button_unchecked: 0xe836,
   routine: 0xe20c,
   schedule: 0xe8b5,
+  school: 0xe80c,
   search: 0xe8b6,
   search_off: 0xea76,
   handyman: 0xf10b,
