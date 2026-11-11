@@ -26,7 +26,7 @@ appId: ${APP_ID}
 # The password field submits the login on return.
 - pressKey: Enter
 # iOS offers to save the password to the keychain after a login; the alert
-# hides the app's accessibility tree until dismissed.
+# hides the app's accessibility tree until dismissed. The system's own labels.
 - runFlow:
     when:
       platform: iOS

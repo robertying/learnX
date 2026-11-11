@@ -1,9 +1,9 @@
-# Switch the current list's filter to the one labelled LABEL (a regex such
-# as 'Favorites(, .*)?|收藏(, .*)?', since iOS reads the count after the
-# label), from the filter button's pull-down menu.
+# Switch the current list's filter to the one labelled LABEL, from the filter
+# button's pull-down menu. LABEL is a regex such as '(${T_fav})(, .*)?', since
+# iOS reads the count after the label.
 appId: ${APP_ID}
 ---
-- tapOn: 'Filter|筛选'
+- tapOn: '${T_filter}'
 - waitForAnimationToEnd
 - tapOn: ${LABEL}
 - waitForAnimationToEnd
