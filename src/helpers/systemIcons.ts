@@ -62,10 +62,7 @@ export const systemIcons = {
   grade: { ios: 'star', android: 'grade' },
   deadlineChange: { ios: 'clock.arrow.circlepath', android: 'update' },
   // Narrow symbols: a form row's icon column is one symbol wide.
-  groupSubmission: {
-    ios: 'person.crop.circle.badge.checkmark',
-    android: 'groups',
-  },
+  groupSubmission: { ios: 'person.2.circle', android: 'groups' },
   calendar: { ios: 'calendar', android: 'calendar_month' },
   assignmentCalendar: {
     ios: 'calendar.badge.clock',
