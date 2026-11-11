@@ -98,7 +98,9 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
   // The header continues the gray grouped background on iOS instead of
   // sitting on it as a white bar: from iOS 26 the Form scrolls under the
   // header's glass, and before it the header is painted gray. Mac Forms are
-  // white, like the header.
+  // white, like the header. Scrolling under the glass needs a transparent
+  // header: with a clear background alone, the Form starts below the header,
+  // which then shows the screen's white behind it.
   useLayoutEffect(() => {
     if (DeviceInfo.isMac()) {
       return;
@@ -106,6 +108,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     navigation?.setOptions({
       // As in the Settings app, no hairline between the header and the Form.
       headerShadowVisible: false,
+      headerTransparent: DeviceInfo.hasLiquidGlass(),
       headerStyle: {
         backgroundColor: DeviceInfo.hasLiquidGlass()
           ? 'transparent'
@@ -117,6 +120,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     return () =>
       navigation?.setOptions({
         headerShadowVisible: undefined,
+        headerTransparent: undefined,
         headerStyle: undefined,
       });
   }, [navigation]);
