@@ -326,6 +326,20 @@ jobs:
           name: apk
           path: build
 
+      # scripts/e2e.sh reads the flows' labels and mock texts from the
+      # translations and mock data (scripts/e2e-env.mjs), which import packages.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       # scripts/e2e.sh types the mock login from .env; same values as the build.
       - name: Write .env
         run: printf 'DUMMY_USERNAME=e2e\nDUMMY_PASSWORD=e2e\n' > .env

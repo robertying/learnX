@@ -5,7 +5,7 @@ import {
   type RemoteFile,
 } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
-import { Assignment, Course, File, Notice, User } from 'data/types/state';
+import type { Assignment, Course, File, Notice, User } from 'data/types/state';
 import type { BookmarkType, UserData } from 'data/userData';
 
 /*
