@@ -1,0 +1,126 @@
+appId: ${APP_ID}
+name: Google Play screenshots on an Android tablet
+---
+# Run by scripts/store-screenshots.sh (android-tablet): the tablet shots of
+# the Play listing, as STORE_OUT/NN-<slug>.png. Details open beside the
+# lists.
+- runFlow: subflows/start.yaml
+
+# 1 Notices with a notice open
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_NOTICE}).*'
+      DETAIL: notice-detail
+# Its body is a web view that renders after the screen shows.
+- extendedWaitUntil:
+    visible: '.*(${MOCK_STORE_NOTICE_BODY}).*'
+    timeout: 15000
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 01-notices
+
+# 2 All assignments with one open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments'
+- runFlow:
+    file: ../subflows/filter.yaml
+    env:
+      LABEL: '(${T_all})(, .*)?'
+# Its card is below the list pane's end, and the notice open beside the list
+# has the same title: match the card by its label (the title, then a comma)
+# and scroll the list pane itself (scrollUntilVisible swipes the middle of
+# the screen, which is the detail pane).
+- repeat:
+    times: 4
+    while:
+      notVisible: '(.*, )?(${MOCK_STORE_ASSIGNMENT}), .*'
+    commands:
+      - swipe:
+          start: 4%,75%
+          end: 4%,35%
+          duration: 600
+      - waitForAnimationToEnd
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '(.*, )?(${MOCK_STORE_ASSIGNMENT}), .*'
+      DETAIL: assignment-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 02-assignments
+
+# 3 Submitting it
+- runFlow: subflows/submission.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 03-submission
+
+# 4 Files with a PDF open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-files'
+- runFlow: subflows/file.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 04-file
+
+# 5 Courses with one open
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-courses'
+- runFlow:
+    file: ../subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_STORE_COURSE}).*'
+      DETAIL: course-detail
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 05-courses
+
+# 6 Search
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices'
+- runFlow:
+    file: ../subflows/search.yaml
+    env:
+      TERM: ${STORE_SEARCH_TERM}
+      RESULT: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+- hideKeyboard
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 06-search
+# The first back clears the query and brings the keyboard back: go back
+# until search is closed, or Settings below would match Gboard's gear.
+- back
+- waitForAnimationToEnd
+- repeat:
+    times: 3
+    while:
+      visible: '${T_searchPrompt}'
+    commands:
+      - back
+      - waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      id: tab-notices
+    timeout: 10000
+
+# 7 Settings with the calendar page open
+- runFlow: subflows/calendar.yaml
+- runFlow:
+    file: ../subflows/screenshot.yaml
+    env:
+      NAME: 07-calendar

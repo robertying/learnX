@@ -19,7 +19,8 @@
     "e2e:ios": "scripts/e2e.sh ios",
     "e2e:android": "scripts/e2e.sh android",
     "e2e:devices": "scripts/e2e-devices.sh",
-    "e2e:mac": "scripts/e2e-mac.sh"
+    "e2e:mac": "scripts/e2e-mac.sh",
+    "e2e:store": "scripts/store-screenshots.sh"
   },
   "dependencies": {
     "@babel/core": "7.29.13",

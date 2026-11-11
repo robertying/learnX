@@ -1,0 +1,8 @@
+# Save the screen, once it has settled (scroll bars faded, transitions done),
+# as $STORE_OUT/$NAME$STORE_SUFFIX.png. Only the store flows (.maestro/store/)
+# use it; scripts/store-screenshots.sh passes STORE_OUT and STORE_SUFFIX.
+appId: ${APP_ID}
+---
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: ${STORE_OUT}/${NAME}${STORE_SUFFIX}

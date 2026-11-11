@@ -5,7 +5,7 @@
 // No Node types in this project: just the calls used here.
 declare const __dirname: string;
 const fs: {
-  readdirSync: (dir: string) => string[];
+  readdirSync: (dir: string, options: { recursive: true }) => string[];
   readFileSync: (file: string, encoding: 'utf8') => string;
 } = require('fs');
 const { join }: { join: (...parts: string[]) => string } = require('path');
@@ -22,10 +22,10 @@ const {
 const root = join(__dirname, '../../..');
 const maestroDir = join(root, '.maestro');
 
-const flows = [
-  ...fs.readdirSync(maestroDir),
-  ...fs.readdirSync(join(maestroDir, 'subflows')).map(n => `subflows/${n}`),
-].filter(name => name.endsWith('.yaml'));
+// Every folder: the tests, their subflows and the store screenshots.
+const flows = fs
+  .readdirSync(maestroDir, { recursive: true })
+  .filter(name => name.endsWith('.yaml'));
 
 const used = new Set(
   flows.flatMap(name =>
