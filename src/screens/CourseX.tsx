@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Linking, Platform, StyleSheet } from 'react-native';
-import ProgressBar from 'components/ProgressBar';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import PageProgressBar from 'components/PageProgressBar';
 import WebView, { WebViewNavigation } from 'react-native-webview';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
@@ -19,6 +20,7 @@ const CourseX: React.FC<Props> = ({ route }) => {
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoForward, setCanGoForward] = useState(false);
   const [toolbarOverlap, setToolbarOverlap] = useState(0);
+  const insets = useSafeAreaInsets();
 
   const handleNavigation = (e: WebViewNavigation) => {
     setCurrentUrl(e.url);
@@ -28,7 +30,7 @@ const CourseX: React.FC<Props> = ({ route }) => {
 
   return (
     <SafeArea>
-      {loading ? <ProgressBar progress={progress} /> : null}
+      {loading ? <PageProgressBar progress={progress} /> : null}
       <WebView
         ref={webViewRef}
         style={styles.webview}
@@ -38,8 +40,11 @@ const CourseX: React.FC<Props> = ({ route }) => {
         }}
         originWhitelist={['https://']}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-        // The iOS toolbar floats over the page, so the page scrolls clear of it.
-        contentInset={{ bottom: toolbarOverlap }}
+        // Below the header, and under its glass from iOS 26. The iOS toolbar
+        // floats over the page, so the page scrolls clear of it too; the
+        // automatic inset already covers the bottom safe area.
+        contentInsetAdjustmentBehavior="automatic"
+        contentInset={{ bottom: Math.max(0, toolbarOverlap - insets.bottom) }}
         onLoadProgress={onLoadProgress}
         onNavigationStateChange={handleNavigation}
       />

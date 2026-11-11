@@ -1,6 +1,6 @@
 import { Platform, StyleSheet } from 'react-native';
 import WebView from 'react-native-webview';
-import ProgressBar from 'components/ProgressBar';
+import PageProgressBar from 'components/PageProgressBar';
 import SafeArea from 'components/SafeArea';
 import useWebViewProgress from 'hooks/useWebViewProgress';
 
@@ -12,27 +12,20 @@ const Changelog: React.FC = () => {
 
   return (
     <SafeArea>
-      {loading ? (
-        <ProgressBar style={styles.progressBar} progress={progress} />
-      ) : null}
+      {loading ? <PageProgressBar progress={progress} /> : null}
       <WebView
         style={styles.webView}
         source={{ uri: releasesUrl }}
         onLoadProgress={onLoadProgress}
         decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
+        // Below the header, and under its glass from iOS 26.
+        contentInsetAdjustmentBehavior="automatic"
       />
     </SafeArea>
   );
 };
 
 const styles = StyleSheet.create({
-  progressBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: 99,
-  },
   webView: {
     backgroundColor: 'transparent',
   },
