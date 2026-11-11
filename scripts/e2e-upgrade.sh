@@ -68,7 +68,8 @@ build_baseline() {
   mkdir -p "$baseline"
   case "$platform" in
   ios)
-    (cd "$worktree/ios" && bundle exec pod install)
+    # 18.0.3 predates the Gemfile: use the current one for the locked CocoaPods.
+    (cd "$worktree/ios" && LANG=en_US.UTF-8 BUNDLE_GEMFILE="$repo/Gemfile" bundle exec pod install)
     local derived="$worktree/ios/build"
     # No dSYM, so 18.0.3's Crashlytics phase uploads nothing.
     xcodebuild build \

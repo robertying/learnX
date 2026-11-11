@@ -19,76 +19,122 @@ appId: ${APP_ID}
 - tapOn: 'Password'
 - inputText: ${PASSWORD}
 - tapOn: 'Login'
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 15000
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+# Not 18.0.3's: iOS's own offer to save the password, which comes up a moment
+# after the login and covers the app. It is not in the view hierarchy (the
+# app's elements are gone while it shows, so Settings isn't visible), but its
+# Not Now button can be tapped by position.
 - runFlow:
     when:
       platform: iOS
+      notVisible: 'Settings'
     commands:
       - tapOn:
-          text: 'Not Now'
-          optional: true
+          point: 32%, 63%
 - extendedWaitUntil:
     visible: 'Settings'
     timeout: 30000
 
-# Settings › Calendars & Reminders. Each switch sits right of its label.
+# Settings › Calendars & Reminders.
 - tapOn: 'Settings'
-- tapOn: 'Calendars & Reminders'
-- tapOn:
-    rightOf: 'Graduate'
-- tapOn:
-    rightOf: 'Class Alert'
-- tapOn:
-    rightOf: 'Omit Location'
-# Writes every assignment to a new "learnX 作业" calendar.
-- tapOn:
-    rightOf: 'Assignment Calendar Sync'
-- extendedWaitUntil:
-    notVisible: '.*[Ff]ailed.*'
-    timeout: 5000
-    optional: true
+- tapOn: '.*, Calendars & Reminders, .*'
 - runFlow:
     when:
       platform: iOS
     commands:
-      - scrollUntilVisible:
-          element: 'Assignment Reminder Sync'
+      # Assignment Reminder Sync, Assignment Calendar Sync (writes every
+      # assignment to a new "learnX 作业" calendar), Omit Location, Class Alert,
+      # Graduate.
       - tapOn:
-          rightOf: 'Assignment Reminder Sync'
-- back:
-    optional: true
-- runFlow:
-    when:
-      platform: iOS
-    commands:
+          point: 88%, 67%
+      - tapOn:
+          point: 88%, 53%
+      - tapOn:
+          point: 88%, 38%
+      - tapOn:
+          point: 88%, 32%
+      - tapOn:
+          point: 88%, 20%
+      - waitForAnimationToEnd:
+          timeout: 5000
       - swipe:
           start: 2%, 50%
           end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          rightOf: '.*, Graduate'
+      - tapOn:
+          rightOf: '.*, Class Alert'
+      - tapOn:
+          rightOf: '.*, Omit Location'
+      - tapOn:
+          rightOf: '.*, Assignment Calendar Sync'
+      - tapOn:
+          rightOf: '.*, Assignment Reminder Sync'
+      - back
 
-# Settings › Files: both 18.0.3-only settings on, and open after download.
-- tapOn: 'Files'
-- tapOn:
-    rightOf: 'Save Downloaded Files to Documents'
-- tapOn:
-    rightOf: 'Omit Course Name in Filenames'
-- tapOn:
-    rightOf: 'Open downloaded files automatically'
-    optional: true
-- back:
-    optional: true
+# Settings › Files: the 18.0.3-only settings on. Open after download is an
+# Android setting.
+- tapOn: '.*, Files, .*'
 - runFlow:
     when:
       platform: iOS
     commands:
+      - tapOn:
+          point: 88%, 35%
+      - tapOn:
+          point: 88%, 20%
       - swipe:
           start: 2%, 50%
           end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          rightOf: '.*, Save Downloaded Files to Documents'
+      - tapOn:
+          rightOf: '.*, Omit Course Name in Filenames'
+      - tapOn:
+          rightOf: '.*, Open downloaded files automatically'
+      - back
 
 # Opening it marks its badge seen; joining asks first.
-- tapOn: 'Course Information Sharing'
-- tapOn:
-    rightOf: 'Course Information Sharing'
-    index: 0
+- tapOn: '.*, Course Information Sharing, .*'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 88%, 20%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          rightOf: '.*, Course Information Sharing'
 - tapOn: 'Ok'
+
+# 18.0.3 syncs the assignments to the calendar and Reminders when it refreshes
+# them: pull the list down so it saves the entries' ids.
+- tapOn: 'Assignments'
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+- waitForAnimationToEnd:
+    timeout: 10000
+# It writes one event at a time.
+- extendedWaitUntil:
+    notVisible: 'sync-done-never-shown'
+    timeout: 15000
 
 # Let redux-persist write, then leave 18.0.3 as a user would.
 - waitForAnimationToEnd

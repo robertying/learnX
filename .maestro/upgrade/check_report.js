@@ -46,7 +46,8 @@ if (report === null) {
   const s = report.settings;
   expect('settings.graduate', s.graduate, true);
   expect('settings.courseEventOmitLocation', s.courseEventOmitLocation, true);
-  expect('settings.openFileAfterDownload', s.openFileAfterDownload, true);
+  // 18.0.3 had this switch on Android only.
+  expect('settings.openFileAfterDownload', s.openFileAfterDownload, !ios);
   expect('settings.courseInformationSharing', s.courseInformationSharing, true);
   expect('settings.assignmentCalendarSync', s.assignmentCalendarSync, true);
   expect('settings.assignmentReminderSync', s.assignmentReminderSync, ios);

@@ -7,7 +7,8 @@ appId: ${APP_ID}
 - launchApp:
     stopApp: true
     arguments:
-      storeReport: true
+      # A string: Maestro leaves the dash off a boolean's name on iOS.
+      storeReport: 'true'
       mockLatency: none
 - extendedWaitUntil:
     visible:
@@ -64,7 +65,8 @@ appId: ${APP_ID}
 - launchApp:
     stopApp: true
     arguments:
-      storeReport: true
+      # A string: Maestro leaves the dash off a boolean's name on iOS.
+      storeReport: 'true'
       mockLatency: none
 - extendedWaitUntil:
     visible:
