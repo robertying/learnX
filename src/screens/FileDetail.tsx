@@ -23,6 +23,7 @@ import {
   FormButton,
   FormParagraph,
   FormSection,
+  FormScreen,
   FormText,
 } from 'components/Form';
 
@@ -98,8 +99,12 @@ const FileDetailContent: React.FC<{
     onToggleInfo: handleShowInfo,
   });
 
+  // The details are a Form, which keeps to the safe area itself.
+  const showsDetails = !error && !!path && (showInfo || !canRender);
+  const Root = showsDetails ? FormScreen : SafeArea;
+
   return (
-    <SafeArea testID="file-detail" collapsable={false}>
+    <Root testID="file-detail" collapsable={false}>
       {error ? (
         // Keys of their own: React would otherwise reuse one View for the
         // error and the loading state below.
@@ -138,7 +143,7 @@ const FileDetailContent: React.FC<{
           onOpen={open}
         />
       )}
-    </SafeArea>
+    </Root>
   );
 };
 

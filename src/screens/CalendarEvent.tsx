@@ -6,10 +6,10 @@ import {
   Form,
   FormButton,
   FormNumberField,
+  FormScreen,
   FormSection,
   FormToggle,
 } from 'components/Form';
-import SafeArea from 'components/SafeArea';
 import { SyncKind, useCalendarSyncStore } from 'data/calendarSync';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
@@ -71,14 +71,16 @@ const CalendarEvent: React.FC<Props> = () => {
           }),
       ]
         .filter(Boolean)
-        .join('\n\n') || undefined
+        // One line apart, not a paragraph: a blank line before it would leave
+        // the time nearer the next section's title than its own caption.
+        .join('\n') || undefined
     );
   };
 
   const assignmentSyncFooter = t('assignmentSyncDescription');
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         <FormSection
           title={t('schedule')}
@@ -256,15 +258,26 @@ const CalendarEvent: React.FC<Props> = () => {
             onPress={exportToICS}
             loading={exporting}
           />
-          <FormButton
-            icon="delete"
-            title={t('deleteSyncedCalendarsAndReminders')}
-            onPress={confirmDeleteCalendars}
-          />
+        </FormSection>
+        <FormSection
+          footer={
+            Platform.OS === 'ios'
+              ? t('calendarAndReminderAccessCaption')
+              : t('calendarAccessCaption')
+          }
+        >
           <FormButton
             icon="settings"
             title={t('configureCalendarAndReminder')}
             onPress={() => openSystemSettings('security')}
+          />
+        </FormSection>
+        {/* Last and on its own, as Apple's settings end with what deletes. */}
+        <FormSection>
+          <FormButton
+            icon="delete"
+            title={t('deleteSyncedCalendarsAndReminders')}
+            onPress={confirmDeleteCalendars}
           />
         </FormSection>
       </Form>
@@ -280,7 +293,7 @@ const CalendarEvent: React.FC<Props> = () => {
         onDismiss={picker.closePicker}
         onConfirm={picker.onRangeConfirm}
       />
-    </SafeArea>
+    </FormScreen>
   );
 };
 

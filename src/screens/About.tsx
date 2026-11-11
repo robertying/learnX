@@ -1,8 +1,13 @@
 import { Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DeviceInfo from 'constants/DeviceInfo';
-import SafeArea from 'components/SafeArea';
-import { Form, FormButton, FormSection, FormText } from 'components/Form';
+import {
+  Form,
+  FormButton,
+  FormScreen,
+  FormSection,
+  FormText,
+} from 'components/Form';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from './types';
 import packageJson from '../../package.json';
@@ -20,7 +25,7 @@ const openGitHub = (path: string) =>
   Linking.openURL(`https://github.com/${path}`);
 
 const About: React.FC<Props> = () => (
-  <SafeArea>
+  <FormScreen>
     <Form>
       <FormSection footer="© 2026 Rui Ying">
         <FormText
@@ -67,7 +72,7 @@ const About: React.FC<Props> = () => (
         ))}
       </FormSection>
     </Form>
-  </SafeArea>
+  </FormScreen>
 );
 
 export default About;

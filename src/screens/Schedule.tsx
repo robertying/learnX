@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { classDetails, itemRow } from 'components/ClassRow';
-import { Form, FormSection, FormText } from 'components/Form';
-import SafeArea from 'components/SafeArea';
+import { Form, FormScreen, FormSection, FormText } from 'components/Form';
 import { useWeekSchedule } from 'data/schedule';
 import { t } from 'helpers/i18n';
 import { beijingDate } from 'helpers/serverTime';
@@ -59,7 +58,7 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
       : undefined;
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form testID="schedule" onRefresh={pullToRefresh.onRefresh}>
         {days.map((day, i) => (
           <FormSection
@@ -94,7 +93,7 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
           </FormSection>
         ))}
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

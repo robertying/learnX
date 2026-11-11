@@ -4,10 +4,10 @@ import {
   FormButton,
   FormIcon,
   FormNumberField,
+  FormScreen,
   FormSection,
   FormToggle,
 } from 'components/Form';
-import SafeArea from 'components/SafeArea';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
@@ -95,7 +95,7 @@ const NotificationSettings: React.FC<Props> = () => {
   );
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         <FormSection
           title={t('setupNewContent')}
@@ -146,7 +146,7 @@ const NotificationSettings: React.FC<Props> = () => {
           />
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

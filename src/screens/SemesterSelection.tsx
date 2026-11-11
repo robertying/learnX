@@ -1,7 +1,6 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useQuery } from '@tanstack/react-query';
-import { Form, FormButton, FormSection } from 'components/Form';
-import SafeArea from 'components/SafeArea';
+import { Form, FormButton, FormScreen, FormSection } from 'components/Form';
 import {
   schoolSemesterQuery,
   selectSemesterId,
@@ -42,7 +41,7 @@ const SemesterSelection: React.FC<Props> = () => {
       : semesters;
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form onRefresh={handleRefresh}>
         <FormSection>
           {choices.map(semester => (
@@ -55,7 +54,7 @@ const SemesterSelection: React.FC<Props> = () => {
           ))}
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 

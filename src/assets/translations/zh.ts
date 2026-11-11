@@ -95,6 +95,9 @@ const zh: typeof en = {
     '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX',
   deleteFailed: '删除失败：',
   exportSyncedCalendars: '导出已同步的日程（.ics）',
+  calendarAccessCaption: '如果 learnX 无法访问日历，请在系统设置中允许。',
+  calendarAndReminderAccessCaption:
+    '如果 learnX 无法访问日历或提醒事项，请在系统设置中允许。',
   exportSyncedCalendarsDescription:
     '将已同步到日历的课表与作业导出为 .ics 文件，可导入其他日历应用；不包含提醒事项。',
   calendarExportSavedToDownloads: '已将 learnX.ics 导出到“下载”文件夹',

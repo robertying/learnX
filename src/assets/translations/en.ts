@@ -95,6 +95,10 @@ export default {
     "Couldn't delete. Give learnX access to Reminders in Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: ",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
+  calendarAccessCaption:
+    "If learnX can't access your calendars, allow it in System Settings.",
+  calendarAndReminderAccessCaption:
+    "If learnX can't access your calendars or reminders, allow it in System Settings.",
   exportSyncedCalendarsDescription:
     "Saves the course schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
   calendarExportSavedToDownloads: 'Exported learnX.ics to Downloads',

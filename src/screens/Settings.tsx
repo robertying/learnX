@@ -1,11 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Alert, Linking } from 'react-native';
-import SafeArea from 'components/SafeArea';
 import {
   Form,
   FormButton,
   FormLink,
   FormProfile,
+  FormScreen,
   FormSection,
 } from 'components/Form';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
@@ -71,7 +71,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <SafeArea>
+    <FormScreen>
       <Form>
         <FormSection>
           <FormProfile
@@ -160,7 +160,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           />
         </FormSection>
       </Form>
-    </SafeArea>
+    </FormScreen>
   );
 };
 
