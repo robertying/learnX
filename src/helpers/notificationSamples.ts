@@ -1,6 +1,7 @@
 // Debug builds: every kind of notification learnX posts, made from the
 // cached items through the same code a sync uses, for reviewing their text.
 import dayjs from 'dayjs';
+import { HomeworkCompletionType } from '@robertying/thu-learn-lib';
 import { ContentDiff } from 'data/contentDiff';
 import { Assignment, File, Notice } from 'data/types/state';
 import {
@@ -10,7 +11,8 @@ import {
 } from 'helpers/contentNotifications';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
-import { reminderContent } from 'helpers/deadlineReminders';
+import { reminderContent, ReminderKind } from 'helpers/deadlineReminders';
+import { t } from 'helpers/i18n';
 import { notificationChannels, postNotification } from 'helpers/notifications';
 
 /** How many items of each kind: one opens itself, two make a list. */
@@ -64,11 +66,32 @@ export const sampleDiff = (
       added: assignments('new'),
       graded: assignments('graded').map(a => ({
         before: a,
-        after: { ...a, graded: true, grade: 95, gradeLevel: undefined },
+        after: {
+          ...a,
+          graded: true,
+          grade: 95,
+          gradeLevel: undefined,
+          gradeContent: t('sampleGradeComment'),
+        },
       })),
+      commented: assignments('comment').map(a => {
+        const before = { ...a, graded: true, grade: 95, gradeLevel: undefined };
+        return {
+          before,
+          after: { ...before, gradeContent: t('sampleGradeComment') },
+        };
+      }),
       deadlineChanged: assignments('deadline').map(a => ({
         before: a,
         after: { ...a, deadline: later },
+      })),
+      groupSubmitted: assignments('group').map(a => ({
+        before: { ...a, completionType: HomeworkCompletionType.GROUP },
+        after: {
+          ...a,
+          completionType: HomeworkCompletionType.GROUP,
+          submitted: true,
+        },
       })),
     },
   };
@@ -89,6 +112,7 @@ export const sampleContentNotifications = (
       assignments: true,
       grades: true,
       deadlineChanges: true,
+      groupSubmissions: true,
       deadlineReminders: true,
       deadlineReminderOffset: 60,
     },
@@ -116,14 +140,29 @@ export const sampleNoticeNotification = (notice: Notice, now = dayjs()) =>
         added: [{ ...notice, hasRead: false, publishTime: now.toISOString() }],
       },
       files: { added: [] },
-      assignments: { added: [], graded: [], deadlineChanged: [] },
+      assignments: {
+        added: [],
+        graded: [],
+        commented: [],
+        deadlineChanged: [],
+        groupSubmitted: [],
+      },
     },
     now,
   )[0];
 
-/** A deadline reminder for `assignment`, as it shows an hour before. */
-export const sampleReminder = (assignment: Assignment, now = dayjs()) => {
-  const deadline = now.add(1, 'hour');
+/**
+ * A deadline reminder for `assignment`, as it shows an hour before the
+ * deadline, or for the late kinds, as it shows at the deadline (late
+ * submission open for two more days) and an hour before late submission
+ * closes.
+ */
+export const sampleReminder = (
+  assignment: Assignment,
+  now = dayjs(),
+  kind: ReminderKind = 'due',
+) => {
+  const deadline = kind === 'lateOpen' ? now.add(2, 'day') : now.add(1, 'hour');
   return reminderContent(
     {
       id: assignment.id,
@@ -132,12 +171,15 @@ export const sampleReminder = (assignment: Assignment, now = dayjs()) => {
       deadline: deadline.valueOf(),
     },
     now.valueOf(),
+    kind,
   );
 };
 
+const reminderKinds: ReminderKind[] = ['due', 'lateOpen', 'lateDue'];
+
 /**
- * Posts every sample: the content notifications, then a deadline reminder.
- * Resolves to how many were posted.
+ * Posts every sample: the content notifications, then a deadline reminder of
+ * each kind. Resolves to how many were posted.
  */
 export const postNotificationSamples = async (
   lists: Parameters<typeof sampleDiff>[0],
@@ -150,12 +192,14 @@ export const postNotificationSamples = async (
   if (!assignment) {
     return notifications.length;
   }
-  await Notifications.scheduleNotificationAsync({
-    content: sampleReminder(assignment),
-    trigger:
-      Platform.OS === 'android'
-        ? { channelId: notificationChannels.deadlines }
-        : null,
-  });
-  return notifications.length + 1;
+  for (const kind of reminderKinds) {
+    await Notifications.scheduleNotificationAsync({
+      content: sampleReminder(assignment, dayjs(), kind),
+      trigger:
+        Platform.OS === 'android'
+          ? { channelId: notificationChannels.deadlines }
+          : null,
+    });
+  }
+  return notifications.length + reminderKinds.length;
 };

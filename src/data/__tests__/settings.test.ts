@@ -42,6 +42,7 @@ describe('settings', () => {
          "deadlineReminders": false,
          "files": false,
          "grades": false,
+         "groupSubmissions": false,
          "notices": false,
        },
        "openFileAfterDownload": false,

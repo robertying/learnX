@@ -26,6 +26,9 @@ export interface NotificationSettings {
   assignments: boolean;
   grades: boolean;
   deadlineChanges: boolean;
+  /** A group assignment submitted by someone else in the group. */
+  groupSubmissions: boolean;
+  /** Includes the late submission window, when there is one. */
   deadlineReminders: boolean;
   /** Minutes before an assignment's deadline to remind the user. */
   deadlineReminderOffset: number;

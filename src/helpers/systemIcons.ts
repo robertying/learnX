@@ -53,6 +53,7 @@ export const systemIcons = {
   notifications: { ios: 'bell.badge', android: 'notifications_active' },
   grade: { ios: 'star', android: 'grade' },
   deadlineChange: { ios: 'clock.arrow.circlepath', android: 'update' },
+  groupSubmission: { ios: 'person.3', android: 'groups' },
   calendar: { ios: 'calendar', android: 'calendar_month' },
   addToCalendar: { ios: 'calendar.badge.plus', android: 'calendar_add_on' },
   assignmentCalendar: {
@@ -149,6 +150,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   gpp_maybe: 0xf014,
   grade: 0xe885,
   group: 0xe7ef,
+  groups: 0xf233,
   hard_drive: 0xf80e,
   heart_minus: 0xf883,
   help: 0xe887,

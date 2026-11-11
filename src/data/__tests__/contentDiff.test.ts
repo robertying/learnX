@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
-import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
+import {
+  HomeworkCompletionType,
+  HomeworkGradeLevel,
+} from '@robertying/thu-learn-lib';
 import { diffById, diffContent, isContentDiffEmpty } from 'data/contentDiff';
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Assignment } from 'data/types/state';
@@ -77,6 +80,8 @@ describe('diffContent', () => {
         .map(n => ({ ...n, hasRead: !n.hasRead, title: `${n.title}!` })),
       assignments: mockAssignments.map(a => ({
         ...a,
+        // A group assignment becoming submitted is news.
+        completionType: HomeworkCompletionType.INDIVIDUAL,
         submitted: !a.submitted,
         description: 'edited',
       })),
@@ -107,7 +112,9 @@ describe('diffContent', () => {
       expect(change(ungraded, after)).toEqual({
         added: [],
         graded: [{ before: ungraded, after }],
+        commented: [],
         deadlineChanged: [],
+        groupSubmitted: [],
       });
     });
 
@@ -150,7 +157,9 @@ describe('diffContent', () => {
       expect(change(ungraded, moved)).toEqual({
         added: [],
         graded: [],
+        commented: [],
         deadlineChanged: [{ before: ungraded, after: moved }],
+        groupSubmitted: [],
       });
       const late = { ...ungraded, lateSubmissionDeadline: later };
       expect(change(ungraded, late).deadlineChanged).toHaveLength(1);
@@ -163,6 +172,49 @@ describe('diffContent', () => {
       };
       expect(sameMoment.deadline).not.toBe(ungraded.deadline);
       expect(change(ungraded, sameMoment).deadlineChanged).toEqual([]);
+    });
+
+    it("reports a grader's comment that came or changed after the grade", () => {
+      const plain = { ...graded, gradeContent: undefined };
+      const commented = { ...plain, gradeContent: 'Good work' };
+      expect(change(plain, commented).commented).toEqual([
+        { before: plain, after: commented },
+      ]);
+      const edited = { ...commented, gradeContent: 'Better work' };
+      expect(change(commented, edited).commented).toHaveLength(1);
+      // Only spaces changed, or the comment taken away
+      const spaced = { ...commented, gradeContent: ' Good work ' };
+      expect(change(commented, spaced).commented).toEqual([]);
+      expect(change(commented, plain).commented).toEqual([]);
+    });
+
+    it('leaves the comment of a new grade to the grade', () => {
+      const after = { ...ungraded, graded: true, grade: 1, gradeContent: 'Ok' };
+      const { graded: g, commented } = change(ungraded, after);
+      expect(g).toHaveLength(1);
+      expect(commented).toEqual([]);
+      const regraded = { ...graded, grade: 2, gradeContent: 'Better' };
+      expect(change(graded, regraded).commented).toEqual([]);
+    });
+
+    it('reports a group assignment that became submitted', () => {
+      const group = {
+        ...ungraded,
+        submitted: false,
+        completionType: HomeworkCompletionType.GROUP,
+      };
+      const submitted = { ...group, submitted: true };
+      expect(change(group, submitted).groupSubmitted).toEqual([
+        { before: group, after: submitted },
+      ]);
+      expect(change(submitted, group).groupSubmitted).toEqual([]);
+      const individual = {
+        ...group,
+        completionType: HomeworkCompletionType.INDIVIDUAL,
+      };
+      expect(
+        change(individual, { ...individual, submitted: true }).groupSubmitted,
+      ).toEqual([]);
     });
 
     it('reports an assignment both graded and moved under both', () => {

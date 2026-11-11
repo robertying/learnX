@@ -61,8 +61,10 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         setSetting('notifications', {
           ...notifications,
           ...chosen,
-          // A new assignment's deadline moving is news about it too.
+          // A new assignment's deadline moving, or its group submitting it,
+          // is news about it too.
           deadlineChanges: chosen.assignments,
+          groupSubmissions: chosen.assignments,
         });
       } else {
         toast(t('notificationPermissionDenied'), 'error');

@@ -143,7 +143,13 @@ it('reports nothing new on the first sync', async () => {
     status: 'synced',
     diff: {
       notices: { added: [] },
-      assignments: { added: [], graded: [], deadlineChanged: [] },
+      assignments: {
+        added: [],
+        graded: [],
+        commented: [],
+        deadlineChanged: [],
+        groupSubmitted: [],
+      },
       files: { added: [] },
     },
   });
@@ -313,7 +319,13 @@ describe('notifyContent', () => {
   };
   const diff = (): ContentDiff => ({
     notices: { added: [unread] },
-    assignments: { added: [], graded: [], deadlineChanged: [] },
+    assignments: {
+      added: [],
+      graded: [],
+      commented: [],
+      deadlineChanged: [],
+      groupSubmitted: [],
+    },
     files: { added: [] },
   });
   const setAppState = (state: string) =>
