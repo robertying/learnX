@@ -20,9 +20,10 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 /**
  * The page after the first login: turns on notifications of new content (in
  * the tabs' order), class and deadline reminders and grades (all on to start
- * with), and calendar sync and, on Apple platforms, Reminders sync (off). All of them
- * start off in Settings; Done asks for the permissions they need. Opened by
- * `useLaunchSheet`, once.
+ * with), and calendar sync and, on Apple platforms, Reminders sync (off). All
+ * of them start off in Settings. Done saves the choices and asks for the
+ * permissions they need; notifications chosen stay on if that's denied, and
+ * start working once they're allowed. Opened by `useLaunchSheet`, once.
  */
 const Setup: React.FC<Props> = ({ navigation }) => {
   const theme = useTheme();
@@ -58,16 +59,17 @@ const Setup: React.FC<Props> = ({ navigation }) => {
     setSaving(true);
     const { calendar, reminders, ...chosen } = choices;
     if (Object.values(chosen).some(Boolean)) {
-      if (await request()) {
-        setSetting('notifications', {
-          ...notifications,
-          ...chosen,
-          // A new assignment's deadline moving, or its group submitting it,
-          // is news about it too.
-          deadlineChanges: chosen.assignments,
-          groupSubmissions: chosen.assignments,
-        });
-      } else {
+      // Kept even if the permission is denied, so they start working once
+      // notifications are allowed in the system settings.
+      setSetting('notifications', {
+        ...notifications,
+        ...chosen,
+        // A new assignment's deadline moving, or its group submitting it,
+        // is news about it too.
+        deadlineChanges: chosen.assignments,
+        groupSubmissions: chosen.assignments,
+      });
+      if (!(await request())) {
         toast(t('notificationPermissionDenied'), 'error');
       }
     }
@@ -128,7 +130,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         {/* Classes before assignments, as in Settings › Calendar. */}
         <FormSection title={t('schedule')}>
           <FormToggle
-            icon="classReminder"
+            icon="reminder"
             title={t('notifyClassReminders')}
             value={choices.classReminders}
             onValueChange={choose('classReminders')}
@@ -159,7 +161,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
           footer={t('setupCaption')}
         >
           <FormToggle
-            icon="addToCalendar"
+            icon="assignmentCalendar"
             title={t('setupCalendar')}
             value={choices.calendar}
             onValueChange={choose('calendar')}

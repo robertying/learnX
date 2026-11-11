@@ -121,11 +121,29 @@ export const syncAssignments = async (
   type: 'calendar' | 'reminder',
   assignments: Assignment[],
   removed: string[] = [],
+  {
+    automatic = false,
+  }: {
+    /**
+     * Started by the app, not the user: it doesn't ask for the permission,
+     * and without it skips quietly (Settings › Calendar says so at the top).
+     */
+    automatic?: boolean;
+  } = {},
 ): Promise<ToastMessage | undefined> => {
   try {
-    await saveAssignmentsToReminderOrCalendar(type, assignments, removed);
+    await saveAssignmentsToReminderOrCalendar(type, assignments, removed, {
+      ask: !automatic,
+    });
     setLastSynced(type);
   } catch (err) {
+    const code = calendarErrorCode(err);
+    if (
+      automatic &&
+      (code === 'calendarPermission' || code === 'reminderPermission')
+    ) {
+      return undefined;
+    }
     return assignmentSyncErrorToast(err);
   }
 };

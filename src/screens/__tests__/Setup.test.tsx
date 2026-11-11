@@ -99,11 +99,11 @@ it('turns on the chosen notifications once allowed, and closes', async () => {
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
-it('keeps notifications off when the permission is denied', async () => {
+it('keeps the chosen notifications on when the permission is denied', async () => {
   request.mockResolvedValueOnce(false);
   await renderScreen();
   await userEvent.press(screen.getByTestId('setup-done'));
-  expect(getSettings().notifications.notices).toBe(false);
+  expect(getSettings().notifications.notices).toBe(true);
   expect(toast).toHaveBeenCalledWith(
     t('notificationPermissionDenied'),
     'error',

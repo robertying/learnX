@@ -191,7 +191,7 @@ const Debug: React.FC<Props> = ({ navigation }) => {
             onPress={withPermission(simulateNewContent)}
           />
           <FormButton
-            icon="classReminder"
+            icon="reminder"
             title="Preview a Class Reminder"
             onPress={() => previewReminder('class')}
           />

@@ -54,8 +54,24 @@ export const getAndRequestPermission = async (
   }
 };
 
-const requirePermission = async (type: 'calendar' | 'reminder') => {
-  if (!(await getAndRequestPermission(type))) {
+/** Whether learnX may use the calendars or Reminders now, without asking. */
+export const hasPermission = async (type: 'calendar' | 'reminder') => {
+  const { status } =
+    type === 'calendar'
+      ? await Calendar.getCalendarPermissions()
+      : await Calendar.getRemindersPermissions();
+  return status === 'granted';
+};
+
+/**
+ * Throws without the permission. `ask` asks for it first: only for what the
+ * user just did, never for a sync the app starts by itself.
+ */
+const requirePermission = async (
+  type: 'calendar' | 'reminder',
+  { ask = true }: { ask?: boolean } = {},
+) => {
+  if (!(await (ask ? getAndRequestPermission(type) : hasPermission(type)))) {
     throw new CalendarError(
       type === 'calendar' ? 'calendarPermission' : 'reminderPermission',
     );
@@ -289,18 +305,20 @@ const removeAssignmentEvents = async (
 /**
  * Writes `assignments` to the calendar or reminders, and deletes the entries
  * of `removed` (assignments archived or hidden since they were written).
+ * `ask` asks for the permission when it's missing; see `requirePermission`.
  */
 export const saveAssignmentsToReminderOrCalendar = async (
   type: AssignmentEventType,
   assignments: Assignment[],
   removed: string[] = [],
+  { ask = true }: { ask?: boolean } = {},
 ) => {
   const settings = getSettings();
 
   if (Platform.OS === 'ios' && type === 'reminder') {
-    await requirePermission('reminder');
+    await requirePermission('reminder', { ask });
   } else {
-    await requirePermission('calendar');
+    await requirePermission('calendar', { ask });
   }
 
   const calendar =

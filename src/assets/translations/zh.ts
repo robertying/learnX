@@ -95,6 +95,16 @@ const zh: typeof en = {
     '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX',
   deleteFailed: '删除失败：',
   exportSyncedCalendars: '导出已同步的日程（.ics）',
+  turnOnNotifications: '开启通知',
+  notificationsOffCaption:
+    '系统设置中已关闭 learnX 的通知，下方开启的通知暂时无法显示。',
+  allowCalendarAccess: '允许访问日历',
+  allowRemindersAccess: '允许访问提醒事项',
+  calendarOffCaption: '允许访问日历前，learnX 无法更新同步到日历的作业。',
+  remindersOffCaption:
+    '允许访问提醒事项前，learnX 无法更新同步到提醒事项的作业。',
+  calendarAndRemindersOffCaption:
+    '允许访问日历和提醒事项前，learnX 无法更新同步到其中的作业。',
   notificationAccessCaption: '如果 learnX 无法发送通知，请在系统设置中允许。',
   calendarAccessCaption: '如果 learnX 无法访问日历，请在系统设置中允许。',
   calendarAndReminderAccessCaption:

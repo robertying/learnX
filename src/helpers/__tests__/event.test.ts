@@ -300,6 +300,18 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     expect(reminders.createReminder).toHaveBeenCalled();
   });
 
+  it("doesn't ask for a sync the app starts by itself", async () => {
+    mocked.getCalendarPermissions.mockResolvedValue({ status: 'denied' });
+    mocked.requestCalendarPermissions.mockResolvedValue({ status: 'granted' });
+
+    await expect(
+      saveAssignmentsToReminderOrCalendar('calendar', [assignment('a1')], [], {
+        ask: false,
+      }),
+    ).rejects.toMatchObject({ code: 'calendarPermission' });
+    expect(mocked.requestCalendarPermissions).not.toHaveBeenCalled();
+  });
+
   it('deletes and forgets the entries of removed assignments', async () => {
     useCalendarSyncStore.setState({
       syncedCalendarAssignments: { a1: 'e1', gone: 'e2', a3: 'e3' },

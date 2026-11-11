@@ -122,6 +122,7 @@ const syncCalendar = async (
     type,
     upcomingAssignments(assignments, dayjs()),
     leftOut,
+    { automatic: true },
   );
   if (message) {
     errorListeners.forEach(listener => listener(message));

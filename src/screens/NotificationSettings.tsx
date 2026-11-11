@@ -78,13 +78,16 @@ const NotificationSettings: React.FC<Props> = () => {
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setSetting('notifications', { ...notifications, [key]: value });
 
-  /** Turning one on asks for the permission first. */
+  /**
+   * Turning one on asks for the permission. It stays on even if that's
+   * denied: it's the user's choice, and it starts working once notifications
+   * are allowed in the system settings.
+   */
   const handleToggle = async (key: Toggle, value: boolean) => {
+    set(key, value);
     if (value && !(await request())) {
       toast(t('notificationPermissionDenied'), 'error');
-      return;
     }
-    set(key, value);
   };
 
   const renderToggle = ({ key, icon, label }: ToggleRow) => (
@@ -105,9 +108,30 @@ const NotificationSettings: React.FC<Props> = () => {
       notifications[key],
   );
 
+  /**
+   * Something is on that can't show: said first, with a way to fix it. While
+   * the system still lets the app ask, the button asks; otherwise it opens
+   * the system settings.
+   */
+  const blocked = permission !== null && permission !== 'granted' && anyOn;
+
   return (
     <FormScreen>
       <Form>
+        {blocked && (
+          <FormSection footer={t('notificationsOffCaption')}>
+            <FormButton
+              testID="notifications-turn-on"
+              icon="notificationsOff"
+              title={t('turnOnNotifications')}
+              onPress={() =>
+                permission === 'denied'
+                  ? openSystemSettings('notifications')
+                  : request()
+              }
+            />
+          </FormSection>
+        )}
         <FormSection
           title={t('setupNewContent')}
           footer={t('notificationsCaption')}
@@ -121,7 +145,7 @@ const NotificationSettings: React.FC<Props> = () => {
         >
           <FormToggle
             testID="notifications-classReminders"
-            icon="classReminder"
+            icon="reminder"
             title={t('notifyClassReminders')}
             value={notifications.classReminders}
             onValueChange={value => handleToggle('classReminders', value)}
@@ -139,9 +163,6 @@ const NotificationSettings: React.FC<Props> = () => {
           footer={[
             t('notifyDeadlineRemindersCaption'),
             showExact && t('exactRemindersCaption'),
-            permission === 'denied' &&
-              anyOn &&
-              t('notificationPermissionDenied'),
           ]
             .filter(Boolean)
             .join('\n\n')}

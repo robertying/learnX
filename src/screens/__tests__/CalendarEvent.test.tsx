@@ -16,9 +16,11 @@ import {
   useCalendarExport,
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
+import useCalendarAccess from 'hooks/useCalendarAccess';
 import CalendarEvent from 'screens/CalendarEvent';
 
 jest.mock('helpers/systemSettings', () => ({ openSystemSettings: jest.fn() }));
+jest.mock('hooks/useCalendarAccess', () => jest.fn());
 jest.mock('hooks/useCalendarSync', () => ({
   confirmDeleteCalendars: jest.fn(),
   useAssignmentSync: jest.fn(),
@@ -46,8 +48,20 @@ const toggle = (label: string, value: boolean) =>
 
 const os = Platform.OS;
 
+const requestAccess = jest.fn();
+const access = (
+  overrides: Partial<ReturnType<typeof useCalendarAccess>> = {},
+) =>
+  jest.mocked(useCalendarAccess).mockReturnValue({
+    calendar: 'granted',
+    reminders: 'granted',
+    request: requestAccess,
+    ...overrides,
+  });
+
 beforeEach(() => {
   resetSettings();
+  access();
   jest
     .mocked(useCourseScheduleSync)
     .mockReturnValue({ syncing: false, picker });
@@ -183,4 +197,47 @@ it('says when each sync last finished, while it is on', async () => {
     type: t('undergraduateSchedule'),
   });
   expect(screen.getByText(`${caption}\n${lastSynced}`)).toBeTruthy();
+});
+
+describe('access', () => {
+  beforeEach(() => {
+    Platform.OS = 'ios';
+  });
+
+  it('says nothing while the syncs are off, even without access', async () => {
+    access({ calendar: 'denied', reminders: 'denied' });
+    await renderScreen();
+    expect(screen.queryByText(t('calendarOffCaption'))).toBeNull();
+  });
+
+  it('asks first for the access a sync that is on lacks', async () => {
+    access({ calendar: 'undetermined', reminders: 'granted' });
+    setSetting('assignmentCalendarSync', true);
+    setSetting('assignmentReminderSync', true);
+    await renderScreen();
+    expect(screen.getByText(t('calendarOffCaption'))).toBeTruthy();
+    expect(screen.queryByText(t('allowRemindersAccess'))).toBeNull();
+    await userEvent.press(screen.getByText(t('allowCalendarAccess')));
+    expect(requestAccess).toHaveBeenCalledWith('calendar');
+  });
+
+  it('names both when both are missing', async () => {
+    access({ calendar: 'denied', reminders: 'denied' });
+    setSetting('assignmentCalendarSync', true);
+    setSetting('assignmentReminderSync', true);
+    await renderScreen();
+    expect(screen.getByText(t('calendarAndRemindersOffCaption'))).toBeTruthy();
+    expect(screen.getByText(t('allowCalendarAccess'))).toBeTruthy();
+    expect(screen.getByText(t('allowRemindersAccess'))).toBeTruthy();
+  });
+
+  it('opens the system settings once it can no longer ask', async () => {
+    access({ calendar: 'granted', reminders: 'denied' });
+    setSetting('assignmentReminderSync', true);
+    await renderScreen();
+    expect(screen.getByText(t('remindersOffCaption'))).toBeTruthy();
+    await userEvent.press(screen.getByText(t('allowRemindersAccess')));
+    expect(openSystemSettings).toHaveBeenCalledWith('security');
+    expect(requestAccess).not.toHaveBeenCalled();
+  });
 });
