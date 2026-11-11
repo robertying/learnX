@@ -224,7 +224,7 @@ run_duo_postures() {
       --test-output-dir "$out/$name" "$flow"; then
       status=1
     fi
-    # Display 3 is the inner display; Maestro's own screenshots are black.
+    # Display 3 is the inner display (1 is the outer one).
     with_timeout 30 xcrun simctl io "$udid" screenshot --display=3 \
       "$out/$name.png" >/dev/null 2>&1 ||
       echo "screenshot of $name failed" >&2
