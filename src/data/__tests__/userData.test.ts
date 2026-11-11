@@ -134,32 +134,6 @@ describe('user data', () => {
     expect(getUserData().courseOrder).toEqual([]);
   });
 
-  it('turns favorites kept on the phone into adds for the website', async () => {
-    (Storage as unknown as { __store: Map<string, string> }).__store.set(
-      USER_DATA_KEY,
-      JSON.stringify({
-        state: {
-          favorites: { notice: ['n', 'n'], assignment: [], file: ['f'] },
-          hiddenCourses: ['c'],
-        },
-        version: 1,
-      }),
-    );
-    await useUserDataStore.persist.rehydrate();
-    expect(getUserData()).not.toHaveProperty('favorites');
-    expect(getUserData().pendingActions).toEqual([
-      expect.objectContaining({
-        kind: 'favorite',
-        type: 'notice',
-        id: 'n',
-        flag: true,
-        tries: 0,
-      }),
-      expect.objectContaining({ type: 'file', id: 'f', flag: true }),
-    ]);
-    expect(getUserData().hiddenCourses).toEqual(['c']);
-  });
-
   describe('applyLatestSemester', () => {
     it("shows the school's semester when none is shown", () => {
       expect(applyLatestSemester('2026-2027-1')).toBe('2026-2027-1');

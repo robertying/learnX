@@ -33,16 +33,9 @@ const initialAppState = (): AppState => ({
 export const useAppStateStore = create<AppState>()(
   persist(initialAppState, {
     name: APP_STATE_KEY,
+    // Version 1 only ran in development builds.
     version: 2,
     storage: persistStorage,
-    // Version 1 also kept the changelog last opened, for a badge that's
-    // gone. Only version 1 reaches here: zustand migrates older versions only.
-    migrate: saved => {
-      const { changelogSeenVersion: _dropped, ...state } = saved as AppState & {
-        changelogSeenVersion?: unknown;
-      };
-      return state;
-    },
   }),
 );
 
