@@ -95,7 +95,15 @@ const CalendarEvent: React.FC<Props> = () => {
     <FormScreen>
       <Form>
         {(calendarBlocked || remindersBlocked) && (
-          <FormSection footer={t('calendarOffCaption')}>
+          <FormSection
+            footer={
+              calendarBlocked && remindersBlocked
+                ? t('calendarAndRemindersOffCaption')
+                : calendarBlocked
+                  ? t('calendarOffCaption')
+                  : t('remindersOffCaption')
+            }
+          >
             {calendarBlocked && (
               <FormButton
                 testID="calendar-allow-access"

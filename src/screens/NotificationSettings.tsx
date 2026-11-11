@@ -145,7 +145,7 @@ const NotificationSettings: React.FC<Props> = () => {
         >
           <FormToggle
             testID="notifications-classReminders"
-            icon="classReminder"
+            icon="reminder"
             title={t('notifyClassReminders')}
             value={notifications.classReminders}
             onValueChange={value => handleToggle('classReminders', value)}

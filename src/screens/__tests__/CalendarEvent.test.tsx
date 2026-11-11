@@ -221,10 +221,21 @@ describe('access', () => {
     expect(requestAccess).toHaveBeenCalledWith('calendar');
   });
 
+  it('names both when both are missing', async () => {
+    access({ calendar: 'denied', reminders: 'denied' });
+    setSetting('assignmentCalendarSync', true);
+    setSetting('assignmentReminderSync', true);
+    await renderScreen();
+    expect(screen.getByText(t('calendarAndRemindersOffCaption'))).toBeTruthy();
+    expect(screen.getByText(t('allowCalendarAccess'))).toBeTruthy();
+    expect(screen.getByText(t('allowRemindersAccess'))).toBeTruthy();
+  });
+
   it('opens the system settings once it can no longer ask', async () => {
     access({ calendar: 'granted', reminders: 'denied' });
     setSetting('assignmentReminderSync', true);
     await renderScreen();
+    expect(screen.getByText(t('remindersOffCaption'))).toBeTruthy();
     await userEvent.press(screen.getByText(t('allowRemindersAccess')));
     expect(openSystemSettings).toHaveBeenCalledWith('security');
     expect(requestAccess).not.toHaveBeenCalled();

@@ -100,7 +100,11 @@ const zh: typeof en = {
     '系统设置中已关闭 learnX 的通知，下方开启的通知暂时无法显示。',
   allowCalendarAccess: '允许访问日历',
   allowRemindersAccess: '允许访问提醒事项',
-  calendarOffCaption: '允许前，learnX 无法更新下方已同步的作业。',
+  calendarOffCaption: '允许访问日历前，learnX 无法更新同步到日历的作业。',
+  remindersOffCaption:
+    '允许访问提醒事项前，learnX 无法更新同步到提醒事项的作业。',
+  calendarAndRemindersOffCaption:
+    '允许访问日历和提醒事项前，learnX 无法更新同步到其中的作业。',
   notificationAccessCaption: '如果 learnX 无法发送通知，请在系统设置中允许。',
   calendarAccessCaption: '如果 learnX 无法访问日历，请在系统设置中允许。',
   calendarAndReminderAccessCaption:

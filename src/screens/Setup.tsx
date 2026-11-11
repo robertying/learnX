@@ -130,7 +130,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         {/* Classes before assignments, as in Settings › Calendar. */}
         <FormSection title={t('schedule')}>
           <FormToggle
-            icon="classReminder"
+            icon="reminder"
             title={t('notifyClassReminders')}
             value={choices.classReminders}
             onValueChange={choose('classReminders')}
@@ -161,7 +161,7 @@ const Setup: React.FC<Props> = ({ navigation }) => {
           footer={t('setupCaption')}
         >
           <FormToggle
-            icon="addToCalendar"
+            icon="assignmentCalendar"
             title={t('setupCalendar')}
             value={choices.calendar}
             onValueChange={choose('calendar')}

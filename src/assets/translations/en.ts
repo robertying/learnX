@@ -101,7 +101,11 @@ export default {
   allowCalendarAccess: 'Allow Calendar Access',
   allowRemindersAccess: 'Allow Reminders Access',
   calendarOffCaption:
-    "learnX can't update the synced assignments below until it's allowed.",
+    "learnX can't update the assignments synced to your calendar until it's allowed.",
+  remindersOffCaption:
+    "learnX can't update the assignments synced to Reminders until it's allowed.",
+  calendarAndRemindersOffCaption:
+    "learnX can't update the assignments synced to your calendar and Reminders until both are allowed.",
   notificationAccessCaption:
     "If learnX can't send you notifications, allow it in System Settings.",
   calendarAccessCaption:
