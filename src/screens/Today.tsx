@@ -8,7 +8,7 @@ import {
   type FormTextProps,
 } from 'components/Form';
 import SafeArea from 'components/SafeArea';
-import SyncStatus from 'components/SyncStatus';
+import { SyncStatusSection } from 'components/SyncStatus';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
@@ -161,8 +161,10 @@ const Today: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeArea>
-      <SyncStatus updatedAt={schedule.updatedAt} />
       <Form testID="today" onRefresh={pullToRefresh.onRefresh}>
+        {/* In the Form, which scrolls under the header and collapses the
+            large title; a view above it would sit behind the header. */}
+        <SyncStatusSection updatedAt={schedule.updatedAt} />
         {current && (
           <FormSection title={t('todayNow')}>
             {itemRow({

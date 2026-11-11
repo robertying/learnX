@@ -51,6 +51,7 @@ import {
   getItemDetailOptions,
   getModalScreenOptions,
   mockNetworkTitle,
+  stackScreenOptions,
   tabRootOptions,
 } from './options';
 import { screenLayout } from './screenLayout';
@@ -160,7 +161,10 @@ export const renderSettingDetails = () => (
 );
 
 export const NoticeStack = () => (
-  <NoticeStackNavigator.Navigator screenLayout={screenLayout}>
+  <NoticeStackNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <NoticeStackNavigator.Screen
       name="Notices"
       component={Notices}
@@ -171,7 +175,10 @@ export const NoticeStack = () => (
 );
 
 export const AssignmentStack = () => (
-  <AssignmentStackNavigator.Navigator screenLayout={screenLayout}>
+  <AssignmentStackNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <AssignmentStackNavigator.Screen
       name="Assignments"
       component={Assignments}
@@ -182,7 +189,10 @@ export const AssignmentStack = () => (
 );
 
 export const FileStack = () => (
-  <FileStackNavigator.Navigator screenLayout={screenLayout}>
+  <FileStackNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <FileStackNavigator.Screen
       name="Files"
       component={Files}
@@ -200,7 +210,10 @@ export const allItemDetails = [
 ] as const;
 
 export const CourseStack = () => (
-  <CourseStackNavigator.Navigator screenLayout={screenLayout}>
+  <CourseStackNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <CourseStackNavigator.Screen
       name="Courses"
       component={Courses}
@@ -211,7 +224,10 @@ export const CourseStack = () => (
 );
 
 export const SettingStack = () => (
-  <SettingStackNavigator.Navigator screenLayout={screenLayout}>
+  <SettingStackNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <SettingStackNavigator.Screen
       name="Settings"
       component={Settings}
@@ -223,7 +239,10 @@ export const SettingStack = () => (
 
 // Settings open from Today's header where there's no Settings tab.
 export const TodayStack = () => (
-  <TodayStackNavigator.Navigator screenLayout={screenLayout}>
+  <TodayStackNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <TodayStackNavigator.Screen
       name="Today"
       component={Today}
@@ -247,6 +266,7 @@ export const LoginStack = () => {
   return (
     <LoginNavigator.Navigator
       screenLayout={screenLayout}
+      screenOptions={stackScreenOptions}
       initialRouteName={welcomeSeen || hasCredentials ? 'Login' : 'Welcome'}
     >
       <LoginNavigator.Screen
@@ -278,7 +298,10 @@ export const LoginStack = () => {
 
 /** What's New in a sheet, with the full changelog a push away. */
 export const WhatsNewStack = () => (
-  <WhatsNewNavigator.Navigator screenLayout={screenLayout}>
+  <WhatsNewNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <WhatsNewNavigator.Screen
       name="WhatsNew"
       component={WhatsNew}
@@ -294,7 +317,10 @@ export const WhatsNewStack = () => (
 );
 
 export const CourseXStack = () => (
-  <CourseXNavigator.Navigator screenLayout={screenLayout}>
+  <CourseXNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <CourseXNavigator.Screen
       name="CourseX"
       component={CourseX}
@@ -304,7 +330,10 @@ export const CourseXStack = () => (
 );
 
 export const SearchStack = () => (
-  <SearchNavigator.Navigator screenLayout={screenLayout}>
+  <SearchNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <SearchNavigator.Screen
       name="Search"
       component={Search}
@@ -315,7 +344,10 @@ export const SearchStack = () => (
 );
 
 export const AssignmentSubmissionStack = () => (
-  <AssignmentSubmissionNavigator.Navigator screenLayout={screenLayout}>
+  <AssignmentSubmissionNavigator.Navigator
+    screenLayout={screenLayout}
+    screenOptions={stackScreenOptions}
+  >
     <AssignmentSubmissionNavigator.Screen
       name="AssignmentSubmission"
       component={AssignmentSubmission}
