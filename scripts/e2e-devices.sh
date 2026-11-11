@@ -16,7 +16,8 @@
 #
 # The flows run on the Release app (what ships: bundled JS, Hermes, R8).
 # Install it with scripts/e2e-build.sh first, or set E2E_BUILD=1 to have this
-# script build and install it on each device it uses. The script
+# script build and install it on each device it uses (one iOS build for every
+# simulator; DERIVED_DATA as in e2e-build.sh). The script
 # boots a device that isn't running and shuts down only the devices it
 # booted. It refuses to boot one while E2E_MAX_BOOTED (3) simulators and
 # emulators are already running.
@@ -56,6 +57,8 @@ failed=""
 passed=""
 # Devices the Release app was installed on in this run (E2E_BUILD=1).
 installed=""
+# The Release app built for the simulators in this run.
+ios_app=""
 # The UDID or serial of the device the current profile runs on.
 device=""
 
@@ -117,7 +120,15 @@ install_app() {
     return 0
   fi
   log "Installing the Release app on $2"
-  scripts/e2e-build.sh "$1" "$2" || return 1
+  if [ "$1" = ios ] && [ -n "$ios_app" ]; then
+    xcrun simctl install "$2" "$ios_app" || return 1
+  else
+    scripts/e2e-build.sh "$1" "$2" || return 1
+    if [ "$1" = ios ]; then
+      # Where e2e-build.sh puts it; every simulator takes the same build.
+      ios_app="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}/Build/Products/Release-iphonesimulator/learnX.app"
+    fi
+  fi
   installed="$installed $2"
 }
 
