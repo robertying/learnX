@@ -11,6 +11,7 @@ import {
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from './event';
+import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from './calendarError';
 import { exportTextFile } from './files/share';
 import { t } from './i18n';
@@ -96,6 +97,7 @@ export const syncCourseSchedule = async (
       return { text: t('courseScheduleSyncNoCourse'), type: 'warning' };
     }
     await saveCoursesToCalendar(events, start, end, failedRanges);
+    setLastSynced('courseSchedule');
     if (failedRanges.length > 0) {
       return { text: t('courseScheduleSyncPartial'), type: 'warning' };
     }
@@ -122,6 +124,7 @@ export const syncAssignments = async (
 ): Promise<ToastMessage | undefined> => {
   try {
     await saveAssignmentsToReminderOrCalendar(type, assignments, removed);
+    setLastSynced(type);
   } catch (err) {
     return assignmentSyncErrorToast(err);
   }

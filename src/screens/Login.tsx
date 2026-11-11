@@ -18,6 +18,7 @@ import { setSSOInProgress, useLoggingIn } from 'data/auth';
 import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
 import { useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
+import Spacing from 'constants/Spacing';
 import Styles from 'constants/Styles';
 import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
@@ -121,13 +122,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
           <View style={styles.switchContainer}>
             <Switch
               accessibilityLabel={t('graduate')}
-              style={Styles.spacex1}
               value={graduate}
               onValueChange={checked => {
                 setSetting('graduate', checked);
               }}
             />
-            <Text style={Styles.spacex1}>{t('graduate')}</Text>
+            <Text>{t('graduate')}</Text>
           </View>
           <LoginFields
             style={styles.textInput}
@@ -142,34 +142,31 @@ const Login: React.FC<Props> = ({ navigation }) => {
           <View style={styles.noteContainer}>
             <Caption style={styles.note}>{t('securityNote')}</Caption>
           </View>
-          <ContainedButton
-            style={styles.button}
-            label={t('login')}
-            disabled={loggingIn}
-            onPress={handleLogin}
-          />
-          {hasCredential && (
-            <>
-              <TextButton style={styles.textButton} onPress={handleRetryLogin}>
-                {t('retryLogin')}
-              </TextButton>
+          <View style={styles.buttons}>
+            <ContainedButton
+              label={t('login')}
+              disabled={loggingIn}
+              onPress={handleLogin}
+            />
+            {hasCredential && (
+              <>
+                <TextButton onPress={handleRetryLogin}>
+                  {t('retryLogin')}
+                </TextButton>
+                <TextButton onPress={handleLoginWithOfflineMode}>
+                  {t('offlineMode')}
+                </TextButton>
+              </>
+            )}
+            {__DEV__ && isMockUser(savedUsername) && (
               <TextButton
-                style={styles.textButton}
-                onPress={handleLoginWithOfflineMode}
+                testID="login-mock-network"
+                onPress={() => navigation.navigate('MockNetwork')}
               >
-                {t('offlineMode')}
+                {mockNetworkTitle}
               </TextButton>
-            </>
-          )}
-          {__DEV__ && isMockUser(savedUsername) && (
-            <TextButton
-              testID="login-mock-network"
-              style={styles.textButton}
-              onPress={() => navigation.navigate('MockNetwork')}
-            >
-              {mockNetworkTitle}
-            </TextButton>
-          )}
+            )}
+          </View>
         </KeyboardAvoidingView>
       </ScrollView>
     </SafeArea>
@@ -184,8 +181,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  // A little more room under the logo than between the rest. Android's logo
+  // carries its own space below.
   logo: {
-    marginBottom: Platform.OS === 'android' ? -16 : 16,
+    marginBottom: Platform.OS === 'android' ? -24 : Spacing.s,
   },
   inputs: {
     flex: 1,
@@ -194,24 +193,20 @@ const styles = StyleSheet.create({
     width: '80%',
     // A phone's width, also in a wide iPad or Mac window.
     maxWidth: 400,
+    // Every child is a step apart; none has margins of its own.
+    gap: Spacing.m,
   },
   textInput: {
     width: '100%',
-    marginVertical: 12,
   },
-  button: {
-    marginTop: 16,
+  buttons: {
+    alignItems: 'center',
+    gap: Spacing.m,
   },
   switchContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginVertical: 8,
-  },
-  // The same space between every button: a text button's label has no
-  // padding of its own on iOS, so a margin on each side would double it.
-  textButton: {
-    marginTop: 16,
+    gap: Spacing.s,
   },
   noteContainer: {
     alignItems: 'center',

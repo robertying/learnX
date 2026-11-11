@@ -53,6 +53,7 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
+import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
@@ -105,7 +106,7 @@ const groupedBackground = PlatformColor('systemGroupedBackground');
 // spacing above it (its footer a little less), as one more section would.
 // (Android's list has its own bottom padding.)
 const lastSectionModifiers = [
-  listSectionMargins({ edges: 'bottom', length: 20 }),
+  listSectionMargins({ edges: 'bottom', length: Spacing.l }),
 ];
 
 const lastSectionMarked = (children: ReactNode) =>

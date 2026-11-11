@@ -15,6 +15,8 @@ import {
   assignmentsQuery,
   filesQuery,
   noticesQuery,
+  useAssignments,
+  useFiles,
   useNotices,
 } from 'data/content';
 import { useCredentialsStore } from 'data/credentials';
@@ -26,6 +28,7 @@ import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { postNotification } from 'helpers/notifications';
+import { postNotificationSamples } from 'helpers/notificationSamples';
 import {
   getServerWritesAllowed,
   setServerWritesAllowed,
@@ -93,6 +96,8 @@ const Debug: React.FC<Props> = ({ navigation }) => {
   );
   const { request } = useNotificationPermission();
   const { notices } = useNotices();
+  const { assignments } = useAssignments();
+  const { files } = useFiles();
   const lastBackgroundSync = useSyncLogStore(state =>
     state.runs.findLast(run => !run.manual),
   );
@@ -150,6 +155,18 @@ const Debug: React.FC<Props> = ({ navigation }) => {
             icon="send"
             title="Send a Test Notification"
             onPress={withPermission(sendTestNotification)}
+          />
+          <FormButton
+            icon="notifications"
+            title="Post Every Notification Format"
+            onPress={withPermission(async () => {
+              const posted = await postNotificationSamples({
+                notices,
+                assignments,
+                files,
+              });
+              toast(`${posted} posted`, 'success');
+            })}
           />
           <FormButton
             icon="sync"

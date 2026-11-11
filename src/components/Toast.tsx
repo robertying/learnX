@@ -23,6 +23,7 @@ import { FullWindowOverlay } from 'react-native-screens';
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
+import Spacing from 'constants/Spacing';
 import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 import { ToastBackground, ToastSymbol } from 'modules/toast';
@@ -116,7 +117,8 @@ const hiddenOffset = 24;
 // Above the tab bar, which is at the bottom only on iPhone (about 56pt over
 // the home indicator inset). iPad's tab bar is at the top and the Mac has a
 // sidebar, so there the toast sits just above the bottom edge.
-const bottomMargin = DeviceInfo.isTablet() || DeviceInfo.isMac() ? 16 : 56 + 8;
+const bottomMargin =
+  DeviceInfo.isTablet() || DeviceInfo.isMac() ? Spacing.m : 56 + Spacing.s;
 
 /** The height of the keyboard while it is up, so the toast can sit above it. */
 const useKeyboardHeight = () => {
@@ -214,10 +216,10 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         {
           paddingBottom:
             keyboardHeight > 0
-              ? keyboardHeight + 16
+              ? keyboardHeight + Spacing.m
               : insets.bottom + bottomMargin,
-          paddingLeft: insets.left + 16,
-          paddingRight: insets.right + 16,
+          paddingLeft: insets.left + Spacing.m,
+          paddingRight: insets.right + Spacing.m,
         },
       ]}
     >
@@ -235,7 +237,7 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
           {
             maxWidth: Math.min(
               maxToastWidth,
-              windowWidth - insets.left - insets.right - 32,
+              windowWidth - insets.left - insets.right - 2 * Spacing.m,
             ),
           },
           animatedStyle,

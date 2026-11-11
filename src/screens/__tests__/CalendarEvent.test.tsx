@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import {
   fireEvent,
@@ -5,6 +6,7 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native';
+import { resetCalendarSync, setLastSynced } from 'data/calendarSync';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
@@ -154,4 +156,20 @@ it('saves the range picked in the picker', async () => {
     startDate: picker.startDate,
     endDate: picker.endDate,
   });
+});
+
+it('says when each sync last finished, while it is on', async () => {
+  resetCalendarSync();
+  const time = new Date(2026, 10, 11, 9, 30).getTime();
+  setLastSynced('courseSchedule', time);
+  setLastSynced('calendar', time);
+  await renderScreen();
+  const lastSynced = t('lastSynced', {
+    time: dayjs(time).format(t('shortDateTimeFormat')),
+  });
+  expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(1);
+
+  setSetting('assignmentCalendarSync', true);
+  await renderScreen();
+  expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(2);
 });

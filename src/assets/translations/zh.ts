@@ -385,6 +385,7 @@ const zh: typeof en = {
   setupCalendar: '将作业添加到日历',
   setupReminders: '将作业添加到提醒事项',
   remindersSection: '提醒事项',
+  lastSynced: '上次同步于 {time}。',
   syncedEventsSection: '已同步的日程',
   setupCaption: '之后可以随时在设置中更改。',
   notNow: '以后再说',

@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import DeviceInfo from 'constants/DeviceInfo';
+import { resetCalendarSync, useCalendarSyncStore } from 'data/calendarSync';
 import { dataSource, ensureSession } from 'data/source';
 import { Assignment } from 'data/types/state';
 import {
@@ -134,6 +135,9 @@ describe('syncCourseSchedule', () => {
       { graduate: true },
     );
     expect(saveCoursesToCalendar).toHaveBeenCalledWith(events, start, end, []);
+    expect(
+      useCalendarSyncStore.getState().lastSynced?.courseSchedule,
+    ).toBeGreaterThan(0);
   });
 
   it('saves the weeks that came back and warns about the rest', async () => {
@@ -196,6 +200,8 @@ describe('upcomingAssignments', () => {
 });
 
 describe('syncAssignments', () => {
+  beforeEach(() => resetCalendarSync());
+
   it('saves and shows nothing on success', async () => {
     const assignments = [{ id: 'a1' }] as Assignment[];
     await expect(
@@ -206,6 +212,9 @@ describe('syncAssignments', () => {
       assignments,
       [],
     );
+    expect(useCalendarSyncStore.getState().lastSynced).toEqual({
+      reminder: expect.any(Number),
+    });
   });
 
   it('turns failures into toasts', async () => {
@@ -216,6 +225,7 @@ describe('syncAssignments', () => {
       text: t('missingCalendarSource'),
       type: 'error',
     });
+    expect(useCalendarSyncStore.getState().lastSynced).toBeUndefined();
   });
 });
 

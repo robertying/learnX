@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DateRangePicker from 'components/DateRangePicker';
@@ -9,6 +10,7 @@ import {
   FormToggle,
 } from 'components/Form';
 import SafeArea from 'components/SafeArea';
+import { SyncKind, useCalendarSyncStore } from 'data/calendarSync';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
 import { calendarDefaults } from 'helpers/eventDetails';
@@ -53,6 +55,26 @@ const CalendarEvent: React.FC<Props> = () => {
     value: AlarmSettings[K],
   ) => setSetting('alarms', { ...alarms, [key]: value });
 
+  const lastSynced = useCalendarSyncStore(state => state.lastSynced);
+  /**
+   * A section's footer: its caption, then when its sync last finished (only
+   * while it's on).
+   */
+  const footer = (caption: string | undefined, kind?: SyncKind) => {
+    const time = kind && lastSynced?.[kind];
+    return (
+      [
+        caption,
+        time &&
+          t('lastSynced', {
+            time: dayjs(time).format(t('shortDateTimeFormat')),
+          }),
+      ]
+        .filter(Boolean)
+        .join('\n\n') || undefined
+    );
+  };
+
   const assignmentSyncFooter = t('assignmentSyncDescription');
 
   return (
@@ -60,9 +82,14 @@ const CalendarEvent: React.FC<Props> = () => {
       <Form>
         <FormSection
           title={t('schedule')}
-          footer={t('courseScheduleSyncCaption', {
-            type: graduate ? t('graduateSchedule') : t('undergraduateSchedule'),
-          })}
+          footer={footer(
+            t('courseScheduleSyncCaption', {
+              type: graduate
+                ? t('graduateSchedule')
+                : t('undergraduateSchedule'),
+            }),
+            'courseSchedule',
+          )}
         >
           <FormToggle
             icon="graduate"
@@ -103,7 +130,10 @@ const CalendarEvent: React.FC<Props> = () => {
         </FormSection>
         <FormSection
           title={t('setupCalendarSection')}
-          footer={Platform.OS === 'ios' ? undefined : assignmentSyncFooter}
+          footer={footer(
+            Platform.OS === 'ios' ? undefined : assignmentSyncFooter,
+            assignmentCalendarSync ? 'calendar' : undefined,
+          )}
         >
           <FormToggle
             icon="assignmentCalendar"
@@ -179,7 +209,10 @@ const CalendarEvent: React.FC<Props> = () => {
         {Platform.OS === 'ios' && (
           <FormSection
             title={t('remindersSection')}
-            footer={assignmentSyncFooter}
+            footer={footer(
+              assignmentSyncFooter,
+              assignmentReminderSync ? 'reminder' : undefined,
+            )}
           >
             <FormToggle
               icon="reminders"

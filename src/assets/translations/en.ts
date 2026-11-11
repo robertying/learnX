@@ -397,6 +397,7 @@ export default {
   setupCalendar: 'Add Assignments to Calendar',
   setupReminders: 'Add Assignments to Reminders',
   remindersSection: 'Reminders',
+  lastSynced: 'Last synced {time}.',
   syncedEventsSection: 'Synced Events',
   setupCaption: 'You can change these any time in Settings.',
   notNow: 'Not Now',

@@ -85,7 +85,7 @@ export const planDeadlineReminders = (
 };
 
 /** A reminder's text, with the deadline's day as of when it shows. */
-const reminderContent = (
+export const reminderContent = (
   { id, title, courseName, deadline }: WidgetDeadline,
   showsAt: number,
 ) => ({
