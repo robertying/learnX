@@ -46,11 +46,11 @@ it('turns a notification on once the permission is granted', async () => {
   expect(getSettings().notifications.files).toBe(true);
 });
 
-it('leaves it off and says why when the permission is denied', async () => {
+it('keeps it on and says why when the permission is denied', async () => {
   request.mockResolvedValueOnce(false);
   await renderScreen();
   await toggle('notices', true);
-  expect(getSettings().notifications.notices).toBe(false);
+  expect(getSettings().notifications.notices).toBe(true);
   expect(toast).toHaveBeenCalledWith(
     t('notificationPermissionDenied'),
     'error',
@@ -84,6 +84,15 @@ it('offers exact reminders when Android holds them back', async () => {
   ).toBeTruthy();
   await userEvent.press(screen.getByText(t('allowExactReminders')));
   expect(requestExact).toHaveBeenCalled();
+});
+
+it('says the permission is off while it can still be asked for', async () => {
+  permission({ permission: 'undetermined' });
+  setSetting('notifications', { ...getSettings().notifications, files: true });
+  await renderScreen();
+  expect(
+    screen.getByText(t('notificationPermissionDenied'), { exact: false }),
+  ).toBeTruthy();
 });
 
 it('says the permission is off when something is on but denied', async () => {

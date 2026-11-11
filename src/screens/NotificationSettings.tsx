@@ -78,13 +78,16 @@ const NotificationSettings: React.FC<Props> = () => {
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setSetting('notifications', { ...notifications, [key]: value });
 
-  /** Turning one on asks for the permission first. */
+  /**
+   * Turning one on asks for the permission. It stays on even if that's
+   * denied: it's the user's choice, and it starts working once notifications
+   * are allowed in the system settings.
+   */
   const handleToggle = async (key: Toggle, value: boolean) => {
+    set(key, value);
     if (value && !(await request())) {
       toast(t('notificationPermissionDenied'), 'error');
-      return;
     }
-    set(key, value);
   };
 
   const renderToggle = ({ key, icon, label }: ToggleRow) => (
@@ -139,7 +142,8 @@ const NotificationSettings: React.FC<Props> = () => {
           footer={[
             t('notifyDeadlineRemindersCaption'),
             showExact && t('exactRemindersCaption'),
-            permission === 'denied' &&
+            permission !== null &&
+              permission !== 'granted' &&
               anyOn &&
               t('notificationPermissionDenied'),
           ]
