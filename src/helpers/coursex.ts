@@ -1,12 +1,21 @@
 import axios from 'axios';
 import { gql, GraphQLClient } from 'graphql-request';
 import { Course } from 'data/types/state';
+import { getCredentials } from 'data/credentials';
 import { getCourseXRefreshToken } from './env';
+import { isMockUser } from './mock';
 import { assertServerWritesAllowed } from './serverWrites';
 
 const graphQLClient = new GraphQLClient('https://api.tsinghua.app/v1/graphql');
 
+/**
+ * Shares the courses with CourseX. Does nothing for the mock account: its
+ * made-up courses must never reach the real CourseX.
+ */
 export const uploadCourses = async (courses: Course[]) => {
+  if (isMockUser(getCredentials()?.username)) {
+    return;
+  }
   assertServerWritesAllowed('Course information sharing');
   const response = await axios.post('https://tsinghua.app/api/auth/session', {
     refreshToken: getCourseXRefreshToken(),

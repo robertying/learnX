@@ -67,11 +67,6 @@ const Today: React.FC<Props> = ({ navigation }) => {
 
   const settingsBadge = useSettingsBadge();
 
-  const fetching =
-    schedule.fetching ||
-    assignmentsQuery.isFetching ||
-    noticesQuery.isFetching ||
-    filesQuery.isFetching;
   const handleRefresh = async () => {
     const results = await Promise.all([
       schedule.refetch(),
@@ -81,7 +76,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
     ]);
     return { isError: results.some(r => r.isError) };
   };
-  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
+  const pullToRefresh = usePullToRefresh(handleRefresh);
 
   const openCourse = (courseId: string) =>
     show('CourseDetail', { id: courseId });

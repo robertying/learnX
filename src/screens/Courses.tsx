@@ -63,7 +63,7 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const handleRefresh = () =>
     loggedIn && currentSemesterId ? refetch() : undefined;
 
-  const pullToRefresh = usePullToRefresh(handleRefresh, fetching);
+  const pullToRefresh = usePullToRefresh(handleRefresh);
 
   const handlePush = (item: Course) => show('CourseDetail', { id: item.id });
 

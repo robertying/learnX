@@ -6,11 +6,9 @@ import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { setCourseSharingSeen } from 'data/appState';
 import { dataSource } from 'data/source';
-import { useCredentialsStore } from 'data/credentials';
 import { Form, FormButton, FormSection, FormToggle } from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import { t } from 'helpers/i18n';
-import { isMockUser } from 'helpers/mock';
 import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
 
@@ -23,9 +21,6 @@ const CourseInformationSharing: React.FC<Props> = () => {
   const currentSemesterId = useCurrentSemester();
   const courseInformationSharing = useSettings(
     settings => settings.courseInformationSharing,
-  );
-  const isDummyUser = useCredentialsStore(state =>
-    isMockUser(state.credentials?.username),
   );
 
   const getCourses = async () => {
@@ -58,9 +53,6 @@ const CourseInformationSharing: React.FC<Props> = () => {
             text: t('join'),
             onPress: async () => {
               setSetting('courseInformationSharing', enabled);
-              if (isDummyUser) {
-                return;
-              }
               try {
                 const courses = await getCourses();
                 await uploadCourses(courses);

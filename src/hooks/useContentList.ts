@@ -61,7 +61,7 @@ const useContentList = <
 
   const handleRefresh = () =>
     loggedIn ? query.refetch({ cancelRefetch: false }) : undefined;
-  const pullToRefresh = usePullToRefresh(handleRefresh, query.isFetching);
+  const pullToRefresh = usePullToRefresh(handleRefresh);
   const refresh = useEffectEvent(handleRefresh);
 
   useEffect(() => {

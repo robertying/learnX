@@ -131,7 +131,7 @@ const Debug: React.FC<Props> = ({ navigation }) => {
     <SafeArea>
       <Form>
         {isMockUser(username) ? (
-          <FormSection>
+          <FormSection footer="The mock account's changes go to the emulated server and never reach the real one or CourseX, so it has no Allow Server Writes.">
             <FormLink
               testID="debug-mock-network"
               icon="network"
