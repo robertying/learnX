@@ -16,6 +16,8 @@ struct SpotlightItem: Record {
   func searchableItem(domain: String) -> CSSearchableItem {
     let attributes = CSSearchableItemAttributeSet(contentType: .text)
     attributes.title = title
+    // Spotlight matches app content mainly on the display name.
+    attributes.displayName = title
     attributes.contentDescription = details
     attributes.keywords = keywords
     attributes.contentCreationDate = date.map(Date.init(milliseconds:))

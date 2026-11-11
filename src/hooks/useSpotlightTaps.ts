@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent } from 'react';
 import Spotlight, { SpotlightOpenedItem } from 'modules/spotlight';
+import { isItemType } from 'helpers/openTarget';
 import useOpenTarget from 'hooks/useOpenTarget';
 
 /**
@@ -9,7 +10,7 @@ import useOpenTarget from 'hooks/useOpenTarget';
 const useSpotlightTaps = () => {
   const openTarget = useOpenTarget();
   const open = useEffectEvent(({ domain, id }: SpotlightOpenedItem) => {
-    if (domain === 'notice' || domain === 'assignment') {
+    if (isItemType(domain)) {
       openTarget({ type: domain, id });
     }
   });

@@ -412,7 +412,7 @@ const zh: typeof en = {
   whatsNew19RemindersTitle: '截止提醒',
   whatsNew19RemindersBody: '作业截止前发送通知提醒你。',
   whatsNew19SpotlightTitle: '聚焦搜索和 Siri',
-  whatsNew19SpotlightBody: '在设备上的任何地方查找公告和作业。',
+  whatsNew19SpotlightBody: '在设备上的任何地方查找公告、作业和文件。',
 };
 
 export default zh;

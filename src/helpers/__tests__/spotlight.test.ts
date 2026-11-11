@@ -1,4 +1,4 @@
-import { mockAssignments, mockNotices } from 'data/mock';
+import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Notice } from 'data/types/state';
 import { clearSpotlight, updateSpotlight } from 'helpers/spotlight';
 
@@ -73,6 +73,17 @@ it('keeps assignments in their own domain', async () => {
   expect(Spotlight.replaceItems).toHaveBeenCalledWith('assignment', [
     expect.objectContaining({ id: mockAssignments[0].id }),
   ]);
+});
+
+it('indexes files with their course, type and size', async () => {
+  const file = mockFiles[0];
+  await updateSpotlight({ files: [file] }, { hiddenCourses: [] });
+  const [domain, [item]] = Spotlight.replaceItems.mock.calls[0];
+  expect(domain).toBe('file');
+  expect(item).toMatchObject({ id: file.id, title: file.title });
+  expect(item.details).toContain(file.courseName);
+  expect(item.details).toContain(file.fileType.toUpperCase());
+  expect(item.keywords).toContain(file.courseName);
 });
 
 it('removes everything on logout', async () => {

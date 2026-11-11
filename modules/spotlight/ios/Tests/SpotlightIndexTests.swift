@@ -66,6 +66,7 @@ func spotlightItem(
     #expect(item.domainIdentifier == "assignment")
     #expect(item.expirationDate == .distantFuture)
     #expect(item.attributeSet.title == "Homework 1")
+    #expect(item.attributeSet.displayName == "Homework 1")
     #expect(item.attributeSet.contentDescription == "Calculus")
     #expect(item.attributeSet.keywords == ["Calculus", "Homework"])
     #expect(item.attributeSet.contentCreationDate == Date(timeIntervalSince1970: 1_700_000_000))

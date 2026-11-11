@@ -1,7 +1,7 @@
 import CoreSpotlight
 import ExpoModulesCore
 
-/// A Spotlight item's unique identifier: its domain (`notice`, `assignment`) and its id there.
+/// A Spotlight item's unique identifier: its domain (`notice`, `assignment`, `file`) and its id there.
 struct SpotlightIdentifier {
   let domain: String
   let id: String
