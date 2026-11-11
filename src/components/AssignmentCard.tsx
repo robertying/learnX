@@ -1,6 +1,10 @@
 import { Assignment } from 'data/types/state';
 import { removeTags } from 'helpers/text';
-import { deadlineText, isDueSoon } from 'helpers/assignments';
+import {
+  deadlineText,
+  deadlineTone,
+  deadlineUrgency,
+} from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { useMinute } from 'hooks/useClock';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
@@ -35,7 +39,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
 }) => {
   const now = useMinute();
   const dueText = deadlineText(deadline, now);
-  const dueSoon = isDueSoon(deadline, now);
+  const urgency = deadlineUrgency(deadline, now, submitted);
 
   const gradeText = gradeLevel
     ? getAssignmentGradeLevelDescription(gradeLevel)
@@ -55,8 +59,8 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     <CardPill testID="submitted" tone="green">
       {t('submitted')}
     </CardPill>
-  ) : dueSoon ? (
-    <CardPill testID="due-soon" tone="red" icon="deadline">
+  ) : urgency ? (
+    <CardPill testID="due-soon" tone={deadlineTone[urgency]} icon="deadline">
       {dueText}
     </CardPill>
   ) : (

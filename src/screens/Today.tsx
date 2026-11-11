@@ -15,7 +15,12 @@ import { useAssignments, useFiles, useNotices } from 'data/content';
 import { useWeekSchedule } from 'data/schedule';
 import { useUserData } from 'data/userData';
 import { Assignment } from 'data/types/state';
-import { deadlineText, isDueSoon } from 'helpers/assignments';
+import {
+  deadlineText,
+  deadlineTone,
+  deadlineUrgency,
+  isDueSoon,
+} from 'helpers/assignments';
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
@@ -218,6 +223,11 @@ const Today: React.FC<Props> = ({ navigation }) => {
                 title={assignment.title}
                 subtitle={assignment.courseName}
                 detail={deadlineText(assignment.deadline, now)}
+                detailTint={
+                  deadlineTone[
+                    deadlineUrgency(assignment.deadline, now) ?? 'soon'
+                  ]
+                }
                 onPress={() => openAssignment(assignment)}
               />
             ))

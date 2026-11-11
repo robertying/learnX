@@ -68,7 +68,7 @@ describe('upcomingDeadlines', () => {
 });
 
 describe('deadlineTimeline', () => {
-  it('starts now and adds an entry at each upcoming deadline', () => {
+  it('starts now and adds an entry as each deadline turns orange, red and passes', () => {
     const timeline = deadlineTimeline(
       [
         assignment('b', '2026-03-17T00:00:00Z'),
@@ -79,10 +79,14 @@ describe('deadlineTimeline', () => {
     );
     expect(timeline.map(e => e.date)).toEqual([
       now,
+      // b turns orange at the start of the day before it (Shanghai time).
+      Date.parse('2026-03-16T00:00:00+08:00'),
+      // a passes as b turns red, a day before it.
       Date.parse('2026-03-16T00:00:00Z'),
       Date.parse('2026-03-17T00:00:00Z'),
     ]);
     expect(timeline.map(e => e.deadlines.deadlines.map(d => d.id))).toEqual([
+      ['a', 'a2', 'b'],
       ['a', 'a2', 'b'],
       ['b'],
       [],

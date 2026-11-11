@@ -31,7 +31,7 @@ import {
 import { accessibilityValue } from '@expo/ui/swift-ui/modifiers';
 import type * as ReactNative from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
-import { font } from '@expo/ui/swift-ui/modifiers';
+import { font, foregroundStyle } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
 
@@ -389,7 +389,7 @@ describe('Form (iOS details)', () => {
     expect(navigation.setOptions).not.toHaveBeenCalled();
   });
 
-  it('sets a grade large and bold, and a warning semibold', async () => {
+  it('sets a grade large and bold, and a deadline semibold in its hue', async () => {
     // At Jest's font scale of 2 the detail would go under the title instead.
     jest
       .spyOn(RN, 'useWindowDimensions')
@@ -397,7 +397,13 @@ describe('Form (iOS details)', () => {
     await render(
       <FormSection>
         <FormText title="Grade" detail="A" detailTint="accent" />
-        <FormText title="Due" detail="Tomorrow" detailTint="warning" />
+        <FormText title="Due" detail="Tomorrow" detailTint="orange" />
+        <FormLink
+          title="Essay"
+          detail="due in 3 hours"
+          detailTint="red"
+          onPress={jest.fn()}
+        />
       </FormSection>,
     );
     expect(font).toHaveBeenCalledWith({ textStyle: 'title3', weight: 'bold' });
@@ -405,6 +411,8 @@ describe('Form (iOS details)', () => {
       textStyle: 'body',
       weight: 'semibold',
     });
+    expect(foregroundStyle).toHaveBeenCalledWith(PlatformColor('systemOrange'));
+    expect(foregroundStyle).toHaveBeenCalledWith(PlatformColor('systemRed'));
   });
 
   it('shows a spinner in a button row while it works', async () => {

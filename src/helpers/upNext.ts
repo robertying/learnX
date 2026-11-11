@@ -47,11 +47,12 @@ export function upcomingClasses(
 
 /**
  * When what the widget shows changes: now, as each class starts and ends, and
- * as each deadline passes. At most `max` times, the first one being `now`.
+ * at `deadlineTimes` (`deadlineChangeTimes`: as each deadline turns orange,
+ * red and passes). At most `max` times, the first one being `now`.
  */
 export function upNextTimes(
   classes: Pick<UpcomingClass, 'start' | 'end'>[],
-  deadlines: number[],
+  deadlineTimes: number[],
   { now = Date.now(), max = 40 }: { now?: number; max?: number } = {},
 ): number[] {
   const times = new Set<number>();
@@ -59,8 +60,8 @@ export function upNextTimes(
     times.add(c.start);
     times.add(c.end);
   }
-  for (const deadline of deadlines) {
-    times.add(deadline);
+  for (const time of deadlineTimes) {
+    times.add(time);
   }
   return [
     now,

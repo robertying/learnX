@@ -7,6 +7,13 @@ export interface DeadlineWidgetProps {
     due: string;
     /** The learnx:// link that opens the assignment. */
     url: string;
+    /**
+     * From when the due date is orange and red, in milliseconds
+     * (`deadlineUrgencyTimes` in helpers/assignments). Missing from props
+     * sent by older versions.
+     */
+    soonFrom?: number;
+    urgentFrom?: number;
   })[];
   /** How many open assignments there are in all, listed or not. */
   total: number;

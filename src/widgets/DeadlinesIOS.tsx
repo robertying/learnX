@@ -34,6 +34,18 @@ function DeadlinesWidget(
     'widget',
   );
   const deadlines = props.deadlines ?? [];
+  const now = (environment.date ?? new Date()).getTime();
+  // The deadline's color by the app's rule (deadlineUrgency in
+  // helpers/assignments): red under a day left, orange when it's due by the
+  // end of tomorrow. The timeline has an entry at each change.
+  const dueColor = (d: DeadlineWidgetProps['deadlines'][number]) =>
+    foregroundStyle(
+      d.urgentFrom !== undefined && now > d.urgentFrom
+        ? PlatformColor('systemRed')
+        : d.soonFrom !== undefined && now >= d.soonFrom
+          ? PlatformColor('systemOrange')
+          : { type: 'hierarchical', style: 'secondary' },
+    );
   // Props sent before widget rows had links have no URLs.
   const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
@@ -154,7 +166,7 @@ function DeadlinesWidget(
                 dateStyle="relative"
                 modifiers={[
                   font({ textStyle: large ? 'subheadline' : 'caption' }),
-                  foregroundStyle(accent),
+                  dueColor(item),
                   lineLimit(1),
                 ]}
               />

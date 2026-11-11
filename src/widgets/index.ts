@@ -5,7 +5,9 @@ import { Assignment } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import { getTargetUrl } from 'helpers/openTarget';
 import { UpcomingClass, upNextTimes } from 'helpers/upNext';
+import { deadlineUrgencyTimes } from 'helpers/assignments';
 import {
+  deadlineChangeTimes,
   deadlineTimeline,
   upcomingDeadlines,
   UpcomingDeadlines,
@@ -30,6 +32,7 @@ const upNextWidget = (): Widget<UpNextWidgetProps> | undefined =>
 const deadlineProps = (deadlines: UpcomingDeadlines['deadlines']) =>
   deadlines.map(d => ({
     ...d,
+    ...deadlineUrgencyTimes(d.deadline),
     due: dayjs(d.deadline).format(t('widgetDateTimeFormat')),
     url: getTargetUrl({ type: 'assignment', id: d.id }),
   }));
@@ -157,7 +160,10 @@ export function updateUpNextWidget(
     if (Platform.OS === 'ios') {
       const times = upNextTimes(
         classes,
-        deadlines.map(d => d.deadline),
+        deadlineChangeTimes(
+          deadlines.map(d => d.deadline),
+          now,
+        ),
         { now },
       );
       widget.updateTimeline(

@@ -63,16 +63,16 @@ export interface FormItemRowProps extends FormRowProps {
   done?: boolean;
   /** A bar under the text, from 0 to 1, for how far along it is. */
   progress?: number;
+  /**
+   * Draws the detail in a color of its own: `accent` (the brand color,
+   * bolder, for a grade), or the `red` or `orange` status hue (for a
+   * deadline, by `deadlineTone` in `helpers/assignments`).
+   */
+  detailTint?: 'accent' | 'red' | 'orange';
 }
 
 /** A row that only shows something. */
-export interface FormTextProps extends FormItemRowProps {
-  /**
-   * Draws the detail in a color of its own: `accent` (the brand color,
-   * bolder, for a grade) or `warning` (orange, for a deadline coming up).
-   */
-  detailTint?: 'accent' | 'warning';
-}
+export type FormTextProps = FormItemRowProps;
 
 export interface FormLinkProps extends FormItemRowProps {
   /** Opens another page. */

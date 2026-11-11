@@ -20,7 +20,11 @@ import {
   getAssignmentGradeLevelDescription,
   t,
 } from 'helpers/i18n';
-import { deadlineText, isDueSoon } from 'helpers/assignments';
+import {
+  deadlineText,
+  deadlineTone,
+  deadlineUrgency,
+} from 'helpers/assignments';
 import { Assignment } from 'data/types/state';
 import { useAssignment, useExcellentHomeworkDetail } from 'data/content';
 import { useHasSubmissionDraft } from 'data/submissionDrafts';
@@ -123,6 +127,7 @@ const AssignmentDetailContent: React.FC<{
   } = assignment;
 
   const now = useMinute();
+  const urgency = deadlineUrgency(deadline, now, submitted);
   const closed = dayjs(now).isAfter(dayjs(deadline));
 
   const html = getWebViewTemplate(
@@ -202,7 +207,7 @@ const AssignmentDetailContent: React.FC<{
             title={t('deadline')}
             subtitle={dayjs(deadline).format(t('fullDateTimeFormat'))}
             detail={deadlineText(deadline, now)}
-            detailTint={isDueSoon(deadline, now) ? 'warning' : undefined}
+            detailTint={urgency && deadlineTone[urgency]}
             icon="deadline"
           />
           {lateSubmissionDeadline ? (

@@ -34,17 +34,20 @@ describe('updateDeadlineWidget', () => {
     Platform.OS = os;
   });
 
-  it('gives iOS an entry now and one as each deadline passes', () => {
+  it('gives iOS an entry now and one as each deadline changes color or passes', () => {
     Platform.OS = 'ios';
     updateDeadlineWidget(assignments, options);
 
     const [entries] = jest.mocked(iosWidget.updateTimeline).mock.calls[0];
     expect(entries.map(e => e.date.toISOString())).toEqual([
       '2026-03-15T12:00:00.000Z',
+      // b turns orange (midnight in Shanghai), then red as a passes.
+      '2026-03-15T16:00:00.000Z',
       '2026-03-16T00:00:00.000Z',
       '2026-03-17T00:00:00.000Z',
     ]);
     expect(entries.map(e => e.props.deadlines.map(d => d.id))).toEqual([
+      ['a', 'b'],
       ['a', 'b'],
       ['b'],
       [],
@@ -124,14 +127,16 @@ describe('updateUpNextWidget', () => {
     updateUpNextWidget();
   });
 
-  it('gives iOS the same props at each class start and end and deadline', () => {
+  it('gives iOS the same props at each class start and end and deadline change', () => {
     Platform.OS = 'ios';
     updateUpNextWidget(classes, assignments, options);
 
     const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
     expect(entries.map(e => e.date.getTime())).toEqual([
       new Date('2026-03-15T20:00:00+08:00').getTime(),
-      // Also assignment a's deadline (00:00Z).
+      // Assignment b turns orange.
+      at('00:00'),
+      // Also assignment a's deadline (00:00Z), and b turning red.
       at('08:00'),
       at('09:35'),
       at('13:30'),

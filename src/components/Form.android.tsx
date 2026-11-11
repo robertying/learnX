@@ -227,7 +227,6 @@ const FormRow: React.FC<
     /** How the row takes a tap: clickable, toggleable or selectable. */
     action?: ModifierConfig;
     titleColor?: string;
-    detailTint?: FormTextProps['detailTint'];
     /** Crossed out. */
     struck?: boolean;
     trailing?: ReactNode;
@@ -267,14 +266,14 @@ const FormRow: React.FC<
             ? colors.outline
             : detailTint === 'accent'
               ? colors.primary
-              : detailTint === 'warning'
-                ? theme.colors.status.orange
+              : detailTint
+                ? theme.colors.status[detailTint]
                 : colors.onSurfaceVariant
         }
         style={
           detailTint === 'accent'
             ? { typography: 'titleLarge' }
-            : detailTint === 'warning'
+            : detailTint
               ? { typography: 'labelLarge' }
               : undefined
         }
