@@ -14,7 +14,8 @@ import {
 import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from './calendarError';
 import { exportTextFile } from './files/share';
-import { t } from './i18n';
+import { Platform } from 'react-native';
+import { t, TranslationKey } from './i18n';
 
 export interface ToastMessage {
   text: string;
@@ -23,13 +24,24 @@ export interface ToastMessage {
 
 const messageOf = (err: unknown) => (err as Error).message;
 
+/** Android has no "full access" to calendars and needs no restart once allowed. */
+const noCalendarPermission = (
+  key:
+    | 'assignmentSyncNoCalendarPermission'
+    | 'courseScheduleSyncNoCalendarPermission'
+    | 'deleteFailedNoCalendarPermission'
+    | 'calendarExportNoCalendarPermission',
+): ToastMessage => ({
+  text: t(
+    Platform.OS === 'android' ? (`${key}Android` as TranslationKey) : key,
+  ),
+  type: 'error',
+});
+
 export const courseSyncErrorToast = (err: unknown): ToastMessage => {
   switch (calendarErrorCode(err)) {
     case 'calendarPermission':
-      return {
-        text: t('courseScheduleSyncNoCalendarPermission'),
-        type: 'error',
-      };
+      return noCalendarPermission('courseScheduleSyncNoCalendarPermission');
     default:
       return { text: t('courseScheduleSyncRepetitiveError'), type: 'error' };
   }
@@ -38,7 +50,7 @@ export const courseSyncErrorToast = (err: unknown): ToastMessage => {
 export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
   switch (calendarErrorCode(err)) {
     case 'calendarPermission':
-      return { text: t('assignmentSyncNoCalendarPermission'), type: 'error' };
+      return noCalendarPermission('assignmentSyncNoCalendarPermission');
     case 'reminderPermission':
       return { text: t('assignmentSyncNoReminderPermission'), type: 'error' };
     case 'noSource':
@@ -54,7 +66,7 @@ export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
 export const calendarExportErrorToast = (err: unknown): ToastMessage => {
   switch (calendarErrorCode(err)) {
     case 'calendarPermission':
-      return { text: t('calendarExportNoCalendarPermission'), type: 'error' };
+      return noCalendarPermission('calendarExportNoCalendarPermission');
     case 'noEvents':
       return { text: t('calendarExportNoEvent'), type: 'warning' };
     default:
@@ -68,7 +80,7 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
 export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
   switch (calendarErrorCode(err)) {
     case 'calendarPermission':
-      return { text: t('deleteFailedNoCalendarPermission'), type: 'error' };
+      return noCalendarPermission('deleteFailedNoCalendarPermission');
     case 'reminderPermission':
       return { text: t('deleteFailedNoReminderPermission'), type: 'error' };
     default:
