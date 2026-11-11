@@ -83,9 +83,12 @@ export const glassHeaderOptions: NativeStackNavigationOptions = hasGlassHeader
 
 /**
  * Every stack's screens: from iOS 26 the back button is the chevron alone,
- * as in Settings and Files. A back button with the previous screen's title
- * fades out and in again once a push has finished (iOS rebuilds it), which
- * the chevron alone doesn't. The Mac keeps the title.
+ * as SwiftUI, Settings and Files show it (the long-press menu still lists the
+ * titles). UIKit shows the previous screen's title only when asked, and on
+ * iOS 27 that titled button fades out and in after a push in which header
+ * buttons morph (a right button on both screens, or a list's left buttons
+ * turning into the back button), also in plain UIKit. The Mac keeps the
+ * title.
  */
 export const stackScreenOptions: NativeStackNavigationOptions = hasGlassHeader
   ? { headerBackButtonDisplayMode: 'minimal' }
