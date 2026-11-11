@@ -12,10 +12,29 @@ name: Open settings pages and log out
       LIST: '.*(Log Out|退出登录).*'
 # Settings is a native lazy list, and on phones About is near the bottom,
 # under the floating tab bar: scroll it to the middle first.
-- scrollUntilVisible:
-    element: '.*(About|关于).*'
-    direction: DOWN
-    centerElement: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element: '.*(About|关于).*'
+          direction: DOWN
+          centerElement: true
+# scrollUntilVisible swipes the middle of the screen, which is the detail
+# pane on an unfolded foldable or tablet: swipe the Settings list itself.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible: '.*(About|关于).*'
+          commands:
+            - swipe:
+                from:
+                  id: settings-list
+                direction: UP
 - tapOn: '.*(About|关于).*'
 - assertVisible: '.*© \d+ Rui Ying.*'
 - runFlow:
@@ -23,11 +42,29 @@ name: Open settings pages and log out
     env:
       # Not About: the About page's title matches that too.
       LIST: '.*(Help & Feedback|帮助与反馈).*'
-- scrollUntilVisible:
-    element:
-      id: settings-logout
-    direction: UP
-    centerElement: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: settings-logout
+          direction: UP
+          centerElement: true
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible:
+              id: settings-logout
+          commands:
+            - swipe:
+                from:
+                  id: settings-list
+                direction: DOWN
 
 - tapOn:
     id: settings-logout

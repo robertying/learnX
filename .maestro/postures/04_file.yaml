@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+name: Open a file on the open iPhone Duo
+---
+# Run by scripts/e2e-devices.sh on the open iPhone Duo, already logged in.
+# Maestro can't tap on the inner display (mobile-dev-inc/Maestro#3623), so
+# the screen opens from its learnx:// link (mock data ids, checked by
+# src/helpers/__tests__/e2ePostures.test.ts) and only its id is checked.
+- openLink: 'learnx://file/2016310501_KJ_173100010b5f1dcc2-f77a-4cca-be0f-95808af85d82'
+- extendedWaitUntil:
+    visible:
+      id: file-detail
+    timeout: 15000

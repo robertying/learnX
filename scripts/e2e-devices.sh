@@ -1,0 +1,324 @@
+#!/bin/bash
+# Run the Maestro flows on each device setup, one device at a time.
+#
+#   scripts/e2e-devices.sh [profile ...]     (no profile: all of them)
+#
+# Profiles:
+#   iphone          every flow on the iPhone
+#   ipad            every flow on the iPad, portrait
+#   ipad-landscape  every flow on the iPad, landscape
+#   duo-folded      every flow on the iPhone Duo, closed (outer display)
+#   duo-half        the posture flows on the iPhone Duo, half open (90°)
+#   duo-open        the posture flows on the iPhone Duo, fully open (180°)
+#   fold-folded     every flow on the Android foldable, folded
+#   fold-unfolded   every flow on the Android foldable, unfolded (the tablet
+#                   layout: split views and a side rail)
+#
+# Install a debug build on each device and start Metro first; the script
+# boots a device that isn't running and shuts down only the devices it
+# booted. It refuses to boot one while E2E_MAX_BOOTED (3) simulators and
+# emulators are already running.
+#
+# Devices, by simulator name or UDID and by AVD name:
+#   E2E_IPHONE (learnX iPhone 18 Pro), E2E_IPAD (learnX iPad Pro 11),
+#   E2E_DUO (learnX iPhone Duo), E2E_AVD (Pixel_10_Pro_Fold)
+# E2E_HINGE is the command that sets the iPhone Duo's hinge (`hinge`,
+# brew install artemnovichkov/tap/hinge). E2E_METRO_PORT (8081) is the port
+# Metro listens on; the emulator reaches it through adb reverse.
+#
+# Results, with Maestro's output and a JUnit report: build/e2e/<profile>/
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+all_profiles="iphone ipad ipad-landscape duo-folded duo-half duo-open fold-folded fold-unfolded"
+profiles="${*:-$all_profiles}"
+
+iphone="${E2E_IPHONE:-learnX iPhone 18 Pro}"
+ipad="${E2E_IPAD:-learnX iPad Pro 11}"
+duo="${E2E_DUO:-learnX iPhone Duo}"
+avd="${E2E_AVD:-Pixel_10_Pro_Fold}"
+hinge="${E2E_HINGE:-hinge}"
+metro_port="${E2E_METRO_PORT:-8081}"
+max_booted="${E2E_MAX_BOOTED:-3}"
+ios_app_id="io.robertying.learnX"
+android_app_id="io.robertying.learnx"
+sdk="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
+out_root="build/e2e"
+
+# The device this script booted ("ios <udid>" or "android <serial>"), shut
+# down before the next device boots and on exit.
+booted=""
+# The iPhone Duo whose hinge this script moved, closed again on exit.
+hinge_moved=""
+failed=""
+passed=""
+# The UDID or serial of the device the current profile runs on.
+device=""
+
+log() { printf '\n==> %s\n' "$*"; }
+
+# Run a command, killing it after $1 seconds (simctl io screenshot can hang).
+with_timeout() {
+  local secs="$1"
+  shift
+  "$@" &
+  local pid=$!
+  local waited=0
+  while kill -0 "$pid" 2>/dev/null; do
+    if [ "$waited" -ge "$secs" ]; then
+      kill "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      return 124
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  wait "$pid"
+}
+
+booted_count() {
+  local sims emulators
+  sims="$(xcrun simctl list devices 2>/dev/null | grep -c '(Booted)' || true)"
+  emulators="$(adb devices 2>/dev/null | grep -c '^emulator-' || true)"
+  echo $((sims + emulators))
+}
+
+check_room() {
+  if [ "$(booted_count)" -ge "$max_booted" ]; then
+    echo "$max_booted simulators/emulators are running already; shut one down or set E2E_MAX_BOOTED" >&2
+    return 1
+  fi
+}
+
+release_device() {
+  case "$booted" in
+  ios\ *) xcrun simctl shutdown "${booted#ios }" || true ;;
+  android\ *) adb -s "${booted#android }" emu kill >/dev/null || true ;;
+  esac
+  booted=""
+}
+
+cleanup() {
+  if [ -n "$hinge_moved" ]; then
+    "$hinge" -d "$hinge_moved" close >/dev/null 2>&1 || true
+  fi
+  release_device
+}
+trap cleanup EXIT
+
+# --- iOS ---------------------------------------------------------------------
+
+sim_udid() {
+  if [[ "$1" =~ ^[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}$ ]]; then
+    echo "$1"
+    return
+  fi
+  xcrun simctl list devices available | grep -F "    $1 (" |
+    grep -oE '[0-9A-F]{8}-([0-9A-F]{4}-){3}[0-9A-F]{12}' | head -n 1
+}
+
+# Boot the simulator named $1 if needed and set $device to its UDID. (Not
+# printed: a command substitution's subshell would lose $booted.)
+use_sim() {
+  local udid
+  udid="$(sim_udid "$1")"
+  device="$udid"
+  if [ -z "$udid" ]; then
+    echo "no simulator named \"$1\"" >&2
+    return 1
+  fi
+  # One device at a time: shut down the one booted for an earlier profile.
+  if [ -n "$booted" ] && [ "$booted" != "ios $udid" ]; then
+    release_device
+  fi
+  if ! xcrun simctl list devices | grep -F "$udid" | grep -q '(Booted)'; then
+    check_room || return 1
+    log "Booting $1 ($udid)"
+    xcrun simctl boot "$udid" || return 1
+    booted="ios $udid"
+  fi
+  xcrun simctl bootstatus "$udid" -b >/dev/null || return 1
+  if ! xcrun simctl get_app_container "$udid" "$ios_app_id" >/dev/null 2>&1; then
+    echo "learnX isn't installed on \"$1\"; build and install a debug app first" >&2
+    return 1
+  fi
+}
+
+set_hinge() {
+  local udid="$1" posture="$2"
+  if ! command -v "$hinge" >/dev/null; then
+    echo "\"$hinge\" not found: brew install artemnovichkov/tap/hinge (or set E2E_HINGE)" >&2
+    return 1
+  fi
+  log "Hinge: $posture"
+  "$hinge" -d "$udid" "$posture" || return 1
+  if [ "$posture" = close ]; then
+    hinge_moved=""
+  else
+    hinge_moved="$udid"
+  fi
+  # The app moves to the other display a few seconds after the hinge does.
+  sleep 10
+}
+
+app_running() {
+  xcrun simctl spawn "$1" launchctl list 2>/dev/null |
+    grep -q "UIKitApplication:$ios_app_id"
+}
+
+# Every flow, on simulator $1 in orientation $2.
+run_ios_suite() {
+  local udid="$1" orientation="$2" out="$3"
+  MAESTRO_DEVICE="$udid" E2E_ORIENTATION="$orientation" scripts/e2e.sh ios \
+    --format junit --output "$out/report.xml" --test-output-dir "$out"
+}
+
+# Log in on the closed Duo, open it to $2 and open each posture flow's
+# screen on the inner display, saving a screenshot of each.
+run_duo_postures() {
+  local udid="$1" posture="$2" out="$3" flow name status=0
+  set_hinge "$udid" close || return 1
+  MAESTRO_DEVICE="$udid" scripts/e2e.sh ios --test-output-dir "$out/login" \
+    .maestro/subflows/login.yaml || return 1
+  set_hinge "$udid" "$posture" || return 1
+  for flow in .maestro/postures/*.yaml; do
+    name="$(basename "$flow" .yaml)"
+    log "$name"
+    if ! MAESTRO_DEVICE="$udid" scripts/e2e.sh ios \
+      --test-output-dir "$out/$name" "$flow"; then
+      status=1
+    fi
+    # Display 3 is the inner display; Maestro's own screenshots are black.
+    with_timeout 30 xcrun simctl io "$udid" screenshot --display=3 \
+      "$out/$name.png" >/dev/null 2>&1 ||
+      echo "screenshot of $name failed" >&2
+    if ! app_running "$udid"; then
+      echo "learnX stopped running after $name" >&2
+      return 1
+    fi
+  done
+  set_hinge "$udid" close || return 1
+  return "$status"
+}
+
+# --- Android -----------------------------------------------------------------
+
+emulator_serial() {
+  local serial
+  for serial in $(adb devices | awk '/^emulator-[0-9]+\tdevice$/ { print $1 }'); do
+    if [ "$(adb -s "$serial" emu avd name 2>/dev/null | head -n 1 | tr -d '\r')" = "$1" ]; then
+      echo "$serial"
+      return
+    fi
+  done
+}
+
+# Boot the AVD named $1 if needed and set $device to its serial.
+use_emulator() {
+  local serial waited=0
+  serial="$(emulator_serial "$1")"
+  if [ -n "$booted" ] && [ "$booted" != "android $serial" ]; then
+    release_device
+  fi
+  if [ -z "$serial" ]; then
+    check_room || return 1
+    log "Booting $1"
+    mkdir -p "$out_root"
+    "$sdk/emulator/emulator" -avd "$1" -no-snapshot-save -no-boot-anim \
+      >"$out_root/emulator.log" 2>&1 &
+    while [ -z "$serial" ]; do
+      if [ "$waited" -ge 180 ]; then
+        echo "$1 didn't start; see $out_root/emulator.log" >&2
+        return 1
+      fi
+      sleep 2
+      waited=$((waited + 2))
+      serial="$(emulator_serial "$1")"
+    done
+    booted="android $serial"
+  fi
+  device="$serial"
+  adb -s "$serial" wait-for-device shell \
+    'while [ "$(getprop sys.boot_completed)" != 1 ]; do sleep 1; done' ||
+    return 1
+  if ! adb -s "$serial" shell pm path "$android_app_id" | grep -q '^package:'; then
+    echo "learnX isn't installed on $1; build and install a debug app first" >&2
+    return 1
+  fi
+  # clearState wipes the debug server host, so the app asks localhost:8081.
+  adb -s "$serial" reverse tcp:8081 "tcp:$metro_port" >/dev/null
+}
+
+run_android_suite() {
+  local serial="$1" state="$2" out="$3"
+  log "Posture: $state"
+  adb -s "$serial" emu "$state" >/dev/null || return 1
+  sleep 3
+  MAESTRO_DEVICE="$serial" scripts/e2e.sh android \
+    --format junit --output "$out/report.xml" --test-output-dir "$out"
+}
+
+# --- Profiles ----------------------------------------------------------------
+
+run_profile() {
+  local profile="$1" out="$out_root/$1"
+  rm -rf "$out"
+  mkdir -p "$out"
+  # set -e is off inside a function called from an if, so each step that
+  # can fail ends the profile with || return.
+  case "$profile" in
+  iphone)
+    use_sim "$iphone" || return 1
+    run_ios_suite "$device" PORTRAIT "$out"
+    ;;
+  ipad)
+    use_sim "$ipad" || return 1
+    run_ios_suite "$device" PORTRAIT "$out"
+    ;;
+  ipad-landscape)
+    use_sim "$ipad" || return 1
+    run_ios_suite "$device" LANDSCAPE_LEFT "$out"
+    ;;
+  duo-folded)
+    use_sim "$duo" || return 1
+    set_hinge "$device" close || return 1
+    run_ios_suite "$device" PORTRAIT "$out"
+    ;;
+  duo-half)
+    use_sim "$duo" || return 1
+    run_duo_postures "$device" half "$out"
+    ;;
+  duo-open)
+    use_sim "$duo" || return 1
+    run_duo_postures "$device" open "$out"
+    ;;
+  fold-folded)
+    use_emulator "$avd" || return 1
+    run_android_suite "$device" fold "$out"
+    ;;
+  fold-unfolded)
+    use_emulator "$avd" || return 1
+    run_android_suite "$device" unfold "$out"
+    ;;
+  *)
+    echo "unknown profile \"$profile\" (one of: $all_profiles)" >&2
+    return 2
+    ;;
+  esac
+}
+
+for profile in $profiles; do
+  log "Profile: $profile"
+  if run_profile "$profile"; then
+    passed="$passed $profile"
+  else
+    failed="$failed $profile"
+  fi
+done
+
+log "Passed:${passed:- none}"
+if [ -n "$failed" ]; then
+  echo "Failed:$failed (see $out_root/<profile>)" >&2
+  exit 1
+fi

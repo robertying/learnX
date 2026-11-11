@@ -2,6 +2,9 @@
 # USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---
+# ORIENTATION comes from scripts/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
+# set), so iPad landscape runs need no rotating by hand.
+- setOrientation: ${ORIENTATION}
 - launchApp:
     clearState: true
     clearKeychain: true

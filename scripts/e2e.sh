@@ -5,6 +5,8 @@
 #   scripts/e2e.sh ios|android [extra maestro test args, e.g. a single flow]
 #
 # Boot one simulator/emulator first (or pass --device <id> via MAESTRO_DEVICE).
+# E2E_ORIENTATION (PORTRAIT, LANDSCAPE_LEFT, ...) sets the orientation each
+# flow starts in. scripts/e2e-devices.sh runs the flows on every device setup.
 set -euo pipefail
 
 platform="${1:-}"
@@ -58,4 +60,5 @@ exec maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test
   -e APP_ID="$app_id" \
   -e USERNAME="$username" \
   -e PASSWORD="$password" \
+  -e ORIENTATION="${E2E_ORIENTATION:-PORTRAIT}" \
   "$@"
