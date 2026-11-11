@@ -131,7 +131,7 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             style={Styles.flex1}
           >
             {searchQuery.trim() ? (
-              <StatusView icon="notFound" message={t('noResults')} />
+              <StatusView icon="noResults" message={t('noResults')} />
             ) : (
               <StatusView icon="search" message={t('searchPrompt')} />
             )}
