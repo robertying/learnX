@@ -3,6 +3,12 @@
 # a hidden course), then changes settings and turns on the assignment syncs so
 # 18.0.3 makes its calendar, reminders and their ids. 18.0.3 has no testIDs:
 # its English labels are matched, so run it with the simulator in English.
+# A row is one accessibility element named "<icon glyph>, <label>" (matched
+# with `.*, <label>, .*`). A switch is tapped by position (x 88% on iOS, where
+# switches are not elements; 91% on Android, where `rightOf` a label picks the
+# wrong switch), bottom to top so that a row a switch adds (Class Alert's
+# "Before Class") doesn't move the ones still to tap. The positions are those
+# of an iPhone 18 Pro and a folded Pixel 10 Pro Fold.
 appId: ${APP_ID}
 ---
 - launchApp:
@@ -79,16 +85,17 @@ appId: ${APP_ID}
     when:
       platform: Android
     commands:
+      # Assignment Calendar Sync, Omit Location, Class Alert, Graduate, bottom
+      # to top (Class Alert adds a row below itself).
       - tapOn:
-          rightOf: '.*, Graduate'
+          point: 91%, 48%
       - tapOn:
-          rightOf: '.*, Class Alert'
+          point: 91%, 34%
       - tapOn:
-          rightOf: '.*, Omit Location'
+          point: 91%, 29%
       - tapOn:
-          rightOf: '.*, Assignment Calendar Sync'
-      - tapOn:
-          rightOf: '.*, Assignment Reminder Sync'
+          point: 91%, 18%
+      # No Assignment Reminder Sync here: Reminders is Apple's.
       - back
 
 # Settings › Files: the 18.0.3-only settings on. Open after download is an
@@ -109,12 +116,14 @@ appId: ${APP_ID}
     when:
       platform: Android
     commands:
+      # Open downloaded files automatically, Omit Course Name in Filenames,
+      # Save Downloaded Files to Documents.
       - tapOn:
-          rightOf: '.*, Save Downloaded Files to Documents'
+          point: 91%, 52%
       - tapOn:
-          rightOf: '.*, Omit Course Name in Filenames'
+          point: 91%, 32%
       - tapOn:
-          rightOf: '.*, Open downloaded files automatically'
+          point: 91%, 18%
       - back
 
 # Opening it marks its badge seen; joining asks first.
@@ -130,7 +139,7 @@ appId: ${APP_ID}
       platform: Android
     commands:
       - tapOn:
-          rightOf: '.*, Course Information Sharing'
+          rightOf: 'Course Information Sharing'
 - tapOn: 'Ok'
 
 # 18.0.3 syncs the assignments to the calendar and Reminders when it refreshes
