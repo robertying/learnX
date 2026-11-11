@@ -24,10 +24,9 @@ it('stays hidden while logged in or before a login has failed', async () => {
 it('says it is offline and how old the data is', async () => {
   useAuthStore.setState({ failure: 'offline' });
   await render(<SyncStatus updatedAt={now - 5 * 60 * 1000} />);
+  expect(screen.getByText(t('syncStatusOffline'))).toBeTruthy();
   expect(
-    screen.getByText(
-      `${t('syncStatusOffline')} · ${t('syncStatusUpdated', { time: '5 minutes ago' })}`,
-    ),
+    screen.getByText(t('syncStatusUpdated', { time: '5 minutes ago' })),
   ).toBeTruthy();
   expect(screen.queryByTestId('sync-status-relogin')).toBeNull();
 });
@@ -69,7 +68,7 @@ describe('as a Form section', () => {
     expect(
       screen.getByText(t('syncStatusUpdated', { time: '5 minutes ago' })),
     ).toBeTruthy();
-    expect(screen.queryByText(t('syncStatusLogInAgain'))).toBeNull();
+    expect(screen.queryByText(t('syncStatusLogIn'))).toBeNull();
   });
 
   it('offers to log in again after a rejected login', async () => {
@@ -77,7 +76,7 @@ describe('as a Form section', () => {
     await render(<SyncStatusSection />);
     await userEvent
       .setup({ advanceTimers: jest.advanceTimersByTime })
-      .press(screen.getByText(t('syncStatusLogInAgain')));
+      .press(screen.getByText(t('syncStatusLogIn')));
     expect(useAuthStore.getState().reloginRequested).toBe(true);
   });
 });

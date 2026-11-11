@@ -87,6 +87,22 @@ describe('Form', () => {
     ).toBeTruthy();
   });
 
+  it('puts a button at the end of a text row', async () => {
+    const onPress = jest.fn();
+    await render(
+      <FormSection>
+        <FormText
+          title="Couldn't log in"
+          subtitle="updated 5 minutes ago"
+          action={{ title: 'Log In', onPress, testID: 'log-in' }}
+        />
+      </FormSection>,
+    );
+    expect(screen.getByText("Couldn't log in")).toBeTruthy();
+    await userEvent.setup().press(screen.getByTestId('log-in'));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
   it('shows a subtitle, dims a row that is over, and progress', async () => {
     await render(
       <FormSection>

@@ -15,6 +15,7 @@ import {
   Row,
   Switch,
   Text,
+  TextButton,
   TextField,
   useMaterialColors,
   useNativeState,
@@ -362,7 +363,21 @@ const FormRow: React.FC<
 };
 
 /** A row that only shows something. */
-export const FormText: React.FC<FormTextProps> = row => <FormRow {...row} />;
+export const FormText: React.FC<FormTextProps> = ({ action, ...row }) => (
+  <FormRow
+    {...row}
+    trailing={
+      action ? (
+        <TextButton
+          onClick={action.onPress}
+          modifiers={action.testID ? [testIDModifier(action.testID)] : []}
+        >
+          <Text style={{ typography: 'labelLarge' }}>{action.title}</Text>
+        </TextButton>
+      ) : null
+    }
+  />
+);
 
 /** A row that opens another page. Material lists don't show a chevron. */
 export const FormLink: React.FC<FormLinkProps> = ({

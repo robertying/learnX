@@ -208,7 +208,7 @@ const zh: typeof en = {
   syncStatusLoginFailed: '登录失败',
   syncStatusReconnecting: '正在重新连接…',
   syncStatusUpdated: '{time}更新',
-  syncStatusLogInAgain: '重新登录',
+  syncStatusLogIn: '登录',
   refreshFailed: '刷新失败，显示的是已保存的数据',
   archive: '归档',
   restore: '取消归档',
