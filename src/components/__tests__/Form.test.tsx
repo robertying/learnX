@@ -344,6 +344,7 @@ describe('Form (iOS details)', () => {
     );
     expect(navigation.setOptions).toHaveBeenLastCalledWith({
       headerShadowVisible: false,
+      headerTransparent: false,
       headerStyle: {
         backgroundColor: PlatformColor('systemGroupedBackground'),
       },
@@ -352,6 +353,7 @@ describe('Form (iOS details)', () => {
     await screen.unmount();
     expect(navigation.setOptions).toHaveBeenLastCalledWith({
       headerShadowVisible: undefined,
+      headerTransparent: undefined,
       headerStyle: undefined,
     });
   });
@@ -368,8 +370,11 @@ describe('Form (iOS details)', () => {
         </Form>
       </NavigationContext.Provider>,
     );
+    // A transparent header lets the Form lay out under it; a clear
+    // background alone leaves it below a white strip.
     expect(navigation.setOptions).toHaveBeenLastCalledWith({
       headerShadowVisible: false,
+      headerTransparent: true,
       headerStyle: { backgroundColor: 'transparent' },
     });
   });
