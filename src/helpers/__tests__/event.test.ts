@@ -32,7 +32,8 @@ const iCloud = { id: 'src-icloud', name: 'iCloud', type: 'caldav' };
 const local = { id: 'src-local', name: 'Default', type: 'local' };
 
 const fakeCalendar = (overrides: object = {}) => ({
-  listEvents: jest.fn(async () => []),
+  listEvents: jest.fn(async (): Promise<object[]> => []),
+  listReminders: jest.fn(async (): Promise<object[]> => []),
   createEvent: jest.fn(async () => ({ id: 'new-event' })),
   createReminder: jest.fn(async () => ({ id: 'new-reminder' })),
   ...overrides,
@@ -269,6 +270,74 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     );
     expect(calendar.createEvent).not.toHaveBeenCalled();
     expect(getCalendarSync().syncedCalendarAssignments).toEqual({ a1: 'e1' });
+  });
+
+  it('takes over matching events when the saved ids are gone', async () => {
+    const a1 = assignment('a1');
+    const a2 = { ...assignment('a2'), title: 'Lab' };
+    const deadline = new Date(a1.deadline);
+    // a2's event was taken over before; a1's was written as submitted.
+    useCalendarSyncStore.setState({ syncedCalendarAssignments: { a2: 'e2' } });
+    mocked.ExpoCalendarEvent.get.mockResolvedValue({
+      update: jest.fn(async () => {}),
+    });
+    assignments.listEvents.mockResolvedValue([
+      { id: 'e2', title: 'Homework - Calculus', endDate: deadline },
+      { id: 'other', title: 'Homework - Physics', endDate: deadline },
+      { id: 'later', title: 'Homework - Calculus', endDate: new Date(0) },
+      { id: 'e1', title: '✅ Homework - Calculus', endDate: deadline },
+    ]);
+
+    await saveAssignmentsToReminderOrCalendar('calendar', [a1, a2]);
+
+    expect(assignments.createEvent).not.toHaveBeenCalled();
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({
+      a1: 'e1',
+      a2: 'e2',
+    });
+  });
+
+  it('takes over a matching reminder due at or before the deadline', async () => {
+    const a1 = assignment('a1');
+    const a2 = assignment('a2');
+    const deadline = new Date(a1.deadline).getTime();
+    mocked.ExpoCalendarReminder.get.mockResolvedValue({
+      update: jest.fn(async () => {}),
+    });
+    reminders.listReminders.mockResolvedValue([
+      { title: 'Homework - Calculus', dueDate: new Date(deadline) },
+      { id: 'late', title: 'Homework - Calculus', dueDate: deadline + 1 },
+      {
+        id: 'early',
+        title: 'Homework - Calculus',
+        dueDate: new Date(deadline - 31 * 24 * 60 * 60 * 1000),
+      },
+      {
+        id: 'r1',
+        title: 'Homework - Calculus',
+        dueDate: new Date(deadline - 24 * 60 * 60 * 1000).toISOString(),
+      },
+      { id: 'r2', title: 'Homework - Calculus' },
+    ]);
+
+    await saveAssignmentsToReminderOrCalendar('reminder', [a1, a2]);
+
+    // a2 matches nothing left, so it gets a new reminder.
+    expect(reminders.createReminder).toHaveBeenCalledTimes(1);
+    expect(getCalendarSync().syncedReminderAssignments).toEqual({
+      a1: 'r1',
+      a2: 'new-reminder',
+    });
+  });
+
+  it("adds events when the calendar can't be listed", async () => {
+    assignments.listEvents.mockRejectedValue(new Error('denied'));
+
+    await saveAssignmentsToReminderOrCalendar('calendar', [assignment('a1')]);
+
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({
+      a1: 'new-event',
+    });
   });
 
   it('creates reminders on iOS', async () => {

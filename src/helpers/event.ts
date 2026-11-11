@@ -229,6 +229,72 @@ export const getAssignmentReminder = () =>
     onCreate: () => clearEventIds('reminder'),
   });
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+/**
+ * How long before its deadline a reminder may be due: its alert moves its date
+ * that far ahead (`buildAssignmentReminderDetails`).
+ */
+const REMINDER_LEAD_MS = 30 * DAY_MS;
+
+const withoutDoneMark = (title: string | undefined) =>
+  title?.replace(/^✅ /, '');
+
+const time = (date: Date | string | undefined) =>
+  date === undefined ? NaN : new Date(date).getTime();
+
+/**
+ * Takes over entries already in `calendar` for assignments with no saved
+ * event or reminder, so a sync whose saved ids are gone (a reinstall, which
+ * keeps the calendar and adopts it by its title) updates them instead of
+ * adding each assignment a second time. Nothing in an entry names its
+ * assignment, so one matches by title (with or without the submitted mark)
+ * and deadline: an event ends at it, a reminder is due at or before it.
+ */
+const adoptExistingEntries = async (
+  type: AssignmentEventType,
+  calendar: Calendar.ExpoCalendar,
+  inputs: AssignmentEventInput[],
+) => {
+  const synced = getAssignmentEventIds(type);
+  const missing = inputs.filter(input => !synced[input.assignmentId]);
+  if (missing.length === 0) {
+    return;
+  }
+  const isReminder = Platform.OS === 'ios' && type === 'reminder';
+  const deadlines = missing.map(input => input.dueDate.valueOf());
+  let entries: { id: string; title?: string; due: number }[];
+  try {
+    entries = isReminder
+      ? (await calendar.listReminders()).flatMap(r =>
+          r.id ? [{ id: r.id, title: r.title, due: time(r.dueDate) }] : [],
+        )
+      : (
+          await calendar.listEvents(
+            new Date(Math.min(...deadlines) - DAY_MS),
+            new Date(Math.max(...deadlines) + DAY_MS),
+          )
+        ).map(e => ({ id: e.id, title: e.title, due: time(e.endDate) }));
+  } catch {
+    return;
+  }
+  const taken = new Set(Object.values(synced));
+  for (const input of missing) {
+    const deadline = input.dueDate.valueOf();
+    const match = entries.find(
+      entry =>
+        !taken.has(entry.id) &&
+        withoutDoneMark(entry.title) === input.title &&
+        (isReminder
+          ? entry.due <= deadline && entry.due >= deadline - REMINDER_LEAD_MS
+          : entry.due === deadline),
+    );
+    if (match) {
+      taken.add(match.id);
+      setEventIdForAssignment(type, input.assignmentId, match.id);
+    }
+  }
+};
+
 export const saveAssignmentEvent = async (
   type: AssignmentEventType,
   settings: SettingsState,
@@ -327,6 +393,7 @@ export const saveAssignmentsToReminderOrCalendar = async (
       : await getAssignmentCalendar();
 
   const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
+  await adoptExistingEntries(type, calendar, inputs);
 
   await Promise.all(
     inputs.map(
