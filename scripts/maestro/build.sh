@@ -37,8 +37,27 @@ if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then
   export JAVA_HOME
 fi
 
-# Simulator driver only, Apple silicon only: enough for local runs.
-ARCHS=arm64 ./maestro-ios-xctest-runner/build-maestro-ios-runner.sh >&2
-./gradlew :maestro-cli:installDist >&2
+# grpc-java's protoc plugin is x86_64 only before 1.76, which needs Rosetta on
+# Apple silicon. Build with 1.76.0, whose plugin is a universal binary.
+if [ "$(uname -m)" = arm64 ]; then
+  sed -i '' 's/^grpc = ".*"/grpc = "1.76.0"/' gradle/libs.versions.toml
+fi
+
+# installDist bundles the iOS driver, which buildIosDriver builds (always, since
+# Gradle can take a failed earlier build for up to date) with these settings:
+# the simulator driver for Apple silicon only, enough for local runs, and
+# iOS 15 instead of the project's iOS 14, which Xcode 27 no longer builds for.
+xcconfig="$(mktemp -t maestro-driver).xcconfig"
+trap 'rm -f "$xcconfig"' EXIT
+echo "IPHONEOS_DEPLOYMENT_TARGET = 15.0" > "$xcconfig"
+XCODE_XCCONFIG_FILE="$xcconfig" ARCHS=arm64 \
+  ./gradlew :maestro-ios-driver:buildIosDriver --rerun :maestro-cli:installDist >&2
+
+# A failed driver build doesn't fail the Gradle task; it leaves no driver.
+driver="maestro-ios-driver/src/main/resources/driver-iPhoneSimulator/Debug-iphonesimulator"
+if [ ! -s "$driver/maestro-driver-iosUITests-Runner.zip" ]; then
+  echo "The iOS driver didn't build; see the xcodebuild output above." >&2
+  exit 1
+fi
 
 echo "$dir/maestro-cli/build/install/maestro/bin"
