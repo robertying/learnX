@@ -18,6 +18,7 @@ class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {
       .LaunchOptionsKey: Any]? = nil
   ) -> Bool {
     FirebaseApp.configure()
+    UIScrollView.preferSoftTopEdgeEffect()
 
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)

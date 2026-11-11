@@ -13,6 +13,7 @@
 		5A0710000000000000000008 /* AppShortcuts.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000006 /* AppShortcuts.xcstrings */; };
 		5A071000000000000000000A /* NextClassIntent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000009 /* NextClassIntent.swift */; };
 		5A071000000000000000000C /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000B /* AppShortcuts.swift */; };
+		5A071000000000000000000E /* ScrollEdgeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000D /* ScrollEdgeEffect.swift */; };
 		5A0710000000000000000D02 /* SharedFileInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000D01 /* SharedFileInbox.swift */; };
 		5E191CFA541A0D10472C77C2 /* Pods_learnXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C3928D6036512F98EC224CA /* Pods_learnXTests.framework */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
@@ -90,6 +91,7 @@
 		5A0710000000000000000006 /* AppShortcuts.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; name = AppShortcuts.xcstrings; path = learnX/AppShortcuts.xcstrings; sourceTree = "<group>"; };
 		5A0710000000000000000009 /* NextClassIntent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = NextClassIntent.swift; path = learnX/NextClassIntent.swift; sourceTree = "<group>"; };
 		5A071000000000000000000B /* AppShortcuts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppShortcuts.swift; path = learnX/AppShortcuts.swift; sourceTree = "<group>"; };
+		5A071000000000000000000D /* ScrollEdgeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScrollEdgeEffect.swift; path = learnX/ScrollEdgeEffect.swift; sourceTree = "<group>"; };
 		5A0710000000000000000D01 /* SharedFileInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedFileInbox.swift; path = ../modules/share/ios/SharedFileInbox.swift; sourceTree = SOURCE_ROOT; };
 		5A0710000000000000000E01 /* learnXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
@@ -175,6 +177,7 @@
 				5A0710000000000000000001 /* NextDeadlineIntent.swift */,
 				5A0710000000000000000009 /* NextClassIntent.swift */,
 				5A071000000000000000000B /* AppShortcuts.swift */,
+				5A071000000000000000000D /* ScrollEdgeEffect.swift */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
 				D4605C0C2E74F66B008F0837 /* AppIcon.icon */,
@@ -745,6 +748,7 @@
 				5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */,
 				5A071000000000000000000A /* NextClassIntent.swift in Sources */,
 				5A071000000000000000000C /* AppShortcuts.swift in Sources */,
+				5A071000000000000000000E /* ScrollEdgeEffect.swift in Sources */,
 				22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

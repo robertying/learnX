@@ -38,6 +38,7 @@ import {
   scrollContentBackground,
   textSelection,
   scrollDismissesKeyboard,
+  scrollEdgeEffectStyle,
   strikethrough,
   textInputAutocapitalization,
   autocorrectionDisabled,
@@ -123,7 +124,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
         modifiers={[
           // Dragging the form down pulls the keyboard away, as in Notes.
           scrollDismissesKeyboard('interactively'),
-          ...(DeviceInfo.isMac() ? macFormModifiers : []),
+          ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
           ...(onRefresh ? [refreshable(onRefresh)] : []),
         ]}
       >
@@ -132,6 +133,11 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
     </ThemedHost>
   );
 };
+
+// The header's glass over what scrolls under it, as for the app's other
+// scroll views (`ScrollEdgeEffect.swift`, which SwiftUI's own style overrides):
+// in an iPad split view's other columns the automatic style is an opaque band.
+const glassHeaderModifiers = [scrollEdgeEffectStyle('soft', 'top')];
 
 const macRowBackground = listRowBackground(
   PlatformColor('quaternarySystemFill'),
