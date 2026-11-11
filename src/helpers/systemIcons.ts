@@ -58,8 +58,12 @@ export const systemIcons = {
   },
   grade: { ios: 'star', android: 'grade' },
   deadlineChange: { ios: 'clock.arrow.circlepath', android: 'update' },
-  groupSubmission: { ios: 'person.3', android: 'groups' },
-  classReminder: { ios: 'graduationcap', android: 'school' },
+  // Narrow symbols: a form row's icon column is one symbol wide.
+  groupSubmission: {
+    ios: 'person.crop.circle.badge.checkmark',
+    android: 'groups',
+  },
+  classReminder: { ios: 'book.closed', android: 'school' },
   calendar: { ios: 'calendar', android: 'calendar_month' },
   addToCalendar: { ios: 'calendar.badge.plus', android: 'calendar_add_on' },
   assignmentCalendar: {

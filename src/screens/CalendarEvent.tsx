@@ -107,7 +107,7 @@ const CalendarEvent: React.FC<Props> = () => {
             {remindersBlocked && (
               <FormButton
                 testID="reminders-allow-access"
-                icon="calendarOff"
+                icon="reminders"
                 title={t('allowRemindersAccess')}
                 onPress={() => allow('reminder', access.reminders)}
               />
