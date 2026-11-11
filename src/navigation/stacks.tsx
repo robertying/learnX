@@ -2,6 +2,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import Notices from 'screens/Notices';
 import Today from 'screens/Today';
+import Schedule from 'screens/Schedule';
 import Search from 'screens/Search';
 import NoticeDetail from 'screens/NoticeDetail';
 import {
@@ -15,6 +16,7 @@ import {
   NoticeStackParams,
   SearchStackParams,
   SettingDetailParams,
+  TodayDetailParams,
   SettingsStackParams,
   TodayStackParams,
   WhatsNewStackParams,
@@ -75,6 +77,7 @@ const AssignmentSubmissionNavigator =
 // their own param lists, which the stacks' param lists are built from.
 const ItemDetails = createNativeStackNavigator<ItemDetailParams>();
 const SettingDetails = createNativeStackNavigator<SettingDetailParams>();
+const TodayDetails = createNativeStackNavigator<TodayDetailParams>();
 
 /** The given item detail screens, for a stack whose params include them. */
 export const renderItemDetails = (
@@ -97,6 +100,17 @@ export const renderItemDetails = (
       <ItemDetails.Screen name="FileDetail" component={FileDetail} />
     )}
   </ItemDetails.Group>
+);
+
+/** The screens Today opens; also shown in the split view's detail pane. */
+export const renderTodayDetails = () => (
+  <TodayDetails.Group>
+    <TodayDetails.Screen
+      name="Schedule"
+      component={Schedule}
+      options={getTitleOptions(t('schedule'))}
+    />
+  </TodayDetails.Group>
 );
 
 /** The screens Settings opens; also shown in the split view's detail pane. */
@@ -248,6 +262,7 @@ export const TodayStack = () => (
       component={Today}
       options={{ ...getTitleOptions(t('today')), ...tabRootOptions }}
     />
+    {renderTodayDetails()}
     {renderItemDetails(allItemDetails)}
     <TodayStackNavigator.Screen
       name="Settings"

@@ -100,6 +100,7 @@ it('opens the details each tab links to, in its own stack', async () => {
   // Settings open from Today where there's no Settings tab.
   expect(await names(TodayStack)).toEqual([
     'Today',
+    'Schedule',
     ...itemDetails,
     'Settings',
     ...settingDetails,
@@ -128,6 +129,7 @@ it('titles the screens, and every screen has a component and the error layout', 
   }
   const today = await configOf(TodayStack);
   expect(today.screens[0].options?.title).toBe(t('today'));
+  expect(today.screens[1].options?.title).toBe(t('schedule'));
   expect(today.screens.find(s => s.name === 'Downloads')?.options?.title).toBe(
     t('downloads'),
   );
@@ -135,7 +137,7 @@ it('titles the screens, and every screen has a component and the error layout', 
     today.screens.find(s => s.name === 'MockNetwork')?.options?.title,
   ).toBe('Network Emulation');
   // Detail screens are titled from the cached item they show (none here).
-  expect(today.screens[1].groupOptions?.title).toBe('');
+  expect(today.screens[2].groupOptions?.title).toBe('');
 });
 
 it('opens the modal stacks with a close button', async () => {

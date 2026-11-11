@@ -31,6 +31,7 @@ jest.mock('navigation/stacks', () => {
       </Fragment>
     ),
     renderSettingDetails: () => null,
+    renderTodayDetails: () => null,
   };
 });
 jest.mock('screens/AssignmentSubmission', () => () => null);
