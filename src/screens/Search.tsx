@@ -130,10 +130,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={Styles.flex1}
           >
-            {/* Nothing until there's something to look for */}
             {searchQuery.trim() ? (
               <StatusView icon="notFound" message={t('noResults')} />
-            ) : null}
+            ) : (
+              <StatusView icon="search" message={t('searchPrompt')} />
+            )}
           </KeyboardAvoidingView>
         ) : (
           <SectionList<Notice | Assignment | File>

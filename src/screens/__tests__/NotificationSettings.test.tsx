@@ -9,6 +9,7 @@ import { toast } from 'components/Toast';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { postNotification } from 'helpers/notifications';
+import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import NotificationSettings from 'screens/NotificationSettings';
@@ -238,7 +239,20 @@ it("shows the last background sync's result in debug builds", async () => {
 it('previews a deadline reminder in debug builds', async () => {
   await renderScreen();
   await userEvent.press(screen.getByText('Preview a Deadline Reminder'));
-  expect(toast).toHaveBeenCalledWith('3', 'success');
+  expect(toast).toHaveBeenCalledWith(
+    'The next of 3 scheduled reminders shows again in 10 seconds. Leave the app to see it.',
+    'success',
+  );
+});
+
+it('says when there is no deadline reminder to preview', async () => {
+  jest.mocked(previewDeadlineReminder).mockResolvedValueOnce(0);
+  await renderScreen();
+  await userEvent.press(screen.getByText('Preview a Deadline Reminder'));
+  expect(toast).toHaveBeenCalledWith(
+    'No deadline reminders are scheduled.',
+    'warning',
+  );
 });
 
 it('changes the reminder offset', async () => {

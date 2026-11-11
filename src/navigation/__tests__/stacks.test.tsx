@@ -201,7 +201,11 @@ it("shows What's New in a sheet, with the changelog a push away", async () => {
   expect(config.screens).toEqual([
     expect.objectContaining({
       name: 'WhatsNew',
-      options: { headerShown: false, title: t('whatsNew') },
+      options: {
+        headerShown: false,
+        headerTitle: '',
+        title: t('whatsNew'),
+      },
     }),
     expect.objectContaining({ name: 'Changelog' }),
   ]);

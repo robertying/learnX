@@ -156,6 +156,7 @@ export default {
   noFiles: 'No Files',
   noCourses: 'No Courses',
   noResults: 'No Results',
+  searchPrompt: 'Search Notices, Assignments and Files',
   noSelection: 'No Selection',
   removeFromFav: 'Removed from Favorites',
   addToFav: 'Added to Favorites',
@@ -181,7 +182,7 @@ export default {
   emailNotRecommended: 'Email',
   issueTemplate: 'Issue Template',
   issueTemplateDescription:
-    'When reporting a problem or asking for help by email, include:',
+    'Include these when reporting a problem or asking for help by email.',
   issueTemplateContent: `
     - Issue Description
     - Reproduction Steps

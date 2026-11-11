@@ -7,6 +7,7 @@ import {
   PlatformColor,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
@@ -107,6 +108,8 @@ const remove = (id: number) => {
 
 const cornerRadius = 25;
 
+const maxToastWidth = 420;
+
 // Slides up into place.
 const hiddenOffset = 24;
 
@@ -141,13 +144,16 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight();
   const progress = useSharedValue(0);
   const drag = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
-      progress.set(withSpring(1, { damping: 18, stiffness: 220 }));
+      // Nearly critically damped: it settles without overshooting, as the
+      // system's HUDs do.
+      progress.set(withSpring(1, { duration: 350, dampingRatio: 0.9 }));
     } else {
       progress.set(
         withTiming(0, { duration: 200 }, finished => {
@@ -221,7 +227,19 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         accessibilityRole="alert"
         accessibilityLabel={text}
         accessibilityHint=""
-        style={[styles.toast, animatedStyle]}
+        style={[
+          styles.toast,
+          // The overlay's window doesn't hold its content to the screen's
+          // width, so the wrapper's side padding alone lets a long toast run
+          // edge to edge.
+          {
+            maxWidth: Math.min(
+              maxToastWidth,
+              windowWidth - insets.left - insets.right - 32,
+            ),
+          },
+          animatedStyle,
+        ]}
       >
         <ToastBackground
           cornerRadius={cornerRadius}
@@ -290,7 +308,6 @@ const styles = StyleSheet.create({
   },
   toast: {
     justifyContent: 'center',
-    maxWidth: 420,
     minHeight: cornerRadius * 2,
   },
   content: {

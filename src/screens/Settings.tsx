@@ -105,6 +105,12 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             onPress={() => handlePush('SemesterSelection')}
           />
           <FormLink
+            testID="settings-notifications"
+            icon="notifications"
+            title={t('notifications')}
+            onPress={() => handlePush('NotificationSettings')}
+          />
+          <FormLink
             icon="calendar"
             title={t('calendarsAndReminders')}
             onPress={() => handlePush('CalendarEvent')}
@@ -113,12 +119,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon="files"
             title={t('fileSettings')}
             onPress={() => handlePush('FileSettings')}
-          />
-          <FormLink
-            testID="settings-notifications"
-            icon="notifications"
-            title={t('notifications')}
-            onPress={() => handlePush('NotificationSettings')}
           />
         </FormSection>
         <FormSection>

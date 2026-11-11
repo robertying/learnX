@@ -150,10 +150,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
           />
           {hasCredential && (
             <>
-              <TextButton
-                style={[styles.button, styles.textButton]}
-                onPress={handleRetryLogin}
-              >
+              <TextButton style={styles.textButton} onPress={handleRetryLogin}>
                 {t('retryLogin')}
               </TextButton>
               <TextButton
@@ -211,8 +208,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 8,
   },
+  // The same space between every button: a text button's label has no
+  // padding of its own on iOS, so a margin on each side would double it.
   textButton: {
-    marginVertical: 10,
+    marginTop: 16,
   },
   noteContainer: {
     alignItems: 'center',

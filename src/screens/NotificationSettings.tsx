@@ -225,9 +225,15 @@ const NotificationSettings: React.FC<Props> = () => {
             <FormButton
               icon="reminder"
               title="Preview a Deadline Reminder"
-              onPress={async () =>
-                toast(String(await previewDeadlineReminder()), 'success')
-              }
+              onPress={async () => {
+                const scheduled = await previewDeadlineReminder();
+                toast(
+                  scheduled > 0
+                    ? `The next of ${scheduled} scheduled reminders shows again in 10 seconds. Leave the app to see it.`
+                    : 'No deadline reminders are scheduled.',
+                  scheduled > 0 ? 'success' : 'warning',
+                );
+              }}
             />
           )}
         </FormSection>

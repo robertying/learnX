@@ -52,6 +52,7 @@ import { useCredentialsStore } from 'data/credentials';
 import {
   getItemDetailOptions,
   getModalScreenOptions,
+  hasGlassHeader,
   mockNetworkTitle,
   stackScreenOptions,
   tabRootOptions,
@@ -320,8 +321,14 @@ export const WhatsNewStack = () => (
     <WhatsNewNavigator.Screen
       name="WhatsNew"
       component={WhatsNew}
-      // The title is Changelog's back button.
-      options={{ headerShown: false, title: t('whatsNew') }}
+      // The title is Changelog's back button. With the glass header the bar
+      // stays, empty and clear: a bar that only appears for Changelog is laid
+      // out too high in the sheet while it slides in, then drops into place.
+      options={{
+        headerShown: hasGlassHeader,
+        headerTitle: '',
+        title: t('whatsNew'),
+      }}
     />
     <WhatsNewNavigator.Screen
       name="Changelog"

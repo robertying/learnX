@@ -152,6 +152,7 @@ const zh: typeof en = {
   noFiles: '暂无文件',
   noCourses: '暂无课程',
   noResults: '无结果',
+  searchPrompt: '搜索公告、作业和文件',
   noSelection: '未选择内容',
   removeFromFav: '已从收藏移除',
   addToFav: '已添加到收藏',
@@ -176,7 +177,7 @@ const zh: typeof en = {
   createNewGitHubIssue: '提交 GitHub Issue',
   emailNotRecommended: '邮件',
   issueTemplate: '反馈模板',
-  issueTemplateDescription: '通过邮件反馈问题或寻求帮助时，请包含以下内容：',
+  issueTemplateDescription: '通过邮件反馈问题或寻求帮助时，请附上以上内容。',
   issueTemplateContent: `
     - 问题描述
     - 复现步骤
