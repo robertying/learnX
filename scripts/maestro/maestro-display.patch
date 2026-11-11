@@ -1,0 +1,317 @@
+From c3b5bb76453492b42d85ca3d2799a00b344e1cdc Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Wed, 11 Nov 2026 20:30:21 +0000
+Subject: [PATCH] fix(ios): keep frames and taps right for apps on another
+ display or in a window
+
+---
+ .../Routes/Handlers/ScreenshotHandler.swift   |   5 +-
+ .../Routes/Handlers/TouchRouteHandler.swift   |   9 +-
+ .../Handlers/ViewHierarchyHandler.swift       |  36 +++++-
+ .../Routes/Helpers/ScreenSizeHelper.swift     | 114 +++++++++++++++++-
+ .../Routes/XCTest/RunningApp.swift            |  29 ++++-
+ 5 files changed, 183 insertions(+), 10 deletions(-)
+
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ScreenshotHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ScreenshotHandler.swift
+index 432db971..e7d46c6f 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ScreenshotHandler.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ScreenshotHandler.swift
+@@ -12,7 +12,10 @@ struct ScreenshotHandler: HTTPHandler {
+     func handleRequest(_ request: FlyingFox.HTTPRequest) async throws -> FlyingFox.HTTPResponse {
+         let compressed = request.query["compressed"] == "true"
+         
+-        let fullScreenshot = XCUIScreen.main.screenshot()
++        // Capture the display the foreground app is on (the main one unless, for example,
++        // the app is on the inner display of an open foldable iPhone).
++        let screen = DisplayHelper.screen(for: ScreenSizeHelper.foregroundAppOtherDisplayID())
++        let fullScreenshot = screen.screenshot()
+         let image = compressed ? fullScreenshot.image.jpegData(compressionQuality: 0.5) : fullScreenshot.pngRepresentation
+         
+         guard let image = image else {
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/TouchRouteHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/TouchRouteHandler.swift
+index 648b7a1f..4429a1c8 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/TouchRouteHandler.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/TouchRouteHandler.swift
+@@ -38,7 +38,14 @@ struct TouchRouteHandler: HTTPHandler {
+                 touchUpAfter: requestBody.duration
+             )
+             let start = Date()
+-            try await RunnerDaemonProxy().synthesize(eventRecord: eventRecord)
++            if let displayID = ScreenSizeHelper.foregroundAppOtherDisplayID() {
++                // The runner daemon synthesizes events on the main display. Dispatch through
++                // the app's event target instead, which routes them to the app's display.
++                NSLog("Tapping on display \(displayID) through the app's event target")
++                try await EventTarget().dispatchEvent(description: "Tap \(x), \(y)") { eventRecord }
++            } else {
++                try await RunnerDaemonProxy().synthesize(eventRecord: eventRecord)
++            }
+             let duration = Date().timeIntervalSince(start)
+             NSLog("Tapping took \(duration)")
+             return HTTPResponse(statusCode: .ok)
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+index 1561f4dc..a47746f4 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+@@ -73,7 +73,34 @@ struct ViewHierarchyHandler: HTTPHandler {
+             "Height": Double(deviceFrame.height)
+         ]
+         let appFrame = appHierarchy.frame
+-        
++
++        // The app's frames are already where they should be when it is on another display
++        // (they are in that display's coordinates, e.g. the inner display of an open foldable
++        // iPhone). Shifting them by the size difference to SpringBoard would move every element
++        // off its real position.
++        if DisplayHelper.isOnOtherDisplay(appHierarchy) {
++            NSLog("Skipping offset adjustment: app is on another display")
++            return AXElement(children: [appHierarchy, AXElement(children: statusBars), safariWebViewHierarchy].compactMap { $0 })
++        }
++
++        // An app in a window smaller than the screen (iPadOS windowed apps) can report its
++        // frames relative to its window. Move them to where SpringBoard shows the window.
++        if let window = DisplayHelper.windowFrame(of: foregroundApp.bundleID) {
++            let offsetX = Double(window.minX) - (appFrame["X"] ?? 0)
++            let offsetY = Double(window.minY) - (appFrame["Y"] ?? 0)
++            if abs(offsetX) < 1 && abs(offsetY) < 1 {
++                NSLog("Skipping offset adjustment: app is in a window at \(window), in screen coordinates")
++                return AXElement(children: [appHierarchy, AXElement(children: statusBars), safariWebViewHierarchy].compactMap { $0 })
++            }
++            let offset = WindowOffset(offsetX: offsetX, offsetY: offsetY)
++            NSLog("Moving the app's frames to its window at \(window) with offset: \(offset)")
++            let adjustedAppHierarchy = expandElementSizes(appHierarchy, offset: offset)
++            // Safari's view service draws in the app's window, so it reports frames relative to
++            // the window too.
++            let adjustedSafariHierarchy = safariWebViewHierarchy.map { expandElementSizes($0, offset: offset) }
++            return AXElement(children: [adjustedAppHierarchy, AXElement(children: statusBars), adjustedSafariHierarchy].compactMap { $0 })
++        }
++
+         if deviceAxFrame != appFrame {
+             guard
+                 let deviceWidth = deviceAxFrame["Width"], deviceWidth > 0,
+@@ -273,12 +300,15 @@ struct ViewHierarchyHandler: HTTPHandler {
+             return nil
+         }
+         
++        // The same service shows the Save Password alert after a login, which the app's own
++        // snapshot doesn't include.
+         let webViewCount = safariWebService.webViews.count
+-        guard webViewCount > 0 else {
++        let alertCount = webViewCount > 0 ? 0 : safariWebService.alerts.count
++        guard webViewCount > 0 || alertCount > 0 else {
+             return nil
+         }
+         
+-        NSLog("[Start] Fetching Safari WebView hierarchy (\(webViewCount) webview(s) detected)")
++        NSLog("[Start] Fetching Safari WebView hierarchy (\(webViewCount) webview(s), \(alertCount) alert(s) detected)")
+         
+         do {
+             AXClientSwizzler.overwriteDefaultParameters["maxDepth"] = snapshotMaxDepth
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift
+index 90fbfbc7..8829262d 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Helpers/ScreenSizeHelper.swift
+@@ -6,6 +6,8 @@ struct ScreenSizeHelper {
+     private static var cachedSize: (Float, Float)?
+     private static var lastAppBundleId: String?
+     private static var lastOrientation: UIDeviceOrientation?
++    private static var lastProcessID: Int?
++    private static var cachedDisplayID: Int?
+ 
+     static func physicalScreenSize() -> (Float, Float) {
+         let springboardBundleId = "com.apple.springboard"
+@@ -15,17 +17,22 @@ struct ScreenSizeHelper {
+         do {
+             let currentAppBundleId = app.bundleID
+             let currentOrientation = XCUIDevice.shared.orientation
++            // A relaunched app can come back on another display or in another window size.
++            let currentProcessID = processID(of: app)
+ 
+             if let cached = cachedSize,
+                 currentAppBundleId == lastAppBundleId,
+-                currentOrientation == lastOrientation
++                currentOrientation == lastOrientation,
++                currentProcessID == lastProcessID
+             {
+                 NSLog("Returning cached screen size")
+                 return cached
+             }
+ 
+             let dict = try app.snapshot().dictionaryRepresentation
+-            let axFrame = AXElement(dict).frame
++            let appElement = AXElement(dict)
++            let axFrame = appElement.frame
++            let displayID = DisplayHelper.displayID(of: appElement)
+ 
+             // Safely unwrap width/height
+             guard let width = axFrame["Width"], let height = axFrame["Height"] else {
+@@ -35,13 +42,21 @@ struct ScreenSizeHelper {
+                 return (Float(size.width), Float(size.height))
+             }
+ 
+-            let screenSize = CGSize(width: width, height: height)
++            // A windowed app (iPadOS) reports its window frame, but taps, swipes and
++            // screenshots still cover the whole screen.
++            let onMainDisplay = displayID == nil || displayID == DisplayHelper.mainDisplayID()
++            let isWindowed = onMainDisplay && DisplayHelper.windowFrame(of: currentAppBundleId ?? "") != nil
++            let screenSize = isWindowed
++                ? XCUIApplication(bundleIdentifier: springboardBundleId).frame.size
++                : CGSize(width: width, height: height)
+             let size = (Float(screenSize.width), Float(screenSize.height))
+ 
+             // Cache results
+             cachedSize = size
+             lastAppBundleId = currentAppBundleId
+             lastOrientation = currentOrientation
++            lastProcessID = currentProcessID
++            cachedDisplayID = displayID
+ 
+             return size
+         } catch let error {
+@@ -53,6 +68,26 @@ struct ScreenSizeHelper {
+         }
+     }
+ 
++    /// The display the foreground app is on, when it is not the main display (for example
++    /// the inner display of an open foldable iPhone simulator). Nil for the main display.
++    static func foregroundAppOtherDisplayID() -> Int? {
++        _ = physicalScreenSize()
++        guard let displayID = cachedDisplayID,
++              let mainDisplayID = DisplayHelper.mainDisplayID(),
++              displayID != mainDisplayID else {
++            return nil
++        }
++        return displayID
++    }
++
++    private static func processID(of app: XCUIApplication) -> Int? {
++        let object = app as NSObject
++        guard object.responds(to: NSSelectorFromString("processID")) else {
++            return nil
++        }
++        return (object.value(forKey: "processID") as? NSNumber)?.intValue
++    }
++
+     private static func actualOrientation() -> UIDeviceOrientation {
+         let orientation = XCUIDevice.shared.orientation
+         if orientation == .unknown {
+@@ -133,3 +168,76 @@ struct ScreenSizeHelper {
+         }
+     }
+ }
++
++
++/// Where the foreground app sits on screen.
++///
++/// Two layouts break the assumption that the app fills SpringBoard's frame:
++///  - The app is on another display than the main one, for example the inner display of a
++///    foldable iPhone simulator that is open. Its frames are in that display's coordinates,
++///    and events synthesized through the runner daemon land on the main display.
++///  - The app is in a window smaller than the screen (iPadOS windowed apps). Its frames are
++///    already in screen coordinates.
++enum DisplayHelper {
++
++    /// The display XCUIScreen.main renders, or nil when XCTest doesn't expose it.
++    static func mainDisplayID() -> Int? {
++        let screen = XCUIScreen.main as NSObject
++        guard screen.responds(to: NSSelectorFromString("displayID")) else {
++            return nil
++        }
++        return (screen.value(forKey: "displayID") as? NSNumber)?.intValue
++    }
++
++    /// The display of the first element in the hierarchy that reports one.
++    static func displayID(of element: AXElement) -> Int? {
++        if element.displayID != 0 {
++            return element.displayID
++        }
++        for child in element.children ?? [] {
++            if let id = displayID(of: child) {
++                return id
++            }
++        }
++        return nil
++    }
++
++    /// True when the element is on a display other than the main one.
++    static func isOnOtherDisplay(_ element: AXElement) -> Bool {
++        guard let appDisplay = displayID(of: element), let mainDisplay = mainDisplayID() else {
++            return false
++        }
++        return appDisplay != mainDisplay
++    }
++
++    /// The frame of the app's window when it is in a window smaller than the screen (iPadOS
++    /// windowed apps), from the card SpringBoard shows it in. Nil when the app fills the screen.
++    static func windowFrame(of bundleID: String) -> CGRect? {
++        let springboard = XCUIApplication(bundleIdentifier: "com.apple.springboard")
++        let card = springboard.otherElements
++            .matching(NSPredicate(format: "identifier BEGINSWITH %@", "card:\(bundleID):"))
++            .firstMatch
++        guard card.exists else {
++            return nil
++        }
++        let frame = card.frame
++        let screen = springboard.frame
++        let fillsScreen = abs(frame.width - screen.width) < 1 && abs(frame.height - screen.height) < 1
++            || abs(frame.width - screen.height) < 1 && abs(frame.height - screen.width) < 1
++        return fillsScreen || frame.isEmpty ? nil : frame
++    }
++
++    /// The screen that shows the given display, falling back to the main screen.
++    static func screen(for displayID: Int?) -> XCUIScreen {
++        guard let displayID = displayID else {
++            return XCUIScreen.main
++        }
++        return XCUIScreen.screens.first { screen in
++            let object = screen as NSObject
++            guard object.responds(to: NSSelectorFromString("displayID")) else {
++                return false
++            }
++            return (object.value(forKey: "displayID") as? NSNumber)?.intValue == displayID
++        } ?? XCUIScreen.main
++    }
++}
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/XCTest/RunningApp.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/XCTest/RunningApp.swift
+index 4c820b76..5b5c6166 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/XCTest/RunningApp.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/XCTest/RunningApp.swift
+@@ -34,9 +34,34 @@ struct RunningApp {
+         // a splash screen). Snapshotting it then throws "Application ... is not running", which callers
+         // escalate as a fatal AppCrash. Returning nil instead lets callers fall back to the springboard hierarchy
+         // and retry.
+-        return runningAppIds
++        let foregroundApps = runningAppIds
+             .map { XCUIApplication(bundleIdentifier: $0) }
+-            .first { $0.state == .runningForeground }
++            .filter { $0.state == .runningForeground }
++        let foregroundAppIds = foregroundApps.compactMap { $0.bundleID }
++
++        // Remember the app that most recently became active: that is the one a flow launched.
++        for appId in runningAppIds where appId != springboardBundleId && !lastActiveAppIds.contains(appId) {
++            newestAppId = appId
++        }
++        lastActiveAppIds = Set(runningAppIds)
++
++        // With iPadOS windowed apps, several apps are in the foreground at once (and an app in a
++        // window can drop out of activeAppsInfo() while it is on screen). The first one listed
++        // isn't necessarily the one under test, so prefer the newest app while it is in the
++        // foreground.
++        let otherApps = foregroundAppIds.filter { $0 != springboardBundleId }
++        if otherApps.count != 1, let newestAppId = newestAppId {
++            let newestApp = XCUIApplication(bundleIdentifier: newestAppId)
++            if newestApp.state == .runningForeground {
++                NSLog("Using the newest foreground app \(newestAppId) among \(otherApps)")
++                return newestApp
++            }
++        }
++
++        return foregroundApps.first
+     }
++
++    private static var newestAppId: String?
++    private static var lastActiveAppIds: Set<String> = []
+     
+ }
+-- 
+2.56.1
+
