@@ -28,7 +28,10 @@ import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { postNotification } from 'helpers/notifications';
-import { postNotificationSamples } from 'helpers/notificationSamples';
+import {
+  postNotificationSamples,
+  sampleNoticeNotification,
+} from 'helpers/notificationSamples';
 import {
   getServerWritesAllowed,
   setServerWritesAllowed,
@@ -113,11 +116,15 @@ const Debug: React.FC<Props> = ({ navigation }) => {
 
   const sendTestNotification = async () => {
     const notice = notices[0];
-    await postNotification({
-      title: notice?.courseName ?? 'learnX',
-      body: notice?.title ?? t('notifications'),
-      target: { type: 'notice', id: notice?.id },
-    });
+    await postNotification(
+      notice
+        ? sampleNoticeNotification(notice)
+        : {
+            title: 'learnX',
+            body: t('notifications'),
+            target: { type: 'notice' },
+          },
+    );
   };
 
   return (
