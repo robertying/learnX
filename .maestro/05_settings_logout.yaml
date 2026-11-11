@@ -5,24 +5,24 @@ name: Open settings pages and log out
 - runFlow: subflows/settings.yaml
 # Changelog first: on iPad the page it opens beside the list is a web view,
 # which keeps the logout alert out of Maestro's snapshot.
-- tapOn: '.*(Changelog|更新日志).*'
+- tapOn: '.*(${T_changelog}).*'
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: '.*(Log Out|退出登录).*'
+      LIST: '.*(${T_logout}).*'
 # Settings is a native lazy list, and on phones About is near the bottom,
 # under the floating tab bar: scroll it to the middle first.
 - scrollUntilVisible:
-    element: '.*(About|关于).*'
+    element: '.*(${T_about}).*'
     direction: DOWN
     centerElement: true
-- tapOn: '.*(About|关于).*'
+- tapOn: '.*(${T_about}).*'
 - assertVisible: '.*© \d+ Rui Ying.*'
 - runFlow:
     file: subflows/back.yaml
     env:
       # Not About: the About page's title matches that too.
-      LIST: '.*(Help & Feedback|帮助与反馈).*'
+      LIST: '.*(${T_helpAndFeedback}).*'
 - scrollUntilVisible:
     element:
       id: settings-logout
@@ -31,11 +31,21 @@ name: Open settings pages and log out
 
 - tapOn:
     id: settings-logout
-# The alert's button repeats the Settings row's label; the alert comes
-# after the list in the snapshot.
-- tapOn:
-    text: 'Log Out|退出登录'
-    index: 1
+# The alert's button repeats the Settings row's label. On iOS the alert comes
+# after the list in the snapshot; on Android the dialog hides the list.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: '${T_logout}'
+          index: 1
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: 'android:id/button1'
 - extendedWaitUntil:
     visible:
       # After a logout iOS may drop the field's own identifier from the

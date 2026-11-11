@@ -2,23 +2,26 @@ appId: ${APP_ID}
 name: Search and open a result
 ---
 - runFlow: subflows/login.yaml
-- tapOn: 'Search|搜索'
-# The search bar is focused on open. ASCII only: Android can't type CJK.
-- inputText: 'AutoCAD'
+- tapOn: '${T_search}'
+# The search field is focused on open.
+- inputText: ${MOCK_SEARCH_TERM}
+# Results are grouped by kind, notices first; the keyboard and the search
+# field cover the rest on phones, so open the notice.
 - extendedWaitUntil:
-    visible: '.*AutoCAD绘图基础练习.*'
+    visible: '.*(${MOCK_SEARCH_NOTICE}).*'
     timeout: 5000
-# While the search bar has focus, the results list spends the first tap on
-# blurring it (keyboardShouldPersistTaps="never"), so tap again if needed.
-- tapOn: '.*AutoCAD绘图基础练习.*'
+- assertVisible: '.*(${MOCK_SEARCH_ASSIGNMENT}).*'
+# While the search field has focus, the results list may spend the first tap
+# on blurring it, so tap again if needed.
+- tapOn: '.*(${MOCK_SEARCH_NOTICE}).*'
 - waitForAnimationToEnd
 - runFlow:
     when:
       notVisible:
-        id: assignment-detail
+        id: notice-detail
     commands:
-      - tapOn: '.*AutoCAD绘图基础练习.*'
+      - tapOn: '.*(${MOCK_SEARCH_NOTICE}).*'
 - extendedWaitUntil:
     visible:
-      id: assignment-detail
+      id: notice-detail
     timeout: 10000
