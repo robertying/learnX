@@ -6,8 +6,9 @@
 #   scripts/e2e-mac.sh [-only-testing:learnXUITests/LearnXUITests/<test>]
 #
 # The tests move the pointer and type on the keyboard, so leave the Mac alone
-# while they run. They log out whatever account the debug Mac app has. Start
-# Metro first. Quit any other learnX Mac app: they share their data.
+# while they run. They run the Release app (bundled JS, as it ships) and log
+# out whatever account the learnX Mac app has: they share its data, so quit
+# any other learnX Mac app first.
 # DerivedData goes to $DERIVED_DATA (default
 # ~/Library/Developer/Xcode/DerivedData/learnX-e2e-mac), the result bundle to
 # build/e2e/mac.xcresult.
@@ -40,7 +41,7 @@ TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
   xcodebuild test \
   -workspace ios/learnX.xcworkspace \
   -scheme learnXUITests \
-  -configuration Debug \
+  -configuration Release \
   -destination 'platform=macOS,variant=Mac Catalyst' \
   -derivedDataPath "$derived" \
   -resultBundlePath "$result" \

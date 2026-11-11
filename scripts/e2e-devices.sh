@@ -14,7 +14,9 @@
 #   fold-unfolded   every flow on the Android foldable, unfolded (the tablet
 #                   layout: split views and a side rail)
 #
-# Install a debug build on each device and start Metro first; the script
+# The flows run on the Release app (what ships: bundled JS, Hermes, R8).
+# Install it with scripts/e2e-build.sh first, or set E2E_BUILD=1 to have this
+# script build and install it on each device it uses. The script
 # boots a device that isn't running and shuts down only the devices it
 # booted. It refuses to boot one while E2E_MAX_BOOTED (3) simulators and
 # emulators are already running.
@@ -23,8 +25,7 @@
 #   E2E_IPHONE (learnX iPhone 18 Pro), E2E_IPAD (learnX iPad Pro 11),
 #   E2E_DUO (learnX iPhone Duo), E2E_AVD (Pixel_10_Pro_Fold)
 # E2E_HINGE is the command that sets the iPhone Duo's hinge (`hinge`,
-# brew install artemnovichkov/tap/hinge). E2E_METRO_PORT (8081) is the port
-# Metro listens on; the emulator reaches it through adb reverse.
+# brew install artemnovichkov/tap/hinge).
 #
 # Results, with Maestro's output and a JUnit report: build/e2e/<profile>/
 set -euo pipefail
@@ -39,7 +40,7 @@ ipad="${E2E_IPAD:-learnX iPad Pro 11}"
 duo="${E2E_DUO:-learnX iPhone Duo}"
 avd="${E2E_AVD:-Pixel_10_Pro_Fold}"
 hinge="${E2E_HINGE:-hinge}"
-metro_port="${E2E_METRO_PORT:-8081}"
+build="${E2E_BUILD:-0}"
 max_booted="${E2E_MAX_BOOTED:-3}"
 ios_app_id="io.robertying.learnX"
 android_app_id="io.robertying.learnx"
@@ -53,6 +54,8 @@ booted=""
 hinge_moved=""
 failed=""
 passed=""
+# Devices the Release app was installed on in this run (E2E_BUILD=1).
+installed=""
 # The UDID or serial of the device the current profile runs on.
 device=""
 
@@ -107,6 +110,17 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# With E2E_BUILD=1, build the Release app and install it on device $2 (once
+# per run; the iOS build is reused for every simulator).
+install_app() {
+  if [ "$build" != 1 ] || [[ " $installed " == *" $2 "* ]]; then
+    return 0
+  fi
+  log "Installing the Release app on $2"
+  scripts/e2e-build.sh "$1" "$2" || return 1
+  installed="$installed $2"
+}
+
 # --- iOS ---------------------------------------------------------------------
 
 sim_udid() {
@@ -139,8 +153,9 @@ use_sim() {
     booted="ios $udid"
   fi
   xcrun simctl bootstatus "$udid" -b >/dev/null || return 1
+  install_app ios "$udid" || return 1
   if ! xcrun simctl get_app_container "$udid" "$ios_app_id" >/dev/null 2>&1; then
-    echo "learnX isn't installed on \"$1\"; build and install a debug app first" >&2
+    echo "learnX isn't installed on \"$1\"; install the Release app with scripts/e2e-build.sh" >&2
     return 1
   fi
 }
@@ -242,12 +257,11 @@ use_emulator() {
   adb -s "$serial" wait-for-device shell \
     'while [ "$(getprop sys.boot_completed)" != 1 ]; do sleep 1; done' ||
     return 1
+  install_app android "$serial" || return 1
   if ! adb -s "$serial" shell pm path "$android_app_id" | grep -q '^package:'; then
-    echo "learnX isn't installed on $1; build and install a debug app first" >&2
+    echo "learnX isn't installed on $1; install the Release app with scripts/e2e-build.sh" >&2
     return 1
   fi
-  # clearState wipes the debug server host, so the app asks localhost:8081.
-  adb -s "$serial" reverse tcp:8081 "tcp:$metro_port" >/dev/null
 }
 
 run_android_suite() {
