@@ -1,6 +1,7 @@
 #!/bin/bash
-# Run the Maestro flows in .maestro/ against the installed debug app, logged
-# in with the mock account from .env (DUMMY_USERNAME / DUMMY_PASSWORD).
+# Run the Maestro flows in .maestro/ against the installed app, logged in with
+# the mock account from .env (DUMMY_USERNAME / DUMMY_PASSWORD). E2E runs use
+# the Release build: install it with scripts/e2e-build.sh first.
 #
 #   scripts/e2e.sh ios|android [extra maestro test args, e.g. a single flow]
 #

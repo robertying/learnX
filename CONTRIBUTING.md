@@ -158,7 +158,7 @@ shellcheck scripts/*.sh  # ShellCheck, for the scripts in scripts/
 
 They need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
 
-End-to-end flows use [Maestro](https://docs.maestro.dev) against a debug build with the mock login: `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
+End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e-build.sh ios <simulator udid>` or `scripts/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
 Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
 
