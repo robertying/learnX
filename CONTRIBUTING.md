@@ -153,9 +153,10 @@ pnpm typecheck           # TypeScript (tsc)
 pnpm lint --deny-warnings   # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
 pnpm format --check      # Oxfmt; run `pnpm format` to fix
 pnpm test                # Jest, iOS and Android projects
+shellcheck scripts/*.sh  # ShellCheck, for the scripts in scripts/
 ```
 
-They need neither `.env` nor any native setup, so you can run them anywhere Node runs. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
+They need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a debug build with the mock login: `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 

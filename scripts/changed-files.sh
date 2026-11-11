@@ -32,7 +32,7 @@ fi
 
 files="$(git diff --name-only "$base" HEAD)"
 echo "Changed files:" >&2
-echo "$files" | sed 's/^/  /' >&2
+echo "  ${files//$'\n'/$'\n  '}" >&2
 if echo "$files" | grep -Eq "$pattern"; then
   echo "changed=true"
 else
