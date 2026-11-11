@@ -14,7 +14,16 @@ import type { AppSource } from 'data/source';
 import { sessionsFromCourses } from 'helpers/schedule';
 import { beijingClock, beijingDate } from 'helpers/serverTime';
 
-const mock = (): typeof import('data/mock') => require('data/mock');
+/** The language the app last asked the emulated server for. */
+let language: Language = Language.ZH;
+
+/** The mock data in the language asked for; English has its own texts. */
+const mock = (): typeof import('data/mock') =>
+  language === Language.EN
+    ? (
+        require('data/mockEnglish') as typeof import('data/mockEnglish')
+      ).mockInEnglish()
+    : require('data/mock');
 
 /**
  * Stands in for learn.tsinghua.edu.cn when a mock account is logged in.
@@ -287,7 +296,10 @@ export const mockSource: AppSource = {
   // Not awaited by callers; never fails.
   logout: () => Promise.resolve(),
   getCSRFToken: () => 'mock-csrf-token',
-  setLanguage: () => request(() => undefined),
+  setLanguage: lang =>
+    request(() => {
+      language = lang;
+    }),
   getUserInfo: () => request(() => mock().mockUser as any),
   getSemesterIdList: () => request(() => mock().mockSemesters),
   getCurrentSemester: () =>

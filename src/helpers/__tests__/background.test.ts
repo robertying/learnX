@@ -6,6 +6,7 @@ import {
   mockFiles,
   mockNotices,
 } from 'data/mock';
+import { mockInEnglish } from 'data/mockEnglish';
 import {
   defaultMockNetworkConfig,
   mockSource,
@@ -280,8 +281,8 @@ it("moves to the school's new semester when a term starts", async () => {
   expect(getUserData().currentSemester).toBe(semesterId);
   // Tests run in English, so courses come with their English names.
   expect(queryClient.getQueryData(coursesQuery(semesterId).queryKey)).toEqual(
-    mockCourses
-      .filter(c => c.semesterId === semesterId)
+    mockInEnglish()
+      .mockCourses.filter(c => c.semesterId === semesterId)
       .map(c => ({ ...c, name: c.englishName })),
   );
   // The new semester's first fetch reports nothing new.
