@@ -18,7 +18,9 @@ export type ContentKind =
   | 'files'
   | 'assignments'
   | 'grades'
-  | 'deadlineChanges';
+  | 'comments'
+  | 'deadlineChanges'
+  | 'groupSubmissions';
 
 /** One item that a sync found and the user wants to hear about. */
 export interface ContentItem {
@@ -71,7 +73,9 @@ const countTitles: Record<ContentKind, (count: number) => string> = {
   files: count => t('notifyFileCount', { count }),
   assignments: count => t('notifyAssignmentCount', { count }),
   grades: count => t('notifyGradeCount', { count }),
+  comments: count => t('notifyCommentCount', { count }),
   deadlineChanges: count => t('notifyDeadlineChangeCount', { count }),
+  groupSubmissions: count => t('notifyGroupSubmittedCount', { count }),
 };
 
 const kindLabels: Record<ContentKind, () => string> = {
@@ -79,7 +83,9 @@ const kindLabels: Record<ContentKind, () => string> = {
   files: () => t('notifyNewFiles'),
   assignments: () => t('notifyNewAssignments'),
   grades: () => t('notifyGrades'),
+  comments: () => t('notifyComments'),
   deadlineChanges: () => t('notifyDeadlineChanges'),
+  groupSubmissions: () => t('notifyGroupSubmissions'),
 };
 
 const targetTypes: Record<ContentKind, ItemTarget['type']> = {
@@ -87,7 +93,9 @@ const targetTypes: Record<ContentKind, ItemTarget['type']> = {
   files: 'file',
   assignments: 'assignment',
   grades: 'assignment',
+  comments: 'assignment',
   deadlineChanges: 'assignment',
+  groupSubmissions: 'assignment',
 };
 
 const formatTime = (time: string) =>
@@ -104,6 +112,22 @@ const preview = (html?: string) => {
 
 const joined = (...parts: (string | null | undefined)[]) =>
   parts.filter(Boolean).join(' · ');
+
+/** A short, stable stand-in for a text in a key. */
+const hash = (text: string) => {
+  let h = 7;
+  for (let i = 0; i < text.length; i++) {
+    h = (h * 31 + text.charCodeAt(i)) % 2147483647;
+  }
+  return h.toString(36);
+};
+
+/**
+ * The key of a group assignment's submission. Submitting from this device
+ * adds it to the notified keys, so only someone else's submission is news.
+ */
+export const groupSubmittedKey = (assignmentId: string) =>
+  `group-submitted:${assignmentId}`;
 
 const gradeText = (a: Assignment) => {
   if (a.gradeLevel) {
@@ -204,8 +228,18 @@ export const pickContentItems = (
         ...base('grades', a),
         key: `graded:${a.id}:${a.grade ?? ''}:${a.gradeLevel ?? ''}`,
         title: a.title,
-        detail: graded,
+        detail: joined(graded, preview(a.gradeContent)),
         line: joined(a.title, graded),
+      });
+    }
+    for (const { after: a } of diff.assignments.commented) {
+      const comment = preview(a.gradeContent);
+      add({
+        ...base('comments', a),
+        key: `comment:${a.id}:${hash(comment)}`,
+        title: a.title,
+        detail: t('notifyNewComment', { comment }),
+        line: joined(a.title, t('notifyNewCommentShort')),
       });
     }
   }
@@ -223,6 +257,17 @@ export const pickContentItems = (
           line: `${a.title} → ${formatTime(a.deadline)}`,
         });
       }
+    }
+  }
+  if (settings.groupSubmissions) {
+    for (const { after: a } of diff.assignments.groupSubmitted) {
+      add({
+        ...base('groupSubmissions', a),
+        key: groupSubmittedKey(a.id),
+        title: a.title,
+        detail: t('notifyGroupSubmitted'),
+        line: a.title,
+      });
     }
   }
   return items;

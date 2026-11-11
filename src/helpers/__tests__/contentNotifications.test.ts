@@ -6,6 +6,7 @@ import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Assignment, File, Notice } from 'data/types/state';
 import {
   groupContentItems,
+  groupSubmittedKey,
   PickContext,
   pickContentItems,
 } from 'helpers/contentNotifications';
@@ -53,7 +54,13 @@ const assignment = (
 
 const emptyDiff = (): ContentDiff => ({
   notices: { added: [] },
-  assignments: { added: [], graded: [], deadlineChanged: [] },
+  assignments: {
+    added: [],
+    graded: [],
+    commented: [],
+    deadlineChanged: [],
+    groupSubmitted: [],
+  },
   files: { added: [] },
 });
 
@@ -191,6 +198,66 @@ describe('pickContentItems', () => {
       }),
     );
     expect(items.map(i => i.key)).toEqual(['notice:new']);
+  });
+
+  it("says the grader's comment with the grade, and a later one alone", () => {
+    const diff = emptyDiff();
+    const graded = assignment('a', {
+      graded: true,
+      grade: 95,
+      gradeContent: '<p>Good <b>work</b></p>',
+    });
+    diff.assignments.graded = [{ before: assignment('a'), after: graded }];
+    const commented = assignment('b', {
+      graded: true,
+      grade: 90,
+      gradeContent: 'Redo part 3',
+    });
+    diff.assignments.commented = [
+      { before: { ...commented, gradeContent: undefined }, after: commented },
+    ];
+    const items = pickContentItems(diff, context());
+    expect(items.map(i => [i.kind, i.detail, i.line])).toEqual([
+      ['grades', 'Graded: 95 · Good work', 'Assignment a · Graded: 95'],
+      ['comments', 'New comment: Redo part 3', 'Assignment b · New comment'],
+    ]);
+    expect(items[1].key).toMatch(/^comment:b:\w+$/);
+    expect(
+      pickContentItems(
+        diff,
+        context({ settings: { ...allOn, grades: false } }),
+      ),
+    ).toEqual([]);
+  });
+
+  it('tells about a group submission when that is on', () => {
+    const diff = emptyDiff();
+    const submitted = assignment('a', { submitted: true });
+    diff.assignments.groupSubmitted = [
+      { before: assignment('a'), after: submitted },
+    ];
+    expect(pickContentItems(diff, context())).toEqual([]);
+    const items = pickContentItems(
+      diff,
+      context({ settings: { ...allOn, groupSubmissions: true } }),
+    );
+    expect(items).toEqual([
+      expect.objectContaining({
+        kind: 'groupSubmissions',
+        key: groupSubmittedKey('a'),
+        title: 'Assignment a',
+        detail: 'Submitted by your group',
+      }),
+    ]);
+    expect(
+      pickContentItems(
+        diff,
+        context({
+          settings: { ...allOn, groupSubmissions: true },
+          notified: new Set([groupSubmittedKey('a')]),
+        }),
+      ),
+    ).toEqual([]);
   });
 
   it('tells about a grade again when it changes', () => {

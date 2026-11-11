@@ -59,6 +59,11 @@ const assignmentToggles: ToggleRow[] = [
     icon: 'deadlineChange',
     label: t('notifyDeadlineChanges'),
   },
+  {
+    key: 'groupSubmissions',
+    icon: 'groupSubmission',
+    label: t('notifyGroupSubmissions'),
+  },
 ];
 
 const NotificationSettings: React.FC<Props> = () => {

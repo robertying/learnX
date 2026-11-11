@@ -90,6 +90,52 @@ describe('planDeadlineReminders', () => {
     );
     expect(planDeadlineReminders(many, options())).toHaveLength(48);
   });
+
+  const late = (dueIn: number, lateIn: number, overrides = {}) =>
+    assignment('a', dueIn, {
+      lateSubmissionDeadline: new Date(now + lateIn * hour).toISOString(),
+      ...overrides,
+    });
+
+  it('reminds when late submission opens and before it closes', () => {
+    const plan = planDeadlineReminders([late(5, 48)], options());
+    expect(plan.map(r => [r.kind, r.date, r.deadline.deadline])).toEqual([
+      ['due', now + 4 * hour, now + 5 * hour],
+      ['lateOpen', now + 5 * hour, now + 48 * hour],
+      ['lateDue', now + 47 * hour, now + 48 * hour],
+    ]);
+    expect(plan[1].identifier).toBe(
+      `deadline-reminder:a:late-open:${now + 5 * hour}:${now + 48 * hour}`,
+    );
+    expect(plan[2].identifier).toBe(
+      `deadline-reminder:a:late:${now + 48 * hour}:60`,
+    );
+  });
+
+  it('keeps reminding of late submission after the deadline', () => {
+    const plan = planDeadlineReminders([late(-5, 48)], options());
+    expect(plan.map(r => r.kind)).toEqual(['lateDue']);
+  });
+
+  it('leaves the late reminder to the first when it would come sooner', () => {
+    const plan = planDeadlineReminders([late(5, 5.5)], options());
+    expect(plan.map(r => r.kind)).toEqual(['due', 'lateOpen']);
+  });
+
+  it('skips late reminders that are closed, submitted, hidden or archived', () => {
+    expect(
+      planDeadlineReminders(
+        [
+          late(-5, -1),
+          late(5, 5),
+          late(5, 48, { submitted: true }),
+          late(5, 48, { courseId: 'hidden' }),
+          late(5, 48, { id: 'archived' }),
+        ],
+        options(),
+      ).map(r => r.kind),
+    ).toEqual(['due']);
+  });
 });
 
 describe('syncDeadlineReminders', () => {
@@ -139,6 +185,39 @@ describe('syncDeadlineReminders', () => {
       'deadline-later:archived',
       'deadline-later:submitted',
     ]);
+  });
+
+  it('says when late submission closes', async () => {
+    await syncDeadlineReminders(
+      [
+        assignment('a', -1, {
+          lateSubmissionDeadline: new Date(now + 3 * hour).toISOString(),
+        }),
+      ],
+      options(),
+    );
+    expect(schedule.mock.calls[0][0]).toMatchObject({
+      content: {
+        body: expect.stringMatching(
+          /^Late submission closes (today|tomorrow) at \d\d:\d\d$/,
+        ),
+        data: { type: 'assignment', id: 'a', deadline: now + 3 * hour },
+      },
+      trigger: { date: now + 2 * hour },
+    });
+  });
+
+  it('keeps put-off reminders while late submission is open', async () => {
+    scheduled.mockResolvedValue([{ identifier: 'deadline-later:a' }] as never);
+    await syncDeadlineReminders(
+      [
+        assignment('a', -1, {
+          lateSubmissionDeadline: new Date(now + 3 * hour).toISOString(),
+        }),
+      ],
+      options(),
+    );
+    expect(cancel).not.toHaveBeenCalled();
   });
 
   it('cancels put-off reminders when reminders are turned off', async () => {

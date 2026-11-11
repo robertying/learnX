@@ -1,3 +1,4 @@
+import { HomeworkCompletionType } from '@robertying/thu-learn-lib';
 import { Assignment, File, Notice } from 'data/types/state';
 import { sameServerTime } from 'helpers/serverTime';
 
@@ -56,13 +57,38 @@ const isDeadlineChanged = (before: Assignment, after: Assignment) =>
   !sameServerTime(before.deadline, after.deadline) ||
   !sameServerTime(before.lateSubmissionDeadline, after.lateSubmissionDeadline);
 
+const commentOf = (a: Assignment) => a.gradeContent?.trim() ?? '';
+
+/**
+ * The grader's comment came or changed on an assignment graded before, with
+ * the grade the same (a new grade carries its comment).
+ */
+const isNewlyCommented = (before: Assignment, after: Assignment) =>
+  after.graded &&
+  before.graded &&
+  !!commentOf(after) &&
+  commentOf(before) !== commentOf(after) &&
+  !isNewlyGraded(before, after);
+
+/**
+ * A group assignment became submitted. The server doesn't say by whom; one
+ * submitted from this device is remembered when it's sent, so it isn't
+ * notified.
+ */
+const isGroupSubmitted = (before: Assignment, after: Assignment) =>
+  after.completionType === HomeworkCompletionType.GROUP &&
+  after.submitted &&
+  !before.submitted;
+
 /** What a sync found that the user may want to hear about. */
 export interface ContentDiff {
   notices: { added: Notice[] };
   assignments: {
     added: Assignment[];
     graded: Change<Assignment>[];
+    commented: Change<Assignment>[];
     deadlineChanged: Change<Assignment>[];
+    groupSubmitted: Change<Assignment>[];
   };
   files: { added: File[] };
 }
@@ -94,7 +120,11 @@ export const diffContent = (
   const assignments = diff(
     before.assignments,
     after.assignments,
-    (a, b) => isNewlyGraded(a, b) || isDeadlineChanged(a, b),
+    (a, b) =>
+      isNewlyGraded(a, b) ||
+      isNewlyCommented(a, b) ||
+      isDeadlineChanged(a, b) ||
+      isGroupSubmitted(a, b),
   );
   const changes = assignments.changed;
 
@@ -103,9 +133,11 @@ export const diffContent = (
     assignments: {
       added: assignments.added,
       graded: changes.filter(c => isNewlyGraded(c.before, c.after)),
+      commented: changes.filter(c => isNewlyCommented(c.before, c.after)),
       deadlineChanged: changes.filter(c =>
         isDeadlineChanged(c.before, c.after),
       ),
+      groupSubmitted: changes.filter(c => isGroupSubmitted(c.before, c.after)),
     },
     files: { added: diff(before.files, after.files).added },
   };
@@ -115,5 +147,7 @@ export const isContentDiffEmpty = (diff: ContentDiff) =>
   diff.notices.added.length === 0 &&
   diff.assignments.added.length === 0 &&
   diff.assignments.graded.length === 0 &&
+  diff.assignments.commented.length === 0 &&
   diff.assignments.deadlineChanged.length === 0 &&
+  diff.assignments.groupSubmitted.length === 0 &&
   diff.files.added.length === 0;

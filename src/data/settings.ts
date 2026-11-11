@@ -33,6 +33,7 @@ export const defaultSettings: SettingsState = {
     assignments: false,
     grades: false,
     deadlineChanges: false,
+    groupSubmissions: false,
     deadlineReminders: false,
     deadlineReminderOffset: 24 * 60,
   },

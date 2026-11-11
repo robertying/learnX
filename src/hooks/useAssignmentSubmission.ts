@@ -5,6 +5,7 @@ import * as Haptics from 'expo-haptics';
 import * as ImagePicker from 'expo-image-picker';
 import { toast } from 'components/Toast';
 import { refreshCourseAssignments } from 'data/content';
+import { addNotifiedKeys } from 'data/notified';
 import {
   setPendingAssignmentData,
   usePendingAssignmentData,
@@ -18,6 +19,7 @@ import {
 } from 'data/submissionDrafts';
 import { Assignment } from 'data/types/state';
 import { getUserData } from 'data/userData';
+import { groupSubmittedKey } from 'helpers/contentNotifications';
 import { isLocaleChinese, t } from 'helpers/i18n';
 import {
   PickedAttachment,
@@ -276,6 +278,8 @@ export const useSubmitAssignment = (
     setProgress(0);
 
     setPendingAssignmentData(null);
+    // Submitted here, so a sync doesn't say the group submitted it.
+    addNotifiedKeys([groupSubmittedKey(assignment.id)]);
     const semesterId = getUserData().currentSemester;
     if (semesterId) {
       refreshCourseAssignments(semesterId, assignment.courseId).catch(() => {});

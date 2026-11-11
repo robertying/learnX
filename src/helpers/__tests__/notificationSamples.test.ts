@@ -35,8 +35,8 @@ const now = dayjs('2026-11-11T12:00:00');
 
 it('makes a single and a grouped notification of every kind, and the summary', () => {
   const notifications = sampleContentNotifications(sampleDiff(lists, now), now);
-  // Five kinds, twice each, then the summary a sync of all ten would end with.
-  expect(notifications).toHaveLength(11);
+  // Seven kinds, twice each, then the summary a sync of all 14 would end with.
+  expect(notifications).toHaveLength(15);
   expect(notifications[0]).toEqual(
     expect.objectContaining({
       title: 'Notice 1',
@@ -54,8 +54,17 @@ it('makes a single and a grouped notification of every kind, and the summary', (
     }),
   );
   expect(notifications.at(-1)).toEqual(
-    expect.objectContaining({ title: '5 Updates in 3 Courses' }),
+    expect.objectContaining({ title: '11 Updates in 7 Courses' }),
   );
+  const single = (kind: string) =>
+    notifications.find(n => n.kind === kind && !n.ids)?.body;
+  expect(single('grades')).toBe(
+    'Graded: 95 · Well done. Part 2 misses the empty-tree case.',
+  );
+  expect(single('comments')).toBe(
+    'New comment: Well done. Part 2 misses the empty-tree case.',
+  );
+  expect(single('groupSubmissions')).toBe('Submitted by your group');
 });
 
 it('makes a deadline reminder an hour ahead', () => {
@@ -70,9 +79,20 @@ it('makes a deadline reminder an hour ahead', () => {
   });
 });
 
+it('makes the late submission reminders', () => {
+  const assignment = { id: 'a1', title: 'Essay', courseName: 'Writing' };
+  expect(sampleReminder(assignment as never, now, 'lateOpen').body).toBe(
+    'Deadline passed · late submission until Nov 13 12:00',
+  );
+  expect(sampleReminder(assignment as never, now, 'lateDue').body).toBe(
+    'Late submission closes today at 13:00',
+  );
+});
+
 it('posts them all', async () => {
-  await expect(postNotificationSamples(lists)).resolves.toBe(12);
-  expect(postNotification).toHaveBeenCalledTimes(11);
+  await expect(postNotificationSamples(lists)).resolves.toBe(18);
+  expect(postNotification).toHaveBeenCalledTimes(15);
+  expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(3);
   expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
     expect.objectContaining({
       content: expect.objectContaining({ title: 'Assignment 1' }),
