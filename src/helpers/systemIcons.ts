@@ -87,6 +87,7 @@ export const systemIcons = {
   // Form rows: settings, help and about
   logout: { ios: 'rectangle.portrait.and.arrow.right', android: 'logout' },
   semester: { ios: 'arrow.left.arrow.right', android: 'swap_horiz' },
+  swipe: { ios: 'hand.draw', android: 'swipe' },
   info: { ios: 'info.circle', android: 'info' },
   whatsNew: { ios: 'sparkles', android: 'auto_awesome' },
   changelog: { ios: 'note.text', android: 'article' },
@@ -193,6 +194,7 @@ export const materialCodepoints: Record<SystemIconAndroidName, number> = {
   settings: 0xe8b8,
   share: 0xe80d,
   swap_horiz: 0xe8d4,
+  swipe: 0xe9ec,
   sync: 0xe627,
   system_update: 0xe62a,
   unarchive: 0xe169,
