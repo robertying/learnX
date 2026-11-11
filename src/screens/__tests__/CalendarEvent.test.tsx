@@ -148,7 +148,7 @@ it('exports, deletes and opens the system settings', async () => {
   expect(exportToICS).toHaveBeenCalled();
   await user.press(screen.getByText(t('deleteSyncedCalendarsAndReminders')));
   expect(confirmDeleteCalendars).toHaveBeenCalled();
-  await user.press(screen.getByText(t('configureCalendarAndReminder')));
+  await user.press(screen.getByText(t('openSystemSettings')));
   expect(openSystemSettings).toHaveBeenCalledWith('security');
 });
 

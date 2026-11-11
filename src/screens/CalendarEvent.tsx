@@ -268,7 +268,7 @@ const CalendarEvent: React.FC<Props> = () => {
         >
           <FormButton
             icon="settings"
-            title={t('configureCalendarAndReminder')}
+            title={t('openSystemSettings')}
             onPress={() => openSystemSettings('security')}
           />
         </FormSection>

@@ -138,10 +138,10 @@ const NotificationSettings: React.FC<Props> = () => {
           )}
           {assignmentToggles.map(renderToggle)}
         </FormSection>
-        <FormSection>
+        <FormSection footer={t('notificationAccessCaption')}>
           <FormButton
             icon="settings"
-            title={t('configureNotifications')}
+            title={t('openSystemSettings')}
             onPress={() => openSystemSettings('notifications')}
           />
         </FormSection>
