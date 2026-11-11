@@ -2,7 +2,7 @@ import AppIntents
 import Foundation
 
 /// Every App Shortcut learnX offers to Siri, Spotlight and Shortcuts. Their Chinese phrases are in
-/// `zh-Hans.lproj/AppShortcuts.strings`.
+/// `AppShortcuts.xcstrings`.
 struct LearnXShortcuts: AppShortcutsProvider {
   static var appShortcuts: [AppShortcut] {
     AppShortcut(

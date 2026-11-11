@@ -30,7 +30,7 @@ export default {
   notSubmitted: 'Not Submitted',
   submittedLate: 'Submitted Late',
   grade: 'Grade',
-  feedback: 'Feedback',
+  feedback: 'Grader Comments',
   yourSubmission: 'Your Submission',
   attachment: 'Attachment',
   answer: 'Answer',
@@ -48,6 +48,8 @@ export default {
   noAssignmentDescription: 'No description',
   assignmentSyncNoCalendarPermission:
     "Couldn't sync assignments. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
+  assignmentSyncNoCalendarPermissionAndroid:
+    "Couldn't sync assignments. Allow calendar access for learnX in System Settings.",
   assignmentSyncNoReminderPermission:
     "Couldn't sync assignments. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
   assignmentSyncFailed: "Couldn't sync assignments: ",
@@ -80,6 +82,8 @@ export default {
     "Some weeks of the course schedule couldn't be fetched and were left as they were. Try syncing again later.",
   courseScheduleSyncNoCalendarPermission:
     "Couldn't sync the course schedule. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
+  courseScheduleSyncNoCalendarPermissionAndroid:
+    "Couldn't sync the course schedule. Allow calendar access for learnX in System Settings.",
   courseScheduleSyncRepetitiveError:
     "Couldn't sync the course schedule. Make sure you're on the campus network and try again. If it keeps failing, pick a shorter date range.",
   courseScheduleSyncNoCourse:
@@ -94,6 +98,8 @@ export default {
   deleteSucceeded: 'Deleted',
   deleteFailedNoCalendarPermission:
     "Couldn't delete. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
+  deleteFailedNoCalendarPermissionAndroid:
+    "Couldn't delete. Allow calendar access for learnX in System Settings.",
   deleteFailedNoReminderPermission:
     "Couldn't delete. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: ",
@@ -120,6 +126,8 @@ export default {
   calendarExportSavedToDownloads: 'Exported learnX.ics to Downloads',
   calendarExportNoCalendarPermission:
     "Couldn't export. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
+  calendarExportNoCalendarPermissionAndroid:
+    "Couldn't export. Allow calendar access for learnX in System Settings.",
   calendarExportNoEvent:
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export: ",

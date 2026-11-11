@@ -50,6 +50,8 @@ const zh: typeof en = {
   noAssignmentDescription: '无说明',
   assignmentSyncNoCalendarPermission:
     '作业同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
+  assignmentSyncNoCalendarPermissionAndroid:
+    '作业同步失败：请在系统设置中允许 learnX 访问日历。',
   assignmentSyncNoReminderPermission:
     '作业同步失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX。',
   assignmentSyncFailed: '作业同步失败：',
@@ -81,6 +83,8 @@ const zh: typeof en = {
     '部分周的课表获取失败，已保留原有日程，请稍后重新同步。',
   courseScheduleSyncNoCalendarPermission:
     '课表同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
+  courseScheduleSyncNoCalendarPermissionAndroid:
+    '课表同步失败：请在系统设置中允许 learnX 访问日历。',
   courseScheduleSyncRepetitiveError:
     '课表同步失败：请确保已连接校园网后重试；如果仍然失败，请缩短同步的日期范围。',
   courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表。',
@@ -94,6 +98,8 @@ const zh: typeof en = {
   deleteSucceeded: '已删除',
   deleteFailedNoCalendarPermission:
     '删除失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
+  deleteFailedNoCalendarPermissionAndroid:
+    '删除失败：请在系统设置中允许 learnX 访问日历。',
   deleteFailedNoReminderPermission:
     '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX。',
   deleteFailed: '删除失败：',
@@ -117,6 +123,8 @@ const zh: typeof en = {
   calendarExportSavedToDownloads: '已将 learnX.ics 导出到“下载”文件夹',
   calendarExportNoCalendarPermission:
     '导出失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
+  calendarExportNoCalendarPermissionAndroid:
+    '导出失败：请在系统设置中允许 learnX 访问日历。',
   calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历。',
   calendarExportFailed: '导出失败：',
   graduate: '研究生',
