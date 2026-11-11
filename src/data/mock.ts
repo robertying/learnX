@@ -37,10 +37,17 @@ const dateTime = (days: number, hour: number, minute: number) =>
 /** `hours` before now, with the device's offset. */
 const hoursAgo = (hours: number) => dayjs().subtract(hours, 'hour').format();
 const monthDay = (d: dayjs.Dayjs) => `${d.month() + 1}月${d.date()}日`;
-const sundayText = `${monthDay(dayjs().day(7))}（周日）`;
-const roomChangeDay = monthDay(dayjs().add(9, 'day'));
-const examDay = dayjs().add(16, 'day');
-const lastMonday = `${monthDay(dayjs().subtract(8, 'day').day(1))}（周一）`;
+/** The days the texts below mention; the English texts format the same days. */
+export const mockDays = {
+  sunday: dayjs().day(7),
+  roomChange: dayjs().add(9, 'day'),
+  exam: dayjs().add(16, 'day'),
+  lastMonday: dayjs().subtract(8, 'day').day(1),
+};
+const sundayText = `${monthDay(mockDays.sunday)}（周日）`;
+const roomChangeDay = monthDay(mockDays.roomChange);
+const examDay = mockDays.exam;
+const lastMonday = `${monthDay(mockDays.lastMonday)}（周一）`;
 
 // --- Files the mock data links to ---------------------------------------------
 
@@ -64,7 +71,7 @@ const samples = {
 };
 type Sample = keyof typeof samples;
 
-const sampleUrl = (sample: Sample) => MOCK_FILES + samples[sample].file;
+export const sampleUrl = (sample: Sample) => MOCK_FILES + samples[sample].file;
 
 /** An attachment of a notice or assignment. */
 const attachment = (id: string, name: string, sample: Sample): RemoteFile => ({
@@ -284,7 +291,7 @@ const of = (c: Course) => ({
 
 // --- Notices ------------------------------------------------------------------
 
-const noticeId = (n: number) =>
+export const noticeId = (n: number) =>
   `26ef84e76d60efc1016d${n.toString(16).padStart(12, '0')}`;
 
 const notice = (
@@ -535,13 +542,13 @@ export const mockNotices: Notice[] = [
 
 // --- Assignments ------------------------------------------------------------
 
-const assignmentId = (n: number) =>
+export const assignmentId = (n: number) =>
   `26ef84e76db3f55b016d${n.toString(16).padStart(12, '0')}`;
 
 const emptySubmission =
   '<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">\r\n\t\t\t\t\t\t\t\t\t\t</span>';
 /** Submitted text, wrapped the way the server returns it. */
-const submittedText = (text: string) =>
+export const submittedText = (text: string) =>
   `<!-- <span style="line-height: 24px;"> -->\r\n\t\t\t\t\t\t\t\t\t\t<span style="line-height:2;">${text}</span>`;
 
 type AssignmentFields = Omit<
@@ -867,7 +874,7 @@ export const mockAssignments: Assignment[] = [
 
 // --- Files --------------------------------------------------------------------
 
-const fileId = (n: number) =>
+export const fileId = (n: number) =>
   `20163105${n.toString().padStart(2, '0')}_KJ_1731${n.toString().padStart(4, '0')}0b5f1dcc2-f77a-4cca-be0f-95808af85d82`;
 
 const fileTypes: Record<Sample, string> = {

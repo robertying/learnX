@@ -18,13 +18,8 @@ import {
   useNotices,
   useRefreshCourseNotices,
 } from 'data/content';
-import {
-  mockAssignments,
-  mockCourses,
-  mockCurrentSemester,
-  mockFiles,
-  mockNotices,
-} from 'data/mock';
+import { mockCurrentSemester } from 'data/mock';
+import { mockInEnglish } from 'data/mockEnglish';
 import {
   defaultMockNetworkConfig,
   mockSource,
@@ -47,6 +42,10 @@ import {
   useUserDataStore,
 } from 'data/userData';
 import { sortAssignments } from 'helpers/assignments';
+
+// The app runs in English here, so the emulated server answers in English.
+const { mockAssignments, mockCourses, mockFiles, mockNotices } =
+  mockInEnglish();
 
 // The emulated server, as when a mock account is logged in.
 jest.mock('data/source', () => ({

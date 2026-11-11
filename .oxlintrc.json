@@ -162,7 +162,8 @@
         "src/assets/translations/**",
         "src/**/__tests__/**",
         "src/**/*.{spec,test}.{js,ts,tsx}",
-        "src/data/mock.ts"
+        "src/data/mock.ts",
+        "src/data/mockEnglish.ts"
       ],
       "rules": {
         "learnx/no-han-outside-translations": "off"

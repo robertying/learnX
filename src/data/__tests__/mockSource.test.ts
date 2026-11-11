@@ -300,3 +300,60 @@ describe('mockSource', () => {
     await expect(mockSource.markNoticeRead('n')).rejects.toBeTruthy();
   });
 });
+
+describe('mockSource in English', () => {
+  afterEach(async () => {
+    await mockSource.setLanguage(Language.ZH);
+  });
+
+  const han = /[一-鿿]/;
+  const listAll = async () => {
+    const courseIds = mockCourses.map(c => c.id);
+    const lists = await Promise.all(
+      courseIds.map(async id => ({
+        notices: await mockSource.getNotificationList(id, CourseType.STUDENT, {
+          attachments: 'all',
+        }),
+        assignments: await mockSource.getHomeworkList(id, CourseType.STUDENT, {
+          details: 'all',
+        }),
+        files: await mockSource.getFileList(id),
+      })),
+    );
+    return lists.flatMap(l => [...l.notices, ...l.assignments, ...l.files]);
+  };
+
+  it('answers in Chinese until English is asked for', async () => {
+    expect(JSON.stringify(await listAll())).toMatch(han);
+    expect((await mockSource.getUserInfo(CourseType.STUDENT)).name).toMatch(
+      han,
+    );
+  });
+
+  it('has no Chinese text left in the items (ids aside), people or account', async () => {
+    await mockSource.setLanguage(Language.EN);
+    for (const item of await listAll()) {
+      expect(
+        JSON.stringify(item, (key, v) => (key === 'id' ? undefined : v)),
+      ).not.toMatch(han);
+    }
+    const user = await mockSource.getUserInfo(CourseType.STUDENT);
+    expect(JSON.stringify(user)).not.toMatch(han);
+    const courses = await mockSource.getCourseList(mockCurrentSemester, {
+      lang: Language.EN,
+    });
+    expect(
+      JSON.stringify(courses.map(c => [c.name, c.teacherName])),
+    ).not.toMatch(han);
+  });
+
+  it('keeps the same items, ids and states', async () => {
+    const zh = await listAll();
+    await mockSource.setLanguage(Language.EN);
+    const en = await listAll();
+    expect(en.map(i => i.id)).toEqual(zh.map(i => i.id));
+    expect(en.map(i => (i as any).hasRead)).toEqual(
+      zh.map(i => (i as any).hasRead),
+    );
+  });
+});
