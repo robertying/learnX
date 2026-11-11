@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
 import { useAssignments } from 'data/content';
@@ -139,8 +139,13 @@ export const useCalendarExport = () => {
 /** Asks first, then deletes every learnX calendar and reminder list */
 export const confirmDeleteCalendars = () => {
   Alert.alert(
-    t('deleteSyncedCalendarsAndReminders'),
-    t('deleteSyncedCalendarsAndRemindersConfirmation'),
+    // Reminders sync is only on iOS, iPadOS and Mac.
+    Platform.OS === 'ios'
+      ? t('deleteSyncedCalendarsAndReminders')
+      : t('deleteSyncedCalendars'),
+    Platform.OS === 'ios'
+      ? t('deleteSyncedCalendarsAndRemindersConfirmation')
+      : t('deleteSyncedCalendarsConfirmation'),
     [
       {
         text: t('cancel'),

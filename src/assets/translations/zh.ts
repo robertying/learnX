@@ -41,17 +41,17 @@ const zh: typeof en = {
   unsentDraft: '未提交的草稿',
   assignmentSubmission: '作业提交',
   loginFailed:
-    '登录失败，请检查网络连接并确保用户电子身份服务系统的登录依旧有效',
+    '登录失败，请检查网络连接并确保用户电子身份服务系统的登录依旧有效。',
   versionInformation: '版本',
   sourceCode: '源代码',
   appIcon: '应用图标',
   specialThanks: '特别感谢',
-  opensourceDependencies: '开源依赖',
+  opensourceDependencies: '开源库',
   noAssignmentDescription: '无说明',
   assignmentSyncNoCalendarPermission:
-    '作业同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX',
+    '作业同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
   assignmentSyncNoReminderPermission:
-    '作业同步失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX',
+    '作业同步失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX。',
   assignmentSyncFailed: '作业同步失败：',
   filePickFailed: '无法打开文件',
   assignmentSubmissionSucceeded: '作业提交成功',
@@ -78,21 +78,24 @@ const zh: typeof en = {
   uploadingSubmission: '正在上传…',
   courseScheduleSyncSucceeded: '课表同步成功',
   courseScheduleSyncPartial:
-    '部分周的课表获取失败，已保留原有日程，请稍后重新同步',
+    '部分周的课表获取失败，已保留原有日程，请稍后重新同步。',
   courseScheduleSyncNoCalendarPermission:
-    '课表同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX',
+    '课表同步失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
   courseScheduleSyncRepetitiveError:
-    '课表同步失败：请确保已连接校园网后重试；如果仍然失败，请缩短同步的日期范围',
-  courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表',
+    '课表同步失败：请确保已连接校园网后重试；如果仍然失败，请缩短同步的日期范围。',
+  courseScheduleSyncNoCourse: '此日期范围内没有课，请在网络学堂查看课表。',
   openSystemSettings: '打开系统设置',
   deleteSyncedCalendarsAndReminders: '删除已同步的日历与提醒事项',
+  deleteSyncedCalendars: '删除已同步的日历',
   deleteSyncedCalendarsAndRemindersConfirmation:
     '确定删除 learnX 创建的日历和提醒事项列表？此操作不可撤销。',
+  deleteSyncedCalendarsConfirmation:
+    '确定删除 learnX 创建的日历？此操作不可撤销。',
   deleteSucceeded: '已删除',
   deleteFailedNoCalendarPermission:
-    '删除失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX',
+    '删除失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
   deleteFailedNoReminderPermission:
-    '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX',
+    '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX。',
   deleteFailed: '删除失败：',
   exportSyncedCalendars: '导出已同步的日程（.ics）',
   turnOnNotifications: '开启通知',
@@ -113,12 +116,12 @@ const zh: typeof en = {
     '将已同步到日历的课表与作业导出为 .ics 文件，可导入其他日历应用；不包含提醒事项。',
   calendarExportSavedToDownloads: '已将 learnX.ics 导出到“下载”文件夹',
   calendarExportNoCalendarPermission:
-    '导出失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX',
-  calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历',
+    '导出失败：请在系统设置中允许 learnX 完全访问日历；如已允许，请重启 learnX。',
+  calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历。',
   calendarExportFailed: '导出失败：',
   graduate: '研究生',
   syncCourseSchedule: '同步课表',
-  classAlarm: '上课提醒',
+  classAlarm: '上课日历提醒',
   classAlarmBefore: '课前提醒（分钟）',
   calendarEventLength: '日程长度（分钟）',
   assignmentCalendarAlarm: '日历提醒',
@@ -141,7 +144,7 @@ const zh: typeof en = {
   missingPassword: '请输入密码',
   usernameOrId: '用户名 / 学号',
   password: '密码',
-  securityNote: '你的登录信息仅保存在此设备上，并由系统加密保护',
+  securityNote: '你的登录信息仅保存在此设备上，并由系统加密保护。',
   login: '登录',
   noNoticeContent: '无内容',
   itemNotFound: '该内容已不存在',
@@ -194,14 +197,14 @@ const zh: typeof en = {
     - 复现步骤
     - 已尝试的解决方案
     - 截图
-    - App 版本
+    - 应用版本
     - 设备型号
     - 系统版本
     - 其他补充信息
   `,
-  shareReceived: '已收到分享的文件，将在下次提交作业时自动添加为附件',
-  shareError: '无法接收分享的文件，文件可能过大',
-  shareUnsupported: '只能将文件添加为作业附件',
+  shareReceived: '已收到分享的文件，将在下次提交作业时自动添加为附件。',
+  shareError: '无法接收分享的文件，文件可能过大。',
+  shareUnsupported: '只能将文件添加为作业附件。',
   noFileSize: '未知',
   datePickerStartLabel: '开始',
   datePickerEndLabel: '结束',
@@ -221,7 +224,7 @@ const zh: typeof en = {
   syncStatusReconnecting: '正在重新连接…',
   syncStatusUpdated: '{time}更新',
   syncStatusLogIn: '登录',
-  refreshFailed: '刷新失败，显示的是已保存的数据',
+  refreshFailed: '刷新失败，显示的是已保存的数据。',
   archive: '归档',
   restore: '取消归档',
   reorder: '排序',
@@ -245,8 +248,8 @@ const zh: typeof en = {
   retryLogin: '使用已保存的账号登录',
   offlineMode: '离线使用',
   download: '下载',
-  downloadToDownloadsSucceeded: '已保存到“下载”',
-  downloadToDownloadsFailed: '无法保存到“下载”',
+  downloadToDownloadsSucceeded: '已保存到“下载”文件夹',
+  downloadToDownloadsFailed: '无法保存到“下载”文件夹',
   sso: '清华大学用户电子身份服务系统',
   ssoNote:
     '请在即将打开的网页中完成登录。如需更改网页中预填的账号或密码，请关闭网页，再在 learnX 登录界面重新输入正确的账号及密码。\n\n如果提示“信任浏览器数量已达到上限”，请在浏览器登录 https://id.tsinghua.edu.cn，前往账号设置-多因子认证-信任浏览器数量-维护，选择并删除其他设备。',
@@ -288,10 +291,10 @@ const zh: typeof en = {
   notifyAssignmentCount: '{count} 项新作业',
   notifyGradeCount: '{count} 项作业已批改',
   notifyDeadlineChangeCount: '{count} 项作业截止时间变更',
-  notifyComments: '批阅意见',
-  notifyNewComment: '新批阅意见：{comment}',
-  notifyNewCommentShort: '新批阅意见',
-  notifyCommentCount: '{count} 条新批阅意见',
+  notifyComments: '评语',
+  notifyNewComment: '新评语：{comment}',
+  notifyNewCommentShort: '新评语',
+  notifyCommentCount: '{count} 条新评语',
   notifyGroupSubmissions: '小组提交',
   notifyGroupSubmitted: '小组已提交',
   notifyGroupSubmittedCount: '{count} 项小组作业已提交',
@@ -309,6 +312,8 @@ const zh: typeof en = {
   notifySummary: '{courses} 门课程有 {count} 条更新',
   notifyDeadlineRemindersCaption:
     '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。可与日历和提醒事项的提醒同时使用。',
+  notifyDeadlineRemindersCaptionAndroid:
+    '在未提交的作业截止前提醒你，截止后仍可补交时也会提醒。可与日历提醒同时使用。',
   deadlineReminderOffset: '提前提醒（分钟）',
   allowExactReminders: '允许准时提醒',
   exactRemindersCaption:
@@ -372,7 +377,7 @@ const zh: typeof en = {
   downloadsExportCourse: '导出',
   downloadsExported: '已导出 {files}',
   downloadsExportedPartly: '已导出 {files}，{failed} 个文件未能复制',
-  downloadsExportFailed: '无法导出：',
+  downloadsExportFailed: '导出失败：',
   downloadsDeleteCourse: '删除已下载的文件？',
   downloadsOneFile: '1 个文件',
   downloadsFileCount: '{count} 个文件',
@@ -384,7 +389,7 @@ const zh: typeof en = {
   todayNext: '下一节课',
   todayStartsIn: '{time}开始',
   todayEndsIn: '{time}结束',
-  todayClasses: '课程',
+  todayClasses: '今天的课',
   todayNoClasses: '今天没有课',
   todayNoMoreClasses: '今天的课已上完',
   todayClassCount: '今天 {count} 节课',

@@ -169,7 +169,7 @@ describe('Login', () => {
 
     it('retries the saved login or goes offline', async () => {
       await setup();
-      await user.press(screen.getByText('Log In With Saved Account'));
+      await user.press(screen.getByText('Log In with Saved Account'));
       expect(login).toHaveBeenCalledWith({ reset: true });
       await user.press(screen.getByText('Continue Offline'));
       expect(loginWithOfflineMode).toHaveBeenCalledTimes(1);
@@ -196,7 +196,7 @@ describe('Login', () => {
 
   it('has no retry or offline buttons without a saved login', async () => {
     await setup();
-    expect(screen.queryByText('Log In With Saved Account')).toBeNull();
+    expect(screen.queryByText('Log In with Saved Account')).toBeNull();
     expect(screen.queryByText('Continue Offline')).toBeNull();
   });
 });
