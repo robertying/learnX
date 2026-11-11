@@ -102,8 +102,7 @@ const groupedBackground = PlatformColor('systemGroupedBackground');
 
 // The last section's footer would otherwise end right at the floating tab
 // bar's top edge when scrolled to the end; with this it keeps the rows' side
-// margin (16 pt) from it. (Android's list has its own
-// bottom padding.)
+// margin (16 pt) from it. (Android's list has its own bottom padding.)
 const lastSectionModifiers = [
   listSectionMargins({ edges: 'bottom', length: 8 }),
 ];
