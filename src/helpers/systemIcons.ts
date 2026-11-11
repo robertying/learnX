@@ -90,7 +90,7 @@ export const systemIcons = {
   info: { ios: 'info.circle', android: 'info' },
   whatsNew: { ios: 'sparkles', android: 'auto_awesome' },
   changelog: { ios: 'note.text', android: 'article' },
-  update: { ios: 'arrow.down.circle', android: 'system_update' },
+  update: { ios: 'arrow.down.app', android: 'system_update' },
   maintainer: { ios: 'hammer', android: 'build' },
   help: { ios: 'questionmark.circle', android: 'help' },
   about: { ios: 'c.circle', android: 'copyright' },
