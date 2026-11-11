@@ -47,7 +47,7 @@ afterEach(() => {
   Platform.OS = os;
 });
 
-it('reports the stores without the password, times or tries', async () => {
+it('reports the stores without the password or times', async () => {
   useCredentialsStore.setState({
     credentials: {
       username: 'mock-user',
@@ -76,9 +76,11 @@ it('reports the stores without the password, times or tries', async () => {
   expect(report.settings.graduate).toBe(true);
   expect(report.userData.archived.notice).toEqual(['n1']);
   expect(report.userData.pendingActions).toEqual([
-    { kind: 'favorite', type: 'file', id: 'f1', flag: true },
+    { kind: 'favorite', type: 'file', id: 'f1', flag: true, tries: 0 },
   ]);
   expect(report.appState.setupSeen).toBe(true);
+  // No What's New for 18.0.3, the version package.json has until 19.0.
+  expect(report.whatsNew).toBeNull();
   expect(report.calendarSync.lastSynced).toEqual(['calendar']);
   expect(report.marks.legacyImported).toBe(true);
   expect(report.legacyLeft).toEqual({

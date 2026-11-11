@@ -48,17 +48,32 @@ appId: ${APP_ID}
 - waitForAnimationToEnd:
     timeout: 10000
 
-# 3. The next launch shows What's New.
+# 3. The next launch shows What's New, when this version has one (the first
+# report says).
 - launchApp:
     stopApp: true
     arguments:
       mockLatency: none
-- extendedWaitUntil:
-    visible:
-      id: whats-new
-    timeout: 20000
-- tapOn:
-    id: whats-new-continue
+- runFlow:
+    when:
+      true: ${output.whatsNew != null}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: whats-new
+          timeout: 20000
+      - tapOn:
+          id: whats-new-continue
+- runFlow:
+    when:
+      true: ${output.whatsNew == null}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+          timeout: 30000
+      - assertNotVisible:
+          id: 'whats-new|setup-not-now'
 
 # 4. The report again, after the sync: the calendars 18.0.3 made are reused,
 # not made again, and nothing of 18.0.3's storage is left.

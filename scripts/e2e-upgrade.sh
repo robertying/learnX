@@ -10,7 +10,7 @@
 #   scripts/e2e-upgrade.sh android <emulator serial>
 #
 # The 18.0.3 build is made once from the tag in a temporary worktree and kept
-# in $BASELINE_DIR (default ~/Library/Caches/learnX-e2e/18.0.3). Its mock
+# in $BASELINE_DIR (default ~/Library/Caches/learnX-e2e/18.0.3-<n>). Its mock
 # login (18.0.3's "persistent" mock account) is set to .env's DUMMY_USERNAME /
 # DUMMY_PASSWORD, so the current build still treats the saved login as the
 # mock account. Android signs it with the debug key, like -PciRelease, so the
@@ -30,7 +30,8 @@ fi
 cd "$(dirname "$0")/.."
 repo="$(pwd)"
 tag="v18.0.3"
-baseline="${BASELINE_DIR:-$HOME/Library/Caches/learnX-e2e/18.0.3}"
+# Bump the suffix when build_baseline changes, so the cache is rebuilt.
+baseline="${BASELINE_DIR:-$HOME/Library/Caches/learnX-e2e/18.0.3-2}"
 
 read_env() {
   grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
@@ -63,6 +64,13 @@ build_baseline() {
   # and login across launches, like the mock account now.
   printf 'DUMMY_PERSIST_USERNAME=%s\nDUMMY_PERSIST_PASSWORD=%s\nDUMMY_USERNAME=e2e-ephemeral\nDUMMY_PASSWORD=e2e-ephemeral\n' \
     "$username" "$password" >"$worktree/.env"
+  # 18.0.3 ignores most actions for a mock account, among them saving the
+  # calendar event of each assignment, which a real account saves. Let the
+  # mock account save them too, so the upgrade carries real event ids.
+  perl -0pi -e 's/(\n\s*)SET_SETTING,\n(\s*\]\.includes\(action\.type\))/$1SET_SETTING,$1SET_EVENT_ID_FOR_ASSIGNMENT,$1REMOVE_EVENT_ID_FOR_ASSIGNMENT,$1CLEAR_EVENT_IDS,\n$2/ or die "18.0.3 root reducer not patched\n"' \
+    "$worktree/src/data/reducers/root.ts"
+  perl -0pi -e 's/(\n  SET_CURRENT_SEMESTER,\n)/$1  SET_EVENT_ID_FOR_ASSIGNMENT,\n  REMOVE_EVENT_ID_FOR_ASSIGNMENT,\n  CLEAR_EVENT_IDS,\n/ or die "18.0.3 root reducer imports not patched\n"' \
+    "$worktree/src/data/reducers/root.ts"
   (cd "$worktree" && pnpm install --frozen-lockfile)
 
   mkdir -p "$baseline"

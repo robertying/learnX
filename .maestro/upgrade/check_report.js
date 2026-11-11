@@ -144,18 +144,50 @@ if (report === null) {
           'file',
           '1996990293_KJ_15706235088371327f3cdca-80cd-48b1-ab44-51afe80978b5',
         ],
-      ].map(([type, id]) => ({ kind: 'favorite', type, id, flag: true })),
+      ].map(([type, id]) => ({
+        kind: 'favorite',
+        type,
+        id,
+        flag: true,
+        tries: 0,
+      })),
     );
     expect('appState.setupSeen', report.appState.setupSeen, false);
   } else {
-    // Sent once the app synced, and the set-up page was seen.
-    expect('userData.pendingActions', u.pendingActions, []);
+    // Sent once the app synced. These are 18.0.3's mock ids, which the
+    // current mock server doesn't have: it answers them with an error, as the
+    // website would, so each was tried and stays until its third try.
+    for (const action of u.pendingActions) {
+      check(
+        `userData.pendingActions ${action.id} sent`,
+        action.kind === 'favorite' && action.tries >= 1,
+        action,
+      );
+    }
     expect('appState.setupSeen', report.appState.setupSeen, true);
     check(
       'calendarSync.lastSynced',
       c.lastSynced.indexOf('calendar') >= 0,
       c.lastSynced,
     );
+  }
+}
+
+// What's New: none for a version without highlights (package.json says
+// 18.0.3 until 19.0 is cut). The flow shows it on the app's second launch when
+// the first report says there is one, and it is seen after that.
+if (report !== null) {
+  if (PHASE === 'migrated') {
+    output.whatsNew = report.whatsNew;
+  } else {
+    expect('whatsNew left', report.whatsNew, null);
+    if (output.whatsNew) {
+      expect(
+        'appState.whatsNewSeenVersion',
+        report.appState.whatsNewSeenVersion,
+        output.whatsNew,
+      );
+    }
   }
 }
 

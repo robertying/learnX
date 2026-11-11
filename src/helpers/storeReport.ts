@@ -22,6 +22,7 @@ import {
   courseCalendarName,
 } from 'helpers/eventDetails';
 import { hasPermission } from 'helpers/event';
+import { whatsNewContext, whatsNewSince } from 'helpers/whatsNew';
 
 /** A synced calendar as the phone has it. */
 interface CalendarReport {
@@ -112,13 +113,19 @@ export const buildStoreReport = async () => {
     settings: getSettings(),
     userData: {
       ...userData,
-      // Without the times and tries, which differ from run to run.
+      // Without the time, which differs from run to run.
       pendingActions: pendingActions.map(pending => {
-        const { queuedAt: _queued, tries: _tries, ...action } = pending;
+        const { queuedAt: _queued, ...action } = pending;
         return action;
       }),
     },
     appState: useAppStateStore.getState(),
+    /** The What's New the next launch of the app would show, if any. */
+    whatsNew:
+      whatsNewSince(
+        useAppStateStore.getState().whatsNewSeenVersion,
+        whatsNewContext(),
+      )?.version ?? null,
     calendarSync: {
       ...calendarSync,
       lastSynced: Object.keys(calendarSync.lastSynced ?? {}).sort(),
