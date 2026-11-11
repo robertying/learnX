@@ -173,34 +173,31 @@ const Today: React.FC<Props> = ({ navigation }) => {
         {/* In the Form, which scrolls under the header and collapses the
             large title; a view above it would sit behind the header. */}
         <SyncStatusSection updatedAt={schedule.updatedAt} />
-        {current && (
-          <FormSection title={t('todayNow')}>
-            {itemRow({
+        {/* One section, and when a class ends or starts goes above its name
+            rather than beside it, so a busy day keeps what's due on screen.
+            The whole week is a tap away in Schedule. */}
+        <FormSection title={t('todayClasses')} footer={note}>
+          {current &&
+            itemRow({
               key: current.key,
+              overline: `${t('todayNow')} · ${t('todayEndsIn', {
+                time: dayjs(now).to(current.end),
+              })}`,
               title: current.courseName,
               subtitle: classDetails(current),
-              detail: t('todayEndsIn', { time: dayjs(now).to(current.end) }),
               progress: (now - current.start) / (current.end - current.start),
               onPress: pressOf(current),
             })}
-          </FormSection>
-        )}
-        {next && (
-          <FormSection title={t('todayNext')}>
-            {itemRow({
+          {next &&
+            itemRow({
               key: next.key,
+              overline: `${t('todayNext')} · ${t('todayStartsIn', {
+                time: dayjs(now).to(next.start),
+              })}`,
               title: next.courseName,
               subtitle: classDetails(next),
-              detail: t('todayStartsIn', { time: dayjs(now).to(next.start) }),
               onPress: pressOf(next),
             })}
-          </FormSection>
-        )}
-
-        {/* The whole day's classes would push what's due off the screen on
-            a busy day, and Now and Next say what matters, so they're a tap
-            away, with the rest of the week. */}
-        <FormSection footer={note}>
           <FormLink
             icon="calendar"
             title={t('schedule')}

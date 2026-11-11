@@ -395,6 +395,27 @@ describe('Form (iOS details)', () => {
     });
   });
 
+  it('shows an overline above the title and its subtitle', async () => {
+    await render(
+      <Form>
+        <FormSection>
+          <FormText
+            overline="Now · ends in an hour"
+            title="Linear Algebra"
+            subtitle="09:50–11:25"
+            progress={0.5}
+          />
+          <FormLink overline="Next" title="Physics" onPress={jest.fn()} />
+        </FormSection>
+      </Form>,
+    );
+    expect(screen.getByText('Now · ends in an hour')).toBeOnTheScreen();
+    expect(screen.getByText('Linear Algebra')).toBeOnTheScreen();
+    expect(screen.getByText('09:50–11:25')).toBeOnTheScreen();
+    expect(screen.getByText('Next')).toBeOnTheScreen();
+    expect(screen.getByText('Physics')).toBeOnTheScreen();
+  });
+
   it('leaves the Mac header alone', async () => {
     jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     const navigation = { setOptions: jest.fn() };

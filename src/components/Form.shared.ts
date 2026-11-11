@@ -59,6 +59,12 @@ export type FormRowPosition = 'only' | 'first' | 'middle' | 'last';
 
 /** Rows that show something about an item: what's on today, for example. */
 export interface FormItemRowProps extends FormRowProps {
+  /**
+   * A short line above the title in the accent color, saying where the item
+   * stands: "Now · ends in an hour". Material's overline; on iOS and Mac a
+   * caption, as above the headline of a widget or an App Store card.
+   */
+  overline?: string;
   /** Dimmed, and read out as over, for something that's over. */
   done?: boolean;
   /** A bar under the text, from 0 to 1, for how far along it is. */
