@@ -7,6 +7,7 @@ import { SwipeableMethods } from 'react-native-gesture-handler/ReanimatedSwipeab
 import { CardAction } from 'helpers/cardActions';
 import { statusContainerOpacity, useTheme } from 'theme';
 import CardActionIcon from './CardActionIcon';
+import { Text } from './Text';
 import Touchable from './Touchable';
 
 const buttonWidth = 80;
@@ -61,7 +62,19 @@ const CardSwipeActions: React.FC<{
               },
             ]}
           />
-          <CardActionIcon action={action} size={40} />
+          <CardActionIcon action={action} size={28} />
+          {/* Named under the icon, as in Mail; VoiceOver reads the button's label. */}
+          <Text
+            variant="caption"
+            numberOfLines={1}
+            importantForAccessibility="no"
+            style={[
+              styles.label,
+              { color: theme.colors.onStatusContainer[action.tone] },
+            ]}
+          >
+            {action.label}
+          </Text>
         </Touchable>
       ))}
     </Animated.View>
@@ -79,6 +92,11 @@ const styles = StyleSheet.create({
     width: buttonWidth,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 4,
+  },
+  label: {
+    marginTop: 4,
+    fontWeight: '600',
   },
 });
 

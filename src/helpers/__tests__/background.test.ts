@@ -341,8 +341,9 @@ describe('notifyContent', () => {
       jest.mocked(Notifications.scheduleNotificationAsync).mock.calls[0][0]
         .content,
     ).toMatchObject({
-      title: `${unread.courseName} · New Notices`,
-      body: unread.title,
+      title: unread.title,
+      subtitle: unread.courseName,
+      threadIdentifier: unread.courseId,
       data: { type: 'notice', id: unread.id },
     });
 

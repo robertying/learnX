@@ -52,7 +52,6 @@ export type SettingDetailParams = {
   CourseInformationSharing: ExtraParams | undefined;
   CalendarEvent: ExtraParams | undefined;
   SemesterSelection: ExtraParams | undefined;
-  FileSettings: ExtraParams | undefined;
   Downloads: ExtraParams | undefined;
   NotificationSettings: ExtraParams | undefined;
   Help: ExtraParams | undefined;
@@ -60,6 +59,7 @@ export type SettingDetailParams = {
   Changelog: ExtraParams | undefined;
   Maintainer: ExtraParams | undefined;
   MockNetwork: ExtraParams | undefined;
+  Debug: ExtraParams | undefined;
 };
 
 export type NoticeStackParams = { Notices: undefined } & ItemDetails<

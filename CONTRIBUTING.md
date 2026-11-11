@@ -139,8 +139,8 @@ As on iOS, JS changes only need a reload. Rebuild after changes under `android/`
 ## Testing without a Tsinghua account
 
 - **Mock login:** on the login screen, enter `DUMMY_USERNAME` / `DUMMY_PASSWORD` from your `.env`. The app loads `src/data/mock.ts` and answers every request from an emulated server with a realistic delay, so refreshes, spinners, file downloads and errors behave as they would with a real account. The login is saved like a real one, so the app stays logged in across relaunches. Typing it again starts over from the mock data.
-- **Network emulation:** debug builds have Settings › Network Emulation (also linked from the login screen once a mock account is saved). It sets the latency, makes requests and downloads fail (offline, server error, timeout) or rejects logins. The choices reset when the JS reloads.
-- **Real accounts are protected in debug builds:** a debug build doesn't send anything that changes a real account (assignment submissions, favorites, course information sharing) until you turn on Settings › Allow Server Writes. Favorites wait in a queue until then. The switch turns off again on every JS reload. Release builds and the mock account aren't affected.
+- **Network emulation:** debug builds have Network Emulation in the Debug page (the wrench button in Today's header; also linked from the login screen once a mock account is saved). It sets the latency, makes requests and downloads fail (offline, server error, timeout) or rejects logins. The choices reset when the JS reloads.
+- **Real accounts are protected in debug builds:** a debug build doesn't send anything that changes a real account (assignment submissions, favorites, course information sharing) until you turn on Allow Server Writes in the Debug page (the wrench button in Today's header). Favorites wait in a queue until then. The switch turns off again on every JS reload. Release builds and the mock account aren't affected.
 
 Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AGENTS.md#mocks).
 

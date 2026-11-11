@@ -24,6 +24,7 @@ import { useShowDetail } from 'hooks/useDetailNavigator';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
+import { debugTitle } from 'navigation/options';
 import { headerButtons } from 'navigation/headerButtons';
 import { sidebarSplit } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from './types';
@@ -135,6 +136,15 @@ const Today: React.FC<Props> = ({ navigation }) => {
             : undefined,
           disabled: refreshing,
           onPress: onRefresh,
+        },
+        // Debug builds: the debug tools, in a group of their own.
+        __DEV__ && {
+          id: 'debug',
+          label: debugTitle,
+          icon: 'debug',
+          onPress: () => navigation.push('Debug'),
+          testID: 'today-debug',
+          ownGroup: true,
         },
         showSettings && {
           id: 'settings',

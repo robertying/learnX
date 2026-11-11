@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
@@ -10,22 +9,10 @@ import {
 } from 'components/Form';
 import SafeArea from 'components/SafeArea';
 import { toast } from 'components/Toast';
-import {
-  assignmentsQuery,
-  filesQuery,
-  noticesQuery,
-  useNotices,
-} from 'data/content';
-import { queryClient } from 'data/queryClient';
-import { describeSyncRun, useSyncLogStore } from 'data/syncLog';
-import { getUserData } from 'data/userData';
-import { notifyContent, syncContent } from 'helpers/background';
-import { previewDeadlineReminder } from 'helpers/deadlineReminders';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
-import { postNotification } from 'helpers/notifications';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from './types';
 
@@ -36,26 +23,32 @@ type Props = NativeStackScreenProps<
 
 type Toggle = Exclude<keyof Settings, 'deadlineReminderOffset'>;
 
-const contentToggles: {
+interface ToggleRow {
   key: Toggle;
   icon: FormIcon;
   label: string;
-}[] = [
+}
+
+// Grouped and ordered as on the Setup page.
+const contentToggles: ToggleRow[] = [
   {
     key: 'notices',
     icon: 'notices',
     label: t('notifyNewNotices'),
   },
   {
-    key: 'files',
-    icon: 'files',
-    label: t('notifyNewFiles'),
-  },
-  {
     key: 'assignments',
     icon: 'assignments',
     label: t('notifyNewAssignments'),
   },
+  {
+    key: 'files',
+    icon: 'files',
+    label: t('notifyNewFiles'),
+  },
+];
+
+const assignmentToggles: ToggleRow[] = [
   {
     key: 'grades',
     icon: 'grade',
@@ -68,46 +61,11 @@ const contentToggles: {
   },
 ];
 
-/**
- * Debug builds: forgets a few items and grades, then syncs as the background
- * task does, so what comes back is posted as new.
- */
-const simulateNewContent = async () => {
-  const semesterId = getUserData().currentSemester;
-  if (!semesterId) {
-    return;
-  }
-  queryClient.setQueryData(noticesQuery(semesterId).queryKey, old =>
-    old?.slice(3),
-  );
-  queryClient.setQueryData(filesQuery(semesterId).queryKey, old =>
-    old?.slice(3),
-  );
-  queryClient.setQueryData(assignmentsQuery(semesterId).queryKey, old =>
-    old
-      ?.filter(a => a.submitted || dayjs(a.deadline).isBefore(dayjs()))
-      .map(a => (a.graded ? { ...a, graded: false } : a)),
-  );
-  const result = await syncContent({ manual: true });
-  const run = useSyncLogStore.getState().runs.at(-1);
-  const summary = run ? describeSyncRun(run) : result.status;
-  if (result.status !== 'synced') {
-    toast(summary, 'error');
-    return;
-  }
-  const posted = await notifyContent(result.diff, { inForeground: true });
-  toast(`${posted.length} posted, ${summary}`, 'success');
-};
-
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
   const { permission, request, exactAlarms, requestExact } =
     useNotificationPermission();
   const showExact = notifications.deadlineReminders && exactAlarms === false;
-  const { notices } = useNotices();
-  const lastBackgroundSync = useSyncLogStore(state =>
-    state.runs.findLast(run => !run.manual),
-  );
 
   const set = <K extends keyof Settings>(key: K, value: Settings[K]) =>
     setSetting('notifications', { ...notifications, [key]: value });
@@ -121,47 +79,32 @@ const NotificationSettings: React.FC<Props> = () => {
     set(key, value);
   };
 
+  const renderToggle = ({ key, icon, label }: ToggleRow) => (
+    <FormToggle
+      key={key}
+      testID={`notifications-${key}`}
+      icon={icon}
+      title={label}
+      value={notifications[key]}
+      onValueChange={value => handleToggle(key, value)}
+    />
+  );
+
   const anyOn = (Object.keys(notifications) as (keyof Settings)[]).some(
     key => key !== 'deadlineReminderOffset' && notifications[key],
   );
 
-  const sendTestNotification = async () => {
-    if (!(await request())) {
-      toast(t('notificationPermissionDenied'), 'error');
-      return;
-    }
-    const notice = notices[0];
-    await postNotification({
-      title: notice?.courseName ?? 'learnX',
-      body: notice?.title ?? t('notifications'),
-      target: { type: 'notice', id: notice?.id },
-    });
-  };
-
-  const handleSimulateNewContent = async () => {
-    if (!(await request())) {
-      toast(t('notificationPermissionDenied'), 'error');
-      return;
-    }
-    await simulateNewContent();
-  };
-
   return (
     <SafeArea>
       <Form>
-        <FormSection footer={t('notificationsCaption')}>
-          {contentToggles.map(({ key, icon, label }) => (
-            <FormToggle
-              key={key}
-              testID={`notifications-${key}`}
-              icon={icon}
-              title={label}
-              value={notifications[key]}
-              onValueChange={value => handleToggle(key, value)}
-            />
-          ))}
+        <FormSection
+          title={t('setupNewContent')}
+          footer={t('notificationsCaption')}
+        >
+          {contentToggles.map(renderToggle)}
         </FormSection>
         <FormSection
+          title={t('assignments')}
           footer={[
             t('notifyDeadlineRemindersCaption'),
             showExact && t('exactRemindersCaption'),
@@ -193,43 +136,14 @@ const NotificationSettings: React.FC<Props> = () => {
               onPress={requestExact}
             />
           )}
+          {assignmentToggles.map(renderToggle)}
         </FormSection>
-        <FormSection
-          footer={
-            __DEV__ && lastBackgroundSync
-              ? `Last background sync ${dayjs(lastBackgroundSync.startedAt).format(t('shortDateTimeFormat'))}: ${describeSyncRun(lastBackgroundSync)}`
-              : undefined
-          }
-        >
+        <FormSection>
           <FormButton
             icon="settings"
             title={t('configureNotifications')}
             onPress={() => openSystemSettings('notifications')}
           />
-          {/* Debug tools, so not translated. */}
-          {__DEV__ && (
-            <FormButton
-              icon="send"
-              title="Send a Test Notification"
-              onPress={sendTestNotification}
-            />
-          )}
-          {__DEV__ && (
-            <FormButton
-              icon="sync"
-              title="Simulate New Content"
-              onPress={handleSimulateNewContent}
-            />
-          )}
-          {__DEV__ && (
-            <FormButton
-              icon="reminder"
-              title="Preview a Deadline Reminder"
-              onPress={async () =>
-                toast(String(await previewDeadlineReminder()), 'success')
-              }
-            />
-          )}
         </FormSection>
       </Form>
     </SafeArea>

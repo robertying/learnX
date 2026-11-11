@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { useSyncExternalStore } from 'react';
 import { Alert, Linking } from 'react-native';
 import SafeArea from 'components/SafeArea';
 import {
@@ -8,7 +7,6 @@ import {
   FormLink,
   FormProfile,
   FormSection,
-  FormToggle,
 } from 'components/Form';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { logout } from 'data/login';
@@ -18,13 +16,6 @@ import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { t } from 'helpers/i18n';
-import { mockNetworkTitle } from 'navigation/options';
-import { isMockUser } from 'helpers/mock';
-import {
-  getServerWritesAllowed,
-  setServerWritesAllowed,
-  subscribeServerWrites,
-} from 'helpers/serverWrites';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
 import { MainStackScreenProps, SettingsStackParams } from './types';
 
@@ -50,10 +41,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const loggedIn = useLoggedIn();
   const { data: userInfo } = useQuery({ ...userQuery, enabled: loggedIn });
   const username = useCredentialsStore(state => state.credentials?.username);
-  const serverWritesAllowed = useSyncExternalStore(
-    subscribeServerWrites,
-    getServerWritesAllowed,
-  );
   const courseSharingSeen = useAppState(state => state.courseSharingSeen);
 
   const update = useAvailableUpdate();
@@ -105,20 +92,20 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             onPress={() => handlePush('SemesterSelection')}
           />
           <FormLink
+            testID="settings-notifications"
+            icon="notifications"
+            title={t('notifications')}
+            onPress={() => handlePush('NotificationSettings')}
+          />
+          <FormLink
             icon="calendar"
             title={t('calendarsAndReminders')}
             onPress={() => handlePush('CalendarEvent')}
           />
           <FormLink
-            icon="files"
-            title={t('fileSettings')}
-            onPress={() => handlePush('FileSettings')}
-          />
-          <FormLink
-            testID="settings-notifications"
-            icon="notifications"
-            title={t('notifications')}
-            onPress={() => handlePush('NotificationSettings')}
+            icon="download"
+            title={t('downloads')}
+            onPress={() => handlePush('Downloads')}
           />
         </FormSection>
         <FormSection>
@@ -172,28 +159,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             onPress={() => handlePush('About')}
           />
         </FormSection>
-        {__DEV__ && !isMockUser(username) && (
-          // A dev-only switch for testing with a real account, so it is not translated.
-          <FormSection footer="Debug builds don't submit assignments, share course information or sync favorites until this is on. Favorites changed meanwhile wait and are sent when it's turned on. It turns off again when the app reloads.">
-            <FormToggle
-              testID="settings-allow-server-writes"
-              icon="warning"
-              title="Allow Server Writes"
-              value={serverWritesAllowed}
-              onValueChange={setServerWritesAllowed}
-            />
-          </FormSection>
-        )}
-        {__DEV__ && isMockUser(username) && (
-          <FormSection>
-            <FormLink
-              testID="settings-mock-network"
-              icon="network"
-              title={mockNetworkTitle}
-              onPress={() => handlePush('MockNetwork')}
-            />
-          </FormSection>
-        )}
       </Form>
     </SafeArea>
   );

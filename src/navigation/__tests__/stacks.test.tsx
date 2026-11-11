@@ -38,12 +38,12 @@ jest.mock('screens/CourseX', () => () => null);
 jest.mock('screens/Courses', () => () => null);
 jest.mock('screens/Downloads', () => () => null);
 jest.mock('screens/FileDetail', () => () => null);
-jest.mock('screens/FileSettings', () => () => null);
 jest.mock('screens/Files', () => () => null);
 jest.mock('screens/Help', () => () => null);
 jest.mock('screens/Login', () => () => null);
 jest.mock('screens/Maintainer', () => () => null);
 jest.mock('screens/MockNetwork', () => () => null);
+jest.mock('screens/Debug', () => () => null);
 jest.mock('screens/NoticeDetail', () => () => null);
 jest.mock('screens/Notices', () => () => null);
 jest.mock('screens/NotificationSettings', () => () => null);
@@ -68,7 +68,6 @@ const settingDetails = [
   'CourseInformationSharing',
   'CalendarEvent',
   'SemesterSelection',
-  'FileSettings',
   'Downloads',
   'NotificationSettings',
   'Maintainer',
@@ -76,6 +75,7 @@ const settingDetails = [
   'About',
   'Changelog',
   'MockNetwork',
+  'Debug',
 ];
 const itemDetails = [
   'CourseDetail',
@@ -201,7 +201,11 @@ it("shows What's New in a sheet, with the changelog a push away", async () => {
   expect(config.screens).toEqual([
     expect.objectContaining({
       name: 'WhatsNew',
-      options: { headerShown: false, title: t('whatsNew') },
+      options: {
+        headerShown: false,
+        headerTitle: '',
+        title: t('whatsNew'),
+      },
     }),
     expect.objectContaining({ name: 'Changelog' }),
   ]);

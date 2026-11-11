@@ -7,6 +7,7 @@ import {
   PlatformColor,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import Animated, {
@@ -22,6 +23,7 @@ import { FullWindowOverlay } from 'react-native-screens';
 import * as Haptics from 'expo-haptics';
 import { create } from 'zustand';
 import DeviceInfo from 'constants/DeviceInfo';
+import Spacing from 'constants/Spacing';
 import { textStyles } from 'components/Text';
 import { useTheme } from 'theme';
 import { ToastBackground, ToastSymbol } from 'modules/toast';
@@ -107,13 +109,35 @@ const remove = (id: number) => {
 
 const cornerRadius = 25;
 
+const maxToastWidth = 420;
+
 // Slides up into place.
 const hiddenOffset = 24;
 
-// Above the tab bar, which is at the bottom only on iPhone (about 56pt over
-// the home indicator inset). iPad's tab bar is at the top and the Mac has a
-// sidebar, so there the toast sits just above the bottom edge.
-const bottomMargin = DeviceInfo.isTablet() || DeviceInfo.isMac() ? 16 : 56 + 8;
+// From iOS 26 the toast floats like the iPhone's tab bar: as far from the
+// screen's sides and bottom as the tab bar is (21 pt, measured: UIKit doesn't
+// expose it), and on iPhone just above the tab bar (62 pt tall). Before iOS 26
+// it keeps the side margin and sits above the docked tab bar (about 56 pt
+// over the home indicator inset). iPad's tab bar is at the top and the Mac
+// has a sidebar, so there the toast sits at the bottom.
+const floatingInset = 21;
+const floatingTabBarHeight = 62;
+const hasTabBarBelow = !DeviceInfo.isTablet() && !DeviceInfo.isMac();
+
+const toastInsets = (insets: { bottom: number; left: number; right: number }) =>
+  DeviceInfo.hasLiquidGlass()
+    ? {
+        bottom: hasTabBarBelow
+          ? floatingInset + floatingTabBarHeight + Spacing.s
+          : Math.max(insets.bottom, floatingInset),
+        left: Math.max(insets.left, floatingInset),
+        right: Math.max(insets.right, floatingInset),
+      }
+    : {
+        bottom: insets.bottom + (hasTabBarBelow ? 56 + Spacing.s : Spacing.m),
+        left: insets.left + Spacing.m,
+        right: insets.right + Spacing.m,
+      };
 
 /** The height of the keyboard while it is up, so the toast can sit above it. */
 const useKeyboardHeight = () => {
@@ -141,13 +165,17 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { width: windowWidth } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight();
+  const margins = toastInsets(insets);
   const progress = useSharedValue(0);
   const drag = useSharedValue(0);
 
   useEffect(() => {
     if (visible) {
-      progress.set(withSpring(1, { damping: 18, stiffness: 220 }));
+      // Nearly critically damped: it settles without overshooting, as the
+      // system's HUDs do.
+      progress.set(withSpring(1, { duration: 350, dampingRatio: 0.9 }));
     } else {
       progress.set(
         withTiming(0, { duration: 200 }, finished => {
@@ -207,11 +235,9 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         styles.wrapper,
         {
           paddingBottom:
-            keyboardHeight > 0
-              ? keyboardHeight + 16
-              : insets.bottom + bottomMargin,
-          paddingLeft: insets.left + 16,
-          paddingRight: insets.right + 16,
+            keyboardHeight > 0 ? keyboardHeight + Spacing.m : margins.bottom,
+          paddingLeft: margins.left,
+          paddingRight: margins.right,
         },
       ]}
     >
@@ -221,7 +247,19 @@ const ToastView: React.FC<Omit<ToastState, 'duration'>> = ({
         accessibilityRole="alert"
         accessibilityLabel={text}
         accessibilityHint=""
-        style={[styles.toast, animatedStyle]}
+        style={[
+          styles.toast,
+          // The overlay's window doesn't hold its content to the screen's
+          // width, so the wrapper's side padding alone lets a long toast run
+          // edge to edge.
+          {
+            maxWidth: Math.min(
+              maxToastWidth,
+              windowWidth - margins.left - margins.right,
+            ),
+          },
+          animatedStyle,
+        ]}
       >
         <ToastBackground
           cornerRadius={cornerRadius}
@@ -290,7 +328,6 @@ const styles = StyleSheet.create({
   },
   toast: {
     justifyContent: 'center',
-    maxWidth: 420,
     minHeight: cornerRadius * 2,
   },
   content: {

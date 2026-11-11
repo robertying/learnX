@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import {
   fireEvent,
@@ -5,6 +6,7 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native';
+import { resetCalendarSync, setLastSynced } from 'data/calendarSync';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
@@ -95,9 +97,9 @@ it('asks how long before a class to alarm once class alarms are on', async () =>
 
 it('turns assignment sync on and off through the sync hook', async () => {
   await renderScreen();
-  await toggle(t('assignmentCalendarSync'), true);
+  await toggle(t('setupCalendar'), true);
   expect(setSyncEnabled).toHaveBeenCalledWith('calendar', true);
-  await toggle(t('assignmentReminderSync'), true);
+  await toggle(t('setupReminders'), true);
   expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
 });
 
@@ -129,7 +131,7 @@ it('shows the event length and alarm options while calendar sync is on', async (
 it('leaves the Reminders section out on Android', async () => {
   Platform.OS = 'android';
   await renderScreen();
-  expect(screen.queryByText(t('assignmentReminderSync'))).toBeNull();
+  expect(screen.queryByText(t('setupReminders'))).toBeNull();
   expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
 });
 
@@ -154,4 +156,20 @@ it('saves the range picked in the picker', async () => {
     startDate: picker.startDate,
     endDate: picker.endDate,
   });
+});
+
+it('says when each sync last finished, while it is on', async () => {
+  resetCalendarSync();
+  const time = new Date(2026, 10, 11, 9, 30).getTime();
+  setLastSynced('courseSchedule', time);
+  setLastSynced('calendar', time);
+  await renderScreen();
+  const lastSynced = t('lastSynced', {
+    time: dayjs(time).format(t('shortDateTimeFormat')),
+  });
+  expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(1);
+
+  setSetting('assignmentCalendarSync', true);
+  await renderScreen();
+  expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(2);
 });

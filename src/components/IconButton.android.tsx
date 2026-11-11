@@ -27,6 +27,7 @@ const icons: Record<IconButtonIcon, number> = {
   checkAll: require('../assets/icons/done_all.xml'),
   close: require('../assets/icons/close.xml'),
   download: require('../assets/icons/download.xml'),
+  debug: require('../assets/icons/handyman.xml'),
   exitFullscreen: require('../assets/icons/fullscreen_exit.xml'),
   filter: require('../assets/icons/filter_list.xml'),
   forward: require('../assets/icons/arrow_forward.xml'),

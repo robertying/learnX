@@ -27,7 +27,12 @@ export interface CalendarSyncState {
   syncedCalendarAssignments: Record<string, string>;
   /** Reminder id (iOS) or event id (Android) by assignment id. */
   syncedReminderAssignments: Record<string, string>;
+  /** When each sync last finished without an error (ms), for Settings. */
+  lastSynced?: Partial<Record<SyncKind, number>>;
 }
+
+/** The syncs Settings › Calendar & Reminders shows a time for. */
+export type SyncKind = 'courseSchedule' | AssignmentEventType;
 
 export const emptyCalendarSync = (): CalendarSyncState => ({
   syncedCalendarAssignments: {},
@@ -81,6 +86,13 @@ export const removeEventIdForAssignment = (
     const { [assignmentId]: _removed, ...synced } = state[key];
     return { [key]: synced };
   });
+};
+
+/** Notes that a sync just finished without an error. */
+export const setLastSynced = (kind: SyncKind, time = Date.now()) => {
+  useCalendarSyncStore.setState(state => ({
+    lastSynced: { ...state.lastSynced, [kind]: time },
+  }));
 };
 
 export const clearEventIds = (type: AssignmentEventType) => {

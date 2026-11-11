@@ -1,11 +1,6 @@
 import { Alert, Linking } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
-import {
-  fireEvent,
-  render,
-  screen,
-  userEvent,
-} from '@testing-library/react-native';
+import { render, screen, userEvent } from '@testing-library/react-native';
 import { useAppStateStore } from 'data/appState';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
@@ -13,10 +8,7 @@ import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { t } from 'helpers/i18n';
-import {
-  getServerWritesAllowed,
-  setServerWritesAllowed,
-} from 'helpers/serverWrites';
+import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
@@ -90,7 +82,7 @@ it('opens each page in the detail view', async () => {
   const pages = {
     semesterSelection: 'SemesterSelection',
     calendarsAndReminders: 'CalendarEvent',
-    fileSettings: 'FileSettings',
+    downloads: 'Downloads',
     notifications: 'NotificationSettings',
     courseInformationSharing: 'CourseInformationSharing',
     changelog: 'Changelog',
@@ -134,23 +126,4 @@ it('links a newer Android release', async () => {
   );
   expect(open).toHaveBeenCalledWith('https://mirror/learnX.apk');
   jest.mocked(useAvailableUpdate).mockReturnValue(null);
-});
-
-it('lets debug builds allow server writes for a real account', async () => {
-  await renderScreen();
-  expect(screen.queryByTestId('settings-mock-network')).toBeNull();
-  await fireEvent(
-    screen.getByTestId('settings-allow-server-writes'),
-    'valueChange',
-    true,
-  );
-  expect(getServerWritesAllowed()).toBe(true);
-});
-
-it('offers network emulation instead for the mock account', async () => {
-  credentials('mock-user');
-  await renderScreen();
-  expect(screen.queryByTestId('settings-allow-server-writes')).toBeNull();
-  await userEvent.press(screen.getByTestId('settings-mock-network'));
-  expect(mockShow).toHaveBeenCalledWith('MockNetwork');
 });

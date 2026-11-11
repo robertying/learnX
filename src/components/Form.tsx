@@ -53,6 +53,7 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
+import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
@@ -100,11 +101,12 @@ const macFormModifiers = [
 // Behind iOS's inset grouped rows
 const groupedBackground = PlatformColor('systemGroupedBackground');
 
-// The last section's footer would otherwise end right at the floating tab
-// bar's top edge when scrolled to the end; with this it keeps the rows' side
-// margin (16 pt) from it. (Android's list has its own bottom padding.)
+// The last section would otherwise end right at the floating tab bar's top
+// edge when scrolled to the end; with this its rows end about a section's
+// spacing above it (its footer a little less), as one more section would.
+// (Android's list has its own bottom padding.)
 const lastSectionModifiers = [
-  listSectionMargins({ edges: 'bottom', length: 8 }),
+  listSectionMargins({ edges: 'bottom', length: Spacing.l }),
 ];
 
 const lastSectionMarked = (children: ReactNode) =>
@@ -206,6 +208,8 @@ const struckText = [
   strikethrough({ isActive: true, pattern: 'solid' }),
 ];
 
+const unavailableModifiers = [foregroundStyle(PlatformColor('tertiaryLabel'))];
+
 const overlineModifiers = [font({ textStyle: 'caption', weight: 'semibold' })];
 
 const RowLabel: React.FC<{
@@ -217,19 +221,35 @@ const RowLabel: React.FC<{
   struck?: boolean;
   /** Read out as over, which the row only shows by being dimmed. */
   done?: boolean;
-}> = ({ title, subtitle, overline, icon, plain, struck, done }) => {
+  /**
+   * Grayed out, as a disabled button's label. Set explicitly: `disabled` only
+   * grays a label drawn in the tint, not the label color plain rows use.
+   */
+  unavailable?: boolean;
+}> = ({
+  title,
+  subtitle,
+  overline,
+  icon,
+  plain,
+  struck,
+  done,
+  unavailable,
+}) => {
   const theme = useTheme();
   const text = (
     <Text
       modifiers={
-        struck
-          ? // the strikethrough isn't read out
-            [...struckText, accessibilityValue(t('a11yStruck'))]
-          : plain
-            ? done
-              ? [primaryText, accessibilityValue(t('a11yDone'))]
-              : [primaryText]
-            : undefined
+        unavailable
+          ? unavailableModifiers
+          : struck
+            ? // the strikethrough isn't read out
+              [...struckText, accessibilityValue(t('a11yStruck'))]
+            : plain
+              ? done
+                ? [primaryText, accessibilityValue(t('a11yDone'))]
+                : [primaryText]
+              : undefined
       }
     >
       {title}
@@ -263,7 +283,12 @@ const RowLabel: React.FC<{
   // The system draws the symbol at the row's text size. (@expo/ui's Image
   // would draw it at a fixed 24 pt.)
   return icon ? (
-    <Label systemImage={systemIcons[icon].ios}>{label}</Label>
+    <Label
+      systemImage={systemIcons[icon].ios}
+      modifiers={unavailable ? unavailableModifiers : undefined}
+    >
+      {label}
+    </Label>
   ) : (
     label
   );
@@ -459,6 +484,7 @@ export const FormButton: React.FC<FormButtonProps> = ({
           // Mac forms don't tint action rows; only choices and the Mac use
           // the label color, and destructive rows stay red.
           plain={(choice || DeviceInfo.isMac()) && !destructive}
+          unavailable={isDisabled}
         />
         <Spacer />
         <RowDetail detail={detail} />

@@ -116,7 +116,21 @@ describe('pickContentItems', () => {
         { type: 'assignment', id: 'a3' },
       ],
     ]);
-    expect(items[3].text).toBe('Assignment a2: A');
+    expect(items.map(i => [i.title, i.detail, i.line])).toEqual([
+      ['Notice n1', expect.any(String), 'Notice n1'],
+      ['File f1', expect.stringMatching(/^New file/), 'File f1'],
+      [
+        'Assignment a1',
+        'New assignment · Due Nov 10 10:00',
+        'Assignment a1 · Due Nov 10 10:00',
+      ],
+      ['Assignment a2', 'Graded: A', 'Assignment a2 · Graded: A'],
+      [
+        'Assignment a3',
+        `Now due Nov 11 10:00 (was Nov 10 10:00)`,
+        'Assignment a3 → Nov 11 10:00',
+      ],
+    ]);
   });
 
   it('only picks the kinds that are on', () => {
@@ -196,18 +210,26 @@ describe('groupContentItems', () => {
   it('opens a single item, and the list for several in a course', () => {
     const diff = emptyDiff();
     diff.files.added = [file('f1'), file('f2')];
-    diff.notices.added = [notice('n1')];
+    diff.notices.added = [
+      notice('n1', { content: '<p>Preview of <b>the</b> notice</p>' }),
+    ];
     const notifications = groupContentItems(pickContentItems(diff, context()));
     expect(notifications).toEqual([
       {
-        title: 'Calculus · New Notices',
-        body: 'Notice n1',
+        kind: 'notices',
+        title: 'Notice n1',
+        subtitle: 'Calculus',
+        body: 'Preview of the notice',
+        threadId: 'c1',
         target: { type: 'notice', id: 'n1' },
         keys: ['notice:n1'],
       },
       {
-        title: 'Calculus · New Files',
+        kind: 'files',
+        title: '2 New Files',
+        subtitle: 'Calculus',
         body: 'File f1\nFile f2',
+        threadId: 'c1',
         target: { type: 'file' },
         ids: ['f1', 'f2'],
         keys: ['file:f1', 'file:f2'],
@@ -223,7 +245,8 @@ describe('groupContentItems', () => {
     const notifications = groupContentItems(pickContentItems(diff, context()));
     expect(notifications).toHaveLength(8);
     expect(notifications[7]).toMatchObject({
-      title: 'learnX',
+      title: '5 Updates in 5 Courses',
+      body: 'Course 7 · New Files\nCourse 8 · New Files\nCourse 9 · New Files\nCourse 10 · New Files\nCourse 11 · New Files',
       target: { type: 'file' },
     });
     expect(notifications.flatMap(n => n.keys)).toHaveLength(12);
