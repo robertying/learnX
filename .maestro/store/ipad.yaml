@@ -19,10 +19,15 @@ name: App Store screenshots on the iPad
       NAME: 01-notices
 
 # 2 Another row's swipe actions with the filter menu open
-- runFlow:
-    file: ../subflows/card_actions.yaml
-    env:
-      CARD: '.*(${MOCK_NOTICE}).*'
+# On iPad a long press opens a context menu, which hides the filter button,
+# and Maestro's element swipe is too short: swipe the first row (MOCK_NOTICE)
+# by its position in the list pane.
+- assertVisible: '.*(${MOCK_NOTICE}).*'
+- swipe:
+    start: 42%,19%
+    end: 24%,19%
+    duration: 500
+- waitForAnimationToEnd
 - tapOn: '${T_filter}'
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -78,10 +83,13 @@ name: App Store screenshots on the iPad
     env:
       CARD: '.*(${MOCK_STORE_COURSE}).*'
       DETAIL: course-detail
-- runFlow:
-    file: ../subflows/card_actions.yaml
-    env:
-      CARD: '.*(${MOCK_COURSE}).*'
+# The first row (MOCK_COURSE), swiped by its position as for notices.
+- assertVisible: '.*(${MOCK_COURSE}).*'
+- swipe:
+    start: 42%,19%
+    end: 24%,19%
+    duration: 800
+- waitForAnimationToEnd
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:

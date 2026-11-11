@@ -24,8 +24,8 @@
 #   STORE_ANDROID_DENSITY  Android density (default 420 phone, 280 tablet)
 #
 # The script sets the device up for the shots and puts it back on exit: the
-# iOS status bar (9:41, full battery and signal), or the Android screen size,
-# density, signal and app locale. Which simulator or emulator model to use
+# iOS status bar (9:41, full battery and signal) and light mode, or the
+# Android screen size, density, signal and app locale. Which simulator or emulator model to use
 # depends on the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch
 # iPad, the iPhone Duo, and any Android foldable or tablet emulator.
 set -euo pipefail
@@ -76,10 +76,14 @@ fi
 
 android_app_id="io.robertying.learnx"
 restore_locales=""
+restore_appearance=""
 
 cleanup() {
   if [ "$platform" = ios ]; then
     xcrun simctl status_bar "$device" clear || true
+    if [ -n "$restore_appearance" ]; then
+      xcrun simctl ui "$device" appearance "$restore_appearance" || true
+    fi
   else
     adb -s "$device" shell wm size reset || true
     adb -s "$device" shell wm density reset || true
@@ -91,6 +95,9 @@ trap cleanup EXIT
 
 if [ "$platform" = ios ]; then
   export E2E_LANGUAGE="${STORE_LANGUAGE:-zh-Hans}"
+  # The shots are in light mode.
+  restore_appearance="$(xcrun simctl ui "$device" appearance)"
+  xcrun simctl ui "$device" appearance light
   xcrun simctl status_bar "$device" override --time 9:41 \
     --batteryState discharging --batteryLevel 100 \
     --wifiBars 3 --cellularMode active --cellularBars 4
@@ -106,9 +113,34 @@ else
   adb -s "$device" emu gsm signal-profile 4 >/dev/null || true
 fi
 
+# Maestro (2.12+) writes takeScreenshot files only inside the run's own
+# output folder, so the flows save relative names and the PNGs are copied out
+# of it, also after a failed run.
+run_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store.XXXXXX")"
+copy_shots() {
+  find "$run_dir" -path '*takeScreenshot*' -name '*.png' -exec cp {} "$out"/ \;
+}
+status=0
 MAESTRO_DEVICE="$device" scripts/e2e.sh "$platform" \
-  -e STORE_OUT="$out" \
+  --test-output-dir "$run_dir" \
+  -e STORE_OUT=store \
   -e STORE_SUFFIX="$suffix" \
-  ".maestro/store/$flow.yaml"
+  ".maestro/store/$flow.yaml" || status=$?
+copy_shots
+if [ "$flow" = ipad ]; then
+  # Maestro saves a landscape iPad shot as portrait pixels with an EXIF
+  # rotation, which App Store Connect doesn't apply: draw the pixels upright
+  # (ffmpeg rotates by the tag and leaves it out).
+  for png in "$out"/*.png; do
+    ffmpeg -loglevel error -y -i "$png" -frames:v 1 "$run_dir/upright.png"
+    mv "$run_dir/upright.png" "$png"
+  done
+fi
+if [ "$status" -eq 0 ]; then
+  rm -rf "$run_dir"
+else
+  echo "Maestro's logs: $run_dir" >&2
+fi
 
 echo "Screenshots: $out"
+exit "$status"

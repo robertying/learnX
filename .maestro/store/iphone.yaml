@@ -54,6 +54,10 @@ name: App Store screenshots on the iPhone
       NAME: 04-assignments
 
 # 5 Submitting an assignment
+# It is far down the list on a short screen (the folded iPhone Duo).
+- scrollUntilVisible:
+    element: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+    direction: DOWN
 - runFlow:
     file: ../subflows/open.yaml
     env:

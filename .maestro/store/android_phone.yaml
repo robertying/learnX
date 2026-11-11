@@ -39,6 +39,10 @@ name: Google Play screenshots on an Android phone
       NAME: 03-assignments
 
 # 4 Submitting an assignment
+# It can be below the screen's end on a short phone.
+- scrollUntilVisible:
+    element: '.*(${MOCK_STORE_ASSIGNMENT}).*'
+    direction: DOWN
 - runFlow:
     file: ../subflows/open.yaml
     env:
