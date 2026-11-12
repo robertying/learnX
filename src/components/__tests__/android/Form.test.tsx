@@ -8,9 +8,11 @@ import {
 import { useState } from 'react';
 import type * as ReactNative from 'react-native';
 import { StyleSheet, Text } from 'react-native';
+import { showChoices } from 'components/choiceSheet';
 import {
   Form,
   FormButton,
+  FormChoiceButton,
   FormFile,
   FormLink,
   FormNumberField,
@@ -25,7 +27,22 @@ import {
   FormToggle,
 } from 'components/Form';
 
+jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
+
 describe('Form (Android)', () => {
+  it('asks from a row with a dialog', async () => {
+    const sheet = { title: '物理', choices: [] };
+    await render(
+      <Form>
+        <FormSection>
+          <FormChoiceButton title="物理" sheet={sheet} />
+        </FormSection>
+      </Form>,
+    );
+    await userEvent.press(screen.getByText('物理'));
+    expect(showChoices).toHaveBeenCalledWith(sheet);
+  });
+
   it('opens a page from a link row, with its new-item badge', async () => {
     const onPress = jest.fn();
     await render(

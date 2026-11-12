@@ -32,6 +32,8 @@ interface FilterListRowProps<T extends { id: string }> {
   selectionMode: boolean;
   reorderMode: boolean;
   checked?: boolean;
+  /** Open in the detail pane beside the list. */
+  opened: boolean;
   fav: boolean;
   archived: boolean;
   hidden: boolean;
@@ -60,6 +62,7 @@ const FilterListRow = <T extends { id: string }>({
   selectionMode,
   reorderMode,
   checked,
+  opened,
   fav,
   archived,
   hidden,
@@ -72,6 +75,7 @@ const FilterListRow = <T extends { id: string }>({
     selectionMode,
     reorderMode,
     checked,
+    opened,
     onCheck: value => actions.check(data.id, value),
     onPress: () => actions.press(data),
     fav,

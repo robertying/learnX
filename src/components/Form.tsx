@@ -2,6 +2,8 @@ import {
   cloneElement,
   useContext,
   useLayoutEffect,
+  useRef,
+  useState,
   type ReactElement,
   type ReactNode,
 } from 'react';
@@ -17,6 +19,7 @@ import { TextInput } from '@expo/ui';
 import {
   Button,
   Circle,
+  ConfirmationDialog,
   Form as SwiftUIForm,
   HStack,
   Image,
@@ -70,6 +73,7 @@ import {
   parseNumberInput,
   sectionRows,
   type FormButtonProps,
+  type FormChoiceButtonProps,
   type FormFileProps,
   type FormIcon,
   type FormItemRowProps,
@@ -523,6 +527,55 @@ export const FormButton: React.FC<FormButtonProps> = ({
         ) : null}
       </HStack>
     </Button>
+  );
+};
+
+export const FormChoiceButton: React.FC<FormChoiceButtonProps> = ({
+  sheet: { title, message, choices, onCancel },
+  ...row
+}) => {
+  const [presented, setPresented] = useState(false);
+  // SwiftUI reports the dismissal after the choice's action has run.
+  const chose = useRef(false);
+
+  const handlePresentedChange = (value: boolean) => {
+    setPresented(value);
+    if (value) {
+      chose.current = false;
+    } else if (!chose.current) {
+      onCancel?.();
+    }
+  };
+
+  return (
+    <ConfirmationDialog
+      title={title}
+      titleVisibility="visible"
+      isPresented={presented}
+      onIsPresentedChange={handlePresentedChange}
+    >
+      <ConfirmationDialog.Trigger>
+        <FormButton {...row} onPress={() => handlePresentedChange(true)} />
+      </ConfirmationDialog.Trigger>
+      <ConfirmationDialog.Actions>
+        {choices.map(choice => (
+          <Button
+            key={choice.label}
+            label={choice.label}
+            role={choice.destructive ? 'destructive' : undefined}
+            onPress={() => {
+              chose.current = true;
+              choice.onPress();
+            }}
+          />
+        ))}
+      </ConfirmationDialog.Actions>
+      {message ? (
+        <ConfirmationDialog.Message>
+          <Text>{message}</Text>
+        </ConfirmationDialog.Message>
+      ) : null}
+    </ConfirmationDialog>
   );
 };
 

@@ -8,23 +8,27 @@ export interface Choice {
   destructive?: boolean;
 }
 
+export interface ChoiceSheet {
+  title: string;
+  message?: string;
+  choices: Choice[];
+  /** Runs when the sheet is dismissed without a choice. */
+  onCancel?: () => void;
+}
+
 /**
  * Asks which of a few things to do, as each platform does: an action sheet
  * on iOS, iPadOS and Mac, with Cancel last; a dialog on Android, the first
  * choice as its main button. Android's dialog holds at most two choices.
- * `onCancel` runs when it's dismissed without a choice.
+ * On iPad and Mac the sheet is a popover in the middle of the window, so a
+ * form row that asks uses `FormChoiceButton`, whose sheet points at the row.
  */
 export const showChoices = ({
   title,
   message,
   choices,
   onCancel,
-}: {
-  title: string;
-  message?: string;
-  choices: Choice[];
-  onCancel?: () => void;
-}) => {
+}: ChoiceSheet) => {
   if (Platform.OS === 'ios') {
     ActionSheetIOS.showActionSheetWithOptions(
       {

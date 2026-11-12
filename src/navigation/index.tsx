@@ -1,26 +1,18 @@
 import { Platform } from 'react-native';
-import { useRef } from 'react';
-import {
-  NavigationContainer,
-  NavigationContainerRef,
-} from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import {
   createNativeStackNavigator,
   type NativeStackNavigationOptions,
 } from '@react-navigation/native-stack';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
-import {
-  DetailStackParams,
-  RootStackParams,
-  AndroidRootStackParams,
-} from './types';
+import { RootStackParams, AndroidRootStackParams } from './types';
 import { SplitViewProvider } from './SplitView';
 import SplitSizes from 'constants/SplitSizes';
 import { trackScreen } from 'services/crashReporting';
 import { useNavigationTheme } from 'theme';
-import { DetailContainer } from './DetailStack';
+import { renderDetailContainer } from './DetailStack';
 import MainTab from './MainTab';
-import { nativeSplit } from './layout';
+import { initialTab, nativeSplit } from './layout';
 import Setup from 'screens/Setup';
 import {
   AssignmentSubmissionStack,
@@ -94,22 +86,17 @@ const renderMainScreens = () => (
 /** Android's main UI, in the split view drawn in JS (`SplitViewProvider`). */
 const AndroidMain = () => {
   const frame = useSafeAreaFrame();
-  const detailNavigationContainerRef =
-    useRef<NavigationContainerRef<DetailStackParams>>(null);
-
   const showDetail = frame.width > SplitSizes.maxCollapsedWidth;
 
   return (
     <SplitViewProvider
-      detailNavigationContainerRef={
-        showDetail ? detailNavigationContainerRef : null
-      }
       showDetail={showDetail}
+      initialTab={initialTab}
+      renderDetail={renderDetailContainer}
     >
       <RootNavigator.Navigator screenOptions={rootScreenOptions}>
         {renderMainScreens()}
       </RootNavigator.Navigator>
-      <DetailContainer navigationContainerRef={detailNavigationContainerRef} />
     </SplitViewProvider>
   );
 };
