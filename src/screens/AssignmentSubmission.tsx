@@ -23,7 +23,7 @@ import {
   initialSubmissionContent,
   pickedAsRemoteFile,
   sanitizeCustomAttachmentName,
-} from 'helpers/submission';
+} from 'services/submission';
 import { Assignment } from 'data/types/state';
 import { useAssignment } from 'data/content';
 import {
@@ -37,7 +37,7 @@ import {
   useSaveSubmissionDraft,
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
-import { AssignmentSubmissionParamList } from './types';
+import { AssignmentSubmissionParamList } from 'navigation/types';
 
 type Props = NativeStackScreenProps<
   AssignmentSubmissionParamList,

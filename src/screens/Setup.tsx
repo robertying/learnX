@@ -8,12 +8,12 @@ import { toast } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
 import { setSetupSeen, setWhatsNewSeen } from 'data/appState';
 import { setSetting, useSettings } from 'data/settings';
-import { calendarSettingsTitle } from 'helpers/eventDetails';
+import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
 import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { useTheme } from 'theme';
-import { RootStackParams } from './types';
+import { RootStackParams } from 'navigation/types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;

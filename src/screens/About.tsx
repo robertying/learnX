@@ -9,7 +9,7 @@ import {
   FormText,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'About'>;

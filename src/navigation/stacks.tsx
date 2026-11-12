@@ -20,7 +20,7 @@ import {
   SettingsStackParams,
   TodayStackParams,
   WhatsNewStackParams,
-} from 'screens/types';
+} from './types';
 import Assignments from 'screens/Assignments';
 import AssignmentDetail from 'screens/AssignmentDetail';
 import Files from 'screens/Files';
@@ -33,7 +33,7 @@ import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
 import CalendarEvent from 'screens/CalendarEvent';
-import { calendarSettingsTitle } from 'helpers/eventDetails';
+import { calendarSettingsTitle } from 'helpers/calendar/details';
 import Downloads from 'screens/Downloads';
 import SwipeActions from 'screens/SwipeActions';
 import NotificationSettings from 'screens/NotificationSettings';

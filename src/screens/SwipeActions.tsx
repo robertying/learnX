@@ -3,7 +3,7 @@ import { Form, FormButton, FormScreen, FormSection } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
 import { SwipeChoice, SwipeSettings } from 'helpers/cardActions';
 import { t } from 'helpers/i18n';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SwipeActions'>;
 

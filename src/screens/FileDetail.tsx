@@ -10,7 +10,7 @@ import { canPreviewInline, needWhiteBackground } from 'helpers/filePreview';
 import { t } from 'helpers/i18n';
 import Spinner from 'components/Spinner';
 import SafeArea from 'components/SafeArea';
-import { FileDetailParamList } from './types';
+import { FileDetailParamList } from 'navigation/types';
 import { markFileSeen, useFile } from 'data/content';
 import { DownloadableFile, File } from 'data/types/state';
 import NotFound from 'components/NotFound';

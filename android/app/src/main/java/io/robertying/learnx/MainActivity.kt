@@ -26,7 +26,7 @@ class MainActivity : ReactActivity() {
             object : DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled) {
                 // Test runs set the app up with launch arguments (Maestro's
                 // launchApp arguments arrive as intent extras): they become the
-                // root component's initial props (helpers/launchOptions.ts).
+                // root component's initial props (services/launchOptions.ts).
                 // Only these string extras are passed; the live login ones are
                 // only read by debug and E2E_LIVE builds.
                 override fun getLaunchOptions(): Bundle? {

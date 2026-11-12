@@ -6,7 +6,7 @@ import { t } from 'helpers/i18n';
 import { beijingDate } from 'helpers/serverTime';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
-import { MainStackScreenProps, ScheduleParamList } from './types';
+import { MainStackScreenProps, ScheduleParamList } from 'navigation/types';
 
 type Props = MainStackScreenProps<ScheduleParamList, 'Schedule'>;
 

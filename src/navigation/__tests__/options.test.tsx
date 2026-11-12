@@ -32,7 +32,7 @@ jest.mock('data/content', () => {
 jest.mock('data/queries', () => ({
   getCachedCourses: () => [{ id: 'c', name: 'Calculus', teacherName: 'Li' }],
 }));
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
 const navigation = { goBack: jest.fn() };
 const theme = { colors: { text: '#123456' } } as never;

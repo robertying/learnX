@@ -4,7 +4,7 @@ import { Directory, File, Paths } from 'expo-file-system';
 import mime from 'mime';
 import { persistStorage } from 'data/storage';
 import { getExtension } from 'helpers/filename';
-import type { PickedAttachment } from 'helpers/submission';
+import type { PickedAttachment } from 'services/submission';
 
 export const SUBMISSION_DRAFTS_KEY = 'submissionDrafts';
 

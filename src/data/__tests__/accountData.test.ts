@@ -10,8 +10,8 @@ import { userQuery } from 'data/queries';
 import { queryClient } from 'data/queryClient';
 import { defaultSettings, getSettings, setSetting } from 'data/settings';
 import { getUserData, setArchived } from 'data/userData';
-import { removeFileDir } from 'helpers/files/downloads';
-import { clearSurfaces } from 'helpers/surfaces';
+import { removeFileDir } from 'services/files/downloads';
+import { clearSurfaces } from 'services/surfaces';
 
 const { readdirSync, readFileSync } = jest.requireActual<{
   readdirSync: (dir: string) => string[];
@@ -25,10 +25,10 @@ const path = jest.requireActual<{
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
 }));
-jest.mock('helpers/surfaces', () => ({
+jest.mock('services/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
-jest.mock('helpers/files/downloads', () => ({
+jest.mock('services/files/downloads', () => ({
   removeFileDir: jest.fn(async () => {}),
 }));
 

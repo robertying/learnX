@@ -29,10 +29,10 @@ jest.mock('data/source', () => ({
   endSession: jest.fn(),
 }));
 // One attempt, without the backoff.
-jest.mock('helpers/surfaces', () => ({
+jest.mock('services/surfaces', () => ({
   clearSurfaces: jest.fn(async () => {}),
 }));
-jest.mock('helpers/files/downloads', () => ({
+jest.mock('services/files/downloads', () => ({
   removeFileDir: jest.fn(async () => {}),
 }));
 jest.mock('helpers/retry', () => ({
@@ -345,7 +345,7 @@ describe('switching accounts', () => {
   });
 
   it('deletes the downloaded files on logout', async () => {
-    const { removeFileDir } = require('helpers/files/downloads');
+    const { removeFileDir } = require('services/files/downloads');
     removeFileDir.mockClear();
     await login(sso);
     await logout();

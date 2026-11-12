@@ -7,7 +7,7 @@ import {
   useSyncExternalStore,
 } from 'react';
 import { AppState } from 'react-native';
-import type { DetailNavigationContainerRef } from 'screens/types';
+import type { DetailNavigationContainerRef } from './types';
 import {
   SafeAreaFrameContext,
   SafeAreaInsetsContext,

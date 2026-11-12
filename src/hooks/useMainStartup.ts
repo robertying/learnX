@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { setUpBackgroundFetch } from 'helpers/background';
-import { removeLegacyDownloads } from 'helpers/files/downloads';
-import { configureNotifications } from 'helpers/notifications';
-import { subscribeSurfaceErrors } from 'helpers/surfaces';
+import { setUpBackgroundFetch } from 'services/background';
+import { removeLegacyDownloads } from 'services/files/downloads';
+import { configureNotifications } from 'services/notifications';
+import { subscribeSurfaceErrors } from 'services/surfaces';
 import { toast } from 'components/Toast';
 import { useLoggedIn } from 'data/auth';
 import {
@@ -21,7 +21,7 @@ import useIncomingTargets from 'hooks/useIncomingTargets';
  * courses and timetable fetched, schedules the background sync, sends the
  * waiting server actions once logged in, opens what was tapped outside the app, sets up
  * notifications, and moves downloads from the old folder layout. The widgets,
- * reminders and Spotlight follow the data by themselves (helpers/surfaces).
+ * reminders and Spotlight follow the data by themselves (services/surfaces).
  */
 const useMainStartup = () => {
   const loggedIn = useLoggedIn();

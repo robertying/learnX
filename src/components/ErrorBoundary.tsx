@@ -5,7 +5,7 @@ import { reloadAppAsync } from 'expo';
 import TextButton from 'components/TextButton';
 import StatusView from 'components/StatusView';
 import Styles from 'constants/Styles';
-import { recordError } from 'helpers/crashReporting';
+import { recordError } from 'services/crashReporting';
 import { t } from 'helpers/i18n';
 import { useTheme } from 'theme';
 

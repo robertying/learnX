@@ -5,7 +5,7 @@ import {
   RestoredSubmissionDraft,
   saveSubmissionDraft,
 } from 'data/submissionDrafts';
-import { PickedAttachment } from 'helpers/submission';
+import { PickedAttachment } from 'services/submission';
 import { useSaveSubmissionDraft } from 'hooks/useAssignmentSubmission';
 
 // The pickers are ESM only; this hook doesn't use them.

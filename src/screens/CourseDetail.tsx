@@ -45,7 +45,7 @@ import {
   CourseDetailParamList,
   MainStackNavigationProp,
   MainStackScreenProps,
-} from './types';
+} from 'navigation/types';
 import { headerButtons } from 'navigation/headerButtons';
 import SegmentedTabs from 'components/SegmentedTabs';
 import { SafeAreaView } from 'react-native-screens/experimental';

@@ -4,7 +4,7 @@ import SafeArea from 'components/SafeArea';
 import { useAssignments } from 'data/content';
 import useContentList from 'hooks/useContentList';
 import { assignmentLists } from 'hooks/useFilteredData';
-import { AssignmentStackParams, MainStackScreenProps } from './types';
+import { AssignmentStackParams, MainStackScreenProps } from 'navigation/types';
 
 type Props = MainStackScreenProps<AssignmentStackParams, 'Assignments'>;
 

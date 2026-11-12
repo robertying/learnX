@@ -9,15 +9,15 @@ import {
 import { toast } from 'components/Toast';
 import { useCredentialsStore } from 'data/credentials';
 import { t } from 'helpers/i18n';
-import { postNotification } from 'helpers/notifications';
-import { previewDeadlineReminder } from 'helpers/deadlineReminders';
+import { postNotification } from 'services/notifications';
+import { previewDeadlineReminder } from 'services/deadlineReminders';
 import {
   getServerWritesAllowed,
   setServerWritesAllowed,
 } from 'helpers/serverWrites';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import Debug from 'screens/Debug';
-import { notifyContent, syncContent } from 'helpers/background';
+import { notifyContent, syncContent } from 'services/background';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { addSyncRun, resetSyncLog } from 'data/syncLog';
@@ -25,15 +25,15 @@ import { resetUserData, setCurrentSemester } from 'data/userData';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
-jest.mock('helpers/notifications', () => ({ postNotification: jest.fn() }));
-jest.mock('helpers/background', () => ({
+jest.mock('services/notifications', () => ({ postNotification: jest.fn() }));
+jest.mock('services/background', () => ({
   syncContent: jest.fn(),
   notifyContent: jest.fn(),
 }));
-jest.mock('helpers/deadlineReminders', () => ({
+jest.mock('services/deadlineReminders', () => ({
   previewDeadlineReminder: jest.fn(async () => 3),
 }));
-jest.mock('helpers/classReminders', () => ({
+jest.mock('services/classReminders', () => ({
   previewClassReminder: jest.fn(async () => 0),
 }));
 jest.mock('data/content', () => ({

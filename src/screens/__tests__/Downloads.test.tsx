@@ -11,18 +11,18 @@ import {
   listDownloads,
   removeCourseDownloads,
   removeFileDir,
-} from 'helpers/files/downloads';
-import { exportDownloads } from 'helpers/files/export';
+} from 'services/files/downloads';
+import { exportDownloads } from 'services/files/export';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import Downloads from 'screens/Downloads';
 
-jest.mock('helpers/files/downloads', () => ({
+jest.mock('services/files/downloads', () => ({
   listDownloads: jest.fn(),
   removeCourseDownloads: jest.fn(),
   removeFileDir: jest.fn(),
 }));
-jest.mock('helpers/files/export', () => ({ exportDownloads: jest.fn() }));
+jest.mock('services/files/export', () => ({ exportDownloads: jest.fn() }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),

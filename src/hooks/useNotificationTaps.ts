@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent } from 'react';
 import * as Notifications from 'expo-notifications';
-import { getNotificationTarget } from 'helpers/notifications';
+import { getNotificationTarget } from 'services/notifications';
 import useOpenTarget from 'hooks/useOpenTarget';
 
 /**

@@ -16,10 +16,10 @@ import { useLoggedIn } from 'data/auth';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import { useShowDetail } from 'hooks/useDetailNavigator';
-import { calendarSettingsTitle } from 'helpers/eventDetails';
+import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
 import { findWhatsNew, releases, whatsNewContext } from 'helpers/whatsNew';
-import { MainStackScreenProps, SettingsStackParams } from './types';
+import { MainStackScreenProps, SettingsStackParams } from 'navigation/types';
 
 type Props = MainStackScreenProps<SettingsStackParams, 'Settings'>;
 

@@ -23,7 +23,7 @@ const mockLiveLogin = jest.fn<
   { username: string; fingerPrint: string } | undefined,
   []
 >(() => undefined);
-jest.mock('helpers/launchOptions', () => ({
+jest.mock('services/launchOptions', () => ({
   getLiveLogin: () => mockLiveLogin(),
 }));
 jest.mock('data/login', () => ({

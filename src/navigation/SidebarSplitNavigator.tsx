@@ -17,10 +17,7 @@ import {
   type TabRouterOptions,
   type TypedNavigator,
 } from '@react-navigation/native';
-import type {
-  DetailNavigationContainerRef,
-  DetailStackParams,
-} from 'screens/types';
+import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import { SidebarView } from 'modules/sidebar';
 import NativeSplitViewProvider from './NativeSplitView';
 import { SplitViewContext } from './SplitView';

@@ -2,13 +2,13 @@ import { act, renderHook } from '@testing-library/react-native';
 import { loadCredentials } from 'data/credentials';
 import { importLegacyUserData } from 'data/legacy';
 import { restoreQueryCache } from 'data/queryClient';
-import { recordError } from 'helpers/crashReporting';
+import { recordError } from 'services/crashReporting';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 
 jest.mock('data/credentials', () => ({ loadCredentials: jest.fn() }));
 jest.mock('data/legacy', () => ({ importLegacyUserData: jest.fn() }));
 jest.mock('data/queryClient', () => ({ restoreQueryCache: jest.fn() }));
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
 describe('useStoresLoaded', () => {
   it('waits for every store, even after one fails', async () => {

@@ -23,7 +23,7 @@ import FileCard from 'components/FileCard';
 import StatusView from 'components/StatusView';
 import SafeArea from 'components/SafeArea';
 import { t } from 'helpers/i18n';
-import { SearchStackParams } from './types';
+import { SearchStackParams } from 'navigation/types';
 import { Paragraph } from 'components/Text';
 import { useTheme } from 'theme';
 

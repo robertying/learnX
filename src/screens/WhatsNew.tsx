@@ -9,7 +9,7 @@ import {
   releases,
   whatsNewContext,
 } from 'helpers/whatsNew';
-import { WhatsNewStackParams } from './types';
+import { WhatsNewStackParams } from 'navigation/types';
 import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<WhatsNewStackParams, 'WhatsNew'>;

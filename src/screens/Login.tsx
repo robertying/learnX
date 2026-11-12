@@ -24,12 +24,12 @@ import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
 import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
-import { getLiveLogin } from 'helpers/launchOptions';
+import { getLiveLogin } from 'services/launchOptions';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { mockNetworkTitle } from 'navigation/options';
 import { noteLoginShown } from 'hooks/useLaunchSheet';
-import { LoginStackParams } from './types';
+import { LoginStackParams } from 'navigation/types';
 import { Caption, Text } from 'components/Text';
 
 type Props = NativeStackScreenProps<LoginStackParams, 'Login'>;
@@ -92,7 +92,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    // The live test account in live E2E runs (helpers/launchOptions.ts):
+    // The live test account in live E2E runs (services/launchOptions.ts):
     // signs in with a saved device fingerprint instead of opening the SSO
     // page, which adds a device each time. The server checks the password.
     const liveLogin = getLiveLogin();

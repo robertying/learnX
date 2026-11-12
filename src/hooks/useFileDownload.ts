@@ -9,12 +9,12 @@ import { Linking, Platform } from 'react-native';
 import { toast } from 'components/Toast';
 import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
-import { downloadFile } from 'helpers/files/downloads';
+import { downloadFile } from 'services/files/downloads';
 import {
   copyFileToMacDownloads,
   openFile,
   shareFile,
-} from 'helpers/files/share';
+} from 'services/files/share';
 import { t } from 'helpers/i18n';
 
 /**

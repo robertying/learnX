@@ -2,10 +2,10 @@ import { Text } from 'react-native';
 import { render, screen, userEvent } from '@testing-library/react-native';
 import { reloadAppAsync } from 'expo';
 import ErrorBoundary from 'components/ErrorBoundary';
-import { recordError } from 'helpers/crashReporting';
+import { recordError } from 'services/crashReporting';
 
 jest.mock('expo', () => ({ reloadAppAsync: jest.fn() }));
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
 const Broken: React.FC = () => {
   throw new Error('render failed');

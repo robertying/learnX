@@ -2,7 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import FeatureList from 'components/FeatureList';
 import { setWelcomeSeen } from 'data/appState';
 import { t } from 'helpers/i18n';
-import { LoginStackParams } from './types';
+import { LoginStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<LoginStackParams, 'Welcome'>;
 

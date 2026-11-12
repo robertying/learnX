@@ -7,8 +7,8 @@ import {
   listDownloads,
   removeCourseDownloads,
   removeFileDir,
-} from 'helpers/files/downloads';
-import { exportDownloads } from 'helpers/files/export';
+} from 'services/files/downloads';
+import { exportDownloads } from 'services/files/export';
 import { formatFileSize } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
@@ -21,7 +21,7 @@ import {
   FormToggle,
 } from 'components/Form';
 import { setSetting, useSettings } from 'data/settings';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
 
