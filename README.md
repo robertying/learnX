@@ -56,45 +56,58 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 
 ### 基础功能 Basic
 
+- 今日概览：当天课程、即将截止的作业和未读内容一目了然。
+
+  Today: the day's classes, upcoming deadlines and unread items at a glance.
+
 - 第一时间看到老师最新发布的公告及其附件。
 
-  Get a glance of the newest notices published by teachers.
+  See the newest notices from your teachers, with their attachments.
 
 - 预览或下载课程文件，将文件分享到其他应用。
 
-  Preview or download uploaded files of each course.
+  Preview or download course files, and share them to other apps.
 
-- 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况。
+- 一览作业要求，不错过任何 deadline，实时查询作业提交与批改情况。提交作业，可从其他应用分享文件作为附件。
 
-  See any assignment detail while keeping track of deadlines.
+  See every assignment and its deadline, and check submission and grading status. Submit assignments, attaching files shared from other apps.
 
 ### 高级功能 Advanced
 
-- 今日概览：当天课程、即将截止的作业和未读内容 Today: the day's classes, upcoming deadlines and unread items
-- 桌面小组件 Home screen widgets (Deadlines, Up Next)
-- 新内容通知 Notifications for new notices, files, grades and deadline changes
-- Spotlight 搜索与快捷指令 Spotlight search and Shortcuts (iOS, macOS)
-
-- courseX 课程信息共享计划 Course Information Sharing
+- 桌面小组件（作业截止、接下来） Home screen widgets (Deadlines, Up Next)
+- 新内容、成绩和截止时间变更通知 Notifications for new notices, files, assignments, grades and deadline changes
+- 作业截止提醒和上课提醒 Deadline reminders and class reminders
+- 聚焦搜索、Siri 与快捷指令 Spotlight search, Siri and Shortcuts (iOS, iPadOS, macOS)
 - 课表日历同步 Course schedule calendar sync
 - 作业日历/提醒事项同步 Assignment calendar/reminder sync
-- 归档内容 Archiving read posts
-- 提交作业 Submitting assignments
+- courseX 课程信息共享计划 Course Information Sharing
 - 收藏内容（与网络学堂同步） Favorites, synced with Web Learning
+- 归档内容 Archiving notices, files and assignments
 - 隐藏课程 Hiding courses
-- 暗黑模式 Dark mode
 - 全局搜索 Global search
 - 切换学期 Switching among semesters
+- 暗黑模式 Dark mode
+
+## 隐私 Privacy
+
+账号和课程内容只保存在您的设备上，只会发送给清华大学的服务器（开启课程信息共享时除外）。详见隐私政策。
+
+Your account and course content stay on your device and only go to Tsinghua's servers, unless you turn on Course Information Sharing. See the privacy policy for details.
+
+- [隐私政策](docs/PRIVACY_POLICY_CN.md)
+- [Privacy Policy](docs/PRIVACY_POLICY_EN.md)
 
 ## 开发 Development
 
 ```bash
 pnpm install
-cp .env.example .env   # fill in the mock login values
+cp .env.example .env   # 填写演示账号 fill in the mock login values
 cd ios && LANG=en_US.UTF-8 bundle exec pod install && cd ..   # iOS / Mac
-pnpm start             # Metro
-pnpm ios               # or: pnpm android
+pnpm start             # 启动 Metro start Metro
+pnpm ios               # 或 or: pnpm android
 ```
+
+[CONTRIBUTING.md](CONTRIBUTING.md) 介绍完整的开发环境配置（工具、用自己的团队为 iOS 签名、Android SDK 与模拟器、用演示账号测试、检查与 Pull Request）。代码约定和架构见 [AGENTS.md](AGENTS.md) 及各文件夹中的 `AGENTS.md`，供开发者和编程智能体共同阅读。
 
 [CONTRIBUTING.md](CONTRIBUTING.md) walks through the full setup (tools, iOS signing with your own team, Android SDK and emulator, testing with the mock login, checks and pull requests). Conventions and architecture are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
 
