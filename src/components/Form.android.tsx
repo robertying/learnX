@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
+import { StyleSheet, useWindowDimensions, type ViewProps } from 'react-native';
 import {
   Badge,
   CircularProgressIndicator,
@@ -169,9 +169,17 @@ export const Form: React.FC<FormProps> = props => {
 /**
  * The root view of a screen that is a Form. The list's background is the
  * screen's own, so the screen keeps its content inside the safe area as any
- * other does.
+ * other does, on the Form's surface color (also behind a title above it).
  */
-export const FormScreen = SafeArea;
+export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => {
+  const theme = useMaterialTheme();
+  return (
+    <SafeArea
+      style={[{ backgroundColor: theme.colors.surface }, style]}
+      {...props}
+    />
+  );
+};
 
 const Caption: React.FC<{ children: string; modifiers: ModifierConfig[] }> = ({
   children,

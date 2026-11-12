@@ -4,6 +4,7 @@
 // Reminders, and the courses shared with courseX. Each is worked out from the cached lists, the user data and the
 // settings whenever those change, in whichever JS runtime that happens: the
 // app, the background sync, or a notification action handled without the app.
+import { isShownBy } from 'helpers/shown';
 import { AppState } from 'react-native';
 import dayjs from 'dayjs';
 import { queryClient } from 'data/queryClient';
@@ -121,21 +122,15 @@ const syncCalendar = async (
   if (!assignments) {
     return;
   }
-  const hidden = new Set(hiddenCourses);
-  const archivedIds = new Set(archived);
-  const isLeftOut = (a: Assignment) =>
-    archivedIds.has(a.id) || hidden.has(a.courseId);
+  const isShown = isShownBy(hiddenCourses, archived);
   // Loaded when needed: it brings in the file helpers, which only the app
   // needs (and Jest can't load).
   const { syncAssignments, upcomingAssignments } =
     require('services/calendar/actions') as typeof import('services/calendar/actions');
   const message = await syncAssignments(
     type,
-    upcomingAssignments(
-      assignments.filter(a => !isLeftOut(a)),
-      dayjs(),
-    ),
-    assignments.filter(isLeftOut).map(a => a.id),
+    upcomingAssignments(assignments.filter(isShown), dayjs()),
+    assignments.filter(a => !isShown(a)).map(a => a.id),
     { automatic: true },
   );
   if (message) {

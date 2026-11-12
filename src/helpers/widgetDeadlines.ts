@@ -1,3 +1,4 @@
+import { isShownBy } from 'helpers/shown';
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
 import { deadlineUrgencyTimes } from 'helpers/assignments';
@@ -35,12 +36,9 @@ export function upcomingDeadlines(
     limit?: number;
   },
 ): UpcomingDeadlines {
-  const hidden = new Set(hiddenCourses);
-  const archivedIds = new Set(archived);
+  const isShown = isShownBy(hiddenCourses, archived);
   const due = assignments
-    .filter(
-      a => !a.submitted && !hidden.has(a.courseId) && !archivedIds.has(a.id),
-    )
+    .filter(a => !a.submitted && isShown(a))
     .map(a => ({
       id: a.id,
       title: a.title,
