@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import dayjs from 'dayjs';
 import {
   ExcellentHomework,
@@ -12,7 +12,7 @@ import {
   MainStackScreenProps,
 } from 'navigation/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import { headerButtons } from 'navigation/headerButtons';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import { useMinute } from 'hooks/useClock';
 import { removeTags } from 'helpers/text';
 import { attachmentFile } from 'helpers/attachments';
@@ -151,21 +151,15 @@ const AssignmentDetailContent: React.FC<{
     }
   }, [detailNavigator, id, navigation]);
 
-  useEffect(() => {
-    if (submissionType !== HomeworkSubmissionType.OFFLINE) {
-      navigation.setOptions(
-        headerButtons('right', [
-          {
-            id: 'submit',
-            label: t('submit'),
-            icon: 'upload',
-            disabled: closed,
-            onPress: handleSubmit,
-          },
-        ]),
-      );
-    }
-  }, [submissionType, closed, handleSubmit, navigation]);
+  useHeaderButtons(navigation, 'right', [
+    submissionType !== HomeworkSubmissionType.OFFLINE && {
+      id: 'submit',
+      label: t('submit'),
+      icon: 'upload',
+      disabled: closed,
+      onPress: handleSubmit,
+    },
+  ]);
 
   // When and how it was handed in: the status row's, or with the submission
   // once the status row shows the grade.
