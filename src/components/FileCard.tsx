@@ -2,10 +2,8 @@ import { File } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { listTime } from 'helpers/listTime';
 import { useToday } from 'hooks/useClock';
-import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { t } from 'helpers/i18n';
-import CardRow, { CardGlyph, cardAccessibilityLabel } from './CardRow';
+import CardRow, { cardAccessibilityLabel } from './CardRow';
 
 export interface FileCardProps extends CardWrapperProps {
   data: File;
@@ -27,7 +25,6 @@ const FileCard: React.FC<FileCardProps> = ({
   hideCourseName,
   ...restProps
 }) => {
-  const theme = useTheme();
   // Re-renders the row at midnight, past the list's row memoization.
   const today = useToday();
   const details = [category?.title, fileType?.toUpperCase(), size]
@@ -40,6 +37,11 @@ const FileCard: React.FC<FileCardProps> = ({
     : details;
   const time = listTime(uploadTime, today);
 
+  const flags = [
+    markedImportant && 'important',
+    restProps.fav && 'favorited',
+  ] as const;
+
   return (
     <CardWrapper
       {...restProps}
@@ -49,10 +51,7 @@ const FileCard: React.FC<FileCardProps> = ({
         title,
         overline,
         status: time,
-        flags: [
-          markedImportant && t('a11yImportant'),
-          restProps.fav && t('a11yFavorited'),
-        ],
+        flags,
         preview,
       })}
     >
@@ -61,16 +60,7 @@ const FileCard: React.FC<FileCardProps> = ({
         unread={!!isNew}
         title={title}
         preview={preview}
-        glyphs={
-          <>
-            {markedImportant ? (
-              <CardGlyph name="important" color={theme.colors.status.orange} />
-            ) : null}
-            {restProps.fav ? (
-              <CardGlyph name="favorited" color={theme.colors.status.red} />
-            ) : null}
-          </>
-        }
+        flags={flags}
         trailing={time}
       />
     </CardWrapper>

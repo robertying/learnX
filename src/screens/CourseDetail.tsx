@@ -64,7 +64,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
   data: T[];
   card: React.FC<{
     data: T;
-    disableSwipe?: boolean;
+    actionsDisabled?: boolean;
     hideCourseName?: boolean;
     onPress?: () => void;
     last?: boolean;
@@ -109,7 +109,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
           <Card
             data={item}
             last={index === data.length - 1}
-            disableSwipe
+            actionsDisabled
             hideCourseName
             onPress={() => navigation.push(detailScreen, { id: item.id })}
           />

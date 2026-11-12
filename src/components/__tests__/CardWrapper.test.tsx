@@ -70,11 +70,11 @@ describe('CardWrapper', () => {
   });
 
   it('puts the actions in the context menu, which a long press opens', async () => {
-    const onArchive = jest.fn();
-    await render(card({ onPress: jest.fn(), onArchive }));
+    const onToggleArchived = jest.fn();
+    await render(card({ onPress: jest.fn(), onToggleArchived }));
     expect(menu().actions.map(a => a.key)).toEqual(['fav', 'archive']);
     menu().onAction({ nativeEvent: { key: 'archive' } });
-    expect(onArchive).toHaveBeenCalledWith(true);
+    expect(onToggleArchived).toHaveBeenCalled();
     await longPress();
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
     expect(mockSwipeableMethods.openLeft).not.toHaveBeenCalled();
@@ -87,8 +87,8 @@ describe('CardWrapper', () => {
     expect(screen.queryByTestId('card-separator')).toBeNull();
   });
 
-  it('turns swipe and long press off with disableSwipe', async () => {
-    await render(card({ disableSwipe: true }));
+  it('turns swipe and long press off with actionsDisabled', async () => {
+    await render(card({ actionsDisabled: true }));
     expect(swipeEnabled()).toBe(false);
     await longPress();
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
@@ -96,50 +96,54 @@ describe('CardWrapper', () => {
 
   describe('for VoiceOver and TalkBack', () => {
     it('is a button with the swipe actions as accessibility actions', async () => {
-      const onFav = jest.fn();
-      const onArchive = jest.fn();
-      await render(card({ fav: false, onFav, archived: false, onArchive }));
+      const onToggleFav = jest.fn();
+      const onToggleArchived = jest.fn();
+      await render(
+        card({ fav: false, onToggleFav, archived: false, onToggleArchived }),
+      );
       expect(screen.getByRole('button')).toBeTruthy();
       expect(actionNames()).toEqual(['fav:Favorite', 'archive:Archive']);
 
       await accessibilityAction('fav');
-      expect(onFav).toHaveBeenLastCalledWith(true);
+      expect(onToggleFav).toHaveBeenCalled();
       await accessibilityAction('archive');
-      expect(onArchive).toHaveBeenLastCalledWith(true);
+      expect(onToggleArchived).toHaveBeenCalled();
     });
 
     it('offers unfavorite, unarchive and show for items already in that state', async () => {
-      const onHide = jest.fn();
-      const view = await render(card({ fav: true, onFav: jest.fn() }));
+      const onToggleHidden = jest.fn();
+      const view = await render(card({ fav: true, onToggleFav: jest.fn() }));
       expect(actionNames()).toEqual(['fav:Unfavorite', 'archive:Archive']);
 
       await view.rerender(card({ archived: true }));
       expect(actionNames()).toEqual(['archive:Unarchive']);
 
-      await view.rerender(card({ hidden: true, onHide }));
+      await view.rerender(card({ hidden: true, onToggleHidden }));
       expect(actionNames()).toEqual(['hide:Unhide']);
       await accessibilityAction('hide');
-      expect(onHide).toHaveBeenLastCalledWith(false);
+      expect(onToggleHidden).toHaveBeenCalled();
     });
 
     it('is a checkbox with its state in selection mode, without the actions', async () => {
-      const onFav = jest.fn();
+      const onToggleFav = jest.fn();
       const view = await render(
-        card({ selectionMode: true, checked: false, onFav }),
+        card({ selectionMode: true, checked: false, onToggleFav }),
       );
       expect(screen.getByRole('checkbox', { checked: false })).toBeTruthy();
       expect(actionNames()).toBeUndefined();
       await accessibilityAction('fav');
-      expect(onFav).not.toHaveBeenCalled();
+      expect(onToggleFav).not.toHaveBeenCalled();
 
-      await view.rerender(card({ selectionMode: true, checked: true, onFav }));
+      await view.rerender(
+        card({ selectionMode: true, checked: true, onToggleFav }),
+      );
       expect(screen.getByRole('checkbox', { checked: true })).toBeTruthy();
     });
 
-    it('has no actions in reorder mode or with disableSwipe', async () => {
+    it('has no actions in reorder mode or with actionsDisabled', async () => {
       const view = await render(card({ reorderMode: true }));
       expect(actionNames()).toBeUndefined();
-      await view.rerender(card({ disableSwipe: true }));
+      await view.rerender(card({ actionsDisabled: true }));
       expect(actionNames()).toBeUndefined();
     });
 
@@ -260,28 +264,28 @@ describe('swipe actions', () => {
   });
 
   it('runs the pressed action and closes the swipe', async () => {
-    const onFav = jest.fn();
-    const onArchive = jest.fn();
-    await render(card({ onFav, onArchive, fav: true }));
+    const onToggleFav = jest.fn();
+    const onToggleArchived = jest.fn();
+    await render(card({ onToggleFav, onToggleArchived, fav: true }));
     await user.press(swipeAction('card-fav'));
-    expect(onFav).toHaveBeenCalledWith(false);
+    expect(onToggleFav).toHaveBeenCalled();
     expect(mockSwipeableMethods.close).toHaveBeenCalled();
     await user.press(swipeAction('card-archive'));
-    expect(onArchive).toHaveBeenCalledWith(true);
+    expect(onToggleArchived).toHaveBeenCalled();
   });
 
   it('rests open on the button when let go short of a full swipe', async () => {
-    const onArchive = jest.fn();
-    await render(card({ onArchive }));
+    const onToggleArchived = jest.fn();
+    await render(card({ onToggleArchived }));
     await act(() => swipeable().onSwipeableWillOpen(SwipeDirection.RIGHT));
     await act(() => swipeable().onSwipeableOpen(SwipeDirection.RIGHT));
-    expect(onArchive).not.toHaveBeenCalled();
+    expect(onToggleArchived).not.toHaveBeenCalled();
     expect(mockSwipeableMethods.close).not.toHaveBeenCalled();
   });
 
   it('runs a full swipe once let go, with a tick as it gets there', async () => {
-    const onFav = jest.fn();
-    await render(card({ onFav }));
+    const onToggleFav = jest.fn();
+    await render(card({ onToggleFav }));
     const trailing = jest
       .mocked(CardSwipeAction)
       .mock.calls.map(([props]) => props)
@@ -289,17 +293,17 @@ describe('swipe actions', () => {
     await act(() => trailing.onArmedChange(true));
     expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
     await act(() => swipeable().onSwipeableWillOpen(SwipeDirection.LEFT));
-    expect(onFav).toHaveBeenCalledWith(true);
+    expect(onToggleFav).toHaveBeenCalled();
     expect(mockSwipeableMethods.close).toHaveBeenCalledTimes(1);
   });
 
   it("hides or shows a course on Archive's side", async () => {
-    const onHide = jest.fn();
-    await render(card({ onHide, hidden: true }));
+    const onToggleHidden = jest.fn();
+    await render(card({ onToggleHidden, hidden: true }));
     expect(swipeKeys('right')).toEqual(['card-hide']);
     expect(swipeKeys('left')).toEqual([]);
     await user.press(swipeAction('card-hide'));
-    expect(onHide).toHaveBeenCalledWith(false);
+    expect(onToggleHidden).toHaveBeenCalled();
   });
 
   it('only unarchives an archived card', async () => {
@@ -337,15 +341,15 @@ describe('on iPad and Mac', () => {
   };
   it('puts the actions in the context menu instead of a long press', async () => {
     const Card = loadCard(false);
-    const onFav = jest.fn();
+    const onToggleFav = jest.fn();
     await render(
-      <Card accessibilityLabel="Card label" onFav={onFav}>
+      <Card accessibilityLabel="Card label" onToggleFav={onToggleFav}>
         <Text>Card</Text>
       </Card>,
     );
     expect(menu().actions.map(a => a.key)).toEqual(['fav', 'archive']);
     menu().onAction({ nativeEvent: { key: 'fav' } });
-    expect(onFav).toHaveBeenCalledWith(true);
+    expect(onToggleFav).toHaveBeenCalled();
     menu().onAction({ nativeEvent: { key: 'unknown' } });
     await longPress();
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();

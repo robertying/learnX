@@ -15,6 +15,7 @@ export interface ItemComponentProps<T> extends CardWrapperProps {
 export interface FilterListRowActions<T> {
   press: (item: T) => void;
   check: (id: string, checked: boolean) => void;
+  /** The flags are the item's state now; each action toggles it. */
   fav: (item: T, isFav: boolean) => void;
   archive: (id: string, isArchived: boolean) => void;
   hide: (id: string, isHidden: boolean) => void;
@@ -70,16 +71,15 @@ const FilterListRow = <T extends { id: string }>({
     data,
     selectionMode,
     reorderMode,
-    disableSwipe: selectionMode || reorderMode,
     checked,
     onCheck: value => actions.check(data.id, value),
     onPress: () => actions.press(data),
     fav,
-    onFav: () => actions.fav(data, fav),
+    onToggleFav: () => actions.fav(data, fav),
     archived,
-    onArchive: () => actions.archive(data.id, archived),
+    onToggleArchived: () => actions.archive(data.id, archived),
     hidden,
-    onHide: isCourse ? () => actions.hide(data.id, hidden) : undefined,
+    onToggleHidden: isCourse ? () => actions.hide(data.id, hidden) : undefined,
     onMove: isCourse ? offset => actions.move(data.id, offset) : undefined,
     canMoveUp,
     canMoveDown,
