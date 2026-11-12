@@ -1,15 +1,28 @@
 # Show the swipe actions of the list card matching CARD on a phone, by
 # swiping DIRECTION: LEFT for notices (favorite, archive), RIGHT for courses
-# (hide). A long
-# press opens the context menu instead (subflows/card_actions.yaml), which
-# covers the header. Maestro's element swipe stops short of a full swipe,
-# so it shows the actions without running one. iPad swipes by position
-# instead (ipad.yaml), since its element swipe lands as a tap.
+# (hide). Maestro's direction can't be a variable, hence a branch for each. A
+# long press opens the context menu instead (subflows/card_actions.yaml),
+# which covers the header. Maestro's element swipe stops short of a full
+# swipe, so it shows the actions without running one. iPad swipes by
+# position instead (ipad.yaml), since its element swipe lands as a tap.
 appId: ${APP_ID}
 ---
-- swipe:
-    from:
-      text: ${CARD}
-    direction: ${DIRECTION}
-    duration: 400
+- runFlow:
+    when:
+      true: ${DIRECTION == 'LEFT'}
+    commands:
+      - swipe:
+          from:
+            text: ${CARD}
+          direction: LEFT
+          duration: 400
+- runFlow:
+    when:
+      true: ${DIRECTION == 'RIGHT'}
+    commands:
+      - swipe:
+          from:
+            text: ${CARD}
+          direction: RIGHT
+          duration: 400
 - waitForAnimationToEnd
