@@ -1,9 +1,12 @@
+import * as ReactNative from 'react-native';
+import { renderHook } from '@testing-library/react-native';
 import {
   BrandDarkTheme,
   BrandLightTheme,
   brandColors,
   MaterialColors,
   StatusTone,
+  useComposeColorOverrides,
 } from 'theme';
 
 // Android: Material 3 roles and custom colors, all plain `rgb(…)` strings.
@@ -66,4 +69,35 @@ describe.each([
       contrast(colors.onStatus[tone], colors.status[tone]),
     ).toBeGreaterThanOrEqual(4.5);
   });
+});
+
+describe('Compose hosts', () => {
+  it.each([
+    ['light', BrandLightTheme],
+    ['dark', BrandDarkTheme],
+  ] as const)(
+    'take the %s theme roles as their palette',
+    async (scheme, theme) => {
+      jest.spyOn(ReactNative, 'useColorScheme').mockReturnValue(scheme);
+      const { result } = await renderHook(() => useComposeColorOverrides());
+      const colors = theme.colors as MaterialColors;
+      for (const role of [
+        'primary',
+        'onPrimary',
+        'primaryContainer',
+        'surface',
+        'surfaceContainer',
+        'onSurface',
+        'onSurfaceVariant',
+        'outline',
+        'outlineVariant',
+        'error',
+      ] as const) {
+        expect([role, toRgb(result.current[role])]).toEqual([
+          role,
+          colors[role],
+        ]);
+      }
+    },
+  );
 });

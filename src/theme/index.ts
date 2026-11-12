@@ -29,8 +29,8 @@ export const brandColor =
 
 // Material 3 tokens from `@material/material-color-utilities`
 // (`SchemeTonalSpot`, seed #660874), with the primary roles set to the brand
-// colors above. Android uses them as they are, matching the native Form, which
-// generates its own scheme from the same seed.
+// colors above. Android uses them as they are, in React Native views and as
+// every Compose Host's palette (`useComposeColorOverrides`).
 const materialLight = {
   primary: 'rgb(102, 8, 116)',
   onPrimary: 'rgb(255, 255, 255)',
@@ -364,26 +364,24 @@ export const webContentColors = (dark: boolean) => ({
 });
 
 /**
- * Compose builds its own `SchemeTonalSpot` palette from a Host's `seedColor`,
- * which mutes the primary roles (#7C4E7F instead of #660874). Android Hosts
- * pass these as `colorOverrides` to keep the brand color.
+ * Every Compose Host takes the whole Material palette above as its
+ * `colorOverrides`, so Compose views and React Native views draw the same
+ * colors. (Compose's own `SchemeTonalSpot` palette from the seed mutes the
+ * primary roles, #7C4E7F instead of #660874, and may differ elsewhere.)
  */
+const toHex = (rgb: string) =>
+  `#${(rgb.match(/\d+/g) ?? [])
+    .map(c => Number(c).toString(16).padStart(2, '0'))
+    .join('')
+    .toUpperCase()}` as const;
+const hexRoles = (roles: typeof materialLight) =>
+  Object.fromEntries(
+    Object.entries(roles).map(([role, rgb]) => [role, toHex(rgb)]),
+  ) as Record<keyof typeof materialLight, `#${string}`>;
 const composeOverrides = {
-  light: {
-    primary: brandColors.light,
-    onPrimary: '#FFFFFF',
-    primaryContainer: '#FFD6FD',
-    onPrimaryContainer: '#36003F',
-    inversePrimary: brandColors.dark,
-  },
-  dark: {
-    primary: brandColors.dark,
-    onPrimary: '#580065',
-    primaryContainer: '#751D82',
-    onPrimaryContainer: '#FFD6FD',
-    inversePrimary: brandColors.light,
-  },
-} as const;
+  light: hexRoles(materialLight),
+  dark: hexRoles(materialDark),
+};
 
 /** `colorOverrides` for a Compose Host, in the system appearance. */
 export const useComposeColorOverrides = () =>
