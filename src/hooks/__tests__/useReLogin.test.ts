@@ -59,7 +59,7 @@ const leaveAndComeBack = async (minutes: number) => {
 describe('useReLogin', () => {
   it('logs in at launch', async () => {
     await renderHook(useReLogin);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({});
   });
 
   it('retries less and less often while offline', async () => {
@@ -151,7 +151,7 @@ describe('useReLogin', () => {
     await launch();
     await fail('rejected');
     await leaveAndComeBack(2);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({});
   });
 
   it('does nothing after a short break when never logged in', async () => {
@@ -173,7 +173,7 @@ describe('useReLogin', () => {
       .mockResolvedValue();
     await launch();
     await leaveAndComeBack(11);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({});
     expect(refetch).not.toHaveBeenCalled();
   });
 });

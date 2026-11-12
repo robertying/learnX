@@ -1,9 +1,4 @@
-import {
-  ContentType,
-  CourseType,
-  FailReason,
-  Language,
-} from '@robertying/thu-learn-lib';
+import { ContentType, FailReason, Language } from '@robertying/thu-learn-lib';
 import {
   defaultMockNetworkConfig,
   MOCK_TIMEOUT_MS,
@@ -56,11 +51,9 @@ describe('mockSource', () => {
     expect(listed.attachmentName).toBe(withAttachment.attachment!.name);
 
     const selected = (
-      await mockSource.getNotificationList(
-        withAttachment.courseId,
-        CourseType.STUDENT,
-        { attachments: n => n.id === withAttachment.id },
-      )
+      await mockSource.getNotificationList(withAttachment.courseId, {
+        attachments: n => n.id === withAttachment.id,
+      })
     ).find(n => n.id === withAttachment.id)!;
     expect(selected.attachment).toEqual(withAttachment.attachment);
   });
@@ -73,13 +66,9 @@ describe('mockSource', () => {
     expect(listed).not.toHaveProperty('description');
 
     const detailed = (
-      await mockSource.getHomeworkList(
-        assignment.courseId,
-        CourseType.STUDENT,
-        {
-          details: 'all',
-        },
-      )
+      await mockSource.getHomeworkList(assignment.courseId, {
+        details: 'all',
+      })
     ).find(a => a.id === assignment.id)!;
     expect(detailed.description).toBe(assignment.description);
   });
@@ -87,13 +76,9 @@ describe('mockSource', () => {
   it('lists excellent homework without details', async () => {
     const assignment = mockAssignments.find(a => a.excellentHomeworkList)!;
     const listed = (
-      await mockSource.getHomeworkList(
-        assignment.courseId,
-        CourseType.STUDENT,
-        {
-          details: 'all',
-        },
-      )
+      await mockSource.getHomeworkList(assignment.courseId, {
+        details: 'all',
+      })
     ).find(a => a.id === assignment.id)!;
     const [excellent] = listed.excellentHomeworkList!;
     expect(excellent).not.toHaveProperty('submittedAttachment');
@@ -228,7 +213,7 @@ describe('mockSource', () => {
   describe('favorites', () => {
     const favoriteIds = async (courseId: string) =>
       (
-        await mockSource.getFileList(courseId, CourseType.STUDENT, {
+        await mockSource.getFileList(courseId, {
           favorites: true,
         } as never)
       )
@@ -281,12 +266,10 @@ describe('mockSource', () => {
     );
     for (const event of events) {
       expect(names).toContain(event.courseName);
-      expect(event.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-      expect(event.startTime).toMatch(/^\d{2}:\d{2}$/);
-      expect(event.date >= monday.format('YYYY-MM-DD')).toBe(true);
-      expect(event.date <= monday.add(6, 'day').format('YYYY-MM-DD')).toBe(
-        true,
-      );
+      expect(event.start).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:00\+08:00$/);
+      const day = event.start!.slice(0, 10);
+      expect(day >= monday.format('YYYY-MM-DD')).toBe(true);
+      expect(day <= monday.add(6, 'day').format('YYYY-MM-DD')).toBe(true);
     }
   });
 
@@ -311,10 +294,10 @@ describe('mockSource in English', () => {
     const courseIds = mockCourses.map(c => c.id);
     const lists = await Promise.all(
       courseIds.map(async id => ({
-        notices: await mockSource.getNotificationList(id, CourseType.STUDENT, {
+        notices: await mockSource.getNotificationList(id, {
           attachments: 'all',
         }),
-        assignments: await mockSource.getHomeworkList(id, CourseType.STUDENT, {
+        assignments: await mockSource.getHomeworkList(id, {
           details: 'all',
         }),
         files: await mockSource.getFileList(id),
@@ -325,9 +308,7 @@ describe('mockSource in English', () => {
 
   it('answers in Chinese until English is asked for', async () => {
     expect(JSON.stringify(await listAll())).toMatch(han);
-    expect((await mockSource.getUserInfo(CourseType.STUDENT)).name).toMatch(
-      han,
-    );
+    expect((await mockSource.getUserInfo()).name).toMatch(han);
   });
 
   it('has no Chinese text left in the items (ids aside), people or account', async () => {
@@ -337,7 +318,7 @@ describe('mockSource in English', () => {
         JSON.stringify(item, (key, v) => (key === 'id' ? undefined : v)),
       ).not.toMatch(han);
     }
-    const user = await mockSource.getUserInfo(CourseType.STUDENT);
+    const user = await mockSource.getUserInfo();
     expect(JSON.stringify(user)).not.toMatch(han);
     const courses = await mockSource.getCourseList(mockCurrentSemester, {
       lang: Language.EN,

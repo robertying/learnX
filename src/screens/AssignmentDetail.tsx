@@ -76,7 +76,9 @@ const ExcellentHomeworkRow: React.FC<{
   const { gradeAttachment, submittedAttachment, author } =
     useExcellentHomeworkDetail(homework);
   const homeworkAttachment = gradeAttachment || submittedAttachment;
-  const authorName = author.anonymous ? t('anonymous') : author.name;
+  // The list leaves the name out when it names no author.
+  const authorName =
+    author.anonymous || !author.name ? t('anonymous') : author.name;
   return (
     <FormFile
       title={homeworkAttachment?.name ?? homework.title}

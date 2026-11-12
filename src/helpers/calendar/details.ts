@@ -10,7 +10,6 @@ import type { CalendarSyncState } from 'data/calendarSync';
 import { hash, removeTags } from 'helpers/text';
 import { ICSEvent } from './ics';
 import locationMappings from '../../assets/locationMappings.json';
-import { beijingTime } from 'helpers/serverTime';
 import { t } from 'helpers/i18n';
 
 /** Settings › Calendar's name: Reminders sync is only on iOS, iPadOS and Mac. */
@@ -75,9 +74,8 @@ export const buildCourseEventDetails = (
   const alarms = settings.alarms;
   return {
     title: e.courseName,
-    // the registrar's dates and times are Beijing times
-    startDate: new Date(beijingTime(e.date, e.startTime)),
-    endDate: new Date(beijingTime(e.date, e.endTime)),
+    startDate: new Date(e.start),
+    endDate: new Date(e.end),
     timeZone: TZ,
     location: settings.courseEventOmitLocation
       ? undefined

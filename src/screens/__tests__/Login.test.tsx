@@ -204,7 +204,7 @@ describe('Login', () => {
     it('retries the saved login or goes offline', async () => {
       await setup();
       await user.press(screen.getByText('Log In with Saved Account'));
-      expect(login).toHaveBeenCalledWith({ reset: true });
+      expect(login).toHaveBeenCalledWith({});
       await user.press(screen.getByText('Continue Offline'));
       expect(loginWithOfflineMode).toHaveBeenCalledTimes(1);
     });

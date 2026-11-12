@@ -223,10 +223,9 @@ describe('per-item details', () => {
     // Each course's selector, asked about that course's assignments.
     const calls = list.mock.calls as unknown as [
       string,
-      unknown,
       HomeworkListOptions?,
     ][];
-    const selected = calls.flatMap(([courseId, , options]) => {
+    const selected = calls.flatMap(([courseId, options]) => {
       const select = options?.details;
       return mockAssignments.filter(
         a =>
@@ -278,7 +277,7 @@ describe('per-item details', () => {
 
     const list = jest.spyOn(mockSource, 'getNotificationList');
     const second = await refetch<typeof first>(query);
-    const selected = list.mock.calls.flatMap(([courseId, , options]) => {
+    const selected = list.mock.calls.flatMap(([courseId, options]) => {
       const select = options?.attachments;
       return mockNotices.filter(
         n =>
@@ -311,7 +310,7 @@ describe('per-item details', () => {
           publishTime: inUtc(n.publishTime),
         }))) as typeof getNotificationList);
     await refetch<typeof first>(query);
-    const selected = list.mock.calls.flatMap(([courseId, , options]) => {
+    const selected = list.mock.calls.flatMap(([courseId, options]) => {
       const select = options?.attachments;
       return mockNotices.filter(
         n =>

@@ -26,11 +26,9 @@ export interface ClassSession {
 export interface CalendarClass {
   courseName: string;
   location: string;
-  /** YYYY-MM-DD */
-  date: string;
-  /** HH:mm */
-  startTime: string;
-  endTime: string;
+  /** When it starts and ends, as `ServerTime`s (`2026-11-07T08:00:00+08:00`). */
+  start: string;
+  end: string;
 }
 
 /** The Monday that starts the week of `date`, at midnight. */
@@ -122,12 +120,12 @@ export const sessionsFromCalendar = (
     .map((c, i) => {
       const course = matchCourse(c.courseName, courses);
       return {
-        key: `${c.date}:${c.startTime}:${i}`,
+        key: `${c.start}:${i}`,
         courseName: course?.name ?? c.courseName,
         courseId: course?.id,
         location: c.location,
-        start: at(c.date, c.startTime),
-        end: at(c.date, c.endTime),
+        start: Date.parse(c.start),
+        end: Date.parse(c.end),
       };
     })
     .filter(s => !Number.isNaN(s.start) && !Number.isNaN(s.end))

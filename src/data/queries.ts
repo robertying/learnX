@@ -1,5 +1,5 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
-import { CourseType, Language } from '@robertying/thu-learn-lib';
+import { Language } from '@robertying/thu-learn-lib';
 import { queryClient } from 'data/queryClient';
 import { dataSource } from 'data/source';
 import { useLoggedIn } from 'data/auth';
@@ -51,7 +51,7 @@ export const userQuery = queryOptions({
   queryKey: queryKeys.user,
   queryFn: async (): Promise<User> => {
     await setLanguage();
-    const user = await dataSource.getUserInfo(CourseType.STUDENT);
+    const user = await dataSource.getUserInfo();
     return {
       name: user?.name ?? null,
       // The server marks untranslated departments in English mode

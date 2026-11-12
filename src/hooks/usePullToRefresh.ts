@@ -47,7 +47,7 @@ const usePullToRefresh = (
         .finally(() => setRefreshing(false));
     } else if (!getAuth().loggingIn) {
       setPulled(true);
-      void login({ reset: true });
+      void login({});
     }
   };
 
