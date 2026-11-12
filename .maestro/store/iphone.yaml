@@ -13,7 +13,7 @@ name: App Store screenshots on the iPhone
 
 # 2 A row's swipe actions with the filter menu open
 - runFlow:
-    file: ../subflows/card_actions.yaml
+    file: subflows/swipe_actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
 - tapOn: '${T_filter}'
@@ -117,7 +117,7 @@ name: App Store screenshots on the iPhone
     env:
       NAME: 08-courses-plain
 - runFlow:
-    file: ../subflows/card_actions.yaml
+    file: subflows/swipe_actions.yaml
     env:
       CARD: '.*(${MOCK_COURSE}).*'
 - runFlow:
