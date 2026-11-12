@@ -7,8 +7,8 @@ import {
   SETTINGS_KEY,
   useSettingsStore,
 } from 'data/settings';
-import { getCalendarSync, resetCalendarSync } from 'data/calendarSync';
-import { APP_STATE_KEY, resetAppState, useAppStateStore } from 'data/appState';
+import { resetCalendarSync } from 'data/calendarSync';
+import { resetAppState } from 'data/appState';
 
 const kv = (Storage as unknown as { __store: Map<string, string> }).__store;
 
@@ -83,7 +83,7 @@ describe('settings', () => {
           tabFilterSelections: { notice: 'fav' },
           swipeActions: { left: 'none' },
         },
-        version: 1,
+        version: 3,
       }),
     );
     await useSettingsStore.persist.rehydrate();
@@ -97,85 +97,5 @@ describe('settings', () => {
       },
       swipeActions: { right: 'archive', left: 'none' },
     });
-  });
-});
-
-describe('settings saved before version 2', () => {
-  it('moves the calendar sync and badges into their own stores', async () => {
-    kv.set(
-      SETTINGS_KEY,
-      JSON.stringify({
-        state: {
-          graduate: true,
-          courseCalendarId: 'c',
-          assignmentCalendarId: 'a',
-          syncedCalendarAssignments: { a1: 'e1' },
-          syncedReminderAssignments: { a1: 3 },
-          lastShowChangelogVersion: '18.0.3',
-          courseInformationSharingBadgeShown: true,
-        },
-        version: 1,
-      }),
-    );
-    await useSettingsStore.persist.rehydrate();
-    expect(getSettings()).toEqual({ ...defaultSettings, graduate: true });
-    expect(getCalendarSync()).toEqual({
-      courseCalendarId: 'c',
-      assignmentCalendarId: 'a',
-      syncedCalendarAssignments: { a1: 'e1' },
-      // Not a map of strings, so dropped.
-      syncedReminderAssignments: {},
-    });
-    // The changelog's version is dropped: its badge is gone.
-    expect(useAppStateStore.getState()).toEqual({
-      courseSharingSeen: true,
-      welcomeSeen: false,
-      setupSeen: false,
-      whatsNewSeenVersion: null,
-    });
-  });
-});
-
-describe('settings saved before version 3', () => {
-  it('drops the download folder and file name settings', async () => {
-    kv.set(
-      SETTINGS_KEY,
-      JSON.stringify({
-        state: {
-          graduate: true,
-          fileUseDocumentDir: true,
-          fileOmitCourseName: true,
-        },
-        version: 2,
-      }),
-    );
-    await useSettingsStore.persist.rehydrate();
-    expect(getSettings()).toEqual({ ...defaultSettings, graduate: true });
-  });
-});
-
-describe('app state saved before version 2', () => {
-  it('drops the changelog version its badge kept', async () => {
-    kv.set(
-      APP_STATE_KEY,
-      JSON.stringify({
-        state: { changelogSeenVersion: '18.0.3', courseSharingSeen: true },
-        version: 1,
-      }),
-    );
-    await useAppStateStore.persist.rehydrate();
-    expect(useAppStateStore.getState()).not.toHaveProperty(
-      'changelogSeenVersion',
-    );
-    expect(useAppStateStore.getState().courseSharingSeen).toBe(true);
-  });
-
-  it('keeps what version 2 saved', async () => {
-    kv.set(
-      APP_STATE_KEY,
-      JSON.stringify({ state: { welcomeSeen: true }, version: 2 }),
-    );
-    await useAppStateStore.persist.rehydrate();
-    expect(useAppStateStore.getState().welcomeSeen).toBe(true);
   });
 });

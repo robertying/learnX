@@ -295,6 +295,8 @@ end
 # build if a release bundle contains any other .env value as is: a LIVE_* test
 # login, the unmasked courseX token, or anything added later.
 def check_bundle_for_env_secrets!(bundles)
+  # An E2E_LIVE bundle takes a live login from launch arguments: local only.
+  UI.user_error!("E2E_LIVE is set: unset it; it's for local E2E builds only") unless ENV["E2E_LIVE"].to_s.empty?
   UI.user_error!("Found no JS bundle to check for .env values") if bundles.empty?
 
   env_file = File.join(ROOT, ".env")

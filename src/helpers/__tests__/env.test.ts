@@ -72,6 +72,18 @@ it('keeps live test logins out of release builds', () => {
   });
 });
 
+it('marks an E2E_LIVE build without adding any live value', () => {
+  process.env.E2E_LIVE = '1';
+  try {
+    expect(build('production').env.default).toEqual({
+      DUMMY_USERNAME: 'mock-user',
+      E2E_LIVE: true,
+    });
+  } finally {
+    delete process.env.E2E_LIVE;
+  }
+});
+
 it('masks the courseX token in the bundle and unmasks it on use', () => {
   const { code, env } = build('production');
   expect(code).not.toContain('token-');

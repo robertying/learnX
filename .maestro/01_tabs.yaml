@@ -1,29 +1,61 @@
 appId: ${APP_ID}
 name: Log in and visit every tab
+# Live runs (scripts/e2e.sh --live) only check the screens: the content is
+# the real account's.
+tags:
+  - live
 ---
 - runFlow: subflows/login.yaml
-- assertVisible: '.*(${MOCK_NOTICE}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${MOCK_NOTICE}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
 # The section header may carry more text around the label.
-- assertVisible: '.*(${T_todayDueSoon}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${T_todayDueSoon}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
-- assertVisible: '.*(${MOCK_ASSIGNMENT}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${MOCK_ASSIGNMENT}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-files|folder\.fill'
-- assertVisible: '.*(${MOCK_FILE}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${MOCK_FILE}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:
       TAB: 'tab-courses|books\.vertical\.fill'
-- assertVisible: '.*(${MOCK_COURSE}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${MOCK_COURSE}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'live'}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: course-card
+          timeout: 30000
 - runFlow: subflows/settings.yaml
 - assertVisible:
     id: settings-logout
@@ -31,4 +63,8 @@ name: Log in and visit every tab
     file: subflows/tab.yaml
     env:
       TAB: 'tab-notices|bell\.fill'
-- assertVisible: '.*(${MOCK_NOTICE}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${MOCK_NOTICE}).*'

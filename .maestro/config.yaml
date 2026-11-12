@@ -3,7 +3,8 @@
 flows:
   - '*'
 # The flows share one login (subflows/login.yaml): start from a fresh install
-# and log out last. Flows not listed run after these. A failed flow doesn't
+# and log out last. Flows not listed, or left out of a tagged run's prefix of
+# this list, run after these. A failed flow doesn't
 # stop the rest.
 executionOrder:
   continueOnFailure: true

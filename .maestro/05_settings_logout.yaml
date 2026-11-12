@@ -1,5 +1,7 @@
 appId: ${APP_ID}
 name: Open settings pages and log out
+tags:
+  - live
 ---
 - runFlow: subflows/login.yaml
 - runFlow: subflows/settings.yaml

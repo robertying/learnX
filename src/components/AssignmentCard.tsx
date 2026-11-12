@@ -74,6 +74,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   return (
     <CardWrapper
       {...restProps}
+      testID="assignment-card"
       accessibilityLabel={cardAccessibilityLabel({
         title,
         overline,
