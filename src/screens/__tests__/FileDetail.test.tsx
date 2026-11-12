@@ -20,11 +20,18 @@ jest.mock('react-native-webview', () => {
   const { View } = require('react-native');
   return {
     __esModule: true,
-    default: (props: { style: object; decelerationRate?: string }) => (
+    default: (props: {
+      style: object;
+      decelerationRate?: string;
+      javaScriptEnabled?: boolean;
+    }) => (
       <View
         testID="webview"
         style={props.style}
-        {...{ decelerationRate: props.decelerationRate }}
+        {...{
+          decelerationRate: props.decelerationRate,
+          javaScriptEnabled: props.javaScriptEnabled,
+        }}
       />
     ),
   };
@@ -98,7 +105,8 @@ it("previews other kinds in a web view and an attachment isn't marked seen", asy
   await renderScreen({
     attachment: { ...zip, fileType: 'html', downloadUrl: 'https://x' },
   });
-  expect(screen.getByTestId('webview')).toBeTruthy();
+  // A downloaded page's scripts don't run.
+  expect(screen.getByTestId('webview')).toHaveProp('javaScriptEnabled', false);
   expect(markFileSeen).not.toHaveBeenCalled();
 });
 

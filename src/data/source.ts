@@ -256,6 +256,16 @@ export const clearLoginCookies = async () => {
 };
 
 /**
+ * Forgets every cookie the app holds, in Foundation's and WebKit's stores on
+ * iOS and the shared store on Android: the Web Learning, registrar and SSO
+ * sessions included, so nobody who uses the phone after a logout is still
+ * signed in, whether or not the server heard the logout.
+ */
+export const clearSessionCookies = async () => {
+  await CookieManager.clearAllStores();
+};
+
+/**
  * Signs in with `credential`, or with the saved login (through the helper's
  * provider) when there is none.
  */

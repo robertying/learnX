@@ -61,6 +61,20 @@ class TakeTest {
   }
 
   @Test
+  fun ignoresAFileUri() {
+    // Read with learnX's own access, it could reach the app's private files.
+    val intent = share(stream = Uri.parse("file:///data/data/io.robertying.learnx/shared_prefs/x.xml"))
+    assertNull(ShareModule.take(intent))
+    assertFalse(intent.hasExtra(Intent.EXTRA_STREAM))
+  }
+
+  @Test
+  fun refusesTextWithAFileUri() {
+    val intent = share(type = "text/plain", stream = Uri.parse("file:///sdcard/notes.txt"), text = "notes")
+    assertEquals(mapOf("kind" to "unsupported"), ShareModule.take(intent))
+  }
+
+  @Test
   fun ignoresAShareWithNothing() {
     assertNull(ShareModule.take(share(stream = null)))
   }

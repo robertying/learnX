@@ -138,6 +138,11 @@ func temporaryFile(named name: String, contents: String = "contents") throws -> 
     (nil, UTType.data, "/tmp/notes.xyz", "notes.xyz"),
     // Neither has one.
     ("Notes", UTType.data, "/tmp/notes", "Notes"),
+    // A suggested name can't climb out of the file's folder.
+    ("../../Preferences/x.plist", UTType.data, "/tmp/x", "_.._Preferences_x.plist"),
+    ("a/b:c", UTType.pdf, "/tmp/x", "a_b_c.pdf"),
+    // Nothing left of it: the file's own name.
+    ("..", UTType.pdf, "/tmp/IMG_1.pdf", "IMG_1.pdf"),
   ] as [(String?, UTType, String, String)])
   func namesTheFile(suggested: String?, type: UTType, path: String, expected: String) {
     #expect(SharedFileInbox.fileName(suggested: suggested, url: URL(fileURLWithPath: path), type: type) == expected)

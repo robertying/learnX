@@ -112,7 +112,7 @@ const loginModule = (): typeof import('data/login') => {
   }));
   jest.doMock('data/source', () => ({
     dataSource: require('data/mockSource').mockSource,
-    clearLoginCookies: jest.fn(async () => {}),
+    clearSessionCookies: jest.fn(async () => {}),
     loginWithFingerPrint: jest.fn(async () => {}),
     endSession: jest.fn(),
   }));

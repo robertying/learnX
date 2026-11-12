@@ -1,5 +1,5 @@
 From 7846ef4c3ea7b6325aa936df4f2c967541b08703 Mon Sep 17 00:00:00 2001
-From: Rui Ying <claude@ruiying.io>
+From: Claude <noreply@anthropic.com>
 Date: Wed, 11 Nov 2026 16:27:05 -0800
 Subject: [PATCH] fix(ios): walk the children when a hierarchy is too deep to
  snapshot

@@ -71,15 +71,26 @@ struct SharedFileInbox {
     return file
   }
 
-  /// The attachment's name, with the type's extension (or the file's) if it has none.
+  /// The attachment's name, with the type's extension (or the file's) if it has none. The sending app picks the
+  /// suggested name, so it can't name a path: slashes and colons become `_` and leading dots go.
   static func fileName(suggested: String?, url: URL, type: UTType) -> String {
-    var name = suggested ?? url.deletingPathExtension().lastPathComponent
+    var name = safeName(suggested) ?? url.deletingPathExtension().lastPathComponent
     if let ext = type.preferredFilenameExtension ?? (url.pathExtension.isEmpty ? nil : url.pathExtension),
       (name as NSString).pathExtension.isEmpty
     {
       name += ".\(ext)"
     }
     return name
+  }
+
+  /// `name` as a single path component, or nil if nothing is left of it.
+  static func safeName(_ name: String?) -> String? {
+    guard let name else {
+      return nil
+    }
+    let flat = name.map { "/:\0".contains($0) ? "_" : String($0) }.joined()
+    let trimmed = String(flat.drop { $0 == "." || $0.isWhitespace })
+    return trimmed.isEmpty ? nil : trimmed
   }
 
   /// Takes the waiting file, if any, so it's handed to JS once.

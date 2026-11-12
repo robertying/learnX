@@ -2,7 +2,7 @@ import { ApiError, FailReason } from '@robertying/thu-learn-lib';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
 import {
-  clearLoginCookies,
+  clearSessionCookies,
   dataSource,
   endSession,
   loginWithFingerPrint,
@@ -184,6 +184,9 @@ const errorDetail = (err: unknown) => {
  */
 export const loginWithOfflineMode = cancelRelogin;
 
+/** How long a logout waits for the server to end the session. */
+const SERVER_LOGOUT_WAIT_MS = 3_000;
+
 /**
  * Logs out: sends what's waiting, ends the session on the server, and forgets
  * the login, the server data and the user's own data, submission drafts
@@ -194,11 +197,20 @@ export async function logout() {
   // while the session is still open.
   await flushServerActionsWithin(3_000);
   useAuthStore.setState(initialAuth);
-  // Not waited for: the account's data goes whether or not the server hears.
-  dataSource.logout().catch(() => {});
+  // The account's data goes whether or not the server hears, but the logout
+  // gets a moment to end the session before its cookies are dropped.
+  const serverLogout = dataSource.logout().catch(() => {});
   endSession();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  await Promise.race([
+    serverLogout,
+    new Promise(resolve => {
+      timer = setTimeout(resolve, SERVER_LOGOUT_WAIT_MS);
+    }),
+  ]);
+  clearTimeout(timer);
   await Promise.all([
-    clearLoginCookies().catch(() => {}),
+    clearSessionCookies().catch(() => {}),
     clearAccountData(),
     clearCredentials(),
     // Only left behind if the one-time import failed; they must not come

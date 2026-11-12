@@ -1,3 +1,4 @@
+import { Linking } from 'react-native';
 import { act, render } from '@testing-library/react-native';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
@@ -34,16 +35,17 @@ const renderScreen = () =>
     />,
   );
 
-const message = (data: unknown) =>
+const message = (data: unknown, url = 'https://id.tsinghua.edu.cn/do/x') =>
   act(() =>
     mockProps.onMessage({
       nativeEvent: {
+        url,
         data: typeof data === 'string' ? data : JSON.stringify(data),
       },
     }),
   );
-const submit = (requestBody: object, formId = 'theform') =>
-  message({ type: 'JQUERY_SUBMIT', data: { formId, requestBody } });
+const submit = (requestBody: object, formId = 'theform', url?: string) =>
+  message({ type: 'JQUERY_SUBMIT', data: { formId, requestBody } }, url);
 
 beforeEach(() => {
   useAuthStore.setState({ ...initialAuth, ssoInProgress: true });
@@ -86,6 +88,39 @@ it('logs in with the captured form once the SSO hands over to Web Learning', asy
   expect(useAuthStore.getState().ssoInProgress).toBe(false);
   expect(navigation.goBack).toHaveBeenCalled();
   expect(toast).not.toHaveBeenCalled();
+});
+
+it('reads messages only from Tsinghua pages over https', async () => {
+  await renderScreen();
+  const form = {
+    fingerPrint: 'fp',
+    fingerGenPrint: 'g',
+    fingerGenPrint3: 'g3',
+  };
+  await submit(form, 'theform', 'https://id.tsinghua.edu.cn.evil.example/');
+  await submit(form, 'theform', 'http://id.tsinghua.edu.cn/');
+  await submit(form, 'theform', 'not a url');
+  mockProps.onShouldStartLoadWithRequest({ url: ROAMING });
+  expect(login).not.toHaveBeenCalled();
+  expect(toast).toHaveBeenCalledWith(t('ssoFailed'), 'error');
+});
+
+it('keeps the page on Tsinghua sites and opens other links outside', async () => {
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+  await renderScreen();
+  const load = (url: string, isTopFrame?: boolean) =>
+    mockProps.onShouldStartLoadWithRequest({ url, isTopFrame });
+  expect(load('https://www.tsinghua.edu.cn/')).toBe(true);
+  expect(load('about:blank')).toBe(true);
+  expect(load('https://cdn.example/frame', false)).toBe(true);
+  expect(load('https://example.com/help')).toBe(false);
+  expect(openURL).toHaveBeenCalledWith('https://example.com/help');
+  // The sites' own http links stay, as before.
+  expect(load('http://learn.tsinghua.edu.cn/')).toBe(true);
+  expect(load('https://tsinghua.edu.cn.example.com/')).toBe(false);
+  expect(load('weixin://dl')).toBe(false);
+  expect(openURL).toHaveBeenCalledTimes(2);
+  expect(useAuthStore.getState().ssoInProgress).toBe(true);
 });
 
 it("fails without the form's device fingerprint", async () => {

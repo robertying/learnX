@@ -18,6 +18,16 @@ import {
 import dayjs from 'dayjs';
 import { CalendarError } from 'services/calendar/errors';
 
+/** A sync the user started: it may ask for the permission. */
+const saveAsUser = (
+  type: 'calendar' | 'reminder',
+  assignments: Assignment[],
+  removed: string[] = [],
+) =>
+  saveAssignmentsToReminderOrCalendar(type, assignments, removed, {
+    ask: true,
+  });
+
 jest.mock('data/queries', () => ({
   getCachedCourses: () => [{ id: 'c1', name: 'Calculus' }],
 }));
@@ -238,7 +248,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
   it('creates calendar events and remembers their ids', async () => {
     const calendar = assignments;
 
-    await saveAssignmentsToReminderOrCalendar('calendar', [assignment('a1')]);
+    await saveAsUser('calendar', [assignment('a1')]);
 
     expect(calendar.createEvent).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Homework - Calculus' }),
@@ -261,10 +271,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       throw new Error('Not found');
     });
 
-    await saveAssignmentsToReminderOrCalendar('calendar', [
-      assignment('a1'),
-      assignment('a2'),
-    ]);
+    await saveAsUser('calendar', [assignment('a1'), assignment('a2')]);
 
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Homework - Calculus' }),
@@ -289,7 +296,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       { id: 'e1', title: '✅ Homework - Calculus', endDate: deadline },
     ]);
 
-    await saveAssignmentsToReminderOrCalendar('calendar', [a1, a2]);
+    await saveAsUser('calendar', [a1, a2]);
 
     expect(assignments.createEvent).not.toHaveBeenCalled();
     expect(getCalendarSync().syncedCalendarAssignments).toEqual({
@@ -322,7 +329,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       { id: 'r2', title: 'Homework - Calculus' },
     ]);
 
-    await saveAssignmentsToReminderOrCalendar('reminder', [a1, a2]);
+    await saveAsUser('reminder', [a1, a2]);
 
     // a2 matches nothing left, so it gets a new reminder.
     expect(reminders.createReminder).toHaveBeenCalledTimes(1);
@@ -335,7 +342,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
   it("adds events when the calendar can't be listed", async () => {
     assignments.listEvents.mockRejectedValue(new Error('denied'));
 
-    await saveAssignmentsToReminderOrCalendar('calendar', [assignment('a1')]);
+    await saveAsUser('calendar', [assignment('a1')]);
 
     expect(getCalendarSync().syncedCalendarAssignments).toEqual({
       a1: 'new-event',
@@ -345,7 +352,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
   it('creates reminders on iOS', async () => {
     const calendar = reminders;
 
-    await saveAssignmentsToReminderOrCalendar('reminder', [assignment('a1')]);
+    await saveAsUser('reminder', [assignment('a1')]);
 
     expect(mocked.getCalendars).toHaveBeenCalledWith('reminder');
     expect(calendar.createReminder).toHaveBeenCalledWith(
@@ -363,7 +370,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     mocked.getCalendarPermissions.mockResolvedValue({ status: 'denied' });
     mocked.requestCalendarPermissions.mockResolvedValue({ status: 'denied' });
 
-    await saveAssignmentsToReminderOrCalendar('reminder', [assignment('a1')]);
+    await saveAsUser('reminder', [assignment('a1')]);
 
     expect(mocked.requestCalendarPermissions).not.toHaveBeenCalled();
     expect(mocked.getCalendars).not.toHaveBeenCalledWith('event');
@@ -400,7 +407,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       };
     });
 
-    await saveAssignmentsToReminderOrCalendar(
+    await saveAsUser(
       'calendar',
       [assignment('a1')],
       ['a3', 'gone', 'neverSynced'],
@@ -413,9 +420,9 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
   it('needs reminder permission for reminders', async () => {
     mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
     mocked.requestRemindersPermissions.mockResolvedValue({ status: 'denied' });
-    await expect(
-      saveAssignmentsToReminderOrCalendar('reminder', []),
-    ).rejects.toThrow(new CalendarError('reminderPermission'));
+    await expect(saveAsUser('reminder', [])).rejects.toThrow(
+      new CalendarError('reminderPermission'),
+    );
   });
 });
 
@@ -577,10 +584,7 @@ describe('more of the sync', () => {
         }
         return { update };
       });
-      await saveAssignmentsToReminderOrCalendar('reminder', [
-        assignment('a1'),
-        assignment('a2'),
-      ]);
+      await saveAsUser('reminder', [assignment('a1'), assignment('a2')]);
       expect(update).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Homework - Calculus' }),
       );
@@ -593,7 +597,7 @@ describe('more of the sync', () => {
       });
       const remove = jest.fn(async () => {});
       mocked.ExpoCalendarReminder.get.mockResolvedValue({ delete: remove });
-      await saveAssignmentsToReminderOrCalendar('reminder', [], ['a1']);
+      await saveAsUser('reminder', [], ['a1']);
       expect(mocked.ExpoCalendarReminder.get).toHaveBeenCalledWith('r1');
       expect(remove).toHaveBeenCalled();
       expect(getCalendarSync().syncedReminderAssignments).toEqual({});

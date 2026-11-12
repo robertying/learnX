@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { Linking, Platform, StyleSheet } from 'react-native';
 import PageProgressBar from 'components/PageProgressBar';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
@@ -24,6 +24,24 @@ const LEARN_ROAMING_URL =
   'https://learn.tsinghua.edu.cn/f/j_spring_security_thauth_roaming_entry';
 
 type Props = NativeStackScreenProps<LoginStackParams, 'SSO'>;
+
+const TSINGHUA_HOST = /(^|\.)tsinghua\.edu\.cn$/;
+
+/**
+ * Whether `url` is on one of Tsinghua's sites, over https unless `http` is
+ * allowed.
+ */
+const isTsinghuaUrl = (url: string, { http = false } = {}) => {
+  try {
+    const { protocol, hostname } = new URL(url);
+    return (
+      (protocol === 'https:' || (http && protocol === 'http:')) &&
+      TSINGHUA_HOST.test(hostname)
+    );
+  } catch {
+    return false;
+  }
+};
 
 const SSO: React.FC<Props> = ({ route, navigation }) => {
   const username = route.params.username;
@@ -51,7 +69,19 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   const handleShouldStartLoadWithRequest: OnShouldStartLoadWithRequest =
     event => {
       if (!event.url.startsWith(LEARN_ROAMING_URL)) {
-        return true;
+        // Frames load as they like; the page itself stays on Tsinghua's
+        // sites, and a link elsewhere opens outside the app.
+        if (
+          event.isTopFrame === false ||
+          event.url === 'about:blank' ||
+          isTsinghuaUrl(event.url, { http: true })
+        ) {
+          return true;
+        }
+        if (/^https?:/i.test(event.url)) {
+          Linking.openURL(event.url).catch(() => {});
+        }
+        return false;
       }
 
       if (!formData.current?.fingerPrint) {
@@ -68,6 +98,11 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
     };
 
   const handleMessage = (event: WebViewMessageEvent) => {
+    // Only Tsinghua's own pages, like the injected script (preval/sso.js),
+    // which holds the password.
+    if (!isTsinghuaUrl(event.nativeEvent.url)) {
+      return;
+    }
     let message: { type?: unknown; data?: any };
     try {
       message = JSON.parse(event.nativeEvent.data);
