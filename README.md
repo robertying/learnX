@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./docs/assets/logo.webp" alt="logo" width="128" height="128" />
+<img src="./docs/assets/logo.webp?v=2" alt="logo" width="128" height="128" />
 
 <h1>learnX</h1>
 
