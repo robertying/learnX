@@ -92,6 +92,7 @@ describe('classReminderContent', () => {
       body: 'Starts at 09:50 · Room 101',
       data: { type: 'today' },
       threadIdentifier: 'classes',
+      interruptionLevel: 'timeSensitive',
     });
     expect(
       classReminderContent(upcoming('a', 0, { start, location: '' })).body,
