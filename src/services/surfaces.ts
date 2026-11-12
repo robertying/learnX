@@ -4,6 +4,7 @@
 // Reminders, and the courses shared with courseX. Each is worked out from the cached lists, the user data and the
 // settings whenever those change, in whichever JS runtime that happens: the
 // app, the background sync, or a notification action handled without the app.
+import { isShownBy } from 'helpers/shown';
 import { AppState } from 'react-native';
 import dayjs from 'dayjs';
 import { queryClient } from 'data/queryClient';
@@ -12,7 +13,14 @@ import { getCachedWeekSessions } from 'data/schedule';
 import { coursesQuery } from 'data/queries';
 import { getSettings, useSettingsStore } from 'data/settings';
 import { getUserData, useUserDataStore } from 'data/userData';
-import { Assignment, Course, File, Notice } from 'data/types/state';
+import { queryKeys } from 'data/queryKeys';
+import {
+  Assignment,
+  contentListNames,
+  Course,
+  File,
+  Notice,
+} from 'data/types/state';
 import type { ToastMessage } from 'services/calendar/actions';
 import { uploadCourses } from 'services/coursex';
 import { recordError } from 'services/crashReporting';
@@ -121,21 +129,15 @@ const syncCalendar = async (
   if (!assignments) {
     return;
   }
-  const hidden = new Set(hiddenCourses);
-  const archivedIds = new Set(archived);
-  const isLeftOut = (a: Assignment) =>
-    archivedIds.has(a.id) || hidden.has(a.courseId);
+  const isShown = isShownBy(hiddenCourses, archived);
   // Loaded when needed: it brings in the file helpers, which only the app
   // needs (and Jest can't load).
   const { syncAssignments, upcomingAssignments } =
     require('services/calendar/actions') as typeof import('services/calendar/actions');
   const message = await syncAssignments(
     type,
-    upcomingAssignments(
-      assignments.filter(a => !isLeftOut(a)),
-      dayjs(),
-    ),
-    assignments.filter(isLeftOut).map(a => a.id),
+    upcomingAssignments(assignments.filter(isShown), dayjs()),
+    assignments.filter(a => !isShown(a)).map(a => a.id),
     { automatic: true },
   );
   if (message) {
@@ -335,13 +337,11 @@ export const clearSurfaces = () => {
 };
 
 /** Lists whose changes the surfaces follow, by the first part of their key. */
-const watchedQueries = new Set([
-  'assignments',
-  'notices',
-  'files',
-  'courses',
-  'semesterDates',
-  'calendar',
+const watchedQueries = new Set<string>([
+  ...contentListNames,
+  queryKeys.coursesAll[0],
+  queryKeys.schoolSemester[0],
+  queryKeys.calendarAll[0],
 ]);
 
 let scheduled = false;

@@ -12,14 +12,9 @@ import { useShowDetail } from 'hooks/useDetailNavigator';
 import useFilteredData, { type ExtraLists } from 'hooks/useFilteredData';
 import usePendingTarget from 'hooks/usePendingTarget';
 import usePullToRefresh from 'hooks/usePullToRefresh';
+import { targetRoutes, type ItemTarget } from 'helpers/openTarget';
 
-type ContentType = 'notice' | 'assignment' | 'file';
-
-const detailScreens = {
-  notice: 'NoticeDetail',
-  assignment: 'AssignmentDetail',
-  file: 'FileDetail',
-} as const;
+type ContentType = ItemTarget['type'];
 
 /** The parts of a list query (`useNotices`, …) the list screen uses. */
 export interface ContentListQuery {
@@ -70,7 +65,7 @@ const useContentList = <
     }
   }, [courseIds, loggedIn]);
 
-  const screen = detailScreens[type];
+  const screen = targetRoutes[type].detail;
   const show = useShowDetail(navigation);
   usePendingTarget(type, (id, inDetail) =>
     inDetail

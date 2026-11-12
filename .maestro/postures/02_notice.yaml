@@ -3,7 +3,7 @@ name: Open a notice on the open iPhone Duo
 ---
 # Run by scripts/e2e-devices.sh on the iPhone Duo, already logged in: opens
 # the screen from its learnx:// link (mock data ids, checked by
-# src/helpers/__tests__/e2ePostures.test.ts) and checks it on the inner display.
+# scripts/__tests__/e2ePostures.test.ts) and checks it on the inner display.
 - runFlow:
     file: ../subflows/open_on_inner.yaml
     env:

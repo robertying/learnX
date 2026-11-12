@@ -58,7 +58,6 @@ beforeEach(() => {
           .join('\n')
       : real.readFileSync(p, ...rest)) as typeof fs.readFileSync);
 });
-afterEach(() => jest.restoreAllMocks());
 
 it('ships the mock login, and only the listed keys', () => {
   const { env } = build('production');

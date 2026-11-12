@@ -1,20 +1,17 @@
 import { useRef, useState } from 'react';
-import { Linking, Platform, StyleSheet } from 'react-native';
-import PageProgressBar from 'components/PageProgressBar';
-import WebView, { WebViewMessageEvent } from 'react-native-webview';
+import { Linking } from 'react-native';
+import type { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import DeviceInfo from 'constants/DeviceInfo';
-import SafeArea from 'components/SafeArea';
+import ScreenWebView from 'components/ScreenWebView';
 import { setSSOInProgress } from 'data/auth';
 import { login } from 'data/login';
 import { generateFingerprint } from 'helpers/fingerprint';
 import { fillSSOScript } from 'helpers/ssoScript';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
-import useWebViewProgress from 'hooks/useWebViewProgress';
 import { LoginStackParams } from 'navigation/types';
-import packageJson from '../../package.json';
 
 const ssoCustomScript = require('../helpers/preval/sso.preval.js');
 
@@ -47,8 +44,6 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   const username = route.params.username;
   const password = route.params.password;
 
-  const { progress, loading, onLoadProgress } = useWebViewProgress();
-
   const [fingerPrint] = useState(generateFingerprint);
   const formData = useRef<{
     username: string;
@@ -57,12 +52,11 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
     fingerGenPrint: string;
     fingerGenPrint3: string;
   } | null>(null);
-  const webviewRef = useRef<WebView>(null);
 
   const injectedJs = fillSSOScript(ssoCustomScript, {
     username,
     password,
-    deviceName: `${DeviceInfo.model()},learnX/${packageJson.version}`,
+    deviceName: `${DeviceInfo.model()},learnX/${DeviceInfo.appVersion()}`,
     fingerPrint,
   });
 
@@ -123,34 +117,19 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   };
 
   return (
-    <SafeArea>
-      {loading ? <PageProgressBar progress={progress} /> : null}
-      <WebView
-        ref={webviewRef}
-        style={styles.webview}
-        source={{
-          uri: SSO_LOGIN_URL,
-          headers: {
-            // Clean slate
-            Cookie: '',
-          },
-        }}
-        decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
-        // Below the header, and under its glass from iOS 26.
-        contentInsetAdjustmentBehavior="automatic"
-        onLoadProgress={onLoadProgress}
-        onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
-        injectedJavaScript={injectedJs}
-        onMessage={handleMessage}
-      />
-    </SafeArea>
+    <ScreenWebView
+      source={{
+        uri: SSO_LOGIN_URL,
+        headers: {
+          // Clean slate
+          Cookie: '',
+        },
+      }}
+      onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
+      injectedJavaScript={injectedJs}
+      onMessage={handleMessage}
+    />
   );
 };
-
-const styles = StyleSheet.create({
-  webview: {
-    backgroundColor: 'transparent',
-  },
-});
 
 export default SSO;

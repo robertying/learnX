@@ -4,9 +4,10 @@ import dayjs from 'dayjs';
 import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
 import DeviceInfo from 'constants/DeviceInfo';
-import { getTitleOptions } from 'components/HeaderTitle';
+import { getTitleOptions } from 'navigation/options';
 import Today from 'screens/Today';
 import { getSettings, setSetting } from 'data/settings';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
@@ -38,8 +39,8 @@ jest.mock('data/content', () => ({
   useNotices: () => query({ notices: mockNotices }),
   useFiles: () => query({ files: mockFiles }),
 }));
-jest.mock('components/HeaderTitle', () => ({
-  ...jest.requireActual('components/HeaderTitle'),
+jest.mock('navigation/options', () => ({
+  ...jest.requireActual('navigation/options'),
   getTitleOptions: jest.fn(() => ({})),
 }));
 
@@ -66,8 +67,7 @@ const setup = async () => {
   };
   await render(
     <Today
-      navigation={navigation as never}
-      route={{ key: 'Today', name: 'Today' } as never}
+      {...screenProps({ navigation, route: { key: 'Today', name: 'Today' } })}
     />,
   );
   return { navigation };
@@ -82,7 +82,6 @@ beforeEach(() => {
   mockNotices = [{ id: 'n', courseId: 'a', hasRead: false }];
   mockFiles = [];
 });
-afterEach(() => jest.restoreAllMocks());
 
 it('shows the current and next class, and opens a course', async () => {
   // Keep both on today, whatever time the test runs.
@@ -114,6 +113,12 @@ it('shows the current and next class, and opens a course', async () => {
     .press(screen.getAllByText('Course b')[0]);
   expect(navigation.dispatch).toHaveBeenCalledWith(
     StackActions.push('CourseDetail', { id: 'b' }),
+  );
+  await userEvent
+    .setup({ advanceTimers: jest.advanceTimersByTime })
+    .press(screen.getByText('Homework'));
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('AssignmentDetail', { id: 'x' }),
   );
   jest.useRealTimers();
 });

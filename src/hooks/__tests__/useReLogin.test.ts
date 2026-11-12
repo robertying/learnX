@@ -25,14 +25,12 @@ beforeEach(async () => {
   jest.useFakeTimers();
   // The preset's AppState has no state of its own.
   (AppState as { currentState: string }).currentState = 'active';
-  jest.mocked(login).mockClear();
   useAuthStore.setState(initialAuth);
   await saveCredentials(credentials);
 });
 
 afterEach(async () => {
   jest.useRealTimers();
-  jest.restoreAllMocks();
   await clearCredentials();
 });
 
@@ -61,7 +59,7 @@ const leaveAndComeBack = async (minutes: number) => {
 describe('useReLogin', () => {
   it('logs in at launch', async () => {
     await renderHook(useReLogin);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({});
   });
 
   it('retries less and less often while offline', async () => {
@@ -153,7 +151,7 @@ describe('useReLogin', () => {
     await launch();
     await fail('rejected');
     await leaveAndComeBack(2);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({});
   });
 
   it('does nothing after a short break when never logged in', async () => {
@@ -175,7 +173,7 @@ describe('useReLogin', () => {
       .mockResolvedValue();
     await launch();
     await leaveAndComeBack(11);
-    expect(login).toHaveBeenCalledWith({ reset: true });
+    expect(login).toHaveBeenCalledWith({});
     expect(refetch).not.toHaveBeenCalled();
   });
 });

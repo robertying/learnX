@@ -1,11 +1,9 @@
 import { Platform } from 'react-native';
-import { NavigationContext } from '@react-navigation/native';
 import { render, screen, userEvent } from '@testing-library/react-native';
-import Colors from 'constants/Colors';
+import { brandColor } from 'theme';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import {
-  getCloseHeaderItem,
   getDetailScreenOptions,
   getItemDetailOptions,
   getItemTitle,
@@ -38,25 +36,19 @@ const navigation = { goBack: jest.fn() };
 const theme = { colors: { text: '#123456' } } as never;
 
 it('closes a modal stack from its native close item or its button', async () => {
-  const item = getCloseHeaderItem(navigation);
+  const options = getModalScreenOptions('Title')({ navigation });
+  expect(options.title).toBe('Title');
+  const [item] = options.unstable_headerLeftItems!({} as never);
   expect(item).toMatchObject({
     type: 'button',
+    identifier: 'close',
     label: t('close'),
     icon: { type: 'sfSymbol', name: 'xmark' },
   });
   (item as { onPress: () => void }).onPress();
   expect(navigation.goBack).toHaveBeenCalledTimes(1);
 
-  const options = getModalScreenOptions('Title')({ navigation });
-  expect(options.title).toBe('Title');
-  expect(options.unstable_headerLeftItems!({} as never)).toEqual([
-    expect.objectContaining({ identifier: 'close' }),
-  ]);
-  await render(
-    <NavigationContext.Provider value={navigation as never}>
-      {options.headerLeft!({} as never)}
-    </NavigationContext.Provider>,
-  );
+  await render(<>{options.headerLeft!({} as never)}</>);
   await userEvent.press(screen.getByText(t('close')));
   expect(navigation.goBack).toHaveBeenCalledTimes(2);
 });
@@ -65,10 +57,10 @@ it('tints detail headers on iOS, keeping a native title in the text color', () =
   const options = getDetailScreenOptions('Detail')({ theme });
   expect(options.title).toBe('Detail');
   expect(options.headerTintColor).toBe(
-    Platform.OS === 'ios' ? Colors.theme : undefined,
+    Platform.OS === 'ios' ? brandColor : undefined,
   );
   expect(options.headerTitleStyle).toEqual(
-    DeviceInfo.supportsNativeSubtitle() ? { color: '#123456' } : undefined,
+    DeviceInfo.hasLiquidGlass() ? { color: '#123456' } : undefined,
   );
   expect(getDetailScreenOptions()({ theme }).title).toBe('');
 });
@@ -115,12 +107,29 @@ it('titles item detail screens from the cached item', () => {
   ).toBe('');
 });
 
+it('puts the subtitle in the header from iOS 26, and in a HeaderTitle before', () => {
+  const titleOptionsOn = (ios26: boolean) => {
+    let options: object = {};
+    jest.isolateModules(() => {
+      const info = require('constants/DeviceInfo').default;
+      jest.spyOn(info, 'hasLiquidGlass').mockReturnValue(ios26);
+      options = require('navigation/options').getTitleOptions('T', 'S');
+    });
+    return options;
+  };
+  expect(titleOptionsOn(true)).toEqual({ title: 'T', headerSubtitle: 'S' });
+  expect(titleOptionsOn(false)).toEqual({
+    title: 'T',
+    headerTitle: expect.any(Function),
+  });
+});
+
 it('gives tab roots a large title on iPhone and iPad from iOS 26 only', () => {
   const tabRootOptionsOn = (ios26: boolean, mac: boolean) => {
     let options: object = {};
     jest.isolateModules(() => {
       const info = require('constants/DeviceInfo').default;
-      jest.spyOn(info, 'supportsNativeSubtitle').mockReturnValue(ios26);
+      jest.spyOn(info, 'hasLiquidGlass').mockReturnValue(ios26);
       jest.spyOn(info, 'isMac').mockReturnValue(mac);
       options = require('navigation/options').tabRootOptions;
     });

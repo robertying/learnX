@@ -4,6 +4,7 @@ import { t } from 'helpers/i18n';
 import { displayVersion, whatsNewContext } from 'helpers/whatsNew';
 import WhatsNew from 'screens/WhatsNew';
 import packageJson from '../../../package.json';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('helpers/whatsNew', () => ({
   ...jest.requireActual('helpers/whatsNew'),
@@ -13,9 +14,7 @@ jest.mock('helpers/whatsNew', () => ({
 const goBack = jest.fn();
 const navigation = { push: jest.fn(), getParent: () => ({ goBack }) };
 const renderScreen = (params: { version: string; preview?: boolean }) =>
-  render(
-    <WhatsNew navigation={navigation as never} route={{ params } as never} />,
-  );
+  render(<WhatsNew {...screenProps({ navigation, route: { params } })} />);
 
 beforeEach(() => {
   useAppStateStore.setState({ whatsNewSeenVersion: null });

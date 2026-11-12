@@ -1,12 +1,11 @@
 import { PlatformColor } from 'react-native';
-import { Host, ProgressView, Text } from '@expo/ui/swift-ui';
+import { ProgressView, Text } from '@expo/ui/swift-ui';
 import {
   controlSize,
   foregroundStyle,
   monospacedDigit,
-  tint,
 } from '@expo/ui/swift-ui/modifiers';
-import { useTheme } from 'theme';
+import ThemedHost from 'components/ThemedHost';
 import { percentLabel } from 'helpers/progress';
 import type { SpinnerProps } from './Spinner.shared';
 
@@ -15,14 +14,11 @@ import type { SpinnerProps } from './Spinner.shared';
  * with the percentage done as its label.
  */
 const Spinner: React.FC<SpinnerProps> = ({ progress, style }) => {
-  const theme = useTheme();
   const label = percentLabel(progress);
 
   return (
-    <Host matchContents style={style}>
-      <ProgressView
-        modifiers={[controlSize('large'), tint(theme.colors.primary)]}
-      >
+    <ThemedHost matchContents style={style}>
+      <ProgressView modifiers={[controlSize('large')]}>
         {label ? (
           <Text
             modifiers={[
@@ -35,7 +31,7 @@ const Spinner: React.FC<SpinnerProps> = ({ progress, style }) => {
           </Text>
         ) : null}
       </ProgressView>
-    </Host>
+    </ThemedHost>
   );
 };
 

@@ -1,45 +1,32 @@
 import { Platform } from 'react-native';
-import {
-  useNavigation,
-  ParamListBase,
-  RouteProp,
-  Theme,
-} from '@react-navigation/native';
+import { ParamListBase, RouteProp, Theme } from '@react-navigation/native';
 import type {
-  NativeStackHeaderItem,
   NativeStackNavigationOptions,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
-import { getTitleOptions } from 'components/HeaderTitle';
-import IconButton from 'components/IconButton';
-import Colors from 'constants/Colors';
+import HeaderTitle from 'components/HeaderTitle';
+import { brandColor } from 'theme';
 import DeviceInfo from 'constants/DeviceInfo';
 import { getAssignment, getFile, getNotice } from 'data/content';
 import { getCachedCourses } from 'data/queries';
+import { headerButtons } from './headerButtons';
 import type { ItemDetailParams } from './types';
 
-export const BackButton = () => {
-  const navigation = useNavigation();
+// From iOS 26 the header shows a subtitle itself.
+const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
 
-  return (
-    <IconButton
-      accessibilityLabel={t('close')}
-      onPress={() => navigation.goBack()}
-      icon="close"
-    />
-  );
-};
-
-export const getCloseHeaderItem = (
-  navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'goBack'>,
-): NativeStackHeaderItem => ({
-  type: 'button',
-  identifier: 'close',
-  label: t('close'),
-  icon: { type: 'sfSymbol', name: 'xmark' },
-  onPress: () => navigation.goBack(),
-});
+/**
+ * A screen's title and subtitle: in the header itself from iOS 26, and in
+ * our own HeaderTitle before that and on Android.
+ */
+export const getTitleOptions = (title: string, subtitle?: string) =>
+  supportsNativeSubtitle
+    ? { title, headerSubtitle: subtitle }
+    : {
+        title,
+        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+      };
 
 /** Options for the first screen of a modal stack: a close button and a title. */
 export const getModalScreenOptions =
@@ -49,12 +36,16 @@ export const getModalScreenOptions =
   }: {
     navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'goBack'>;
   }): NativeStackNavigationOptions => ({
-    headerLeft: () => <BackButton />,
-    unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
+    ...headerButtons('left', [
+      {
+        id: 'close',
+        label: t('close'),
+        icon: 'close',
+        onPress: () => navigation.goBack(),
+      },
+    ]),
     ...getTitleOptions(title),
   });
-
-const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
 
 /**
  * A tab's first screen: a large title that collapses as the list scrolls, on
@@ -102,7 +93,7 @@ export const getDetailScreenOptions = (title = '', subtitle?: string) =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {
     return {
       ...getTitleOptions(title, subtitle),
-      headerTintColor: Platform.OS === 'ios' ? Colors.theme : undefined,
+      headerTintColor: Platform.OS === 'ios' ? brandColor : undefined,
       // A native title would otherwise take the tint color.
       headerTitleStyle: supportsNativeSubtitle
         ? { color: theme.colors.text }

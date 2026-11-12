@@ -7,6 +7,7 @@ import {
   semesterWeek,
 } from '@robertying/thu-learn-lib';
 import type { Course } from 'data/types/state';
+import { timeRange } from './i18n';
 import { beijingDate, beijingTime } from './serverTime';
 
 /** One class meeting. Times are ms since the epoch. */
@@ -25,11 +26,9 @@ export interface ClassSession {
 export interface CalendarClass {
   courseName: string;
   location: string;
-  /** YYYY-MM-DD */
-  date: string;
-  /** HH:mm */
-  startTime: string;
-  endTime: string;
+  /** When it starts and ends, as `ServerTime`s (`2026-11-07T08:00:00+08:00`). */
+  start: string;
+  end: string;
 }
 
 /** The Monday that starts the week of `date`, at midnight. */
@@ -121,12 +120,12 @@ export const sessionsFromCalendar = (
     .map((c, i) => {
       const course = matchCourse(c.courseName, courses);
       return {
-        key: `${c.date}:${c.startTime}:${i}`,
+        key: `${c.start}:${i}`,
         courseName: course?.name ?? c.courseName,
         courseId: course?.id,
         location: c.location,
-        start: at(c.date, c.startTime),
-        end: at(c.date, c.endTime),
+        start: Date.parse(c.start),
+        end: Date.parse(c.end),
       };
     })
     .filter(s => !Number.isNaN(s.start) && !Number.isNaN(s.end))
@@ -146,3 +145,14 @@ export const currentAndNext = (sessions: ClassSession[], now: number) => ({
   current: sessions.find(s => s.start <= now && now < s.end),
   next: sessions.find(s => s.start > now),
 });
+
+/**
+ * Time and room on the second line, as Calendar lists events, so the course
+ * name gets the row's full width. The room is as the course lists it
+ * ("六教6A414"), which students know, not the full building name the
+ * calendar export adds for maps.
+ */
+export const classDetails = (session: ClassSession) =>
+  [timeRange(session.start, session.end), session.location.trim()]
+    .filter(Boolean)
+    .join(' · ');

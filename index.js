@@ -4,6 +4,9 @@ import './polyfills';
 import { AppRegistry, LogBox } from 'react-native';
 import { name as appName } from './app.json';
 import App from './src/App';
+// Sets up dayjs in the app's language for every runtime, also one that never
+// renders the app (a bare import, so Metro doesn't inline it).
+import './src/helpers/i18n';
 import {
   installGlobalErrorHandler,
   installRejectionTracker,

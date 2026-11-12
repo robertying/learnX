@@ -5,8 +5,9 @@ import { Assignment } from 'data/types/state';
 import {
   cancelDeadlineReminders,
   cancelDeadlineRemindersOf,
+  isReminderKind,
   planDeadlineReminders,
-  previewDeadlineReminder,
+  reminderContent,
   remindLater,
   remindLaterDate,
   syncDeadlineReminders,
@@ -47,11 +48,6 @@ beforeEach(() => {
     .mocked(Notifications.getPermissionsAsync)
     .mockResolvedValue({ granted: true, canAskAgain: true } as never);
   scheduled.mockResolvedValue([]);
-});
-
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
 });
 
 describe('planDeadlineReminders', () => {
@@ -239,7 +235,7 @@ describe('syncDeadlineReminders', () => {
   });
 
   it('marks reminders that Android may hold back, to redo them once allowed', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest
       .mocked(Notifications.getExactAlarmPermissionsAsync)
       .mockResolvedValueOnce({ granted: false } as never);
@@ -306,7 +302,7 @@ describe('remindLaterDate', () => {
 describe('remindLater', () => {
   const notification = {
     request: {
-      content: { title: 'Essay', body: 'Calculus', data: { extra: 1 } },
+      content: { title: 'Essay', subtitle: 'Calculus', body: 'Old text' },
     },
   } as unknown as Notifications.Notification;
 
@@ -317,33 +313,40 @@ describe('remindLater', () => {
     jest.useRealTimers();
   });
 
-  it('replaces the put-off reminder of the assignment', async () => {
-    Platform.OS = 'ios';
-    await remindLater(notification, { id: 'a', deadline: now + 5 * hour });
+  it('replaces the put-off reminder, its text as of when it shows again', async () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
+    const deadline = now + 5 * hour;
+    await remindLater(notification, { id: 'a', deadline, kind: 'lateDue' });
     expect(schedule).toHaveBeenCalledWith({
       identifier: 'deadline-later:a',
-      content: {
-        title: 'Essay',
-        body: 'Calculus',
-        data: {
-          extra: 1,
-          type: 'assignment',
-          id: 'a',
-          deadline: now + 5 * hour,
-        },
-        categoryIdentifier: 'deadlineReminder',
-      },
+      content: reminderContent(
+        { id: 'a', title: 'Essay', courseName: 'Calculus', deadline },
+        now + hour,
+        'lateDue',
+      ),
       trigger: { type: 'date', date: now + hour },
+    });
+    expect(schedule.mock.calls[0][0].content).toMatchObject({
+      subtitle: 'Calculus',
+      data: { kind: 'lateDue' },
     });
   });
 
   it('posts to the deadlines channel on Android', async () => {
-    Platform.OS = 'android';
-    await remindLater(notification, { id: 'a', deadline: now + 5 * hour });
+    jest.replaceProperty(Platform, 'OS', 'android');
+    await remindLater(
+      { request: { content: {} } } as unknown as Notifications.Notification,
+      { id: 'a', deadline: now + 5 * hour },
+    );
     expect(schedule.mock.calls[0][0].trigger).toEqual({
       type: 'date',
       date: now + hour,
       channelId: 'deadlines',
+    });
+    expect(schedule.mock.calls[0][0].content).toMatchObject({
+      title: '',
+      subtitle: '',
+      data: { kind: 'due' },
     });
   });
 
@@ -353,30 +356,8 @@ describe('remindLater', () => {
   });
 });
 
-describe('previewDeadlineReminder', () => {
-  it('shows the first reminder again soon and counts them', async () => {
-    scheduled.mockResolvedValue([
-      { identifier: 'other', content: { title: 'Other' } },
-      {
-        identifier: 'deadline-reminder:a:1:60',
-        content: { title: 'A', body: 'Due', data: { id: 'a' } },
-      },
-      { identifier: 'deadline-reminder:b:1:60', content: { title: 'B' } },
-    ] as never);
-    await expect(previewDeadlineReminder()).resolves.toBe(2);
-    expect(schedule).toHaveBeenCalledWith({
-      content: {
-        title: 'A',
-        body: 'Due',
-        data: { id: 'a' },
-        categoryIdentifier: 'deadlineReminder',
-      },
-      trigger: { type: 'timeInterval', seconds: 10 },
-    });
-  });
-
-  it('schedules nothing without reminders', async () => {
-    await expect(previewDeadlineReminder()).resolves.toBe(0);
-    expect(schedule).not.toHaveBeenCalled();
-  });
+it('tells reminder kinds apart from other values', () => {
+  expect(isReminderKind('lateOpen')).toBe(true);
+  expect(isReminderKind('later')).toBe(false);
+  expect(isReminderKind(1)).toBe(false);
 });

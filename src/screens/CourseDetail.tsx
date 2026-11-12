@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  useContext,
-  useEffectEvent,
-  useLayoutEffect,
-  useState,
-} from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import {
   useSafeAreaFrame,
@@ -46,7 +40,7 @@ import {
   MainStackNavigationProp,
   MainStackScreenProps,
 } from 'navigation/types';
-import { headerButtons } from 'navigation/headerButtons';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import SegmentedTabs from 'components/SegmentedTabs';
 import { SafeAreaView } from 'react-native-screens/experimental';
 import { hasGlassHeader } from 'navigation/options';
@@ -64,7 +58,7 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
   data: T[];
   card: React.FC<{
     data: T;
-    disableSwipe?: boolean;
+    actionsDisabled?: boolean;
     hideCourseName?: boolean;
     onPress?: () => void;
     last?: boolean;
@@ -109,7 +103,7 @@ const CourseItemList = <T extends Notice | Assignment | File>({
           <Card
             data={item}
             last={index === data.length - 1}
-            disableSwipe
+            actionsDisabled
             hideCourseName
             onPress={() => navigation.push(detailScreen, { id: item.id })}
           />
@@ -247,21 +241,16 @@ const CourseDetailContent: React.FC<{
       });
     }
   };
-  const openCourseX = useEffectEvent(handleNavigateCourseX);
 
   // The course's page on CourseX, from the header like an item's info.
-  useLayoutEffect(() => {
-    navigation.setOptions(
-      headerButtons('right', [
-        {
-          id: 'courseInformation',
-          label: t('courseInformation'),
-          icon: 'info',
-          onPress: () => openCourseX(),
-        },
-      ]),
-    );
-  }, [navigation]);
+  useHeaderButtons(navigation, 'right', [
+    {
+      id: 'courseInformation',
+      label: t('courseInformation'),
+      icon: 'info',
+      onPress: handleNavigateCourseX,
+    },
+  ]);
 
   // From iOS 26 the tabs float under the header as a glass capsule over the
   // selected list, which scrolls under both. It has to be the screen's first

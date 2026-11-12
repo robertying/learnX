@@ -17,6 +17,7 @@ module LearnXModule
     s.platforms      = { :ios => DEPLOYMENT_TARGET }
     s.source         = { git: '' }
     s.static_framework = true
+    s.swift_version  = '6.0'
 
     s.dependency 'ExpoModulesCore'
 

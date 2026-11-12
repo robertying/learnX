@@ -28,6 +28,8 @@ jest.mock('data/serverActions', () => ({
 jest.mock('services/deadlineReminders', () => ({
   cancelDeadlineRemindersOf: jest.fn(async () => {}),
   remindLater: jest.fn(async () => {}),
+  isReminderKind: jest.requireActual('services/deadlineReminders')
+    .isReminderKind,
 }));
 jest.mock('services/surfaces', () => ({
   refreshSurfaces: jest.fn(async () => {}),
@@ -43,8 +45,6 @@ const response = (actionIdentifier: string, data: object) =>
       request: { identifier: 'notification-1', content: { data } },
     },
   }) as unknown as Notifications.NotificationResponse;
-
-const os = Platform.OS;
 const appState = AppState.currentState;
 
 beforeEach(() => {
@@ -52,7 +52,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  Platform.OS = os;
   AppState.currentState = appState;
   useAuthStore.setState(initialAuth);
 });
@@ -99,16 +98,32 @@ it('cancels the reminders and refreshes the surfaces for assignments', async () 
   expect(refreshSurfaces).toHaveBeenCalled();
 });
 
-it('puts a reminder off', async () => {
+it('puts a reminder off, keeping its kind', async () => {
   const later = response('remindLater', {
     type: 'assignment',
     id: 'a1',
     deadline: 123,
+    kind: 'lateDue',
   });
   await handleNotificationAction(later);
   expect(remindLater).toHaveBeenCalledWith(later.notification, {
     id: 'a1',
     deadline: 123,
+    kind: 'lateDue',
+  });
+
+  await handleNotificationAction(
+    response('remindLater', {
+      type: 'assignment',
+      id: 'a1',
+      deadline: 123,
+      kind: 'other',
+    }),
+  );
+  expect(jest.mocked(remindLater).mock.calls[1][1]).toEqual({
+    id: 'a1',
+    deadline: 123,
+    kind: undefined,
   });
 });
 
@@ -118,7 +133,7 @@ it('dismisses the notification on Android only', async () => {
   );
   expect(dismiss).not.toHaveBeenCalled();
 
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await handleNotificationAction(
     response('archive', { type: 'notice', id: 'n2' }),
   );
@@ -142,7 +157,7 @@ it('leaves sending a favorite to the app when it can', async () => {
 });
 
 it('ignores unknown actions and incomplete data', async () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await handleNotificationAction(
     response('reply', { type: 'notice', id: 'n1' }),
   );
@@ -166,7 +181,7 @@ describe('setUpNotificationActions', () => {
   const registerTask = jest.mocked(Notifications.registerTaskAsync);
 
   it('handles the action that launched the app and later ones', async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     lastResponse.mockReturnValue(
       response('archive', { type: 'notice', id: 'n1' }),
     );
@@ -194,7 +209,7 @@ describe('setUpNotificationActions', () => {
   });
 
   it('registers the background task on Android and records failures', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     lastResponse.mockReturnValue(null);
     registerTask.mockRejectedValueOnce(new Error('no task'));
     setUpNotificationActions();

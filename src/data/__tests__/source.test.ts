@@ -12,9 +12,7 @@ import {
   endSession,
   ensureSession,
   loginWithFingerPrint,
-  resetDataSource,
   serverWritesBlocked,
-  submitAssignment,
 } from 'data/source';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
@@ -30,7 +28,13 @@ const mockEnsureSession = jest.fn(() => Promise.resolve());
 const mockLogin = jest.fn<Promise<void>, [credential?: unknown]>(() =>
   Promise.resolve(),
 );
-let mockHelperConfig: { provider: () => unknown } | undefined;
+const mockMarkNotificationRead = jest.fn<Promise<void>, [unknown]>(() =>
+  Promise.resolve(),
+);
+type HelperConfig = {
+  provider: () => unknown;
+  clearLoginCookies: () => Promise<void>;
+};
 const mockGetSubmitRequest = jest.fn(
   async (
     id: string,
@@ -54,17 +58,19 @@ const mockGetSubmitRequest = jest.fn(
 );
 jest.mock('@robertying/thu-learn-lib', () => ({
   ...jest.requireActual('@robertying/thu-learn-lib'),
-  Learn2018Helper: class {
-    // The first one is made on import, before this file's variables exist.
-    constructor(config: { provider: () => unknown }) {
-      try {
-        mockHelperConfig = config;
-      } catch {}
+  Learn2018Helper: class Helper {
+    // Kept on the class: the helper is made when data/source loads, before
+    // this file's variables exist.
+    static config: HelperConfig;
+    constructor(config: HelperConfig) {
+      Helper.config = config;
     }
     getCSRFToken = () => 'token';
     login = (credential?: unknown) => mockLogin(credential);
     ensureSession = () => mockEnsureSession();
-    // the helper is made when data/source loads, before this file's consts
+    markNotificationRead = (notification: unknown) =>
+      mockMarkNotificationRead(notification);
+    // These call this file's consts only once a test runs.
     getHomeworkSubmitRequest = (
       ...args: Parameters<typeof mockGetSubmitRequest>
     ) => mockGetSubmitRequest(...args);
@@ -72,8 +78,13 @@ jest.mock('@robertying/thu-learn-lib', () => ({
 }));
 
 const post = jest.mocked(axios.post);
+const helperConfig = () =>
+  jest.requireMock<{ Learn2018Helper: { config: HelperConfig } }>(
+    '@robertying/thu-learn-lib',
+  ).Learn2018Helper.config;
 
-const submit = () => submitAssignment('homework-id', { content: 'content' });
+const submit = () =>
+  dataSource.submitAssignment('homework-id', { content: 'content' });
 
 describe('submitAssignment', () => {
   beforeEach(() => setServerWritesAllowed(true));
@@ -87,7 +98,7 @@ describe('submitAssignment', () => {
 
   it("sends thu-learn-lib's request, with the file as React Native uploads it", async () => {
     post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
-    await submitAssignment('homework-id', {
+    await dataSource.submitAssignment('homework-id', {
       content: '<p>answer</p>',
       attachment: { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
     });
@@ -137,7 +148,10 @@ describe('submitAssignment', () => {
   it('reports upload progress rounded, keeping the response text as is', async () => {
     post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
     const onProgress = jest.fn();
-    await submitAssignment('homework-id', { content: 'a', onProgress });
+    await dataSource.submitAssignment('homework-id', {
+      content: 'a',
+      onProgress,
+    });
     const config = post.mock.calls[0][2] as {
       onUploadProgress: (e: { loaded: number; total?: number }) => void;
       transformResponse: (data: string) => string;
@@ -147,69 +161,22 @@ describe('submitAssignment', () => {
     expect(onProgress.mock.calls).toEqual([[0.33], [0]]);
     expect(config.transformResponse('{"a":1}')).toBe('{"a":1}');
   });
-
-  it('does not call the server with nothing to submit', async () => {
-    post.mockClear();
-    await submitAssignment('homework-id', {});
-    expect(post).not.toHaveBeenCalled();
-  });
 });
 
 describe('markNoticeRead', () => {
   const url =
     'https://learn.tsinghua.edu.cn/f/wlxt/kcgg/wlkc_ggb/student/beforeViewXs?wlkcid=c&id=n';
-  const notice = `<html>${'notice '.repeat(1000)}</html>`;
-  const loginPage = '<html><title>登录超时</title></html>';
-  const page = (text: string, init: { status?: number; url?: string } = {}) => {
-    const response = new Response(text, { status: init.status ?? 200 });
-    Object.defineProperty(response, 'url', { value: init.url ?? url });
-    return response;
-  };
-  const fetchMock = jest.fn<Promise<Response>, [string]>();
 
-  beforeEach(() => {
-    fetchMock.mockReset();
-    mockEnsureSession.mockClear();
-    globalThis.fetch = fetchMock as unknown as typeof fetch;
-  });
+  beforeEach(() => mockMarkNotificationRead.mockClear());
 
-  it('loads the notice page once when the session is good', async () => {
-    fetchMock.mockResolvedValue(page(notice));
+  it("loads a Web Learning notice page through thu-learn-lib's session", async () => {
     await dataSource.markNoticeRead(url);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(mockEnsureSession).not.toHaveBeenCalled();
-  });
-
-  it('logs in again and loads it once more when it gets the login page', async () => {
-    fetchMock
-      .mockResolvedValueOnce(page(loginPage))
-      .mockResolvedValueOnce(page(notice));
-    await dataSource.markNoticeRead(url);
-    expect(mockEnsureSession).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-  });
-
-  it('treats a redirect to the login timeout page as an expired session', async () => {
-    fetchMock.mockResolvedValue(
-      page('', { url: 'https://learn.tsinghua.edu.cn/f/login_timeout' }),
-    );
-    await expect(dataSource.markNoticeRead(url)).rejects.toMatchObject({
-      reason: FailReason.NOT_LOGGED_IN,
-    });
-    expect(mockEnsureSession).toHaveBeenCalledTimes(1);
-  });
-
-  it('fails with the status of an error page', async () => {
-    fetchMock.mockResolvedValue(page('', { status: 500 }));
-    await expect(dataSource.markNoticeRead(url)).rejects.toMatchObject({
-      reason: FailReason.UNEXPECTED_STATUS,
-      extra: 500,
-    });
+    expect(mockMarkNotificationRead).toHaveBeenCalledWith({ url });
   });
 
   it('does not load a page outside Web Learning', async () => {
     await dataSource.markNoticeRead('https://example.com/notice');
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(mockMarkNotificationRead).not.toHaveBeenCalled();
   });
 });
 
@@ -224,12 +191,10 @@ describe('picking the server', () => {
         fingerGenPrint3: 'g3',
       },
     });
-  const os = Platform.OS;
 
   afterEach(() => {
     useCredentialsStore.setState({ credentials: null });
     endSession();
-    Platform.OS = os;
   });
 
   it('keeps to the server a login started with, whatever login is saved', async () => {
@@ -271,18 +236,13 @@ describe('picking the server', () => {
 
   it('picks by the account a new login names, not the stored one', async () => {
     credentials('mock-user');
-    Platform.OS = 'ios';
     const credential = { username: '2020000000', password: 'p' };
     await loginWithFingerPrint(credential);
     expect(mockLogin).toHaveBeenCalledWith(credential);
-    expect(CookieManager.get).toHaveBeenCalledWith(
-      'https://id.tsinghua.edu.cn',
-      { iosCookieStore: 'foundation' },
-    );
   });
 
-  it("clears the SSO page's id.tsinghua.edu.cn cookies from both iOS stores", async () => {
-    Platform.OS = 'ios';
+  it("has thu-learn-lib clear the SSO page's id.tsinghua.edu.cn cookies from both iOS stores", async () => {
+    jest.replaceProperty(Platform, 'OS', 'ios');
     jest
       .mocked(CookieManager.get)
       .mockImplementation((_url, options) =>
@@ -293,7 +253,7 @@ describe('picking the server', () => {
             : ({ JSESSIONID: {} } as never),
         ),
       );
-    await loginWithFingerPrint({ username: '2020000000', password: 'p' });
+    await helperConfig().clearLoginCookies();
     const cleared = jest
       .mocked(CookieManager.clearByName)
       .mock.calls.map(([, name, options]) => [
@@ -314,11 +274,11 @@ describe('picking the server', () => {
   });
 
   it('empties the SSO cookies by hand on Android', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest
       .mocked(CookieManager.get)
       .mockResolvedValueOnce({ singleLogin: {} } as never);
-    await loginWithFingerPrint({ username: '2020000000', password: 'p' });
+    await helperConfig().clearLoginCookies();
     expect(CookieManager.setFromResponse).toHaveBeenCalledWith(
       'https://id.tsinghua.edu.cn',
       'JSESSIONID=; path=/; HttpOnly',
@@ -341,8 +301,7 @@ describe('picking the server', () => {
   });
 
   it("hands thu-learn-lib the saved login, blanks for what's missing", () => {
-    resetDataSource();
-    const provider = mockHelperConfig!.provider;
+    const provider = helperConfig().provider;
     expect(provider()).toEqual({
       username: undefined,
       password: undefined,

@@ -8,6 +8,7 @@ import {
   osVersion,
   supportedCpuArchitectures,
 } from 'expo-device';
+import packageJson from '../../package.json';
 
 // iOS 26 and later: Liquid Glass, native header subtitles
 const ios26 =
@@ -17,6 +18,11 @@ const ios26 =
 const isMac = Platform.OS === 'ios' && deviceType === DeviceType.DESKTOP;
 
 export default {
+  /**
+   * The running JS version (`package.json`'s), which an over-the-air update
+   * changes; the store version can be older.
+   */
+  appVersion: () => packageJson.version,
   buildNo: () => nativeBuildVersion ?? '',
   isTablet: () => deviceType === DeviceType.TABLET,
   isIPad: () => osName === 'iPadOS',
@@ -24,9 +30,11 @@ export default {
   /** The APK flavor to download on Android. */
   abi: () => supportedCpuArchitectures?.[0] || 'universal',
   systemVersion: () => osVersion ?? '',
-  /** iOS 26 and later, which draw controls in Liquid Glass. */
+  /**
+   * iOS 26 and later, which draw controls in Liquid Glass and have native
+   * header subtitles.
+   */
   hasLiquidGlass: () => ios26,
-  supportsNativeSubtitle: () => ios26,
   // On a Mac, expo-device names the CPU ("arm64" reads as "Simulator iOS").
   model: () => (isMac ? 'Mac' : modelName || osName || Platform.OS),
 };

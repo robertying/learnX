@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { AppState, AppStateStatus, Text } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { act, render, screen } from '@testing-library/react-native';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import NativeSplitViewProvider, {
   useSplitLaidOut,
 } from 'navigation/NativeSplitView';
@@ -78,7 +78,8 @@ it('shows only the master pane without the split', async () => {
   expect(context()).toMatchObject({
     detailNavigationContainerRef: null,
     showDetail: false,
-    masterWidth: Numbers.splitViewMasterWidth,
+    laidOut: true,
+    masterWidth: SplitSizes.masterWidth,
   });
 });
 
@@ -88,12 +89,11 @@ it('lays the panes side by side until UIKit collapses them', async () => {
     preferredDisplayMode: 'oneBesideSecondary',
     displayModeButtonVisibility: 'never',
     topColumnForCollapsing: 'primary',
-    maxCollapsedWidth: Numbers.splitViewMaxCollapsedWidth,
+    maxCollapsedWidth: SplitSizes.maxCollapsedWidth,
   });
   expect(mockColumns).toHaveLength(2);
   expect(context().detailNavigationContainerRef).toBe(ref);
   expect(context().showDetail).toBe(true);
-
   await act(() => mockHost.onCollapse());
   expect(context().showDetail).toBe(false);
   expect(context().detailNavigationContainerRef).toBeNull();
@@ -145,7 +145,7 @@ describe('with a sidebar', () => {
       topColumnForCollapsing: 'supplementary',
       maxCollapsedWidth: undefined,
       columnMetrics: {
-        minimumSecondaryColumnWidth: Numbers.splitViewMinDetailWidth,
+        minimumSecondaryColumnWidth: SplitSizes.minDetailWidth,
       },
     });
   });
@@ -191,4 +191,15 @@ it('gives each column the safe area it reports on screen, and splits not yet lai
 
   await act(() => master.onDidDisappear());
   expect(screen.getByTestId('master-insets')).toHaveTextContent('0');
+});
+
+// Last: a column on screen reports its metrics to every split for good.
+it('knows its layout once its columns have been on screen', async () => {
+  await renderSplit();
+  // Until then, UIKit may still collapse it.
+  expect(context().laidOut).toBe(false);
+  await act(() => mockColumns[0].onDidAppear());
+  expect(context().laidOut).toBe(true);
+  await act(() => mockColumns[0].onDidDisappear());
+  expect(context().laidOut).toBe(true);
 });

@@ -8,50 +8,8 @@
   },
   "env": {
     "builtin": true,
-    "es2026": true
-  },
-  "globals": {
-    "__DEV__": "writable",
-    "__dirname": "readonly",
-    "__fbBatchedBridgeConfig": "readonly",
-    "AbortController": "readonly",
-    "Blob": "writable",
-    "alert": "readonly",
-    "cancelAnimationFrame": "readonly",
-    "cancelIdleCallback": "readonly",
-    "clearImmediate": "writable",
-    "clearInterval": "readonly",
-    "clearTimeout": "readonly",
-    "console": "readonly",
-    "document": "readonly",
-    "ErrorUtils": "readonly",
-    "Event": "readonly",
-    "EventTarget": "readonly",
-    "exports": "readonly",
-    "fetch": "readonly",
-    "File": "writable",
-    "FileReader": "readonly",
-    "FormData": "readonly",
-    "global": "readonly",
-    "Headers": "readonly",
-    "Map": "writable",
-    "module": "readonly",
-    "navigator": "readonly",
-    "process": "readonly",
-    "Promise": "writable",
-    "requestAnimationFrame": "writable",
-    "requestIdleCallback": "writable",
-    "require": "readonly",
-    "Set": "writable",
-    "setImmediate": "writable",
-    "setInterval": "readonly",
-    "setTimeout": "readonly",
-    "queueMicrotask": "writable",
-    "URL": "readonly",
-    "URLSearchParams": "readonly",
-    "WebSocket": "writable",
-    "window": "readonly",
-    "XMLHttpRequest": "readonly"
+    "es2026": true,
+    "node": true
   },
   "rules": {
     "no-regex-spaces": "warn",
@@ -180,7 +138,8 @@
       }
     },
     {
-      "files": ["src/helpers/preval/sso.js"],
+      // Scripts the app runs in its web views
+      "files": ["src/helpers/preval/sso.js", "src/helpers/preval/darkMode.js"],
       "env": {
         "browser": true
       }

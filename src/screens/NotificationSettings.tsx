@@ -3,7 +3,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   Form,
   FormButton,
-  FormIcon,
   FormNumberField,
   FormScreen,
   FormSection,
@@ -13,6 +12,11 @@ import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
 import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
+import {
+  newContentToggles,
+  notificationToggles,
+  type NotificationToggle,
+} from 'helpers/notificationToggles';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { SettingsStackParams } from 'navigation/types';
@@ -22,51 +26,12 @@ type Props = NativeStackScreenProps<
   'NotificationSettings'
 >;
 
-type Offset = 'deadlineReminderOffset' | 'classReminderOffset';
-type Toggle = Exclude<keyof Settings, Offset>;
-
-interface ToggleRow {
-  key: Toggle;
-  icon: FormIcon;
-  label: string;
-}
-
-// Grouped and ordered as on the Setup page.
-const contentToggles: ToggleRow[] = [
-  {
-    key: 'notices',
-    icon: 'notices',
-    label: t('notifyNewNotices'),
-  },
-  {
-    key: 'assignments',
-    icon: 'assignments',
-    label: t('notifyNewAssignments'),
-  },
-  {
-    key: 'files',
-    icon: 'files',
-    label: t('notifyNewFiles'),
-  },
-];
-
-const assignmentToggles: ToggleRow[] = [
-  {
-    key: 'grades',
-    icon: 'grade',
-    label: t('notifyGrades'),
-  },
-  {
-    key: 'deadlineChanges',
-    icon: 'deadlineChange',
-    label: t('notifyDeadlineChanges'),
-  },
-  {
-    key: 'groupSubmissions',
-    icon: 'groupSubmission',
-    label: t('notifyGroupSubmissions'),
-  },
-];
+// Grades and the assignment changes follow deadline reminders.
+const assignmentToggles = [
+  'grades',
+  'deadlineChanges',
+  'groupSubmissions',
+] as const satisfies NotificationToggle[];
 
 const NotificationSettings: React.FC<Props> = () => {
   const notifications = useSettings(settings => settings.notifications);
@@ -84,29 +49,26 @@ const NotificationSettings: React.FC<Props> = () => {
    * denied: it's the user's choice, and it starts working once notifications
    * are allowed in the system settings.
    */
-  const handleToggle = async (key: Toggle, value: boolean) => {
+  const handleToggle = async (key: NotificationToggle, value: boolean) => {
     set(key, value);
     if (value && !(await request())) {
       toast(t('notificationPermissionDenied'), 'error');
     }
   };
 
-  const renderToggle = ({ key, icon, label }: ToggleRow) => (
+  const renderToggle = (key: NotificationToggle) => (
     <FormToggle
       key={key}
       testID={`notifications-${key}`}
-      icon={icon}
-      title={label}
+      icon={notificationToggles[key].icon}
+      title={notificationToggles[key].title()}
       value={notifications[key]}
       onValueChange={value => handleToggle(key, value)}
     />
   );
 
-  const anyOn = (Object.keys(notifications) as (keyof Settings)[]).some(
-    key =>
-      key !== 'deadlineReminderOffset' &&
-      key !== 'classReminderOffset' &&
-      notifications[key],
+  const anyOn = (Object.keys(notificationToggles) as NotificationToggle[]).some(
+    key => notifications[key],
   );
 
   /**
@@ -137,20 +99,14 @@ const NotificationSettings: React.FC<Props> = () => {
           title={t('setupNewContent')}
           footer={t('notificationsCaption')}
         >
-          {contentToggles.map(renderToggle)}
+          {newContentToggles.map(renderToggle)}
         </FormSection>
         {/* Classes before assignments, as in Settings › Calendar. */}
         <FormSection
           title={t('schedule')}
           footer={t('notifyClassRemindersCaption')}
         >
-          <FormToggle
-            testID="notifications-classReminders"
-            icon="reminder"
-            title={t('notifyClassReminders')}
-            value={notifications.classReminders}
-            onValueChange={value => handleToggle('classReminders', value)}
-          />
+          {renderToggle('classReminders')}
           {notifications.classReminders && (
             <FormNumberField
               title={t('classReminderOffset')}
@@ -170,13 +126,7 @@ const NotificationSettings: React.FC<Props> = () => {
             .filter(Boolean)
             .join('\n\n')}
         >
-          <FormToggle
-            testID="notifications-deadlineReminders"
-            icon="reminder"
-            title={t('notifyDeadlineReminders')}
-            value={notifications.deadlineReminders}
-            onValueChange={value => handleToggle('deadlineReminders', value)}
-          />
+          {renderToggle('deadlineReminders')}
           {notifications.deadlineReminders && (
             <FormNumberField
               title={t('deadlineReminderOffset')}

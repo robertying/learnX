@@ -113,13 +113,6 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
     files: fileResult,
   } = useSearch(notices, assignments, files, searchQuery);
 
-  const handlePush = (
-    name: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail',
-    id: string,
-  ) => {
-    navigation.push(name, { id });
-  };
-
   return (
     <SafeArea>
       <View style={Styles.flex1}>
@@ -156,22 +149,26 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
                 <NoticeCard
                   data={item as Notice}
                   last={index === data.length - 1}
-                  disableSwipe
-                  onPress={() => handlePush('NoticeDetail', item.id)}
+                  actionsDisabled
+                  onPress={() =>
+                    navigation.push('NoticeDetail', { id: item.id })
+                  }
                 />
               ) : key === 'assignment' ? (
                 <AssignmentCard
                   data={item as Assignment}
                   last={index === data.length - 1}
-                  disableSwipe
-                  onPress={() => handlePush('AssignmentDetail', item.id)}
+                  actionsDisabled
+                  onPress={() =>
+                    navigation.push('AssignmentDetail', { id: item.id })
+                  }
                 />
               ) : (
                 <FileCard
                   data={item as File}
                   last={index === data.length - 1}
-                  disableSwipe
-                  onPress={() => handlePush('FileDetail', item.id)}
+                  actionsDisabled
+                  onPress={() => navigation.push('FileDetail', { id: item.id })}
                 />
               )
             }
@@ -202,7 +199,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginVertical: -1,
+    marginVertical: 1,
   },
 });
 

@@ -4,9 +4,10 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import About from 'screens/About';
 import packageJson from '../../../package.json';
+import { screenProps } from 'test-utils/screenProps';
 
 it('shows the version with its build, and every dependency', async () => {
-  await render(<About navigation={{} as never} route={{} as never} />);
+  await render(<About {...screenProps()} />);
   expect(
     screen.getByText(`${packageJson.version} (${DeviceInfo.buildNo()})`),
   ).toBeTruthy();
@@ -19,7 +20,7 @@ it('shows the version with its build, and every dependency', async () => {
 it('opens the source, contributors, thanks and filing pages', async () => {
   const user = userEvent.setup();
   const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
-  await render(<About navigation={{} as never} route={{} as never} />);
+  await render(<About {...screenProps()} />);
   const links = {
     [t('sourceCode')]: 'https://github.com/robertying/learnX',
     'Rui Ying': 'https://github.com/robertying',

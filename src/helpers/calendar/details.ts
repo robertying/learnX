@@ -7,10 +7,9 @@ import dayjs, { Dayjs } from 'dayjs';
 import type { CalendarClass } from 'helpers/schedule';
 import { Assignment, Course, SettingsState } from 'data/types/state';
 import type { CalendarSyncState } from 'data/calendarSync';
-import { removeTags } from 'helpers/text';
+import { hash, removeTags } from 'helpers/text';
 import { ICSEvent } from './ics';
 import locationMappings from '../../assets/locationMappings.json';
-import { beijingTime } from 'helpers/serverTime';
 import { t } from 'helpers/i18n';
 
 /** Settings › Calendar's name: Reminders sync is only on iOS, iPadOS and Mac. */
@@ -59,15 +58,6 @@ export function sanitizeLocation(location: string): string {
   return location;
 }
 
-/** djb2, as hex; used for stable course event uids */
-export function hash(text: string): string {
-  let result = 5381;
-  for (let i = 0; i < text.length; i++) {
-    result = (result * 33 + text.charCodeAt(i)) % 0x100000000;
-  }
-  return result.toString(16);
-}
-
 /** What the optional calendar settings (in minutes) are until they're set. */
 export const calendarDefaults = {
   courseAlarmOffset: 15,
@@ -84,9 +74,8 @@ export const buildCourseEventDetails = (
   const alarms = settings.alarms;
   return {
     title: e.courseName,
-    // the registrar's dates and times are Beijing times
-    startDate: new Date(beijingTime(e.date, e.startTime)),
-    endDate: new Date(beijingTime(e.date, e.endTime)),
+    startDate: new Date(e.start),
+    endDate: new Date(e.end),
     timeZone: TZ,
     location: settings.courseEventOmitLocation
       ? undefined

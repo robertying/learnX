@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
 import { Assignment, File, Notice } from 'data/types/state';
-import { removeTags } from 'helpers/text';
+import Storage from 'expo-sqlite/kv-store';
+import { hash, removeTags } from 'helpers/text';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
 const MAX_DETAILS_LENGTH = 500;
@@ -52,12 +53,58 @@ export const fileSpotlightItem = (file: File): SpotlightItem => ({
   date: time(file.uploadTime),
 });
 
+/** A hash of each indexed item, by domain and item id. */
+type Indexed = Partial<Record<SpotlightDomain, Record<string, string>>>;
+
+export const SPOTLIGHT_INDEXED_KEY = 'spotlightIndexed';
+
+const readSaved = (): Indexed => {
+  try {
+    const saved = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
+    return saved ? (JSON.parse(saved) as Indexed) : {};
+  } catch {
+    return {};
+  }
+};
+
 /**
- * What each domain was last sent with, by item id, so an unchanged list isn't
- * sent again. The module keeps its own record across launches and indexes
- * only what changed.
+ * What the index holds: each domain's items, as of the last write that
+ * finished, saved so a new JS runtime (an app launch, the background task)
+ * sends only what changed instead of indexing everything again.
  */
-let sent: Partial<Record<SpotlightDomain, Map<string, string>>> = {};
+let saved: Indexed | undefined;
+/** What the queued writes will make it: compared with the next update. */
+let indexed: Indexed | undefined;
+
+const getIndexed = () => {
+  saved ??= readSaved();
+  indexed ??= { ...saved };
+  return indexed;
+};
+
+const save = (
+  domain: SpotlightDomain,
+  items: Record<string, string> | undefined,
+) => {
+  const next = { ...(saved ??= readSaved()) };
+  if (items) {
+    next[domain] = items;
+  } else {
+    delete next[domain];
+  }
+  saved = next;
+  try {
+    Storage.setItemSync(SPOTLIGHT_INDEXED_KEY, JSON.stringify(next));
+  } catch {}
+};
+
+const forgetSaved = () => {
+  saved = {};
+  try {
+    Storage.removeItemSync(SPOTLIGHT_INDEXED_KEY);
+  } catch {}
+};
+
 /** Index changes run one at a time, in order. */
 let queue = Promise.resolve();
 
@@ -70,23 +117,30 @@ const enqueue = (work: () => Promise<void>) => {
   });
 };
 
-const syncItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
-  const before = sent[domain];
-  const after = new Map(items.map(item => [item.id, JSON.stringify(item)]));
-  if (
-    before &&
-    before.size === after.size &&
-    [...after].every(([id, item]) => before.get(id) === item)
-  ) {
+const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
+  const all = getIndexed();
+  const before = all[domain];
+  const after = Object.fromEntries(
+    items.map(item => [item.id, hash(JSON.stringify(item))]),
+  );
+  const changed = items.filter(item => before?.[item.id] !== after[item.id]);
+  const removed = before
+    ? Object.keys(before).filter(id => !Object.hasOwn(after, id))
+    : [];
+  if (before && changed.length === 0 && removed.length === 0) {
     return;
   }
-  sent[domain] = after;
+  all[domain] = after;
   enqueue(async () => {
     try {
-      await Spotlight!.syncItems(domain, items);
+      await (before
+        ? Spotlight!.updateItems(domain, changed, removed)
+        : Spotlight!.replaceItems(domain, items));
+      save(domain, after);
     } catch (error) {
-      // Sent again with the next update.
-      delete sent[domain];
+      // The next change replaces the whole domain.
+      delete getIndexed()[domain];
+      save(domain, undefined);
       throw error;
     }
   });
@@ -113,13 +167,13 @@ export async function updateSpotlight(
     items.filter(item => !hidden.has(item.courseId));
 
   if (notices) {
-    syncItems('notice', shown(notices).map(noticeSpotlightItem));
+    replaceItems('notice', shown(notices).map(noticeSpotlightItem));
   }
   if (assignments) {
-    syncItems('assignment', shown(assignments).map(assignmentSpotlightItem));
+    replaceItems('assignment', shown(assignments).map(assignmentSpotlightItem));
   }
   if (files) {
-    syncItems('file', shown(files).map(fileSpotlightItem));
+    replaceItems('file', shown(files).map(fileSpotlightItem));
   }
   await queue;
 }
@@ -129,6 +183,10 @@ export function clearSpotlight() {
   if (!Spotlight) {
     return;
   }
-  sent = {};
-  enqueue(() => Spotlight!.removeAllItems());
+  indexed = {};
+  enqueue(async () => {
+    // After the writes queued before it, which saved what they indexed.
+    forgetSaved();
+    await Spotlight!.removeAllItems();
+  });
 }

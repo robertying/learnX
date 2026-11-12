@@ -20,7 +20,8 @@ export interface SpotlightOpenedItem {
   id: string;
 }
 
-export interface UpcomingDeadline {
+/** An open assignment, as the "Next Deadline" App Intent stores it. */
+export interface IntentDeadline {
   id: string;
   title: string;
   courseName: string;
@@ -28,7 +29,8 @@ export interface UpcomingDeadline {
   deadline: number;
 }
 
-export interface UpcomingClass {
+/** A class still ahead, as the "Next Class" App Intent stores it. */
+export interface IntentClass {
   courseName: string;
   location: string;
   /** Milliseconds since the epoch. */
@@ -41,12 +43,17 @@ type SpotlightEvents = {
 };
 
 declare class SpotlightModule extends NativeModule<SpotlightEvents> {
+  /** Replaces the domain's items in the Spotlight index with these. */
+  replaceItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
   /**
-   * Makes the domain hold exactly these items. The module remembers what it
-   * indexed (across launches), so only new and changed items are indexed and
-   * the ones that went are removed.
+   * Indexes `items` (new or changed) and removes the items with `removedIds`
+   * from the domain.
    */
-  syncItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
+  updateItems(
+    domain: SpotlightDomain,
+    items: SpotlightItem[],
+    removedIds: string[],
+  ): Promise<void>;
   /** Removes everything the app indexed. */
   removeAllItems(): Promise<void>;
   /**
@@ -55,13 +62,12 @@ declare class SpotlightModule extends NativeModule<SpotlightEvents> {
    */
   takeOpenedItem(): SpotlightOpenedItem | null;
   /** Saves the open assignments for the "Next Deadline" App Intent. */
-  setUpcomingDeadlines(deadlines: UpcomingDeadline[]): void;
+  setUpcomingDeadlines(deadlines: IntentDeadline[]): void;
   /** Saves the classes still ahead for the "Next Class" App Intent. */
-  setUpcomingClasses(classes: UpcomingClass[]): void;
+  setUpcomingClasses(classes: IntentClass[]): void;
 }
 
 /**
- * Core Spotlight on iOS and Mac. Null on Android, in Jest, and in an app built
- * before the module was added.
+ * Core Spotlight on iOS and Mac. Null on Android and in Jest.
  */
 export default requireOptionalNativeModule<SpotlightModule>('Spotlight');

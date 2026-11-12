@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Platform, PlatformColor, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import ActionBar from 'components/ActionBar';
-import { Form, FormSection, FormToggle } from 'components/Form';
+import { Form, FormScreen, FormSection, FormToggle } from 'components/Form';
 import { Title } from 'components/Text';
 import { toast } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -10,26 +10,27 @@ import { setSetupSeen, setWhatsNewSeen } from 'data/appState';
 import { setSetting, useSettings } from 'data/settings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
+import {
+  newContentToggles,
+  notificationToggles,
+} from 'helpers/notificationToggles';
 import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
-import { useTheme } from 'theme';
 import { RootStackParams } from 'navigation/types';
-import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
 /**
- * The page after the first login: turns on notifications of new content (in
- * the tabs' order), class and deadline reminders and grades (all on to start
- * with), and calendar sync and, on Apple platforms, Reminders sync (off,
- * unless an earlier version synced them). All
- * of them start off in Settings. Done saves the choices and asks for the
- * permissions they need; notifications chosen stay on if that's denied, and
- * start working once they're allowed. Opened by `useLaunchSheet`, once, also
- * on an update for a user who never saw it.
+ * The page after the first login, where people choose what to turn on:
+ * notifications of new content (in the tabs' order), class and deadline
+ * reminders and grades, all on here to start with, and calendar sync and, on
+ * Apple platforms, Reminders sync, off unless an earlier version synced them.
+ * (Settings has them all off until chosen.) Done saves the choices and asks
+ * for the permissions they need; notifications chosen stay on if that's
+ * denied, and start working once they're allowed. Opened by `useLaunchSheet`,
+ * once, also on an update for a user who never saw it.
  */
 const Setup: React.FC<Props> = ({ navigation, route }) => {
-  const theme = useTheme();
   const notifications = useSettings(settings => settings.notifications);
   // On after an update if the user synced before.
   const calendarSynced = useSettings(
@@ -59,12 +60,25 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
   useEffect(() => {
     setSetupSeen();
     if (!update) {
-      setWhatsNewSeen(packageJson.version);
+      setWhatsNewSeen(DeviceInfo.appVersion());
     }
   }, [update]);
 
   const choose = (key: keyof typeof choices) => (value: boolean) =>
     setChoices(current => ({ ...current, [key]: value }));
+
+  const toggle = (
+    key: Exclude<keyof typeof choices, 'calendar' | 'reminders'>,
+  ) => (
+    <FormToggle
+      key={key}
+      testID={`setup-${key}`}
+      icon={notificationToggles[key].icon}
+      title={notificationToggles[key].title()}
+      value={choices[key]}
+      onValueChange={choose(key)}
+    />
+  );
 
   const close = () => navigation.goBack();
 
@@ -97,20 +111,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
   };
 
   return (
-    <View
-      testID="setup"
-      style={[
-        styles.root,
-        {
-          backgroundColor:
-            Platform.OS === 'android'
-              ? theme.colors.surface
-              : DeviceInfo.isMac()
-                ? PlatformColor('systemBackground')
-                : PlatformColor('systemGroupedBackground'),
-        },
-      ]}
-    >
+    <FormScreen testID="setup">
       <Title
         variant="largeTitle"
         style={styles.title}
@@ -120,48 +121,15 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
       </Title>
       <Form>
         <FormSection title={t('setupNewContent')}>
-          <FormToggle
-            testID="setup-notices"
-            icon="notices"
-            title={t('notifyNewNotices')}
-            value={choices.notices}
-            onValueChange={choose('notices')}
-          />
-          <FormToggle
-            icon="assignments"
-            title={t('notifyNewAssignments')}
-            value={choices.assignments}
-            onValueChange={choose('assignments')}
-          />
-          <FormToggle
-            icon="files"
-            title={t('notifyNewFiles')}
-            value={choices.files}
-            onValueChange={choose('files')}
-          />
+          {newContentToggles.map(toggle)}
         </FormSection>
         {/* Classes before assignments, as in Settings › Calendar. */}
         <FormSection title={t('schedule')}>
-          <FormToggle
-            icon="reminder"
-            title={t('notifyClassReminders')}
-            value={choices.classReminders}
-            onValueChange={choose('classReminders')}
-          />
+          {toggle('classReminders')}
         </FormSection>
         <FormSection title={t('assignments')}>
-          <FormToggle
-            icon="reminder"
-            title={t('notifyDeadlineReminders')}
-            value={choices.deadlineReminders}
-            onValueChange={choose('deadlineReminders')}
-          />
-          <FormToggle
-            icon="grade"
-            title={t('notifyGrades')}
-            value={choices.grades}
-            onValueChange={choose('grades')}
-          />
+          {toggle('deadlineReminders')}
+          {toggle('grades')}
         </FormSection>
         {/* Reminders sync is only on iOS, iPadOS and Mac. */}
         <FormSection title={calendarSettingsTitle()} footer={t('setupCaption')}>
@@ -194,19 +162,16 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
           onPress: close,
         }}
       />
-    </View>
+    </FormScreen>
   );
 };
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-  },
   title: {
     textAlign: Platform.OS === 'android' ? 'auto' : 'center',
     paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 8,
+    paddingTop: 34,
+    paddingBottom: 10,
   },
 });
 

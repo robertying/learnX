@@ -2,6 +2,7 @@ import { act, render, screen, userEvent } from '@testing-library/react-native';
 import type { SearchBarProps } from 'react-native-screens';
 import { Assignment, File, Notice } from 'data/types/state';
 import Search from 'screens/Search';
+import { screenProps } from 'test-utils/screenProps';
 
 const mockNotices: Notice[] = [
   {
@@ -64,8 +65,10 @@ const setup = async (query?: string, parent?: object) => {
   };
   await render(
     <Search
-      navigation={navigation as never}
-      route={{ key: 'Search', name: 'Search', params: { query } } as never}
+      {...screenProps({
+        navigation,
+        route: { key: 'Search', name: 'Search', params: { query } },
+      })}
     />,
   );
   const options = (): SearchBarProps =>

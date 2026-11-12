@@ -32,7 +32,7 @@ import Login from 'screens/Login';
 import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
-import CalendarEvent from 'screens/CalendarEvent';
+import CalendarSettings from 'screens/CalendarSettings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import Downloads from 'screens/Downloads';
 import SwipeActions from 'screens/SwipeActions';
@@ -47,13 +47,13 @@ import About from 'screens/About';
 import Changelog from 'screens/Changelog';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
-import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import {
   getItemDetailOptions,
   getModalScreenOptions,
+  getTitleOptions,
   hasGlassHeader,
   debugTitle,
   mockNetworkTitle,
@@ -83,26 +83,34 @@ const ItemDetails = createNativeStackNavigator<ItemDetailParams>();
 const SettingDetails = createNativeStackNavigator<SettingDetailParams>();
 const TodayDetails = createNativeStackNavigator<TodayDetailParams>();
 
+/** The page of each kind of item. */
+const itemDetailScreens: {
+  [Name in keyof ItemDetailParams]: React.ComponentType<any>;
+} = {
+  CourseDetail,
+  NoticeDetail,
+  AssignmentDetail,
+  FileDetail,
+};
+
+export const allItemDetails = Object.keys(
+  itemDetailScreens,
+) as (keyof ItemDetailParams)[];
+
 /** The given item detail screens, for a stack whose params include them. */
 export const renderItemDetails = (
   names: readonly (keyof ItemDetailParams)[],
 ) => (
   <ItemDetails.Group screenOptions={getItemDetailOptions}>
-    {names.includes('CourseDetail') && (
-      <ItemDetails.Screen name="CourseDetail" component={CourseDetail} />
-    )}
-    {names.includes('NoticeDetail') && (
-      <ItemDetails.Screen name="NoticeDetail" component={NoticeDetail} />
-    )}
-    {names.includes('AssignmentDetail') && (
-      <ItemDetails.Screen
-        name="AssignmentDetail"
-        component={AssignmentDetail}
-      />
-    )}
-    {names.includes('FileDetail') && (
-      <ItemDetails.Screen name="FileDetail" component={FileDetail} />
-    )}
+    {allItemDetails
+      .filter(name => names.includes(name))
+      .map(name => (
+        <ItemDetails.Screen
+          key={name}
+          name={name}
+          component={itemDetailScreens[name]}
+        />
+      ))}
   </ItemDetails.Group>
 );
 
@@ -117,69 +125,43 @@ export const renderTodayDetails = () => (
   </TodayDetails.Group>
 );
 
+/** Each page Settings opens, and its title. */
+const settingDetailScreens: {
+  [Name in keyof SettingDetailParams]: [React.ComponentType<any>, () => string];
+} = {
+  CourseInformationSharing: [
+    CourseInformationSharing,
+    () => t('courseInformationSharing'),
+  ],
+  CalendarSettings: [CalendarSettings, calendarSettingsTitle],
+  SemesterSelection: [SemesterSelection, () => t('semesterSelection')],
+  Downloads: [Downloads, () => t('downloads')],
+  NotificationSettings: [NotificationSettings, () => t('notifications')],
+  SwipeActions: [SwipeActions, () => t('swipeActions')],
+  Maintainer: [Maintainer, () => t('becomeMaintainer')],
+  Help: [Help, () => t('helpAndFeedback')],
+  About: [About, () => t('about')],
+  Changelog: [Changelog, () => t('changelog')],
+  MockNetwork: [MockNetwork, () => mockNetworkTitle],
+  Debug: [Debug, () => debugTitle],
+};
+
 /** The screens Settings opens; also shown in the split view's detail pane. */
 export const renderSettingDetails = () => (
   <SettingDetails.Group>
-    <SettingDetails.Screen
-      name="CourseInformationSharing"
-      component={CourseInformationSharing}
-      options={getTitleOptions(t('courseInformationSharing'))}
-    />
-    <SettingDetails.Screen
-      name="CalendarEvent"
-      component={CalendarEvent}
-      options={getTitleOptions(calendarSettingsTitle())}
-    />
-    <SettingDetails.Screen
-      name="SemesterSelection"
-      component={SemesterSelection}
-      options={getTitleOptions(t('semesterSelection'))}
-    />
-    <SettingDetails.Screen
-      name="Downloads"
-      component={Downloads}
-      options={getTitleOptions(t('downloads'))}
-    />
-    <SettingDetails.Screen
-      name="NotificationSettings"
-      component={NotificationSettings}
-      options={getTitleOptions(t('notifications'))}
-    />
-    <SettingDetails.Screen
-      name="SwipeActions"
-      component={SwipeActions}
-      options={getTitleOptions(t('swipeActions'))}
-    />
-    <SettingDetails.Screen
-      name="Maintainer"
-      component={Maintainer}
-      options={getTitleOptions(t('becomeMaintainer'))}
-    />
-    <SettingDetails.Screen
-      name="Help"
-      component={Help}
-      options={getTitleOptions(t('helpAndFeedback'))}
-    />
-    <SettingDetails.Screen
-      name="About"
-      component={About}
-      options={getTitleOptions(t('about'))}
-    />
-    <SettingDetails.Screen
-      name="Changelog"
-      component={Changelog}
-      options={getTitleOptions(t('changelog'))}
-    />
-    <SettingDetails.Screen
-      name="MockNetwork"
-      component={MockNetwork}
-      options={getTitleOptions(mockNetworkTitle)}
-    />
-    <SettingDetails.Screen
-      name="Debug"
-      component={Debug}
-      options={getTitleOptions(debugTitle)}
-    />
+    {(Object.keys(settingDetailScreens) as (keyof SettingDetailParams)[]).map(
+      name => {
+        const [component, title] = settingDetailScreens[name];
+        return (
+          <SettingDetails.Screen
+            key={name}
+            name={name}
+            component={component}
+            options={getTitleOptions(title())}
+          />
+        );
+      },
+    )}
   </SettingDetails.Group>
 );
 
@@ -224,13 +206,6 @@ export const FileStack = () => (
     {renderItemDetails(['FileDetail'])}
   </FileStackNavigator.Navigator>
 );
-
-export const allItemDetails = [
-  'CourseDetail',
-  'NoticeDetail',
-  'AssignmentDetail',
-  'FileDetail',
-] as const;
 
 export const CourseStack = () => (
   <CourseStackNavigator.Navigator

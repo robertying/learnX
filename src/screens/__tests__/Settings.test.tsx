@@ -1,6 +1,6 @@
 import { Alert, Linking } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAppStateStore } from 'data/appState';
 import { initialAuth, useAuthStore } from 'data/auth';
@@ -13,6 +13,7 @@ import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/login', () => ({ logout: jest.fn() }));
 jest.mock('hooks/useAvailableUpdate', () => jest.fn(() => null));
@@ -26,7 +27,7 @@ const navigation = { navigate: jest.fn() };
 const renderScreen = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <Settings navigation={navigation as never} route={{} as never} />
+      <Settings {...screenProps({ navigation })} />
     </QueryClientProvider>,
   );
 
@@ -47,21 +48,25 @@ beforeEach(() => {
   useAppStateStore.setState({ courseSharingSeen: false });
 });
 
-afterEach(() => {
-  useAuthStore.setState(initialAuth);
-  useCredentialsStore.setState({ credentials: null });
-  setServerWritesAllowed(false);
-});
+afterEach(() =>
+  act(() => {
+    useAuthStore.setState(initialAuth);
+    useCredentialsStore.setState({ credentials: null });
+    setServerWritesAllowed(false);
+  }),
+);
 
 it("shows the user's name and department, or the username before they load", async () => {
   await renderScreen();
   expect(screen.getByText('2020000000')).toBeTruthy();
 
-  useAuthStore.setState({ loggedIn: true });
-  queryClient.setQueryData(userQuery.queryKey, {
-    name: '张三',
-    department: '计算机系',
-  } as never);
+  await act(() => {
+    useAuthStore.setState({ loggedIn: true });
+    queryClient.setQueryData(userQuery.queryKey, {
+      name: '张三',
+      department: '计算机系',
+    } as never);
+  });
   await renderScreen();
   expect(screen.getByText('张三')).toBeTruthy();
   expect(screen.getByText('计算机系')).toBeTruthy();
@@ -82,7 +87,7 @@ it('opens each page in the detail view', async () => {
   await renderScreen();
   const pages = {
     semesterSelection: 'SemesterSelection',
-    calendarsAndReminders: 'CalendarEvent',
+    calendarsAndReminders: 'CalendarSettings',
     downloads: 'Downloads',
     swipeActions: 'SwipeActions',
     notifications: 'NotificationSettings',
@@ -118,7 +123,7 @@ it("opens What's New as a sheet", async () => {
 it('marks course sharing never opened, and not the changelog', async () => {
   await renderScreen();
   expect(screen.getAllByLabelText(t('a11yNewBadge'))).toHaveLength(1);
-  useAppStateStore.setState({ courseSharingSeen: true });
+  await act(() => useAppStateStore.setState({ courseSharingSeen: true }));
   await renderScreen();
   expect(screen.queryAllByLabelText(t('a11yNewBadge'))).toHaveLength(0);
 });

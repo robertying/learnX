@@ -1,24 +1,29 @@
 import { createContext, useState, Children } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { DetailNavigationContainerRef } from './types';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import Divider from 'components/Divider';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: DetailNavigationContainerRef | null;
-  splitEnabled: boolean;
   showDetail: boolean;
+  /**
+   * Whether the split knows its layout, so that `showDetail` says whether
+   * the detail pane is on screen. A native split only knows once UIKit has
+   * put it in the window (and collapsed it, where it's too narrow).
+   */
+  laidOut: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
   /** Width of the master pane beside the detail one. */
   masterWidth: number;
 }>({
   detailNavigationContainerRef: null,
-  splitEnabled: false,
   showDetail: false,
+  laidOut: true,
   showMaster: true,
   toggleMaster: () => {},
-  masterWidth: Numbers.splitViewMasterWidth,
+  masterWidth: SplitSizes.masterWidth,
 });
 
 export interface SplitViewProps {
@@ -43,11 +48,11 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
     <SplitViewContext.Provider
       value={{
         detailNavigationContainerRef,
-        splitEnabled: showDetail,
         showDetail,
+        laidOut: true,
         showMaster,
         toggleMaster: setShowMaster,
-        masterWidth: Numbers.splitViewMasterWidth,
+        masterWidth: SplitSizes.masterWidth,
       }}
     >
       <View style={styles.root}>
@@ -86,14 +91,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   master: {
-    width: Numbers.splitViewMasterWidth,
+    width: SplitSizes.masterWidth,
     zIndex: 2,
   },
   masterHidden: {
     position: 'absolute',
     top: 0,
     bottom: 0,
-    left: -Numbers.splitViewMasterWidth,
+    left: -SplitSizes.masterWidth,
   },
   detail: {
     flex: 1,

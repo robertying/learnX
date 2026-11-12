@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { t } from 'helpers/i18n';
+import { t, timeFormat } from 'helpers/i18n';
 
 /**
  * When something in a list was published, as Mail and Files show it: the
@@ -12,7 +12,7 @@ export const listTime = (time: dayjs.ConfigType, today: dayjs.ConfigType) => {
   const day = dayjs(today).startOf('day');
   // also a time ahead of the device's clock
   if (!at.isBefore(day)) {
-    return at.format('HH:mm');
+    return at.format(timeFormat());
   }
   if (!at.isBefore(day.subtract(1, 'day'))) {
     return t('listYesterday');

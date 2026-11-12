@@ -1,17 +1,24 @@
+import Storage from 'expo-sqlite/kv-store';
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Notice } from 'data/types/state';
-import { clearSpotlight, updateSpotlight } from 'services/spotlight';
+import {
+  SPOTLIGHT_INDEXED_KEY,
+  clearSpotlight,
+  updateSpotlight,
+} from 'services/spotlight';
 
 jest.mock('modules/spotlight', () => ({
   __esModule: true,
   default: {
-    syncItems: jest.fn(async () => {}),
+    replaceItems: jest.fn(async () => {}),
+    updateItems: jest.fn(async () => {}),
     removeAllItems: jest.fn(async () => {}),
   },
 }));
 
 const Spotlight = jest.requireMock('modules/spotlight').default as {
-  syncItems: jest.Mock;
+  replaceItems: jest.Mock;
+  updateItems: jest.Mock;
   removeAllItems: jest.Mock;
 };
 
@@ -28,38 +35,39 @@ beforeEach(async () => {
   jest.clearAllMocks();
 });
 
-it('sends a domain without hidden courses', async () => {
+it('replaces a domain first, without hidden courses', async () => {
   await updateSpotlight({ notices }, options);
-  expect(Spotlight.syncItems).toHaveBeenCalledTimes(1);
-  const [domain, items] = Spotlight.syncItems.mock.calls[0];
+  expect(Spotlight.replaceItems).toHaveBeenCalledTimes(1);
+  const [domain, items] = Spotlight.replaceItems.mock.calls[0];
   expect(domain).toBe('notice');
   expect(items.map((i: { id: string }) => i.id)).toEqual(['n0', 'n1']);
+  expect(Spotlight.updateItems).not.toHaveBeenCalled();
 });
 
-it('sends the whole list again when anything changed, and nothing when unchanged', async () => {
+it('then sends only what changed or went, and nothing when unchanged', async () => {
   await updateSpotlight({ notices }, options);
   await updateSpotlight({ notices }, options);
-  expect(Spotlight.syncItems).toHaveBeenCalledTimes(1);
+  expect(Spotlight.replaceItems).toHaveBeenCalledTimes(1);
+  expect(Spotlight.updateItems).not.toHaveBeenCalled();
 
   await updateSpotlight(
     { notices: [{ ...notices[0], title: 'Renamed' }] },
     options,
   );
-  expect(Spotlight.syncItems).toHaveBeenLastCalledWith('notice', [
-    expect.objectContaining({ id: 'n0', title: 'Renamed' }),
-  ]);
-
-  await updateSpotlight({ notices: [] }, options);
-  expect(Spotlight.syncItems).toHaveBeenLastCalledWith('notice', []);
-  expect(Spotlight.syncItems).toHaveBeenCalledTimes(3);
+  expect(Spotlight.updateItems).toHaveBeenCalledWith(
+    'notice',
+    [expect.objectContaining({ id: 'n0', title: 'Renamed' })],
+    ['n1'],
+  );
 });
 
-it('sends the same list again after a failed sync', async () => {
-  Spotlight.syncItems.mockRejectedValueOnce(new Error('Busy'));
+it('replaces the domain again after a failed update', async () => {
+  await updateSpotlight({ notices }, options);
+  Spotlight.updateItems.mockRejectedValueOnce(new Error('Busy'));
   jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
-  await updateSpotlight({ notices }, options);
-  await updateSpotlight({ notices }, options);
-  expect(Spotlight.syncItems).toHaveBeenCalledTimes(2);
+  await updateSpotlight({ notices: notices.slice(0, 1) }, options);
+  await updateSpotlight({ notices: notices.slice(1, 2) }, options);
+  expect(Spotlight.replaceItems).toHaveBeenCalledTimes(2);
 });
 
 it('keeps assignments in their own domain', async () => {
@@ -67,7 +75,7 @@ it('keeps assignments in their own domain', async () => {
     { assignments: mockAssignments.slice(0, 1) },
     { hiddenCourses: [] },
   );
-  expect(Spotlight.syncItems).toHaveBeenCalledWith('assignment', [
+  expect(Spotlight.replaceItems).toHaveBeenCalledWith('assignment', [
     expect.objectContaining({ id: mockAssignments[0].id }),
   ]);
 });
@@ -75,7 +83,7 @@ it('keeps assignments in their own domain', async () => {
 it('indexes files with their course, type and size', async () => {
   const file = mockFiles[0];
   await updateSpotlight({ files: [file] }, { hiddenCourses: [] });
-  const [domain, [item]] = Spotlight.syncItems.mock.calls[0];
+  const [domain, [item]] = Spotlight.replaceItems.mock.calls[0];
   expect(domain).toBe('file');
   expect(item).toMatchObject({ id: file.id, title: file.title });
   expect(item.details).toContain(file.courseName);
@@ -87,4 +95,45 @@ it('removes everything on logout', async () => {
   clearSpotlight();
   await updateSpotlight({}, options);
   expect(Spotlight.removeAllItems).toHaveBeenCalled();
+});
+
+it('sends only what changed after the app starts again', async () => {
+  await updateSpotlight({ notices }, options);
+  const indexed = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
+  expect(indexed).toBeTruthy();
+
+  jest.clearAllMocks();
+  // A new JS runtime: fresh modules, the same saved index.
+  await jest.isolateModulesAsync(async () => {
+    (
+      jest.requireMock('expo-sqlite/kv-store') as {
+        default: { setItemSync: (key: string, value: string) => void };
+      }
+    ).default.setItemSync(SPOTLIGHT_INDEXED_KEY, indexed!);
+    const spotlight =
+      require('services/spotlight') as typeof import('services/spotlight');
+    const native = jest.requireMock('modules/spotlight').default as {
+      replaceItems: jest.Mock;
+      updateItems: jest.Mock;
+    };
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.replaceItems).not.toHaveBeenCalled();
+    expect(native.updateItems).not.toHaveBeenCalled();
+
+    await spotlight.updateSpotlight({ notices: notices.slice(1) }, options);
+    expect(native.updateItems).toHaveBeenCalledWith('notice', [], ['n0']);
+  });
+});
+
+it('forgets the saved index on logout and after a failed write', async () => {
+  await updateSpotlight({ notices }, options);
+  Spotlight.updateItems.mockRejectedValueOnce(new Error('Busy'));
+  jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+  await updateSpotlight({ notices: notices.slice(1) }, options);
+  expect(Storage.getItemSync(SPOTLIGHT_INDEXED_KEY)).toBe('{}');
+
+  await updateSpotlight({ notices }, options);
+  clearSpotlight();
+  await updateSpotlight({}, options);
+  expect(Storage.getItemSync(SPOTLIGHT_INDEXED_KEY)).toBeNull();
 });

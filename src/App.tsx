@@ -1,16 +1,11 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, useColorScheme } from 'react-native';
+import { Platform, StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/en';
-import 'dayjs/locale/zh-cn';
-import { isLocaleChinese } from 'helpers/i18n';
 import ErrorBoundary from 'components/ErrorBoundary';
 import { Toast } from 'components/Toast';
 import Splash from 'components/Splash';
-import { useCredentials } from 'data/credentials';
+import { hasSavedLogin, useCredentials } from 'data/credentials';
 import { useReloginRequested } from 'data/auth';
 import { queryClient } from 'data/queryClient';
 import useReLogin from 'hooks/useReLogin';
@@ -18,16 +13,10 @@ import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 import Navigation from 'navigation';
 
-dayjs.extend(relativeTime);
-dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
-
 const Container = () => {
   const reloginRequested = useReloginRequested();
   const credentials = useCredentials();
-  const hasCredentials =
-    !!credentials?.username &&
-    !!credentials.password &&
-    !!credentials.fingerPrint;
+  const hasCredentials = hasSavedLogin(credentials);
 
   useReLogin();
   useShareHandler();
@@ -50,7 +39,14 @@ const App = () => {
         </SafeAreaProvider>
       </ErrorBoundary>
       <StatusBar
-        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        // iOS's default style follows the appearance by itself.
+        barStyle={
+          Platform.OS === 'ios'
+            ? 'default'
+            : colorScheme === 'dark'
+              ? 'light-content'
+              : 'dark-content'
+        }
         animated
       />
     </GestureHandlerRootView>

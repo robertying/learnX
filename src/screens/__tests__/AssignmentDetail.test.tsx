@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { HomeworkSubmissionType } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { mockAssignments } from 'data/mock';
@@ -7,6 +7,7 @@ import type { Assignment } from 'data/types/state';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import AssignmentDetail from 'screens/AssignmentDetail';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
@@ -42,8 +43,10 @@ const renderScreen = (assignment: Assignment | undefined) => {
   mockAssignment = assignment;
   return render(
     <AssignmentDetail
-      navigation={navigation as never}
-      route={{ params: { id: assignment?.id ?? 'gone' } } as never}
+      {...screenProps({
+        navigation,
+        route: { params: { id: assignment?.id ?? 'gone' } },
+      })}
     />,
   );
 };
@@ -198,7 +201,7 @@ it('links an unsent draft to the submission page', async () => {
     'AssignmentSubmissionStack',
     expect.anything(),
   );
-  saveSubmissionDraft(open.id, null);
+  await act(() => saveSubmissionDraft(open.id, null));
 });
 
 describe('what each state of the assignment shows', () => {

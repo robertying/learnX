@@ -5,8 +5,9 @@ import ObjectiveC
 import React
 import ReactAppDependencyProvider
 
+// Main-actor conformance: ExpoAppSceneDelegate reads the provider from scene(_:willConnectTo:), on the main actor.
 @main
-class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {
+class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
   var window: UIWindow?
 
   var reactNativeDelegate: ExpoReactNativeFactoryDelegate?

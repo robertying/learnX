@@ -5,6 +5,7 @@ import { openNotice } from 'data/serverActions';
 import type { Notice } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import NoticeDetail from 'screens/NoticeDetail';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
@@ -24,8 +25,10 @@ const renderScreen = (notice: Notice | undefined) => {
   mockNotice = notice;
   return render(
     <NoticeDetail
-      navigation={navigation as never}
-      route={{ params: { id: notice?.id ?? 'gone' } } as never}
+      {...screenProps({
+        navigation,
+        route: { params: { id: notice?.id ?? 'gone' } },
+      })}
     />,
   );
 };

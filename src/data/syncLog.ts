@@ -1,13 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import type { ContentListName } from 'data/types/state';
 
 export const SYNC_LOG_KEY = 'syncLog';
 
 /** Enough to see how long syncs take over a few days. */
 const MAX_RUNS = 20;
-
-export type SyncListName = 'assignments' | 'notices' | 'files';
 
 /** One run of background sync. */
 export interface SyncRun {
@@ -17,7 +16,7 @@ export interface SyncRun {
   duration: number;
   status: 'skipped' | 'failed' | 'synced';
   /** Courses whose list came back, of those it tried, per list. */
-  courses?: Record<SyncListName, { fetched: number; total: number }>;
+  courses?: Record<ContentListName, { fetched: number; total: number }>;
   /** It ran out of time before every course came back. */
   timedOut?: boolean;
   /** Started by hand in a debug build rather than by the system. */

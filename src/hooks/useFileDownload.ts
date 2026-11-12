@@ -5,7 +5,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { toast } from 'components/Toast';
 import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
@@ -98,13 +98,10 @@ const useFileDownload = (file: DownloadableFile) => {
     }
   }, [path, downloadable]);
 
+  /** Opens the file in another app (Android only: Apple platforms share it). */
   const open = useCallback(async () => {
     try {
-      if (Platform.OS === 'android') {
-        await openFile(path, downloadable.fileType);
-      } else {
-        await Linking.openURL(path);
-      }
+      await openFile(path, downloadable.fileType);
     } catch {
       toast(t('openFileFailed'), 'error');
     }

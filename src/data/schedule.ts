@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { semesterWeek } from '@robertying/thu-learn-lib';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { queryClient } from 'data/queryClient';
+import { queryKeys } from 'data/queryKeys';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import { getSettings, useSettings } from 'data/settings';
@@ -17,11 +18,7 @@ import {
   sessionsFromCourses,
   startOfWeek,
 } from 'helpers/schedule';
-
-export const scheduleKeys = {
-  calendar: (weekStart: string, graduate: boolean) =>
-    ['calendar', weekStart, graduate ? 'graduate' : 'undergraduate'] as const,
-};
+import { beijingDate } from 'helpers/serverTime';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -46,13 +43,19 @@ const fetchCalendar = async (
   if (failedRanges.length > 0) {
     throw new Error(`Calendar unavailable for ${start}–${end}`);
   }
-  return events.map(({ courseName, location, date, startTime, endTime }) => ({
-    courseName,
-    location,
-    date,
-    startTime,
-    endTime,
-  }));
+  // An event without both times can't be placed.
+  return events.flatMap(e =>
+    e.start && e.end
+      ? [
+          {
+            courseName: e.courseName,
+            location: e.location,
+            start: e.start,
+            end: e.end,
+          },
+        ]
+      : [],
+  );
 };
 
 /**
@@ -61,7 +64,7 @@ const fetchCalendar = async (
  */
 export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
   queryOptions({
-    queryKey: scheduleKeys.calendar(weekStart, graduate),
+    queryKey: queryKeys.calendar(weekStart, graduate),
     // Timetables rarely change within a day.
     staleTime: DAY / 2,
     // Offline, a retry only keeps the spinner going; the saved week shows.
@@ -112,7 +115,10 @@ export const fetchCalendarRange = async (
         calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
       );
       classes.push(
-        ...weekClasses.filter(c => c.date >= first && c.date <= last),
+        ...weekClasses.filter(c => {
+          const day = beijingDate(Date.parse(c.start));
+          return day >= first && day <= last;
+        }),
       );
     } catch (error) {
       lastError = error;

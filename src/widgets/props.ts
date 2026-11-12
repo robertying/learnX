@@ -9,11 +9,10 @@ export interface DeadlineWidgetProps {
     url: string;
     /**
      * From when the due date is orange and red, in milliseconds
-     * (`deadlineUrgencyTimes` in helpers/assignments). Missing from props
-     * sent by older versions.
+     * (`deadlineUrgencyTimes` in helpers/assignments).
      */
-    soonFrom?: number;
-    urgentFrom?: number;
+    soonFrom: number;
+    urgentFrom: number;
   })[];
   /** How many open assignments there are in all, listed or not. */
   total: number;
@@ -32,7 +31,7 @@ export interface UpNextWidgetClass {
   /** Milliseconds since the epoch. */
   start: number;
   end: number;
-  /** Start to end, e.g. 08:00–09:35. */
+  /** Start to end, e.g. 08:00–09:35 or 4:00–5:35 PM. */
   time: string;
   /** Its day, e.g. "Mon 11/9", shown when it isn't today or tomorrow. */
   day: string;

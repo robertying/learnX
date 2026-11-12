@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { t } from 'helpers/i18n';
 import { loginRetryDelay } from 'helpers/loginRetry';
 import { toast } from 'components/Toast';
-import { getCredentials } from 'data/credentials';
+import { hasSavedLogin } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
@@ -25,15 +25,6 @@ const catchUp = async () => {
   await queryClient
     .refetchQueries({ type: 'active', stale: true }, { cancelRefetch: false })
     .catch(() => {});
-};
-
-const hasSavedLogin = () => {
-  const credentials = getCredentials();
-  return (
-    !!credentials?.username &&
-    !!credentials.password &&
-    !!credentials.fingerPrint
-  );
 };
 
 /** Whether a login may start on its own now. */
@@ -75,7 +66,7 @@ const useReLogin = () => {
       toast(t('loggingIn'), 'none', 1 * 1000);
       // At launch there's no session yet; after a break the session may
       // still be good, which saves a full SSO login.
-      await login(auth.loggedIn ? { resume: true } : { reset: true });
+      await login(auth.loggedIn ? { resume: true } : {});
       // The lists only refresh by themselves when the session starts; one
       // that was already open would keep showing what it had.
       if (getAuth().loggedIn) {
@@ -85,7 +76,7 @@ const useReLogin = () => {
       await catchUp();
     } else if (auth.failure) {
       // Back from a short break without a session: try again quietly.
-      void login({ reset: true });
+      void login({});
     }
   });
 
@@ -114,7 +105,7 @@ const useReLogin = () => {
   const retry = useEffectEvent(() => {
     if (canLogIn() && getAuth().failure === 'offline') {
       retries.current += 1;
-      void login({ reset: true });
+      void login({});
     }
   });
 

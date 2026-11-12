@@ -13,6 +13,7 @@ import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import Setup from 'screens/Setup';
 import packageJson from '../../../package.json';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
@@ -23,21 +24,14 @@ const setSyncEnabled = jest.fn(async () => {});
 const navigation = { goBack: jest.fn() };
 
 const renderScreen = (params?: { update?: boolean }) =>
-  render(
-    <Setup navigation={navigation as never} route={{ params } as never} />,
-  );
+  render(<Setup {...screenProps({ navigation, route: { params } })} />);
 const toggle = (label: string, value: boolean) =>
   fireEvent(screen.getByRole('switch', { name: label }), 'valueChange', value);
-
-const os = Platform.OS;
 beforeEach(() => {
   resetSettings();
   useAppStateStore.setState({ setupSeen: false, whatsNewSeenVersion: null });
   jest.mocked(useNotificationPermission).mockReturnValue({ request } as never);
   jest.mocked(useAssignmentSync).mockReturnValue({ setSyncEnabled } as never);
-});
-afterEach(() => {
-  Platform.OS = os;
 });
 
 it("marks itself and this version's What's New seen once shown", async () => {
@@ -83,7 +77,7 @@ it("groups new content in the tabs' order, then classes, assignments and calenda
 });
 
 it('offers only calendar sync on Android, which has no Reminders', async () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await renderScreen();
   expect(screen.getByText(t('setupCalendarSection'))).toBeTruthy();
   expect(screen.queryByText(t('setupReminders'))).toBeNull();
@@ -157,7 +151,7 @@ it('keeps sync an earlier version turned on, without syncing again', async () =>
 
 it('closes without changes on Not Now, on either platform', async () => {
   for (const platform of ['ios', 'android'] as const) {
-    Platform.OS = platform;
+    jest.replaceProperty(Platform, 'OS', platform);
     await renderScreen();
     await userEvent.press(screen.getByTestId('setup-not-now'));
   }

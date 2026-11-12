@@ -1,4 +1,4 @@
-import { Linking, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
 import { setSetting } from 'data/settings';
@@ -144,27 +144,9 @@ describe('useFileDownload', () => {
     expect(toast).toHaveBeenLastCalledWith(expect.any(String), 'error');
   });
 
-  it('opens the downloaded file by URL on iOS', async () => {
-    const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
-    const { result } = await setup();
-    await waitFor(() => expect(result.current.path).toBe(PATH));
-
-    await act(() => result.current.open());
-    expect(openURL).toHaveBeenCalledWith(PATH);
-    expect(openFile).not.toHaveBeenCalled();
-
-    openURL.mockRejectedValueOnce(new Error());
-    await act(() => result.current.open());
-    expect(toast).toHaveBeenLastCalledWith(expect.any(String), 'error');
-  });
-
   describe('on Android', () => {
     beforeEach(() => {
       jest.replaceProperty(Platform, 'OS', 'android');
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
     });
 
     it('opens with the file type', async () => {
@@ -172,6 +154,10 @@ describe('useFileDownload', () => {
       await waitFor(() => expect(result.current.path).toBe(PATH));
       await act(() => result.current.open());
       expect(openFile).toHaveBeenCalledWith(PATH, 'docx');
+
+      jest.mocked(openFile).mockRejectedValueOnce(new Error());
+      await act(() => result.current.open());
+      expect(toast).toHaveBeenLastCalledWith(expect.any(String), 'error');
     });
 
     it('opens the file after download when the setting is on', async () => {

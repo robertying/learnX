@@ -1,39 +1,21 @@
 // Which downloaded files File detail can show inline, and how.
 import { Platform } from 'react-native';
 import mime from 'mime';
-import { coerce, gte } from 'semver';
 import DeviceInfo from 'constants/DeviceInfo';
 
-export const needWhiteBackground = (ext?: string | null) => {
-  return ext && ['doc', 'docx', 'xls', 'xlsx'].includes(ext) ? true : false;
-};
+/** Word and Excel pages are drawn on white, also in dark mode. */
+export const needWhiteBackground = (ext?: string | null) =>
+  !!ext && ['doc', 'docx', 'xls', 'xlsx'].includes(ext);
 
-export const canRenderInMacWebview = (ext?: string | null) => {
-  const osVersion = DeviceInfo.systemVersion();
-  const coercedVersion = coerce(osVersion);
-  if (!coercedVersion || !gte(coercedVersion, '17.1.0')) {
-    return false;
-  }
-
-  if (!ext) {
-    return false;
-  }
-
-  const mimeType = mime.getType(ext);
-  if (!mimeType) {
-    return false;
-  }
-
-  return (
-    mimeType === 'application/pdf' ||
-    mimeType.includes('image/') ||
-    mimeType.includes('audio/') ||
-    mimeType.includes('video/') ||
-    mimeType.includes('text/')
+/** What WebKit shows on every Apple platform: PDFs, images, media and text. */
+const isWebKitType = (mimeType: string) =>
+  mimeType === 'application/pdf' ||
+  ['image/', 'audio/', 'video/', 'text/'].some(kind =>
+    mimeType.startsWith(kind),
   );
-};
 
-const iosSupportedMimeTypes = new Set([
+/** Office and iWork documents, which only iOS's web view renders (not Mac's). */
+const iosDocumentTypes = new Set([
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   'application/vnd.ms-powerpoint',
@@ -43,25 +25,17 @@ const iosSupportedMimeTypes = new Set([
   'application/vnd.apple.pages',
   'application/vnd.apple.keynote',
   'application/vnd.apple.numbers',
-  'application/pdf',
 ]);
 
+export const canRenderInMacWebview = (ext?: string | null) => {
+  const mimeType = ext && mime.getType(ext);
+  return !!mimeType && isWebKitType(mimeType);
+};
+
 export const canRenderInIosWebview = (ext?: string | null) => {
-  if (!ext) {
-    return false;
-  }
-
-  const mimeType = mime.getType(ext);
-  if (!mimeType) {
-    return false;
-  }
-
+  const mimeType = ext && mime.getType(ext);
   return (
-    iosSupportedMimeTypes.has(mimeType) ||
-    mimeType.includes('image/') ||
-    mimeType.includes('audio/') ||
-    mimeType.includes('video/') ||
-    mimeType.includes('text/')
+    !!mimeType && (isWebKitType(mimeType) || iosDocumentTypes.has(mimeType))
   );
 };
 
@@ -72,8 +46,6 @@ export const canRenderInIosWebview = (ext?: string | null) => {
 export const canPreviewInline = (fileType?: string | null) =>
   fileType === 'pdf' ||
   (Platform.OS === 'ios' &&
-    !DeviceInfo.isMac() &&
-    canRenderInIosWebview(fileType)) ||
-  (Platform.OS === 'ios' &&
-    DeviceInfo.isMac() &&
-    canRenderInMacWebview(fileType));
+    (DeviceInfo.isMac()
+      ? canRenderInMacWebview(fileType)
+      : canRenderInIosWebview(fileType)));

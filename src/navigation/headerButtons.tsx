@@ -6,6 +6,7 @@ import type {
 } from '@react-navigation/native-stack';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import IconButton, { type IconButtonIcon } from 'components/IconButton';
+import TextButton from 'components/TextButton';
 import { systemIcons } from 'helpers/systemIcons';
 
 /**
@@ -30,6 +31,12 @@ export interface HeaderButton {
   ownGroup?: boolean;
   /** Leaves the button out of the native items (they put it in a menu). */
   nativeItem?: false;
+  /**
+   * Shows the label as a bold text button instead of the icon where the
+   * header draws its own buttons (Android, before iOS 26), as a sheet's
+   * confirming action (Submit) is there.
+   */
+  text?: boolean;
   testID?: string;
 }
 
@@ -83,7 +90,18 @@ const nativeItem = (
 };
 
 const element = (entry: HeaderButton | CustomHeaderEntry) =>
-  isButton(entry) ? (
+  isButton(entry) && entry.text ? (
+    <TextButton
+      key={entry.id}
+      size="large"
+      bold
+      disabled={entry.disabled}
+      onPress={entry.onPress}
+      testID={entry.testID}
+    >
+      {entry.label}
+    </TextButton>
+  ) : isButton(entry) ? (
     <IconButton
       key={entry.id}
       accessibilityLabel={entry.label}

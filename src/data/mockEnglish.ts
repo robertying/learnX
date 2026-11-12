@@ -59,7 +59,8 @@ const personNames: Record<string, string> = {
   周雨桐: 'Yutong Zhou',
   邱子墨: 'Zimo Qiu',
 };
-const person = (name: string) => personNames[name] ?? name;
+const person = <T extends string | undefined>(name: T) =>
+  (name && (personNames[name] ?? name)) as T;
 
 const categoryNames: Record<string, string> = {
   课件: 'Slides',

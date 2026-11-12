@@ -6,7 +6,7 @@ import {
 } from '@react-navigation/native';
 import { DetailStackParams } from 'navigation/types';
 import { SplitViewContext } from 'navigation/SplitView';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import useDetailNavigator, {
   reportDetailReady,
   useShowDetail,
@@ -25,11 +25,11 @@ const wrapper = ({ children }: React.PropsWithChildren) => (
         current:
           container as unknown as NavigationContainerRef<DetailStackParams>,
       },
-      splitEnabled: true,
       showDetail: true,
+      laidOut: true,
       showMaster: true,
       toggleMaster: () => {},
-      masterWidth: Numbers.splitViewMasterWidth,
+      masterWidth: SplitSizes.masterWidth,
     }}
   >
     {children}
@@ -38,7 +38,6 @@ const wrapper = ({ children }: React.PropsWithChildren) => (
 
 beforeEach(() => {
   container.ready = false;
-  container.dispatch.mockClear();
 });
 
 it('waits for the detail stack to report that it is ready', async () => {

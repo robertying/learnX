@@ -235,8 +235,9 @@ const styles = StyleSheet.create({
   },
   featureText: {
     flex: 1,
-    gap: 2,
-    paddingTop: apple ? 0 : 8,
+    gap: 6,
+    paddingTop: apple ? 2 : 10,
+    paddingBottom: 2,
   },
 });
 

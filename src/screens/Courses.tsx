@@ -1,4 +1,3 @@
-import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
@@ -11,6 +10,8 @@ import usePullToRefresh from 'hooks/usePullToRefresh';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/semester';
 import { sortByOrder } from 'helpers/reorder';
+import { countByCourse } from 'helpers/courseCounts';
+import { useMinute } from 'hooks/useClock';
 import { CourseStackParams, MainStackScreenProps } from 'navigation/types';
 
 type Props = MainStackScreenProps<CourseStackParams, 'Courses'>;
@@ -34,20 +35,16 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const { assignments } = useAssignments();
   const { files } = useFiles();
 
+  const archived = useUserData(data => data.archived);
+  const now = useMinute();
+  const countsOf = countByCourse(
+    { notices, assignments, files },
+    archived,
+    now,
+  );
   const coursesWithCounts = courses.map(course => ({
     ...course,
-    unreadNoticeCount: notices.filter(
-      notice => notice.courseId === course.id && !notice.hasRead,
-    ).length,
-    unfinishedAssignmentCount: assignments.filter(
-      assignment =>
-        assignment.courseId === course.id &&
-        !assignment.submitted &&
-        dayjs(assignment.deadline).isAfter(dayjs()),
-    ).length,
-    unreadFileCount: files.filter(
-      file => file.courseId === course.id && file.isNew,
-    ).length,
+    ...countsOf(course.id),
   }));
 
   const all = coursesWithCounts.filter(i => !hiddenIds.includes(i.id));

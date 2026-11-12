@@ -1,16 +1,9 @@
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
-import { t } from './i18n';
+import { t, tCount, timeFormat } from './i18n';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
-
-/** `one` for a count of 1, `other` with the count filled in otherwise. */
-const counted = (
-  count: number,
-  one: Parameters<typeof t>[0],
-  other: Parameters<typeof t>[0],
-) => (count === 1 ? t(one) : t(other, { count }));
 
 /**
  * "due in 3 hours", "due in 2 days" or "closed 2 days ago", in the app's
@@ -31,19 +24,19 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   const left = dl.diff(n);
   if (left < HOUR) {
     const minutes = Math.max(1, Math.floor(left / (60 * 1000)));
-    return counted(minutes, 'deadlineInOneMinute', 'deadlineInMinutes');
+    return tCount('deadlineInOneMinute', 'deadlineInMinutes', minutes);
   }
   if (left < DAY) {
-    return counted(
-      Math.floor(left / HOUR),
+    return tCount(
       'deadlineInOneHour',
       'deadlineInHours',
+      Math.floor(left / HOUR),
     );
   }
   const days = dl.startOf('day').diff(n.startOf('day'), 'day');
   return days > 25
     ? t('deadlineIn', { time: n.to(dl, true) })
-    : counted(days, 'deadlineInOneDay', 'deadlineInDays');
+    : tCount('deadlineInOneDay', 'deadlineInDays', days);
 };
 
 /**
@@ -90,23 +83,31 @@ export const deadlineTone = {
 export const isDueSoon = (deadline: string, now?: dayjs.ConfigType) =>
   deadlineUrgency(deadline, now) !== undefined;
 
+const dayTimeKeys = {
+  due: ['deadlineToday', 'deadlineTomorrow', 'deadlineAt'],
+  lateCloses: ['lateClosesToday', 'lateClosesTomorrow', 'lateClosesAt'],
+} as const;
+
 /**
- * The deadline's day and time from the point of view of `now`: "today at
- * 23:59", "tomorrow at 23:59" or "Nov 12 23:59", for text that stays put
- * once written, like a reminder.
+ * The deadline's day and time from the point of view of `now`: "due today at
+ * 23:59", "due tomorrow at 23:59" or "due Nov 12 23:59" (or when late
+ * submission closes, with `lateCloses`), for text that stays put once
+ * written, like a reminder.
  */
 export const deadlineDayTime = (
   deadline: dayjs.ConfigType,
   now?: dayjs.ConfigType,
+  phrase: keyof typeof dayTimeKeys = 'due',
 ) => {
+  const [today, tomorrow, at] = dayTimeKeys[phrase];
   const n = dayjs(now);
   const dl = dayjs(deadline);
-  const time = dl.format('HH:mm');
+  const time = dl.format(timeFormat());
   return dl.isSame(n, 'day')
-    ? t('deadlineToday', { time })
+    ? t(today, { time })
     : dl.isSame(n.add(1, 'day'), 'day')
-      ? t('deadlineTomorrow', { time })
-      : t('deadlineAt', { date: dl.format(t('shortDateTimeFormat')) });
+      ? t(tomorrow, { time })
+      : t(at, { date: dl.format(t('shortDateTimeFormat')) });
 };
 
 /**

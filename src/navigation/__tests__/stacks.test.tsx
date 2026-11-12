@@ -16,10 +16,10 @@ import {
   WhatsNewStack,
 } from 'navigation/stacks';
 import { stackScreenOptions } from 'navigation/options';
-import { navigatorConfig, optionsArgs } from '../../../jest/mocks/navigator';
+import { navigatorConfig, optionsArgs } from 'test-utils/mocks/navigator';
 
 jest.mock('@react-navigation/native-stack', () => ({
-  createNativeStackNavigator: require('../../../jest/mocks/navigator')
+  createNativeStackNavigator: require('test-utils/mocks/navigator')
     .createNavigator,
 }));
 // The error layout's retry reloads through expo, which is ESM only.
@@ -30,7 +30,7 @@ jest.mock('screens/About', () => () => null);
 jest.mock('screens/AssignmentDetail', () => () => null);
 jest.mock('screens/AssignmentSubmission', () => () => null);
 jest.mock('screens/Assignments', () => () => null);
-jest.mock('screens/CalendarEvent', () => () => null);
+jest.mock('screens/CalendarSettings', () => () => null);
 jest.mock('screens/Changelog', () => () => null);
 jest.mock('screens/CourseDetail', () => () => null);
 jest.mock('screens/CourseInformationSharing', () => () => null);
@@ -66,7 +66,7 @@ const names = async (Stack: React.ComponentType) =>
 
 const settingDetails = [
   'CourseInformationSharing',
-  'CalendarEvent',
+  'CalendarSettings',
   'SemesterSelection',
   'Downloads',
   'NotificationSettings',

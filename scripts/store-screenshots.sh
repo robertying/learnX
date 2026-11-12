@@ -90,18 +90,7 @@ if [ "$platform" = mac ]; then
   export_dir="$(mktemp -d "${TMPDIR:-/tmp}/learnx-store-mac.XXXXXX")"
   xcrun xcresulttool export attachments --path build/e2e/mac.xcresult \
     --output-path "$export_dir"
-  # shellcheck disable=SC2016 # JavaScript, not shell
-  node -e '
-    const fs = require("fs");
-    const [dir, out] = process.argv.slice(1);
-    const tests = JSON.parse(fs.readFileSync(`${dir}/manifest.json`, "utf8"));
-    for (const test of tests) {
-      for (const a of test.attachments) {
-        const name = a.suggestedHumanReadableName.split("_")[0];
-        fs.copyFileSync(`${dir}/${a.exportedFileName}`, `${out}/${name}.png`);
-      }
-    }
-  ' "$export_dir" "$out"
+  node scripts/lib/mac-store-shots.mjs "$export_dir" "$out"
   rm -rf "$export_dir"
   echo "Screenshots: $out"
   exit "$status"
@@ -205,26 +194,7 @@ if [ -n "$posture" ]; then
   # Maestro's takeScreenshot of the inner display is black, so the flow asks
   # this server for each shot, which saves the inner display (3) with simctl.
   shot_port_file="$run_dir/shot-port"
-  # shellcheck disable=SC2016 # JavaScript, not shell
-  node -e '
-    const http = require("http");
-    const fs = require("fs");
-    const { execFile } = require("child_process");
-    const [device, out, portFile] = process.argv.slice(1);
-    const server = http.createServer((req, res) => {
-      const name = new URL(req.url, "http://localhost").searchParams.get("name");
-      if (!name || !/^[\w.-]+$/.test(name)) {
-        res.writeHead(400).end();
-        return;
-      }
-      execFile("xcrun", ["simctl", "io", device, "screenshot", "--display=3",
-        `${out}/${name}.png`], { timeout: 30000 }, err => {
-        res.writeHead(err ? 500 : 200).end(err ? String(err) : "ok");
-      });
-    });
-    server.listen(0, "127.0.0.1", () =>
-      fs.writeFileSync(portFile, String(server.address().port)));
-  ' "$device" "$out" "$shot_port_file" &
+  node scripts/lib/inner-display-shots.mjs "$device" "$out" "$shot_port_file" &
   shot_server=$!
   trap 'kill "$shot_server" 2>/dev/null || true; cleanup' EXIT
   while [ ! -s "$shot_port_file" ]; do sleep 0.2; done

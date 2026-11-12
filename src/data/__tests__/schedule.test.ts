@@ -51,9 +51,8 @@ const calendar: CalendarClass[] = [
   {
     courseName: '物理',
     location: '四教4102',
-    date: '2026-09-30',
-    startTime: '13:30',
-    endTime: '15:05',
+    start: '2026-09-30T13:30:00+08:00',
+    end: '2026-09-30T15:05:00+08:00',
   },
 ];
 
@@ -168,9 +167,8 @@ describe('fetchCalendarRange', () => {
   const day = (date: string): CalendarClass => ({
     courseName: '物理',
     location: '四教4102',
-    date,
-    startTime: '13:30',
-    endTime: '15:05',
+    start: `${date}T13:30:00+08:00`,
+    end: `${date}T15:05:00+08:00`,
   });
 
   beforeEach(() => {
@@ -204,7 +202,10 @@ describe('fetchCalendarRange', () => {
       '20260928',
     ]);
     // Sep 14 is before the range and is left out.
-    expect(classes.map(c => c.date)).toEqual(['2026-09-23', '2026-09-28']);
+    expect(classes.map(c => c.start.slice(0, 10))).toEqual([
+      '2026-09-23',
+      '2026-09-28',
+    ]);
     expect(failedRanges).toEqual([]);
   });
 
@@ -282,7 +283,7 @@ describe('useWeekSchedule', () => {
     resetSettings();
     resetUserData();
   });
-  afterEach(() => useAuthStore.setState({ loggedIn: false }));
+  afterEach(() => act(() => useAuthStore.setState({ loggedIn: false })));
 
   it('asks for nothing while logged out, and has no teaching week', async () => {
     const { result } = await renderHook(() => useWeekSchedule('2026-09-30'), {

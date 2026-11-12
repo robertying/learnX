@@ -6,11 +6,8 @@ import {
   saveSubmissionDraft,
 } from 'data/submissionDrafts';
 import { PickedAttachment } from 'services/submission';
-import { useSaveSubmissionDraft } from 'hooks/useAssignmentSubmission';
+import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 
-// The pickers are ESM only; this hook doesn't use them.
-jest.mock('expo-document-picker', () => ({}));
-jest.mock('expo-image-picker', () => ({}));
 jest.mock('data/submissionDrafts', () => ({
   isDraftFile: (uri: string) => uri.startsWith('draft://'),
   keepDraftFile: jest.fn(),

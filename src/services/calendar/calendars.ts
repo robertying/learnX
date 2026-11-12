@@ -17,7 +17,7 @@ import {
 } from 'data/calendarSync';
 import { getCachedCourses } from 'data/queries';
 import { Assignment, SettingsState } from 'data/types/state';
-import Colors from 'constants/Colors';
+import { brandColors } from 'theme';
 import {
   AssignmentEventInput,
   assignmentCalendarReminderName,
@@ -164,7 +164,7 @@ const getOrCreateCalendar = async ({
 
   const newCalendar = await Calendar.createCalendar({
     title,
-    color: Colors.plainTheme,
+    color: brandColors.light,
     entityType,
     sourceId: defaultCalendarSource.id,
     source: defaultCalendarSource,

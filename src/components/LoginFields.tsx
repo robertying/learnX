@@ -20,7 +20,7 @@ import {
   textContentType,
   textInputAutocapitalization,
 } from '@expo/ui/swift-ui/modifiers';
-import { useFieldText } from 'components/Form.shared';
+import { useFieldText } from 'hooks/useFieldText';
 import ThemedHost from 'components/ThemedHost';
 import { trim, type LoginFieldsProps } from './LoginFields.shared';
 

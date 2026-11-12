@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react-native';
 import { SwipeDirection } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import { mockSwipeableMethods } from '../../../../jest/mocks/swipeable';
+import { mockSwipeableMethods } from 'test-utils/mocks/swipeable';
 
 const card = (props: CardWrapperProps = {}) => (
   <CardWrapper accessibilityLabel="Card label" {...props}>
@@ -32,14 +32,14 @@ const longPress = () => fireEvent(cardElement(), 'longPress');
 const tap = () => fireEvent.press(cardElement());
 
 it('opens a Material menu of the actions on long press', async () => {
-  const onFav = jest.fn();
+  const onToggleFav = jest.fn();
   const onPress = jest.fn();
-  await render(card({ onFav, onPress }));
+  await render(card({ onToggleFav, onPress }));
   expect(screen.queryByTestId('card-fav')).toBeNull();
 
   await longPress();
   await user.press(screen.getByTestId('card-fav'));
-  expect(onFav).toHaveBeenCalledWith(true);
+  expect(onToggleFav).toHaveBeenCalled();
   expect(screen.queryByTestId('card-fav')).toBeNull();
   expect(onPress).not.toHaveBeenCalled();
 });
@@ -74,9 +74,9 @@ it('shows the Material checkbox in selection mode, which only shows the state', 
 });
 
 it('swipes like Gmail: right archives and left favorites once the card slides off', async () => {
-  const onFav = jest.fn();
-  const onArchive = jest.fn();
-  await render(card({ onFav, onArchive }));
+  const onToggleFav = jest.fn();
+  const onToggleArchived = jest.fn();
+  await render(card({ onToggleFav, onToggleArchived }));
   const swipeable = screen.getByTestId('swipeable').props;
   expect(swipeable.enabled).toBe(true);
   // full-width backgrounds, hidden from TalkBack, which has the card's actions
@@ -88,11 +88,11 @@ it('swipes like Gmail: right archives and left favorites once the card slides of
   expect(screen.queryByTestId('card-archive')).toBeNull();
 
   await act(() => swipeable.onSwipeableWillOpen(SwipeDirection.RIGHT));
-  expect(onArchive).not.toHaveBeenCalled();
+  expect(onToggleArchived).not.toHaveBeenCalled();
   await act(() => swipeable.onSwipeableOpen(SwipeDirection.RIGHT));
-  expect(onArchive).toHaveBeenCalledWith(true);
+  expect(onToggleArchived).toHaveBeenCalled();
   expect(mockSwipeableMethods.close).toHaveBeenCalledTimes(1);
 
   await act(() => swipeable.onSwipeableOpen(SwipeDirection.LEFT));
-  expect(onFav).toHaveBeenCalledWith(true);
+  expect(onToggleFav).toHaveBeenCalled();
 });

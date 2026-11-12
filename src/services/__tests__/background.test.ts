@@ -96,9 +96,6 @@ beforeEach(() => {
   resetUserData();
   setCurrentSemester(semesterId);
   mockSavedCredentials = mockCredentials;
-  jest.restoreAllMocks();
-  jest.mocked(ensureSession).mockClear();
-  jest.mocked(recordError).mockClear();
   resetSyncLog();
 });
 
@@ -377,6 +374,18 @@ describe('notifyContent', () => {
       .mockResolvedValue({ granted: false, canAskAgain: false } as never);
     await notifyContent(diff());
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  it('records a notification that fails to post', async () => {
+    const error = new Error('post failed');
+    jest
+      .mocked(Notifications.scheduleNotificationAsync)
+      .mockRejectedValueOnce(error);
+    await notifyContent(diff());
+    expect(recordError).toHaveBeenCalledWith(
+      error,
+      'Posting a content notification',
+    );
   });
 
   it('posts nothing with notifications off', async () => {

@@ -2,8 +2,6 @@ import ExpoModulesCore
 import UIKit
 
 public final class MenusModule: Module {
-  private var observer: NSObjectProtocol?
-
   public func definition() -> ModuleDefinition {
     Name("Menus")
 
@@ -22,23 +20,24 @@ public final class MenusModule: Module {
   }
 
   func startObserving() {
-    // Commands are posted on the main thread, from the menu bar or a key command.
-    observer = NotificationCenter.default.addObserver(
-      forName: AppCommands.notification,
-      object: nil,
-      queue: nil
-    ) { [weak self] notification in
-      guard let command = notification.userInfo?[AppCommands.commandKey] as? String else {
-        return
-      }
-      self?.sendEvent("onCommand", ["command": command])
-    }
+    // Commands are posted on the main thread, from the menu bar or a key command. A selector, unlike a block,
+    // doesn't hand the (non-Sendable) module to a @Sendable closure.
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(commandPosted(_:)),
+      name: AppCommands.notification,
+      object: nil
+    )
   }
 
   func stopObserving() {
-    if let observer {
-      NotificationCenter.default.removeObserver(observer)
-      self.observer = nil
+    NotificationCenter.default.removeObserver(self, name: AppCommands.notification, object: nil)
+  }
+
+  @objc private func commandPosted(_ notification: Notification) {
+    guard let command = notification.userInfo?[AppCommands.commandKey] as? String else {
+      return
     }
+    sendEvent("onCommand", ["command": command])
   }
 }

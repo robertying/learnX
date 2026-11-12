@@ -14,7 +14,9 @@ import {
 import { applyLatestSemester } from 'data/userData';
 import { flushServerActions } from 'data/serverActions';
 import useUpNext from 'hooks/useUpNext';
-import useIncomingTargets from 'hooks/useIncomingTargets';
+import useLinkTaps from 'hooks/useLinkTaps';
+import useNotificationTaps from 'hooks/useNotificationTaps';
+import useSpotlightTaps from 'hooks/useSpotlightTaps';
 
 /**
  * What the main UI starts once logged in: picks the semester and keeps its
@@ -65,7 +67,13 @@ const useMainStartup = () => {
     }
   }, [loggedIn]);
 
-  useIncomingTargets();
+  // What the user tapped outside the app (a notification, a widget row or
+  // another learnx:// link, or a Spotlight result), including the one that
+  // launched it. Each goes through `useOpenTarget`, which shows the item's
+  // list and leaves the item to it (`usePendingTarget`).
+  useNotificationTaps();
+  useLinkTaps();
+  useSpotlightTaps();
 
   useEffect(() => {
     void configureNotifications();

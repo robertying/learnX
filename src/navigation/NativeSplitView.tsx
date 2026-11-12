@@ -18,7 +18,7 @@ import {
 import type { Metrics } from 'react-native-safe-area-context';
 import { Split } from 'react-native-screens/experimental';
 import type { SplitDisplayMode } from 'react-native-screens/experimental';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { SplitViewContext } from './SplitView';
 
 export interface NativeSplitViewProps {
@@ -144,6 +144,13 @@ const NativeSplitViewProvider: React.FC<
   const detailAppearance = useColumnAppearance();
   const sidebarAppearance = useColumnAppearance();
 
+  // UIKit has collapsed the split, if it's going to, by the time its columns
+  // first appear; until then `expanded` is only a guess.
+  const [laidOut, setLaidOut] = useState(false);
+  if (masterAppearance.onScreen && !laidOut) {
+    setLaidOut(true);
+  }
+
   const hasSidebar = sidebar !== undefined;
   const showDetail = enabled && expanded;
   const showMaster = displayMode !== 'secondaryOnly';
@@ -210,11 +217,11 @@ const NativeSplitViewProvider: React.FC<
         detailNavigationContainerRef: showDetail
           ? detailNavigationContainerRef
           : null,
-        splitEnabled: showDetail,
         showDetail,
+        laidOut: !enabled || laidOut,
         showMaster,
         toggleMaster,
-        masterWidth: masterWidth ?? Numbers.splitViewMasterWidth,
+        masterWidth: masterWidth ?? SplitSizes.masterWidth,
       }}
     >
       {enabled ? (
@@ -226,7 +233,7 @@ const NativeSplitViewProvider: React.FC<
           // The window can't be made narrower than the list beside this.
           columnMetrics={
             hasSidebar
-              ? { minimumSecondaryColumnWidth: Numbers.splitViewMinDetailWidth }
+              ? { minimumSecondaryColumnWidth: SplitSizes.minDetailWidth }
               : undefined
           }
           // In the sidebar's bar, which is in the window's title bar on Mac.
@@ -237,7 +244,7 @@ const NativeSplitViewProvider: React.FC<
           // behind a resize (or the hinge, which is handled natively too).
           // Collapsed, the sidebar would be out of reach.
           maxCollapsedWidth={
-            hasSidebar ? undefined : Numbers.splitViewMaxCollapsedWidth
+            hasSidebar ? undefined : SplitSizes.maxCollapsedWidth
           }
           onCollapse={() => setExpanded(false)}
           onExpand={() => setExpanded(true)}

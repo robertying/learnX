@@ -56,7 +56,7 @@ const buildEnv = (includeDev, e2eLive = false) => {
   return env;
 };
 
-module.exports = function inlineEnv(api) {
+function inlineEnv(api) {
   // Also makes Babel cache this plugin's config per env name.
   const includeDev = DEV_ENVS.has(api.env());
   const e2eLive = api.cache.using(() => process.env.E2E_LIVE === '1');
@@ -71,6 +71,7 @@ module.exports = function inlineEnv(api) {
       },
     },
   };
-};
+}
 
-module.exports.buildEnv = buildEnv;
+inlineEnv.buildEnv = buildEnv;
+module.exports = inlineEnv;

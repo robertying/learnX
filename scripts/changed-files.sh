@@ -4,7 +4,12 @@
 # can be a required check (a workflow-level `paths:` filter would leave it
 # pending instead).
 #
-#   scripts/changed-files.sh <extended regex> >> "$GITHUB_OUTPUT"
+#   scripts/changed-files.sh <set> >> "$GITHUB_OUTPUT"
+#
+# Sets (each also counts its own workflow file, this script and the shared JS
+# setup action):
+#   android-unit   what the modules' Android unit tests build (ci.yml)
+#   android-build  what the Android release build builds (native.yml)
 #
 # Prints `changed=true` or `changed=false`. Pull requests compare the merge
 # commit with its base (checkout's default); pushes compare with the previous
@@ -12,7 +17,22 @@
 # Needs actions/checkout with fetch-depth: 2.
 set -euo pipefail
 
-pattern="${1:?usage: $0 <extended regex>}"
+# Android sources and what they build from: native code, patches, the JS
+# dependencies, app config and the Node version.
+android='android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$'
+shared='scripts/changed-files\.sh$|\.github/actions/setup-js/'
+case "${1:-}" in
+android-unit)
+  pattern="^($android|$shared|scripts/(test-android\.sh|android-coverage\.mjs)$|\.github/workflows/ci\.yml$)"
+  ;;
+android-build)
+  pattern="^($android|$shared|\.github/workflows/native\.yml$)"
+  ;;
+*)
+  echo "usage: $0 android-unit|android-build" >&2
+  exit 2
+  ;;
+esac
 
 case "${GITHUB_EVENT_NAME:-}" in
 pull_request) base=HEAD^1 ;;

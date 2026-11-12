@@ -2,7 +2,7 @@
 // allows, and the upload itself. Used by hooks/useAssignmentSubmission.
 import mime from 'mime';
 import { RemoteFile, homeworkContentHtml } from '@robertying/thu-learn-lib';
-import { submitAssignment } from 'data/source';
+import { dataSource } from 'data/source';
 import { getExtension, withExtension } from 'helpers/filename';
 import { interpolate, translationsFor } from 'helpers/i18n';
 import { removeTags } from 'helpers/text';
@@ -15,9 +15,12 @@ export interface PickedAttachment {
   size?: number | null;
 }
 
-/** What the content input starts with: the submitted text, tags removed */
+/**
+ * What the content input starts with: the submitted text, tags removed. The
+ * server's copy can end in a stray `-->`, which is dropped too.
+ */
 export const initialSubmissionContent = (submittedContent?: string) =>
-  (removeTags(submittedContent || '') ?? '').replace('-->', '');
+  removeTags(submittedContent?.replace('-->', ''));
 
 /**
  * The answer as the website's editor sends it: HTML, one paragraph per line.
@@ -108,7 +111,7 @@ export const sendSubmission = async ({
   if (!content && !attachment && !removeAttachment) {
     return;
   }
-  await submitAssignment(studentHomeworkId, {
+  await dataSource.submitAssignment(studentHomeworkId, {
     content: submissionHtml(content, submittedContent),
     attachment,
     onProgress,

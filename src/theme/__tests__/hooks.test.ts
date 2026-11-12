@@ -10,8 +10,6 @@ const RN: typeof ReactNative = require('react-native');
 const scheme = (value: 'light' | 'dark') =>
   jest.spyOn(RN, 'useColorScheme').mockReturnValue(value);
 
-afterEach(() => jest.restoreAllMocks());
-
 it('follows the system appearance', async () => {
   scheme('dark');
   const { result } = await renderHook(() => ({

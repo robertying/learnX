@@ -7,15 +7,15 @@ import { useSplitLaidOut } from 'navigation/NativeSplitView';
 import {
   lastNavigatorScreens,
   navigatorConfig,
-} from '../../../jest/mocks/navigator';
+} from 'test-utils/mocks/navigator';
 
 jest.mock('@bottom-tabs/react-navigation', () => ({
-  createNativeBottomTabNavigator: require('../../../jest/mocks/navigator')
+  createNativeBottomTabNavigator: require('test-utils/mocks/navigator')
     .createNavigator,
 }));
 jest.mock('navigation/SidebarSplitNavigator', () => ({
   __esModule: true,
-  default: require('../../../jest/mocks/navigator').createNavigator,
+  default: require('test-utils/mocks/navigator').createNavigator,
 }));
 jest.mock('navigation/NativeSplitView', () => ({
   useSplitLaidOut: jest.fn(() => true),
@@ -58,7 +58,7 @@ const shared = {
   react: require('react'),
   compilerRuntime: require('react/compiler-runtime'),
   reactNative: require('react-native'),
-  navigator: require('../../../jest/mocks/navigator'),
+  navigator: require('test-utils/mocks/navigator'),
 };
 const loadMainTab = (layout: typeof mockLayout) => {
   mockLayout = layout;
@@ -67,7 +67,7 @@ const loadMainTab = (layout: typeof mockLayout) => {
     jest.doMock('react', () => shared.react);
     jest.doMock('react/compiler-runtime', () => shared.compilerRuntime);
     jest.doMock('react-native', () => shared.reactNative);
-    jest.doMock('../../../jest/mocks/navigator', () => shared.navigator);
+    jest.doMock('test-utils/mocks/navigator', () => shared.navigator);
     MainTab = require('navigation/MainTab').default;
   });
   return MainTab;
@@ -77,7 +77,6 @@ const config = () => navigatorConfig(screen.getByTestId('navigator'));
 const lazy = () => config().screens.map(s => s.options?.lazy);
 
 const idle: (() => void)[] = [];
-const os = Platform.OS;
 beforeEach(() => {
   idle.length = 0;
   globalThis.requestIdleCallback = jest.fn(callback => {
@@ -85,10 +84,6 @@ beforeEach(() => {
     return idle.length;
   });
   globalThis.cancelIdleCallback = jest.fn();
-});
-afterEach(() => {
-  Platform.OS = os;
-  jest.restoreAllMocks();
 });
 
 // Beijing time, as Jest runs in Asia/Shanghai
@@ -169,7 +164,7 @@ it.each([
     const MainTab = loadMainTab(iPhone);
     await render(<MainTab />);
     expect(tabBarIcon(0)).toEqual({ sfSymbol: ios });
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     expect(tabBarIcon(0)).toEqual({ uri: `tab_${material}` });
   },
 );
@@ -187,7 +182,7 @@ it('leaves the Settings badge off the tab bar, and hides it for the keyboard', a
 
 it('uses Material Symbols, filled on the selected tab, and the card color on Android', async () => {
   at('2026-03-15T22:00:00');
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   const MainTab = loadMainTab(android);
   await render(<MainTab />);
   expect(config().tabBarStyle).toEqual({ backgroundColor: expect.anything() });

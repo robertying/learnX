@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import dayjs from 'dayjs';
-import { classDetails, itemRow } from 'components/ClassRow';
+import { itemRow } from 'components/ItemRow';
 import {
   Form,
   FormLink,
@@ -9,7 +9,6 @@ import {
   FormText,
 } from 'components/Form';
 import { SyncStatusSection } from 'components/SyncStatus';
-import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { getSettings, setSetting } from 'data/settings';
@@ -22,15 +21,21 @@ import {
   deadlineUrgency,
   isDueSoon,
 } from 'helpers/assignments';
-import { t } from 'helpers/i18n';
-import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
+import { t, tCount } from 'helpers/i18n';
+import {
+  ClassSession,
+  classDetails,
+  currentAndNext,
+  sessionsOn,
+} from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
+import { isShownBy } from 'helpers/shown';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
-import { debugTitle } from 'navigation/options';
-import { headerButtons } from 'navigation/headerButtons';
+import { debugTitle, getTitleOptions } from 'navigation/options';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import { sidebarSplit } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from 'navigation/types';
 
@@ -50,11 +55,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const visible = <T extends { id: string; courseId: string }>(
     items: T[],
     archivedIds: string[],
-  ) =>
-    items.filter(
-      item =>
-        !hiddenIds.includes(item.courseId) && !archivedIds.includes(item.id),
-    );
+  ) => items.filter(isShownBy(hiddenIds, archivedIds));
 
   const assignmentsQuery = useAssignments();
   const noticesQuery = useNotices();
@@ -122,42 +123,38 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const showSettings = !sidebarSplit;
   const openSettings = () => navigation.push('Settings');
   const refreshing = pullToRefresh.refreshing;
-  const onRefresh = pullToRefresh.onRefresh;
   useLayoutEffect(() => {
-    navigation.setOptions({
-      ...getTitleOptions(t('today'), subtitle),
-      ...headerButtons('right', [
-        DeviceInfo.isMac() && {
-          id: 'refresh',
-          label: t('refresh'),
-          icon: 'refresh',
-          sfSymbol: refreshing
-            ? 'arrow.trianglehead.2.clockwise.rotate.90'
-            : undefined,
-          disabled: refreshing,
-          onPress: onRefresh,
-        },
-        // Debug builds: the debug tools, in a group of their own.
-        __DEV__ && {
-          id: 'debug',
-          label: debugTitle,
-          icon: 'debug',
-          onPress: () => navigation.push('Debug'),
-          testID: 'today-debug',
-          ownGroup: true,
-        },
-        showSettings && {
-          id: 'settings',
-          label: t('settings'),
-          icon: 'settings',
-          badge: settingsBadge,
-          onPress: openSettings,
-          testID: 'today-settings',
-        },
-      ]),
-    });
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- handlers read the latest props
-  }, [navigation, subtitle, settingsBadge, refreshing, showSettings]);
+    navigation.setOptions(getTitleOptions(t('today'), subtitle));
+  }, [navigation, subtitle]);
+  useHeaderButtons(navigation, 'right', [
+    DeviceInfo.isMac() && {
+      id: 'refresh',
+      label: t('refresh'),
+      icon: 'refresh',
+      sfSymbol: refreshing
+        ? 'arrow.trianglehead.2.clockwise.rotate.90'
+        : undefined,
+      disabled: refreshing,
+      onPress: pullToRefresh.onRefresh,
+    },
+    // Debug builds: the debug tools, in a group of their own.
+    __DEV__ && {
+      id: 'debug',
+      label: debugTitle,
+      icon: 'debug',
+      onPress: () => navigation.push('Debug'),
+      testID: 'today-debug',
+      ownGroup: true,
+    },
+    showSettings && {
+      id: 'settings',
+      label: t('settings'),
+      icon: 'settings',
+      badge: settingsBadge,
+      onPress: openSettings,
+      testID: 'today-settings',
+    },
+  ]);
 
   const remaining = classes.filter(s => s.end > now);
   const note =
@@ -173,9 +170,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? t('todayNoClasses')
       : remaining.length === 0
         ? t('todayNoMoreClasses')
-        : classes.length === 1
-          ? t('todayOneClass')
-          : t('todayClassCount', { count: classes.length });
+        : tCount('todayOneClass', 'todayClassCount', classes.length);
 
   return (
     <FormScreen>
@@ -243,22 +238,18 @@ const Today: React.FC<Props> = ({ navigation }) => {
             {unreadNotices > 0 && (
               <FormLink
                 icon="notices"
-                title={
-                  unreadNotices === 1
-                    ? t('todayOneUnreadNotice')
-                    : t('todayUnreadNotices', { count: unreadNotices })
-                }
+                title={tCount(
+                  'todayOneUnreadNotice',
+                  'todayUnreadNotices',
+                  unreadNotices,
+                )}
                 onPress={openUnreadNotices}
               />
             )}
             {newFiles > 0 && (
               <FormLink
                 icon="files"
-                title={
-                  newFiles === 1
-                    ? t('todayOneNewFile')
-                    : t('todayNewFiles', { count: newFiles })
-                }
+                title={tCount('todayOneNewFile', 'todayNewFiles', newFiles)}
                 onPress={openNewFiles}
               />
             )}

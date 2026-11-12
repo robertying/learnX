@@ -1,12 +1,13 @@
 {
   "extends": "@react-native/typescript-config",
   "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/node_modules", "**/Pods"],
+  "exclude": ["**/node_modules", "**/Pods", "scripts"],
   "compilerOptions": {
     "lib": ["esnext", "dom"],
     "noUnusedLocals": true,
     "paths": {
       "modules/*": ["./modules/*"],
+      "test-utils/*": ["./jest/*"],
       "*": ["./src/*"]
     }
   }

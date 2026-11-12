@@ -19,3 +19,4 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 - Address the user as 你, never 您, and call the app "learnX", not "App".
 - Full-width punctuation (，。：) in Chinese text. A message ends with 。 when its English ends with a period.
 - Put a space between Chinese and Latin letters or numbers (`{count} 条未读公告`).
+- Times of day follow the device's 12/24-hour setting. A date format (a key ending in `Format`) writes `{time}` where the time goes, and `t()` fills it with `timeFormat()` from `helpers/i18n`; code formatting a time alone uses `timeFormat()`, never `HH:mm`.

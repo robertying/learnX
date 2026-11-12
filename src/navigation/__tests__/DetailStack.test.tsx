@@ -11,10 +11,10 @@ import {
   lastNavigatorProps,
   lastNavigatorScreens,
   navigatorConfig,
-} from '../../../jest/mocks/navigator';
+} from 'test-utils/mocks/navigator';
 
 jest.mock('@react-navigation/native-stack', () => ({
-  createNativeStackNavigator: require('../../../jest/mocks/navigator')
+  createNativeStackNavigator: require('test-utils/mocks/navigator')
     .createNavigator,
 }));
 jest.mock('navigation/stacks', () => {
@@ -24,7 +24,7 @@ jest.mock('navigation/stacks', () => {
     renderItemDetails: (names: string[]) => (
       <Fragment>
         {names.map(name => {
-          const { createNavigator } = require('../../../jest/mocks/navigator');
+          const { createNavigator } = require('test-utils/mocks/navigator');
           const { Screen } = createNavigator();
           return <Screen key={name} name={name} component={() => null} />;
         })}

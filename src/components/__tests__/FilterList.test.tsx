@@ -74,11 +74,11 @@ const items = ['a', 'b', 'c'].map(item);
 const Card: React.FC<ItemComponentProps<Item>> = ({
   data,
   onPress,
-  onFav,
+  onToggleFav,
   fav,
-  onArchive,
+  onToggleArchived,
   archived,
-  onHide,
+  onToggleHidden,
   hidden,
   onCheck,
   checked,
@@ -91,13 +91,13 @@ const Card: React.FC<ItemComponentProps<Item>> = ({
       <Text>{data.title}</Text>
     </Pressable>
     <Text>{`${data.id}: ${fav ? 'fav' : ''} ${archived ? 'archived' : ''} ${hidden ? 'hidden' : ''} ${checked ? 'checked' : ''}`}</Text>
-    <Pressable onPress={() => onFav?.(!fav)}>
+    <Pressable onPress={() => onToggleFav?.()}>
       <Text>{`fav ${data.id}`}</Text>
     </Pressable>
-    <Pressable onPress={() => onArchive?.(!archived)}>
+    <Pressable onPress={() => onToggleArchived?.()}>
       <Text>{`archive ${data.id}`}</Text>
     </Pressable>
-    <Pressable onPress={() => onHide?.(!hidden)}>
+    <Pressable onPress={() => onToggleHidden?.()}>
       <Text>{`hide ${data.id}`}</Text>
     </Pressable>
     <Pressable onPress={() => onCheck?.(!checked)}>
@@ -251,7 +251,7 @@ it('shows the sync status at the top of the list, where it scrolls with it', asy
   const list = screen.getByTestId('filter-list');
   expect(within(list).getByTestId('sync-status')).toBeTruthy();
   expect(within(list).getByText(t('syncStatusOffline'))).toBeTruthy();
-  useAuthStore.setState(initialAuth);
+  await act(() => useAuthStore.setState(initialAuth));
 });
 
 it('opens Course X in the detail pane when there is one', async () => {

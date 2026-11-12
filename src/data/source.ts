@@ -2,9 +2,7 @@ import { Platform } from 'react-native';
 import {
   Learn2018Helper,
   checkHomeworkSubmitResponse,
-  type ApiError,
   type Credential,
-  FailReason,
 } from '@robertying/thu-learn-lib';
 import mime from 'mime';
 import axios from 'axios';
@@ -61,7 +59,11 @@ export interface AppSource extends DataSource {
    * website does when it's opened.
    */
   markNoticeRead: (url: string) => Promise<void>;
-  /** See `submitAssignment` below. */
+  /**
+   * Submits an assignment: `content` is the whole answer as HTML, which
+   * replaces the submitted one; `remove` deletes the attachment. Sent with
+   * axios, which reports upload progress (thu-learn-lib's fetch can't).
+   */
   submitAssignment: (
     studentHomeworkId: string,
     submission: Submission,
@@ -69,8 +71,6 @@ export interface AppSource extends DataSource {
   /** Runs before a file is downloaded from the server. */
   prepareFileDownload: () => Promise<void>;
 }
-
-let helper: Learn2018Helper;
 
 /**
  * Which server the session talks to, set when a login starts (a login may
@@ -90,50 +90,14 @@ export const endSession = () => {
   sessionServer = null;
 };
 
-/** Web Learning's login pages are short; a notice's page never is. */
-const MAX_LOGIN_PAGE_LENGTH = 4096;
-
-/**
- * Whether a page load found the session expired: Web Learning answers with
- * its "login timeout" page, or redirects to it or to the SSO login, with
- * status 200 (403 for some pages), the way thu-learn-lib tells. Throws for any
- * other failed status.
- */
-const isSessionExpired = async (response: Response) => {
-  if (response.status === 403 || response.url.includes('login_timeout')) {
-    return true;
-  }
-  if (!response.ok) {
-    throw {
-      reason: FailReason.UNEXPECTED_STATUS,
-      extra: response.status,
-    } satisfies ApiError;
-  }
-  const text = await response.text();
-  return (
-    text.length < MAX_LOGIN_PAGE_LENGTH &&
-    /登录超时|您未登录或登录失效|log_fail\.png|login_timeout|id\.tsinghua\.edu\.cn\/do\/off\/ui\/auth\/login|j_spring_security_thauth_roaming_entry/.test(
-      text,
-    )
-  );
-};
-
 /** The requests the app sends to learn.tsinghua.edu.cn itself. */
 const realRequests: Omit<AppSource, keyof DataSource> = {
   markNoticeRead: async url => {
     // Only Web Learning's own pages: the session cookies go with the request.
-    if (!isLearnUrl(url)) {
-      return;
-    }
-    if (await isSessionExpired(await fetch(url))) {
-      // The page was the login page, so the notice isn't marked read yet.
-      // Log in again if the session has expired, and load it once more.
-      await helper.ensureSession();
-      if (await isSessionExpired(await fetch(url))) {
-        throw {
-          reason: FailReason.NOT_LOGGED_IN,
-        } satisfies ApiError;
-      }
+    if (isLearnUrl(url)) {
+      // thu-learn-lib logs in again and loads it once more when the session
+      // has expired.
+      await helper.markNotificationRead({ url });
     }
   },
   submitAssignment: async (
@@ -166,7 +130,9 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
       transformResponse: data => data,
       onUploadProgress: e => {
         // Two decimals are plenty for a progress bar.
-        onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
+        onProgress?.(
+          Math.round((e.total ? e.loaded / e.total : 0) * 100) / 100,
+        );
       },
     });
     checkHomeworkSubmitResponse(res.data);
@@ -218,7 +184,7 @@ export const dataSource = new Proxy({} as AppSource, {
 
 /**
  * Whether changes to the account stay on the phone for now: a debug build
- * with a real account, until "Allow Server Writes" is on in Settings.
+ * with a real account, until the Debug page's "Allow Server Writes" is on.
  */
 export const serverWritesBlocked = () =>
   !isMockSession() && !getServerWritesAllowed();
@@ -273,9 +239,7 @@ export const loginWithFingerPrint = async (credential?: Credential) => {
   // A new login names its account; it may differ from the stored one.
   const isMock = isMockUser(credential?.username ?? getCredentials()?.username);
   sessionServer = isMock ? 'mock' : 'real';
-  if (!isMock) {
-    await clearLoginCookies();
-  }
+  // thu-learn-lib clears the SSO cookies first (clearLoginCookies).
   await (isMock ? mockSource : helper).login(credential);
 };
 
@@ -292,43 +256,28 @@ export const ensureSession = async () => {
   await dataSource.ensureSession();
 };
 
-export const resetDataSource = () => {
-  helper = new Learn2018Helper({
-    // React Native's fetch keeps cookies in the system's store, which the
-    // web views, file downloads and the submission upload use too. Handing
-    // it over directly keeps that the only cookie jar: without it,
-    // thu-learn-lib wraps fetch with a jar of its own (fetch-cookie), and the
-    // two only agree because native fetch saves the cookies as well.
-    fetch: (input, init) => fetch(input, init),
-    provider: () => {
-      const credentials = getCredentials();
-      return {
-        username: credentials?.username || undefined,
-        password: credentials?.password || undefined,
-        fingerPrint: credentials?.fingerPrint ?? '',
-        fingerGenPrint: credentials?.fingerGenPrint ?? '',
-        fingerGenPrint3: credentials?.fingerGenPrint3 ?? '',
-      };
-    },
-  });
-};
-resetDataSource();
+/**
+ * The one thu-learn-lib helper in this JS runtime, so its logins never overlap
+ * (it runs one at a time, and requests that find the session expired wait for
+ * it) and it remembers a password the server turned down. It sends requests
+ * with React Native's fetch, whose cookies live in the system's store, which
+ * the web views, file downloads and the submission upload use too, and clears
+ * the SSO cookies there before every login, the ones it starts by itself for
+ * an expired session included.
+ */
+const helper = new Learn2018Helper({
+  clearLoginCookies: () => clearLoginCookies(),
+  provider: () => {
+    const credentials = getCredentials();
+    return {
+      username: credentials?.username || undefined,
+      password: credentials?.password || undefined,
+      fingerPrint: credentials?.fingerPrint ?? '',
+      fingerGenPrint: credentials?.fingerGenPrint ?? '',
+      fingerGenPrint3: credentials?.fingerGenPrint3 ?? '',
+    };
+  },
+});
 
 export const addCSRF = (url: string) =>
   addCSRFTokenToLearnUrl(url, dataSource.getCSRFToken());
-
-/**
- * Submits an assignment: `content` is the whole answer as HTML, which replaces
- * the submitted one; `remove` deletes the attachment. Sent with axios, which
- * reports upload progress (thu-learn-lib's fetch can't).
- */
-export const submitAssignment = async (
-  studentHomeworkId: string,
-  submission: Submission,
-) => {
-  const { content, attachment, remove } = submission;
-  if (!content && !attachment && !remove) {
-    return;
-  }
-  await dataSource.submitAssignment(studentHomeworkId, submission);
-};

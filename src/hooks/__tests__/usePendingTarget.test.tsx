@@ -2,38 +2,29 @@ import { act, renderHook } from '@testing-library/react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
 import { DetailStackParams } from 'navigation/types';
 import { SplitViewContext } from 'navigation/SplitView';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';
 
 // The split view's divider pulls in the theme, which isn't needed here.
 jest.mock('components/Divider', () => () => null);
 jest.mock('@react-navigation/native', () => ({}));
-jest.mock('navigation/layout', () => ({ nativeSplit: true }));
-let mockSplitLaidOut = true;
-let mockTablet = true;
-jest.mock('constants/DeviceInfo', () => ({
-  isTablet: () => mockTablet,
-  isMac: () => false,
-}));
-jest.mock('navigation/NativeSplitView', () => ({
-  useSplitLaidOut: () => mockSplitLaidOut,
-}));
 
-const splitContext = (navigator: object | null) => ({
+const splitContext = (
+  navigator: object | null,
+  { showDetail = true, laidOut = true } = {},
+) => ({
   detailNavigationContainerRef: navigator
     ? { current: navigator as NavigationContainerRef<DetailStackParams> }
     : null,
-  splitEnabled: true,
-  showDetail: true,
+  showDetail,
+  laidOut,
   showMaster: true,
   toggleMaster: () => {},
-  masterWidth: Numbers.splitViewMasterWidth,
+  masterWidth: SplitSizes.masterWidth,
 });
 
 afterEach(() => {
   setPendingTarget(null);
-  mockSplitLaidOut = true;
-  mockTablet = true;
 });
 
 it('opens a pending item of its type once', async () => {
@@ -78,10 +69,10 @@ it('waits for the detail pane of a split view', async () => {
   expect(open.mock.calls).toEqual([['n1', true]]);
 });
 
-it('waits for the split to be laid out on iPad', async () => {
+it('waits for a native split to be laid out, which may still collapse', async () => {
   const open = jest.fn();
-  mockSplitLaidOut = false;
-  const context = splitContext({ isReady: () => true });
+  // Before UIKit has put it on screen, a split hands out its detail pane.
+  let context = splitContext({ isReady: () => true }, { laidOut: false });
   const wrapper = ({ children }: React.PropsWithChildren) => (
     <SplitViewContext.Provider value={context}>
       {children}
@@ -93,15 +84,14 @@ it('waits for the split to be laid out on iPad', async () => {
   });
   expect(open).not.toHaveBeenCalled();
 
-  mockSplitLaidOut = true;
+  // Collapsed, as on an iPhone: pushed on the list.
+  context = splitContext(null, { showDetail: false });
   await hook.rerender({});
-  expect(open.mock.calls).toEqual([['n1', true]]);
+  expect(open.mock.calls).toEqual([['n1', false]]);
 });
 
-it("pushes on an iPhone, even while a tab's split hands out its hidden pane", async () => {
+it('opens in the detail pane of an expanded split, whatever the device', async () => {
   const open = jest.fn();
-  mockTablet = false;
-  mockSplitLaidOut = false;
   const context = splitContext({ isReady: () => true });
   const wrapper = ({ children }: React.PropsWithChildren) => (
     <SplitViewContext.Provider value={context}>
@@ -110,5 +100,5 @@ it("pushes on an iPhone, even while a tab's split hands out its hidden pane", as
   );
   setPendingTarget({ type: 'file', id: 'f1' });
   await renderHook(() => usePendingTarget('file', open), { wrapper });
-  expect(open.mock.calls).toEqual([['f1', false]]);
+  expect(open.mock.calls).toEqual([['f1', true]]);
 });

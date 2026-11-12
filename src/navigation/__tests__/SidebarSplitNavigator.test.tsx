@@ -31,8 +31,8 @@ jest.mock('navigation/NativeSplitView', () => {
         <Context.Provider
           value={{
             detailNavigationContainerRef,
-            splitEnabled: true,
             showDetail: true,
+            laidOut: true,
             showMaster: true,
             toggleMaster: () => {},
             masterWidth: 320,

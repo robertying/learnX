@@ -63,12 +63,12 @@ import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
+import { useFieldText } from 'hooks/useFieldText';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import {
   parseNumberInput,
   sectionRows,
-  useFieldText,
   type FormButtonProps,
   type FormFileProps,
   type FormIcon,
@@ -179,7 +179,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
  * `SafeArea` that background would stop at the safe area instead.
  */
 export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
-  <View style={[styles.fill, style]} {...props} />
+  <View style={[styles.fill, styles.screen, style]} {...props} />
 );
 
 // The header's glass over what scrolls under it, as for the app's other
@@ -752,6 +752,12 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
+  },
+  // The Form's own background, also behind a title above it (Setup).
+  screen: {
+    backgroundColor: DeviceInfo.isMac()
+      ? PlatformColor('systemBackground')
+      : groupedBackground,
   },
   numberField: {
     width: 72,

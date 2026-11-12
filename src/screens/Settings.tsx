@@ -48,9 +48,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
   const update = useAvailableUpdate();
   const whatsNew = latestWhatsNew();
 
-  const handlePush = (name: Exclude<keyof SettingsStackParams, 'Settings'>) =>
-    show(name);
-
   const handleLogout = () => {
     Alert.alert(
       t('logoutQuestion'),
@@ -91,23 +88,23 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormLink
             icon="semester"
             title={t('semesterSelection')}
-            onPress={() => handlePush('SemesterSelection')}
+            onPress={() => show('SemesterSelection')}
           />
           <FormLink
             testID="settings-notifications"
             icon="notifications"
             title={t('notifications')}
-            onPress={() => handlePush('NotificationSettings')}
+            onPress={() => show('NotificationSettings')}
           />
           <FormLink
             icon="calendar"
             title={calendarSettingsTitle()}
-            onPress={() => handlePush('CalendarEvent')}
+            onPress={() => show('CalendarSettings')}
           />
           <FormLink
             icon="download"
             title={t('downloads')}
-            onPress={() => handlePush('Downloads')}
+            onPress={() => show('Downloads')}
           />
           {/* The Mac has no swipe: its cards' actions are in a right-click menu. */}
           {!DeviceInfo.isMac() && (
@@ -115,7 +112,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
               testID="settings-swipe-actions"
               icon="swipe"
               title={t('swipeActions')}
-              onPress={() => handlePush('SwipeActions')}
+              onPress={() => show('SwipeActions')}
             />
           )}
         </FormSection>
@@ -124,7 +121,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon="info"
             badge={!courseSharingSeen}
             title={t('courseInformationSharing')}
-            onPress={() => handlePush('CourseInformationSharing')}
+            onPress={() => show('CourseInformationSharing')}
           />
         </FormSection>
         <FormSection>
@@ -144,7 +141,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormLink
             icon="changelog"
             title={t('changelog')}
-            onPress={() => handlePush('Changelog')}
+            onPress={() => show('Changelog')}
           />
           {update && (
             <FormLink
@@ -157,17 +154,17 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormLink
             icon="maintainer"
             title={t('becomeMaintainer')}
-            onPress={() => handlePush('Maintainer')}
+            onPress={() => show('Maintainer')}
           />
           <FormLink
             icon="help"
             title={t('helpAndFeedback')}
-            onPress={() => handlePush('Help')}
+            onPress={() => show('Help')}
           />
           <FormLink
             icon="about"
             title={t('about')}
-            onPress={() => handlePush('About')}
+            onPress={() => show('About')}
           />
         </FormSection>
       </Form>

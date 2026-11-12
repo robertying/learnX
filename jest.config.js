@@ -8,9 +8,16 @@ const base = {
   // Loads Reanimated's and Worklets' web builds instead of the native ones
   resolver: 'react-native-reanimated/jest/resolver',
   setupFiles: ['<rootDir>/jest/setup.ts'],
-  // Every test starts with fresh call records on every mock.
+  setupFilesAfterEnv: ['<rootDir>/jest/setupAfterEnv.ts'],
+  // Every test starts with fresh call records on every mock, and spies and
+  // replaced properties (jest.replaceProperty(Platform, 'OS', 'android'))
+  // go back to the real thing.
   clearMocks: true,
+  restoreMocks: true,
   transform: {
+    // Before the preset's babel-jest: a cache key that covers the files these
+    // read at transform time
+    '/src/helpers/preval/[^/]+\\.preval\\.js$': '<rootDir>/jest/transformer.js',
     '^.+\\.mjs$': 'babel-jest',
   },
   transformIgnorePatterns: [
@@ -23,10 +30,12 @@ const base = {
 };
 
 /**
- * Two runs: everything with each split component's iOS file (Jest's default
- * platform here), and the component tests under `__tests__/android` with the
- * `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`) and
- * `Platform.OS` 'android'.
+ * Three runs: everything in src/ with each split component's iOS file (Jest's
+ * default platform here); the component tests under `__tests__/android` with
+ * the `.android.tsx` files, Compose stand-ins (`jest/mocks/expoCompose.tsx`)
+ * and `Platform.OS` 'android'; and `tooling`, the tests of the repo's scripts,
+ * Maestro flows and lint rules in `scripts/__tests__`, typed with Node
+ * (`scripts/tsconfig.json`).
  */
 /** @type {import('jest').Config} */
 module.exports = {
@@ -61,10 +70,16 @@ module.exports = {
         defaultPlatform: 'android',
         platforms: ['android', 'ios', 'native'],
       },
-      setupFiles: [...base.setupFiles, '<rootDir>/jest/android.ts'],
+      setupFiles: ['<rootDir>/jest/setup.ts', '<rootDir>/jest/android.ts'],
       // Material Symbols, which Compose draws from vector drawables
       moduleNameMapper: { '\\.xml$': '<rootDir>/jest/mocks/drawable.ts' },
       testMatch: ['<rootDir>/src/**/__tests__/android/**/*.test.ts?(x)'],
+    },
+    {
+      ...base,
+      displayName: 'tooling',
+      roots: ['<rootDir>/scripts'],
+      testEnvironment: 'node',
     },
   ],
 };

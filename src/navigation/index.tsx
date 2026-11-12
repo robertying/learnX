@@ -3,25 +3,22 @@ import { useRef } from 'react';
 import {
   NavigationContainer,
   NavigationContainerRef,
-  NavigationIndependentTree,
 } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
-  SafeAreaProvider,
-  useSafeAreaFrame,
-} from 'react-native-safe-area-context';
+  createNativeStackNavigator,
+  type NativeStackNavigationOptions,
+} from '@react-navigation/native-stack';
+import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import {
   DetailStackParams,
   RootStackParams,
   AndroidRootStackParams,
 } from './types';
-import Splash from 'components/Splash';
 import { SplitViewProvider } from './SplitView';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { trackScreen } from 'services/crashReporting';
-import { reportDetailReady } from 'hooks/useDetailNavigator';
 import { useNavigationTheme } from 'theme';
-import { DetailStack } from './DetailStack';
+import { DetailContainer } from './DetailStack';
 import MainTab from './MainTab';
 import { nativeSplit } from './layout';
 import Setup from 'screens/Setup';
@@ -34,6 +31,18 @@ import {
 } from './stacks';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
+
+// A page sheet on iOS, iPadOS and Mac, which a swipe down closes, as the
+// system's own apps present search and web pages. Android covers the window.
+const sheetOptions: NativeStackNavigationOptions =
+  Platform.OS === 'ios'
+    ? { presentation: 'pageSheet' }
+    : { gestureEnabled: false };
+
+const rootScreenOptions = {
+  headerShown: false,
+  presentation: 'transparentModal',
+} as const;
 const AndroidRootNavigator =
   createNativeStackNavigator<AndroidRootStackParams>();
 
@@ -65,12 +74,12 @@ const renderMainScreens = () => (
     <RootNavigator.Screen
       name="CourseXStack"
       component={CourseXStack}
-      options={{ gestureEnabled: false }}
+      options={sheetOptions}
     />
     <RootNavigator.Screen
       name="SearchStack"
       component={SearchStack}
-      options={{ gestureEnabled: false }}
+      options={sheetOptions}
     />
     <RootNavigator.Screen
       name="AssignmentSubmissionStack"
@@ -84,12 +93,11 @@ const renderMainScreens = () => (
 
 /** Android's main UI, in the split view drawn in JS (`SplitViewProvider`). */
 const AndroidMain = () => {
-  const theme = useNavigationTheme();
   const frame = useSafeAreaFrame();
   const detailNavigationContainerRef =
     useRef<NavigationContainerRef<DetailStackParams>>(null);
 
-  const showDetail = frame.width > Numbers.splitViewMaxCollapsedWidth;
+  const showDetail = frame.width > SplitSizes.maxCollapsedWidth;
 
   return (
     <SplitViewProvider
@@ -98,25 +106,10 @@ const AndroidMain = () => {
       }
       showDetail={showDetail}
     >
-      <RootNavigator.Navigator
-        screenOptions={{
-          headerShown: false,
-          presentation: 'transparentModal',
-        }}
-      >
+      <RootNavigator.Navigator screenOptions={rootScreenOptions}>
         {renderMainScreens()}
       </RootNavigator.Navigator>
-      <NavigationIndependentTree>
-        <NavigationContainer
-          ref={detailNavigationContainerRef}
-          theme={theme}
-          fallback={<Splash />}
-          onReady={reportDetailReady}
-          onStateChange={trackScreen}
-        >
-          <DetailStack />
-        </NavigationContainer>
-      </NavigationIndependentTree>
+      <DetailContainer navigationContainerRef={detailNavigationContainerRef} />
     </SplitViewProvider>
   );
 };
@@ -128,60 +121,47 @@ const Navigation: React.FC<{ showMain: boolean }> = ({ showMain }) => {
   const theme = useNavigationTheme();
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer
-        theme={theme}
-        fallback={<Splash />}
-        onStateChange={trackScreen}
-      >
-        {nativeSplit ? (
-          <RootNavigator.Navigator
-            screenOptions={{
-              headerShown: false,
-              presentation: 'transparentModal',
-            }}
-          >
-            {showMain ? (
-              renderMainScreens()
-            ) : (
-              <RootNavigator.Screen
-                name="LoginStack"
-                component={LoginStack}
-                options={{ gestureEnabled: false }}
-              />
-            )}
-          </RootNavigator.Navigator>
-        ) : (
-          <AndroidRootNavigator.Navigator
-            screenOptions={{ headerShown: false }}
-          >
-            {showMain ? (
-              <>
-                <AndroidRootNavigator.Screen
-                  name="Main"
-                  component={AndroidMain}
-                  // Login slides away to reveal the main UI.
-                  options={{ animationTypeForReplace: 'pop' }}
-                />
-                {/* Over the whole window, not inside the list's pane */}
-                {renderSheets()}
-              </>
-            ) : (
-              // Beside the split rather than in its master pane, so it always
-              // covers the whole window and the panes never resize under it.
+    <NavigationContainer theme={theme} onStateChange={trackScreen}>
+      {nativeSplit ? (
+        <RootNavigator.Navigator screenOptions={rootScreenOptions}>
+          {showMain ? (
+            renderMainScreens()
+          ) : (
+            <RootNavigator.Screen
+              name="LoginStack"
+              component={LoginStack}
+              options={{ gestureEnabled: false }}
+            />
+          )}
+        </RootNavigator.Navigator>
+      ) : (
+        <AndroidRootNavigator.Navigator screenOptions={{ headerShown: false }}>
+          {showMain ? (
+            <>
               <AndroidRootNavigator.Screen
-                name="LoginStack"
-                component={LoginStack}
-                options={{
-                  animation: 'slide_from_bottom',
-                  gestureEnabled: false,
-                }}
+                name="Main"
+                component={AndroidMain}
+                // Login slides away to reveal the main UI.
+                options={{ animationTypeForReplace: 'pop' }}
               />
-            )}
-          </AndroidRootNavigator.Navigator>
-        )}
-      </NavigationContainer>
-    </SafeAreaProvider>
+              {/* Over the whole window, not inside the list's pane */}
+              {renderSheets()}
+            </>
+          ) : (
+            // Beside the split rather than in its master pane, so it always
+            // covers the whole window and the panes never resize under it.
+            <AndroidRootNavigator.Screen
+              name="LoginStack"
+              component={LoginStack}
+              options={{
+                animation: 'slide_from_bottom',
+                gestureEnabled: false,
+              }}
+            />
+          )}
+        </AndroidRootNavigator.Navigator>
+      )}
+    </NavigationContainer>
   );
 };
 
