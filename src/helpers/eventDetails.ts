@@ -4,7 +4,7 @@
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
-import { CalendarEvent } from '@robertying/thu-learn-lib';
+import type { CalendarClass } from './schedule';
 import { Assignment, Course, SettingsState } from 'data/types/state';
 import type { CalendarSyncState } from 'data/calendarSync';
 import { removeTags } from './text';
@@ -78,7 +78,7 @@ export const calendarDefaults = {
 };
 
 export const buildCourseEventDetails = (
-  e: CalendarEvent,
+  e: CalendarClass,
   settings: SettingsState,
 ): EventDetails => {
   const alarms = settings.alarms;

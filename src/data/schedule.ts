@@ -77,6 +77,61 @@ export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
       ),
   });
 
+/** Days the registrar's calendar couldn't be fetched for (YYYYMMDD). */
+export interface FailedRange {
+  startDate: string;
+  endDate: string;
+}
+
+/**
+ * The registrar's classes from `start` to `end` (whole days), fetched week by
+ * week through the same queries (and the same saved weeks) as Today and Up
+ * Next, so the exported calendar and the app's timetable agree. A week that
+ * fails is left out and listed in `failedRanges`; rejects only when every
+ * week failed.
+ */
+export const fetchCalendarRange = async (
+  start: dayjs.Dayjs,
+  end: dayjs.Dayjs,
+  graduate: boolean,
+): Promise<{ classes: CalendarClass[]; failedRanges: FailedRange[] }> => {
+  const first = start.format('YYYY-MM-DD');
+  const last = end.format('YYYY-MM-DD');
+  const classes: CalendarClass[] = [];
+  const failedRanges: FailedRange[] = [];
+  let lastError: unknown;
+  let weeks = 0;
+  for (
+    let week = startOfWeek(start);
+    !week.isAfter(end, 'day');
+    week = week.add(7, 'day')
+  ) {
+    weeks += 1;
+    try {
+      const weekClasses = await queryClient.fetchQuery(
+        calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
+      );
+      classes.push(
+        ...weekClasses.filter(c => c.date >= first && c.date <= last),
+      );
+    } catch (error) {
+      lastError = error;
+      const from = week.isBefore(start, 'day') ? start : week;
+      const to = week.add(6, 'day').isAfter(end, 'day')
+        ? end
+        : week.add(6, 'day');
+      failedRanges.push({
+        startDate: from.format('YYYYMMDD'),
+        endDate: to.format('YYYYMMDD'),
+      });
+    }
+  }
+  if (weeks > 0 && failedRanges.length === weeks) {
+    throw lastError;
+  }
+  return { classes, failedRanges };
+};
+
 export type ScheduleSource =
   /** The registrar's calendar, fetched now or earlier. */
   | 'calendar'

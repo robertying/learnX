@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import DeviceInfo from 'constants/DeviceInfo';
 import { resetCalendarSync, useCalendarSyncStore } from 'data/calendarSync';
-import { dataSource, ensureSession } from 'data/source';
+import { ensureSession } from 'data/source';
+import { fetchCalendarRange } from 'data/schedule';
 import { Assignment } from 'data/types/state';
 import {
   assignmentSyncErrorToast,
@@ -25,9 +26,9 @@ import { CalendarError, CalendarErrorCode } from 'helpers/calendarError';
 import { t } from 'helpers/i18n';
 
 jest.mock('data/source', () => ({
-  dataSource: { getCalendar: jest.fn() },
   ensureSession: jest.fn(async () => {}),
 }));
+jest.mock('data/schedule', () => ({ fetchCalendarRange: jest.fn() }));
 jest.mock('helpers/event', () => ({
   exportSyncedCalendarsToICS: jest.fn(),
   removeCalendars: jest.fn(),
@@ -121,19 +122,15 @@ describe('syncCourseSchedule', () => {
   it('fetches the range and saves the events', async () => {
     const events = [{ courseName: 'Calculus' }];
     jest
-      .mocked(dataSource.getCalendar)
-      .mockResolvedValue({ events, failedRanges: [] } as never);
+      .mocked(fetchCalendarRange)
+      .mockResolvedValue({ classes: events, failedRanges: [] } as never);
 
     await expect(syncCourseSchedule(start, end, true)).resolves.toEqual({
       text: t('courseScheduleSyncSucceeded'),
       type: 'success',
     });
     expect(ensureSession).toHaveBeenCalled();
-    expect(dataSource.getCalendar).toHaveBeenCalledWith(
-      '20260301',
-      '20260328',
-      { graduate: true },
-    );
+    expect(fetchCalendarRange).toHaveBeenCalledWith(start, end, true);
     expect(saveCoursesToCalendar).toHaveBeenCalledWith(events, start, end, []);
     expect(
       useCalendarSyncStore.getState().lastSynced?.courseSchedule,
@@ -144,8 +141,8 @@ describe('syncCourseSchedule', () => {
     const events = [{ courseName: 'Calculus' }];
     const failedRanges = [{ startDate: '20260315', endDate: '20260328' }];
     jest
-      .mocked(dataSource.getCalendar)
-      .mockResolvedValue({ events, failedRanges } as never);
+      .mocked(fetchCalendarRange)
+      .mockResolvedValue({ classes: events, failedRanges } as never);
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
       text: t('courseScheduleSyncPartial'),
@@ -161,8 +158,8 @@ describe('syncCourseSchedule', () => {
 
   it('warns when there are no courses', async () => {
     jest
-      .mocked(dataSource.getCalendar)
-      .mockResolvedValue({ events: [], failedRanges: [] });
+      .mocked(fetchCalendarRange)
+      .mockResolvedValue({ classes: [], failedRanges: [] });
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
       text: t('courseScheduleSyncNoCourse'),
@@ -173,8 +170,8 @@ describe('syncCourseSchedule', () => {
 
   it('turns failures into toasts', async () => {
     jest
-      .mocked(dataSource.getCalendar)
-      .mockResolvedValue({ events: [{}], failedRanges: [] } as never);
+      .mocked(fetchCalendarRange)
+      .mockResolvedValue({ classes: [{}], failedRanges: [] } as never);
     jest
       .mocked(saveCoursesToCalendar)
       .mockImplementation(fail('calendarPermission'));

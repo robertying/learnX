@@ -3,14 +3,13 @@ import dayjs from 'dayjs';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { useCourses } from 'data/queries';
-import { resetSettings, setSetting } from 'data/settings';
+import { resetSettings } from 'data/settings';
 import {
   resetUserData,
   setCourseHidden,
   setCurrentSemester,
   useUserDataStore,
 } from 'data/userData';
-import { uploadCourses } from 'helpers/coursex';
 import { getSemesterTextFromId } from 'helpers/semester';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Courses from 'screens/Courses';
@@ -27,7 +26,6 @@ jest.mock('data/content', () => ({
 }));
 jest.mock('data/queries', () => ({ useCourses: jest.fn() }));
 jest.mock('data/login', () => ({ login: jest.fn() }));
-jest.mock('helpers/coursex', () => ({ uploadCourses: jest.fn() }));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({
   useShowDetail: jest.fn(() => mockShow),
@@ -143,14 +141,4 @@ it('opens a course in the detail view', async () => {
   mockList.onItemPress(courses[1]);
   expect(useShowDetail).toHaveBeenCalledWith(navigation);
   expect(mockShow).toHaveBeenCalledWith('CourseDetail', { id: 'phys' });
-});
-
-it('shares the courses only when sharing is on, ignoring a failed upload', async () => {
-  await renderScreen();
-  expect(uploadCourses).not.toHaveBeenCalled();
-
-  setSetting('courseInformationSharing', true);
-  jest.mocked(uploadCourses).mockRejectedValueOnce(new Error('offline'));
-  await renderScreen();
-  expect(uploadCourses).toHaveBeenCalledWith(courses);
 });

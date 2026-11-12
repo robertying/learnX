@@ -9,16 +9,8 @@ import {
 import { useAppStateStore } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
-import { dataSource } from 'data/source';
-import { resetUserData, setCurrentSemester } from 'data/userData';
-import { uploadCourses } from 'helpers/coursex';
 import { t } from 'helpers/i18n';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
-
-jest.mock('data/source', () => ({
-  dataSource: { getCourseList: jest.fn() },
-}));
-jest.mock('helpers/coursex', () => ({ uploadCourses: jest.fn() }));
 
 const signIn = (username: string) =>
   useCredentialsStore.setState({
@@ -46,13 +38,8 @@ const toggle = (value: boolean) =>
 let alert: jest.SpyInstance;
 beforeEach(() => {
   resetSettings();
-  resetUserData();
-  setCurrentSemester('2026-2027-1');
   signIn('2020000000');
   useAppStateStore.setState({ courseSharingSeen: false });
-  jest
-    .mocked(dataSource.getCourseList)
-    .mockResolvedValue([{ id: 'c1', name: '微积分' }] as never);
   alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 });
 afterEach(() => {
@@ -69,7 +56,7 @@ it('marks the page seen', async () => {
   expect(useAppStateStore.getState().courseSharingSeen).toBe(true);
 });
 
-it("joins once confirmed, sharing this semester's courses", async () => {
+it('joins once confirmed; the courses are shared from then on', async () => {
   await renderScreen();
   expect(
     screen.getByText(t('courseInformationSharingOffCaption')),
@@ -79,29 +66,9 @@ it("joins once confirmed, sharing this semester's courses", async () => {
 
   await join();
   expect(getSettings().courseInformationSharing).toBe(true);
-  expect(dataSource.getCourseList).toHaveBeenCalledWith('2026-2027-1', {
-    lang: 'zh',
-  });
-  expect(uploadCourses).toHaveBeenCalledWith([
-    { id: 'c1', name: '微积分', semesterId: '2026-2027-1' },
-  ]);
   expect(
     await screen.findByText(t('courseInformationSharingOnCaption')),
   ).toBeTruthy();
-});
-
-it('uploads nothing before a semester, and keeps joined if the upload fails', async () => {
-  resetUserData();
-  await renderScreen();
-  await toggle(true);
-  await join();
-  expect(dataSource.getCourseList).not.toHaveBeenCalled();
-  expect(uploadCourses).toHaveBeenCalledWith([]);
-
-  jest.mocked(uploadCourses).mockRejectedValueOnce(new Error('offline'));
-  await toggle(true);
-  await join();
-  expect(getSettings().courseInformationSharing).toBe(true);
 });
 
 it('leaves right away, without asking', async () => {

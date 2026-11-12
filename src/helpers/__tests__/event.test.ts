@@ -173,7 +173,6 @@ describe('saveCoursesToCalendar', () => {
           startTime: '08:00',
           endTime: '09:35',
           location: '六教6A017',
-          status: '',
         },
       ],
       start,
