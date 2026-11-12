@@ -31,6 +31,11 @@ class LearnXUITestCase: XCTestCase {
     let started = element(idMatching: "welcome-continue|login-username|tab-notices")
     XCTAssertTrue(started.waitForExistence(timeout: 60), "the app didn't start")
     if element(id: "tab-notices").exists {
+      // An account an older version left logged in first gets What's New, which covers the sidebar.
+      let whatsNew = element(id: "whats-new-continue")
+      if whatsNew.waitForExistence(timeout: 3) {
+        whatsNew.click()
+      }
       try logOut()
     }
     let welcome = element(id: "welcome-continue")
@@ -54,12 +59,12 @@ class LearnXUITestCase: XCTestCase {
   func logOut() throws {
     try open(tab: "tab-settings")
     try waitFor(id: "settings-logout").click()
-    // The alert's button repeats the row's label; it's the last one.
-    let buttons = app.buttons.matching(NSPredicate(format: "label == %@", "退出登录"))
-    let confirm = buttons.element(boundBy: max(buttons.count - 1, 0))
+    // The alert is a sheet on the Mac, and its buttons have a title, not a label.
+    let confirm = app.sheets.buttons.matching(NSPredicate(format: "title == %@", "退出登录")).firstMatch
     XCTAssertTrue(confirm.waitForExistence(timeout: 5), "no logout confirmation")
     confirm.click()
-    try waitFor(idMatching: "login-username(-label)?", timeout: 15)
+    // The welcome page when this account never saw it (one an older version logged in), else the login page.
+    try waitFor(idMatching: "welcome-continue|login-username(-label)?", timeout: 15)
   }
 
   func open(tab id: String) throws {

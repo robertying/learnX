@@ -27,14 +27,32 @@ env:
 # Password?" alert (the system's own labels) comes first and hides the app's
 # accessibility tree until dismissed. Wait for whichever shows, then read
 # which it is: a condition on an absent element would cost Maestro's 7 s
-# optional lookup.
+# optional lookup. On the closed iPhone Duo the password sometimes doesn't
+# reach its field, and the login page stays: then its Log In button is what
+# shows, and the password goes in again.
 - extendedWaitUntil:
     visible: '${SAVE_PASSWORD}|${T_setupTitle}'
-    timeout: 30000
-- copyTextFrom: '${SAVE_PASSWORD}|${T_setupTitle}'
+    timeout: 15000
+    optional: true
+- copyTextFrom: '${SAVE_PASSWORD}|${T_setupTitle}|${T_login}'
+# (No regex in these scripts: Maestro leaves a script with a `$` in it
+# unevaluated, and the raw text counts as true.)
 - runFlow:
     when:
-      true: "${new RegExp('^(' + SAVE_PASSWORD + ')$').test(maestro.copiedText)}"
+      true: "${T_login.split('|').indexOf(maestro.copiedText) >= 0}"
+    commands:
+      - tapOn:
+          id: login-password
+      - inputText: ${PASSWORD}
+      - pressKey: Enter
+      - extendedWaitUntil:
+          visible: '${SAVE_PASSWORD}|${T_setupTitle}'
+          timeout: 30000
+      - copyTextFrom: '${SAVE_PASSWORD}|${T_setupTitle}'
+# Anything but the set-up title is the alert.
+- runFlow:
+    when:
+      true: "${T_setupTitle.split('|').indexOf(maestro.copiedText) < 0}"
     commands:
       - tapOn: 'Not Now|现在不|以后'
 - tapOn:

@@ -59,6 +59,35 @@ appId: ${APP_ID}
 # Settings › Calendars & Reminders.
 - tapOn: 'Settings'
 - tapOn: '.*, Calendars & Reminders, .*'
+# First delete the calendar and reminder list an earlier run left: they
+# outlive the app, and 18.0.3 would add its events to the ones it finds by
+# title, so the report would count them twice. Its own Delete Synced
+# Calendars & Reminders removes every calendar with "learnX" in its title.
+# Then leave and come back, so the switches below are where their positions
+# expect them, at the top.
+- scrollUntilVisible:
+    element: '.*Delete Synced Calendars & Reminders.*'
+    direction: DOWN
+- tapOn: '.*Delete Synced Calendars & Reminders.*'
+- tapOn: 'Ok'
+# Its toast says when the delete is done.
+- extendedWaitUntil:
+    visible: 'Successfully deleted'
+    timeout: 5000
+    optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - back
+- tapOn: '.*, Calendars & Reminders, .*'
 - runFlow:
     when:
       platform: iOS
