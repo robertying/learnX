@@ -36,8 +36,8 @@
 #
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
-# Android screen size, density, signal, app locale and status bar (demo
-# mode: 9:41, full signal and battery, no notification icons). Which simulator or emulator model to use
+# Android screen size, density, app locale and status bar (demo mode: 9:41,
+# full battery, no network or notification icons). Which simulator or emulator model to use
 # depends on the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch
 # iPad, the iPhone Duo, and any Android foldable or tablet emulator.
 set -euo pipefail
@@ -120,6 +120,7 @@ fi
 
 android_app_id="io.robertying.learnx"
 restore_locales=""
+shield_key=""
 restore_appearance=""
 
 # shellcheck disable=SC2329 # run by the EXIT trap
@@ -135,6 +136,9 @@ cleanup() {
     adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
       --locales "$restore_locales" || true
     demo exit || true
+    if [ -n "$shield_key" ]; then
+      adb -s "$device" shell cmd notification unsnooze "'$shield_key'" || true
+    fi
     adb -s "$device" shell settings put global sysui_demo_allowed 0 || true
   fi
 }
@@ -168,23 +172,26 @@ else
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
   adb -s "$device" shell wm size "$size"
   adb -s "$device" shell wm density "$density"
-  # Full signal; mobile data must stay on, or the bar shows a "!".
-  adb -s "$device" emu gsm signal-profile 4 >/dev/null || true
-  # Demo mode draws the status bar from fixed values: 9:41, full Wi-Fi and
-  # cell signal (the emulator's own cell icon shows no signal), a full
-  # battery, and no notification or system icons (the screen lock shield).
+  sleep 3
+  # Demo mode draws the status bar from fixed values: 9:41, a full battery,
+  # no network icons and no notification icons. Enter it after the size
+  # change; entered before, SystemUI keeps the real clock and draws
+  # satellite icons.
   adb -s "$device" shell settings put global sysui_demo_allowed 1
+  demo exit
   demo enter
+  sleep 1
   demo clock -e hhmm 0941
-  demo battery -e level 100 -e plugged false -e powersave false
-  demo network -e airplane hide -e nosim hide -e carriernetworkchange hide
-  demo network -e wifi show -e level 4 -e fully true
-  demo network -e mobile show -e level 4 -e datatype lte -e fully true
+  demo network -e mobile hide -e wifi hide
   demo notifications -e visible false
-  demo status -e volume hide -e bluetooth hide -e location hide \
-    -e alarm hide -e zen hide -e mute hide -e speakerphone hide \
-    -e cast hide -e hotspot hide -e sync hide -e tty hide -e eri hide \
-    -e managed_profile hide
+  demo battery -e level 100 -e plugged false
+  # The no-screen-lock shield is a Safety Center notification that demo mode
+  # still shows: snooze it for the run.
+  shield_key="$(adb -s "$device" shell dumpsys notification --noredact |
+    grep -oE 'key=0\|android\|[^ ]*NoScreenLock[^ ]*' | head -n 1 | cut -d= -f2- | tr -d '\r' || true)"
+  if [ -n "$shield_key" ]; then
+    adb -s "$device" shell cmd notification snooze --for 3600000 "'$shield_key'"
+  fi
 fi
 
 # Maestro (2.12+) writes takeScreenshot files only inside the run's own
