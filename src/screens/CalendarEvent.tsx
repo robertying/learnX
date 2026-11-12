@@ -315,6 +315,7 @@ const CalendarEvent: React.FC<Props> = () => {
         {/* Last and on its own, as Apple's settings end with what deletes. */}
         <FormSection>
           <FormButton
+            destructive
             icon="delete"
             title={
               Platform.OS === 'ios'

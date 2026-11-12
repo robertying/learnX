@@ -9,6 +9,7 @@ import { Assignment } from 'data/types/state';
 import {
   exportSyncedCalendarsToICS,
   removeCalendars,
+  requireAssignmentAccess,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'services/calendar/calendars';
@@ -160,6 +161,21 @@ export const syncAssignments = async (
     ) {
       return undefined;
     }
+    return assignmentSyncErrorToast(err);
+  }
+};
+
+/**
+ * Asks for the access assignment sync to the calendar or Reminders needs, as
+ * the user turns it on; the sync itself follows the setting
+ * (services/surfaces). The toast to show when the access is denied.
+ */
+export const allowAssignmentSync = async (
+  type: 'calendar' | 'reminder',
+): Promise<ToastMessage | undefined> => {
+  try {
+    await requireAssignmentAccess(type, { ask: true });
+  } catch (err) {
     return assignmentSyncErrorToast(err);
   }
 };

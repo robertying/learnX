@@ -25,6 +25,7 @@ export const getRemindersPermissions = jest.fn();
 export const requestRemindersPermissions = jest.fn();
 export const getCalendars = jest.fn();
 export const createCalendar = jest.fn();
+export const getDefaultCalendarSync = jest.fn();
 
 export const ExpoCalendar = { get: jest.fn() };
 export const ExpoCalendarEvent = { get: jest.fn() };

@@ -120,7 +120,7 @@ describe('buildAssignmentReminderDetails', () => {
       timeZone: 'Asia/Shanghai',
       completed: true,
       completionDate: completionDate.toDate(),
-      notes: `${t('deadline')}: 2026-03-20 23:59\n\nRead chapter 2`,
+      notes: `${t('deadline')}: Mar 20 23:59\n\nRead chapter 2`,
     });
   });
 
@@ -131,7 +131,7 @@ describe('buildAssignmentReminderDetails', () => {
     );
     expect(daily.dueDate).toEqual(new Date('2026-03-19T23:59:00+08:00'));
     expect(daily.alarms).toEqual([{ relativeOffset: 0 }]);
-    expect(daily.notes).toMatch(/^.+: 2026-03-20 23:59\n\nRead chapter 2$/);
+    expect(daily.notes).toMatch(/^.+: Mar 20 23:59\n\nRead chapter 2$/);
     const hourly = buildAssignmentReminderDetails(
       settingsWith(
         {},

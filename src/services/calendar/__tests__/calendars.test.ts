@@ -1,5 +1,5 @@
 import * as Calendar from 'expo-calendar';
-import { resetSettings } from 'data/settings';
+import { resetSettings, setSetting } from 'data/settings';
 import {
   getCalendarSync,
   resetCalendarSync,
@@ -109,6 +109,16 @@ describe('synced calendars', () => {
       accessLevel: 'owner',
     });
     expect(getCalendarSync().courseCalendarId).toBe('created');
+  });
+
+  it("creates the course calendar in the default calendar's account", async () => {
+    const google = { id: 'src-google', name: 'Google', type: 'caldav' };
+    mocked.getDefaultCalendarSync.mockReturnValueOnce({ source: google });
+    await getCourseCalendar();
+    expect(mocked.createCalendar).toHaveBeenCalledWith(
+      expect.objectContaining({ sourceId: 'src-google', source: google }),
+    );
+    expect(mocked.getCalendars).toHaveBeenCalledTimes(1);
   });
 
   it('throws when there is no calendar source', async () => {
@@ -258,7 +268,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     });
   });
 
-  it('updates synced events and forgets ones that are gone', async () => {
+  it('updates synced events and makes again the ones deleted in Calendar', async () => {
     useCalendarSyncStore.setState({
       syncedCalendarAssignments: { a1: 'e1', a2: 'e2' },
     });
@@ -276,8 +286,11 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     expect(update).toHaveBeenCalledWith(
       expect.objectContaining({ title: 'Homework - Calculus' }),
     );
-    expect(calendar.createEvent).not.toHaveBeenCalled();
-    expect(getCalendarSync().syncedCalendarAssignments).toEqual({ a1: 'e1' });
+    expect(calendar.createEvent).toHaveBeenCalledTimes(1);
+    expect(getCalendarSync().syncedCalendarAssignments).toEqual({
+      a1: 'e1',
+      a2: 'new-event',
+    });
   });
 
   it('takes over matching events when the saved ids are gone', async () => {
@@ -465,6 +478,38 @@ describe('removeCalendars', () => {
   });
 });
 
+describe('removeCalendars and Reminders access', () => {
+  const course = () => ({
+    id: 'c',
+    title: 'x',
+    delete: jest.fn(async () => {}),
+  });
+
+  it("doesn't ask for Reminders when no list can be there", async () => {
+    mocked.getRemindersPermissions.mockResolvedValue({
+      status: 'undetermined',
+    });
+    useCalendarSyncStore.setState({ courseCalendarId: 'c' });
+    const calendar = course();
+    mocked.getCalendars.mockResolvedValue([calendar]);
+    await removeCalendars();
+    expect(mocked.requestRemindersPermissions).not.toHaveBeenCalled();
+    expect(mocked.getCalendars).not.toHaveBeenCalledWith('reminder');
+    expect(calendar.delete).toHaveBeenCalled();
+  });
+
+  it('asks for Reminders while Reminders sync is on', async () => {
+    mocked.getRemindersPermissions.mockResolvedValue({
+      status: 'undetermined',
+    });
+    mocked.requestRemindersPermissions.mockResolvedValue({ status: 'denied' });
+    setSetting('assignmentReminderSync', true);
+    await expect(removeCalendars()).rejects.toThrow(
+      new CalendarError('reminderPermission'),
+    );
+  });
+});
+
 describe('exportSyncedCalendarsToICS', () => {
   const event = (id: string, title: string, start: string) => ({
     id,
@@ -573,7 +618,7 @@ describe('more of the sync', () => {
       ]);
     });
 
-    it('updates a synced reminder, and forgets one deleted in Reminders', async () => {
+    it('updates a synced reminder, and makes again one deleted in Reminders', async () => {
       useCalendarSyncStore.setState({
         syncedReminderAssignments: { a1: 'r1', a2: 'r2' },
       });
@@ -588,7 +633,10 @@ describe('more of the sync', () => {
       expect(update).toHaveBeenCalledWith(
         expect.objectContaining({ title: 'Homework - Calculus' }),
       );
-      expect(getCalendarSync().syncedReminderAssignments).toEqual({ a1: 'r1' });
+      expect(getCalendarSync().syncedReminderAssignments).toEqual({
+        a1: 'r1',
+        a2: 'new-reminder',
+      });
     });
 
     it('deletes the reminders of removed assignments', async () => {
