@@ -53,10 +53,12 @@ const lastMonday = `${monthDay(mockDays.lastMonday)}（周一）`;
 
 /**
  * Sample files in this repo's `mock-files` (built by its `generate.py`), so
- * downloads and previews show real content of the right type.
+ * downloads and previews show real content of the right type. Served by
+ * jsDelivr's GitHub CDN, which mainland China reaches more reliably than
+ * raw.githubusercontent.com.
  */
 const MOCK_FILES =
-  'https://raw.githubusercontent.com/robertying/learnX/main/mock-files/';
+  'https://cdn.jsdelivr.net/gh/robertying/learnX@main/mock-files/';
 
 const samples = {
   lecturePdf: { file: 'human-visual-system.pdf', size: '102.83KB' },

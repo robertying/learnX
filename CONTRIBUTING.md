@@ -146,13 +146,13 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request check (`CI / JS checks` in `.github/workflows/check.yml`) runs these, and all of them must pass:
+The pull request check (`CI / JS checks` in `.github/workflows/ci.yml`) runs these, and all of them must pass:
 
 ```sh
 pnpm typecheck           # TypeScript (tsc)
 pnpm lint --deny-warnings   # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
 pnpm format --check      # Oxfmt; run `pnpm format` to fix
-pnpm test                # Jest, iOS and Android projects
+pnpm test --coverage     # Jest, iOS and Android projects; fails below the coverage thresholds in jest.config.js
 shellcheck scripts/*.sh  # ShellCheck, for the scripts in scripts/
 ```
 

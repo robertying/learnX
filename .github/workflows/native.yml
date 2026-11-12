@@ -85,22 +85,12 @@ jobs:
         id: changes
         run: >-
           scripts/changed-files.sh
-          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/workflows/build\.yml$)'
+          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/(workflows/native\.yml|actions/setup-js/)'
           >> "$GITHUB_OUTPUT"
 
-      - name: Set up pnpm
+      - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
-        uses: pnpm/action-setup@v6
-
-      - name: Set up Node.js
-        if: steps.changes.outputs.changed == 'true'
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          # Not cached, as in check.yml: the ~200 MB store restores no faster
-          # than a cold install and would crowd the Xcode caches out of the
-          # repo's 10 GB.
-          package-manager-cache: false
+        uses: ./.github/actions/setup-js
 
       - name: Set up Java
         if: steps.changes.outputs.changed == 'true'
@@ -121,10 +111,6 @@ jobs:
         with:
           key: android
           save: ${{ env.SAVE_CACHE }}
-
-      - name: Install dependencies
-        if: steps.changes.outputs.changed == 'true'
-        run: pnpm install --frozen-lockfile
 
       # The release bundle inlines .env; the mock login is what E2E logs in
       # with. Any non-empty values work, as they only switch to mock data.
@@ -184,26 +170,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          # Not cached, as in check.yml: the ~200 MB store restores no faster
-          # than a cold install and would crowd the Xcode caches out of the
-          # repo's 10 GB.
-          package-manager-cache: false
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           # Version comes from .ruby-version.
           bundler-cache: true
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Restore Pods
         id: pods
@@ -328,17 +302,8 @@ jobs:
 
       # scripts/e2e.sh reads the flows' labels and mock texts from the
       # translations and mock data (scripts/e2e-env.mjs), which import packages.
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          package-manager-cache: false
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Set up JS
+        uses: ./.github/actions/setup-js
 
       # scripts/e2e.sh types the mock login from .env; same values as the build.
       - name: Write .env

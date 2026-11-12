@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -130,12 +131,17 @@ it('opens an item on top of the course', async () => {
 
 it("refreshes the tab's list only while logged in", async () => {
   await renderScreen();
-  // A pull on the list, from one of its rows.
-  const pull = () =>
-    fireEvent(screen.getByText(of(mockNotices)[0].title), 'refresh');
+  // A pull on the list that holds the first row.
+  const pull = () => {
+    let list = screen.getByText(of(mockNotices)[0].title);
+    while (list.type !== 'RCTScrollView') {
+      list = list.parent!;
+    }
+    return fireEvent(list, 'refresh');
+  };
   await pull();
   expect(mockRefresh.notice.mutate).not.toHaveBeenCalled();
-  useAuthStore.setState({ loggedIn: true });
+  await act(() => useAuthStore.setState({ loggedIn: true }));
   await renderScreen();
   await pull();
   expect(mockRefresh.notice.mutate).toHaveBeenCalled();
