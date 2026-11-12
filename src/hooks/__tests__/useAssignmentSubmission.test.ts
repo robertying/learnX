@@ -9,7 +9,7 @@ import {
   setPendingAssignmentData,
   usePendingAssignmentStore,
 } from 'data/pendingAssignment';
-import { submitAssignment } from 'data/source';
+import { dataSource } from 'data/source';
 import { resetUserData, setCurrentSemester } from 'data/userData';
 import { PickedAttachment } from 'services/submission';
 import {
@@ -19,7 +19,9 @@ import {
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/content', () => ({ refreshCourseAssignments: jest.fn() }));
-jest.mock('data/source', () => ({ submitAssignment: jest.fn() }));
+jest.mock('data/source', () => ({
+  dataSource: { submitAssignment: jest.fn() },
+}));
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: jest.fn() }));
 jest.mock('expo-image-picker', () => ({ launchImageLibraryAsync: jest.fn() }));
 
@@ -238,7 +240,7 @@ describe('useSubmitAssignment', () => {
     result.current.confirmSubmit();
     const buttons = alert.mock.calls[0][2] as AlertButton[];
     expect(buttons[0].style).toBe('cancel');
-    expect(submitAssignment).not.toHaveBeenCalled();
+    expect(dataSource.submitAssignment).not.toHaveBeenCalled();
     alert.mockRestore();
   });
 
@@ -249,7 +251,7 @@ describe('useSubmitAssignment', () => {
     });
     await confirm(result.current.confirmSubmit);
 
-    expect(submitAssignment).toHaveBeenCalledWith('hw1', {
+    expect(dataSource.submitAssignment).toHaveBeenCalledWith('hw1', {
       content: '<p>answer</p>',
       attachment: { uri: picked.uri, name: 'Final.pdf' },
       onProgress: expect.any(Function),
@@ -272,7 +274,7 @@ describe('useSubmitAssignment', () => {
     const { result } = await setup({ removeAttachment: true });
     await confirm(result.current.confirmSubmit);
     // the answer stays: the server replaces the submitted one with what's sent
-    expect(submitAssignment).toHaveBeenCalledWith('hw1', {
+    expect(dataSource.submitAssignment).toHaveBeenCalledWith('hw1', {
       content: '<p>answer</p>',
       attachment: undefined,
       onProgress: expect.any(Function),
@@ -284,7 +286,7 @@ describe('useSubmitAssignment', () => {
     let finish: () => void = () => {};
     let report: (progress: number) => void = () => {};
     jest
-      .mocked(submitAssignment)
+      .mocked(dataSource.submitAssignment)
       .mockImplementationOnce((_id, { onProgress }) => {
         report = onProgress!;
         return new Promise(resolve => {
@@ -311,7 +313,9 @@ describe('useSubmitAssignment', () => {
   });
 
   it('shows an error and keeps the form when the upload fails', async () => {
-    jest.mocked(submitAssignment).mockRejectedValueOnce(new Error('Network'));
+    jest
+      .mocked(dataSource.submitAssignment)
+      .mockRejectedValueOnce(new Error('Network'));
     setPendingAssignmentData({ data: 'file:///shared.png', mimeType: 'x' });
     const { result, onSubmitted } = await setup();
     await confirm(result.current.confirmSubmit);

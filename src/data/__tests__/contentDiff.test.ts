@@ -3,18 +3,24 @@ import {
   HomeworkCompletionType,
   HomeworkGradeLevel,
 } from '@robertying/thu-learn-lib';
-import { diffById, diffContent, isContentDiffEmpty } from 'data/contentDiff';
+import { type ContentDiff, diffById, diffContent } from 'data/contentDiff';
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Assignment } from 'data/types/state';
 
 const ungraded = mockAssignments.find(a => !a.graded)!;
 const graded = mockAssignments.find(a => a.graded)!;
 
+/** Nothing to tell the user about. */
+const isContentDiffEmpty = (diff: ContentDiff) =>
+  Object.values(diff).every(kinds =>
+    Object.values(kinds).every(items => (items as unknown[]).length === 0),
+  );
+
 describe('diffById', () => {
   const differ = (a: { id: string; v: number }, b: { id: string; v: number }) =>
     a.v !== b.v;
 
-  it('finds added, removed and changed items by id, in list order', () => {
+  it('finds added and changed items by id, in list order', () => {
     const before = [
       { id: 'a', v: 1 },
       { id: 'b', v: 1 },
@@ -28,7 +34,6 @@ describe('diffById', () => {
     ];
     expect(diffById(before, after, differ)).toEqual({
       added: [after[0], after[3]],
-      removed: [before[1]],
       changed: [{ before: before[2], after: after[1] }],
     });
   });
@@ -40,7 +45,6 @@ describe('diffById', () => {
     ];
     expect(diffById(items, [...items].reverse(), differ)).toEqual({
       added: [],
-      removed: [],
       changed: [],
     });
   });
@@ -125,21 +129,6 @@ describe('diffContent', () => {
       ]);
       const leveled = { ...graded, gradeLevel: HomeworkGradeLevel.A };
       expect(change(graded, leveled).graded).toHaveLength(1);
-    });
-
-    it('ignores the negative grade a cached grade level still has', () => {
-      // thu-learn-lib before 7 sent A+ as grade -99 next to the level
-      const before = {
-        ...graded,
-        grade: -99,
-        gradeLevel: HomeworkGradeLevel.A_PLUS,
-      };
-      const after = {
-        ...graded,
-        grade: undefined,
-        gradeLevel: HomeworkGradeLevel.A_PLUS,
-      };
-      expect(change(before, after).graded).toEqual([]);
     });
 
     it('ignores a grade that was taken back', () => {

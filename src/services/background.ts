@@ -6,18 +6,10 @@ import { loadCredentials } from 'data/credentials';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { queryClient, restoreQueryCache } from 'data/queryClient';
 import { applyLatestSemester, getUserData } from 'data/userData';
-import {
-  assignmentsQuery,
-  contentLists,
-  filesQuery,
-  noticesQuery,
-} from 'data/content';
-import {
-  SyncListName,
-  SyncRun,
-  addSyncRun,
-  describeSyncRun,
-} from 'data/syncLog';
+import { contentLists } from 'data/content';
+import { queryKeys } from 'data/queryKeys';
+import { SyncRun, addSyncRun, describeSyncRun } from 'data/syncLog';
+import type { ContentListName } from 'data/types/state';
 import { ContentDiff, ContentLists, diffContent } from 'data/contentDiff';
 import { flushServerActionsWithin } from 'data/serverActions';
 import { getSettings } from 'data/settings';
@@ -68,7 +60,11 @@ const followLatestSemester = async (shownSemester: string) => {
 export const SYNC_BUDGET_MS = 25_000;
 
 /** The lists the sync fetches. */
-const SYNC_LISTS: readonly SyncListName[] = ['assignments', 'notices', 'files'];
+const SYNC_LISTS: readonly ContentListName[] = [
+  'assignments',
+  'notices',
+  'files',
+];
 
 /**
  * Logs in and refetches the current semester's notices, assignments and files
@@ -151,16 +147,12 @@ export const syncContent = async ({
     return record({ status: 'skipped' });
   }
 
-  const queries = {
-    notices: noticesQuery(semesterId),
-    assignments: assignmentsQuery(semesterId),
-    files: filesQuery(semesterId),
-  };
-  const before: ContentLists = {
-    notices: queryClient.getQueryData(queries.notices.queryKey),
-    assignments: queryClient.getQueryData(queries.assignments.queryKey),
-    files: queryClient.getQueryData(queries.files.queryKey),
-  };
+  const before: ContentLists = Object.fromEntries(
+    SYNC_LISTS.map(list => [
+      list,
+      queryClient.getQueryData(queryKeys.content(list, semesterId)),
+    ]),
+  );
 
   // The three lists share the screens' limiter, which starts assignments
   // first, so deadlines are in if time runs out.
@@ -170,34 +162,28 @@ export const syncContent = async ({
       contentLists[list].fetchCourses(semesterId, courseIds, { deadline }),
     ),
   );
-  const results = Object.fromEntries(
-    SYNC_LISTS.map((list, i) => [list, runs[i]]),
-  ) as Record<SyncListName, (typeof runs)[number]>;
-
-  const counts = {} as NonNullable<SyncRun['courses']>;
-  /** Saves the courses of `list` that came back; undefined if none did. */
-  const put = async <T>(
-    list: SyncListName,
-    putCourses: (
-      semesterId: string,
-      fetched: ReadonlyMap<string, object[]>,
-      options: { complete: boolean; startedAt: number },
-    ) => Promise<T[]>,
-  ) => {
-    const { fetched } = results[list];
-    counts[list] = { fetched: fetched.size, total: courseIds.length };
-    return fetched.size > 0
-      ? putCourses(semesterId, fetched, {
-          complete: fetched.size === courseIds.length,
-          startedAt: fetchStartedAt,
-        })
-      : undefined;
-  };
-  const after = {
-    assignments: await put('assignments', contentLists.assignments.putCourses),
-    notices: await put('notices', contentLists.notices.putCourses),
-    files: await put('files', contentLists.files.putCourses),
-  };
+  const counts = Object.fromEntries(
+    SYNC_LISTS.map((list, i) => [
+      list,
+      { fetched: runs[i].fetched.size, total: courseIds.length },
+    ]),
+  ) as NonNullable<SyncRun['courses']>;
+  // Saves the courses of each list that came back into it.
+  const after: ContentLists = Object.fromEntries(
+    await Promise.all(
+      SYNC_LISTS.map(async (list, i) => {
+        const { fetched } = runs[i];
+        const items =
+          fetched.size > 0
+            ? await contentLists[list].putCourses(semesterId, fetched, {
+                complete: fetched.size === courseIds.length,
+                startedAt: fetchStartedAt,
+              })
+            : undefined;
+        return [list, items];
+      }),
+    ),
+  );
   const details = {
     courses: counts,
     timedOut: runs.some(run => run.timedOut),

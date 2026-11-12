@@ -13,7 +13,7 @@ import useMainStartup from 'hooks/useMainStartup';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('data/queries', () => ({
-  schoolSemesterQuery: { queryKey: ['semesterDates'] },
+  schoolSemesterQuery: { queryKey: ['schoolSemester'] },
   selectSemesterId: jest.fn(),
   useCourses: jest.fn(),
 }));

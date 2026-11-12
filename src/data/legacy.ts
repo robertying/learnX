@@ -1,8 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { type AppState, useAppStateStore } from 'data/appState';
+import {
+  type CalendarSyncState,
+  useCalendarSyncStore,
+} from 'data/calendarSync';
 import {
   defaultSettings,
   mergeSettings,
-  moveOutOfSettings,
   useSettingsStore,
 } from 'data/settings';
 import { bookmarkLists } from 'data/pendingActions';
@@ -63,6 +67,60 @@ export const parseLegacyPersist = (raw: string | null): Json | null => {
   } catch {
     return null;
   }
+};
+
+const isStringRecord = (value: unknown): value is Record<string, string> =>
+  !!value &&
+  typeof value === 'object' &&
+  !Array.isArray(value) &&
+  Object.values(value).every(item => typeof item === 'string');
+
+/**
+ * Moves what settings used to hold besides settings into its own store: the
+ * calendar sync's bookkeeping (`data/calendarSync`) and what the user has
+ * seen (`data/appState`). Values of the wrong type are dropped. Returns the
+ * rest, the settings themselves.
+ */
+const moveOutOfSettings = (saved: Record<string, unknown>) => {
+  const {
+    courseCalendarId,
+    assignmentCalendarId,
+    assignmentReminderId,
+    syncedCalendarAssignments,
+    syncedReminderAssignments,
+    // The changelog's badge is gone, so its version isn't kept.
+    lastShowChangelogVersion: _changelog,
+    courseInformationSharingBadgeShown,
+    newUpdate: _transient,
+    ...rest
+  } = saved;
+
+  const calendarSync: Partial<CalendarSyncState> = {};
+  const ids = { courseCalendarId, assignmentCalendarId, assignmentReminderId };
+  for (const [key, id] of Object.entries(ids)) {
+    if (typeof id === 'string') {
+      calendarSync[key as keyof typeof ids] = id;
+    }
+  }
+  if (isStringRecord(syncedCalendarAssignments)) {
+    calendarSync.syncedCalendarAssignments = syncedCalendarAssignments;
+  }
+  if (isStringRecord(syncedReminderAssignments)) {
+    calendarSync.syncedReminderAssignments = syncedReminderAssignments;
+  }
+  if (Object.keys(calendarSync).length > 0) {
+    useCalendarSyncStore.setState(calendarSync);
+  }
+
+  const appState: Partial<AppState> = {};
+  if (courseInformationSharingBadgeShown === true) {
+    appState.courseSharingSeen = true;
+  }
+  if (Object.keys(appState).length > 0) {
+    useAppStateStore.setState(appState);
+  }
+
+  return rest;
 };
 
 /** Settings whose default is undefined, with the type they must have. */
@@ -133,27 +191,8 @@ export const legacyUserData = (root: Json): Partial<UserData> => {
   return result;
 };
 
-/**
- * Builds from before the semester being shown moved to the user data imported
- * the rest without it and kept the root. Takes it from there if it is still
- * missing.
- */
-const importLegacySemester = async () => {
-  if (useUserDataStore.getState().currentSemester) {
-    return;
-  }
-  const root = parseLegacyPersist(await AsyncStorage.getItem(LEGACY_ROOT_KEY));
-  const currentSemester = root && legacyUserData(root).currentSemester;
-  if (currentSemester) {
-    useUserDataStore.setState({ currentSemester });
-  }
-};
-
 const importLegacy = async () => {
   if (kvStorage.getItem(LEGACY_IMPORTED_KEY)) {
-    await importLegacySemester();
-    // Those builds also left the root behind; nothing reads it after this.
-    await AsyncStorage.removeItem(LEGACY_ROOT_KEY);
     return;
   }
 

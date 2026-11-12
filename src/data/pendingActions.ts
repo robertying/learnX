@@ -1,4 +1,5 @@
 import { ContentType } from '@robertying/thu-learn-lib';
+import type { ContentListName } from 'data/types/state';
 import type { BookmarkType } from 'data/userData';
 
 /**
@@ -29,8 +30,6 @@ export const actionKey = (action: ServerAction) =>
   action.kind === 'favorite'
     ? `favorite:${action.type}:${action.id}`
     : `${action.kind}:${action.id}`;
-
-export type ContentListName = 'notices' | 'assignments' | 'files';
 
 /** The content list each kind of bookmarkable item is in. */
 export const bookmarkLists: Record<BookmarkType, ContentListName> = {

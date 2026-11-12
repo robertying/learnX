@@ -13,7 +13,14 @@ import { getCachedWeekSessions } from 'data/schedule';
 import { coursesQuery } from 'data/queries';
 import { getSettings, useSettingsStore } from 'data/settings';
 import { getUserData, useUserDataStore } from 'data/userData';
-import { Assignment, Course, File, Notice } from 'data/types/state';
+import { queryKeys } from 'data/queryKeys';
+import {
+  Assignment,
+  contentListNames,
+  Course,
+  File,
+  Notice,
+} from 'data/types/state';
 import type { ToastMessage } from 'services/calendar/actions';
 import { uploadCourses } from 'services/coursex';
 import { recordError } from 'services/crashReporting';
@@ -330,13 +337,11 @@ export const clearSurfaces = () => {
 };
 
 /** Lists whose changes the surfaces follow, by the first part of their key. */
-const watchedQueries = new Set([
-  'assignments',
-  'notices',
-  'files',
-  'courses',
-  'semesterDates',
-  'calendar',
+const watchedQueries = new Set<string>([
+  ...contentListNames,
+  queryKeys.coursesAll[0],
+  queryKeys.schoolSemester[0],
+  queryKeys.calendarAll[0],
 ]);
 
 let scheduled = false;

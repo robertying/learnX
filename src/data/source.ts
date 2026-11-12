@@ -61,7 +61,11 @@ export interface AppSource extends DataSource {
    * website does when it's opened.
    */
   markNoticeRead: (url: string) => Promise<void>;
-  /** See `submitAssignment` below. */
+  /**
+   * Submits an assignment: `content` is the whole answer as HTML, which
+   * replaces the submitted one; `remove` deletes the attachment. Sent with
+   * axios, which reports upload progress (thu-learn-lib's fetch can't).
+   */
   submitAssignment: (
     studentHomeworkId: string,
     submission: Submission,
@@ -166,7 +170,9 @@ const realRequests: Omit<AppSource, keyof DataSource> = {
       transformResponse: data => data,
       onUploadProgress: e => {
         // Two decimals are plenty for a progress bar.
-        onProgress?.(parseFloat((e.total ? e.loaded / e.total : 0).toFixed(2)));
+        onProgress?.(
+          Math.round((e.total ? e.loaded / e.total : 0) * 100) / 100,
+        );
       },
     });
     checkHomeworkSubmitResponse(res.data);
@@ -218,7 +224,7 @@ export const dataSource = new Proxy({} as AppSource, {
 
 /**
  * Whether changes to the account stay on the phone for now: a debug build
- * with a real account, until "Allow Server Writes" is on in Settings.
+ * with a real account, until the Debug page's "Allow Server Writes" is on.
  */
 export const serverWritesBlocked = () =>
   !isMockSession() && !getServerWritesAllowed();
@@ -316,19 +322,3 @@ resetDataSource();
 
 export const addCSRF = (url: string) =>
   addCSRFTokenToLearnUrl(url, dataSource.getCSRFToken());
-
-/**
- * Submits an assignment: `content` is the whole answer as HTML, which replaces
- * the submitted one; `remove` deletes the attachment. Sent with axios, which
- * reports upload progress (thu-learn-lib's fetch can't).
- */
-export const submitAssignment = async (
-  studentHomeworkId: string,
-  submission: Submission,
-) => {
-  const { content, attachment, remove } = submission;
-  if (!content && !attachment && !remove) {
-    return;
-  }
-  await dataSource.submitAssignment(studentHomeworkId, submission);
-};
