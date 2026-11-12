@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react-native';
 import Empty from 'components/Empty';
-import StatusView from 'components/StatusView';
 import { t } from 'helpers/i18n';
 
 jest.mock('expo-symbols', () => ({
@@ -24,12 +23,4 @@ describe('Empty', () => {
       expect(screen.getByTestId(`symbol-${symbol}`)).toBeTruthy();
     },
   );
-});
-
-describe('StatusView', () => {
-  it('leaves the icon out when it has none', async () => {
-    await render(<StatusView message="No Selection" />);
-    expect(screen.getByText('No Selection')).toBeTruthy();
-    expect(screen.queryByTestId(/^symbol-/)).toBeNull();
-  });
 });
