@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import FormWebView from 'components/FormWebView';
-import { NoticeDetailParamList } from 'screens/types';
+import { NoticeDetailParamList } from 'navigation/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
 import { getExtension, stripExtension } from 'helpers/filename';

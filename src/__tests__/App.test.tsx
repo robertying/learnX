@@ -20,7 +20,7 @@ jest.mock('hooks/useStoresLoaded', () => jest.fn(() => true));
 jest.mock('hooks/useReLogin', () => jest.fn());
 jest.mock('hooks/useShareHandler', () => jest.fn());
 jest.mock('expo', () => ({ reloadAppAsync: jest.fn() }));
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 
 const signIn = (fingerPrint = 'fp') =>
   useCredentialsStore.setState({

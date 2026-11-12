@@ -6,7 +6,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { getCredentials } from 'data/credentials';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 import { isMockUser } from 'helpers/mock';
-import { buildStoreReport } from 'helpers/storeReport';
+import { buildStoreReport } from 'services/storeReport';
 
 /**
  * What the app keeps, as JSON, in place of the app: the upgrade test

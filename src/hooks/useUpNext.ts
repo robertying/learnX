@@ -4,7 +4,7 @@ import { useBeijingDay } from 'hooks/useClock';
 
 /**
  * Keeps this week's and next week's timetable fetched, which the Up Next
- * widget and the "Next class" App Intent show (helpers/surfaces), also when
+ * widget and the "Next class" App Intent show (services/surfaces), also when
  * Today isn't open.
  */
 const useUpNext = () => {

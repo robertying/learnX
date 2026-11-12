@@ -10,7 +10,7 @@
 //   that shouldn't be there.
 // - E2E_LIVE=1 in the build's environment (`E2E_LIVE=1 scripts/e2e-build.sh`)
 //   adds `E2E_LIVE: true`, no .env value: that build takes the live test login
-//   from launch arguments (helpers/launchOptions.ts), so live E2E runs need no
+//   from launch arguments (services/launchOptions.ts), so live E2E runs need no
 //   secret in any bundle. The fastlane build lanes refuse to run with it set.
 // Every other key in .env is left out.
 const crypto = require('crypto');

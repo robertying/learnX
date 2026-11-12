@@ -15,7 +15,7 @@ import { NotificationSettings as Settings } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,

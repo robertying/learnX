@@ -12,8 +12,8 @@ import {
 } from 'data/submissionDrafts';
 import { resetSyncLog, SYNC_LOG_KEY } from 'data/syncLog';
 import { resetUserData, USER_DATA_KEY, UserData } from 'data/userData';
-import { removeFileDir } from 'helpers/files/downloads';
-import { clearSurfaces } from 'helpers/surfaces';
+import { removeFileDir } from 'services/files/downloads';
+import { clearSurfaces } from 'services/surfaces';
 
 /**
  * Every persisted store, by its storage key, with how to empty it. All of

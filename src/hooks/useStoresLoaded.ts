@@ -3,7 +3,7 @@ import { importLegacyUserData } from 'data/legacy';
 import { loadCredentials } from 'data/credentials';
 import { forgetLoginAfterReinstall } from 'data/install';
 import { restoreQueryCache } from 'data/queryClient';
-import { recordError } from 'helpers/crashReporting';
+import { recordError } from 'services/crashReporting';
 
 /**
  * Loads what the first screen needs: the saved login, the user data saved by

@@ -4,7 +4,7 @@ import {
   NavigationContainerRef,
   StackActions,
 } from '@react-navigation/native';
-import { DetailStackParams } from 'screens/types';
+import { DetailStackParams } from 'navigation/types';
 import { SplitViewContext } from 'navigation/SplitView';
 import Numbers from 'constants/Numbers';
 import useDetailNavigator, {

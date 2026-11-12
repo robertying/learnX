@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AppState, Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
-import { getAndRequestPermission } from 'helpers/event';
+import { getAndRequestPermission } from 'services/calendar/calendars';
 
 export type CalendarAccess = 'granted' | 'undetermined' | 'denied';
 

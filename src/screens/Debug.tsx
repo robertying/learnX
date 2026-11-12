@@ -24,16 +24,16 @@ import { useCredentialsStore } from 'data/credentials';
 import { queryClient } from 'data/queryClient';
 import { describeSyncRun, useSyncLogStore } from 'data/syncLog';
 import { getUserData } from 'data/userData';
-import { notifyContent, syncContent } from 'helpers/background';
-import { previewClassReminder } from 'helpers/classReminders';
-import { previewDeadlineReminder } from 'helpers/deadlineReminders';
+import { notifyContent, syncContent } from 'services/background';
+import { previewClassReminder } from 'services/classReminders';
+import { previewDeadlineReminder } from 'services/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
-import { postNotification } from 'helpers/notifications';
+import { postNotification } from 'services/notifications';
 import {
   postNotificationSamples,
   sampleNoticeNotification,
-} from 'helpers/notificationSamples';
+} from 'services/notificationSamples';
 import {
   getServerWritesAllowed,
   setServerWritesAllowed,
@@ -42,7 +42,7 @@ import {
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { mockNetworkTitle } from 'navigation/options';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Debug'>;
 

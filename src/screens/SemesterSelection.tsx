@@ -9,7 +9,7 @@ import {
 import { useLoggedIn } from 'data/auth';
 import { setCurrentSemester, useCurrentSemester } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/semester';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'SemesterSelection'>;
 

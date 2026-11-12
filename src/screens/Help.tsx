@@ -8,7 +8,7 @@ import {
   FormSection,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'Help'>;
 

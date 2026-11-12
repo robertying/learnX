@@ -5,10 +5,10 @@ import { toast } from 'components/Toast';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { flushServerActions } from 'data/serverActions';
 import { applyLatestSemester } from 'data/userData';
-import { setUpBackgroundFetch } from 'helpers/background';
-import { removeLegacyDownloads } from 'helpers/files/downloads';
-import { configureNotifications } from 'helpers/notifications';
-import { subscribeSurfaceErrors } from 'helpers/surfaces';
+import { setUpBackgroundFetch } from 'services/background';
+import { removeLegacyDownloads } from 'services/files/downloads';
+import { configureNotifications } from 'services/notifications';
+import { subscribeSurfaceErrors } from 'services/surfaces';
 import useMainStartup from 'hooks/useMainStartup';
 
 jest.mock('@tanstack/react-query', () => ({ useQuery: jest.fn() }));
@@ -21,17 +21,17 @@ jest.mock('data/userData', () => ({ applyLatestSemester: jest.fn() }));
 jest.mock('data/serverActions', () => ({
   flushServerActions: jest.fn(async () => {}),
 }));
-jest.mock('helpers/background', () => ({
+jest.mock('services/background', () => ({
   setUpBackgroundFetch: jest.fn(async () => {}),
 }));
-jest.mock('helpers/files/downloads', () => ({
+jest.mock('services/files/downloads', () => ({
   removeLegacyDownloads: jest.fn(),
 }));
-jest.mock('helpers/notifications', () => ({
+jest.mock('services/notifications', () => ({
   configureNotifications: jest.fn(async () => {}),
 }));
 const mockUnsubscribe = jest.fn();
-jest.mock('helpers/surfaces', () => ({
+jest.mock('services/surfaces', () => ({
   subscribeSurfaceErrors: jest.fn(() => mockUnsubscribe),
 }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));

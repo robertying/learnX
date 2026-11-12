@@ -26,7 +26,7 @@ import {
   defaultAttachmentName,
   sendSubmission,
   uploadAttachment,
-} from 'helpers/submission';
+} from 'services/submission';
 
 /**
  * The attachment to submit: picked from documents or photos, or shared to the

@@ -10,7 +10,7 @@ import {
   exportCalendars,
   syncAssignments,
   syncCourseSchedule,
-} from 'helpers/calendarSync';
+} from 'services/calendar/actions';
 import {
   confirmDeleteCalendars,
   useAssignmentSync,
@@ -20,14 +20,14 @@ import {
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 // Loaded by the real calendarSync below; native only.
-jest.mock('helpers/files/share', () => ({ exportTextFile: jest.fn() }));
-jest.mock('helpers/calendarSync', () => ({
+jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
+jest.mock('services/calendar/actions', () => ({
   syncCourseSchedule: jest.fn(async () => undefined),
   syncAssignments: jest.fn(async () => undefined),
   exportCalendars: jest.fn(async () => undefined),
   deleteCalendars: jest.fn(async () => ({ text: 'Deleted', type: 'success' })),
   // The real filter, by deadline
-  upcomingAssignments: jest.requireActual('helpers/calendarSync')
+  upcomingAssignments: jest.requireActual('services/calendar/actions')
     .upcomingAssignments,
 }));
 

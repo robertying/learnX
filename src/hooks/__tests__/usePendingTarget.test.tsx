@@ -1,6 +1,6 @@
 import { act, renderHook } from '@testing-library/react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
-import { DetailStackParams } from 'screens/types';
+import { DetailStackParams } from 'navigation/types';
 import { SplitViewContext } from 'navigation/SplitView';
 import Numbers from 'constants/Numbers';
 import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';

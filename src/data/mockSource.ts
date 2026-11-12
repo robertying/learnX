@@ -33,7 +33,7 @@ const mock = (): typeof import('data/mock') =>
  * refreshes, spinners, errors and the re-login flow can be exercised without a
  * real account. Dev builds change the behavior from Settings › Network
  * emulation (`screens/MockNetwork.tsx`), which also applies to file downloads
- * (`helpers/files/downloads.ts`).
+ * (`services/files/downloads.ts`).
  */
 
 export type MockLatency = 'none' | 'normal' | 'slow';

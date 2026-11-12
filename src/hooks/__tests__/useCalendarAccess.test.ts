@@ -1,10 +1,10 @@
 import { AppState, Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import { act, renderHook } from '@testing-library/react-native';
-import { getAndRequestPermission } from 'helpers/event';
+import { getAndRequestPermission } from 'services/calendar/calendars';
 import useCalendarAccess from 'hooks/useCalendarAccess';
 
-jest.mock('helpers/event', () => ({
+jest.mock('services/calendar/calendars', () => ({
   getAndRequestPermission: jest.fn(async () => true),
 }));
 

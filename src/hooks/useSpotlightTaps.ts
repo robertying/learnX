@@ -5,7 +5,7 @@ import useOpenTarget from 'hooks/useOpenTarget';
 
 /**
  * Opens the item of a tapped Spotlight result (iOS and Mac), including the one
- * that launched the app. helpers/surfaces keeps the index current.
+ * that launched the app. services/surfaces keeps the index current.
  */
 const useSpotlightTaps = () => {
   const openTarget = useOpenTarget();

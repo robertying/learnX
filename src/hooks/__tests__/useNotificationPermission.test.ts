@@ -5,10 +5,10 @@ import {
   getNotificationPermission,
   requestExactAlarms,
   requestNotificationPermission,
-} from 'helpers/notifications';
+} from 'services/notifications';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 
-jest.mock('helpers/notifications', () => ({
+jest.mock('services/notifications', () => ({
   getNotificationPermission: jest.fn(async () => 'undetermined'),
   canScheduleExactAlarms: jest.fn(async () => false),
   requestNotificationPermission: jest.fn(async () => 'granted'),

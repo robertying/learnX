@@ -4,7 +4,7 @@ import SafeArea from 'components/SafeArea';
 import { useFiles } from 'data/content';
 import useContentList from 'hooks/useContentList';
 import { fileLists } from 'hooks/useFilteredData';
-import { FileStackParams, MainStackScreenProps } from './types';
+import { FileStackParams, MainStackScreenProps } from 'navigation/types';
 
 type Props = MainStackScreenProps<FileStackParams, 'Files'>;
 

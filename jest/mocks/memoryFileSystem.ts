@@ -1,6 +1,6 @@
 /**
  * An in-memory `expo-file-system` for tests of code that keeps files
- * (helpers/files). Opt in per test file:
+ * (services/files). Opt in per test file:
  *
  *   jest.mock('expo-file-system', () =>
  *     require('../../../../jest/mocks/memoryFileSystem'),

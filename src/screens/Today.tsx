@@ -32,7 +32,7 @@ import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle } from 'navigation/options';
 import { headerButtons } from 'navigation/headerButtons';
 import { sidebarSplit } from 'navigation/layout';
-import { MainStackScreenProps, TodayStackParams } from './types';
+import { MainStackScreenProps, TodayStackParams } from 'navigation/types';
 
 type Props = MainStackScreenProps<TodayStackParams, 'Today'>;
 

@@ -7,7 +7,10 @@ import {
   RemoteFile,
 } from '@robertying/thu-learn-lib';
 import FormWebView from 'components/FormWebView';
-import { AssignmentDetailParamList, MainStackScreenProps } from 'screens/types';
+import {
+  AssignmentDetailParamList,
+  MainStackScreenProps,
+} from 'navigation/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import { headerButtons } from 'navigation/headerButtons';
 import { useMinute } from 'hooks/useClock';

@@ -17,7 +17,7 @@ import {
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import { headerButtons, type HeaderButton } from 'navigation/headerButtons';
-import { RootStackParams } from 'screens/types';
+import { RootStackParams } from 'navigation/types';
 
 const TITLES = {
   notice: 'notices',

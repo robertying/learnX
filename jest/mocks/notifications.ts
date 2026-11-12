@@ -33,5 +33,5 @@ export const clearLastNotificationResponse = jest.fn();
 export const addNotificationResponseReceivedListener = jest.fn(() => ({
   remove: jest.fn(),
 }));
-// The Android action task (helpers/notificationActions)
+// The Android action task (services/notificationActions)
 export const registerTaskAsync = jest.fn(() => Promise.resolve(null));

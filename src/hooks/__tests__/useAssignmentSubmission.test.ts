@@ -11,7 +11,7 @@ import {
 } from 'data/pendingAssignment';
 import { submitAssignment } from 'data/source';
 import { resetUserData, setCurrentSemester } from 'data/userData';
-import { PickedAttachment } from 'helpers/submission';
+import { PickedAttachment } from 'services/submission';
 import {
   useAttachmentPicker,
   useSubmitAssignment,
