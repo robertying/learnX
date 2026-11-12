@@ -1,6 +1,6 @@
 {
   "name": "learnX",
-  "version": "18.0.3",
+  "version": "19.0.0",
   "private": true,
   "engines": {
     "node": ">=26"
