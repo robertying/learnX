@@ -16,7 +16,7 @@ import { headerButtons } from 'navigation/headerButtons';
 import { useMinute } from 'hooks/useClock';
 import { getWebViewTemplate } from 'helpers/html';
 import { removeTags } from 'helpers/text';
-import { getExtension, stripExtension } from 'helpers/filename';
+import { attachmentFile } from 'helpers/attachments';
 import {
   formatLiteral,
   getAssignmentGradeLevelDescription,
@@ -102,8 +102,6 @@ const AssignmentDetailContent: React.FC<{
 
   const {
     id,
-    courseId,
-    courseName,
     title,
     deadline,
     lateSubmissionDeadline,
@@ -147,14 +145,7 @@ const AssignmentDetailContent: React.FC<{
   const handleFileOpen = (remoteFile?: RemoteFile) => {
     if (remoteFile) {
       navigation.push('FileDetail', {
-        attachment: {
-          id: remoteFile.id,
-          courseId,
-          courseName,
-          title: stripExtension(remoteFile.name),
-          downloadUrl: remoteFile.downloadUrl,
-          fileType: getExtension(remoteFile.name),
-        },
+        attachment: attachmentFile(assignment, remoteFile),
       });
     }
   };

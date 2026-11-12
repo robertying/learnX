@@ -14,11 +14,11 @@ import {
 import dayjs from 'dayjs';
 import { RemoteFile } from '@robertying/thu-learn-lib';
 import TextButton from 'components/TextButton';
+import { attachmentFile } from 'helpers/attachments';
 import { t } from 'helpers/i18n';
 import { deadlineText } from 'helpers/assignments';
 import { useMinute } from 'hooks/useClock';
 import {
-  attachmentForFileDetail,
   canSubmit,
   initialSubmissionContent,
   pickedAsRemoteFile,
@@ -216,7 +216,7 @@ const AssignmentSubmissionContent: React.FC<{
   ) => {
     if (attachment) {
       navigation.push('FileDetail', {
-        attachment: attachmentForFileDetail(assignment, attachment),
+        attachment: attachmentFile(assignment, attachment),
       });
     }
   };

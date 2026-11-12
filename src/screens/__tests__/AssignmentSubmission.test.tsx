@@ -200,6 +200,18 @@ it('shows a picked file, which can be renamed, opened or removed', async () => {
   expect(picker.removePicked).toHaveBeenCalled();
 });
 
+it('opens the uploaded file under its own id', async () => {
+  const user = userEvent.setup();
+  await renderScreen(withUpload);
+  await user.press(screen.getByText(withUpload.submittedAttachment!.name));
+  expect(navigation.push).toHaveBeenCalledWith('FileDetail', {
+    attachment: expect.objectContaining({
+      id: withUpload.submittedAttachment!.id,
+      courseId: withUpload.courseId,
+    }),
+  });
+});
+
 it('removes the uploaded file, and undoes that', async () => {
   const user = userEvent.setup();
   await renderScreen(withUpload);
