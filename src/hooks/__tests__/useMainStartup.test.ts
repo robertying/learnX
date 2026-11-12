@@ -1,5 +1,5 @@
 import { AppState } from 'react-native';
-import { act, renderHook } from '@testing-library/react-native';
+import { renderHook } from '@testing-library/react-native';
 import { useQuery } from '@tanstack/react-query';
 import { toast } from 'components/Toast';
 import { initialAuth, useAuthStore } from 'data/auth';
@@ -69,21 +69,12 @@ it("moves to the school's current semester once known", async () => {
   expect(applyLatestSemester).toHaveBeenCalledWith('2026-2027-1');
 });
 
-it('once logged in, schedules the sync and sends waiting actions on every return', async () => {
+it('once logged in, schedules the sync and sends waiting actions, leaving returns to useReLogin', async () => {
   useAuthStore.setState({ loggedIn: true });
   const hook = await renderHook(() => useMainStartup());
   expect(setUpBackgroundFetch).toHaveBeenCalled();
   expect(flushServerActions).toHaveBeenCalledTimes(1);
-
-  const listener = addListener.mock.calls[0][1];
-  listener('background');
-  expect(flushServerActions).toHaveBeenCalledTimes(1);
-  listener('active');
-  expect(flushServerActions).toHaveBeenCalledTimes(2);
-
-  const remove = jest.mocked(addListener.mock.results[0].value.remove);
-  await act(() => useAuthStore.setState({ loggedIn: false }));
-  expect(remove).toHaveBeenCalled();
+  expect(addListener).not.toHaveBeenCalled();
   await hook.unmount();
 });
 

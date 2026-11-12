@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { AppState } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { setUpBackgroundFetch } from 'helpers/background';
 import { removeLegacyDownloads } from 'helpers/files/downloads';
@@ -20,7 +19,7 @@ import useIncomingTargets from 'hooks/useIncomingTargets';
 /**
  * What the main UI starts once logged in: picks the semester and keeps its
  * courses and timetable fetched, schedules the background sync, sends the
- * waiting server actions, opens what was tapped outside the app, sets up
+ * waiting server actions once logged in, opens what was tapped outside the app, sets up
  * notifications, and moves downloads from the old folder layout. The widgets,
  * reminders and Spotlight follow the data by themselves (helpers/surfaces).
  */
@@ -58,18 +57,12 @@ const useMainStartup = () => {
   }, [loggedIn]);
 
   // Sends the favorites and notices read that are waiting (offline, or from
-  // a notification) once logged in and whenever the app comes back.
+  // a notification) once logged in; coming back to the app sends them after
+  // checking the session (hooks/useReLogin).
   useEffect(() => {
-    if (!loggedIn) {
-      return;
+    if (loggedIn) {
+      void flushServerActions();
     }
-    void flushServerActions();
-    const subscription = AppState.addEventListener('change', state => {
-      if (state === 'active') {
-        void flushServerActions();
-      }
-    });
-    return () => subscription.remove();
   }, [loggedIn]);
 
   useIncomingTargets();

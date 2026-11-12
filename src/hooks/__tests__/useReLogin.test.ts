@@ -4,10 +4,14 @@ import { initialAuth, useAuthStore } from 'data/auth';
 import { saveCredentials, clearCredentials } from 'data/credentials';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
+import { flushServerActionsWithin } from 'data/serverActions';
 import useReLogin from 'hooks/useReLogin';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('data/login', () => ({ login: jest.fn(async () => {}) }));
+jest.mock('data/serverActions', () => ({
+  flushServerActionsWithin: jest.fn(async () => {}),
+}));
 
 const credentials = {
   username: 'student',
@@ -118,6 +122,31 @@ describe('useReLogin', () => {
     await leaveAndComeBack(11);
     expect(login).toHaveBeenCalledWith({ resume: true });
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it('sends the waiting actions after the session check and before the refetch', async () => {
+    const order: string[] = [];
+    jest.spyOn(queryClient, 'refetchQueries').mockImplementation(async () => {
+      order.push('refetch');
+    });
+    jest.mocked(flushServerActionsWithin).mockImplementation(async () => {
+      order.push('flush');
+    });
+    await launch();
+    await act(() => useAuthStore.setState({ loggedIn: true }));
+    jest.mocked(login).mockImplementationOnce(async () => {
+      order.push('session');
+    });
+    await leaveAndComeBack(11);
+    expect(order).toEqual(['session', 'flush', 'refetch']);
+  });
+
+  it("doesn't send the waiting actions without a session", async () => {
+    await launch();
+    jest.mocked(flushServerActionsWithin).mockClear();
+    await fail('rejected');
+    await leaveAndComeBack(2);
+    expect(flushServerActionsWithin).not.toHaveBeenCalled();
   });
 
   it('tries again quietly after a short break without a session', async () => {

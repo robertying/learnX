@@ -8,15 +8,24 @@ import { getCredentials } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
+import { flushServerActionsWithin } from 'data/serverActions';
+
+/** How long the waiting server actions may hold up the refetch on return. */
+const FLUSH_BEFORE_REFETCH_MS = 3_000;
 
 /**
- * Refetches the lists that are mounted and older than their stale time,
- * joining a fetch already under way rather than restarting it.
+ * Catches up once there's a session: sends the server actions that are
+ * waiting (offline, or from a notification), so the lists fetched next
+ * already have them, then refetches the lists that are mounted and older than
+ * their stale time, joining a fetch already under way rather than restarting
+ * it.
  */
-const refreshOpenLists = () =>
-  queryClient
+const catchUp = async () => {
+  await flushServerActionsWithin(FLUSH_BEFORE_REFETCH_MS);
+  await queryClient
     .refetchQueries({ type: 'active', stale: true }, { cancelRefetch: false })
     .catch(() => {});
+};
 
 const hasSavedLogin = () => {
   const credentials = getCredentials();
@@ -43,8 +52,9 @@ const canLogIn = () => {
  * back after at least 10 minutes in the background (keeping the session if
  * the server still accepts it), and when it comes back without a session.
  * While the server can't be reached, it also retries on its own, less and
- * less often, as long as the app is open. Coming back with a session
- * refetches the open lists that are out of date.
+ * less often, as long as the app is open. This is the one place that handles
+ * coming back to the app: the session first, then, with a session, the
+ * waiting server actions, then the open lists that are out of date.
  */
 const useReLogin = () => {
   const appState = useRef(AppState.currentState);
@@ -69,10 +79,10 @@ const useReLogin = () => {
       // The lists only refresh by themselves when the session starts; one
       // that was already open would keep showing what it had.
       if (getAuth().loggedIn) {
-        void refreshOpenLists();
+        await catchUp();
       }
     } else if (auth.loggedIn) {
-      void refreshOpenLists();
+      await catchUp();
     } else if (auth.failure) {
       // Back from a short break without a session: try again quietly.
       void login({ reset: true });
