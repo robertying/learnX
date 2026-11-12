@@ -16,9 +16,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-read_env() {
-  grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
-}
+# shellcheck source=scripts/lib/env.sh
+. scripts/lib/env.sh
 username="$(read_env DUMMY_USERNAME)"
 password="$(read_env DUMMY_PASSWORD)"
 if [ -z "$username" ] || [ -z "$password" ]; then

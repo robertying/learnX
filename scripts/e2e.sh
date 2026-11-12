@@ -49,10 +49,8 @@ if ! command -v maestro >/dev/null; then
   exit 1
 fi
 
-# Read only the values the flows need; nothing else in .env leaves this script.
-read_env() {
-  grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
-}
+# shellcheck source=scripts/lib/env.sh
+. scripts/lib/env.sh
 if [ "$live" = true ]; then
   if [ -n "${CI:-}" ]; then
     echo "--live is for local runs only, never CI" >&2
