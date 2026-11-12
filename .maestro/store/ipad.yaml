@@ -26,9 +26,11 @@ name: App Store screenshots on the iPad
 # and Maestro's element swipe is too short: swipe the first row (MOCK_NOTICE)
 # by its position in the list pane.
 - assertVisible: '.*(${MOCK_NOTICE}).*'
+# Landscape has three columns; the list runs from about 20% to 43% of the
+# width. Drag about a fifth of the row: farther runs the first action.
 - swipe:
-    start: 42%,19%
-    end: 24%,19%
+    start: 41%,19%
+    end: 36%,19%
     duration: 800
 - waitForAnimationToEnd
 # Fail here, not in the shot, if the actions didn't open.
@@ -92,10 +94,10 @@ name: App Store screenshots on the iPad
 # The first row (MOCK_COURSE), swiped by its position as for notices, but
 # to the right: Hide is a course's leading swipe action.
 - assertVisible: '.*(${MOCK_COURSE}).*'
-# A short drag: past about half the row, the swipe runs Hide.
+# A short drag, as for notices: farther runs Hide.
 - swipe:
-    start: 24%,19%
-    end: 32%,19%
+    start: 23%,19%
+    end: 28%,19%
     duration: 800
 - waitForAnimationToEnd
 - assertVisible:
