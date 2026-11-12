@@ -64,8 +64,17 @@ target 'learnX' do
     hermes_dir = File.join(installer.sandbox.root.to_s, 'hermes-engine')
     File.write(File.join(hermes_dir, '.last_build_configuration'), 'Unknown') if Dir.exist?(hermes_dir)
 
+    # A pod whose podspec names no Swift version would take the app's (Swift 6
+    # language mode, for learnX's own Swift); keep those in Swift 5 mode.
+    swift5_pods = installer.pod_targets
+      .select { |pod_target| pod_target.uses_swift? && pod_target.spec_swift_versions.empty? }
+      .map(&:label)
+
     installer.pods_project.targets.each do |target|
       target.build_configurations.each do |config|
+        if swift5_pods.include?(target.name) && config.build_settings.key?('SWIFT_VERSION')
+          config.build_settings['SWIFT_VERSION'] = '5.0'
+        end
         # The widget extension links the same pods as the app, and some of them use
         # app-only API (UIApplication.shared) in code the extension never runs.
         config.build_settings['APPLICATION_EXTENSION_API_ONLY'] = 'NO'

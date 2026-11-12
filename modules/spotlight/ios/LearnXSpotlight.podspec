@@ -8,6 +8,7 @@ Pod::Spec.new do |s|
   s.platforms      = { :ios => '17.6' }
   s.source         = { git: '' }
   s.static_framework = true
+  s.swift_version  = '6.0'
 
   s.dependency 'ExpoModulesCore'
   s.frameworks = 'CoreSpotlight'
