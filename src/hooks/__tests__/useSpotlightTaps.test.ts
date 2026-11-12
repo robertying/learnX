@@ -20,7 +20,7 @@ it('opens the result that launched the app', async () => {
   expect(mockOpen).toHaveBeenCalledWith({ type: 'notice', id: 'n1' });
 });
 
-it('opens notices and assignments tapped later, ignoring other domains', async () => {
+it('opens notices, assignments and files tapped later, ignoring other domains', async () => {
   await renderHook(() => useSpotlightTaps());
   const listener = spotlight.addListener.mock.calls[0][1] as (item: {
     domain: string;
@@ -30,4 +30,6 @@ it('opens notices and assignments tapped later, ignoring other domains', async (
   expect(mockOpen).not.toHaveBeenCalled();
   listener({ domain: 'assignment', id: 'a1' });
   expect(mockOpen).toHaveBeenCalledWith({ type: 'assignment', id: 'a1' });
+  listener({ domain: 'file', id: 'f1' });
+  expect(mockOpen).toHaveBeenCalledWith({ type: 'file', id: 'f1' });
 });

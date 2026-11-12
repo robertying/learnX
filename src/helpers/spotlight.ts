@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
-import { Assignment, Notice } from 'data/types/state';
+import { Assignment, File, Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
@@ -11,11 +11,8 @@ const time = (date: string | number | Date | undefined) => {
   return Number.isNaN(value) ? undefined : value;
 };
 
-const details = (courseName: string, html?: string) =>
-  [courseName, removeTags(html)]
-    .filter(Boolean)
-    .join(' · ')
-    .slice(0, MAX_DETAILS_LENGTH);
+const details = (...parts: (string | undefined)[]) =>
+  parts.filter(Boolean).join(' · ').slice(0, MAX_DETAILS_LENGTH);
 
 const keywords = (...words: (string | undefined)[]) =>
   words.filter((word): word is string => !!word);
@@ -23,7 +20,7 @@ const keywords = (...words: (string | undefined)[]) =>
 export const noticeSpotlightItem = (notice: Notice): SpotlightItem => ({
   id: notice.id,
   title: notice.title,
-  details: details(notice.courseName, notice.content),
+  details: details(notice.courseName, removeTags(notice.content)),
   keywords: keywords(
     notice.courseName,
     notice.courseTeacherName,
@@ -37,9 +34,22 @@ export const assignmentSpotlightItem = (
 ): SpotlightItem => ({
   id: assignment.id,
   title: assignment.title,
-  details: details(assignment.courseName, assignment.description),
+  details: details(assignment.courseName, removeTags(assignment.description)),
   keywords: keywords(assignment.courseName, assignment.courseTeacherName),
   dueDate: time(assignment.deadline),
+});
+
+export const fileSpotlightItem = (file: File): SpotlightItem => ({
+  id: file.id,
+  title: file.title,
+  details: details(
+    file.courseName,
+    file.fileType.toUpperCase(),
+    file.size,
+    removeTags(file.description),
+  ),
+  keywords: keywords(file.courseName, file.courseTeacherName, file.fileType),
+  date: time(file.uploadTime),
 });
 
 /**
@@ -88,12 +98,16 @@ const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
 };
 
 /**
- * Makes the notices and assignments findable in Spotlight, without hidden
+ * Makes the notices, assignments and files findable in Spotlight, without hidden
  * courses. A list that isn't loaded keeps what was indexed. Resolves once the
  * index is updated; it never rejects.
  */
 export async function updateSpotlight(
-  { notices, assignments }: { notices?: Notice[]; assignments?: Assignment[] },
+  {
+    notices,
+    assignments,
+    files,
+  }: { notices?: Notice[]; assignments?: Assignment[]; files?: File[] },
   { hiddenCourses }: { hiddenCourses: string[] },
 ) {
   if (!Spotlight) {
@@ -108,6 +122,9 @@ export async function updateSpotlight(
   }
   if (assignments) {
     replaceItems('assignment', shown(assignments).map(assignmentSpotlightItem));
+  }
+  if (files) {
+    replaceItems('file', shown(files).map(fileSpotlightItem));
   }
   await queue;
 }

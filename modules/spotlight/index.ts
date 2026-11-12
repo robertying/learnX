@@ -1,6 +1,6 @@
 import { NativeModule, requireOptionalNativeModule } from 'expo';
 
-export type SpotlightDomain = 'notice' | 'assignment';
+export type SpotlightDomain = 'notice' | 'assignment' | 'file';
 
 export interface SpotlightItem {
   /** The item's id within its domain. */

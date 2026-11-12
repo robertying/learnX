@@ -480,5 +480,5 @@ export default {
   whatsNew19RemindersBody: 'A notification before an assignment is due.',
   whatsNew19SpotlightTitle: 'Spotlight and Siri',
   whatsNew19SpotlightBody:
-    'Find notices and assignments from anywhere on your device.',
+    'Find notices, assignments and files from anywhere on your device.',
 };

@@ -7,11 +7,11 @@
 import { AppState } from 'react-native';
 import dayjs from 'dayjs';
 import { queryClient } from 'data/queryClient';
-import { assignmentsQuery, noticesQuery } from 'data/content';
+import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { getCachedWeekSessions } from 'data/schedule';
 import { getSettings, useSettingsStore } from 'data/settings';
 import { getUserData, useUserDataStore } from 'data/userData';
-import { Assignment, Notice } from 'data/types/state';
+import { Assignment, File, Notice } from 'data/types/state';
 import type { ToastMessage } from 'helpers/calendarSync';
 import { recordError } from 'helpers/crashReporting';
 import {
@@ -37,6 +37,7 @@ interface Inputs {
   /** The semester being shown's lists; undefined until fetched. */
   assignments: Assignment[] | undefined;
   notices: Notice[] | undefined;
+  files: File[] | undefined;
   hiddenCourses: string[];
   /** Archived assignments' ids. */
   archived: string[];
@@ -61,6 +62,9 @@ const readInputs = (): Inputs => {
   const notices = currentSemester
     ? queryClient.getQueryData(noticesQuery(currentSemester).queryKey)
     : undefined;
+  const files = currentSemester
+    ? queryClient.getQueryData(filesQuery(currentSemester).queryKey)
+    : undefined;
   const archivedIds = new Set(archived.assignment);
   const hidden = new Set(hiddenCourses);
 
@@ -72,6 +76,7 @@ const readInputs = (): Inputs => {
   return {
     assignments,
     notices,
+    files,
     hiddenCourses,
     archived: archived.assignment,
     shownAssignments: assignments?.filter(
@@ -190,9 +195,9 @@ const surfaces: Surface[] = [
   },
   {
     name: 'Spotlight',
-    deps: i => [i.notices, i.assignments, i.hiddenCourses],
-    update: ({ notices, assignments, hiddenCourses }) =>
-      updateSpotlight({ notices, assignments }, { hiddenCourses }),
+    deps: i => [i.notices, i.assignments, i.files, i.hiddenCourses],
+    update: ({ notices, assignments, files, hiddenCourses }) =>
+      updateSpotlight({ notices, assignments, files }, { hiddenCourses }),
   },
   {
     name: 'Next Deadline intent',
@@ -303,6 +308,7 @@ export const clearSurfaces = () => {
 const watchedQueries = new Set([
   'assignments',
   'notices',
+  'files',
   'courses',
   'semesterDates',
   'calendar',
