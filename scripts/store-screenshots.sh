@@ -36,8 +36,8 @@
 #
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
-# Android screen size, density, app locale and status bar (demo mode: 9:41,
-# full battery, no network or notification icons). Which simulator or emulator model to use
+# Android screen size, density, app locale and status bar (9:41, full LTE
+# signal, no notification icons). Which simulator or emulator model to use
 # depends on the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch
 # iPad, the iPhone Duo, and any Android foldable or tablet emulator.
 set -euo pipefail
@@ -121,6 +121,7 @@ fi
 android_app_id="io.robertying.learnx"
 restore_locales=""
 shield_key=""
+lte_keeper=""
 restore_appearance=""
 
 # shellcheck disable=SC2329 # run by the EXIT trap
@@ -131,6 +132,9 @@ cleanup() {
       xcrun simctl ui "$device" appearance "$restore_appearance" || true
     fi
   else
+    if [ -n "$lte_keeper" ]; then
+      kill "$lte_keeper" 2>/dev/null || true
+    fi
     adb -s "$device" shell wm size reset || true
     adb -s "$device" shell wm density reset || true
     adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
@@ -141,6 +145,12 @@ cleanup() {
     fi
     adb -s "$device" shell settings put global sysui_demo_allowed 0 || true
   fi
+}
+
+# Full LTE signal on the emulator's modem (Android).
+lte() {
+  adb -s "$device" emu network speed lte >/dev/null || true
+  adb -s "$device" emu gsm signal-profile 4 >/dev/null || true
 }
 
 # A SystemUI demo mode command (Android).
@@ -173,20 +183,28 @@ else
   adb -s "$device" shell wm size "$size"
   adb -s "$device" shell wm density "$density"
   sleep 3
-  # Demo mode draws the status bar from fixed values: 9:41, a full battery,
-  # no network icons and no notification icons. Enter it after the size
-  # change; entered before, SystemUI keeps the real clock and draws
-  # satellite icons.
+  # The real network icons, at full LTE signal: hidden cell icons make
+  # SystemUI draw a satellite one, and the modem's default NR reads "3G".
+  # The modem can drift back, so a background loop keeps it on LTE.
+  lte
+  (
+    while sleep 5; do
+      adb -s "$device" shell dumpsys telephony.registry 2>/dev/null |
+        grep -q 'network=LTE' || lte
+    done
+  ) &
+  lte_keeper=$!
+  # Demo mode, entered after the size change (before it, SystemUI keeps the
+  # real clock), sets the clock to 9:41; leaving it right away keeps that
+  # clock and the real icons.
   adb -s "$device" shell settings put global sysui_demo_allowed 1
   demo exit
   demo enter
   sleep 1
   demo clock -e hhmm 0941
-  demo network -e mobile hide -e wifi hide
-  demo notifications -e visible false
-  demo battery -e level 100 -e plugged false
-  # The no-screen-lock shield is a Safety Center notification that demo mode
-  # still shows: snooze it for the run.
+  demo exit
+  # The no-screen-lock shield is a Safety Center notification: snooze it for
+  # the run.
   shield_key="$(adb -s "$device" shell dumpsys notification --noredact |
     grep -oE 'key=0\|android\|[^ ]*NoScreenLock[^ ]*' | head -n 1 | cut -d= -f2- | tr -d '\r' || true)"
   if [ -n "$shield_key" ]; then
