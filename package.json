@@ -16,6 +16,7 @@
     "typecheck": "tsc",
     "format": "oxfmt",
     "test": "jest",
+    "check": "pnpm typecheck && pnpm lint --deny-warnings && pnpm format --check && pnpm test --coverage && git ls-files -z '*.sh' | xargs -0 shellcheck",
     "e2e:ios": "scripts/e2e.sh ios",
     "e2e:android": "scripts/e2e.sh android",
     "e2e:devices": "scripts/e2e-devices.sh",

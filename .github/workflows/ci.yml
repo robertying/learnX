@@ -23,7 +23,8 @@ env:
 
 jobs:
   js:
-    # Typecheck, lint, format and Jest (with its coverage thresholds)
+    # Typecheck, lint, format, ShellCheck, Jest (with its coverage
+    # thresholds) and the release JS bundles
     name: JS checks
     runs-on: ubuntu-latest
     permissions:
@@ -55,7 +56,7 @@ jobs:
       # Catches shell mistakes before a script only runs on main
       - name: Shell scripts
         if: ${{ !cancelled() }}
-        run: shellcheck --version | head -2 && shellcheck scripts/*.sh
+        run: shellcheck --version | head -2 && git ls-files -z '*.sh' | xargs -0 shellcheck
 
       # Jest's cache holds Babel output, mostly for node_modules. Its key
       # follows what changes that output (the Babel plugins in babel/ too,
@@ -81,6 +82,24 @@ jobs:
         with:
           path: ${{ env.JEST_CACHE_DIR }}
           key: ${{ steps.jest-cache.outputs.cache-primary-key }}
+
+      # Builds the Android and iOS release JS bundles (production Babel and
+      # Metro, which Jest doesn't run) and fails if one contains a .env value
+      # other than the mock login. The .env has a made-up value for every key,
+      # and one babel/inline-env.js doesn't know, so any leak shows up.
+      - name: Release bundles
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: |
+          cat > .env <<'ENV'
+          DUMMY_USERNAME=ci-mock-user
+          DUMMY_PASSWORD=ci-mock-password
+          COURSEX_REFRESH_TOKEN=ci-canary-coursex-token
+          LIVE_USERNAME=ci-canary-live-username
+          LIVE_PASSWORD=ci-canary-live-password
+          LIVE_FINGERPRINT=ci-canary-live-fingerprint
+          UNLISTED_KEY=ci-canary-unlisted-key
+          ENV
+          scripts/check-release-bundle.sh
 
       # Drops caches that newer ones replaced (old Gradle, ccache, Pods, Xcode
       # and Jest entries), so the repo stays under its 10 GB limit.
@@ -109,9 +128,7 @@ jobs:
       - name: Detect changed files
         id: changes
         run: >-
-          scripts/changed-files.sh
-          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(test-android\.sh|android-coverage\.mjs|changed-files\.sh)$|\.github/(workflows/ci\.yml$|actions/setup-js/))'
-          >> "$GITHUB_OUTPUT"
+          scripts/changed-files.sh android-unit >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
