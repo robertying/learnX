@@ -11,7 +11,7 @@ import {
   semantics,
   testID,
 } from '@expo/ui/jetpack-compose/modifiers';
-import { useFieldText } from 'components/Form.shared';
+import { useFieldText } from 'hooks/useFieldText';
 import ThemedHost from 'components/ThemedHost';
 import { trim, type LoginFieldsProps } from './LoginFields.shared';
 

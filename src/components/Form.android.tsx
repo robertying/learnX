@@ -40,10 +40,10 @@ import type { ModifierConfig } from '@expo/ui/jetpack-compose/modifiers';
 import SafeArea from 'components/SafeArea';
 import { useMaterialTheme } from 'theme';
 import { t } from 'helpers/i18n';
+import { useFieldText } from 'hooks/useFieldText';
 import {
   parseNumberInput,
   positionRows,
-  useFieldText,
   type FormButtonProps,
   type FormFileProps,
   type FormIcon,
