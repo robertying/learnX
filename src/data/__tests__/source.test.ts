@@ -7,6 +7,7 @@ import { useCredentialsStore } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import {
   addCSRF,
+  clearSessionCookies,
   dataSource,
   endSession,
   ensureSession,
@@ -23,6 +24,7 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
   clearByName: jest.fn(),
   setFromResponse: jest.fn(),
   flush: jest.fn(),
+  clearAllStores: jest.fn(() => Promise.resolve(true)),
 }));
 const mockEnsureSession = jest.fn(() => Promise.resolve());
 const mockLogin = jest.fn<Promise<void>, [credential?: unknown]>(() =>
@@ -326,6 +328,11 @@ describe('picking the server', () => {
       'singleLogin=; path=/; HttpOnly',
     );
     expect(CookieManager.flush).toHaveBeenCalled();
+  });
+
+  it('clears every cookie in every store on logout', async () => {
+    await clearSessionCookies();
+    expect(CookieManager.clearAllStores).toHaveBeenCalledTimes(1);
   });
 
   it('loads the saved login before making sure of a session', async () => {

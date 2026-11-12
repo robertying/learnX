@@ -83,12 +83,17 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.debug
+            // MainActivity passes test launch arguments on (see release).
+            buildConfigField "boolean", "TAKES_LAUNCH_OPTIONS", "true"
         }
         release {
             // -PciRelease (CI's E2E build): a real release build (R8, bundled
             // JS) signed with the debug key, and nothing uploaded to Crashlytics.
             def ciRelease = project.hasProperty("ciRelease")
             signingConfig = ciRelease ? signingConfigs.debug : signingConfigs.release
+            // Only E2E builds take test launch arguments: in a store build,
+            // any app could start learnX with them.
+            buildConfigField "boolean", "TAKES_LAUNCH_OPTIONS", ciRelease ? "true" : "false"
             minifyEnabled = true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             firebaseCrashlytics {

@@ -27,9 +27,11 @@ class MainActivity : ReactActivity() {
                 // Test runs set the app up with launch arguments (Maestro's
                 // launchApp arguments arrive as intent extras): they become the
                 // root component's initial props (services/launchOptions.ts).
-                // Only these string extras are passed; the live login ones are
+                // Only these string extras are passed, and only in debug and
+                // E2E builds (TAKES_LAUNCH_OPTIONS); the live login ones are
                 // only read by debug and E2E_LIVE builds.
                 override fun getLaunchOptions(): Bundle? {
+                    if (!BuildConfig.TAKES_LAUNCH_OPTIONS) return null
                     val extras = LAUNCH_OPTIONS.mapNotNull { key ->
                         intent?.getStringExtra(key)?.let { key to it }
                     }

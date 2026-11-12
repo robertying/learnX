@@ -13,7 +13,7 @@ import { getUserData, resetUserData, setArchived } from 'data/userData';
 import env from '../../../jest/mocks/env';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import {
-  clearLoginCookies,
+  clearSessionCookies,
   dataSource,
   loginWithFingerPrint,
   resetDataSource,
@@ -25,7 +25,7 @@ jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
   loginWithFingerPrint: jest.fn(async () => {}),
   resetDataSource: jest.fn(),
-  clearLoginCookies: jest.fn(async () => {}),
+  clearSessionCookies: jest.fn(async () => {}),
   endSession: jest.fn(),
 }));
 // One attempt, without the backoff.
@@ -230,12 +230,29 @@ describe('login', () => {
     jest.spyOn(dataSource, 'logout').mockImplementationOnce(async () => {
       order.push('server logout');
     });
-    jest.mocked(clearLoginCookies).mockImplementationOnce(async () => {
+    jest.mocked(clearSessionCookies).mockImplementationOnce(async () => {
       order.push('cookies');
     });
     await logout();
     expect(order).toEqual(['server logout', 'cookies']);
     expect(getAuth()).toEqual(initialAuth);
+    expect(getCredentials()).toBeNull();
+  });
+
+  it("clears the cookies when the server doesn't answer the logout", async () => {
+    await login(sso);
+    jest
+      .spyOn(dataSource, 'logout')
+      .mockImplementationOnce(() => new Promise(() => {}));
+    jest.useFakeTimers();
+    try {
+      const done = logout();
+      await jest.advanceTimersByTimeAsync(3_000);
+      await done;
+    } finally {
+      jest.useRealTimers();
+    }
+    expect(clearSessionCookies).toHaveBeenCalled();
     expect(getCredentials()).toBeNull();
   });
 });

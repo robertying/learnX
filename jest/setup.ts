@@ -52,6 +52,7 @@ jest.mock('@preeternal/react-native-cookie-manager', () => ({
     setFromResponse: jest.fn(() => Promise.resolve(true)),
     clearByName: jest.fn(() => Promise.resolve(true)),
     clearAll: jest.fn(() => Promise.resolve(true)),
+    clearAllStores: jest.fn(() => Promise.resolve(true)),
     flush: jest.fn(() => Promise.resolve()),
   },
 }));

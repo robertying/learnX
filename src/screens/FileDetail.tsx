@@ -130,6 +130,9 @@ const FileDetailContent: React.FC<{
             source={{
               uri: path,
             }}
+            // Course files are only shown: scripts in a downloaded .html or
+            // .svg file don't run.
+            javaScriptEnabled={false}
             originWhitelist={['*']}
             decelerationRate={Platform.OS === 'ios' ? 'normal' : undefined}
             contentInsetAdjustmentBehavior="automatic"

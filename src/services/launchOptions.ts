@@ -8,7 +8,7 @@ import env from 'helpers/env';
  * `launchApp: { arguments: { mockLatency: none } }`. iOS reads them from the
  * launch arguments (`-mockLatency none`, through NSUserDefaults); Android
  * passes the launch intent's extras as the root component's initial props
- * (MainActivity).
+ * (MainActivity), in debug and E2E builds only.
  */
 export interface LaunchOptions {
   /** The emulated server's latency for a mock account. */

@@ -70,7 +70,7 @@ export const hasPermission = async (type: 'calendar' | 'reminder') => {
  */
 const requirePermission = async (
   type: 'calendar' | 'reminder',
-  { ask = true }: { ask?: boolean } = {},
+  { ask }: { ask: boolean },
 ) => {
   if (!(await (ask ? getAndRequestPermission(type) : hasPermission(type)))) {
     throw new CalendarError(
@@ -182,7 +182,7 @@ export const saveCoursesToCalendar = async (
 ) => {
   const settings = getSettings();
 
-  await requirePermission('calendar');
+  await requirePermission('calendar', { ask: true });
 
   const calendar = await getCourseCalendar();
 
@@ -373,12 +373,13 @@ const removeAssignmentEvents = async (
  * Writes `assignments` to the calendar or reminders, and deletes the entries
  * of `removed` (assignments archived or hidden since they were written).
  * `ask` asks for the permission when it's missing; see `requirePermission`.
+ * Required, so a new caller decides whether it may show a prompt.
  */
 export const saveAssignmentsToReminderOrCalendar = async (
   type: AssignmentEventType,
   assignments: Assignment[],
-  removed: string[] = [],
-  { ask = true }: { ask?: boolean } = {},
+  removed: string[],
+  { ask }: { ask: boolean },
 ) => {
   const settings = getSettings();
 
@@ -405,10 +406,10 @@ export const saveAssignmentsToReminderOrCalendar = async (
 };
 
 export const removeCalendars = async () => {
-  await requirePermission('calendar');
+  await requirePermission('calendar', { ask: true });
 
   if (Platform.OS === 'ios') {
-    await requirePermission('reminder');
+    await requirePermission('reminder', { ask: true });
   }
 
   const calendars = await Calendar.getCalendars();
@@ -433,7 +434,7 @@ export const removeCalendars = async () => {
 };
 
 export const exportSyncedCalendarsToICS = async () => {
-  await requirePermission('calendar');
+  await requirePermission('calendar', { ask: true });
 
   const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
   const { courseCalendars, assignmentCalendars } = findSyncedCalendars(
