@@ -20,8 +20,8 @@
 # E2E_ORIENTATION (PORTRAIT, LANDSCAPE_LEFT, ...) sets the orientation each
 # flow starts in. scripts/e2e-devices.sh runs the flows on every device setup.
 # E2E_LANGUAGE (e.g. zh-Hans) launches the iOS app in that language.
-# E2E_STATE_CLEARED=1 launches the app without clearing its data first, for a
-# caller that cleared it itself (scripts/store-screenshots.sh on Android).
+# E2E_STATE_CLEARED=1 skips the reset (subflows/reset.yaml), for a caller that
+# cleared the app's data itself (scripts/store-screenshots.sh on Android).
 set -euo pipefail
 
 platform="${1:-}"
@@ -92,6 +92,19 @@ if [ -n "${MAESTRO_DEVICE:-}" ]; then
   device_args=(--device "$MAESTRO_DEVICE")
 fi
 
+# IPAD=true on an iPad simulator (the booted one, or MAESTRO_DEVICE), whose
+# paged tab bar subflows/tab.yaml handles; other devices skip that check.
+ipad=false
+if [ "$platform" = ios ]; then
+  booted="$(xcrun simctl list devices booted 2>/dev/null || true)"
+  if [ -n "${MAESTRO_DEVICE:-}" ]; then
+    booted="$(grep -F "$MAESTRO_DEVICE" <<<"$booted" || true)"
+  fi
+  if grep -q 'iPad' <<<"$booted"; then
+    ipad=true
+  fi
+fi
+
 # Run every flow unless a flow file or folder was passed (options alone, e.g.
 # --test-output-dir <dir>, still run them all).
 has_flow=false
@@ -113,6 +126,7 @@ test_args=(
   -e ORIENTATION="${E2E_ORIENTATION:-PORTRAIT}"
   -e APP_LANGUAGE="${E2E_LANGUAGE:-}"
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"
+  -e IPAD="$ipad"
   "${env_args[@]}"
 )
 if [ "$live" = false ]; then

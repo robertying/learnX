@@ -1,0 +1,41 @@
+# Log in from the welcome or login page with the mock account, then close the
+# set-up page that a first login opens. Reached from login.yaml.
+appId: ${APP_ID}
+env:
+  SAVE_PASSWORD: 'Save Password\??|存储密码？?|要存储密码吗？?'
+---
+- tapOn:
+    id: welcome-continue
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: login-username
+    timeout: 10000
+- tapOn:
+    id: login-username
+- inputText: ${USERNAME}
+# Return moves the focus to the password field. A tap alone sometimes misses
+# it in iPad landscape, and the password ends up in the account field; the
+# tap is then a no-op on the focused field.
+- pressKey: Enter
+- tapOn:
+    id: login-password
+- inputText: ${PASSWORD}
+# The password field submits the login on return.
+- pressKey: Enter
+# Next comes the set-up page, over Today. On some iOS devices a "Save
+# Password?" alert (the system's own labels) comes first and hides the app's
+# accessibility tree until dismissed. Wait for whichever shows, then read
+# which it is: a condition on an absent element would cost Maestro's 7 s
+# optional lookup.
+- extendedWaitUntil:
+    visible: '${SAVE_PASSWORD}|${T_setupTitle}'
+    timeout: 30000
+- copyTextFrom: '${SAVE_PASSWORD}|${T_setupTitle}'
+- runFlow:
+    when:
+      true: "${new RegExp('^(' + SAVE_PASSWORD + ')$').test(maestro.copiedText)}"
+    commands:
+      - tapOn: 'Not Now|现在不|以后'
+- tapOn:
+    id: setup-not-now

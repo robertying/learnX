@@ -2,3 +2,19 @@
 # Only the top-level flows run; subflows/ is reached through runFlow.
 flows:
   - '*'
+# The flows share one login (subflows/login.yaml): start from a fresh install
+# and log out last. Flows not listed, or left out of a tagged run's prefix of
+# this list, run after these. A failed flow doesn't
+# stop the rest.
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - Start from a fresh install
+    # Logs in. Right after the reset, because released Maestro only reads
+    # the notice detail's deep accessibility tree on iOS after a login in the
+    # same launch (AGENTS.md; the patched Maestro doesn't need this).
+    - Open a notice, an assignment and a file
+    - Log in and visit every tab
+    - Favorite and archive a notice
+    - Search and open a result
+    - Open settings pages and log out

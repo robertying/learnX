@@ -1,100 +1,55 @@
-# Fresh install state, then log in with the mock account (see src/data/AGENTS.md, Mock login).
-# USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
+# Open the app logged in with the mock account (see src/data/AGENTS.md, Mock
+# login), on the notices. The flows share one login: the first flow of a run
+# logs in after 00_reset, the others find the app logged in and only relaunch
+# it. USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---
 # ORIENTATION comes from scripts/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
 # set), so iPad landscape runs need no rotating by hand.
 - setOrientation: ${ORIENTATION}
-# APP_LANGUAGE (from scripts/e2e.sh, empty by default) launches iOS in that
-# language, e.g. zh-Hans. Android takes the app's locale from
-# `cmd locale set-app-locales`, which clearing the app's data also clears, so
-# scripts/store-screenshots.sh clears it before setting the locale and passes
-# STATE_CLEARED to launch the app as it is.
+# Every launch: no emulated server delay (helpers/launchOptions.ts), and with
+# APP_LANGUAGE (from scripts/e2e.sh, empty by default, e.g. zh-Hans) iOS in
+# that language. Android takes the app's locale from
+# `cmd locale set-app-locales` instead (scripts/store-screenshots.sh).
 - runFlow:
     when:
-      true: ${!!STATE_CLEARED}
-    commands:
-      - launchApp
-- runFlow:
-    when:
-      true: ${!APP_LANGUAGE && !STATE_CLEARED && ACCOUNT != 'live'}
+      true: ${!APP_LANGUAGE && ACCOUNT != 'live'}
     commands:
       - launchApp:
-          clearState: true
-          clearKeychain: true
-# Live runs (scripts/e2e.sh --live) hand the app the live account's saved
-# fingerprint, so typing its username signs in without the SSO page
-# (helpers/launchOptions.ts). Only E2E_LIVE builds take it.
-- runFlow:
-    when:
-      true: ${!APP_LANGUAGE && !STATE_CLEARED && ACCOUNT == 'live'}
-    commands:
-      - launchApp:
-          clearState: true
-          clearKeychain: true
           arguments:
-            liveUsername: ${USERNAME}
-            liveFingerprint: ${LIVE_FINGERPRINT}
+            mockLatency: none
 - runFlow:
     when:
       true: ${!!APP_LANGUAGE}
     commands:
       - launchApp:
-          clearState: true
-          clearKeychain: true
           arguments:
+            mockLatency: none
             AppleLanguages: '(${APP_LANGUAGE})'
-# A new install opens on the welcome page.
-- extendedWaitUntil:
-    visible:
-      id: 'welcome-continue|login-username'
-    timeout: 60000
-- tapOn:
-    id: welcome-continue
-    optional: true
-- extendedWaitUntil:
-    visible:
-      id: login-username
-    timeout: 10000
-- tapOn:
-    id: login-username
-- inputText: ${USERNAME}
-# Return moves the focus to the password field. A tap alone sometimes misses
-# it in iPad landscape, and the password ends up in the account field; the
-# tap is then a no-op on the focused field.
-- pressKey: Enter
-- tapOn:
-    id: login-password
-- inputText: ${PASSWORD}
-# The password field submits the login on return.
-- pressKey: Enter
-# iOS offers to save the password to the keychain after a login; the alert
-# hides the app's accessibility tree until dismissed. The system's own labels.
+# Live runs (scripts/e2e.sh --live) hand the app the live account's saved
+# fingerprint, so typing its username signs in without the SSO page
+# (helpers/launchOptions.ts). Only E2E_LIVE builds take it.
 - runFlow:
     when:
-      platform: iOS
+      true: ${!APP_LANGUAGE && ACCOUNT == 'live'}
     commands:
-      - extendedWaitUntil:
-          visible: 'Save Password\??|存储密码？?|要存储密码吗？?'
-          timeout: 10000
-          optional: true
-      - tapOn:
-          text: 'Not Now|现在不|以后'
-          optional: true
-# The set-up page opens over Today after the first login, and can hide the
-# tab bar from Maestro before it is seen.
+      - launchApp:
+          arguments:
+            liveUsername: ${USERNAME}
+            liveFingerprint: ${LIVE_FINGERPRINT}
+# A new install opens on the welcome page, a logged-out app on the login
+# page, a logged-in one on its tabs.
 - extendedWaitUntil:
     visible:
-      id: 'tab-notices|bell\.fill|setup-not-now'
-    timeout: 30000
-- extendedWaitUntil:
-    visible:
-      id: setup-not-now
-    timeout: 5000
-    optional: true
-- tapOn:
-    id: setup-not-now
-    optional: true
+      id: 'welcome-continue|login-username|tab-notices|bell\.fill'
+    timeout: 60000
+# Logged in already: an absent element costs Maestro's optional lookup (up to
+# 7 s from the launch), still far less than a login.
+- runFlow:
+    when:
+      visible:
+        id: 'welcome-continue|login-username'
+    file: login_form.yaml
 # The app opens on Today; the flows start from the notices.
 - runFlow:
     file: tab.yaml
