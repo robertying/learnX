@@ -47,13 +47,13 @@ import About from 'screens/About';
 import Changelog from 'screens/Changelog';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
-import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAppState } from 'data/appState';
 import { useCredentialsStore } from 'data/credentials';
 import {
   getItemDetailOptions,
   getModalScreenOptions,
+  getTitleOptions,
   hasGlassHeader,
   debugTitle,
   mockNetworkTitle,

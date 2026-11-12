@@ -61,16 +61,4 @@ const styles = StyleSheet.create({
   },
 });
 
-// From iOS 26 the header shows a subtitle itself.
-const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
-
-export const getTitleOptions = (title: string, subtitle?: string) => {
-  return supportsNativeSubtitle
-    ? { title, headerSubtitle: subtitle }
-    : {
-        title,
-        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
-      };
-};
-
 export default HeaderTitle;

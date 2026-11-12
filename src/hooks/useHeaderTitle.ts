@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { getTitleOptions } from 'components/HeaderTitle';
+import { getTitleOptions } from 'navigation/options';
 
 /**
  * Sets the header title from data the screen reads itself (e.g. from the

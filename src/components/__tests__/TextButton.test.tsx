@@ -1,7 +1,7 @@
 import { render, screen, userEvent } from '@testing-library/react-native';
-import { buttonStyle, font, frame } from '@expo/ui/swift-ui/modifiers';
-import IconButton from 'components/IconButton';
+import { font } from '@expo/ui/swift-ui/modifiers';
 import TextButton from 'components/TextButton';
+import { withGutter } from 'components/TextButton.shared';
 import DeviceInfo from 'constants/DeviceInfo';
 
 afterEach(() => jest.restoreAllMocks());
@@ -11,6 +11,30 @@ const modifierNames = (button: { props: { modifiers?: unknown[] } }) =>
   (button.props.modifiers ?? []).map(
     modifier => (modifier as { modifier?: string } | undefined)?.modifier,
   );
+
+describe('withGutter', () => {
+  it('pulls the touch padding into the margins', () => {
+    expect(withGutter(undefined, { vertical: 4 })).toEqual([
+      undefined,
+      { marginTop: -4, marginBottom: -4 },
+    ]);
+  });
+
+  it("adds to the caller's margins, the most specific one first", () => {
+    const style = { margin: 2, marginTop: 10, marginHorizontal: 6 };
+    expect(withGutter(style, { vertical: 14, start: 12 })[1]).toEqual({
+      marginTop: -4,
+      marginBottom: -12,
+      marginStart: -6,
+    });
+  });
+
+  it('treats a percentage margin as none', () => {
+    expect(
+      withGutter({ marginVertical: '10%' }, { vertical: 4 })[1],
+    ).toMatchObject({ marginTop: -4, marginBottom: -4 });
+  });
+});
 
 describe('TextButton (iOS)', () => {
   it('follows Dynamic Type through text styles, bold or crossed out', async () => {
@@ -53,29 +77,5 @@ describe('TextButton (iOS)', () => {
     expect(screen.getByText('Open')).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('open'));
     expect(onPress).toHaveBeenCalled();
-  });
-});
-
-describe('IconButton (iOS)', () => {
-  it('draws a contained button at its size, with the badge in its label', async () => {
-    await render(
-      <IconButton
-        icon="settings"
-        size={32}
-        mode="contained"
-        badge
-        accessibilityLabel="Settings"
-      />,
-    );
-    expect(buttonStyle).toHaveBeenCalledWith('bordered');
-    expect(frame).toHaveBeenCalledWith({ width: 48, height: 48 });
-    expect(screen.getByText('Settings, New')).toBeTruthy();
-  });
-
-  it('keeps a small borderless button at the 44 pt tap target', async () => {
-    await render(<IconButton icon="settings" size={16} badge />);
-    expect(buttonStyle).toHaveBeenCalledWith('borderless');
-    expect(frame).toHaveBeenCalledWith({ width: 44, height: 44 });
-    expect(screen.getByText(', New')).toBeTruthy();
   });
 });

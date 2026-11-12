@@ -1,8 +1,9 @@
 import dayjs from 'dayjs';
-import { classDetails, itemRow } from 'components/ClassRow';
+import { itemRow } from 'components/ItemRow';
 import { Form, FormScreen, FormSection, FormText } from 'components/Form';
 import { useWeekSchedule } from 'data/schedule';
 import { t } from 'helpers/i18n';
+import { classDetails } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
