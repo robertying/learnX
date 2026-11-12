@@ -1,0 +1,24 @@
+{
+  // The repo's tooling: scripts and their tests, the config files, the Babel
+  // and lint plugins. They run in Node, so they get Node's types, which the
+  // app's own tsconfig leaves out. `pnpm typecheck` checks both.
+  "extends": "../tsconfig.json",
+  "include": [
+    "**/*.ts",
+    "**/*.mjs",
+    "../babel/*.js",
+    "../lint/*.mjs",
+    "../jest/transformer.js",
+    "../*.config.js"
+  ],
+  "exclude": [],
+  "compilerOptions": {
+    "types": ["jest", "node"],
+    "allowJs": true,
+    "checkJs": true,
+    // Plain JS has no parameter types; the checks still catch wrong
+    // properties, calls and imports.
+    "noImplicitAny": false,
+    "noEmit": true
+  }
+}

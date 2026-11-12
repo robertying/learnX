@@ -21,11 +21,13 @@ const prevalInputsHash = () => {
   return hash.digest('hex');
 };
 
-const babelJest = createTransformer();
+const babelJest = /** @type {import('@jest/transform').SyncTransformer} */ (
+  createTransformer()
+);
 
 module.exports = {
   ...babelJest,
   getCacheKey(sourceText, sourcePath, options) {
-    return `${babelJest.getCacheKey(sourceText, sourcePath, options)}-${prevalInputsHash()}`;
+    return `${babelJest.getCacheKey?.(sourceText, sourcePath, options)}-${prevalInputsHash()}`;
   },
 };
