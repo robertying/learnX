@@ -2,11 +2,6 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/en';
-import 'dayjs/locale/zh-cn';
-import { isLocaleChinese } from 'helpers/i18n';
 import ErrorBoundary from 'components/ErrorBoundary';
 import { Toast } from 'components/Toast';
 import Splash from 'components/Splash';
@@ -17,9 +12,6 @@ import useReLogin from 'hooks/useReLogin';
 import useShareHandler from 'hooks/useShareHandler';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 import Navigation from 'navigation';
-
-dayjs.extend(relativeTime);
-dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
 
 const Container = () => {
   const reloginRequested = useReloginRequested();

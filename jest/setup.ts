@@ -3,7 +3,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn';
 import { mockLocale } from './locale';
 
-// As App.tsx does at startup
+// As helpers/i18n does when it loads
 dayjs.extend(relativeTime);
 
 // Modules every test gets a stand-in for: native modules, ESM-only packages
