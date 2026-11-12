@@ -245,7 +245,10 @@ export const notifyContent = async (
     for (const notification of notifications) {
       try {
         await postNotification(notification);
-      } catch {}
+      } catch (error) {
+        // The rest still go out.
+        recordError(error, 'Posting a content notification');
+      }
     }
   }
   addNotifiedKeys(items.map(item => item.key));

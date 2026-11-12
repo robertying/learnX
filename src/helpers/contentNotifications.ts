@@ -5,7 +5,7 @@ import { Assignment, NotificationSettings } from 'data/types/state';
 import { deadlineDayTime } from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { ItemTarget } from 'helpers/openTarget';
-import { capitalize, removeTags } from 'helpers/text';
+import { capitalize, hash, removeTags } from 'helpers/text';
 
 /** Items older than this aren't news, e.g. when an old course comes back. */
 const RECENT_DAYS = 7;
@@ -112,15 +112,6 @@ const preview = (html?: string) => {
 
 const joined = (...parts: (string | null | undefined)[]) =>
   parts.filter(Boolean).join(' · ');
-
-/** A short, stable stand-in for a text in a key. */
-const hash = (text: string) => {
-  let h = 7;
-  for (let i = 0; i < text.length; i++) {
-    h = (h * 31 + text.charCodeAt(i)) % 2147483647;
-  }
-  return h.toString(36);
-};
 
 /**
  * The key of a group assignment's submission. Submitting from this device

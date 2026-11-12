@@ -379,6 +379,18 @@ describe('notifyContent', () => {
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
   });
 
+  it('records a notification that fails to post', async () => {
+    const error = new Error('post failed');
+    jest
+      .mocked(Notifications.scheduleNotificationAsync)
+      .mockRejectedValueOnce(error);
+    await notifyContent(diff());
+    expect(recordError).toHaveBeenCalledWith(
+      error,
+      'Posting a content notification',
+    );
+  });
+
   it('posts nothing with notifications off', async () => {
     setSetting('notifications', defaultSettings.notifications);
     await notifyContent(diff());

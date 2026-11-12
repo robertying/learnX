@@ -45,9 +45,9 @@ declare class SpotlightModule extends NativeModule<SpotlightEvents> {
   replaceItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
   /**
    * Indexes `items` (new or changed) and removes the items with `removedIds`
-   * from the domain. Missing in an app built before it was added.
+   * from the domain.
    */
-  updateItems?(
+  updateItems(
     domain: SpotlightDomain,
     items: SpotlightItem[],
     removedIds: string[],
