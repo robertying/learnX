@@ -1,5 +1,10 @@
 import { Directory, File, Paths } from 'expo-file-system';
-import { sanitizeFileName } from 'helpers/filename';
+import {
+  getExtension,
+  sanitizeFileName,
+  stripExtension,
+  withExtension,
+} from 'helpers/filename';
 import { getSemesterTextFromId } from 'helpers/semester';
 import {
   courseNameOf,
@@ -34,12 +39,11 @@ const childDirectory = (dir: Directory, name: string) =>
  * file systems do.
  */
 const uniqueName = (name: string, taken: Set<string>) => {
-  const dot = name.lastIndexOf('.');
-  const base = dot > 0 ? name.slice(0, dot) : name;
-  const extension = dot > 0 ? name.slice(dot) : '';
+  const base = stripExtension(name);
+  const extension = getExtension(name);
   let candidate = name;
   for (let n = 2; taken.has(candidate.toLowerCase()); n++) {
-    candidate = `${base} (${n})${extension}`;
+    candidate = withExtension(`${base} (${n})`, extension);
   }
   taken.add(candidate.toLowerCase());
   return candidate;

@@ -35,14 +35,16 @@ const usePullToRefresh = (
   const onRefresh = async () => {
     if (loggedIn) {
       setRefreshing(true);
-      try {
-        const result = await refresh();
-        if (result?.isError) {
-          toast(t('refreshFailed'), 'error');
-        }
-      } finally {
-        setRefreshing(false);
-      }
+      // A promise chain rather than try/finally, which the React Compiler
+      // can't compile: the hook would lose its memoization.
+      await Promise.resolve()
+        .then(refresh)
+        .then(result => {
+          if (result?.isError) {
+            toast(t('refreshFailed'), 'error');
+          }
+        })
+        .finally(() => setRefreshing(false));
     } else if (!getAuth().loggingIn) {
       setPulled(true);
       void login({ reset: true });

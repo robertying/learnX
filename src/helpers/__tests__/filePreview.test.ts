@@ -8,12 +8,10 @@ import {
 
 jest.mock('constants/DeviceInfo', () => ({
   isMac: jest.fn(() => false),
-  systemVersion: jest.fn(() => '26.1'),
 }));
 
 beforeEach(() => {
   jest.mocked(DeviceInfo.isMac).mockReturnValue(false);
-  jest.mocked(DeviceInfo.systemVersion).mockReturnValue('26.1');
 });
 
 describe('needWhiteBackground', () => {
@@ -55,11 +53,10 @@ describe('canRenderInMacWebview', () => {
     expect(canRenderInMacWebview('docx')).toBe(false);
   });
 
-  it('needs macOS 17.1 or later', () => {
-    jest.mocked(DeviceInfo.systemVersion).mockReturnValue('17.0');
-    expect(canRenderInMacWebview('pdf')).toBe(false);
-    jest.mocked(DeviceInfo.systemVersion).mockReturnValue('17.1');
-    expect(canRenderInMacWebview('pdf')).toBe(true);
+  it('does not render archives or unknown types', () => {
+    expect(canRenderInMacWebview('zip')).toBe(false);
+    expect(canRenderInMacWebview('nope')).toBe(false);
+    expect(canRenderInMacWebview(null)).toBe(false);
   });
 });
 
@@ -77,7 +74,6 @@ describe('canPreviewInline', () => {
 
   it('always previews PDFs', () => {
     jest.mocked(DeviceInfo.isMac).mockReturnValue(true);
-    jest.mocked(DeviceInfo.systemVersion).mockReturnValue('16.0');
     expect(canPreviewInline('pdf')).toBe(true);
   });
 });

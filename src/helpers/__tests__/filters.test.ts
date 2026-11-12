@@ -1,6 +1,7 @@
 import { mockLocale } from '../../../jest/locale';
 import {
   checkedIds,
+  filterOptions,
   filterSubtitle,
   listForFilter,
   selectedCountLabel,
@@ -80,5 +81,43 @@ describe('selection', () => {
     } finally {
       mockLocale.current = 'en-US';
     }
+  });
+});
+
+describe('filterOptions', () => {
+  const names = (options: { name: string }[]) => options.map(o => o.name);
+
+  it('offers only All and Hidden when a screen has no other filters', () => {
+    expect(filterOptions({ allCount: 5, hiddenCount: 1 })).toEqual([
+      { name: 'all', label: t('all'), count: 5, icon: 'all' },
+      { name: 'hidden', label: t('hidden'), count: 1, icon: 'hide' },
+    ]);
+  });
+
+  it('offers a filter for each count given, in menu order', () => {
+    const options = filterOptions({
+      allCount: 10,
+      unreadCount: 3,
+      favCount: 2,
+      archivedCount: 1,
+      hiddenCount: 0,
+      unfinishedCount: 4,
+    });
+    expect(names(options)).toEqual([
+      'unfinished',
+      'finished',
+      'all',
+      'unread',
+      'fav',
+      'archived',
+      'hidden',
+    ]);
+    expect(options.find(o => o.name === 'finished')?.count).toBe(6);
+  });
+
+  it('keeps a filter with a count of 0', () => {
+    expect(
+      names(filterOptions({ allCount: 0, unreadCount: 0, hiddenCount: 0 })),
+    ).toEqual(['all', 'unread', 'hidden']);
   });
 });
