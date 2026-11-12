@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 import { SafeAreaFrameContext } from 'react-native-safe-area-context';
 import Navigation from 'navigation';
@@ -67,7 +68,14 @@ describe('with the native split (iOS, iPadOS and Mac)', () => {
       presentation: 'formSheet',
       sheetAllowedDetents: [1],
     });
-    expect(config().screens[1].options).toEqual({ gestureEnabled: false });
+    // Search and CourseX in page sheets; a submission can't be swiped away.
+    expect(config().screens[1].options).toEqual(
+      Platform.OS === 'ios'
+        ? { presentation: 'pageSheet' }
+        : { gestureEnabled: false },
+    );
+    expect(config().screens[2].options).toEqual(config().screens[1].options);
+    expect(config().screens[3].options).toEqual({ gestureEnabled: false });
   });
 });
 

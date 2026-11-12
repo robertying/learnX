@@ -16,6 +16,11 @@ const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: mockNavigate }),
 }));
+let mockSplitLaidOut = true;
+jest.mock('navigation/NativeSplitView', () => ({
+  useSplitLaidOut: () => mockSplitLaidOut,
+}));
+jest.mock('navigation/layout', () => ({ nativeSplit: true }));
 jest.mock('helpers/whatsNew', () => ({
   whatsNewContext: () => ({}),
   whatsNewSince: jest.fn(() => null),
@@ -98,6 +103,19 @@ describe('useLaunchSheet', () => {
   });
   afterEach(() => {
     jest.useRealTimers();
+    mockSplitLaidOut = true;
+  });
+
+  it("waits for iOS's tabs to be on screen", async () => {
+    mockSplitLaidOut = false;
+    noteLoginShown();
+    const hook = await renderHook(() => useLaunchSheet());
+    jest.advanceTimersByTime(5000);
+    expect(mockNavigate).not.toHaveBeenCalled();
+    mockSplitLaidOut = true;
+    await hook.rerender({});
+    jest.advanceTimersByTime(1000);
+    expect(mockNavigate).toHaveBeenCalledWith('Setup', undefined);
   });
 
   it('opens the set-up page a moment after the first login', async () => {
