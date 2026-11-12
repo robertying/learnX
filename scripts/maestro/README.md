@@ -16,7 +16,15 @@ flow can set the iPhone Duo's hinge:
 - setFoldPosture: halfFold # closed, halfFold or flat
 ```
 
-Until a Maestro release includes both, build
+`maestro-hierarchy-fallback.patch` fixes the hierarchy of a screen whose
+accessibility tree is 60 or more levels deep, such as a notice on iPhone. The
+driver then snapshots each child on its own, but it took the nth `.other`
+descendant instead of the nth child. The first one is UIKit's empty touch
+fallback view, so an app with one window came back with only the status bar.
+After a login the keyboard's window happened to hide this, so it showed up
+only when a flow started with the app already logged in.
+
+Until a Maestro release includes all three, build
 it from source and put it first on `PATH`:
 
 ```sh
