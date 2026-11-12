@@ -17,6 +17,13 @@ import Login from 'screens/Login';
 import env from '../../../jest/mocks/env';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
+const mockLiveLogin = jest.fn<
+  { username: string; fingerPrint: string } | undefined,
+  []
+>(() => undefined);
+jest.mock('helpers/launchOptions', () => ({
+  getLiveLogin: () => mockLiveLogin(),
+}));
 jest.mock('data/login', () => ({
   login: jest.fn(),
   loginWithMockAccount: jest.fn(),
@@ -56,6 +63,7 @@ const pressLogin = () =>
   user.press(screen.getByRole('button', { name: 'Log In' }));
 
 beforeEach(() => {
+  mockLiveLogin.mockReturnValue(undefined);
   useAuthStore.setState(initialAuth);
   useCredentialsStore.setState({ credentials: null });
   resetSettings();
@@ -139,6 +147,33 @@ describe('Login', () => {
       fingerPrint: MOCK_FINGER_PRINT,
     });
     expect(alert).not.toHaveBeenCalled();
+  });
+
+  it('logs the live test account in with its launch fingerprint', async () => {
+    mockLiveLogin.mockReturnValue({ username: 'live', fingerPrint: 'fp' });
+    const alert = jest.spyOn(Alert, 'alert');
+    const { navigation } = await setup();
+    await fill('live', 'secret');
+    await pressLogin();
+
+    expect(login).toHaveBeenCalledWith({
+      username: 'live',
+      password: 'secret',
+      fingerPrint: 'fp',
+    });
+    expect(alert).not.toHaveBeenCalled();
+    expect(navigation.navigate).not.toHaveBeenCalled();
+  });
+
+  it('sends another account to SSO in a live run', async () => {
+    mockLiveLogin.mockReturnValue({ username: 'live', fingerPrint: 'fp' });
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    await setup();
+    await fill('student', 'secret');
+    await pressLogin();
+
+    expect(login).not.toHaveBeenCalled();
+    expect(alert).toHaveBeenCalledTimes(1);
   });
 
   it('turns the graduate setting on and off', async () => {

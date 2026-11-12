@@ -7,6 +7,11 @@ type InlinedEnv = {
   DUMMY_USERNAME?: string;
   DUMMY_PASSWORD?: string;
   COURSEX_REFRESH_TOKEN?: Masked;
+  /**
+   * A local build for live E2E runs (E2E_LIVE=1): it takes the live test login
+   * from launch arguments. Never set in a shipped build.
+   */
+  E2E_LIVE?: boolean;
 } & {
   /** Live test logins. Debug builds only; always undefined in release. */
   [key: `LIVE_${string}`]: string | undefined;

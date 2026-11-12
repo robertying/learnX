@@ -6,7 +6,12 @@ import {
   getMockNetworkConfig,
   setMockNetworkConfig,
 } from 'data/mockSource';
-import { applyLaunchOptions, withLaunchOptions } from 'helpers/launchOptions';
+import {
+  applyLaunchOptions,
+  getLiveLogin,
+  withLaunchOptions,
+} from 'helpers/launchOptions';
+import env from '../../../jest/mocks/env';
 
 const mockSettingsGet = jest.fn<unknown, [string]>();
 
@@ -59,6 +64,51 @@ it('ignores missing and unknown values', () => {
   applyLaunchOptions();
 
   expect(getMockNetworkConfig()).toEqual(defaultMockNetworkConfig);
+});
+
+describe('live login', () => {
+  const live = { liveUsername: 'student', liveFingerprint: 'fp' };
+  const dev = __DEV__;
+
+  afterEach(() => {
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
+    delete (env as { E2E_LIVE?: boolean }).E2E_LIVE;
+    applyLaunchOptions();
+  });
+
+  it('reads it from the initial props on Android', () => {
+    Platform.OS = 'android';
+    applyLaunchOptions(live);
+    expect(getLiveLogin()).toEqual({ username: 'student', fingerPrint: 'fp' });
+  });
+
+  it('reads it from the launch arguments on iOS', () => {
+    Platform.OS = 'ios';
+    mockSettingsGet.mockImplementation(
+      key => (live as Record<string, string>)[key],
+    );
+    applyLaunchOptions();
+    expect(getLiveLogin()).toEqual({ username: 'student', fingerPrint: 'fp' });
+  });
+
+  it('needs both values', () => {
+    Platform.OS = 'android';
+    applyLaunchOptions({ liveUsername: 'student', liveFingerprint: '' });
+    expect(getLiveLogin()).toBeUndefined();
+    applyLaunchOptions({ liveUsername: 1, liveFingerprint: 'fp' });
+    expect(getLiveLogin()).toBeUndefined();
+  });
+
+  it('is ignored by release builds without E2E_LIVE', () => {
+    Platform.OS = 'android';
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
+    applyLaunchOptions(live);
+    expect(getLiveLogin()).toBeUndefined();
+
+    (env as { E2E_LIVE?: boolean }).E2E_LIVE = true;
+    applyLaunchOptions(live);
+    expect(getLiveLogin()).toEqual({ username: 'student', fingerPrint: 'fp' });
+  });
 });
 
 describe('withLaunchOptions', () => {

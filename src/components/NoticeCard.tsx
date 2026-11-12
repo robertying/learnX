@@ -36,6 +36,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
   return (
     <CardWrapper
       {...restProps}
+      testID="notice-card"
       accessibilityLabel={cardAccessibilityLabel({
         unread: !hasRead,
         title,
