@@ -192,8 +192,11 @@ set_hinge() {
 }
 
 app_running() {
-  xcrun simctl spawn "$1" launchctl list 2>/dev/null |
-    grep -q "UIKitApplication:$ios_app_id"
+  # Not piped into grep -q: it stops reading at the match, and with pipefail
+  # launchctl's SIGPIPE would fail the check.
+  local list
+  list="$(xcrun simctl spawn "$1" launchctl list 2>/dev/null)" || return 1
+  grep -q "UIKitApplication:$ios_app_id" <<<"$list"
 }
 
 # Every flow, on simulator $1 in orientation $2.
