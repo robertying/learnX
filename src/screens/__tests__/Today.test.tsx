@@ -115,6 +115,12 @@ it('shows the current and next class, and opens a course', async () => {
   expect(navigation.dispatch).toHaveBeenCalledWith(
     StackActions.push('CourseDetail', { id: 'b' }),
   );
+  await userEvent
+    .setup({ advanceTimers: jest.advanceTimersByTime })
+    .press(screen.getByText('Homework'));
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('AssignmentDetail', { id: 'x' }),
+  );
   jest.useRealTimers();
 });
 

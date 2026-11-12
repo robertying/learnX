@@ -9,9 +9,9 @@ import type { Assignment } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import {
   useAttachmentPicker,
-  useSaveSubmissionDraft,
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
+import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
@@ -20,9 +20,9 @@ let mockAssignment: Assignment | undefined;
 jest.mock('data/content', () => ({ useAssignment: () => mockAssignment }));
 jest.mock('hooks/useAssignmentSubmission', () => ({
   useAttachmentPicker: jest.fn(),
-  useSaveSubmissionDraft: jest.fn(),
   useSubmitAssignment: jest.fn(),
 }));
+jest.mock('hooks/useSaveSubmissionDraft', () => jest.fn());
 
 const picker = {
   picked: null as null | { uri: string; type: string; name: string },

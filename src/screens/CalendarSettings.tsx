@@ -25,9 +25,9 @@ import {
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
 import { SettingsStackParams } from 'navigation/types';
 
-type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
+type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
 
-const CalendarEvent: React.FC<Props> = () => {
+const CalendarSettings: React.FC<Props> = () => {
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );
@@ -342,4 +342,4 @@ const CalendarEvent: React.FC<Props> = () => {
   );
 };
 
-export default CalendarEvent;
+export default CalendarSettings;

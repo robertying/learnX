@@ -21,14 +21,14 @@ import packageJson from '../../package.json';
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
 /**
- * The page after the first login: turns on notifications of new content (in
- * the tabs' order), class and deadline reminders and grades (all on to start
- * with), and calendar sync and, on Apple platforms, Reminders sync (off,
- * unless an earlier version synced them). All
- * of them start off in Settings. Done saves the choices and asks for the
- * permissions they need; notifications chosen stay on if that's denied, and
- * start working once they're allowed. Opened by `useLaunchSheet`, once, also
- * on an update for a user who never saw it.
+ * The page after the first login, where people choose what to turn on:
+ * notifications of new content (in the tabs' order), class and deadline
+ * reminders and grades, all on here to start with, and calendar sync and, on
+ * Apple platforms, Reminders sync, off unless an earlier version synced them.
+ * (Settings has them all off until chosen.) Done saves the choices and asks
+ * for the permissions they need; notifications chosen stay on if that's
+ * denied, and start working once they're allowed. Opened by `useLaunchSheet`,
+ * once, also on an update for a user who never saw it.
  */
 const Setup: React.FC<Props> = ({ navigation, route }) => {
   const notifications = useSettings(settings => settings.notifications);

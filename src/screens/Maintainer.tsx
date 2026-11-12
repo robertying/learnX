@@ -7,6 +7,7 @@ import {
   FormScreen,
   FormSection,
 } from 'components/Form';
+import { supportEmail } from 'constants/Urls';
 import { t } from 'helpers/i18n';
 import { SettingsStackParams } from 'navigation/types';
 
@@ -19,8 +20,8 @@ const Maintainer: React.FC<Props> = () => (
         <FormParagraph text={t('maintainerDescription')} />
         <FormButton
           icon="email"
-          title="learnX@ruiying.io"
-          onPress={() => Linking.openURL('mailto:learnX@ruiying.io')}
+          title={supportEmail}
+          onPress={() => Linking.openURL(`mailto:${supportEmail}`)}
         />
       </FormSection>
     </Form>

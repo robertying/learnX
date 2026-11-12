@@ -36,9 +36,9 @@ import NotFound from 'components/NotFound';
 import useHeaderTitle from 'hooks/useHeaderTitle';
 import {
   useAttachmentPicker,
-  useSaveSubmissionDraft,
   useSubmitAssignment,
 } from 'hooks/useAssignmentSubmission';
+import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import { AssignmentSubmissionParamList } from 'navigation/types';
 
 type Props = NativeStackScreenProps<
