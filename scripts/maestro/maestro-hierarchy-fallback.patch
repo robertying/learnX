@@ -1,0 +1,39 @@
+From 7846ef4c3ea7b6325aa936df4f2c967541b08703 Mon Sep 17 00:00:00 2001
+From: Rui Ying <claude@ruiying.io>
+Date: Wed, 11 Nov 2026 16:27:05 -0800
+Subject: [PATCH] fix(ios): walk the children when a hierarchy is too deep to
+ snapshot
+
+getHierarchyWithFallback took descendants(matching: .other)[i] for each of
+the element's children. The first .other in an app's window is often an
+empty view (UIKit's touch fallback view), so an app with one window and a
+tree over snapshotMaxDepth came back with only the status bar.
+---
+ .../Routes/Handlers/ViewHierarchyHandler.swift            | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+index a47746f4..9d426781 100644
+--- a/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
++++ b/maestro-ios-xctest-runner/maestro-driver-iosUITests/Routes/Handlers/ViewHierarchyHandler.swift
+@@ -177,11 +177,15 @@ struct ViewHierarchyHandler: HTTPHandler {
+             if hierarchy.depth() < snapshotMaxDepth {
+                 return hierarchy
+             }
++            // Too deep for one snapshot: take each child on its own. The
++            // children, not the nth `.other` descendant: that is often an
++            // empty view at the top of the window (UIKit's touch fallback
++            // view), which left only the status bar in the hierarchy.
+             let count = try element.snapshot().children.count
+             var children: [AXElement] = []
+             for i in 0..<count {
+-              let element = element.descendants(matching: .other).element(boundBy: i).firstMatch
+-              children.append(try getHierarchyWithFallback(element))
++              let child = element.children(matching: .any).element(boundBy: i)
++              children.append(try getHierarchyWithFallback(child))
+             }
+             hierarchy.children = children
+             return hierarchy
+-- 
+2.56.1
+
