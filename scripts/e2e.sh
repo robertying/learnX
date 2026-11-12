@@ -7,13 +7,14 @@
 #
 # --live logs in with the real test account from .env (LIVE_USERNAME /
 # LIVE_PASSWORD / LIVE_FINGERPRINT) instead, and runs only the flows tagged
-# `live`. Local only: it refuses to run in CI. Build the app with the same .env
-# and E2E_LIVE=1 (`E2E_LIVE=1 scripts/e2e-build.sh ios|android <device>`): that
-# Release build gets LIVE_USERNAME and LIVE_FINGERPRINT, and signs the account
-# in with the fingerprint instead of opening the SSO page (debug builds always
-# have both). Maestro's output, which has the typed password in it, goes to a
-# temporary folder that is deleted afterwards, and the app's data is cleared at
-# the end so the real login isn't left on the device.
+# `live`. Local only: it refuses to run in CI. Install a build made with
+# E2E_LIVE=1 (`E2E_LIVE=1 scripts/e2e-build.sh ios|android <device>`), which
+# holds no live value: the flow passes the fingerprint as a launch argument,
+# and the app signs the account in with it instead of opening the SSO page,
+# which would add a device each run. Maestro's output, which has the password
+# and fingerprint in it, goes to a temporary folder that is deleted afterwards,
+# and the app's data is cleared at the end so the real login isn't left on the
+# device.
 #
 # Boot one simulator/emulator first (or pass --device <id> via MAESTRO_DEVICE).
 # E2E_ORIENTATION (PORTRAIT, LANDSCAPE_LEFT, ...) sets the orientation each
@@ -59,7 +60,8 @@ if [ "$live" = true ]; then
   fi
   username="$(read_env LIVE_USERNAME)"
   password="$(read_env LIVE_PASSWORD)"
-  if [ -z "$username" ] || [ -z "$password" ] || [ -z "$(read_env LIVE_FINGERPRINT)" ]; then
+  fingerprint="$(read_env LIVE_FINGERPRINT)"
+  if [ -z "$username" ] || [ -z "$password" ] || [ -z "$fingerprint" ]; then
     echo "LIVE_USERNAME / LIVE_PASSWORD / LIVE_FINGERPRINT missing from .env" >&2
     exit 1
   fi
@@ -71,6 +73,7 @@ else
     echo "DUMMY_USERNAME / DUMMY_PASSWORD missing from .env" >&2
     exit 1
   fi
+  fingerprint=
   account=mock
 fi
 
@@ -106,6 +109,7 @@ test_args=(
   -e ACCOUNT="$account"
   -e USERNAME="$username"
   -e PASSWORD="$password"
+  -e LIVE_FINGERPRINT="$fingerprint"
   -e ORIENTATION="${E2E_ORIENTATION:-PORTRAIT}"
   -e APP_LANGUAGE="${E2E_LANGUAGE:-}"
   -e STATE_CLEARED="${E2E_STATE_CLEARED:-}"

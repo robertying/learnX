@@ -4,7 +4,8 @@
 # JS (no Metro), starts faster and is what ships, so the flows run on what R8
 # and Hermes made.
 # The bundle inlines .env, so its mock login works as in debug builds. With
-# E2E_LIVE=1 it also gets the live test login (scripts/e2e.sh --live).
+# E2E_LIVE=1 it takes the live test login from launch arguments
+# (scripts/e2e.sh --live); no live value goes into the build.
 #
 #   scripts/e2e-build.sh ios <simulator udid>
 #   scripts/e2e-build.sh android <emulator serial>

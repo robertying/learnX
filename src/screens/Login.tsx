@@ -24,6 +24,7 @@ import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
 import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
+import { getLiveLogin } from 'helpers/launchOptions';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { mockNetworkTitle } from 'navigation/options';
@@ -71,14 +72,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
-    // Debug builds, and local Release builds for live E2E runs (E2E_LIVE=1):
-    // babel/inline-env.js keeps LIVE_* out of shipped bundles. The live test
-    // account signs in with the device fingerprint of an earlier SSO login
-    // instead of opening the SSO page, so test runs (`scripts/e2e.sh --live`)
-    // don't register a new login device each time. The server checks the
-    // password.
-    if (env.LIVE_FINGERPRINT && username === env.LIVE_USERNAME) {
-      void login({ username, password, fingerPrint: env.LIVE_FINGERPRINT });
+    // The live test account in live E2E runs (helpers/launchOptions.ts):
+    // signs in with a saved device fingerprint instead of opening the SSO
+    // page, which adds a device each time. The server checks the password.
+    const liveLogin = getLiveLogin();
+    if (liveLogin && username === liveLogin.username) {
+      void login({ username, password, fingerPrint: liveLogin.fingerPrint });
       return;
     }
 

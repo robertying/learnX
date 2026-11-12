@@ -9,9 +9,9 @@
 //   fastlane build lanes also fail if a release bundle contains a .env value
 //   that shouldn't be there.
 // - E2E_LIVE=1 in the build's environment (`E2E_LIVE=1 scripts/e2e-build.sh`)
-//   adds LIVE_USERNAME and LIVE_FINGERPRINT to a release bundle, for live E2E
-//   runs on a local Release build. Never the password: the flows type it. The
-//   fastlane check fails such a bundle, so it can't ship.
+//   adds `E2E_LIVE: true`, no .env value: that build takes the live test login
+//   from launch arguments (helpers/launchOptions.ts), so live E2E runs need no
+//   secret in any bundle. The fastlane build lanes refuse to run with it set.
 // Every other key in .env is left out.
 const crypto = require('crypto');
 const fs = require('fs');
@@ -24,7 +24,6 @@ const PUBLIC_KEYS = ['DUMMY_USERNAME', 'DUMMY_PASSWORD'];
 const MASKED_KEYS = ['COURSEX_REFRESH_TOKEN'];
 const DEV_KEY = /^LIVE_[A-Z0-9_]+$/;
 const DEV_ENVS = new Set(['development', 'test']);
-const E2E_LIVE_KEYS = ['LIVE_USERNAME', 'LIVE_FINGERPRINT'];
 
 const readEnv = () =>
   fs.existsSync(ENV_FILE) ? dotenv.parse(fs.readFileSync(ENV_FILE)) : {};
@@ -52,11 +51,8 @@ const buildEnv = (includeDev, e2eLive = false) => {
     for (const [key, value] of Object.entries(parsed)) {
       if (DEV_KEY.test(key) && value) env[key] = value;
     }
-  } else if (e2eLive) {
-    for (const key of E2E_LIVE_KEYS) {
-      if (parsed[key]) env[key] = parsed[key];
-    }
   }
+  if (e2eLive) env.E2E_LIVE = true;
   return env;
 };
 

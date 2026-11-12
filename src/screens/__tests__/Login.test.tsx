@@ -17,6 +17,13 @@ import Login from 'screens/Login';
 import env from '../../../jest/mocks/env';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
+const mockLiveLogin = jest.fn<
+  { username: string; fingerPrint: string } | undefined,
+  []
+>(() => undefined);
+jest.mock('helpers/launchOptions', () => ({
+  getLiveLogin: () => mockLiveLogin(),
+}));
 jest.mock('data/login', () => ({
   login: jest.fn(),
   loginWithMockAccount: jest.fn(),
@@ -56,6 +63,7 @@ const pressLogin = () =>
   user.press(screen.getByRole('button', { name: 'Log In' }));
 
 beforeEach(() => {
+  mockLiveLogin.mockReturnValue(undefined);
   useAuthStore.setState(initialAuth);
   useCredentialsStore.setState({ credentials: null });
   resetSettings();
@@ -141,33 +149,28 @@ describe('Login', () => {
     expect(alert).not.toHaveBeenCalled();
   });
 
-  it('logs the live test account in with its saved fingerprint', async () => {
+  it('logs the live test account in with its launch fingerprint', async () => {
+    mockLiveLogin.mockReturnValue({ username: 'live', fingerPrint: 'fp' });
     const alert = jest.spyOn(Alert, 'alert');
     const { navigation } = await setup();
-    await fill(env.LIVE_USERNAME, env.LIVE_PASSWORD);
+    await fill('live', 'secret');
     await pressLogin();
 
     expect(login).toHaveBeenCalledWith({
-      username: env.LIVE_USERNAME,
-      password: env.LIVE_PASSWORD,
-      fingerPrint: env.LIVE_FINGERPRINT,
+      username: 'live',
+      password: 'secret',
+      fingerPrint: 'fp',
     });
-    expect(loginWithMockAccount).not.toHaveBeenCalled();
     expect(alert).not.toHaveBeenCalled();
     expect(navigation.navigate).not.toHaveBeenCalled();
   });
 
-  it('sends the live test account to SSO without a saved fingerprint', async () => {
+  it('sends another account to SSO in a live run', async () => {
+    mockLiveLogin.mockReturnValue({ username: 'live', fingerPrint: 'fp' });
     const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-    const fingerPrint = env.LIVE_FINGERPRINT;
-    (env as { LIVE_FINGERPRINT?: string }).LIVE_FINGERPRINT = undefined;
-    try {
-      await setup();
-      await fill(env.LIVE_USERNAME, env.LIVE_PASSWORD);
-      await pressLogin();
-    } finally {
-      env.LIVE_FINGERPRINT = fingerPrint;
-    }
+    await setup();
+    await fill('student', 'secret');
+    await pressLogin();
 
     expect(login).not.toHaveBeenCalled();
     expect(alert).toHaveBeenCalledTimes(1);

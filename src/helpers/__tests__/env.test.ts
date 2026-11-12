@@ -20,8 +20,6 @@ const dotenv = {
   DUMMY_USERNAME: 'mock-user',
   COURSEX_REFRESH_TOKEN: 'token-✓',
   LIVE_USERNAME: 'live',
-  LIVE_PASSWORD: 'live-password',
-  LIVE_FINGERPRINT: 'live-fingerprint',
   SECRET: 'not listed',
 };
 
@@ -71,21 +69,16 @@ it('keeps live test logins out of release builds', () => {
   expect(build('development').env.default).toEqual({
     DUMMY_USERNAME: 'mock-user',
     LIVE_USERNAME: 'live',
-    LIVE_PASSWORD: 'live-password',
-    LIVE_FINGERPRINT: 'live-fingerprint',
   });
 });
 
-it('adds the live username and fingerprint to an E2E_LIVE release build', () => {
+it('marks an E2E_LIVE build without adding any live value', () => {
   process.env.E2E_LIVE = '1';
   try {
-    const { code, env } = build('production');
-    expect(env.default).toEqual({
+    expect(build('production').env.default).toEqual({
       DUMMY_USERNAME: 'mock-user',
-      LIVE_USERNAME: 'live',
-      LIVE_FINGERPRINT: 'live-fingerprint',
+      E2E_LIVE: true,
     });
-    expect(code).not.toContain('live-password');
   } finally {
     delete process.env.E2E_LIVE;
   }
