@@ -99,6 +99,8 @@ const styles = StyleSheet.create({
   },
   names: {
     flex: 1,
+    paddingVertical: 2,
+    gap: 4,
   },
   // Regular weight, as the other lists' titles (`CardRow`): a course has
   // nothing unread for weight to stand for.

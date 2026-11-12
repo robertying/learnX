@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { renderHook } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { t } from 'helpers/i18n';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import { SplitViewContext } from 'navigation/SplitView';
@@ -36,7 +36,7 @@ const split = {
   showDetail: true,
   showMaster: true,
   toggleMaster: jest.fn(),
-  masterWidth: Numbers.splitViewMasterWidth,
+  masterWidth: SplitSizes.masterWidth,
 };
 
 const items = () =>

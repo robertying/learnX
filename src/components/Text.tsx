@@ -128,8 +128,6 @@ const writingDirection = I18nManager.getConstants().isRTL ? 'rtl' : 'ltr';
 interface StyledTextProps extends TextProps {
   color: 'onSurface' | 'onSurfaceHigh' | 'onSurfaceMedium';
   variant: TextVariant;
-  /** A little space above and below, between stacked titles and captions. */
-  spaced?: boolean;
 }
 
 /*
@@ -147,13 +145,7 @@ const useFontLineHeight =
     ? () => useWindowDimensions().fontScale > nonlinearFontScale
     : () => false;
 
-const StyledText = ({
-  color,
-  variant,
-  spaced,
-  style,
-  ...rest
-}: StyledTextProps) => {
+const StyledText = ({ color, variant, style, ...rest }: StyledTextProps) => {
   const theme = useTheme();
   const fontLineHeight = useFontLineHeight();
   return (
@@ -164,7 +156,6 @@ const StyledText = ({
         styles.base,
         textStyles[variant],
         fontLineHeight && styles.fontLineHeight,
-        spaced && styles.spaced,
         { color: theme.colors[color], writingDirection },
         style,
       ]}
@@ -179,9 +170,6 @@ const styles = StyleSheet.create({
   fontLineHeight: {
     lineHeight: undefined,
   },
-  spaced: {
-    marginVertical: 2,
-  },
 });
 
 /** Body text in the surface color. */
@@ -191,20 +179,20 @@ export const Text = ({ variant = 'body', ...props }: TextProps) => (
 
 /** The title of a detail screen or a section of text. */
 export const Title = ({ variant = 'title', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
 );
 
 /** The title of a card or row. */
 export const Headline = ({ variant = 'headline', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
+  <StyledText {...props} color="onSurfaceHigh" variant={variant} />
 );
 
-/** Subheadline text in the title color: card previews and list section headers. */
+/** Subheadline text in the secondary color: card previews and list section headers. */
 export const Paragraph = ({ variant = 'subheadline', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceHigh" variant={variant} spaced />
+  <StyledText {...props} color="onSurfaceMedium" variant={variant} />
 );
 
 /** Small, dimmed text for metadata and hints. */
 export const Caption = ({ variant = 'footnote', ...props }: TextProps) => (
-  <StyledText {...props} color="onSurfaceMedium" variant={variant} spaced />
+  <StyledText {...props} color="onSurfaceMedium" variant={variant} />
 );

@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
-import { Host, Icon } from '@expo/ui';
+import { Icon } from '@expo/ui';
+import ThemedHost from 'components/ThemedHost';
 import { useTheme } from 'theme';
 import type { SelectionMarkProps } from './SelectionMark.shared';
 
@@ -17,13 +18,13 @@ const SelectionMark: React.FC<SelectionMarkProps> = ({ checked }) => {
 
   return (
     <View style={styles.ios} pointerEvents="none">
-      <Host matchContents>
+      <ThemedHost matchContents>
         <Icon
           name={checked ? 'checkmark.circle.fill' : 'circle'}
           size={22}
           color={color}
         />
-      </Host>
+      </ThemedHost>
     </View>
   );
 };

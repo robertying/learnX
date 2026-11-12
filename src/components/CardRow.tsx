@@ -47,7 +47,6 @@ const CardRow: React.FC<CardRowProps> = ({
   title,
   preview,
 }) => {
-  const theme = useTheme();
   const titleLines = useTitleLines();
 
   const meta = (
@@ -56,7 +55,7 @@ const CardRow: React.FC<CardRowProps> = ({
         <CardGlyph key={flag} name={flag} />
       ))}
       {typeof trailing === 'string' ? (
-        <Caption variant={metaVariant} numberOfLines={1} style={styles.time}>
+        <Caption variant={metaVariant} numberOfLines={1}>
           {trailing}
         </Caption>
       ) : (
@@ -90,14 +89,7 @@ const CardRow: React.FC<CardRowProps> = ({
           </Headline>
           {overline ? null : meta}
         </View>
-        {preview ? (
-          <Paragraph
-            numberOfLines={2}
-            style={{ color: theme.colors.onSurfaceMedium }}
-          >
-            {preview}
-          </Paragraph>
-        ) : null}
+        {preview ? <Paragraph numberOfLines={2}>{preview}</Paragraph> : null}
       </View>
     </View>
   );
@@ -251,9 +243,12 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
+  // The lines 4 apart, with 2 above and below.
   content: {
     flex: 1,
     minWidth: 0,
+    paddingVertical: 2,
+    gap: 4,
   },
   firstLine: {
     flexDirection: 'row',
@@ -274,9 +269,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     flexShrink: 0,
-  },
-  time: {
-    marginVertical: 0,
   },
   pill: {
     overflow: 'hidden',

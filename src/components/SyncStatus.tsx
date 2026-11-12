@@ -76,7 +76,7 @@ const SyncStatus: React.FC<SyncStatusProps> = ({ updatedAt }) => {
       />
       <View style={styles.text}>
         <Text variant="subheadline">{status}</Text>
-        {updated ? <Caption style={styles.flush}>{updated}</Caption> : null}
+        {updated ? <Caption>{updated}</Caption> : null}
       </View>
       {canLogIn && (
         <TextButton testID="sync-status-relogin" bold onPress={requestRelogin}>
@@ -98,14 +98,11 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   // The status and its time a fixed gap apart, as one block centered in the
-  // row: a Caption's own margins would add space under it only.
+  // row.
   text: {
     flex: 1,
     marginRight: Spacing.s,
     gap: 2,
-  },
-  flush: {
-    marginVertical: 0,
   },
 });
 

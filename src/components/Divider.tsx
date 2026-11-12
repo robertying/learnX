@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
-import { Divider as NativeDivider, HStack, Host } from '@expo/ui/swift-ui';
+import { Divider as NativeDivider, HStack } from '@expo/ui/swift-ui';
+import ThemedHost from 'components/ThemedHost';
 import type { DividerProps } from './Divider.shared';
 
 export type { DividerProps } from './Divider.shared';
@@ -9,7 +10,7 @@ export type { DividerProps } from './Divider.shared';
  * vertical inside an `HStack`, which then fills the height of the host.
  */
 const Divider: React.FC<DividerProps> = ({ vertical, style }) => (
-  <Host
+  <ThemedHost
     matchContents={vertical ? { horizontal: true } : { vertical: true }}
     style={[styles.stretch, style]}
   >
@@ -20,7 +21,7 @@ const Divider: React.FC<DividerProps> = ({ vertical, style }) => (
     ) : (
       <NativeDivider />
     )}
-  </Host>
+  </ThemedHost>
 );
 
 const styles = StyleSheet.create({
