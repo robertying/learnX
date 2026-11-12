@@ -185,9 +185,7 @@ const deadlineProps: DeadlineWidgetProps = {
 };
 
 describe('Up Next on iOS', () => {
-  const layout = layoutOf<UpNextWidgetProps>(() =>
-    require('widgets/UpNextIOS'),
-  );
+  const layout = layoutOf<UpNextWidgetProps>(() => require('widgets/UpNext'));
   const render = (widgetFamily?: string, props = upNextProps) =>
     layout(props, { widgetFamily, date: new Date(now) });
 
@@ -285,7 +283,7 @@ describe('Up Next on iOS', () => {
 
 describe('Deadlines on iOS', () => {
   const layout = layoutOf<DeadlineWidgetProps>(() =>
-    require('widgets/DeadlinesIOS'),
+    require('widgets/Deadlines'),
   );
   const render = (widgetFamily?: string, props = deadlineProps) =>
     layout(props, { widgetFamily, colorScheme: 'dark' });
@@ -382,7 +380,7 @@ describe('Deadlines on iOS', () => {
 
 describe('Deadlines on Android', () => {
   const layout = layoutOf<DeadlineWidgetProps>(() =>
-    require('widgets/DeadlinesAndroid'),
+    require('widgets/Deadlines.android'),
   );
 
   beforeEach(() => {
@@ -455,7 +453,7 @@ describe('Deadlines on Android', () => {
 
 describe('Up Next on Android', () => {
   const layout = layoutOf<UpNextWidgetProps>(() =>
-    require('widgets/UpNextAndroid'),
+    require('widgets/UpNext.android'),
   );
 
   beforeEach(() => {

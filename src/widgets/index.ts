@@ -17,16 +17,16 @@ import type { DeadlineWidgetProps, UpNextWidgetProps } from 'widgets/props';
 // Each layout imports only its own platform's @expo/ui components.
 const deadlinesWidget = (): Widget<DeadlineWidgetProps> | undefined =>
   Platform.OS === 'ios'
-    ? require('./DeadlinesIOS').default
+    ? require('./Deadlines').default
     : Platform.OS === 'android'
-      ? require('./DeadlinesAndroid').default
+      ? require('./Deadlines.android').default
       : undefined;
 
 const upNextWidget = (): Widget<UpNextWidgetProps> | undefined =>
   Platform.OS === 'ios'
-    ? require('./UpNextIOS').default
+    ? require('./UpNext').default
     : Platform.OS === 'android'
-      ? require('./UpNextAndroid').default
+      ? require('./UpNext.android').default
       : undefined;
 
 const deadlineProps = (deadlines: UpcomingDeadlines['deadlines']) =>

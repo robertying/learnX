@@ -8,7 +8,7 @@ name: Favorite and archive a notice
 
 # Favorite
 - runFlow:
-    file: subflows/card_actions.yaml
+    file: subflows/card-actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
 - tapOn: '${T_favorite}'
@@ -20,7 +20,7 @@ name: Favorite and archive a notice
 
 # Unfavorite from the favorites list
 - runFlow:
-    file: subflows/card_actions.yaml
+    file: subflows/card-actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
 - tapOn: '${T_unfavorite}'
@@ -32,7 +32,7 @@ name: Favorite and archive a notice
     env:
       LABEL: '(${T_all})(, .*)?'
 - runFlow:
-    file: subflows/card_actions.yaml
+    file: subflows/card-actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
 - tapOn: '${T_archive}'
@@ -45,7 +45,7 @@ name: Favorite and archive a notice
 
 # Unarchive it
 - runFlow:
-    file: subflows/card_actions.yaml
+    file: subflows/card-actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
 - tapOn: '${T_restore}'
