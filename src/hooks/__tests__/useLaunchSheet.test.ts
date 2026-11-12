@@ -35,8 +35,14 @@ describe('pickLaunchSheet', () => {
     ).toBe('Setup');
   });
 
-  it("shows What's New after an update, not the set-up page", () => {
-    expect(pickLaunchSheet({ ...base, setupSeen: false })).toBe('WhatsNew');
+  it('opens the set-up page after an update if it was never seen', () => {
+    expect(pickLaunchSheet({ ...base, setupSeen: false })).toBe('Setup');
+  });
+
+  it('keeps the set-up page for a launch not opened from outside', () => {
+    expect(
+      pickLaunchSheet({ ...base, setupSeen: false, openedFromOutside: true }),
+    ).toBeNull();
   });
 
   it('leaves a launch from outside the app alone', () => {
@@ -100,17 +106,25 @@ describe('useLaunchSheet', () => {
     jest.advanceTimersByTime(999);
     expect(mockNavigate).not.toHaveBeenCalled();
     jest.advanceTimersByTime(1);
-    expect(mockNavigate).toHaveBeenCalledWith('Setup');
+    expect(mockNavigate).toHaveBeenCalledWith('Setup', undefined);
     expect(useAppStateStore.getState().setupSeen).toBe(false);
     await hook.unmount();
   });
 
-  it("marks set-up seen after an update and shows What's New", async () => {
+  it('opens the set-up page after an update if it was never seen', async () => {
     jest
       .mocked(whatsNewSince)
       .mockReturnValueOnce({ version: '19.0.0', highlights: [] });
     await launch();
-    expect(useAppStateStore.getState().setupSeen).toBe(true);
+    expect(mockNavigate).toHaveBeenCalledWith('Setup', { update: true });
+  });
+
+  it("shows What's New once set-up was seen", async () => {
+    useAppStateStore.setState({ setupSeen: true });
+    jest
+      .mocked(whatsNewSince)
+      .mockReturnValueOnce({ version: '19.0.0', highlights: [] });
+    await launch();
     expect(mockNavigate).toHaveBeenCalledWith('WhatsNewStack', {
       screen: 'WhatsNew',
       params: { version: '19.0.0' },

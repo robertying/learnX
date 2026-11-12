@@ -142,13 +142,19 @@ export type DetailStackParams = {
 export type DetailNavigationContainerRef =
   React.RefObject<NavigationContainerRef<DetailStackParams> | null>;
 
+/**
+ * `update`: opened on an update for a user who was logged in already, so
+ * What's New stays unseen and shows next.
+ */
+export type SetupParams = { update?: boolean };
+
 export type RootStackParams = {
   MainTab: NavigatorScreenParams<MainTabParams>;
   CourseXStack: NavigatorScreenParams<CourseXStackParams> | undefined;
   SearchStack: NavigatorScreenParams<SearchStackParams> | undefined;
   AssignmentSubmissionStack: NavigatorScreenParams<AssignmentSubmissionStackParams>;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
-  Setup: undefined;
+  Setup: SetupParams | undefined;
   WhatsNewStack: NavigatorScreenParams<WhatsNewStackParams>;
 };
 
@@ -156,7 +162,7 @@ export type RootStackParams = {
 export type AndroidRootStackParams = {
   Main: undefined;
   LoginStack: NavigatorScreenParams<LoginStackParams>;
-  Setup: undefined;
+  Setup: SetupParams | undefined;
   WhatsNewStack: NavigatorScreenParams<WhatsNewStackParams>;
 };
 

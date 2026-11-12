@@ -7,7 +7,7 @@ import {
 } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
 import { useAppStateStore } from 'data/appState';
-import { getSettings, resetSettings } from 'data/settings';
+import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
@@ -22,8 +22,10 @@ const request = jest.fn(async () => true);
 const setSyncEnabled = jest.fn(async () => {});
 const navigation = { goBack: jest.fn() };
 
-const renderScreen = () =>
-  render(<Setup navigation={navigation as never} route={{} as never} />);
+const renderScreen = (params?: { update?: boolean }) =>
+  render(
+    <Setup navigation={navigation as never} route={{ params } as never} />,
+  );
 const toggle = (label: string, value: boolean) =>
   fireEvent(screen.getByRole('switch', { name: label }), 'valueChange', value);
 
@@ -43,6 +45,14 @@ it("marks itself and this version's What's New seen once shown", async () => {
   expect(useAppStateStore.getState()).toMatchObject({
     setupSeen: true,
     whatsNewSeenVersion: packageJson.version,
+  });
+});
+
+it("leaves What's New unseen after an update", async () => {
+  await renderScreen({ update: true });
+  expect(useAppStateStore.getState()).toMatchObject({
+    setupSeen: true,
+    whatsNewSeenVersion: null,
   });
 });
 
@@ -129,6 +139,20 @@ it("doesn't ask with every notification off, and turns calendar and Reminders sy
   expect(request).not.toHaveBeenCalled();
   expect(setSyncEnabled).toHaveBeenCalledWith('calendar', true);
   expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
+});
+
+it('keeps sync an earlier version turned on, without syncing again', async () => {
+  setSetting('assignmentCalendarSync', true);
+  setSetting('assignmentReminderSync', true);
+  await renderScreen({ update: true });
+  expect(
+    screen.getByRole('switch', { name: t('setupCalendar') }),
+  ).toBeChecked();
+  expect(
+    screen.getByRole('switch', { name: t('setupReminders') }),
+  ).toBeChecked();
+  await userEvent.press(screen.getByTestId('setup-done'));
+  expect(setSyncEnabled).not.toHaveBeenCalled();
 });
 
 it('closes without changes on Not Now, on either platform', async () => {
