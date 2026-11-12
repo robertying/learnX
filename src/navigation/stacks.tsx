@@ -32,7 +32,7 @@ import Login from 'screens/Login';
 import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
-import CalendarEvent from 'screens/CalendarEvent';
+import CalendarSettings from 'screens/CalendarSettings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import Downloads from 'screens/Downloads';
 import SwipeActions from 'screens/SwipeActions';
@@ -126,8 +126,8 @@ export const renderSettingDetails = () => (
       options={getTitleOptions(t('courseInformationSharing'))}
     />
     <SettingDetails.Screen
-      name="CalendarEvent"
-      component={CalendarEvent}
+      name="CalendarSettings"
+      component={CalendarSettings}
       options={getTitleOptions(calendarSettingsTitle())}
     />
     <SettingDetails.Screen

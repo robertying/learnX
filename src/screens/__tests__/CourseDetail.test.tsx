@@ -15,6 +15,7 @@ import {
 import { useCourse } from 'data/queries';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
+import * as options from 'navigation/options';
 import CourseDetail from 'screens/CourseDetail';
 
 const mockPush = jest.fn();
@@ -39,6 +40,7 @@ jest.mock('data/content', () => ({
   useRefreshCourseFiles: () => mockRefresh.file,
 }));
 jest.mock('hooks/useDetailNavigator', () => jest.fn(() => undefined));
+
 jest.mock('components/FlatList', () => require('react-native').FlatList);
 // The pager, showing the selected tab's page.
 jest.mock('react-native-tab-view', () => ({
@@ -165,4 +167,27 @@ it('opens the course on CourseX from the header', async () => {
   info().onPress();
   expect(push).toHaveBeenCalledWith('CourseX', { id: course.id });
   jest.mocked(useDetailNavigator).mockReturnValue(undefined);
+});
+
+describe('from iOS 26', () => {
+  beforeEach(() => {
+    jest.replaceProperty(options, 'hasGlassHeader', true);
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('shows the selected list under floating tabs once they are laid out', async () => {
+    await renderScreen();
+    // No list until the tabs' height is known, so it starts below them.
+    expect(screen.queryByText(of(mockNotices)[0].title)).toBeNull();
+    await fireEvent(screen.getByText(t('files')), 'layout', {
+      nativeEvent: { layout: { height: 52 } },
+    });
+    expect(screen.getByText(of(mockNotices)[0].title)).toBeTruthy();
+
+    await selectTab(2);
+    expect(screen.getByText(of(mockFiles)[0].title)).toBeTruthy();
+    expect(screen.queryByText(of(mockNotices)[0].title)).toBeNull();
+  });
 });

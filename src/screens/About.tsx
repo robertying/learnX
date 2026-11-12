@@ -21,13 +21,16 @@ const contributors = [
   { name: 'Junbo Niu', github: 'lyrenius' },
 ];
 
+// This year's, so it never goes stale.
+const copyright = `© ${new Date().getFullYear()} Rui Ying`;
+
 const openGitHub = (path: string) =>
   Linking.openURL(`https://github.com/${path}`);
 
 const About: React.FC<Props> = () => (
   <FormScreen>
     <Form>
-      <FormSection footer="© 2026 Rui Ying">
+      <FormSection footer={copyright}>
         <FormText
           icon="info"
           title={t('versionInformation')}
