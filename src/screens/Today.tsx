@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
 import dayjs from 'dayjs';
-import { classDetails, itemRow } from 'components/ClassRow';
+import { itemRow } from 'components/ItemRow';
 import {
   Form,
   FormLink,
@@ -9,7 +9,6 @@ import {
   FormText,
 } from 'components/Form';
 import { SyncStatusSection } from 'components/SyncStatus';
-import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAssignments, useFiles, useNotices } from 'data/content';
 import { getSettings, setSetting } from 'data/settings';
@@ -23,14 +22,19 @@ import {
   isDueSoon,
 } from 'helpers/assignments';
 import { t, tCount } from 'helpers/i18n';
-import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
+import {
+  ClassSession,
+  classDetails,
+  currentAndNext,
+  sessionsOn,
+} from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
-import { debugTitle } from 'navigation/options';
+import { debugTitle, getTitleOptions } from 'navigation/options';
 import useHeaderButtons from 'hooks/useHeaderButtons';
 import { sidebarSplit } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from 'navigation/types';

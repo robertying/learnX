@@ -5,7 +5,7 @@ import type {
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import FilterMenu from 'components/FilterMenu';
-import { getTitleOptions } from 'components/HeaderTitle';
+import { getTitleOptions } from 'navigation/options';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
   filterSubtitle,

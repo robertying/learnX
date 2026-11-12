@@ -115,6 +115,23 @@ it('titles item detail screens from the cached item', () => {
   ).toBe('');
 });
 
+it('puts the subtitle in the header from iOS 26, and in a HeaderTitle before', () => {
+  const titleOptionsOn = (ios26: boolean) => {
+    let options: object = {};
+    jest.isolateModules(() => {
+      const info = require('constants/DeviceInfo').default;
+      jest.spyOn(info, 'hasLiquidGlass').mockReturnValue(ios26);
+      options = require('navigation/options').getTitleOptions('T', 'S');
+    });
+    return options;
+  };
+  expect(titleOptionsOn(true)).toEqual({ title: 'T', headerSubtitle: 'S' });
+  expect(titleOptionsOn(false)).toEqual({
+    title: 'T',
+    headerTitle: expect.any(Function),
+  });
+});
+
 it('gives tab roots a large title on iPhone and iPad from iOS 26 only', () => {
   const tabRootOptionsOn = (ios26: boolean, mac: boolean) => {
     let options: object = {};

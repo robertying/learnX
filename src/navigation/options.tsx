@@ -11,7 +11,7 @@ import type {
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
-import { getTitleOptions } from 'components/HeaderTitle';
+import HeaderTitle from 'components/HeaderTitle';
 import IconButton from 'components/IconButton';
 import { brandColor } from 'theme';
 import DeviceInfo from 'constants/DeviceInfo';
@@ -41,6 +41,21 @@ export const getCloseHeaderItem = (
   onPress: () => navigation.goBack(),
 });
 
+// From iOS 26 the header shows a subtitle itself.
+const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
+
+/**
+ * A screen's title and subtitle: in the header itself from iOS 26, and in
+ * our own HeaderTitle before that and on Android.
+ */
+export const getTitleOptions = (title: string, subtitle?: string) =>
+  supportsNativeSubtitle
+    ? { title, headerSubtitle: subtitle }
+    : {
+        title,
+        headerTitle: () => <HeaderTitle title={title} subtitle={subtitle} />,
+      };
+
 /** Options for the first screen of a modal stack: a close button and a title. */
 export const getModalScreenOptions =
   (title: string) =>
@@ -53,8 +68,6 @@ export const getModalScreenOptions =
     unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
     ...getTitleOptions(title),
   });
-
-const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
 
 /**
  * A tab's first screen: a large title that collapses as the list scrolls, on
