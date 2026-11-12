@@ -237,7 +237,7 @@ describe('Login', () => {
     expect(screen.queryByText('Continue Offline')).toBeNull();
   });
 
-  it('says why a login from here failed, once per attempt', async () => {
+  it('says a login from here failed, once per attempt', async () => {
     await setup();
     await act(() => useAuthStore.setState({ loggingIn: true }));
     await act(() =>
@@ -249,7 +249,7 @@ describe('Login', () => {
     );
     // Debug builds (tests run as one) add the reason and the server's answer.
     expect(toast).toHaveBeenLastCalledWith(
-      `Wrong username or password.\n${FailReason.BAD_CREDENTIAL}`,
+      `${t('loginFailed')}\n${FailReason.BAD_CREDENTIAL}`,
       'error',
       8000,
     );

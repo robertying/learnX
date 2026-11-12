@@ -1,4 +1,3 @@
-import { FailReason } from '@robertying/thu-learn-lib';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -52,18 +51,14 @@ const Login: React.FC<Props> = ({ navigation }) => {
     noteLoginShown();
   }, []);
 
-  // Says why a login started here (after SSO, the mock or live test login, or
+  // Says when a login started here (after SSO, the mock or live test login, or
   // Retry Login) didn't go through. The saved login, if any, is kept, so this
   // is the only place it shows.
   useEffect(
     () =>
       useAuthStore.subscribe((state, previous) => {
         if (previous.loggingIn && !state.loggingIn && state.error) {
-          const message = t(
-            state.error === FailReason.BAD_CREDENTIAL
-              ? 'wrongCredentials'
-              : 'loginFailed',
-          );
+          const message = t('loginFailed');
           toast(
             // Debug builds also say what the server answered.
             __DEV__
