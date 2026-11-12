@@ -315,11 +315,13 @@ const FormRow: React.FC<
         <Text
           color={contentColor}
           style={struck ? { textDecoration: 'lineThrough' } : undefined}
-          modifiers={
-            state
-              ? [semantics({ contentDescription: `${title}, ${state}` })]
-              : undefined
-          }
+          // Always set: a row that loses its state must read its title alone
+          // again, which leaving the modifier out wouldn't undo.
+          modifiers={[
+            semantics({
+              contentDescription: state ? `${title}, ${state}` : title,
+            }),
+          ]}
         >
           {title}
         </Text>

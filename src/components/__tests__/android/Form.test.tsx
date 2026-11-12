@@ -366,7 +366,7 @@ describe('Form (Android)', () => {
 
   it('crosses out a removed file, which still opens', async () => {
     const open = jest.fn();
-    await render(
+    const view = await render(
       <FormSection>
         <FormFile title="old.pdf" struck onPress={open} testID="old" />
       </FormSection>,
@@ -381,6 +381,13 @@ describe('Form (Android)', () => {
     ).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('old'));
     expect(open).toHaveBeenCalled();
+    // Kept after all: the title alone again
+    await view.rerender(
+      <FormSection>
+        <FormFile title="old.pdf" onPress={open} testID="old" />
+      </FormSection>,
+    );
+    expect(screen.getByLabelText('old.pdf')).toBeTruthy();
   });
 
   it('writes several lines, or plain text without capitals or corrections', async () => {
