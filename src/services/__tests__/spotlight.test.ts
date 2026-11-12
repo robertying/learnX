@@ -1,6 +1,11 @@
+import Storage from 'expo-sqlite/kv-store';
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { Notice } from 'data/types/state';
-import { clearSpotlight, updateSpotlight } from 'services/spotlight';
+import {
+  SPOTLIGHT_INDEXED_KEY,
+  clearSpotlight,
+  updateSpotlight,
+} from 'services/spotlight';
 
 jest.mock('modules/spotlight', () => ({
   __esModule: true,
@@ -90,4 +95,45 @@ it('removes everything on logout', async () => {
   clearSpotlight();
   await updateSpotlight({}, options);
   expect(Spotlight.removeAllItems).toHaveBeenCalled();
+});
+
+it('sends only what changed after the app starts again', async () => {
+  await updateSpotlight({ notices }, options);
+  const indexed = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
+  expect(indexed).toBeTruthy();
+
+  jest.clearAllMocks();
+  // A new JS runtime: fresh modules, the same saved index.
+  await jest.isolateModulesAsync(async () => {
+    (
+      jest.requireMock('expo-sqlite/kv-store') as {
+        default: { setItemSync: (key: string, value: string) => void };
+      }
+    ).default.setItemSync(SPOTLIGHT_INDEXED_KEY, indexed!);
+    const spotlight =
+      require('services/spotlight') as typeof import('services/spotlight');
+    const native = jest.requireMock('modules/spotlight').default as {
+      replaceItems: jest.Mock;
+      updateItems: jest.Mock;
+    };
+    await spotlight.updateSpotlight({ notices }, options);
+    expect(native.replaceItems).not.toHaveBeenCalled();
+    expect(native.updateItems).not.toHaveBeenCalled();
+
+    await spotlight.updateSpotlight({ notices: notices.slice(1) }, options);
+    expect(native.updateItems).toHaveBeenCalledWith('notice', [], ['n0']);
+  });
+});
+
+it('forgets the saved index on logout and after a failed write', async () => {
+  await updateSpotlight({ notices }, options);
+  Spotlight.updateItems.mockRejectedValueOnce(new Error('Busy'));
+  jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
+  await updateSpotlight({ notices: notices.slice(1) }, options);
+  expect(Storage.getItemSync(SPOTLIGHT_INDEXED_KEY)).toBe('{}');
+
+  await updateSpotlight({ notices }, options);
+  clearSpotlight();
+  await updateSpotlight({}, options);
+  expect(Storage.getItemSync(SPOTLIGHT_INDEXED_KEY)).toBeNull();
 });

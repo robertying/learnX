@@ -39,3 +39,12 @@ export const removeTags = (html?: string) => {
  */
 export const capitalize = (text: string) =>
   text.charAt(0).toUpperCase() + text.slice(1);
+
+/** djb2, as hex: a short, stable stand-in for a text, e.g. in a key or uid. */
+export const hash = (text: string) => {
+  let result = 5381;
+  for (let i = 0; i < text.length; i++) {
+    result = (result * 33 + text.charCodeAt(i)) % 0x100000000;
+  }
+  return result.toString(16);
+};

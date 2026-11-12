@@ -7,7 +7,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import type { CalendarClass } from 'helpers/schedule';
 import { Assignment, Course, SettingsState } from 'data/types/state';
 import type { CalendarSyncState } from 'data/calendarSync';
-import { removeTags } from 'helpers/text';
+import { hash, removeTags } from 'helpers/text';
 import { ICSEvent } from './ics';
 import locationMappings from '../../assets/locationMappings.json';
 import { beijingTime } from 'helpers/serverTime';
@@ -57,15 +57,6 @@ export function sanitizeLocation(location: string): string {
   }
 
   return location;
-}
-
-/** djb2, as hex; used for stable course event uids */
-export function hash(text: string): string {
-  let result = 5381;
-  for (let i = 0; i < text.length; i++) {
-    result = (result * 33 + text.charCodeAt(i)) % 0x100000000;
-  }
-  return result.toString(16);
 }
 
 /** What the optional calendar settings (in minutes) are until they're set. */

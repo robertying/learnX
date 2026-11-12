@@ -1,4 +1,4 @@
-import { capitalize, removeTags } from 'helpers/text';
+import { capitalize, hash, removeTags } from 'helpers/text';
 
 describe('removeTags', () => {
   it('drops tags and decodes entities', () => {
@@ -52,5 +52,14 @@ describe('capitalize', () => {
     expect(capitalize('due today at 9:00')).toBe('Due today at 9:00');
     expect(capitalize('今天截止')).toBe('今天截止');
     expect(capitalize('')).toBe('');
+  });
+});
+
+describe('hash', () => {
+  it('is stable and hex', () => {
+    expect(hash('')).toBe('1505');
+    expect(hash('learnX')).toBe(hash('learnX'));
+    expect(hash('learnX')).toMatch(/^[0-9a-f]+$/);
+    expect(hash('a')).not.toBe(hash('b'));
   });
 });

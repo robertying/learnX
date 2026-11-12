@@ -33,7 +33,10 @@ jest.mock(
 );
 
 // Native modules
-jest.mock('expo-application', () => ({ nativeBuildVersion: '1' }));
+jest.mock('expo-application', () => ({
+  nativeBuildVersion: '1',
+  applicationId: 'io.robertying.learnx',
+}));
 jest.mock('expo-calendar', () => require('./mocks/expoCalendar'));
 jest.mock('expo-device', () => require('./mocks/device'));
 jest.mock('expo-file-system', () => require('./mocks/fileSystem'));
