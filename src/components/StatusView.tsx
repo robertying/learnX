@@ -6,8 +6,7 @@ import type { SystemIconName } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 
 export interface StatusViewProps {
-  /** Left out where the message says it all, as in an empty detail pane. */
-  icon?: SystemIconName;
+  icon: SystemIconName;
   message: string;
   /** Something to do about it, such as a button, under the message. */
   action?: React.ReactNode;
@@ -30,14 +29,12 @@ const StatusView: React.FC<StatusViewProps> = ({
 
   return (
     <View testID={testID} style={styles.root}>
-      {icon ? (
-        <SystemIcon
-          style={Styles.spacey1}
-          name={icon}
-          color={theme.colors.outline}
-          size={56}
-        />
-      ) : null}
+      <SystemIcon
+        style={Styles.spacey1}
+        name={icon}
+        color={theme.colors.outline}
+        size={56}
+      />
       <Text style={[Styles.spacey1, { color: theme.colors.onSurfaceMedium }]}>
         {message}
       </Text>

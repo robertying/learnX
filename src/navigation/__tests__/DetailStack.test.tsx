@@ -42,6 +42,12 @@ jest.mock('helpers/crashReporting', () => ({
   recordError: jest.fn(),
 }));
 jest.mock('expo', () => ({ reloadAppAsync: jest.fn() }));
+jest.mock('expo-symbols', () => ({
+  SymbolView: ({ name }: { name: string }) => {
+    const { View } = require('react-native');
+    return <View testID={`symbol-${name}`} />;
+  },
+}));
 let mockSplitProps: Record<string, any> = {};
 jest.mock('navigation/NativeSplitView', () => ({
   __esModule: true,
@@ -71,6 +77,7 @@ it('says nothing is selected in the empty detail pane', async () => {
   const Empty = lastNavigatorScreens()[0].component as React.FC;
   await render(<Empty />);
   expect(screen.getByText(t('noSelection'))).toBeTruthy();
+  expect(screen.getByTestId('symbol-hand.tap')).toBeTruthy();
 });
 
 it('opens a screen without animation when asked', async () => {
