@@ -1,4 +1,8 @@
 import { getLocales } from 'expo-localization';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import 'dayjs/locale/en';
+import 'dayjs/locale/zh-cn';
 import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';
@@ -13,6 +17,13 @@ export const resetLocale = () => {
 };
 
 export const isLocaleChinese = () => getLocale().startsWith('zh');
+
+// Dates and relative times in the app's language. Set up here, with the
+// strings, rather than in App.tsx: Metro inlines requires, so a runtime that
+// never renders the app (the background task, a notification action) would
+// otherwise format in English. index.js imports this file for that reason.
+dayjs.extend(relativeTime);
+dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
 
 export type TranslationKey = keyof typeof en;
 
@@ -37,6 +48,16 @@ export function t(
 ): string {
   return interpolate(translationsFor(isLocaleChinese())[key], params);
 }
+
+/**
+ * `one` for a count of 1, else `other` with `{count}` filled in. English and
+ * Chinese need nothing more: Chinese uses the same words either way.
+ */
+export const tCount = (
+  one: TranslationKey,
+  other: TranslationKey,
+  count: number,
+) => (count === 1 ? t(one, { count }) : t(other, { count }));
 
 /** Escapes text for a dayjs format string, so it is printed as is. */
 export const formatLiteral = (text: string) =>

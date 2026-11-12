@@ -22,7 +22,7 @@ import {
   deadlineUrgency,
   isDueSoon,
 } from 'helpers/assignments';
-import { t } from 'helpers/i18n';
+import { t, tCount } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
 import { useShowDetail } from 'hooks/useDetailNavigator';
@@ -173,9 +173,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
       ? t('todayNoClasses')
       : remaining.length === 0
         ? t('todayNoMoreClasses')
-        : classes.length === 1
-          ? t('todayOneClass')
-          : t('todayClassCount', { count: classes.length });
+        : tCount('todayOneClass', 'todayClassCount', classes.length);
 
   return (
     <FormScreen>
@@ -243,22 +241,18 @@ const Today: React.FC<Props> = ({ navigation }) => {
             {unreadNotices > 0 && (
               <FormLink
                 icon="notices"
-                title={
-                  unreadNotices === 1
-                    ? t('todayOneUnreadNotice')
-                    : t('todayUnreadNotices', { count: unreadNotices })
-                }
+                title={tCount(
+                  'todayOneUnreadNotice',
+                  'todayUnreadNotices',
+                  unreadNotices,
+                )}
                 onPress={openUnreadNotices}
               />
             )}
             {newFiles > 0 && (
               <FormLink
                 icon="files"
-                title={
-                  newFiles === 1
-                    ? t('todayOneNewFile')
-                    : t('todayNewFiles', { count: newFiles })
-                }
+                title={tCount('todayOneNewFile', 'todayNewFiles', newFiles)}
                 onPress={openNewFiles}
               />
             )}

@@ -54,7 +54,7 @@ const zh: typeof en = {
     '作业同步失败：请在系统设置中允许 learnX 访问日历。',
   assignmentSyncNoReminderPermission:
     '作业同步失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX。',
-  assignmentSyncFailed: '作业同步失败：',
+  assignmentSyncFailed: '作业同步失败：{error}',
   filePickFailed: '无法打开文件',
   assignmentSubmissionSucceeded: '作业提交成功',
   assignmentSubmissionFailed: '作业提交失败',
@@ -102,7 +102,7 @@ const zh: typeof en = {
     '删除失败：请在系统设置中允许 learnX 访问日历。',
   deleteFailedNoReminderPermission:
     '删除失败：请在系统设置中允许 learnX 访问提醒事项；如已允许，请重启 learnX。',
-  deleteFailed: '删除失败：',
+  deleteFailed: '删除失败：{error}',
   exportSyncedCalendars: '导出已同步的日程（.ics）',
   turnOnNotifications: '开启通知',
   notificationsOffCaption:
@@ -126,7 +126,7 @@ const zh: typeof en = {
   calendarExportNoCalendarPermissionAndroid:
     '导出失败：请在系统设置中允许 learnX 访问日历。',
   calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历。',
-  calendarExportFailed: '导出失败：',
+  calendarExportFailed: '导出失败：{error}',
   graduate: '研究生',
   syncCourseSchedule: '同步课表',
   classAlarm: '上课日历提醒',
@@ -390,7 +390,7 @@ const zh: typeof en = {
   downloadsExportCourse: '导出',
   downloadsExported: '已导出 {files}',
   downloadsExportedPartly: '已导出 {files}，{failed} 个文件未能复制',
-  downloadsExportFailed: '导出失败：',
+  downloadsExportFailed: '导出失败：{error}',
   downloadsDeleteCourse: '删除已下载的文件？',
   downloadsOneFile: '1 个文件',
   downloadsFileCount: '{count} 个文件',

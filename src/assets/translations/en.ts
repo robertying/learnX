@@ -52,7 +52,7 @@ export default {
     "Couldn't sync assignments. Allow calendar access for learnX in System Settings.",
   assignmentSyncNoReminderPermission:
     "Couldn't sync assignments. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
-  assignmentSyncFailed: "Couldn't sync assignments: ",
+  assignmentSyncFailed: "Couldn't sync assignments: {error}",
   filePickFailed: "Couldn't open the file",
   assignmentSubmissionSucceeded: 'Assignment submitted',
   assignmentSubmissionFailed: "Couldn't submit the assignment",
@@ -102,7 +102,7 @@ export default {
     "Couldn't delete. Allow calendar access for learnX in System Settings.",
   deleteFailedNoReminderPermission:
     "Couldn't delete. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
-  deleteFailed: "Couldn't delete: ",
+  deleteFailed: "Couldn't delete: {error}",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
@@ -130,7 +130,7 @@ export default {
     "Couldn't export. Allow calendar access for learnX in System Settings.",
   calendarExportNoEvent:
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
-  calendarExportFailed: "Couldn't export: ",
+  calendarExportFailed: "Couldn't export: {error}",
   graduate: 'Graduate',
   syncCourseSchedule: 'Sync Course Schedule',
   classAlarm: 'Class Alert',
@@ -403,7 +403,7 @@ export default {
   downloadsExportCourse: 'Export',
   downloadsExported: 'Exported {files}',
   downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
-  downloadsExportFailed: "Couldn't export: ",
+  downloadsExportFailed: "Couldn't export: {error}",
   downloadsDeleteCourse: 'Delete Downloaded Files?',
   downloadsOneFile: '1 file',
   downloadsFileCount: '{count} files',

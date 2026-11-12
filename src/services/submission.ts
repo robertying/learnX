@@ -15,9 +15,12 @@ export interface PickedAttachment {
   size?: number | null;
 }
 
-/** What the content input starts with: the submitted text, tags removed */
+/**
+ * What the content input starts with: the submitted text, tags removed. The
+ * server's copy can end in a stray `-->`, which is dropped too.
+ */
 export const initialSubmissionContent = (submittedContent?: string) =>
-  (removeTags(submittedContent || '') ?? '').replace('-->', '');
+  removeTags(submittedContent?.replace('-->', ''));
 
 /**
  * The answer as the website's editor sends it: HTML, one paragraph per line.

@@ -82,7 +82,7 @@ describe('error toasts', () => {
       type: 'error',
     });
     expect(assignmentSyncErrorToast(new Error('Boom'))).toEqual({
-      text: t('assignmentSyncFailed') + 'Boom',
+      text: t('assignmentSyncFailed', { error: 'Boom' }),
       type: 'error',
     });
   });
@@ -97,7 +97,7 @@ describe('error toasts', () => {
       type: 'warning',
     });
     expect(calendarExportErrorToast(new Error('Boom'))).toEqual({
-      text: t('calendarExportFailed') + 'Boom',
+      text: t('calendarExportFailed', { error: 'Boom' }),
       type: 'error',
     });
   });
@@ -112,7 +112,7 @@ describe('error toasts', () => {
       type: 'error',
     });
     expect(calendarDeleteErrorToast(new Error('Boom'))).toEqual({
-      text: t('deleteFailed') + 'Boom',
+      text: t('deleteFailed', { error: 'Boom' }),
       type: 'error',
     });
   });
