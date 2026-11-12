@@ -189,14 +189,34 @@ export const dataSource = new Proxy({} as AppSource, {
 export const serverWritesBlocked = () =>
   !isMockSession() && !getServerWritesAllowed();
 
+/**
+ * Forgets the id.tsinghua.edu.cn cookies, so a login starts from the login
+ * form without an SSO session: the SSO page has just signed in there, and a
+ * login sent with that session isn't answered with a ticket. On iOS the web
+ * views keep their cookies in WebKit's store and fetch in Foundation's, so
+ * both are cleared; Android has one store, where each cookie is emptied.
+ */
 export const clearLoginCookies = async () => {
   if (Platform.OS === 'ios') {
-    await CookieManager.clearByName(Urls.id, 'JSESSIONID');
-  } else {
-    await CookieManager.setFromResponse(
-      Urls.id,
-      'JSESSIONID=; path=/; HttpOnly',
+    await Promise.all(
+      (['foundation', 'webKit'] as const).map(async iosCookieStore => {
+        const cookies = await CookieManager.get(Urls.id, { iosCookieStore });
+        await Promise.all(
+          Object.keys(cookies).map(name =>
+            CookieManager.clearByName(Urls.id, name, { iosCookieStore }),
+          ),
+        );
+      }),
     );
+  } else {
+    const cookies = await CookieManager.get(Urls.id);
+    const names = new Set(['JSESSIONID', ...Object.keys(cookies)]);
+    for (const name of names) {
+      await CookieManager.setFromResponse(
+        Urls.id,
+        `${name}=; path=/; HttpOnly`,
+      );
+    }
     await CookieManager.flush();
   }
 };
