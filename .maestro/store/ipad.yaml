@@ -2,10 +2,12 @@ appId: ${APP_ID}
 name: App Store screenshots on the iPad
 ---
 # Run by scripts/store-screenshots.sh (ipad): the iPad shots of the store
-# listing in landscape, as STORE_OUT/NN-<slug>.png. Details open beside the
-# lists.
-- setOrientation: LANDSCAPE_LEFT
+# listing, as STORE_OUT/NN-<slug>.png, in landscape. It turns after the
+# login, which sets E2E_ORIENTATION (portrait by default). Details open
+# beside the lists.
 - runFlow: subflows/start.yaml
+- setOrientation: LANDSCAPE_LEFT
+- waitForAnimationToEnd
 
 # 1 Notices with a notice open
 - runFlow:
@@ -27,11 +29,16 @@ name: App Store screenshots on the iPad
 # and Maestro's element swipe is too short: swipe the first row (MOCK_NOTICE)
 # by its position in the list pane.
 - assertVisible: '.*(${MOCK_NOTICE}).*'
+# Landscape has three columns; the list runs from about 20% to 43% of the
+# width. Drag about a fifth of the row: farther runs the first action.
 - swipe:
-    start: 42%,19%
-    end: 24%,19%
-    duration: 500
+    start: 41%,19%
+    end: 36%,19%
+    duration: 800
 - waitForAnimationToEnd
+# Fail here, not in the shot, if the actions didn't open.
+- assertVisible:
+    id: card-fav
 - tapOn: '${T_filter}'
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -87,13 +94,18 @@ name: App Store screenshots on the iPad
     env:
       CARD: '.*(${MOCK_STORE_COURSE}).*'
       DETAIL: course-detail
-# The first row (MOCK_COURSE), swiped by its position as for notices.
+# The first row (MOCK_COURSE), swiped by its position as for notices, but
+# to the right: Hide is a course's leading swipe action.
 - assertVisible: '.*(${MOCK_COURSE}).*'
+# A short drag from the middle of the row (a shorter one doesn't move it):
+# farther runs Hide.
 - swipe:
-    start: 42%,19%
-    end: 24%,19%
+    start: 30%,19%
+    end: 40%,19%
     duration: 800
 - waitForAnimationToEnd
+- assertVisible:
+    id: card-hide
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
@@ -123,4 +135,3 @@ name: App Store screenshots on the iPad
     file: ../subflows/screenshot.yaml
     env:
       NAME: 08-calendar
-- setOrientation: PORTRAIT
