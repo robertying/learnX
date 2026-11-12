@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { setSetupSeen, useAppStateStore } from 'data/appState';
+import { useAppStateStore } from 'data/appState';
 import { whatsNewContext, whatsNewSince } from 'helpers/whatsNew';
 import type { RootStackParams } from 'screens/types';
 
@@ -31,9 +31,10 @@ export const resetLaunchNotes = () => {
 export type LaunchSheet = 'Setup' | 'WhatsNew';
 
 /**
- * Which sheet the main UI opens with, if any. The set-up page follows the
- * first login; an install that was logged in already (an update) skips it.
- * What's New shows for the newest release since the one last seen
+ * Which sheet the main UI opens with, if any. The set-up page shows until
+ * it's been seen: after the first login, or on an update from a version
+ * that didn't have it (it waits for a launch not opened from outside).
+ * Otherwise What's New shows for the newest release since the one last seen
  * (`whatsNewSince`), unless the app was opened from outside.
  */
 export const pickLaunchSheet = ({
@@ -52,6 +53,9 @@ export const pickLaunchSheet = ({
   }
   if (fromOutside) {
     return null;
+  }
+  if (!setupSeen) {
+    return 'Setup';
   }
   return hasWhatsNew ? 'WhatsNew' : null;
 };
@@ -77,12 +81,10 @@ const useLaunchSheet = () => {
       openedFromOutside,
       hasWhatsNew: !!whatsNew,
     });
-    if (!setupSeen && !loginShown) {
-      // Logged in before this version: an update, not a new user.
-      setSetupSeen();
-    }
     if (sheet === 'Setup') {
-      navigation.navigate('Setup');
+      // Logged in before this version (an update): What's New follows on
+      // the next launch.
+      navigation.navigate('Setup', loginShown ? undefined : { update: true });
     } else if (sheet === 'WhatsNew' && whatsNew) {
       navigation.navigate('WhatsNewStack', {
         screen: 'WhatsNew',

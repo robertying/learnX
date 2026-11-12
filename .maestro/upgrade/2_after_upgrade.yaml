@@ -1,0 +1,96 @@
+# Runs on the current build installed over 18.0.3 (scripts/e2e-upgrade.sh),
+# after 1_use_18.0.3.yaml. Nothing is cleared between the two.
+appId: ${APP_ID}
+---
+# 1. The store report in place of the app: what the first launch moved out of
+# 18.0.3's storage, before anything syncs.
+- launchApp:
+    stopApp: true
+    arguments:
+      # A string: Maestro leaves the dash off a boolean's name on iOS.
+      storeReport: 'true'
+      mockLatency: none
+- extendedWaitUntil:
+    visible:
+      id: store-report
+    timeout: 30000
+- copyTextFrom:
+    id: store-report
+- runScript:
+    file: check_report.js
+    env:
+      PHASE: migrated
+- assertTrue: ${output.report.ok}
+
+# 2. The app itself: still logged in, so Today rather than the welcome or login
+# page, and the set-up page this account never saw.
+- launchApp:
+    stopApp: true
+    arguments:
+      mockLatency: none
+- extendedWaitUntil:
+    visible:
+      id: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+    timeout: 30000
+- assertNotVisible:
+    id: 'welcome-continue|login-username'
+- extendedWaitUntil:
+    visible:
+      id: setup-not-now
+    timeout: 10000
+- tapOn:
+    id: setup-not-now
+# Let the launch's sync send the favorites and update the calendars.
+- runFlow:
+    file: ../subflows/tab.yaml
+    env:
+      TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
+- waitForAnimationToEnd:
+    timeout: 10000
+
+# 3. The next launch shows What's New, when this version has one (the first
+# report says).
+- launchApp:
+    stopApp: true
+    arguments:
+      mockLatency: none
+- runFlow:
+    when:
+      true: ${output.whatsNew != null}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: whats-new
+          timeout: 20000
+      - tapOn:
+          id: whats-new-continue
+- runFlow:
+    when:
+      true: ${output.whatsNew == null}
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
+          timeout: 30000
+      - assertNotVisible:
+          id: 'whats-new|setup-not-now'
+
+# 4. The report again, after the sync: the calendars 18.0.3 made are reused,
+# not made again, and nothing of 18.0.3's storage is left.
+- launchApp:
+    stopApp: true
+    arguments:
+      # A string: Maestro leaves the dash off a boolean's name on iOS.
+      storeReport: 'true'
+      mockLatency: none
+- extendedWaitUntil:
+    visible:
+      id: store-report
+    timeout: 30000
+- copyTextFrom:
+    id: store-report
+- runScript:
+    file: check_report.js
+    env:
+      PHASE: synced
+- assertTrue: ${output.report.ok}

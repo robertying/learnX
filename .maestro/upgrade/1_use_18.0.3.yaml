@@ -1,0 +1,162 @@
+# Runs on 18.0.3 (scripts/e2e-upgrade.sh installs it): logs in with its
+# persistent mock account, which saves 18.0.3's mock data (favorites, archives,
+# a hidden course), then changes settings and turns on the assignment syncs so
+# 18.0.3 makes its calendar, reminders and their ids. 18.0.3 has no testIDs:
+# its English labels are matched, so run it with the simulator in English.
+# A row is one accessibility element named "<icon glyph>, <label>" (matched
+# with `.*, <label>, .*`). A switch is tapped by position (x 88% on iOS, where
+# switches are not elements; 91% on Android, where `rightOf` a label picks the
+# wrong switch), bottom to top so that a row a switch adds (Class Alert's
+# "Before Class") doesn't move the ones still to tap. The positions are those
+# of an iPhone 18 Pro and a folded Pixel 10 Pro Fold.
+appId: ${APP_ID}
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+    permissions:
+      calendar: allow
+      reminders: allow
+- extendedWaitUntil:
+    visible: 'Username / ID'
+    timeout: 60000
+- tapOn: 'Username / ID'
+- inputText: ${USERNAME}
+- tapOn: 'Password'
+- inputText: ${PASSWORD}
+- tapOn: 'Login'
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 15000
+    optional: true
+# Not 18.0.3's: iOS's own offer to save the password, which comes up a moment
+# after the login and covers the app. It is not in the view hierarchy (the
+# app's elements are gone while it shows, so Settings isn't visible), but its
+# Not Now button can be tapped by position. Looked for a few times, since the
+# sheet can still be sliding in when the first tap lands.
+- extendedWaitUntil:
+    visible: 'nothing-like-this-is-ever-shown'
+    timeout: 8000
+    optional: true
+- repeat:
+    times: 6
+    commands:
+      - runFlow:
+          when:
+            platform: iOS
+            notVisible: 'Settings'
+          commands:
+            - tapOn:
+                point: 32%, 63%
+            - extendedWaitUntil:
+                visible: 'nothing-like-this-is-ever-shown'
+                timeout: 3000
+                optional: true
+- extendedWaitUntil:
+    visible: 'Settings'
+    timeout: 30000
+
+# Settings › Calendars & Reminders.
+- tapOn: 'Settings'
+- tapOn: '.*, Calendars & Reminders, .*'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      # Assignment Reminder Sync, Assignment Calendar Sync (writes every
+      # assignment to a new "learnX 作业" calendar), Omit Location, Class Alert,
+      # Graduate.
+      - tapOn:
+          point: 88%, 67%
+      - tapOn:
+          point: 88%, 53%
+      - tapOn:
+          point: 88%, 38%
+      - tapOn:
+          point: 88%, 32%
+      - tapOn:
+          point: 88%, 20%
+      - waitForAnimationToEnd:
+          timeout: 5000
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # Assignment Calendar Sync, Omit Location, Class Alert, Graduate, bottom
+      # to top (Class Alert adds a row below itself).
+      - tapOn:
+          point: 91%, 48%
+      - tapOn:
+          point: 91%, 34%
+      - tapOn:
+          point: 91%, 29%
+      - tapOn:
+          point: 91%, 18%
+      # No Assignment Reminder Sync here: Reminders is Apple's.
+      - back
+
+# Settings › Files: the 18.0.3-only settings on. Open after download is an
+# Android setting.
+- tapOn: '.*, Files, .*'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 88%, 35%
+      - tapOn:
+          point: 88%, 20%
+      - swipe:
+          start: 2%, 50%
+          end: 80%, 50%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      # Open downloaded files automatically, Omit Course Name in Filenames,
+      # Save Downloaded Files to Documents.
+      - tapOn:
+          point: 91%, 52%
+      - tapOn:
+          point: 91%, 32%
+      - tapOn:
+          point: 91%, 18%
+      - back
+
+# Opening it marks its badge seen; joining asks first.
+- tapOn: '.*, Course Information Sharing, .*'
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          point: 88%, 20%
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          rightOf: 'Course Information Sharing'
+- tapOn: 'Ok'
+
+# 18.0.3 syncs the assignments to the calendar and Reminders when it refreshes
+# them: pull the list down so it saves the entries' ids.
+- tapOn: 'Assignments'
+- swipe:
+    start: 50%, 30%
+    end: 50%, 70%
+- waitForAnimationToEnd:
+    timeout: 10000
+# It writes the events one at a time (a wait for something that never shows is
+# a sleep).
+- extendedWaitUntil:
+    visible: 'nothing-like-this-is-ever-shown'
+    timeout: 15000
+    optional: true
+
+# Let redux-persist write, then leave 18.0.3 as a user would.
+- waitForAnimationToEnd
+- stopApp

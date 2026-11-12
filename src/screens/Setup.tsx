@@ -21,14 +21,23 @@ type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 /**
  * The page after the first login: turns on notifications of new content (in
  * the tabs' order), class and deadline reminders and grades (all on to start
- * with), and calendar sync and, on Apple platforms, Reminders sync (off). All
+ * with), and calendar sync and, on Apple platforms, Reminders sync (off,
+ * unless an earlier version synced them). All
  * of them start off in Settings. Done saves the choices and asks for the
  * permissions they need; notifications chosen stay on if that's denied, and
- * start working once they're allowed. Opened by `useLaunchSheet`, once.
+ * start working once they're allowed. Opened by `useLaunchSheet`, once, also
+ * on an update for a user who never saw it.
  */
-const Setup: React.FC<Props> = ({ navigation }) => {
+const Setup: React.FC<Props> = ({ navigation, route }) => {
   const theme = useTheme();
   const notifications = useSettings(settings => settings.notifications);
+  // On after an update if the user synced before.
+  const calendarSynced = useSettings(
+    settings => settings.assignmentCalendarSync,
+  );
+  const remindersSynced = useSettings(
+    settings => settings.assignmentReminderSync,
+  );
   const { request } = useNotificationPermission();
   const { setSyncEnabled } = useAssignmentSync();
 
@@ -39,17 +48,20 @@ const Setup: React.FC<Props> = ({ navigation }) => {
     classReminders: true,
     deadlineReminders: true,
     grades: true,
-    calendar: false,
-    reminders: false,
+    calendar: calendarSynced,
+    reminders: remindersSynced,
   });
   const [saving, setSaving] = useState(false);
 
   // Seen once shown, however it's closed, and a new user's What's New is
-  // this version's.
+  // this version's. After an update, What's New still shows next launch.
+  const update = route.params?.update ?? false;
   useEffect(() => {
     setSetupSeen();
-    setWhatsNewSeen(packageJson.version);
-  }, []);
+    if (!update) {
+      setWhatsNewSeen(packageJson.version);
+    }
+  }, [update]);
 
   const choose = (key: keyof typeof choices) => (value: boolean) =>
     setChoices(current => ({ ...current, [key]: value }));
@@ -74,10 +86,10 @@ const Setup: React.FC<Props> = ({ navigation }) => {
         toast(t('notificationPermissionDenied'), 'error');
       }
     }
-    if (calendar) {
+    if (calendar && !calendarSynced) {
       await setSyncEnabled('calendar', true);
     }
-    if (reminders) {
+    if (reminders && !remindersSynced) {
       await setSyncEnabled('reminder', true);
     }
     setSaving(false);

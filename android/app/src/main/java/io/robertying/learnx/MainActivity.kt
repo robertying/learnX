@@ -27,14 +27,21 @@ class MainActivity : ReactActivity() {
                 // Test runs set the app up with launch arguments (Maestro's
                 // launchApp arguments arrive as intent extras): they become the
                 // root component's initial props (helpers/launchOptions.ts).
-                override fun getLaunchOptions(): Bundle? =
-                    intent?.getStringExtra(MOCK_LATENCY)?.let { latency ->
-                        Bundle().apply { putString(MOCK_LATENCY, latency) }
+                // Only these string extras are passed; the live login ones are
+                // only read by debug and E2E_LIVE builds.
+                override fun getLaunchOptions(): Bundle? {
+                    val extras = LAUNCH_OPTIONS.mapNotNull { key ->
+                        intent?.getStringExtra(key)?.let { key to it }
                     }
+                    if (extras.isEmpty()) return null
+                    return Bundle().apply {
+                        extras.forEach { (key, value) -> putString(key, value) }
+                    }
+                }
             }
         )
 
     private companion object {
-        const val MOCK_LATENCY = "mockLatency"
+        val LAUNCH_OPTIONS = listOf("mockLatency", "storeReport", "liveUsername", "liveFingerprint")
     }
 }
