@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols "school" (400 weight), 36dp in the middle of the 108dp adaptive icon canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="2880"
+    android:viewportHeight="2880">
+  <group
+      android:translateX="960"
+      android:translateY="960">
+    <path
+        android:fillColor="@color/md_theme_onPrimaryContainer"
+        android:pathData="M480,840L200,688V448L40,360L480,120L920,360V680H840V404L760,448V688ZM480,508L754,360L480,212L206,360ZM480,749L680,641V490L480,600L280,490V641ZM480,508ZM480,598ZM480,598Z"/>
+  </group>
+</vector>
