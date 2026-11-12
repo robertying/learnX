@@ -3,7 +3,6 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import FormWebView from 'components/FormWebView';
 import { NoticeDetailParamList } from 'navigation/types';
-import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
 import { attachmentFile } from 'helpers/attachments';
 import { Notice } from 'data/types/state';
@@ -20,7 +19,6 @@ import {
   FormParagraph,
   FormTitle,
 } from 'components/Form';
-import { useTheme, webContentColors } from 'theme';
 
 type Props = NativeStackScreenProps<NoticeDetailParamList, 'NoticeDetail'>;
 
@@ -40,7 +38,6 @@ const NoticeDetailContent: React.FC<{
   notice: Notice;
   navigation: Props['navigation'];
 }> = ({ notice, navigation }) => {
-  const theme = useTheme();
   const now = useMinute();
 
   const {
@@ -53,13 +50,6 @@ const NoticeDetailContent: React.FC<{
     content,
     attachment,
   } = notice;
-
-  const html = getWebViewTemplate(content ?? '', {
-    dark: theme.dark,
-    // The form row's own color shows through.
-    backgroundColor: 'transparent',
-    ...webContentColors(theme.dark),
-  });
 
   const handleFileOpen = () => {
     if (attachment) {
@@ -108,7 +98,7 @@ const NoticeDetailContent: React.FC<{
         ) : null}
         <FormSection>
           {content?.trim() ? (
-            <FormWebView html={html} />
+            <FormWebView content={content} />
           ) : (
             <FormParagraph text={t('noNoticeContent')} />
           )}

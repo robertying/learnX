@@ -1,3 +1,4 @@
+import { isShownBy } from 'helpers/shown';
 import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
@@ -68,15 +69,9 @@ const lateWindows = (
     now,
   }: { hiddenCourses: string[]; archived: string[]; now: number },
 ) => {
-  const hidden = new Set(hiddenCourses);
-  const archivedIds = new Set(archived);
+  const isShown = isShownBy(hiddenCourses, archived);
   return assignments.flatMap(a => {
-    if (
-      a.submitted ||
-      !a.lateSubmissionDeadline ||
-      hidden.has(a.courseId) ||
-      archivedIds.has(a.id)
-    ) {
+    if (a.submitted || !a.lateSubmissionDeadline || !isShown(a)) {
       return [];
     }
     const deadline = dayjs(a.deadline).valueOf();

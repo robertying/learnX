@@ -25,6 +25,7 @@ import {
 import { t } from 'helpers/i18n';
 import { ClassSession, currentAndNext, sessionsOn } from 'helpers/schedule';
 import { beijingDate } from 'helpers/serverTime';
+import { isShownBy } from 'helpers/shown';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
@@ -50,11 +51,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const visible = <T extends { id: string; courseId: string }>(
     items: T[],
     archivedIds: string[],
-  ) =>
-    items.filter(
-      item =>
-        !hiddenIds.includes(item.courseId) && !archivedIds.includes(item.id),
-    );
+  ) => items.filter(isShownBy(hiddenIds, archivedIds));
 
   const assignmentsQuery = useAssignments();
   const noticesQuery = useNotices();
