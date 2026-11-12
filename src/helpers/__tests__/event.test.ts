@@ -299,7 +299,8 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
 
   it('takes over a matching reminder due at or before the deadline', async () => {
     const a1 = assignment('a1');
-    const a2 = assignment('a2');
+    // Same deadline: each call reads the clock, and 'late' is 1 ms after.
+    const a2 = { ...assignment('a2'), deadline: a1.deadline };
     const deadline = new Date(a1.deadline).getTime();
     mocked.ExpoCalendarReminder.get.mockResolvedValue({
       update: jest.fn(async () => {}),
