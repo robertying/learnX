@@ -358,10 +358,6 @@ const noticeOverlays = byId(notices, noticeId);
 const assignmentOverlays = byId(assignments, assignmentId);
 const fileOverlays = byId(files, fileId);
 
-export const englishNoticeTexts = noticeOverlays;
-export const englishAssignmentTexts = assignmentOverlays;
-export const englishFileTexts = fileOverlays;
-
 const englishCourse = (course: Course): Course => ({
   ...course,
   teacherName: person(course.teacherName),

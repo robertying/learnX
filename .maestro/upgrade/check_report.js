@@ -173,9 +173,9 @@ if (report === null) {
   }
 }
 
-// What's New: none for a version without highlights (package.json says
-// 18.0.3 until 19.0 is cut). The flow shows it on the app's second launch when
-// the first report says there is one, and it is seen after that.
+// What's New: none for a version without highlights. The flow shows it on the
+// app's second launch when the first report says there is one, and it is seen
+// after that.
 if (report !== null) {
   if (PHASE === 'migrated') {
     output.whatsNew = report.whatsNew;

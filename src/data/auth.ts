@@ -43,7 +43,6 @@ export const getAuth = () => useAuthStore.getState();
 export const useLoggedIn = () => useAuthStore(state => state.loggedIn);
 export const useLoggingIn = () => useAuthStore(state => state.loggingIn);
 export const useLoginError = () => useAuthStore(state => state.error);
-export const useLoginFailure = () => useAuthStore(state => state.failure);
 export const useReloginRequested = () =>
   useAuthStore(state => state.reloginRequested);
 

@@ -10,7 +10,7 @@
 #   ipad-windowed   every flow on an iPad set to Windowed Apps, in the
 #                   app's default window
 #   duo-folded      every flow on the iPhone Duo, closed (outer display)
-#   duo-half        the posture flows on the iPhone Duo, half open (90°)
+#   duo-half-open   the posture flows on the iPhone Duo, half open (90°)
 #   duo-open        the posture flows on the iPhone Duo, fully open (180°)
 #   fold-folded     every flow on the Android foldable, folded
 #   fold-unfolded   every flow on the Android foldable, unfolded (the tablet
@@ -37,7 +37,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-all_profiles="iphone ipad ipad-landscape ipad-windowed duo-folded duo-half duo-open fold-folded fold-unfolded"
+all_profiles="iphone ipad ipad-landscape ipad-windowed duo-folded duo-half-open duo-open fold-folded fold-unfolded"
 profiles="${*:-$all_profiles}"
 
 iphone="${E2E_IPHONE:-learnX iPhone 18 Pro}"
@@ -335,7 +335,7 @@ run_profile() {
     set_hinge "$device" closed || return 1
     run_ios_suite "$device" PORTRAIT "$out"
     ;;
-  duo-half)
+  duo-half-open)
     use_sim "$duo" || return 1
     run_duo_postures "$device" halfFold "$out"
     ;;

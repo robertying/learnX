@@ -37,9 +37,10 @@
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
 # Android screen size, density, app locale and status bar (9:41; the other
-# icons are painted over with the bar's color after the run). Which simulator or emulator model to use
-# depends on the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch
-# iPad, the iPhone Duo, and any Android foldable or tablet emulator.
+# icons are painted over with the bar's color after the run). Which simulator
+# or emulator model to use depends on the store's size rules: an iPhone of
+# 1206x2622 pixels, a 13-inch iPad, the iPhone Duo, and any Android foldable
+# or tablet emulator.
 set -euo pipefail
 
 target="${1:-}"

@@ -3,7 +3,12 @@ import * as Calendar from 'expo-calendar';
 import * as SecureStore from 'expo-secure-store';
 import { Directory } from 'expo-file-system';
 import { Platform } from 'react-native';
-import { resetAppState, setSetupSeen } from 'data/appState';
+import {
+  resetAppState,
+  setSetupSeen,
+  setWhatsNewSeen,
+  useAppStateStore,
+} from 'data/appState';
 import {
   resetCalendarSync,
   setEventIdForAssignment,
@@ -16,6 +21,7 @@ import { resetSettings, setSetting } from 'data/settings';
 import { kvStorage } from 'data/storage';
 import { queueAction, resetUserData, setArchived } from 'data/userData';
 import { buildStoreReport } from 'helpers/storeReport';
+import { whatsNewContext } from 'helpers/whatsNew';
 
 const mocked = Calendar as unknown as {
   [K in keyof typeof import('../../../jest/mocks/expoCalendar')]: jest.Mock;
@@ -35,6 +41,7 @@ beforeEach(async () => {
   resetUserData();
   resetAppState();
   resetCalendarSync();
+  useAppStateStore.setState({ whatsNewSeenVersion: null });
   useCredentialsStore.setState({ credentials: null });
   await AsyncStorage.clear();
   (SecureStore as unknown as { __store: Map<string, string> }).__store.clear();
@@ -79,8 +86,6 @@ it('reports the stores without the password or times', async () => {
     { kind: 'favorite', type: 'file', id: 'f1', flag: true, tries: 0 },
   ]);
   expect(report.appState.setupSeen).toBe(true);
-  // No What's New for 18.0.3, the version package.json has until 19.0.
-  expect(report.whatsNew).toBeNull();
   expect(report.calendarSync.lastSynced).toEqual(['calendar']);
   expect(report.marks.legacyImported).toBe(true);
   expect(report.legacyLeft).toEqual({
@@ -90,6 +95,15 @@ it('reports the stores without the password or times', async () => {
     downloads: false,
     documentDownloads: false,
   });
+});
+
+it("reports no What's New once the running version's is seen", async () => {
+  setWhatsNewSeen(whatsNewContext().version);
+  mocked.getCalendars.mockResolvedValue([]);
+
+  const report = await buildStoreReport();
+
+  expect(report.whatsNew).toBeNull();
 });
 
 it("reports what is left of 18.0.x's storage", async () => {
