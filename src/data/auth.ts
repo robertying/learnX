@@ -60,7 +60,7 @@ export const cancelRelogin = () =>
   useAuthStore.setState({ reloginRequested: false });
 
 /**
- * Notes a failed request. thu-learn-lib logs in again by itself when a request
+ * Notes a failed request (`dataSource` calls it for every one). thu-learn-lib logs in again by itself when a request
  * finds the session expired; when that login is turned down for a wrong
  * password (changed since it was saved), the session is gone, so the lists say
  * the login failed and offer to log in again, as after a failed login at

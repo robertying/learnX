@@ -283,3 +283,33 @@ describe('watchSurfaces', () => {
     expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
   });
 });
+
+it('clears only after a refresh under way has finished', async () => {
+  const { cancelDeadlineReminders } = jest.requireMock(
+    'helpers/deadlineReminders',
+  ) as { cancelDeadlineReminders: jest.Mock };
+  const order: string[] = [];
+  let finishSync!: () => void;
+  jest.mocked(syncDeadlineReminders).mockImplementationOnce(
+    () =>
+      new Promise<void>(resolve => {
+        finishSync = () => {
+          order.push('scheduled');
+          resolve();
+        };
+      }),
+  );
+  cancelDeadlineReminders.mockImplementationOnce(async () => {
+    order.push('cancelled');
+  });
+  cacheAssignments();
+
+  const refreshed = refreshSurfaces();
+  const cleared = clearSurfaces();
+  // Let the refresh reach the reminders before it's let go.
+  await new Promise(resolve => setTimeout(resolve, 0));
+  finishSync();
+  await Promise.all([refreshed, cleared]);
+
+  expect(order).toEqual(['scheduled', 'cancelled']);
+});

@@ -4,7 +4,6 @@ import Login from 'screens/Login';
 
 jest.mock('data/login', () => ({
   login: jest.fn(),
-  loginWithMockAccount: jest.fn(),
   loginWithOfflineMode: jest.fn(),
 }));
 jest.mock('data/source', () => ({

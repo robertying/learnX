@@ -15,7 +15,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
 import { setSSOInProgress, useAuthStore, useLoggingIn } from 'data/auth';
-import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
+import { login, loginWithOfflineMode } from 'data/login';
 import { useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
 import Spacing from 'constants/Spacing';
@@ -86,9 +86,8 @@ const Login: React.FC<Props> = ({ navigation }) => {
     }
 
     if (username === env.DUMMY_USERNAME && password === env.DUMMY_PASSWORD) {
-      loginWithMockAccount(username);
-      // Goes through the emulated server and saves the login, so it survives
-      // relaunch.
+      // Goes through the emulated server, starts over from the mock data and
+      // saves the login, so it survives relaunch.
       void login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
       return;
     }

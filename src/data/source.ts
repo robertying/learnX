@@ -9,6 +9,7 @@ import {
 import mime from 'mime';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
+import { noteRequestError } from 'data/auth';
 import { getCredentials, loadCredentials } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import Urls from 'constants/Urls';
@@ -71,7 +72,23 @@ export interface AppSource extends DataSource {
 
 let helper: Learn2018Helper;
 
-const isMockSession = () => isMockUser(getCredentials()?.username);
+/**
+ * Which server the session talks to, set when a login starts (a login may
+ * name another account than the saved one) and forgotten on logout. Before
+ * the first login in this JS runtime (a background launch), it's the saved
+ * login's.
+ */
+let sessionServer: 'mock' | 'real' | null = null;
+
+const isMockSession = () =>
+  sessionServer
+    ? sessionServer === 'mock'
+    : isMockUser(getCredentials()?.username);
+
+/** Forgets which server the session used, e.g. on logout. */
+export const endSession = () => {
+  sessionServer = null;
+};
 
 /** Web Learning's login pages are short; a notice's page never is. */
 const MAX_LOGIN_PAGE_LENGTH = 4096;
@@ -170,15 +187,32 @@ const realSource = new Proxy({} as AppSource, {
 
 /**
  * Talks to learn.tsinghua.edu.cn, or to the emulated server in
- * `data/mockSource` while a mock account is logged in. Picked per call, so
- * logging in or out switches it; nothing else in the app checks for the mock
- * account to pick a server.
+ * `data/mockSource` while the session is the mock account's. Picked per call,
+ * so logging in or out switches it; nothing else in the app checks for the
+ * mock account to pick a server. Every failed call is noted (`noteRequestError`
+ * in `data/auth`), so a wrong password found by thu-learn-lib's own re-login
+ * ends the session wherever the request came from: a list, a server action, a
+ * download or a submission.
  */
 export const dataSource = new Proxy({} as AppSource, {
   get: (_, key: keyof AppSource) => {
     const source: AppSource = isMockSession() ? mockSource : realSource;
     const value = source[key];
-    return typeof value === 'function' ? value.bind(source) : value;
+    if (typeof value !== 'function') {
+      return value;
+    }
+    return (...args: unknown[]) => {
+      const result: unknown = (value as (...a: unknown[]) => unknown).apply(
+        source,
+        args,
+      );
+      return result instanceof Promise
+        ? result.catch((error: unknown) => {
+            noteRequestError(error);
+            throw error;
+          })
+        : result;
+    };
   },
 });
 
@@ -228,6 +262,7 @@ export const clearLoginCookies = async () => {
 export const loginWithFingerPrint = async (credential?: Credential) => {
   // A new login names its account; it may differ from the stored one.
   const isMock = isMockUser(credential?.username ?? getCredentials()?.username);
+  sessionServer = isMock ? 'mock' : 'real';
   if (!isMock) {
     await clearLoginCookies();
   }

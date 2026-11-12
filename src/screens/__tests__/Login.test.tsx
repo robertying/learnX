@@ -11,7 +11,7 @@ import { toast } from 'components/Toast';
 import { t } from 'helpers/i18n';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { Credentials, useCredentialsStore } from 'data/credentials';
-import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
+import { login, loginWithOfflineMode } from 'data/login';
 import { getSettings, resetSettings } from 'data/settings';
 import { clearLoginCookies } from 'data/source';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
@@ -28,7 +28,6 @@ jest.mock('helpers/launchOptions', () => ({
 }));
 jest.mock('data/login', () => ({
   login: jest.fn(),
-  loginWithMockAccount: jest.fn(),
   loginWithOfflineMode: jest.fn(),
 }));
 jest.mock('data/source', () => ({
@@ -141,8 +140,6 @@ describe('Login', () => {
     await fill(env.DUMMY_USERNAME, env.DUMMY_PASSWORD);
     await pressLogin();
 
-    expect(loginWithMockAccount).toHaveBeenCalledTimes(1);
-    expect(loginWithMockAccount).toHaveBeenCalledWith(env.DUMMY_USERNAME);
     expect(login).toHaveBeenCalledWith({
       username: env.DUMMY_USERNAME,
       password: env.DUMMY_PASSWORD,
