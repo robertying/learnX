@@ -1,25 +1,5 @@
+require File.expand_path('../../learnx_module', File.dirname(__FILE__))
+
 Pod::Spec.new do |s|
-  s.name           = 'Sidebar'
-  s.version        = '1.0.0'
-  s.summary        = 'The native sidebar list for the Mac split view'
-  s.description    = 'The native sidebar list for the Mac split view'
-  s.author         = ''
-  s.homepage       = 'https://docs.expo.dev/modules/'
-  s.platforms      = { :ios => '17.6' }
-  s.source         = { git: '' }
-  s.static_framework = true
-
-  s.dependency 'ExpoModulesCore'
-
-  s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES'
-  }
-
-  s.source_files = "*.swift"
-
-  # Run with scripts/test-ios.sh. Hosted in an app, which some UIKit APIs need.
-  s.test_spec 'Tests' do |test_spec|
-    test_spec.requires_app_host = true
-    test_spec.source_files = 'Tests/**/*.swift'
-  end
+  LearnXModule.podspec(s, name: 'Sidebar', summary: 'The native sidebar list for the Mac split view')
 end

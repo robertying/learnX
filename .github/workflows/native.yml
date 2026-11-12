@@ -85,7 +85,7 @@ jobs:
         id: changes
         run: >-
           scripts/changed-files.sh
-          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/(workflows/native\.yml$|actions/setup-js/))'
+          '^(android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/(workflows/native\.yml$|actions/setup-js/))'
           >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
