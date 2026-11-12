@@ -244,6 +244,12 @@ export default {
   refreshFailed: "Couldn't refresh. Showing saved data.",
   archive: 'Archive',
   restore: 'Unarchive',
+  swipeActions: 'Swipe Actions',
+  swipeRight: 'Swipe Right',
+  swipeLeft: 'Swipe Left',
+  swipeNone: 'None',
+  swipeActionsFooter:
+    'In the Courses list, Archive hides or unhides the course.',
   reorder: 'Reorder',
   select: 'Select',
   checkAll: 'Select All',

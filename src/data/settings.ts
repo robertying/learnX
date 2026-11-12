@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
+import { defaultSwipeSettings } from 'helpers/cardActions';
 import { SettingsState } from 'data/types/state';
 import {
   type CalendarSyncState,
@@ -42,6 +43,7 @@ export const defaultSettings: SettingsState = {
   courseInformationSharing: false,
   openFileAfterDownload: false,
   courseEventOmitLocation: false,
+  swipeActions: defaultSwipeSettings,
 };
 
 /**
@@ -60,6 +62,7 @@ export const mergeSettings = (
   },
   alarms: { ...current.alarms, ...saved.alarms },
   notifications: { ...current.notifications, ...saved.notifications },
+  swipeActions: { ...current.swipeActions, ...saved.swipeActions },
 });
 
 const isStringRecord = (value: unknown): value is Record<string, string> =>
