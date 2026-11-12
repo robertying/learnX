@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import dayjs from 'dayjs';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
@@ -6,13 +5,11 @@ import SafeArea from 'components/SafeArea';
 import { useAssignments, useNotices, useFiles } from 'data/content';
 import { useCourses } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
-import { useSettings } from 'data/settings';
 import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/semester';
-import { uploadCourses } from 'helpers/coursex';
 import { sortByOrder } from 'helpers/reorder';
 import { CourseStackParams, MainStackScreenProps } from './types';
 
@@ -22,9 +19,6 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
 
   const currentSemesterId = useCurrentSemester();
-  const courseInformationSharing = useSettings(
-    settings => settings.courseInformationSharing,
-  );
   const {
     courses: fetchedCourses,
     isFetching: fetching,
@@ -66,16 +60,6 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const pullToRefresh = usePullToRefresh(handleRefresh);
 
   const handlePush = (item: Course) => show('CourseDetail', { id: item.id });
-
-  useEffect(() => {
-    if (courseInformationSharing) {
-      void (async () => {
-        try {
-          await uploadCourses(fetchedCourses);
-        } catch {}
-      })();
-    }
-  }, [courseInformationSharing, fetchedCourses]);
 
   return (
     <SafeArea>

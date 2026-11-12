@@ -5,8 +5,10 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useAuthStore } from 'data/auth';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
+import dayjs from 'dayjs';
 import {
   calendarWeekQuery,
+  fetchCalendarRange,
   getCachedWeekSessions,
   useWeekSchedule,
   weekSessions,
@@ -155,6 +157,80 @@ describe('calendarWeekQuery', () => {
       week3,
       'undergraduate',
     ]);
+  });
+});
+
+describe('fetchCalendarRange', () => {
+  const offline = {
+    reason: FailReason.NETWORK_ERROR,
+    extra: new TypeError('Network request failed'),
+  };
+  const day = (date: string): CalendarClass => ({
+    courseName: '物理',
+    location: '四教4102',
+    date,
+    startTime: '13:30',
+    endTime: '15:05',
+  });
+
+  beforeEach(() => {
+    clearQueryCache();
+    getCalendar.mockReset();
+  });
+
+  it('fetches each week once, reuses saved weeks and keeps the days asked for', async () => {
+    queryClient.setQueryData(calendarWeekQuery('2026-09-21', false).queryKey, [
+      day('2026-09-23'),
+    ]);
+    getCalendar.mockImplementation(
+      async start =>
+        ({
+          events: [
+            day(`${start.slice(0, 4)}-${start.slice(4, 6)}-${start.slice(6)}`),
+          ],
+          failedRanges: [],
+        }) as never,
+    );
+
+    const { classes, failedRanges } = await fetchCalendarRange(
+      dayjs('2026-09-16'),
+      dayjs('2026-09-28'),
+      false,
+    );
+
+    // Weeks of Sep 14 and Sep 28 fetched; Sep 21 came from the cache.
+    expect(getCalendar.mock.calls.map(([start]) => start)).toEqual([
+      '20260914',
+      '20260928',
+    ]);
+    // Sep 14 is before the range and is left out.
+    expect(classes.map(c => c.date)).toEqual(['2026-09-23', '2026-09-28']);
+    expect(failedRanges).toEqual([]);
+  });
+
+  it('lists the days of a failed week, within the range', async () => {
+    getCalendar.mockRejectedValueOnce(offline).mockResolvedValueOnce({
+      events: [day('2026-09-23')],
+      failedRanges: [],
+    } as never);
+
+    const result = await fetchCalendarRange(
+      dayjs('2026-09-16'),
+      dayjs('2026-09-23'),
+      false,
+    );
+
+    expect(result).toEqual({
+      classes: [day('2026-09-23')],
+      failedRanges: [{ startDate: '20260916', endDate: '20260920' }],
+    });
+  });
+
+  it('rejects when every week failed', async () => {
+    getCalendar.mockRejectedValue(offline);
+    await expect(
+      fetchCalendarRange(dayjs('2026-09-14'), dayjs('2026-09-27'), true),
+    ).rejects.toBe(offline);
   });
 });
 

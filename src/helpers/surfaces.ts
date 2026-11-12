@@ -1,7 +1,7 @@
 // Keeps what learnX shows outside the app in step with its data: the
 // Deadlines and Up Next widgets, deadline and class reminders, Spotlight, the
-// App Intents' data, and the assignments written to the system calendar or
-// Reminders. Each is worked out from the cached lists, the user data and the
+// App Intents' data, the assignments written to the system calendar or
+// Reminders, and the courses shared with courseX. Each is worked out from the cached lists, the user data and the
 // settings whenever those change, in whichever JS runtime that happens: the
 // app, the background sync, or a notification action handled without the app.
 import { AppState } from 'react-native';
@@ -9,10 +9,12 @@ import dayjs from 'dayjs';
 import { queryClient } from 'data/queryClient';
 import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { getCachedWeekSessions } from 'data/schedule';
+import { coursesQuery } from 'data/queries';
 import { getSettings, useSettingsStore } from 'data/settings';
 import { getUserData, useUserDataStore } from 'data/userData';
-import { Assignment, File, Notice } from 'data/types/state';
+import { Assignment, Course, File, Notice } from 'data/types/state';
 import type { ToastMessage } from 'helpers/calendarSync';
+import { uploadCourses } from 'helpers/coursex';
 import { recordError } from 'helpers/crashReporting';
 import {
   cancelClassReminders,
@@ -38,6 +40,8 @@ interface Inputs {
   assignments: Assignment[] | undefined;
   notices: Notice[] | undefined;
   files: File[] | undefined;
+  /** The semester being shown's courses; undefined until fetched. */
+  courses: Course[] | undefined;
   hiddenCourses: string[];
   /** Archived assignments' ids. */
   archived: string[];
@@ -65,6 +69,9 @@ const readInputs = (): Inputs => {
   const files = currentSemester
     ? queryClient.getQueryData(filesQuery(currentSemester).queryKey)
     : undefined;
+  const courses = currentSemester
+    ? queryClient.getQueryData(coursesQuery(currentSemester).queryKey)
+    : undefined;
   const archivedIds = new Set(archived.assignment);
   const hidden = new Set(hiddenCourses);
 
@@ -77,6 +84,7 @@ const readInputs = (): Inputs => {
     assignments,
     notices,
     files,
+    courses,
     hiddenCourses,
     archived: archived.assignment,
     shownAssignments: assignments?.filter(
@@ -246,6 +254,16 @@ const surfaces: Surface[] = [
     update: ({ shownAssignments, leftOutAssignments, settings }) =>
       settings.assignmentReminderSync && shownAssignments
         ? syncCalendar('reminder', shownAssignments, leftOutAssignments)
+        : undefined,
+  },
+  {
+    name: 'courseX sharing',
+    deps: i => [i.courses, i.settings.courseInformationSharing],
+    // Once per JS runtime and whenever the courses change, while sharing is
+    // on; uploadCourses skips the mock account.
+    update: ({ courses, settings }) =>
+      settings.courseInformationSharing && courses?.length
+        ? uploadCourses(courses)
         : undefined,
   },
 ];
