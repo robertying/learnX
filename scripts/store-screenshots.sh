@@ -168,6 +168,11 @@ else
   export E2E_STATE_CLEARED=1
   adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
+  # From the default size: straight from another override (the previous
+  # target), SystemUI can leave the clock out of demo mode.
+  adb -s "$device" shell wm size reset
+  adb -s "$device" shell wm density reset
+  sleep 3
   adb -s "$device" shell wm size "$size"
   adb -s "$device" shell wm density "$density"
   sleep 3
