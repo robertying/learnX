@@ -13,6 +13,8 @@ import {
   Text,
 } from '@expo/ui/jetpack-compose';
 import { testID } from '@expo/ui/jetpack-compose/modifiers';
+import { iconDrawables } from 'assets/icons';
+import { systemIcons } from 'helpers/systemIcons';
 import { useMaterialTheme } from 'theme';
 import type { FilterMenuProps } from './FilterMenu.shared';
 import SystemIcon from 'components/SystemIcon';
@@ -48,7 +50,7 @@ const FilterMenu: React.FC<FilterMenuProps> = ({
           >
             {/* The same icon and size as the other header IconButtons. */}
             <Icon
-              source={require('../assets/icons/filter_list.xml')}
+              source={iconDrawables[systemIcons.filter.android]}
               size={24}
               contentDescription={label}
             />

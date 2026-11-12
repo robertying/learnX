@@ -81,7 +81,7 @@ const useFileDetailHeader = ({
         Platform.OS === 'android' && {
           id: 'open',
           label: t('open'),
-          icon: 'openInNew',
+          icon: 'open',
           onPress: onOpen,
           disabled: unavailable,
         },

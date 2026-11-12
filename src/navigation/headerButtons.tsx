@@ -6,7 +6,7 @@ import type {
 } from '@react-navigation/native-stack';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import IconButton, { type IconButtonIcon } from 'components/IconButton';
-import { iconSymbols } from 'components/IconButton.shared';
+import { systemIcons } from 'helpers/systemIcons';
 
 /**
  * A header button, described once for both kinds of header: a native header
@@ -69,7 +69,10 @@ const nativeItem = (
     type: 'button',
     identifier: entry.id,
     label: entry.label,
-    icon: { type: 'sfSymbol', name: entry.sfSymbol ?? iconSymbols[entry.icon] },
+    icon: {
+      type: 'sfSymbol',
+      name: entry.sfSymbol ?? systemIcons[entry.icon].ios,
+    },
     onPress: entry.onPress,
     disabled: entry.disabled,
     sharesBackground: entry.ownGroup ? false : undefined,
