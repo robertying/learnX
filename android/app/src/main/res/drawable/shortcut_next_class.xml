@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- The "Next class" app shortcut's icon, adaptive so the launcher gives it the same shape as its other
-     shortcuts: Material Symbols "school" in the theme's primary container colors. -->
+     shortcuts: Material Symbols "event" in the theme's primary container colors. -->
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
     <background android:drawable="@color/md_theme_primaryContainer" />
     <foreground android:drawable="@drawable/shortcut_next_class_foreground" />
