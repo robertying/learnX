@@ -1,9 +1,9 @@
 #!/bin/bash
 # Test the upgrade from 18.0.3, the last release before the data moved to the
 # new stores: install a Release build of 18.0.3, use it with the mock account
-# (.maestro/upgrade/1_use_18.0.3.yaml), install the current Release build over
+# (.maestro/upgrade/1-use-18.0.3.yaml), install the current Release build over
 # it without clearing anything, and check that everything came along
-# (.maestro/upgrade/2_after_upgrade.yaml). Both builds write and read the
+# (.maestro/upgrade/2-after-upgrade.yaml). Both builds write and read the
 # data with their own native modules, as on a user's phone.
 #
 #   scripts/e2e-upgrade.sh ios <simulator udid>
@@ -124,7 +124,7 @@ android)
 esac
 
 export MAESTRO_DEVICE="$device"
-scripts/e2e.sh "$platform" .maestro/upgrade/1_use_18.0.3.yaml
+scripts/e2e.sh "$platform" .maestro/upgrade/1-use-18.0.3.yaml
 
 # Over it, keeping the data.
 if [ "${SKIP_CURRENT_BUILD:-}" = 1 ]; then
@@ -141,4 +141,4 @@ else
   scripts/e2e-build.sh "$platform" "$device"
 fi
 
-scripts/e2e.sh "$platform" .maestro/upgrade/2_after_upgrade.yaml
+scripts/e2e.sh "$platform" .maestro/upgrade/2-after-upgrade.yaml

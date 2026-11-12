@@ -30,6 +30,13 @@ learnX is a React Native app (iOS, iPadOS, Mac Catalyst, Android) for Tsinghua U
 - `android/local.properties` (git-ignored, see `android/local.properties.example`) holds the Android release signing values; debug builds don't need it.
 - `.env` (git-ignored, see `.env.example`) is inlined at build time into `helpers/env.ts` by `babel/inline-env.js`, which only passes listed keys: mock logins as is, the courseX token masked, and `LIVE_*` test logins in debug builds only. Add a key there before reading it in the app. The app can be used without a Tsinghua account through the mock login (`src/data/AGENTS.md`).
 
+## File names
+
+- In `src` and `jest`, a file is named after what it exports: PascalCase for a component, screen or navigator (`CourseCard.tsx`) and for a default-exported constant object (`constants/Colors.ts`); camelCase for hooks (`useClock.ts`), helpers, data, services and files with several exports (`navigation/options.tsx`). Folders are lowercase. Tests are `<module>.test.ts(x)` in the folder's `__tests__` (`<module>.<case>.test.ts` for a case that needs a fresh module, like `useLinkTaps.noLink.test.ts`); one table of cases over sibling screens is named for the group (`ContentLists.test.tsx` for Notices, Assignments and Files).
+- Platform variants use React Native's platform extensions: `Name.tsx` for iOS and Mac, `Name.android.tsx` for Android, and `Name.shared.ts` for what both use. Never put the platform in the name itself (`NameAndroid.tsx`).
+- Scripts, Maestro flows, mock files and patches are kebab-case. Swift and Kotlin files are PascalCase.
+- Names set by something else stay as they are: Android resources and the icons in `src/assets/icons` are snake_case, `ios/ExpoWidgetsTarget/index.swift` matches what the expo-widgets config plugin generates, and `docs/PRIVACY_POLICY_*.md` are linked from the store listings.
+
 ## React Compiler
 
 - `babel-plugin-react-compiler` (in `babel.config.js`) memoizes every component and hook under `src/`, so don't add `useMemo`, `useCallback` or `React.memo` for performance.

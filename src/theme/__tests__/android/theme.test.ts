@@ -121,7 +121,7 @@ describe('Android widget colors', () => {
     };
   };
 
-  it.each(['DeadlinesAndroid', 'UpNextAndroid'])(
+  it.each(['Deadlines.android', 'UpNext.android'])(
     '%s uses the Material roles',
     widget => {
       const widgetColors = palettes(widget);

@@ -13,7 +13,7 @@ name: App Store screenshots on the iPhone
 
 # 2 A row's swipe actions with the filter menu open
 - runFlow:
-    file: subflows/swipe_actions.yaml
+    file: subflows/swipe-actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
       DIRECTION: LEFT
@@ -118,7 +118,7 @@ name: App Store screenshots on the iPhone
     env:
       NAME: 08-courses-plain
 - runFlow:
-    file: subflows/swipe_actions.yaml
+    file: subflows/swipe-actions.yaml
     env:
       CARD: '.*(${MOCK_COURSE}).*'
       DIRECTION: RIGHT
