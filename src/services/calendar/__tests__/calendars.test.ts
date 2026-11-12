@@ -191,9 +191,8 @@ describe('saveCoursesToCalendar', () => {
       [
         {
           courseName: 'Calculus',
-          date: '2026-03-10',
-          startTime: '08:00',
-          endTime: '09:35',
+          start: '2026-03-10T08:00:00+08:00',
+          end: '2026-03-10T09:35:00+08:00',
           location: '六教6A017',
         },
       ],

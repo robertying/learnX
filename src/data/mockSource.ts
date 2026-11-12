@@ -321,7 +321,7 @@ export const mockSource: AppSource = {
             ),
           ) as any,
     ),
-  getNotificationList: (courseId, _courseType, options) =>
+  getNotificationList: (courseId, options) =>
     request(
       () =>
         groupByCourse(mock().mockNotices, [courseId])[courseId].map(notice =>
@@ -331,7 +331,7 @@ export const mockSource: AppSource = {
           ),
         ) as any,
     ),
-  getHomeworkList: ((courseId: string, _courseType?: unknown, options?: any) =>
+  getHomeworkList: ((courseId: string, options?: any) =>
     request(
       () =>
         groupByCourse(mock().mockAssignments, [courseId])[courseId].map(
@@ -355,7 +355,7 @@ export const mockSource: AppSource = {
       ),
     ),
   // Like thu-learn-lib's, the list has `isFavorite` only when asked for.
-  getFileList: (courseId, _courseType, options) =>
+  getFileList: (courseId, options) =>
     request(
       () =>
         groupByCourse(mock().mockFiles, [courseId])[courseId].map(file =>
@@ -394,9 +394,8 @@ export const mockSource: AppSource = {
         location: session.location,
         status: '',
         // the registrar writes Beijing dates and times
-        date: beijingDate(session.start),
-        startTime: beijingClock(session.start),
-        endTime: beijingClock(session.end),
+        start: `${beijingDate(session.start)}T${beijingClock(session.start)}:00+08:00`,
+        end: `${beijingDate(session.end)}T${beijingClock(session.end)}:00+08:00`,
       }));
       return { events, failedRanges: [] };
     }),

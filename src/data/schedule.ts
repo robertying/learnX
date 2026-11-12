@@ -18,6 +18,7 @@ import {
   sessionsFromCourses,
   startOfWeek,
 } from 'helpers/schedule';
+import { beijingDate } from 'helpers/serverTime';
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -42,13 +43,19 @@ const fetchCalendar = async (
   if (failedRanges.length > 0) {
     throw new Error(`Calendar unavailable for ${start}–${end}`);
   }
-  return events.map(({ courseName, location, date, startTime, endTime }) => ({
-    courseName,
-    location,
-    date,
-    startTime,
-    endTime,
-  }));
+  // An event without both times can't be placed.
+  return events.flatMap(e =>
+    e.start && e.end
+      ? [
+          {
+            courseName: e.courseName,
+            location: e.location,
+            start: e.start,
+            end: e.end,
+          },
+        ]
+      : [],
+  );
 };
 
 /**
@@ -108,7 +115,10 @@ export const fetchCalendarRange = async (
         calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
       );
       classes.push(
-        ...weekClasses.filter(c => c.date >= first && c.date <= last),
+        ...weekClasses.filter(c => {
+          const day = beijingDate(Date.parse(c.start));
+          return day >= first && day <= last;
+        }),
       );
     } catch (error) {
       lastError = error;

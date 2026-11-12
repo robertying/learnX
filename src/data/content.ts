@@ -1,6 +1,5 @@
 import { queryOptions, useMutation, useQuery } from '@tanstack/react-query';
 import {
-  CourseType,
   type ExcellentHomework,
   type Homework,
   type CourseNotificationBase,
@@ -396,11 +395,9 @@ const fetchNotices = async (courseId: string, cached: Notice[]) => {
       old.attachment?.name === notice.attachmentName
     );
   };
-  const notices = await dataSource.getNotificationList(
-    courseId,
-    CourseType.STUDENT,
-    { attachments: notice => !isUnchanged(notice) },
-  );
+  const notices = await dataSource.getNotificationList(courseId, {
+    attachments: notice => !isUnchanged(notice),
+  });
   return notices.map(notice =>
     notice.attachmentName && !notice.attachment && isUnchanged(notice)
       ? { ...notice, attachment: known.get(notice.id)!.attachment }
@@ -476,11 +473,9 @@ const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
       )
     );
   };
-  const homework = await dataSource.getHomeworkList(
-    courseId,
-    CourseType.STUDENT,
-    { details: item => !isUnchanged(item) },
-  );
+  const homework = await dataSource.getHomeworkList(courseId, {
+    details: item => !isUnchanged(item),
+  });
   return homework.map(item => {
     const old = known.get(item.id);
     // The library leaves the excellent homework out (undefined, not `[]`)
@@ -523,7 +518,7 @@ export const useAssignments = () => {
  * so does the course, which keeps what was cached.
  */
 const fetchFiles = (courseId: string) =>
-  dataSource.getFileList(courseId, CourseType.STUDENT, { favorites: true });
+  dataSource.getFileList(courseId, { favorites: true });
 
 const files = createContent<File>({
   name: 'files',
