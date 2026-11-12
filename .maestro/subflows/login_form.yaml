@@ -14,6 +14,10 @@ env:
 - tapOn:
     id: login-username
 - inputText: ${USERNAME}
+# Return moves the focus to the password field. A tap alone sometimes misses
+# it in iPad landscape, and the password ends up in the account field; the
+# tap is then a no-op on the focused field.
+- pressKey: Enter
 - tapOn:
     id: login-password
 - inputText: ${PASSWORD}
