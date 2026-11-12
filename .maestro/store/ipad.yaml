@@ -97,10 +97,11 @@ name: App Store screenshots on the iPad
 # The first row (MOCK_COURSE), swiped by its position as for notices, but
 # to the right: Hide is a course's leading swipe action.
 - assertVisible: '.*(${MOCK_COURSE}).*'
-# A short drag, as for notices: farther runs Hide.
+# A short drag from the middle of the row (a shorter one doesn't move it):
+# farther runs Hide.
 - swipe:
-    start: 23%,19%
-    end: 28%,19%
+    start: 30%,19%
+    end: 40%,19%
     duration: 800
 - waitForAnimationToEnd
 - assertVisible:
