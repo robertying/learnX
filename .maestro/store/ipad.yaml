@@ -30,8 +30,11 @@ name: App Store screenshots on the iPad
 - swipe:
     start: 42%,19%
     end: 24%,19%
-    duration: 500
+    duration: 800
 - waitForAnimationToEnd
+# Fail here, not in the shot, if the actions didn't open.
+- assertVisible:
+    id: card-fav
 - tapOn: '${T_filter}'
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -90,11 +93,14 @@ name: App Store screenshots on the iPad
 # The first row (MOCK_COURSE), swiped by its position as for notices, but
 # to the right: Hide is a course's leading swipe action.
 - assertVisible: '.*(${MOCK_COURSE}).*'
+# A short drag: past about half the row, the swipe runs Hide.
 - swipe:
     start: 24%,19%
-    end: 42%,19%
+    end: 32%,19%
     duration: 800
 - waitForAnimationToEnd
+- assertVisible:
+    id: card-hide
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:
