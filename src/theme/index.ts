@@ -12,10 +12,20 @@ import {
 
 /**
  * The brand color: Tsinghua purple, and the lighter tone of it used in dark
- * mode. The iOS `ThemeColor` asset, Android's `colors.xml`, `Colors.theme` and
+ * mode. The iOS `ThemeColor` asset, Android's `colors.xml`, `brandColor` and
  * the widgets use these same two values (checked by `brand.test.ts`).
  */
 export const brandColors = { light: '#660874', dark: '#F4ABFF' } as const;
+
+/**
+ * The brand color for the system appearance, for static styles and options
+ * that take one color (a dynamic color on iOS, the light one on Android).
+ * Inside components, prefer `useTheme().colors.primary`.
+ */
+export const brandColor =
+  Platform.OS === 'ios'
+    ? (DynamicColorIOS(brandColors) as unknown as string)
+    : brandColors.light;
 
 // Material 3 tokens from `@material/material-color-utilities`
 // (`SchemeTonalSpot`, seed #660874), with the primary roles set to the brand

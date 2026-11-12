@@ -1,6 +1,6 @@
 import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { Text } from 'components/Text';
 
 export interface HeaderTitleProps {
@@ -17,8 +17,7 @@ const maxFontSizeMultiplier = 1.3;
 const HeaderTitle: React.FC<HeaderTitleProps> = ({ title, subtitle }) => {
   const { width } = useWindowDimensions();
   // Wide windows (tablets, unfolded foldables) get the roomy header, like the split view.
-  const isWide =
-    DeviceInfo.isTablet() || width > Numbers.splitViewMaxCollapsedWidth;
+  const isWide = DeviceInfo.isTablet() || width > SplitSizes.maxCollapsedWidth;
 
   return (
     <View
@@ -62,7 +61,8 @@ const styles = StyleSheet.create({
   },
 });
 
-const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
+// From iOS 26 the header shows a subtitle itself.
+const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
 
 export const getTitleOptions = (title: string, subtitle?: string) => {
   return supportsNativeSubtitle

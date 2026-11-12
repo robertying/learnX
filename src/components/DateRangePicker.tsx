@@ -5,7 +5,6 @@ import {
   Button,
   DatePicker,
   Form,
-  Host,
   NavigationStack,
   Section,
   Toolbar,
@@ -18,6 +17,7 @@ import {
   tint,
 } from '@expo/ui/swift-ui/modifiers';
 import { useTheme } from 'theme';
+import ThemedHost from 'components/ThemedHost';
 import type { DateRangePickerProps } from './DateRangePicker.shared';
 
 export type { DateRangePickerProps } from './DateRangePicker.shared';
@@ -33,7 +33,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = props => {
 
   // SwiftUI presents the sheet over the whole window, wherever this sits.
   return (
-    <Host style={styles.anchor}>
+    <ThemedHost style={styles.anchor}>
       <BottomSheet
         isPresented={visible}
         onIsPresentedChange={isPresented => {
@@ -46,7 +46,7 @@ const DateRangePicker: React.FC<DateRangePickerProps> = props => {
         {/* Mounted per presentation, so each opening starts from the props. */}
         <DateRangeSheet {...props} />
       </BottomSheet>
-    </Host>
+    </ThemedHost>
   );
 };
 

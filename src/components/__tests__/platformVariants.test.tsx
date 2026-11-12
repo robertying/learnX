@@ -56,7 +56,7 @@ describe('HeaderTitle', () => {
       let options: ReturnType<typeof getTitleOptions> = {} as never;
       jest.isolateModules(() => {
         jest.doMock('constants/DeviceInfo', () => ({
-          supportsNativeSubtitle: () => nativeSubtitle,
+          hasLiquidGlass: () => nativeSubtitle,
         }));
         options = require('components/HeaderTitle').getTitleOptions('T', 'S');
       });

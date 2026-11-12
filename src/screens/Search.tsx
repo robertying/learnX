@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginVertical: -1,
+    marginVertical: 1,
   },
 });
 

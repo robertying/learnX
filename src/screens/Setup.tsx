@@ -170,8 +170,8 @@ const styles = StyleSheet.create({
   title: {
     textAlign: Platform.OS === 'android' ? 'auto' : 'center',
     paddingHorizontal: 24,
-    paddingTop: 32,
-    paddingBottom: 8,
+    paddingTop: 34,
+    paddingBottom: 10,
   },
 });
 

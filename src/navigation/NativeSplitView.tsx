@@ -18,7 +18,7 @@ import {
 import type { Metrics } from 'react-native-safe-area-context';
 import { Split } from 'react-native-screens/experimental';
 import type { SplitDisplayMode } from 'react-native-screens/experimental';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { SplitViewContext } from './SplitView';
 
 export interface NativeSplitViewProps {
@@ -214,7 +214,7 @@ const NativeSplitViewProvider: React.FC<
         showDetail,
         showMaster,
         toggleMaster,
-        masterWidth: masterWidth ?? Numbers.splitViewMasterWidth,
+        masterWidth: masterWidth ?? SplitSizes.masterWidth,
       }}
     >
       {enabled ? (
@@ -226,7 +226,7 @@ const NativeSplitViewProvider: React.FC<
           // The window can't be made narrower than the list beside this.
           columnMetrics={
             hasSidebar
-              ? { minimumSecondaryColumnWidth: Numbers.splitViewMinDetailWidth }
+              ? { minimumSecondaryColumnWidth: SplitSizes.minDetailWidth }
               : undefined
           }
           // In the sidebar's bar, which is in the window's title bar on Mac.
@@ -237,7 +237,7 @@ const NativeSplitViewProvider: React.FC<
           // behind a resize (or the hinge, which is handled natively too).
           // Collapsed, the sidebar would be out of reach.
           maxCollapsedWidth={
-            hasSidebar ? undefined : Numbers.splitViewMaxCollapsedWidth
+            hasSidebar ? undefined : SplitSizes.maxCollapsedWidth
           }
           onCollapse={() => setExpanded(false)}
           onExpand={() => setExpanded(true)}

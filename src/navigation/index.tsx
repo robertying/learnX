@@ -17,7 +17,7 @@ import {
 } from './types';
 import Splash from 'components/Splash';
 import { SplitViewProvider } from './SplitView';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { trackScreen } from 'services/crashReporting';
 import { reportDetailReady } from 'hooks/useDetailNavigator';
 import { useNavigationTheme } from 'theme';
@@ -89,7 +89,7 @@ const AndroidMain = () => {
   const detailNavigationContainerRef =
     useRef<NavigationContainerRef<DetailStackParams>>(null);
 
-  const showDetail = frame.width > Numbers.splitViewMaxCollapsedWidth;
+  const showDetail = frame.width > SplitSizes.maxCollapsedWidth;
 
   return (
     <SplitViewProvider

@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import { AppState, AppStateStatus, Text } from 'react-native';
 import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { act, render, screen } from '@testing-library/react-native';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import NativeSplitViewProvider, {
   useSplitLaidOut,
 } from 'navigation/NativeSplitView';
@@ -78,7 +78,7 @@ it('shows only the master pane without the split', async () => {
   expect(context()).toMatchObject({
     detailNavigationContainerRef: null,
     showDetail: false,
-    masterWidth: Numbers.splitViewMasterWidth,
+    masterWidth: SplitSizes.masterWidth,
   });
 });
 
@@ -88,7 +88,7 @@ it('lays the panes side by side until UIKit collapses them', async () => {
     preferredDisplayMode: 'oneBesideSecondary',
     displayModeButtonVisibility: 'never',
     topColumnForCollapsing: 'primary',
-    maxCollapsedWidth: Numbers.splitViewMaxCollapsedWidth,
+    maxCollapsedWidth: SplitSizes.maxCollapsedWidth,
   });
   expect(mockColumns).toHaveLength(2);
   expect(context().detailNavigationContainerRef).toBe(ref);
@@ -145,7 +145,7 @@ describe('with a sidebar', () => {
       topColumnForCollapsing: 'supplementary',
       maxCollapsedWidth: undefined,
       columnMetrics: {
-        minimumSecondaryColumnWidth: Numbers.splitViewMinDetailWidth,
+        minimumSecondaryColumnWidth: SplitSizes.minDetailWidth,
       },
     });
   });

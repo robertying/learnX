@@ -332,7 +332,6 @@ describe('on iPad and Mac', () => {
         isIPad: () => !mac,
         isMac: () => mac,
         hasLiquidGlass: () => false,
-        supportsNativeSubtitle: () => false,
       }));
       jest.doMock('../../../jest/mocks/menus', () => shared.menus);
       Card = require('components/CardWrapper').default;
