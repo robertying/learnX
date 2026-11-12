@@ -1,4 +1,5 @@
 import type { AppStateStatus } from 'react-native';
+import { CancelledError } from '@tanstack/react-query';
 
 /**
  * Saving lists changed in place. The module listens to the app state as it
@@ -63,4 +64,38 @@ it('saves at once when the app leaves the foreground, and only with changes', as
   clearQueryCache();
   appStateListener('background');
   expect(await saved()).toBeUndefined();
+});
+
+it("doesn't write back a response that arrives as the cache is cleared", async () => {
+  let respond: (value: string[]) => void = () => {};
+  const fetching = queryClient
+    .fetchQuery({
+      queryKey: key,
+      queryFn: () => new Promise<string[]>(resolve => (respond = resolve)),
+    })
+    .catch((err: unknown) => err);
+  await jest.advanceTimersByTimeAsync(0);
+
+  // Logged out with the fetch still running: clearing cancels the query, but
+  // the request itself still comes back.
+  clearQueryCache();
+  expect(await fetching).toBeInstanceOf(CancelledError);
+  respond(['old account']);
+  await jest.advanceTimersByTimeAsync(0);
+  expect(await saved()).toBeUndefined();
+
+  // Arrived, then logged out before its write, and the list asked for again
+  await queryClient.fetchQuery({ queryKey: key, queryFn: () => ['old'] });
+  clearQueryCache();
+  const refetching = queryClient
+    .fetchQuery({ queryKey: key, queryFn: () => new Promise(() => {}) })
+    .catch((err: unknown) => err);
+  await jest.advanceTimersByTimeAsync(0);
+  expect(await saved()).toBeUndefined();
+  expect(await refetching).toBeInstanceOf(CancelledError);
+
+  // Written as usual otherwise
+  await queryClient.fetchQuery({ queryKey: key, queryFn: () => ['new'] });
+  await jest.advanceTimersByTimeAsync(0);
+  expect(await saved()).toEqual(['new']);
 });
