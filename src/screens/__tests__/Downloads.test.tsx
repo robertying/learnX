@@ -14,6 +14,7 @@ import {
 } from 'services/files/downloads';
 import { exportDownloads } from 'services/files/export';
 import { t } from 'helpers/i18n';
+import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import Downloads from 'screens/Downloads';
 
@@ -24,6 +25,7 @@ jest.mock('services/files/downloads', () => ({
 }));
 jest.mock('services/files/export', () => ({ exportDownloads: jest.fn() }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
+jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useFocusEffect: (effect: () => void) =>
@@ -53,6 +55,13 @@ const pressAlertButton = async (text: string) => {
   });
 };
 const confirmDelete = () => pressAlertButton(t('delete'));
+/** Picks `label` in the last course menu. */
+const pressChoice = async (label: string) => {
+  const { choices } = jest.mocked(showChoices).mock.calls.at(-1)![0];
+  await act(async () => {
+    choices.find(choice => choice.label === label)!.onPress();
+  });
+};
 
 it('sums the downloads and lists each course with its count and size', async () => {
   await renderScreen();
@@ -78,10 +87,10 @@ it('shows only the total without downloads', async () => {
 it("deletes a course's files once confirmed, then lists again", async () => {
   await renderScreen();
   await userEvent.press(screen.getByText('物理'));
-  expect(alert.mock.calls[0][0]).toBe('物理');
-  await pressAlertButton(t('delete'));
-  expect(alert.mock.calls[1][0]).toBe(t('downloadsDeleteCourse'));
-  expect(alert.mock.calls[1][1]).toContain('物理');
+  expect(jest.mocked(showChoices).mock.calls[0][0].title).toBe('物理');
+  await pressChoice(t('delete'));
+  expect(alert.mock.calls[0][0]).toBe(t('downloadsDeleteCourse'));
+  expect(alert.mock.calls[0][1]).toContain('物理');
   expect(removeCourseDownloads).not.toHaveBeenCalled();
 
   jest.mocked(listDownloads).mockReturnValue([courses[0]] as never);
@@ -128,7 +137,7 @@ it('exports all downloads or one course, and says how it went', async () => {
     .mocked(exportDownloads)
     .mockResolvedValueOnce({ exported: 1, failed: 2 });
   await userEvent.press(screen.getByText('微积分'));
-  await pressAlertButton(t('downloadsExportCourse'));
+  await pressChoice(t('downloadsExportCourse'));
   expect(exportDownloads).toHaveBeenLastCalledWith('c1');
   expect(toast).toHaveBeenLastCalledWith(
     t('downloadsExportedPartly', { files: t('downloadsOneFile'), failed: 2 }),
@@ -148,14 +157,6 @@ it('says nothing when the folder picker is cancelled, and why export failed', as
     t('downloadsExportFailed', { error: 'denied' }),
     'error',
   );
-});
-
-it('cancels the course menu without doing anything', async () => {
-  await renderScreen();
-  await userEvent.press(screen.getByText('物理'));
-  await pressAlertButton(t('cancel'));
-  expect(exportDownloads).not.toHaveBeenCalled();
-  expect(removeCourseDownloads).not.toHaveBeenCalled();
 });
 
 describe('open files after downloading', () => {

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
-import { ActionSheetIOS, Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
+import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import { mockAssignments } from 'data/mock';
 import { saveSubmissionDraft } from 'data/submissionDrafts';
@@ -14,6 +15,7 @@ import {
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
+jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
 let mockAssignment: Assignment | undefined;
 jest.mock('data/content', () => ({ useAssignment: () => mockAssignment }));
 jest.mock('hooks/useAssignmentSubmission', () => ({
@@ -70,8 +72,6 @@ const submitItem = () =>
     onPress: () => void;
   };
 
-const os = Platform.OS;
-
 beforeEach(() => {
   picker.picked = null;
   picker.isShared = false;
@@ -85,7 +85,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  Platform.OS = os;
   saveSubmissionDraft(unsubmitted.id, null);
 });
 
@@ -143,37 +142,22 @@ it('stops saving the draft and goes back once submitted', async () => {
   expect(navigation.goBack).toHaveBeenCalled();
 });
 
-it('picks from documents or photos in an action sheet on iOS', async () => {
-  Platform.OS = 'ios';
-  const sheet = jest
-    .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
-    .mockImplementation(() => {});
+it('picks from documents or photos, closing the menu when cancelled', async () => {
   await renderScreen();
   await userEvent.press(screen.getByTestId('pickAttachment'));
   expect(picker.openMenu).toHaveBeenCalled();
-  const choose = sheet.mock.calls[0][1];
-  choose(0);
-  expect(picker.pickDocument).toHaveBeenCalled();
-  choose(1);
-  expect(picker.pickPhoto).toHaveBeenCalled();
-  choose(2);
-  expect(picker.closeMenu).toHaveBeenCalled();
-});
-
-it('asks in an alert on Android, closing the menu when dismissed', async () => {
-  Platform.OS = 'android';
-  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
-  await renderScreen();
-  await userEvent.press(screen.getByTestId('pickAttachment'));
-  const [, , buttons, options] = alert.mock.calls[0];
-  expect(buttons!.map(b => b.text)).toEqual([
-    t('cancel'),
-    t('photos'),
+  const { title, choices, onCancel } =
+    jest.mocked(showChoices).mock.calls[0][0];
+  expect(title).toBe(t('pickAttachment'));
+  expect(choices.map(choice => choice.label)).toEqual([
     t('documents'),
+    t('photos'),
   ]);
-  buttons![2].onPress!();
+  choices[0].onPress();
   expect(picker.pickDocument).toHaveBeenCalled();
-  options!.onDismiss!();
+  choices[1].onPress();
+  expect(picker.pickPhoto).toHaveBeenCalled();
+  onCancel!();
   expect(picker.closeMenu).toHaveBeenCalled();
 });
 

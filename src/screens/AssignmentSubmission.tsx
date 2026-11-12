@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useState } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { ActionSheetIOS, Alert, Platform } from 'react-native';
+import { Alert } from 'react-native';
+import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import {
   Form,
@@ -161,41 +162,26 @@ const AssignmentSubmissionContent: React.FC<{
     );
   };
 
-  // The system's own choice sheet: an action sheet on iOS and Mac, an alert
-  // on Android.
   const handlePickerOpen = () => {
     handlePickerMenuOpen();
-    const options = [t('documents'), t('photos'), t('cancel')];
-    const handleChoice = (index: number) => {
-      if (index === 0) {
-        void handleDocumentPick();
-      } else if (index === 1) {
-        void handlePhotoPick();
-      } else {
-        handlePickerMenuClose();
-      }
-    };
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
+    showChoices({
+      title: t('pickAttachment'),
+      choices: [
         {
-          title: t('pickAttachment'),
-          options,
-          cancelButtonIndex: 2,
+          label: t('documents'),
+          onPress: () => {
+            void handleDocumentPick();
+          },
         },
-        handleChoice,
-      );
-    } else {
-      Alert.alert(
-        t('pickAttachment'),
-        undefined,
-        [
-          { text: options[2], style: 'cancel', onPress: () => handleChoice(2) },
-          { text: options[1], onPress: () => handleChoice(1) },
-          { text: options[0], onPress: () => handleChoice(0) },
-        ],
-        { cancelable: true, onDismiss: () => handleChoice(2) },
-      );
-    }
+        {
+          label: t('photos'),
+          onPress: () => {
+            void handlePhotoPick();
+          },
+        },
+      ],
+      onCancel: handlePickerMenuClose,
+    });
   };
 
   const showUploadError = useEffectEvent(() => {

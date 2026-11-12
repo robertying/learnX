@@ -11,6 +11,7 @@ import {
 import { exportDownloads } from 'services/files/export';
 import { formatFileSize } from 'helpers/filename';
 import { t, tCount } from 'helpers/i18n';
+import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import {
   Form,
@@ -145,17 +146,19 @@ const Downloads: React.FC<Props> = () => {
                 detail={summary(course)}
                 disabled={exporting}
                 onPress={() =>
-                  Alert.alert(
-                    course.courseName,
-                    summary(course),
-                    [
+                  showChoices({
+                    title: course.courseName,
+                    message: summary(course),
+                    choices: [
                       {
-                        text: t('downloadsExportCourse'),
-                        onPress: () => exportFiles(course.courseId),
+                        label: t('downloadsExportCourse'),
+                        onPress: () => {
+                          void exportFiles(course.courseId);
+                        },
                       },
                       {
-                        text: t('delete'),
-                        style: 'destructive',
+                        label: t('delete'),
+                        destructive: true,
                         onPress: () =>
                           confirm(
                             t('downloadsDeleteCourse'),
@@ -166,10 +169,8 @@ const Downloads: React.FC<Props> = () => {
                             }),
                           ),
                       },
-                      { text: t('cancel'), style: 'cancel' },
                     ],
-                    { cancelable: true },
-                  )
+                  })
                 }
               />
             ))}
