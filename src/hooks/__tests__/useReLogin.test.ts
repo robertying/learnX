@@ -25,14 +25,12 @@ beforeEach(async () => {
   jest.useFakeTimers();
   // The preset's AppState has no state of its own.
   (AppState as { currentState: string }).currentState = 'active';
-  jest.mocked(login).mockClear();
   useAuthStore.setState(initialAuth);
   await saveCredentials(credentials);
 });
 
 afterEach(async () => {
   jest.useRealTimers();
-  jest.restoreAllMocks();
   await clearCredentials();
 });
 

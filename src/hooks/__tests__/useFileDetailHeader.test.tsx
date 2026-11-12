@@ -50,11 +50,6 @@ const items = () =>
     onPress: () => void;
   }[];
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 it('shows refresh, share and info for a downloaded file', async () => {
   await renderHook(() =>
     useFileDetailHeader({ navigation: navigation(), ...props }),
@@ -82,7 +77,7 @@ it('disables the file actions until it has downloaded', async () => {
 
 it('adds download on the Mac and open on Android, info only when shown inline', async () => {
   const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await renderHook(() =>
     useFileDetailHeader({
       navigation: navigation(),

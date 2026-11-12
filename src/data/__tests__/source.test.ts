@@ -221,12 +221,10 @@ describe('picking the server', () => {
         fingerGenPrint3: 'g3',
       },
     });
-  const os = Platform.OS;
 
   afterEach(() => {
     useCredentialsStore.setState({ credentials: null });
     endSession();
-    Platform.OS = os;
   });
 
   it('keeps to the server a login started with, whatever login is saved', async () => {
@@ -268,7 +266,7 @@ describe('picking the server', () => {
 
   it('picks by the account a new login names, not the stored one', async () => {
     credentials('mock-user');
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     const credential = { username: '2020000000', password: 'p' };
     await loginWithFingerPrint(credential);
     expect(mockLogin).toHaveBeenCalledWith(credential);
@@ -279,7 +277,7 @@ describe('picking the server', () => {
   });
 
   it("clears the SSO page's id.tsinghua.edu.cn cookies from both iOS stores", async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     jest
       .mocked(CookieManager.get)
       .mockImplementation((_url, options) =>
@@ -311,7 +309,7 @@ describe('picking the server', () => {
   });
 
   it('empties the SSO cookies by hand on Android', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest
       .mocked(CookieManager.get)
       .mockResolvedValueOnce({ singleLogin: {} } as never);

@@ -96,9 +96,6 @@ beforeEach(() => {
   resetUserData();
   setCurrentSemester(semesterId);
   mockSavedCredentials = mockCredentials;
-  jest.restoreAllMocks();
-  jest.mocked(ensureSession).mockClear();
-  jest.mocked(recordError).mockClear();
   resetSyncLog();
 });
 

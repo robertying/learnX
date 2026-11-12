@@ -29,15 +29,12 @@ jest.mock('screens/StoreReport', () => {
   };
 });
 
-const os = Platform.OS;
-
 afterEach(() => {
-  Platform.OS = os;
   setMockNetworkConfig(defaultMockNetworkConfig);
 });
 
 it('reads the latency from the launch arguments on iOS', () => {
-  Platform.OS = 'ios';
+  jest.replaceProperty(Platform, 'OS', 'ios');
   mockSettingsGet.mockReturnValue('none');
 
   applyLaunchOptions({ mockLatency: 'slow' });
@@ -47,7 +44,7 @@ it('reads the latency from the launch arguments on iOS', () => {
 });
 
 it('reads the latency from the initial props on Android', () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
 
   applyLaunchOptions({ mockLatency: 'slow' });
 
@@ -56,10 +53,10 @@ it('reads the latency from the initial props on Android', () => {
 });
 
 it('ignores missing and unknown values', () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   applyLaunchOptions();
   applyLaunchOptions({ mockLatency: 'instant' });
-  Platform.OS = 'ios';
+  jest.replaceProperty(Platform, 'OS', 'ios');
   mockSettingsGet.mockReturnValue(undefined);
   applyLaunchOptions();
 
@@ -77,13 +74,13 @@ describe('live login', () => {
   });
 
   it('reads it from the initial props on Android', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     applyLaunchOptions(live);
     expect(getLiveLogin()).toEqual({ username: 'student', fingerPrint: 'fp' });
   });
 
   it('reads it from the launch arguments on iOS', () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     mockSettingsGet.mockImplementation(
       key => (live as Record<string, string>)[key],
     );
@@ -92,7 +89,7 @@ describe('live login', () => {
   });
 
   it('needs both values', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     applyLaunchOptions({ liveUsername: 'student', liveFingerprint: '' });
     expect(getLiveLogin()).toBeUndefined();
     applyLaunchOptions({ liveUsername: 1, liveFingerprint: 'fp' });
@@ -100,7 +97,7 @@ describe('live login', () => {
   });
 
   it('is ignored by release builds without E2E_LIVE', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
     applyLaunchOptions(live);
     expect(getLiveLogin()).toBeUndefined();
@@ -113,7 +110,7 @@ describe('live login', () => {
 
 describe('withLaunchOptions', () => {
   beforeEach(() => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
   });
 
   it('applies the launch arguments before the app renders', async () => {
@@ -143,12 +140,12 @@ describe('withLaunchOptions', () => {
 
 describe('store report', () => {
   it('is on for true, as a string or a boolean', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     expect(applyLaunchOptions({ storeReport: 'true' }).storeReport).toBe(true);
     expect(applyLaunchOptions({ storeReport: true }).storeReport).toBe(true);
     expect(applyLaunchOptions({ storeReport: 'yes' }).storeReport).toBe(false);
     expect(applyLaunchOptions().storeReport).toBe(false);
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     mockSettingsGet.mockImplementation(key =>
       key === 'storeReport' ? 'true' : undefined,
     );
@@ -156,7 +153,7 @@ describe('store report', () => {
   });
 
   it('replaces the app', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     const Root = withLaunchOptions(() => createElement(Text, null, 'app'));
 
     const screen = await render(createElement(Root, { storeReport: 'true' }));

@@ -160,18 +160,14 @@ it('says nothing when the folder picker is cancelled, and why export failed', as
 });
 
 describe('open files after downloading', () => {
-  const os = Platform.OS;
   beforeEach(() => resetSettings());
-  afterEach(() => {
-    Platform.OS = os;
-  });
 
   it('is offered on Android only', async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await renderScreen();
     expect(screen.queryByLabelText(t('openFileAfterDownload'))).toBeNull();
 
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     await renderScreen();
     const value = getSettings().openFileAfterDownload;
     await fireEvent(

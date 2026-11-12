@@ -8,9 +8,16 @@ const base = {
   // Loads Reanimated's and Worklets' web builds instead of the native ones
   resolver: 'react-native-reanimated/jest/resolver',
   setupFiles: ['<rootDir>/jest/setup.ts'],
-  // Every test starts with fresh call records on every mock.
+  setupFilesAfterEnv: ['<rootDir>/jest/setupAfterEnv.ts'],
+  // Every test starts with fresh call records on every mock, and spies and
+  // replaced properties (jest.replaceProperty(Platform, 'OS', 'android'))
+  // go back to the real thing.
   clearMocks: true,
+  restoreMocks: true,
   transform: {
+    // Before the preset's babel-jest: a cache key that covers the files these
+    // read at transform time
+    '/src/helpers/preval/[^/]+\\.preval\\.js$': '<rootDir>/jest/transformer.js',
     '^.+\\.mjs$': 'babel-jest',
   },
   transformIgnorePatterns: [

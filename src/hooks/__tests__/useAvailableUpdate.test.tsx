@@ -16,11 +16,7 @@ const wrapper = ({ children }: { children: ReactNode }) =>
   createElement(QueryClientProvider, { client: queryClient }, children);
 
 describe('useAvailableUpdate', () => {
-  const os = Platform.OS;
   beforeEach(() => clearQueryCache());
-  afterEach(() => {
-    Platform.OS = os;
-  });
 
   /** What the hook offers once the check for this latest release has answered. */
   const offered = async (version: string) => {
@@ -39,7 +35,7 @@ describe('useAvailableUpdate', () => {
   };
 
   it('offers a newer Android release than the installed app', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     const result = await offered('19.1.0');
     await waitFor(() =>
       expect(result.current).toMatchObject({ version: '19.1.0' }),
@@ -47,14 +43,14 @@ describe('useAvailableUpdate', () => {
   });
 
   it('offers nothing as new or older', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     expect((await offered('19.0.0')).current).toBeNull();
     clearQueryCache();
     expect((await offered('18.9.0')).current).toBeNull();
   });
 
   it("doesn't check outside Android, where the stores update the app", async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     const { result } = await renderHook(() => useAvailableUpdate(), {
       wrapper,
     });

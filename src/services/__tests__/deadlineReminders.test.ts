@@ -50,11 +50,6 @@ beforeEach(() => {
   scheduled.mockResolvedValue([]);
 });
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 describe('planDeadlineReminders', () => {
   it('reminds of open assignments the offset before, earliest first', () => {
     const plan = planDeadlineReminders(
@@ -240,7 +235,7 @@ describe('syncDeadlineReminders', () => {
   });
 
   it('marks reminders that Android may hold back, to redo them once allowed', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest
       .mocked(Notifications.getExactAlarmPermissionsAsync)
       .mockResolvedValueOnce({ granted: false } as never);
@@ -319,7 +314,7 @@ describe('remindLater', () => {
   });
 
   it('replaces the put-off reminder, its text as of when it shows again', async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     const deadline = now + 5 * hour;
     await remindLater(notification, { id: 'a', deadline, kind: 'lateDue' });
     expect(schedule).toHaveBeenCalledWith({
@@ -338,7 +333,7 @@ describe('remindLater', () => {
   });
 
   it('posts to the deadlines channel on Android', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     await remindLater(
       { request: { content: {} } } as unknown as Notifications.Notification,
       { id: 'a', deadline: now + 5 * hour },

@@ -19,11 +19,6 @@ const learn = 'https://learn.tsinghua.edu.cn';
 const webView = () => screen.getByTestId('webview').props as WebViewProps;
 const height = () => (webView().style as { height: number }[]).flat()[0].height;
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 const renderView = async (props: WebViewProps = {}) => {
   await render(<AutoHeightWebView source={{ html: '<p>Hi</p>' }} {...props} />);
   // Lets the cookie copy finish.
@@ -116,7 +111,7 @@ describe('loads', () => {
     } as never);
 
   it('keeps its own page on iOS and opens tapped web and mail links outside', async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await renderView();
     expect(shouldLoad({ url: 'about:blank', navigationType: 'other' })).toBe(
       true,
@@ -138,7 +133,7 @@ describe('loads', () => {
   });
 
   it('treats every load the page starts on Android as a link', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     await renderView();
     expect(shouldLoad({ url: 'mailto:ta@example.com' })).toBe(false);
     expect(open).toHaveBeenCalledWith('mailto:ta@example.com');

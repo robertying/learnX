@@ -39,10 +39,6 @@ const LEGACY = 'learnX Files';
 const fetchMock = jest.fn(() => Promise.resolve(new Response()));
 globalThis.fetch = fetchMock as typeof fetch;
 
-const os = Platform.OS;
-const setOS = (value: typeof Platform.OS) =>
-  Object.defineProperty(Platform, 'OS', { value, configurable: true });
-
 const file = {
   id: 'f1',
   courseId: 'c1',
@@ -65,10 +61,8 @@ const calculus = {
 beforeEach(() => {
   __fs.reset();
   jest.mocked(getCachedCourses).mockReturnValue([]);
-  setOS('ios');
+  jest.replaceProperty(Platform, 'OS', 'ios');
 });
-
-afterAll(() => setOS(os));
 
 describe('getDownloadedFile', () => {
   it('keeps each file in <course id>/<file id>/ under downloads in Caches', () => {
@@ -139,7 +133,7 @@ describe('downloadFile', () => {
   });
 
   it('sends the login cookies on Android, only to Web Learning', async () => {
-    setOS('android');
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest.mocked(CookieManager.get).mockResolvedValue({
       a: { name: 'JSESSIONID', value: 'session' },
       b: { name: 'XSRF-TOKEN', value: 'token' },

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { Platform } from 'react-native';
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -46,8 +47,6 @@ const renderScreen = () =>
 const toggle = (label: string, value: boolean) =>
   fireEvent(screen.getByRole('switch', { name: label }), 'valueChange', value);
 
-const os = Platform.OS;
-
 const requestAccess = jest.fn();
 const access = (
   overrides: Partial<ReturnType<typeof useCalendarAccess>> = {},
@@ -73,10 +72,6 @@ beforeEach(() => {
   jest
     .mocked(useCalendarExport)
     .mockReturnValue({ exporting: false, exportToICS });
-});
-
-afterEach(() => {
-  Platform.OS = os;
 });
 
 it('saves the course schedule settings and opens the range picker', async () => {
@@ -143,7 +138,7 @@ it('shows the event length and alarm options while calendar sync is on', async (
 });
 
 it('leaves the Reminders section out on Android', async () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await renderScreen();
   expect(screen.queryByText(t('setupReminders'))).toBeNull();
   expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
@@ -189,7 +184,7 @@ it('says when each sync last finished, while it is on', async () => {
   });
   expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(1);
 
-  setSetting('assignmentCalendarSync', true);
+  await act(() => setSetting('assignmentCalendarSync', true));
   await renderScreen();
   expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(2);
   // On the caption's next line, not a paragraph of its own.
@@ -201,7 +196,7 @@ it('says when each sync last finished, while it is on', async () => {
 
 describe('access', () => {
   beforeEach(() => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
   });
 
   it('says nothing while the syncs are off, even without access', async () => {

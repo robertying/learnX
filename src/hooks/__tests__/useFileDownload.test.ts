@@ -149,10 +149,6 @@ describe('useFileDownload', () => {
       jest.replaceProperty(Platform, 'OS', 'android');
     });
 
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
     it('opens with the file type', async () => {
       const { result } = await setup();
       await waitFor(() => expect(result.current.path).toBe(PATH));

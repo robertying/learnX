@@ -8,8 +8,6 @@ const RN: typeof ReactNative = require('react-native');
 const style = (node: { props: { style?: unknown } }) =>
   StyleSheet.flatten(node.props.style as never);
 
-afterEach(() => jest.restoreAllMocks());
-
 describe('CardPill', () => {
   it('writes in the text shade of the system color, over a light tint of it', async () => {
     await render(<CardPill tone="orange">Due soon</CardPill>);

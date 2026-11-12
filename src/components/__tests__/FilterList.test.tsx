@@ -251,7 +251,7 @@ it('shows the sync status at the top of the list, where it scrolls with it', asy
   const list = screen.getByTestId('filter-list');
   expect(within(list).getByTestId('sync-status')).toBeTruthy();
   expect(within(list).getByText(t('syncStatusOffline'))).toBeTruthy();
-  useAuthStore.setState(initialAuth);
+  await act(() => useAuthStore.setState(initialAuth));
 });
 
 it('opens Course X in the detail pane when there is one', async () => {

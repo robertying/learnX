@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 import { HomeworkSubmissionType } from '@robertying/thu-learn-lib';
 import dayjs from 'dayjs';
 import { mockAssignments } from 'data/mock';
@@ -198,7 +198,7 @@ it('links an unsent draft to the submission page', async () => {
     'AssignmentSubmissionStack',
     expect.anything(),
   );
-  saveSubmissionDraft(open.id, null);
+  await act(() => saveSubmissionDraft(open.id, null));
 });
 
 describe('what each state of the assignment shows', () => {

@@ -10,13 +10,9 @@ jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('services/files/share', () => ({ copyFileToCache: jest.fn() }));
 
 const share = Share!;
-const os = Platform.OS;
-const setOS = (value: typeof Platform.OS) =>
-  Object.defineProperty(Platform, 'OS', { value, configurable: true });
-
 let listener: ((item: SharedItem) => void) | undefined;
 beforeEach(() => {
-  setOS('ios');
+  jest.replaceProperty(Platform, 'OS', 'ios');
   listener = undefined;
   usePendingAssignmentStore.setState({ data: null });
   jest.mocked(share.takeSharedItem).mockReturnValue(null);
@@ -25,7 +21,6 @@ beforeEach(() => {
     return { remove: jest.fn() };
   });
 });
-afterAll(() => setOS(os));
 
 const file: SharedItem = {
   kind: 'file',
@@ -52,7 +47,7 @@ describe('useShareHandler', () => {
   });
 
   it('copies an Android share out of its content URI', async () => {
-    setOS('android');
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest.mocked(copyFileToCache).mockResolvedValue('file:///cache/Report.pdf');
     await renderHook(() => useShareHandler());
     await act(async () => listener!({ ...file, uri: 'content://x/1' }));

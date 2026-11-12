@@ -361,7 +361,6 @@ describe('form helpers', () => {
 
 describe('Form (iOS details)', () => {
   const RN: typeof ReactNative = require('react-native');
-  afterEach(() => jest.restoreAllMocks());
 
   it('continues the grouped background into the header, and gives it back', async () => {
     const navigation = { setOptions: jest.fn() };

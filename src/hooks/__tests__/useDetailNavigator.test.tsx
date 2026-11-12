@@ -37,7 +37,6 @@ const wrapper = ({ children }: React.PropsWithChildren) => (
 
 beforeEach(() => {
   container.ready = false;
-  container.dispatch.mockClear();
 });
 
 it('waits for the detail stack to report that it is ready', async () => {

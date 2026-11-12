@@ -39,11 +39,6 @@ beforeEach(() => {
   scheduled.mockResolvedValue([]);
 });
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 describe('planClassReminders', () => {
   it('reminds the offset before each class, earliest first', () => {
     const plan = planClassReminders(
@@ -127,7 +122,7 @@ describe('syncClassReminders', () => {
   });
 
   it('uses the classes channel on Android and marks inexact reminders', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     jest
       .mocked(Notifications.getExactAlarmPermissionsAsync)
       .mockResolvedValueOnce({ granted: false } as never);

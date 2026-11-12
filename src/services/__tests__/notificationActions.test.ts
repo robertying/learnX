@@ -45,8 +45,6 @@ const response = (actionIdentifier: string, data: object) =>
       request: { identifier: 'notification-1', content: { data } },
     },
   }) as unknown as Notifications.NotificationResponse;
-
-const os = Platform.OS;
 const appState = AppState.currentState;
 
 beforeEach(() => {
@@ -54,7 +52,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  Platform.OS = os;
   AppState.currentState = appState;
   useAuthStore.setState(initialAuth);
 });
@@ -136,7 +133,7 @@ it('dismisses the notification on Android only', async () => {
   );
   expect(dismiss).not.toHaveBeenCalled();
 
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await handleNotificationAction(
     response('archive', { type: 'notice', id: 'n2' }),
   );
@@ -160,7 +157,7 @@ it('leaves sending a favorite to the app when it can', async () => {
 });
 
 it('ignores unknown actions and incomplete data', async () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   await handleNotificationAction(
     response('reply', { type: 'notice', id: 'n1' }),
   );
@@ -184,7 +181,7 @@ describe('setUpNotificationActions', () => {
   const registerTask = jest.mocked(Notifications.registerTaskAsync);
 
   it('handles the action that launched the app and later ones', async () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     lastResponse.mockReturnValue(
       response('archive', { type: 'notice', id: 'n1' }),
     );
@@ -212,7 +209,7 @@ describe('setUpNotificationActions', () => {
   });
 
   it('registers the background task on Android and records failures', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     lastResponse.mockReturnValue(null);
     registerTask.mockRejectedValueOnce(new Error('no task'));
     setUpNotificationActions();

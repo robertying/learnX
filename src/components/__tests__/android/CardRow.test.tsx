@@ -5,8 +5,6 @@ import CardRow, { CardGutter } from 'components/CardRow';
 const style = (node: { props: { style?: unknown } }) =>
   StyleSheet.flatten(node.props.style as never);
 
-afterEach(() => jest.restoreAllMocks());
-
 describe('CardRow (Android)', () => {
   it('sets only unread titles bolder, with no unread gutter', async () => {
     await render(

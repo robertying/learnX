@@ -6,8 +6,6 @@ import FlatList from 'components/FlatList';
 
 jest.mock('@shopify/flash-list', () => ({ FlashList: jest.fn(() => null) }));
 
-afterEach(() => jest.restoreAllMocks());
-
 it('pulls to refresh everywhere but on Mac, which has no pull', async () => {
   const refresh = (
     <RefreshControl testID="refresh" refreshing={false} onRefresh={() => {}} />
