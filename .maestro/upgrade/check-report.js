@@ -1,5 +1,5 @@
-// Checks the store report (screens/StoreReport) copied by 2_after_upgrade.yaml
-// against what 1_use_18.0.3.yaml did on 18.0.3, with 18.0.3's mock data
+// Checks the store report (screens/StoreReport) copied by 2-after-upgrade.yaml
+// against what 1-use-18.0.3.yaml did on 18.0.3, with 18.0.3's mock data
 // (src/data/mock.ts at v18.0.3). PHASE is `migrated` (first launch, before any
 // sync) or `synced` (after the app has run and synced). Sets
 // output.report.ok and logs every mismatch.

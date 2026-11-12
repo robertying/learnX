@@ -136,7 +136,7 @@ debug_dir="$(mktemp -d)"
 cleanup() {
   maestro "${device_args[@]+"${device_args[@]}"}" --platform "$platform" test \
     -e APP_ID="$app_id" --debug-output "$debug_dir" \
-    .maestro/subflows/clear_state.yaml >/dev/null ||
+    .maestro/subflows/clear-state.yaml >/dev/null ||
     echo "Couldn't clear the app's data: log out of the live account by hand" >&2
   rm -rf "$debug_dir"
 }

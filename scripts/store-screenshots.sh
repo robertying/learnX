@@ -15,8 +15,8 @@
 # can tap on its inner display yet) and open the hinge for each shot, so they
 # need the patched Maestro (scripts/maestro/build.sh) first on PATH.
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
-#   android-phone   .maestro/store/android_phone.yaml   android/phone/
-#   android-tablet  .maestro/store/android_tablet.yaml  android/tablet/
+#   android-phone   .maestro/store/android-phone.yaml   android/phone/
+#   android-tablet  .maestro/store/android-tablet.yaml  android/tablet/
 #   mac             ios/learnXUITests/StoreScreenshots.swift  macos/windows/
 #
 # mac runs the Mac app's XCUITest (scripts/e2e-mac.sh: it takes over the
@@ -64,12 +64,12 @@ duo-open) platform=ios flow=iphone folder=ios/iphone-duo suffix=-open posture=fl
 ipad) platform=ios flow=ipad folder=ios/ipad ;;
 mac) platform=mac folder=macos/windows ;;
 android-phone)
-  platform=android flow=android_phone folder=android/phone
+  platform=android flow=android-phone folder=android/phone
   size="${STORE_ANDROID_SIZE:-1080x1920}" density="${STORE_ANDROID_DENSITY:-420}"
   bar_dp=33
   ;;
 android-tablet)
-  platform=android flow=android_tablet folder=android/tablet
+  platform=android flow=android-tablet folder=android/tablet
   size="${STORE_ANDROID_SIZE:-2560x1440}" density="${STORE_ANDROID_DENSITY:-280}"
   bar_dp=62
   ;;
@@ -187,10 +187,10 @@ copy_shots() {
 flows=.maestro
 if [ -n "$posture" ]; then
   # A copy of the flows whose shots open the hinge (see
-  # .maestro/store/subflows/screenshot_posture.yaml).
+  # .maestro/store/subflows/screenshot-posture.yaml).
   flows="$run_dir/flows"
   cp -R .maestro "$flows"
-  cp .maestro/store/subflows/screenshot_posture.yaml "$flows/subflows/screenshot.yaml"
+  cp .maestro/store/subflows/screenshot-posture.yaml "$flows/subflows/screenshot.yaml"
   # Maestro's takeScreenshot of the inner display is black, so the flow asks
   # this server for each shot, which saves the inner display (3) with simctl.
   shot_port_file="$run_dir/shot-port"

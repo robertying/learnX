@@ -1,10 +1,10 @@
 import { Platform } from 'react-native';
 import { Assignment } from 'data/types/state';
 import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
-import iosWidget from 'widgets/DeadlinesIOS';
-import androidWidget from 'widgets/DeadlinesAndroid';
-import iosUpNext from 'widgets/UpNextIOS';
-import androidUpNext from 'widgets/UpNextAndroid';
+import iosWidget from 'widgets/Deadlines';
+import androidWidget from 'widgets/Deadlines.android';
+import iosUpNext from 'widgets/UpNext';
+import androidUpNext from 'widgets/UpNext.android';
 
 const assignment = (id: string, deadline: string) =>
   ({

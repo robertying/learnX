@@ -83,7 +83,7 @@
             android:name="expo.modules.imagepicker.ExpoCropImageActivity"
             tools:node="remove" />
 
-        <!-- Home screen widget from expo-widgets (src/widgets/DeadlinesAndroid.tsx). -->
+        <!-- Home screen widget from expo-widgets (src/widgets/Deadlines.android.tsx). -->
         <receiver
             android:name=".DeadlinesProvider"
             android:exported="true"
@@ -100,7 +100,7 @@
                 android:value="Deadlines" />
         </receiver>
 
-        <!-- Home screen widget from expo-widgets (src/widgets/UpNextAndroid.tsx). -->
+        <!-- Home screen widget from expo-widgets (src/widgets/UpNext.android.tsx). -->
         <receiver
             android:name=".UpNextProvider"
             android:exported="true"

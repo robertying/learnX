@@ -2,11 +2,11 @@
   "widgets": [
     {
       "name": "Deadlines",
-      "initialLayout": "src/widgets/DeadlinesAndroid.tsx"
+      "initialLayout": "src/widgets/Deadlines.android.tsx"
     },
     {
       "name": "UpNext",
-      "initialLayout": "src/widgets/UpNextAndroid.tsx"
+      "initialLayout": "src/widgets/UpNext.android.tsx"
     }
   ]
 }
