@@ -104,7 +104,10 @@ it('clears the file cache, and says why when it fails', async () => {
   jest.mocked(removeFileDir).mockRejectedValueOnce(new Error('busy'));
   await userEvent.press(screen.getByText(t('clearFileCache')));
   await confirmDelete();
-  expect(toast).toHaveBeenLastCalledWith(t('deleteFailed') + 'busy', 'error');
+  expect(toast).toHaveBeenLastCalledWith(
+    t('deleteFailed', { error: 'busy' }),
+    'error',
+  );
 });
 
 it('exports all downloads or one course, and says how it went', async () => {
@@ -142,7 +145,7 @@ it('says nothing when the folder picker is cancelled, and why export failed', as
   jest.mocked(exportDownloads).mockRejectedValueOnce(new Error('denied'));
   await userEvent.press(screen.getByText(t('downloadsExport')));
   expect(toast).toHaveBeenCalledWith(
-    t('downloadsExportFailed') + 'denied',
+    t('downloadsExportFailed', { error: 'denied' }),
     'error',
   );
 });

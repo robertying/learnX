@@ -59,7 +59,10 @@ const Downloads: React.FC<Props> = () => {
     }
     setExporting(false);
     if (error) {
-      toast(t('downloadsExportFailed') + (error as Error).message, 'error');
+      toast(
+        t('downloadsExportFailed', { error: (error as Error).message }),
+        'error',
+      );
     } else if (result) {
       const files = fileCount(result.exported);
       toast(
@@ -98,7 +101,10 @@ const Downloads: React.FC<Props> = () => {
               await action();
               toast(succeeded, 'success');
             } catch (e) {
-              toast(t('deleteFailed') + (e as Error).message, 'error');
+              toast(
+                t('deleteFailed', { error: (e as Error).message }),
+                'error',
+              );
             }
             reload();
           },

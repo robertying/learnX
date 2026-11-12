@@ -59,7 +59,7 @@ export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
       return { text: t('missingCalendarSource'), type: 'error' };
     default:
       return {
-        text: t('assignmentSyncFailed') + messageOf(err),
+        text: t('assignmentSyncFailed', { error: messageOf(err) }),
         type: 'error',
       };
   }
@@ -73,7 +73,7 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
       return { text: t('calendarExportNoEvent'), type: 'warning' };
     default:
       return {
-        text: t('calendarExportFailed') + messageOf(err),
+        text: t('calendarExportFailed', { error: messageOf(err) }),
         type: 'error',
       };
   }
@@ -86,7 +86,10 @@ export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
     case 'reminderPermission':
       return { text: t('deleteFailedNoReminderPermission'), type: 'error' };
     default:
-      return { text: t('deleteFailed') + messageOf(err), type: 'error' };
+      return {
+        text: t('deleteFailed', { error: messageOf(err) }),
+        type: 'error',
+      };
   }
 };
 
