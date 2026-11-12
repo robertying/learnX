@@ -11,7 +11,7 @@ import {
   getLiveLogin,
   withLaunchOptions,
 } from 'services/launchOptions';
-import env from '../../../jest/mocks/env';
+import env from 'test-utils/mocks/env';
 
 const mockSettingsGet = jest.fn<unknown, [string]>();
 

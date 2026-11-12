@@ -10,6 +10,7 @@ import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import NotificationSettings from 'screens/NotificationSettings';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
@@ -28,8 +29,7 @@ const permission = (
     ...overrides,
   });
 
-const renderScreen = () =>
-  render(<NotificationSettings navigation={{} as never} route={{} as never} />);
+const renderScreen = () => render(<NotificationSettings {...screenProps()} />);
 
 const toggle = (key: string, value: boolean) =>
   fireEvent(screen.getByTestId(`notifications-${key}`), 'valueChange', value);

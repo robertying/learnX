@@ -13,6 +13,7 @@ import {
 } from 'hooks/useAssignmentSubmission';
 import useSaveSubmissionDraft from 'hooks/useSaveSubmissionDraft';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
@@ -57,8 +58,10 @@ const renderScreen = (assignment: Assignment | undefined = unsubmitted) => {
   mockAssignment = assignment;
   return render(
     <AssignmentSubmission
-      navigation={navigation as never}
-      route={{ params: { id: assignment?.id ?? 'gone' } } as never}
+      {...screenProps({
+        navigation,
+        route: { params: { id: assignment?.id ?? 'gone' } },
+      })}
     />,
   );
 };

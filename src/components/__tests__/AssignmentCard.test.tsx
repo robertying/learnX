@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react-native';
 import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
-import { mockLocale } from '../../../jest/locale';
-import { NOW, daysFromNow, assignment } from '../../../jest/fixtures/cards';
+import { mockLocale } from 'test-utils/locale';
+import { NOW, daysFromNow, assignment } from 'test-utils/fixtures/cards';
 import AssignmentCard from 'components/AssignmentCard';
 import { BrandLightTheme } from 'theme';
 import type { Assignment } from 'data/types/state';

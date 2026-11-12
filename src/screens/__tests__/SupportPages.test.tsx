@@ -4,6 +4,7 @@ import { t } from 'helpers/i18n';
 import Changelog from 'screens/Changelog';
 import Help from 'screens/Help';
 import Maintainer from 'screens/Maintainer';
+import { screenProps } from 'test-utils/screenProps';
 
 let mockProps: Record<string, any> = {};
 jest.mock('react-native-webview', () => {
@@ -25,7 +26,7 @@ beforeEach(() => {
 describe('Help', () => {
   it('opens a GitHub issue or an email', async () => {
     const user = userEvent.setup();
-    await render(<Help navigation={{} as never} route={{} as never} />);
+    await render(<Help {...screenProps()} />);
     await user.press(screen.getByText(t('createNewGitHubIssue')));
     expect(openURL).toHaveBeenLastCalledWith(
       'https://github.com/robertying/learnX/issues/new/choose',
@@ -35,7 +36,7 @@ describe('Help', () => {
   });
 
   it("shows the issue template without the translation file's indentation", async () => {
-    await render(<Help navigation={{} as never} route={{} as never} />);
+    await render(<Help {...screenProps()} />);
     const template = t('issueTemplateContent')
       .split('\n')
       .map(line => line.trim())
@@ -47,7 +48,7 @@ describe('Help', () => {
 
 describe('Maintainer', () => {
   it('asks for maintainers by email', async () => {
-    await render(<Maintainer navigation={{} as never} route={{} as never} />);
+    await render(<Maintainer {...screenProps()} />);
     expect(screen.getByText(t('maintainerDescription'))).toBeTruthy();
     await userEvent.press(screen.getByText('learnX@ruiying.io'));
     expect(openURL).toHaveBeenCalledWith('mailto:learnX@ruiying.io');

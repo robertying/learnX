@@ -22,6 +22,7 @@ import { assignmentsQuery, filesQuery, noticesQuery } from 'data/content';
 import { clearQueryCache, queryClient } from 'data/queryClient';
 import { addSyncRun, resetSyncLog } from 'data/syncLog';
 import { resetUserData, setCurrentSemester } from 'data/userData';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
@@ -52,7 +53,7 @@ const request = jest.fn(async () => true);
 const renderScreen = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <Debug navigation={{} as never} route={{} as never} />
+      <Debug {...screenProps()} />
     </QueryClientProvider>,
   );
 

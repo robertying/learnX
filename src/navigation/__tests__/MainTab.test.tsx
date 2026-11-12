@@ -7,15 +7,15 @@ import { useSplitLaidOut } from 'navigation/NativeSplitView';
 import {
   lastNavigatorScreens,
   navigatorConfig,
-} from '../../../jest/mocks/navigator';
+} from 'test-utils/mocks/navigator';
 
 jest.mock('@bottom-tabs/react-navigation', () => ({
-  createNativeBottomTabNavigator: require('../../../jest/mocks/navigator')
+  createNativeBottomTabNavigator: require('test-utils/mocks/navigator')
     .createNavigator,
 }));
 jest.mock('navigation/SidebarSplitNavigator', () => ({
   __esModule: true,
-  default: require('../../../jest/mocks/navigator').createNavigator,
+  default: require('test-utils/mocks/navigator').createNavigator,
 }));
 jest.mock('navigation/NativeSplitView', () => ({
   useSplitLaidOut: jest.fn(() => true),
@@ -58,7 +58,7 @@ const shared = {
   react: require('react'),
   compilerRuntime: require('react/compiler-runtime'),
   reactNative: require('react-native'),
-  navigator: require('../../../jest/mocks/navigator'),
+  navigator: require('test-utils/mocks/navigator'),
 };
 const loadMainTab = (layout: typeof mockLayout) => {
   mockLayout = layout;
@@ -67,7 +67,7 @@ const loadMainTab = (layout: typeof mockLayout) => {
     jest.doMock('react', () => shared.react);
     jest.doMock('react/compiler-runtime', () => shared.compilerRuntime);
     jest.doMock('react-native', () => shared.reactNative);
-    jest.doMock('../../../jest/mocks/navigator', () => shared.navigator);
+    jest.doMock('test-utils/mocks/navigator', () => shared.navigator);
     MainTab = require('navigation/MainTab').default;
   });
   return MainTab;

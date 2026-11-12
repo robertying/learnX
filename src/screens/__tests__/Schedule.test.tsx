@@ -2,6 +2,7 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import type { ClassSession } from 'helpers/schedule';
 import Schedule from 'screens/Schedule';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
@@ -49,8 +50,10 @@ const setup = async () => {
   const navigation = { push: jest.fn(), setOptions: jest.fn() };
   await render(
     <Schedule
-      navigation={navigation as never}
-      route={{ key: 'Schedule', name: 'Schedule' } as never}
+      {...screenProps({
+        navigation,
+        route: { key: 'Schedule', name: 'Schedule' },
+      })}
     />,
   );
   return { navigation };

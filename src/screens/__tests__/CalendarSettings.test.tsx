@@ -19,6 +19,7 @@ import {
 } from 'hooks/useCalendarSync';
 import useCalendarAccess from 'hooks/useCalendarAccess';
 import CalendarSettings from 'screens/CalendarSettings';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('helpers/systemSettings', () => ({ openSystemSettings: jest.fn() }));
 jest.mock('hooks/useCalendarAccess', () => jest.fn());
@@ -41,8 +42,7 @@ const picker = {
 const setSyncEnabled = jest.fn();
 const exportToICS = jest.fn();
 
-const renderScreen = () =>
-  render(<CalendarSettings navigation={{} as never} route={{} as never} />);
+const renderScreen = () => render(<CalendarSettings {...screenProps()} />);
 
 const toggle = (label: string, value: boolean) =>
   fireEvent(screen.getByRole('switch', { name: label }), 'valueChange', value);

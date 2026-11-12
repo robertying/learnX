@@ -8,6 +8,7 @@ import { t } from 'helpers/i18n';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import useFileDownload from 'hooks/useFileDownload';
 import FileDetail from 'screens/FileDetail';
+import { screenProps } from 'test-utils/screenProps';
 
 let mockFile: File | undefined;
 jest.mock('data/content', () => ({
@@ -60,9 +61,7 @@ const zip = { ...pdf, id: 'zip', fileType: 'zip' };
 
 const navigation = { setOptions: jest.fn() };
 const renderScreen = (params: object) =>
-  render(
-    <FileDetail navigation={navigation as never} route={{ params } as never} />,
-  );
+  render(<FileDetail {...screenProps({ navigation, route: { params } })} />);
 beforeEach(() => {
   mockFile = pdf;
   downloaded();

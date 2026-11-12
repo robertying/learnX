@@ -9,7 +9,7 @@ const load = (
   let info: DeviceInfo | undefined;
   jest.isolateModules(() => {
     jest.doMock('expo-device', () => ({
-      ...jest.requireActual('../../../jest/mocks/device'),
+      ...jest.requireActual('test-utils/mocks/device'),
       ...device,
     }));
     jest.doMock('expo-application', () => application);

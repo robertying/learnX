@@ -2,9 +2,9 @@ import { render, screen, userEvent } from '@testing-library/react-native';
 import { defaultSettings, getSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import SwipeActions from 'screens/SwipeActions';
+import { screenProps } from 'test-utils/screenProps';
 
-const renderScreen = () =>
-  render(<SwipeActions navigation={{} as never} route={{} as never} />);
+const renderScreen = () => render(<SwipeActions {...screenProps()} />);
 
 afterEach(() => setSetting('swipeActions', defaultSettings.swipeActions));
 

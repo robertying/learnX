@@ -7,6 +7,7 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { getTitleOptions } from 'navigation/options';
 import Today from 'screens/Today';
 import { getSettings, setSetting } from 'data/settings';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('hooks/useAvailableUpdate', () => () => null);
 jest.mock('data/login', () => ({ login: jest.fn() }));
@@ -66,8 +67,7 @@ const setup = async () => {
   };
   await render(
     <Today
-      navigation={navigation as never}
-      route={{ key: 'Today', name: 'Today' } as never}
+      {...screenProps({ navigation, route: { key: 'Today', name: 'Today' } })}
     />,
   );
   return { navigation };

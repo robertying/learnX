@@ -9,7 +9,7 @@ import {
 } from '@testing-library/react-native';
 import { SwipeDirection } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import { mockSwipeableMethods } from '../../../../jest/mocks/swipeable';
+import { mockSwipeableMethods } from 'test-utils/mocks/swipeable';
 
 const card = (props: CardWrapperProps = {}) => (
   <CardWrapper accessibilityLabel="Card label" {...props}>

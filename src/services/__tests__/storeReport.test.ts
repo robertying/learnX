@@ -24,7 +24,7 @@ import { buildStoreReport } from 'services/storeReport';
 import { whatsNewContext } from 'helpers/whatsNew';
 
 const mocked = Calendar as unknown as {
-  [K in keyof typeof import('../../../jest/mocks/expoCalendar')]: jest.Mock;
+  [K in keyof typeof import('test-utils/mocks/expoCalendar')]: jest.Mock;
 };
 
 const calendar = (id: string, title: string, entries: number) => ({

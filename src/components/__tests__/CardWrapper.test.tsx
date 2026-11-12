@@ -12,8 +12,8 @@ import * as Haptics from 'expo-haptics';
 import CardSwipeAction from 'components/CardSwipeAction';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
 import { defaultSettings, setSetting } from 'data/settings';
-import * as menus from '../../../jest/mocks/menus';
-import { mockSwipeableMethods } from '../../../jest/mocks/swipeable';
+import * as menus from 'test-utils/mocks/menus';
+import { mockSwipeableMethods } from 'test-utils/mocks/swipeable';
 
 // The real component, its props recorded
 jest.mock('components/CardSwipeAction', () => ({
@@ -319,7 +319,7 @@ describe('on iPad and Mac', () => {
     react: require('react'),
     compilerRuntime: require('react/compiler-runtime'),
     reactNative: require('react-native'),
-    menus: require('../../../jest/mocks/menus'),
+    menus: require('test-utils/mocks/menus'),
   };
   const loadCard = (mac: boolean) => {
     let Card: typeof CardWrapper = () => null;
@@ -333,7 +333,7 @@ describe('on iPad and Mac', () => {
         isMac: () => mac,
         hasLiquidGlass: () => false,
       }));
-      jest.doMock('../../../jest/mocks/menus', () => shared.menus);
+      jest.doMock('test-utils/mocks/menus', () => shared.menus);
       Card = require('components/CardWrapper').default;
     });
     return Card;

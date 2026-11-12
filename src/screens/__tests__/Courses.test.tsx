@@ -13,6 +13,7 @@ import {
 import { getSemesterTextFromId } from 'helpers/semester';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Courses from 'screens/Courses';
+import { screenProps } from 'test-utils/screenProps';
 
 let mockList: Record<string, any> = {};
 jest.mock('components/FilterList', () => (props: object) => {
@@ -47,8 +48,7 @@ const coursesResult = (overrides: object = {}) =>
   } as never);
 
 const navigation = {};
-const renderScreen = () =>
-  render(<Courses navigation={navigation as never} route={{} as never} />);
+const renderScreen = () => render(<Courses {...screenProps({ navigation })} />);
 
 const future = dayjs().add(1, 'day').toISOString();
 const past = dayjs().subtract(1, 'day').toISOString();

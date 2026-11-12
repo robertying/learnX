@@ -24,8 +24,9 @@ module.exports = {
       'module-resolver',
       {
         root: ['./src'],
-        // The local Expo modules sit next to src/, not in it
-        alias: { modules: './modules' },
+        // The local Expo modules sit next to src/, not in it; tests import the
+        // helpers, mocks and fixtures in jest/ as test-utils/…
+        alias: { modules: './modules', 'test-utils': './jest' },
         extensions: ['.ts', '.tsx'],
       },
     ],

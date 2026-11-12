@@ -13,6 +13,7 @@ import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import Setup from 'screens/Setup';
 import packageJson from '../../../package.json';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useNotificationPermission', () => jest.fn());
@@ -23,9 +24,7 @@ const setSyncEnabled = jest.fn(async () => {});
 const navigation = { goBack: jest.fn() };
 
 const renderScreen = (params?: { update?: boolean }) =>
-  render(
-    <Setup navigation={navigation as never} route={{ params } as never} />,
-  );
+  render(<Setup {...screenProps({ navigation, route: { params } })} />);
 const toggle = (label: string, value: boolean) =>
   fireEvent(screen.getByRole('switch', { name: label }), 'valueChange', value);
 beforeEach(() => {

@@ -33,9 +33,7 @@ jest.mock('data/queries', () => ({
 }));
 
 const mocked = Calendar as unknown as {
-  [
-    K in keyof typeof import('../../../../jest/mocks/expoCalendar')
-  ]: jest.Mock & {
+  [K in keyof typeof import('test-utils/mocks/expoCalendar')]: jest.Mock & {
     get: jest.Mock;
   };
 };

@@ -7,6 +7,7 @@ import type { Assignment } from 'data/types/state';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import AssignmentDetail from 'screens/AssignmentDetail';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/source', () => ({
   dataSource: { getCSRFToken: () => 'token' },
@@ -42,8 +43,10 @@ const renderScreen = (assignment: Assignment | undefined) => {
   mockAssignment = assignment;
   return render(
     <AssignmentDetail
-      navigation={navigation as never}
-      route={{ params: { id: assignment?.id ?? 'gone' } } as never}
+      {...screenProps({
+        navigation,
+        route: { params: { id: assignment?.id ?? 'gone' } },
+      })}
     />,
   );
 };

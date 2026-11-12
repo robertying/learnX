@@ -16,10 +16,10 @@ import {
 } from 'services/files/downloads';
 
 jest.mock('expo-file-system', () =>
-  require('../../../../jest/mocks/memoryFileSystem'),
+  require('test-utils/mocks/memoryFileSystem'),
 );
 const { __fs } =
-  jest.requireMock<typeof import('../../../../jest/mocks/memoryFileSystem')>(
+  jest.requireMock<typeof import('test-utils/mocks/memoryFileSystem')>(
     'expo-file-system',
   );
 

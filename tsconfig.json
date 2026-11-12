@@ -7,6 +7,7 @@
     "noUnusedLocals": true,
     "paths": {
       "modules/*": ["./modules/*"],
+      "test-utils/*": ["./jest/*"],
       "*": ["./src/*"]
     }
   }

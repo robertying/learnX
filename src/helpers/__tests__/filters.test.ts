@@ -1,4 +1,4 @@
-import { mockLocale } from '../../../jest/locale';
+import { mockLocale } from 'test-utils/locale';
 import {
   checkedIds,
   filterOptions,

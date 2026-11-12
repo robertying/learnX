@@ -1,5 +1,5 @@
 import { getSemesterTextFromId } from 'helpers/semester';
-import { mockLocale } from '../../../jest/locale';
+import { mockLocale } from 'test-utils/locale';
 
 describe('getSemesterTextFromId', () => {
   afterEach(() => {

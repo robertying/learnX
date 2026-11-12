@@ -11,6 +11,7 @@ import { useCredentialsStore } from 'data/credentials';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
 import CourseInformationSharing from 'screens/CourseInformationSharing';
+import { screenProps } from 'test-utils/screenProps';
 
 const signIn = (username: string) =>
   useCredentialsStore.setState({
@@ -24,9 +25,7 @@ const signIn = (username: string) =>
   });
 
 const renderScreen = () =>
-  render(
-    <CourseInformationSharing navigation={{} as never} route={{} as never} />,
-  );
+  render(<CourseInformationSharing {...screenProps()} />);
 
 const toggle = (value: boolean) =>
   fireEvent(

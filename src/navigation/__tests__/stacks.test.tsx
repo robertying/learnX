@@ -16,10 +16,10 @@ import {
   WhatsNewStack,
 } from 'navigation/stacks';
 import { stackScreenOptions } from 'navigation/options';
-import { navigatorConfig, optionsArgs } from '../../../jest/mocks/navigator';
+import { navigatorConfig, optionsArgs } from 'test-utils/mocks/navigator';
 
 jest.mock('@react-navigation/native-stack', () => ({
-  createNativeStackNavigator: require('../../../jest/mocks/navigator')
+  createNativeStackNavigator: require('test-utils/mocks/navigator')
     .createNavigator,
 }));
 // The error layout's retry reloads through expo, which is ESM only.

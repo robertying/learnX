@@ -7,7 +7,7 @@ import {
   tCount,
   timeFormat,
 } from 'helpers/i18n';
-import { mockClock, mockLocale } from '../../../jest/locale';
+import { mockClock, mockLocale } from 'test-utils/locale';
 
 // A runtime that never loads App.tsx (the background task) still formats in
 // the app's language once helpers/i18n is loaded.

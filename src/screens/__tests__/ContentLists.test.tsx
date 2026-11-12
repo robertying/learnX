@@ -8,6 +8,7 @@ import { assignmentLists, fileLists, noticeLists } from 'hooks/useFilteredData';
 import Assignments from 'screens/Assignments';
 import Files from 'screens/Files';
 import Notices from 'screens/Notices';
+import { screenProps } from 'test-utils/screenProps';
 
 let mockList: Record<string, any> = {};
 jest.mock('components/FilterList', () => (props: object) => {
@@ -62,9 +63,7 @@ it.each([
 ] as const)(
   'lists the %ss by read state',
   async (type, Screen, typeLists, Card) => {
-    await render(
-      <Screen navigation={navigation as never} route={{} as never} />,
-    );
+    await render(<Screen {...screenProps({ navigation })} />);
     expect(useContentList).toHaveBeenCalledWith(
       type,
       items,
@@ -81,9 +80,7 @@ it.each([
 );
 
 it('lists the assignments by whether they are done, open ones first', async () => {
-  await render(
-    <Assignments navigation={navigation as never} route={{} as never} />,
-  );
+  await render(<Assignments {...screenProps({ navigation })} />);
   expect(useContentList).toHaveBeenCalledWith(
     'assignment',
     items,
