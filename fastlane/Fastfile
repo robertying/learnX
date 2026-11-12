@@ -33,6 +33,10 @@ def build_numbers
   File.read(PBXPROJ).scan(/CURRENT_PROJECT_VERSION = (\d+);/).flatten.map(&:to_i)
 end
 
+def marketing_version_count
+  File.read(PBXPROJ).scan(/MARKETING_VERSION = [\d.]+;/).size
+end
+
 def build_number
   build_numbers.max
 end
@@ -46,7 +50,7 @@ def verify_versions!
   pbxproj = File.read(PBXPROJ)
   gradle = File.read(GRADLE)
   problems = []
-  problems << "ios MARKETING_VERSION" unless pbxproj.scan(/MARKETING_VERSION = #{Regexp.escape(version)};/).size == 2
+  problems << "ios MARKETING_VERSION" unless pbxproj.scan(/MARKETING_VERSION = #{Regexp.escape(version)};/).size == marketing_version_count
   problems << "ios CURRENT_PROJECT_VERSION (#{build_numbers.uniq.join(', ')})" unless build_numbers.uniq.size == 1
   problems << "android versionName" unless gradle.include?(%(versionName = "#{version}"))
   problems << "android versionCode" unless gradle.include?("versionCode = #{android_version_code}")
@@ -551,7 +555,7 @@ lane :bump do |options|
   new_code = ANDROID_VERSION_CODE_BASE + new_build
 
   replace_in_file!(PACKAGE_JSON, %("version": "#{current}"), %("version": "#{version}"), count: 1)
-  replace_in_file!(PBXPROJ, "MARKETING_VERSION = #{current};", "MARKETING_VERSION = #{version};", count: 2)
+  replace_in_file!(PBXPROJ, "MARKETING_VERSION = #{current};", "MARKETING_VERSION = #{version};", count: marketing_version_count)
   replace_in_file!(PBXPROJ, "CURRENT_PROJECT_VERSION = #{build};", "CURRENT_PROJECT_VERSION = #{new_build};", count: build_numbers.size)
   replace_in_file!(GRADLE, %(versionName = "#{current}"), %(versionName = "#{version}"), count: 1)
   replace_in_file!(GRADLE, "versionCode = #{ANDROID_VERSION_CODE_BASE + build}", "versionCode = #{new_code}", count: 1)
