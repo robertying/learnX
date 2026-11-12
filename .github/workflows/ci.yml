@@ -16,14 +16,14 @@ permissions:
   contents: read
 
 # Only main saves the Jest cache, so other refs don't spend the repo's 10 GB
-# cache limit, which the Xcode caches in build.yml need.
+# cache limit, which the Xcode caches in native.yml need.
 env:
   SAVE_CACHE: ${{ github.ref == 'refs/heads/main' }}
   JEST_CACHE_DIR: ${{ github.workspace }}/.jest-cache
 
 jobs:
   js:
-    # Typecheck, lint, format and Jest
+    # Typecheck, lint, format and Jest (with its coverage thresholds)
     name: JS checks
     runs-on: ubuntu-latest
     permissions:
@@ -35,21 +35,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      # Version comes from the `packageManager` field in package.json.
-      - name: Set up pnpm
-        uses: pnpm/action-setup@v6
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          # A cold `pnpm install` takes about 4 s, and restoring the ~200 MB
-          # store cache took just as long, so it isn't cached.
-          package-manager-cache: false
-
-      - name: Install dependencies
+      - name: Set up JS
         id: install
-        run: pnpm install --frozen-lockfile
+        uses: ./.github/actions/setup-js
 
       # The checks below run even if an earlier one fails, so one push shows
       # every failure. They're skipped only when setup failed.
@@ -83,7 +71,7 @@ jobs:
       - name: Test
         id: test
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
-        run: pnpm test --cacheDirectory "$JEST_CACHE_DIR"
+        run: pnpm test --coverage --cacheDirectory "$JEST_CACHE_DIR"
 
       - name: Save Jest cache
         if: env.SAVE_CACHE == 'true' && steps.test.outcome == 'success' && steps.jest-cache.outputs.cache-hit != 'true'
@@ -120,19 +108,12 @@ jobs:
         id: changes
         run: >-
           scripts/changed-files.sh
-          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(test-android\.sh|android-coverage\.mjs|changed-files\.sh)$|\.github/workflows/check\.yml$)'
+          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/(test-android\.sh|android-coverage\.mjs|changed-files\.sh)$|\.github/(workflows/ci\.yml$|actions/setup-js/))'
           >> "$GITHUB_OUTPUT"
 
-      - name: Set up pnpm
+      - name: Set up JS
         if: steps.changes.outputs.changed == 'true'
-        uses: pnpm/action-setup@v6
-
-      - name: Set up Node.js
-        if: steps.changes.outputs.changed == 'true'
-        uses: actions/setup-node@v7
-        with:
-          node-version-file: .node-version
-          package-manager-cache: false
+        uses: ./.github/actions/setup-js
 
       - name: Set up Java
         if: steps.changes.outputs.changed == 'true'
@@ -146,10 +127,6 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: ${{ env.SAVE_CACHE != 'true' }}
-
-      - name: Install dependencies
-        if: steps.changes.outputs.changed == 'true'
-        run: pnpm install --frozen-lockfile
 
       # The build cache lives in the Gradle home that setup-gradle restores,
       # so PRs reuse main's compiled outputs (dependency modules, Gradle

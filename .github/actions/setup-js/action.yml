@@ -1,0 +1,23 @@
+name: Set up JS
+description: >-
+  pnpm (the version in package.json's `packageManager`), Node.js (the version
+  in .node-version) and the locked dependencies.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up pnpm
+      uses: pnpm/action-setup@v6
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version-file: .node-version
+        # Not cached: a cold `pnpm install` takes about 4 s, and restoring the
+        # ~200 MB store took just as long and would crowd the Xcode caches out
+        # of the repo's 10 GB.
+        package-manager-cache: false
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
