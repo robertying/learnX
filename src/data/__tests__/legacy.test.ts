@@ -113,6 +113,8 @@ const loginModule = (): typeof import('data/login') => {
   jest.doMock('data/source', () => ({
     dataSource: require('data/mockSource').mockSource,
     clearLoginCookies: jest.fn(async () => {}),
+    loginWithFingerPrint: jest.fn(async () => {}),
+    endSession: jest.fn(),
   }));
   return require('data/login');
 };
@@ -342,9 +344,17 @@ describe('the mock account', () => {
     m.userData.setArchived('notice', ['mine'], true);
     m.settings.setSetting('graduate', true);
 
-    const { loginWithMockAccount } = loginModule();
+    const { login } = loginModule();
     const { mockUserData } = require('data/mock');
-    loginWithMockAccount('mock-user');
+    const env = require('helpers/env').default;
+    jest
+      .spyOn(require('data/queryClient').queryClient, 'prefetchQuery')
+      .mockResolvedValue(undefined);
+    await login({
+      username: env.DUMMY_USERNAME,
+      password: env.DUMMY_PASSWORD,
+      fingerPrint: 'fingerPrint',
+    });
 
     expect(require('data/auth').getAuth().loggedIn).toBe(true);
     expect(m.userData.getUserData()).toEqual(mockUserData);

@@ -1,14 +1,7 @@
 import { AppState } from 'react-native';
-import {
-  hashKey,
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  type QueryKey,
-} from '@tanstack/react-query';
+import { hashKey, QueryClient, type QueryKey } from '@tanstack/react-query';
 import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core';
 import { SQLiteStorage } from 'expo-sqlite/kv-store';
-import { noteRequestError } from 'data/auth';
 import { localizeCachedCourseNames } from 'data/courseNames';
 
 /**
@@ -45,9 +38,6 @@ export const queryPersister = experimental_createQueryPersister({
 });
 
 export const queryClient = new QueryClient({
-  // A login turned down while refreshing ends the session (data/auth).
-  queryCache: new QueryCache({ onError: noteRequestError }),
-  mutationCache: new MutationCache({ onError: noteRequestError }),
   defaultOptions: {
     queries: {
       // Writes each response to storage once it arrives.

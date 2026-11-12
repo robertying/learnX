@@ -2,11 +2,13 @@ import { Platform } from 'react-native';
 import axios from 'axios';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import { FailReason } from '@robertying/thu-learn-lib';
+import { getAuth, initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
 import { mockSource } from 'data/mockSource';
 import {
   addCSRF,
   dataSource,
+  endSession,
   ensureSession,
   loginWithFingerPrint,
   resetDataSource,
@@ -224,7 +226,23 @@ describe('picking the server', () => {
 
   afterEach(() => {
     useCredentialsStore.setState({ credentials: null });
+    endSession();
     Platform.OS = os;
+  });
+
+  it('keeps to the server a login started with, whatever login is saved', async () => {
+    credentials('2020000000');
+    const login = jest.spyOn(mockSource, 'login');
+    await loginWithFingerPrint({ username: 'mock-user', password: 'p' });
+    expect(login).toHaveBeenCalled();
+    // The mock login isn't saved yet; the session is still the mock one's.
+    expect(dataSource.getCSRFToken()).toBe(mockSource.getCSRFToken());
+    expect(serverWritesBlocked()).toBe(false);
+
+    // After logout, the saved login decides again.
+    endSession();
+    expect(dataSource.getCSRFToken()).toBe('token');
+    login.mockRestore();
   });
 
   it('talks to the emulated server while a mock account is logged in', async () => {
@@ -342,5 +360,46 @@ describe('picking the server', () => {
       ),
     ).toContain('_csrf=token');
     expect(addCSRF('https://example.com/a')).toBe('https://example.com/a');
+  });
+});
+
+describe('failed requests', () => {
+  beforeEach(() => {
+    useCredentialsStore.setState({
+      credentials: {
+        username: 'mock-user',
+        password: 'p',
+        fingerPrint: 'fp',
+        fingerGenPrint: '',
+        fingerGenPrint3: '',
+      },
+    });
+    useAuthStore.setState({ ...initialAuth, loggedIn: true });
+  });
+  afterEach(() => {
+    useCredentialsStore.setState({ credentials: null });
+    useAuthStore.setState(initialAuth);
+    jest.restoreAllMocks();
+  });
+
+  it('end the session when any call finds the password was turned down', async () => {
+    const error = { reason: FailReason.BAD_CREDENTIAL };
+    jest.spyOn(mockSource, 'addToFavorites').mockRejectedValue(error);
+
+    await expect(
+      dataSource.addToFavorites('notification' as never, 'n1'),
+    ).rejects.toBe(error);
+    expect(getAuth()).toMatchObject({ loggedIn: false, failure: 'rejected' });
+  });
+
+  it('leave the session alone for other errors and pass results through', async () => {
+    jest
+      .spyOn(mockSource, 'removeFromFavorites')
+      .mockRejectedValue({ reason: FailReason.UNEXPECTED_STATUS });
+    await expect(dataSource.removeFromFavorites('n1')).rejects.toMatchObject({
+      reason: FailReason.UNEXPECTED_STATUS,
+    });
+    expect(getAuth().loggedIn).toBe(true);
+    expect(dataSource.getCSRFToken()).toBe(mockSource.getCSRFToken());
   });
 });

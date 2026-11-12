@@ -4,6 +4,7 @@ import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
 import {
   clearLoginCookies,
   dataSource,
+  endSession,
   loginWithFingerPrint,
   resetDataSource,
 } from 'data/source';
@@ -19,20 +20,33 @@ import { flushServerActionsWithin } from 'data/serverActions';
 import { queryClient } from 'data/queryClient';
 import { clearAccountData } from 'data/accountData';
 import { userQuery } from 'data/queries';
+import type { UserData } from 'data/userData';
 import { errorReason, isBadCredential, isNetworkError } from 'helpers/errors';
+import { isMockUser } from 'helpers/mock';
 import { retry } from 'helpers/retry';
 
 /**
  * Makes the saved data `username`'s: when it belonged to someone else, or to
  * nobody known, it is dropped first, so a new account never starts with the
- * previous one's courses, lists or timetable.
+ * previous one's courses, lists or timetable. With `startOver`, it's dropped
+ * either way and the user data starts from it (the mock account typed on the
+ * login screen starts from its sample data). Resolves once the old data is
+ * gone, reminders and files included.
  */
-function claimData(previousOwner: string | null, username: string) {
-  if (previousOwner !== username) {
-    void clearAccountData();
+async function claimData(
+  previousOwner: string | null,
+  username: string,
+  startOver?: UserData,
+) {
+  if (startOver || previousOwner !== username) {
+    await clearAccountData(startOver);
   }
   setDataOwner(username);
 }
+
+/** The mock account's sample user data, loaded only when it's used. */
+const mockUserData = () =>
+  (require('data/mock') as typeof import('data/mock')).mockUserData;
 
 const loggedIn = () =>
   useAuthStore.setState({
@@ -46,9 +60,12 @@ const loggedIn = () =>
 /**
  * Signs in with the given login, or the saved one when none is given. A given
  * login needs the fingerprint SSO captured, and is saved once it works; one
- * without it fails without touching the saved login. With `resume`, it keeps the current session when the
- * server still accepts it (one request) and only signs in again when it has
- * expired, as when the app comes back from the background.
+ * without it fails without touching the saved login. A given mock login drops
+ * the saved data and starts over from the mock account's. With `resume`, it
+ * keeps the current session when the server still accepts it (one request)
+ * and only signs in again when it has expired, as when the app comes back
+ * from the background. The main UI shows only once the login is saved and its
+ * data is ready, so no list is fetched for the previous account meanwhile.
  */
 export async function login({
   username,
@@ -121,7 +138,11 @@ export async function login({
     }
     const account = username ?? getCredentials()?.username;
     if (account) {
-      claimData(previousOwner, account);
+      await claimData(
+        previousOwner,
+        account,
+        username && isMockUser(username) ? mockUserData() : undefined,
+      );
     }
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
@@ -163,14 +184,6 @@ const errorDetail = (err: unknown) => {
  */
 export const loginWithOfflineMode = cancelRelogin;
 
-/** Loads the mock account's data, replacing whatever was there. */
-export function loginWithMockAccount(username: string) {
-  const { mockUserData } = require('data/mock') as typeof import('data/mock');
-  void clearAccountData(mockUserData);
-  setDataOwner(username);
-  loggedIn();
-}
-
 /**
  * Logs out: sends what's waiting, ends the session on the server, and forgets
  * the login, the server data and the user's own data, submission drafts
@@ -183,6 +196,7 @@ export async function logout() {
   useAuthStore.setState(initialAuth);
   // Not waited for: the account's data goes whether or not the server hears.
   dataSource.logout().catch(() => {});
+  endSession();
   await Promise.all([
     clearLoginCookies().catch(() => {}),
     clearAccountData(),

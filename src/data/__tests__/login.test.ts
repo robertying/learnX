@@ -6,12 +6,7 @@ import {
   useCredentialsStore,
 } from 'data/credentials';
 import { getDataOwner, setDataOwner } from 'data/dataOwner';
-import {
-  login,
-  loginWithMockAccount,
-  loginWithOfflineMode,
-  logout,
-} from 'data/login';
+import { login, loginWithOfflineMode, logout } from 'data/login';
 import { mockUserData } from 'data/mock';
 import { getUserData, resetUserData, setArchived } from 'data/userData';
 // The fixture helpers/env is mocked with (jest/setup.ts), typed as strings.
@@ -31,6 +26,7 @@ jest.mock('data/source', () => ({
   loginWithFingerPrint: jest.fn(async () => {}),
   resetDataSource: jest.fn(),
   clearLoginCookies: jest.fn(async () => {}),
+  endSession: jest.fn(),
 }));
 // One attempt, without the backoff.
 jest.mock('helpers/surfaces', () => ({
@@ -258,7 +254,6 @@ describe('switching accounts', () => {
     queryClient.getQueryData(cachedKey) !== undefined;
 
   it('drops the mock account’s data on a real login', async () => {
-    loginWithMockAccount(env.DUMMY_USERNAME);
     await login({
       username: env.DUMMY_USERNAME,
       password: env.DUMMY_PASSWORD,
@@ -305,18 +300,19 @@ describe('switching accounts', () => {
     expect(getDataOwner()).toBe('student');
   });
 
-  it('keeps the mock account’s data when it logs in', async () => {
-    loginWithMockAccount(env.DUMMY_USERNAME);
+  it('starts the mock account over from its data when it is typed in, and keeps it on relaunch', async () => {
     leaveData();
     await login({
       username: env.DUMMY_USERNAME,
       password: env.DUMMY_PASSWORD,
       fingerPrint: MOCK_FINGER_PRINT,
     });
-    expect(dataKept()).toBe(true);
+    expect(dataKept()).toBe(false);
+    expect(getUserData()).toEqual(mockUserData);
     expect(getDataOwner()).toBe(env.DUMMY_USERNAME);
+    leaveData();
 
-    // A relaunch logs in with the saved login and keeps it too.
+    // A relaunch logs in with the saved login and keeps it.
     useAuthStore.setState(initialAuth);
     await login({ reset: true });
     expect(dataKept()).toBe(true);
@@ -354,5 +350,50 @@ describe('switching accounts', () => {
     await login(sso);
     await logout();
     expect(removeFileDir).toHaveBeenCalled();
+  });
+});
+
+describe('a login that replaces data', () => {
+  it('shows the main UI only once the login is saved and the old data is gone', async () => {
+    await saveCredentials(sso);
+    setDataOwner('student');
+    queryClient.setQueryData(['courses', 'semester'], ['old-course']);
+    requestRelogin();
+    const seen: unknown[] = [];
+    const unsubscribe = useAuthStore.subscribe(state => {
+      if (state.loggedIn) {
+        seen.push([
+          getCredentials()?.username,
+          queryClient.getQueryData(['courses', 'semester']),
+        ]);
+      }
+    });
+
+    await login({
+      username: env.DUMMY_USERNAME,
+      password: env.DUMMY_PASSWORD,
+      fingerPrint: MOCK_FINGER_PRINT,
+    });
+    unsubscribe();
+
+    expect(seen[0]).toEqual([env.DUMMY_USERNAME, undefined]);
+    expect(getAuth().reloginRequested).toBe(false);
+  });
+
+  it('keeps the data when the mock login fails', async () => {
+    await login(sso);
+    queryClient.setQueryData(['courses', 'semester'], ['old-course']);
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.NOT_LOGGED_IN });
+    await login({
+      username: env.DUMMY_USERNAME,
+      password: env.DUMMY_PASSWORD,
+      fingerPrint: MOCK_FINGER_PRINT,
+    });
+    expect(queryClient.getQueryData(['courses', 'semester'])).toEqual([
+      'old-course',
+    ]);
+    expect(getDataOwner()).toBe('student');
   });
 });
