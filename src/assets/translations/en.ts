@@ -275,8 +275,12 @@ export default {
   downloadToDownloadsFailed: "Couldn't save to Downloads",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
-    'Finish logging in on the web page that opens. To change the prefilled username or password, close the page and enter them again on the learnX login screen.\n\nIf you see an error about the trusted browser limit, log in to https://id.tsinghua.edu.cn in a browser, go to Settings - Two-factor Authentication - Number of trusted device browsers - Manage, and delete the other devices.',
+    'Finish logging in on the web page that opens. To change the prefilled username or password, close the page and enter them again on the learnX login screen.',
   ssoFailed: "Couldn't finish logging in. Try again.",
+  trustedBrowserLimit: 'Trusted Browser Limit Reached',
+  trustedBrowserLimitNote:
+    'learnX logs in as a trusted browser, and your account has as many as it allows. Log in to the Tsinghua ID site, go to Settings › Two-factor Authentication › Number of trusted device browsers › Manage, and delete devices you no longer use. Then try again on this page.',
+  manageTrustedBrowsers: 'Manage Trusted Browsers',
   courseEventOmitLocation: 'Omit Location',
   fullscreen: 'Full Screen',
   exitFullscreen: 'Exit Full Screen',

@@ -139,7 +139,11 @@
     },
     {
       // Scripts the app runs in its web views
-      "files": ["src/helpers/preval/sso.js", "src/helpers/preval/darkMode.js"],
+      "files": [
+        "src/helpers/preval/sso.js",
+        "src/helpers/preval/ssoAlerts.js",
+        "src/helpers/preval/darkMode.js"
+      ],
       "env": {
         "browser": true
       }
