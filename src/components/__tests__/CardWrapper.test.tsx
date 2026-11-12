@@ -1,13 +1,25 @@
 import { Text } from 'react-native';
 import {
+  act,
   fireEvent,
   render,
   screen,
   userEvent,
+  within,
 } from '@testing-library/react-native';
+import { SwipeDirection } from 'react-native-gesture-handler/ReanimatedSwipeable';
+import * as Haptics from 'expo-haptics';
+import CardSwipeAction from 'components/CardSwipeAction';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
+import { defaultSettings, setSetting } from 'data/settings';
 import * as menus from '../../../jest/mocks/menus';
 import { mockSwipeableMethods } from '../../../jest/mocks/swipeable';
+
+// The real component, its props recorded
+jest.mock('components/CardSwipeAction', () => ({
+  __esModule: true,
+  default: jest.fn(jest.requireActual('components/CardSwipeAction').default),
+}));
 
 const card = (props: CardWrapperProps = {}) => (
   <CardWrapper accessibilityLabel="Card label" {...props}>
@@ -31,12 +43,19 @@ const actionNames = () =>
     (a: { name: string; label: string }) => `${a.name}:${a.label}`,
   );
 
+const menu = () =>
+  jest.mocked(menus.ContextMenuView).mock.lastCall![0] as unknown as {
+    actions: { key: string; title: string }[];
+    onAction: (e: { nativeEvent: { key: string } }) => void;
+  };
+
 beforeEach(() => {
   jest.useFakeTimers();
 });
 
 afterEach(() => {
   jest.useRealTimers();
+  setSetting('swipeActions', defaultSettings.swipeActions);
 });
 
 describe('CardWrapper', () => {
@@ -50,11 +69,15 @@ describe('CardWrapper', () => {
     expect(screen.queryByTestId('icon-circle')).toBeNull();
   });
 
-  it('opens the swipe actions on long press', async () => {
-    await render(card({ onPress: jest.fn() }));
-    expect(swipeEnabled()).toBe(true);
+  it('puts the actions in the context menu, which a long press opens', async () => {
+    const onArchive = jest.fn();
+    await render(card({ onPress: jest.fn(), onArchive }));
+    expect(menu().actions.map(a => a.key)).toEqual(['fav', 'archive']);
+    menu().onAction({ nativeEvent: { key: 'archive' } });
+    expect(onArchive).toHaveBeenCalledWith(true);
     await longPress();
-    expect(mockSwipeableMethods.openRight).toHaveBeenCalledTimes(1);
+    expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
+    expect(mockSwipeableMethods.openLeft).not.toHaveBeenCalled();
   });
 
   it('draws a separator under every row but the last', async () => {
@@ -201,8 +224,40 @@ describe('CardWrapper', () => {
 });
 
 describe('swipe actions', () => {
-  const swipeAction = (testID: string) =>
-    screen.getByTestId(testID, { includeHiddenElements: true });
+  const hidden = { includeHiddenElements: true };
+  const swipeAction = (testID: string) => screen.getByTestId(testID, hidden);
+  // The actions a right swipe reveals are on the left, and a left swipe's on
+  // the right.
+  const swipeKeys = (direction: 'right' | 'left') =>
+    within(
+      screen.getByTestId(
+        `swipe-actions-${direction === 'right' ? 'left' : 'right'}`,
+        hidden,
+      ),
+    )
+      .queryAllByTestId(/^card-/, hidden)
+      .map(el => el.props.testID);
+  const swipeable = () => screen.getByTestId('swipeable').props;
+
+  it('archives on a right swipe and favorites on a left one by default', async () => {
+    await render(card());
+    expect(swipeEnabled()).toBe(true);
+    expect(swipeKeys('right')).toEqual(['card-archive']);
+    expect(swipeKeys('left')).toEqual(['card-fav']);
+  });
+
+  it('follows the choices in Settings', async () => {
+    setSetting('swipeActions', { right: 'fav', left: 'none' });
+    const view = await render(card());
+    expect(swipeKeys('right')).toEqual(['card-fav']);
+    expect(swipeKeys('left')).toEqual([]);
+
+    await act(() =>
+      setSetting('swipeActions', { right: 'none', left: 'none' }),
+    );
+    await view.rerender(card());
+    expect(swipeEnabled()).toBe(false);
+  });
 
   it('runs the pressed action and closes the swipe', async () => {
     const onFav = jest.fn();
@@ -215,11 +270,42 @@ describe('swipe actions', () => {
     expect(onArchive).toHaveBeenCalledWith(true);
   });
 
-  it('hides or shows a course', async () => {
+  it('rests open on the button when let go short of a full swipe', async () => {
+    const onArchive = jest.fn();
+    await render(card({ onArchive }));
+    await act(() => swipeable().onSwipeableWillOpen(SwipeDirection.RIGHT));
+    await act(() => swipeable().onSwipeableOpen(SwipeDirection.RIGHT));
+    expect(onArchive).not.toHaveBeenCalled();
+    expect(mockSwipeableMethods.close).not.toHaveBeenCalled();
+  });
+
+  it('runs a full swipe once let go, with a tick as it gets there', async () => {
+    const onFav = jest.fn();
+    await render(card({ onFav }));
+    const trailing = jest
+      .mocked(CardSwipeAction)
+      .mock.calls.map(([props]) => props)
+      .find(props => props.side === 'trailing')!;
+    await act(() => trailing.onArmedChange(true));
+    expect(Haptics.selectionAsync).toHaveBeenCalledTimes(1);
+    await act(() => swipeable().onSwipeableWillOpen(SwipeDirection.LEFT));
+    expect(onFav).toHaveBeenCalledWith(true);
+    expect(mockSwipeableMethods.close).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides or shows a course on Archive's side", async () => {
     const onHide = jest.fn();
     await render(card({ onHide, hidden: true }));
+    expect(swipeKeys('right')).toEqual(['card-hide']);
+    expect(swipeKeys('left')).toEqual([]);
     await user.press(swipeAction('card-hide'));
     expect(onHide).toHaveBeenCalledWith(false);
+  });
+
+  it('only unarchives an archived card', async () => {
+    await render(card({ archived: true }));
+    expect(swipeKeys('right')).toEqual(['card-archive']);
+    expect(swipeKeys('left')).toEqual([]);
   });
 });
 
@@ -231,7 +317,6 @@ describe('on iPad and Mac', () => {
     reactNative: require('react-native'),
     menus: require('../../../jest/mocks/menus'),
   };
-  const contextMenu = jest.mocked(menus.ContextMenuView);
   const loadCard = (mac: boolean) => {
     let Card: typeof CardWrapper = () => null;
     jest.isolateModules(() => {
@@ -250,12 +335,6 @@ describe('on iPad and Mac', () => {
     });
     return Card;
   };
-  const menu = () =>
-    contextMenu.mock.lastCall![0] as unknown as {
-      actions: { key: string; title: string }[];
-      onAction: (e: { nativeEvent: { key: string } }) => void;
-    };
-
   it('puts the actions in the context menu instead of a long press', async () => {
     const Card = loadCard(false);
     const onFav = jest.fn();

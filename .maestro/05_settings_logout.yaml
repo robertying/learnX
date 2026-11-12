@@ -11,11 +11,33 @@ name: Open settings pages and log out
     env:
       LIST: '.*(${T_logout}).*'
 # Settings is a native lazy list, and on phones About is near the bottom,
-# under the floating tab bar: scroll it to the middle first.
-- scrollUntilVisible:
-    element: '.*(${T_about}).*'
-    direction: DOWN
-    centerElement: true
+# under the floating tab bar: scroll it to the middle first. Not when it's on
+# screen already (iPad): centerElement swipes the middle of the screen, which
+# is the detail pane there, and never gets it to the middle.
+- runFlow:
+    when:
+      platform: iOS
+      notVisible: '.*(${T_about}).*'
+    commands:
+      - scrollUntilVisible:
+          element: '.*(${T_about}).*'
+          direction: DOWN
+          centerElement: true
+# scrollUntilVisible swipes the middle of the screen, which is the detail
+# pane on an unfolded foldable or tablet: swipe the Settings list itself.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible: '.*(${T_about}).*'
+          commands:
+            - swipe:
+                from:
+                  id: settings-list
+                direction: UP
 - tapOn: '.*(${T_about}).*'
 - assertVisible: '.*© \d+ Rui Ying.*'
 - runFlow:
@@ -23,11 +45,31 @@ name: Open settings pages and log out
     env:
       # Not About: the About page's title matches that too.
       LIST: '.*(${T_helpAndFeedback}).*'
-- scrollUntilVisible:
-    element:
-      id: settings-logout
-    direction: UP
-    centerElement: true
+- runFlow:
+    when:
+      platform: iOS
+      notVisible:
+        id: settings-logout
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: settings-logout
+          direction: UP
+          centerElement: true
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible:
+              id: settings-logout
+          commands:
+            - swipe:
+                from:
+                  id: settings-list
+                direction: DOWN
 
 - tapOn:
     id: settings-logout

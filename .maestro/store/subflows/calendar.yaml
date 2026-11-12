@@ -1,0 +1,15 @@
+# Open Settings › Calendars and Reminders (iOS) or Calendar (Android).
+appId: ${APP_ID}
+---
+- runFlow: ../../subflows/settings.yaml
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn: '.*(${T_calendarsAndReminders}).*'
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn: '.*(${T_setupCalendarSection}).*'
+- waitForAnimationToEnd

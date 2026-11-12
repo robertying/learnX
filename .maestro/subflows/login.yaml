@@ -2,9 +2,35 @@
 # USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---
-- launchApp:
-    clearState: true
-    clearKeychain: true
+# ORIENTATION comes from scripts/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
+# set), so iPad landscape runs need no rotating by hand.
+- setOrientation: ${ORIENTATION}
+# APP_LANGUAGE (from scripts/e2e.sh, empty by default) launches iOS in that
+# language, e.g. zh-Hans. Android takes the app's locale from
+# `cmd locale set-app-locales`, which clearing the app's data also clears, so
+# scripts/store-screenshots.sh clears it before setting the locale and passes
+# STATE_CLEARED to launch the app as it is.
+- runFlow:
+    when:
+      true: ${!!STATE_CLEARED}
+    commands:
+      - launchApp
+- runFlow:
+    when:
+      true: ${!APP_LANGUAGE && !STATE_CLEARED}
+    commands:
+      - launchApp:
+          clearState: true
+          clearKeychain: true
+- runFlow:
+    when:
+      true: ${!!APP_LANGUAGE}
+    commands:
+      - launchApp:
+          clearState: true
+          clearKeychain: true
+          arguments:
+            AppleLanguages: '(${APP_LANGUAGE})'
 # A new install opens on the welcome page.
 - extendedWaitUntil:
     visible:

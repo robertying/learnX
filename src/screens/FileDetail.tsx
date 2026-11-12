@@ -114,7 +114,7 @@ const FileDetailContent: React.FC<{
           message={t('fileDownloadFailed')}
         />
       ) : !path ? (
-        <View key="loading" style={styles.centered}>
+        <View key="loading" testID="file-loading" style={styles.centered}>
           <Spinner progress={progress} />
         </View>
       ) : !showInfo && canRender ? (

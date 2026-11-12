@@ -8,6 +8,7 @@ import {
   FormScreen,
   FormSection,
 } from 'components/Form';
+import DeviceInfo from 'constants/DeviceInfo';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
@@ -73,7 +74,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="settings-list">
         <FormSection>
           <FormProfile
             name={userInfo?.name ?? username ?? 'learnX'}
@@ -108,6 +109,15 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             title={t('downloads')}
             onPress={() => handlePush('Downloads')}
           />
+          {/* The Mac has no swipe: its cards' actions are in a right-click menu. */}
+          {!DeviceInfo.isMac() && (
+            <FormLink
+              testID="settings-swipe-actions"
+              icon="swipe"
+              title={t('swipeActions')}
+              onPress={() => handlePush('SwipeActions')}
+            />
+          )}
         </FormSection>
         <FormSection>
           <FormLink

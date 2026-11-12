@@ -1,4 +1,3 @@
-import { t } from 'helpers/i18n';
 import { Fragment, type ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type {
@@ -74,11 +73,9 @@ const nativeItem = (
     onPress: entry.onPress,
     disabled: entry.disabled,
     sharesBackground: entry.ownGroup ? false : undefined,
+    // UIKit reads the badge itself, as the item's value ("New items"), so
+    // the label stays the button's own.
     badge: entry.badge ? { value: '' } : undefined,
-    // An empty badge isn't read out, so the label says it.
-    accessibilityLabel: entry.badge
-      ? `${entry.label}, ${t('a11yNewBadge')}`
-      : undefined,
   };
 };
 

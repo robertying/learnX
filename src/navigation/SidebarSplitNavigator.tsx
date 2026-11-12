@@ -30,6 +30,8 @@ export interface SidebarSplitNavigationOptions {
   title: string;
   sfSymbol: SFSymbol;
   badge?: boolean;
+  /** The sidebar row's accessibility identifier, for UI tests. */
+  testID?: string;
   /** Whether to wait until the tab is first selected to mount it. */
   lazy?: boolean;
 }
@@ -113,12 +115,13 @@ const Sidebar: React.FC<{
   const theme = useTheme();
 
   const items = state.routes.map(route => {
-    const { title, sfSymbol, badge } = descriptors[route.key].options;
+    const { title, sfSymbol, badge, testID } = descriptors[route.key].options;
     return {
       key: route.name,
       title,
       systemImage: sfSymbol,
       badge: !!badge,
+      testID,
     };
   });
 

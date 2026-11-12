@@ -1,0 +1,10 @@
+# Open the list card matching CARD (e.g. '.*(${MOCK_NOTICE}).*') and wait for
+# its detail screen, whose testID is DETAIL. On iPad and unfolded Android it
+# opens beside the list.
+appId: ${APP_ID}
+---
+- tapOn: ${CARD}
+- extendedWaitUntil:
+    visible:
+      id: ${DETAIL}
+    timeout: 10000

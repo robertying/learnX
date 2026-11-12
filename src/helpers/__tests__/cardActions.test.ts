@@ -2,6 +2,7 @@ import {
   SWIPE_TAIL_MS,
   cardActions,
   pressWhileSwiped,
+  swipeAction,
 } from 'helpers/cardActions';
 import { t } from 'helpers/i18n';
 
@@ -67,5 +68,31 @@ describe('pressWhileSwiped', () => {
 
   it('closes the actions on a later tap', () => {
     expect(pressWhileSwiped(true, 1000, 1001 + SWIPE_TAIL_MS)).toBe('close');
+  });
+});
+
+describe('swipeAction', () => {
+  const key = (
+    actions: ReturnType<typeof cardActions>,
+    choice: Parameters<typeof swipeAction>[1],
+  ) => swipeAction(actions, choice)?.key;
+
+  it('finds the chosen action', () => {
+    const actions = cardActions({ canHide: false });
+    expect(key(actions, 'archive')).toBe('archive');
+    expect(key(actions, 'fav')).toBe('fav');
+    expect(key(actions, 'none')).toBeUndefined();
+  });
+
+  it("puts a course's Hide in Archive's place", () => {
+    const actions = cardActions({ canHide: true });
+    expect(key(actions, 'archive')).toBe('hide');
+    expect(key(actions, 'fav')).toBeUndefined();
+  });
+
+  it("doesn't favorite an archived card", () => {
+    const actions = cardActions({ canHide: false, archived: true });
+    expect(key(actions, 'fav')).toBeUndefined();
+    expect(key(actions, 'archive')).toBe('archive');
   });
 });

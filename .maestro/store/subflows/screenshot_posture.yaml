@@ -1,0 +1,28 @@
+# For the open iPhone Duo's store shots (scripts/store-screenshots.sh
+# duo-half-open, duo-open): the script puts this file in place of
+# subflows/screenshot.yaml, so each shot is set up on the closed Duo's outer
+# display, where taps land, then the hinge opens to STORE_POSTURE (halfFold or
+# flat) for the shot of the inner display and closes again. Only the patched
+# Maestro has setFoldPosture (scripts/maestro), and Maestro reads every
+# subflow before a run, so the other targets never load this file.
+appId: ${APP_ID}
+---
+- waitForAnimationToEnd:
+    timeout: 5000
+- runFlow:
+    file: fold.yaml
+    env:
+      POSTURE: ${STORE_POSTURE}
+# The app moves to the inner display and lays the screen out again.
+- waitForAnimationToEnd:
+    timeout: 5000
+# takeScreenshot only sees the outer display (black while open):
+# scripts/store-screenshots.sh saves the inner one when asked at STORE_SHOT_URL.
+- evalScript: ${output.shot = http.get(STORE_SHOT_URL + '?name=' + NAME + STORE_SUFFIX).body}
+- assertTrue: ${output.shot == 'ok'}
+- runFlow:
+    file: fold.yaml
+    env:
+      POSTURE: closed
+- waitForAnimationToEnd:
+    timeout: 5000

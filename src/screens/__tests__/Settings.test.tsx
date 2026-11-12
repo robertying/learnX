@@ -1,6 +1,7 @@
 import { Alert, Linking } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, userEvent } from '@testing-library/react-native';
+import DeviceInfo from 'constants/DeviceInfo';
 import { useAppStateStore } from 'data/appState';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
@@ -83,6 +84,7 @@ it('opens each page in the detail view', async () => {
     semesterSelection: 'SemesterSelection',
     calendarsAndReminders: 'CalendarEvent',
     downloads: 'Downloads',
+    swipeActions: 'SwipeActions',
     notifications: 'NotificationSettings',
     courseInformationSharing: 'CourseInformationSharing',
     changelog: 'Changelog',
@@ -95,6 +97,13 @@ it('opens each page in the detail view', async () => {
     expect(mockShow).toHaveBeenLastCalledWith(page);
   }
   expect(useShowDetail).toHaveBeenCalledWith(navigation);
+});
+
+it('leaves out Swipe Actions on Mac, which has no swipe', async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+  await renderScreen();
+  expect(screen.queryByText(t('swipeActions'))).toBeNull();
+  jest.restoreAllMocks();
 });
 
 it("opens What's New as a sheet", async () => {
