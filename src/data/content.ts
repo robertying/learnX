@@ -481,14 +481,20 @@ const fetchAssignments = async (courseId: string, cached: Assignment[]) => {
     { details: item => !isUnchanged(item) },
   );
   return homework.map(item => {
-    if (!isUnchanged(item)) {
-      return item;
+    const old = known.get(item.id);
+    // The library leaves the excellent homework out (undefined, not `[]`)
+    // when the course's list of it failed; the cached one stays.
+    const withExcellent =
+      item.excellentHomeworkList === undefined && old?.excellentHomeworkList
+        ? { ...item, excellentHomeworkList: old.excellentHomeworkList }
+        : item;
+    if (!old || !isUnchanged(item)) {
+      return withExcellent;
     }
-    const old = known.get(item.id)!;
     const detail = Object.fromEntries(
       detailFields.map(field => [field, old[field]]),
     );
-    return { ...item, ...detail };
+    return { ...withExcellent, ...detail };
   });
 };
 

@@ -15,6 +15,8 @@ const mockAddToFavorites = jest.fn<Promise<void>, [unknown, string]>(() =>
 const mockMarkNoticeRead = jest.fn<Promise<void>, [string]>(() =>
   Promise.resolve(),
 );
+const mockEnsureSession = jest.fn<Promise<void>, []>(() => Promise.resolve());
+let mockLoggedIn = true;
 
 jest.mock('data/source', () => {
   const writes = jest.requireActual('helpers/serverWrites');
@@ -25,10 +27,13 @@ jest.mock('data/source', () => {
       removeFromFavorites: () => mockRemoveFromFavorites(),
       markNoticeRead: (url: string) => mockMarkNoticeRead(url),
     },
+    ensureSession: () => mockEnsureSession(),
     serverWritesBlocked: () => !writes.getServerWritesAllowed(),
   };
 });
-jest.mock('data/auth', () => ({ getAuth: () => ({ loggedIn: true }) }));
+jest.mock('data/auth', () => ({
+  getAuth: () => ({ loggedIn: mockLoggedIn }),
+}));
 jest.mock('data/content', () => ({
   markNoticeRead: jest.fn(),
   showFavorite: jest.fn(),
@@ -46,6 +51,9 @@ beforeEach(() => {
   mockMarkNoticeRead.mockReset();
   mockMarkNoticeRead.mockImplementation(() => Promise.resolve());
   jest.mocked(showFavorite).mockClear();
+  mockEnsureSession.mockReset();
+  mockEnsureSession.mockImplementation(() => Promise.resolve());
+  mockLoggedIn = true;
 });
 
 describe('server actions in a debug build', () => {
@@ -138,5 +146,43 @@ describe('the queue', () => {
     await settle();
     expect(mockAddToFavorites).not.toHaveBeenCalled();
     expect(mockRemoveFromFavorites).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('sending with the app logged out', () => {
+  beforeEach(() => setServerWritesAllowed(true));
+
+  const queueWhileLoggedOut = async () => {
+    mockLoggedIn = false;
+    setFavorite('notice', 'n1', true);
+    await settle();
+  };
+
+  it('waits for a login', async () => {
+    await queueWhileLoggedOut();
+    await flushServerActions();
+    expect(mockAddToFavorites).not.toHaveBeenCalled();
+    expect(getUserData().pendingActions).toHaveLength(1);
+  });
+
+  it('opens a session first when asked, as for a notification action', async () => {
+    await queueWhileLoggedOut();
+    await flushServerActions({ ensureSession: true });
+    expect(mockEnsureSession).toHaveBeenCalledTimes(1);
+    expect(mockAddToFavorites).toHaveBeenCalledWith(expect.anything(), 'n1');
+    expect(getUserData().pendingActions).toEqual([]);
+  });
+
+  it('keeps the action when that session fails to open', async () => {
+    await queueWhileLoggedOut();
+    mockEnsureSession.mockRejectedValue({ reason: FailReason.NETWORK_ERROR });
+    await flushServerActions({ ensureSession: true });
+    expect(mockAddToFavorites).not.toHaveBeenCalled();
+    expect(getUserData().pendingActions).toMatchObject([{ tries: 0 }]);
+  });
+
+  it('opens no session when nothing is waiting', async () => {
+    await flushServerActions({ ensureSession: true });
+    expect(mockEnsureSession).not.toHaveBeenCalled();
   });
 });

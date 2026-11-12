@@ -243,6 +243,29 @@ describe('per-item details', () => {
     }
   });
 
+  it('keeps the cached excellent homework when its list fails', async () => {
+    const query = assignmentsQuery(semesterId);
+    const first = await queryClient.fetchQuery(query);
+    const withExcellent = first.find(a => a.excellentHomeworkList?.length)!;
+    expect(withExcellent).toBeDefined();
+
+    // thu-learn-lib leaves the list out when the course's request for it fails.
+    const getList = mockSource.getHomeworkList;
+    jest
+      .spyOn(mockSource, 'getHomeworkList')
+      .mockImplementation(async (...args) =>
+        (await getList(...args)).map(a => ({
+          ...a,
+          excellentHomeworkList: undefined,
+        })),
+      );
+
+    const second = await refetch<typeof first>(query);
+    expect(
+      second.find(a => a.id === withExcellent.id)!.excellentHomeworkList,
+    ).toEqual(withExcellent.excellentHomeworkList);
+  });
+
   it('fetches notice attachments only for new or changed notices', async () => {
     const query = noticesQuery(semesterId);
     const withAttachment = mockNotices.filter(
