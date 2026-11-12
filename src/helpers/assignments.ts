@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
-import { t, tCount } from './i18n';
+import { t, tCount, timeFormat } from './i18n';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
@@ -94,7 +94,7 @@ export const deadlineDayTime = (
 ) => {
   const n = dayjs(now);
   const dl = dayjs(deadline);
-  const time = dl.format('HH:mm');
+  const time = dl.format(timeFormat());
   return dl.isSame(n, 'day')
     ? t('deadlineToday', { time })
     : dl.isSame(n.add(1, 'day'), 'day')

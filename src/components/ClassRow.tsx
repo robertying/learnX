@@ -1,8 +1,9 @@
 import dayjs from 'dayjs';
 import { FormLink, FormText, type FormTextProps } from 'components/Form';
 import type { ClassSession } from 'helpers/schedule';
+import { timeFormat } from 'helpers/i18n';
 
-const time = (ms: number) => dayjs(ms).format('HH:mm');
+const time = (ms: number) => dayjs(ms).format(timeFormat());
 
 /**
  * Time and room on the second line, as Calendar lists events, so the course
