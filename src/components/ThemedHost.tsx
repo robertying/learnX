@@ -2,7 +2,7 @@ import { Host, type HostProps } from '@expo/ui/swift-ui';
 import { useTheme } from 'theme';
 
 export type ThemedHostProps = Omit<HostProps, 'seedColor'> & {
-  /** Read by TalkBack (Compose passes it to the host view). */
+  /** Only read on Android (`ThemedHost.android.tsx`), by TalkBack. */
   accessibilityLabel?: string;
 };
 
