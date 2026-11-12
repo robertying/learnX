@@ -9,9 +9,9 @@ executionOrder:
   continueOnFailure: true
   flowsOrder:
     - Start from a fresh install
-    # Logs in. Must come right after the reset: after a relaunch that's
-    # already logged in, the notice detail's accessibility tree comes back
-    # empty (TODO in AGENTS.md).
+    # Logs in. Must come right after the reset: on iOS, Maestro only reads
+    # the notice detail's deep accessibility tree after a login in the same
+    # launch (TODO in AGENTS.md).
     - Open a notice, an assignment and a file
     - Log in and visit every tab
     - Favorite and archive a notice
