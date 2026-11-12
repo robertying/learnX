@@ -11,11 +11,6 @@ jest.mock('services/calendar/calendars', () => ({
 const response = (status: string, canAskAgain = true) =>
   ({ status, canAskAgain, granted: status === 'granted' }) as never;
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 beforeEach(() => {
   jest
     .mocked(Calendar.getCalendarPermissions)
@@ -26,7 +21,7 @@ beforeEach(() => {
 });
 
 it('reads calendar and Reminders access', async () => {
-  Platform.OS = 'ios';
+  jest.replaceProperty(Platform, 'OS', 'ios');
   const { result } = await renderHook(() => useCalendarAccess());
   await act(async () => {});
   expect(result.current.calendar).toBe('granted');
@@ -34,7 +29,7 @@ it('reads calendar and Reminders access', async () => {
 });
 
 it("leaves Reminders unknown on Android, and can ask again when it's allowed", async () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   jest
     .mocked(Calendar.getCalendarPermissions)
     .mockResolvedValue(response('denied', true));

@@ -5,8 +5,6 @@ import Splash from 'components/Splash';
 const style = (node: { props: { style?: unknown } }) =>
   StyleSheet.flatten(node.props.style as never);
 
-afterEach(() => jest.restoreAllMocks());
-
 describe('Splash (Android)', () => {
   it('draws the larger logo on the surface color', async () => {
     await render(<Splash />);

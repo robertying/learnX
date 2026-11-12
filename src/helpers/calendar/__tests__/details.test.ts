@@ -215,14 +215,9 @@ describe('buildAssignmentEventDetails', () => {
 
   it('keeps Android alerts at or before the start', () => {
     const { Platform } = require('react-native');
-    const os = Platform.OS;
-    Platform.OS = 'android';
-    try {
-      expect(alertBeforeDeadline(15, 60).relativeOffset).toBe(0);
-      expect(alertBeforeDeadline(120, 60).relativeOffset).toBe(-60);
-    } finally {
-      Platform.OS = os;
-    }
+    jest.replaceProperty(Platform, 'OS', 'android');
+    expect(alertBeforeDeadline(15, 60).relativeOffset).toBe(0);
+    expect(alertBeforeDeadline(120, 60).relativeOffset).toBe(-60);
   });
 
   it('skips the second alarm without the first', () => {

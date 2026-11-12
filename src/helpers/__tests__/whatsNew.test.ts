@@ -143,7 +143,6 @@ describe('platforms', () => {
   });
 
   it('describes this install', () => {
-    const os = Platform.OS;
     expect(whatsNewContext()).toMatchObject({
       version: packageJson.version,
       platform: 'ios',
@@ -151,9 +150,8 @@ describe('platforms', () => {
     const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
     expect(whatsNewContext().platform).toBe('mac');
     isMac.mockRestore();
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     expect(whatsNewContext().platform).toBe('android');
-    Platform.OS = os;
   });
 });
 

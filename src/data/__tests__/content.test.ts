@@ -65,7 +65,6 @@ const isNewestFirst = (notices: Notice[]) =>
   );
 
 beforeEach(() => {
-  jest.restoreAllMocks();
   setMockNetworkConfig({ ...defaultMockNetworkConfig, latency: 'none' });
   clearQueryCache();
 });

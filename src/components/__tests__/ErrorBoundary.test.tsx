@@ -16,10 +16,6 @@ beforeEach(() => {
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
-afterEach(() => {
-  jest.restoreAllMocks();
-});
-
 describe('ErrorBoundary', () => {
   it('renders its children when nothing throws', async () => {
     await render(

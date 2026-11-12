@@ -282,7 +282,7 @@ describe('useWeekSchedule', () => {
     resetSettings();
     resetUserData();
   });
-  afterEach(() => useAuthStore.setState({ loggedIn: false }));
+  afterEach(() => act(() => useAuthStore.setState({ loggedIn: false })));
 
   it('asks for nothing while logged out, and has no teaching week', async () => {
     const { result } = await renderHook(() => useWeekSchedule('2026-09-30'), {

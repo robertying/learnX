@@ -18,8 +18,6 @@ const setChinese = (chinese: boolean) =>
     .spyOn(require('helpers/i18n') as typeof i18n, 'isLocaleChinese')
     .mockReturnValue(chinese);
 
-afterEach(() => jest.restoreAllMocks());
-
 const semester = '2026-2027-1';
 
 const course = (id: string, chineseName: string, englishName: string) =>

@@ -5,13 +5,8 @@ import {
   intervalTrigger,
 } from 'services/scheduledNotifications';
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 it('puts each trigger on its channel on Android only', () => {
-  Platform.OS = 'ios';
+  jest.replaceProperty(Platform, 'OS', 'ios');
   expect(dateTrigger(1, 'deadlines')).toEqual({ type: 'date', date: 1 });
   expect(intervalTrigger(10, 'classes')).toEqual({
     type: 'timeInterval',
@@ -19,7 +14,7 @@ it('puts each trigger on its channel on Android only', () => {
   });
   expect(immediateTrigger('content')).toBeNull();
 
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   expect(dateTrigger(1, 'deadlines')).toEqual({
     type: 'date',
     date: 1,

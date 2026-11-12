@@ -1,7 +1,7 @@
 import { createElement, type ReactNode } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Language } from '@robertying/thu-learn-lib';
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { useAuthStore } from 'data/auth';
 import { mockCourses, mockCurrentSemester, mockSemesters } from 'data/mock';
 import {
@@ -105,8 +105,6 @@ describe('server queries', () => {
 });
 
 describe('asking in the app language', () => {
-  afterEach(() => jest.restoreAllMocks());
-
   it('asks the server for Chinese names in Chinese', async () => {
     jest
       .spyOn(require('helpers/i18n') as typeof i18n, 'isLocaleChinese')
@@ -145,9 +143,11 @@ describe('asking in the app language', () => {
 describe('course hooks', () => {
   const wrapper = ({ children }: { children: ReactNode }) =>
     createElement(QueryClientProvider, { client: queryClient }, children);
-  afterEach(() => {
-    useAuthStore.setState({ loggedIn: false });
-    resetUserData();
+  afterEach(async () => {
+    await act(() => {
+      useAuthStore.setState({ loggedIn: false });
+      resetUserData();
+    });
   });
 
   it('has no courses while logged out or before a semester is picked', async () => {
@@ -158,8 +158,10 @@ describe('course hooks', () => {
     );
     expect(result.current).toEqual({ courses: [], ids: [] });
 
-    useAuthStore.setState({ loggedIn: true });
-    useUserDataStore.setState({ currentSemester: undefined });
+    await act(() => {
+      useAuthStore.setState({ loggedIn: true });
+      useUserDataStore.setState({ currentSemester: undefined });
+    });
     const second = await renderHook(() => useCourses(), { wrapper });
     expect(second.result.current.fetchStatus).toBe('idle');
   });

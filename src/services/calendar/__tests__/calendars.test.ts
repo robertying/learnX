@@ -560,13 +560,9 @@ describe('exportSyncedCalendarsToICS', () => {
 
 describe('more of the sync', () => {
   const { Platform } = require('react-native') as typeof import('react-native');
-  const os = Platform.OS;
-  afterEach(() => {
-    Platform.OS = os;
-  });
 
   it('creates the course calendar on its own local account on Android', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     mocked.createCalendar.mockResolvedValue({});
     await getCourseCalendar();
     expect(mocked.createCalendar).toHaveBeenCalledWith(
@@ -653,7 +649,7 @@ describe('more of the sync', () => {
   });
 
   it('removes only calendars on Android, which has no Reminders', async () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
     useCalendarSyncStore.setState({ courseCalendarId: 'c' });
     const course = { id: 'c', title: 'x', delete: jest.fn(async () => {}) };

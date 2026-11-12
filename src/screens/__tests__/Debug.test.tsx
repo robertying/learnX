@@ -77,10 +77,12 @@ beforeEach(() => {
   });
 });
 
-afterEach(() => {
-  useCredentialsStore.setState({ credentials: null });
-  setServerWritesAllowed(false);
-});
+afterEach(() =>
+  act(() => {
+    useCredentialsStore.setState({ credentials: null });
+    setServerWritesAllowed(false);
+  }),
+);
 
 it('lets a real account allow server writes', async () => {
   await renderScreen();
@@ -194,7 +196,7 @@ describe('Simulate New Content', () => {
     await simulate();
     expect(syncContent).not.toHaveBeenCalled();
 
-    setCurrentSemester(semesterId);
+    await act(() => setCurrentSemester(semesterId));
     request.mockResolvedValueOnce(false);
     await simulate();
     expect(syncContent).not.toHaveBeenCalled();

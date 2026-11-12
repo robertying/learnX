@@ -2,11 +2,6 @@ import { ActionSheetIOS, Alert, Platform } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
 import { t } from 'helpers/i18n';
 
-const os = Platform.OS;
-afterEach(() => {
-  Platform.OS = os;
-});
-
 const first = jest.fn();
 const second = jest.fn();
 const onCancel = jest.fn();
@@ -22,7 +17,7 @@ const show = () =>
   });
 
 it('shows an action sheet on iOS, with Cancel last and Delete in red', () => {
-  Platform.OS = 'ios';
+  jest.replaceProperty(Platform, 'OS', 'ios');
   const sheet = jest
     .spyOn(ActionSheetIOS, 'showActionSheetWithOptions')
     .mockImplementation(() => {});
@@ -44,7 +39,7 @@ it('shows an action sheet on iOS, with Cancel last and Delete in red', () => {
 });
 
 it('shows a dialog on Android, the first choice as its main button', () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   show();
   const [title, message, buttons, options] = alert.mock.calls[0];

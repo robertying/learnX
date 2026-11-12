@@ -58,15 +58,17 @@ jobs:
         run: shellcheck --version | head -2 && shellcheck scripts/*.sh
 
       # Jest's cache holds Babel output, mostly for node_modules. Its key
-      # follows what changes that output; source files that changed since are
-      # just transformed again.
+      # follows what changes that output (the Babel plugins in babel/ too,
+      # which babel-jest's own per-file key leaves out); source files that
+      # changed since are just transformed again, and the preval files'
+      # inputs are in their per-file key (jest/transformer.js).
       - name: Restore Jest cache
         id: jest-cache
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         uses: actions/cache/restore@v6
         with:
           path: ${{ env.JEST_CACHE_DIR }}
-          key: jest-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'jest.config.js') }}
+          key: jest-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'patches/**', 'babel.config.js', 'babel/**', 'jest.config.js', 'jest/transformer.js') }}
 
       - name: Test
         id: test

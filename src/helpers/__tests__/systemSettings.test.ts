@@ -2,8 +2,6 @@ import { Linking, Platform } from 'react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import { openSystemSettings } from 'helpers/systemSettings';
 
-afterEach(() => jest.restoreAllMocks());
-
 it("opens the app's settings, or the System Settings pane on Mac", async () => {
   const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
   const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
@@ -19,8 +17,7 @@ it("opens the app's settings, or the System Settings pane on Mac", async () => {
 });
 
 it("opens the app's notification page on Android", async () => {
-  const os = Platform.OS;
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(false);
   const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
   const sendIntent = jest.spyOn(Linking, 'sendIntent').mockResolvedValue();
@@ -42,5 +39,4 @@ it("opens the app's notification page on Android", async () => {
   await openSystemSettings('security');
   expect(openSettings).toHaveBeenCalledTimes(2);
   expect(sendIntent).toHaveBeenCalledTimes(2);
-  Platform.OS = os;
 });

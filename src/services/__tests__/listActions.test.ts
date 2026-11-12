@@ -13,7 +13,6 @@ jest.mock('data/serverActions', () => ({ setFavorite: jest.fn() }));
 
 beforeEach(() => {
   resetUserData();
-  jest.mocked(toast).mockClear();
 });
 
 describe('list actions', () => {

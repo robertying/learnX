@@ -82,7 +82,6 @@ beforeEach(() => {
   mockNotices = [{ id: 'n', courseId: 'a', hasRead: false }];
   mockFiles = [];
 });
-afterEach(() => jest.restoreAllMocks());
 
 it('shows the current and next class, and opens a course', async () => {
   // Keep both on today, whatever time the test runs.

@@ -1,16 +1,10 @@
 // @preval
 
-// Inlined at build time: after editing csrfLinks.js, restart Metro with
-// --reset-cache to pick up the change.
+// Inlined at build time. Metro (metro.config.js) and Jest (jest/transformer.js)
+// both key their caches on this folder, so edits to csrfLinks.js show up on the next
+// run.
 
 const fs = require('fs');
 const path = require('path');
 
-const basePath = process.cwd().includes('ios')
-  ? path.resolve(process.cwd(), '../src/helpers/preval')
-  : path.resolve(process.cwd(), './src/helpers/preval');
-
-module.exports = fs.readFileSync(
-  path.resolve(basePath, 'csrfLinks.js'),
-  'utf8',
-);
+module.exports = fs.readFileSync(path.join(__dirname, 'csrfLinks.js'), 'utf8');

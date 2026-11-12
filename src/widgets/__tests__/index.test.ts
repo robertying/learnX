@@ -23,19 +23,16 @@ const assignments = [
 const options = { hiddenCourses: [], archived: [] };
 
 describe('updateDeadlineWidget', () => {
-  const os = Platform.OS;
-
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
 
   afterEach(() => {
     jest.useRealTimers();
-    Platform.OS = os;
   });
 
   it('gives iOS an entry now and one as each deadline changes color or passes', () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     updateDeadlineWidget(assignments, options);
 
     const [entries] = jest.mocked(iosWidget.updateTimeline).mock.calls[0];
@@ -61,7 +58,7 @@ describe('updateDeadlineWidget', () => {
   });
 
   it('gives Android a snapshot with formatted due times', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     updateDeadlineWidget(assignments, options);
 
     const [props] = jest.mocked(androidWidget.updateSnapshot).mock.calls[0];
@@ -71,7 +68,7 @@ describe('updateDeadlineWidget', () => {
   });
 
   it('gives Android more deadlines than it shows, to drop passed ones', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     const many = Array.from({ length: 12 }, (_, i) =>
       assignment(
         `a${i}`,
@@ -86,7 +83,7 @@ describe('updateDeadlineWidget', () => {
   });
 
   it('empties the widget when there are no assignments', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     updateDeadlineWidget([], options);
 
     expect(androidWidget.updateSnapshot).toHaveBeenCalledWith(
@@ -96,7 +93,6 @@ describe('updateDeadlineWidget', () => {
 });
 
 describe('updateUpNextWidget', () => {
-  const os = Platform.OS;
   const at = (time: string) =>
     new Date(`2026-03-16T${time}:00+08:00`).getTime();
   const classes = [
@@ -122,13 +118,12 @@ describe('updateUpNextWidget', () => {
 
   afterEach(() => {
     jest.useRealTimers();
-    Platform.OS = os;
     // Clears what was last sent, so each test sends.
     updateUpNextWidget();
   });
 
   it('gives iOS the same props at each class start and end and deadline change', () => {
-    Platform.OS = 'ios';
+    jest.replaceProperty(Platform, 'OS', 'ios');
     updateUpNextWidget(classes, assignments, options);
 
     const [entries] = jest.mocked(iosUpNext.updateTimeline).mock.calls[0];
@@ -156,7 +151,7 @@ describe('updateUpNextWidget', () => {
   });
 
   it('gives Android a snapshot, once for the same props', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     updateUpNextWidget(classes, assignments, options);
     updateUpNextWidget(classes, assignments, options);
 
@@ -165,7 +160,7 @@ describe('updateUpNextWidget', () => {
   });
 
   it('empties the widget when given nothing', () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     updateUpNextWidget(classes, assignments, options);
     updateUpNextWidget();
 
@@ -176,19 +171,17 @@ describe('updateUpNextWidget', () => {
 });
 
 describe('a widget that is missing or fails', () => {
-  const os = Platform.OS;
   beforeEach(() => {
     jest.useFakeTimers({ now: new Date('2026-03-15T12:00:00Z') });
   });
   afterEach(() => {
     jest.useRealTimers();
-    Platform.OS = os;
     jest.restoreAllMocks();
     updateUpNextWidget();
   });
 
   it('does nothing where there are no widgets', () => {
-    Platform.OS = 'web' as never;
+    jest.replaceProperty(Platform, 'OS', 'web' as never);
     updateDeadlineWidget(assignments, options);
     updateUpNextWidget([], assignments, options);
     for (const widget of [iosWidget, androidWidget, iosUpNext, androidUpNext]) {
@@ -198,7 +191,7 @@ describe('a widget that is missing or fails', () => {
   });
 
   it("doesn't break the caller, and sends again next time", () => {
-    Platform.OS = 'android';
+    jest.replaceProperty(Platform, 'OS', 'android');
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
     jest.mocked(androidWidget.updateSnapshot).mockImplementationOnce(() => {
       throw new Error('no widget host');

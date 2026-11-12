@@ -8,8 +8,6 @@ const RN: typeof ReactNative = require('react-native');
 const style = (node: { props: { style?: unknown } }) =>
   StyleSheet.flatten(node.props.style as never);
 
-afterEach(() => jest.restoreAllMocks());
-
 describe('HeaderTitle (Android)', () => {
   const atWidth = (width: number) =>
     jest

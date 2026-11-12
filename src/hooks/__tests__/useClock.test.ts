@@ -8,7 +8,6 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.useRealTimers();
-  jest.restoreAllMocks();
 });
 
 describe('useMinute', () => {

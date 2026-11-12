@@ -19,7 +19,6 @@ beforeEach(() => {
 afterEach(async () => {
   await act(() => toast('', 'none'));
   jest.useRealTimers();
-  jest.restoreAllMocks();
 });
 
 describe('Toast (iOS)', () => {

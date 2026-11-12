@@ -26,7 +26,6 @@ import { whatsNewContext } from 'helpers/whatsNew';
 const mocked = Calendar as unknown as {
   [K in keyof typeof import('../../../jest/mocks/expoCalendar')]: jest.Mock;
 };
-const os = Platform.OS;
 
 const calendar = (id: string, title: string, entries: number) => ({
   id,
@@ -36,7 +35,7 @@ const calendar = (id: string, title: string, entries: number) => ({
 });
 
 beforeEach(async () => {
-  Platform.OS = 'ios';
+  jest.replaceProperty(Platform, 'OS', 'ios');
   resetSettings();
   resetUserData();
   resetAppState();
@@ -48,10 +47,6 @@ beforeEach(async () => {
   kvStorage.removeItem(LEGACY_IMPORTED_KEY);
   mocked.getCalendarPermissions.mockResolvedValue({ status: 'granted' });
   mocked.getRemindersPermissions.mockResolvedValue({ status: 'granted' });
-});
-
-afterEach(() => {
-  Platform.OS = os;
 });
 
 it('reports the stores without the password or times', async () => {
@@ -148,7 +143,7 @@ it('reports the synced calendars, their entries and duplicates', async () => {
 });
 
 it('leaves the calendars out without access, and Reminders on Android', async () => {
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   mocked.getCalendarPermissions.mockResolvedValue({ status: 'denied' });
 
   const report = await buildStoreReport();

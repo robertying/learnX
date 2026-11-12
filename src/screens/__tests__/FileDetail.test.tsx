@@ -63,14 +63,9 @@ const renderScreen = (params: object) =>
   render(
     <FileDetail navigation={navigation as never} route={{ params } as never} />,
   );
-
-const os = Platform.OS;
 beforeEach(() => {
   mockFile = pdf;
   downloaded();
-});
-afterEach(() => {
-  Platform.OS = os;
 });
 
 it('shows Not Found for a file no longer listed', async () => {
@@ -135,7 +130,7 @@ it("shows the info of a file it can't preview, with what to do with it", async (
 
 it('offers download on the Mac and open on Android', async () => {
   const isMac = jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
-  Platform.OS = 'android';
+  jest.replaceProperty(Platform, 'OS', 'android');
   mockFile = { ...zip, description: '', size: undefined } as never;
   downloaded({ path: 'file:///a.zip' });
   await renderScreen({ id: zip.id });

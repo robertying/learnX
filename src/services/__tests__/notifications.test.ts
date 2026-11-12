@@ -18,15 +18,6 @@ const response = (data: unknown) =>
     notification: { request: { content: { data } } },
   }) as unknown as Notifications.NotificationResponse;
 
-const setOS = (os: typeof Platform.OS) =>
-  Object.defineProperty(Platform, 'OS', { value: os, configurable: true });
-
-const originalOS = Platform.OS;
-
-afterEach(() => {
-  setOS(originalOS);
-});
-
 describe('getNotificationTarget', () => {
   it('reads the item a notification points to', () => {
     expect(
@@ -90,7 +81,7 @@ describe('permission', () => {
   });
 
   it('creates the Android channels before asking', async () => {
-    setOS('android');
+    jest.replaceProperty(Platform, 'OS', 'android');
     expect(await requestNotificationPermission()).toBe('granted');
     const channels = jest
       .mocked(Notifications.setNotificationChannelAsync)
@@ -114,7 +105,7 @@ describe('postNotification', () => {
   };
 
   it('posts now with the target as data', async () => {
-    setOS('ios');
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await postNotification(content);
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith({
       content: {
@@ -128,7 +119,7 @@ describe('postNotification', () => {
   });
 
   it('uses a channel on Android', async () => {
-    setOS('android');
+    jest.replaceProperty(Platform, 'OS', 'android');
     await postNotification(content, 'deadlines');
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
       expect.objectContaining({ trigger: { channelId: 'deadlines' } }),
@@ -136,7 +127,7 @@ describe('postNotification', () => {
   });
 
   it('marks a grouped notification for Archive All', async () => {
-    setOS('ios');
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await postNotification({
       title: 'Course',
       body: '3 new files',
@@ -155,7 +146,7 @@ describe('postNotification', () => {
   });
 
   it('shows no buttons for a list without items', async () => {
-    setOS('ios');
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await postNotification({
       title: 'Course',
       body: 'Changed',
@@ -215,7 +206,7 @@ describe('getNotificationData', () => {
 
 describe('exact alarms', () => {
   it('are always allowed outside Android', async () => {
-    setOS('ios');
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await expect(canScheduleExactAlarms()).resolves.toBe(true);
     await expect(requestExactAlarms()).resolves.toBe(true);
     expect(Notifications.getExactAlarmPermissionsAsync).not.toHaveBeenCalled();
@@ -225,7 +216,7 @@ describe('exact alarms', () => {
   });
 
   it('follow the Android permission, false when it cannot be read', async () => {
-    setOS('android');
+    jest.replaceProperty(Platform, 'OS', 'android');
     await expect(canScheduleExactAlarms()).resolves.toBe(true);
     jest
       .mocked(Notifications.getExactAlarmPermissionsAsync)
@@ -245,7 +236,7 @@ describe('configureNotifications', () => {
   const setCategory = jest.mocked(Notifications.setNotificationCategoryAsync);
 
   it('shows notifications in the foreground and sets up the buttons', async () => {
-    setOS('ios');
+    jest.replaceProperty(Platform, 'OS', 'ios');
     await configureNotifications();
     const handler = jest.mocked(Notifications.setNotificationHandler).mock
       .calls[0][0];
@@ -275,7 +266,7 @@ describe('configureNotifications', () => {
   });
 
   it('creates the channels on Android, even if the buttons fail', async () => {
-    setOS('android');
+    jest.replaceProperty(Platform, 'OS', 'android');
     setCategory.mockRejectedValueOnce(new Error('failed'));
     await expect(configureNotifications()).resolves.toBeUndefined();
     expect(

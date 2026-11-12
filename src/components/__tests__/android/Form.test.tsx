@@ -290,7 +290,6 @@ describe('Form (Android)', () => {
         'useWindowDimensions',
       )
       .mockReturnValue({ width: 400, height: 800, scale: 2, fontScale });
-  afterEach(() => jest.restoreAllMocks());
 
   it('tints a detail by its kind, and grays out a row that is over', async () => {
     atFontScale(1);

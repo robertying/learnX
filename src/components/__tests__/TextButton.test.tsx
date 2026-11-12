@@ -4,8 +4,6 @@ import TextButton from 'components/TextButton';
 import { withGutter } from 'components/TextButton.shared';
 import DeviceInfo from 'constants/DeviceInfo';
 
-afterEach(() => jest.restoreAllMocks());
-
 /** The names of the SwiftUI modifiers a button was given. */
 const modifierNames = (button: { props: { modifiers?: unknown[] } }) =>
   (button.props.modifiers ?? []).map(
