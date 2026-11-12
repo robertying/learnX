@@ -79,7 +79,7 @@ it('logs in again without a session, spinning until the login ends', async () =>
 
   await act(() => useAuthStore.setState({ loggingIn: false }));
   await act(() => result.current.onRefresh());
-  expect(login).toHaveBeenCalledWith({ reset: true });
+  expect(login).toHaveBeenCalledWith({});
   expect(refresh).not.toHaveBeenCalled();
   expect(result.current.refreshing).toBe(true);
   await act(() => useAuthStore.setState({ loggingIn: false }));

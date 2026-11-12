@@ -16,7 +16,6 @@ import {
   clearSessionCookies,
   dataSource,
   loginWithFingerPrint,
-  resetDataSource,
 } from 'data/source';
 import { queryClient } from 'data/queryClient';
 import { userQuery } from 'data/queries';
@@ -24,7 +23,6 @@ import { userQuery } from 'data/queries';
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
   loginWithFingerPrint: jest.fn(async () => {}),
-  resetDataSource: jest.fn(),
   clearSessionCookies: jest.fn(async () => {}),
   endSession: jest.fn(),
 }));
@@ -63,7 +61,6 @@ beforeEach(() => {
   // The user's name is fetched after a login; it isn't what's tested here.
   jest.spyOn(queryClient, 'prefetchQuery').mockResolvedValue();
   jest.mocked(loginWithFingerPrint).mockClear();
-  jest.mocked(resetDataSource).mockClear();
 });
 
 describe('login', () => {
@@ -194,7 +191,7 @@ describe('login', () => {
       reason: FailReason.NETWORK_ERROR,
       extra: new TypeError('Network request failed'),
     });
-    await login({ reset: true });
+    await login({});
     expect(getAuth()).toMatchObject({
       loggedIn: false,
       error: FailReason.NETWORK_ERROR,
@@ -206,7 +203,7 @@ describe('login', () => {
     jest
       .mocked(loginWithFingerPrint)
       .mockRejectedValueOnce({ reason: FailReason.REQUEST_TIMEOUT });
-    await login({ reset: true });
+    await login({});
     expect(getAuth()).toMatchObject({ failure: 'offline' });
   });
 
@@ -225,17 +222,11 @@ describe('login', () => {
     });
   });
 
-  it('resets the session when asked', async () => {
-    await login({ reset: true });
-    expect(resetDataSource).toHaveBeenCalled();
-  });
-
   it('keeps a session the server still accepts when resuming', async () => {
     const ensureSession = jest.spyOn(dataSource, 'ensureSession');
     await login({ resume: true });
     expect(ensureSession).toHaveBeenCalled();
     expect(loginWithFingerPrint).not.toHaveBeenCalled();
-    expect(resetDataSource).not.toHaveBeenCalled();
     expect(getAuth()).toMatchObject({ loggedIn: true, failure: null });
   });
 
@@ -249,7 +240,7 @@ describe('login', () => {
 
   it('does not start a second login with the saved one', async () => {
     useAuthStore.setState({ loggingIn: true });
-    await login({ reset: true });
+    await login({});
     expect(loginWithFingerPrint).not.toHaveBeenCalled();
   });
 
@@ -349,7 +340,7 @@ describe('switching accounts', () => {
     expect(dataKept()).toBe(true);
 
     // A relaunch or a resume signs in with the saved login.
-    await login({ reset: true });
+    await login({});
     await login({ resume: true });
     expect(dataKept()).toBe(true);
     expect(getDataOwner()).toBe('student');
@@ -369,7 +360,7 @@ describe('switching accounts', () => {
 
     // A relaunch logs in with the saved login and keeps it.
     useAuthStore.setState(initialAuth);
-    await login({ reset: true });
+    await login({});
     expect(dataKept()).toBe(true);
     expect(getCredentials()?.username).toBe(env.DUMMY_USERNAME);
   });
@@ -377,7 +368,7 @@ describe('switching accounts', () => {
   it('takes data saved before its owner was recorded as the saved login’s', async () => {
     await saveCredentials(sso);
     leaveData();
-    await login({ reset: true });
+    await login({});
     expect(dataKept()).toBe(true);
     expect(getDataOwner()).toBe('student');
   });

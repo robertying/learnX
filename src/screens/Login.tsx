@@ -129,7 +129,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleRetryLogin = () => {
-    void login({ reset: true });
+    void login({});
   };
 
   const handleLoginWithOfflineMode = () => {

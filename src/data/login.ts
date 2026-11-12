@@ -6,7 +6,6 @@ import {
   dataSource,
   endSession,
   loginWithFingerPrint,
-  resetDataSource,
 } from 'data/source';
 import {
   clearCredentials,
@@ -73,9 +72,8 @@ export async function login({
   fingerPrint,
   fingerGenPrint = '',
   fingerGenPrint3 = '',
-  reset = false,
   resume = false,
-}: Partial<Credentials> & { reset?: boolean; resume?: boolean }) {
+}: Partial<Credentials> & { resume?: boolean }) {
   if (username && (!password || !fingerPrint)) {
     // SSO didn't capture the login: signing in with the saved one instead
     // would log in as someone else, so this login just fails.
@@ -97,10 +95,6 @@ export async function login({
   const previousOwner = getDataOwner() ?? getCredentials()?.username ?? null;
 
   try {
-    if (reset) {
-      resetDataSource();
-    }
-
     // Without a connection, another try right away won't help (and a timeout
     // takes long); the offline retries in useReLogin take over instead.
     await retry(
