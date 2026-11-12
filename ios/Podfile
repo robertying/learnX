@@ -160,14 +160,20 @@ target 'learnX' do
 
     # React Native's prebuilt Mac Catalyst frameworks ship without the
     # versioned macOS bundle layout, which the Catalyst build needs to embed
-    # and sign them. Fix them now, and again whenever a build phase swaps in
-    # the other configuration's copy.
+    # and sign them. Fix them now, and again whenever a pod's build phase swaps
+    # in the other configuration's copy of its framework.
     fix_catalyst_frameworks = File.expand_path('../scripts/fix-catalyst-frameworks.sh', __dir__)
     system('bash', fix_catalyst_frameworks, installer.sandbox.root.to_s, exception: true)
+    catalyst_frameworks = {
+      'hermes-engine' => 'hermesvm',
+      'React-Core-prebuilt' => 'React',
+      'ReactNativeDependencies' => 'ReactNativeDependencies',
+    }
     installer.pods_project.targets.each do |target|
+      framework = catalyst_frameworks[target.name] or next
       target.shell_script_build_phases
         .select { |phase| phase.name.to_s.include?('for the right configuration') }
-        .each { |phase| phase.shell_script += "\nbash \"${PODS_ROOT}/../../scripts/fix-catalyst-frameworks.sh\" \"${PODS_ROOT}\"\n" }
+        .each { |phase| phase.shell_script += "\nbash \"${PODS_ROOT}/../../scripts/fix-catalyst-frameworks.sh\" \"${PODS_ROOT}\" #{framework}\n" }
     end
   end
 end
