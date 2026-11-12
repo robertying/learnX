@@ -141,6 +141,38 @@ describe('Login', () => {
     expect(alert).not.toHaveBeenCalled();
   });
 
+  it('logs the live test account in with its saved fingerprint', async () => {
+    const alert = jest.spyOn(Alert, 'alert');
+    const { navigation } = await setup();
+    await fill(env.LIVE_USERNAME, env.LIVE_PASSWORD);
+    await pressLogin();
+
+    expect(login).toHaveBeenCalledWith({
+      username: env.LIVE_USERNAME,
+      password: env.LIVE_PASSWORD,
+      fingerPrint: env.LIVE_FINGERPRINT,
+    });
+    expect(loginWithMockAccount).not.toHaveBeenCalled();
+    expect(alert).not.toHaveBeenCalled();
+    expect(navigation.navigate).not.toHaveBeenCalled();
+  });
+
+  it('sends the live test account to SSO without a saved fingerprint', async () => {
+    const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+    const fingerPrint = env.LIVE_FINGERPRINT;
+    (env as { LIVE_FINGERPRINT?: string }).LIVE_FINGERPRINT = undefined;
+    try {
+      await setup();
+      await fill(env.LIVE_USERNAME, env.LIVE_PASSWORD);
+      await pressLogin();
+    } finally {
+      env.LIVE_FINGERPRINT = fingerPrint;
+    }
+
+    expect(login).not.toHaveBeenCalled();
+    expect(alert).toHaveBeenCalledTimes(1);
+  });
+
   it('turns the graduate setting on and off', async () => {
     await setup();
     const toggle = screen.getByRole('switch', { name: 'Graduate' });

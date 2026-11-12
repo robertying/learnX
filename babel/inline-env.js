@@ -8,6 +8,10 @@
 //   are transformed with Babel env "production" and never get them; the
 //   fastlane build lanes also fail if a release bundle contains a .env value
 //   that shouldn't be there.
+// - E2E_LIVE=1 in the build's environment (`E2E_LIVE=1 scripts/e2e-build.sh`)
+//   adds LIVE_USERNAME and LIVE_FINGERPRINT to a release bundle, for live E2E
+//   runs on a local Release build. Never the password: the flows type it. The
+//   fastlane check fails such a bundle, so it can't ship.
 // Every other key in .env is left out.
 const crypto = require('crypto');
 const fs = require('fs');
@@ -20,6 +24,7 @@ const PUBLIC_KEYS = ['DUMMY_USERNAME', 'DUMMY_PASSWORD'];
 const MASKED_KEYS = ['COURSEX_REFRESH_TOKEN'];
 const DEV_KEY = /^LIVE_[A-Z0-9_]+$/;
 const DEV_ENVS = new Set(['development', 'test']);
+const E2E_LIVE_KEYS = ['LIVE_USERNAME', 'LIVE_FINGERPRINT'];
 
 const readEnv = () =>
   fs.existsSync(ENV_FILE) ? dotenv.parse(fs.readFileSync(ENV_FILE)) : {};
@@ -34,7 +39,7 @@ const mask = value => {
   return { key, data: codes.map((c, i) => c ^ key[i]) };
 };
 
-const buildEnv = includeDev => {
+const buildEnv = (includeDev, e2eLive = false) => {
   const parsed = readEnv();
   const env = {};
   for (const key of PUBLIC_KEYS) {
@@ -47,6 +52,10 @@ const buildEnv = includeDev => {
     for (const [key, value] of Object.entries(parsed)) {
       if (DEV_KEY.test(key) && value) env[key] = value;
     }
+  } else if (e2eLive) {
+    for (const key of E2E_LIVE_KEYS) {
+      if (parsed[key]) env[key] = parsed[key];
+    }
   }
   return env;
 };
@@ -54,6 +63,7 @@ const buildEnv = includeDev => {
 module.exports = function inlineEnv(api) {
   // Also makes Babel cache this plugin's config per env name.
   const includeDev = DEV_ENVS.has(api.env());
+  const e2eLive = api.cache.using(() => process.env.E2E_LIVE === '1');
   const t = api.types;
 
   return {
@@ -61,7 +71,7 @@ module.exports = function inlineEnv(api) {
     visitor: {
       Identifier(p) {
         if (p.node.name !== PLACEHOLDER || !p.isReferencedIdentifier()) return;
-        p.replaceWith(t.valueToNode(buildEnv(includeDev)));
+        p.replaceWith(t.valueToNode(buildEnv(includeDev, e2eLive)));
       },
     },
   };

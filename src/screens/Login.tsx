@@ -71,6 +71,17 @@ const Login: React.FC<Props> = ({ navigation }) => {
       return;
     }
 
+    // Debug builds, and local Release builds for live E2E runs (E2E_LIVE=1):
+    // babel/inline-env.js keeps LIVE_* out of shipped bundles. The live test
+    // account signs in with the device fingerprint of an earlier SSO login
+    // instead of opening the SSO page, so test runs (`scripts/e2e.sh --live`)
+    // don't register a new login device each time. The server checks the
+    // password.
+    if (env.LIVE_FINGERPRINT && username === env.LIVE_USERNAME) {
+      void login({ username, password, fingerPrint: env.LIVE_FINGERPRINT });
+      return;
+    }
+
     Alert.alert(
       t('sso'),
       t('ssoNote'),

@@ -1,9 +1,21 @@
 # Open the list card matching CARD (e.g. '.*(${MOCK_NOTICE}).*') and wait for
 # its detail screen, whose testID is DETAIL. On iPad and unfolded Android it
-# opens beside the list.
+# opens beside the list. Live runs (scripts/e2e.sh --live) open the first card
+# whose testID is CARD_ID instead, when the flow passes one.
 appId: ${APP_ID}
 ---
-- tapOn: ${CARD}
+- runFlow:
+    when:
+      true: ${ACCOUNT != 'live' || !CARD_ID}
+    commands:
+      - tapOn: ${CARD}
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'live' && !!CARD_ID}
+    commands:
+      - tapOn:
+          id: ${CARD_ID}
+          index: 0
 - extendedWaitUntil:
     visible:
       id: ${DETAIL}

@@ -1,5 +1,9 @@
 appId: ${APP_ID}
 name: Open a notice, an assignment and a file
+# Live runs (scripts/e2e.sh --live) open the first item of each list instead,
+# so the account needs a notice, an assignment and a file this semester.
+tags:
+  - live
 ---
 - runFlow: subflows/login.yaml
 
@@ -7,6 +11,7 @@ name: Open a notice, an assignment and a file
     file: subflows/open.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
+      CARD_ID: notice-card
       DETAIL: notice-detail
 - runFlow:
     file: subflows/back.yaml
@@ -21,8 +26,13 @@ name: Open a notice, an assignment and a file
     file: subflows/open.yaml
     env:
       CARD: '.*(${MOCK_ASSIGNMENT}).*'
+      CARD_ID: assignment-card
       DETAIL: assignment-detail
-- assertVisible: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
+- runFlow:
+    when:
+      true: ${ACCOUNT == 'mock'}
+    commands:
+      - assertVisible: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
 - runFlow:
     file: subflows/back.yaml
     env:
@@ -37,6 +47,7 @@ name: Open a notice, an assignment and a file
     file: subflows/open.yaml
     env:
       CARD: '.*(${MOCK_FILE}).*'
+      CARD_ID: file-card
       DETAIL: file-detail
 - runFlow:
     file: subflows/back.yaml

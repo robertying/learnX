@@ -47,6 +47,8 @@ export interface CardWrapperProps {
   canMoveDown?: boolean;
   /** What screen readers say for the card, in place of its texts in order. */
   accessibilityLabel?: string;
+  /** Finds the card in tests, e.g. the first `notice-card` in a live E2E run. */
+  testID?: string;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
   disableSwipe?: boolean;
@@ -73,6 +75,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   canMoveUp,
   canMoveDown,
   accessibilityLabel,
+  testID,
   checked,
   onCheck,
   disableSwipe,
@@ -247,6 +250,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       }
       onLongPress={handleLongPress}
       onLayout={({ nativeEvent }) => rowWidth.set(nativeEvent.layout.width)}
+      testID={testID}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole={
         selectionMode ? 'checkbox' : reorderMode ? undefined : 'button'

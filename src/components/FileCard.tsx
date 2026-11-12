@@ -43,6 +43,7 @@ const FileCard: React.FC<FileCardProps> = ({
   return (
     <CardWrapper
       {...restProps}
+      testID="file-card"
       accessibilityLabel={cardAccessibilityLabel({
         unread: !!isNew,
         title,
