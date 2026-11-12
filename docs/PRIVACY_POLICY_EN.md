@@ -1,50 +1,72 @@
 # learnX Privacy Policy
 
-Rui Ying built the learnX app as a Free app. This SERVICE is provided by Rui Ying at no cost and is intended for use as is.
+Effective: November 2026
 
-This page is used to inform visitors regarding my policies with the collection, use, and disclosure of Personal Information if anyone decided to use my Service.
+learnX is a free, open-source app for Tsinghua University's Web Learning, made by Rui Ying ("I"). This policy explains what information the app handles, where it goes, and the choices you have. The app's source code is public at [github.com/robertying/learnX](https://github.com/robertying/learnX), so you can check everything described here.
 
-If you choose to use my Service, then you agree to the collection and use of information in relation to this policy. The Personal Information that I collect is used for providing and improving the Service. I will not use or share your information with anyone except as described in this Privacy Policy.
+## In short
 
-The terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which is accessible at learnX unless otherwise defined in this Privacy Policy.
+- Your Tsinghua username, password and course content stay on your device and are only sent to Tsinghua's own servers.
+- I don't run a server for learnX and don't collect your account, courses, notices, assignments, files or grades.
+- Crash reports and basic usage statistics go to Google Firebase. They don't include your login or course content.
+- Course Information Sharing (courseX) is off until you turn it on. When on, it uploads public information about your courses this semester, never information about you.
 
-## Information Collection and Use
+## Your Tsinghua account
 
-For a better experience, while using our Service, I may require you to provide us with certain personally identifiable information, including but not limited to User Credentials. The information that I request will be retained on your device and is not collected by me in any way.
+To sign in, learnX asks for your Tsinghua username and password. When you sign in through Tsinghua's single sign-on page, learnX also keeps the device identifier that page uses to recognize a trusted device.
 
-The app does use third party services that may collect information used to identify you.
+- They are stored in your device's secure storage (Keychain on iOS, iPadOS and macOS; Keystore-protected storage on Android). They are not included in backups and don't move to other devices.
+- They are only sent to Tsinghua's servers (id.tsinghua.edu.cn and learn.tsinghua.edu.cn) to sign you in, including when the app refreshes in the background.
+- Signing out deletes them from the device, along with the sign-in cookies for Tsinghua's sites.
 
-Link to privacy policy of third party service providers that may be used by the app:
+## Your course content
 
-- [Google Play Services](https://policies.google.com/privacy)
-- [Firebase](https://firebase.google.com/support/privacy)
+learnX downloads your courses, notices, files, assignments, grades and class schedule from Web Learning and keeps them on your device so you can read them offline. Files you download are saved on your device. Actions you take, such as submitting an assignment or adding a favorite, are sent to Web Learning, just as on its website.
 
-## Log Data
+Your settings, archived and hidden items, and submission drafts are also kept only on your device. Signing out or deleting the app removes them.
 
-I want to inform you that whenever you use my Service, in a case of an error in the app I collect data and information (through third party products) on your phone called Log Data. This Log Data may include information such as your device Internet Protocol (IP) address, device name, operating system version, the configuration of the app when utilizing my Service, the time and date of your use of the Service, and other statistics.
+## Device features
 
-## Cookies
+Each of these runs on your device and sends nothing to me:
 
-Cookies are files with a small amount of data that are commonly used as anonymous unique identifiers. These are sent from APIs that the app accesses and are stored in your device's internal memory.
+- **Notifications.** learnX checks Web Learning in the background and posts notifications on your device for new content, grades, deadline changes, deadline reminders and class reminders. There is no push server.
+- **Calendar and Reminders.** Only when you turn on sync, learnX adds your class schedule and assignments to the calendar or reminders list you choose. It reads the list of your calendars to let you choose one, and doesn't read your other events.
+- **Widgets, Spotlight and Siri.** learnX shares upcoming deadlines, classes and recent items with its widgets, and on Apple devices adds notices, assignments and files to the system's on-device search index. You can remove them by turning the feature off or signing out.
+- **Camera, photos and files.** learnX only reads a photo or file you pick or share to it, to attach it to an assignment submission. It saves images to your photo library only when you ask.
 
-This Service does not use these "cookies" explicitly. However, the app may use third party code and libraries that use "cookies" to collect information and improve their services. You have the option to either accept or refuse these cookies and know when a cookie is being sent to your device. If you choose to refuse our cookies, you may not be able to use some portions of this Service.
+The system asks your permission before learnX can use notifications, calendars, reminders, the camera or your photos, and you can change these in your device's settings at any time.
 
-## Security
+## Course Information Sharing (courseX)
 
-I value your trust in providing your Personal Information, thus we are striving to use commercially acceptable means to protect it. But remember that no method of transmission over the internet, or method of electronic storage is 100% secure and reliable, and I cannot guarantee its absolute security.
+This feature is off by default. When you turn it on, learnX uploads information about your courses this semester to courseX ([tsinghua.app](https://tsinghua.app)), where anyone can see it: the course ID, number and section, Chinese and English names, the teacher's name and staff number, and the class times and locations.
 
-## Links to Other Sites
+No information about you is uploaded: not your name, student number, grades or anything else from your account, and the upload carries no identifier of you or your device. Turning the feature off stops further uploads. Course information already shared stays on courseX, since it describes the course, not you.
 
-This Service may contain links to other sites. If you click on a third-party link, you will be directed to that site. Note that these external sites are not operated by me. Therefore, I strongly advise you to review the Privacy Policy of these websites. I have no control over and assume no responsibility for the content, privacy policies, or practices of any third-party sites or services.
+## Crash reports and usage statistics
 
-## Children’s Privacy
+learnX uses Google Firebase to find and fix problems:
 
-These Services do not address anyone under the age of 13. I do not knowingly collect personally identifiable information from children under 13. In the case I discover that a child under 13 has provided me with personal information, I will immediately delete this from our servers. If you are a parent or guardian and you are aware that your child has provided us with personal information, please contact me so that I will be able to do necessary actions.
+- **Firebase Crashlytics** receives a report when the app crashes or hits an unexpected error. A report has the error and where in the code it happened, the app version, the device model, operating system version, free memory and disk space, the screen that was open, how the last background refresh went (how long it took and how many items it got), and a random installation identifier. Web addresses in reports have their query parts removed, and replies from Web Learning are left out, so reports don't carry your course content.
+- **Firebase Analytics** counts app installs, opens and sessions, along with the app version, device model, operating system and the approximate region derived from your IP address.
 
-## Changes to This Privacy Policy
+learnX doesn't collect your advertising identifier, doesn't show ads, and doesn't track you across other apps or websites. Crash reports aren't sent from the demo account. Google keeps this data under its own retention settings and the [Firebase privacy information](https://firebase.google.com/support/privacy).
 
-I may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately after they are posted on this page.
+## Other connections
 
-## Contact Us
+- The Android app checks the TUNA mirror at Tsinghua (mirrors.tuna.tsinghua.edu.cn) for new versions and downloads updates from it when you ask.
+- The changelog opens learnX's releases page on GitHub, and links in notices open the sites they point to. Those sites have their own privacy policies.
+- If you install learnX from the App Store or Google Play, Apple or Google handle the download under their own policies.
 
-If you have any questions or suggestions about this Privacy Policy, do not hesitate to [contact me](mailto:learnX@ruiying.io).
+Like any website, each of these servers sees your IP address when the app connects to it.
+
+## Children
+
+learnX is meant for Tsinghua University students and isn't directed at children under 13.
+
+## Changes to this policy
+
+When this policy changes, the new version is posted on this page with a new effective date. You can see every past version in the project's history on GitHub.
+
+## Contact
+
+If you have any questions about this policy or want to ask about data held by Firebase, [email me](mailto:learnX@ruiying.io).
