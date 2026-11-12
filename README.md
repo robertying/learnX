@@ -98,11 +98,13 @@ Your account and course content stay on your device and only go to Tsinghua's se
 
 ```bash
 pnpm install
-cp .env.example .env   # fill in the mock login values
+cp .env.example .env   # 填写演示账号 fill in the mock login values
 cd ios && LANG=en_US.UTF-8 bundle exec pod install && cd ..   # iOS / Mac
-pnpm start             # Metro
-pnpm ios               # or: pnpm android
+pnpm start             # 启动 Metro start Metro
+pnpm ios               # 或 or: pnpm android
 ```
+
+[CONTRIBUTING.md](CONTRIBUTING.md) 介绍完整的开发环境配置（工具、用自己的团队为 iOS 签名、Android SDK 与模拟器、用演示账号测试、检查与 Pull Request）。代码约定和架构见 [AGENTS.md](AGENTS.md) 及各文件夹中的 `AGENTS.md`，供开发者和编程智能体共同阅读。
 
 [CONTRIBUTING.md](CONTRIBUTING.md) walks through the full setup (tools, iOS signing with your own team, Android SDK and emulator, testing with the mock login, checks and pull requests). Conventions and architecture are in [AGENTS.md](AGENTS.md) and the folders' own `AGENTS.md` files, written for both people and coding agents.
 
