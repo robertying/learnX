@@ -2,13 +2,11 @@ import './setupEnv';
 import './polyfills';
 
 import { AppRegistry, LogBox } from 'react-native';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import 'dayjs/locale/en';
-import 'dayjs/locale/zh-cn';
-import { isLocaleChinese } from './src/helpers/i18n';
 import { name as appName } from './app.json';
 import App from './src/App';
+// Sets up dayjs in the app's language for every runtime, also one that never
+// renders the app (a bare import, so Metro doesn't inline it).
+import './src/helpers/i18n';
 import {
   installGlobalErrorHandler,
   installRejectionTracker,
@@ -26,10 +24,6 @@ import { withLaunchOptions } from './src/services/launchOptions';
 // bar and opens a React Native DevTools window when tapped. Read warnings in
 // the Metro log instead.
 LogBox.ignoreAllLogs(true);
-
-// For every date shown, also by a background launch that never renders.
-dayjs.extend(relativeTime);
-dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
 
 installGlobalErrorHandler();
 installRejectionTracker();

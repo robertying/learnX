@@ -1,7 +1,6 @@
 import { submitAssignment } from 'data/source';
 import {
   PickedAttachment,
-  attachmentForFileDetail,
   canSubmit,
   defaultAttachmentName,
   initialSubmissionContent,
@@ -152,12 +151,9 @@ describe('sendSubmission', () => {
   });
 });
 
-describe('file detail params', () => {
-  const assignment = { id: 'a1', courseId: 'c1', courseName: 'Calculus' };
-
-  it('opens a picked file by its MIME type', () => {
-    const remote = pickedAsRemoteFile(picked);
-    expect(remote).toEqual({
+describe('pickedAsRemoteFile', () => {
+  it('shapes a picked file like a remote one', () => {
+    expect(pickedAsRemoteFile(picked)).toEqual({
       id: '0000',
       name: 'scan.pdf',
       downloadUrl: picked.uri,
@@ -165,26 +161,6 @@ describe('file detail params', () => {
       size: '2048B',
       type: 'application/pdf',
     });
-    expect(attachmentForFileDetail(assignment, remote)).toEqual({
-      id: 'a1',
-      courseId: 'c1',
-      courseName: 'Calculus',
-      title: 'scan',
-      downloadUrl: picked.uri,
-      fileType: 'pdf',
-    });
-  });
-
-  it('falls back to the extension for submitted files', () => {
-    expect(
-      attachmentForFileDetail(assignment, {
-        id: 'f',
-        name: 'report.docx',
-        downloadUrl: 'https://example.com/f',
-        previewUrl: '',
-        size: '',
-      }).fileType,
-    ).toBe('docx');
     expect(pickedAsRemoteFile({ ...picked, size: 0 }).size).toBe('');
   });
 });

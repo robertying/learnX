@@ -41,11 +41,13 @@ struct SharedFileInbox {
   }
 
   /// Copies the file into a folder of its own, so it keeps its name (the attachment's name) without clashing, and
-  /// records it for the app.
+  /// records it for the app. Runs on the caller's actor, so the share extension's main-actor provider isn't sent
+  /// elsewhere; the copy itself happens in the provider's callback.
   @discardableResult
-  func save(_ provider: NSItemProvider, type: UTType) async throws -> URL {
+  nonisolated(nonsending) func save(_ provider: NSItemProvider, type: UTType) async throws -> URL {
     let folder = directory.appendingPathComponent(UUID().uuidString, isDirectory: true)
     try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+    let suggestedName = provider.suggestedName
     let file: URL = try await withCheckedThrowingContinuation { continuation in
       // The URL is only valid until this returns.
       _ = provider.loadFileRepresentation(forTypeIdentifier: type.identifier) { url, error in
@@ -54,7 +56,7 @@ struct SharedFileInbox {
           return
         }
         let destination = folder.appendingPathComponent(
-          Self.fileName(suggested: provider.suggestedName, url: url, type: type)
+          Self.fileName(suggested: suggestedName, url: url, type: type)
         )
         do {
           try FileManager.default.copyItem(at: url, to: destination)

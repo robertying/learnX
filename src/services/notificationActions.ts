@@ -8,6 +8,7 @@ import { setArchived } from 'data/userData';
 import { recordError } from 'services/crashReporting';
 import {
   cancelDeadlineRemindersOf,
+  isReminderKind,
   remindLater,
 } from 'services/deadlineReminders';
 import {
@@ -71,6 +72,7 @@ export const handleNotificationAction = async (
         await remindLater(response.notification, {
           id: data.id,
           deadline: data.deadline,
+          kind: isReminderKind(data.kind) ? data.kind : undefined,
         });
       }
       break;

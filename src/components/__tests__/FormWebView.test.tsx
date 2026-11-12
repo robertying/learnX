@@ -17,11 +17,11 @@ jest.mock('components/AutoHeightWebView', () => {
   );
 });
 
-it('shows a spinner until the content has rendered', async () => {
-  await render(<FormWebView html="<p>Hi</p>" />);
+it('shows the content in the page template, with a spinner until it has rendered', async () => {
+  await render(<FormWebView content="<p>Hi</p>" />);
   expect(screen.getByTestId('progress')).toBeTruthy();
-  expect(screen.getByText('<p>Hi</p>')).toBeTruthy();
+  const page = screen.getByText('<p>Hi</p>', { exact: false });
+  expect(page.props.children).toContain('<html');
   await userEvent.press(screen.getByTestId('ready'));
   expect(screen.queryByTestId('progress')).toBeNull();
-  expect(screen.getByText('<p>Hi</p>')).toBeTruthy();
 });

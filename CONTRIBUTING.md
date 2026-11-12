@@ -2,7 +2,7 @@
 
 Thanks for helping out. This guide takes you from a fresh clone to running the app on a simulator or emulator, testing it without a Tsinghua account, and opening a pull request. Most of the trouble people hit is in the native setup (Xcode signing, CocoaPods, the Android SDK), so those parts go step by step.
 
-Once you're set up, the code conventions and architecture are in [AGENTS.md](AGENTS.md) and the `AGENTS.md` files in `src/data`, `src/widgets`, `modules` and `.maestro`. They're written for people and coding agents alike.
+Once you're set up, the code conventions and architecture are in [AGENTS.md](AGENTS.md) and the `AGENTS.md` files in the folders it lists. They're written for people and coding agents alike.
 
 ## What you need
 

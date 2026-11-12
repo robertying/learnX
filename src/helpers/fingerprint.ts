@@ -1,5 +1,3 @@
-import * as Crypto from 'expo-crypto';
-
-export const generateFingerprint = () => {
-  return Crypto.randomUUID().replaceAll('-', '');
-};
+/** A new SSO device fingerprint: 32 random hex digits. */
+export const generateFingerprint = () =>
+  globalThis.crypto.randomUUID().replaceAll('-', '');

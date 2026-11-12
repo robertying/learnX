@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { headerButtons } from 'navigation/headerButtons';
 
@@ -82,5 +82,29 @@ describe('headerButtons', () => {
     await render(<HeaderLeft />);
     expect(screen.getAllByRole('button')).toHaveLength(1);
     expect(screen.getByText('Close')).toBeTruthy();
+  });
+
+  it('draws a text button where the header draws its own, and an icon as a native item', async () => {
+    const submit = headerButtons('right', [
+      {
+        id: 'submit',
+        label: 'Submit',
+        icon: 'upload',
+        text: true,
+        onPress,
+        testID: 'submit',
+      },
+    ]);
+    expect(submit.unstable_headerRightItems!({} as never)).toEqual([
+      expect.objectContaining({
+        identifier: 'submit',
+        icon: { type: 'sfSymbol', name: expect.any(String) },
+      }),
+    ]);
+    const HeaderRight = submit.headerRight as () => React.ReactElement;
+    await render(<HeaderRight />);
+    await fireEvent.press(screen.getByTestId('submit'));
+    expect(screen.getByText('Submit')).toBeTruthy();
+    expect(onPress).toHaveBeenCalled();
   });
 });

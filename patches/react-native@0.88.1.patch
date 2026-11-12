@@ -1,24 +1,33 @@
 diff --git a/Libraries/Network/FormData.js b/Libraries/Network/FormData.js
-index b237b45..fcc4f4b 100644
+index 3e7b02e..dd8e9c6 100644
 --- a/Libraries/Network/FormData.js
 +++ b/Libraries/Network/FormData.js
-@@ -91,8 +91,9 @@ class FormData {
+@@ -91,8 +91,19 @@ class FormData {
        // content type (cf. web Blob interface.)
        if (typeof value === 'object' && !Array.isArray(value) && value) {
          if (typeof value.name === 'string') {
--          headers['content-disposition'] +=
++          // Web Learning reads the UTF-8 name in `filename` (a percent-encoded
++          // one shows as is). Like browsers (HTML spec), escape only what would
++          // end the quoted string or the header; `filename*` has RFC 5987 form.
++          const quotedName = value.name.replace(
++            /[\r\n"]/g,
++            char => ({'\r': '%0D', '\n': '%0A', '"': '%22'})[char],
++          );
++          const extendedName = encodeURIComponent(value.name).replace(
++            /['()*]/g,
++            char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
++          );
+           headers['content-disposition'] +=
 -            `; filename="${encodeFilename(value.name)}"`;
-+          headers['content-disposition'] += `; filename="${
-+            value.name
-+          }"; filename*=utf-8''${encodeURI(value.name)}`;
++            `; filename="${quotedName}"; filename*=utf-8''${extendedName}`;
          }
          if (typeof value.type === 'string') {
            headers['content-type'] = value.type;
 diff --git a/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm b/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
-index 0000000..1111111 100644
+index 8f55121..593f570 100644
 --- a/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
 +++ b/React/Fabric/Mounting/ComponentViews/TextInput/RCTTextInputComponentView.mm
-@@ -388,8 +388,33 @@
+@@ -397,6 +397,31 @@ static NSSet<NSNumber *> *returnKeyTypesSet;
    _backedTextInputView.inputAccessoryView = nil;
    _hasInputAccessoryView = false;
    [_backedTextInputView resignFirstResponder];
@@ -28,8 +37,8 @@ index 0000000..1111111 100644
 +  if ([self _isCredentialTextInput]) {
 +    [self _replaceBackedTextInputView];
 +  }
- }
- 
++}
++
 +- (BOOL)_isCredentialTextInput
 +{
 +  UITextContentType textContentType = _backedTextInputView.textContentType;
@@ -47,8 +56,6 @@ index 0000000..1111111 100644
 +  _backedTextInputView.tintColor = oldTextInputView.tintColor;
 +  _backedTextInputView.inputView = oldTextInputView.inputView;
 +  _backedTextInputView.dataDetectorTypes = oldTextInputView.dataDetectorTypes;
-+}
-+
- #pragma mark - RCTBackedTextInputDelegate
+ }
  
- - (BOOL)textInputShouldBeginEditing
+ #pragma mark - RCTBackedTextInputDelegate

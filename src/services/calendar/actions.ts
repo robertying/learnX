@@ -9,6 +9,7 @@ import { Assignment } from 'data/types/state';
 import {
   exportSyncedCalendarsToICS,
   removeCalendars,
+  requireAssignmentAccess,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'services/calendar/calendars';
@@ -58,7 +59,7 @@ export const assignmentSyncErrorToast = (err: unknown): ToastMessage => {
       return { text: t('missingCalendarSource'), type: 'error' };
     default:
       return {
-        text: t('assignmentSyncFailed') + messageOf(err),
+        text: t('assignmentSyncFailed', { error: messageOf(err) }),
         type: 'error',
       };
   }
@@ -72,7 +73,7 @@ export const calendarExportErrorToast = (err: unknown): ToastMessage => {
       return { text: t('calendarExportNoEvent'), type: 'warning' };
     default:
       return {
-        text: t('calendarExportFailed') + messageOf(err),
+        text: t('calendarExportFailed', { error: messageOf(err) }),
         type: 'error',
       };
   }
@@ -85,7 +86,10 @@ export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
     case 'reminderPermission':
       return { text: t('deleteFailedNoReminderPermission'), type: 'error' };
     default:
-      return { text: t('deleteFailed') + messageOf(err), type: 'error' };
+      return {
+        text: t('deleteFailed', { error: messageOf(err) }),
+        type: 'error',
+      };
   }
 };
 
@@ -160,6 +164,21 @@ export const syncAssignments = async (
     ) {
       return undefined;
     }
+    return assignmentSyncErrorToast(err);
+  }
+};
+
+/**
+ * Asks for the access assignment sync to the calendar or Reminders needs, as
+ * the user turns it on; the sync itself follows the setting
+ * (services/surfaces). The toast to show when the access is denied.
+ */
+export const allowAssignmentSync = async (
+  type: 'calendar' | 'reminder',
+): Promise<ToastMessage | undefined> => {
+  try {
+    await requireAssignmentAccess(type, { ask: true });
+  } catch (err) {
     return assignmentSyncErrorToast(err);
   }
 };

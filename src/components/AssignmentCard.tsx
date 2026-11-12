@@ -7,13 +7,8 @@ import {
 } from 'helpers/assignments';
 import { getAssignmentGradeLevelDescription, t } from 'helpers/i18n';
 import { useMinute } from 'hooks/useClock';
-import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from 'components/CardWrapper';
-import CardRow, {
-  CardGlyph,
-  CardPill,
-  cardAccessibilityLabel,
-} from 'components/CardRow';
+import CardRow, { CardPill, cardAccessibilityLabel } from 'components/CardRow';
 
 export interface AssignmentCardProps extends CardWrapperProps {
   data: Assignment;
@@ -39,7 +34,6 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
   hideCourseName,
   ...restProps
 }) => {
-  const theme = useTheme();
   const now = useMinute();
   const dueText = deadlineText(deadline, now);
   const urgency = deadlineUrgency(deadline, now, submitted);
@@ -71,6 +65,12 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
     dueText
   );
 
+  const flags = [
+    attachment && 'attachment',
+    hasAnswer && 'answer',
+    restProps.fav && 'favorited',
+  ] as const;
+
   return (
     <CardWrapper
       {...restProps}
@@ -79,11 +79,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         title,
         overline,
         status: statusText,
-        flags: [
-          attachment && t('attachment'),
-          hasAnswer && t('a11yHasAnswer'),
-          restProps.fav && t('a11yFavorited'),
-        ],
+        flags,
         preview,
       })}
     >
@@ -91,15 +87,7 @@ const AssignmentCard: React.FC<AssignmentCardProps> = ({
         overline={overline}
         title={title}
         preview={preview}
-        glyphs={
-          <>
-            {attachment ? <CardGlyph name="attachment" /> : null}
-            {hasAnswer ? <CardGlyph name="answer" /> : null}
-            {restProps.fav ? (
-              <CardGlyph name="favorited" color={theme.colors.status.red} />
-            ) : null}
-          </>
-        }
+        flags={flags}
         trailing={status}
       />
     </CardWrapper>

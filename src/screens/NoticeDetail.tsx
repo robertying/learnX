@@ -3,9 +3,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import dayjs from 'dayjs';
 import FormWebView from 'components/FormWebView';
 import { NoticeDetailParamList } from 'navigation/types';
-import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
-import { getExtension, stripExtension } from 'helpers/filename';
+import { attachmentFile } from 'helpers/attachments';
 import { Notice } from 'data/types/state';
 import { useNotice } from 'data/content';
 import { openNotice } from 'data/serverActions';
@@ -20,7 +19,6 @@ import {
   FormParagraph,
   FormTitle,
 } from 'components/Form';
-import { useTheme, webContentColors } from 'theme';
 
 type Props = NativeStackScreenProps<NoticeDetailParamList, 'NoticeDetail'>;
 
@@ -40,14 +38,11 @@ const NoticeDetailContent: React.FC<{
   notice: Notice;
   navigation: Props['navigation'];
 }> = ({ notice, navigation }) => {
-  const theme = useTheme();
   const now = useMinute();
 
   const {
     id,
     url,
-    courseId,
-    courseName,
     title,
     publisher,
     publishTime,
@@ -56,24 +51,10 @@ const NoticeDetailContent: React.FC<{
     attachment,
   } = notice;
 
-  const html = getWebViewTemplate(content ?? '', {
-    dark: theme.dark,
-    // The form row's own color shows through.
-    backgroundColor: 'transparent',
-    ...webContentColors(theme.dark),
-  });
-
   const handleFileOpen = () => {
     if (attachment) {
       navigation.push('FileDetail', {
-        attachment: {
-          id,
-          courseId,
-          courseName,
-          title: stripExtension(attachment.name),
-          downloadUrl: attachment.downloadUrl,
-          fileType: getExtension(attachment.name),
-        },
+        attachment: attachmentFile(notice, attachment),
       });
     }
   };
@@ -117,7 +98,7 @@ const NoticeDetailContent: React.FC<{
         ) : null}
         <FormSection>
           {content?.trim() ? (
-            <FormWebView html={html} />
+            <FormWebView content={content} />
           ) : (
             <FormParagraph text={t('noNoticeContent')} />
           )}

@@ -5,6 +5,7 @@ import { ensureSession } from 'data/source';
 import { fetchCalendarRange } from 'data/schedule';
 import { Assignment } from 'data/types/state';
 import {
+  allowAssignmentSync,
   assignmentSyncErrorToast,
   calendarDeleteErrorToast,
   calendarExportErrorToast,
@@ -18,6 +19,7 @@ import {
 import {
   exportSyncedCalendarsToICS,
   removeCalendars,
+  requireAssignmentAccess,
   saveAssignmentsToReminderOrCalendar,
   saveCoursesToCalendar,
 } from 'services/calendar/calendars';
@@ -32,6 +34,7 @@ jest.mock('data/schedule', () => ({ fetchCalendarRange: jest.fn() }));
 jest.mock('services/calendar/calendars', () => ({
   exportSyncedCalendarsToICS: jest.fn(),
   removeCalendars: jest.fn(),
+  requireAssignmentAccess: jest.fn(async () => {}),
   saveAssignmentsToReminderOrCalendar: jest.fn(),
   saveCoursesToCalendar: jest.fn(),
 }));
@@ -79,7 +82,7 @@ describe('error toasts', () => {
       type: 'error',
     });
     expect(assignmentSyncErrorToast(new Error('Boom'))).toEqual({
-      text: t('assignmentSyncFailed') + 'Boom',
+      text: t('assignmentSyncFailed', { error: 'Boom' }),
       type: 'error',
     });
   });
@@ -94,7 +97,7 @@ describe('error toasts', () => {
       type: 'warning',
     });
     expect(calendarExportErrorToast(new Error('Boom'))).toEqual({
-      text: t('calendarExportFailed') + 'Boom',
+      text: t('calendarExportFailed', { error: 'Boom' }),
       type: 'error',
     });
   });
@@ -109,7 +112,7 @@ describe('error toasts', () => {
       type: 'error',
     });
     expect(calendarDeleteErrorToast(new Error('Boom'))).toEqual({
-      text: t('deleteFailed') + 'Boom',
+      text: t('deleteFailed', { error: 'Boom' }),
       type: 'error',
     });
   });
@@ -246,6 +249,25 @@ describe('syncAssignments', () => {
     await expect(
       syncAssignments('calendar', [], [], { automatic: true }),
     ).resolves.toMatchObject({ type: 'error' });
+  });
+});
+
+describe('allowAssignmentSync', () => {
+  it('asks for the access and has nothing to say once allowed', async () => {
+    await expect(allowAssignmentSync('reminder')).resolves.toBeUndefined();
+    expect(requireAssignmentAccess).toHaveBeenCalledWith('reminder', {
+      ask: true,
+    });
+  });
+
+  it('says why when the access is denied', async () => {
+    jest
+      .mocked(requireAssignmentAccess)
+      .mockImplementationOnce(fail('reminderPermission'));
+    await expect(allowAssignmentSync('reminder')).resolves.toEqual({
+      text: t('assignmentSyncNoReminderPermission'),
+      type: 'error',
+    });
   });
 });
 

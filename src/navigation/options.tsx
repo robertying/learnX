@@ -6,7 +6,7 @@ import type {
 } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import { getTitleOptions } from 'components/HeaderTitle';
-import Colors from 'constants/Colors';
+import { brandColor } from 'theme';
 import DeviceInfo from 'constants/DeviceInfo';
 import { getAssignment, getFile, getNotice } from 'data/content';
 import { getCachedCourses } from 'data/queries';
@@ -32,7 +32,7 @@ export const getModalScreenOptions =
     ...getTitleOptions(title),
   });
 
-const supportsNativeSubtitle = DeviceInfo.supportsNativeSubtitle();
+const supportsNativeSubtitle = DeviceInfo.hasLiquidGlass();
 
 /**
  * A tab's first screen: a large title that collapses as the list scrolls, on
@@ -80,7 +80,7 @@ export const getDetailScreenOptions = (title = '', subtitle?: string) =>
   function ({ theme }: { theme: Theme }): NativeStackNavigationOptions {
     return {
       ...getTitleOptions(title, subtitle),
-      headerTintColor: Platform.OS === 'ios' ? Colors.theme : undefined,
+      headerTintColor: Platform.OS === 'ios' ? brandColor : undefined,
       // A native title would otherwise take the tint color.
       headerTitleStyle: supportsNativeSubtitle
         ? { color: theme.colors.text }

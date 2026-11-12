@@ -10,7 +10,7 @@ import { toast } from 'components/Toast';
 import { useCredentialsStore } from 'data/credentials';
 import { t } from 'helpers/i18n';
 import { postNotification } from 'services/notifications';
-import { previewDeadlineReminder } from 'services/deadlineReminders';
+import { previewScheduledReminder } from 'services/notificationSamples';
 import {
   getServerWritesAllowed,
   setServerWritesAllowed,
@@ -30,11 +30,11 @@ jest.mock('services/background', () => ({
   syncContent: jest.fn(),
   notifyContent: jest.fn(),
 }));
-jest.mock('services/deadlineReminders', () => ({
-  previewDeadlineReminder: jest.fn(async () => 3),
-}));
-jest.mock('services/classReminders', () => ({
-  previewClassReminder: jest.fn(async () => 0),
+jest.mock('services/notificationSamples', () => ({
+  ...jest.requireActual('services/notificationSamples'),
+  previewScheduledReminder: jest.fn(async (kind: string) =>
+    kind === 'deadline' ? 3 : 0,
+  ),
 }));
 jest.mock('data/content', () => ({
   ...jest.requireActual('data/content'),
@@ -236,7 +236,7 @@ it('previews a deadline reminder', async () => {
 });
 
 it('says when there is no deadline reminder to preview', async () => {
-  jest.mocked(previewDeadlineReminder).mockResolvedValueOnce(0);
+  jest.mocked(previewScheduledReminder).mockResolvedValueOnce(0);
   await renderScreen();
   await userEvent.press(screen.getByText('Preview a Deadline Reminder'));
   expect(toast).toHaveBeenCalledWith(

@@ -53,16 +53,10 @@ const lastMonday = `${monthDay(mockDays.lastMonday)}（周一）`;
 
 /**
  * Sample files in this repo's `mock-files` (built by its `generate.py`), so
- * downloads and previews show real content of the right type. Served by
- * jsDelivr's GitHub CDN, which mainland China reaches more reliably than
- * raw.githubusercontent.com, except for the types jsDelivr refuses (403):
- * Word, Excel and PowerPoint files come from raw.githubusercontent.com.
+ * downloads and previews show real content of the right type.
  */
-const MOCK_FILES_CDN =
-  'https://cdn.jsdelivr.net/gh/robertying/learnX@main/mock-files/';
-const MOCK_FILES_RAW =
+const MOCK_FILES =
   'https://raw.githubusercontent.com/robertying/learnX/main/mock-files/';
-const notOnCdn = /\.(docx|xlsx|pptx)$/;
 
 const samples = {
   lecturePdf: { file: 'human-visual-system.pdf', size: '102.83KB' },
@@ -77,10 +71,7 @@ const samples = {
 };
 type Sample = keyof typeof samples;
 
-export const sampleUrl = (sample: Sample) => {
-  const { file } = samples[sample];
-  return (notOnCdn.test(file) ? MOCK_FILES_RAW : MOCK_FILES_CDN) + file;
-};
+export const sampleUrl = (sample: Sample) => MOCK_FILES + samples[sample].file;
 
 /** An attachment of a notice or assignment. */
 const attachment = (id: string, name: string, sample: Sample): RemoteFile => ({

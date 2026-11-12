@@ -4,8 +4,6 @@ import ExpoModulesCore
 /// `learnx://`; the link reaches `ShareAppDelegateSubscriber`, which tells a listening module to send it. Before JS
 /// listens (the link that launched the app), the file waits in the app group until `takeSharedItem`.
 public final class ShareModule: Module {
-  private var observer: NSObjectProtocol?
-
   public func definition() -> ModuleDefinition {
     Name("LearnXShare")
 
@@ -24,22 +22,23 @@ public final class ShareModule: Module {
   }
 
   func startObserving() {
-    // The subscriber posts on the main thread, from the app delegate.
-    observer = NotificationCenter.default.addObserver(
-      forName: ShareAppDelegateSubscriber.notification,
-      object: nil,
-      queue: nil
-    ) { [weak self] _ in
-      if let item = Self.takeSharedItem() {
-        self?.sendEvent("onShare", item)
-      }
-    }
+    // The subscriber posts on the main thread, from the app delegate. A selector, unlike a block, doesn't hand the
+    // (non-Sendable) module to a @Sendable closure.
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(linkOpened),
+      name: ShareAppDelegateSubscriber.notification,
+      object: nil
+    )
   }
 
   func stopObserving() {
-    if let observer {
-      NotificationCenter.default.removeObserver(observer)
-      self.observer = nil
+    NotificationCenter.default.removeObserver(self, name: ShareAppDelegateSubscriber.notification, object: nil)
+  }
+
+  @objc private func linkOpened() {
+    if let item = Self.takeSharedItem() {
+      sendEvent("onShare", item)
     }
   }
 
@@ -56,7 +55,7 @@ public final class ShareModule: Module {
 /// Notices links that may come from the share extension. Other modules (React Native's Linking) handle the link
 /// itself, so this never claims it.
 public final class ShareAppDelegateSubscriber: ExpoAppDelegateSubscriber {
-  static let notification = Notification.Name("io.robertying.learnx.SharedFile")
+  nonisolated static let notification = Notification.Name("io.robertying.learnx.SharedFile")
 
   public func application(
     _ app: UIApplication,

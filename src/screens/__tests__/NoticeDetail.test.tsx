@@ -53,12 +53,12 @@ it('shows the notice and marks it read', async () => {
   );
 });
 
-it('opens the attachment as a file', async () => {
+it('opens the attachment as a file, downloaded under its own id', async () => {
   await renderScreen(withAttachment);
   await userEvent.press(screen.getByText(withAttachment.attachment!.name));
   expect(navigation.push).toHaveBeenCalledWith('FileDetail', {
     attachment: expect.objectContaining({
-      id: withAttachment.id,
+      id: withAttachment.attachment!.id,
       title: withAttachment.attachment!.name.replace(/\.[^.]+$/, ''),
     }),
   });

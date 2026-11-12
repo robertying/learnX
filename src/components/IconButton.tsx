@@ -8,13 +8,10 @@ import {
   frame,
   labelStyle,
 } from '@expo/ui/swift-ui/modifiers';
-import Badge, { DOT_SIZE } from 'components/Badge';
+import BadgeDot from 'components/Badge';
 import { t } from 'helpers/i18n';
-import {
-  iconSymbols,
-  PADDING,
-  type IconButtonProps,
-} from './IconButton.shared';
+import { systemIcons } from 'helpers/systemIcons';
+import { PADDING, type IconButtonProps } from './IconButton.shared';
 import ThemedHost from 'components/ThemedHost';
 
 export type { IconButtonIcon, IconButtonProps } from './IconButton.shared';
@@ -46,7 +43,7 @@ const IconButton: React.FC<IconButtonProps> = ({
     <View style={style}>
       <ThemedHost matchContents>
         <Button
-          systemImage={iconSymbols[icon]}
+          systemImage={systemIcons[icon].ios}
           label={label}
           onPress={onPress}
           testID={testID}
@@ -63,8 +60,7 @@ const IconButton: React.FC<IconButtonProps> = ({
         />
       </ThemedHost>
       {badge && (
-        <Badge
-          size={DOT_SIZE}
+        <BadgeDot
           style={[styles.badge, { top: badgeInset, right: badgeInset }]}
         />
       )}

@@ -114,6 +114,9 @@ const deadline = (
   deadline: ms,
   due: `${id}-due`,
   url,
+  // Uncolored until it's due; coloredDeadlines sets its own.
+  soonFrom: ms,
+  urgentFrom: ms,
 });
 
 const DAY = 86400000;

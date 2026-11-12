@@ -179,7 +179,7 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
  * `SafeArea` that background would stop at the safe area instead.
  */
 export const FormScreen: React.FC<ViewProps> = ({ style, ...props }) => (
-  <View style={[styles.fill, style]} {...props} />
+  <View style={[styles.fill, styles.screen, style]} {...props} />
 );
 
 // The header's glass over what scrolls under it, as for the app's other
@@ -752,6 +752,12 @@ export const FormProfile: React.FC<FormProfileProps> = ({ name, detail }) => {
 const styles = StyleSheet.create({
   fill: {
     flex: 1,
+  },
+  // The Form's own background, also behind a title above it (Setup).
+  screen: {
+    backgroundColor: DeviceInfo.isMac()
+      ? PlatformColor('systemBackground')
+      : groupedBackground,
   },
   numberField: {
     width: 72,

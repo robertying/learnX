@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import Spotlight, { SpotlightDomain, SpotlightItem } from 'modules/spotlight';
 import { Assignment, File, Notice } from 'data/types/state';
-import { removeTags } from 'helpers/text';
+import Storage from 'expo-sqlite/kv-store';
+import { hash, removeTags } from 'helpers/text';
 
 /** Spotlight shows two or three lines; the rest is only searched. */
 const MAX_DETAILS_LENGTH = 500;
@@ -52,12 +53,58 @@ export const fileSpotlightItem = (file: File): SpotlightItem => ({
   date: time(file.uploadTime),
 });
 
+/** A hash of each indexed item, by domain and item id. */
+type Indexed = Partial<Record<SpotlightDomain, Record<string, string>>>;
+
+export const SPOTLIGHT_INDEXED_KEY = 'spotlightIndexed';
+
+const readSaved = (): Indexed => {
+  try {
+    const saved = Storage.getItemSync(SPOTLIGHT_INDEXED_KEY);
+    return saved ? (JSON.parse(saved) as Indexed) : {};
+  } catch {
+    return {};
+  }
+};
+
 /**
- * What each domain was last indexed with, by item id, so only the items that
- * changed are sent. Empty in a new JS runtime, whose first update replaces
- * the domain.
+ * What the index holds: each domain's items, as of the last write that
+ * finished, saved so a new JS runtime (an app launch, the background task)
+ * sends only what changed instead of indexing everything again.
  */
-let indexed: Partial<Record<SpotlightDomain, Map<string, string>>> = {};
+let saved: Indexed | undefined;
+/** What the queued writes will make it: compared with the next update. */
+let indexed: Indexed | undefined;
+
+const getIndexed = () => {
+  saved ??= readSaved();
+  indexed ??= { ...saved };
+  return indexed;
+};
+
+const save = (
+  domain: SpotlightDomain,
+  items: Record<string, string> | undefined,
+) => {
+  const next = { ...(saved ??= readSaved()) };
+  if (items) {
+    next[domain] = items;
+  } else {
+    delete next[domain];
+  }
+  saved = next;
+  try {
+    Storage.setItemSync(SPOTLIGHT_INDEXED_KEY, JSON.stringify(next));
+  } catch {}
+};
+
+const forgetSaved = () => {
+  saved = {};
+  try {
+    Storage.removeItemSync(SPOTLIGHT_INDEXED_KEY);
+  } catch {}
+};
+
 /** Index changes run one at a time, in order. */
 let queue = Promise.resolve();
 
@@ -71,27 +118,29 @@ const enqueue = (work: () => Promise<void>) => {
 };
 
 const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
-  const before = indexed[domain];
-  const after = new Map(items.map(item => [item.id, JSON.stringify(item)]));
-  const changed = items.filter(
-    item => before?.get(item.id) !== after.get(item.id),
+  const all = getIndexed();
+  const before = all[domain];
+  const after = Object.fromEntries(
+    items.map(item => [item.id, hash(JSON.stringify(item))]),
   );
-  const removed = before ? [...before.keys()].filter(id => !after.has(id)) : [];
+  const changed = items.filter(item => before?.[item.id] !== after[item.id]);
+  const removed = before
+    ? Object.keys(before).filter(id => !Object.hasOwn(after, id))
+    : [];
   if (before && changed.length === 0 && removed.length === 0) {
     return;
   }
-  indexed[domain] = after;
+  all[domain] = after;
   enqueue(async () => {
     try {
-      // An app built before updateItems replaces the whole domain.
-      if (before && Spotlight!.updateItems) {
-        await Spotlight!.updateItems(domain, changed, removed);
-      } else {
-        await Spotlight!.replaceItems(domain, items);
-      }
+      await (before
+        ? Spotlight!.updateItems(domain, changed, removed)
+        : Spotlight!.replaceItems(domain, items));
+      save(domain, after);
     } catch (error) {
       // The next change replaces the whole domain.
-      delete indexed[domain];
+      delete getIndexed()[domain];
+      save(domain, undefined);
       throw error;
     }
   });
@@ -135,5 +184,9 @@ export function clearSpotlight() {
     return;
   }
   indexed = {};
-  enqueue(() => Spotlight!.removeAllItems());
+  enqueue(async () => {
+    // After the writes queued before it, which saved what they indexed.
+    forgetSaved();
+    await Spotlight!.removeAllItems();
+  });
 }

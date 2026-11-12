@@ -5,7 +5,6 @@ import {
   classReminderContent,
   MAX_CLASS_REMINDERS,
   planClassReminders,
-  previewClassReminder,
   syncClassReminders,
 } from 'services/classReminders';
 import { UpcomingClass } from 'helpers/upNext';
@@ -97,6 +96,7 @@ describe('classReminderContent', () => {
       title: 'Course a',
       body: 'Starts at 09:50 · Room 101',
       data: { type: 'today' },
+      threadIdentifier: 'classes',
     });
     expect(
       classReminderContent(upcoming('a', 0, { start, location: '' })).body,
@@ -165,26 +165,4 @@ it('cancels only class reminders', async () => {
   ] as never);
   await cancelClassReminders();
   expect(cancel.mock.calls).toEqual([['class-reminder:a:1:15']]);
-});
-
-describe('previewClassReminder', () => {
-  it('shows the first class reminder again soon and counts them', async () => {
-    scheduled.mockResolvedValue([
-      {
-        identifier: 'class-reminder:a:1:15',
-        content: { title: 'Course a', body: 'Starts at 09:50', data: {} },
-      },
-      { identifier: 'deadline-reminder:a:1:60', content: {} },
-    ] as never);
-    await expect(previewClassReminder()).resolves.toBe(1);
-    expect(schedule.mock.calls[0][0]).toMatchObject({
-      content: { title: 'Course a', body: 'Starts at 09:50' },
-      trigger: { seconds: 10 },
-    });
-  });
-
-  it('schedules nothing without class reminders', async () => {
-    await expect(previewClassReminder()).resolves.toBe(0);
-    expect(schedule).not.toHaveBeenCalled();
-  });
 });

@@ -28,11 +28,14 @@ const contextMenuSupported = Platform.OS === 'ios';
 
 export interface CardWrapperProps {
   fav?: boolean;
-  onFav?: (fav: boolean) => void;
+  /** Favorites the item, or removes it from favorites when `fav`. */
+  onToggleFav?: () => void;
   archived?: boolean;
-  onArchive?: (archived: boolean) => void;
+  /** Archives the item, or restores it when `archived`. */
+  onToggleArchived?: () => void;
   hidden?: boolean;
-  onHide?: (hide: boolean) => void;
+  /** Hides the course, or shows it again when `hidden`. Only courses hide. */
+  onToggleHidden?: () => void;
   onPress?: () => void;
   selectionMode?: boolean;
   reorderMode?: boolean;
@@ -51,7 +54,11 @@ export interface CardWrapperProps {
   testID?: string;
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
-  disableSwipe?: boolean;
+  /**
+   * No swipe, menu or accessibility actions, for a card that only opens (as
+   * in search results). Selection and reorder mode turn them off too.
+   */
+  actionsDisabled?: boolean;
   /**
    * The last row of its list or section: no separator under it, which would
    * otherwise sit on the tab bar or the next section's header.
@@ -61,10 +68,10 @@ export interface CardWrapperProps {
 
 const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   fav,
-  onFav,
+  onToggleFav,
   archived,
-  onArchive,
-  onHide,
+  onToggleArchived,
+  onToggleHidden,
   hidden,
   onPress,
   children,
@@ -78,16 +85,24 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   testID,
   checked,
   onCheck,
-  disableSwipe,
+  actionsDisabled,
   last,
 }) => {
   const theme = useTheme();
   const swipeSettings = useSettings(settings => settings.swipeActions);
 
   const [menuVisible, setMenuVisible] = useState(false);
+  // Android's menu is a Compose view: mounted on the card's first long press,
+  // not with every row.
+  const [menuMounted, setMenuMounted] = useState(false);
 
-  const actions = cardActions({ fav, archived, hidden, canHide: !!onHide });
-  const actionsEnabled = !disableSwipe && !selectionMode && !reorderMode;
+  const actions = cardActions({
+    fav,
+    archived,
+    hidden,
+    canHide: !!onToggleHidden,
+  });
+  const actionsEnabled = !actionsDisabled && !selectionMode && !reorderMode;
   // One action each way, as chosen in Settings › Swipe Actions
   const swipeActions: Record<SwipeSide, CardAction | undefined> = {
     leading: swipeAction(actions, swipeSettings.right),
@@ -102,7 +117,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
                 {
                   key: 'moveUp',
                   label: t('moveUp'),
-                  systemImage: 'arrow.up' as const,
+                  systemImage: systemIcons.moveUp.ios,
                   offset: -1 as const,
                 },
               ]
@@ -112,7 +127,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
                 {
                   key: 'moveDown',
                   label: t('moveDown'),
-                  systemImage: 'arrow.down' as const,
+                  systemImage: systemIcons.moveDown.ios,
                   offset: 1 as const,
                 },
               ]
@@ -123,13 +138,13 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const runAction = (action: CardAction) => {
     switch (action.key) {
       case 'fav':
-        onFav?.(!fav);
+        onToggleFav?.();
         break;
       case 'archive':
-        onArchive?.(!archived);
+        onToggleArchived?.();
         break;
       case 'hide':
-        onHide?.(!hidden);
+        onToggleHidden?.();
         break;
     }
   };
@@ -237,6 +252,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       void Haptics.selectionAsync();
+      setMenuMounted(true);
       setMenuVisible(true);
     }
   };
@@ -276,7 +292,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           <SystemIcon
             testID="reorder-handle"
             style={styles.checkbox}
-            name="reorder"
+            name="dragHandle"
             size={20}
             color={theme.colors.onSurface}
           />
@@ -321,12 +337,14 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   ) : (
     <View collapsable={false}>
       {touchable}
-      <CardMenu
-        visible={menuVisible}
-        actions={actions}
-        onAction={handleMenuAction}
-        onDismiss={closeMenu}
-      />
+      {menuMounted ? (
+        <CardMenu
+          visible={menuVisible}
+          actions={actions}
+          onAction={handleMenuAction}
+          onDismiss={closeMenu}
+        />
+      ) : null}
     </View>
   );
 

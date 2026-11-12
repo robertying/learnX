@@ -3,9 +3,10 @@ import UIKit
 /// The app's commands in the menu bar (Mac, and iPad with iPadOS 26), which also makes their shortcuts work with a
 /// hardware keyboard and lists them when ⌘ is held on iPad. JS handles them: each one posts `notification`, which
 /// `MenusModule` forwards as an `onCommand` event.
+@MainActor
 public enum AppCommands {
-  public static let notification = Notification.Name("io.robertying.learnx.AppCommand")
-  public static let commandKey = "command"
+  public nonisolated static let notification = Notification.Name("io.robertying.learnx.AppCommand")
+  public nonisolated static let commandKey = "command"
 
   struct Command {
     let id: String
@@ -96,6 +97,7 @@ public enum AppCommands {
 }
 
 /// The parts of `UIMenuBuilder` the commands use, so tests can build into a fake.
+@MainActor
 protocol MenuBuilding {
   var system: UIMenuSystem { get }
   func menu(for identifier: UIMenu.Identifier) -> UIMenu?

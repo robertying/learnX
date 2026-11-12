@@ -2,10 +2,8 @@ import { Notice } from 'data/types/state';
 import { removeTags } from 'helpers/text';
 import { listTime } from 'helpers/listTime';
 import { useToday } from 'hooks/useClock';
-import { useTheme } from 'theme';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
-import { t } from 'helpers/i18n';
-import CardRow, { CardGlyph, cardAccessibilityLabel } from './CardRow';
+import CardRow, { cardAccessibilityLabel } from './CardRow';
 
 export interface NoticeCardProps extends CardWrapperProps {
   data: Notice;
@@ -26,12 +24,17 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
   hideCourseName,
   ...restProps
 }) => {
-  const theme = useTheme();
   // Re-renders the row at midnight, past the list's row memoization.
   const today = useToday();
   const overline = hideCourseName ? publisher : courseName;
   const preview = removeTags(content);
   const time = listTime(publishTime, today);
+
+  const flags = [
+    attachment && 'attachment',
+    markedImportant && 'important',
+    restProps.fav && 'favorited',
+  ] as const;
 
   return (
     <CardWrapper
@@ -42,11 +45,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
         title,
         overline,
         status: time,
-        flags: [
-          attachment && t('attachment'),
-          markedImportant && t('a11yImportant'),
-          restProps.fav && t('a11yFavorited'),
-        ],
+        flags,
         preview,
       })}
     >
@@ -55,17 +54,7 @@ const NoticeCard: React.FC<NoticeCardProps> = ({
         unread={!hasRead}
         title={title}
         preview={preview}
-        glyphs={
-          <>
-            {attachment ? <CardGlyph name="attachment" /> : null}
-            {markedImportant ? (
-              <CardGlyph name="important" color={theme.colors.status.orange} />
-            ) : null}
-            {restProps.fav ? (
-              <CardGlyph name="favorited" color={theme.colors.status.red} />
-            ) : null}
-          </>
-        }
+        flags={flags}
         trailing={time}
       />
     </CardWrapper>

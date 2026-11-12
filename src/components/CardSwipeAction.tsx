@@ -1,16 +1,9 @@
 import { StyleSheet, View } from 'react-native';
-import Animated, {
-  useAnimatedReaction,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { statusContainerOpacity, useTheme } from 'theme';
 import {
   CardSwipeActionProps,
-  FULL_SWIPE,
-  swipedShare,
+  useArmedProgress,
 } from './CardSwipeAction.shared';
 import CardActionIcon from './CardActionIcon';
 import { Text } from './Text';
@@ -35,17 +28,12 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
 }) => {
   const theme = useTheme();
   const leading = side === 'leading';
-  const armedProgress = useSharedValue(0);
-
-  useAnimatedReaction(
-    () => swipedShare(side, translation.get(), rowWidth.get()) > FULL_SWIPE,
-    (armed, previous) => {
-      if (previous !== null && armed !== previous) {
-        armedProgress.set(withTiming(armed ? 1 : 0, { duration: 150 }));
-        scheduleOnRN(onArmedChange, armed);
-      }
-    },
-  );
+  const armedProgress = useArmedProgress({
+    side,
+    translation,
+    rowWidth,
+    onArmedChange,
+  });
 
   // The revealed area: from the screen's edge to the card's.
   const fillStyle = useAnimatedStyle(() => ({

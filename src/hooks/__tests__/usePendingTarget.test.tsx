@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
 import { DetailStackParams } from 'navigation/types';
 import { SplitViewContext } from 'navigation/SplitView';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import usePendingTarget, { setPendingTarget } from 'hooks/usePendingTarget';
 
 // The split view's divider pulls in the theme, which isn't needed here.
@@ -26,7 +26,7 @@ const splitContext = (navigator: object | null) => ({
   showDetail: true,
   showMaster: true,
   toggleMaster: () => {},
-  masterWidth: Numbers.splitViewMasterWidth,
+  masterWidth: SplitSizes.masterWidth,
 });
 
 afterEach(() => {

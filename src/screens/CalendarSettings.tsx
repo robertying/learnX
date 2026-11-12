@@ -25,9 +25,9 @@ import {
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
 import { SettingsStackParams } from 'navigation/types';
 
-type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
+type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarSettings'>;
 
-const CalendarEvent: React.FC<Props> = () => {
+const CalendarSettings: React.FC<Props> = () => {
   const assignmentCalendarSync = useSettings(
     settings => settings.assignmentCalendarSync,
   );
@@ -315,6 +315,7 @@ const CalendarEvent: React.FC<Props> = () => {
         {/* Last and on its own, as Apple's settings end with what deletes. */}
         <FormSection>
           <FormButton
+            destructive
             icon="delete"
             title={
               Platform.OS === 'ios'
@@ -341,4 +342,4 @@ const CalendarEvent: React.FC<Props> = () => {
   );
 };
 
-export default CalendarEvent;
+export default CalendarSettings;

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Platform } from 'react-native';
 import { renderHook } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
-import Numbers from 'constants/Numbers';
+import SplitSizes from 'constants/SplitSizes';
 import { t } from 'helpers/i18n';
 import useFileDetailHeader from 'hooks/useFileDetailHeader';
 import { SplitViewContext } from 'navigation/SplitView';
@@ -35,8 +35,12 @@ const split = {
   showDetail: true,
   showMaster: true,
   toggleMaster: jest.fn(),
-  masterWidth: Numbers.splitViewMasterWidth,
+  masterWidth: SplitSizes.masterWidth,
 };
+
+/** The latest value set for one option. */
+const option = (key: string) =>
+  setOptions.mock.calls.findLast(([options]) => key in options)![0][key];
 
 const items = () =>
   setOptions.mock.lastCall![0].unstable_headerRightItems() as {
@@ -105,7 +109,7 @@ it('toggles full screen in a split view, but not in search', async () => {
     () => useFileDetailHeader({ navigation: navigation(), ...props }),
     { wrapper },
   );
-  expect(setOptions.mock.lastCall![0].headerBackVisible).toBe(true);
+  expect(option('headerBackVisible')).toBe(true);
   expect(items()[0]).toMatchObject({
     identifier: 'toggleMaster',
     label: t('fullscreen'),
@@ -139,7 +143,7 @@ it('brings the list back from full screen, and the preview back from the info', 
       }),
     { wrapper },
   );
-  expect(setOptions.mock.lastCall![0].headerBackVisible).toBe(false);
+  expect(option('headerBackVisible')).toBe(false);
   const [toggle] = items();
   expect(toggle.label).toBe(t('exitFullscreen'));
   toggle.onPress();

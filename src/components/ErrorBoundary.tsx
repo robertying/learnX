@@ -21,14 +21,9 @@ const ErrorFallback: React.FC<{ onRetry?: () => void }> = ({ onRetry }) => {
         action={
           <>
             {onRetry ? (
-              <TextButton style={Styles.spacey1} onPress={onRetry}>
-                {t('tryAgain')}
-              </TextButton>
+              <TextButton onPress={onRetry}>{t('tryAgain')}</TextButton>
             ) : null}
-            <TextButton
-              style={Styles.spacey1}
-              onPress={() => reloadAppAsync('Error boundary')}
-            >
+            <TextButton onPress={() => reloadAppAsync('Error boundary')}>
               {t('reloadApp')}
             </TextButton>
           </>

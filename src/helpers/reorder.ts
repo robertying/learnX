@@ -1,22 +1,20 @@
+/**
+ * `items` in the order of the ids in `order`; items whose id isn't in it
+ * follow in their own order (a course added after the user reordered).
+ */
 export const sortByOrder = <T extends { id: string }>(
   items: T[],
   order: string[],
 ) => {
-  const itemMap = items.reduce((acc, item) => {
-    acc.set(item.id, item);
-    return acc;
-  }, new Map<string, T>());
+  const itemMap = new Map(items.map(item => [item.id, item]));
 
   const orderedItems: T[] = [];
   for (const itemId of order) {
-    if (itemMap.has(itemId)) {
-      orderedItems.push(itemMap.get(itemId)!);
+    const item = itemMap.get(itemId);
+    if (item) {
+      orderedItems.push(item);
       itemMap.delete(itemId);
     }
   }
-  for (const item of itemMap.values()) {
-    orderedItems.push(item);
-  }
-
-  return orderedItems;
+  return [...orderedItems, ...itemMap.values()];
 };

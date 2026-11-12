@@ -1,9 +1,12 @@
+import * as ReactNative from 'react-native';
+import { renderHook } from '@testing-library/react-native';
 import {
   BrandDarkTheme,
   BrandLightTheme,
   brandColors,
   MaterialColors,
   StatusTone,
+  useComposeColorOverrides,
 } from 'theme';
 
 // Android: Material 3 roles and custom colors, all plain `rgb(…)` strings.
@@ -66,4 +69,73 @@ describe.each([
       contrast(colors.onStatus[tone], colors.status[tone]),
     ).toBeGreaterThanOrEqual(4.5);
   });
+});
+
+describe('Compose hosts', () => {
+  it.each([
+    ['light', BrandLightTheme],
+    ['dark', BrandDarkTheme],
+  ] as const)(
+    'take the %s theme roles as their palette',
+    async (scheme, theme) => {
+      jest.spyOn(ReactNative, 'useColorScheme').mockReturnValue(scheme);
+      const { result } = await renderHook(() => useComposeColorOverrides());
+      const colors = theme.colors as MaterialColors;
+      for (const role of [
+        'primary',
+        'onPrimary',
+        'primaryContainer',
+        'surface',
+        'surfaceContainer',
+        'onSurface',
+        'onSurfaceVariant',
+        'outline',
+        'outlineVariant',
+        'error',
+      ] as const) {
+        expect([role, toRgb(result.current[role])]).toEqual([
+          role,
+          colors[role],
+        ]);
+      }
+    },
+  );
+});
+
+describe('Android widget colors', () => {
+  // The widgets run without the app's modules, so they keep their own copies.
+  const { readFileSync } = require('fs') as {
+    readFileSync: (path: string, encoding: 'utf8') => string;
+  };
+  const palettes = (widget: string) => {
+    const source = readFileSync(`src/widgets/${widget}.tsx`, 'utf8');
+    const palette = (from: number) =>
+      Object.fromEntries(
+        [...source.slice(from).matchAll(/(\w+): '(#[0-9A-F]{6})'/gi)]
+          .slice(0, 6)
+          .map(([, key, hex]) => [key, toRgb(hex)]),
+      );
+    return {
+      dark: palette(source.indexOf('? {')),
+      light: palette(source.indexOf(': {')),
+    };
+  };
+
+  it.each(['DeadlinesAndroid', 'UpNextAndroid'])(
+    '%s uses the Material roles',
+    widget => {
+      const widgetColors = palettes(widget);
+      for (const theme of [BrandLightTheme, BrandDarkTheme]) {
+        const colors = theme.colors as MaterialColors;
+        expect(widgetColors[theme.dark ? 'dark' : 'light']).toEqual({
+          background: colors.surface,
+          title: colors.onSurface,
+          caption: colors.onSurfaceVariant,
+          accent: colors.primary,
+          red: colors.status.red,
+          orange: colors.status.orange,
+        });
+      }
+    },
+  );
 });

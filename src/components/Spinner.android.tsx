@@ -22,7 +22,7 @@ const Spinner: React.FC<SpinnerProps> = ({ progress, style }) => {
         horizontalAlignment="center"
         verticalArrangement={{ spacedBy: 12 }}
       >
-        <CircularProgressIndicator color={theme.colors.primary} />
+        <CircularProgressIndicator />
         {label ? (
           <Text
             color={theme.colors.onSurfaceVariant}

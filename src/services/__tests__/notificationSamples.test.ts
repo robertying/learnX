@@ -3,6 +3,7 @@ import * as Notifications from 'expo-notifications';
 import { postNotification } from 'services/notifications';
 import {
   postNotificationSamples,
+  previewScheduledReminder,
   sampleContentNotifications,
   sampleDiff,
   sampleReminder,
@@ -98,4 +99,55 @@ it('posts them all', async () => {
       content: expect.objectContaining({ title: 'Assignment 1' }),
     }),
   );
+});
+
+describe('previewScheduledReminder', () => {
+  const scheduled = jest.mocked(
+    Notifications.getAllScheduledNotificationsAsync,
+  );
+  const schedule = jest.mocked(Notifications.scheduleNotificationAsync);
+
+  it('shows the first reminder of the kind again soon and counts them', async () => {
+    scheduled.mockResolvedValue([
+      { identifier: 'class-reminder:a:1:15', content: { title: 'Class' } },
+      {
+        identifier: 'deadline-reminder:a:1:60',
+        content: {
+          title: 'A',
+          subtitle: 'Course',
+          body: 'Due',
+          data: { id: 'a' },
+          categoryIdentifier: 'deadlineReminder',
+        },
+      },
+      { identifier: 'deadline-reminder:b:1:60', content: { title: 'B' } },
+    ] as never);
+    await expect(previewScheduledReminder('deadline')).resolves.toBe(2);
+    expect(schedule).toHaveBeenCalledWith({
+      content: {
+        title: 'A',
+        subtitle: 'Course',
+        body: 'Due',
+        data: { id: 'a' },
+        categoryIdentifier: 'deadlineReminder',
+        threadIdentifier: 'deadlines',
+      },
+      trigger: { type: 'timeInterval', seconds: 10 },
+    });
+
+    await expect(previewScheduledReminder('class')).resolves.toBe(1);
+    expect(schedule.mock.calls[1][0]).toMatchObject({
+      content: {
+        title: 'Class',
+        categoryIdentifier: undefined,
+        threadIdentifier: 'classes',
+      },
+    });
+  });
+
+  it('schedules nothing without reminders of the kind', async () => {
+    scheduled.mockResolvedValue([]);
+    await expect(previewScheduledReminder('class')).resolves.toBe(0);
+    expect(schedule).not.toHaveBeenCalled();
+  });
 });

@@ -50,7 +50,7 @@ type ItemDetails<Name extends keyof ItemDetailParams> = Pick<
  */
 export type SettingDetailParams = {
   CourseInformationSharing: ExtraParams | undefined;
-  CalendarEvent: ExtraParams | undefined;
+  CalendarSettings: ExtraParams | undefined;
   SemesterSelection: ExtraParams | undefined;
   Downloads: ExtraParams | undefined;
   NotificationSettings: ExtraParams | undefined;

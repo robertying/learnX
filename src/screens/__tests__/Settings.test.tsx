@@ -82,7 +82,7 @@ it('opens each page in the detail view', async () => {
   await renderScreen();
   const pages = {
     semesterSelection: 'SemesterSelection',
-    calendarsAndReminders: 'CalendarEvent',
+    calendarsAndReminders: 'CalendarSettings',
     downloads: 'Downloads',
     swipeActions: 'SwipeActions',
     notifications: 'NotificationSettings',

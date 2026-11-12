@@ -86,9 +86,9 @@ describe('FilterListRow', () => {
     );
     props!.onPress!();
     props!.onCheck!(true);
-    props!.onFav!(true);
-    props!.onArchive!(false);
-    props!.onHide!(true);
+    props!.onToggleFav!();
+    props!.onToggleArchived!();
+    props!.onToggleHidden!();
     expect(actions.press).toHaveBeenCalledWith(item);
     expect(actions.check).toHaveBeenCalledWith('a', true);
     expect(actions.fav).toHaveBeenCalledWith(item, true);

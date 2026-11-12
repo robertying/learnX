@@ -1,5 +1,4 @@
 import { StyleSheet, View } from 'react-native';
-import Styles from 'constants/Styles';
 import SystemIcon from 'components/SystemIcon';
 import { Text } from 'components/Text';
 import type { SystemIconName } from 'helpers/systemIcons';
@@ -29,15 +28,8 @@ const StatusView: React.FC<StatusViewProps> = ({
 
   return (
     <View testID={testID} style={styles.root}>
-      <SystemIcon
-        style={Styles.spacey1}
-        name={icon}
-        color={theme.colors.outline}
-        size={56}
-      />
-      <Text style={[Styles.spacey1, { color: theme.colors.onSurfaceMedium }]}>
-        {message}
-      </Text>
+      <SystemIcon name={icon} color={theme.colors.outline} size={56} />
+      <Text style={{ color: theme.colors.onSurfaceMedium }}>{message}</Text>
       {action}
     </View>
   );
@@ -49,6 +41,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 16,
+    gap: 8,
   },
 });
 

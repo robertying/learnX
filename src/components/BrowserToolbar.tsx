@@ -11,8 +11,8 @@ import {
   labelStyle,
   padding,
 } from '@expo/ui/swift-ui/modifiers';
-import type { SFSymbol } from 'sf-symbols-typescript';
 import { t } from 'helpers/i18n';
+import { systemIcons } from 'helpers/systemIcons';
 import type { BrowserToolbarProps } from './BrowserToolbar.shared';
 import DeviceInfo from 'constants/DeviceInfo';
 import ThemedHost from 'components/ThemedHost';
@@ -50,14 +50,14 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
   const bottom = Math.max(insets.bottom, MARGIN);
 
   const item = (
-    systemImage: SFSymbol,
+    icon: 'back' | 'forward' | 'refresh' | 'openInBrowser',
     label: string,
     isDisabled: boolean,
     onPress: () => void,
     testID: string,
   ) => (
     <Button
-      systemImage={systemImage}
+      systemImage={systemIcons[icon].ios}
       label={label}
       onPress={onPress}
       testID={testID}
@@ -80,29 +80,17 @@ const BrowserToolbar: React.FC<BrowserToolbarProps> = ({
     >
       <ThemedHost matchContents>
         <HStack spacing={4} modifiers={capsuleModifiers}>
+          {item('back', t('back'), !canGoBack, onBack, 'courseXBack')}
           {item(
-            'chevron.backward',
-            t('back'),
-            !canGoBack,
-            onBack,
-            'courseXBack',
-          )}
-          {item(
-            'chevron.forward',
+            'forward',
             t('forward'),
             !canGoForward,
             onForward,
             'courseXForward',
           )}
+          {item('refresh', t('refresh'), loading, onReload, 'courseXReload')}
           {item(
-            'arrow.clockwise',
-            t('refresh'),
-            loading,
-            onReload,
-            'courseXReload',
-          )}
-          {item(
-            'safari',
+            'openInBrowser',
             t('openInBrowser'),
             loading,
             onOpenInBrowser,

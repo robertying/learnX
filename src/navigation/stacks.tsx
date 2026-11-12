@@ -32,7 +32,7 @@ import Login from 'screens/Login';
 import Welcome from 'screens/Welcome';
 import WhatsNew from 'screens/WhatsNew';
 import SemesterSelection from 'screens/SemesterSelection';
-import CalendarEvent from 'screens/CalendarEvent';
+import CalendarSettings from 'screens/CalendarSettings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
 import Downloads from 'screens/Downloads';
 import SwipeActions from 'screens/SwipeActions';
@@ -133,7 +133,7 @@ const settingDetailScreens: {
     CourseInformationSharing,
     () => t('courseInformationSharing'),
   ],
-  CalendarEvent: [CalendarEvent, calendarSettingsTitle],
+  CalendarSettings: [CalendarSettings, calendarSettingsTitle],
   SemesterSelection: [SemesterSelection, () => t('semesterSelection')],
   Downloads: [Downloads, () => t('downloads')],
   NotificationSettings: [NotificationSettings, () => t('notifications')],

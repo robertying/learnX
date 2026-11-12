@@ -161,6 +161,28 @@ it('writes shown assignments to Reminders when that sync is on, quietly when it 
   expect(errors).toEqual([]);
 });
 
+it('writes the calendar and Reminders again only when their data changed', async () => {
+  cacheAssignments();
+  setSetting('assignmentCalendarSync', true);
+  setSetting('assignmentReminderSync', true);
+  await refreshSurfaces();
+  expect(syncAssignments).toHaveBeenCalledTimes(2);
+
+  // Other lists, other settings and coming back to the app change nothing.
+  queryClient.setQueryData(
+    noticesQuery(semester).queryKey,
+    mockNotices.slice(0, 1) as never,
+  );
+  setSetting('graduate', true);
+  await refreshSurfaces();
+  await refreshSurfaces();
+  expect(syncAssignments).toHaveBeenCalledTimes(2);
+
+  setArchived('assignment', [assignments[1].id], true);
+  await refreshSurfaces();
+  expect(syncAssignments).toHaveBeenCalledTimes(4);
+});
+
 it('has no lists to show without a semester', async () => {
   cacheAssignments();
   setCurrentSemester(undefined as never);

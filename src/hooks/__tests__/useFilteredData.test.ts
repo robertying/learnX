@@ -1,6 +1,11 @@
 import { renderHook } from '@testing-library/react-native';
 import { Assignment } from 'data/types/state';
-import useFilteredData, { assignmentLists } from 'hooks/useFilteredData';
+import { File, Notice } from 'data/types/state';
+import useFilteredData, {
+  assignmentLists,
+  fileLists,
+  noticeLists,
+} from 'hooks/useFilteredData';
 
 const assignment = (
   id: string,
@@ -54,5 +59,27 @@ describe('useFilteredData', () => {
     await rerender({ ...props });
     expect(result.current.all).toBe(before.all);
     expect(result.current.unfinished).toBe(before.unfinished);
+  });
+
+  it('works without lists of its own', async () => {
+    const { result } = await renderHook(useFilteredData<Assignment>, {
+      initialProps: { data, archived: [], hidden: [] },
+    });
+    expect(result.current.all).toHaveLength(4);
+    expect(Object.keys(result.current).sort()).toEqual([
+      'all',
+      'archived',
+      'fav',
+      'hidden',
+    ]);
+  });
+});
+
+describe('noticeLists and fileLists', () => {
+  it('put unread notices and new files in Unread', () => {
+    expect(noticeLists.unread({ hasRead: false } as Notice)).toBe(true);
+    expect(noticeLists.unread({ hasRead: true } as Notice)).toBe(false);
+    expect(fileLists.unread({ isNew: true } as File)).toBe(true);
+    expect(fileLists.unread({ isNew: false } as File)).toBe(false);
   });
 });

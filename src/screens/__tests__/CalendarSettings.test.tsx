@@ -17,7 +17,7 @@ import {
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 import useCalendarAccess from 'hooks/useCalendarAccess';
-import CalendarEvent from 'screens/CalendarEvent';
+import CalendarSettings from 'screens/CalendarSettings';
 
 jest.mock('helpers/systemSettings', () => ({ openSystemSettings: jest.fn() }));
 jest.mock('hooks/useCalendarAccess', () => jest.fn());
@@ -41,7 +41,7 @@ const setSyncEnabled = jest.fn();
 const exportToICS = jest.fn();
 
 const renderScreen = () =>
-  render(<CalendarEvent navigation={{} as never} route={{} as never} />);
+  render(<CalendarSettings navigation={{} as never} route={{} as never} />);
 
 const toggle = (label: string, value: boolean) =>
   fireEvent(screen.getByRole('switch', { name: label }), 'valueChange', value);

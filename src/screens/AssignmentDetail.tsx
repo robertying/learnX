@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import dayjs from 'dayjs';
 import {
   ExcellentHomework,
@@ -12,11 +12,10 @@ import {
   MainStackScreenProps,
 } from 'navigation/types';
 import useDetailNavigator from 'hooks/useDetailNavigator';
-import { headerButtons } from 'navigation/headerButtons';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import { useMinute } from 'hooks/useClock';
-import { getWebViewTemplate } from 'helpers/html';
 import { removeTags } from 'helpers/text';
-import { getExtension, stripExtension } from 'helpers/filename';
+import { attachmentFile } from 'helpers/attachments';
 import {
   formatLiteral,
   getAssignmentGradeLevelDescription,
@@ -43,7 +42,6 @@ import {
   FormText,
   FormTitle,
 } from 'components/Form';
-import { useTheme, webContentColors } from 'theme';
 
 type Props = MainStackScreenProps<
   AssignmentDetailParamList,
@@ -95,15 +93,11 @@ const AssignmentDetailContent: React.FC<{
   assignment: Assignment;
   navigation: Props['navigation'];
 }> = ({ assignment, navigation }) => {
-  const theme = useTheme();
-
   const detailNavigator = useDetailNavigator();
   const hasDraft = useHasSubmissionDraft(assignment.id);
 
   const {
     id,
-    courseId,
-    courseName,
     title,
     deadline,
     lateSubmissionDeadline,
@@ -137,24 +131,11 @@ const AssignmentDetailContent: React.FC<{
 
   // An empty description shows as text, with no web view to wait for.
   const hasDescription = !!description?.trim();
-  const html = getWebViewTemplate(description ?? '', {
-    dark: theme.dark,
-    // The form row's own color shows through.
-    backgroundColor: 'transparent',
-    ...webContentColors(theme.dark),
-  });
 
   const handleFileOpen = (remoteFile?: RemoteFile) => {
     if (remoteFile) {
       navigation.push('FileDetail', {
-        attachment: {
-          id: remoteFile.id,
-          courseId,
-          courseName,
-          title: stripExtension(remoteFile.name),
-          downloadUrl: remoteFile.downloadUrl,
-          fileType: getExtension(remoteFile.name),
-        },
+        attachment: attachmentFile(assignment, remoteFile),
       });
     }
   };
@@ -170,21 +151,25 @@ const AssignmentDetailContent: React.FC<{
     }
   }, [detailNavigator, id, navigation]);
 
-  useEffect(() => {
-    if (submissionType !== HomeworkSubmissionType.OFFLINE) {
-      navigation.setOptions(
-        headerButtons('right', [
-          {
-            id: 'submit',
-            label: t('submit'),
-            icon: 'upload',
-            disabled: closed,
-            onPress: handleSubmit,
-          },
-        ]),
-      );
-    }
-  }, [submissionType, closed, handleSubmit, navigation]);
+  useHeaderButtons(navigation, 'right', [
+    submissionType !== HomeworkSubmissionType.OFFLINE && {
+      id: 'submit',
+      label: t('submit'),
+      icon: 'upload',
+      disabled: closed,
+      onPress: handleSubmit,
+    },
+  ]);
+
+  // When and how it was handed in: the status row's, or with the submission
+  // once the status row shows the grade.
+  const submittedTitle = isLateSubmission ? t('submittedLate') : t('submitted');
+  const submittedTime = submitTime
+    ? dayjs(submitTime).format(
+        isLateSubmission ? t('submittedLateAtFormat') : t('submittedAtFormat'),
+      )
+    : undefined;
+  const submittedIcon = isLateSubmission ? 'submittedLate' : 'done';
 
   const submittedText = removeTags(submittedContent);
   const gradeText = removeTags(gradeContent);
@@ -245,27 +230,11 @@ const AssignmentDetailContent: React.FC<{
             />
           ) : (
             <FormText
-              title={
-                submitted
-                  ? isLateSubmission
-                    ? t('submittedLate')
-                    : t('submitted')
-                  : t('notSubmitted')
-              }
-              subtitle={
-                submitted && submitTime
-                  ? dayjs(submitTime).format(
-                      isLateSubmission
-                        ? t('submittedLateAtFormat')
-                        : t('submittedAtFormat'),
-                    )
-                  : undefined
-              }
+              title={submitted ? submittedTitle : t('notSubmitted')}
+              subtitle={submitted ? submittedTime : undefined}
               icon={
                 submitted
-                  ? isLateSubmission
-                    ? 'submittedLate'
-                    : 'done'
+                  ? submittedIcon
                   : !closed
                     ? 'unfinished'
                     : lateOpen
@@ -284,7 +253,7 @@ const AssignmentDetailContent: React.FC<{
         </FormSection>
         <FormSection title={t('description')}>
           {hasDescription ? (
-            <FormWebView html={html} />
+            <FormWebView content={description ?? ''} />
           ) : !attachment ? (
             <FormParagraph text={t('noAssignmentDescription')} />
           ) : null}
@@ -301,17 +270,9 @@ const AssignmentDetailContent: React.FC<{
           <FormSection title={t('yourSubmission')}>
             {graded ? (
               <FormText
-                title={isLateSubmission ? t('submittedLate') : t('submitted')}
-                subtitle={
-                  submitTime
-                    ? dayjs(submitTime).format(
-                        isLateSubmission
-                          ? t('submittedLateAtFormat')
-                          : t('submittedAtFormat'),
-                      )
-                    : undefined
-                }
-                icon="done"
+                title={submittedTitle}
+                subtitle={submittedTime}
+                icon={submittedIcon}
               />
             ) : null}
             {submittedText ? <FormParagraph text={submittedText} /> : null}

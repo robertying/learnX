@@ -30,9 +30,11 @@ export default {
   /** The APK flavor to download on Android. */
   abi: () => supportedCpuArchitectures?.[0] || 'universal',
   systemVersion: () => osVersion ?? '',
-  /** iOS 26 and later, which draw controls in Liquid Glass. */
+  /**
+   * iOS 26 and later, which draw controls in Liquid Glass and have native
+   * header subtitles.
+   */
   hasLiquidGlass: () => ios26,
-  supportsNativeSubtitle: () => ios26,
   // On a Mac, expo-device names the CPU ("arm64" reads as "Simulator iOS").
   model: () => (isMac ? 'Mac' : modelName || osName || Platform.OS),
 };

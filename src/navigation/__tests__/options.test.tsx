@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { render, screen, userEvent } from '@testing-library/react-native';
-import Colors from 'constants/Colors';
+import { brandColor } from 'theme';
 import DeviceInfo from 'constants/DeviceInfo';
 import { t } from 'helpers/i18n';
 import {
@@ -57,10 +57,10 @@ it('tints detail headers on iOS, keeping a native title in the text color', () =
   const options = getDetailScreenOptions('Detail')({ theme });
   expect(options.title).toBe('Detail');
   expect(options.headerTintColor).toBe(
-    Platform.OS === 'ios' ? Colors.theme : undefined,
+    Platform.OS === 'ios' ? brandColor : undefined,
   );
   expect(options.headerTitleStyle).toEqual(
-    DeviceInfo.supportsNativeSubtitle() ? { color: '#123456' } : undefined,
+    DeviceInfo.hasLiquidGlass() ? { color: '#123456' } : undefined,
   );
   expect(getDetailScreenOptions()({ theme }).title).toBe('');
 });
@@ -112,7 +112,7 @@ it('gives tab roots a large title on iPhone and iPad from iOS 26 only', () => {
     let options: object = {};
     jest.isolateModules(() => {
       const info = require('constants/DeviceInfo').default;
-      jest.spyOn(info, 'supportsNativeSubtitle').mockReturnValue(ios26);
+      jest.spyOn(info, 'hasLiquidGlass').mockReturnValue(ios26);
       jest.spyOn(info, 'isMac').mockReturnValue(mac);
       options = require('navigation/options').tabRootOptions;
     });

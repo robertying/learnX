@@ -1,11 +1,5 @@
 import { ReactNode } from 'react';
-import {
-  ColorValue,
-  Platform,
-  StyleSheet,
-  View,
-  useWindowDimensions,
-} from 'react-native';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Paragraph, Text } from 'components/Text';
 import { t } from 'helpers/i18n';
@@ -27,8 +21,8 @@ export interface CardRowProps {
   overline?: string;
   /** Marks the item unread. Leave unset for items that are never unread. */
   unread?: boolean;
-  /** Next to the time: small glyphs such as a paperclip or a flag. */
-  glyphs?: ReactNode;
+  /** Next to the time: a small glyph for each, such as a paperclip. */
+  flags?: CardFlags;
   /** The time, or a pill, at the end of the first line. */
   trailing?: ReactNode;
   title: string;
@@ -48,19 +42,20 @@ export interface CardRowProps {
 const CardRow: React.FC<CardRowProps> = ({
   overline,
   unread,
-  glyphs,
+  flags,
   trailing,
   title,
   preview,
 }) => {
-  const theme = useTheme();
   const titleLines = useTitleLines();
 
   const meta = (
     <View style={styles.meta}>
-      {glyphs}
+      {flags?.filter(isFlag).map(flag => (
+        <CardGlyph key={flag} name={flag} />
+      ))}
       {typeof trailing === 'string' ? (
-        <Caption variant={metaVariant} numberOfLines={1} style={styles.time}>
+        <Caption variant={metaVariant} numberOfLines={1}>
           {trailing}
         </Caption>
       ) : (
@@ -94,14 +89,7 @@ const CardRow: React.FC<CardRowProps> = ({
           </Headline>
           {overline ? null : meta}
         </View>
-        {preview ? (
-          <Paragraph
-            numberOfLines={2}
-            style={{ color: theme.colors.onSurfaceMedium }}
-          >
-            {preview}
-          </Paragraph>
-        ) : null}
+        {preview ? <Paragraph numberOfLines={2}>{preview}</Paragraph> : null}
       </View>
     </View>
   );
@@ -126,8 +114,8 @@ export const cardAccessibilityLabel = ({
   title: string;
   overline?: string;
   status?: string;
-  /** Spoken names of the glyphs shown, such as "Attachment". */
-  flags?: (string | false | undefined)[];
+  /** The glyphs shown, said by name, such as "Attachment". */
+  flags?: CardFlags;
   preview?: string;
 }) =>
   [
@@ -135,7 +123,7 @@ export const cardAccessibilityLabel = ({
     title,
     overline,
     status,
-    ...flags,
+    ...flags.filter(isFlag).map(flag => cardFlags[flag].label()),
     // The row shows two lines of it; a whole notice is too long to listen to.
     preview && preview.length > previewLength
       ? `${preview.slice(0, previewLength)}…`
@@ -166,18 +154,35 @@ export const CardGutter: React.FC<{ unread?: boolean }> = ({ unread }) => {
   );
 };
 
-/** A small glyph next to the time, in the caption color unless `color` is set. */
-export const CardGlyph: React.FC<{
-  name: 'attachment' | 'important' | 'favorited' | 'answer';
-  color?: ColorValue;
-}> = ({ name, color }) => {
+/**
+ * What a row can show as a small glyph next to the time, with the name a
+ * screen reader says for it and the status hue it is drawn in (the caption
+ * color when it has none).
+ */
+export type CardFlag = 'attachment' | 'answer' | 'important' | 'favorited';
+
+const cardFlags: Record<CardFlag, { label: () => string; tone?: StatusTone }> =
+  {
+    attachment: { label: () => t('attachment') },
+    answer: { label: () => t('a11yHasAnswer') },
+    important: { label: () => t('a11yImportant'), tone: 'orange' },
+    favorited: { label: () => t('a11yFavorited'), tone: 'red' },
+  };
+
+/** A row's flags in the order shown; `false` and `undefined` are left out. */
+type CardFlags = readonly (CardFlag | false | undefined)[];
+
+const isFlag = (flag: CardFlag | false | undefined): flag is CardFlag => !!flag;
+
+const CardGlyph: React.FC<{ name: CardFlag }> = ({ name }) => {
   const theme = useTheme();
+  const { tone } = cardFlags[name];
   return (
     <SystemIcon
       testID={`icon-${name}`}
       name={name}
       size={15}
-      color={color ?? theme.colors.onSurfaceMedium}
+      color={tone ? theme.colors.status[tone] : theme.colors.onSurfaceMedium}
     />
   );
 };
@@ -238,9 +243,12 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
   },
+  // The lines 4 apart, with 2 above and below.
   content: {
     flex: 1,
     minWidth: 0,
+    paddingVertical: 2,
+    gap: 4,
   },
   firstLine: {
     flexDirection: 'row',
@@ -261,9 +269,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     flexShrink: 0,
-  },
-  time: {
-    marginVertical: 0,
   },
   pill: {
     overflow: 'hidden',

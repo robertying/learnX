@@ -1,10 +1,9 @@
-import { Linking, RefreshControl, Text } from 'react-native';
+import { Linking, Platform, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { render, screen } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import FlatList from 'components/FlatList';
 import HeaderTitle, { getTitleOptions } from 'components/HeaderTitle';
-import ScrollView from 'components/ScrollView';
 import { generateFingerprint } from 'helpers/fingerprint';
 import { openSystemSettings } from 'helpers/systemSettings';
 
@@ -16,7 +15,7 @@ jest.mock('expo-crypto', () => ({
 
 afterEach(() => jest.restoreAllMocks());
 
-describe('lists and scroll views', () => {
+describe('FlatList', () => {
   const refresh = (
     <RefreshControl testID="refresh" refreshing={false} onRefresh={() => {}} />
   );
@@ -39,14 +38,6 @@ describe('lists and scroll views', () => {
         onRefresh: mac ? undefined : onRefresh,
         refreshControl: mac ? undefined : refresh,
       });
-
-      await render(
-        <ScrollView refreshControl={refresh}>
-          <Text>content</Text>
-        </ScrollView>,
-      );
-      expect(screen.getByText('content')).toBeTruthy();
-      expect(screen.root?.props.refreshControl).toBe(mac ? undefined : refresh);
     }
   });
 });
@@ -65,7 +56,7 @@ describe('HeaderTitle', () => {
       let options: ReturnType<typeof getTitleOptions> = {} as never;
       jest.isolateModules(() => {
         jest.doMock('constants/DeviceInfo', () => ({
-          supportsNativeSubtitle: () => nativeSubtitle,
+          hasLiquidGlass: () => nativeSubtitle,
         }));
         options = require('components/HeaderTitle').getTitleOptions('T', 'S');
       });
@@ -94,6 +85,35 @@ describe('system settings', () => {
     expect(openURL).toHaveBeenCalledWith(
       'x-apple.systempreferences:com.apple.preference.security',
     );
+  });
+
+  it("opens the app's notification page on Android", async () => {
+    const os = Platform.OS;
+    Platform.OS = 'android';
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(false);
+    const openSettings = jest
+      .spyOn(Linking, 'openSettings')
+      .mockResolvedValue();
+    const sendIntent = jest.spyOn(Linking, 'sendIntent').mockResolvedValue();
+    await openSystemSettings('notifications');
+    expect(sendIntent).toHaveBeenCalledWith(
+      'android.settings.APP_NOTIFICATION_SETTINGS',
+      [
+        {
+          key: 'android.provider.extra.APP_PACKAGE',
+          value: 'io.robertying.learnx',
+        },
+      ],
+    );
+    expect(openSettings).not.toHaveBeenCalled();
+
+    // Without that page, the app's page; calendars always there.
+    sendIntent.mockRejectedValueOnce(new Error('No activity'));
+    await openSystemSettings('notifications');
+    await openSystemSettings('security');
+    expect(openSettings).toHaveBeenCalledTimes(2);
+    expect(sendIntent).toHaveBeenCalledTimes(2);
+    Platform.OS = os;
   });
 });
 

@@ -11,10 +11,10 @@ import {
   buildCourseEventDetails,
   dedupeAndSortICSEvents,
   findSyncedCalendars,
-  hash,
   sanitizeLocation,
   toICSEvent,
 } from 'helpers/calendar/details';
+import { hash } from 'helpers/text';
 import { t } from 'helpers/i18n';
 import { ICSEvent } from 'helpers/calendar/ics';
 
@@ -48,15 +48,6 @@ describe('sanitizeLocation', () => {
     expect(sanitizeLocation('  某楼101 ')).toBe('某楼101');
     expect(sanitizeLocation('101')).toBe('101');
     expect(sanitizeLocation('')).toBe('');
-  });
-});
-
-describe('hash', () => {
-  it('is stable and hex', () => {
-    expect(hash('')).toBe('1505');
-    expect(hash('learnX')).toBe(hash('learnX'));
-    expect(hash('learnX')).toMatch(/^[0-9a-f]+$/);
-    expect(hash('a')).not.toBe(hash('b'));
   });
 });
 
@@ -120,7 +111,7 @@ describe('buildAssignmentReminderDetails', () => {
       timeZone: 'Asia/Shanghai',
       completed: true,
       completionDate: completionDate.toDate(),
-      notes: `${t('deadline')}: 2026-03-20 23:59\n\nRead chapter 2`,
+      notes: `${t('deadline')}: Mar 20 23:59\n\nRead chapter 2`,
     });
   });
 
@@ -131,7 +122,7 @@ describe('buildAssignmentReminderDetails', () => {
     );
     expect(daily.dueDate).toEqual(new Date('2026-03-19T23:59:00+08:00'));
     expect(daily.alarms).toEqual([{ relativeOffset: 0 }]);
-    expect(daily.notes).toMatch(/^.+: 2026-03-20 23:59\n\nRead chapter 2$/);
+    expect(daily.notes).toMatch(/^.+: Mar 20 23:59\n\nRead chapter 2$/);
     const hourly = buildAssignmentReminderDetails(
       settingsWith(
         {},
