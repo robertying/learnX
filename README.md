@@ -56,6 +56,10 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 
 ### 基础功能 Basic
 
+- 今日概览：当天课程、即将截止的作业和未读内容一目了然。
+
+  Today: the day's classes, upcoming deadlines and unread items at a glance.
+
 - 第一时间看到老师最新发布的公告及其附件。
 
   See the newest notices from your teachers, with their attachments.
@@ -70,8 +74,7 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 
 ### 高级功能 Advanced
 
-- 今日概览：当天课程、即将截止的作业和未读内容 Today: the day's classes, upcoming deadlines and unread items
-- 桌面小组件 Home screen widgets (Deadlines, Up Next)
+- 桌面小组件（作业截止、接下来） Home screen widgets (Deadlines, Up Next)
 - 新内容、成绩和截止时间变更通知 Notifications for new notices, files, assignments, grades and deadline changes
 - 作业截止提醒和上课提醒 Deadline reminders and class reminders
 - 聚焦搜索、Siri 与快捷指令 Spotlight search, Siri and Shortcuts (iOS, iPadOS, macOS)
