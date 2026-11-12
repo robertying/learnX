@@ -34,7 +34,9 @@ android {
     }
 
     androidResources {
-        localeFilters += ["en", "zh"]
+        // Chinese strings are Simplified (values-zh); values-b+zh+Hant repeats
+        // them for Traditional Chinese, which would fall back to English.
+        localeFilters += ["en", "zh", "b+zh+Hant"]
     }
 
     splits {

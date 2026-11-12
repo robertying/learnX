@@ -5,7 +5,17 @@ import zh from 'assets/translations/zh';
 
 let locale: string | undefined;
 
-export const getLocale = () => (locale ??= getLocales()[0].languageTag);
+/**
+ * The first of the user's preferred languages the app has, English or
+ * Chinese, as iOS and Android pick the app's native strings; English when the
+ * list has neither. Traditional Chinese counts as Chinese: the app (and its
+ * native strings, through their zh-Hant fallbacks) has only Simplified.
+ */
+export const getLocale = () =>
+  (locale ??=
+    getLocales()
+      .map(({ languageTag }) => languageTag)
+      .find(tag => /^(en|zh)(-|$)/i.test(tag)) ?? 'en');
 
 /** Reads the system locale again on the next lookup (for tests that switch it). */
 export const resetLocale = () => {

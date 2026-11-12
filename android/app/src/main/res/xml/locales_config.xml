@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The languages Android's per-app language setting offers. Chinese strings
-     are in values-zh, so they also serve other Chinese locales. -->
+<!-- The languages Android's per-app language setting offers. Other Chinese
+     locales get the same Simplified strings (values-zh, values-b+zh+Hant). -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="en-US" />
     <locale android:name="zh-CN" />

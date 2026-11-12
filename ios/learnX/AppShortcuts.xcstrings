@@ -11,6 +11,14 @@
               "${applicationName}的下一节课"
             ]
           }
+        },
+        "zh-Hant" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}的下一节课"
+            ]
+          }
         }
       }
     },
@@ -18,6 +26,14 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}的作业截止"
+            ]
+          }
+        },
+        "zh-Hant" : {
           "stringSet" : {
             "state" : "translated",
             "values" : [
@@ -37,6 +53,14 @@
               "${applicationName}下一节课"
             ]
           }
+        },
+        "zh-Hant" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一节课"
+            ]
+          }
         }
       }
     },
@@ -44,6 +68,14 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一项作业截止"
+            ]
+          }
+        },
+        "zh-Hant" : {
           "stringSet" : {
             "state" : "translated",
             "values" : [
@@ -63,6 +95,14 @@
               "${applicationName}下一节课是什么"
             ]
           }
+        },
+        "zh-Hant" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一节课是什么"
+            ]
+          }
         }
       }
     },
@@ -71,6 +111,14 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringSet" : {
+            "state" : "translated",
+            "values" : [
+              "${applicationName}下一个截止的作业是什么"
+            ]
+          }
+        },
+        "zh-Hant" : {
           "stringSet" : {
             "state" : "translated",
             "values" : [

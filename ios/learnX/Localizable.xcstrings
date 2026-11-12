@@ -10,6 +10,12 @@
             "state" : "translated",
             "value" : "%2$@的“%1$@”%3$@截止。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%2$@的“%1$@”%3$@截止。"
+          }
         }
       }
     },
@@ -18,6 +24,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一节课"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一节课"
@@ -34,6 +46,12 @@
             "state" : "translated",
             "value" : "下一项作业截止"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一项作业截止"
+          }
         }
       }
     },
@@ -42,6 +60,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一项"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一项"
@@ -58,6 +82,12 @@
             "state" : "translated",
             "value" : "上一项"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上一项"
+          }
         }
       }
     },
@@ -66,6 +96,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "刷新"
@@ -82,6 +118,12 @@
             "state" : "translated",
             "value" : "搜索"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
+          }
         }
       }
     },
@@ -90,6 +132,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置…"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "设置…"
@@ -105,6 +153,12 @@
             "state" : "translated",
             "value" : "告诉你下一节课的时间和地点。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告诉你下一节课的时间和地点。"
+          }
         }
       }
     },
@@ -112,6 +166,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告诉你下一个要交的作业。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "告诉你下一个要交的作业。"
@@ -127,6 +187,12 @@
             "state" : "translated",
             "value" : "本周和下周没有课了。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本周和下周没有课了。"
+          }
         }
       }
     },
@@ -134,6 +200,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有即将截止的作业。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有即将截止的作业。"
@@ -150,6 +222,12 @@
             "state" : "translated",
             "value" : "正在上%1$@，%2$@下课。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在上%1$@，%2$@下课。"
+          }
         }
       }
     },
@@ -158,6 +236,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一节课是%1$@，%2$@，在%3$@。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一节课是%1$@，%2$@，在%3$@。"
@@ -174,6 +258,12 @@
             "state" : "translated",
             "value" : "下一节课是%1$@，%2$@。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一节课是%1$@，%2$@。"
+          }
         }
       }
     },
@@ -182,6 +272,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ""
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : ""

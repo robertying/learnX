@@ -9,6 +9,12 @@
             "state" : "translated",
             "value" : "作业截止"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "作业截止"
+          }
         }
       }
     },
@@ -16,6 +22,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接下来"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "接下来"
@@ -31,6 +43,12 @@
             "state" : "translated",
             "value" : "正在上或下一节课，以及最近截止的作业。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在上或下一节课，以及最近截止的作业。"
+          }
         }
       }
     },
@@ -38,6 +56,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即将截止的作业。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "即将截止的作业。"
