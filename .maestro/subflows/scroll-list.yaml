@@ -1,0 +1,34 @@
+# Scroll a list until TARGET (a text regex) is on screen, by swiping the list
+# itself (LIST, its testID): DIRECTION UP shows what's further down, DOWN
+# goes back up. Not scrollUntilVisible: it swipes the middle of the screen,
+# which is the detail pane in a split view (iPad, unfolded foldable). Ends
+# once TARGET is found, which costs Maestro's lookup timeout once.
+appId: ${APP_ID}
+---
+# A swipe's direction can't come from a variable.
+- runFlow:
+    when:
+      true: ${DIRECTION == 'UP'}
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible: ${TARGET}
+          commands:
+            - swipe:
+                from:
+                  id: ${LIST}
+                direction: UP
+- runFlow:
+    when:
+      true: ${DIRECTION == 'DOWN'}
+    commands:
+      - repeat:
+          times: 8
+          while:
+            notVisible: ${TARGET}
+          commands:
+            - swipe:
+                from:
+                  id: ${LIST}
+                direction: DOWN

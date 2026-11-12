@@ -119,6 +119,11 @@ ios)
   ;;
 android)
   adb -s "$device" uninstall io.robertying.learnx || true
+  # 1-use-18.0.3.yaml taps switches at a folded Pixel 10 Pro Fold's (phone)
+  # positions: fold a foldable emulator first.
+  if adb -s "$device" shell cmd device_state print-states 2>/dev/null | grep -q CLOSED; then
+    adb -s "$device" emu fold >/dev/null
+  fi
   adb -s "$device" install "$artifact"
   ;;
 esac

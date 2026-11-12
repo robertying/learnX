@@ -5,41 +5,27 @@ tags:
 ---
 - runFlow: subflows/login.yaml
 - runFlow: subflows/settings.yaml
-# Changelog first: on iPad the page it opens beside the list is a web view,
-# which keeps the logout alert out of Maestro's snapshot.
+# Scroll to the end of Settings: About is the last row. It can first come
+# into view under the floating tab bar, where a tap lands on a tab, so swipe
+# once more; at the end of the list that leaves it above the tab bar, with
+# Changelog three rows up.
+- runFlow:
+    file: subflows/scroll-list.yaml
+    env:
+      LIST: settings-list
+      TARGET: '.*(${T_about}).*'
+      DIRECTION: UP
+- swipe:
+    from:
+      id: settings-list
+    direction: UP
+# Changelog before About: on iPad the page it opens beside the list is a web
+# view, which would keep the logout alert out of Maestro's snapshot.
 - tapOn: '.*(${T_changelog}).*'
 - runFlow:
     file: subflows/back.yaml
     env:
-      LIST: '.*(${T_logout}).*'
-# Settings is a native lazy list, and on phones About is near the bottom,
-# under the floating tab bar: scroll it to the middle first. Not when it's on
-# screen already (iPad): centerElement swipes the middle of the screen, which
-# is the detail pane there, and never gets it to the middle.
-- runFlow:
-    when:
-      platform: iOS
-      notVisible: '.*(${T_about}).*'
-    commands:
-      - scrollUntilVisible:
-          element: '.*(${T_about}).*'
-          direction: DOWN
-          centerElement: true
-# scrollUntilVisible swipes the middle of the screen, which is the detail
-# pane on an unfolded foldable or tablet: swipe the Settings list itself.
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - repeat:
-          times: 8
-          while:
-            notVisible: '.*(${T_about}).*'
-          commands:
-            - swipe:
-                from:
-                  id: settings-list
-                direction: UP
+      LIST: '.*(${T_about}).*'
 - tapOn: '.*(${T_about}).*'
 - assertVisible: '.*© \d+ Rui Ying.*'
 - runFlow:
@@ -48,30 +34,18 @@ tags:
       # Not About: the About page's title matches that too.
       LIST: '.*(${T_helpAndFeedback}).*'
 - runFlow:
-    when:
-      platform: iOS
-      notVisible:
-        id: settings-logout
-    commands:
-      - scrollUntilVisible:
-          element:
-            id: settings-logout
-          direction: UP
-          centerElement: true
-- runFlow:
-    when:
-      platform: Android
-    commands:
-      - repeat:
-          times: 8
-          while:
-            notVisible:
-              id: settings-logout
-          commands:
-            - swipe:
-                from:
-                  id: settings-list
-                direction: DOWN
+    file: subflows/scroll-list.yaml
+    env:
+      LIST: settings-list
+      TARGET: '.*(${T_logout}).*'
+      DIRECTION: DOWN
+# Once more: iOS keeps rows that scrolled under the navigation bar in its
+# snapshot, so Log Out can count as visible while a tap on it lands on the
+# status bar. At the top of the list this swipe does nothing.
+- swipe:
+    from:
+      id: settings-list
+    direction: DOWN
 
 - tapOn:
     id: settings-logout
