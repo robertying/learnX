@@ -1,4 +1,10 @@
-import type { SharedValue } from 'react-native-reanimated';
+import {
+  useAnimatedReaction,
+  useSharedValue,
+  withTiming,
+  type SharedValue,
+} from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import type { CardAction } from 'helpers/cardActions';
 
 /** The edge a swipe action shows from: leading for a right swipe */
@@ -34,4 +40,30 @@ export const swipedShare = (
     return 0;
   }
   return ((side === 'leading' ? 1 : -1) * translation) / rowWidth;
+};
+
+/**
+ * Goes from 0 to 1 as the swipe passes `FULL_SWIPE`, and back as it returns,
+ * calling `onArmedChange` at each crossing.
+ */
+export const useArmedProgress = ({
+  side,
+  translation,
+  rowWidth,
+  onArmedChange,
+}: Pick<
+  CardSwipeActionProps,
+  'side' | 'translation' | 'rowWidth' | 'onArmedChange'
+>) => {
+  const armedProgress = useSharedValue(0);
+  useAnimatedReaction(
+    () => swipedShare(side, translation.get(), rowWidth.get()) > FULL_SWIPE,
+    (armed, previous) => {
+      if (previous !== null && armed !== previous) {
+        armedProgress.set(withTiming(armed ? 1 : 0, { duration: 150 }));
+        scheduleOnRN(onArmedChange, armed);
+      }
+    },
+  );
+  return armedProgress;
 };

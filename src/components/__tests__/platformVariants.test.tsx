@@ -1,10 +1,9 @@
-import { Linking, RefreshControl, Text } from 'react-native';
+import { Linking, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { render, screen } from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import FlatList from 'components/FlatList';
 import HeaderTitle, { getTitleOptions } from 'components/HeaderTitle';
-import ScrollView from 'components/ScrollView';
 import { generateFingerprint } from 'helpers/fingerprint';
 import { openSystemSettings } from 'helpers/systemSettings';
 
@@ -16,7 +15,7 @@ jest.mock('expo-crypto', () => ({
 
 afterEach(() => jest.restoreAllMocks());
 
-describe('lists and scroll views', () => {
+describe('FlatList', () => {
   const refresh = (
     <RefreshControl testID="refresh" refreshing={false} onRefresh={() => {}} />
   );
@@ -39,14 +38,6 @@ describe('lists and scroll views', () => {
         onRefresh: mac ? undefined : onRefresh,
         refreshControl: mac ? undefined : refresh,
       });
-
-      await render(
-        <ScrollView refreshControl={refresh}>
-          <Text>content</Text>
-        </ScrollView>,
-      );
-      expect(screen.getByText('content')).toBeTruthy();
-      expect(screen.root?.props.refreshControl).toBe(mac ? undefined : refresh);
     }
   });
 });

@@ -2,8 +2,8 @@ import {
   PlatformColor,
   StyleProp,
   StyleSheet,
-  Text,
-  TextStyle,
+  View,
+  ViewStyle,
 } from 'react-native';
 
 /**
@@ -20,46 +20,18 @@ export const BADGE_COLOR = PlatformColor('systemRed');
  */
 export const DOT_SIZE = 8;
 
-export interface BadgeProps {
-  children?: React.ReactNode;
-  /** Height in points; a badge without children is a dot of this size. */
-  size?: number;
-  style?: StyleProp<TextStyle>;
-}
-
-/** A small count or dot, in the badge color unless the style sets one. */
-const Badge: React.FC<BadgeProps> = ({ children, size = 20, style }) => {
-  return (
-    <Text
-      numberOfLines={1}
-      allowFontScaling={false}
-      style={[
-        styles.badge,
-        {
-          backgroundColor: BADGE_COLOR,
-          color: 'white',
-          fontSize: size * 0.5,
-          lineHeight: size,
-          height: size,
-          minWidth: size,
-          borderRadius: size / 2,
-        },
-        style,
-      ]}
-    >
-      {children}
-    </Text>
-  );
-};
+/** A badge dot, for something new behind a button (iOS and Mac). */
+const BadgeDot: React.FC<{ style?: StyleProp<ViewStyle> }> = ({ style }) => (
+  <View style={[styles.dot, style]} />
+);
 
 const styles = StyleSheet.create({
-  badge: {
-    alignSelf: 'flex-end',
-    textAlign: 'center',
-    textAlignVertical: 'center',
-    overflow: 'hidden',
-    paddingHorizontal: 3,
+  dot: {
+    width: DOT_SIZE,
+    height: DOT_SIZE,
+    borderRadius: DOT_SIZE / 2,
+    backgroundColor: BADGE_COLOR,
   },
 });
 
-export default Badge;
+export default BadgeDot;

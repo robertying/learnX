@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react';
-import { Platform, RefreshControl, View } from 'react-native';
+import { RefreshControl, View } from 'react-native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ParamListBase, useIsFocused } from '@react-navigation/native';
 import { runOnJS } from 'react-native-reanimated';
@@ -307,13 +307,12 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     ListHeaderComponent: <SyncStatus updatedAt={updatedAt} />,
     renderItem,
     keyExtractor: (item: T) => item.id,
-    refreshControl: (
-      <RefreshControl
-        enabled={!selectionMode && !reorderMode}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
-    ),
+    // No pull to refresh while selecting or reordering (a pull would start a
+    // drag in reorder mode), nor on the Mac, which has no pull.
+    refreshControl:
+      selectionMode || reorderMode || DeviceInfo.isMac() ? undefined : (
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      ),
   };
 
   return (
@@ -331,11 +330,6 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
           panActivateAfterLongPress={520}
           onReorder={handleReorderDone}
           onIndexChange={handleDragChange}
-          refreshControl={
-            DeviceInfo.isMac() || (Platform.OS === 'android' && reorderMode)
-              ? undefined
-              : listProps.refreshControl
-          }
         />
       ) : (
         <FlatList key={filterSelected} {...listProps} />

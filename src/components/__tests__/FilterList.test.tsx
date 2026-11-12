@@ -40,7 +40,10 @@ jest.mock('components/FlatList', () => {
 });
 jest.mock('react-native-reorderable-list', () => ({
   __esModule: true,
-  default: require('react-native').FlatList,
+  default: (props: object) => {
+    const { FlatList } = require('react-native');
+    return <FlatList testID="filter-list" {...props} />;
+  },
   useReorderableDrag: () => jest.fn(),
 }));
 const mockListeners = new Set<(event: { command: AppCommand }) => void>();
@@ -308,5 +311,24 @@ describe('menu bar commands', () => {
     await act(() => header().onSelect());
     await choose('refresh');
     expect(onRefresh).not.toHaveBeenCalled();
+  });
+});
+
+describe('pull to refresh', () => {
+  const refreshControl = () =>
+    screen.getByTestId('filter-list').props.refreshControl;
+
+  it('is off while selecting', async () => {
+    await renderList();
+    expect(refreshControl().props.onRefresh).toBe(onRefresh);
+    await act(() => header().onSelect());
+    expect(refreshControl()).toBeUndefined();
+  });
+
+  it('is off while reordering courses', async () => {
+    await renderList({ type: 'course' });
+    expect(refreshControl()).toBeDefined();
+    await act(() => header().onReorder());
+    expect(refreshControl()).toBeUndefined();
   });
 });

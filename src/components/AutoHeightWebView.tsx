@@ -15,6 +15,65 @@ import Urls from 'constants/Urls';
 const isOwnPage = (url: string) =>
   url.startsWith('about:') || url.replace(/\/?(#.*)?$/, '') === Urls.learn;
 
+/**
+ * Posts the content's height to React Native whenever it changes.
+ */
+const injectedScript = `
+  var lastHeight = 0;
+
+  // Measure the content itself rather than the viewport: the client/scroll
+  // height of the root element is never smaller than the web view, so it
+  // could not shrink once the content reflows into fewer lines.
+  function measure() {
+    return Math.ceil(
+      Math.max(
+        document.documentElement?.getBoundingClientRect().height ?? 0,
+        document.body?.getBoundingClientRect().height ?? 0,
+        document.body?.scrollHeight ?? 0
+      )
+    );
+  }
+
+  function postHeight() {
+    if (!window.ReactNativeWebView?.postMessage) {
+      setTimeout(postHeight, 200);
+    } else {
+      var height = measure();
+      if (height !== lastHeight) {
+        lastHeight = height;
+        window.ReactNativeWebView.postMessage(height.toString());
+      }
+    }
+  }
+
+  // Content reflows when the web view is resized (rotation, split view,
+  // window resizing) or when images and such finish loading
+  function observe() {
+    if (!window.ResizeObserver) {
+      return;
+    }
+    var observer = new ResizeObserver(postHeight);
+    if (document.documentElement) {
+      observer.observe(document.documentElement);
+    }
+    if (document.body) {
+      observer.observe(document.body);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    observe();
+    postHeight();
+  });
+  window.addEventListener("load", postHeight);
+  window.addEventListener("resize", postHeight);
+
+  // Update height as long as there's something
+  postHeight();
+
+  true;
+`;
+
 export interface AutoHeightWebViewProps extends WebViewProps {
   /**
    * Called once the content has a height to show, or once loading ends
@@ -68,62 +127,6 @@ const AutoHeightWebView: React.FC<AutoHeightWebViewProps> = ({
     }
     return false;
   };
-
-  const injectedScript = `
-    var lastHeight = 0;
-
-    // Measure the content itself rather than the viewport: the client/scroll
-    // height of the root element is never smaller than the web view, so it
-    // could not shrink once the content reflows into fewer lines.
-    function measure() {
-      return Math.ceil(
-        Math.max(
-          document.documentElement?.getBoundingClientRect().height ?? 0,
-          document.body?.getBoundingClientRect().height ?? 0,
-          document.body?.scrollHeight ?? 0
-        )
-      );
-    }
-
-    function postHeight() {
-      if (!window.ReactNativeWebView?.postMessage) {
-        setTimeout(postHeight, 200);
-      } else {
-        var height = measure();
-        if (height !== lastHeight) {
-          lastHeight = height;
-          window.ReactNativeWebView.postMessage(height.toString());
-        }
-      }
-    }
-
-    // Content reflows when the web view is resized (rotation, split view,
-    // window resizing) or when images and such finish loading
-    function observe() {
-      if (!window.ResizeObserver) {
-        return;
-      }
-      var observer = new ResizeObserver(postHeight);
-      if (document.documentElement) {
-        observer.observe(document.documentElement);
-      }
-      if (document.body) {
-        observer.observe(document.body);
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", function () {
-      observe();
-      postHeight();
-    });
-    window.addEventListener("load", postHeight);
-    window.addEventListener("resize", postHeight);
-
-    // Update height as long as there's something
-    postHeight();
-
-    true;
-  `;
 
   useEffect(() => {
     void (async () => {

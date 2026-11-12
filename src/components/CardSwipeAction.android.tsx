@@ -1,16 +1,10 @@
 import { StyleSheet } from 'react-native';
-import Animated, {
-  useAnimatedReaction,
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
+import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { useTheme } from 'theme';
 import {
   CardSwipeActionProps,
-  FULL_SWIPE,
   swipedShare,
+  useArmedProgress,
 } from './CardSwipeAction.shared';
 import CardActionIcon from './CardActionIcon';
 
@@ -29,17 +23,12 @@ const CardSwipeAction: React.FC<CardSwipeActionProps> = ({
   onArmedChange,
 }) => {
   const theme = useTheme();
-  const armedProgress = useSharedValue(0);
-
-  useAnimatedReaction(
-    () => swipedShare(side, translation.get(), rowWidth.get()) > FULL_SWIPE,
-    (armed, previous) => {
-      if (previous !== null && armed !== previous) {
-        armedProgress.set(withTiming(armed ? 1 : 0, { duration: 150 }));
-        scheduleOnRN(onArmedChange, armed);
-      }
-    },
-  );
+  const armedProgress = useArmedProgress({
+    side,
+    translation,
+    rowWidth,
+    onArmedChange,
+  });
 
   const iconStyle = useAnimatedStyle(() => ({
     transform: [{ scale: 1 + 0.25 * armedProgress.get() }],
