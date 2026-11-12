@@ -4,7 +4,7 @@
 // the timetable or the settings change (`services/surfaces`).
 import dayjs from 'dayjs';
 import { NotificationSettings } from 'data/types/state';
-import { t } from 'helpers/i18n';
+import { t, timeFormat } from 'helpers/i18n';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
@@ -85,7 +85,10 @@ export const classReminderContent = ({
   start,
 }: UpcomingClass) => ({
   title: courseName,
-  body: [t('classStartsAt', { time: dayjs(start).format('HH:mm') }), location]
+  body: [
+    t('classStartsAt', { time: dayjs(start).format(timeFormat()) }),
+    location,
+  ]
     .filter(Boolean)
     .join(' · '),
   data: { type: 'today' },

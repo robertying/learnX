@@ -5,8 +5,9 @@ import {
   getAssignmentGradeLevelDescription,
   t,
   tCount,
+  timeFormat,
 } from 'helpers/i18n';
-import { mockLocale } from '../../../jest/locale';
+import { mockClock, mockLocale } from '../../../jest/locale';
 
 // A runtime that never loads App.tsx (the background task) still formats in
 // the app's language once helpers/i18n is loaded.
@@ -50,5 +51,39 @@ describe('getAssignmentGradeLevelDescription', () => {
     expect(getAssignmentGradeLevelDescription('A+' as HomeworkGradeLevel)).toBe(
       'A+',
     );
+  });
+});
+
+describe('times of day', () => {
+  const evening = dayjs('2026-11-12T21:30:00');
+
+  afterEach(() => {
+    mockClock.uses24hourClock = true;
+    mockLocale.current = 'en-US';
+  });
+
+  it('follow a 24-hour clock', () => {
+    expect(evening.format(timeFormat())).toBe('21:30');
+    expect(evening.format(t('shortDateTimeFormat'))).toBe('Nov 12 21:30');
+  });
+
+  it('follow a 12-hour clock in English', () => {
+    mockClock.uses24hourClock = false;
+    expect(evening.format(timeFormat())).toBe('9:30 PM');
+    expect(evening.format(t('shortDateTimeFormat'))).toBe('Nov 12 9:30 PM');
+  });
+
+  it('follow a 12-hour clock in Chinese', () => {
+    mockClock.uses24hourClock = false;
+    mockLocale.current = 'zh-CN';
+    expect(evening.locale('zh-cn').format(t('shortDateTimeFormat'))).toBe(
+      '11 月 12 日 晚上9:30',
+    );
+  });
+
+  it('keep other placeholders of a format', () => {
+    expect(
+      evening.format(t('gradedByAtFormat', { grader: formatLiteral('Li') })),
+    ).toBe('Graded by Li, Nov 12, 2026 21:30');
   });
 });
