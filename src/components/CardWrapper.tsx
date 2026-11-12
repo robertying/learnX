@@ -92,6 +92,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const swipeSettings = useSettings(settings => settings.swipeActions);
 
   const [menuVisible, setMenuVisible] = useState(false);
+  // Android's menu is a Compose view: mounted on the card's first long press,
+  // not with every row.
+  const [menuMounted, setMenuMounted] = useState(false);
 
   const actions = cardActions({
     fav,
@@ -249,6 +252,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       onDrag?.();
     } else if (actionsEnabled && !contextMenuSupported) {
       void Haptics.selectionAsync();
+      setMenuMounted(true);
       setMenuVisible(true);
     }
   };
@@ -333,12 +337,14 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   ) : (
     <View collapsable={false}>
       {touchable}
-      <CardMenu
-        visible={menuVisible}
-        actions={actions}
-        onAction={handleMenuAction}
-        onDismiss={closeMenu}
-      />
+      {menuMounted ? (
+        <CardMenu
+          visible={menuVisible}
+          actions={actions}
+          onAction={handleMenuAction}
+          onDismiss={closeMenu}
+        />
+      ) : null}
     </View>
   );
 
