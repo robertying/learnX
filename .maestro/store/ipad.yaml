@@ -2,9 +2,8 @@ appId: ${APP_ID}
 name: App Store screenshots on the iPad
 ---
 # Run by scripts/store-screenshots.sh (ipad): the iPad shots of the store
-# listing in landscape, as STORE_OUT/NN-<slug>.png. Details open beside the
-# lists.
-- setOrientation: LANDSCAPE_LEFT
+# listing, as STORE_OUT/NN-<slug>.png. Landscape: the script passes it as
+# E2E_ORIENTATION, which the login sets. Details open beside the lists.
 - runFlow: subflows/start.yaml
 
 # 1 Notices with a notice open
@@ -130,4 +129,3 @@ name: App Store screenshots on the iPad
     file: ../subflows/screenshot.yaml
     env:
       NAME: 08-calendar
-- setOrientation: PORTRAIT
