@@ -1,10 +1,10 @@
-import { Linking } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import { act, render } from '@testing-library/react-native';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
-import SSO from 'screens/SSO';
+import SSO, { TRUSTED_BROWSERS_URL } from 'screens/SSO';
 import { screenProps } from 'test-utils/screenProps';
 
 let mockProps: Record<string, any> = {};
@@ -60,6 +60,11 @@ it('opens the SSO form fresh, filling the credentials and device into its script
   expect(mockProps.injectedJavaScript).toContain(JSON.stringify('u"1'));
   expect(mockProps.injectedJavaScript).toContain(JSON.stringify('p\\w'));
   expect(mockProps.injectedJavaScript).toContain('"device-fp"');
+  // The alert override runs before the page's scripts, without the password.
+  expect(mockProps.injectedJavaScriptBeforeContentLoaded).toContain(
+    'TRUSTED_BROWSER_LIMIT',
+  );
+  expect(mockProps.injectedJavaScriptBeforeContentLoaded).not.toContain('p\\w');
   expect(
     mockProps.onShouldStartLoadWithRequest({
       url: 'https://id.tsinghua.edu.cn/x',
@@ -142,4 +147,27 @@ it('shows the progress while loading', async () => {
   expect(screen.queryByTestId('progress')).toBeNull();
   await act(() => mockProps.onLoadProgress({ nativeEvent: { progress: 0.3 } }));
   expect(screen.getByTestId('progress')).toBeTruthy();
+});
+
+it("shows learnX's own alert for the trusted browser limit, linking to the page that manages them", async () => {
+  const alert = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue(undefined);
+  await renderScreen();
+
+  await message({ type: 'TRUSTED_BROWSER_LIMIT' }, 'https://example.com/');
+  expect(alert).not.toHaveBeenCalled();
+
+  await message({ type: 'TRUSTED_BROWSER_LIMIT' });
+  expect(alert).toHaveBeenCalledWith(
+    t('trustedBrowserLimit'),
+    t('trustedBrowserLimitNote'),
+    [
+      { text: t('cancel'), style: 'cancel' },
+      expect.objectContaining({ text: t('manageTrustedBrowsers') }),
+    ],
+  );
+  const buttons = alert.mock.calls[0][2]!;
+  buttons[1].onPress!();
+  expect(openURL).toHaveBeenCalledWith(TRUSTED_BROWSERS_URL);
+  expect(navigation.goBack).not.toHaveBeenCalled();
 });

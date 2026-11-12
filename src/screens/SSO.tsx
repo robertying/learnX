@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Linking } from 'react-native';
+import { Alert, Linking } from 'react-native';
 import type { WebViewMessageEvent } from 'react-native-webview';
 import type { OnShouldStartLoadWithRequest } from 'react-native-webview/lib/WebViewTypes';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -14,9 +14,12 @@ import { toast } from 'components/Toast';
 import { LoginStackParams } from 'navigation/types';
 
 const ssoCustomScript = require('../helpers/preval/sso.preval.js');
+const ssoAlertsScript: string = require('../helpers/preval/ssoAlerts.preval.js');
 
 const SSO_LOGIN_URL =
   'https://id.tsinghua.edu.cn/do/off/ui/auth/login/form/bb5df85216504820be7bba2b0ae1535b/0';
+/** Where the account's trusted browsers are listed and deleted. */
+export const TRUSTED_BROWSERS_URL = 'https://id.tsinghua.edu.cn/';
 const LEARN_ROAMING_URL =
   'https://learn.tsinghua.edu.cn/f/j_spring_security_thauth_roaming_entry';
 
@@ -113,6 +116,18 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
         fingerGenPrint: data.requestBody.fingerGenPrint,
         fingerGenPrint3: data.requestBody.fingerGenPrint3,
       };
+    } else if (type === 'TRUSTED_BROWSER_LIMIT') {
+      // In place of the page's own alert (preval/ssoAlerts.js)
+      Alert.alert(t('trustedBrowserLimit'), t('trustedBrowserLimitNote'), [
+        { text: t('cancel'), style: 'cancel' },
+        {
+          text: t('manageTrustedBrowsers'),
+          isPreferred: true,
+          onPress: () => {
+            Linking.openURL(TRUSTED_BROWSERS_URL).catch(() => {});
+          },
+        },
+      ]);
     }
   };
 
@@ -126,6 +141,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
         },
       }}
       onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
+      injectedJavaScriptBeforeContentLoaded={ssoAlertsScript}
       injectedJavaScript={injectedJs}
       onMessage={handleMessage}
     />
