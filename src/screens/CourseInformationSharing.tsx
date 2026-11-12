@@ -1,11 +1,8 @@
 import { useEffect } from 'react';
 import { Alert, Linking } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Language } from '@robertying/thu-learn-lib';
-import { useCurrentSemester } from 'data/userData';
 import { setSetting, useSettings } from 'data/settings';
 import { setCourseSharingSeen } from 'data/appState';
-import { dataSource } from 'data/source';
 import {
   Form,
   FormButton,
@@ -14,7 +11,6 @@ import {
   FormToggle,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { uploadCourses } from 'helpers/coursex';
 import { SettingsStackParams } from './types';
 
 type Props = NativeStackScreenProps<
@@ -23,26 +19,9 @@ type Props = NativeStackScreenProps<
 >;
 
 const CourseInformationSharing: React.FC<Props> = () => {
-  const currentSemesterId = useCurrentSemester();
   const courseInformationSharing = useSettings(
     settings => settings.courseInformationSharing,
   );
-
-  const getCourses = async () => {
-    if (!currentSemesterId) {
-      return [];
-    }
-
-    const results = await dataSource.getCourseList(currentSemesterId, {
-      lang: Language.ZH,
-    });
-    const courses = results.map(course => ({
-      ...course,
-      semesterId: currentSemesterId,
-    }));
-
-    return courses;
-  };
 
   const handleEnable = (enabled: boolean) => {
     if (enabled) {
@@ -56,12 +35,10 @@ const CourseInformationSharing: React.FC<Props> = () => {
           },
           {
             text: t('join'),
-            onPress: async () => {
+            onPress: () => {
+              // The cached courses are shared from here on
+              // (helpers/surfaces).
               setSetting('courseInformationSharing', enabled);
-              try {
-                const courses = await getCourses();
-                await uploadCourses(courses);
-              } catch {}
             },
           },
         ],

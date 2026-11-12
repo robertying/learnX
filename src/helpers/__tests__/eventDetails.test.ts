@@ -67,7 +67,6 @@ describe('buildCourseEventDetails', () => {
     startTime: '08:00',
     endTime: '09:35',
     location: '六教6A017',
-    status: '',
   };
 
   it('builds a course event in Beijing time with the mapped location', () => {

@@ -3,7 +3,8 @@
 import dayjs, { Dayjs } from 'dayjs';
 import type { ToastType } from 'components/Toast';
 import DeviceInfo from 'constants/DeviceInfo';
-import { dataSource, ensureSession } from 'data/source';
+import { ensureSession } from 'data/source';
+import { fetchCalendarRange } from 'data/schedule';
 import { Assignment } from 'data/types/state';
 import {
   exportSyncedCalendarsToICS,
@@ -88,7 +89,10 @@ export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
   }
 };
 
-/** Fetches the course schedule in the range and writes it to the calendar */
+/**
+ * Fetches the course schedule in the range, through the same week queries as
+ * Today's timetable, and writes it to the calendar
+ */
 export const syncCourseSchedule = async (
   start: Dayjs,
   end: Dayjs,
@@ -97,18 +101,18 @@ export const syncCourseSchedule = async (
   try {
     await ensureSession();
 
-    // Long ranges are fetched a few weeks at a time; it rejects only when
-    // every window failed.
-    const { events, failedRanges } = await dataSource.getCalendar(
-      start.format('YYYYMMDD'),
-      end.format('YYYYMMDD'),
-      { graduate },
+    // Week by week, as Today's timetable; it rejects only when every week
+    // failed, and the calendar keeps its entries for the weeks that did.
+    const { classes, failedRanges } = await fetchCalendarRange(
+      start,
+      end,
+      graduate,
     );
 
-    if (events.length === 0 && failedRanges.length === 0) {
+    if (classes.length === 0 && failedRanges.length === 0) {
       return { text: t('courseScheduleSyncNoCourse'), type: 'warning' };
     }
-    await saveCoursesToCalendar(events, start, end, failedRanges);
+    await saveCoursesToCalendar(classes, start, end, failedRanges);
     setLastSynced('courseSchedule');
     if (failedRanges.length > 0) {
       return { text: t('courseScheduleSyncPartial'), type: 'warning' };

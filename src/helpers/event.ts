@@ -1,7 +1,8 @@
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
-import { CalendarEvent, CalendarRange } from '@robertying/thu-learn-lib';
+import type { CalendarClass } from 'helpers/schedule';
+import type { FailedRange } from 'data/schedule';
 import { getSettings } from 'data/settings';
 import {
   type AssignmentEventType,
@@ -174,10 +175,10 @@ export const getCourseCalendar = () =>
  * `failedRanges` (weeks the registrar didn't answer for) stay as they were.
  */
 export const saveCoursesToCalendar = async (
-  events: CalendarEvent[],
+  events: CalendarClass[],
   startDate: Dayjs,
   endDate: Dayjs,
-  failedRanges: CalendarRange[] = [],
+  failedRanges: FailedRange[] = [],
 ) => {
   const settings = getSettings();
 

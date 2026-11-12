@@ -50,6 +50,9 @@ jest.mock('helpers/calendarSync', () => ({
   syncAssignments: jest.fn(async () => undefined),
   upcomingAssignments: (assignments: unknown[]) => assignments,
 }));
+jest.mock('helpers/coursex', () => ({
+  uploadCourses: jest.fn(async () => {}),
+}));
 jest.mock('data/schedule', () => ({
   getCachedWeekSessions: jest.fn(() => ({ sessions: [], source: 'none' })),
 }));
@@ -312,4 +315,29 @@ it('clears only after a refresh under way has finished', async () => {
   await Promise.all([refreshed, cleared]);
 
   expect(order).toEqual(['scheduled', 'cancelled']);
+});
+
+it('shares the courses with courseX while sharing is on, once per change', async () => {
+  const { uploadCourses } = jest.requireMock('helpers/coursex') as {
+    uploadCourses: jest.Mock;
+  };
+  const { coursesQuery } = jest.requireActual('data/queries');
+  const courses = [{ id: 'c1', name: '微积分', semesterId: semester }];
+  queryClient.setQueryData(coursesQuery(semester).queryKey, courses);
+
+  await refreshSurfaces();
+  expect(uploadCourses).not.toHaveBeenCalled();
+
+  setSetting('courseInformationSharing', true);
+  await refreshSurfaces();
+  await refreshSurfaces();
+  expect(uploadCourses).toHaveBeenCalledTimes(1);
+  expect(uploadCourses).toHaveBeenCalledWith(courses);
+
+  queryClient.setQueryData(coursesQuery(semester).queryKey, [
+    ...courses,
+    { id: 'c2', name: '物理', semesterId: semester },
+  ]);
+  await refreshSurfaces();
+  expect(uploadCourses).toHaveBeenCalledTimes(2);
 });
