@@ -10,12 +10,19 @@ appId: ${APP_ID}
     env:
       POSTURE: closed
 - openLink: ${LINK}
-# iOS asks "Open in “learnX”?" first. The prompt belongs to SpringBoard, which
-# isn't in Maestro's view hierarchy while learnX is in front, so tap its Open
-# button by position on the closed Duo's outer display.
+# iOS may ask "Open in “learnX”?" first (not every time). The prompt belongs
+# to SpringBoard, which isn't in Maestro's view hierarchy while learnX is in
+# front, so tap its Open button by position on the closed Duo's outer display,
+# and only while the link's screen hasn't shown: without the prompt, the tap
+# would land on that screen (Today's Schedule row).
 - waitForAnimationToEnd
-- tapOn:
-    point: 57%,51%
+- runFlow:
+    when:
+      notVisible:
+        id: ${ID}
+    commands:
+      - tapOn:
+          point: 57%,51%
 - extendedWaitUntil:
     visible:
       id: ${ID}

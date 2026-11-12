@@ -1,7 +1,7 @@
-# Reveal the favorite / archive actions of the list card titled CARD. A long
-# press opens the swipe actions on iOS and a menu on Android; a swipe would
-# also work on iOS, but on iPad Maestro's element swipe is too short and
-# lands as a tap.
+# Open the actions menu of the list card titled CARD: a long press shows the
+# context menu on iOS and the Material menu on Android. Tap an item by its
+# text, which both platforms' menus show. Swipes run one action each way,
+# but on iPad Maestro's element swipe is too short and lands as a tap.
 appId: ${APP_ID}
 ---
 - longPressOn: ${CARD}

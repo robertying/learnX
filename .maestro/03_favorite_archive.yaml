@@ -11,11 +11,7 @@ name: Favorite and archive a notice
     file: subflows/card_actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
-- runFlow:
-    file: subflows/card_action.yaml
-    env:
-      ID: card-fav
-      LABEL: '${T_favorite}'
+- tapOn: '${T_favorite}'
 - runFlow:
     file: subflows/filter.yaml
     env:
@@ -27,11 +23,7 @@ name: Favorite and archive a notice
     file: subflows/card_actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
-- runFlow:
-    file: subflows/card_action.yaml
-    env:
-      ID: card-fav
-      LABEL: '${T_unfavorite}'
+- tapOn: '${T_unfavorite}'
 - assertNotVisible: '.*(${MOCK_NOTICE}).*'
 
 # Archive from the full list
@@ -43,11 +35,7 @@ name: Favorite and archive a notice
     file: subflows/card_actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
-- runFlow:
-    file: subflows/card_action.yaml
-    env:
-      ID: card-archive
-      LABEL: '${T_archive}'
+- tapOn: '${T_archive}'
 - assertNotVisible: '.*(${MOCK_NOTICE}).*'
 - runFlow:
     file: subflows/filter.yaml
@@ -60,11 +48,7 @@ name: Favorite and archive a notice
     file: subflows/card_actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
-- runFlow:
-    file: subflows/card_action.yaml
-    env:
-      ID: card-archive
-      LABEL: '${T_restore}'
+- tapOn: '${T_restore}'
 - runFlow:
     file: subflows/filter.yaml
     env:

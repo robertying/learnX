@@ -5,6 +5,7 @@ import type {
   CourseFile,
   UserInfo,
 } from '@robertying/thu-learn-lib';
+import type { SwipeSettings } from 'helpers/cardActions';
 import type { FilterSelection } from 'helpers/filters';
 
 export type Tab = 'notice' | 'assignment' | 'file' | 'course';
@@ -49,6 +50,8 @@ export interface SettingsState {
   courseInformationSharing: boolean;
   openFileAfterDownload: boolean;
   courseEventOmitLocation: boolean;
+  /** What swiping a card right and left does */
+  swipeActions: SwipeSettings;
 }
 
 export type Course = Pick<
