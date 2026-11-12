@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/zh-cn';
-import { mockLocale } from './locale';
+import { mockClock, mockLocale } from './locale';
 
 // As helpers/i18n does when it loads
 dayjs.extend(relativeTime);
@@ -15,6 +15,7 @@ dayjs.extend(relativeTime);
 jest.mock('../src/helpers/env', () => require('./mocks/env'));
 
 jest.mock('expo-localization', () => ({
+  getCalendars: () => [{ uses24hourClock: mockClock.uses24hourClock }],
   getLocales: () => [
     {
       languageTag: mockLocale.current,
