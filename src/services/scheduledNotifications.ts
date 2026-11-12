@@ -54,11 +54,17 @@ export const cancelScheduled = async (
   );
 };
 
+/** iOS's interruption level of a notification, if it says. */
+const interruptionLevel = (content: object | undefined) =>
+  (content as { interruptionLevel?: string } | undefined)?.interruptionLevel;
+
 /**
  * Makes the scheduled notifications that `owns` accepts match `plan`:
  * cancels the ones not in it (unless `keep` accepts them) and schedules the
  * ones not scheduled yet. An identifier changes with whatever should
- * reschedule a notification, so one already scheduled is left as it is.
+ * reschedule a notification, so one already scheduled is left as it is,
+ * unless it was scheduled with another interruption level on iOS (by an
+ * earlier version of the app).
  */
 export const reconcileScheduled = async (
   owns: (identifier: string) => boolean,
@@ -66,14 +72,31 @@ export const reconcileScheduled = async (
   keep: (identifier: string) => boolean = () => false,
 ) => {
   const wanted = new Set(plan.map(n => n.identifier));
-  const scheduled = (await getScheduled(owns)).map(n => n.identifier);
-  const existing = new Set(scheduled);
+  const scheduled = await getScheduled(owns);
+  const current = new Map(
+    scheduled.map(n => [n.identifier, interruptionLevel(n.content)]),
+  );
+  // iOS always says the scheduled one's level; a plan without one wants the
+  // default.
+  const isCurrent = (n: PlannedNotification) => {
+    if (!current.has(n.identifier)) {
+      return false;
+    }
+    const level = current.get(n.identifier);
+    return (
+      Platform.OS !== 'ios' ||
+      level === undefined ||
+      level === (interruptionLevel(n.content) ?? 'active')
+    );
+  };
   await Promise.all([
     ...scheduled
+      .map(n => n.identifier)
       .filter(id => !wanted.has(id) && !keep(id))
       .map(id => Notifications.cancelScheduledNotificationAsync(id)),
+    // Scheduling an identifier again replaces it.
     ...plan
-      .filter(n => !existing.has(n.identifier))
+      .filter(n => !isCurrent(n))
       .map(n => Notifications.scheduleNotificationAsync(n)),
   ]);
 };
