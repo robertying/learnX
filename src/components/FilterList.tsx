@@ -13,7 +13,7 @@ import useAppCommand from 'hooks/useAppCommand';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
 import useListSelection from 'hooks/useListSelection';
-import { RootStackParams } from 'screens/types';
+import { RootStackParams } from 'navigation/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -26,7 +26,7 @@ import {
   toggleArchived,
   toggleCourseHidden,
   toggleFavorite,
-} from 'helpers/listActions';
+} from 'services/listActions';
 import Empty from './Empty';
 import Spinner from './Spinner';
 import SyncStatus from './SyncStatus';

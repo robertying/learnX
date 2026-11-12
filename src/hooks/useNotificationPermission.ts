@@ -6,7 +6,7 @@ import {
   NotificationPermission,
   requestExactAlarms,
   requestNotificationPermission,
-} from 'helpers/notifications';
+} from 'services/notifications';
 
 /**
  * The notification permission and whether reminders can be exact (Android

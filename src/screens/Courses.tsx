@@ -11,7 +11,7 @@ import usePullToRefresh from 'hooks/usePullToRefresh';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { getSemesterTextFromId } from 'helpers/semester';
 import { sortByOrder } from 'helpers/reorder';
-import { CourseStackParams, MainStackScreenProps } from './types';
+import { CourseStackParams, MainStackScreenProps } from 'navigation/types';
 
 type Props = MainStackScreenProps<CourseStackParams, 'Courses'>;
 

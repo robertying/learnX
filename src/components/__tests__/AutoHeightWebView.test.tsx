@@ -3,9 +3,9 @@ import { act, render, screen } from '@testing-library/react-native';
 import type { WebViewProps } from 'react-native-webview';
 import CookieManager from '@preeternal/react-native-cookie-manager';
 import AutoHeightWebView from 'components/AutoHeightWebView';
-import { recordError } from 'helpers/crashReporting';
+import { recordError } from 'services/crashReporting';
 
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 // The native web view, as a view that keeps its props.
 jest.mock('react-native-webview', () => {
   const { View } = require('react-native');

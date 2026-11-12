@@ -6,13 +6,13 @@ import {
 } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
-import { trackScreen } from 'helpers/crashReporting';
+import { trackScreen } from 'services/crashReporting';
 import { reportDetailReady } from 'hooks/useDetailNavigator';
 import {
   DetailNavigationContainerRef,
   DetailStackParams,
   ExtraParams,
-} from 'screens/types';
+} from './types';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
 import { getTitleOptions } from 'components/HeaderTitle';

@@ -11,7 +11,7 @@ import {
   FormToggle,
 } from 'components/Form';
 import { t } from 'helpers/i18n';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<
   SettingsStackParams,
@@ -37,7 +37,7 @@ const CourseInformationSharing: React.FC<Props> = () => {
             text: t('join'),
             onPress: () => {
               // The cached courses are shared from here on
-              // (helpers/surfaces).
+              // (services/surfaces).
               setSetting('courseInformationSharing', enabled);
             },
           },

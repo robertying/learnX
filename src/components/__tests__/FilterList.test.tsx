@@ -17,7 +17,7 @@ import {
   toggleArchived,
   toggleCourseHidden,
   toggleFavorite,
-} from 'helpers/listActions';
+} from 'services/listActions';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import useFilterListHeader, {
   type FilterListHeaderOptions,
@@ -27,7 +27,7 @@ import type { AppCommand } from 'modules/menus';
 jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
 jest.mock('hooks/useFilterListHeader', () => jest.fn());
 jest.mock('hooks/useDetailNavigator', () => jest.fn(() => undefined));
-jest.mock('helpers/listActions', () => ({
+jest.mock('services/listActions', () => ({
   moveCourse: jest.fn(),
   toggleArchived: jest.fn(),
   toggleCourseHidden: jest.fn(),

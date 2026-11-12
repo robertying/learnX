@@ -3,17 +3,17 @@ import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { toast } from 'components/Toast';
 import { setSetting } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
-import { downloadFile } from 'helpers/files/downloads';
+import { downloadFile } from 'services/files/downloads';
 import {
   copyFileToMacDownloads,
   openFile,
   shareFile,
-} from 'helpers/files/share';
+} from 'services/files/share';
 import useFileDownload from 'hooks/useFileDownload';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
-jest.mock('helpers/files/downloads', () => ({ downloadFile: jest.fn() }));
-jest.mock('helpers/files/share', () => ({
+jest.mock('services/files/downloads', () => ({ downloadFile: jest.fn() }));
+jest.mock('services/files/share', () => ({
   copyFileToMacDownloads: jest.fn(),
   openFile: jest.fn(),
   shareFile: jest.fn(),

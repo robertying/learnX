@@ -3,7 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppStateStore } from 'data/appState';
 import { whatsNewContext, whatsNewSince } from 'helpers/whatsNew';
-import type { RootStackParams } from 'screens/types';
+import type { RootStackParams } from 'navigation/types';
 
 // What happened earlier in this run of the app, before the main UI showed.
 let loginShown = false;

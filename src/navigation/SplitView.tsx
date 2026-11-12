@@ -1,6 +1,6 @@
 import { createContext, useState, Children } from 'react';
 import { StyleSheet, View } from 'react-native';
-import type { DetailNavigationContainerRef } from 'screens/types';
+import type { DetailNavigationContainerRef } from './types';
 import Numbers from 'constants/Numbers';
 import Divider from 'components/Divider';
 

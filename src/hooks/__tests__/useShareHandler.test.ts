@@ -2,12 +2,12 @@ import { Platform } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import Share, { type SharedItem } from 'modules/share';
 import { toast } from 'components/Toast';
-import { copyFileToCache } from 'helpers/files/share';
+import { copyFileToCache } from 'services/files/share';
 import { usePendingAssignmentStore } from 'data/pendingAssignment';
 import useShareHandler from 'hooks/useShareHandler';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
-jest.mock('helpers/files/share', () => ({ copyFileToCache: jest.fn() }));
+jest.mock('services/files/share', () => ({ copyFileToCache: jest.fn() }));
 
 const share = Share!;
 const os = Platform.OS;

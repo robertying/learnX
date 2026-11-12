@@ -9,7 +9,7 @@ jest.mock('hooks/useStoresLoaded', () => ({
   __esModule: true,
   default: () => mockLoaded(),
 }));
-jest.mock('helpers/storeReport', () => ({
+jest.mock('services/storeReport', () => ({
   buildStoreReport: () => mockBuild(),
 }));
 

@@ -17,7 +17,7 @@ import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
 import { getAssignment, getFile, getNotice } from 'data/content';
 import { getCachedCourses } from 'data/queries';
-import type { ItemDetailParams } from 'screens/types';
+import type { ItemDetailParams } from './types';
 
 export const BackButton = () => {
   const navigation = useNavigation();

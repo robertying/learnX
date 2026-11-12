@@ -6,7 +6,7 @@ import type { DayPart } from 'helpers/dayPart';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
-import { MainTabParams } from 'screens/types';
+import { MainTabParams } from './types';
 import { useSplitLaidOut } from './NativeSplitView';
 import createSidebarSplitNavigator from './SidebarSplitNavigator';
 import DeviceInfo from 'constants/DeviceInfo';

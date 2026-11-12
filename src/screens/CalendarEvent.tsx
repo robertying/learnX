@@ -13,7 +13,7 @@ import {
 import { SyncKind, useCalendarSyncStore } from 'data/calendarSync';
 import { setSetting, useSettings } from 'data/settings';
 import { AlarmSettings } from 'data/types/state';
-import { calendarDefaults } from 'helpers/eventDetails';
+import { calendarDefaults } from 'helpers/calendar/details';
 import { t } from 'helpers/i18n';
 import { openSystemSettings } from 'helpers/systemSettings';
 import {
@@ -23,7 +23,7 @@ import {
   useCourseScheduleSync,
 } from 'hooks/useCalendarSync';
 import useCalendarAccess, { CalendarAccess } from 'hooks/useCalendarAccess';
-import { SettingsStackParams } from './types';
+import { SettingsStackParams } from 'navigation/types';
 
 type Props = NativeStackScreenProps<SettingsStackParams, 'CalendarEvent'>;
 

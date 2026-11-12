@@ -23,7 +23,7 @@ jest.mock('@react-navigation/native-stack', () => ({
     .createNavigator,
 }));
 // The error layout's retry reloads through expo, which is ESM only.
-jest.mock('helpers/crashReporting', () => ({ recordError: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ recordError: jest.fn() }));
 jest.mock('expo', () => ({ reloadAppAsync: jest.fn() }));
 // Only the setup is under test, so the screens are stand-ins.
 jest.mock('screens/About', () => () => null);

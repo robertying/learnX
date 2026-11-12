@@ -25,7 +25,7 @@ jest.mock('navigation/stacks', () => ({
   WhatsNewStack: () => null,
 }));
 jest.mock('screens/Setup', () => () => null);
-jest.mock('helpers/crashReporting', () => ({ trackScreen: jest.fn() }));
+jest.mock('services/crashReporting', () => ({ trackScreen: jest.fn() }));
 
 let mockNativeSplit = true;
 jest.mock('navigation/layout', () => ({

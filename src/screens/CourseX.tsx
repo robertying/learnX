@@ -7,7 +7,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import SafeArea from 'components/SafeArea';
 import BrowserToolbar from 'components/BrowserToolbar';
 import useWebViewProgress from 'hooks/useWebViewProgress';
-import { CourseXParamList } from './types';
+import { CourseXParamList } from 'navigation/types';
 
 type Props = NativeStackScreenProps<CourseXParamList, 'CourseX'>;
 

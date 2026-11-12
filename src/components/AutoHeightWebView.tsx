@@ -8,7 +8,7 @@ import {
   WebViewSourceHtml,
 } from 'react-native-webview/lib/WebViewTypes';
 import CookieManager from '@preeternal/react-native-cookie-manager';
-import { recordError } from 'helpers/crashReporting';
+import { recordError } from 'services/crashReporting';
 import Urls from 'constants/Urls';
 
 /** Whether a load is the web view's own page: HTML at Web Learning's root. */

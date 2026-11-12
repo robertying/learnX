@@ -12,7 +12,7 @@ import {
   syncAssignments,
   syncCourseSchedule,
   upcomingAssignments,
-} from 'helpers/calendarSync';
+} from 'services/calendar/actions';
 import { t } from 'helpers/i18n';
 import useFilteredData from './useFilteredData';
 

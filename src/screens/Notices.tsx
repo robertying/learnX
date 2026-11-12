@@ -4,7 +4,7 @@ import SafeArea from 'components/SafeArea';
 import { useNotices } from 'data/content';
 import useContentList from 'hooks/useContentList';
 import { noticeLists } from 'hooks/useFilteredData';
-import { NoticeStackParams, MainStackScreenProps } from './types';
+import { NoticeStackParams, MainStackScreenProps } from 'navigation/types';
 
 type Props = MainStackScreenProps<NoticeStackParams, 'Notices'>;
 

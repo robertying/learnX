@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent } from 'react';
 import { Platform } from 'react-native';
 import Share, { type SharedItem } from '../../modules/share';
 import { t } from 'helpers/i18n';
-import { copyFileToCache } from 'helpers/files/share';
+import { copyFileToCache } from 'services/files/share';
 import { toast } from 'components/Toast';
 import { setPendingAssignmentData } from 'data/pendingAssignment';
 

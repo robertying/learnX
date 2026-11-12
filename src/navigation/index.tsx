@@ -14,11 +14,11 @@ import {
   DetailStackParams,
   RootStackParams,
   AndroidRootStackParams,
-} from 'screens/types';
+} from './types';
 import Splash from 'components/Splash';
 import { SplitViewProvider } from './SplitView';
 import Numbers from 'constants/Numbers';
-import { trackScreen } from 'helpers/crashReporting';
+import { trackScreen } from 'services/crashReporting';
 import { reportDetailReady } from 'hooks/useDetailNavigator';
 import { useNavigationTheme } from 'theme';
 import { DetailStack } from './DetailStack';
