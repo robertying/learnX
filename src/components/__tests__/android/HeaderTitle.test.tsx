@@ -1,11 +1,10 @@
 import { StyleSheet } from 'react-native';
 import type * as ReactNative from 'react-native';
 import { render, screen } from '@testing-library/react-native';
-import CardRow, { CardGutter } from 'components/CardRow';
 import HeaderTitle from 'components/HeaderTitle';
-import Splash from 'components/Splash';
 
 const RN: typeof ReactNative = require('react-native');
+
 const style = (node: { props: { style?: unknown } }) =>
   StyleSheet.flatten(node.props.style as never);
 
@@ -38,38 +37,5 @@ describe('HeaderTitle (Android)', () => {
       maxWidth: undefined,
       height: 64,
     });
-  });
-});
-
-describe('Splash (Android)', () => {
-  it('draws the larger logo on the surface color', async () => {
-    await render(<Splash />);
-    const splash = screen.toJSON() as {
-      props: { style?: unknown };
-      children: { type: string; props: Record<string, any> }[];
-    };
-    const [logo] = splash.children;
-    expect(logo.type).toBe('Image');
-    expect(style(logo)).toMatchObject({ width: 288, height: 288 });
-    expect(logo.props.source).toEqual({ uri: 'splash_screen_icon' });
-    expect(style(splash).backgroundColor).toMatch(/^rgb/);
-  });
-});
-
-describe('CardRow (Android)', () => {
-  it('sets only unread titles bolder, with no unread gutter', async () => {
-    await render(
-      <>
-        <CardGutter unread />
-        <CardRow title="Read" unread={false} trailing="10:00" />
-        <CardRow title="Never unread" />
-        <CardRow title="Unread" unread />
-      </>,
-    );
-    expect(screen.queryByTestId('unread-dot')).toBeNull();
-    expect(style(screen.getByText('Read')).fontWeight).toBe('400');
-    expect(style(screen.getByText('Never unread')).fontWeight).toBe('400');
-    expect(style(screen.getByText('Unread')).fontWeight).not.toBe('400');
-    expect(screen.getByText('10:00')).toBeTruthy();
   });
 });

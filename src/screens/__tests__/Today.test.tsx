@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import type { Assignment } from 'data/types/state';
 import type { ClassSession } from 'helpers/schedule';
 import DeviceInfo from 'constants/DeviceInfo';
-import { getTitleOptions } from 'components/HeaderTitle';
+import { getTitleOptions } from 'navigation/options';
 import Today from 'screens/Today';
 import { getSettings, setSetting } from 'data/settings';
 
@@ -38,8 +38,8 @@ jest.mock('data/content', () => ({
   useNotices: () => query({ notices: mockNotices }),
   useFiles: () => query({ files: mockFiles }),
 }));
-jest.mock('components/HeaderTitle', () => ({
-  ...jest.requireActual('components/HeaderTitle'),
+jest.mock('navigation/options', () => ({
+  ...jest.requireActual('navigation/options'),
   getTitleOptions: jest.fn(() => ({})),
 }));
 

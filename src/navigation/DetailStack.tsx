@@ -15,14 +15,17 @@ import {
 } from './types';
 import AssignmentSubmission from 'screens/AssignmentSubmission';
 import CourseX from 'screens/CourseX';
-import { getTitleOptions } from 'components/HeaderTitle';
 import StatusView from 'components/StatusView';
 import SafeArea from 'components/SafeArea';
 import NativeSplitViewProvider from './NativeSplitView';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useNavigationTheme } from 'theme';
 import { nativeSplit } from './layout';
-import { getDetailScreenOptions, stackScreenOptions } from './options';
+import {
+  getDetailScreenOptions,
+  getTitleOptions,
+  stackScreenOptions,
+} from './options';
 import { screenLayout } from './screenLayout';
 import {
   allItemDetails,
