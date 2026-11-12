@@ -6,6 +6,7 @@ import UIKit
 ///
 /// Opening the app needs `UIApplication.shared`, which an extension isn't meant to reach; the class is marked
 /// unavailable to extensions so it compiles, and the call works at run time.
+/// It is the extension's principal class (Info.plist), so it has no storyboard.
 @available(iOSApplicationExtension, unavailable)
 final class ShareViewController: UIViewController {
   override func viewDidLoad() {
@@ -19,8 +20,7 @@ final class ShareViewController: UIViewController {
   /// Copies the file and records it (`SharedFileInbox`, in modules/share). On any failure the app still opens, with
   /// nothing new to attach.
   private func saveSharedFile() async {
-    guard let appGroup = Bundle.main.object(forInfoDictionaryKey: "LearnXAppGroup") as? String,
-      let inbox = SharedFileInbox(appGroup: appGroup),
+    guard let inbox = SharedFileInbox(bundle: .main),
       let shared = SharedFileInbox.firstFile(in: extensionContext?.inputItems as? [NSExtensionItem] ?? [])
     else {
       return

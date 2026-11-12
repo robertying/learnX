@@ -30,7 +30,7 @@ plugins {
 }
 
 // Libraries read compileSdk, minSdk and targetSdk from the ext block above.
-// Set for every library: the NDK and CMake (one with its own, expo-widgets'
+// Set for every project (the app and every library): the NDK and CMake (one with its own, expo-widgets'
 // 28.2, would make Gradle download a second NDK), and one Java and Kotlin JVM
 // target, so a library's Java and Kotlin classes agree.
 subprojects { subproject ->

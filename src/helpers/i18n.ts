@@ -10,7 +10,17 @@ import zh from 'assets/translations/zh';
 
 let locale: string | undefined;
 
-export const getLocale = () => (locale ??= getLocales()[0].languageTag);
+/**
+ * The first of the user's preferred languages the app has, English or
+ * Chinese, as iOS and Android pick the app's native strings; English when the
+ * list has neither. Traditional Chinese counts as Chinese: the app (and its
+ * native strings, through their zh-Hant fallbacks) has only Simplified.
+ */
+export const getLocale = () =>
+  (locale ??=
+    getLocales()
+      .map(({ languageTag }) => languageTag)
+      .find(tag => /^(en|zh)(-|$)/i.test(tag)) ?? 'en');
 
 let hour24: boolean | undefined;
 
@@ -65,6 +75,25 @@ export const interpolate = (
  */
 export const timeFormat = () =>
   uses24HourClock() ? 'HH:mm' : t('time12HourFormat');
+
+/**
+ * A start–end range of times. On a 12-hour clock, AM or PM is written once
+ * when both times share it, as Calendar does ("4:00–5:35 PM", "下午4:00–5:35"),
+ * so the range fits where space is tight (the lock screen widget).
+ */
+export const timeRange = (start: dayjs.ConfigType, end: dayjs.ConfigType) => {
+  const from = dayjs(start);
+  const to = dayjs(end);
+  const format = timeFormat();
+  if (uses24HourClock() || from.format('A') !== to.format('A')) {
+    return `${from.format(format)}–${to.format(format)}`;
+  }
+  // The format with its AM/PM marker ("A") and the space next to it removed.
+  const bare = format.replace(/\s*A\s*/, '');
+  return format.startsWith('A')
+    ? `${from.format(format)}–${to.format(bare)}`
+    : `${from.format(bare)}–${to.format(format)}`;
+};
 
 /**
  * The string for `key` in the app's language, with its placeholders filled.

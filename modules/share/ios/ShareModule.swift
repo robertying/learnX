@@ -16,9 +16,9 @@ public final class ShareModule: Module {
     Function("getSharedFilesDirectory", Self.getSharedFilesDirectory)
   }
 
-  /// The app's inbox, in the group the share extension shares with it.
+  /// The app's inbox, in the group the share extension shares with it (`LearnXAppGroup` in both Info.plists).
   static var inbox: SharedFileInbox? {
-    Bundle.main.bundleIdentifier.flatMap { SharedFileInbox(appGroup: "group.\($0)") }
+    SharedFileInbox(bundle: .main)
   }
 
   func startObserving() {

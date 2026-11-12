@@ -1,14 +1,10 @@
 require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
 require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
 
-platform :ios, '17.6'
-prepare_react_native_project!
+require_relative '../modules/learnx_module'
 
-# Build React Native core and its third-party deps (folly, etc.) from source:
-# patches/react-native@*.patch changes native code (RCTTextInputComponentView.mm)
-# that a prebuilt core would leave out.
-ENV['RCT_USE_RN_DEP'] = '0'
-ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
+platform :ios, LearnXModule::DEPLOYMENT_TARGET
+prepare_react_native_project!
 
 # Compile react-native-screens' experimental components (native split view).
 ENV['RNS_GAMMA_ENABLED'] = '1'
@@ -43,7 +39,9 @@ target 'learnX' do
     hermes_enabled: true
   )
 
-  pod 'FirebaseAnalytics/WithoutAdIdSupport'
+  # Analytics without the advertising identifier (Firebase 12 dropped the
+  # WithoutAdIdSupport subspec; Core is the same set without IdentitySupport).
+  pod 'FirebaseAnalytics/Core'
   pod 'FirebaseCrashlytics'
 
   # The app's own tests (learnXTests), hosted in the app.
@@ -87,6 +85,11 @@ target 'learnX' do
         config.build_settings.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'
         # The Pods-* targets only build an umbrella module, which verifies cleanly.
         config.build_settings['ENABLE_MODULE_VERIFIER'] = 'YES' if target.name.start_with?('Pods-')
+        # The modules' test bundles link ExpoModulesCore's C++ statically. With
+        # React Native's prebuilt core nothing else in them links libc++.
+        if target.name.end_with?('-Unit-Tests')
+          config.build_settings['OTHER_LDFLAGS'] = ['$(inherited)', '-lc++']
+        end
       end
     end
 
@@ -153,6 +156,24 @@ target 'learnX' do
       # never call React Native's CC wrapper, and with C_COMPILER_LAUNCHER
       # ccache can't cache explicitly built modules.
       config.build_settings['COMPILATION_CACHE_ENABLE_CACHING'] = 'YES' if config.name == 'Debug'
+    end
+
+    # React Native's prebuilt Mac Catalyst frameworks ship without the
+    # versioned macOS bundle layout, which the Catalyst build needs to embed
+    # and sign them. Fix them now, and again whenever a pod's build phase swaps
+    # in the other configuration's copy of its framework.
+    fix_catalyst_frameworks = File.expand_path('../scripts/fix-catalyst-frameworks.sh', __dir__)
+    system('bash', fix_catalyst_frameworks, installer.sandbox.root.to_s, exception: true)
+    catalyst_frameworks = {
+      'hermes-engine' => 'hermesvm',
+      'React-Core-prebuilt' => 'React',
+      'ReactNativeDependencies' => 'ReactNativeDependencies',
+    }
+    installer.pods_project.targets.each do |target|
+      framework = catalyst_frameworks[target.name] or next
+      target.shell_script_build_phases
+        .select { |phase| phase.name.to_s.include?('for the right configuration') }
+        .each { |phase| phase.shell_script += "\nbash \"${PODS_ROOT}/../../scripts/fix-catalyst-frameworks.sh\" \"${PODS_ROOT}\" #{framework}\n" }
     end
   end
 end

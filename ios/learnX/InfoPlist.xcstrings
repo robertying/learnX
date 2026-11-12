@@ -41,6 +41,12 @@
             "state" : "translated",
             "value" : "learnX 会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "learnX 会将课表和作业同步到日历。它会读取日历列表以选择写入位置，并可删除它创建的日历。"
+          }
         }
       }
     },
@@ -54,6 +60,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "learnX 会将课表和作业同步到日历，并可删除它创建的日历。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "learnX 会将课表和作业同步到日历，并可删除它创建的日历。"
@@ -75,6 +87,12 @@
             "state" : "translated",
             "value" : "拍摄照片作为作业附件。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拍摄照片作为作业附件。"
+          }
         }
       }
     },
@@ -88,6 +106,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件作为作业附件。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "选择文件作为作业附件。"
@@ -109,6 +133,12 @@
             "state" : "translated",
             "value" : "选择文件作为作业附件。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件作为作业附件。"
+          }
         }
       }
     },
@@ -122,6 +152,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件作为作业附件。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "选择文件作为作业附件。"
@@ -143,6 +179,12 @@
             "state" : "translated",
             "value" : "选择文件作为作业附件。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件作为作业附件。"
+          }
         }
       }
     },
@@ -156,6 +198,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许 learnX 访问你的麦克风。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "允许 learnX 访问你的麦克风。"
@@ -177,6 +225,12 @@
             "state" : "translated",
             "value" : "选择文件作为作业附件。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件作为作业附件。"
+          }
         }
       }
     },
@@ -190,6 +244,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将 learnX 中的图片存储到照片图库。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "将 learnX 中的图片存储到照片图库。"
@@ -211,6 +271,12 @@
             "state" : "translated",
             "value" : "选择照片作为作业附件。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择照片作为作业附件。"
+          }
         }
       }
     },
@@ -224,6 +290,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
@@ -245,6 +317,12 @@
             "state" : "translated",
             "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "learnX 会将作业同步到提醒事项，并可删除它创建的列表。"
+          }
         }
       }
     },
@@ -258,6 +336,12 @@
           }
         },
         "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择文件作为作业附件。"
+          }
+        },
+        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "选择文件作为作业附件。"

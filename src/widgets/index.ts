@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
-import { t, timeFormat } from 'helpers/i18n';
+import { t, timeRange } from 'helpers/i18n';
 import { getTargetUrl } from 'helpers/openTarget';
 import { UpcomingClass, upNextTimes } from 'helpers/upNext';
 import { deadlineUrgencyTimes } from 'helpers/assignments';
@@ -104,7 +104,7 @@ export const upNextProps = (
     location: c.location,
     start: c.start,
     end: c.end,
-    time: `${dayjs(c.start).format(timeFormat())}–${dayjs(c.end).format(timeFormat())}`,
+    time: timeRange(c.start, c.end),
     day: dayjs(c.start).format(t('widgetClassDay')),
   })),
   deadlines: deadlineProps(deadlines),

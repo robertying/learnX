@@ -22,6 +22,14 @@ for patch in patches/*.patch; do
     echo "error: $patch isn't applied to node_modules. Run 'pnpm install --force' to reinstall packages with every patch." >&2
     missing=1
   fi
+  # Expo ships some modules' Android code prebuilt (local-maven-repo), and the
+  # app links that instead of the patched sources unless the package is in
+  # expo.autolinking.android.buildFromSource (package.json).
+  if [ -d "node_modules/$package/local-maven-repo" ] && grep -q '^diff --git a/android/' "$patch" &&
+    ! node -e 'process.exit(require("./package.json").expo.autolinking.android.buildFromSource.includes(process.argv[1]) ? 0 : 1)' "$package"; then
+    echo "error: $patch changes Android code that $package ships prebuilt. Add it to expo.autolinking.android.buildFromSource in package.json." >&2
+    missing=1
+  fi
 done
 
 exit $missing

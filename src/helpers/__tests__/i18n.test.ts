@@ -1,11 +1,16 @@
+import type * as Localization from 'expo-localization';
 import dayjs from 'dayjs';
 import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import {
   formatLiteral,
   getAssignmentGradeLevelDescription,
+  getLocale,
+  isLocaleChinese,
+  resetLocale,
   t,
   tCount,
   timeFormat,
+  timeRange,
 } from 'helpers/i18n';
 import { mockClock, mockLocale } from 'test-utils/locale';
 
@@ -85,5 +90,81 @@ describe('times of day', () => {
     expect(
       evening.format(t('gradedByAtFormat', { grader: formatLiteral('Li') })),
     ).toBe('Graded by Li, Nov 12, 2026 21:30');
+  });
+});
+
+describe('timeRange', () => {
+  const at = (time: string) => dayjs(`2026-11-12T${time}:00`);
+
+  afterEach(() => {
+    mockClock.uses24hourClock = true;
+    mockLocale.current = 'en-US';
+    dayjs.locale('en');
+  });
+
+  it('shows both ends on a 24-hour clock', () => {
+    expect(timeRange(at('16:00'), at('17:35'))).toBe('16:00–17:35');
+  });
+
+  it('names a shared half of the day once in English', () => {
+    mockClock.uses24hourClock = false;
+    expect(timeRange(at('16:00'), at('17:35'))).toBe('4:00–5:35 PM');
+  });
+
+  it('names both halves of the day when they differ in English', () => {
+    mockClock.uses24hourClock = false;
+    expect(timeRange(at('11:00'), at('12:35'))).toBe('11:00 AM–12:35 PM');
+  });
+
+  it('names a shared period of the day once in Chinese', () => {
+    mockClock.uses24hourClock = false;
+    mockLocale.current = 'zh-CN';
+    dayjs.locale('zh-cn');
+    expect(timeRange(at('16:00'), at('17:35'))).toBe('下午4:00–5:35');
+    expect(timeRange(at('17:00'), at('19:35'))).toBe('下午5:00–晚上7:35');
+  });
+});
+
+describe('getLocale', () => {
+  const prefer = (...tags: string[]) => {
+    jest
+      .spyOn(
+        jest.requireMock<typeof Localization>('expo-localization'),
+        'getLocales',
+      )
+      .mockReturnValue(
+        tags.map(languageTag => ({ languageTag })) as ReturnType<
+          typeof Localization.getLocales
+        >,
+      );
+    resetLocale();
+  };
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+    resetLocale();
+  });
+
+  it.each([
+    [['en-US'], 'en-US', false],
+    [['en-GB'], 'en-GB', false],
+    [['zh-Hans-CN'], 'zh-Hans-CN', true],
+    [['zh-Hant-HK'], 'zh-Hant-HK', true],
+    [['zh-Hant-TW'], 'zh-Hant-TW', true],
+    // The first language the app has, as the OS picks it.
+    [['ja-JP', 'zh-Hans-CN', 'en-US'], 'zh-Hans-CN', true],
+    [['fr-FR', 'en-GB'], 'en-GB', false],
+    // Neither: English.
+    [['ja-JP', 'ko-KR'], 'en', false],
+    [[], 'en', false],
+  ])('%j uses %s', (tags, locale, chinese) => {
+    prefer(...tags);
+    expect(getLocale()).toBe(locale);
+    expect(isLocaleChinese()).toBe(chinese);
+  });
+
+  it("doesn't take a language that only starts with en or zh", () => {
+    prefer('enx', 'zha', 'zh-CN');
+    expect(getLocale()).toBe('zh-CN');
   });
 });

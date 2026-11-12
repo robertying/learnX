@@ -8,43 +8,6 @@ version = '1.0.0'
 
 android {
   namespace = "io.robertying.learnx.share"
-
-  buildTypes {
-    debug {
-      // createDebugUnitTestCoverageReport writes JaCoCo's report for the unit tests.
-      enableUnitTestCoverage = true
-    }
-  }
-
-  testOptions {
-    unitTests.includeAndroidResources = true
-  }
 }
 
-dependencies {
-  testImplementation("junit:junit:${rootProject.ext.junitVersion}")
-  testImplementation("org.robolectric:robolectric:${rootProject.ext.robolectricVersion}")
-  testImplementation("io.mockk:mockk:${rootProject.ext.mockkVersion}")
-}
-
-// Robolectric runs Android 15 and later only on Java 21, and Android 16 reaches
-// into the JDK's file descriptor internals.
-tasks.withType(Test).configureEach {
-  javaLauncher = javaToolchains.launcherFor {
-    languageVersion = JavaLanguageVersion.of(21)
-  }
-  jvmArgs "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED", "--add-opens=java.base/java.io=ALL-UNNAMED"
-  testLogging {
-    exceptionFormat = "full"
-  }
-}
-
-// JaCoCo (which AGP adds for the coverage report) also counts the classes
-// Robolectric's sandbox loads.
-plugins.withId("jacoco") {
-  tasks.withType(Test).configureEach { test ->
-    def jacoco = test.extensions.getByType(JacocoTaskExtension)
-    jacoco.includeNoLocationClasses = true
-    jacoco.excludes = ["jdk.internal.*"]
-  }
-}
+apply from: "../../unit-tests.gradle"

@@ -19,7 +19,7 @@ set -euo pipefail
 
 # Android sources and what they build from: native code, patches, the JS
 # dependencies, app config and the Node version.
-android='android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$'
+android='android/|modules/([^/]+/(android/|expo-module\.config\.json$)|unit-tests\.gradle$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$'
 shared='scripts/changed-files\.sh$|\.github/actions/setup-js/'
 case "${1:-}" in
 android-unit)

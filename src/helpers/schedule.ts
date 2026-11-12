@@ -7,7 +7,7 @@ import {
   semesterWeek,
 } from '@robertying/thu-learn-lib';
 import type { Course } from 'data/types/state';
-import { timeFormat } from './i18n';
+import { timeRange } from './i18n';
 import { beijingDate, beijingTime } from './serverTime';
 
 /** One class meeting. Times are ms since the epoch. */
@@ -146,8 +146,6 @@ export const currentAndNext = (sessions: ClassSession[], now: number) => ({
   next: sessions.find(s => s.start > now),
 });
 
-const time = (ms: number) => dayjs(ms).format(timeFormat());
-
 /**
  * Time and room on the second line, as Calendar lists events, so the course
  * name gets the row's full width. The room is as the course lists it
@@ -155,6 +153,6 @@ const time = (ms: number) => dayjs(ms).format(timeFormat());
  * calendar export adds for maps.
  */
 export const classDetails = (session: ClassSession) =>
-  [`${time(session.start)}–${time(session.end)}`, session.location.trim()]
+  [timeRange(session.start, session.end), session.location.trim()]
     .filter(Boolean)
     .join(' · ');

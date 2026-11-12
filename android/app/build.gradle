@@ -18,17 +18,9 @@ java {
     }
 }
 
+// The NDK, CMake and Java settings come from the root build.gradle, which sets
+// them for every project.
 android {
-    ndkVersion = rootProject.ext.ndkVersion
-    externalNativeBuild {
-        cmake {
-            version = rootProject.ext.cmakeVersion
-        }
-    }
-    compileOptions {
-        sourceCompatibility = rootProject.ext.javaVersion
-        targetCompatibility = rootProject.ext.javaVersion
-    }
     compileSdk = rootProject.ext.compileSdkVersion
 
     namespace = "io.robertying.learnx"
@@ -42,8 +34,9 @@ android {
     }
 
     androidResources {
-        localeFilters += ["en", "en-rUS", "zh", "zh-rCN"]
-        generateLocaleConfig = true
+        // Chinese strings are Simplified (values-zh); values-b+zh+Hant repeats
+        // them for Traditional Chinese, which would fall back to English.
+        localeFilters += ["en", "zh", "b+zh+Hant"]
     }
 
     splits {
