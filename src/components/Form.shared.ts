@@ -191,8 +191,13 @@ export interface FormTextFieldProps {
    * each key lands.
    */
   format?: (text: string) => string;
-  /** Shown when empty, and read as the field's name. */
+  /** Shown when empty. */
   placeholder?: string;
+  /**
+   * The field's name for screen readers, which the placeholder isn't once
+   * text is typed (or when it only says "Optional").
+   */
+  label?: string;
   /** Several lines: starts a few lines tall and grows as text is typed. */
   multiline?: boolean;
   /**

@@ -238,6 +238,8 @@ const FormRow: React.FC<
     titleColor?: string;
     /** Crossed out. */
     struck?: boolean;
+    /** A state the row shows only visually (a badge), read after the title. */
+    spokenState?: string;
     trailing?: ReactNode;
   }
 > = ({
@@ -250,6 +252,7 @@ const FormRow: React.FC<
   action,
   titleColor,
   struck,
+  spokenState,
   detail,
   detailTint,
   trailing,
@@ -267,6 +270,8 @@ const FormRow: React.FC<
     : subtitle;
   // Over: the text in the secondary color, read out as over.
   const contentColor = done ? colors.outline : titleColor;
+  // What the row shows only by its look (dimmed, crossed out, a badge).
+  const state = done ? t('a11yDone') : struck ? t('a11yStruck') : spokenState;
   const ends = [
     detail && !stackDetail ? (
       <Text
@@ -310,15 +315,13 @@ const FormRow: React.FC<
         <Text
           color={contentColor}
           style={struck ? { textDecoration: 'lineThrough' } : undefined}
-          modifiers={
-            done
-              ? [
-                  semantics({
-                    contentDescription: `${title}, ${t('a11yDone')}`,
-                  }),
-                ]
-              : undefined
-          }
+          // Always set: a row that loses its state must read its title alone
+          // again, which leaving the modifier out wouldn't undo.
+          modifiers={[
+            semantics({
+              contentDescription: state ? `${title}, ${state}` : title,
+            }),
+          ]}
         >
           {title}
         </Text>
@@ -402,6 +405,7 @@ export const FormLink: React.FC<FormLinkProps> = ({
   <FormRow
     {...row}
     action={clickable(onPress)}
+    spokenState={badge ? t('a11yNewBadge') : undefined}
     trailing={badge ? <Badge /> : null}
   />
 );
@@ -481,7 +485,8 @@ export const FormFile: React.FC<FormFileProps> = ({
  * the underline, so it reads as a row of the section.
  */
 export const FormTextField: React.FC<FormTextFieldProps> = props => {
-  const { placeholder, multiline, plain, disabled, testID, position } = props;
+  const { placeholder, label, multiline, plain, disabled, testID, position } =
+    props;
   const colors = useMaterialColors();
   const text = useNativeState(props.value);
   useFieldText(text, props);
@@ -504,7 +509,12 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
         unfocusedIndicatorColor: 'transparent',
         disabledIndicatorColor: 'transparent',
       }}
-      modifiers={[fillMaxWidth(), rowShape(position), ...withTestID(testID)]}
+      modifiers={[
+        fillMaxWidth(),
+        rowShape(position),
+        ...withTestID(testID),
+        ...(label ? [semantics({ contentDescription: label })] : []),
+      ]}
     >
       {placeholder ? (
         <TextField.Placeholder>

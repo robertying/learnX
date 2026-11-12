@@ -178,10 +178,11 @@ const Search: React.FC<Props> = ({ navigation, route }) => {
             renderSectionHeader={({ section: { title, data } }) =>
               data.length ? (
                 <Paragraph
+                  accessibilityRole="header"
                   style={[
                     styles.header,
                     {
-                      color: theme.colors.outline,
+                      color: theme.colors.onSurfaceMedium,
                       backgroundColor: theme.colors.background,
                     },
                   ]}

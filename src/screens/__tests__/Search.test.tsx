@@ -107,9 +107,9 @@ describe('Search', () => {
   it('groups matches by kind under section headers', async () => {
     const { type } = await setup();
     await type('midterm');
-    expect(screen.getByText('Notices')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Notices' })).toBeTruthy();
     expect(screen.getByText('Midterm room change')).toBeTruthy();
-    expect(screen.getByText('Assignments')).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'Assignments' })).toBeTruthy();
     expect(screen.getByText('Midterm review problems')).toBeTruthy();
     // No file matches, so no Files header
     expect(screen.queryByText('Files')).toBeNull();

@@ -4,7 +4,7 @@ import { render, screen } from '@testing-library/react-native';
 import { cardAccessibilityLabel, CardPill } from 'components/CardRow';
 import Splash from 'components/Splash';
 import { Headline, Paragraph, Title } from 'components/Text';
-import { brandColors } from 'theme';
+import { BrandLightTheme, brandColors } from 'theme';
 
 const RN: typeof ReactNative = require('react-native');
 const style = (node: { props: { style?: unknown } }) =>
@@ -33,10 +33,10 @@ describe('Splash (iOS)', () => {
 });
 
 describe('CardPill', () => {
-  it('draws the system color over a light tint of it', async () => {
+  it('writes in the text shade of the system color, over a light tint of it', async () => {
     await render(<CardPill tone="orange">Due soon</CardPill>);
     expect(style(screen.getByText('Due soon')).color).toEqual(
-      PlatformColor('systemOrange'),
+      BrandLightTheme.colors.onStatusContainer.orange,
     );
     expect(style(screen.getByTestId('pill-tint'))).toMatchObject({
       backgroundColor: PlatformColor('systemOrange'),

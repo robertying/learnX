@@ -52,9 +52,26 @@ export const Text = ({
   testID?: string;
 }) => <RNText testID={testID}>{children}</RNText>;
 
-export const Image = ({ systemName }: { systemName: string }) => (
-  <View testID={`icon-${systemName}`} />
-);
+export const Image = ({
+  systemName,
+  modifiers,
+}: {
+  systemName: string;
+  modifiers?: unknown[];
+}) => <View testID={`icon-${systemName}`} {...{ modifiers }} />;
+
+type ModifierList = (
+  | { disabled?: boolean; modifier?: string; args?: unknown[] }
+  | undefined
+)[];
+
+/** Whether `accessibilityAddTraits` gave the view this trait. */
+const hasTrait = (modifiers: ModifierList | undefined, trait: string) =>
+  !!modifiers?.some(
+    m =>
+      m?.modifier === 'accessibilityAddTraits' &&
+      (m.args?.[0] as string[] | undefined)?.includes(trait),
+  );
 
 export const ProgressView = ({
   value,
@@ -135,7 +152,7 @@ export const Button = ({
   onPress?: () => void;
   role?: string;
   testID?: string;
-  modifiers?: ({ disabled?: boolean } | undefined)[];
+  modifiers?: ModifierList;
   children?: ReactNode;
 }) => {
   const isDisabled = !!modifiers?.some(modifier => modifier?.disabled);
@@ -143,7 +160,10 @@ export const Button = ({
     <Pressable
       accessibilityRole="button"
       accessibilityHint={role}
-      accessibilityState={{ disabled: isDisabled }}
+      accessibilityState={{
+        disabled: isDisabled,
+        selected: hasTrait(modifiers, 'isSelected'),
+      }}
       disabled={isDisabled}
       testID={testID}
       onPress={onPress}
@@ -207,7 +227,12 @@ export const TextField = ({
   onTextChange?: (text: string) => void;
   testID?: string;
   modifiers?: (
-    | { disabled?: boolean; modifier?: string; args?: unknown[] }
+    | {
+        disabled?: boolean;
+        accessibilityLabel?: string;
+        modifier?: string;
+        args?: unknown[];
+      }
     | undefined
   )[];
   ref?: Ref<{ focus: () => void }>;
@@ -222,7 +247,11 @@ export const TextField = ({
     <RNTextInput
       value={value}
       placeholder={placeholder}
-      accessibilityLabel={placeholder}
+      // SwiftUI names a field by its placeholder unless it's given a label
+      accessibilityLabel={
+        modifiers?.find(modifier => modifier?.accessibilityLabel)
+          ?.accessibilityLabel ?? placeholder
+      }
       secureTextEntry={secure}
       editable={!modifiers?.some(modifier => modifier?.disabled)}
       onChangeText={typed => {

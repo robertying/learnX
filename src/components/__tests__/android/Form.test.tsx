@@ -45,6 +45,8 @@ describe('Form (Android)', () => {
     expect(screen.getByText('Pick the semester to show')).toBeTruthy();
     expect(screen.getByTestId('icon-calendar')).toBeTruthy();
     expect(screen.getByTestId('badge')).toBeTruthy();
+    // TalkBack reads the badge with the title
+    expect(screen.getByLabelText('Semester, New')).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('semester'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
@@ -348,9 +350,23 @@ describe('Form (Android)', () => {
     expect(style('Sync').color).toBeUndefined();
   });
 
+  it('names a text field for screen readers by its label', async () => {
+    await render(
+      <FormSection>
+        <FormTextField
+          value=""
+          onChangeText={jest.fn()}
+          placeholder="Optional"
+          label="Content"
+        />
+      </FormSection>,
+    );
+    expect(screen.getByLabelText('Content')).toBeTruthy();
+  });
+
   it('crosses out a removed file, which still opens', async () => {
     const open = jest.fn();
-    await render(
+    const view = await render(
       <FormSection>
         <FormFile title="old.pdf" struck onPress={open} testID="old" />
       </FormSection>,
@@ -359,8 +375,19 @@ describe('Form (Android)', () => {
       color: 'onSurfaceVariant',
       textDecorationLine: 'line-through',
     });
+    // The line through isn't read out
+    expect(
+      screen.getByLabelText('old.pdf, Will be replaced or removed'),
+    ).toBeTruthy();
     await userEvent.setup().press(screen.getByTestId('old'));
     expect(open).toHaveBeenCalled();
+    // Kept after all: the title alone again
+    await view.rerender(
+      <FormSection>
+        <FormFile title="old.pdf" onPress={open} testID="old" />
+      </FormSection>,
+    );
+    expect(screen.getByLabelText('old.pdf')).toBeTruthy();
   });
 
   it('writes several lines, or plain text without capitals or corrections', async () => {

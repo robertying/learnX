@@ -68,4 +68,69 @@ describe('on iOS and Mac', () => {
       linkColor: theme.brandColors.dark,
     });
   });
+
+  describe('status text', () => {
+    // UIKit's system colors (light, dark), which pills tint with.
+    const system: Record<theme.StatusTone, [string, string]> = {
+      red: ['#FF3B30', '#FF453A'],
+      orange: ['#FF9500', '#FF9F0A'],
+      yellow: ['#FFCC00', '#FFD60A'],
+      green: ['#34C759', '#30D158'],
+      blue: ['#007AFF', '#0A84FF'],
+      grey: ['#8E8E93', '#8E8E93'],
+    };
+    const channels = (hex: string) =>
+      [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+    // `color` at `alpha` over `under`, as the pill's tint draws.
+    const over = (color: string, under: string, alpha: number) =>
+      `#${channels(color)
+        .map((c, i) =>
+          Math.round(c * alpha + channels(under)[i] * (1 - alpha))
+            .toString(16)
+            .padStart(2, '0'),
+        )
+        .join('')}`;
+    const luminance = (hex: string) => {
+      const [r, g, b] = channels(hex).map(c => {
+        const v = c / 255;
+        return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const contrast = (a: string, b: string) => {
+      const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+      return (hi + 0.05) / (lo + 0.05);
+    };
+    const tones = Object.keys(system) as theme.StatusTone[];
+    const tint = theme.statusContainerOpacity;
+
+    it.each(tones)('keeps %s text readable on its pill', tone => {
+      const text = theme.appleStatusText[tone];
+      const [light, dark] = system[tone];
+      // Light: on the grouped gray, the darkest background a pill sits on
+      expect(
+        contrast(text.light, over(light, '#F2F2F7', tint)),
+      ).toBeGreaterThanOrEqual(4.5);
+      // Dark: list cards are on black
+      expect(
+        contrast(text.dark, over(dark, '#000000', tint)),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(text.highContrastDark, over(dark, '#000000', tint)),
+      ).toBeGreaterThanOrEqual(4.5);
+      // Dark mode keeps the system color itself
+      expect(text.dark).toBe(dark);
+    });
+
+    it('draws status text in those shades, following the appearance', () => {
+      expect(colors.onStatusContainer.green).toEqual(
+        RN.DynamicColorIOS({
+          light: '#1F7534',
+          dark: '#30D158',
+          highContrastLight: '#1F7534',
+          highContrastDark: '#30DB5B',
+        }),
+      );
+    });
+  });
 });
