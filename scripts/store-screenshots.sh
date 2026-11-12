@@ -60,12 +60,7 @@ duo-half-open)
   posture=halfFold
   ;;
 duo-open) platform=ios flow=iphone folder=ios/iphone-duo suffix=-open posture=flat ;;
-ipad)
-  platform=ios flow=ipad folder=ios/ipad
-  # The login subflow sets this orientation (scripts/e2e.sh), after any the
-  # flow set.
-  export E2E_ORIENTATION=LANDSCAPE_LEFT
-  ;;
+ipad) platform=ios flow=ipad folder=ios/ipad ;;
 mac) platform=mac folder=macos/windows ;;
 android-phone)
   platform=android flow=android_phone folder=android/phone
