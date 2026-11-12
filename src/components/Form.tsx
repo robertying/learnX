@@ -63,12 +63,12 @@ import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
+import { useFieldText } from 'hooks/useFieldText';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
 import {
   parseNumberInput,
   sectionRows,
-  useFieldText,
   type FormButtonProps,
   type FormFileProps,
   type FormIcon,
