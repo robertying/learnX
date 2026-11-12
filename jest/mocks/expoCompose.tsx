@@ -35,6 +35,7 @@ type Modifier =
       selected?: boolean;
       disabled?: boolean;
       contentType?: string;
+      accessibilityLabel?: string;
     }
   | undefined;
 
@@ -290,6 +291,7 @@ const Field = ({
           contentType: fromModifiers(modifiers).contentType,
         }}
         testID={fromModifiers(modifiers).testID}
+        accessibilityLabel={fromModifiers(modifiers).accessibilityLabel}
       />
       {children}
     </View>

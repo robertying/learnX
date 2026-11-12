@@ -65,6 +65,15 @@ describe('getWebViewTemplate', () => {
     expect(dark.length).toBeLessThan(10_000);
   });
 
+  it('tells screen readers the language of the content', () => {
+    expect(getWebViewTemplate('<p>Midterm moved</p>')).toContain(
+      '<html lang="en">',
+    );
+    expect(getWebViewTemplate('<p>期中考试改期</p>')).toContain(
+      '<html lang="zh-Hans">',
+    );
+  });
+
   it('replaces \\mbox, which KaTeX does not support', () => {
     expect(getWebViewTemplate('$$\\mbox{a}$$')).toContain('$$\\text{a}$$');
   });

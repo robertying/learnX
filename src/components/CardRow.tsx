@@ -1,11 +1,23 @@
 import { ReactNode } from 'react';
-import { ColorValue, Platform, StyleSheet, View } from 'react-native';
+import {
+  ColorValue,
+  Platform,
+  StyleSheet,
+  View,
+  useWindowDimensions,
+} from 'react-native';
 import SystemIcon from 'components/SystemIcon';
 import { Caption, Headline, Paragraph, Text } from 'components/Text';
 import { t } from 'helpers/i18n';
 import { StatusTone, statusContainerOpacity, useTheme } from 'theme';
 
 const isAndroid = Platform.OS === 'android';
+
+/**
+ * Titles get one line, as in Mail, except at accessibility text sizes, where
+ * one line holds only a few characters.
+ */
+const useTitleLines = () => (useWindowDimensions().fontScale >= 1.5 ? 3 : 1);
 // Mail's first line is Subheadline; a Material three-line item's overline is
 // small (bodySmall).
 const metaVariant = isAndroid ? 'footnote' : 'subheadline';
@@ -42,6 +54,7 @@ const CardRow: React.FC<CardRowProps> = ({
   preview,
 }) => {
   const theme = useTheme();
+  const titleLines = useTitleLines();
 
   const meta = (
     <View style={styles.meta}>
@@ -74,7 +87,7 @@ const CardRow: React.FC<CardRowProps> = ({
         ) : null}
         <View style={styles.firstLine}>
           <Headline
-            numberOfLines={1}
+            numberOfLines={titleLines}
             style={[styles.title, !(isAndroid && unread) && styles.regular]}
           >
             {title}

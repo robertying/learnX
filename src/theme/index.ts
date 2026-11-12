@@ -1,5 +1,6 @@
 import {
   ColorValue,
+  DynamicColorIOS,
   Platform,
   PlatformColor,
   useColorScheme,
@@ -224,6 +225,37 @@ type ColorRoles = Widen<MaterialColors>;
 const system = (name: string) => PlatformColor(name);
 
 /**
+ * The status hues as text on Apple platforms, in pills, swipe buttons and
+ * Form rows. The system colors are too light to read as text in light mode
+ * (orange and green are about 2:1 on white), so light mode uses Apple's
+ * Increase Contrast shade of each, darkened just enough for 4.5:1 on its own
+ * 15% tint over the grouped background (tested in `__tests__/hooks.test.ts`).
+ * Dark mode keeps the system color's own value, and Increase Contrast its
+ * accessible dark shade.
+ */
+export const appleStatusText: Record<
+  StatusTone,
+  { light: string; dark: string; highContrastDark: string }
+> = {
+  red: { light: '#C40013', dark: '#FF453A', highContrastDark: '#FF6961' },
+  orange: { light: '#BF3100', dark: '#FF9F0A', highContrastDark: '#FFB340' },
+  yellow: { light: '#AB4D00', dark: '#FFD60A', highContrastDark: '#FFD426' },
+  green: { light: '#1F7534', dark: '#30D158', highContrastDark: '#30DB5B' },
+  blue: { light: '#0040DD', dark: '#0A84FF', highContrastDark: '#409CFF' },
+  grey: { light: '#646468', dark: '#8E8E93', highContrastDark: '#AEAEB2' },
+};
+
+const statusText = (tone: StatusTone): ColorValue => {
+  const { light, dark, highContrastDark } = appleStatusText[tone];
+  return DynamicColorIOS({
+    light,
+    dark,
+    highContrastLight: light,
+    highContrastDark,
+  });
+};
+
+/**
  * iOS, iPadOS and Mac: UIKit's dynamic system colors, which follow dark mode
  * and Increase Contrast by themselves, and the brand color as the tint.
  */
@@ -274,7 +306,8 @@ const buildAppleColors = (dark: boolean): ColorRoles => {
     onStatus: { ...mapTones(() => 'white'), yellow: 'black' } as ToneColors,
     // Drawn at `statusContainerOpacity` over the surface.
     statusContainer: tones,
-    onStatusContainer: tones,
+    // Text and icons on that tint, and status text on a row.
+    onStatusContainer: mapTones(statusText),
   };
 };
 
