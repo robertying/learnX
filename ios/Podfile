@@ -39,7 +39,9 @@ target 'learnX' do
     hermes_enabled: true
   )
 
-  pod 'FirebaseAnalytics/WithoutAdIdSupport'
+  # Analytics without the advertising identifier (Firebase 12 dropped the
+  # WithoutAdIdSupport subspec; Core is the same set without IdentitySupport).
+  pod 'FirebaseAnalytics/Core'
   pod 'FirebaseCrashlytics'
 
   # The app's own tests (learnXTests), hosted in the app.
@@ -83,6 +85,11 @@ target 'learnX' do
         config.build_settings.delete 'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES'
         # The Pods-* targets only build an umbrella module, which verifies cleanly.
         config.build_settings['ENABLE_MODULE_VERIFIER'] = 'YES' if target.name.start_with?('Pods-')
+        # The modules' test bundles link ExpoModulesCore's C++ statically. With
+        # React Native's prebuilt core nothing else in them links libc++.
+        if target.name.end_with?('-Unit-Tests')
+          config.build_settings['OTHER_LDFLAGS'] = ['$(inherited)', '-lc++']
+        end
       end
     end
 
