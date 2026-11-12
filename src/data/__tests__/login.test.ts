@@ -35,8 +35,15 @@ jest.mock('services/surfaces', () => ({
 jest.mock('services/files/downloads', () => ({
   removeFileDir: jest.fn(async () => {}),
 }));
+let mockShouldRetry: ((error: unknown) => boolean) | undefined;
 jest.mock('helpers/retry', () => ({
-  retry: (fn: () => Promise<unknown>) => fn(),
+  retry: (
+    fn: () => Promise<unknown>,
+    options?: { shouldRetry?: (error: unknown) => boolean },
+  ) => {
+    mockShouldRetry = options?.shouldRetry;
+    return fn();
+  },
 }));
 
 const sso = {
@@ -149,6 +156,37 @@ describe('login', () => {
     expect(getAuth().errorDetail).toBeNull();
     await done;
     expect(getAuth().errorDetail).toBe('Wrong password');
+  });
+
+  it('shows no detail for an answer it cannot write out', async () => {
+    const extra: Record<string, unknown> = {};
+    extra.self = extra;
+    jest
+      .mocked(loginWithFingerPrint)
+      .mockRejectedValueOnce({ reason: FailReason.ERROR_FETCH_FROM_ID, extra });
+    await login(sso);
+    expect(getAuth()).toMatchObject({ failure: 'rejected', errorDetail: null });
+  });
+
+  it('retries only a failure that may pass', async () => {
+    await login(sso);
+    expect(mockShouldRetry?.({ reason: FailReason.ERROR_FETCH_FROM_ID })).toBe(
+      true,
+    );
+    expect(mockShouldRetry?.({ reason: FailReason.NETWORK_ERROR })).toBe(false);
+    expect(mockShouldRetry?.({ reason: FailReason.BAD_CREDENTIAL })).toBe(
+      false,
+    );
+  });
+
+  it('stays logged in for the session when the login cannot be saved', async () => {
+    const SecureStore = require('expo-secure-store');
+    jest
+      .spyOn(SecureStore, 'setItemAsync')
+      .mockRejectedValueOnce(new Error('keychain'));
+    await login(sso);
+    expect(getAuth().loggedIn).toBe(true);
+    expect(getCredentials()).toEqual(sso);
   });
 
   it('records a login that got no answer as offline', async () => {
