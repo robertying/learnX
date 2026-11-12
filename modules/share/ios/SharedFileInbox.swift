@@ -27,6 +27,17 @@ struct SharedFileInbox {
     self.init(defaults: defaults, directory: container.appendingPathComponent("Library/Caches", isDirectory: true))
   }
 
+  /// The inbox of the app group the bundle's Info.plist names (`LearnXAppGroup`), or nil without one.
+  init?(bundle: Bundle) {
+    guard let appGroup = bundle.object(forInfoDictionaryKey: Self.appGroupKey) as? String else {
+      return nil
+    }
+    self.init(appGroup: appGroup)
+  }
+
+  /// The Info.plist key of the app group, in the app's and the share extension's.
+  static let appGroupKey = "LearnXAppGroup"
+
   /// The first attachment that has a file representation, with its most specific type.
   static func firstFile(in items: [NSExtensionItem]) -> (provider: NSItemProvider, type: UTType)? {
     for provider in items.flatMap({ $0.attachments ?? [] }) {

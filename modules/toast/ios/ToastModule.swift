@@ -68,20 +68,16 @@ final class ToastBackgroundView: ExpoView {
   }
 
   private static var glassAvailable: Bool {
-#if compiler(>=6.2)  // Xcode 26
     if #available(iOS 26.0, *) {
       return true
     }
-#endif
     return false
   }
 
   private func makeEffect() -> UIVisualEffect {
-#if compiler(>=6.2)  // Xcode 26
     if #available(iOS 26.0, *), usesGlass {
       return UIGlassEffect()
     }
-#endif
     return UIBlurEffect(style: .systemThickMaterial)
   }
 

@@ -8,7 +8,7 @@ To change one: `pnpm patch <pkg>@<version>`, edit the folder it prints, then
 `pnpm patch-commit <folder>`. Paths in a patch are relative to the package
 folder. `scripts/check-patches.sh` fails the iOS and Android builds when a
 patch isn't applied to `node_modules` (`pnpm install --force` fixes that; then run `pod install` in `ios/` again,
-since the reinstall wipes the `sqlite3.h` that expo-sqlite's pod copies in).
+since the reinstall wipes the `sqlite3.h` that expo-sqlite's pod copies in). It also fails when a patch changes Android code that Expo ships prebuilt (`local-maven-repo` in the package) and the package isn't in `expo.autolinking.android.buildFromSource` in `package.json`, since the app would link the unpatched build.
 
 Before bumping a patched package, check whether the new release fixes the
 issue upstream; drop the patch if so.

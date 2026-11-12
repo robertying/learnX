@@ -122,6 +122,12 @@ func temporaryFile(named name: String, contents: String = "contents") throws -> 
     // The test host has no app group entitlement.
     #expect(SharedFileInbox(appGroup: "group.io.robertying.learnx.tests") == nil)
   }
+
+  @Test func readsTheAppGroupFromInfoPlist() {
+    // The test host's Info.plist names no app group.
+    #expect(Bundle.main.object(forInfoDictionaryKey: SharedFileInbox.appGroupKey) == nil)
+    #expect(SharedFileInbox(bundle: .main) == nil)
+  }
 }
 
 @Suite struct SharedFileNameTests {
