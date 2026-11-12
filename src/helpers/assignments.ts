@@ -83,23 +83,31 @@ export const deadlineTone = {
 export const isDueSoon = (deadline: string, now?: dayjs.ConfigType) =>
   deadlineUrgency(deadline, now) !== undefined;
 
+const dayTimeKeys = {
+  due: ['deadlineToday', 'deadlineTomorrow', 'deadlineAt'],
+  lateCloses: ['lateClosesToday', 'lateClosesTomorrow', 'lateClosesAt'],
+} as const;
+
 /**
- * The deadline's day and time from the point of view of `now`: "today at
- * 23:59", "tomorrow at 23:59" or "Nov 12 23:59", for text that stays put
- * once written, like a reminder.
+ * The deadline's day and time from the point of view of `now`: "due today at
+ * 23:59", "due tomorrow at 23:59" or "due Nov 12 23:59" (or when late
+ * submission closes, with `lateCloses`), for text that stays put once
+ * written, like a reminder.
  */
 export const deadlineDayTime = (
   deadline: dayjs.ConfigType,
   now?: dayjs.ConfigType,
+  phrase: keyof typeof dayTimeKeys = 'due',
 ) => {
+  const [today, tomorrow, at] = dayTimeKeys[phrase];
   const n = dayjs(now);
   const dl = dayjs(deadline);
   const time = dl.format(timeFormat());
   return dl.isSame(n, 'day')
-    ? t('deadlineToday', { time })
+    ? t(today, { time })
     : dl.isSame(n.add(1, 'day'), 'day')
-      ? t('deadlineTomorrow', { time })
-      : t('deadlineAt', { date: dl.format(t('shortDateTimeFormat')) });
+      ? t(tomorrow, { time })
+      : t(at, { date: dl.format(t('shortDateTimeFormat')) });
 };
 
 /**

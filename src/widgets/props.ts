@@ -9,11 +9,10 @@ export interface DeadlineWidgetProps {
     url: string;
     /**
      * From when the due date is orange and red, in milliseconds
-     * (`deadlineUrgencyTimes` in helpers/assignments). Missing from props
-     * sent by older versions.
+     * (`deadlineUrgencyTimes` in helpers/assignments).
      */
-    soonFrom?: number;
-    urgentFrom?: number;
+    soonFrom: number;
+    urgentFrom: number;
   })[];
   /** How many open assignments there are in all, listed or not. */
   total: number;

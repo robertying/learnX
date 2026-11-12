@@ -67,9 +67,9 @@ function UpNextWidget(
   // helpers/assignments): red under a day left, orange when it's due by the
   // end of tomorrow.
   const dueColor = (d: UpNextWidgetProps['deadlines'][number]) =>
-    d.urgentFrom !== undefined && now > d.urgentFrom
+    now > d.urgentFrom
       ? colors.red
-      : d.soonFrom !== undefined && now >= d.soonFrom
+      : now >= d.soonFrom
         ? colors.orange
         : undefined;
   const classes = (props.classes ?? []).filter(c => c.end > now);

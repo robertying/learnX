@@ -45,7 +45,12 @@ describe('brand color', () => {
   });
 
   it('is what the widgets use', () => {
-    for (const widget of ['DeadlinesIOS', 'DeadlinesAndroid']) {
+    for (const widget of [
+      'DeadlinesIOS',
+      'DeadlinesAndroid',
+      'UpNextIOS',
+      'UpNextAndroid',
+    ]) {
       const source = read(`src/widgets/${widget}.tsx`);
       expect(source).toContain(`'${brandColors.light}'`);
       expect(source).toContain(`'${brandColors.dark}'`);

@@ -20,7 +20,8 @@ export interface SpotlightOpenedItem {
   id: string;
 }
 
-export interface UpcomingDeadline {
+/** An open assignment, as the "Next Deadline" App Intent stores it. */
+export interface IntentDeadline {
   id: string;
   title: string;
   courseName: string;
@@ -28,7 +29,8 @@ export interface UpcomingDeadline {
   deadline: number;
 }
 
-export interface UpcomingClass {
+/** A class still ahead, as the "Next Class" App Intent stores it. */
+export interface IntentClass {
   courseName: string;
   location: string;
   /** Milliseconds since the epoch. */
@@ -60,16 +62,12 @@ declare class SpotlightModule extends NativeModule<SpotlightEvents> {
    */
   takeOpenedItem(): SpotlightOpenedItem | null;
   /** Saves the open assignments for the "Next Deadline" App Intent. */
-  setUpcomingDeadlines(deadlines: UpcomingDeadline[]): void;
-  /**
-   * Saves the classes still ahead for the "Next Class" App Intent. Missing in
-   * an app built before the intent was added.
-   */
-  setUpcomingClasses?(classes: UpcomingClass[]): void;
+  setUpcomingDeadlines(deadlines: IntentDeadline[]): void;
+  /** Saves the classes still ahead for the "Next Class" App Intent. */
+  setUpcomingClasses(classes: IntentClass[]): void;
 }
 
 /**
- * Core Spotlight on iOS and Mac. Null on Android, in Jest, and in an app built
- * before the module was added.
+ * Core Spotlight on iOS and Mac. Null on Android and in Jest.
  */
 export default requireOptionalNativeModule<SpotlightModule>('Spotlight');

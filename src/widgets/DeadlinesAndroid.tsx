@@ -67,9 +67,9 @@ function DeadlinesWidget(
   // helpers/assignments): red under a day left, orange when it's due by the
   // end of tomorrow.
   const dueColor = (d: DeadlineWidgetProps['deadlines'][number]) =>
-    d.urgentFrom !== undefined && now > d.urgentFrom
+    now > d.urgentFrom
       ? colors.red
-      : d.soonFrom !== undefined && now >= d.soonFrom
+      : now >= d.soonFrom
         ? colors.orange
         : undefined;
   const all = props.deadlines ?? [];

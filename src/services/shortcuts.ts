@@ -53,7 +53,7 @@ export function saveUpcomingClasses(classes: UpcomingClass[]) {
     return;
   }
   try {
-    Spotlight.setUpcomingClasses?.(items);
+    Spotlight.setUpcomingClasses(items);
     savedClasses = key;
   } catch (error) {
     if (__DEV__) {
