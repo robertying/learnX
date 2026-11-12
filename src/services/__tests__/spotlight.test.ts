@@ -5,15 +5,13 @@ import { clearSpotlight, updateSpotlight } from 'services/spotlight';
 jest.mock('modules/spotlight', () => ({
   __esModule: true,
   default: {
-    replaceItems: jest.fn(async () => {}),
-    updateItems: jest.fn(async () => {}),
+    syncItems: jest.fn(async () => {}),
     removeAllItems: jest.fn(async () => {}),
   },
 }));
 
 const Spotlight = jest.requireMock('modules/spotlight').default as {
-  replaceItems: jest.Mock;
-  updateItems: jest.Mock;
+  syncItems: jest.Mock;
   removeAllItems: jest.Mock;
 };
 
@@ -30,39 +28,38 @@ beforeEach(async () => {
   jest.clearAllMocks();
 });
 
-it('replaces a domain first, without hidden courses', async () => {
+it('sends a domain without hidden courses', async () => {
   await updateSpotlight({ notices }, options);
-  expect(Spotlight.replaceItems).toHaveBeenCalledTimes(1);
-  const [domain, items] = Spotlight.replaceItems.mock.calls[0];
+  expect(Spotlight.syncItems).toHaveBeenCalledTimes(1);
+  const [domain, items] = Spotlight.syncItems.mock.calls[0];
   expect(domain).toBe('notice');
   expect(items.map((i: { id: string }) => i.id)).toEqual(['n0', 'n1']);
-  expect(Spotlight.updateItems).not.toHaveBeenCalled();
 });
 
-it('then sends only what changed or went, and nothing when unchanged', async () => {
+it('sends the whole list again when anything changed, and nothing when unchanged', async () => {
   await updateSpotlight({ notices }, options);
   await updateSpotlight({ notices }, options);
-  expect(Spotlight.replaceItems).toHaveBeenCalledTimes(1);
-  expect(Spotlight.updateItems).not.toHaveBeenCalled();
+  expect(Spotlight.syncItems).toHaveBeenCalledTimes(1);
 
   await updateSpotlight(
     { notices: [{ ...notices[0], title: 'Renamed' }] },
     options,
   );
-  expect(Spotlight.updateItems).toHaveBeenCalledWith(
-    'notice',
-    [expect.objectContaining({ id: 'n0', title: 'Renamed' })],
-    ['n1'],
-  );
+  expect(Spotlight.syncItems).toHaveBeenLastCalledWith('notice', [
+    expect.objectContaining({ id: 'n0', title: 'Renamed' }),
+  ]);
+
+  await updateSpotlight({ notices: [] }, options);
+  expect(Spotlight.syncItems).toHaveBeenLastCalledWith('notice', []);
+  expect(Spotlight.syncItems).toHaveBeenCalledTimes(3);
 });
 
-it('replaces the domain again after a failed update', async () => {
-  await updateSpotlight({ notices }, options);
-  Spotlight.updateItems.mockRejectedValueOnce(new Error('Busy'));
+it('sends the same list again after a failed sync', async () => {
+  Spotlight.syncItems.mockRejectedValueOnce(new Error('Busy'));
   jest.spyOn(console, 'warn').mockImplementationOnce(() => {});
-  await updateSpotlight({ notices: notices.slice(0, 1) }, options);
-  await updateSpotlight({ notices: notices.slice(1, 2) }, options);
-  expect(Spotlight.replaceItems).toHaveBeenCalledTimes(2);
+  await updateSpotlight({ notices }, options);
+  await updateSpotlight({ notices }, options);
+  expect(Spotlight.syncItems).toHaveBeenCalledTimes(2);
 });
 
 it('keeps assignments in their own domain', async () => {
@@ -70,7 +67,7 @@ it('keeps assignments in their own domain', async () => {
     { assignments: mockAssignments.slice(0, 1) },
     { hiddenCourses: [] },
   );
-  expect(Spotlight.replaceItems).toHaveBeenCalledWith('assignment', [
+  expect(Spotlight.syncItems).toHaveBeenCalledWith('assignment', [
     expect.objectContaining({ id: mockAssignments[0].id }),
   ]);
 });
@@ -78,7 +75,7 @@ it('keeps assignments in their own domain', async () => {
 it('indexes files with their course, type and size', async () => {
   const file = mockFiles[0];
   await updateSpotlight({ files: [file] }, { hiddenCourses: [] });
-  const [domain, [item]] = Spotlight.replaceItems.mock.calls[0];
+  const [domain, [item]] = Spotlight.syncItems.mock.calls[0];
   expect(domain).toBe('file');
   expect(item).toMatchObject({ id: file.id, title: file.title });
   expect(item.details).toContain(file.courseName);

@@ -41,17 +41,12 @@ type SpotlightEvents = {
 };
 
 declare class SpotlightModule extends NativeModule<SpotlightEvents> {
-  /** Replaces the domain's items in the Spotlight index with these. */
-  replaceItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
   /**
-   * Indexes `items` (new or changed) and removes the items with `removedIds`
-   * from the domain. Missing in an app built before it was added.
+   * Makes the domain hold exactly these items. The module remembers what it
+   * indexed (across launches), so only new and changed items are indexed and
+   * the ones that went are removed.
    */
-  updateItems?(
-    domain: SpotlightDomain,
-    items: SpotlightItem[],
-    removedIds: string[],
-  ): Promise<void>;
+  syncItems(domain: SpotlightDomain, items: SpotlightItem[]): Promise<void>;
   /** Removes everything the app indexed. */
   removeAllItems(): Promise<void>;
   /**
@@ -61,11 +56,8 @@ declare class SpotlightModule extends NativeModule<SpotlightEvents> {
   takeOpenedItem(): SpotlightOpenedItem | null;
   /** Saves the open assignments for the "Next Deadline" App Intent. */
   setUpcomingDeadlines(deadlines: UpcomingDeadline[]): void;
-  /**
-   * Saves the classes still ahead for the "Next Class" App Intent. Missing in
-   * an app built before the intent was added.
-   */
-  setUpcomingClasses?(classes: UpcomingClass[]): void;
+  /** Saves the classes still ahead for the "Next Class" App Intent. */
+  setUpcomingClasses(classes: UpcomingClass[]): void;
 }
 
 /**

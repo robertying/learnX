@@ -53,11 +53,11 @@ export const fileSpotlightItem = (file: File): SpotlightItem => ({
 });
 
 /**
- * What each domain was last indexed with, by item id, so only the items that
- * changed are sent. Empty in a new JS runtime, whose first update replaces
- * the domain.
+ * What each domain was last sent with, by item id, so an unchanged list isn't
+ * sent again. The module keeps its own record across launches and indexes
+ * only what changed.
  */
-let indexed: Partial<Record<SpotlightDomain, Map<string, string>>> = {};
+let sent: Partial<Record<SpotlightDomain, Map<string, string>>> = {};
 /** Index changes run one at a time, in order. */
 let queue = Promise.resolve();
 
@@ -70,28 +70,23 @@ const enqueue = (work: () => Promise<void>) => {
   });
 };
 
-const replaceItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
-  const before = indexed[domain];
+const syncItems = (domain: SpotlightDomain, items: SpotlightItem[]) => {
+  const before = sent[domain];
   const after = new Map(items.map(item => [item.id, JSON.stringify(item)]));
-  const changed = items.filter(
-    item => before?.get(item.id) !== after.get(item.id),
-  );
-  const removed = before ? [...before.keys()].filter(id => !after.has(id)) : [];
-  if (before && changed.length === 0 && removed.length === 0) {
+  if (
+    before &&
+    before.size === after.size &&
+    [...after].every(([id, item]) => before.get(id) === item)
+  ) {
     return;
   }
-  indexed[domain] = after;
+  sent[domain] = after;
   enqueue(async () => {
     try {
-      // An app built before updateItems replaces the whole domain.
-      if (before && Spotlight!.updateItems) {
-        await Spotlight!.updateItems(domain, changed, removed);
-      } else {
-        await Spotlight!.replaceItems(domain, items);
-      }
+      await Spotlight!.syncItems(domain, items);
     } catch (error) {
-      // The next change replaces the whole domain.
-      delete indexed[domain];
+      // Sent again with the next update.
+      delete sent[domain];
       throw error;
     }
   });
@@ -118,13 +113,13 @@ export async function updateSpotlight(
     items.filter(item => !hidden.has(item.courseId));
 
   if (notices) {
-    replaceItems('notice', shown(notices).map(noticeSpotlightItem));
+    syncItems('notice', shown(notices).map(noticeSpotlightItem));
   }
   if (assignments) {
-    replaceItems('assignment', shown(assignments).map(assignmentSpotlightItem));
+    syncItems('assignment', shown(assignments).map(assignmentSpotlightItem));
   }
   if (files) {
-    replaceItems('file', shown(files).map(fileSpotlightItem));
+    syncItems('file', shown(files).map(fileSpotlightItem));
   }
   await queue;
 }
@@ -134,6 +129,6 @@ export function clearSpotlight() {
   if (!Spotlight) {
     return;
   }
-  indexed = {};
+  sent = {};
   enqueue(() => Spotlight!.removeAllItems());
 }

@@ -70,10 +70,34 @@ extension CSSearchableIndex: SearchableIndex {}
 /// The app's items in a Spotlight index, one domain per type.
 struct SpotlightIndex {
   let index: SearchableIndex
+  /// What was indexed, across launches.
+  let indexed: IndexedItems
 
   /// The device's index, or nil where it can't index.
   static var system: SpotlightIndex? {
-    CSSearchableIndex.isIndexingAvailable() ? SpotlightIndex(index: CSSearchableIndex.default()) : nil
+    guard CSSearchableIndex.isIndexingAvailable(), let indexed = IndexedItems.standard else {
+      return nil
+    }
+    return SpotlightIndex(index: CSSearchableIndex.default(), indexed: indexed)
+  }
+
+  /// Makes the domain hold exactly these items, indexing only the ones that are new or changed since the last sync
+  /// (even in an earlier launch) and removing the ones that went. A domain with no record is replaced as a whole.
+  func syncItems(domain: String, items: [SpotlightItem]) async throws {
+    let digests = Dictionary(items.map { ($0.id, $0.digest) }, uniquingKeysWith: { _, last in last })
+    let previous = indexed.load(domain: domain)
+    // Forgotten until the index has the new items, so a failure replaces the domain next time.
+    indexed.remove(domain: domain)
+    if let previous {
+      try await updateItems(
+        domain: domain,
+        items: items.filter { previous[$0.id] != digests[$0.id] },
+        removedIds: previous.keys.filter { digests[$0] == nil }.sorted()
+      )
+    } else {
+      try await replaceItems(domain: domain, items: items)
+    }
+    try indexed.save(digests, domain: domain)
   }
 
   /// Replaces the domain's items with these.
@@ -97,6 +121,7 @@ struct SpotlightIndex {
   }
 
   func removeAllItems() async throws {
+    indexed.removeAll()
     try await index.deleteAllSearchableItems()
   }
 }
@@ -113,11 +138,8 @@ public final class SpotlightModule: Module {
     OnStopObserving(nil, Self.stopObserving)
 
     Function("takeOpenedItem", Self.takeOpenedItem)
-    AsyncFunction("replaceItems") { (domain: String, items: [SpotlightItem]) in
-      try await Self.replaceItems(domain: domain, items: items)
-    }
-    AsyncFunction("updateItems") { (domain: String, items: [SpotlightItem], removedIds: [String]) in
-      try await Self.updateItems(domain: domain, items: items, removedIds: removedIds)
+    AsyncFunction("syncItems") { (domain: String, items: [SpotlightItem]) in
+      try await Self.syncItems(domain: domain, items: items)
     }
     AsyncFunction("removeAllItems") {
       try await Self.removeAllItems()
@@ -141,12 +163,8 @@ public final class SpotlightModule: Module {
     SpotlightTaps.shared.takePending()?.payload
   }
 
-  static func replaceItems(domain: String, items: [SpotlightItem]) async throws {
-    try await SpotlightIndex.system?.replaceItems(domain: domain, items: items)
-  }
-
-  static func updateItems(domain: String, items: [SpotlightItem], removedIds: [String]) async throws {
-    try await SpotlightIndex.system?.updateItems(domain: domain, items: items, removedIds: removedIds)
+  static func syncItems(domain: String, items: [SpotlightItem]) async throws {
+    try await SpotlightIndex.system?.syncItems(domain: domain, items: items)
   }
 
   static func removeAllItems() async throws {
