@@ -637,7 +637,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"$SRCROOT/../scripts/check-patches.sh\"\n";
+			shellScript = "\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\" \"$SRCROOT/../scripts/check-patches.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		88E92500F02C21F83190CD41 /* [Expo] Configure project */ = {

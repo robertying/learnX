@@ -5,12 +5,20 @@
 # `pnpm install` there can say "up to date" without applying patches added
 # since, so native code can build without them (a Mac Catalyst build without
 # the react-native-pager-view patch crashed in CourseDetail). The iOS app's
-# "Check patches" build phase and Android's preBuild run this.
+# "Check patches" build phase (through React Native's with-environment.sh,
+# which sets NODE_BINARY from ios/.xcode.env, since Xcode's PATH has no node)
+# and Android's preBuild run this.
 
 cd "$(dirname "$0")/.." || exit 1
 
 # Not a git checkout (git apply needs one): nothing to check against.
 git rev-parse --git-dir > /dev/null 2>&1 || exit 0
+
+node=${NODE_BINARY:-node}
+if ! command -v "$node" > /dev/null 2>&1; then
+  echo "error: node isn't found. Set NODE_BINARY in ios/.xcode.env.local or put node on PATH." >&2
+  exit 1
+fi
 
 missing=0
 for patch in patches/*.patch; do
@@ -26,7 +34,7 @@ for patch in patches/*.patch; do
   # app links that instead of the patched sources unless the package is in
   # expo.autolinking.android.buildFromSource (package.json).
   if [ -d "node_modules/$package/local-maven-repo" ] && grep -q '^diff --git a/android/' "$patch" &&
-    ! node -e 'process.exit(require("./package.json").expo.autolinking.android.buildFromSource.includes(process.argv[1]) ? 0 : 1)' "$package"; then
+    ! "$node" -e 'process.exit(require("./package.json").expo.autolinking.android.buildFromSource.includes(process.argv[1]) ? 0 : 1)' "$package"; then
     echo "error: $patch changes Android code that $package ships prebuilt. Add it to expo.autolinking.android.buildFromSource in package.json." >&2
     missing=1
   fi
