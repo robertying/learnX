@@ -33,8 +33,12 @@ fi
 files="$(git diff --name-only "$base" HEAD)"
 echo "Changed files:" >&2
 echo "  ${files//$'\n'/$'\n  '}" >&2
-if echo "$files" | grep -Eq "$pattern"; then
-  echo "changed=true"
-else
-  echo "changed=false"
-fi
+# grep exits 1 for no match and 2 for a bad pattern, which must fail the job
+# rather than skip it.
+status=0
+echo "$files" | grep -Eq "$pattern" || status=$?
+case $status in
+0) echo "changed=true" ;;
+1) echo "changed=false" ;;
+*) exit "$status" ;;
+esac

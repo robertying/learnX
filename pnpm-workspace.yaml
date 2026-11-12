@@ -2,6 +2,8 @@ allowBuilds:
   '@parcel/watcher': true
   msgpackr-extract: true
 nodeLinker: hoisted
+# Install fails on a Node older than package.json's `engines`.
+engineStrict: true
 # pnpm's default minimumReleaseAge (1 day) applies to everything else.
 minimumReleaseAgeExclude:
   - '@robertying/thu-learn-lib'

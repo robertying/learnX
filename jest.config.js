@@ -40,6 +40,14 @@ module.exports = {
     // runs that text instead.
     '!src/widgets/*{IOS,Android}.tsx',
   ],
+  // CI runs `pnpm test --coverage` and fails below these, so coverage can't
+  // slip unnoticed. Keep them just under the current numbers; raise them as
+  // coverage grows.
+  // The totals in the log, and a browsable report in coverage/index.html
+  coverageReporters: ['text-summary', 'html'],
+  coverageThreshold: {
+    global: { statements: 98, branches: 94, functions: 96, lines: 98 },
+  },
   projects: [
     {
       ...base,
