@@ -16,6 +16,7 @@ name: App Store screenshots on the iPhone
     file: subflows/swipe_actions.yaml
     env:
       CARD: '.*(${MOCK_NOTICE}).*'
+      DIRECTION: LEFT
 - tapOn: '${T_filter}'
 - runFlow:
     file: ../subflows/screenshot.yaml
@@ -120,6 +121,7 @@ name: App Store screenshots on the iPhone
     file: subflows/swipe_actions.yaml
     env:
       CARD: '.*(${MOCK_COURSE}).*'
+      DIRECTION: RIGHT
 - runFlow:
     file: ../subflows/screenshot.yaml
     env:

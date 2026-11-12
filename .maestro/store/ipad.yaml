@@ -87,11 +87,12 @@ name: App Store screenshots on the iPad
     env:
       CARD: '.*(${MOCK_STORE_COURSE}).*'
       DETAIL: course-detail
-# The first row (MOCK_COURSE), swiped by its position as for notices.
+# The first row (MOCK_COURSE), swiped by its position as for notices, but
+# to the right: Hide is a course's leading swipe action.
 - assertVisible: '.*(${MOCK_COURSE}).*'
 - swipe:
-    start: 42%,19%
-    end: 24%,19%
+    start: 24%,19%
+    end: 42%,19%
     duration: 800
 - waitForAnimationToEnd
 - runFlow:
