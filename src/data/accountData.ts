@@ -35,10 +35,9 @@ export const accountStores = {
 /**
  * Forgets everything kept for the account whose data this is: the stores
  * above (the user data replaced by `userData` when given, e.g. the mock
- * account's), the server cache, the server actions sent and the items marked read this
- * session, the
- * data's owner, the downloaded files, and what the widgets, Spotlight and
- * reminders show. The login itself is left alone. Resolves once the reminders
+ * account's), the server cache, the server actions sent and the items marked
+ * read this session, the data's owner, the downloaded files, and what the
+ * widgets, Spotlight and reminders show. The login itself is left alone. Resolves once the reminders
  * are cancelled and the files deleted.
  */
 export function clearAccountData(userData?: UserData) {

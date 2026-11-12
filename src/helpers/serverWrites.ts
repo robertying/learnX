@@ -1,7 +1,7 @@
 /**
  * Debug builds don't send anything that changes the real account (assignment
- * submissions, course information sharing, favorites) until it's allowed in
- * Settings, so testing with a real account can't change it by accident.
+ * submissions, course information sharing, favorites) until it's allowed on
+ * the Debug page, so testing with a real account can't change it by accident.
  * Favorites wait in the queue meanwhile and go out when it is. Not persisted: a
  * JS reload blocks them again. Release builds always allow them, and the mock
  * accounts go to the emulated server either way.
@@ -26,7 +26,7 @@ export const subscribeServerWrites = (listener: () => void) => {
 export const assertServerWritesAllowed = (what: string) => {
   if (!allowed) {
     throw new Error(
-      `${what} blocked: debug builds need "Allow Server Writes" in Settings`,
+      `${what} blocked: debug builds need "Allow Server Writes" on the Debug page`,
     );
   }
 };

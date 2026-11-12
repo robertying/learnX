@@ -11,8 +11,6 @@ export interface Change<T> {
 export interface ListDiff<T> {
   /** In the new list only, in its order. */
   added: T[];
-  /** In the old list only, in its order. */
-  removed: T[];
   /** In both, where `isChanged` says they differ, in the new list's order. */
   changed: Change<T>[];
 }
@@ -24,7 +22,6 @@ export const diffById = <T extends { id: string }>(
   isChanged: (before: T, after: T) => boolean,
 ): ListDiff<T> => {
   const old = new Map(before.map(item => [item.id, item]));
-  const ids = new Set(after.map(item => item.id));
   const added: T[] = [];
   const changed: Change<T>[] = [];
   for (const item of after) {
@@ -35,23 +32,15 @@ export const diffById = <T extends { id: string }>(
       changed.push({ before: previous, after: item });
     }
   }
-  return {
-    added,
-    removed: before.filter(item => !ids.has(item.id)),
-    changed,
-  };
+  return { added, changed };
 };
 
-/**
- * Graded since, or its grade changed. A grade level is compared alone: before
- * thu-learn-lib 7 a level also came as a negative `grade` (-99 for A+), which
- * cached assignments may still have.
- */
+/** Graded since, or its grade or grade level changed. */
 const isNewlyGraded = (before: Assignment, after: Assignment) =>
   after.graded &&
   (!before.graded ||
     before.gradeLevel !== after.gradeLevel ||
-    (!after.gradeLevel && before.grade !== after.grade));
+    before.grade !== after.grade);
 
 const isDeadlineChanged = (before: Assignment, after: Assignment) =>
   !sameServerTime(before.deadline, after.deadline) ||
@@ -113,9 +102,7 @@ export const diffContent = (
     b: readonly T[] | undefined,
     isChanged: (before: T, after: T) => boolean = () => false,
   ): ListDiff<T> =>
-    a && b
-      ? diffById(a, b, isChanged)
-      : { added: [], removed: [], changed: [] };
+    a && b ? diffById(a, b, isChanged) : { added: [], changed: [] };
 
   const assignments = diff(
     before.assignments,
@@ -142,12 +129,3 @@ export const diffContent = (
     files: { added: diff(before.files, after.files).added },
   };
 };
-
-export const isContentDiffEmpty = (diff: ContentDiff) =>
-  diff.notices.added.length === 0 &&
-  diff.assignments.added.length === 0 &&
-  diff.assignments.graded.length === 0 &&
-  diff.assignments.commented.length === 0 &&
-  diff.assignments.deadlineChanged.length === 0 &&
-  diff.assignments.groupSubmitted.length === 0 &&
-  diff.files.added.length === 0;

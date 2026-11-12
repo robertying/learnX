@@ -9,6 +9,10 @@ import type { SwipeSettings } from 'helpers/cardActions';
 import type { FilterSelection } from 'helpers/filters';
 
 export type Tab = 'notice' | 'assignment' | 'file' | 'course';
+
+/** The semester lists of notices, assignments and files (`data/content`). */
+export const contentListNames = ['notices', 'assignments', 'files'] as const;
+export type ContentListName = (typeof contentListNames)[number];
 export interface AlarmSettings {
   courseAlarm: boolean;
   courseAlarmOffset?: number;

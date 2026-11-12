@@ -3,11 +3,6 @@ import { persist } from 'zustand/middleware';
 import { persistStorage } from 'data/storage';
 import { defaultSwipeSettings } from 'helpers/cardActions';
 import { SettingsState } from 'data/types/state';
-import {
-  type CalendarSyncState,
-  useCalendarSyncStore,
-} from 'data/calendarSync';
-import { type AppState, useAppStateStore } from 'data/appState';
 
 export const SETTINGS_KEY = 'settings';
 
@@ -64,60 +59,6 @@ export const mergeSettings = (
   notifications: { ...current.notifications, ...saved.notifications },
   swipeActions: { ...current.swipeActions, ...saved.swipeActions },
 });
-
-const isStringRecord = (value: unknown): value is Record<string, string> =>
-  !!value &&
-  typeof value === 'object' &&
-  !Array.isArray(value) &&
-  Object.values(value).every(item => typeof item === 'string');
-
-/**
- * Moves what settings used to hold besides settings into its own store: the
- * calendar sync's bookkeeping (`data/calendarSync`) and what the user has
- * seen (`data/appState`). Values of the wrong type are dropped. Returns the
- * rest, the settings themselves.
- */
-export const moveOutOfSettings = (saved: Record<string, unknown>) => {
-  const {
-    courseCalendarId,
-    assignmentCalendarId,
-    assignmentReminderId,
-    syncedCalendarAssignments,
-    syncedReminderAssignments,
-    // The changelog's badge is gone, so its version isn't kept.
-    lastShowChangelogVersion: _changelog,
-    courseInformationSharingBadgeShown,
-    newUpdate: _transient,
-    ...rest
-  } = saved;
-
-  const calendarSync: Partial<CalendarSyncState> = {};
-  const ids = { courseCalendarId, assignmentCalendarId, assignmentReminderId };
-  for (const [key, id] of Object.entries(ids)) {
-    if (typeof id === 'string') {
-      calendarSync[key as keyof typeof ids] = id;
-    }
-  }
-  if (isStringRecord(syncedCalendarAssignments)) {
-    calendarSync.syncedCalendarAssignments = syncedCalendarAssignments;
-  }
-  if (isStringRecord(syncedReminderAssignments)) {
-    calendarSync.syncedReminderAssignments = syncedReminderAssignments;
-  }
-  if (Object.keys(calendarSync).length > 0) {
-    useCalendarSyncStore.setState(calendarSync);
-  }
-
-  const appState: Partial<AppState> = {};
-  if (courseInformationSharingBadgeShown === true) {
-    appState.courseSharingSeen = true;
-  }
-  if (Object.keys(appState).length > 0) {
-    useAppStateStore.setState(appState);
-  }
-
-  return rest;
-};
 
 export const useSettingsStore = create<SettingsState>()(
   persist(() => defaultSettings, {

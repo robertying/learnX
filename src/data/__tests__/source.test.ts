@@ -14,7 +14,6 @@ import {
   loginWithFingerPrint,
   resetDataSource,
   serverWritesBlocked,
-  submitAssignment,
 } from 'data/source';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 
@@ -73,7 +72,8 @@ jest.mock('@robertying/thu-learn-lib', () => ({
 
 const post = jest.mocked(axios.post);
 
-const submit = () => submitAssignment('homework-id', { content: 'content' });
+const submit = () =>
+  dataSource.submitAssignment('homework-id', { content: 'content' });
 
 describe('submitAssignment', () => {
   beforeEach(() => setServerWritesAllowed(true));
@@ -87,7 +87,7 @@ describe('submitAssignment', () => {
 
   it("sends thu-learn-lib's request, with the file as React Native uploads it", async () => {
     post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
-    await submitAssignment('homework-id', {
+    await dataSource.submitAssignment('homework-id', {
       content: '<p>answer</p>',
       attachment: { uri: 'file:///tmp/answer.pdf', name: 'Answer.pdf' },
     });
@@ -137,7 +137,10 @@ describe('submitAssignment', () => {
   it('reports upload progress rounded, keeping the response text as is', async () => {
     post.mockResolvedValueOnce({ status: 200, data: '{"result":"success"}' });
     const onProgress = jest.fn();
-    await submitAssignment('homework-id', { content: 'a', onProgress });
+    await dataSource.submitAssignment('homework-id', {
+      content: 'a',
+      onProgress,
+    });
     const config = post.mock.calls[0][2] as {
       onUploadProgress: (e: { loaded: number; total?: number }) => void;
       transformResponse: (data: string) => string;
@@ -146,12 +149,6 @@ describe('submitAssignment', () => {
     config.onUploadProgress({ loaded: 5 });
     expect(onProgress.mock.calls).toEqual([[0.33], [0]]);
     expect(config.transformResponse('{"a":1}')).toBe('{"a":1}');
-  });
-
-  it('does not call the server with nothing to submit', async () => {
-    post.mockClear();
-    await submitAssignment('homework-id', {});
-    expect(post).not.toHaveBeenCalled();
   });
 });
 

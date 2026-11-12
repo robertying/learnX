@@ -31,8 +31,8 @@ const mock = (): typeof import('data/mock') =>
  * Every call answers with the data in `data/mock.ts` after a network-like
  * delay, and can be made to fail the way the real server and network do, so
  * refreshes, spinners, errors and the re-login flow can be exercised without a
- * real account. Dev builds change the behavior from Settings › Network
- * emulation (`screens/MockNetwork.tsx`), which also applies to file downloads
+ * real account. Debug builds change the behavior from Network Emulation on
+ * the Debug page (`screens/MockNetwork.tsx`), which also applies to file downloads
  * (`services/files/downloads.ts`).
  */
 

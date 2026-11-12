@@ -1,9 +1,8 @@
-import type { ContentListName } from 'data/pendingActions';
+import type { ContentListName } from 'data/types/state';
 
 export const queryKeys = {
   semesters: ['semesters'] as const,
-  // Its key from when only the timetable asked for the dates.
-  schoolSemester: ['semesterDates'] as const,
+  schoolSemester: ['schoolSemester'] as const,
   user: ['user'] as const,
   coursesAll: ['courses'] as const,
   courses: (semesterId: string) => ['courses', semesterId] as const,
@@ -13,4 +12,9 @@ export const queryKeys = {
   content: (list: ContentListName, semesterId: string) =>
     [list, semesterId] as const,
   excellentHomework: (id: string) => ['excellentHomework', id] as const,
+  /** Every week of the registrar's calendar (`data/schedule`). */
+  calendarAll: ['calendar'] as const,
+  /** The registrar's calendar for the week starting `weekStart`. */
+  calendar: (weekStart: string, graduate: boolean) =>
+    ['calendar', weekStart, graduate ? 'graduate' : 'undergraduate'] as const,
 };

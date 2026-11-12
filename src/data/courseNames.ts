@@ -1,7 +1,6 @@
 import type { QueryClient, QueryKey } from '@tanstack/react-query';
-import type { ContentListName } from 'data/pendingActions';
 import { queryKeys } from 'data/queryKeys';
-import type { Course } from 'data/types/state';
+import { type Course, contentListNames } from 'data/types/state';
 import { isLocaleChinese } from 'helpers/i18n';
 
 /**
@@ -14,8 +13,6 @@ export const localizedCourseName = (
   course: Pick<Course, 'name' | 'chineseName' | 'englishName'>,
 ) =>
   (isLocaleChinese() ? course.chineseName : course.englishName) || course.name;
-
-const contentLists: ContentListName[] = ['notices', 'assignments', 'files'];
 
 /**
  * Renames the cached courses, and the course names copied into the cached
@@ -49,7 +46,7 @@ export const localizeCachedCourseNames = (client: QueryClient) => {
     names.set(course.id, name);
     return name === course.name ? course : { ...course, name };
   });
-  for (const list of contentLists) {
+  for (const list of contentListNames) {
     renameAll<{ courseId: string; courseName: string }>(
       queryKeys.contentAll(list),
       item => {

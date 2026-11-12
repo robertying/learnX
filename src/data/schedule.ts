@@ -3,6 +3,7 @@ import dayjs from 'dayjs';
 import { semesterWeek } from '@robertying/thu-learn-lib';
 import { coursesQuery, schoolSemesterQuery } from 'data/queries';
 import { queryClient } from 'data/queryClient';
+import { queryKeys } from 'data/queryKeys';
 import { useLoggedIn } from 'data/auth';
 import { dataSource } from 'data/source';
 import { getSettings, useSettings } from 'data/settings';
@@ -17,11 +18,6 @@ import {
   sessionsFromCourses,
   startOfWeek,
 } from 'helpers/schedule';
-
-export const scheduleKeys = {
-  calendar: (weekStart: string, graduate: boolean) =>
-    ['calendar', weekStart, graduate ? 'graduate' : 'undergraduate'] as const,
-};
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -61,7 +57,7 @@ const fetchCalendar = async (
  */
 export const calendarWeekQuery = (weekStart: string, graduate: boolean) =>
   queryOptions({
-    queryKey: scheduleKeys.calendar(weekStart, graduate),
+    queryKey: queryKeys.calendar(weekStart, graduate),
     // Timetables rarely change within a day.
     staleTime: DAY / 2,
     // Offline, a retry only keeps the spinner going; the saved week shows.

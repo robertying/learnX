@@ -1,4 +1,4 @@
-import { submitAssignment } from 'data/source';
+import { dataSource } from 'data/source';
 import {
   PickedAttachment,
   canSubmit,
@@ -11,7 +11,9 @@ import {
   uploadAttachment,
 } from 'services/submission';
 
-jest.mock('data/source', () => ({ submitAssignment: jest.fn() }));
+jest.mock('data/source', () => ({
+  dataSource: { submitAssignment: jest.fn() },
+}));
 
 const picked: PickedAttachment = {
   uri: 'file:///tmp/scan.pdf',
@@ -104,7 +106,7 @@ describe('sendSubmission', () => {
       removeAttachment: true,
       onProgress,
     });
-    expect(submitAssignment).toHaveBeenCalledWith('hw', {
+    expect(dataSource.submitAssignment).toHaveBeenCalledWith('hw', {
       content: '<p>my answer</p>',
       attachment: undefined,
       onProgress,
@@ -120,7 +122,7 @@ describe('sendSubmission', () => {
       removeAttachment: false,
       onProgress,
     });
-    expect(submitAssignment).toHaveBeenCalledWith('hw', {
+    expect(dataSource.submitAssignment).toHaveBeenCalledWith('hw', {
       content: '<p>answer</p>',
       attachment: attachment,
       onProgress,
@@ -135,11 +137,13 @@ describe('sendSubmission', () => {
       removeAttachment: false,
       onProgress,
     });
-    expect(submitAssignment).not.toHaveBeenCalled();
+    expect(dataSource.submitAssignment).not.toHaveBeenCalled();
   });
 
   it('passes failures on', async () => {
-    jest.mocked(submitAssignment).mockRejectedValueOnce(new Error('Network'));
+    jest
+      .mocked(dataSource.submitAssignment)
+      .mockRejectedValueOnce(new Error('Network'));
     await expect(
       sendSubmission({
         studentHomeworkId: 'hw',
