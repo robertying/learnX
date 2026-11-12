@@ -28,6 +28,8 @@ jest.mock('data/serverActions', () => ({
 jest.mock('services/deadlineReminders', () => ({
   cancelDeadlineRemindersOf: jest.fn(async () => {}),
   remindLater: jest.fn(async () => {}),
+  isReminderKind: jest.requireActual('services/deadlineReminders')
+    .isReminderKind,
 }));
 jest.mock('services/surfaces', () => ({
   refreshSurfaces: jest.fn(async () => {}),
@@ -99,16 +101,32 @@ it('cancels the reminders and refreshes the surfaces for assignments', async () 
   expect(refreshSurfaces).toHaveBeenCalled();
 });
 
-it('puts a reminder off', async () => {
+it('puts a reminder off, keeping its kind', async () => {
   const later = response('remindLater', {
     type: 'assignment',
     id: 'a1',
     deadline: 123,
+    kind: 'lateDue',
   });
   await handleNotificationAction(later);
   expect(remindLater).toHaveBeenCalledWith(later.notification, {
     id: 'a1',
     deadline: 123,
+    kind: 'lateDue',
+  });
+
+  await handleNotificationAction(
+    response('remindLater', {
+      type: 'assignment',
+      id: 'a1',
+      deadline: 123,
+      kind: 'other',
+    }),
+  );
+  expect(jest.mocked(remindLater).mock.calls[1][1]).toEqual({
+    id: 'a1',
+    deadline: 123,
+    kind: undefined,
   });
 });
 

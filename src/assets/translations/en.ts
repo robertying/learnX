@@ -296,7 +296,11 @@ export default {
   notificationsCaption:
     'learnX checks for new content in the background when the system lets it, so these notifications can arrive late.',
   notificationChannelContent: 'New content',
+  notificationChannelContentDescription:
+    'New notices, files and assignments, grades, deadline changes and group submissions',
   notificationChannelDeadlines: 'Deadline reminders',
+  notificationChannelDeadlinesDescription:
+    'Reminders before assignments are due and before late submission closes',
   notifyNewNotices: 'New Notices',
   notifyNewFiles: 'New Files',
   notifyNewAssignments: 'New Assignments',
@@ -327,6 +331,7 @@ export default {
   lateClosesAt: 'late submission closes {date}',
   sampleGradeComment: 'Well done. Part 2 misses the empty-tree case.',
   notificationChannelClasses: 'Class reminders',
+  notificationChannelClassesDescription: 'Reminders before your classes start',
   notifyClassReminders: 'Class Reminders',
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',

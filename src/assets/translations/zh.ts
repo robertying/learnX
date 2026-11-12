@@ -286,7 +286,10 @@ const zh: typeof en = {
   notificationsCaption:
     'learnX 会在系统允许时于后台检查新内容，因此这些通知可能会有延迟。',
   notificationChannelContent: '新内容',
+  notificationChannelContentDescription:
+    '新公告、文件和作业，成绩、截止时间变更和小组提交',
   notificationChannelDeadlines: '截止提醒',
+  notificationChannelDeadlinesDescription: '作业截止和补交截止前的提醒',
   notifyNewNotices: '新公告',
   notifyNewFiles: '新文件',
   notifyNewAssignments: '新作业',
@@ -317,6 +320,7 @@ const zh: typeof en = {
   lateClosesAt: '{date} 停止补交',
   sampleGradeComment: '完成得不错。第二问没有考虑空树的情况。',
   notificationChannelClasses: '上课提醒',
+  notificationChannelClassesDescription: '上课前的提醒',
   notifyClassReminders: '上课提醒',
   classReminderOffset: '提前提醒（分钟）',
   classStartsAt: '{time} 上课',

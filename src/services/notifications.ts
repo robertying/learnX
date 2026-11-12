@@ -54,14 +54,17 @@ const setUpChannels = async () => {
   await Promise.all([
     Notifications.setNotificationChannelAsync(notificationChannels.content, {
       name: t('notificationChannelContent'),
+      description: t('notificationChannelContentDescription'),
       importance: Notifications.AndroidImportance.DEFAULT,
     }),
     Notifications.setNotificationChannelAsync(notificationChannels.deadlines, {
       name: t('notificationChannelDeadlines'),
+      description: t('notificationChannelDeadlinesDescription'),
       importance: Notifications.AndroidImportance.HIGH,
     }),
     Notifications.setNotificationChannelAsync(notificationChannels.classes, {
       name: t('notificationChannelClasses'),
+      description: t('notificationChannelClassesDescription'),
       importance: Notifications.AndroidImportance.HIGH,
     }),
   ]);
@@ -201,6 +204,8 @@ export interface NotificationData extends ItemTarget {
   ids?: string[];
   /** A deadline reminder's deadline, in milliseconds. */
   deadline?: number;
+  /** A deadline reminder's kind (`ReminderKind` in services/deadlineReminders). */
+  kind?: string;
 }
 
 /**
@@ -244,6 +249,7 @@ export const getNotificationData = (
         ? (data.ids as string[])
         : undefined,
     deadline: typeof data.deadline === 'number' ? data.deadline : undefined,
+    kind: typeof data.kind === 'string' ? data.kind : undefined,
   };
 };
 

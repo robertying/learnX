@@ -25,13 +25,12 @@ import { queryClient } from 'data/queryClient';
 import { describeSyncRun, useSyncLogStore } from 'data/syncLog';
 import { getUserData } from 'data/userData';
 import { notifyContent, syncContent } from 'services/background';
-import { previewClassReminder } from 'services/classReminders';
-import { previewDeadlineReminder } from 'services/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { isMockUser } from 'helpers/mock';
 import { postNotification } from 'services/notifications';
 import {
   postNotificationSamples,
+  previewScheduledReminder,
   sampleNoticeNotification,
 } from 'services/notificationSamples';
 import {
@@ -84,9 +83,7 @@ const simulateNewContent = async () => {
 };
 
 const previewReminder = async (kind: 'deadline' | 'class') => {
-  const scheduled = await (kind === 'deadline'
-    ? previewDeadlineReminder()
-    : previewClassReminder());
+  const scheduled = await previewScheduledReminder(kind);
   toast(
     scheduled > 0
       ? `The next of ${scheduled} scheduled reminders shows again in 10 seconds. Leave the app to see it.`

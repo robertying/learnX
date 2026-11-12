@@ -10,11 +10,22 @@ import {
   pickContentItems,
 } from 'helpers/contentNotifications';
 import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
-import { classReminderContent } from 'services/classReminders';
-import { reminderContent, ReminderKind } from 'services/deadlineReminders';
+import {
+  CLASS_REMINDER_PREFIX,
+  classReminderContent,
+} from 'services/classReminders';
+import {
+  DEADLINE_REMINDER_PREFIX,
+  reminderContent,
+  ReminderKind,
+} from 'services/deadlineReminders';
 import { t } from 'helpers/i18n';
 import { notificationChannels, postNotification } from 'services/notifications';
+import {
+  getScheduled,
+  immediateTrigger,
+  intervalTrigger,
+} from 'services/scheduledNotifications';
 
 /** How many items of each kind: one opens itself, two make a list. */
 const counts = [1, 2];
@@ -212,18 +223,40 @@ export const postNotificationSamples = async (
   for (const kind of reminderKinds) {
     await Notifications.scheduleNotificationAsync({
       content: sampleReminder(assignment, dayjs(), kind),
-      trigger:
-        Platform.OS === 'android'
-          ? { channelId: notificationChannels.deadlines }
-          : null,
+      trigger: immediateTrigger(notificationChannels.deadlines),
     });
   }
   await Notifications.scheduleNotificationAsync({
     content: sampleClassReminder(assignment),
-    trigger:
-      Platform.OS === 'android'
-        ? { channelId: notificationChannels.classes }
-        : null,
+    trigger: immediateTrigger(notificationChannels.classes),
   });
   return notifications.length + reminderKinds.length + 1;
+};
+
+/**
+ * How many deadline or class reminders are scheduled, and the first one
+ * again in ten seconds, to see what it looks like.
+ */
+export const previewScheduledReminder = async (kind: 'deadline' | 'class') => {
+  const [prefix, channel] =
+    kind === 'deadline'
+      ? [DEADLINE_REMINDER_PREFIX, notificationChannels.deadlines]
+      : [CLASS_REMINDER_PREFIX, notificationChannels.classes];
+  const scheduled = await getScheduled(id => id.startsWith(prefix));
+  const first = scheduled[0];
+  if (first) {
+    const { title, subtitle, body, data, categoryIdentifier } = first.content;
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title,
+        subtitle,
+        body,
+        data,
+        categoryIdentifier: categoryIdentifier ?? undefined,
+        threadIdentifier: channel,
+      },
+      trigger: intervalTrigger(10, channel),
+    });
+  }
+  return scheduled.length;
 };
