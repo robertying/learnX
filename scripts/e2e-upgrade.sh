@@ -33,9 +33,8 @@ tag="v18.0.3"
 # Bump the suffix when build_baseline changes, so the cache is rebuilt.
 baseline="${BASELINE_DIR:-$HOME/Library/Caches/learnX-e2e/18.0.3-2}"
 
-read_env() {
-  grep -E "^$1=" .env | tail -n 1 | cut -d= -f2- | sed -e 's/^["'\'']//' -e 's/["'\'']$//'
-}
+# shellcheck source=scripts/lib/env.sh
+. scripts/lib/env.sh
 username="$(read_env DUMMY_USERNAME)"
 password="$(read_env DUMMY_PASSWORD)"
 if [ -z "$username" ] || [ -z "$password" ]; then

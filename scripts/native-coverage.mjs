@@ -3,6 +3,7 @@
 // back), keeping each file's best run. Used by scripts/test-ios.sh.
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
+import { coverageTable } from './lib/coverage-table.mjs';
 
 const root = process.argv[2] ?? process.cwd();
 const input = readFileSync(0, 'utf8');
@@ -46,20 +47,11 @@ for (const report of reports) {
   }
 }
 
-let covered = 0;
-let executable = 0;
-const rows = [...files.entries()].sort(([a], [b]) => a.localeCompare(b));
-for (const [path, file] of rows) {
-  covered += file.coveredLines;
-  executable += file.executableLines;
-  const percent = file.executableLines
-    ? (100 * file.coveredLines) / file.executableLines
-    : 100;
-  console.log(
-    `${percent.toFixed(1).padStart(6)}%  ${String(file.coveredLines).padStart(4)}/${String(file.executableLines).padEnd(4)}  ${path}`,
-  );
-}
-const total = executable ? (100 * covered) / executable : 100;
-console.log(
-  `${total.toFixed(1).padStart(6)}%  ${String(covered).padStart(4)}/${String(executable).padEnd(4)}  total`,
-);
+const rows = [...files.entries()]
+  .sort(([a], [b]) => a.localeCompare(b))
+  .map(([path, file]) => ({
+    path,
+    covered: file.coveredLines,
+    executable: file.executableLines,
+  }));
+console.log(coverageTable(rows).join('\n'));
