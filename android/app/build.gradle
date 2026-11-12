@@ -34,7 +34,7 @@ android {
     }
 
     androidResources {
-        localeFilters += ["en", "en-rUS", "zh", "zh-rCN"]
+        localeFilters += ["en", "zh"]
         generateLocaleConfig = true
     }
 
