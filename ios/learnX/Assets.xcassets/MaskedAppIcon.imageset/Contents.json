@@ -1,9 +1,8 @@
 {
   "images": [
     {
-      "filename": "MaskedAppIcon.png",
-      "idiom": "universal",
-      "scale": "1x"
+      "filename": "MaskedAppIcon.svg",
+      "idiom": "universal"
     },
     {
       "appearances": [
@@ -12,41 +11,8 @@
           "value": "dark"
         }
       ],
-      "filename": "MaskedAppIconDark.png",
-      "idiom": "universal",
-      "scale": "1x"
-    },
-    {
-      "filename": "MaskedAppIcon@2x.png",
-      "idiom": "universal",
-      "scale": "2x"
-    },
-    {
-      "appearances": [
-        {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ],
-      "filename": "MaskedAppIconDark@2x.png",
-      "idiom": "universal",
-      "scale": "2x"
-    },
-    {
-      "filename": "MaskedAppIcon@3x.png",
-      "idiom": "universal",
-      "scale": "3x"
-    },
-    {
-      "appearances": [
-        {
-          "appearance": "luminosity",
-          "value": "dark"
-        }
-      ],
-      "filename": "MaskedAppIconDark@3x.png",
-      "idiom": "universal",
-      "scale": "3x"
+      "filename": "MaskedAppIconDark.svg",
+      "idiom": "universal"
     }
   ],
   "info": {
@@ -54,6 +20,7 @@
     "version": 1
   },
   "properties": {
-    "compression-type": "automatic"
+    "compression-type": "automatic",
+    "preserves-vector-representation": true
   }
 }

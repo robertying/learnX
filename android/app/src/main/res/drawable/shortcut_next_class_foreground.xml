@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Material Symbols "event" (400 weight), 36dp in the middle of the 108dp adaptive icon canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="2880"
+    android:viewportHeight="2880">
+  <group
+      android:translateX="960"
+      android:translateY="960">
+    <path
+        android:fillColor="@color/md_theme_onPrimaryContainer"
+        android:pathData="M580,720Q538,720 509,691Q480,662 480,620Q480,578 509,549Q538,520 580,520Q622,520 651,549Q680,578 680,620Q680,662 651,691Q622,720 580,720ZM200,880Q167,880 143.5,856.5Q120,833 120,800V240Q120,207 143.5,183.5Q167,160 200,160H240V80H320V160H640V80H720V160H760Q793,160 816.5,183.5Q840,207 840,240V800Q840,833 816.5,856.5Q793,880 760,880ZM200,800H760Q760,800 760,800Q760,800 760,800V400H200V800Q200,800 200,800Q200,800 200,800ZM200,320H760V240Q760,240 760,240Q760,240 760,240H200Q200,240 200,240Q200,240 200,240ZM200,320V240Q200,240 200,240Q200,240 200,240Q200,240 200,240Q200,240 200,240V320Z"/>
+  </group>
+</vector>
