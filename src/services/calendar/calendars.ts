@@ -35,34 +35,27 @@ import {
 import { CalendarError } from 'services/calendar/errors';
 import { buildICS } from 'helpers/calendar/ics';
 
-export const getAndRequestPermission = async (
-  type: 'calendar' | 'reminder',
-) => {
-  if (type === 'calendar') {
-    const { status } = await Calendar.getCalendarPermissions();
-    if (status === 'granted') {
-      return true;
-    }
-    const { status: newStatus } = await Calendar.requestCalendarPermissions();
-    return newStatus === 'granted';
-  } else {
-    const { status } = await Calendar.getRemindersPermissions();
-    if (status === 'granted') {
-      return true;
-    }
-    const { status: newStatus } = await Calendar.requestRemindersPermissions();
-    return newStatus === 'granted';
-  }
-};
+const permissions = {
+  calendar: {
+    get: Calendar.getCalendarPermissions,
+    request: Calendar.requestCalendarPermissions,
+    error: 'calendarPermission',
+  },
+  reminder: {
+    get: Calendar.getRemindersPermissions,
+    request: Calendar.requestRemindersPermissions,
+    error: 'reminderPermission',
+  },
+} as const;
+
+/** Whether learnX may use the calendars or Reminders, asking if it may not. */
+export const getAndRequestPermission = async (type: 'calendar' | 'reminder') =>
+  (await hasPermission(type)) ||
+  (await permissions[type].request()).status === 'granted';
 
 /** Whether learnX may use the calendars or Reminders now, without asking. */
-export const hasPermission = async (type: 'calendar' | 'reminder') => {
-  const { status } =
-    type === 'calendar'
-      ? await Calendar.getCalendarPermissions()
-      : await Calendar.getRemindersPermissions();
-  return status === 'granted';
-};
+export const hasPermission = async (type: 'calendar' | 'reminder') =>
+  (await permissions[type].get()).status === 'granted';
 
 /**
  * Throws without the permission. `ask` asks for it first: only for what the
@@ -73,13 +66,37 @@ const requirePermission = async (
   { ask }: { ask: boolean },
 ) => {
   if (!(await (ask ? getAndRequestPermission(type) : hasPermission(type)))) {
-    throw new CalendarError(
-      type === 'calendar' ? 'calendarPermission' : 'reminderPermission',
-    );
+    throw new CalendarError(permissions[type].error);
   }
 };
 
+/** Reminders on iOS, iPadOS and Mac; Android writes reminders as events. */
+const isReminderList = (type: AssignmentEventType) =>
+  Platform.OS === 'ios' && type === 'reminder';
+
+/**
+ * Throws without the access assignment sync of `type` needs: Reminders for
+ * reminders on Apple platforms, the calendars otherwise. `ask` as in
+ * `requirePermission`.
+ */
+export const requireAssignmentAccess = (
+  type: AssignmentEventType,
+  { ask }: { ask: boolean },
+) => requirePermission(isReminderList(type) ? 'reminder' : 'calendar', { ask });
+
+/**
+ * Where a new calendar or list goes: the account of the user's default
+ * calendar for events, else iCloud, else the device.
+ */
 const getDefaultCalendarSource = async (entityType: Calendar.EntityTypes) => {
+  if (entityType === Calendar.EntityTypes.EVENT) {
+    try {
+      const source = Calendar.getDefaultCalendarSync().source;
+      if (source.id) {
+        return source;
+      }
+    } catch {}
+  }
   const calendars = await Calendar.getCalendars(entityType);
 
   const iCloudCalendar = calendars.find(c => c.source.name === 'iCloud');
@@ -261,7 +278,7 @@ const adoptExistingEntries = async (
   if (missing.length === 0) {
     return;
   }
-  const isReminder = Platform.OS === 'ios' && type === 'reminder';
+  const isReminder = isReminderList(type);
   const deadlines = missing.map(input => input.dueDate.valueOf());
   let entries: { id: string; title?: string; due: number }[];
   try {
@@ -296,6 +313,16 @@ const adoptExistingEntries = async (
   }
 };
 
+/** The synced event or reminder with this id; throws when it's gone. */
+const getEntry = (type: AssignmentEventType, id: string) =>
+  isReminderList(type)
+    ? Calendar.ExpoCalendarReminder.get(id)
+    : Calendar.ExpoCalendarEvent.get(id);
+
+/**
+ * Updates the assignment's event or reminder, or creates it when there is
+ * none or the user deleted it.
+ */
 export const saveAssignmentEvent = async (
   type: AssignmentEventType,
   settings: SettingsState,
@@ -303,44 +330,38 @@ export const saveAssignmentEvent = async (
   input: AssignmentEventInput,
 ) => {
   const { assignmentId } = input;
-  const syncedAssignments = getAssignmentEventIds(type);
+  const syncedId = getAssignmentEventIds(type)[assignmentId];
+  const reminder = isReminderList(type);
 
-  if (Platform.OS === 'ios' && type === 'reminder') {
-    const details = buildAssignmentReminderDetails(settings, input);
-    if (
-      syncedAssignments &&
-      Object.keys(syncedAssignments).includes(assignmentId)
-    ) {
-      try {
-        const reminder = await Calendar.ExpoCalendarReminder.get(
-          syncedAssignments[assignmentId],
-        );
-        await reminder.update(details);
-      } catch {
-        removeEventIdForAssignment('reminder', assignmentId);
-      }
-    } else {
-      const reminder = await calendar.createReminder(details);
-      setEventIdForAssignment('reminder', assignmentId, reminder.id!);
+  if (syncedId) {
+    let entry;
+    try {
+      entry = await getEntry(type, syncedId);
+    } catch {
+      // Deleted outside learnX: made again below.
+      removeEventIdForAssignment(type, assignmentId);
     }
-  } else {
-    const details = buildAssignmentEventDetails(settings, input);
-    if (
-      syncedAssignments &&
-      Object.keys(syncedAssignments).includes(assignmentId)
-    ) {
-      try {
-        const event = await Calendar.ExpoCalendarEvent.get(
-          syncedAssignments[assignmentId],
-        );
-        await event.update(details);
-      } catch {
-        removeEventIdForAssignment('calendar', assignmentId);
-      }
-    } else {
-      const event = await calendar.createEvent(details);
-      setEventIdForAssignment('calendar', assignmentId, event.id);
+    if (entry) {
+      await (reminder
+        ? (entry as Calendar.ExpoCalendarReminder).update(
+            buildAssignmentReminderDetails(settings, input),
+          )
+        : (entry as Calendar.ExpoCalendarEvent).update(
+            buildAssignmentEventDetails(settings, input),
+          ));
+      return;
     }
+  }
+  const id = reminder
+    ? (
+        await calendar.createReminder(
+          buildAssignmentReminderDetails(settings, input),
+        )
+      ).id
+    : (await calendar.createEvent(buildAssignmentEventDetails(settings, input)))
+        .id;
+  if (id) {
+    setEventIdForAssignment(type, assignmentId, id);
   }
 };
 
@@ -353,16 +374,12 @@ const removeAssignmentEvents = async (
   ids: string[],
 ) => {
   const synced = getAssignmentEventIds(type);
-  const isReminder = Platform.OS === 'ios' && type === 'reminder';
   await Promise.all(
     ids
       .filter(id => synced[id])
       .map(async id => {
         try {
-          const item = isReminder
-            ? await Calendar.ExpoCalendarReminder.get(synced[id])
-            : await Calendar.ExpoCalendarEvent.get(synced[id]);
-          await item.delete();
+          await (await getEntry(type, synced[id])).delete();
         } catch {}
         removeEventIdForAssignment(type, id);
       }),
@@ -383,52 +400,50 @@ export const saveAssignmentsToReminderOrCalendar = async (
 ) => {
   const settings = getSettings();
 
-  if (Platform.OS === 'ios' && type === 'reminder') {
-    await requirePermission('reminder', { ask });
-  } else {
-    await requirePermission('calendar', { ask });
-  }
+  await requireAssignmentAccess(type, { ask });
 
-  const calendar =
-    Platform.OS === 'ios' && type === 'reminder'
-      ? await getAssignmentReminder()
-      : await getAssignmentCalendar();
+  const calendar = isReminderList(type)
+    ? await getAssignmentReminder()
+    : await getAssignmentCalendar();
 
   const inputs = buildAssignmentEventInputs(assignments, getCachedCourses());
   await adoptExistingEntries(type, calendar, inputs);
 
   await Promise.all(
-    inputs.map(
-      async input => await saveAssignmentEvent(type, settings, calendar, input),
-    ),
+    inputs.map(input => saveAssignmentEvent(type, settings, calendar, input)),
   );
   await removeAssignmentEvents(type, removed);
 };
 
+/**
+ * Deletes the calendars and the Reminders list learnX created or adopted.
+ * Asks for Reminders access only when there may be a list to delete: one was
+ * made, or Reminders sync is on.
+ */
 export const removeCalendars = async () => {
   await requirePermission('calendar', { ask: true });
 
-  if (Platform.OS === 'ios') {
+  const synced = getCalendarSync();
+  const reminderList =
+    Platform.OS === 'ios' &&
+    (!!synced.assignmentReminderId ||
+      getSettings().assignmentReminderSync ||
+      (await hasPermission('reminder')));
+  if (reminderList) {
     await requirePermission('reminder', { ask: true });
   }
 
   const calendars = await Calendar.getCalendars();
-  const reminders =
-    Platform.OS === 'ios'
-      ? await Calendar.getCalendars(Calendar.EntityTypes.REMINDER)
-      : [];
+  const reminders = reminderList
+    ? await Calendar.getCalendars(Calendar.EntityTypes.REMINDER)
+    : [];
 
   // Only the ones learnX created or adopted, not every title with learnX.
-  const synced = getCalendarSync();
   const existingCalendars = [...calendars, ...reminders].filter(c =>
     isSyncedCalendar(c, synced),
   );
 
-  await Promise.all(
-    existingCalendars.map(async c => {
-      await c.delete().catch(() => {});
-    }),
-  );
+  await Promise.all(existingCalendars.map(c => c.delete().catch(() => {})));
 
   resetCalendarSync();
 };

@@ -139,7 +139,7 @@ export const buildAssignmentReminderDetails = (
         'minute',
       )
     : dueDate;
-  const deadline = `${t('deadline')}: ${dueDate.format('YYYY-MM-DD HH:mm')}`;
+  const deadline = `${t('deadline')}: ${dueDate.format(t('shortDateTimeFormat'))}`;
   return {
     title,
     startDate: (startDate.isBefore(remindAt) ? startDate : remindAt).toDate(),

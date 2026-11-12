@@ -2,15 +2,14 @@ import { Alert } from 'react-native';
 import { act, renderHook } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
-import { mockAssignments } from 'data/mock';
 import { getSettings, resetSettings } from 'data/settings';
-import { resetUserData, setArchived } from 'data/userData';
 import {
+  allowAssignmentSync,
   deleteCalendars,
   exportCalendars,
-  syncAssignments,
   syncCourseSchedule,
 } from 'services/calendar/actions';
+import { refreshSurfaces } from 'services/surfaces';
 import {
   confirmDeleteCalendars,
   useAssignmentSync,
@@ -19,34 +18,21 @@ import {
 } from 'hooks/useCalendarSync';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
-// Loaded by the real calendarSync below; native only.
-jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
 jest.mock('services/calendar/actions', () => ({
   syncCourseSchedule: jest.fn(async () => undefined),
-  syncAssignments: jest.fn(async () => undefined),
+  allowAssignmentSync: jest.fn(async () => undefined),
   exportCalendars: jest.fn(async () => undefined),
   deleteCalendars: jest.fn(async () => ({ text: 'Deleted', type: 'success' })),
-  // The real filter, by deadline
-  upcomingAssignments: jest.requireActual('services/calendar/actions')
-    .upcomingAssignments,
+}));
+jest.mock('services/surfaces', () => ({
+  refreshSurfaces: jest.fn(async () => {}),
 }));
 
 const now = Date.parse('2026-11-10T00:00:00Z');
-const assignments = [
-  { ...mockAssignments[0], id: 'due', deadline: '2026-11-20T00:00:00Z' },
-  { ...mockAssignments[0], id: 'past', deadline: '2026-11-01T00:00:00Z' },
-  { ...mockAssignments[0], id: 'archived', deadline: '2026-11-20T00:00:00Z' },
-];
-jest.mock('data/content', () => ({
-  useAssignments: () => ({ assignments: mockList }),
-}));
-let mockList: typeof assignments = [];
 
 beforeEach(() => {
   jest.useFakeTimers({ now, doNotFake: ['nextTick', 'setImmediate'] });
-  mockList = assignments;
   resetSettings();
-  resetUserData();
 });
 
 afterEach(() => {
@@ -103,15 +89,17 @@ describe('useCourseScheduleSync', () => {
 });
 
 describe('useAssignmentSync', () => {
-  it('syncs the shown assignments still due when turned on', async () => {
-    setArchived('assignment', ['archived'], true);
+  it('asks for access, turns the sync on and waits for the surfaces to write', async () => {
+    let written = false;
+    jest.mocked(refreshSurfaces).mockImplementationOnce(async () => {
+      // The setting is on before the surfaces run.
+      written = getSettings().assignmentCalendarSync;
+    });
     const { result } = await renderHook(() => useAssignmentSync());
     await act(() => result.current.setSyncEnabled('calendar', true));
-    expect(jest.mocked(syncAssignments).mock.calls[0][0]).toBe('calendar');
-    expect(
-      jest.mocked(syncAssignments).mock.calls[0][1].map(a => a.id),
-    ).toEqual(['due']);
-    expect(getSettings().assignmentCalendarSync).toBe(true);
+    expect(allowAssignmentSync).toHaveBeenCalledWith('calendar');
+    expect(written).toBe(true);
+    expect(toast).not.toHaveBeenCalled();
     expect(result.current.calendarSyncing).toBe(false);
   });
 
@@ -119,17 +107,19 @@ describe('useAssignmentSync', () => {
     const { result } = await renderHook(() => useAssignmentSync());
     await act(() => result.current.setSyncEnabled('reminder', true));
     await act(() => result.current.setSyncEnabled('reminder', false));
-    expect(syncAssignments).toHaveBeenCalledTimes(1);
+    expect(allowAssignmentSync).toHaveBeenCalledTimes(1);
+    expect(refreshSurfaces).toHaveBeenCalledTimes(1);
     expect(getSettings().assignmentReminderSync).toBe(false);
   });
 
-  it('shows a failure', async () => {
+  it('says when access is denied and keeps the sync on', async () => {
     jest
-      .mocked(syncAssignments)
+      .mocked(allowAssignmentSync)
       .mockResolvedValueOnce({ text: 'No permission', type: 'error' });
     const { result } = await renderHook(() => useAssignmentSync());
     await act(() => result.current.setSyncEnabled('reminder', true));
     expect(toast).toHaveBeenCalledWith('No permission', 'error');
+    expect(getSettings().assignmentReminderSync).toBe(true);
   });
 });
 

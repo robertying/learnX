@@ -2,19 +2,16 @@ import { useState } from 'react';
 import { Alert, Platform } from 'react-native';
 import dayjs from 'dayjs';
 import { toast } from 'components/Toast';
-import { useAssignments } from 'data/content';
 import { setSetting, useSettings } from 'data/settings';
-import { useUserData } from 'data/userData';
 import {
   ToastMessage,
+  allowAssignmentSync,
   deleteCalendars,
   exportCalendars,
-  syncAssignments,
   syncCourseSchedule,
-  upcomingAssignments,
 } from 'services/calendar/actions';
+import { refreshSurfaces } from 'services/surfaces';
 import { t } from 'helpers/i18n';
-import useFilteredData from './useFilteredData';
 
 const show = (message?: ToastMessage) => {
   if (message) {
@@ -86,19 +83,12 @@ export const useCourseScheduleSync = () => {
 
 /**
  * Turns assignment sync to the calendar or reminders on and off. Turning it on
- * syncs the visible assignments that are still due.
+ * asks for the access it needs and shows it working until the surfaces
+ * (services/surfaces) have written the shown assignments that are still due;
+ * a failed write shows its toast from there. It stays on if the access is
+ * denied, and starts working once it's allowed.
  */
 export const useAssignmentSync = () => {
-  const hiddenCourseIds = useUserData(data => data.hiddenCourses);
-  const archivedIds = useUserData(data => data.archived.assignment);
-  const { assignments } = useAssignments();
-
-  const { all } = useFilteredData({
-    data: assignments,
-    archived: archivedIds,
-    hidden: hiddenCourseIds,
-  });
-
   const [calendarSyncing, setCalendarSyncing] = useState(false);
   const [reminderSyncing, setReminderSyncing] = useState(false);
 
@@ -106,19 +96,19 @@ export const useAssignmentSync = () => {
     type: 'calendar' | 'reminder',
     enabled: boolean,
   ) => {
+    const setting =
+      type === 'calendar' ? 'assignmentCalendarSync' : 'assignmentReminderSync';
+    if (!enabled) {
+      setSetting(setting, false);
+      return;
+    }
     const setSyncing =
       type === 'calendar' ? setCalendarSyncing : setReminderSyncing;
-
-    if (enabled) {
-      setSyncing(true);
-      show(await syncAssignments(type, upcomingAssignments(all)));
-      setSyncing(false);
-    }
-
-    setSetting(
-      type === 'calendar' ? 'assignmentCalendarSync' : 'assignmentReminderSync',
-      enabled,
-    );
+    setSyncing(true);
+    show(await allowAssignmentSync(type));
+    setSetting(setting, true);
+    await refreshSurfaces();
+    setSyncing(false);
   };
 
   return { calendarSyncing, reminderSyncing, setSyncEnabled };

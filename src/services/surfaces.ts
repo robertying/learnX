@@ -45,10 +45,6 @@ interface Inputs {
   hiddenCourses: string[];
   /** Archived assignments' ids. */
   archived: string[];
-  /** Archived and hidden assignments left out, as the Assignments tab shows. */
-  shownAssignments: Assignment[] | undefined;
-  /** Ids of the archived and hidden ones, whose calendar entries go. */
-  leftOutAssignments: string[];
   settings: ReturnType<typeof getSettings>;
   /** This and next week's classes still ahead (JSON); empty until known. */
   classes: string;
@@ -72,9 +68,6 @@ const readInputs = (): Inputs => {
   const courses = currentSemester
     ? queryClient.getQueryData(coursesQuery(currentSemester).queryKey)
     : undefined;
-  const archivedIds = new Set(archived.assignment);
-  const hidden = new Set(hiddenCourses);
-
   // Classes after the weekend are next week's.
   const thisWeek = startOfWeek(beijingDate(Date.now()));
   const thisWeekSchedule = getCachedWeekSessions(thisWeek);
@@ -87,12 +80,6 @@ const readInputs = (): Inputs => {
     courses,
     hiddenCourses,
     archived: archived.assignment,
-    shownAssignments: assignments?.filter(
-      a => !archivedIds.has(a.id) && !hidden.has(a.courseId),
-    ),
-    leftOutAssignments: (assignments ?? [])
-      .filter(a => archivedIds.has(a.id) || hidden.has(a.courseId))
-      .map(a => a.id),
     settings: getSettings(),
     classes:
       thisWeekSchedule.source === 'none'
@@ -122,19 +109,33 @@ export const subscribeSurfaceErrors = (listener: ErrorListener) => {
   };
 };
 
+/**
+ * Writes the assignments the Assignments tab shows (no archived ones, none in
+ * a hidden course) to the calendar or Reminders, and deletes the entries of
+ * the ones left out.
+ */
 const syncCalendar = async (
   type: 'calendar' | 'reminder',
-  assignments: Assignment[],
-  leftOut: string[],
+  { assignments, hiddenCourses, archived }: Inputs,
 ) => {
+  if (!assignments) {
+    return;
+  }
+  const hidden = new Set(hiddenCourses);
+  const archivedIds = new Set(archived);
+  const isLeftOut = (a: Assignment) =>
+    archivedIds.has(a.id) || hidden.has(a.courseId);
   // Loaded when needed: it brings in the file helpers, which only the app
   // needs (and Jest can't load).
   const { syncAssignments, upcomingAssignments } =
     require('services/calendar/actions') as typeof import('services/calendar/actions');
   const message = await syncAssignments(
     type,
-    upcomingAssignments(assignments, dayjs()),
-    leftOut,
+    upcomingAssignments(
+      assignments.filter(a => !isLeftOut(a)),
+      dayjs(),
+    ),
+    assignments.filter(isLeftOut).map(a => a.id),
     { automatic: true },
   );
   if (message) {
@@ -233,27 +234,33 @@ const surfaces: Surface[] = [
   },
   {
     name: 'Calendar assignments',
+    // The lists and settings themselves, which keep their identity until
+    // they change, so the calendar is written only when something did.
     deps: i => [
-      i.shownAssignments,
+      i.assignments,
+      i.hiddenCourses,
+      i.archived,
       i.settings.assignmentCalendarSync,
       i.settings.alarms,
       i.settings.calendarEventLength,
     ],
-    update: ({ shownAssignments, leftOutAssignments, settings }) =>
-      settings.assignmentCalendarSync && shownAssignments
-        ? syncCalendar('calendar', shownAssignments, leftOutAssignments)
+    update: inputs =>
+      inputs.settings.assignmentCalendarSync
+        ? syncCalendar('calendar', inputs)
         : undefined,
   },
   {
     name: 'Reminders assignments',
     deps: i => [
-      i.shownAssignments,
+      i.assignments,
+      i.hiddenCourses,
+      i.archived,
       i.settings.assignmentReminderSync,
       i.settings.alarms,
     ],
-    update: ({ shownAssignments, leftOutAssignments, settings }) =>
-      settings.assignmentReminderSync && shownAssignments
-        ? syncCalendar('reminder', shownAssignments, leftOutAssignments)
+    update: inputs =>
+      inputs.settings.assignmentReminderSync
+        ? syncCalendar('reminder', inputs)
         : undefined,
   },
   {
