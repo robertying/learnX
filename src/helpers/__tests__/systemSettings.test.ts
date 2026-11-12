@@ -6,7 +6,7 @@ it("opens the app's settings, or the System Settings pane on Mac", async () => {
   const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
   const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
   jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(false);
-  await openSystemSettings('notifications');
+  await openSystemSettings('security');
   expect(openSettings).toHaveBeenCalled();
 
   jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
@@ -39,4 +39,18 @@ it("opens the app's notification page on Android", async () => {
   await openSystemSettings('security');
   expect(openSettings).toHaveBeenCalledTimes(2);
   expect(sendIntent).toHaveBeenCalledTimes(2);
+});
+
+it("opens the app's notification page on iOS", async () => {
+  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(false);
+  const openSettings = jest.spyOn(Linking, 'openSettings').mockResolvedValue();
+  const openURL = jest.spyOn(Linking, 'openURL').mockResolvedValue();
+  await openSystemSettings('notifications');
+  expect(openURL).toHaveBeenCalledWith('app-settings:notifications');
+  expect(openSettings).not.toHaveBeenCalled();
+
+  // Not opened: the app's page.
+  openURL.mockRejectedValueOnce(new Error('Unable to open URL'));
+  await openSystemSettings('notifications');
+  expect(openSettings).toHaveBeenCalledTimes(1);
 });

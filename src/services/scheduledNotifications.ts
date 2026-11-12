@@ -54,11 +54,30 @@ export const cancelScheduled = async (
   );
 };
 
+/** What a reminder says and how it interrupts, as the system reports it. */
+const shownFields = ['title', 'subtitle', 'body', 'interruptionLevel'] as const;
+
+/**
+ * Whether a scheduled notification still says what the planned one would.
+ * Only the fields the system reports are compared (Android has no subtitle or
+ * interruption level).
+ */
+const saysTheSame = (scheduled: object, planned: object) =>
+  shownFields.every(field => {
+    const before = (scheduled as Record<string, unknown>)[field];
+    const after =
+      (planned as Record<string, unknown>)[field] ??
+      (field === 'interruptionLevel' ? 'active' : undefined);
+    return before == null || before === after;
+  });
+
 /**
  * Makes the scheduled notifications that `owns` accepts match `plan`:
  * cancels the ones not in it (unless `keep` accepts them) and schedules the
  * ones not scheduled yet. An identifier changes with whatever should
- * reschedule a notification, so one already scheduled is left as it is.
+ * reschedule a notification, so one already scheduled is left as it is,
+ * unless its text or interruption level differ, e.g. after a change of
+ * language or time format, or from an earlier version of the app.
  */
 export const reconcileScheduled = async (
   owns: (identifier: string) => boolean,
@@ -66,14 +85,25 @@ export const reconcileScheduled = async (
   keep: (identifier: string) => boolean = () => false,
 ) => {
   const wanted = new Set(plan.map(n => n.identifier));
-  const scheduled = (await getScheduled(owns)).map(n => n.identifier);
-  const existing = new Set(scheduled);
+  const scheduled = await getScheduled(owns);
+  const contents = new Map(
+    scheduled.map(n => [n.identifier, n.content as object | undefined]),
+  );
+  const isCurrent = (n: PlannedNotification) => {
+    if (!contents.has(n.identifier)) {
+      return false;
+    }
+    const content = contents.get(n.identifier);
+    return !content || saysTheSame(content, n.content);
+  };
   await Promise.all([
     ...scheduled
+      .map(n => n.identifier)
       .filter(id => !wanted.has(id) && !keep(id))
       .map(id => Notifications.cancelScheduledNotificationAsync(id)),
+    // Scheduling an identifier again replaces it.
     ...plan
-      .filter(n => !existing.has(n.identifier))
+      .filter(n => !isCurrent(n))
       .map(n => Notifications.scheduleNotificationAsync(n)),
   ]);
 };

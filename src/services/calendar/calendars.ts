@@ -433,7 +433,8 @@ export const removeCalendars = async () => {
     await requirePermission('reminder', { ask: true });
   }
 
-  const calendars = await Calendar.getCalendars();
+  // Events only: with no type, iOS also needs Reminders access.
+  const calendars = await Calendar.getCalendars(Calendar.EntityTypes.EVENT);
   const reminders = reminderList
     ? await Calendar.getCalendars(Calendar.EntityTypes.REMINDER)
     : [];
