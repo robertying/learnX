@@ -36,7 +36,8 @@
 #
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
-# Android screen size, density, signal and app locale. Which simulator or emulator model to use
+# Android screen size, density, signal, app locale and status bar clock
+# (9:41, no notification icons). Which simulator or emulator model to use
 # depends on the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch
 # iPad, the iPhone Duo, and any Android foldable or tablet emulator.
 set -euo pipefail
@@ -133,7 +134,17 @@ cleanup() {
     adb -s "$device" shell wm density reset || true
     adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
       --locales "$restore_locales" || true
+    demo exit || true
+    adb -s "$device" shell settings put global sysui_demo_allowed 0 || true
   fi
+}
+
+# A SystemUI demo mode command (Android).
+demo() {
+  local command="$1"
+  shift
+  adb -s "$device" shell am broadcast -a com.android.systemui.demo \
+    -e command "$command" "$@" >/dev/null
 }
 trap cleanup EXIT
 
@@ -158,7 +169,13 @@ else
   adb -s "$device" shell wm size "$size"
   adb -s "$device" shell wm density "$density"
   # Full signal; mobile data must stay on, or the bar shows a "!".
-  adb -s "$device" emu gsm signal-profile 4 >/dev/null || true
+  adb -s "$device" emu gsm signal-profile 4 >/dev/null || true  # Demo mode, for the clock (9:41) and to hide notification icons (the
+  # screen lock shield). Only those two: its network icons draw a second
+  # Wi-Fi and a "3G", so the real ones stay.
+  adb -s "$device" shell settings put global sysui_demo_allowed 1
+  demo enter
+  demo clock -e hhmm 0941
+  demo notifications -e visible false
 fi
 
 # Maestro (2.12+) writes takeScreenshot files only inside the run's own
