@@ -1,60 +1,19 @@
 import type { StyleProp, ViewStyle } from 'react-native';
-import type { SFSymbol } from 'sf-symbols-typescript';
+import type { iconDrawables } from 'assets/icons';
+import type { SystemIconName, systemIcons } from 'helpers/systemIcons';
 
 /**
- * The icons an IconButton can show. Each platform maps a name to its own
- * symbol: an SF Symbol on iOS and Mac, a Material Symbol on Android.
+ * The icons a button can show: the `helpers/systemIcons` meanings whose
+ * Material Symbol has a drawable for Compose (`assets/icons`). iOS and Mac
+ * draw the meaning's SF Symbol.
  */
-export type IconButtonIcon =
-  | 'archive'
-  | 'back'
-  | 'checkAll'
-  | 'close'
-  | 'debug'
-  | 'download'
-  | 'exitFullscreen'
-  | 'filter'
-  | 'forward'
-  | 'fullscreen'
-  | 'info'
-  | 'openInNew'
-  | 'preview'
-  | 'refresh'
-  | 'reorder'
-  | 'restore'
-  | 'search'
-  | 'select'
-  | 'settings'
-  | 'share'
-  | 'upload';
-
-/**
- * Each icon's SF Symbol, for the iOS and Mac button and for native header
- * items (`navigation/headerButtons`).
- */
-export const iconSymbols: Record<IconButtonIcon, SFSymbol> = {
-  archive: 'archivebox',
-  back: 'chevron.backward',
-  checkAll: 'checkmark.circle.fill',
-  close: 'xmark',
-  debug: 'wrench.and.screwdriver',
-  download: 'arrow.down.to.line',
-  exitFullscreen: 'arrow.down.right.and.arrow.up.left',
-  filter: 'line.3.horizontal.decrease.circle',
-  forward: 'chevron.forward',
-  fullscreen: 'arrow.up.left.and.arrow.down.right',
-  info: 'info.circle',
-  openInNew: 'arrow.up.forward.app',
-  preview: 'eye',
-  refresh: 'arrow.clockwise',
-  reorder: 'arrow.up.and.down',
-  restore: 'arrow.up.bin',
-  search: 'magnifyingglass',
-  select: 'checklist',
-  settings: 'gearshape',
-  share: 'square.and.arrow.up',
-  upload: 'arrow.up.circle',
-};
+export type IconButtonIcon = {
+  [
+    K in SystemIconName
+  ]: (typeof systemIcons)[K]['android'] extends keyof typeof iconDrawables
+    ? K
+    : never;
+}[SystemIconName];
 
 export interface IconButtonProps {
   icon: IconButtonIcon;

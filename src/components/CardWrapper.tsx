@@ -102,7 +102,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
                 {
                   key: 'moveUp',
                   label: t('moveUp'),
-                  systemImage: 'arrow.up' as const,
+                  systemImage: systemIcons.moveUp.ios,
                   offset: -1 as const,
                 },
               ]
@@ -112,7 +112,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
                 {
                   key: 'moveDown',
                   label: t('moveDown'),
-                  systemImage: 'arrow.down' as const,
+                  systemImage: systemIcons.moveDown.ios,
                   offset: 1 as const,
                 },
               ]
@@ -276,7 +276,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
           <SystemIcon
             testID="reorder-handle"
             style={styles.checkbox}
-            name="reorder"
+            name="dragHandle"
             size={20}
             color={theme.colors.onSurface}
           />

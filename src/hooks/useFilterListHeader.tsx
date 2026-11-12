@@ -5,7 +5,6 @@ import type {
 } from '@react-navigation/native-stack';
 import { ParamListBase } from '@react-navigation/native';
 import FilterMenu from 'components/FilterMenu';
-import { iconSymbols } from 'components/IconButton.shared';
 import { getTitleOptions } from 'components/HeaderTitle';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -113,7 +112,7 @@ const useFilterListHeader = ({
           {
             id: 'archive',
             label: archiveLabel,
-            icon: restoring ? 'restore' : 'archive',
+            icon: restoring ? 'unarchive' : 'archive',
             onPress: onArchiveSelected,
           },
         ]),
@@ -187,7 +186,7 @@ const useFilterListHeader = ({
                       label: button.label,
                       icon: {
                         type: 'sfSymbol',
-                        name: iconSymbols[button.icon],
+                        name: systemIcons[button.icon].ios,
                       },
                       onPress: button.onPress,
                     })),
