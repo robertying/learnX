@@ -49,6 +49,16 @@ export function t(
   return interpolate(translationsFor(isLocaleChinese())[key], params);
 }
 
+/**
+ * `one` for a count of 1, else `other` with `{count}` filled in. English and
+ * Chinese need nothing more: Chinese uses the same words either way.
+ */
+export const tCount = (
+  one: TranslationKey,
+  other: TranslationKey,
+  count: number,
+) => (count === 1 ? t(one, { count }) : t(other, { count }));
+
 /** Escapes text for a dayjs format string, so it is printed as is. */
 export const formatLiteral = (text: string) =>
   `[${text.replace(/[[\]]/g, '')}]`;

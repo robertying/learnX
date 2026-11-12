@@ -1,16 +1,9 @@
 import dayjs from 'dayjs';
 import { Assignment } from 'data/types/state';
-import { t } from './i18n';
+import { t, tCount } from './i18n';
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
-
-/** `one` for a count of 1, `other` with the count filled in otherwise. */
-const counted = (
-  count: number,
-  one: Parameters<typeof t>[0],
-  other: Parameters<typeof t>[0],
-) => (count === 1 ? t(one) : t(other, { count }));
 
 /**
  * "due in 3 hours", "due in 2 days" or "closed 2 days ago", in the app's
@@ -31,19 +24,19 @@ export const deadlineText = (deadline: string, now?: dayjs.ConfigType) => {
   const left = dl.diff(n);
   if (left < HOUR) {
     const minutes = Math.max(1, Math.floor(left / (60 * 1000)));
-    return counted(minutes, 'deadlineInOneMinute', 'deadlineInMinutes');
+    return tCount('deadlineInOneMinute', 'deadlineInMinutes', minutes);
   }
   if (left < DAY) {
-    return counted(
-      Math.floor(left / HOUR),
+    return tCount(
       'deadlineInOneHour',
       'deadlineInHours',
+      Math.floor(left / HOUR),
     );
   }
   const days = dl.startOf('day').diff(n.startOf('day'), 'day');
   return days > 25
     ? t('deadlineIn', { time: n.to(dl, true) })
-    : counted(days, 'deadlineInOneDay', 'deadlineInDays');
+    : tCount('deadlineInOneDay', 'deadlineInDays', days);
 };
 
 /**

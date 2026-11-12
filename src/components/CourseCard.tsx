@@ -1,6 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 import { Course } from 'data/types/state';
-import { t } from 'helpers/i18n';
+import { tCount, type TranslationKey } from 'helpers/i18n';
 import { CardGutter } from './CardRow';
 import SystemIcon from './SystemIcon';
 import CardWrapper, { CardWrapperProps } from './CardWrapper';
@@ -39,8 +39,8 @@ const Count: React.FC<{ icon: CountIcon; count: number }> = ({
   );
 };
 
-const countText = (count: number, one: string, many: string) =>
-  count === 0 ? undefined : count === 1 ? one : many;
+const countText = (count: number, one: TranslationKey, other: TranslationKey) =>
+  count === 0 ? undefined : tCount(one, other, count);
 
 const CourseCard: React.FC<CourseCardProps> = ({
   data: {
@@ -60,19 +60,15 @@ const CourseCard: React.FC<CourseCardProps> = ({
       teacherName,
       countText(
         unreadNoticeCount,
-        t('todayOneUnreadNotice'),
-        t('todayUnreadNotices', { count: unreadNoticeCount }),
+        'todayOneUnreadNotice',
+        'todayUnreadNotices',
       ),
       countText(
         unfinishedAssignmentCount,
-        t('courseOneUnfinishedAssignment'),
-        t('courseUnfinishedAssignments', { count: unfinishedAssignmentCount }),
+        'courseOneUnfinishedAssignment',
+        'courseUnfinishedAssignments',
       ),
-      countText(
-        unreadFileCount,
-        t('todayOneNewFile'),
-        t('todayNewFiles', { count: unreadFileCount }),
-      ),
+      countText(unreadFileCount, 'todayOneNewFile', 'todayNewFiles'),
     ]
       .filter(Boolean)
       .join(', ')}

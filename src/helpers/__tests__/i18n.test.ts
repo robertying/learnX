@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import { tCount } from 'helpers/i18n';
 import { mockLocale } from '../../../jest/locale';
 
 // A runtime that never loads App.tsx (the background task) still formats in
@@ -18,5 +19,13 @@ describe('dayjs setup in helpers/i18n', () => {
       expect(isolated('2026-11-09').format('ddd')).toBe('周一');
       expect(typeof isolated().to).toBe('function');
     });
+  });
+});
+
+describe('tCount', () => {
+  it('uses the one key for 1 and the other key with the count otherwise', () => {
+    expect(tCount('downloadsOneFile', 'downloadsFileCount', 1)).toBe('1 file');
+    expect(tCount('downloadsOneFile', 'downloadsFileCount', 3)).toBe('3 files');
+    expect(tCount('downloadsOneFile', 'downloadsFileCount', 0)).toBe('0 files');
   });
 });

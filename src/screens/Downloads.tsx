@@ -10,7 +10,7 @@ import {
 } from 'services/files/downloads';
 import { exportDownloads } from 'services/files/export';
 import { formatFileSize } from 'helpers/filename';
-import { t } from 'helpers/i18n';
+import { t, tCount } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import {
   Form,
@@ -26,7 +26,7 @@ import { SettingsStackParams } from 'navigation/types';
 type Props = NativeStackScreenProps<SettingsStackParams, 'Downloads'>;
 
 const fileCount = (count: number) =>
-  count === 1 ? t('downloadsOneFile') : t('downloadsFileCount', { count });
+  tCount('downloadsOneFile', 'downloadsFileCount', count);
 
 const summary = ({ count, size }: { count: number; size: number }) =>
   `${fileCount(count)} · ${formatFileSize(size)}`;
