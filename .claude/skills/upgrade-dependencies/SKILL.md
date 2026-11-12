@@ -14,7 +14,8 @@ learnX declares versions in many places besides `package.json`. An upgrade cover
 - `package.json` has one `dependencies` list (no `devDependencies`), with exact versions (no `^` or `~`).
 - Upgrades are done by hand with this skill, which covers every place a version is declared.
 - Minimum OS versions are a support decision, not a dependency: leave the iOS deployment target (`ios/Podfile`, `ios/learnX.xcodeproj`, the module podspecs; Mac Catalyst follows it) and Android's `minSdkVersion` alone unless asked, unless a new React Native or Expo SDK requires a higher one (then raise every place together and update the minimum versions in `README.md` and `CONTRIBUTING.md`).
-- Likewise leave `SWIFT_VERSION` (Swift 5 language mode) and the Java toolchain (`javaVersion`, `java-version` in CI) where they are unless the React Native template moves them.
+- Likewise leave the Java toolchain (`javaVersion`, `java-version` in CI) where it is unless the React Native template moves it.
+- learnX's own Swift is in Swift 6 language mode (`SWIFT_VERSION = 6.0` on every target in `ios/learnX.xcodeproj`, `s.swift_version` in the module podspecs). Keep it there and fix new strict-concurrency errors a bump brings in code, not by lowering the mode. Pods from `node_modules` keep their own setting.
 
 ## Inventory
 
