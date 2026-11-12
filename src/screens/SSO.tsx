@@ -14,7 +14,6 @@ import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import useWebViewProgress from 'hooks/useWebViewProgress';
 import { LoginStackParams } from 'navigation/types';
-import packageJson from '../../package.json';
 
 const ssoCustomScript = require('../helpers/preval/sso.preval.js');
 
@@ -62,7 +61,7 @@ const SSO: React.FC<Props> = ({ route, navigation }) => {
   const injectedJs = fillSSOScript(ssoCustomScript, {
     username,
     password,
-    deviceName: `${DeviceInfo.model()},learnX/${packageJson.version}`,
+    deviceName: `${DeviceInfo.model()},learnX/${DeviceInfo.appVersion()}`,
     fingerPrint,
   });
 

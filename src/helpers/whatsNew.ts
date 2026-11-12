@@ -6,7 +6,6 @@ import semverValid from 'semver/functions/valid';
 import DeviceInfo from 'constants/DeviceInfo';
 import type { TranslationKey } from 'helpers/i18n';
 import type { SystemIconName } from 'helpers/systemIcons';
-import packageJson from '../../package.json';
 
 export type WhatsNewPlatform = 'ios' | 'mac' | 'android';
 
@@ -153,7 +152,7 @@ export const whatsNewSince = (
 
 /** This install's version and platform. */
 export const whatsNewContext = (): WhatsNewContext => ({
-  version: packageJson.version,
+  version: DeviceInfo.appVersion(),
   nativeVersion: nativeApplicationVersion,
   platform: DeviceInfo.isMac()
     ? 'mac'

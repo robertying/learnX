@@ -41,21 +41,19 @@ const useFileDetailHeader = ({
   const routeNames: readonly string[] = navigation.getState().routeNames;
   const isSearch = routeNames.includes('Search');
 
-  const { splitEnabled, showDetail, showMaster, toggleMaster } =
-    useContext(SplitViewContext);
+  const { showDetail, showMaster, toggleMaster } = useContext(SplitViewContext);
 
   useEffect(() => {
     const unavailable = error || !path;
     navigation.setOptions({
-      headerBackVisible: splitEnabled ? showMaster : undefined,
+      headerBackVisible: showDetail ? showMaster : undefined,
       ...headerButtons('right', [
-        splitEnabled &&
+        showDetail &&
           !isSearch && {
             id: 'toggleMaster',
             label: showMaster ? t('fullscreen') : t('exitFullscreen'),
             icon: showMaster ? 'fullscreen' : 'exitFullscreen',
             onPress: () => toggleMaster(!showMaster),
-            disabled: !showDetail,
           },
         {
           id: 'refresh',
@@ -109,7 +107,6 @@ const useFileDetailHeader = ({
     showDetail,
     showInfo,
     showMaster,
-    splitEnabled,
     toggleMaster,
   ]);
 };

@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { t } from 'helpers/i18n';
 import { loginRetryDelay } from 'helpers/loginRetry';
 import { toast } from 'components/Toast';
-import { getCredentials } from 'data/credentials';
+import { hasSavedLogin } from 'data/credentials';
 import { getAuth, useAuthStore } from 'data/auth';
 import { login } from 'data/login';
 import { queryClient } from 'data/queryClient';
@@ -25,15 +25,6 @@ const catchUp = async () => {
   await queryClient
     .refetchQueries({ type: 'active', stale: true }, { cancelRefetch: false })
     .catch(() => {});
-};
-
-const hasSavedLogin = () => {
-  const credentials = getCredentials();
-  return (
-    !!credentials?.username &&
-    !!credentials.password &&
-    !!credentials.fingerPrint
-  );
 };
 
 /** Whether a login may start on its own now. */

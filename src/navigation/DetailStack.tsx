@@ -77,7 +77,8 @@ export const DetailStack = () => (
   </DetailNavigator.Navigator>
 );
 
-const DetailContainer: React.FC<{
+/** A split view's detail stack, in a navigation container of its own. */
+export const DetailContainer: React.FC<{
   navigationContainerRef: DetailNavigationContainerRef;
 }> = ({ navigationContainerRef }) => {
   const theme = useNavigationTheme();

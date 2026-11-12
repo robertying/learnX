@@ -23,7 +23,6 @@ const splitContext = (navigator: object | null) => ({
   detailNavigationContainerRef: navigator
     ? { current: navigator as NavigationContainerRef<DetailStackParams> }
     : null,
-  splitEnabled: true,
   showDetail: true,
   showMaster: true,
   toggleMaster: () => {},

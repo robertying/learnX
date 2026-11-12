@@ -1,5 +1,9 @@
-import { useNavigation } from '@react-navigation/native';
-import { OpenTarget } from 'helpers/openTarget';
+import {
+  useNavigation,
+  type NavigatorScreenParams,
+} from '@react-navigation/native';
+import type { MainTabParams } from 'navigation/types';
+import { OpenTarget, targetRoutes } from 'helpers/openTarget';
 import { noteOpenedFromOutside } from 'hooks/useLaunchSheet';
 import { setPendingTarget } from 'hooks/usePendingTarget';
 
@@ -22,26 +26,12 @@ const useOpenTarget = () => {
     // The list opens the item, as a tap on it would, so it lands in the
     // detail pane of a split view and on top of the list on a phone.
     setPendingTarget(target.id ? target : null);
-    switch (target.type) {
-      case 'notice':
-        return navigation.navigate('MainTab', {
-          screen: 'NoticeStack',
-          params: { screen: 'Notices', pop: true },
-        });
-      case 'assignment':
-        return navigation.navigate('MainTab', {
-          screen: 'AssignmentStack',
-          params: { screen: 'Assignments', pop: true },
-        });
-      case 'file':
-        return navigation.navigate('MainTab', {
-          screen: 'FileStack',
-          params: { screen: 'Files', pop: true },
-        });
-      default:
-        // A new target type needs a case here.
-        return target satisfies never;
-    }
+    const { tab, list } = targetRoutes[target.type];
+    // Each tab with its own list; TypeScript can't pair the two unions.
+    return navigation.navigate('MainTab', {
+      screen: tab,
+      params: { screen: list, pop: true },
+    } as NavigatorScreenParams<MainTabParams>);
   };
 };
 

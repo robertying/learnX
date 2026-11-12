@@ -1,45 +1,17 @@
 import { Platform } from 'react-native';
-import {
-  useNavigation,
-  ParamListBase,
-  RouteProp,
-  Theme,
-} from '@react-navigation/native';
+import { ParamListBase, RouteProp, Theme } from '@react-navigation/native';
 import type {
-  NativeStackHeaderItem,
   NativeStackNavigationOptions,
   NativeStackNavigationProp,
 } from '@react-navigation/native-stack';
 import { t } from 'helpers/i18n';
 import { getTitleOptions } from 'components/HeaderTitle';
-import IconButton from 'components/IconButton';
 import Colors from 'constants/Colors';
 import DeviceInfo from 'constants/DeviceInfo';
 import { getAssignment, getFile, getNotice } from 'data/content';
 import { getCachedCourses } from 'data/queries';
+import { headerButtons } from './headerButtons';
 import type { ItemDetailParams } from './types';
-
-export const BackButton = () => {
-  const navigation = useNavigation();
-
-  return (
-    <IconButton
-      accessibilityLabel={t('close')}
-      onPress={() => navigation.goBack()}
-      icon="close"
-    />
-  );
-};
-
-export const getCloseHeaderItem = (
-  navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'goBack'>,
-): NativeStackHeaderItem => ({
-  type: 'button',
-  identifier: 'close',
-  label: t('close'),
-  icon: { type: 'sfSymbol', name: 'xmark' },
-  onPress: () => navigation.goBack(),
-});
 
 /** Options for the first screen of a modal stack: a close button and a title. */
 export const getModalScreenOptions =
@@ -49,8 +21,14 @@ export const getModalScreenOptions =
   }: {
     navigation: Pick<NativeStackNavigationProp<ParamListBase>, 'goBack'>;
   }): NativeStackNavigationOptions => ({
-    headerLeft: () => <BackButton />,
-    unstable_headerLeftItems: () => [getCloseHeaderItem(navigation)],
+    ...headerButtons('left', [
+      {
+        id: 'close',
+        label: t('close'),
+        icon: 'close',
+        onPress: () => navigation.goBack(),
+      },
+    ]),
     ...getTitleOptions(title),
   });
 

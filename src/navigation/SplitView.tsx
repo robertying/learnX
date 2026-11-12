@@ -6,7 +6,6 @@ import Divider from 'components/Divider';
 
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: DetailNavigationContainerRef | null;
-  splitEnabled: boolean;
   showDetail: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
@@ -14,7 +13,6 @@ const SplitViewContext = createContext<{
   masterWidth: number;
 }>({
   detailNavigationContainerRef: null,
-  splitEnabled: false,
   showDetail: false,
   showMaster: true,
   toggleMaster: () => {},
@@ -43,7 +41,6 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
     <SplitViewContext.Provider
       value={{
         detailNavigationContainerRef,
-        splitEnabled: showDetail,
         showDetail,
         showMaster,
         toggleMaster: setShowMaster,
