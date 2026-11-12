@@ -42,6 +42,6 @@ class MainActivity : ReactActivity() {
         )
 
     private companion object {
-        val LAUNCH_OPTIONS = listOf("mockLatency", "liveUsername", "liveFingerprint")
+        val LAUNCH_OPTIONS = listOf("mockLatency", "storeReport", "liveUsername", "liveFingerprint")
     }
 }

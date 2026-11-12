@@ -64,7 +64,7 @@ export const mergeUserData = (
 });
 
 /**
- * Favorites kept on the phone, as user data saved them before they were synced
+ * Favorites kept on the phone, as 18.0.x saved them before they were synced
  * with the website, turned into actions that add them there. Nothing is
  * removed on either side.
  */
@@ -89,22 +89,10 @@ export const favoritesToActions = (
 export const useUserDataStore = create<UserData>()(
   persist(emptyUserData, {
     name: USER_DATA_KEY,
+    // Version 1 only ran in development builds; 18.0.x's user data comes in
+    // through `data/legacy`.
     version: 2,
     storage: persistStorage,
-    migrate: (saved, version) => {
-      const data = (saved ?? {}) as Partial<UserData> & {
-        favorites?: Partial<Record<BookmarkType, unknown>>;
-      };
-      if (version < 2) {
-        // Version 1 kept favorites on the phone only.
-        const { favorites, ...rest } = data;
-        return {
-          ...rest,
-          pendingActions: favorites ? favoritesToActions(favorites) : [],
-        };
-      }
-      return data;
-    },
     merge: (saved, current) =>
       mergeUserData(current, (saved ?? {}) as Partial<UserData>),
   }),

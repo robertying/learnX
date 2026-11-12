@@ -120,6 +120,16 @@
   },
   "overrides": [
     {
+      "files": [".maestro/**/*.js"],
+      // Maestro's runScript globals, and the flow's env values (upgrade/).
+      "globals": {
+        "maestro": "readonly",
+        "output": "writable",
+        "PHASE": "readonly",
+        "USERNAME": "readonly"
+      }
+    },
+    {
       "files": ["**/*.ts", "**/*.tsx"],
       "plugins": ["typescript"],
       "rules": {
