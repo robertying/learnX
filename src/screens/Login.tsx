@@ -59,12 +59,16 @@ const Login: React.FC<Props> = ({ navigation }) => {
     () =>
       useAuthStore.subscribe((state, previous) => {
         if (previous.loggingIn && !state.loggingIn && state.error) {
+          const message = t(
+            state.error === FailReason.BAD_CREDENTIAL
+              ? 'wrongCredentials'
+              : 'loginFailed',
+          );
           toast(
-            t(
-              state.error === FailReason.BAD_CREDENTIAL
-                ? 'wrongCredentials'
-                : 'loginFailed',
-            ),
+            // Debug builds also say what the server answered.
+            __DEV__
+              ? `${message}\n${state.error}${state.errorDetail ? `: ${state.errorDetail}` : ''}`
+              : message,
             'error',
             8 * 1000,
           );

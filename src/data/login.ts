@@ -74,7 +74,7 @@ export async function login({
     return;
   }
 
-  useAuthStore.setState({ loggingIn: true, error: null });
+  useAuthStore.setState({ loggingIn: true, error: null, errorDetail: null });
   // Before the saved login is replaced: data saved before owners were
   // recorded belongs to the saved login.
   const previousOwner = getDataOwner() ?? getCredentials()?.username ?? null;
@@ -126,11 +126,6 @@ export async function login({
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
-    if (__DEV__) {
-      // What the SSO server answered (thu-learn-lib's `extra`), for debugging
-      // a login it turned down.
-      console.warn('Login failed', errorReason(err), (err as ApiError)?.extra);
-    }
     // Offline when the last attempt got no answer; anything else (a wrong
     // password, or the server failing the login) is the server turning it
     // down.
@@ -139,10 +134,28 @@ export async function login({
       loggingIn: false,
       loggedIn: false,
       error: errorReason(err),
+      // What the SSO server answered (thu-learn-lib's `extra`), which the
+      // login screen shows in debug builds.
+      errorDetail: __DEV__ ? errorDetail(err) : null,
       failure: offline ? 'offline' : 'rejected',
     });
   }
 }
+
+const errorDetail = (err: unknown) => {
+  const extra = (err as Partial<ApiError> | null)?.extra;
+  if (extra === undefined || extra === null) {
+    return null;
+  }
+  if (typeof extra === 'string' || extra instanceof Error) {
+    return String(extra);
+  }
+  try {
+    return JSON.stringify(extra);
+  } catch {
+    return null;
+  }
+};
 
 /**
  * Leaves the login screen for the saved data, without a session. Lists show

@@ -247,8 +247,9 @@ describe('Login', () => {
         failure: 'rejected',
       }),
     );
+    // Debug builds (tests run as one) add the reason and the server's answer.
     expect(toast).toHaveBeenLastCalledWith(
-      'Wrong username or password.',
+      `Wrong username or password.\n${FailReason.BAD_CREDENTIAL}`,
       'error',
       8000,
     );
@@ -258,10 +259,15 @@ describe('Login', () => {
       useAuthStore.setState({
         loggingIn: false,
         error: FailReason.ERROR_FETCH_FROM_ID,
+        errorDetail: 'Two-factor page',
         failure: 'rejected',
       }),
     );
-    expect(toast).toHaveBeenLastCalledWith(t('loginFailed'), 'error', 8000);
+    expect(toast).toHaveBeenLastCalledWith(
+      `${t('loginFailed')}\n${FailReason.ERROR_FETCH_FROM_ID}: Two-factor page`,
+      'error',
+      8000,
+    );
     expect(toast).toHaveBeenCalledTimes(2);
 
     // A state change that isn't the end of a login says nothing.

@@ -20,6 +20,8 @@ export interface AuthState {
   /** A session is open, so queries can run. */
   loggedIn: boolean;
   error: FailReason | null;
+  /** Debug builds: what the server answered to the failed login. */
+  errorDetail: string | null;
   /** Set once a failed login has been told apart; null while logged in. */
   failure: LoginFailure | null;
   /** The user asked to log in again from the main UI. */
@@ -31,6 +33,7 @@ export const initialAuth: AuthState = {
   ssoInProgress: false,
   loggedIn: false,
   error: null,
+  errorDetail: null,
   failure: null,
   reloginRequested: false,
 };
