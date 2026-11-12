@@ -6,6 +6,10 @@
 #   maestro-fold-posture.patch  the setFoldPosture command (closed, halfFold,
 #                               flat) for foldable simulators, from upstream
 #                               PR mobile-dev-inc/Maestro#3621
+#   maestro-hierarchy-fallback.patch
+#                               the hierarchy of an app whose accessibility
+#                               tree is too deep for one snapshot (only the
+#                               status bar came back)
 #
 #   scripts/maestro/build.sh [maestro checkout]   (default: ~/repos/Maestro)
 #
@@ -29,7 +33,8 @@ if [ "${MAESTRO_KEEP:-}" != 1 ]; then
   git fetch origin main >&2
   git checkout -q -B learnx-patched "$base" >&2
   git -c commit.gpgsign=false am -q "$here/maestro-display.patch" \
-    "$here/maestro-fold-posture.patch" >&2
+    "$here/maestro-fold-posture.patch" \
+    "$here/maestro-hierarchy-fallback.patch" >&2
 fi
 
 if [ -z "${JAVA_HOME:-}" ] && [ -x /usr/libexec/java_home ]; then
