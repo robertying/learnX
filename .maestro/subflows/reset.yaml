@@ -1,0 +1,14 @@
+# Start from a fresh install: clear the app's data and keychain. Skipped with
+# STATE_CLEARED (from scripts/e2e.sh), for a caller that cleared the app
+# itself: Android's app locale (`cmd locale set-app-locales`), which
+# scripts/store-screenshots.sh sets after clearing, would go with the data.
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      true: ${!STATE_CLEARED}
+    commands:
+      - launchApp:
+          clearState: true
+          clearKeychain: true
+      - stopApp

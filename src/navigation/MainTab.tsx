@@ -185,6 +185,7 @@ const MainTab = () => {
               title: tab.title,
               sfSymbol: systemIcons[iconOf(tab)].ios,
               badge: tab.name === 'SettingStack' && settingsBadge,
+              testID: tab.testID,
             }}
           />
         ))}

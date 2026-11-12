@@ -39,6 +39,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		5A0710000000000000000F07 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
+			remoteInfo = learnX;
+		};
 		5A0710000000000000000E07 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
@@ -94,6 +101,7 @@
 		5A071000000000000000000D /* ScrollEdgeEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ScrollEdgeEffect.swift; path = learnX/ScrollEdgeEffect.swift; sourceTree = "<group>"; };
 		5A0710000000000000000D01 /* SharedFileInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedFileInbox.swift; path = ../modules/share/ios/SharedFileInbox.swift; sourceTree = SOURCE_ROOT; };
 		5A0710000000000000000E01 /* learnXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A0710000000000000000F01 /* learnXUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		98A6289E98CCDFCA5DBBFDA4 /* Pods-ExpoWidgetsTarget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExpoWidgetsTarget.release.xcconfig"; path = "Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget.release.xcconfig"; sourceTree = "<group>"; };
@@ -132,9 +140,23 @@
 			path = learnXTests;
 			sourceTree = "<group>";
 		};
+		5A0710000000000000000F02 /* learnXUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
+			path = learnXUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5A0710000000000000000F05 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -209,6 +231,7 @@
 				D40B9F702B248C8E004BC08C /* ShareExtension */,
 				E7D600000000000000000006 /* ExpoWidgetsTarget */,
 				5A0710000000000000000E02 /* learnXTests */,
+				5A0710000000000000000F02 /* learnXUITests */,
 				AC5859D138A6B40B1C9419B9 /* ExpoModulesProviders */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				83CBBA001A601CBA00E9B192 /* Products */,
@@ -226,6 +249,7 @@
 				D40B9F6F2B248C8E004BC08C /* ShareExtension.appex */,
 				E7D600000000000000000002 /* ExpoWidgetsTarget.appex */,
 				5A0710000000000000000E01 /* learnXTests.xctest */,
+				5A0710000000000000000F01 /* learnXUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -356,6 +380,27 @@
 			productReference = 5A0710000000000000000E01 /* learnXTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		5A0710000000000000000F03 /* learnXUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A0710000000000000000F09 /* Build configuration list for PBXNativeTarget "learnXUITests" */;
+			buildPhases = (
+				5A0710000000000000000F04 /* Sources */,
+				5A0710000000000000000F05 /* Frameworks */,
+				5A0710000000000000000F06 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				5A0710000000000000000F08 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				5A0710000000000000000F02 /* learnXUITests */,
+			);
+			name = learnXUITests;
+			productName = learnXUITests;
+			productReference = 5A0710000000000000000F01 /* learnXUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		D40B9F6E2B248C8E004BC08C /* ShareExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = D40B9F7A2B248C8E004BC08C /* Build configuration list for PBXNativeTarget "ShareExtension" */;
@@ -410,6 +455,10 @@
 						CreatedOnToolsVersion = 26.0;
 						TestTargetID = 13B07F861A680F5B00A75B9A;
 					};
+					5A0710000000000000000F03 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 13B07F861A680F5B00A75B9A;
+					};
 					D40B9F6E2B248C8E004BC08C = {
 						CreatedOnToolsVersion = 15.0.1;
 						LastSwiftMigration = 1500;
@@ -437,11 +486,19 @@
 				D40B9F6E2B248C8E004BC08C /* ShareExtension */,
 				E7D600000000000000000001 /* ExpoWidgetsTarget */,
 				5A0710000000000000000E03 /* learnXTests */,
+				5A0710000000000000000F03 /* learnXUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5A0710000000000000000F06 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		13B07F8E1A680F5B00A75B9A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -739,6 +796,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5A0710000000000000000F04 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		13B07F871A680F5B00A75B9A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -784,6 +848,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		5A0710000000000000000F08 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 13B07F861A680F5B00A75B9A /* learnX */;
+			targetProxy = 5A0710000000000000000F07 /* PBXContainerItemProxy */;
+		};
 		5A0710000000000000000E08 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 13B07F861A680F5B00A75B9A /* learnX */;
@@ -814,6 +883,42 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		5A0710000000000000000F0A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnXUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+				TEST_TARGET_NAME = learnX;
+			};
+			name = Debug;
+		};
+		5A0710000000000000000F0B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				PRODUCT_BUNDLE_IDENTIFIER = io.robertying.learnXUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2,6";
+				TEST_TARGET_NAME = learnX;
+			};
+			name = Release;
+		};
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3B4392A12AC88292D35C810B /* Pods-learnX.debug.xcconfig */;
@@ -1466,6 +1571,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5A0710000000000000000F09 /* Build configuration list for PBXNativeTarget "learnXUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A0710000000000000000F0A /* Debug */,
+				5A0710000000000000000F0B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "learnX" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

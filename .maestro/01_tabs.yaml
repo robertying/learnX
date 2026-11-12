@@ -7,7 +7,8 @@ name: Log in and visit every tab
     file: subflows/tab.yaml
     env:
       TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
-- assertVisible: '${T_todayDueSoon}'
+# The section header may carry more text around the label.
+- assertVisible: '.*(${T_todayDueSoon}).*'
 - runFlow:
     file: subflows/tab.yaml
     env:

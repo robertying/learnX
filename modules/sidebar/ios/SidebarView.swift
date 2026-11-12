@@ -38,6 +38,7 @@ final class SidebarView: ExpoView, UICollectionViewDelegate {
       content.text = item.title
       content.image = UIImage(systemName: item.systemImage)
       cell.contentConfiguration = content
+      cell.accessibilityIdentifier = item.testID.isEmpty ? nil : item.testID
 
       if item.badge {
         let (accessory, dot) = Self.badge()

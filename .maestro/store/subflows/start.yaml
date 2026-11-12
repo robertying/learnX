@@ -1,0 +1,21 @@
+# From a fresh install, log in and clear the Settings badge, which the
+# screenshots mustn't show: opening Course Information Sharing once marks it
+# seen. Ends on the notices.
+appId: ${APP_ID}
+---
+- runFlow: ../../subflows/reset.yaml
+- runFlow: ../../subflows/login.yaml
+- runFlow: ../../subflows/settings.yaml
+- tapOn: '.*(${T_courseInformationSharing}).*'
+- waitForAnimationToEnd
+- runFlow:
+    file: ../../subflows/back.yaml
+    env:
+      LIST: '.*(${T_logout}).*'
+- runFlow:
+    file: ../../subflows/tab.yaml
+    env:
+      TAB: 'tab-notices|bell\.fill'
+- extendedWaitUntil:
+    visible: '.*(${MOCK_STORE_NOTICE}).*'
+    timeout: 10000

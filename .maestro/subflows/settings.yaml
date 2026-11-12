@@ -7,5 +7,6 @@ appId: ${APP_ID}
     env:
       TAB: 'tab-today|(sunrise|sun\.max|sunset|moon\.stars)\.fill'
 # The iOS header button only exposes its label; Android's has the same one.
-# iOS reads a badge after the label ('Settings, New').
-- tapOn: '(${T_settings})(, .*)?'
+# With the "new" badge, Maestro reads the iOS button as the badge's value,
+# UIKit's own text, not the label; Android reads the badge after the label.
+- tapOn: '(${T_settings})(, .*)?|New items?|新项目'

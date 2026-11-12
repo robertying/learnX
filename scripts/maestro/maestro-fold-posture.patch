@@ -1,0 +1,1169 @@
+From 8c9a9f3c88bacab61cd873f52c07092badf1abcc Mon Sep 17 00:00:00 2001
+From: Mauricio Chirino <1657723+mchirino89@users.noreply.github.com>
+Date: Tue, 22 Sep 2026 15:52:04 -0300
+Subject: [PATCH 1/4] feat(ios): add setFoldPosture for foldable simulators
+
+Adds a `setFoldPosture` command that folds a foldable iOS simulator
+(iPhone Duo, Xcode 27.1+) to `closed`, `halfFold` or `flat`.
+
+simctl exposes no hinge control, so the driver compiles a small helper
+from `hinge_helper.c`, spawns it inside the simulator, and posts the
+private vendor-defined HID event that Device Hub's hinge slider sends.
+The resulting angle is read back through `devicectl device motion
+hinge-angle`, which catches both a simulator that cannot fold and a
+future Xcode that changes the private event -- `optional: true`
+downgrades either failure to a warning.
+
+The YAML shape follows `pressKey`: a `@YamlValues` String plus a
+delegating creator, so the published schema describes the command
+without a hand-written deserializer. Drivers that cannot fold inherit a
+default that fails with a clear message.
+
+Tent, vertical and split-screen postures are left out: the hinge only
+spans 0-180 degrees, so an angle alone cannot separate laptop from tent,
+and nothing in simctl or devicectl drives split-screen.
+
+Refs #3617
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FWXWaSjH7YFRgKFCykQLuU
+---
+ .../src/main/java/maestro/Driver.kt           |  4 +
+ .../src/main/java/maestro/Maestro.kt          |  9 +++
+ .../main/java/maestro/device/FoldPosture.kt   | 18 +++++
+ .../main/java/maestro/drivers/IOSDriver.kt    |  7 ++
+ .../src/main/kotlin/device/IOSDevice.kt       |  6 ++
+ .../src/main/kotlin/device/SimctlIOSDevice.kt |  4 +
+ .../main/kotlin/util/LocalSimulatorUtils.kt   | 70 ++++++++++++++++
+ .../src/main/resources/hinge_helper.c         | 79 +++++++++++++++++++
+ .../src/main/java/ios/LocalIOSDevice.kt       |  4 +
+ .../main/java/maestro/orchestra/Commands.kt   | 14 ++++
+ .../java/maestro/orchestra/MaestroCommand.kt  |  3 +
+ .../main/java/maestro/orchestra/Orchestra.kt  |  4 +
+ .../orchestra/yaml/YamlFluentCommand.kt       | 17 ++++
+ .../orchestra/yaml/YamlSetFoldPosture.kt      | 20 +++++
+ .../MaestroCommandSerializationTest.kt        | 28 +++++++
+ .../kotlin/maestro/test/drivers/FakeDriver.kt | 11 +++
+ .../kotlin/maestro/test/IntegrationTest.kt    | 24 ++++++
+ .../test/resources/155_set_fold_posture.yaml  |  7 ++
+ 18 files changed, 329 insertions(+)
+ create mode 100644 maestro-client/src/main/java/maestro/device/FoldPosture.kt
+ create mode 100644 maestro-ios-driver/src/main/resources/hinge_helper.c
+ create mode 100644 maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlSetFoldPosture.kt
+ create mode 100644 maestro-test/src/test/resources/155_set_fold_posture.yaml
+
+diff --git a/maestro-client/src/main/java/maestro/Driver.kt b/maestro-client/src/main/java/maestro/Driver.kt
+index 9d6747bc..0b4f1284 100644
+--- a/maestro-client/src/main/java/maestro/Driver.kt
++++ b/maestro-client/src/main/java/maestro/Driver.kt
+@@ -21,6 +21,7 @@ package maestro
+ 
+ import maestro.device.DeviceOrientation
+ import maestro.device.AppCrashReport
++import maestro.device.FoldPosture
+ import maestro.device.CapturedDeviceArtifact
+ import okio.Sink
+ import java.io.File
+@@ -117,6 +118,9 @@ interface Driver {
+ 
+     fun setDarkMode(enabled: Boolean)
+ 
++    fun setFoldPosture(posture: FoldPosture): Unit =
++        throw MaestroException.InvalidCommand("setFoldPosture is only supported on foldable iOS simulators")
++
+     fun setAndroidChromeDevToolsEnabled(enabled: Boolean) = Unit
+ 
+     fun queryOnDeviceElements(query: OnDeviceElementQuery): List<TreeNode> {
+diff --git a/maestro-client/src/main/java/maestro/Maestro.kt b/maestro-client/src/main/java/maestro/Maestro.kt
+index ddedf173..aba775fa 100644
+--- a/maestro-client/src/main/java/maestro/Maestro.kt
++++ b/maestro-client/src/main/java/maestro/Maestro.kt
+@@ -24,6 +24,7 @@ import maestro.UiElement.Companion.toUiElementOrNull
+ import maestro.device.AppCrashReport
+ import maestro.device.CapturedDeviceArtifact
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.drivers.CdpWebDriver
+ import maestro.utils.MaestroTimer
+ import maestro.utils.ScreenshotUtils
+@@ -785,6 +786,14 @@ class Maestro(
+         driver.setDarkMode(enabled)
+     }
+ 
++    suspend fun setFoldPosture(posture: FoldPosture) {
++        LOGGER.info("Setting fold posture: $posture")
++
++        runInterruptible(Dispatchers.IO) { driver.setFoldPosture(posture) }
++
++        waitForAppToSettle()
++    }
++
+     suspend fun setAndroidChromeDevToolsEnabled(enabled: Boolean) = runInterruptible(Dispatchers.IO) {
+         driver.setAndroidChromeDevToolsEnabled(enabled)
+     }
+diff --git a/maestro-client/src/main/java/maestro/device/FoldPosture.kt b/maestro-client/src/main/java/maestro/device/FoldPosture.kt
+new file mode 100644
+index 00000000..66067df6
+--- /dev/null
++++ b/maestro-client/src/main/java/maestro/device/FoldPosture.kt
+@@ -0,0 +1,18 @@
++package maestro.device
++
++/**
++ * Hinge postures of a foldable device, each pinned to the hinge angle that produces it
++ * (0° = closed, 180° = flat).
++ *
++ * [yamlValue] is the word written in YAML. It is deliberately NOT a `@JsonProperty` on each constant:
++ * the constant name is what the MaestroCommand wire writes and reads back.
++ */
++enum class FoldPosture(val yamlValue: String, val hingeAngle: Double) {
++    CLOSED("closed", 0.0),
++    HALF_FOLD("halfFold", 90.0),
++    FLAT("flat", 180.0);
++
++    companion object {
++        fun getByYamlValue(value: String): FoldPosture? = entries.firstOrNull { it.yamlValue == value }
++    }
++}
+diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+index 86159988..dca80a2e 100644
+--- a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
++++ b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+@@ -27,6 +27,7 @@ import maestro.utils.network.XCUITestServerError
+ import maestro.Capability
+ import maestro.DeviceInfo
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.DeviceUnreachableException
+ import maestro.Driver
+ import maestro.Filters
+@@ -551,6 +552,12 @@ class IOSDriver(
+         }
+     }
+ 
++    override fun setFoldPosture(posture: FoldPosture) {
++        metrics.measured("operation", mapOf("command" to "setFoldPosture", "posture" to posture.name)) {
++            runDeviceCall("setFoldPosture") { iosDevice.setHingeAngle(posture.hingeAngle) }
++        }
++    }
++
+     private fun addMediaToDevice(mediaFile: File) {
+         metrics.measured("operation", mapOf("command" to "addMediaToDevice")) {
+             val namedSource = NamedSource(
+diff --git a/maestro-ios-driver/src/main/kotlin/device/IOSDevice.kt b/maestro-ios-driver/src/main/kotlin/device/IOSDevice.kt
+index 14eca7f6..4964c91c 100644
+--- a/maestro-ios-driver/src/main/kotlin/device/IOSDevice.kt
++++ b/maestro-ios-driver/src/main/kotlin/device/IOSDevice.kt
+@@ -167,6 +167,12 @@ interface IOSDevice : AutoCloseable {
+     fun eraseText(charactersToErase: Int)
+ 
+     fun addMedia(path: String)
++
++    /**
++     * Sets the hinge angle of a foldable device, 0 (closed) to 180 (flat).
++     */
++    fun setHingeAngle(degrees: Double): Unit =
++        throw UnsupportedOperationException("Setting the hinge angle is only supported on foldable iOS simulators")
+ }
+ 
+ interface IOSScreenRecording : AutoCloseable {
+diff --git a/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt b/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt
+index 2894584c..44d932b5 100644
+--- a/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt
++++ b/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt
+@@ -158,6 +158,10 @@ class SimctlIOSDevice(
+         TODO("Not yet implemented")
+     }
+ 
++    override fun setHingeAngle(degrees: Double) {
++        localSimulatorUtils.setHingeAngle(deviceId, degrees)
++    }
++
+     override fun isDarkModeEnabled(): Boolean {
+         TODO("Not yet implemented")
+     }
+diff --git a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+index d324f520..15d95634 100644
+--- a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
++++ b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+@@ -17,6 +17,7 @@ import java.time.Instant
+ import java.time.LocalDateTime
+ import java.time.format.DateTimeFormatter
+ import kotlin.io.path.Path
++import kotlin.math.abs
+ 
+ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+ 
+@@ -24,6 +25,8 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+ 
+     companion object {
+         private const val LOG_DIR_DATE_FORMAT = "yyyy-MM-dd_HHmmss"
++        private const val HINGE_ANGLE_TOLERANCE = 1.0
++        private val HINGE_ANGLE_PATTERN = Regex("""\bAngle:\s*(\d+(?:[.,]\d+)?)""")
+     }
+ 
+     private val homedir = System.getProperty("user.home")
+@@ -384,6 +387,73 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         )
+     }
+ 
++    /**
++     * Folds a foldable simulator (iPhone Duo, Xcode 27.1+) to [degrees], 0 (closed) to 180 (flat).
++     *
++     * simctl has no hinge command, so a small helper posts Device Hub's private hinge event from inside
++     * the simulator. The angle is then read back through devicectl, which catches both a simulator that
++     * cannot fold and an Xcode release that changed the private event.
++     */
++    fun setHingeAngle(deviceId: String, degrees: Double) {
++        runCommand(listOf("xcrun", "simctl", "spawn", deviceId, hingeHelper.absolutePath, degrees.toString()))
++
++        val actual = readHingeAngle(deviceId, expected = degrees)
++            ?: throw SimctlError(
++                "Device $deviceId did not report a hinge angle. Fold postures need a foldable simulator such as iPhone Duo (Xcode 27.1+)"
++            )
++        if (abs(actual - degrees) > HINGE_ANGLE_TOLERANCE) {
++            throw SimctlError("Device $deviceId reports a hinge angle of $actual° after setting it to $degrees°")
++        }
++    }
++
++    /**
++     * Streams `devicectl device motion hinge-angle` until it reports [expected], or until the session ends.
++     * Returns the last angle seen, or null if the device never reported one.
++     */
++    private fun readHingeAngle(deviceId: String, expected: Double): Double? {
++        val process = ProcessBuilder(
++            "xcrun", "devicectl", "device", "motion", "hinge-angle",
++            "--device", deviceId, "--session-timeout", "5", "--timeout", "10",
++        ).redirectErrorStream(true).start()
++
++        try {
++            var angle: Double? = null
++            process.inputStream.bufferedReader().useLines { lines ->
++                for (line in lines) {
++                    // devicectl formats with the host locale, so the decimal separator may be a comma.
++                    val reading = HINGE_ANGLE_PATTERN.find(line)?.groupValues?.get(1) ?: continue
++                    val degrees = reading.replace(',', '.').toDouble()
++                    angle = degrees
++                    if (abs(degrees - expected) <= HINGE_ANGLE_TOLERANCE) break
++                }
++            }
++            return angle
++        } finally {
++            // devicectl can hang past its session timeout, so never wait for it to exit on its own.
++            process.destroy()
++        }
++    }
++
++    private val hingeHelper: File by lazy {
++        val dir = tempFileHandler.createTempDirectory()
++        val source = File(dir, "hinge_helper.c")
++        val binary = File(dir, "hinge_helper")
++        val resource = LocalSimulatorUtils::class.java.getResourceAsStream("/hinge_helper.c")
++            ?: throw IllegalStateException("hinge_helper.c file not found")
++        resource.use { input -> source.outputStream().use { input.copyTo(it) } }
++
++        // Simulators run the host's architecture.
++        val arch = if (System.getProperty("os.arch") == "aarch64") "arm64" else "x86_64"
++        runCommand(
++            listOf(
++                "xcrun", "-sdk", "iphonesimulator", "clang", "-arch", arch, "-mios-simulator-version-min=17.0",
++                "-O2", "-o", binary.path, source.path, "-framework", "IOKit", "-framework", "CoreFoundation",
++            )
++        )
++        runCommand(listOf("codesign", "-f", "-s", "-", binary.path))
++        binary
++    }
++
+     fun openURL(deviceId: String, url: String) {
+         runCommand(
+             listOf(
+diff --git a/maestro-ios-driver/src/main/resources/hinge_helper.c b/maestro-ios-driver/src/main/resources/hinge_helper.c
+new file mode 100644
+index 00000000..672ff147
+--- /dev/null
++++ b/maestro-ios-driver/src/main/resources/hinge_helper.c
+@@ -0,0 +1,79 @@
++// Runs inside a foldable iOS Simulator (via `xcrun simctl spawn`) and posts the same
++// vendor-defined HID event that the hidden hinge slider in Xcode's Device Hub sends.
++// The event format is private and undocumented, so a new Xcode may change it; callers
++// verify the result with `xcrun devicectl device motion hinge-angle`.
++//
++//   hinge_helper <degrees>
++//
++// Adapted from https://github.com/artemnovichkov/hinge
++// Copyright (c) 2026 Artem Novichkov. Licensed under the MIT License:
++// Permission is hereby granted, free of charge, to any person obtaining a copy of this software
++// and associated documentation files (the "Software"), to deal in the Software without restriction,
++// including without limitation the rights to use, copy, modify, merge, publish, distribute,
++// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
++// furnished to do so, subject to the following conditions: The above copyright notice and this
++// permission notice shall be included in all copies or substantial portions of the Software.
++// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
++
++#include <CoreFoundation/CoreFoundation.h>
++#include <mach/mach_time.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++
++typedef struct __IOHIDEvent *IOHIDEventRef;
++typedef struct __IOHIDEventSystemClient *IOHIDEventSystemClientRef;
++
++extern IOHIDEventRef IOHIDEventCreateVendorDefinedEvent(CFAllocatorRef allocator, uint64_t timeStamp,
++    uint32_t usagePage, uint32_t usage, uint32_t version, const uint8_t *data, CFIndex length, uint32_t options);
++extern IOHIDEventSystemClientRef IOHIDEventSystemClientCreateWithType(CFAllocatorRef allocator, int type,
++    CFDictionaryRef properties);
++extern void IOHIDEventSystemClientDispatchEvent(IOHIDEventSystemClientRef client, IOHIDEventRef event);
++extern CFDataRef IOCFSerialize(CFTypeRef object, CFOptionFlags options);
++
++enum {
++    kUsagePage = 0xFF61,
++    kUsage = 0x5B,
++    kClientTypeSimple = 4,
++    kSerializeBinary = 1,
++};
++
++int main(int argc, char **argv) {
++    if (argc != 2) {
++        fprintf(stderr, "usage: hinge_helper <degrees>\n");
++        return 64;
++    }
++
++    double degrees = atof(argv[1]);
++    if (degrees < 0) degrees = 0;
++    if (degrees > 180) degrees = 180;
++
++    IOHIDEventSystemClientRef client = IOHIDEventSystemClientCreateWithType(NULL, kClientTypeSimple, NULL);
++    if (!client) {
++        fprintf(stderr, "hinge_helper: failed to create HID event system client\n");
++        return 1;
++    }
++
++    CFNumberRef value = CFNumberCreate(NULL, kCFNumberDoubleType, &degrees);
++    const void *keys[] = {CFSTR("provider"), CFSTR("source"), CFSTR("type"), CFSTR("value")};
++    const void *values[] = {CFSTR("com.apple.Virtualization"), CFSTR("hinge-slider-control"), CFSTR("range"), value};
++    CFDictionaryRef payload = CFDictionaryCreate(NULL, keys, values, 4,
++        &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
++    CFDataRef data = IOCFSerialize(payload, kSerializeBinary);
++    if (!data) {
++        fprintf(stderr, "hinge_helper: failed to serialize the hinge event\n");
++        return 1;
++    }
++
++    IOHIDEventRef event = IOHIDEventCreateVendorDefinedEvent(NULL, mach_absolute_time(), kUsagePage, kUsage, 0,
++        CFDataGetBytePtr(data), CFDataGetLength(data), 0);
++    if (!event) {
++        fprintf(stderr, "hinge_helper: failed to create the hinge event\n");
++        return 1;
++    }
++    IOHIDEventSystemClientDispatchEvent(client, event);
++
++    // Give the event system a moment to deliver before the process exits.
++    usleep(100000);
++    return 0;
++}
+diff --git a/maestro-ios/src/main/java/ios/LocalIOSDevice.kt b/maestro-ios/src/main/java/ios/LocalIOSDevice.kt
+index afe8c683..8db7d73d 100644
+--- a/maestro-ios/src/main/java/ios/LocalIOSDevice.kt
++++ b/maestro-ios/src/main/java/ios/LocalIOSDevice.kt
+@@ -167,4 +167,8 @@ class LocalIOSDevice(
+     override fun addMedia(path: String) {
+         deviceController.addMedia(path)
+     }
++
++    override fun setHingeAngle(degrees: Double) {
++        deviceController.setHingeAngle(degrees)
++    }
+ }
+diff --git a/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt b/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt
+index 5695e394..492f17d7 100644
+--- a/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt
++++ b/maestro-orchestra-models/src/main/java/maestro/orchestra/Commands.kt
+@@ -20,6 +20,7 @@
+ package maestro.orchestra
+ 
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.KeyCode
+ import maestro.Point
+ import maestro.ScrollDirection
+@@ -1287,6 +1288,19 @@ data class AssertLightModeCommand(
+     }
+ }
+ 
++data class SetFoldPostureCommand(
++    val posture: FoldPosture,
++    override val label: String? = null,
++    override val optional: Boolean = false,
++) : Command {
++    override val originalDescription: String
++        get() = "Set fold posture ${posture.yamlValue}"
++
++    override fun evaluateScripts(jsEngine: JsEngine): Command {
++        return this
++    }
++}
++
+ internal fun tapOnDescription(isLongPress: Boolean?, repeat: TapRepeat?): String {
+     return if (isLongPress == true) "Long press"
+     else if (repeat != null) {
+diff --git a/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt b/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt
+index 5357d4ae..10e8df67 100644
+--- a/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt
++++ b/maestro-orchestra-models/src/main/java/maestro/orchestra/MaestroCommand.kt
+@@ -77,6 +77,7 @@ data class MaestroCommand(
+     val toggleDarkModeCommand: ToggleDarkModeCommand? = null,
+     val assertDarkModeCommand: AssertDarkModeCommand? = null,
+     val assertLightModeCommand: AssertLightModeCommand? = null,
++    val setFoldPostureCommand: SetFoldPostureCommand? = null,
+     val retryCommand: RetryCommand? = null,
+     // @JsonIgnore: serializing would duplicate the full origin YAML on every command in the DB.
+     @JsonIgnore val sourceInfo: SourceInfo? = null,
+@@ -131,6 +132,7 @@ data class MaestroCommand(
+         toggleDarkModeCommand = command as? ToggleDarkModeCommand,
+         assertDarkModeCommand = command as? AssertDarkModeCommand,
+         assertLightModeCommand = command as? AssertLightModeCommand,
++        setFoldPostureCommand = command as? SetFoldPostureCommand,
+         retryCommand = command as? RetryCommand
+     )
+ 
+@@ -183,6 +185,7 @@ data class MaestroCommand(
+         toggleDarkModeCommand != null -> toggleDarkModeCommand
+         assertDarkModeCommand != null -> assertDarkModeCommand
+         assertLightModeCommand != null -> assertLightModeCommand
++        setFoldPostureCommand != null -> setFoldPostureCommand
+         retryCommand != null -> retryCommand
+         else -> null
+     }
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt b/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
+index 3d21f70d..46e12b75 100644
+--- a/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/Orchestra.kt
+@@ -490,6 +490,10 @@ class Orchestra(
+             is ToggleDarkModeCommand -> toggleDarkMode()
+             is AssertDarkModeCommand -> assertDarkMode(expected = true)
+             is AssertLightModeCommand -> assertDarkMode(expected = false)
++            is SetFoldPostureCommand -> {
++                maestro.setFoldPosture(command.posture)
++                true
++            }
+             is RetryCommand -> retryCommand(command, config)
+             else -> true
+         }.also { mutating ->
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt
+index 2e48108c..75126813 100644
+--- a/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlFluentCommand.kt
+@@ -21,6 +21,7 @@ package maestro.orchestra.yaml
+ 
+ import com.fasterxml.jackson.annotation.JsonIgnore
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.KeyCode
+ import maestro.Point
+ import maestro.TapRepeat
+@@ -61,6 +62,7 @@ import maestro.orchestra.ScrollCommand
+ import maestro.orchestra.ScrollUntilVisibleCommand
+ import maestro.orchestra.SetAirplaneModeCommand
+ import maestro.orchestra.SetDarkModeCommand
++import maestro.orchestra.SetFoldPostureCommand
+ import maestro.orchestra.SetLocationCommand
+ import maestro.orchestra.SetOrientationCommand
+ import maestro.orchestra.SetPermissionsCommand
+@@ -150,6 +152,7 @@ data class YamlFluentCommand(
+     val toggleDarkMode: YamlToggleDarkMode? = null,
+     val assertDarkMode: YamlAssertDarkMode? = null,
+     val assertLightMode: YamlAssertLightMode? = null,
++    val setFoldPosture: YamlSetFoldPosture? = null,
+     val retry: YamlRetryCommand? = null,
+     @JsonIgnore val _sourceInfo: SourceInfo,
+ ) {
+@@ -531,6 +534,20 @@ data class YamlFluentCommand(
+                 )
+             )
+ 
++            setFoldPosture != null -> listOf(
++                MaestroCommand(
++                    SetFoldPostureCommand(
++                        posture = FoldPosture.getByYamlValue(setFoldPosture.posture)
++                            ?: throw SyntaxError(
++                                "Unknown fold posture: ${setFoldPosture.posture}. " +
++                                    "Valid postures are: ${FoldPosture.entries.map { it.yamlValue }}"
++                            ),
++                        label = setFoldPosture.label,
++                        optional = setFoldPosture.optional,
++                    )
++                )
++            )
++
+             else -> throw SyntaxError("Invalid command: No mapping provided for $this")
+         }
+     }
+diff --git a/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlSetFoldPosture.kt b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlSetFoldPosture.kt
+new file mode 100644
+index 00000000..5b3e4d6e
+--- /dev/null
++++ b/maestro-orchestra/src/main/java/maestro/orchestra/yaml/YamlSetFoldPosture.kt
+@@ -0,0 +1,20 @@
++package maestro.orchestra.yaml
++
++import com.fasterxml.jackson.annotation.JsonCreator
++import maestro.device.FoldPosture
++import maestro.orchestra.yaml.schema.YamlValues
++
++data class YamlSetFoldPosture(
++    @YamlValues(FoldPosture::class, spelledBy = "yamlValue")
++    val posture: String,
++    val label: String? = null,
++    val optional: Boolean = false,
++) {
++    companion object {
++        @JvmStatic
++        @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
++        fun parse(@YamlValues(FoldPosture::class, spelledBy = "yamlValue") posture: String) = YamlSetFoldPosture(
++            posture = posture,
++        )
++    }
++}
+diff --git a/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt b/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt
+index 4f1d6f80..b67b779a 100644
+--- a/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt
++++ b/maestro-orchestra/src/test/java/maestro/orchestra/MaestroCommandSerializationTest.kt
+@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
+ import com.fasterxml.jackson.module.kotlin.KotlinModule
+ import com.google.common.truth.Truth.assertThat
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.KeyCode
+ import maestro.Point
+ import maestro.SwipeDirection
+@@ -732,6 +733,33 @@ internal class MaestroCommandSerializationTest {
+             .isEqualTo(command)
+     }
+ 
++    @Test
++    fun `serialize SetFoldPostureCommand`() {
++        // given
++        val command = MaestroCommand(
++            SetFoldPostureCommand(FoldPosture.HALF_FOLD)
++        )
++
++        // when
++        val serializedCommandJson = command.toJson()
++        val deserializedCommand = objectMapper.readValue(serializedCommandJson, MaestroCommand::class.java)
++
++        // then
++        @Language("json")
++        val expectedJson = """
++            {
++              "setFoldPostureCommand" : {
++                "posture" : "HALF_FOLD",
++                "optional" : false
++              }
++            }
++          """.trimIndent()
++        assertThat(serializedCommandJson)
++            .isEqualTo(expectedJson)
++        assertThat(deserializedCommand)
++            .isEqualTo(command)
++    }
++
+     private fun MaestroCommand.toJson(): String =
+         objectMapper
+             .writerWithDefaultPrettyPrinter()
+diff --git a/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt b/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt
+index 758d1ebf..60f5efd5 100644
+--- a/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt
++++ b/maestro-test/src/main/kotlin/maestro/test/drivers/FakeDriver.kt
+@@ -24,6 +24,7 @@ import com.google.common.truth.Truth.assertThat
+ import maestro.Capability
+ import maestro.DeviceInfo
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.Driver
+ import maestro.KeyCode
+ import maestro.MaestroException
+@@ -109,6 +110,12 @@ open class FakeDriver : Driver {
+         events += Event.SetOrientation(orientation)
+     }
+ 
++    override fun setFoldPosture(posture: FoldPosture) {
++        ensureOpen()
++
++        events += Event.SetFoldPosture(posture)
++    }
++
+     override fun launchApp(
+         appId: String,
+         launchArguments: Map<String, Any>,
+@@ -526,6 +533,10 @@ open class FakeDriver : Driver {
+             val orientation: DeviceOrientation,
+         ) : Event()
+ 
++        data class SetFoldPosture(
++            val posture: FoldPosture,
++        ) : Event()
++
+         object TakeScreenshot : Event()
+ 
+         object ClearKeychain : Event()
+diff --git a/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt b/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt
+index f992f988..0c38a9b0 100644
+--- a/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt
++++ b/maestro-test/src/test/kotlin/maestro/test/IntegrationTest.kt
+@@ -17,6 +17,7 @@ import kotlinx.coroutines.yield
+ import maestro.device.AppCrashReport
+ import maestro.device.CapturedDeviceArtifact
+ import maestro.device.DeviceOrientation
++import maestro.device.FoldPosture
+ import maestro.KeyCode
+ import maestro.DeviceConnectionException
+ import maestro.DeviceUnreachableException
+@@ -5539,6 +5540,29 @@ class IntegrationTest {
+         }
+     }
+ 
++    @Test
++    fun `Case 155 - Set fold posture`() {
++        // Given
++        val commands = readCommands("155_set_fold_posture")
++        val driver = driver { }
++
++        // When
++        Maestro(driver).use {
++            runBlocking {
++                orchestra(it).runFlow(commands)
++            }
++        }
++
++        // Then
++        driver.assertEvents(
++            listOf(
++                Event.SetFoldPosture(FoldPosture.CLOSED),
++                Event.SetFoldPosture(FoldPosture.HALF_FOLD),
++                Event.SetFoldPosture(FoldPosture.FLAT),
++            )
++        )
++    }
++
+     @Test
+     fun `optional assertDarkMode is warned, not failed`() {
+         val driver = driver { } // darkMode defaults to false
+diff --git a/maestro-test/src/test/resources/155_set_fold_posture.yaml b/maestro-test/src/test/resources/155_set_fold_posture.yaml
+new file mode 100644
+index 00000000..ca7ef254
+--- /dev/null
++++ b/maestro-test/src/test/resources/155_set_fold_posture.yaml
+@@ -0,0 +1,7 @@
++appId: com.example.app
++---
++- setFoldPosture: closed
++- setFoldPosture: halfFold
++- setFoldPosture:
++    posture: flat
++    label: Unfold the device
+-- 
+2.43.0
+
+
+From faf64e5fe4d2cb8927fed20046404f7e9007b179 Mon Sep 17 00:00:00 2001
+From: Mauricio Chirino <1657723+mchirino89@users.noreply.github.com>
+Date: Tue, 22 Sep 2026 18:21:57 -0300
+Subject: [PATCH 2/4] fix(ios): fail setFoldPosture as a command, not a crash
+
+Running setFoldPosture against a non-foldable simulator killed the whole
+run with an unhandled SimctlError: Orchestra only downgrades
+MaestroException, so `optional: true` could not warn and the flow never
+reached its next command.
+
+Map anything that is not an IOSDeviceErrors to
+MaestroException.InvalidCommand, keeping the underlying message.
+
+Verified on a booted iPhone 17 Pro: the command now reports FAILED with
+"... did not report a hinge angle ...", and WARNED with `optional: true`
+while the rest of the flow runs. The iPhone Duo path is unchanged.
+
+Refs #3617
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01FWXWaSjH7YFRgKFCykQLuU
+---
+ .../src/main/java/maestro/drivers/IOSDriver.kt    | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
+
+diff --git a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+index dca80a2e..4ab48f80 100644
+--- a/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
++++ b/maestro-client/src/main/java/maestro/drivers/IOSDriver.kt
+@@ -554,7 +554,20 @@ class IOSDriver(
+ 
+     override fun setFoldPosture(posture: FoldPosture) {
+         metrics.measured("operation", mapOf("command" to "setFoldPosture", "posture" to posture.name)) {
+-            runDeviceCall("setFoldPosture") { iosDevice.setHingeAngle(posture.hingeAngle) }
++            runDeviceCall("setFoldPosture") {
++                try {
++                    iosDevice.setHingeAngle(posture.hingeAngle)
++                } catch (deviceError: IOSDeviceErrors) {
++                    throw deviceError
++                } catch (e: Throwable) {
++                    // simctl and the unsupported-device path throw their own types; as a MaestroException
++                    // this fails the command (and honours `optional`) instead of killing the run.
++                    throw MaestroException.InvalidCommand(
++                        e.message ?: "Failed to set fold posture ${posture.yamlValue}",
++                        e,
++                    )
++                }
++            }
+         }
+     }
+ 
+-- 
+2.43.0
+
+
+From d6e38687b1bbab0a6d6165d5f6171efad76d7455 Mon Sep 17 00:00:00 2001
+From: Mauricio Chirino <1657723+mchirino89@users.noreply.github.com>
+Date: Wed, 14 Oct 2026 10:29:32 -0300
+Subject: [PATCH 3/4] feat(ios): turn foldable simulators with setOrientation
+
+On an iPhone Duo simulator (Xcode 27.1), `setOrientation` reported
+COMPLETED and turned neither display, open or closed. The XCTest driver
+sets `XCUIDevice.shared.orientation`, but the Duo's displays follow an
+orientation relay inside the simulator (locationd) that only Device
+Hub's rotate buttons reach.
+
+Those buttons post the same vendor-defined HID event as the hinge
+slider, with source `orientation-picker-control`, type `enum` and a
+string value. `orient_helper.c` posts it the way `hinge_helper.c` posts
+the hinge angle, and on a simulator `setOrientation` now spawns it before
+calling XCTest. Order matters: the relay turns the display
+asynchronously, and with the helper second a screenshot taken straight
+after the command came back black.
+
+The event goes to every simulator. An iPhone 17 Pro (iOS 26.5) ignores
+it and keeps turning through XCTest exactly as before. `UPSIDE_DOWN` has
+no Device Hub value and is left to XCTest alone: the Duo stays as it
+was, which is also what an iPhone's Safari does when told upside down.
+Physical devices are unchanged.
+
+Verified with Safari, `setOrientation` then `takeScreenshot`:
+- Duo closed: outer display 1398x2034 -> 2034x1398 (LANDSCAPE_LEFT and
+  LANDSCAPE_RIGHT), back with PORTRAIT; five turns in one flow, each
+  screenshot taken right after the command already turned.
+- Duo open flat: inner display 2853x2007 -> 2007x2853 (LANDSCAPE_LEFT,
+  LANDSCAPE_RIGHT), back with PORTRAIT.
+- iPhone 17 Pro: 1206x2622 -> 2622x1206, as before.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BXMTZrpfcCmT9NQqpXAC99
+---
+ .../drivers/IOSDriverSetOrientationTest.kt    | 28 ++++++
+ .../src/main/kotlin/device/SimctlIOSDevice.kt |  2 +-
+ .../main/kotlin/util/LocalSimulatorUtils.kt   | 43 ++++++++--
+ .../src/main/resources/orient_helper.c        | 85 +++++++++++++++++++
+ .../src/main/java/ios/LocalIOSDevice.kt       |  6 +-
+ .../ios/devicectl/DeviceControlIOSDevice.kt   |  2 +-
+ 6 files changed, 157 insertions(+), 9 deletions(-)
+ create mode 100644 maestro-client/src/test/java/maestro/drivers/IOSDriverSetOrientationTest.kt
+ create mode 100644 maestro-ios-driver/src/main/resources/orient_helper.c
+
+diff --git a/maestro-client/src/test/java/maestro/drivers/IOSDriverSetOrientationTest.kt b/maestro-client/src/test/java/maestro/drivers/IOSDriverSetOrientationTest.kt
+new file mode 100644
+index 00000000..daf5e2c9
+--- /dev/null
++++ b/maestro-client/src/test/java/maestro/drivers/IOSDriverSetOrientationTest.kt
+@@ -0,0 +1,28 @@
++package maestro.drivers
++
++import device.IOSDevice
++import io.mockk.mockk
++import io.mockk.verifyOrder
++import ios.LocalIOSDevice
++import ios.xctest.XCTestIOSDevice
++import maestro.device.DeviceOrientation
++import org.junit.jupiter.api.Test
++
++class IOSDriverSetOrientationTest {
++
++    @Test
++    fun `setOrientation turns the device controller first, then XCTest`() {
++        // The controller is what turns a foldable simulator (SimctlIOSDevice posts Device Hub's rotate event);
++        // XCTest's own setter comes second so that the screen has turned by the time the command returns.
++        val xcTestDevice = mockk<XCTestIOSDevice>(relaxed = true)
++        val deviceController = mockk<IOSDevice>(relaxed = true)
++        val driver = IOSDriver(LocalIOSDevice("SIM-ID", xcTestDevice, deviceController))
++
++        driver.setOrientation(DeviceOrientation.LANDSCAPE_LEFT)
++
++        verifyOrder {
++            deviceController.setOrientation("landscapeLeft")
++            xcTestDevice.setOrientation("landscapeLeft")
++        }
++    }
++}
+diff --git a/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt b/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt
+index 44d932b5..77a3ef16 100644
+--- a/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt
++++ b/maestro-ios-driver/src/main/kotlin/device/SimctlIOSDevice.kt
+@@ -155,7 +155,7 @@ class SimctlIOSDevice(
+     }
+ 
+     override fun setOrientation(orientation: String) {
+-        TODO("Not yet implemented")
++        localSimulatorUtils.setOrientation(deviceId, orientation)
+     }
+ 
+     override fun setHingeAngle(degrees: Double) {
+diff --git a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+index 15d95634..0c22148e 100644
+--- a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
++++ b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+@@ -27,6 +27,17 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         private const val LOG_DIR_DATE_FORMAT = "yyyy-MM-dd_HHmmss"
+         private const val HINGE_ANGLE_TOLERANCE = 1.0
+         private val HINGE_ANGLE_PATTERN = Regex("""\bAngle:\s*(\d+(?:[.,]\d+)?)""")
++
++        /**
++         * Maps a `DeviceOrientation` camelCase name to the value Device Hub's rotate event carries, or null
++         * for `upsideDown`: Device Hub has no upside-down position, so that one is left to XCUIDevice.
++         */
++        fun deviceHubOrientation(orientation: String): String? = when (orientation) {
++            "portrait" -> "portrait"
++            "landscapeLeft" -> "landscape-left"
++            "landscapeRight" -> "landscape-right"
++            else -> null
++        }
+     }
+ 
+     private val homedir = System.getProperty("user.home")
+@@ -434,12 +445,32 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         }
+     }
+ 
+-    private val hingeHelper: File by lazy {
++    /**
++     * Turns a simulator to [orientation], a `DeviceOrientation` camelCase name such as `landscapeLeft`.
++     *
++     * `XCUIDevice.shared.orientation`, which the XCTest driver sets, does not turn a foldable simulator
++     * (iPhone Duo, Xcode 27.1+): its displays follow an orientation relay inside the simulator that only
++     * Device Hub's rotate event reaches. A small helper posts that event from inside the simulator.
++     * Simulators without the relay ignore it, so it is safe to post to every simulator.
++     */
++    fun setOrientation(deviceId: String, orientation: String) {
++        val value = deviceHubOrientation(orientation) ?: return
++        runCommand(listOf("xcrun", "simctl", "spawn", deviceId, orientHelper.absolutePath, value))
++    }
++
++    private val hingeHelper: File by lazy { compileHelper("hinge_helper") }
++
++    private val orientHelper: File by lazy { compileHelper("orient_helper") }
++
++    /**
++     * Compiles the C helper bundled as the resource `<name>.c` into a signed simulator binary.
++     */
++    private fun compileHelper(name: String): File {
+         val dir = tempFileHandler.createTempDirectory()
+-        val source = File(dir, "hinge_helper.c")
+-        val binary = File(dir, "hinge_helper")
+-        val resource = LocalSimulatorUtils::class.java.getResourceAsStream("/hinge_helper.c")
+-            ?: throw IllegalStateException("hinge_helper.c file not found")
++        val source = File(dir, "$name.c")
++        val binary = File(dir, name)
++        val resource = LocalSimulatorUtils::class.java.getResourceAsStream("/$name.c")
++            ?: throw IllegalStateException("$name.c file not found")
+         resource.use { input -> source.outputStream().use { input.copyTo(it) } }
+ 
+         // Simulators run the host's architecture.
+@@ -451,7 +482,7 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+             )
+         )
+         runCommand(listOf("codesign", "-f", "-s", "-", binary.path))
+-        binary
++        return binary
+     }
+ 
+     fun openURL(deviceId: String, url: String) {
+diff --git a/maestro-ios-driver/src/main/resources/orient_helper.c b/maestro-ios-driver/src/main/resources/orient_helper.c
+new file mode 100644
+index 00000000..0cdc9ed4
+--- /dev/null
++++ b/maestro-ios-driver/src/main/resources/orient_helper.c
+@@ -0,0 +1,85 @@
++// Runs inside an iOS Simulator (via `xcrun simctl spawn`) and posts the same vendor-defined
++// HID event that the rotate buttons in Xcode's Device Hub send. Inside the simulator,
++// locationd relays it as the device orientation, which reaches displays that
++// XCUIDevice.shared.orientation does not turn (the iPhone Duo's, Xcode 27.1+).
++// The event format is private and undocumented, so a new Xcode may change it.
++//
++//   orient_helper portrait|landscape-left|landscape-right|faceup|facedown
++//
++// Adapted from https://github.com/artemnovichkov/hinge
++// Copyright (c) 2026 Artem Novichkov. Licensed under the MIT License:
++// Permission is hereby granted, free of charge, to any person obtaining a copy of this software
++// and associated documentation files (the "Software"), to deal in the Software without restriction,
++// including without limitation the rights to use, copy, modify, merge, publish, distribute,
++// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
++// furnished to do so, subject to the following conditions: The above copyright notice and this
++// permission notice shall be included in all copies or substantial portions of the Software.
++// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
++
++#include <CoreFoundation/CoreFoundation.h>
++#include <mach/mach_time.h>
++#include <stdio.h>
++#include <string.h>
++#include <unistd.h>
++
++typedef struct __IOHIDEvent *IOHIDEventRef;
++typedef struct __IOHIDEventSystemClient *IOHIDEventSystemClientRef;
++
++extern IOHIDEventRef IOHIDEventCreateVendorDefinedEvent(CFAllocatorRef allocator, uint64_t timeStamp,
++    uint32_t usagePage, uint32_t usage, uint32_t version, const uint8_t *data, CFIndex length, uint32_t options);
++extern IOHIDEventSystemClientRef IOHIDEventSystemClientCreateWithType(CFAllocatorRef allocator, int type,
++    CFDictionaryRef properties);
++extern void IOHIDEventSystemClientDispatchEvent(IOHIDEventSystemClientRef client, IOHIDEventRef event);
++extern CFDataRef IOCFSerialize(CFTypeRef object, CFOptionFlags options);
++
++enum {
++    kUsagePage = 0xFF61,
++    kUsage = 0x5B,
++    kClientTypeSimple = 4,
++    kSerializeBinary = 1,
++};
++
++static const char *const kOrientations[] = {"portrait", "landscape-left", "landscape-right", "faceup", "facedown"};
++
++static int isKnownOrientation(const char *value) {
++    for (size_t i = 0; i < sizeof(kOrientations) / sizeof(kOrientations[0]); i++) {
++        if (strcmp(value, kOrientations[i]) == 0) return 1;
++    }
++    return 0;
++}
++
++int main(int argc, char **argv) {
++    if (argc != 2 || !isKnownOrientation(argv[1])) {
++        fprintf(stderr, "usage: orient_helper portrait|landscape-left|landscape-right|faceup|facedown\n");
++        return 64;
++    }
++
++    IOHIDEventSystemClientRef client = IOHIDEventSystemClientCreateWithType(NULL, kClientTypeSimple, NULL);
++    if (!client) {
++        fprintf(stderr, "orient_helper: failed to create HID event system client\n");
++        return 1;
++    }
++
++    CFStringRef value = CFStringCreateWithCString(NULL, argv[1], kCFStringEncodingUTF8);
++    const void *keys[] = {CFSTR("provider"), CFSTR("source"), CFSTR("type"), CFSTR("value")};
++    const void *values[] = {CFSTR("com.apple.Virtualization"), CFSTR("orientation-picker-control"), CFSTR("enum"), value};
++    CFDictionaryRef payload = CFDictionaryCreate(NULL, keys, values, 4,
++        &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
++    CFDataRef data = IOCFSerialize(payload, kSerializeBinary);
++    if (!data) {
++        fprintf(stderr, "orient_helper: failed to serialize the orientation event\n");
++        return 1;
++    }
++
++    IOHIDEventRef event = IOHIDEventCreateVendorDefinedEvent(NULL, mach_absolute_time(), kUsagePage, kUsage, 0,
++        CFDataGetBytePtr(data), CFDataGetLength(data), 0);
++    if (!event) {
++        fprintf(stderr, "orient_helper: failed to create the orientation event\n");
++        return 1;
++    }
++    IOHIDEventSystemClientDispatchEvent(client, event);
++
++    // Give the event system a moment to deliver before the process exits.
++    usleep(100000);
++    return 0;
++}
+diff --git a/maestro-ios/src/main/java/ios/LocalIOSDevice.kt b/maestro-ios/src/main/java/ios/LocalIOSDevice.kt
+index 8db7d73d..60be49e9 100644
+--- a/maestro-ios/src/main/java/ios/LocalIOSDevice.kt
++++ b/maestro-ios/src/main/java/ios/LocalIOSDevice.kt
+@@ -132,7 +132,11 @@ class LocalIOSDevice(
+     }
+ 
+     override fun setOrientation(orientation: String) {
+-        return xcTestDevice.setOrientation(orientation)
++        // XCTest's orientation does not reach a foldable simulator's displays; the controller turns those.
++        // It goes first: the turn it starts is asynchronous, and a screenshot taken straight after it came
++        // back black, while XCTest's call afterwards gives the turn time to land.
++        deviceController.setOrientation(orientation)
++        xcTestDevice.setOrientation(orientation)
+     }
+ 
+     override fun isDarkModeEnabled(): Boolean {
+diff --git a/maestro-ios/src/main/java/ios/devicectl/DeviceControlIOSDevice.kt b/maestro-ios/src/main/java/ios/devicectl/DeviceControlIOSDevice.kt
+index 588942e0..42b7788e 100644
+--- a/maestro-ios/src/main/java/ios/devicectl/DeviceControlIOSDevice.kt
++++ b/maestro-ios/src/main/java/ios/devicectl/DeviceControlIOSDevice.kt
+@@ -92,7 +92,7 @@ class DeviceControlIOSDevice(override val deviceId: String) : IOSDevice {
+     }
+ 
+     override fun setOrientation(orientation: String) {
+-        TODO("Not yet implemented")
++        // XCTest turns a physical device; there is nothing to add here.
+     }
+ 
+     override fun isDarkModeEnabled(): Boolean {
+-- 
+2.43.0
+
+
+From b3f2d9cf8f453a10525f1e714878a20a8d451f09 Mon Sep 17 00:00:00 2001
+From: Mauricio Chirino <1657723+mchirino89@users.noreply.github.com>
+Date: Wed, 14 Oct 2026 10:34:07 -0300
+Subject: [PATCH 4/4] fix(ios): read the fold back from the displays when
+ hinge-angle is gone
+
+Xcode 27.1 RC removed `devicectl device motion hinge-angle` (it now
+exits 64, "Unknown option '--device'"), so every `setFoldPosture` on a
+Duo failed with "did not report a hinge angle" even though the hinge
+moved.
+
+When that command yields no angle, read `devicectl device info displays
+--json-output -` instead: an open Duo lights its inner display (not the
+primary one), a closed one only the outer. That tells closed from open,
+not halfFold from flat; a simulator with one display still fails with
+the same message as before. Older Xcodes that still stream the angle
+keep the exact check.
+
+Verified on the 27.1 RC: closed, flat, halfFold, flat, closed all
+COMPLETED on an iPhone Duo; an iPhone 17 Pro (iOS 26.5) still fails the
+command (WARNED with `optional: true`).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01BXMTZrpfcCmT9NQqpXAC99
+---
+ .../main/kotlin/util/LocalSimulatorUtils.kt   | 53 +++++++++++++++++--
+ .../kotlin/util/LocalSimulatorUtilsTest.kt    | 35 ++++++++++++
+ 2 files changed, 84 insertions(+), 4 deletions(-)
+
+diff --git a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+index 0c22148e..a7555c7c 100644
+--- a/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
++++ b/maestro-ios-driver/src/main/kotlin/util/LocalSimulatorUtils.kt
+@@ -28,6 +28,21 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         private const val HINGE_ANGLE_TOLERANCE = 1.0
+         private val HINGE_ANGLE_PATTERN = Regex("""\bAngle:\s*(\d+(?:[.,]\d+)?)""")
+ 
++        private const val FOLD_READ_ATTEMPTS = 5
++        private const val FOLD_READ_INTERVAL_MS = 1000L
++
++        /**
++         * Reads whether a foldable is open from `devicectl device info displays --json-output`: open lights
++         * a display other than the primary (outer) one. Null when the JSON does not list two displays.
++         */
++        fun isFoldOpen(displaysJson: String): Boolean? {
++            val displays = runCatching { jacksonObjectMapper().readTree(displaysJson) }.getOrNull()
++                ?.path("result")?.path("displays")
++                ?.takeIf { it.isArray && it.size() >= 2 }
++                ?: return null
++            return displays.any { !it.path("primary").asBoolean() && it.path("active").asBoolean() }
++        }
++
+         /**
+          * Maps a `DeviceOrientation` camelCase name to the value Device Hub's rotate event carries, or null
+          * for `upsideDown`: Device Hub has no upside-down position, so that one is left to XCUIDevice.
+@@ -403,15 +418,25 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+      *
+      * simctl has no hinge command, so a small helper posts Device Hub's private hinge event from inside
+      * the simulator. The angle is then read back through devicectl, which catches both a simulator that
+-     * cannot fold and an Xcode release that changed the private event.
++     * cannot fold and an Xcode release that changed the private event. Xcode 27.1 removed
++     * `devicectl device motion hinge-angle`; there the readback falls back to which display is lit, which
++     * tells closed from open but not one open angle from another.
+      */
+     fun setHingeAngle(deviceId: String, degrees: Double) {
+         runCommand(listOf("xcrun", "simctl", "spawn", deviceId, hingeHelper.absolutePath, degrees.toString()))
+ 
+         val actual = readHingeAngle(deviceId, expected = degrees)
+-            ?: throw SimctlError(
+-                "Device $deviceId did not report a hinge angle. Fold postures need a foldable simulator such as iPhone Duo (Xcode 27.1+)"
+-            )
++        if (actual == null) {
++            val expectOpen = degrees > 0
++            val open = readFoldOpen(deviceId, expectOpen)
++                ?: throw SimctlError(
++                    "Device $deviceId did not report a hinge angle. Fold postures need a foldable simulator such as iPhone Duo (Xcode 27.1+)"
++                )
++            if (open != expectOpen) {
++                throw SimctlError("Device $deviceId is ${if (open) "open" else "closed"} after setting its hinge to $degrees°")
++            }
++            return
++        }
+         if (abs(actual - degrees) > HINGE_ANGLE_TOLERANCE) {
+             throw SimctlError("Device $deviceId reports a hinge angle of $actual° after setting it to $degrees°")
+         }
+@@ -445,6 +470,26 @@ class LocalSimulatorUtils(private val tempFileHandler: TempFileHandler) {
+         }
+     }
+ 
++    /**
++     * Polls `devicectl device info displays` until the fold reads [expectOpen], for a few seconds.
++     * Returns the last reading, or null if the device never reported two displays.
++     */
++    private fun readFoldOpen(deviceId: String, expectOpen: Boolean): Boolean? {
++        var open: Boolean? = null
++        repeat(FOLD_READ_ATTEMPTS) { attempt ->
++            if (attempt > 0) Thread.sleep(FOLD_READ_INTERVAL_MS)
++            val process = ProcessBuilder(
++                "xcrun", "devicectl", "device", "info", "displays",
++                "--device", deviceId, "--timeout", "10", "--quiet", "--json-output", "-",
++            ).redirectError(ProcessBuilder.Redirect.DISCARD).start()
++            val json = process.inputStream.bufferedReader().use { it.readText() }
++            process.waitFor()
++            open = isFoldOpen(json) ?: return open
++            if (open == expectOpen) return open
++        }
++        return open
++    }
++
+     /**
+      * Turns a simulator to [orientation], a `DeviceOrientation` camelCase name such as `landscapeLeft`.
+      *
+diff --git a/maestro-ios-driver/src/test/kotlin/util/LocalSimulatorUtilsTest.kt b/maestro-ios-driver/src/test/kotlin/util/LocalSimulatorUtilsTest.kt
+index 67b61c7c..efac4ad9 100644
+--- a/maestro-ios-driver/src/test/kotlin/util/LocalSimulatorUtilsTest.kt
++++ b/maestro-ios-driver/src/test/kotlin/util/LocalSimulatorUtilsTest.kt
+@@ -49,4 +49,39 @@ class LocalSimulatorUtilsTest {
+             "open", "-a", simulatorApp.path, "--args", "-CurrentDeviceUDID", "some-udid"
+         ).inOrder()
+     }
++
++    @Test
++    fun `a foldable with only its outer display lit is closed`() {
++        assertThat(LocalSimulatorUtils.isFoldOpen(displaysJson(outerActive = true, innerActive = false))).isFalse()
++    }
++
++    @Test
++    fun `a foldable with its inner display lit is open`() {
++        assertThat(LocalSimulatorUtils.isFoldOpen(displaysJson(outerActive = false, innerActive = true))).isTrue()
++    }
++
++    @Test
++    fun `a single display is not a foldable`() {
++        val json = """{"result": {"displays": [{"primary": true, "active": true, "displayId": 1}]}}"""
++
++        assertThat(LocalSimulatorUtils.isFoldOpen(json)).isNull()
++    }
++
++    @Test
++    fun `output that is not JSON reads as no fold`() {
++        assertThat(LocalSimulatorUtils.isFoldOpen("Error: Unknown option '--json-output'")).isNull()
++    }
++
++    // The shape `xcrun devicectl device info displays --json-output -` prints for an iPhone Duo (Xcode 27.1).
++    private fun displaysJson(outerActive: Boolean, innerActive: Boolean) = """
++        {
++          "info": {"commandType": "devicectl.device.info.displays", "outcome": "success"},
++          "result": {
++            "displays": [
++              {"active": $outerActive, "displayId": 1, "name": "LCD", "primary": true},
++              {"active": $innerActive, "displayId": 3, "name": "LCD-1", "primary": false}
++            ]
++          }
++        }
++    """.trimIndent()
+ }
+-- 
+2.43.0
+

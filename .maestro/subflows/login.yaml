@@ -4,10 +4,28 @@
 # it. USERNAME / PASSWORD / APP_ID are passed with -e by scripts/e2e.sh.
 appId: ${APP_ID}
 ---
-# No emulated server delay (helpers/launchOptions.ts).
-- launchApp:
-    arguments:
-      mockLatency: none
+# ORIENTATION comes from scripts/e2e.sh (PORTRAIT unless E2E_ORIENTATION is
+# set), so iPad landscape runs need no rotating by hand.
+- setOrientation: ${ORIENTATION}
+# Every launch: no emulated server delay (helpers/launchOptions.ts), and with
+# APP_LANGUAGE (from scripts/e2e.sh, empty by default, e.g. zh-Hans) iOS in
+# that language. Android takes the app's locale from
+# `cmd locale set-app-locales` instead (scripts/store-screenshots.sh).
+- runFlow:
+    when:
+      true: ${!APP_LANGUAGE}
+    commands:
+      - launchApp:
+          arguments:
+            mockLatency: none
+- runFlow:
+    when:
+      true: ${!!APP_LANGUAGE}
+    commands:
+      - launchApp:
+          arguments:
+            mockLatency: none
+            AppleLanguages: '(${APP_LANGUAGE})'
 # A new install opens on the welcome page, a logged-out app on the login
 # page, a logged-in one on its tabs.
 - extendedWaitUntil:

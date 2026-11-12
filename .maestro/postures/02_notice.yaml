@@ -1,0 +1,11 @@
+appId: ${APP_ID}
+name: Open a notice on the open iPhone Duo
+---
+# Run by scripts/e2e-devices.sh on the iPhone Duo, already logged in: opens
+# the screen from its learnx:// link (mock data ids, checked by
+# src/helpers/__tests__/e2ePostures.test.ts) and checks it on the inner display.
+- runFlow:
+    file: ../subflows/open_on_inner.yaml
+    env:
+      LINK: 'learnx://notice/26ef84e76d60efc1016d000000000001'
+      ID: notice-detail
