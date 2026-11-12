@@ -36,8 +36,8 @@
 #
 # The script sets the device up for the shots and puts it back on exit: the
 # iOS status bar (9:41, full battery and signal) and light mode, or the
-# Android screen size, density, signal, app locale and status bar clock
-# (9:41, no notification icons). Which simulator or emulator model to use
+# Android screen size, density, app locale and status bar (9:41; the other
+# icons are painted over with the bar's color after the run). Which simulator or emulator model to use
 # depends on the store's size rules: an iPhone of 1206x2622 pixels, a 13-inch
 # iPad, the iPhone Duo, and any Android foldable or tablet emulator.
 set -euo pipefail
@@ -65,10 +65,12 @@ mac) platform=mac folder=macos/windows ;;
 android-phone)
   platform=android flow=android_phone folder=android/phone
   size="${STORE_ANDROID_SIZE:-1080x1920}" density="${STORE_ANDROID_DENSITY:-420}"
+  bar_dp=33
   ;;
 android-tablet)
   platform=android flow=android_tablet folder=android/tablet
   size="${STORE_ANDROID_SIZE:-2560x1440}" density="${STORE_ANDROID_DENSITY:-280}"
+  bar_dp=62
   ;;
 *) usage ;;
 esac
@@ -166,14 +168,21 @@ else
   export E2E_STATE_CLEARED=1
   adb -s "$device" shell cmd locale set-app-locales "$android_app_id" \
     --locales "${STORE_ANDROID_LOCALE:-zh-CN}"
+  # From the default size: straight from another override (the previous
+  # target), SystemUI can leave the clock out of demo mode.
+  adb -s "$device" shell wm size reset
+  adb -s "$device" shell wm density reset
+  sleep 3
   adb -s "$device" shell wm size "$size"
   adb -s "$device" shell wm density "$density"
-  # Full signal; mobile data must stay on, or the bar shows a "!".
-  adb -s "$device" emu gsm signal-profile 4 >/dev/null || true  # Demo mode, for the clock (9:41) and to hide notification icons (the
-  # screen lock shield). Only those two: its network icons draw a second
-  # Wi-Fi and a "3G", so the real ones stay.
+  sleep 3
+  # Demo mode, entered after the size change (before it, SystemUI keeps the
+  # real clock), sets the clock to 9:41 and hides notification icons. The
+  # other status bar icons are painted over after the run.
   adb -s "$device" shell settings put global sysui_demo_allowed 1
+  demo exit
   demo enter
+  sleep 1
   demo clock -e hhmm 0941
   demo notifications -e visible false
 fi
@@ -234,6 +243,28 @@ if [ -n "$posture" ]; then
     --test-output-dir "$run_dir/close" .maestro/subflows/fold.yaml || true
 fi
 copy_shots
+if [ "$platform" = android ]; then
+  # Paint the status bar's icons (network, battery, system and notification
+  # icons; the screen lock shield) with the bar's own color, keeping only the
+  # clock on the left. On a tablet the painted band also covers the window
+  # handle under the bar. STORE_ANDROID_STATUS_BAR_DP (default 33 phone, 62
+  # tablet) is the band's height, STORE_ANDROID_CLOCK_DP (48) the clock's
+  # width.
+  bar_height=$(((${STORE_ANDROID_STATUS_BAR_DP:-$bar_dp} * density + 159) / 160))
+  clock_width=$(((${STORE_ANDROID_CLOCK_DP:-48} * density + 159) / 160))
+  for png in "$out"/*.png; do
+    width="$(ffprobe -v error -select_streams v:0 -show_entries stream=width \
+      -of csv=p=0 "$png")"
+    # The bar's color, from its top edge in the middle (above any icon). RGB
+    # throughout: drawbox would otherwise shift every pixel's color a little.
+    color="$(ffmpeg -v error -i "$png" -vf "crop=1:1:$((width / 2)):1,format=rgb24" \
+      -f rawvideo -pix_fmt rgb24 - | od -An -tx1 | tr -d ' \n')"
+    ffmpeg -v error -y -i "$png" -frames:v 1 -vf \
+      "format=rgb24,drawbox=x=$clock_width:y=0:w=$((width - clock_width)):h=$bar_height:color=0x$color:t=fill,format=rgb24" \
+      "$run_dir/painted.png"
+    mv "$run_dir/painted.png" "$png"
+  done
+fi
 if [ "$flow" = ipad ]; then
   # Maestro saves a landscape iPad shot as portrait pixels with an EXIF
   # rotation, which App Store Connect doesn't apply: draw the pixels upright
