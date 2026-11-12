@@ -21,7 +21,11 @@ const cache = new SQLiteStorage('queryCache');
 
 const storage = {
   getItem: (key: string) => cache.getItemSync(key),
-  setItem: (key: string, value: string) => cache.setItemSync(key, value),
+  setItem: (key: string, value: string) => {
+    if (value) {
+      cache.setItemSync(key, value);
+    }
+  },
   removeItem: (key: string) => {
     cache.removeItemSync(key);
   },
@@ -33,6 +37,14 @@ const storage = {
 
 export const queryPersister = experimental_createQueryPersister({
   storage,
+  // A response is written a moment after it arrives. One whose query was
+  // cleared in the meantime (a fetch that came back as the user logged out)
+  // belongs to the old session: it serializes to nothing and isn't written.
+  serialize: persisted =>
+    queryClient.getQueryCache().get(persisted.queryHash)?.state ===
+    persisted.state
+      ? JSON.stringify(persisted)
+      : '',
   maxAge: MAX_AGE,
   buster: QUERY_CACHE_VERSION,
 });
