@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import FeatureList from 'components/FeatureList';
+import DeviceInfo from 'constants/DeviceInfo';
 import { setWhatsNewSeen } from 'data/appState';
 import { t } from 'helpers/i18n';
 import {
@@ -10,7 +11,6 @@ import {
   whatsNewContext,
 } from 'helpers/whatsNew';
 import { WhatsNewStackParams } from 'navigation/types';
-import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<WhatsNewStackParams, 'WhatsNew'>;
 
@@ -31,7 +31,7 @@ const WhatsNew: React.FC<Props> = ({ navigation, route }) => {
 
   // Seen up to the running version, however the sheet is closed.
   useEffect(() => {
-    setWhatsNewSeen(packageJson.version);
+    setWhatsNewSeen(DeviceInfo.appVersion());
   }, []);
 
   return (

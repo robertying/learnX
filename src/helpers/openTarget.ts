@@ -11,7 +11,21 @@ export interface ItemTarget {
 /** What a learnx:// link opens: an item or list, or the Today tab. */
 export type OpenTarget = ItemTarget | { type: 'today'; id?: undefined };
 
-const itemTypes = new Set<string>(['notice', 'assignment', 'file']);
+/** Where each kind of item opens: its tab, the tab's list, and the item's page. */
+export const targetRoutes = {
+  notice: { tab: 'NoticeStack', list: 'Notices', detail: 'NoticeDetail' },
+  assignment: {
+    tab: 'AssignmentStack',
+    list: 'Assignments',
+    detail: 'AssignmentDetail',
+  },
+  file: { tab: 'FileStack', list: 'Files', detail: 'FileDetail' },
+} as const satisfies Record<
+  ItemTarget['type'],
+  { tab: string; list: string; detail: string }
+>;
+
+const itemTypes = new Set<string>(Object.keys(targetRoutes));
 
 export const isItemType = (type: string): type is ItemTarget['type'] =>
   itemTypes.has(type);

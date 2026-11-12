@@ -41,6 +41,14 @@ export const useCredentials = () =>
 
 export const getCredentials = () => useCredentialsStore.getState().credentials;
 
+/** Whether `credentials` hold everything an automatic login needs. */
+export const hasSavedLogin = (
+  credentials: Credentials | null | undefined = getCredentials(),
+) =>
+  !!credentials?.username &&
+  !!credentials.password &&
+  !!credentials.fingerPrint;
+
 const isCredentials = (value: unknown): value is Credentials => {
   if (!value || typeof value !== 'object') {
     return false;

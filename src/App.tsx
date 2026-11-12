@@ -1,11 +1,11 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, useColorScheme } from 'react-native';
+import { Platform, StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import ErrorBoundary from 'components/ErrorBoundary';
 import { Toast } from 'components/Toast';
 import Splash from 'components/Splash';
-import { useCredentials } from 'data/credentials';
+import { hasSavedLogin, useCredentials } from 'data/credentials';
 import { useReloginRequested } from 'data/auth';
 import { queryClient } from 'data/queryClient';
 import useReLogin from 'hooks/useReLogin';
@@ -16,10 +16,7 @@ import Navigation from 'navigation';
 const Container = () => {
   const reloginRequested = useReloginRequested();
   const credentials = useCredentials();
-  const hasCredentials =
-    !!credentials?.username &&
-    !!credentials.password &&
-    !!credentials.fingerPrint;
+  const hasCredentials = hasSavedLogin(credentials);
 
   useReLogin();
   useShareHandler();
@@ -42,7 +39,14 @@ const App = () => {
         </SafeAreaProvider>
       </ErrorBoundary>
       <StatusBar
-        barStyle={colorScheme === 'dark' ? 'light-content' : 'dark-content'}
+        // iOS's default style follows the appearance by itself.
+        barStyle={
+          Platform.OS === 'ios'
+            ? 'default'
+            : colorScheme === 'dark'
+              ? 'light-content'
+              : 'dark-content'
+        }
         animated
       />
     </GestureHandlerRootView>

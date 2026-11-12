@@ -12,7 +12,7 @@ jest.mock('@react-navigation/native-stack', () => ({
 }));
 jest.mock('navigation/MainTab', () => () => null);
 jest.mock('navigation/DetailStack', () => ({
-  DetailStack: () => {
+  DetailContainer: () => {
     const { Text: RNText } = require('react-native');
     return <RNText>detail stack</RNText>;
   },

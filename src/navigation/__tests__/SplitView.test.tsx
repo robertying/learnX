@@ -33,7 +33,6 @@ it('shows the list alone in a narrow window', async () => {
   ).toHaveStyle({ display: 'none' });
   expect(screen.queryByTestId('divider')).toBeNull();
   expect(context()).toMatchObject({
-    splitEnabled: false,
     showDetail: false,
     showMaster: true,
     masterWidth: 320,
@@ -53,7 +52,7 @@ it('puts the detail beside the list in a wide window, and can hide the list', as
   expect(
     screen.getByTestId('split-detail', { includeHiddenElements: true }),
   ).toHaveStyle({ display: 'flex' });
-  expect(context().splitEnabled).toBe(true);
+  expect(context().showDetail).toBe(true);
 
   await act(() => context().toggleMaster(false));
   expect(context().showMaster).toBe(false);

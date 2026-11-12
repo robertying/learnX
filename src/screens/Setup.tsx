@@ -5,6 +5,7 @@ import ActionBar from 'components/ActionBar';
 import { Form, FormScreen, FormSection, FormToggle } from 'components/Form';
 import { Title } from 'components/Text';
 import { toast } from 'components/Toast';
+import DeviceInfo from 'constants/DeviceInfo';
 import { setSetupSeen, setWhatsNewSeen } from 'data/appState';
 import { setSetting, useSettings } from 'data/settings';
 import { calendarSettingsTitle } from 'helpers/calendar/details';
@@ -16,7 +17,6 @@ import {
 import { useAssignmentSync } from 'hooks/useCalendarSync';
 import useNotificationPermission from 'hooks/useNotificationPermission';
 import { RootStackParams } from 'navigation/types';
-import packageJson from '../../package.json';
 
 type Props = NativeStackScreenProps<RootStackParams, 'Setup'>;
 
@@ -60,7 +60,7 @@ const Setup: React.FC<Props> = ({ navigation, route }) => {
   useEffect(() => {
     setSetupSeen();
     if (!update) {
-      setWhatsNewSeen(packageJson.version);
+      setWhatsNewSeen(DeviceInfo.appVersion());
     }
   }, [update]);
 

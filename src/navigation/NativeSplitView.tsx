@@ -210,7 +210,6 @@ const NativeSplitViewProvider: React.FC<
         detailNavigationContainerRef: showDetail
           ? detailNavigationContainerRef
           : null,
-        splitEnabled: showDetail,
         showDetail,
         showMaster,
         toggleMaster,

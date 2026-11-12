@@ -36,7 +36,9 @@ jest.mock('services/surfaces', () => ({
 }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 jest.mock('hooks/useUpNext', () => jest.fn());
-jest.mock('hooks/useIncomingTargets', () => jest.fn());
+jest.mock('hooks/useNotificationTaps', () => jest.fn());
+jest.mock('hooks/useLinkTaps', () => jest.fn());
+jest.mock('hooks/useSpotlightTaps', () => jest.fn());
 
 const semester = jest.mocked(useQuery);
 const addListener = jest.spyOn(AppState, 'addEventListener');

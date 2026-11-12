@@ -32,7 +32,6 @@ const props = {
 
 const split = {
   detailNavigationContainerRef: null,
-  splitEnabled: true,
   showDetail: true,
   showMaster: true,
   toggleMaster: jest.fn(),
