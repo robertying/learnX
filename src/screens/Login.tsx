@@ -24,6 +24,7 @@ import SafeArea from 'components/SafeArea';
 import Logo from 'components/Logo';
 import ContainedButton from 'components/ContainedButton';
 import env from 'helpers/env';
+import { getLiveLogin } from 'helpers/launchOptions';
 import { isMockUser, MOCK_FINGER_PRINT } from 'helpers/mock';
 import { t } from 'helpers/i18n';
 import { mockNetworkTitle } from 'navigation/options';
@@ -68,6 +69,15 @@ const Login: React.FC<Props> = ({ navigation }) => {
       // Goes through the emulated server and saves the login, so it survives
       // relaunch.
       void login({ username, password, fingerPrint: MOCK_FINGER_PRINT });
+      return;
+    }
+
+    // The live test account in live E2E runs (helpers/launchOptions.ts):
+    // signs in with a saved device fingerprint instead of opening the SSO
+    // page, which adds a device each time. The server checks the password.
+    const liveLogin = getLiveLogin();
+    if (liveLogin && username === liveLogin.username) {
+      void login({ username, password, fingerPrint: liveLogin.fingerPrint });
       return;
     }
 

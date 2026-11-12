@@ -402,3 +402,24 @@ describe('CourseCard', () => {
     ).toBeTruthy();
   });
 });
+
+describe('card test ids', () => {
+  it('names each kind of card for E2E flows', async () => {
+    await render(
+      <>
+        <NoticeCard data={notice()} />
+        <AssignmentCard data={assignment()} />
+        <FileCard data={file()} />
+        <CourseCard data={course} />
+      </>,
+    );
+    for (const id of [
+      'notice-card',
+      'assignment-card',
+      'file-card',
+      'course-card',
+    ]) {
+      expect(screen.getByTestId(id)).toBeOnTheScreen();
+    }
+  });
+});

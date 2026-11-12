@@ -54,6 +54,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 }) => (
   <CardWrapper
     {...restProps}
+    testID="course-card"
     accessibilityLabel={[
       name,
       teacherName,

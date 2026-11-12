@@ -3,7 +3,9 @@
 # emulator. E2E runs always use Release, never a debug build: it bundles the
 # JS (no Metro), starts faster and is what ships, so the flows run on what R8
 # and Hermes made.
-# The bundle inlines .env, so its mock login works as in debug builds.
+# The bundle inlines .env, so its mock login works as in debug builds. With
+# E2E_LIVE=1 it takes the live test login from launch arguments
+# (scripts/e2e.sh --live); no live value goes into the build.
 #
 #   scripts/e2e-build.sh ios <simulator udid>
 #   scripts/e2e-build.sh android <emulator serial>
@@ -44,7 +46,11 @@ ios)
   ;;
 android)
   abi="${ANDROID_ABI:-arm64-v8a}"
-  (cd android && ./gradlew app:assembleRelease -PciRelease -PreactNativeArchitectures="$abi")
+  # The JS bundle task doesn't see the build's environment (E2E_LIVE, see
+  # babel/inline-env.js), so it always reruns rather than reuse a bundle made
+  # with or without it.
+  (cd android && ./gradlew app:createBundleReleaseJsAndAssets --rerun \
+    app:assembleRelease -PciRelease -PreactNativeArchitectures="$abi")
   apk="android/app/build/outputs/apk/release/app-$abi-release.apk"
   # -d: a newer debug build may be installed; both are signed with the debug key.
   adb -s "$device" install -r -d "$apk"
