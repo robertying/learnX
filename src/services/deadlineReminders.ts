@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
 import { deadlineDayTime } from 'helpers/assignments';
-import { t } from 'helpers/i18n';
+import { t, timeFormat } from 'helpers/i18n';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
@@ -197,7 +197,7 @@ export const planDeadlineReminders = (
 const lateDayTime = (deadline: number, now: number) => {
   const n = dayjs(now);
   const dl = dayjs(deadline);
-  const time = dl.format('HH:mm');
+  const time = dl.format(timeFormat());
   return dl.isSame(n, 'day')
     ? t('lateClosesToday', { time })
     : dl.isSame(n.add(1, 'day'), 'day')
