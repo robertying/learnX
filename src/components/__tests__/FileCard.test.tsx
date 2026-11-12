@@ -1,7 +1,7 @@
 import { act, render, screen } from '@testing-library/react-native';
 import dayjs from 'dayjs';
-import { mockLocale } from '../../../jest/locale';
-import { NOW, file } from '../../../jest/fixtures/cards';
+import { mockLocale } from 'test-utils/locale';
+import { NOW, file } from 'test-utils/fixtures/cards';
 import FileCard from 'components/FileCard';
 import type { File } from 'data/types/state';
 

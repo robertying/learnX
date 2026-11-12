@@ -17,6 +17,7 @@ import { t } from 'helpers/i18n';
 import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import Downloads from 'screens/Downloads';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('services/files/downloads', () => ({
   listDownloads: jest.fn(),
@@ -37,8 +38,7 @@ const courses = [
   { courseId: 'c2', courseName: '物理', count: 3, size: 2000 },
 ];
 
-const renderScreen = () =>
-  render(<Downloads navigation={{} as never} route={{} as never} />);
+const renderScreen = () => render(<Downloads {...screenProps()} />);
 
 let alert: jest.SpyInstance;
 beforeEach(() => {

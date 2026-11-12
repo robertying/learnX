@@ -2,8 +2,8 @@ import { act, render, screen } from '@testing-library/react-native';
 import type * as ReactNative from 'react-native';
 import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
-import { mockLocale } from '../../../jest/locale';
-import { NOW, notice } from '../../../jest/fixtures/cards';
+import { mockLocale } from 'test-utils/locale';
+import { NOW, notice } from 'test-utils/fixtures/cards';
 import NoticeCard from 'components/NoticeCard';
 import type { Notice } from 'data/types/state';
 

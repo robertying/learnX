@@ -1,6 +1,7 @@
 import { StyleSheet } from 'react-native';
 import { render, screen } from '@testing-library/react-native';
 import Login from 'screens/Login';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/login', () => ({
   login: jest.fn(),
@@ -13,8 +14,10 @@ jest.mock('data/source', () => ({
 it('start-aligns the login page on Android, as the welcome page is', async () => {
   await render(
     <Login
-      navigation={{ navigate: jest.fn() } as never}
-      route={{ key: 'Login', name: 'Log In' } as never}
+      {...screenProps({
+        navigation: { navigate: jest.fn() },
+        route: { key: 'Login', name: 'Log In' },
+      })}
     />,
   );
   const note = screen.getByText(

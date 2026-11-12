@@ -13,6 +13,7 @@ import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import Settings from 'screens/Settings';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/login', () => ({ logout: jest.fn() }));
 jest.mock('hooks/useAvailableUpdate', () => jest.fn(() => null));
@@ -26,7 +27,7 @@ const navigation = { navigate: jest.fn() };
 const renderScreen = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <Settings navigation={navigation as never} route={{} as never} />
+      <Settings {...screenProps({ navigation })} />
     </QueryClientProvider>,
   );
 

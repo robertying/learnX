@@ -1,6 +1,7 @@
 import { Linking } from 'react-native';
 import { act, render, screen, userEvent } from '@testing-library/react-native';
 import CourseX from 'screens/CourseX';
+import { screenProps } from 'test-utils/screenProps';
 
 const mockWebView = {
   goBack: jest.fn(),
@@ -22,7 +23,7 @@ jest.mock('react-native-webview', () => {
 });
 
 const renderScreen = (params?: { id: string }) =>
-  render(<CourseX navigation={{} as never} route={{ params } as never} />);
+  render(<CourseX {...screenProps({ route: { params } })} />);
 
 const navigate = (state: object) =>
   act(() =>

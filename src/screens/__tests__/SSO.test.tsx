@@ -5,6 +5,7 @@ import { login } from 'data/login';
 import { t } from 'helpers/i18n';
 import { toast } from 'components/Toast';
 import SSO from 'screens/SSO';
+import { screenProps } from 'test-utils/screenProps';
 
 let mockProps: Record<string, any> = {};
 jest.mock('react-native-webview', () => {
@@ -30,8 +31,10 @@ const navigation = { goBack: jest.fn() };
 const renderScreen = () =>
   render(
     <SSO
-      navigation={navigation as never}
-      route={{ params: { username: 'u"1', password: 'p\\w' } } as never}
+      {...screenProps({
+        navigation,
+        route: { params: { username: 'u"1', password: 'p\\w' } },
+      })}
     />,
   );
 

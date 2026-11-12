@@ -12,6 +12,7 @@ import {
 } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/semester';
 import SemesterSelection from 'screens/SemesterSelection';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('data/source', () => ({
   dataSource: {
@@ -23,7 +24,7 @@ jest.mock('data/source', () => ({
 const renderScreen = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <SemesterSelection navigation={{} as never} route={{} as never} />
+      <SemesterSelection {...screenProps()} />
     </QueryClientProvider>,
   );
 

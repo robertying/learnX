@@ -17,6 +17,7 @@ import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import * as options from 'navigation/options';
 import CourseDetail from 'screens/CourseDetail';
+import { screenProps } from 'test-utils/screenProps';
 
 const mockPush = jest.fn();
 jest.mock('@react-navigation/native', () => ({
@@ -83,8 +84,7 @@ const navigation = { setOptions: jest.fn(), navigate: jest.fn() };
 const renderScreen = () =>
   render(
     <CourseDetail
-      navigation={navigation as never}
-      route={{ params: { id: course.id } } as never}
+      {...screenProps({ navigation, route: { params: { id: course.id } } })}
     />,
   );
 

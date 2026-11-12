@@ -5,10 +5,10 @@ import Navigation from 'navigation';
 import {
   lastNavigatorScreens,
   navigatorConfig,
-} from '../../../jest/mocks/navigator';
+} from 'test-utils/mocks/navigator';
 
 jest.mock('@react-navigation/native-stack', () => ({
-  createNativeStackNavigator: require('../../../jest/mocks/navigator')
+  createNativeStackNavigator: require('test-utils/mocks/navigator')
     .createNavigator,
 }));
 jest.mock('navigation/MainTab', () => () => null);

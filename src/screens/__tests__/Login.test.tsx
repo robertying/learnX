@@ -16,7 +16,8 @@ import { getSettings, resetSettings } from 'data/settings';
 import { clearLoginCookies } from 'data/source';
 import { MOCK_FINGER_PRINT } from 'helpers/mock';
 import Login from 'screens/Login';
-import env from '../../../jest/mocks/env';
+import env from 'test-utils/mocks/env';
+import { screenProps } from 'test-utils/screenProps';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
 const mockLiveLogin = jest.fn<
@@ -48,8 +49,7 @@ const setup = async () => {
   const navigation = { navigate: jest.fn() };
   await render(
     <Login
-      navigation={navigation as never}
-      route={{ key: 'Login', name: 'Log In' } as never}
+      {...screenProps({ navigation, route: { key: 'Login', name: 'Log In' } })}
     />,
   );
   return { navigation };

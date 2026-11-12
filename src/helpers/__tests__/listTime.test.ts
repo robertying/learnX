@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import { mockLocale } from '../../../jest/locale';
+import { mockLocale } from 'test-utils/locale';
 import { listTime } from 'helpers/listTime';
 
 // a Tuesday, in Asia/Shanghai, where tests run
