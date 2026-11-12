@@ -494,7 +494,7 @@ describe('removeCalendars and Reminders access', () => {
     mocked.getCalendars.mockResolvedValue([calendar]);
     await removeCalendars();
     expect(mocked.requestRemindersPermissions).not.toHaveBeenCalled();
-    expect(mocked.getCalendars).not.toHaveBeenCalledWith('reminder');
+    expect(mocked.getCalendars.mock.calls).toEqual([['event']]);
     expect(calendar.delete).toHaveBeenCalled();
   });
 
