@@ -2,9 +2,7 @@
 // the cached timetable (this and next week), scheduled ahead like deadline
 // reminders, so they go off without the app. They are planned again whenever
 // the timetable or the settings change (`services/surfaces`).
-import { Platform } from 'react-native';
 import dayjs from 'dayjs';
-import * as Notifications from 'expo-notifications';
 import { NotificationSettings } from 'data/types/state';
 import { t } from 'helpers/i18n';
 import {
@@ -12,6 +10,11 @@ import {
   getNotificationPermission,
   notificationChannels,
 } from 'services/notifications';
+import {
+  cancelScheduled,
+  dateTrigger,
+  reconcileScheduled,
+} from 'services/scheduledNotifications';
 import { UpcomingClass } from 'helpers/upNext';
 
 /**
@@ -21,7 +24,8 @@ import { UpcomingClass } from 'helpers/upNext';
 export const MAX_CLASS_REMINDERS = 24;
 
 /** Identifiers of class reminders start with this, so others are left alone. */
-const PREFIX = 'class-reminder:';
+export const CLASS_REMINDER_PREFIX = 'class-reminder:';
+const PREFIX = CLASS_REMINDER_PREFIX;
 
 export interface PlannedClassReminder {
   /**
@@ -85,6 +89,8 @@ export const classReminderContent = ({
     .filter(Boolean)
     .join(' · '),
   data: { type: 'today' },
+  // Stacked together in the iOS notification center.
+  threadIdentifier: notificationChannels.classes,
 });
 
 /**
@@ -104,68 +110,16 @@ export const syncClassReminders = async (
           inexact: !(await canScheduleExactAlarms()),
         })
       : [];
-  const wanted = new Set(plan.map(r => r.identifier));
-  const scheduled = (await Notifications.getAllScheduledNotificationsAsync())
-    .map(n => n.identifier)
-    .filter(id => id.startsWith(PREFIX));
-  const existing = new Set(scheduled);
-
-  await Promise.all([
-    ...scheduled
-      .filter(id => !wanted.has(id))
-      .map(id => Notifications.cancelScheduledNotificationAsync(id)),
-    ...plan
-      .filter(r => !existing.has(r.identifier))
-      .map(r =>
-        Notifications.scheduleNotificationAsync({
-          identifier: r.identifier,
-          content: classReminderContent(r.upcoming),
-          trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.DATE,
-            date: r.date,
-            ...(Platform.OS === 'android'
-              ? { channelId: notificationChannels.classes }
-              : {}),
-          },
-        }),
-      ),
-  ]);
-};
-
-/**
- * Debug builds: how many class reminders are scheduled, and the first one
- * again in ten seconds, to see what it looks like.
- */
-export const previewClassReminder = async () => {
-  const scheduled = (
-    await Notifications.getAllScheduledNotificationsAsync()
-  ).filter(n => n.identifier.startsWith(PREFIX));
-  const first = scheduled[0];
-  if (first) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: first.content.title,
-        body: first.content.body,
-        data: first.content.data,
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: 10,
-        ...(Platform.OS === 'android'
-          ? { channelId: notificationChannels.classes }
-          : {}),
-      },
-    });
-  }
-  return scheduled.length;
+  await reconcileScheduled(
+    id => id.startsWith(PREFIX),
+    plan.map(r => ({
+      identifier: r.identifier,
+      content: classReminderContent(r.upcoming),
+      trigger: dateTrigger(r.date, notificationChannels.classes),
+    })),
+  );
 };
 
 /** Cancels every class reminder, e.g. when logging out. */
-export const cancelClassReminders = async () => {
-  const scheduled = await Notifications.getAllScheduledNotificationsAsync();
-  await Promise.all(
-    scheduled
-      .filter(n => n.identifier.startsWith(PREFIX))
-      .map(n => Notifications.cancelScheduledNotificationAsync(n.identifier)),
-  );
-};
+export const cancelClassReminders = () =>
+  cancelScheduled(id => id.startsWith(PREFIX));
