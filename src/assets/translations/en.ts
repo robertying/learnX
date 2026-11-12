@@ -38,6 +38,7 @@ export default {
   description: 'Description',
   unsentDraft: 'Unsent Draft',
   assignmentSubmission: 'Assignment Submission',
+  wrongCredentials: 'Wrong username or password.',
   loginFailed:
     "Couldn't log in. Check your connection and that your Tsinghua ID login still works.",
   versionInformation: 'Version',

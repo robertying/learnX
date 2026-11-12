@@ -6,7 +6,9 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native';
+import { FailReason } from '@robertying/thu-learn-lib';
 import { toast } from 'components/Toast';
+import { t } from 'helpers/i18n';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { Credentials, useCredentialsStore } from 'data/credentials';
 import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
@@ -233,5 +235,46 @@ describe('Login', () => {
     await setup();
     expect(screen.queryByText('Log In with Saved Account')).toBeNull();
     expect(screen.queryByText('Continue Offline')).toBeNull();
+  });
+
+  it('says why a login from here failed, once per attempt', async () => {
+    await setup();
+    await act(() => useAuthStore.setState({ loggingIn: true }));
+    await act(() =>
+      useAuthStore.setState({
+        loggingIn: false,
+        error: FailReason.BAD_CREDENTIAL,
+        failure: 'rejected',
+      }),
+    );
+    expect(toast).toHaveBeenLastCalledWith(
+      'Wrong username or password.',
+      'error',
+      8000,
+    );
+
+    await act(() => useAuthStore.setState({ loggingIn: true, error: null }));
+    await act(() =>
+      useAuthStore.setState({
+        loggingIn: false,
+        error: FailReason.ERROR_FETCH_FROM_ID,
+        failure: 'rejected',
+      }),
+    );
+    expect(toast).toHaveBeenLastCalledWith(t('loginFailed'), 'error', 8000);
+    expect(toast).toHaveBeenCalledTimes(2);
+
+    // A state change that isn't the end of a login says nothing.
+    await act(() => useAuthStore.setState({ ssoInProgress: true }));
+    expect(toast).toHaveBeenCalledTimes(2);
+  });
+
+  it('says nothing when a login from here succeeds', async () => {
+    await setup();
+    await act(() => useAuthStore.setState({ loggingIn: true }));
+    await act(() =>
+      useAuthStore.setState({ loggingIn: false, loggedIn: true }),
+    );
+    expect(toast).not.toHaveBeenCalled();
   });
 });

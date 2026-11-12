@@ -1,4 +1,4 @@
-import { FailReason } from '@robertying/thu-learn-lib';
+import { ApiError, FailReason } from '@robertying/thu-learn-lib';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getAuth, initialAuth, cancelRelogin, useAuthStore } from 'data/auth';
 import {
@@ -126,6 +126,11 @@ export async function login({
     loggedIn();
     void queryClient.prefetchQuery(userQuery);
   } catch (err) {
+    if (__DEV__) {
+      // What the SSO server answered (thu-learn-lib's `extra`), for debugging
+      // a login it turned down.
+      console.warn('Login failed', errorReason(err), (err as ApiError)?.extra);
+    }
     // Offline when the last attempt got no answer; anything else (a wrong
     // password, or the server failing the login) is the server turning it
     // down.

@@ -42,7 +42,6 @@ export const getAuth = () => useAuthStore.getState();
 /** Queries run only while logged in; their cached data shows meanwhile. */
 export const useLoggedIn = () => useAuthStore(state => state.loggedIn);
 export const useLoggingIn = () => useAuthStore(state => state.loggingIn);
-export const useLoginError = () => useAuthStore(state => state.error);
 export const useReloginRequested = () =>
   useAuthStore(state => state.reloginRequested);
 
