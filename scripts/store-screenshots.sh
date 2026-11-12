@@ -65,7 +65,7 @@ mac) platform=mac folder=macos/windows ;;
 android-phone)
   platform=android flow=android_phone folder=android/phone
   size="${STORE_ANDROID_SIZE:-1080x1920}" density="${STORE_ANDROID_DENSITY:-420}"
-  bar_dp=32
+  bar_dp=33
   ;;
 android-tablet)
   platform=android flow=android_tablet folder=android/tablet
@@ -242,11 +242,11 @@ if [ "$platform" = android ]; then
   # Paint the status bar's icons (network, battery, system and notification
   # icons; the screen lock shield) with the bar's own color, keeping only the
   # clock on the left. On a tablet the painted band also covers the window
-  # handle under the bar. STORE_ANDROID_STATUS_BAR_DP (default 32 phone, 62
-  # tablet) is the band's height, STORE_ANDROID_CLOCK_DP (72) the clock's
+  # handle under the bar. STORE_ANDROID_STATUS_BAR_DP (default 33 phone, 62
+  # tablet) is the band's height, STORE_ANDROID_CLOCK_DP (48) the clock's
   # width.
   bar_height=$(((${STORE_ANDROID_STATUS_BAR_DP:-$bar_dp} * density + 159) / 160))
-  clock_width=$(((${STORE_ANDROID_CLOCK_DP:-72} * density + 159) / 160))
+  clock_width=$(((${STORE_ANDROID_CLOCK_DP:-48} * density + 159) / 160))
   for png in "$out"/*.png; do
     width="$(ffprobe -v error -select_streams v:0 -show_entries stream=width \
       -of csv=p=0 "$png")"
