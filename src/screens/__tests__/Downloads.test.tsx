@@ -5,6 +5,7 @@ import {
   render,
   screen,
   userEvent,
+  within,
 } from '@testing-library/react-native';
 import { getSettings, resetSettings } from 'data/settings';
 import {
@@ -14,7 +15,6 @@ import {
 } from 'services/files/downloads';
 import { exportDownloads } from 'services/files/export';
 import { t } from 'helpers/i18n';
-import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import Downloads from 'screens/Downloads';
 import { screenProps } from 'test-utils/screenProps';
@@ -26,7 +26,6 @@ jest.mock('services/files/downloads', () => ({
 }));
 jest.mock('services/files/export', () => ({ exportDownloads: jest.fn() }));
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
-jest.mock('components/choiceSheet', () => ({ showChoices: jest.fn() }));
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useFocusEffect: (effect: () => void) =>
@@ -55,12 +54,10 @@ const pressAlertButton = async (text: string) => {
   });
 };
 const confirmDelete = () => pressAlertButton(t('delete'));
-/** Picks `label` in the last course menu. */
+/** Picks `label` in the open course sheet. */
 const pressChoice = async (label: string) => {
-  const { choices } = jest.mocked(showChoices).mock.calls.at(-1)![0];
-  await act(async () => {
-    choices.find(choice => choice.label === label)!.onPress();
-  });
+  const sheet = screen.getByTestId('confirmation-dialog');
+  await userEvent.press(within(sheet).getByText(label));
 };
 
 it('sums the downloads and lists each course with its count and size', async () => {
@@ -87,7 +84,13 @@ it('shows only the total without downloads', async () => {
 it("deletes a course's files once confirmed, then lists again", async () => {
   await renderScreen();
   await userEvent.press(screen.getByText('物理'));
-  expect(jest.mocked(showChoices).mock.calls[0][0].title).toBe('物理');
+  const sheet = screen.getByTestId('confirmation-dialog');
+  expect(within(sheet).getByText('物理')).toBeTruthy();
+  expect(
+    within(sheet).getByText(
+      `${t('downloadsFileCount', { count: 3 })} · 2.0 KB`,
+    ),
+  ).toBeTruthy();
   await pressChoice(t('delete'));
   expect(alert.mock.calls[0][0]).toBe(t('downloadsDeleteCourse'));
   expect(alert.mock.calls[0][1]).toContain('物理');

@@ -39,6 +39,7 @@ const row = (data: Item, checked = false) => (
     selectionMode
     reorderMode={false}
     checked={checked}
+    opened={false}
     fav={false}
     archived={false}
     hidden={false}
@@ -79,11 +80,13 @@ describe('FilterListRow', () => {
         isCourse
         selectionMode={false}
         reorderMode={false}
+        opened
         fav
         archived={false}
         hidden
       />,
     );
+    expect(props!.opened).toBe(true);
     props!.onPress!();
     props!.onCheck!(true);
     props!.onToggleFav!();

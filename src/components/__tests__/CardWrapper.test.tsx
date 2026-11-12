@@ -1,3 +1,4 @@
+import { PlatformColor } from 'react-native';
 import { Text } from 'react-native';
 import {
   act,
@@ -78,6 +79,18 @@ describe('CardWrapper', () => {
     await longPress();
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
     expect(mockSwipeableMethods.openLeft).not.toHaveBeenCalled();
+  });
+
+  it('stays filled and reads as selected while open beside the list', async () => {
+    await render(card({ opened: true }));
+    expect(touchable()).toHaveStyle({
+      backgroundColor: PlatformColor('systemGray4'),
+    });
+    expect(touchable().props.accessibilityState).toEqual({ selected: true });
+    await render(card());
+    expect(touchable()).not.toHaveStyle({
+      backgroundColor: PlatformColor('systemGray4'),
+    });
   });
 
   it('draws a separator under every row but the last', async () => {

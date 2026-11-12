@@ -18,7 +18,7 @@ import {
   toggleCourseHidden,
   toggleFavorite,
 } from 'services/listActions';
-import useDetailNavigator from 'hooks/useDetailNavigator';
+import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader, {
   type FilterListHeaderOptions,
 } from 'hooks/useFilterListHeader';
@@ -26,7 +26,11 @@ import type { AppCommand } from 'modules/menus';
 
 jest.mock('@react-navigation/native', () => ({ useIsFocused: () => true }));
 jest.mock('hooks/useFilterListHeader', () => jest.fn());
-jest.mock('hooks/useDetailNavigator', () => jest.fn(() => undefined));
+jest.mock('hooks/useDetailNavigator', () => ({
+  __esModule: true,
+  default: jest.fn(() => undefined),
+  useDetailRoot: jest.fn(() => undefined),
+}));
 jest.mock('services/listActions', () => ({
   moveCourse: jest.fn(),
   toggleArchived: jest.fn(),
@@ -82,6 +86,7 @@ const Card: React.FC<ItemComponentProps<Item>> = ({
   hidden,
   onCheck,
   checked,
+  opened,
   onMove,
   last,
 }) => (
@@ -90,7 +95,7 @@ const Card: React.FC<ItemComponentProps<Item>> = ({
     <Pressable onPress={onPress}>
       <Text>{data.title}</Text>
     </Pressable>
-    <Text>{`${data.id}: ${fav ? 'fav' : ''} ${archived ? 'archived' : ''} ${hidden ? 'hidden' : ''} ${checked ? 'checked' : ''}`}</Text>
+    <Text>{`${data.id}: ${fav ? 'fav' : ''} ${archived ? 'archived' : ''} ${hidden ? 'hidden' : ''} ${checked ? 'checked' : ''} ${opened ? 'opened' : ''}`}</Text>
     <Pressable onPress={() => onToggleFav?.()}>
       <Text>{`fav ${data.id}`}</Text>
     </Pressable>
@@ -290,15 +295,28 @@ describe('menu bar commands', () => {
     jest
       .mocked(useDetailNavigator)
       .mockReturnValue({ push: jest.fn() } as never);
-    const user = userEvent.setup();
-    await renderList();
+    const view = await renderList();
+    // From either end with nothing open
     await choose('previousItem');
     expect(onItemPress).toHaveBeenLastCalledWith(items[2]);
     await choose('nextItem');
-    expect(onItemPress).toHaveBeenLastCalledWith(items[2]);
-    expect(onItemPress).toHaveBeenCalledTimes(1);
+    expect(onItemPress).toHaveBeenLastCalledWith(items[0]);
+    await view.unmount();
 
-    await user.press(screen.getByText('Item a'));
+    // Not past the end
+    jest
+      .mocked(useDetailRoot)
+      .mockReturnValue({ name: 'NoticeDetail', id: 'c' });
+    onItemPress.mockClear();
+    await renderList();
+    await choose('nextItem');
+    expect(onItemPress).not.toHaveBeenCalled();
+    await screen.unmount();
+
+    jest
+      .mocked(useDetailRoot)
+      .mockReturnValue({ name: 'NoticeDetail', id: 'a' });
+    await renderList();
     await choose('nextItem');
     expect(onItemPress).toHaveBeenLastCalledWith(items[1]);
   });
@@ -312,6 +330,27 @@ describe('menu bar commands', () => {
     await choose('refresh');
     expect(onRefresh).not.toHaveBeenCalled();
   });
+});
+
+it('marks the item open in the detail pane, by the page its list opens', async () => {
+  jest.mocked(useDetailRoot).mockReturnValue({ name: 'NoticeDetail', id: 'b' });
+  const view = await renderList();
+  expect(screen.getByText(/^b:.*opened/)).toBeTruthy();
+  expect(screen.queryByText(/^a:.*opened/)).toBeNull();
+
+  // A course with the same id isn't this list's item.
+  jest.mocked(useDetailRoot).mockReturnValue({ name: 'CourseDetail', id: 'b' });
+  await view.rerender(
+    <FilterList<Item>
+      type="notice"
+      all={items}
+      hidden={[]}
+      itemComponent={Card}
+      navigation={navigation}
+      refreshing={false}
+    />,
+  );
+  expect(screen.queryByText(/opened/)).toBeNull();
 });
 
 describe('pull to refresh', () => {

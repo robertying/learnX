@@ -4,6 +4,7 @@ import {
   View,
   StyleSheet,
   Platform,
+  PlatformColor,
 } from 'react-native';
 import { SharedValue, useSharedValue } from 'react-native-reanimated';
 import ReanimatedSwipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
@@ -55,6 +56,11 @@ export interface CardWrapperProps {
   checked?: boolean;
   onCheck?: (checked: boolean) => void;
   /**
+   * The item open in the detail pane beside the list: the row stays filled,
+   * as a selected table cell or Material's selected list item.
+   */
+  opened?: boolean;
+  /**
    * No swipe, menu or accessibility actions, for a card that only opens (as
    * in search results). Selection and reorder mode turn them off too.
    */
@@ -65,6 +71,13 @@ export interface CardWrapperProps {
    */
   last?: boolean;
 }
+
+// UITableViewCell's selected background, as a pressed row shows it
+// (`Touchable`); Material's selected list item.
+const openedBackground = (theme: ReturnType<typeof useTheme>) =>
+  Platform.OS === 'ios'
+    ? PlatformColor('systemGray4')
+    : theme.colors.secondaryContainer;
 
 const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   fav,
@@ -85,6 +98,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   testID,
   checked,
   onCheck,
+  opened,
   actionsDisabled,
   last,
 }) => {
@@ -260,7 +274,11 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   const touchable = (
     <Touchable
       type="highlight"
-      style={{ backgroundColor: theme.colors.surface }}
+      style={{
+        backgroundColor: opened
+          ? openedBackground(theme)
+          : theme.colors.surface,
+      }}
       onPress={
         reorderMode ? undefined : selectionMode ? handleCheck : handlePress
       }
@@ -271,7 +289,13 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       accessibilityRole={
         selectionMode ? 'checkbox' : reorderMode ? undefined : 'button'
       }
-      accessibilityState={selectionMode ? { checked: !!checked } : undefined}
+      accessibilityState={
+        selectionMode
+          ? { checked: !!checked }
+          : opened
+            ? { selected: true }
+            : undefined
+      }
       // Swipe, long press and drag aren't reachable with VoiceOver or TalkBack.
       accessibilityActions={
         actionsEnabled

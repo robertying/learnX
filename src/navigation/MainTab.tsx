@@ -17,7 +17,8 @@ import useLaunchSheet from 'hooks/useLaunchSheet';
 import useMainStartup from 'hooks/useMainStartup';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { renderDetailContainer, TabSplit } from './DetailStack';
-import { nativeSplit, sidebarSplit } from './layout';
+import { initialTab, nativeSplit, sidebarSplit } from './layout';
+import { SplitTab } from './SplitView';
 import {
   AssignmentStack,
   CourseStack,
@@ -62,15 +63,23 @@ const getTabBarIcon = (icon: TabIcon, focused: boolean) =>
     : { uri: `tab_${systemIcons[icon].android}${focused ? '_filled' : ''}` };
 
 // UIKit only moves the tab bar into the vertical bar when the tab bar controller
-// contains the split view, so each tab gets its own split.
-const withSplit = (Master: React.ComponentType) =>
-  nativeSplit && !sidebarSplit
-    ? () => (
-        <TabSplit>
-          <Master />
-        </TabSplit>
-      )
-    : Master;
+// contains the split view, so each tab gets its own split. Android's split holds
+// all the tabs, with a detail stack for each. The Mac's sidebar navigator gives
+// each tab its own detail stack itself.
+const withSplit = (name: keyof MainTabParams, Master: React.ComponentType) =>
+  sidebarSplit
+    ? Master
+    : nativeSplit
+      ? () => (
+          <TabSplit>
+            <Master />
+          </TabSplit>
+        )
+      : () => (
+          <SplitTab name={name}>
+            <Master />
+          </SplitTab>
+        );
 
 // Today, Notices, Assignments, Files, Courses, and on Mac Settings. Elsewhere
 // Settings open from Today's header: Android's navigation bar holds at most
@@ -87,36 +96,36 @@ interface Tab {
 
 const tabs: Tab[] = [
   {
-    name: 'TodayStack',
-    component: withSplit(TodayStack),
+    name: initialTab,
+    component: withSplit(initialTab, TodayStack),
     title: t('today'),
     icon: 'dayPart',
     testID: 'tab-today',
   },
   {
     name: 'NoticeStack',
-    component: withSplit(NoticeStack),
+    component: withSplit('NoticeStack', NoticeStack),
     title: t('notices'),
     icon: 'notices',
     testID: 'tab-notices',
   },
   {
     name: 'AssignmentStack',
-    component: withSplit(AssignmentStack),
+    component: withSplit('AssignmentStack', AssignmentStack),
     title: t('assignments'),
     icon: 'assignments',
     testID: 'tab-assignments',
   },
   {
     name: 'FileStack',
-    component: withSplit(FileStack),
+    component: withSplit('FileStack', FileStack),
     title: t('files'),
     icon: 'files',
     testID: 'tab-files',
   },
   {
     name: 'CourseStack',
-    component: withSplit(CourseStack),
+    component: withSplit('CourseStack', CourseStack),
     title: t('courses'),
     icon: 'courses',
     testID: 'tab-courses',
@@ -125,7 +134,7 @@ const tabs: Tab[] = [
     ? ([
         {
           name: 'SettingStack',
-          component: withSplit(SettingStack),
+          component: withSplit('SettingStack', SettingStack),
           title: t('settings'),
           icon: 'settings',
           testID: 'tab-settings',

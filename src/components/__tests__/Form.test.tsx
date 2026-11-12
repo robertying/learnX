@@ -10,6 +10,7 @@ import { PlatformColor, Text } from 'react-native';
 import {
   Form,
   FormButton,
+  FormChoiceButton,
   FormFile,
   FormLink,
   FormNumberField,
@@ -38,6 +39,46 @@ import DeviceInfo from 'constants/DeviceInfo';
 import { BrandLightTheme } from 'theme';
 
 describe('Form', () => {
+  it("asks from a row with the row's own sheet", async () => {
+    const exportCourse = jest.fn();
+    const remove = jest.fn();
+    const onCancel = jest.fn();
+    await render(
+      <Form>
+        <FormSection>
+          <FormChoiceButton
+            title="物理"
+            detail="3 files"
+            sheet={{
+              title: '物理',
+              message: '3 files · 2 KB',
+              choices: [
+                { label: 'Export', onPress: exportCourse },
+                { label: 'Delete', onPress: remove, destructive: true },
+              ],
+              onCancel,
+            }}
+          />
+        </FormSection>
+      </Form>,
+    );
+    expect(screen.queryByTestId('confirmation-dialog')).toBeNull();
+    await userEvent.press(screen.getByText('物理'));
+    expect(screen.getByText('3 files · 2 KB')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Delete' }).props).toMatchObject({
+      accessibilityHint: 'destructive',
+    });
+    await userEvent.press(screen.getByText('Export'));
+    expect(exportCourse).toHaveBeenCalled();
+    expect(screen.queryByTestId('confirmation-dialog')).toBeNull();
+    expect(onCancel).not.toHaveBeenCalled();
+
+    await userEvent.press(screen.getByText('物理'));
+    await userEvent.press(screen.getByText('Cancel'));
+    expect(onCancel).toHaveBeenCalledTimes(1);
+    expect(remove).not.toHaveBeenCalled();
+  });
+
   it('opens a page from a link row with a chevron', async () => {
     const onPress = jest.fn();
     await render(
