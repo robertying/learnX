@@ -293,15 +293,20 @@ export const refreshSurfaces = () => {
  * them). Resolves once the reminders are cancelled; never rejects.
  */
 export const clearSurfaces = () => {
-  lastDeps = new Map();
-  updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
-  updateUpNextWidget();
-  clearSpotlight();
-  clearShortcuts();
-  return Promise.all([
-    cancelDeadlineReminders().catch(() => {}),
-    cancelClassReminders().catch(() => {}),
-  ]).then(() => {});
+  // In the same queue as the refreshes, so a refresh for the next account
+  // never schedules reminders that this then cancels.
+  running = running.then(async () => {
+    lastDeps = new Map();
+    updateDeadlineWidget([], { hiddenCourses: [], archived: [] });
+    updateUpNextWidget();
+    clearSpotlight();
+    clearShortcuts();
+    await Promise.all([
+      cancelDeadlineReminders().catch(() => {}),
+      cancelClassReminders().catch(() => {}),
+    ]);
+  });
+  return running;
 };
 
 /** Lists whose changes the surfaces follow, by the first part of their key. */
