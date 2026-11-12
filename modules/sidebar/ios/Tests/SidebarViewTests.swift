@@ -4,12 +4,13 @@ import UIKit
 
 @testable import Sidebar
 
-func sidebarItem(_ key: String, title: String? = nil, badge: Bool = false) -> SidebarItem {
+func sidebarItem(_ key: String, title: String? = nil, badge: Bool = false, testID: String = "") -> SidebarItem {
   var item = SidebarItem()
   item.key = key
   item.title = title ?? key.capitalized
   item.systemImage = "tray"
   item.badge = badge
+  item.testID = testID
   return item
 }
 
@@ -51,21 +52,24 @@ extension SidebarView {
     #expect(sidebarItem("a") != sidebarItem("a", badge: true))
     #expect(sidebarItem("a") != sidebarItem("a", title: "Other"))
     #expect(sidebarItem("a") != sidebarItem("b"))
+    #expect(sidebarItem("a") != sidebarItem("a", testID: "tab-a"))
   }
 
   @Test func showsTheItems() throws {
     let (view, window) = makeSidebar()
     defer { window.isHidden = true }
-    view.setItems([sidebarItem("today"), sidebarItem("notices", badge: true)])
+    view.setItems([sidebarItem("today", testID: "tab-today"), sidebarItem("notices", badge: true)])
 
     let today = try #require(view.cell(0))
     let content = try #require(today.contentConfiguration as? UIListContentConfiguration)
     #expect(content.text == "Today")
     #expect(content.image != nil)
     #expect(today.accessories.isEmpty)
+    #expect(today.accessibilityIdentifier == "tab-today")
 
     let notices = try #require(view.cell(1))
     #expect(notices.accessories.count == 1)
+    #expect(notices.accessibilityIdentifier == nil)
   }
 
   @Test func updatesChangedItems() throws {

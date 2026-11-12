@@ -1,0 +1,11 @@
+appId: ${APP_ID}
+name: Open a file on the open iPhone Duo
+---
+# Run by scripts/e2e-devices.sh on the iPhone Duo, already logged in: opens
+# the screen from its learnx:// link (mock data ids, checked by
+# src/helpers/__tests__/e2ePostures.test.ts) and checks it on the inner display.
+- runFlow:
+    file: ../subflows/open_on_inner.yaml
+    env:
+      LINK: 'learnx://file/2016310501_KJ_173100010b5f1dcc2-f77a-4cca-be0f-95808af85d82'
+      ID: file-detail

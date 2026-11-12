@@ -270,7 +270,7 @@ const CourseDetailContent: React.FC<{
   // segmented controls).
   if (hasGlassHeader) {
     return (
-      <SafeArea>
+      <SafeArea testID="course-detail" collapsable={false}>
         {/* Once the tabs are laid out: a list starts at its top inset only
             when it has it from the start. */}
         {tabsHeight ? (
@@ -297,7 +297,7 @@ const CourseDetailContent: React.FC<{
   }
 
   return (
-    <SafeArea>
+    <SafeArea testID="course-detail" collapsable={false}>
       <TabView
         navigationState={{ index, routes }}
         renderScene={renderScene}

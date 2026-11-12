@@ -74,7 +74,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
 
   return (
     <FormScreen>
-      <Form>
+      <Form testID="settings-list">
         <FormSection>
           <FormProfile
             name={userInfo?.name ?? username ?? 'learnX'}

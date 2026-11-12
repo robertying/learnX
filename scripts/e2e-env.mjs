@@ -8,6 +8,8 @@
 // - `MOCK_*`: mock items (`data/mock.ts`, `data/mockEnglish.ts`) the flows
 //   open, as an alternation of their English and Chinese texts. A flow matches
 //   one inside a card's label as `'.*(${MOCK_NOTICE}).*'`.
+// - `STORE_SEARCH_TERM`: what the store screenshots (.maestro/store/), which
+//   are in Chinese, search for.
 //
 // scripts/e2e.sh passes each line to Maestro with -e. Node strips the types.
 import { readdirSync, readFileSync } from 'node:fs';
@@ -73,13 +75,21 @@ const searchTerm = 'AutoCAD';
 const searchNotice = zhMock.noticeId(15);
 const searchAssignment = zhMock.assignmentId(13);
 
+// The store screenshots (.maestro/store/): notice 3 and assignment 7 (both
+// "Project 1", with an attachment and a future deadline), file 2 (a PDF) and
+// notice 3's course, which split views open while notice 1's course shows
+// its swipe actions.
+const storeNotice = item(zhMock.mockNotices, zhMock.noticeId(3));
+const storeCourse = item(zhMock.mockCourses, storeNotice.courseId);
+const storeAssignment = zhMock.assignmentId(7);
+const storeFile = zhMock.fileId(2);
+const courseName = c =>
+  either(c.englishName || c.name, c.chineseName || c.name);
+
 const mock = {
   MOCK_NOTICE: both('mockNotices', notice.id),
   // As data/courseNames shows a course in each language.
-  MOCK_COURSE: either(
-    course.englishName || course.name,
-    course.chineseName || course.name,
-  ),
+  MOCK_COURSE: courseName(course),
   MOCK_ASSIGNMENT: both('mockAssignments', assignment),
   MOCK_ASSIGNMENT_ATTACHMENT: both(
     'mockAssignments',
@@ -90,6 +100,17 @@ const mock = {
   MOCK_SEARCH_TERM: searchTerm,
   MOCK_SEARCH_NOTICE: both('mockNotices', searchNotice),
   MOCK_SEARCH_ASSIGNMENT: both('mockAssignments', searchAssignment),
+  MOCK_STORE_NOTICE: both('mockNotices', storeNotice.id),
+  // The start of its body, to wait for its web view to render.
+  MOCK_STORE_NOTICE_BODY: both('mockNotices', storeNotice.id, n => {
+    const text = n.content.replace(/<[^>]+>/g, ' ').trim();
+    return /\p{Script=Han}/u.test(text)
+      ? text.slice(0, 8)
+      : text.split(/\s+/).slice(0, 3).join(' ');
+  }),
+  MOCK_STORE_COURSE: courseName(storeCourse),
+  MOCK_STORE_ASSIGNMENT: both('mockAssignments', storeAssignment),
+  MOCK_STORE_FILE: both('mockFiles', storeFile),
 };
 for (const [listName, id] of [
   ['mockNotices', searchNotice],
@@ -102,14 +123,22 @@ for (const [listName, id] of [
   }
 }
 
-// The translation keys the flows use.
+// The store screenshots are in Chinese and search for 作业 ("Assignments");
+// the results include assignment 7.
+const storeSearchTerm = zh.assignments;
+if (
+  !item(zhMock.mockAssignments, storeAssignment).title.includes(storeSearchTerm)
+) {
+  throw new Error(
+    `Mock item ${storeAssignment} doesn't contain "${storeSearchTerm}"`,
+  );
+}
+
+// The translation keys the flows use, in every folder of .maestro/.
 const maestro = join(root, '.maestro');
-const flows = [
-  ...readdirSync(maestro).map(name => join(maestro, name)),
-  ...readdirSync(join(maestro, 'subflows')).map(name =>
-    join(maestro, 'subflows', name),
-  ),
-].filter(path => path.endsWith('.yaml'));
+const flows = readdirSync(maestro, { recursive: true })
+  .map(name => join(maestro, name))
+  .filter(path => path.endsWith('.yaml'));
 const keys = new Set(
   flows.flatMap(path =>
     [...readFileSync(path, 'utf8').matchAll(/\$\{T_(\w+)\}/g)].map(m => m[1]),
@@ -117,6 +146,7 @@ const keys = new Set(
 );
 
 const lines = Object.entries(mock).map(([key, value]) => `${key}=${value}`);
+lines.push(`STORE_SEARCH_TERM=${storeSearchTerm}`);
 for (const key of [...keys].sort()) {
   if (typeof en[key] !== 'string' || typeof zh[key] !== 'string') {
     throw new Error(`No translation "${key}" (used as \${T_${key}})`);

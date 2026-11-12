@@ -2,14 +2,13 @@ appId: ${APP_ID}
 name: Search and open a result
 ---
 - runFlow: subflows/login.yaml
-- tapOn: '${T_search}'
-# The search field is focused on open.
-- inputText: ${MOCK_SEARCH_TERM}
 # Results are grouped by kind, notices first; the keyboard and the search
 # field cover the rest on phones, so open the notice.
-- extendedWaitUntil:
-    visible: '.*(${MOCK_SEARCH_NOTICE}).*'
-    timeout: 5000
+- runFlow:
+    file: subflows/search.yaml
+    env:
+      TERM: ${MOCK_SEARCH_TERM}
+      RESULT: '.*(${MOCK_SEARCH_NOTICE}).*'
 - assertVisible: '.*(${MOCK_SEARCH_ASSIGNMENT}).*'
 # While the search field has focus, the results list may spend the first tap
 # on blurring it, so tap again if needed.

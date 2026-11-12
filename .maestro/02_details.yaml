@@ -3,11 +3,11 @@ name: Open a notice, an assignment and a file
 ---
 - runFlow: subflows/login.yaml
 
-- tapOn: '.*(${MOCK_NOTICE}).*'
-- extendedWaitUntil:
-    visible:
-      id: notice-detail
-    timeout: 10000
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_NOTICE}).*'
+      DETAIL: notice-detail
 - runFlow:
     file: subflows/back.yaml
     env:
@@ -17,11 +17,11 @@ name: Open a notice, an assignment and a file
     file: subflows/tab.yaml
     env:
       TAB: 'tab-assignments|list\.bullet\.clipboard\.fill'
-- tapOn: '.*(${MOCK_ASSIGNMENT}).*'
-- extendedWaitUntil:
-    visible:
-      id: assignment-detail
-    timeout: 10000
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_ASSIGNMENT}).*'
+      DETAIL: assignment-detail
 - assertVisible: '.*(${MOCK_ASSIGNMENT_ATTACHMENT}).*'
 - runFlow:
     file: subflows/back.yaml
@@ -32,12 +32,12 @@ name: Open a notice, an assignment and a file
     file: subflows/tab.yaml
     env:
       TAB: 'tab-files|folder\.fill'
-- tapOn: '.*(${MOCK_FILE}).*'
 # The screen shows right away; the file itself downloads in the background.
-- extendedWaitUntil:
-    visible:
-      id: file-detail
-    timeout: 10000
+- runFlow:
+    file: subflows/open.yaml
+    env:
+      CARD: '.*(${MOCK_FILE}).*'
+      DETAIL: file-detail
 - runFlow:
     file: subflows/back.yaml
     env:
