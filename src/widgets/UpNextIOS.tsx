@@ -47,9 +47,9 @@ function UpNextWidget(
   // end of tomorrow. The timeline has an entry at each change.
   const dueColor = (d: UpNextWidgetProps['deadlines'][number]) =>
     foregroundStyle(
-      d.urgentFrom !== undefined && now > d.urgentFrom
+      now > d.urgentFrom
         ? PlatformColor('systemRed')
-        : d.soonFrom !== undefined && now >= d.soonFrom
+        : now >= d.soonFrom
           ? PlatformColor('systemOrange')
           : { type: 'hierarchical', style: 'secondary' },
     );

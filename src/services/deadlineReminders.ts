@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import * as Notifications from 'expo-notifications';
 import { Assignment, NotificationSettings } from 'data/types/state';
 import { deadlineDayTime } from 'helpers/assignments';
-import { t, timeFormat } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import {
   canScheduleExactAlarms,
   getNotificationPermission,
@@ -193,18 +193,6 @@ export const planDeadlineReminders = (
     .slice(0, max);
 };
 
-/** When late submission closes, as of `now`: "today at 23:59". */
-const lateDayTime = (deadline: number, now: number) => {
-  const n = dayjs(now);
-  const dl = dayjs(deadline);
-  const time = dl.format(timeFormat());
-  return dl.isSame(n, 'day')
-    ? t('lateClosesToday', { time })
-    : dl.isSame(n.add(1, 'day'), 'day')
-      ? t('lateClosesTomorrow', { time })
-      : t('lateClosesAt', { date: dl.format(t('shortDateTimeFormat')) });
-};
-
 const reminderBodies: Record<
   ReminderKind,
   (deadline: number, showsAt: number) => string
@@ -214,7 +202,8 @@ const reminderBodies: Record<
     t('notifyLateOpen', {
       date: dayjs(deadline).format(t('shortDateTimeFormat')),
     }),
-  lateDue: (deadline, showsAt) => capitalize(lateDayTime(deadline, showsAt)),
+  lateDue: (deadline, showsAt) =>
+    capitalize(deadlineDayTime(deadline, showsAt, 'lateCloses')),
 };
 
 /**
