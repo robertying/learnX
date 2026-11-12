@@ -40,6 +40,7 @@ const zh: typeof en = {
   description: '说明',
   unsentDraft: '未提交的草稿',
   assignmentSubmission: '作业提交',
+  wrongCredentials: '用户名或密码错误。',
   loginFailed:
     '登录失败，请检查网络连接并确保用户电子身份服务系统的登录依旧有效。',
   versionInformation: '版本',

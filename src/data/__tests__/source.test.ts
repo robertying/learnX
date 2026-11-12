@@ -17,6 +17,7 @@ import { setServerWritesAllowed } from 'helpers/serverWrites';
 
 jest.mock('axios', () => ({ post: jest.fn() }));
 jest.mock('@preeternal/react-native-cookie-manager', () => ({
+  get: jest.fn(() => Promise.resolve({})),
   clearByName: jest.fn(),
   setFromResponse: jest.fn(),
   flush: jest.fn(),
@@ -235,7 +236,7 @@ describe('picking the server', () => {
     await loginWithFingerPrint();
     expect(login).toHaveBeenCalled();
     expect(mockLogin).not.toHaveBeenCalled();
-    expect(CookieManager.clearByName).not.toHaveBeenCalled();
+    expect(CookieManager.get).not.toHaveBeenCalled();
     login.mockRestore();
   });
 
@@ -254,18 +255,57 @@ describe('picking the server', () => {
     const credential = { username: '2020000000', password: 'p' };
     await loginWithFingerPrint(credential);
     expect(mockLogin).toHaveBeenCalledWith(credential);
-    expect(CookieManager.clearByName).toHaveBeenCalledWith(
+    expect(CookieManager.get).toHaveBeenCalledWith(
       'https://id.tsinghua.edu.cn',
-      'JSESSIONID',
+      { iosCookieStore: 'foundation' },
     );
   });
 
-  it('expires the SSO cookie by hand on Android', async () => {
+  it("clears the SSO page's id.tsinghua.edu.cn cookies from both iOS stores", async () => {
+    Platform.OS = 'ios';
+    jest
+      .mocked(CookieManager.get)
+      .mockImplementation((_url, options) =>
+        Promise.resolve(
+          (options as unknown as { iosCookieStore?: string })
+            ?.iosCookieStore === 'webKit'
+            ? ({ JSESSIONID: {}, singleLogin: {} } as never)
+            : ({ JSESSIONID: {} } as never),
+        ),
+      );
+    await loginWithFingerPrint({ username: '2020000000', password: 'p' });
+    const cleared = jest
+      .mocked(CookieManager.clearByName)
+      .mock.calls.map(([, name, options]) => [
+        name,
+        (options as unknown as { iosCookieStore: string }).iosCookieStore,
+      ]);
+    expect(cleared).toEqual(
+      expect.arrayContaining([
+        ['JSESSIONID', 'foundation'],
+        ['JSESSIONID', 'webKit'],
+        ['singleLogin', 'webKit'],
+      ]),
+    );
+    expect(cleared).toHaveLength(3);
+    jest
+      .mocked(CookieManager.get)
+      .mockImplementation(() => Promise.resolve({}));
+  });
+
+  it('empties the SSO cookies by hand on Android', async () => {
     Platform.OS = 'android';
+    jest
+      .mocked(CookieManager.get)
+      .mockResolvedValueOnce({ singleLogin: {} } as never);
     await loginWithFingerPrint({ username: '2020000000', password: 'p' });
     expect(CookieManager.setFromResponse).toHaveBeenCalledWith(
       'https://id.tsinghua.edu.cn',
       'JSESSIONID=; path=/; HttpOnly',
+    );
+    expect(CookieManager.setFromResponse).toHaveBeenCalledWith(
+      'https://id.tsinghua.edu.cn',
+      'singleLogin=; path=/; HttpOnly',
     );
     expect(CookieManager.flush).toHaveBeenCalled();
   });

@@ -1,3 +1,4 @@
+import { FailReason } from '@robertying/thu-learn-lib';
 import { useEffect, useState } from 'react';
 import {
   Alert,
@@ -14,7 +15,7 @@ import Switch from 'components/Switch';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { toast } from 'components/Toast';
 import { setSetting, useSettings } from 'data/settings';
-import { setSSOInProgress, useLoggingIn } from 'data/auth';
+import { setSSOInProgress, useAuthStore, useLoggingIn } from 'data/auth';
 import { login, loginWithMockAccount, loginWithOfflineMode } from 'data/login';
 import { useCredentials } from 'data/credentials';
 import { clearLoginCookies } from 'data/source';
@@ -50,6 +51,31 @@ const Login: React.FC<Props> = ({ navigation }) => {
   useEffect(() => {
     noteLoginShown();
   }, []);
+
+  // Says why a login started here (after SSO, the mock or live test login, or
+  // Retry Login) didn't go through. The saved login, if any, is kept, so this
+  // is the only place it shows.
+  useEffect(
+    () =>
+      useAuthStore.subscribe((state, previous) => {
+        if (previous.loggingIn && !state.loggingIn && state.error) {
+          const message = t(
+            state.error === FailReason.BAD_CREDENTIAL
+              ? 'wrongCredentials'
+              : 'loginFailed',
+          );
+          toast(
+            // Debug builds also say what the server answered.
+            __DEV__
+              ? `${message}\n${state.error}${state.errorDetail ? `: ${state.errorDetail}` : ''}`
+              : message,
+            'error',
+            8 * 1000,
+          );
+        }
+      }),
+    [],
+  );
 
   const handleLogin = async () => {
     Keyboard.dismiss();

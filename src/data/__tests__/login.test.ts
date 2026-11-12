@@ -70,6 +70,7 @@ describe('login', () => {
       ssoInProgress: false,
       loggedIn: false,
       error: null,
+      errorDetail: null,
       failure: null,
       reloginRequested: false,
     });
@@ -130,6 +131,28 @@ describe('login', () => {
       error: FailReason.BAD_CREDENTIAL,
       failure: 'rejected',
     });
+  });
+
+  it('keeps what the server answered to a turned-down login, until the next try', async () => {
+    // A wrong password isn't retried, so each login makes one attempt.
+    jest.mocked(loginWithFingerPrint).mockRejectedValueOnce({
+      reason: FailReason.BAD_CREDENTIAL,
+      extra: { code: 401, text: 'Unauthorized' },
+    });
+    await login(sso);
+    expect(getAuth()).toMatchObject({
+      error: FailReason.BAD_CREDENTIAL,
+      errorDetail: '{"code":401,"text":"Unauthorized"}',
+    });
+
+    jest.mocked(loginWithFingerPrint).mockRejectedValueOnce({
+      reason: FailReason.BAD_CREDENTIAL,
+      extra: 'Wrong password',
+    });
+    const done = login(sso);
+    expect(getAuth().errorDetail).toBeNull();
+    await done;
+    expect(getAuth().errorDetail).toBe('Wrong password');
   });
 
   it('records a login that got no answer as offline', async () => {

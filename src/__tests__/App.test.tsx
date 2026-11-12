@@ -2,8 +2,6 @@ import { act, render, screen } from '@testing-library/react-native';
 import App from 'App';
 import { initialAuth, useAuthStore } from 'data/auth';
 import { useCredentialsStore } from 'data/credentials';
-import { t } from 'helpers/i18n';
-import { toast } from 'components/Toast';
 import useStoresLoaded from 'hooks/useStoresLoaded';
 
 jest.mock('navigation', () => ({ showMain }: { showMain: boolean }) => {
@@ -61,18 +59,4 @@ it('goes back to the login when asked to log in again', async () => {
   await render(<App />);
   await act(() => useAuthStore.setState({ reloginRequested: true }));
   expect(screen.getByText('login')).toBeTruthy();
-});
-
-it('says so when logging in again fails with a saved login', async () => {
-  signIn();
-  await render(<App />);
-  await act(() =>
-    useAuthStore.setState({ reloginRequested: true, error: 'failed' as never }),
-  );
-  expect(toast).toHaveBeenCalledWith(t('loginFailed'), 'error', 8000);
-
-  jest.mocked(toast).mockClear();
-  await act(() => useCredentialsStore.setState({ credentials: null }));
-  await render(<App />);
-  expect(toast).not.toHaveBeenCalled();
 });
