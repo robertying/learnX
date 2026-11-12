@@ -1,3 +1,4 @@
+import ObjectiveC
 import Testing
 import UIKit
 
@@ -13,7 +14,17 @@ import UIKit
   }
 
   @Test func loadsTheBundleFromMetroInDebug() {
-    // Debug builds ask Metro, which may not be running.
-    _ = ReactNativeDelegate().bundleURL()
+    // Metro may not be running, and then there is no bundle to load.
+    if let url = ReactNativeDelegate().bundleURL() {
+      #expect(url.path.hasSuffix("index.bundle"))
+    }
+  }
+
+  @Test func keepsTextInputsOutOfTheRecyclePool() throws {
+    let viewClass: AnyClass = try #require(NSClassFromString(TextInputRecycling.className))
+    let method = try #require(class_getClassMethod(viewClass, TextInputRecycling.selector))
+    typealias ShouldBeRecycled = @convention(c) (AnyClass, Selector) -> Bool
+    let shouldBeRecycled = unsafeBitCast(method_getImplementation(method), to: ShouldBeRecycled.self)
+    #expect(shouldBeRecycled(viewClass, TextInputRecycling.selector) == false)
   }
 }

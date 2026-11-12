@@ -67,7 +67,7 @@ LANG=en_US.UTF-8 bundle exec pod install
 cd ..
 ```
 
-Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes. React Native is built from source here (a patch changes its native code), so the first build takes a while.
+Run `pod install` again whenever `ios/Podfile`, `ios/Podfile.lock`, a native package or a patch changes.
 
 ### Signing: use your own team and bundle IDs
 

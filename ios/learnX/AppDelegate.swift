@@ -1,6 +1,7 @@
 internal import Expo
 import FirebaseCore
 internal import LearnXMenus
+import ObjectiveC
 import React
 import ReactAppDependencyProvider
 
@@ -19,6 +20,7 @@ class AppDelegate: ExpoAppDelegate, ExpoReactNativeFactoryProvider {
   ) -> Bool {
     FirebaseApp.configure()
     UIScrollView.preferSoftTopEdgeEffect()
+    TextInputRecycling.disable()
 
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
@@ -54,4 +56,24 @@ class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {
       return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
     #endif
   }
+}
+
+/// UIKit's AutoFill remembers the text fields it took as a username or password field, so a recycled credential
+/// text input would carry that role into an unrelated one. React Native keeps a view out of its recycle pool when its
+/// class answers `shouldBeRecycled` with NO, so text inputs get that. Call before React Native registers the class.
+enum TextInputRecycling {
+  static let className = "RCTTextInputComponentView"
+  static let selector = NSSelectorFromString("shouldBeRecycled")
+
+  static func disable() {
+    _ = addClassMethod
+  }
+
+  private static let addClassMethod: Void = {
+    guard let viewClass = NSClassFromString(className), let metaclass = object_getClass(viewClass) else {
+      return
+    }
+    let shouldBeRecycled: @convention(block) (AnyClass) -> Bool = { _ in false }
+    class_addMethod(metaclass, selector, imp_implementationWithBlock(shouldBeRecycled), "B@:")
+  }()
 }

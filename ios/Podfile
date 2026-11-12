@@ -4,12 +4,6 @@ require File.join(File.dirname(`node --print "require.resolve('react-native/pack
 platform :ios, '17.6'
 prepare_react_native_project!
 
-# Build React Native core and its third-party deps (folly, etc.) from source:
-# patches/react-native@*.patch changes native code (RCTTextInputComponentView.mm)
-# that a prebuilt core would leave out.
-ENV['RCT_USE_RN_DEP'] = '0'
-ENV['RCT_USE_PREBUILT_RNCORE'] = '0'
-
 # Compile react-native-screens' experimental components (native split view).
 ENV['RNS_GAMMA_ENABLED'] = '1'
 
