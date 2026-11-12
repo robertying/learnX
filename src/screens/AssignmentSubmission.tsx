@@ -1,4 +1,5 @@
 import { useEffect, useEffectEvent, useState } from 'react';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Alert } from 'react-native';
 import { showChoices } from 'components/choiceSheet';
@@ -15,7 +16,6 @@ import {
 } from 'components/Form';
 import dayjs from 'dayjs';
 import { RemoteFile } from '@robertying/thu-learn-lib';
-import TextButton from 'components/TextButton';
 import { attachmentFile } from 'helpers/attachments';
 import { t } from 'helpers/i18n';
 import { deadlineText } from 'helpers/assignments';
@@ -215,33 +215,16 @@ const AssignmentSubmissionContent: React.FC<{
     picked: attachmentResult,
   });
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <TextButton
-          disabled={submitDisabled}
-          size="large"
-          bold
-          onPress={confirmSubmit}
-        >
-          {t('submit')}
-        </TextButton>
-      ),
-      unstable_headerRightItems: () => [
-        {
-          type: 'button',
-          identifier: 'submit',
-          label: t('submit'),
-          icon: {
-            type: 'sfSymbol',
-            name: 'arrow.up.circle',
-          },
-          disabled: submitDisabled,
-          onPress: confirmSubmit,
-        },
-      ],
-    });
-  }, [confirmSubmit, navigation, submitDisabled]);
+  useHeaderButtons(navigation, 'right', [
+    {
+      id: 'submit',
+      label: t('submit'),
+      icon: 'upload',
+      text: true,
+      disabled: submitDisabled,
+      onPress: confirmSubmit,
+    },
+  ]);
 
   const pickLabel = attachmentResult
     ? t('reUploadAttachment')

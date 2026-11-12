@@ -39,6 +39,10 @@ const split = {
   masterWidth: Numbers.splitViewMasterWidth,
 };
 
+/** The latest value set for one option. */
+const option = (key: string) =>
+  setOptions.mock.calls.findLast(([options]) => key in options)![0][key];
+
 const items = () =>
   setOptions.mock.lastCall![0].unstable_headerRightItems() as {
     identifier: string;
@@ -106,7 +110,7 @@ it('toggles full screen in a split view, but not in search', async () => {
     () => useFileDetailHeader({ navigation: navigation(), ...props }),
     { wrapper },
   );
-  expect(setOptions.mock.lastCall![0].headerBackVisible).toBe(true);
+  expect(option('headerBackVisible')).toBe(true);
   expect(items()[0]).toMatchObject({
     identifier: 'toggleMaster',
     label: t('fullscreen'),
@@ -140,7 +144,7 @@ it('brings the list back from full screen, and the preview back from the info', 
       }),
     { wrapper },
   );
-  expect(setOptions.mock.lastCall![0].headerBackVisible).toBe(false);
+  expect(option('headerBackVisible')).toBe(false);
   const [toggle] = items();
   expect(toggle.label).toBe(t('exitFullscreen'));
   toggle.onPress();

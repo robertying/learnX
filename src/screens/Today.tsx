@@ -31,7 +31,7 @@ import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import useSettingsBadge from 'hooks/useSettingsBadge';
 import { debugTitle } from 'navigation/options';
-import { headerButtons } from 'navigation/headerButtons';
+import useHeaderButtons from 'hooks/useHeaderButtons';
 import { sidebarSplit } from 'navigation/layout';
 import { MainStackScreenProps, TodayStackParams } from 'navigation/types';
 
@@ -119,42 +119,38 @@ const Today: React.FC<Props> = ({ navigation }) => {
   const showSettings = !sidebarSplit;
   const openSettings = () => navigation.push('Settings');
   const refreshing = pullToRefresh.refreshing;
-  const onRefresh = pullToRefresh.onRefresh;
   useLayoutEffect(() => {
-    navigation.setOptions({
-      ...getTitleOptions(t('today'), subtitle),
-      ...headerButtons('right', [
-        DeviceInfo.isMac() && {
-          id: 'refresh',
-          label: t('refresh'),
-          icon: 'refresh',
-          sfSymbol: refreshing
-            ? 'arrow.trianglehead.2.clockwise.rotate.90'
-            : undefined,
-          disabled: refreshing,
-          onPress: onRefresh,
-        },
-        // Debug builds: the debug tools, in a group of their own.
-        __DEV__ && {
-          id: 'debug',
-          label: debugTitle,
-          icon: 'debug',
-          onPress: () => navigation.push('Debug'),
-          testID: 'today-debug',
-          ownGroup: true,
-        },
-        showSettings && {
-          id: 'settings',
-          label: t('settings'),
-          icon: 'settings',
-          badge: settingsBadge,
-          onPress: openSettings,
-          testID: 'today-settings',
-        },
-      ]),
-    });
-    // oxlint-disable-next-line react-hooks/exhaustive-deps -- handlers read the latest props
-  }, [navigation, subtitle, settingsBadge, refreshing, showSettings]);
+    navigation.setOptions(getTitleOptions(t('today'), subtitle));
+  }, [navigation, subtitle]);
+  useHeaderButtons(navigation, 'right', [
+    DeviceInfo.isMac() && {
+      id: 'refresh',
+      label: t('refresh'),
+      icon: 'refresh',
+      sfSymbol: refreshing
+        ? 'arrow.trianglehead.2.clockwise.rotate.90'
+        : undefined,
+      disabled: refreshing,
+      onPress: pullToRefresh.onRefresh,
+    },
+    // Debug builds: the debug tools, in a group of their own.
+    __DEV__ && {
+      id: 'debug',
+      label: debugTitle,
+      icon: 'debug',
+      onPress: () => navigation.push('Debug'),
+      testID: 'today-debug',
+      ownGroup: true,
+    },
+    showSettings && {
+      id: 'settings',
+      label: t('settings'),
+      icon: 'settings',
+      badge: settingsBadge,
+      onPress: openSettings,
+      testID: 'today-settings',
+    },
+  ]);
 
   const remaining = classes.filter(s => s.end > now);
   const note =
