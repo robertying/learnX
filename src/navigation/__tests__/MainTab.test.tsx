@@ -44,6 +44,7 @@ jest.mock('hooks/useSettingsBadge', () => jest.fn(() => false));
 
 let mockLayout = { nativeSplit: true, sidebarSplit: false };
 jest.mock('navigation/layout', () => ({
+  initialTab: 'TodayStack',
   get nativeSplit() {
     return mockLayout.nativeSplit;
   },

@@ -36,7 +36,10 @@ jest.mock('navigation/stacks', () => {
 });
 jest.mock('screens/AssignmentSubmission', () => () => null);
 jest.mock('screens/CourseX', () => () => null);
-jest.mock('hooks/useDetailNavigator', () => ({ reportDetailReady: jest.fn() }));
+jest.mock('hooks/useDetailNavigator', () => ({
+  reportDetailReady: jest.fn(),
+  reportDetailState: jest.fn(),
+}));
 jest.mock('services/crashReporting', () => ({
   trackScreen: jest.fn(),
   recordError: jest.fn(),

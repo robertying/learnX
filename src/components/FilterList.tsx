@@ -10,10 +10,10 @@ import * as Haptics from 'expo-haptics';
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { getSettings, setSetting, useSettings } from 'data/settings';
 import useAppCommand from 'hooks/useAppCommand';
-import useDetailNavigator from 'hooks/useDetailNavigator';
+import useDetailNavigator, { useDetailRoot } from 'hooks/useDetailNavigator';
 import useFilterListHeader from 'hooks/useFilterListHeader';
 import useListSelection from 'hooks/useListSelection';
-import { RootStackParams } from 'navigation/types';
+import type { DetailStackParams, RootStackParams } from 'navigation/types';
 import Styles from 'constants/Styles';
 import DeviceInfo from 'constants/DeviceInfo';
 import {
@@ -38,6 +38,17 @@ import FlatList from './FlatList';
 import ListBackground from './ListBackground';
 
 export type { ItemComponentProps };
+
+// The page an item of each list opens.
+const detailScreens: Record<
+  FilterListProps<unknown>['type'],
+  keyof DetailStackParams
+> = {
+  notice: 'NoticeDetail',
+  assignment: 'AssignmentDetail',
+  file: 'FileDetail',
+  course: 'CourseDetail',
+};
 
 export interface FilterListProps<T> {
   type: 'notice' | 'assignment' | 'file' | 'course';
@@ -86,6 +97,10 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
   updatedAt,
 }: FilterListProps<T>) => {
   const detailNavigator = useDetailNavigator();
+  // The item open beside the list, which its row shows as selected.
+  const detailRoot = useDetailRoot();
+  const openedId =
+    detailRoot?.name === detailScreens[type] ? detailRoot.id : undefined;
 
   // Only this tab's selection, so changing another tab's filter does not
   // re-render this list
@@ -215,16 +230,11 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     onCourseX: handleNavigateCourseX,
   });
 
-  const lastOpenedIdRef = useRef<string | undefined>(undefined);
-
   // Rows get one actions object that never changes, and call the latest
   // handlers through it, so a new onItemPress from the screen or a toggled
   // selection does not re-render every row.
   const rowHandlers: FilterListRowActions<T> = {
-    press: item => {
-      lastOpenedIdRef.current = item.id;
-      onItemPress?.(item);
-    },
+    press: item => onItemPress?.(item),
     check: setChecked,
     fav: handleFav,
     archive: (id, isArchived) => handleArchive(isArchived, [id]),
@@ -244,10 +254,9 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
     },
     commandsEnabled,
   );
-  // Steps through the list from the item last opened, beside it in the split
-  // view.
+  // Steps through the list from the item open beside it in the split view.
   const openAdjacent = (offset: 1 | -1) => {
-    const index = data.findIndex(i => i.id === lastOpenedIdRef.current);
+    const index = data.findIndex(i => i.id === openedId);
     const item =
       index === -1
         ? data[offset === 1 ? 0 : data.length - 1]
@@ -289,6 +298,7 @@ const FilterList = <T extends Notice | Assignment | File | Course>({
       selectionMode={selectionMode}
       reorderMode={reorderMode}
       checked={!!selection[item.id]}
+      opened={item.id === openedId}
       fav={favIdSet.has(item.id)}
       archived={archivedIdSet.has(item.id)}
       hidden={hiddenIdSet.has(item.id)}

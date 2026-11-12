@@ -1,4 +1,4 @@
-import { createRef, useContext, useMemo, useState } from 'react';
+import { createRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { SFSymbol } from 'sf-symbols-typescript';
 import {
@@ -20,7 +20,7 @@ import {
 import type { DetailNavigationContainerRef, DetailStackParams } from './types';
 import { SidebarView } from 'modules/sidebar';
 import NativeSplitViewProvider from './NativeSplitView';
-import { SplitViewContext } from './SplitView';
+import { TabLayer, TabSplitContext } from './SplitView';
 import { useTheme } from 'theme';
 
 export interface SidebarSplitNavigationOptions {
@@ -62,47 +62,6 @@ export type SidebarSplitNavigatorProps = DefaultNavigatorOptions<
 > &
   TabRouterOptions &
   SidebarSplitNavigationConfig;
-
-// Points the tab's master and detail stacks at its own detail container.
-const TabSplitContext: React.FC<
-  React.PropsWithChildren<{
-    detailNavigationContainerRef: DetailNavigationContainerRef;
-  }>
-> = ({ detailNavigationContainerRef, children }) => {
-  const context = useContext(SplitViewContext);
-  const value = useMemo(
-    () => ({
-      ...context,
-      detailNavigationContainerRef: context.detailNavigationContainerRef
-        ? detailNavigationContainerRef
-        : null,
-    }),
-    [context, detailNavigationContainerRef],
-  );
-
-  return (
-    <SplitViewContext.Provider value={value}>
-      {children}
-    </SplitViewContext.Provider>
-  );
-};
-
-// Tabs that aren't selected stay mounted, natively too, so that they keep their
-// navigation state and don't have to be laid out again. Fabric doesn't mount
-// the children of views with `display: 'none'`.
-const TabLayer: React.FC<React.PropsWithChildren<{ selected: boolean }>> = ({
-  selected,
-  children,
-}) => (
-  <View
-    style={[StyleSheet.absoluteFill, !selected && styles.hiddenLayer]}
-    pointerEvents={selected ? 'auto' : 'none'}
-    accessibilityElementsHidden={!selected}
-    importantForAccessibility={selected ? 'auto' : 'no-hide-descendants'}
-  >
-    {children}
-  </View>
-);
 
 const Sidebar: React.FC<{
   state: TabNavigationState<ParamListBase>;
@@ -254,10 +213,6 @@ function SidebarSplitNavigator({
 const styles = StyleSheet.create({
   flex1: {
     flex: 1,
-  },
-  hiddenLayer: {
-    opacity: 0,
-    zIndex: -1,
   },
 });
 

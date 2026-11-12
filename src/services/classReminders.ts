@@ -94,6 +94,8 @@ export const classReminderContent = ({
   data: { type: 'today' },
   // Stacked together in the iOS notification center.
   threadIdentifier: notificationChannels.classes,
+  // Shown during a Focus on iOS, unless the user turns that off for learnX.
+  interruptionLevel: 'timeSensitive' as const,
 });
 
 /**

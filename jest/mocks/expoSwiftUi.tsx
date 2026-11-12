@@ -1,4 +1,8 @@
 import {
+  Children,
+  cloneElement,
+  isValidElement,
+  ReactElement,
   ReactNode,
   Ref,
   useImperativeHandle,
@@ -174,6 +178,76 @@ export const Button = ({
     </Pressable>
   );
 };
+
+const Slot = ({ children }: { children?: ReactNode }) => <>{children}</>;
+
+/**
+ * Shows its trigger, and while presented its title, message, actions and a
+ * Cancel button; an action or Cancel dismisses it, as SwiftUI does.
+ */
+export const ConfirmationDialog = Object.assign(
+  ({
+    title,
+    isPresented,
+    onIsPresentedChange,
+    children,
+  }: {
+    title: string;
+    isPresented?: boolean;
+    onIsPresentedChange?: (value: boolean) => void;
+    children?: ReactNode;
+  }) => {
+    const slots = Children.toArray(children).filter(
+      isValidElement,
+    ) as ReactElement<{ children?: ReactNode }>[];
+    const slot = (type: unknown) =>
+      slots.find(element => element.type === type)?.props.children;
+    const dismiss = () => onIsPresentedChange?.(false);
+    const actions = Children.toArray(slot(ConfirmationDialogActions))
+      .filter(isValidElement)
+      .map(action => {
+        const button = action as ReactElement<{ onPress?: () => void }>;
+        return cloneElement(button, {
+          onPress: () => {
+            button.props.onPress?.();
+            dismiss();
+          },
+        });
+      });
+    return (
+      <View>
+        {slot(ConfirmationDialogTrigger)}
+        {isPresented ? (
+          <View testID="confirmation-dialog">
+            <RNText>{title}</RNText>
+            {slot(ConfirmationDialogMessage)}
+            {actions}
+            <Pressable accessibilityRole="button" onPress={dismiss}>
+              <RNText>Cancel</RNText>
+            </Pressable>
+          </View>
+        ) : null}
+      </View>
+    );
+  },
+  {} as {
+    Trigger: typeof Slot;
+    Actions: typeof Slot;
+    Message: typeof Slot;
+  },
+);
+const ConfirmationDialogTrigger = (props: { children?: ReactNode }) => (
+  <Slot {...props} />
+);
+const ConfirmationDialogActions = (props: { children?: ReactNode }) => (
+  <Slot {...props} />
+);
+const ConfirmationDialogMessage = (props: { children?: ReactNode }) => (
+  <Slot {...props} />
+);
+ConfirmationDialog.Trigger = ConfirmationDialogTrigger;
+ConfirmationDialog.Actions = ConfirmationDialogActions;
+ConfirmationDialog.Message = ConfirmationDialogMessage;
 
 interface NativeState<T> {
   get: () => T;

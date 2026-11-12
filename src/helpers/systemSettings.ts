@@ -4,8 +4,9 @@ import DeviceInfo from 'constants/DeviceInfo';
 
 /**
  * Opens the app's page in the system's settings; on Mac, which has no such
- * page, the System Settings pane for the permission instead. On Android,
- * notifications open the app's notification page, where the toggles are.
+ * page, the System Settings pane for the permission instead. On iOS and
+ * Android, notifications open the app's notification page, where the
+ * toggles are.
  */
 export const openSystemSettings = async (
   page: 'notifications' | 'security',
@@ -14,6 +15,14 @@ export const openSystemSettings = async (
     return Linking.openURL(
       `x-apple.systempreferences:com.apple.preference.${page}`,
     );
+  }
+  if (Platform.OS === 'ios' && page === 'notifications') {
+    try {
+      // UIApplicationOpenNotificationSettingsURLString (iOS 16+).
+      return await Linking.openURL('app-settings:notifications');
+    } catch {
+      // Not opened: the app's page instead.
+    }
   }
   if (Platform.OS === 'android' && page === 'notifications' && applicationId) {
     try {

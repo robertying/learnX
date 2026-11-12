@@ -13,7 +13,7 @@ jest.mock('@react-navigation/native-stack', () => ({
 }));
 jest.mock('navigation/MainTab', () => () => null);
 jest.mock('navigation/DetailStack', () => ({
-  DetailContainer: () => {
+  renderDetailContainer: () => {
     const { Text: RNText } = require('react-native');
     return <RNText>detail stack</RNText>;
   },
@@ -30,6 +30,7 @@ jest.mock('services/crashReporting', () => ({ trackScreen: jest.fn() }));
 
 let mockNativeSplit = true;
 jest.mock('navigation/layout', () => ({
+  initialTab: 'TodayStack',
   get nativeSplit() {
     return mockNativeSplit;
   },

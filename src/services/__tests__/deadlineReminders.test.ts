@@ -166,6 +166,7 @@ describe('syncDeadlineReminders', () => {
         subtitle: expect.any(String),
         body: expect.stringMatching(/^Due (today|tomorrow) at \d\d:\d\d$/),
         data: { type: 'assignment', id: 'new' },
+        interruptionLevel: 'timeSensitive',
       },
       trigger: { type: 'date', date: now + 9 * hour },
     });

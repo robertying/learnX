@@ -45,6 +45,7 @@ import {
   parseNumberInput,
   positionRows,
   type FormButtonProps,
+  type FormChoiceButtonProps,
   type FormFileProps,
   type FormIcon,
   type FormItemRowProps,
@@ -62,6 +63,7 @@ import {
   type FormToggleProps,
   type FormViewProps,
 } from './Form.shared';
+import { showChoices } from './choiceSheet';
 import ThemedHost from 'components/ThemedHost';
 import SystemIcon from 'components/SystemIcon';
 
@@ -462,6 +464,11 @@ export const FormButton: React.FC<FormButtonProps> = ({
     />
   );
 };
+
+export const FormChoiceButton: React.FC<FormChoiceButtonProps> = ({
+  sheet,
+  ...row
+}) => <FormButton {...row} onPress={() => showChoices(sheet)} />;
 
 /** A file that opens on tap. */
 export const FormFile: React.FC<FormFileProps> = ({

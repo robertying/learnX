@@ -1,6 +1,7 @@
 import { Children, cloneElement, Fragment, isValidElement } from 'react';
 import type { ReactElement, ReactNode } from 'react';
 import type { SystemIconName } from 'helpers/systemIcons';
+import type { ChoiceSheet } from './choiceSheet';
 
 // Props and helpers shared by Form.tsx (SwiftUI) and Form.android.tsx (Compose).
 
@@ -105,6 +106,17 @@ export interface FormButtonProps extends FormRowProps {
    * (Android) shows whether it is chosen.
    */
   selected?: boolean;
+}
+
+/**
+ * A row that asks which of a few things to do (`showChoices`). On iOS, iPadOS
+ * and Mac it's the row's own confirmation dialog, which on iPad and Mac is a
+ * popover pointing at the row.
+ */
+export interface FormChoiceButtonProps extends FormRowProps {
+  sheet: ChoiceSheet;
+  /** Dimmed, and taps do nothing. */
+  disabled?: boolean;
 }
 
 export interface FormToggleProps extends FormRowProps {

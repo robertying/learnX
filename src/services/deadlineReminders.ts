@@ -224,6 +224,8 @@ export const reminderContent = (
   categoryIdentifier: notificationCategories.deadline,
   // Stacked together in the iOS notification center.
   threadIdentifier: notificationChannels.deadlines,
+  // Shown during a Focus on iOS, unless the user turns that off for learnX.
+  interruptionLevel: 'timeSensitive' as const,
 });
 
 /**

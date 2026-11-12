@@ -11,11 +11,11 @@ import {
 import { exportDownloads } from 'services/files/export';
 import { formatFileSize } from 'helpers/filename';
 import { t, tCount } from 'helpers/i18n';
-import { showChoices } from 'components/choiceSheet';
 import { toast } from 'components/Toast';
 import {
   Form,
   FormButton,
+  FormChoiceButton,
   FormScreen,
   FormSection,
   FormText,
@@ -139,39 +139,37 @@ const Downloads: React.FC<Props> = () => {
         {courses.length > 0 && (
           <FormSection>
             {courses.map(course => (
-              <FormButton
+              <FormChoiceButton
                 key={course.courseId}
                 icon="folder"
                 title={course.courseName}
                 detail={summary(course)}
                 disabled={exporting}
-                onPress={() =>
-                  showChoices({
-                    title: course.courseName,
-                    message: summary(course),
-                    choices: [
-                      {
-                        label: t('downloadsExportCourse'),
-                        onPress: () => {
-                          void exportFiles(course.courseId);
-                        },
+                sheet={{
+                  title: course.courseName,
+                  message: summary(course),
+                  choices: [
+                    {
+                      label: t('downloadsExportCourse'),
+                      onPress: () => {
+                        void exportFiles(course.courseId);
                       },
-                      {
-                        label: t('delete'),
-                        destructive: true,
-                        onPress: () =>
-                          confirm(
-                            t('downloadsDeleteCourse'),
-                            `${course.courseName}\n${summary(course)}`,
-                            () => removeCourseDownloads(course.courseId),
-                            t('downloadsDeletedCourse', {
-                              course: course.courseName,
-                            }),
-                          ),
-                      },
-                    ],
-                  })
-                }
+                    },
+                    {
+                      label: t('delete'),
+                      destructive: true,
+                      onPress: () =>
+                        confirm(
+                          t('downloadsDeleteCourse'),
+                          `${course.courseName}\n${summary(course)}`,
+                          () => removeCourseDownloads(course.courseId),
+                          t('downloadsDeletedCourse', {
+                            course: course.courseName,
+                          }),
+                        ),
+                    },
+                  ],
+                }}
               />
             ))}
           </FormSection>
