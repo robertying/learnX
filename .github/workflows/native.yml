@@ -18,8 +18,8 @@ name: Native
 #   build" box ticked.
 # - Android E2E tests: by hand only, with the "Android E2E tests" box ticked.
 #   Runs the Maestro flows (scripts/e2e.sh) in an emulator on the APK from the
-#   Android release build. The Android flows aren't maintained, so expect
-#   drift there (.maestro/AGENTS.md). No iOS E2E in CI for now.
+#   Android release build. The flows are kept passing there, as on the
+#   local devices (.maestro/AGENTS.md). No iOS E2E in CI for now.
 on:
   pull_request:
   push:
@@ -84,9 +84,7 @@ jobs:
       - name: Detect changed files
         id: changes
         run: >-
-          scripts/changed-files.sh
-          '^(android/|modules/[^/]+/(android/|expo-module\.config\.json$)|patches/|package\.json$|pnpm-(lock|workspace)\.yaml$|app\.json$|\.node-version$|scripts/changed-files\.sh$|\.github/(workflows/native\.yml$|actions/setup-js/))'
-          >> "$GITHUB_OUTPUT"
+          scripts/changed-files.sh android-build >> "$GITHUB_OUTPUT"
 
       - name: Set up JS
         if: steps.changes.outputs.changed == 'true'

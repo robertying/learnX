@@ -146,17 +146,18 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request check (`CI / JS checks` in `.github/workflows/ci.yml`) runs these, and all of them must pass:
+The pull request check (`CI / JS checks` in `.github/workflows/ci.yml`) runs these, and all of them must pass. `pnpm check` runs the first five in one go:
 
 ```sh
-pnpm typecheck           # TypeScript (tsc)
-pnpm lint --deny-warnings   # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
-pnpm format --check      # Oxfmt; run `pnpm format` to fix
-pnpm test --coverage     # Jest, iOS and Android projects; fails below the coverage thresholds in jest.config.js
-shellcheck scripts/*.sh  # ShellCheck, for the scripts in scripts/
+pnpm typecheck                   # TypeScript (tsc)
+pnpm lint --deny-warnings        # Oxlint, type-aware; config in .oxlintrc.json and lint/plugin.mjs
+pnpm format --check              # Oxfmt; run `pnpm format` to fix
+pnpm test --coverage             # Jest, iOS and Android projects; fails below the coverage thresholds in jest.config.js
+git ls-files -z '*.sh' | xargs -0 shellcheck   # ShellCheck, for every shell script
+scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login in them
 ```
 
-They need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
+The first five need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about a minute. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e-build.sh ios <simulator udid>` or `scripts/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 
