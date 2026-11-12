@@ -69,7 +69,7 @@ describe('reconcileScheduled', () => {
     ).toEqual(['r:new']);
   });
 
-  it('schedules again what an earlier version scheduled at another level on iOS', async () => {
+  it('schedules again what says something else or interrupts differently', async () => {
     jest.replaceProperty(Platform, 'OS', 'ios');
     jest
       .mocked(Notifications.getAllScheduledNotificationsAsync)
@@ -78,6 +78,22 @@ describe('reconcileScheduled', () => {
     expect(
       Notifications.cancelScheduledNotificationAsync,
     ).not.toHaveBeenCalled();
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
+      planned('r:old'),
+    );
+
+    // In another language now.
+    jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+    jest
+      .mocked(Notifications.getAllScheduledNotificationsAsync)
+      .mockResolvedValue([
+        {
+          identifier: 'r:old',
+          content: { title: '旧', interruptionLevel: 'timeSensitive' },
+          trigger: {},
+        },
+      ] as never);
+    await reconcileScheduled(id => id.startsWith('r:'), [planned('r:old')]);
     expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledWith(
       planned('r:old'),
     );

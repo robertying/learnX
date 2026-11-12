@@ -54,17 +54,30 @@ export const cancelScheduled = async (
   );
 };
 
-/** iOS's interruption level of a notification, if it says. */
-const interruptionLevel = (content: object | undefined) =>
-  (content as { interruptionLevel?: string } | undefined)?.interruptionLevel;
+/** What a reminder says and how it interrupts, as the system reports it. */
+const shownFields = ['title', 'subtitle', 'body', 'interruptionLevel'] as const;
+
+/**
+ * Whether a scheduled notification still says what the planned one would.
+ * Only the fields the system reports are compared (Android has no subtitle or
+ * interruption level).
+ */
+const saysTheSame = (scheduled: object, planned: object) =>
+  shownFields.every(field => {
+    const before = (scheduled as Record<string, unknown>)[field];
+    const after =
+      (planned as Record<string, unknown>)[field] ??
+      (field === 'interruptionLevel' ? 'active' : undefined);
+    return before == null || before === after;
+  });
 
 /**
  * Makes the scheduled notifications that `owns` accepts match `plan`:
  * cancels the ones not in it (unless `keep` accepts them) and schedules the
  * ones not scheduled yet. An identifier changes with whatever should
  * reschedule a notification, so one already scheduled is left as it is,
- * unless it was scheduled with another interruption level on iOS (by an
- * earlier version of the app).
+ * unless its text or interruption level differ, e.g. after a change of
+ * language or time format, or from an earlier version of the app.
  */
 export const reconcileScheduled = async (
   owns: (identifier: string) => boolean,
@@ -73,21 +86,15 @@ export const reconcileScheduled = async (
 ) => {
   const wanted = new Set(plan.map(n => n.identifier));
   const scheduled = await getScheduled(owns);
-  const current = new Map(
-    scheduled.map(n => [n.identifier, interruptionLevel(n.content)]),
+  const contents = new Map(
+    scheduled.map(n => [n.identifier, n.content as object | undefined]),
   );
-  // iOS always says the scheduled one's level; a plan without one wants the
-  // default.
   const isCurrent = (n: PlannedNotification) => {
-    if (!current.has(n.identifier)) {
+    if (!contents.has(n.identifier)) {
       return false;
     }
-    const level = current.get(n.identifier);
-    return (
-      Platform.OS !== 'ios' ||
-      level === undefined ||
-      level === (interruptionLevel(n.content) ?? 'active')
-    );
+    const content = contents.get(n.identifier);
+    return !content || saysTheSame(content, n.content);
   };
   await Promise.all([
     ...scheduled
