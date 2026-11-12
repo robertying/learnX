@@ -21,7 +21,13 @@ name: App Store screenshots on the iPhone
     file: ../subflows/screenshot.yaml
     env:
       NAME: 02-notices-actions
-- tapOn: '(${T_all})(, .*)?'
+# Closes the filter menu. Opening the hinge for the shot already closed it
+# (duo-half-open, duo-open).
+- runFlow:
+    when:
+      visible: '(${T_all})(, .*)?'
+    commands:
+      - tapOn: '(${T_all})(, .*)?'
 - waitForAnimationToEnd
 
 # 3 A notice with an attachment

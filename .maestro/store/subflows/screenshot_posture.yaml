@@ -16,7 +16,10 @@ appId: ${APP_ID}
 # The app moves to the inner display and lays the screen out again.
 - waitForAnimationToEnd:
     timeout: 5000
-- takeScreenshot: ${STORE_OUT}/${NAME}${STORE_SUFFIX}
+# takeScreenshot only sees the outer display (black while open):
+# scripts/store-screenshots.sh saves the inner one when asked at STORE_SHOT_URL.
+- evalScript: ${output.shot = http.get(STORE_SHOT_URL + '?name=' + NAME + STORE_SUFFIX).body}
+- assertTrue: ${output.shot == 'ok'}
 - runFlow:
     file: fold.yaml
     env:

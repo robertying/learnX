@@ -175,6 +175,33 @@ if [ -n "$posture" ]; then
   flows="$run_dir/flows"
   cp -R .maestro "$flows"
   cp .maestro/store/subflows/screenshot_posture.yaml "$flows/subflows/screenshot.yaml"
+  # Maestro's takeScreenshot of the inner display is black, so the flow asks
+  # this server for each shot, which saves the inner display (3) with simctl.
+  shot_port_file="$run_dir/shot-port"
+  # shellcheck disable=SC2016 # JavaScript, not shell
+  node -e '
+    const http = require("http");
+    const fs = require("fs");
+    const { execFile } = require("child_process");
+    const [device, out, portFile] = process.argv.slice(1);
+    const server = http.createServer((req, res) => {
+      const name = new URL(req.url, "http://localhost").searchParams.get("name");
+      if (!name || !/^[\w.-]+$/.test(name)) {
+        res.writeHead(400).end();
+        return;
+      }
+      execFile("xcrun", ["simctl", "io", device, "screenshot", "--display=3",
+        `${out}/${name}.png`], { timeout: 30000 }, err => {
+        res.writeHead(err ? 500 : 200).end(err ? String(err) : "ok");
+      });
+    });
+    server.listen(0, "127.0.0.1", () =>
+      fs.writeFileSync(portFile, String(server.address().port)));
+  ' "$device" "$out" "$shot_port_file" &
+  shot_server=$!
+  trap 'kill "$shot_server" 2>/dev/null || true; cleanup' EXIT
+  while [ ! -s "$shot_port_file" ]; do sleep 0.2; done
+  shot_url="http://127.0.0.1:$(cat "$shot_port_file")/shot"
 fi
 status=0
 MAESTRO_DEVICE="$device" scripts/e2e.sh "$platform" \
@@ -182,6 +209,7 @@ MAESTRO_DEVICE="$device" scripts/e2e.sh "$platform" \
   -e STORE_OUT=store \
   -e STORE_SUFFIX="$suffix" \
   -e STORE_POSTURE="$posture" \
+  -e STORE_SHOT_URL="${shot_url:-}" \
   "$flows/store/$flow.yaml" || status=$?
 if [ -n "$posture" ]; then
   # Leave the Duo closed, as the next run expects.
