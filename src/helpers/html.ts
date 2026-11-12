@@ -36,6 +36,13 @@ const getScriptNonce = () =>
   (scriptNonce ??= globalThis.crypto.randomUUID().replaceAll('-', ''));
 
 /**
+ * The language screen readers read the content in: Chinese when it has any
+ * Chinese characters, English otherwise (an English course's notices).
+ */
+const contentLanguage = (content: string) =>
+  /\p{Script=Han}/u.test(content) ? 'zh-Hans' : 'en';
+
+/**
  * Wraps course-site HTML (notice and assignment descriptions) into a page for
  * AutoHeightWebView, without margins of its own: the page sits in a form row,
  * which has them. KaTeX (~300 KB) is only inlined when the content has
@@ -50,7 +57,7 @@ export const getWebViewTemplate = (
   const nonce = getScriptNonce();
   return `
   <!DOCTYPE html>
-  <html lang="zh-cmn-Hans">
+  <html lang="${contentLanguage(content)}">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1" />

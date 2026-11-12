@@ -288,6 +288,7 @@ const AssignmentSubmissionContent: React.FC<{
           multiline
           disabled={removeAttachment || uploading}
           placeholder={t('assignmentSubmissionContentPlaceholder')}
+          label={t('submissionContent')}
           value={content}
           onChangeText={setContent}
           testID="submissionContent"
@@ -324,6 +325,7 @@ const AssignmentSubmissionContent: React.FC<{
             plain
             disabled={uploading}
             placeholder={t('assignmentSubmissionFilenamePlaceholder')}
+            label={t('assignmentSubmissionFilenamePlaceholder')}
             value={customAttachmentName}
             onChangeText={setCustomAttachmentName}
             format={sanitizeCustomAttachmentName}

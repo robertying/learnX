@@ -1,5 +1,6 @@
 import { act, render, screen } from '@testing-library/react-native';
-import { PlatformColor, StyleSheet } from 'react-native';
+import type * as ReactNative from 'react-native';
+import { StyleSheet } from 'react-native';
 import dayjs from 'dayjs';
 import { mockLocale } from '../../../jest/locale';
 import { Assignment, Course, File, Notice } from 'data/types/state';
@@ -7,6 +8,11 @@ import AssignmentCard from 'components/AssignmentCard';
 import CourseCard from 'components/CourseCard';
 import FileCard from 'components/FileCard';
 import NoticeCard from 'components/NoticeCard';
+import { BrandLightTheme } from 'theme';
+
+const RN: typeof ReactNative = require('react-native');
+// The hues' text shades, which pills draw their text in
+const statusText = BrandLightTheme.colors.onStatusContainer;
 
 const NOW = new Date('2026-03-10T12:00:00+08:00');
 
@@ -94,6 +100,28 @@ describe('NoticeCard', () => {
         .fontWeight,
     ).toBe('400');
     expect(screen.getByTestId('unread-dot')).toBeTruthy();
+  });
+
+  it('wraps the title only at accessibility text sizes', async () => {
+    const dimensions = jest.spyOn(RN, 'useWindowDimensions');
+    dimensions.mockReturnValue({
+      width: 400,
+      height: 800,
+      scale: 2,
+      fontScale: 1,
+    });
+    const view = await render(<NoticeCard data={notice()} />);
+    expect(screen.getByText('Midterm room change').props.numberOfLines).toBe(1);
+    await view.unmount();
+    dimensions.mockReturnValue({
+      width: 400,
+      height: 800,
+      scale: 2,
+      fontScale: 2,
+    });
+    await render(<NoticeCard data={notice()} />);
+    expect(screen.getByText('Midterm room change').props.numberOfLines).toBe(3);
+    dimensions.mockRestore();
   });
 
   it('shows the course, title, plain-text content and weekday', async () => {
@@ -203,7 +231,7 @@ describe('AssignmentCard', () => {
       />,
     );
     expect(screen.getByTestId('due-soon')).toBeTruthy();
-    expect(pillColor('due in 5 hours')).toEqual(PlatformColor('systemRed'));
+    expect(pillColor('due in 5 hours')).toEqual(statusText.red);
   });
 
   it('marks a deadline later tomorrow in orange, as Today does', async () => {
@@ -214,7 +242,7 @@ describe('AssignmentCard', () => {
         } as Partial<Assignment>)}
       />,
     );
-    expect(pillColor('due in 1 day')).toEqual(PlatformColor('systemOrange'));
+    expect(pillColor('due in 1 day')).toEqual(statusText.orange);
   });
 
   it('leaves a deadline after tomorrow and a submitted one unmarked', async () => {
@@ -288,7 +316,7 @@ describe('AssignmentCard', () => {
         data={assignment({ submitted: true, isLateSubmission: true })}
       />,
     );
-    expect(pillColor('Submitted Late')).toEqual(PlatformColor('systemOrange'));
+    expect(pillColor('Submitted Late')).toEqual(statusText.orange);
   });
 
   it('marks a favorite with a red heart', async () => {

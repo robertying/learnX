@@ -31,9 +31,14 @@ import {
 import { accessibilityValue } from '@expo/ui/swift-ui/modifiers';
 import type * as ReactNative from 'react-native';
 import { NavigationContext } from '@react-navigation/native';
-import { font, foregroundStyle } from '@expo/ui/swift-ui/modifiers';
+import {
+  accessibilityHidden,
+  font,
+  foregroundStyle,
+} from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
+import { BrandLightTheme } from 'theme';
 
 describe('Form', () => {
   it('opens a page from a link row with a chevron', async () => {
@@ -48,6 +53,10 @@ describe('Form', () => {
     expect(screen.getByText('Pick the semester to show')).toBeTruthy();
     expect(screen.getByTestId('icon-calendar')).toBeTruthy();
     expect(screen.getByTestId('icon-chevron.right')).toBeTruthy();
+    // Not read out as "Forward"
+    expect(
+      screen.getByTestId('icon-chevron.right').props.modifiers,
+    ).toContainEqual(accessibilityHidden(true));
     await userEvent.setup().press(screen.getByText('Semester'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
@@ -157,6 +166,16 @@ describe('Form', () => {
       </FormSection>,
     );
     expect(screen.getAllByTestId('icon-checkmark')).toHaveLength(1);
+    // Read out as Selected, not as "Checkmark"
+    expect(screen.getByTestId('icon-checkmark').props.modifiers).toContainEqual(
+      accessibilityHidden(true),
+    );
+    expect(
+      screen.getByRole('button', { name: 'Spring', selected: true }),
+    ).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Fall', selected: false }),
+    ).toBeTruthy();
     await userEvent.setup().press(screen.getByText('Fall'));
     expect(onPress).toHaveBeenCalledTimes(1);
   });
@@ -177,6 +196,20 @@ describe('Form', () => {
     await fireEvent.changeText(field, '30');
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenCalledWith(30);
+  });
+
+  it('names a text field for screen readers by its label', async () => {
+    await render(
+      <FormSection>
+        <FormTextField
+          value=""
+          onChangeText={jest.fn()}
+          placeholder="Optional"
+          label="Content"
+        />
+      </FormSection>,
+    );
+    expect(screen.getByLabelText('Content')).toBeTruthy();
   });
 
   it('keeps a text field and its value in step', async () => {
@@ -437,7 +470,7 @@ describe('Form (iOS details)', () => {
     expect(navigation.setOptions).not.toHaveBeenCalled();
   });
 
-  it('sets a grade large and bold, and a deadline semibold in its hue', async () => {
+  it('sets a grade large and bold, and a deadline semibold in its text shade', async () => {
     // At Jest's font scale of 2 the detail would go under the title instead.
     jest
       .spyOn(RN, 'useWindowDimensions')
@@ -459,8 +492,10 @@ describe('Form (iOS details)', () => {
       textStyle: 'body',
       weight: 'semibold',
     });
-    expect(foregroundStyle).toHaveBeenCalledWith(PlatformColor('systemOrange'));
-    expect(foregroundStyle).toHaveBeenCalledWith(PlatformColor('systemRed'));
+    // The hue's shade for text, which keeps 4.5:1 in light mode
+    const { onStatusContainer } = BrandLightTheme.colors;
+    expect(foregroundStyle).toHaveBeenCalledWith(onStatusContainer.orange);
+    expect(foregroundStyle).toHaveBeenCalledWith(onStatusContainer.red);
   });
 
   it('shows a spinner in a button row while it works', async () => {

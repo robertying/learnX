@@ -34,6 +34,8 @@ import {
   ZStack,
 } from '@expo/ui/swift-ui';
 import {
+  accessibilityAddTraits,
+  accessibilityHidden,
   accessibilityLabel,
   buttonStyle,
   accessibilityValue,
@@ -91,11 +93,18 @@ export * from './Form.shared';
 // Concrete system colors: inside a Button, hierarchical styles resolve to
 // the tint.
 const primaryText = foregroundStyle(PlatformColor('label'));
-const checkmarkModifiers = [font({ textStyle: 'body', weight: 'semibold' })];
+// A button reads the names of the symbols in it ("Forward", "Checkmark"):
+// the chevron is decoration, and a choice says Selected with its trait.
+const checkmarkModifiers = [
+  font({ textStyle: 'body', weight: 'semibold' }),
+  accessibilityHidden(true),
+];
 const chevronModifiers = [
   font({ textStyle: 'footnote', weight: 'semibold' }),
   foregroundStyle(PlatformColor('tertiaryLabel')),
+  accessibilityHidden(true),
 ];
+const selectedModifiers = [accessibilityAddTraits(['isSelected'])];
 
 // Mac apps draw grouped rows in light gray on the window's white (black in
 // Dark Mode), not white rows on gray as on iOS.
@@ -341,7 +350,8 @@ const RowDetail: React.FC<{
       : tint
         ? [
             font({ textStyle: 'body', weight: 'semibold' }),
-            foregroundStyle(theme.colors.status[tint]),
+            // The text shade of the hue, readable on the row
+            foregroundStyle(theme.colors.onStatusContainer[tint]),
           ]
         : [secondaryText];
   return <Text modifiers={modifiers}>{detail}</Text>;
@@ -490,7 +500,10 @@ export const FormButton: React.FC<FormButtonProps> = ({
       onPress={onPress}
       role={destructive ? 'destructive' : undefined}
       testID={testID}
-      modifiers={loading || isDisabled ? [disabled(true)] : undefined}
+      modifiers={[
+        ...(loading || isDisabled ? [disabled(true)] : []),
+        ...(selected ? selectedModifiers : []),
+      ]}
     >
       <HStack>
         <RowLabel
@@ -556,7 +569,14 @@ const plainTextModifiers = [
 
 /** Text the user writes, the whole width of the row. */
 export const FormTextField: React.FC<FormTextFieldProps> = props => {
-  const { placeholder, multiline, plain, disabled: isDisabled, testID } = props;
+  const {
+    placeholder,
+    label,
+    multiline,
+    plain,
+    disabled: isDisabled,
+    testID,
+  } = props;
   const text = useNativeState(props.value);
   useFieldText(text, props);
 
@@ -574,6 +594,7 @@ export const FormTextField: React.FC<FormTextFieldProps> = props => {
           : []),
         ...(plain ? plainTextModifiers : []),
         ...(isDisabled ? [disabled(true)] : []),
+        ...(label ? [accessibilityLabel(label)] : []),
       ]}
     />
   );
