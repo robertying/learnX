@@ -5,7 +5,7 @@ import FormWebView from 'components/FormWebView';
 import { NoticeDetailParamList } from 'navigation/types';
 import { getWebViewTemplate } from 'helpers/html';
 import { t } from 'helpers/i18n';
-import { getExtension, stripExtension } from 'helpers/filename';
+import { attachmentFile } from 'helpers/attachments';
 import { Notice } from 'data/types/state';
 import { useNotice } from 'data/content';
 import { openNotice } from 'data/serverActions';
@@ -46,8 +46,6 @@ const NoticeDetailContent: React.FC<{
   const {
     id,
     url,
-    courseId,
-    courseName,
     title,
     publisher,
     publishTime,
@@ -66,14 +64,7 @@ const NoticeDetailContent: React.FC<{
   const handleFileOpen = () => {
     if (attachment) {
       navigation.push('FileDetail', {
-        attachment: {
-          id,
-          courseId,
-          courseName,
-          title: stripExtension(attachment.name),
-          downloadUrl: attachment.downloadUrl,
-          fileType: getExtension(attachment.name),
-        },
+        attachment: attachmentFile(notice, attachment),
       });
     }
   };
