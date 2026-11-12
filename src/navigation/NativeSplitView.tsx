@@ -144,6 +144,13 @@ const NativeSplitViewProvider: React.FC<
   const detailAppearance = useColumnAppearance();
   const sidebarAppearance = useColumnAppearance();
 
+  // UIKit has collapsed the split, if it's going to, by the time its columns
+  // first appear; until then `expanded` is only a guess.
+  const [laidOut, setLaidOut] = useState(false);
+  if (masterAppearance.onScreen && !laidOut) {
+    setLaidOut(true);
+  }
+
   const hasSidebar = sidebar !== undefined;
   const showDetail = enabled && expanded;
   const showMaster = displayMode !== 'secondaryOnly';
@@ -211,6 +218,7 @@ const NativeSplitViewProvider: React.FC<
           ? detailNavigationContainerRef
           : null,
         showDetail,
+        laidOut: !enabled || laidOut,
         showMaster,
         toggleMaster,
         masterWidth: masterWidth ?? SplitSizes.masterWidth,

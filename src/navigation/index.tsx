@@ -4,7 +4,10 @@ import {
   NavigationContainer,
   NavigationContainerRef,
 } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {
+  createNativeStackNavigator,
+  type NativeStackNavigationOptions,
+} from '@react-navigation/native-stack';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 import {
   DetailStackParams,
@@ -28,6 +31,14 @@ import {
 } from './stacks';
 
 const RootNavigator = createNativeStackNavigator<RootStackParams>();
+
+// A page sheet on iOS, iPadOS and Mac, which a swipe down closes, as the
+// system's own apps present search and web pages. Android covers the window.
+const sheetOptions: NativeStackNavigationOptions =
+  Platform.OS === 'ios'
+    ? { presentation: 'pageSheet' }
+    : { gestureEnabled: false };
+
 const rootScreenOptions = {
   headerShown: false,
   presentation: 'transparentModal',
@@ -63,12 +74,12 @@ const renderMainScreens = () => (
     <RootNavigator.Screen
       name="CourseXStack"
       component={CourseXStack}
-      options={{ gestureEnabled: false }}
+      options={sheetOptions}
     />
     <RootNavigator.Screen
       name="SearchStack"
       component={SearchStack}
-      options={{ gestureEnabled: false }}
+      options={sheetOptions}
     />
     <RootNavigator.Screen
       name="AssignmentSubmissionStack"

@@ -26,6 +26,7 @@ const wrapper = ({ children }: React.PropsWithChildren) => (
           container as unknown as NavigationContainerRef<DetailStackParams>,
       },
       showDetail: true,
+      laidOut: true,
       showMaster: true,
       toggleMaster: () => {},
       masterWidth: SplitSizes.masterWidth,

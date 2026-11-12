@@ -3,6 +3,8 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppStateStore } from 'data/appState';
 import { whatsNewContext, whatsNewSince } from 'helpers/whatsNew';
+import { nativeSplit } from 'navigation/layout';
+import { useSplitLaidOut } from 'navigation/NativeSplitView';
 import type { RootStackParams } from 'navigation/types';
 
 // What happened earlier in this run of the app, before the main UI showed.
@@ -93,10 +95,16 @@ const useLaunchSheet = () => {
     }
   });
 
+  // On iOS the wait starts once the tabs' splits are on screen, which can
+  // take a while on a slow first launch.
+  const laidOut = useSplitLaidOut() || !nativeSplit;
   useEffect(() => {
+    if (!laidOut) {
+      return;
+    }
     const timer = setTimeout(open, delay);
     return () => clearTimeout(timer);
-  }, []);
+  }, [laidOut]);
 };
 
 export default useLaunchSheet;

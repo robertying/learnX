@@ -7,6 +7,12 @@ import Divider from 'components/Divider';
 const SplitViewContext = createContext<{
   detailNavigationContainerRef: DetailNavigationContainerRef | null;
   showDetail: boolean;
+  /**
+   * Whether the split knows its layout, so that `showDetail` says whether
+   * the detail pane is on screen. A native split only knows once UIKit has
+   * put it in the window (and collapsed it, where it's too narrow).
+   */
+  laidOut: boolean;
   showMaster: boolean;
   toggleMaster: (show: boolean) => void;
   /** Width of the master pane beside the detail one. */
@@ -14,6 +20,7 @@ const SplitViewContext = createContext<{
 }>({
   detailNavigationContainerRef: null,
   showDetail: false,
+  laidOut: true,
   showMaster: true,
   toggleMaster: () => {},
   masterWidth: SplitSizes.masterWidth,
@@ -42,6 +49,7 @@ const SplitViewProvider: React.FC<React.PropsWithChildren<SplitViewProps>> = ({
       value={{
         detailNavigationContainerRef,
         showDetail,
+        laidOut: true,
         showMaster,
         toggleMaster: setShowMaster,
         masterWidth: SplitSizes.masterWidth,
