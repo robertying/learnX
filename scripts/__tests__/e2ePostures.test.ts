@@ -3,12 +3,7 @@
 // those links pointing at items the mock account has.
 import { mockAssignments, mockFiles, mockNotices } from 'data/mock';
 import { getUrlTarget } from 'helpers/openTarget';
-
-// The app's tsconfig has no Node types; Jest runs in Node from the repo root.
-const { readdirSync, readFileSync } = jest.requireActual<{
-  readdirSync: (dir: string) => string[];
-  readFileSync: (path: string, encoding: 'utf8') => string;
-}>('fs');
+import { readdirSync, readFileSync } from 'node:fs';
 
 const dir = '.maestro/postures';
 const flows = readdirSync(dir).filter(name => name.endsWith('.yaml'));

@@ -157,7 +157,7 @@ git ls-files -z '*.sh' | xargs -0 shellcheck   # ShellCheck, for every shell scr
 scripts/check-release-bundle.sh  # The Android and iOS release JS bundles, with no .env value but the mock login in them
 ```
 
-The first five need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about a minute. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
+The first five need neither `.env` nor any native setup, so you can run them anywhere Node runs (ShellCheck comes from your package manager, for example `brew install shellcheck`). The bundle check needs a `.env` with the mock login and takes about two minutes. Lint is strict about a few project rules: Chinese text belongs in `src/assets/translations` (`en.ts` and `zh.ts`), and an intentionally unawaited promise is marked with `void`.
 
 End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build with the mock login: install it with `scripts/e2e-build.sh ios <simulator udid>` or `scripts/e2e-build.sh android <emulator serial>`, then run `pnpm e2e:ios` or `pnpm e2e:android`. See [.maestro/AGENTS.md](.maestro/AGENTS.md).
 

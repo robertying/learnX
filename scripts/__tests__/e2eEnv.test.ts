@@ -2,37 +2,25 @@
 // scripts/e2e-env.mjs reads from the translations and the mock data, and they
 // only run on a device. This catches a mock data or translation edit that
 // would leave a flow without its value.
-// No Node types in this project: just the calls used here.
-declare const __dirname: string;
-const fs: {
-  readdirSync: (dir: string, options: { recursive: true }) => string[];
-  readFileSync: (file: string, encoding: 'utf8') => string;
-} = require('fs');
-const { join }: { join: (...parts: string[]) => string } = require('path');
-const {
-  execFileSync,
-}: {
-  execFileSync: (
-    file: string,
-    args: string[],
-    options: { encoding: 'utf8' },
-  ) => string;
-} = require('child_process');
+import { execFileSync } from 'node:child_process';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
-const root = join(__dirname, '../../..');
+const root = join(__dirname, '../..');
 const maestroDir = join(root, '.maestro');
 
 // Every folder: the tests, their subflows and the store screenshots.
-const flows = fs
-  .readdirSync(maestroDir, { recursive: true })
-  .filter(name => name.endsWith('.yaml'));
+const flows = readdirSync(maestroDir, {
+  recursive: true,
+  encoding: 'utf8',
+}).filter(name => name.endsWith('.yaml'));
 
 const used = new Set(
   flows.flatMap(name =>
     [
-      ...fs
-        .readFileSync(join(maestroDir, name), 'utf8')
-        .matchAll(/\$\{((?:T|MOCK)_\w+)\}/g),
+      ...readFileSync(join(maestroDir, name), 'utf8').matchAll(
+        /\$\{((?:T|MOCK)_\w+)\}/g,
+      ),
     ].map(match => match[1]),
   ),
 );
