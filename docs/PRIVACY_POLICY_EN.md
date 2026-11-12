@@ -6,7 +6,7 @@ learnX is a free, open-source app for Tsinghua University's Web Learning, made b
 
 ## In short
 
-- Your Tsinghua username, password and course content stay on your device and are only sent to Tsinghua's own servers.
+- Your Tsinghua username, password and course content stay on your device and are only sent to Tsinghua's own servers, unless you turn on Course Information Sharing (below).
 - I don't run a server for learnX and don't collect your account, courses, notices, assignments, files or grades.
 - Crash reports and basic usage statistics go to Google Firebase. They don't include your login or course content.
 - Course Information Sharing (courseX) is off until you turn it on. When on, it uploads public information about your courses this semester, never information about you.

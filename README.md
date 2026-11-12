@@ -90,9 +90,9 @@ Requires iOS / iPadOS 17.6, macOS 14.6 or Android 9 and later.
 
 ## 隐私 Privacy
 
-账号和课程内容只保存在您的设备上，只会发送给清华大学的服务器。详见隐私政策。
+账号和课程内容只保存在您的设备上，只会发送给清华大学的服务器（开启课程信息共享时除外）。详见隐私政策。
 
-Your account and course content stay on your device and only go to Tsinghua's servers. See the privacy policy for details.
+Your account and course content stay on your device and only go to Tsinghua's servers, unless you turn on Course Information Sharing. See the privacy policy for details.
 
 - [隐私政策](docs/PRIVACY_POLICY_CN.md)
 - [Privacy Policy](docs/PRIVACY_POLICY_EN.md)
