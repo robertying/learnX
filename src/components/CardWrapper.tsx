@@ -13,6 +13,7 @@ import { useSettings } from 'data/settings';
 import { CardAction, cardActions, swipeAction } from 'helpers/cardActions';
 import { t } from 'helpers/i18n';
 import { systemIcons } from 'helpers/systemIcons';
+import useBackSwipeEdge, { backSwipeEdgeWidth } from 'hooks/useBackSwipeEdge';
 import useCardSwipe from 'hooks/useCardSwipe';
 import CardMenu from './CardMenu';
 import CardSwipeAction, { SwipeSide } from './CardSwipeAction';
@@ -104,6 +105,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
 }) => {
   const theme = useTheme();
   const swipeSettings = useSettings(settings => settings.swipeActions);
+  const backSwipeEdge = useBackSwipeEdge();
 
   const [menuVisible, setMenuVisible] = useState(false);
   // Android's menu is a Compose view: mounted on the card's first long press,
@@ -390,6 +392,8 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       enabled={
         actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
       }
+      // A swipe that starts at the screen's edge goes back, not to the card.
+      hitSlop={backSwipeEdge ? { left: -backSwipeEdgeWidth } : undefined}
       onSwipeableOpenStartDrag={onStartDrag}
       onSwipeableWillOpen={onWillOpen}
       onSwipeableOpen={onOpen}
