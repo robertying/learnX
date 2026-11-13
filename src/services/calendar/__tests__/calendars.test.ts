@@ -214,7 +214,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     await saveAsUser('calendar', [assignment('a1')]);
 
     expect(calendar.createEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Homework - Calculus' }),
+      expect.objectContaining({ title: 'Homework · Calculus' }),
     );
     expect(getCalendarSync().syncedCalendarAssignments).toEqual({
       a1: 'new-event',
@@ -237,7 +237,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     await saveAsUser('calendar', [assignment('a1'), assignment('a2')]);
 
     expect(update).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Homework - Calculus' }),
+      expect.objectContaining({ title: 'Homework · Calculus' }),
     );
     expect(calendar.createEvent).toHaveBeenCalledTimes(1);
     expect(getCalendarSync().syncedCalendarAssignments).toEqual({
@@ -250,15 +250,16 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     const a1 = assignment('a1');
     const a2 = { ...assignment('a2'), title: 'Lab' };
     const deadline = new Date(a1.deadline);
-    // a2's event was taken over before; a1's was written as submitted.
+    // a2's event was taken over before; a1's was written as submitted, by a
+    // version that joined title and course with a hyphen.
     useCalendarSyncStore.setState({ syncedCalendarAssignments: { a2: 'e2' } });
     mocked.ExpoCalendarEvent.get.mockResolvedValue({
       update: jest.fn(async () => {}),
     });
     assignments.listEvents.mockResolvedValue([
-      { id: 'e2', title: 'Homework - Calculus', endDate: deadline },
-      { id: 'other', title: 'Homework - Physics', endDate: deadline },
-      { id: 'later', title: 'Homework - Calculus', endDate: new Date(0) },
+      { id: 'e2', title: 'Homework · Calculus', endDate: deadline },
+      { id: 'other', title: 'Homework · Physics', endDate: deadline },
+      { id: 'later', title: 'Homework · Calculus', endDate: new Date(0) },
       { id: 'e1', title: '✅ Homework - Calculus', endDate: deadline },
     ]);
 
@@ -280,19 +281,19 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
       update: jest.fn(async () => {}),
     });
     reminders.listReminders.mockResolvedValue([
-      { title: 'Homework - Calculus', dueDate: new Date(deadline) },
-      { id: 'late', title: 'Homework - Calculus', dueDate: deadline + 1 },
+      { title: 'Homework · Calculus', dueDate: new Date(deadline) },
+      { id: 'late', title: 'Homework · Calculus', dueDate: deadline + 1 },
       {
         id: 'early',
-        title: 'Homework - Calculus',
+        title: 'Homework · Calculus',
         dueDate: new Date(deadline - 31 * 24 * 60 * 60 * 1000),
       },
       {
         id: 'r1',
-        title: 'Homework - Calculus',
+        title: 'Homework · Calculus',
         dueDate: new Date(deadline - 24 * 60 * 60 * 1000).toISOString(),
       },
-      { id: 'r2', title: 'Homework - Calculus' },
+      { id: 'r2', title: 'Homework · Calculus' },
     ]);
 
     await saveAsUser('reminder', [a1, a2]);
@@ -323,7 +324,7 @@ describe('saveAssignmentsToReminderOrCalendar', () => {
     expect(mocked.getCalendars).toHaveBeenCalledWith('reminder');
     expect(calendar.createReminder).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'Homework - Calculus',
+        title: 'Homework · Calculus',
         completed: false,
       }),
     );
@@ -558,7 +559,7 @@ describe('more of the sync', () => {
       });
       await saveAsUser('reminder', [assignment('a1'), assignment('a2')]);
       expect(update).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Homework - Calculus' }),
+        expect.objectContaining({ title: 'Homework · Calculus' }),
       );
       expect(getCalendarSync().syncedReminderAssignments).toEqual({
         a1: 'r1',

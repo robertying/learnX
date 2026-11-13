@@ -263,8 +263,9 @@ const time = (date: Date | string | undefined) =>
  * event or reminder, so a sync whose saved ids are gone (a reinstall, which
  * keeps the calendar and adopts it by its title) updates them instead of
  * adding each assignment a second time. Nothing in an entry names its
- * assignment, so one matches by title (with or without the submitted mark)
- * and deadline: an event ends at it, a reminder is due at or before it.
+ * assignment, so one matches by title (with or without the submitted mark,
+ * and the "Title - Course" form earlier versions wrote) and deadline: an
+ * event ends at it, a reminder is due at or before it.
  */
 const adoptExistingEntries = async (
   type: AssignmentEventType,
@@ -299,7 +300,9 @@ const adoptExistingEntries = async (
     const match = entries.find(
       entry =>
         !taken.has(entry.id) &&
-        withoutDoneMark(entry.title) === input.title &&
+        [input.title, input.formerTitle].includes(
+          withoutDoneMark(entry.title),
+        ) &&
         (isReminder
           ? entry.due <= deadline && entry.due >= deadline - REMINDER_LEAD_MS
           : entry.due === deadline),

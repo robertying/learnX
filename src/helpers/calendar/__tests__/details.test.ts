@@ -30,7 +30,7 @@ const input = (
   overrides: Partial<AssignmentEventInput> = {},
 ): AssignmentEventInput => ({
   assignmentId: 'a1',
-  title: 'Homework 1 - Calculus',
+  title: 'Homework 1 · Calculus',
   note: 'Read chapter 2',
   dueDate: dayjs('2026-03-20T23:59:00+08:00'),
   completed: false,
@@ -113,7 +113,7 @@ describe('buildAssignmentReminderDetails', () => {
         input({ completed: true, completionDate }),
       ),
     ).toEqual({
-      title: 'Homework 1 - Calculus',
+      title: 'Homework 1 · Calculus',
       dueDate: new Date('2026-03-20T23:59:00+08:00'),
       alarms: [],
       timeZone: 'Asia/Shanghai',
@@ -181,7 +181,7 @@ describe('buildAssignmentReminderDetails', () => {
 describe('buildAssignmentEventDetails', () => {
   it('ends at the deadline and lasts 30 minutes by default', () => {
     expect(buildAssignmentEventDetails(settingsWith(), input())).toEqual({
-      title: 'Homework 1 - Calculus',
+      title: 'Homework 1 · Calculus',
       startDate: new Date('2026-03-20T23:29:00+08:00'),
       endDate: new Date('2026-03-20T23:59:00+08:00'),
       timeZone: 'Asia/Shanghai',
@@ -204,7 +204,7 @@ describe('buildAssignmentEventDetails', () => {
     expect(
       buildAssignmentEventDetails(settingsWith(), input({ completed: true }))
         .title,
-    ).toBe('✅ Homework 1 - Calculus');
+    ).toBe('✅ Homework 1 · Calculus');
   });
 
   it('adds the first and second alarms with their defaults', () => {
@@ -302,7 +302,8 @@ describe('buildAssignmentEventInputs', () => {
       [
         {
           assignmentId: 'a1',
-          title: 'Homework 1 - Calculus',
+          title: 'Homework 1 · Calculus',
+          formerTitle: 'Homework 1 - Calculus',
           note: 'Read chapter 2',
           dueDate: dayjs('2026-03-20T23:59:00+08:00'),
           completed: false,
