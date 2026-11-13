@@ -218,7 +218,7 @@ const AssignmentSubmissionContent: React.FC<{
   useHeaderButtons(navigation, 'right', [
     {
       id: 'submit',
-      label: t('submitEllipsis'),
+      label: t('submit'),
       icon: 'upload',
       text: true,
       disabled: submitDisabled,
