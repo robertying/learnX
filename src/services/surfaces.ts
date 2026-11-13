@@ -23,8 +23,10 @@ import {
   Notice,
 } from 'data/types/state';
 import type { ToastMessage } from 'services/calendar/actions';
+import { assignmentEntriesMissing } from 'services/calendar/calendars';
 import {
   updateSyncedClasses,
+  syncedClassesMissing,
   syncedClassWeeks,
 } from 'services/calendar/classes';
 import { uploadCourses } from 'services/coursex';
@@ -126,31 +128,55 @@ export const subscribeSurfaceErrors = (listener: ErrorListener) => {
 };
 
 /**
- * Writes the assignments the Assignments tab shows (no archived ones, none in
- * a hidden course) to the calendar or Reminders, and deletes the entries of
- * the ones left out.
+ * The assignments written to the calendar or Reminders: the ones the
+ * Assignments tab shows (no archived ones, none in a hidden course) with the
+ * deadline ahead. `removed` are the ones left out, whose entries go.
  */
-const syncCalendar = async (
-  type: 'calendar' | 'reminder',
-  { assignments, hiddenCourses, archived }: Inputs,
-) => {
+const syncedAssignments = ({
+  assignments,
+  hiddenCourses,
+  archived,
+}: Inputs) => {
   if (!assignments) {
-    return;
+    return undefined;
   }
   const isShown = isShownBy(hiddenCourses, archived);
   // Loaded when needed: it brings in the file helpers, which only the app
   // needs (and Jest can't load).
-  const { syncAssignments, upcomingAssignments } =
+  const { upcomingAssignments } =
     require('services/calendar/actions') as typeof import('services/calendar/actions');
-  const message = await syncAssignments(
-    type,
-    upcomingAssignments(assignments.filter(isShown), dayjs()),
-    assignments.filter(a => !isShown(a)).map(a => a.id),
-    { automatic: true },
-  );
+  return {
+    written: upcomingAssignments(assignments.filter(isShown), dayjs()),
+    removed: assignments.filter(a => !isShown(a)).map(a => a.id),
+  };
+};
+
+/**
+ * Writes the synced assignments to the calendar or Reminders, and deletes
+ * the entries of the ones left out.
+ */
+const syncCalendar = async (type: 'calendar' | 'reminder', inputs: Inputs) => {
+  const synced = syncedAssignments(inputs);
+  if (!synced) {
+    return;
+  }
+  const { syncAssignments } =
+    require('services/calendar/actions') as typeof import('services/calendar/actions');
+  const message = await syncAssignments(type, synced.written, synced.removed, {
+    automatic: true,
+  });
   if (message) {
     errorListeners.forEach(listener => listener(message));
   }
+};
+
+/** Whether a synced assignment has lost its event or reminder. */
+const calendarEntriesMissing = async (
+  type: 'calendar' | 'reminder',
+  inputs: Inputs,
+) => {
+  const synced = syncedAssignments(inputs);
+  return !!synced && assignmentEntriesMissing(type, synced.written);
 };
 
 /**
@@ -161,6 +187,12 @@ interface Surface {
   name: string;
   deps: (inputs: Inputs) => unknown[];
   update: (inputs: Inputs) => void | Promise<void>;
+  /**
+   * For an output the user can change outside learnX (the calendar and
+   * Reminders): whether it lost what it was given, checked when nothing it
+   * depends on changed. True runs `update` anyway.
+   */
+  missing?: (inputs: Inputs) => Promise<boolean>;
 }
 
 const surfaces: Surface[] = [
@@ -258,6 +290,9 @@ const surfaces: Surface[] = [
       inputs.settings.assignmentCalendarSync
         ? syncCalendar('calendar', inputs)
         : undefined,
+    missing: async inputs =>
+      inputs.settings.assignmentCalendarSync &&
+      calendarEntriesMissing('calendar', inputs),
   },
   {
     name: 'Reminders assignments',
@@ -272,6 +307,9 @@ const surfaces: Surface[] = [
       inputs.settings.assignmentReminderSync
         ? syncCalendar('reminder', inputs)
         : undefined,
+    missing: async inputs =>
+      inputs.settings.assignmentReminderSync &&
+      calendarEntriesMissing('reminder', inputs),
   },
   {
     name: 'Calendar classes',
@@ -285,6 +323,7 @@ const surfaces: Surface[] = [
       i.settings.courseEventOmitLocation,
     ],
     update: () => updateSyncedClasses(),
+    missing: () => syncedClassesMissing(),
   },
   {
     name: 'courseX sharing',
@@ -306,6 +345,16 @@ const changed = (before: unknown[] | undefined, after: unknown[]) =>
   before.length !== after.length ||
   before.some((value, i) => !Object.is(value, after[i]));
 
+/** Whether the surface lost what it was given; false when that can't be told. */
+const isMissing = async (surface: Surface, inputs: Inputs) => {
+  try {
+    return (await surface.missing?.(inputs)) ?? false;
+  } catch (error) {
+    recordError(error, `Checking ${surface.name}`);
+    return false;
+  }
+};
+
 let running: Promise<void> = Promise.resolve();
 
 /**
@@ -319,7 +368,10 @@ export const refreshSurfaces = () => {
     const inputs = readInputs();
     for (const surface of surfaces) {
       const deps = surface.deps(inputs);
-      if (!changed(lastDeps.get(surface.name), deps)) {
+      if (
+        !changed(lastDeps.get(surface.name), deps) &&
+        !(await isMissing(surface, inputs))
+      ) {
         continue;
       }
       lastDeps.set(surface.name, deps);

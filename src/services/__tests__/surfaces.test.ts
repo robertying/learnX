@@ -22,9 +22,11 @@ import {
 } from 'services/surfaces';
 import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
 import {
+  syncedClassesMissing,
   syncedClassWeeks,
   updateSyncedClasses,
 } from 'services/calendar/classes';
+import { assignmentEntriesMissing } from 'services/calendar/calendars';
 
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
@@ -57,7 +59,11 @@ jest.mock('services/calendar/actions', () => ({
 }));
 jest.mock('services/calendar/classes', () => ({
   updateSyncedClasses: jest.fn(async () => {}),
+  syncedClassesMissing: jest.fn(async () => false),
   syncedClassWeeks: jest.fn(() => []),
+}));
+jest.mock('services/calendar/calendars', () => ({
+  assignmentEntriesMissing: jest.fn(async () => false),
 }));
 jest.mock('services/coursex', () => ({
   uploadCourses: jest.fn(async () => {}),
@@ -190,6 +196,62 @@ it('writes the calendar and Reminders again only when their data changed', async
   setArchived('assignment', [assignments[1].id], true);
   await refreshSurfaces();
   expect(syncAssignments).toHaveBeenCalledTimes(4);
+});
+
+it('writes the calendar and Reminders again when their entries went missing', async () => {
+  cacheAssignments();
+  setSetting('assignmentCalendarSync', true);
+  await refreshSurfaces();
+  expect(syncAssignments).toHaveBeenCalledTimes(1);
+
+  // Nothing changed and nothing is missing: only the check runs.
+  await refreshSurfaces();
+  expect(assignmentEntriesMissing).toHaveBeenLastCalledWith(
+    'calendar',
+    assignments,
+  );
+  expect(syncAssignments).toHaveBeenCalledTimes(1);
+
+  // The user deleted events in Calendar.
+  jest.mocked(assignmentEntriesMissing).mockResolvedValueOnce(true);
+  await refreshSurfaces();
+  expect(syncAssignments).toHaveBeenCalledTimes(2);
+  expect(syncAssignments).toHaveBeenLastCalledWith(
+    'calendar',
+    assignments,
+    [],
+    { automatic: true },
+  );
+});
+
+it("doesn't check the calendar or Reminders while their sync is off", async () => {
+  cacheAssignments();
+  await refreshSurfaces();
+  await refreshSurfaces();
+  expect(assignmentEntriesMissing).not.toHaveBeenCalled();
+});
+
+it('writes the classes again when their events went missing', async () => {
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
+  jest.mocked(syncedClassesMissing).mockResolvedValueOnce(true);
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(2);
+});
+
+it('records a failed check and leaves the output as it is', async () => {
+  await refreshSurfaces();
+  jest
+    .mocked(syncedClassesMissing)
+    .mockRejectedValueOnce(new Error('no calendar'));
+  await refreshSurfaces();
+  expect(recordError).toHaveBeenCalledWith(
+    new Error('no calendar'),
+    'Checking Calendar classes',
+  );
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
 });
 
 it('has no lists to show without a semester', async () => {
