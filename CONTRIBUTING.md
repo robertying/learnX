@@ -146,7 +146,7 @@ Mock data details, and how to add to it, are in [src/data/AGENTS.md](src/data/AG
 
 ## Checks
 
-The pull request check (`CI / JS checks` in `.github/workflows/ci.yml`) runs these, and all of them must pass. `pnpm check` runs the first five in one go:
+The pull request checks (`CI / JS checks` and `CI / Release bundles` in `.github/workflows/ci.yml`) run these, and all of them must pass. `pnpm check` runs the first five in one go:
 
 ```sh
 pnpm typecheck                   # TypeScript (tsc)
@@ -163,10 +163,9 @@ End-to-end flows use [Maestro](https://docs.maestro.dev) against a Release build
 
 Other CI jobs (none of them build a signed app or run on a device, so still build and try the app yourself on each platform your change touches, and say in the pull request what you checked):
 
-- `CI / Android unit tests` (required) runs `scripts/test-android.sh` when a pull request touches Android paths; otherwise it skips its steps and passes.
-- `Native / Android release build` builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths. Not required.
-- `Native / Apple (iOS)` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Native › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Tick "Mac: build" to also build Mac Catalyst (`Native / Apple (Mac)`).
-- End-to-end flows run by hand only, on Android: tick "Android E2E tests" when running Native, and `Native / Android E2E tests` runs the Maestro flows in an emulator on the APK from `Native / Android release build`.
+- `CI / Android` (required) runs `scripts/test-android.sh` and builds a release APK (R8 and the JS bundle included, debug-signed) when a pull request touches Android paths; otherwise it skips its steps and passes.
+- `CI / Android E2E tests` runs the Maestro flows in an emulator on that APK after every push to `main`. To run it on a branch: Actions › CI › Run workflow.
+- `Apple / Apple (iOS)` builds the app and runs the native iOS tests (`scripts/test-ios.sh`), by hand only: Actions › Apple › Run workflow, on `main` (which also refreshes its compilation cache) or on a branch. Tick "Mac: build" to also build Mac Catalyst (`Apple / Apple (Mac)`).
 
 ## Pull requests
 
@@ -176,7 +175,7 @@ Other CI jobs (none of them build a signed app or run on a device, so still buil
 4. Open the pull request against `main`. Describe what changed and why, how you tested it (platforms, simulators or devices, mock or real account), and add screenshots for visible changes.
 5. Changing a patched dependency? Follow [patches/README.md](patches/README.md) (`pnpm patch` / `pnpm patch-commit`) rather than editing `node_modules` by hand.
 
-Pull requests are squash-merged once `CI / JS checks` and `CI / Android unit tests` pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
+Pull requests are squash-merged once `CI / JS checks`, `CI / Release bundles` and `CI / Android` pass and the change has been reviewed. For bugs and feature ideas, open an issue with one of the templates first.
 
 ## Troubleshooting
 

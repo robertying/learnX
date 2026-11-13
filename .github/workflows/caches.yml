@@ -1,0 +1,39 @@
+name: Caches
+
+# After each CI or Apple run on main, which are the only runs that save
+# caches, drops the caches newer ones replaced (scripts/prune-caches.sh), so
+# the repo stays under its 10 GB limit. A job of its own, so the jobs that
+# build and run the project's code don't need write access to Actions.
+on:
+  workflow_run:
+    workflows: [CI, Apple]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: caches
+  cancel-in-progress: false
+
+jobs:
+  prune:
+    name: Prune caches
+    if: github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          sparse-checkout: scripts/prune-caches.sh
+          sparse-checkout-cone-mode: false
+
+      - name: Prune caches
+        run: scripts/prune-caches.sh
+        env:
+          GH_TOKEN: ${{ github.token }}
