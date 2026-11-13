@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
  * once it's recycled are dropped. Closing the document under a render crashed in Pdfium.
  */
 @RunWith(RobolectricTestRunner::class)
-class RecycleSafeRenderingPatchTest {
+class PdfPatchTest {
   @Test
   fun disposesTheDocumentOnTheRendererThread() {
     val view = mockk<PDFView>(relaxed = true)
