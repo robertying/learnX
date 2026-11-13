@@ -328,6 +328,7 @@ const zh: typeof en = {
   notifyClassReminders: '上课提醒',
   classReminderOffset: '提前提醒（分钟）',
   classStartsAt: '{time} 上课',
+  classStartsAtBeijing: '北京时间 {time} 上课',
   notifyClassRemindersCaption:
     '在课表上每节课开始前提醒你。打开 learnX 会更新接下来约一周的提醒。',
   notifySummary: '{courses} 门课程有 {count} 条更新',
@@ -412,6 +413,7 @@ const zh: typeof en = {
   todayStartsIn: '{time}开始',
   todayEndsIn: '{time}结束',
   todayClasses: '今天的课',
+  beijingTime: '北京时间',
   todayNoClasses: '今天没有课',
   todayNoMoreClasses: '今天的课已上完',
   todayClassCount: '今天 {count} 节课',

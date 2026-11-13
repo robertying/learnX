@@ -98,6 +98,15 @@ describe('classReminderContent', () => {
       classReminderContent(upcoming('a', 0, { start, location: '' })).body,
     ).toBe('Starts at 09:50');
   });
+
+  it('says the time is Beijing time on a phone elsewhere', () => {
+    const start = new Date(2026, 10, 9, 9, 50).valueOf();
+    // Los Angeles (UTC-8)
+    jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
+    expect(classReminderContent(upcoming('a', 0, { start })).body).toBe(
+      'Starts at 09:50 Beijing Time · Room 101',
+    );
+  });
 });
 
 describe('syncClassReminders', () => {

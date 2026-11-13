@@ -56,13 +56,10 @@ function UpNextWidget(
   const featured = classes[0];
   const current = !!featured && featured.start <= now;
 
-  const midnight = (ms: number) => {
-    const d = new Date(ms);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  };
-  // Days from today, rounded for the days that are 23 or 25 hours long.
-  const daysAway = (ms: number) =>
-    Math.round((midnight(ms) - midnight(now)) / 86400000);
+  // Days counted in Beijing (UTC+8), as the app's timetable counts them.
+  const beijingDay = (ms: number) =>
+    Math.floor((ms + 8 * 60 * 60 * 1000) / 86400000);
+  const daysAway = (ms: number) => beijingDay(ms) - beijingDay(now);
   const when = (c: UpNextWidgetProps['classes'][number]) => {
     const days = daysAway(c.start);
     return days === 0

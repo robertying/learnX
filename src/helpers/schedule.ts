@@ -8,7 +8,7 @@ import {
 } from '@robertying/thu-learn-lib';
 import type { Course } from 'data/types/state';
 import { timeRange } from './i18n';
-import { beijingDate, beijingTime } from './serverTime';
+import { beijingDate, beijingTime, beijingWallClock } from './serverTime';
 
 /** One class meeting. Times are ms since the epoch. */
 export interface ClassSession {
@@ -147,12 +147,20 @@ export const currentAndNext = (sessions: ClassSession[], now: number) => ({
 });
 
 /**
+ * A class's start and end in Beijing time, as the timetable lists them
+ * ("9:50–11:25"), also on a phone in another time zone, where the screen says
+ * the times are Beijing's.
+ */
+export const classTimeRange = (session: Pick<ClassSession, 'start' | 'end'>) =>
+  timeRange(beijingWallClock(session.start), beijingWallClock(session.end));
+
+/**
  * Time and room on the second line, as Calendar lists events, so the course
  * name gets the row's full width. The room is as the course lists it
  * ("六教6A414"), which students know, not the full building name the
  * calendar export adds for maps.
  */
 export const classDetails = (session: ClassSession) =>
-  [timeRange(session.start, session.end), session.location.trim()]
+  [classTimeRange(session), session.location.trim()]
     .filter(Boolean)
     .join(' · ');

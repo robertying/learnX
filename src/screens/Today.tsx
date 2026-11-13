@@ -28,7 +28,7 @@ import {
   currentAndNext,
   sessionsOn,
 } from 'helpers/schedule';
-import { beijingDate } from 'helpers/serverTime';
+import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { isShownBy } from 'helpers/shown';
 import { useShowDetail } from 'hooks/useDetailNavigator';
 import { useMinute } from 'hooks/useClock';
@@ -165,6 +165,11 @@ const Today: React.FC<Props> = ({ navigation }) => {
             time: dayjs(schedule.updatedAt).from(now),
           })
         : undefined;
+  // Class times are Beijing's; a phone elsewhere says so beside them.
+  const classesTitle =
+    classes.length > 0 && !showsBeijingTime(now)
+      ? `${t('todayClasses')} · ${t('beijingTime')}`
+      : t('todayClasses');
   const classCount =
     classes.length === 0
       ? t('todayNoClasses')
@@ -181,7 +186,7 @@ const Today: React.FC<Props> = ({ navigation }) => {
         {/* One section, and when a class ends or starts goes above its name
             rather than beside it, so a busy day keeps what's due on screen.
             The whole week is a tap away in Schedule. */}
-        <FormSection title={t('todayClasses')} footer={note}>
+        <FormSection title={classesTitle} footer={note}>
           {current &&
             itemRow({
               key: current.key,

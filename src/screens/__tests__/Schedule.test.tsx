@@ -112,6 +112,18 @@ it('shows the time alone without a room, and opens nothing without a course', as
   expect(navigation.push).not.toHaveBeenCalled();
 });
 
+it('says the times are Beijing time on a phone elsewhere', async () => {
+  mockWeeks['2026-11-09'] = [session('a', 'a', '2026-11-15', '08:00')];
+  // Los Angeles (UTC-8)
+  jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
+  await setup();
+  // On the first day with classes, not on an empty today
+  expect(screen.getByText('Today · Sat, Nov 14')).toBeOnTheScreen();
+  expect(
+    screen.getByText('Tomorrow · Sun, Nov 15 · Beijing Time'),
+  ).toBeOnTheScreen();
+});
+
 it('says when no classes are coming up', async () => {
   await setup();
   expect(screen.getByText('Today · Sat, Nov 14')).toBeOnTheScreen();

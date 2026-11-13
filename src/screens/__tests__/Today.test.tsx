@@ -136,6 +136,19 @@ it("counts the day's classes and opens the schedule", async () => {
   jest.useRealTimers();
 });
 
+it('says the class times are Beijing time on a phone elsewhere', async () => {
+  jest.useFakeTimers({ now: dayjs().hour(12).minute(0).toDate() });
+  mockSessions.push(session('a', 'a', 60, 120));
+  await setup();
+  expect(screen.getByText('Classes')).toBeOnTheScreen();
+
+  // Los Angeles (UTC-8)
+  jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
+  await setup();
+  expect(screen.getByText('Classes · Beijing Time')).toBeOnTheScreen();
+  jest.useRealTimers();
+});
+
 it('says when there are no classes or deadlines', async () => {
   await setup();
   expect(screen.getByText('No classes today')).toBeOnTheScreen();

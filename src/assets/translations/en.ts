@@ -339,6 +339,7 @@ export default {
   notifyClassReminders: 'Class Reminders',
   classReminderOffset: 'Remind Before (Minutes)',
   classStartsAt: 'Starts at {time}',
+  classStartsAtBeijing: 'Starts at {time} Beijing Time',
   notifyClassRemindersCaption:
     'Reminds you before each class on your timetable. Opening learnX keeps them up to date for the next week or so.',
   notifySummary: '{count} Updates in {courses} Courses',
@@ -426,6 +427,7 @@ export default {
   todayStartsIn: 'starts {time}',
   todayEndsIn: 'ends {time}',
   todayClasses: 'Classes',
+  beijingTime: 'Beijing Time',
   todayNoClasses: 'No classes today',
   todayNoMoreClasses: 'No more classes today',
   todayClassCount: '{count} classes today',
