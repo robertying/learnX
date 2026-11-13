@@ -29,6 +29,12 @@ export interface CalendarSyncState {
   syncedReminderAssignments: Record<string, string>;
   /** When each sync last finished without an error (ms), for Settings. */
   lastSynced?: Partial<Record<SyncKind, number>>;
+  /**
+   * What each week's classes in the calendar were last written from (a hash
+   * of its timetable and the class settings), by the week's Monday, so a week
+   * is written again only when one of them changed.
+   */
+  writtenClassWeeks: Record<string, string>;
 }
 
 /** The syncs Settings › Calendar & Reminders shows a time for. */
@@ -37,6 +43,7 @@ export type SyncKind = 'courseSchedule' | AssignmentEventType;
 export const emptyCalendarSync = (): CalendarSyncState => ({
   syncedCalendarAssignments: {},
   syncedReminderAssignments: {},
+  writtenClassWeeks: {},
 });
 
 export const useCalendarSyncStore = create<CalendarSyncState>()(
@@ -92,6 +99,13 @@ export const removeEventIdForAssignment = (
 export const setLastSynced = (kind: SyncKind, time = Date.now()) => {
   useCalendarSyncStore.setState(state => ({
     lastSynced: { ...state.lastSynced, [kind]: time },
+  }));
+};
+
+/** Notes what a week's classes in the calendar were just written from. */
+export const setClassWeekWritten = (weekStart: string, key: string) => {
+  useCalendarSyncStore.setState(state => ({
+    writtenClassWeeks: { ...state.writtenClassWeeks, [weekStart]: key },
   }));
 };
 

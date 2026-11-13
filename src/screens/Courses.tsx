@@ -1,3 +1,4 @@
+import { StackActions } from '@react-navigation/native';
 import CourseCard from 'components/CourseCard';
 import FilterList from 'components/FilterList';
 import SafeArea from 'components/SafeArea';
@@ -8,6 +9,7 @@ import { useCurrentSemester, useUserData } from 'data/userData';
 import { Course } from 'data/types/state';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import { useShowDetail } from 'hooks/useDetailNavigator';
+import usePendingTarget from 'hooks/usePendingTarget';
 import { getSemesterTextFromId } from 'helpers/semester';
 import { sortByOrder } from 'helpers/reorder';
 import { countByCourse } from 'helpers/courseCounts';
@@ -57,6 +59,12 @@ const Courses: React.FC<Props> = ({ navigation }) => {
   const pullToRefresh = usePullToRefresh(handleRefresh);
 
   const handlePush = (item: Course) => show('CourseDetail', { id: item.id });
+  // A class event's learnx://course link.
+  usePendingTarget('course', (id, inDetail) =>
+    inDetail
+      ? show('CourseDetail', { id })
+      : navigation.dispatch(StackActions.push('CourseDetail', { id })),
+  );
 
   return (
     <SafeArea>

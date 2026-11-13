@@ -4,7 +4,8 @@
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';
-import type { CalendarClass } from 'helpers/schedule';
+import { type CalendarClass, matchCourse } from 'helpers/schedule';
+import { getTargetUrl } from 'helpers/openTarget';
 import { Assignment, Course, SettingsState } from 'data/types/state';
 import type { CalendarSyncState } from 'data/calendarSync';
 import { hash, removeTags } from 'helpers/text';
@@ -61,19 +62,27 @@ export function sanitizeLocation(location: string): string {
 /** What the optional calendar settings (in minutes) are until they're set. */
 export const calendarDefaults = {
   courseAlarmOffset: 15,
-  assignmentReminderAlarmOffset: 24 * 60,
   assignmentCalendarAlarmOffset: 24 * 60,
   assignmentCalendarSecondAlarmOffset: 30,
   calendarEventLength: 30,
 };
 
+/**
+ * A class's event. Its link opens the course in learnX, or Today when the
+ * class matches none of `courses`.
+ */
 export const buildCourseEventDetails = (
   e: CalendarClass,
   settings: SettingsState,
+  courses: Course[] = [],
 ): EventDetails => {
   const alarms = settings.alarms;
+  const course = matchCourse(e.courseName, courses);
   return {
     title: e.courseName,
+    url: getTargetUrl(
+      course ? { type: 'course', id: course.id } : { type: 'today' },
+    ),
     startDate: new Date(e.start),
     endDate: new Date(e.end),
     timeZone: TZ,
@@ -97,48 +106,41 @@ export interface AssignmentEventInput {
   assignmentId: string;
   title: string;
   note: string;
-  startDate: Dayjs;
   dueDate: Dayjs;
   completed: boolean;
   completionDate?: Dayjs;
 }
 
 /**
- * iOS reminder for an assignment. With the alert on, it's dated the chosen
- * time before the deadline and alerts then; the deadline is in its notes.
+ * iOS reminder for an assignment, due at the deadline, and alerting then with
+ * the alert on. Its link opens the assignment in learnX.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
   {
+    assignmentId,
     title,
     note,
-    startDate,
     dueDate,
     completed,
     completionDate,
   }: AssignmentEventInput,
 ): ReminderDetails => {
   const alarms = settings.alarms;
-  // Reminders folds any alarm into the reminder's own date and time, so an
-  // early alert is the reminder's date. The real deadline goes in the notes.
-  const remindAt = alarms.assignmentReminderAlarm
-    ? dueDate.subtract(
-        alarms.assignmentReminderAlarmOffset ??
-          calendarDefaults.assignmentReminderAlarmOffset,
-        'minute',
-      )
-    : dueDate;
-  const deadline = `${t('deadline')}: ${dueDate.format(t('shortDateTimeFormat'))}`;
   return {
     title,
-    startDate: (startDate.isBefore(remindAt) ? startDate : remindAt).toDate(),
-    dueDate: remindAt.toDate(),
+    dueDate: dueDate.toDate(),
+    // Only at the due date: Reminders shows a reminder at its earliest alarm,
+    // so an earlier one would move it off the deadline (and make it overdue
+    // from then). Apps can't set Early Reminder. learnX's own deadline
+    // notifications alert ahead of time.
     alarms: alarms.assignmentReminderAlarm ? [{ relativeOffset: 0 }] : [],
     // The device's zone: Reminders labels any other zone (e.g. "GMT+8").
     timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
-    notes: note ? `${deadline}\n\n${note}` : deadline,
+    notes: note,
+    url: getTargetUrl({ type: 'assignment', id: assignmentId }),
   };
 };
 
@@ -156,10 +158,13 @@ export const alertBeforeDeadline = (minutes: number, eventLength: number) => ({
   method: Calendar.AlarmMethod.DEFAULT,
 });
 
-/** Calendar event for an assignment, ending at the deadline */
+/**
+ * Calendar event for an assignment, ending at the deadline. Its link opens
+ * the assignment in learnX.
+ */
 export const buildAssignmentEventDetails = (
   settings: SettingsState,
-  { title, note, dueDate, completed }: AssignmentEventInput,
+  { assignmentId, title, note, dueDate, completed }: AssignmentEventInput,
 ): EventDetails => {
   const alarms = settings.alarms;
   const eventLength =
@@ -197,6 +202,7 @@ export const buildAssignmentEventDetails = (
     endDate: dueDate.toDate(),
     timeZone: TZ,
     notes: note,
+    url: getTargetUrl({ type: 'assignment', id: assignmentId }),
     alarms: alerts,
   };
 };
@@ -222,7 +228,6 @@ export const buildAssignmentEventInputs = (
           assignmentId: assignment.id,
           title: assignment.title + ' - ' + course.name,
           note: removeTags(assignment.description),
-          startDate: now,
           dueDate: dayjs(assignment.deadline),
           completed: assignment.submitted,
           completionDate: assignment.submitTime

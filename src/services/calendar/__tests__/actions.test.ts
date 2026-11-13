@@ -6,6 +6,7 @@ import { fetchCalendarRange } from 'data/schedule';
 import { Assignment } from 'data/types/state';
 import {
   allowAssignmentSync,
+  allowCourseCalendarSync,
   assignmentSyncErrorToast,
   calendarDeleteErrorToast,
   calendarExportErrorToast,
@@ -20,9 +21,10 @@ import {
   exportSyncedCalendarsToICS,
   removeCalendars,
   requireAssignmentAccess,
+  requirePermission,
   saveAssignmentsToReminderOrCalendar,
-  saveCoursesToCalendar,
 } from 'services/calendar/calendars';
+import { saveClassesToCalendar } from 'services/calendar/classes';
 import { exportTextFile } from 'services/files/share';
 import { CalendarError, CalendarErrorCode } from 'services/calendar/errors';
 import { t } from 'helpers/i18n';
@@ -35,8 +37,11 @@ jest.mock('services/calendar/calendars', () => ({
   exportSyncedCalendarsToICS: jest.fn(),
   removeCalendars: jest.fn(),
   requireAssignmentAccess: jest.fn(async () => {}),
+  requirePermission: jest.fn(async () => {}),
   saveAssignmentsToReminderOrCalendar: jest.fn(),
-  saveCoursesToCalendar: jest.fn(),
+}));
+jest.mock('services/calendar/classes', () => ({
+  saveClassesToCalendar: jest.fn(),
 }));
 jest.mock('services/files/share', () => ({ exportTextFile: jest.fn() }));
 jest.mock('constants/DeviceInfo', () => ({ isMac: jest.fn(() => false) }));
@@ -133,8 +138,14 @@ describe('syncCourseSchedule', () => {
       type: 'success',
     });
     expect(ensureSession).toHaveBeenCalled();
-    expect(fetchCalendarRange).toHaveBeenCalledWith(start, end, true);
-    expect(saveCoursesToCalendar).toHaveBeenCalledWith(events, start, end, []);
+    expect(fetchCalendarRange).toHaveBeenCalledWith(start, end, true, {
+      fresh: true,
+    });
+    expect(saveClassesToCalendar).toHaveBeenCalledWith(
+      events,
+      { first: '2026-03-01', last: '2026-03-28', graduate: true },
+      [],
+    );
     expect(
       useCalendarSyncStore.getState().lastSynced?.courseSchedule,
     ).toBeGreaterThan(0);
@@ -151,10 +162,9 @@ describe('syncCourseSchedule', () => {
       text: t('courseScheduleSyncPartial'),
       type: 'warning',
     });
-    expect(saveCoursesToCalendar).toHaveBeenCalledWith(
+    expect(saveClassesToCalendar).toHaveBeenCalledWith(
       events,
-      start,
-      end,
+      { first: '2026-03-01', last: '2026-03-28', graduate: false },
       failedRanges,
     );
   });
@@ -168,7 +178,7 @@ describe('syncCourseSchedule', () => {
       text: t('courseScheduleSyncNoCourse'),
       type: 'warning',
     });
-    expect(saveCoursesToCalendar).not.toHaveBeenCalled();
+    expect(saveClassesToCalendar).not.toHaveBeenCalled();
   });
 
   it('turns failures into toasts', async () => {
@@ -176,7 +186,7 @@ describe('syncCourseSchedule', () => {
       .mocked(fetchCalendarRange)
       .mockResolvedValue({ classes: [{}], failedRanges: [] } as never);
     jest
-      .mocked(saveCoursesToCalendar)
+      .mocked(saveClassesToCalendar)
       .mockImplementation(fail('calendarPermission'));
 
     await expect(syncCourseSchedule(start, end, false)).resolves.toEqual({
@@ -268,6 +278,19 @@ describe('allowAssignmentSync', () => {
       text: t('assignmentSyncNoReminderPermission'),
       type: 'error',
     });
+  });
+});
+
+describe('allowCourseCalendarSync', () => {
+  it('asks for calendar access, and says why when it is denied', async () => {
+    await expect(allowCourseCalendarSync()).resolves.toBeUndefined();
+    expect(requirePermission).toHaveBeenCalledWith('calendar', { ask: true });
+    jest
+      .mocked(requirePermission)
+      .mockImplementationOnce(fail('calendarPermission'));
+    await expect(allowCourseCalendarSync()).resolves.toEqual(
+      courseSyncErrorToast(new CalendarError('calendarPermission')),
+    );
   });
 });
 

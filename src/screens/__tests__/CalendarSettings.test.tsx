@@ -41,6 +41,12 @@ const picker = {
   onRangeConfirm: jest.fn(),
 };
 const setSyncEnabled = jest.fn();
+const setCourseSyncEnabled = jest.fn();
+const courseSync = {
+  syncing: false,
+  enabling: false,
+  setSyncEnabled: setCourseSyncEnabled,
+};
 const exportToICS = jest.fn();
 
 const renderScreen = () => render(<CalendarSettings {...screenProps()} />);
@@ -62,9 +68,7 @@ const access = (
 beforeEach(() => {
   resetSettings();
   access();
-  jest
-    .mocked(useCourseScheduleSync)
-    .mockReturnValue({ syncing: false, picker });
+  jest.mocked(useCourseScheduleSync).mockReturnValue({ ...courseSync, picker });
   jest.mocked(useAssignmentSync).mockReturnValue({
     calendarSyncing: false,
     reminderSyncing: false,
@@ -75,15 +79,24 @@ beforeEach(() => {
     .mockReturnValue({ exporting: false, exportToICS });
 });
 
-it('saves the course schedule settings and opens the range picker', async () => {
+it('turns course schedule sync on through the sync hook', async () => {
   await renderScreen();
   expect(
     screen.getByText(
       t('courseScheduleSyncCaption', { type: t('undergraduateSchedule') }),
     ),
   ).toBeTruthy();
-  await toggle(t('graduate'), true);
-  expect(getSettings().graduate).toBe(true);
+  // Its options show only while it's on.
+  expect(screen.queryByText(t('classAlarm'))).toBeNull();
+  expect(screen.queryByText(t('syncCourseSchedule'))).toBeNull();
+  await toggle(t('setupCourseCalendar'), true);
+  expect(setCourseSyncEnabled).toHaveBeenCalledWith(true);
+});
+
+it('saves the course schedule settings and opens the range picker', async () => {
+  setSetting('courseCalendarSync', true);
+  setSetting('graduate', true);
+  await renderScreen();
   expect(
     screen.getByText(
       t('courseScheduleSyncCaption', { type: t('graduateSchedule') }),
@@ -97,6 +110,7 @@ it('saves the course schedule settings and opens the range picker', async () => 
 });
 
 it('asks how long before a class to alarm once class alarms are on', async () => {
+  setSetting('courseCalendarSync', true);
   await renderScreen();
   expect(screen.queryByText(t('classAlarmBefore'))).toBeNull();
   await toggle(t('classAlarm'), true);
@@ -107,14 +121,19 @@ it('asks how long before a class to alarm once class alarms are on', async () =>
 
 it('turns assignment sync on and off through the sync hook', async () => {
   await renderScreen();
+  expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
+  // Each sync's options show only while it's on.
+  expect(screen.queryByText(t('assignmentCalendarAlarm'))).toBeNull();
+  expect(screen.queryByText(t('assignmentReminderAlarm'))).toBeNull();
   await toggle(t('setupCalendar'), true);
   expect(setSyncEnabled).toHaveBeenCalledWith('calendar', true);
   await toggle(t('setupReminders'), true);
   expect(setSyncEnabled).toHaveBeenCalledWith('reminder', true);
 });
 
-it('shows the event length and alarm options while calendar sync is on', async () => {
+it('shows the alert options of the syncs that are on', async () => {
   setSetting('assignmentCalendarSync', true);
+  setSetting('assignmentReminderSync', true);
   setSetting('alarms', {
     ...getSettings().alarms,
     assignmentCalendarAlarm: true,
@@ -126,7 +145,6 @@ it('shows the event length and alarm options while calendar sync is on', async (
     'calendarEventLength',
     'assignmentCalendarAlarmOffset',
     'assignmentCalendarSecondAlarmOffset',
-    'assignmentReminderAlarmOffset',
   ] as const) {
     expect(screen.getAllByText(t(label)).length).toBeGreaterThan(0);
   }
@@ -173,7 +191,7 @@ it('leaves the ellipsis off Export on the Mac, which saves to Downloads', async 
 it('saves the range picked in the picker', async () => {
   jest
     .mocked(useCourseScheduleSync)
-    .mockReturnValue({ syncing: false, picker: { ...picker, open: true } });
+    .mockReturnValue({ ...courseSync, picker: { ...picker, open: true } });
   await renderScreen();
   await userEvent.press(screen.getByText(t('datePickerSaveLabel')));
   expect(picker.onRangeConfirm).toHaveBeenCalledWith({
@@ -187,6 +205,7 @@ it('says when each sync last finished, while it is on', async () => {
   const time = new Date(2026, 10, 11, 9, 30).getTime();
   setLastSynced('courseSchedule', time);
   setLastSynced('calendar', time);
+  setSetting('courseCalendarSync', true);
   await renderScreen();
   const lastSynced = t('lastSynced', {
     time: dayjs(time).format(t('shortDateTimeFormat')),

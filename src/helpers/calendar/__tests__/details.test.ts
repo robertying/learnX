@@ -15,7 +15,6 @@ import {
   toICSEvent,
 } from 'helpers/calendar/details';
 import { hash } from 'helpers/text';
-import { t } from 'helpers/i18n';
 import { ICSEvent } from 'helpers/calendar/ics';
 
 const settingsWith = (
@@ -33,7 +32,6 @@ const input = (
   assignmentId: 'a1',
   title: 'Homework 1 - Calculus',
   note: 'Read chapter 2',
-  startDate: dayjs('2026-03-10T08:00:00+08:00'),
   dueDate: dayjs('2026-03-20T23:59:00+08:00'),
   completed: false,
   ...overrides,
@@ -67,8 +65,18 @@ describe('buildCourseEventDetails', () => {
       timeZone: 'Asia/Shanghai',
       location: '清华大学第六教学楼 六教6A017',
       notes: '六教6A017',
+      url: 'learnx://today',
       alarms: [],
     });
+  });
+
+  it('links the course it matches', () => {
+    const courses = [
+      { id: 'c1', name: 'Calculus', chineseName: 'Calculus' },
+    ] as Course[];
+    expect(buildCourseEventDetails(event, settingsWith(), courses).url).toBe(
+      'learnx://course/c1',
+    );
   });
 
   it('omits the location when asked to', () => {
@@ -95,7 +103,7 @@ describe('buildCourseEventDetails', () => {
 });
 
 describe('buildAssignmentReminderDetails', () => {
-  it('uses the deadline as the due date without an alarm', () => {
+  it('is due at the deadline, links the assignment, and has no alert', () => {
     const completionDate = dayjs('2026-03-12T10:00:00+08:00');
     expect(
       buildAssignmentReminderDetails(
@@ -104,41 +112,23 @@ describe('buildAssignmentReminderDetails', () => {
       ),
     ).toEqual({
       title: 'Homework 1 - Calculus',
-      startDate: new Date('2026-03-10T08:00:00+08:00'),
       dueDate: new Date('2026-03-20T23:59:00+08:00'),
       alarms: [],
       timeZone: 'Asia/Shanghai',
       completed: true,
       completionDate: completionDate.toDate(),
-      notes: `${t('deadline')}: Mar 20 23:59\n\nRead chapter 2`,
+      notes: 'Read chapter 2',
+      url: 'learnx://assignment/a1',
     });
   });
 
-  it('dates the reminder the offset before the deadline and alerts then, a day by default', () => {
-    const daily = buildAssignmentReminderDetails(
-      settingsWith({}, { assignmentReminderAlarm: true }),
-      input(),
-    );
-    expect(daily.dueDate).toEqual(new Date('2026-03-19T23:59:00+08:00'));
-    expect(daily.alarms).toEqual([{ relativeOffset: 0 }]);
-    expect(daily.notes).toMatch(/^.+: Mar 20 23:59\n\nRead chapter 2$/);
-    const hourly = buildAssignmentReminderDetails(
-      settingsWith(
-        {},
-        { assignmentReminderAlarm: true, assignmentReminderAlarmOffset: 60 },
-      ),
-      input(),
-    );
-    expect(hourly.dueDate).toEqual(new Date('2026-03-20T22:59:00+08:00'));
-    expect(hourly.alarms).toEqual([{ relativeOffset: 0 }]);
-  });
-
-  it('starts no later than the alert', () => {
+  it('alerts only at the deadline, keeping it as the date', () => {
     const details = buildAssignmentReminderDetails(
       settingsWith({}, { assignmentReminderAlarm: true }),
-      input({ startDate: dayjs('2026-03-20T12:00:00+08:00') }),
+      input(),
     );
-    expect(details.startDate).toEqual(details.dueDate);
+    expect(details.dueDate).toEqual(new Date('2026-03-20T23:59:00+08:00'));
+    expect(details.alarms).toEqual([{ relativeOffset: 0 }]);
   });
 });
 
@@ -150,6 +140,7 @@ describe('buildAssignmentEventDetails', () => {
       endDate: new Date('2026-03-20T23:59:00+08:00'),
       timeZone: 'Asia/Shanghai',
       notes: 'Read chapter 2',
+      url: 'learnx://assignment/a1',
       alarms: [],
     });
   });
@@ -267,7 +258,6 @@ describe('buildAssignmentEventInputs', () => {
           assignmentId: 'a1',
           title: 'Homework 1 - Calculus',
           note: 'Read chapter 2',
-          startDate: now,
           dueDate: dayjs('2026-03-20T23:59:00+08:00'),
           completed: false,
           completionDate: undefined,

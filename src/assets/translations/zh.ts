@@ -133,7 +133,7 @@ const zh: typeof en = {
   calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历。',
   calendarExportFailed: '导出失败：{error}',
   graduate: '研究生',
-  syncCourseSchedule: '同步课表',
+  syncCourseSchedule: '同步更多日期…',
   classAlarm: '上课日历提醒',
   classAlarmBefore: '课前提醒（分钟）',
   calendarEventLength: '日程长度（分钟）',
@@ -142,8 +142,7 @@ const zh: typeof en = {
   assignmentCalendarSecondAlarm: '日历第二次提醒',
   assignmentCalendarSecondAlarmOffset: '截止前第二次提醒（分钟）',
   assignmentCalendarNoAlarmIfComplete: '已提交的作业不提醒',
-  assignmentReminderAlarm: '截止前提醒',
-  assignmentReminderAlarmOffset: '截止前提醒（分钟）',
+  assignmentReminderAlarm: '截止时提醒',
   assignmentSyncDescription:
     'learnX 每次获取作业时都会添加并更新未截止的作业；已截止的作业不会添加，已归档的作业和已屏蔽课程的作业会被移除。',
   clearFileCache: '删除全部已下载文件',
@@ -389,7 +388,8 @@ const zh: typeof en = {
   semesterSummer: '夏季学期',
   shareFile: '分享文件',
   submissionAttachmentName: '{title}-提交.{ext}',
-  courseScheduleSyncCaption: '将{type}课表同步到日历；更改设置后请重新同步。',
+  courseScheduleSyncCaption:
+    '开启后，本周和下周的{type}课程会自动添加到日历，并随课表和以上设置更新。如需更多周，点按同步更多日期并选择日期，这些课程同样会自动更新。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
   courseInformationSharingOnCaption:
@@ -463,6 +463,7 @@ const zh: typeof en = {
   setupNewContent: '新内容',
   setupCalendarSection: '日历',
   setupCalendar: '将作业添加到日历',
+  setupCourseCalendar: '将课表添加到日历',
   setupReminders: '将作业添加到提醒事项',
   remindersSection: '提醒事项',
   lastSynced: '上次同步于 {time}。',

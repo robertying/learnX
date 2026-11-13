@@ -138,7 +138,7 @@ export default {
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export: {error}",
   graduate: 'Graduate',
-  syncCourseSchedule: 'Sync Course Schedule',
+  syncCourseSchedule: 'Sync More Dates…',
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Alert Before Class (Minutes)',
   calendarEventLength: 'Event Length (Minutes)',
@@ -147,8 +147,7 @@ export default {
   assignmentCalendarSecondAlarm: 'Second Calendar Alert',
   assignmentCalendarSecondAlarmOffset: 'Second Alert Before Deadline (Minutes)',
   assignmentCalendarNoAlarmIfComplete: 'No Alerts for Submitted Assignments',
-  assignmentReminderAlarm: 'Reminder Alert',
-  assignmentReminderAlarmOffset: 'Alert Before Deadline (Minutes)',
+  assignmentReminderAlarm: 'Alert at Deadline',
   assignmentSyncDescription:
     "Upcoming assignments are added and kept up to date whenever learnX gets assignments. Past-due assignments aren't added, and archived ones and those of hidden courses are removed.",
   clearFileCache: 'Delete All Downloads',
@@ -404,7 +403,7 @@ export default {
   shareFile: 'Share File',
   submissionAttachmentName: '{title} Submission.{ext}',
   courseScheduleSyncCaption:
-    'Syncs the {type} course schedule to your calendar. Sync again after changing these settings.',
+    "When on, this week's and next week's {type} classes are added to your calendar and kept up to date with the timetable and these settings. For more weeks, tap Sync More Dates and pick the dates; those classes are kept up to date too.",
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:
@@ -481,6 +480,7 @@ export default {
   setupNewContent: 'New Content',
   setupCalendarSection: 'Calendar',
   setupCalendar: 'Add Assignments to Calendar',
+  setupCourseCalendar: 'Add Schedule to Calendar',
   setupReminders: 'Add Assignments to Reminders',
   remindersSection: 'Reminders',
   lastSynced: 'Last synced {time}.',

@@ -1,3 +1,4 @@
+import { StackActions } from '@react-navigation/native';
 import { act, render } from '@testing-library/react-native';
 import dayjs from 'dayjs';
 import { initialAuth, useAuthStore } from 'data/auth';
@@ -12,6 +13,7 @@ import {
 } from 'data/userData';
 import { getSemesterTextFromId } from 'helpers/semester';
 import { useShowDetail } from 'hooks/useDetailNavigator';
+import { setPendingTarget } from 'hooks/usePendingTarget';
 import Courses from 'screens/Courses';
 import { screenProps } from 'test-utils/screenProps';
 
@@ -29,6 +31,8 @@ jest.mock('data/queries', () => ({ useCourses: jest.fn() }));
 jest.mock('data/login', () => ({ login: jest.fn() }));
 const mockShow = jest.fn();
 jest.mock('hooks/useDetailNavigator', () => ({
+  __esModule: true,
+  default: jest.fn(() => undefined),
   useShowDetail: jest.fn(() => mockShow),
 }));
 
@@ -47,7 +51,7 @@ const coursesResult = (overrides: object = {}) =>
     ...overrides,
   } as never);
 
-const navigation = {};
+const navigation = { dispatch: jest.fn() };
 const renderScreen = () => render(<Courses {...screenProps({ navigation })} />);
 
 const future = dayjs().add(1, 'day').toISOString();
@@ -134,6 +138,14 @@ it('refetches on a pull only with a session and a semester', async () => {
   await renderScreen();
   await act(() => mockList.onRefresh());
   expect(refetch).toHaveBeenCalled();
+});
+
+it('opens the course a class event links to', async () => {
+  await renderScreen();
+  await act(() => setPendingTarget({ type: 'course', id: 'calc' }));
+  expect(navigation.dispatch).toHaveBeenCalledWith(
+    StackActions.push('CourseDetail', { id: 'calc' }),
+  );
 });
 
 it('opens a course in the detail view', async () => {

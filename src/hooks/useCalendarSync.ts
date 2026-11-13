@@ -6,6 +6,7 @@ import { setSetting, useSettings } from 'data/settings';
 import {
   ToastMessage,
   allowAssignmentSync,
+  allowCourseCalendarSync,
   deleteCalendars,
   exportCalendars,
   syncCourseSchedule,
@@ -25,11 +26,30 @@ export interface DateRange {
 }
 type RangeChange = (range: DateRange) => void;
 
-/** Course schedule sync over a range picked in a date range picker */
+/**
+ * Course schedule sync: the switch that keeps the fetched timetable in the
+ * calendar, and Sync over a range picked in a date range picker. Turning the
+ * switch on asks for the calendar access and shows it working until the
+ * surfaces (services/surfaces) have written the saved weeks; it stays on if
+ * the access is denied, and starts working once it's allowed.
+ */
 export const useCourseScheduleSync = () => {
   const graduate = useSettings(settings => settings.graduate);
 
   const [syncing, setSyncing] = useState(false);
+  const [enabling, setEnabling] = useState(false);
+
+  const setSyncEnabled = async (enabled: boolean) => {
+    if (!enabled) {
+      setSetting('courseCalendarSync', false);
+      return;
+    }
+    setEnabling(true);
+    show(await allowCourseCalendarSync());
+    setSetting('courseCalendarSync', true);
+    await refreshSurfaces();
+    setEnabling(false);
+  };
   const [pickerOpen, setPickerOpen] = useState(false);
   const [startDate, setStartDate] = useState<Date | undefined>(
     dayjs().toDate(),
@@ -69,6 +89,8 @@ export const useCourseScheduleSync = () => {
 
   return {
     syncing,
+    enabling,
+    setSyncEnabled,
     picker: {
       open: pickerOpen,
       startDate,

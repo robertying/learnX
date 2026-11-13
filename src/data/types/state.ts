@@ -22,7 +22,6 @@ export interface AlarmSettings {
   assignmentCalendarAlarmOffset?: number;
   assignmentCalendarNoAlarmIfComplete: boolean;
   assignmentReminderAlarm: boolean;
-  assignmentReminderAlarmOffset?: number;
 }
 /** Which notifications the app posts; all off until the user turns them on. */
 export interface NotificationSettings {
@@ -42,6 +41,11 @@ export interface NotificationSettings {
   classReminderOffset: number;
 }
 export interface SettingsState {
+  /**
+   * Writes the fetched timetable's classes from today on to the course
+   * calendar, and keeps them up to date.
+   */
+  courseCalendarSync: boolean;
   assignmentCalendarSync: boolean;
   calendarEventLength?: number;
   assignmentReminderSync: boolean;

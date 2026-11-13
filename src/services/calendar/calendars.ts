@@ -1,8 +1,6 @@
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
-import dayjs, { Dayjs } from 'dayjs';
-import type { CalendarClass } from 'helpers/schedule';
-import type { FailedRange } from 'data/schedule';
+import dayjs from 'dayjs';
 import { getSettings } from 'data/settings';
 import {
   type AssignmentEventType,
@@ -24,7 +22,6 @@ import {
   buildAssignmentEventDetails,
   buildAssignmentEventInputs,
   buildAssignmentReminderDetails,
-  buildCourseEventDetails,
   courseCalendarName,
   dedupeAndSortICSEvents,
   isSyncedCalendar,
@@ -61,7 +58,7 @@ export const hasPermission = async (type: 'calendar' | 'reminder') =>
  * Throws without the permission. `ask` asks for it first: only for what the
  * user just did, never for a sync the app starts by itself.
  */
-const requirePermission = async (
+export const requirePermission = async (
   type: 'calendar' | 'reminder',
   { ask }: { ask: boolean },
 ) => {
@@ -119,6 +116,16 @@ const androidCalendarSource = {
   isLocalAccount: true,
 } as Calendar.Source;
 
+/** A calendar or list learnX keeps its entries in. */
+interface CalendarSpec {
+  setting: SyncedCalendar;
+  title: string;
+  name: string;
+  entityType: Calendar.EntityTypes;
+  /** Runs before a new calendar is created */
+  onCreate?: () => void;
+}
+
 /**
  * Returns the stored calendar if it still exists, else adopts one with the
  * same title, else creates it. The id is saved in `data/calendarSync`.
@@ -129,14 +136,19 @@ const getOrCreateCalendar = async ({
   name,
   entityType,
   onCreate,
-}: {
-  setting: SyncedCalendar;
-  title: string;
-  name: string;
-  entityType: Calendar.EntityTypes;
-  /** Runs before a new calendar is created */
-  onCreate?: () => void;
-}): Promise<Calendar.ExpoCalendar> => {
+}: CalendarSpec): Promise<Calendar.ExpoCalendar> =>
+  (await findCalendar(setting, title, entityType)) ??
+  createCalendar({ setting, title, name, entityType, onCreate });
+
+/**
+ * The stored calendar if it still exists, else one with the same title (whose
+ * id is then saved in `data/calendarSync`), else undefined.
+ */
+const findCalendar = async (
+  setting: SyncedCalendar,
+  title: string,
+  entityType: Calendar.EntityTypes,
+) => {
   // Listed by type, since EventKit guards each with its own permission:
   // Reminders sync works with only Reminders access.
   const calendars = await Calendar.getCalendars(entityType);
@@ -152,9 +164,17 @@ const getOrCreateCalendar = async ({
   const existingCalendar = calendars.find(value => value.title === title);
   if (existingCalendar) {
     setSyncedCalendarId(setting, existingCalendar.id);
-    return existingCalendar;
   }
+  return existingCalendar;
+};
 
+const createCalendar = async ({
+  setting,
+  title,
+  name,
+  entityType,
+  onCreate,
+}: CalendarSpec) => {
   onCreate?.();
 
   const defaultCalendarSource =
@@ -179,6 +199,14 @@ const getOrCreateCalendar = async ({
   return newCalendar;
 };
 
+/** The course calendar if there is one; never creates it. */
+export const findCourseCalendar = () =>
+  findCalendar(
+    'courseCalendarId',
+    courseCalendarName,
+    Calendar.EntityTypes.EVENT,
+  );
+
 export const getCourseCalendar = () =>
   getOrCreateCalendar({
     setting: 'courseCalendarId',
@@ -186,47 +214,6 @@ export const getCourseCalendar = () =>
     name: courseCalendarName,
     entityType: Calendar.EntityTypes.EVENT,
   });
-
-/**
- * Replaces the synced classes in the range with `events`. Classes in
- * `failedRanges` (weeks the registrar didn't answer for) stay as they were.
- */
-export const saveCoursesToCalendar = async (
-  events: CalendarClass[],
-  startDate: Dayjs,
-  endDate: Dayjs,
-  failedRanges: FailedRange[] = [],
-) => {
-  const settings = getSettings();
-
-  await requirePermission('calendar', { ask: true });
-
-  const calendar = await getCourseCalendar();
-
-  const oldEvents = await calendar.listEvents(
-    startDate.toDate(),
-    endDate.toDate(),
-  );
-
-  const isInFailedRange = (date: string | Date) => {
-    const day = dayjs(date).format('YYYYMMDD');
-    return failedRanges.some(
-      range => range.startDate <= day && day <= range.endDate,
-    );
-  };
-  await Promise.all(
-    oldEvents
-      .filter(e => !isInFailedRange(e.startDate))
-      .map(async e => await e.delete()),
-  );
-
-  await Promise.all(
-    events.map(
-      async e =>
-        await calendar.createEvent(buildCourseEventDetails(e, settings)),
-    ),
-  );
-};
 
 export const getAssignmentCalendar = () =>
   getOrCreateCalendar({

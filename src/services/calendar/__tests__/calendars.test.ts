@@ -13,7 +13,6 @@ import {
   getCourseCalendar,
   removeCalendars,
   saveAssignmentsToReminderOrCalendar,
-  saveCoursesToCalendar,
 } from 'services/calendar/calendars';
 import dayjs from 'dayjs';
 import { CalendarError } from 'services/calendar/errors';
@@ -170,61 +169,6 @@ describe('synced calendars', () => {
     );
     expect(getCalendarSync().assignmentReminderId).toBe('created');
     expect(getCalendarSync().syncedReminderAssignments).toEqual({});
-  });
-});
-
-describe('saveCoursesToCalendar', () => {
-  it('replaces the events in the range', async () => {
-    useCalendarSyncStore.setState({ courseCalendarId: 'courses' });
-    const old = { delete: jest.fn(async () => {}) };
-    const calendar = fakeCalendar({
-      id: 'courses',
-      listEvents: jest.fn(async () => [old]),
-    });
-    mocked.getCalendars.mockResolvedValue([calendar]);
-
-    const start = dayjs('2026-03-01');
-    const end = dayjs('2026-03-31');
-    await saveCoursesToCalendar(
-      [
-        {
-          courseName: 'Calculus',
-          start: '2026-03-10T08:00:00+08:00',
-          end: '2026-03-10T09:35:00+08:00',
-          location: '六教6A017',
-        },
-      ],
-      start,
-      end,
-    );
-
-    expect(mocked.getCalendars).toHaveBeenCalledWith('event');
-    expect(calendar.listEvents).toHaveBeenCalledWith(
-      start.toDate(),
-      end.toDate(),
-    );
-    expect(old.delete).toHaveBeenCalled();
-    expect(calendar.createEvent).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: 'Calculus',
-        location: '清华大学第六教学楼 六教6A017',
-      }),
-    );
-  });
-
-  it("doesn't ask for Reminders", async () => {
-    mocked.getRemindersPermissions.mockResolvedValue({ status: 'denied' });
-    useCalendarSyncStore.setState({ courseCalendarId: 'courses' });
-    mocked.getCalendars.mockResolvedValue([fakeCalendar({ id: 'courses' })]);
-    await saveCoursesToCalendar([], dayjs(), dayjs());
-    expect(mocked.requestRemindersPermissions).not.toHaveBeenCalled();
-  });
-
-  it('needs calendar permission', async () => {
-    grant('denied');
-    await expect(saveCoursesToCalendar([], dayjs(), dayjs())).rejects.toThrow(
-      new CalendarError('calendarPermission'),
-    );
   });
 });
 
@@ -471,6 +415,7 @@ describe('removeCalendars', () => {
     expect(getCalendarSync()).toEqual({
       syncedCalendarAssignments: {},
       syncedReminderAssignments: {},
+      writtenClassWeeks: {},
     });
   });
 });
@@ -569,29 +514,6 @@ describe('more of the sync', () => {
     );
     // No id came back, so none is stored.
     expect(getCalendarSync().courseCalendarId).toBeUndefined();
-  });
-
-  it('keeps the classes of weeks the registrar could not list', async () => {
-    useCalendarSyncStore.setState({ courseCalendarId: 'courses' });
-    const kept = {
-      startDate: '2026-03-10T08:00:00+08:00',
-      delete: jest.fn(async () => {}),
-    };
-    const replaced = {
-      startDate: '2026-03-20T08:00:00+08:00',
-      delete: jest.fn(async () => {}),
-    };
-    mocked.getCalendars.mockResolvedValue([
-      fakeCalendar({
-        id: 'courses',
-        listEvents: jest.fn(async () => [kept, replaced]),
-      }),
-    ]);
-    await saveCoursesToCalendar([], dayjs('2026-03-01'), dayjs('2026-03-31'), [
-      { startDate: '20260309', endDate: '20260315' },
-    ]);
-    expect(kept.delete).not.toHaveBeenCalled();
-    expect(replaced.delete).toHaveBeenCalled();
   });
 
   describe('reminders on iOS', () => {

@@ -1,7 +1,8 @@
 // Keeps what learnX shows outside the app in step with its data: the
 // Deadlines and Up Next widgets, deadline and class reminders, Spotlight, the
 // App Intents' data, the assignments written to the system calendar or
-// Reminders, and the courses shared with courseX. Each is worked out from the cached lists, the user data and the
+// Reminders, the classes synced to the calendar, and the courses shared with
+// courseX. Each is worked out from the cached lists, the user data and the
 // settings whenever those change, in whichever JS runtime that happens: the
 // app, the background sync, or a notification action handled without the app.
 import { isShownBy } from 'helpers/shown';
@@ -22,6 +23,10 @@ import {
   Notice,
 } from 'data/types/state';
 import type { ToastMessage } from 'services/calendar/actions';
+import {
+  updateSyncedClasses,
+  syncedClassWeeks,
+} from 'services/calendar/classes';
 import { uploadCourses } from 'services/coursex';
 import { recordError } from 'services/crashReporting';
 import {
@@ -58,6 +63,8 @@ interface Inputs {
   classes: string;
   /** How many times the app came back to the foreground. */
   resumes: number;
+  /** The saved timetable weeks the course calendar follows. */
+  classWeeks: unknown[];
 }
 
 let resumes = 0;
@@ -99,6 +106,7 @@ const readInputs = (): Inputs => {
             ]),
           ),
     resumes,
+    classWeeks: syncedClassWeeks(),
   };
 };
 
@@ -266,6 +274,19 @@ const surfaces: Surface[] = [
         : undefined,
   },
   {
+    name: 'Calendar classes',
+    // The followed weeks' timetables and the class settings; each week is
+    // written again only when what it's written from changed.
+    deps: i => [
+      ...i.classWeeks,
+      i.settings.courseCalendarSync,
+      i.settings.graduate,
+      i.settings.alarms,
+      i.settings.courseEventOmitLocation,
+    ],
+    update: () => updateSyncedClasses(),
+  },
+  {
     name: 'courseX sharing',
     deps: i => [i.courses, i.settings.courseInformationSharing],
     // Once per JS runtime and whenever the courses change, while sharing is
@@ -344,18 +365,32 @@ const watchedQueries = new Set<string>([
   queryKeys.calendarAll[0],
 ]);
 
-let scheduled = false;
+/**
+ * How long a settings change waits for the next before the surfaces follow:
+ * a number typed in Settings changes the setting with each digit.
+ */
+export const SETTINGS_SETTLE_MS = 1000;
 
-/** Refreshes once after the changes made in this tick. */
-const schedule = () => {
-  if (scheduled) {
+let timer: ReturnType<typeof setTimeout> | undefined;
+/** When the scheduled refresh runs (ms). */
+let due = 0;
+
+/**
+ * Refreshes once after the changes made in this tick, or `delay` ms after
+ * the last of a run of changes. A refresh that's due later isn't moved
+ * earlier, so a change elsewhere doesn't catch a setting halfway typed.
+ */
+const schedule = (delay = 0) => {
+  const at = Date.now() + delay;
+  if (timer !== undefined && due >= at) {
     return;
   }
-  scheduled = true;
-  setTimeout(() => {
-    scheduled = false;
+  clearTimeout(timer);
+  due = at;
+  timer = setTimeout(() => {
+    timer = undefined;
     void refreshSurfaces();
-  }, 0);
+  }, delay);
 };
 
 let watching = false;
@@ -380,8 +415,8 @@ export const watchSurfaces = () => {
       schedule();
     }
   });
-  useUserDataStore.subscribe(schedule);
-  useSettingsStore.subscribe(schedule);
+  useUserDataStore.subscribe(() => schedule());
+  useSettingsStore.subscribe(() => schedule(SETTINGS_SETTLE_MS));
   AppState.addEventListener('change', state => {
     if (state === 'active') {
       resumes += 1;

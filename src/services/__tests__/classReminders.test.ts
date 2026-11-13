@@ -90,13 +90,17 @@ describe('classReminderContent', () => {
     expect(classReminderContent(upcoming('a', 0, { start }))).toEqual({
       title: 'Course a',
       body: 'Starts at 09:50 · Room 101',
-      data: { type: 'today' },
+      data: { type: 'course', id: 'a' },
       threadIdentifier: 'classes',
       interruptionLevel: 'timeSensitive',
     });
     expect(
       classReminderContent(upcoming('a', 0, { start, location: '' })).body,
     ).toBe('Starts at 09:50');
+    // Today, when the class matches no course.
+    expect(
+      classReminderContent(upcoming('a', 0, { courseId: undefined })).data,
+    ).toEqual({ type: 'today' });
   });
 
   it('says the time is Beijing time on a phone elsewhere', () => {
@@ -126,7 +130,7 @@ describe('syncClassReminders', () => {
     expect(cancel.mock.calls).toEqual([['class-reminder:gone:1:15']]);
     expect(schedule).toHaveBeenCalledTimes(1);
     expect(schedule.mock.calls[0][0]).toMatchObject({
-      content: { title: 'Course new', data: { type: 'today' } },
+      content: { title: 'Course new', data: { type: 'course', id: 'new' } },
       trigger: { type: 'date', date: now + 285 * minute },
     });
   });

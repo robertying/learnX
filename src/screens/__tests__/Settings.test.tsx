@@ -1,6 +1,12 @@
 import { Alert, Linking } from 'react-native';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { act, render, screen, userEvent } from '@testing-library/react-native';
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  userEvent,
+} from '@testing-library/react-native';
 import DeviceInfo from 'constants/DeviceInfo';
 import { useAppStateStore } from 'data/appState';
 import { initialAuth, useAuthStore } from 'data/auth';
@@ -8,6 +14,7 @@ import { useCredentialsStore } from 'data/credentials';
 import { logout } from 'data/login';
 import { userQuery } from 'data/queries';
 import { clearQueryCache, queryClient } from 'data/queryClient';
+import { getSettings, resetSettings } from 'data/settings';
 import { t } from 'helpers/i18n';
 import { setServerWritesAllowed } from 'helpers/serverWrites';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
@@ -70,6 +77,17 @@ it("shows the user's name and department, or the username before they load", asy
   await renderScreen();
   expect(screen.getByText('张三')).toBeTruthy();
   expect(screen.getByText('计算机系')).toBeTruthy();
+});
+
+it('picks the graduate timetable', async () => {
+  resetSettings();
+  await renderScreen();
+  await fireEvent(
+    screen.getByRole('switch', { name: t('graduate') }),
+    'valueChange',
+    true,
+  );
+  expect(getSettings().graduate).toBe(true);
 });
 
 it('logs out only once confirmed', async () => {

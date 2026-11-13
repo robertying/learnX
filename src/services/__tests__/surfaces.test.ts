@@ -16,10 +16,15 @@ import { recordError } from 'services/crashReporting';
 import {
   clearSurfaces,
   refreshSurfaces,
+  SETTINGS_SETTLE_MS,
   subscribeSurfaceErrors,
   watchSurfaces,
 } from 'services/surfaces';
 import { updateDeadlineWidget, updateUpNextWidget } from 'widgets';
+import {
+  syncedClassWeeks,
+  updateSyncedClasses,
+} from 'services/calendar/classes';
 
 jest.mock('data/source', () => ({
   dataSource: require('data/mockSource').mockSource,
@@ -49,6 +54,10 @@ jest.mock('services/classReminders', () => ({
 jest.mock('services/calendar/actions', () => ({
   syncAssignments: jest.fn(async () => undefined),
   upcomingAssignments: (assignments: unknown[]) => assignments,
+}));
+jest.mock('services/calendar/classes', () => ({
+  updateSyncedClasses: jest.fn(async () => {}),
+  syncedClassWeeks: jest.fn(() => []),
 }));
 jest.mock('services/coursex', () => ({
   uploadCourses: jest.fn(async () => {}),
@@ -294,6 +303,40 @@ describe('watchSurfaces', () => {
     });
   });
 
+  it('waits for a run of settings changes to settle', async () => {
+    cacheAssignments();
+    await refreshSurfaces();
+    expect(syncDeadlineReminders).toHaveBeenCalledTimes(1);
+    jest.useFakeTimers();
+    try {
+      // Typing 30 in a number field sets 3, then 30.
+      setSetting('notifications', {
+        ...jest.requireActual('data/settings').getSettings().notifications,
+        deadlineReminderOffset: 3,
+      });
+      jest.advanceTimersByTime(SETTINGS_SETTLE_MS - 1);
+      // A list fetched meanwhile doesn't catch the setting halfway typed.
+      setArchived('assignment', [assignments[0].id], true);
+      setSetting('notifications', {
+        ...jest.requireActual('data/settings').getSettings().notifications,
+        deadlineReminderOffset: 30,
+      });
+      jest.advanceTimersByTime(SETTINGS_SETTLE_MS - 1);
+      expect(syncDeadlineReminders).toHaveBeenCalledTimes(1);
+      jest.advanceTimersByTime(1);
+    } finally {
+      jest.useRealTimers();
+    }
+    await refreshSurfaces();
+    expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
+    expect(syncDeadlineReminders).toHaveBeenLastCalledWith(
+      assignments,
+      expect.objectContaining({
+        settings: expect.objectContaining({ deadlineReminderOffset: 30 }),
+      }),
+    );
+  });
+
   it('syncs the reminders again when the app comes back', async () => {
     cacheAssignments();
     await refreshSurfaces();
@@ -307,6 +350,22 @@ describe('watchSurfaces', () => {
     await settle();
     expect(syncDeadlineReminders).toHaveBeenCalledTimes(2);
   });
+});
+
+it('writes the synced classes when their weeks or settings change', async () => {
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
+
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(1);
+
+  setSetting('courseEventOmitLocation', true);
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(2);
+
+  jest.mocked(syncedClassWeeks).mockReturnValue([[]]);
+  await refreshSurfaces();
+  expect(updateSyncedClasses).toHaveBeenCalledTimes(3);
 });
 
 it('clears only after a refresh under way has finished', async () => {

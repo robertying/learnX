@@ -77,9 +77,11 @@ export const planClassReminders = (
 
 /**
  * A reminder's text: the course, then when it starts and where, as Calendar
- * shows an event. Tapping it opens Today.
+ * shows an event. Tapping it opens the course, or Today when the class
+ * matches no course.
  */
 export const classReminderContent = ({
+  courseId,
   courseName,
   location,
   start,
@@ -94,7 +96,7 @@ export const classReminderContent = ({
   ]
     .filter(Boolean)
     .join(' · '),
-  data: { type: 'today' },
+  data: courseId ? { type: 'course', id: courseId } : { type: 'today' },
   // Stacked together in the iOS notification center.
   threadIdentifier: notificationChannels.classes,
   // Shown during a Focus on iOS, unless the user turns that off for learnX.

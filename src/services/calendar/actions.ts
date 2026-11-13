@@ -10,9 +10,10 @@ import {
   exportSyncedCalendarsToICS,
   removeCalendars,
   requireAssignmentAccess,
+  requirePermission,
   saveAssignmentsToReminderOrCalendar,
-  saveCoursesToCalendar,
 } from 'services/calendar/calendars';
+import { saveClassesToCalendar } from 'services/calendar/classes';
 import { setLastSynced } from 'data/calendarSync';
 import { calendarErrorCode } from 'services/calendar/errors';
 import { exportTextFile } from 'services/files/share';
@@ -94,8 +95,9 @@ export const calendarDeleteErrorToast = (err: unknown): ToastMessage => {
 };
 
 /**
- * Fetches the course schedule in the range, through the same week queries as
- * Today's timetable, and writes it to the calendar
+ * Fetches the course schedule in the range afresh, through the same week
+ * queries as Today's timetable, and writes it to the calendar. The days then
+ * follow the timetable and the class settings (services/calendar/classes).
  */
 export const syncCourseSchedule = async (
   start: Dayjs,
@@ -111,17 +113,41 @@ export const syncCourseSchedule = async (
       start,
       end,
       graduate,
+      { fresh: true },
     );
 
     if (classes.length === 0 && failedRanges.length === 0) {
       return { text: t('courseScheduleSyncNoCourse'), type: 'warning' };
     }
-    await saveCoursesToCalendar(classes, start, end, failedRanges);
+    await saveClassesToCalendar(
+      classes,
+      {
+        first: start.format('YYYY-MM-DD'),
+        last: end.format('YYYY-MM-DD'),
+        graduate,
+      },
+      failedRanges,
+    );
     setLastSynced('courseSchedule');
     if (failedRanges.length > 0) {
       return { text: t('courseScheduleSyncPartial'), type: 'warning' };
     }
     return { text: t('courseScheduleSyncSucceeded'), type: 'success' };
+  } catch (err) {
+    return courseSyncErrorToast(err);
+  }
+};
+
+/**
+ * Asks for the calendar access course calendar sync needs, as the user turns
+ * it on; the writes follow the setting (services/calendar/classes). The toast
+ * to show when the access is denied.
+ */
+export const allowCourseCalendarSync = async (): Promise<
+  ToastMessage | undefined
+> => {
+  try {
+    await requirePermission('calendar', { ask: true });
   } catch (err) {
     return courseSyncErrorToast(err);
   }
