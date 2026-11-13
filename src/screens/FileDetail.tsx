@@ -67,7 +67,7 @@ const FileDetailContent: React.FC<{
   courseFileId?: string;
   navigation: Props['navigation'];
 }> = ({ file, courseFileId, navigation }) => {
-  const { path, progress, error, redownload, share, copyToDownloads, open } =
+  const { path, progress, error, redownload, share, save, open } =
     useFileDownload(file);
 
   // A course file downloaded here no longer shows as new.
@@ -94,7 +94,7 @@ const FileDetailContent: React.FC<{
     showInfo,
     onRefresh: redownload,
     onShare: share,
-    onCopyToDownloads: copyToDownloads,
+    onSave: save,
     onOpen: open,
     onToggleInfo: handleShowInfo,
   });
@@ -139,12 +139,7 @@ const FileDetailContent: React.FC<{
           />
         )
       ) : (
-        <FileInfo
-          file={file}
-          onShare={share}
-          onCopyToDownloads={copyToDownloads}
-          onOpen={open}
-        />
+        <FileInfo file={file} onShare={share} onSave={save} onOpen={open} />
       )}
     </Root>
   );
@@ -154,9 +149,9 @@ const FileDetailContent: React.FC<{
 const FileInfo: React.FC<{
   file: DownloadableFile & Partial<File>;
   onShare: () => void;
-  onCopyToDownloads: () => void;
+  onSave: () => void;
   onOpen: () => void;
-}> = ({ file, onShare, onCopyToDownloads, onOpen }) => (
+}> = ({ file, onShare, onSave, onOpen }) => (
   <Form testID="file-info">
     <FormSection>
       <FormParagraph text={file.title} headline />
@@ -184,11 +179,7 @@ const FileInfo: React.FC<{
     <FormSection>
       <FormButton title={t('share')} icon="share" onPress={onShare} />
       {DeviceInfo.isMac() ? (
-        <FormButton
-          title={t('download')}
-          icon="download"
-          onPress={onCopyToDownloads}
-        />
+        <FormButton title={t('download')} icon="download" onPress={onSave} />
       ) : null}
       {Platform.OS === 'android' ? (
         <FormButton title={t('open')} icon="open" onPress={onOpen} />

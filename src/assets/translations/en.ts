@@ -72,10 +72,9 @@ export default {
     "The text and file you haven't submitted will be deleted.",
   discard: 'Discard',
   removePickedAttachment: 'Remove Attachment',
-  reUploadAttachment: 'Choose Another Attachment…',
-  overwriteAttachment: 'Replace Uploaded Attachment…',
+  reUploadAttachment: 'Choose Another Attachment',
+  overwriteAttachment: 'Replace Uploaded Attachment',
   pickAttachment: 'Choose Attachment',
-  pickAttachmentEllipsis: 'Choose Attachment…',
   submissionContent: 'Content',
   submissionAttachment: 'Attachment',
   uploadingSubmission: 'Uploading…',
@@ -109,7 +108,6 @@ export default {
     "Couldn't delete. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: {error}",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
-  exportSyncedCalendarsEllipsis: 'Export Synced Events (.ics)…',
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
     "Notifications for learnX are off in System Settings, so the ones turned on below can't show.",
@@ -129,7 +127,6 @@ export default {
     "If learnX can't access your calendars or reminders, allow it in System Settings.",
   exportSyncedCalendarsDescription:
     "Saves the course schedule and assignments already synced to your calendar as an .ics file that other calendar apps can import. Reminders aren't included.",
-  calendarExportSavedToDownloads: 'Exported learnX.ics to Downloads',
   calendarExportNoCalendarPermission:
     "Couldn't export. Give learnX full access to Calendars in System Settings. If it already has access, restart learnX.",
   calendarExportNoCalendarPermissionAndroid:
@@ -138,7 +135,7 @@ export default {
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export: {error}",
   graduate: 'Graduate',
-  syncCourseSchedule: 'Sync More Dates…',
+  syncCourseSchedule: 'Sync More Dates',
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Alert Before Class (Minutes)',
   calendarEventLength: 'Event Length (Minutes)',
@@ -161,7 +158,7 @@ export default {
   fileDownloadFailed: "Couldn't download the file. Try again.",
   openFileFailed:
     "Couldn't open the file. Download it again, or install an app that can open this type of file.",
-  share: 'Share…',
+  share: 'Share',
   open: 'Open',
   missingUsername: 'Enter your username or student ID',
   missingPassword: 'Enter your password',
@@ -267,8 +264,8 @@ export default {
   more: 'More',
   refresh: 'Refresh',
   dragToReorder: 'Hold and drag to reorder',
-  documents: 'Choose File…',
-  photos: 'Photo Library…',
+  documents: 'Choose File',
+  photos: 'Photo Library',
   assignmentIndividualCompletion: 'Complete Individually',
   assignmentGroupCompletion: 'Complete as a Group',
   assignmentOnlineSubmission: 'Submit Online',
@@ -281,8 +278,8 @@ export default {
   retryLogin: 'Log In with Saved Account',
   offlineMode: 'Continue Offline',
   download: 'Download',
-  downloadToDownloadsSucceeded: 'Saved to Downloads',
-  downloadToDownloadsFailed: "Couldn't save to Downloads",
+  saveFileSucceeded: 'Saved {name}',
+  saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:
     'Finish logging in on the web page that opens. To change the prefilled username or password, close the page and enter them again on the learnX login screen.',
@@ -419,10 +416,10 @@ export default {
   downloadsTotal: 'All Downloads',
   downloadsCaption:
     'Files downloaded in learnX, by course. Tap a course to export or delete its files.',
-  downloadsExport: 'Export All Downloads…',
+  downloadsExport: 'Export All Downloads',
   downloadsExportCaption:
     'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
-  downloadsExportCourse: 'Export…',
+  downloadsExportCourse: 'Export',
   downloadsExported: 'Exported {files}',
   downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
   downloadsExportFailed: "Couldn't export: {error}",

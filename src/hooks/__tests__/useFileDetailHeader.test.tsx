@@ -16,7 +16,7 @@ const navigation = (routeNames = ['Files', 'FileDetail']) =>
 const handlers = {
   onRefresh: jest.fn(),
   onShare: jest.fn(),
-  onCopyToDownloads: jest.fn(),
+  onSave: jest.fn(),
   onOpen: jest.fn(),
   onToggleInfo: jest.fn(),
 };

@@ -45,10 +45,12 @@ module.exports = {
     'src/**/*.{ts,tsx}',
     '!src/**/__tests__/**',
     '!src/**/*.d.ts',
-    // Widget layouts become source text at build time ('widget' directive),
-    // so their code never runs as itself; src/widgets/__tests__/layouts.test.ts
+    // Widget layouts and their kit become source text at build time ('widget'
+    // directive), so their code never runs as itself (and counters added to
+    // it would be missing where it runs); src/widgets/__tests__/layouts.test.ts
     // runs that text instead.
     '!src/widgets/{Deadlines,UpNext}{,.android}.tsx',
+    '!src/widgets/kit.tsx',
   ],
   // CI runs `pnpm test --coverage` and fails below these, so coverage can't
   // slip unnoticed. Keep them just under the current numbers; raise them as

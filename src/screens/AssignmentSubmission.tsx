@@ -230,7 +230,7 @@ const AssignmentSubmissionContent: React.FC<{
     ? t('reUploadAttachment')
     : submittedAttachment
       ? t('overwriteAttachment')
-      : t('pickAttachmentEllipsis');
+      : t('pickAttachment');
 
   return (
     <FormScreen>

@@ -112,13 +112,13 @@ describe('Toast (iOS)', () => {
     const padding = () =>
       StyleSheet.flatten(screen.getByRole('alert').parent!.props.style)
         .paddingBottom;
-    expect(padding()).toBe(64);
+    expect(padding()).toBe(72);
     await act(() =>
       listeners.keyboardWillShow({ endCoordinates: { height: 300 } }),
     );
     expect(padding()).toBe(316);
     await act(() => listeners.keyboardWillHide({}));
-    expect(padding()).toBe(64);
+    expect(padding()).toBe(72);
     await screen.unmount();
     expect(remove).toHaveBeenCalledTimes(2);
   });
@@ -139,7 +139,7 @@ describe('Toast (iOS)', () => {
     metrics.mockReturnValue(undefined);
     await screen.unmount();
     await render(<Toast />);
-    expect(padding()).toBe(64);
+    expect(padding()).toBe(72);
   });
 
   it('shows the symbol for the type and none for plain toasts', async () => {
