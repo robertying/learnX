@@ -19,16 +19,14 @@ import UIKit
   }
 
   /// RNPDFPdfView's props are Objective-C properties. React sets them and sends the names that changed, which the
-  /// view keeps until its first frame.
+  /// view keeps until its first frame. FileDetail's `<Pdf source={…} fitPolicy={0} />` changes only these two: the
+  /// scale (1) and its limits (1 to 3) are the view's defaults.
   private func pdfView(width: CGFloat, url: URL) throws -> UIView {
     let viewClass = try #require(NSClassFromString("RNPDFPdfView") as? UIView.Type)
     let view = viewClass.init(frame: .zero)
     view.setValue(url.path, forKey: "path")
-    view.setValue(1, forKey: "scale")
-    view.setValue(1, forKey: "minScale")
-    view.setValue(3, forKey: "maxScale")
     view.setValue(0, forKey: "fitPolicy")
-    view.perform(NSSelectorFromString("didSetProps:"), with: ["path", "scale", "minScale", "maxScale", "fitPolicy"])
+    view.perform(NSSelectorFromString("didSetProps:"), with: ["path", "fitPolicy"])
     resize(view, width: width)
     return view
   }
@@ -56,8 +54,9 @@ import UIKit
     #expect(abs(pdf.minScaleFactor - 400 / pageWidth) < 0.01)
   }
 
+  /// More than the maximum scale (3) at once, like a Mac window made wider.
   @Test func fitsThePageWhenTheViewGrows() throws {
-    let view = try pdfView(width: 400, url: try document())
+    let view = try pdfView(width: 200, url: try document())
     let pdf = try #require(pdfKitView(in: view))
     resize(view, width: 800)
     #expect(abs(pdf.scaleFactor - 800 / pageWidth) < 0.01)
