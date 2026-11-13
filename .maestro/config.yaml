@@ -20,4 +20,5 @@ executionOrder:
     - Log in and visit every tab
     - Favorite and archive a notice
     - Search and open a result
+    - Leave a PDF while it renders
     - Open settings pages and log out
