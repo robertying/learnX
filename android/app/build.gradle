@@ -29,7 +29,7 @@ android {
         applicationId = "io.robertying.learnx"
         minSdk = rootProject.ext.minSdkVersion
         targetSdk = rootProject.ext.targetSdkVersion
-        versionCode = 9204543
+        versionCode = 9204544
         versionName = "19.0.0"
     }
 
