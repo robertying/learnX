@@ -7,6 +7,10 @@ plugins {
   id 'expo-module-gradle-plugin'
 }
 
+// The Expo module plugin wants both, though nothing is published.
+group = 'io.robertying.learnx'
+version = '1.0.0'
+
 android {
   namespace = "io.robertying.learnx.patches"
 }
