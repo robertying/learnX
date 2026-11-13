@@ -13,6 +13,8 @@ import {
   mockNotices,
 } from 'data/mock';
 import { useCourse } from 'data/queries';
+import { resetUserData, setArchived } from 'data/userData';
+import { toggleArchived, toggleFavorite } from 'services/listActions';
 import { t } from 'helpers/i18n';
 import useDetailNavigator from 'hooks/useDetailNavigator';
 import * as options from 'navigation/options';
@@ -41,6 +43,10 @@ jest.mock('data/content', () => ({
   useRefreshCourseFiles: () => mockRefresh.file,
 }));
 jest.mock('hooks/useDetailNavigator', () => jest.fn(() => undefined));
+jest.mock('services/listActions', () => ({
+  toggleArchived: jest.fn(),
+  toggleFavorite: jest.fn(),
+}));
 
 jest.mock('components/FlatList', () => require('react-native').FlatList);
 // The pager, showing the selected tab's page.
@@ -97,6 +103,7 @@ beforeEach(() => {
 
 afterEach(() => {
   useAuthStore.setState(initialAuth);
+  resetUserData();
 });
 
 it('shows Not Found for a course no longer listed', async () => {
@@ -149,6 +156,38 @@ it("refreshes the tab's list only while logged in", async () => {
   expect(mockRefresh.notice.mutate).toHaveBeenCalled();
 });
 
+// The first notice's card.
+const noticeCard = () => screen.getAllByTestId('notice-card')[0];
+const actionNames = () =>
+  noticeCard().props.accessibilityActions?.map((a: { name: string }) => a.name);
+const swipeEnabled = () => screen.getAllByTestId('swipeable')[0].props.enabled;
+
+it('favorites and archives a card from its actions, and leaves archived ones out', async () => {
+  const notice = of(mockNotices)[0];
+  await renderScreen();
+  expect(actionNames()).toEqual(['fav', 'archive']);
+  await fireEvent(noticeCard(), 'accessibilityAction', {
+    nativeEvent: { actionName: 'fav' },
+  });
+  expect(toggleFavorite).toHaveBeenCalledWith(
+    'notice',
+    notice.id,
+    !!notice.isFavorite,
+  );
+  await fireEvent(noticeCard(), 'accessibilityAction', {
+    nativeEvent: { actionName: 'archive' },
+  });
+  expect(toggleArchived).toHaveBeenCalledWith('notice', [notice.id], false);
+
+  await act(() => setArchived('notice', [notice.id], true));
+  expect(screen.queryByText(notice.title)).toBeNull();
+});
+
+it("doesn't swipe the cards, which the pager swipes between tabs", async () => {
+  await renderScreen();
+  expect(swipeEnabled()).toBe(false);
+});
+
 it('opens the course on CourseX from the header', async () => {
   await renderScreen();
   const info = () =>
@@ -189,5 +228,34 @@ describe('from iOS 26', () => {
     await selectTab(2);
     expect(screen.getByText(of(mockFiles)[0].title)).toBeTruthy();
     expect(screen.queryByText(of(mockNotices)[0].title)).toBeNull();
+  });
+
+  it('swipes the cards, with no pager to swipe', async () => {
+    await renderScreen();
+    await fireEvent(screen.getByText(t('files')), 'layout', {
+      nativeEvent: { layout: { height: 52 } },
+    });
+    expect(swipeEnabled()).toBe(true);
+  });
+
+  it("starts the list over at its top inset when the tabs' height changes", async () => {
+    await renderScreen();
+    const layout = (height: number) =>
+      fireEvent(screen.getByText(t('files')), 'layout', {
+        nativeEvent: { layout: { height } },
+      });
+    const list = () => {
+      let node = screen.getByText(of(mockNotices)[0].title);
+      while (node.type !== 'RCTScrollView') {
+        node = node.parent!;
+      }
+      return node;
+    };
+    await layout(16);
+    const first = list();
+    expect(first.props.contentInset).toEqual({ top: 16 });
+    await layout(52);
+    expect(list().props.contentInset).toEqual({ top: 52 });
+    expect(list()).not.toBe(first);
   });
 });

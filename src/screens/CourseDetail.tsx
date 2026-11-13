@@ -13,6 +13,8 @@ import {
 import { Assignment, Course, File, Notice } from 'data/types/state';
 import { useCourse } from 'data/queries';
 import { useLoggedIn } from 'data/auth';
+import { useUserData, type BookmarkType } from 'data/userData';
+import { toggleArchived, toggleFavorite } from 'services/listActions';
 import {
   useAssignments,
   useFiles,
@@ -24,7 +26,7 @@ import {
 import NoticeCard from 'components/NoticeCard';
 import AssignmentCard from 'components/AssignmentCard';
 import FileCard from 'components/FileCard';
-import Empty, { type EmptyType } from 'components/Empty';
+import Empty from 'components/Empty';
 import SafeArea from 'components/SafeArea';
 import FlatList from 'components/FlatList';
 import ListBackground from 'components/ListBackground';
@@ -58,18 +60,27 @@ interface CourseItemListProps<T extends Notice | Assignment | File> {
   data: T[];
   card: React.FC<{
     data: T;
-    actionsDisabled?: boolean;
+    fav?: boolean;
+    onToggleFav?: () => void;
+    archived?: boolean;
+    onToggleArchived?: () => void;
+    swipeDisabled?: boolean;
     hideCourseName?: boolean;
     onPress?: () => void;
     last?: boolean;
   }>;
   detailScreen: 'NoticeDetail' | 'AssignmentDetail' | 'FileDetail';
-  /** What the list holds, for its empty state. */
-  type: EmptyType;
+  /** What the list holds, for its empty state and the cards' actions. */
+  type: BookmarkType;
   /** The course's refresh of this list (`useRefreshCourseNotices`, …). */
   refresh: { isPending: boolean; mutate: () => void };
   /** The height of the tabs floating over the top of the list. */
   topInset: number;
+  /**
+   * The pager swipes between the tabs (Android, and iOS before 26), so the
+   * cards don't: their actions are in the long-press menu.
+   */
+  swipeDisabled: boolean;
 }
 
 /** One of the course's notices, assignments and files tabs. */
@@ -80,9 +91,15 @@ const CourseItemList = <T extends Notice | Assignment | File>({
   type,
   refresh,
   topInset,
+  swipeDisabled,
 }: CourseItemListProps<T>) => {
   const navigation = useNavigation<NavigationProp>();
   const loggedIn = useLoggedIn();
+  const archivedIds = useUserData(userData => userData.archived[type]);
+  // As on the tab's All list, an archived item is gone from here too, so a
+  // swipe that archives takes the row away.
+  const archivedSet = new Set(archivedIds);
+  const shown = data.filter(item => !archivedSet.has(item.id));
 
   const handleRefresh = () => {
     if (loggedIn) {
@@ -92,18 +109,22 @@ const CourseItemList = <T extends Notice | Assignment | File>({
 
   return (
     <View style={Styles.flex1}>
-      {data.length ? null : (
+      {shown.length ? null : (
         <ListBackground>
           <Empty type={type} />
         </ListBackground>
       )}
       <FlatList
-        data={data}
+        data={shown}
         renderItem={({ item, index }) => (
           <Card
             data={item}
-            last={index === data.length - 1}
-            actionsDisabled
+            last={index === shown.length - 1}
+            fav={!!item.isFavorite}
+            onToggleFav={() => toggleFavorite(type, item.id, !!item.isFavorite)}
+            archived={false}
+            onToggleArchived={() => toggleArchived(type, [item.id], false)}
+            swipeDisabled={swipeDisabled}
             hideCourseName
             onPress={() => navigation.push(detailScreen, { id: item.id })}
           />
@@ -200,6 +221,7 @@ const CourseDetailContent: React.FC<{
             type="notice"
             refresh={refreshNotices}
             topInset={tabsHeight}
+            swipeDisabled={!hasGlassHeader}
           />
         );
       case 'assignment':
@@ -211,6 +233,7 @@ const CourseDetailContent: React.FC<{
             type="assignment"
             refresh={refreshAssignments}
             topInset={tabsHeight}
+            swipeDisabled={!hasGlassHeader}
           />
         );
       case 'file':
@@ -222,6 +245,7 @@ const CourseDetailContent: React.FC<{
             type="file"
             refresh={refreshFiles}
             topInset={tabsHeight}
+            swipeDisabled={!hasGlassHeader}
           />
         );
       default:
@@ -261,9 +285,11 @@ const CourseDetailContent: React.FC<{
     return (
       <SafeArea testID="course-detail" collapsable={false}>
         {/* Once the tabs are laid out: a list starts at its top inset only
-            when it has it from the start. */}
+            when it has it from the start, so it starts over when the tabs'
+            height changes (the SwiftUI control sizes itself after the first
+            layout), or it would open scrolled down under them. */}
         {tabsHeight ? (
-          <Fragment key={routes[index].key}>
+          <Fragment key={`${routes[index].key}-${tabsHeight}`}>
             {renderScene({ route: routes[index] })}
           </Fragment>
         ) : null}

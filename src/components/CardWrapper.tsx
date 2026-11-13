@@ -66,6 +66,11 @@ export interface CardWrapperProps {
    */
   actionsDisabled?: boolean;
   /**
+   * No swipe, for a card in a pager that swipes between its pages; the menu
+   * and accessibility actions stay.
+   */
+  swipeDisabled?: boolean;
+  /**
    * The last row of its list or section: no separator under it, which would
    * otherwise sit on the tab bar or the next section's header.
    */
@@ -100,6 +105,7 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
   onCheck,
   opened,
   actionsDisabled,
+  swipeDisabled,
   last,
 }) => {
   const theme = useTheme();
@@ -388,7 +394,9 @@ const CardWrapper: React.FC<PropsWithChildren<CardWrapperProps>> = ({
       overshootLeft={Platform.OS === 'ios'}
       overshootRight={Platform.OS === 'ios'}
       enabled={
-        actionsEnabled && !!(swipeActions.leading || swipeActions.trailing)
+        actionsEnabled &&
+        !swipeDisabled &&
+        !!(swipeActions.leading || swipeActions.trailing)
       }
       onSwipeableOpenStartDrag={onStartDrag}
       onSwipeableWillOpen={onWillOpen}
