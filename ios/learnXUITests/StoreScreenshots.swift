@@ -1,3 +1,4 @@
+#if targetEnvironment(macCatalyst)
 import UIKit
 import XCTest
 
@@ -108,3 +109,4 @@ final class StoreScreenshots: LearnXUITestCase {
     wait(for: [gone], timeout: timeout)
   }
 }
+#endif
