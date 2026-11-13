@@ -4,7 +4,8 @@ import Testing
 import UIKit
 
 /// What patches/react-native-pdf@7.0.5.patch changes on iOS: when the view resizes, the page is fitted to the new
-/// size. The scale factor used to be set before its limits, so shrinking held it at the old minimum.
+/// size (the scale factor used to be set before its limits, so shrinking held it at the old minimum), and a document
+/// opens at the top of the content inset, below a translucent header, not under it.
 @MainActor
 @Suite struct PdfPatchTests {
   private let pageWidth: CGFloat = 200
@@ -60,5 +61,18 @@ import UIKit
     let pdf = try #require(pdfKitView(in: view))
     resize(view, width: 800)
     #expect(abs(pdf.scaleFactor - 800 / pageWidth) < 0.01)
+  }
+
+  @Test func opensBelowTheTopInset() async throws {
+    let view = try pdfView(width: 400, url: try document())
+    let pdf = try #require(pdfKitView(in: view))
+    let scrollView = try #require(pdf.subviews.lazy.compactMap { $0 as? UIScrollView }.first)
+    // What a translucent header gives it in the app, as a safe area inset.
+    scrollView.contentInsetAdjustmentBehavior = .never
+    scrollView.contentInset.top = 100
+
+    // The view goes to the first page once the main queue gets to it.
+    try await Task.sleep(for: .milliseconds(200))
+    #expect(scrollView.contentOffset.y == -100)
   }
 }
