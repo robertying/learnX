@@ -9,12 +9,13 @@ import { applyLatestSemester, getUserData } from 'data/userData';
 import { contentLists } from 'data/content';
 import { queryKeys } from 'data/queryKeys';
 import { SyncRun, addSyncRun, describeSyncRun } from 'data/syncLog';
-import type { ContentListName } from 'data/types/state';
+import type { Assignment, ContentListName } from 'data/types/state';
 import { ContentDiff, ContentLists, diffContent } from 'data/contentDiff';
 import { flushServerActionsWithin } from 'data/serverActions';
 import { getSettings } from 'data/settings';
 import { addNotifiedKeys, getNotifiedKeys } from 'data/notified';
 import {
+  type ContentKind,
   groupContentItems,
   pickContentItems,
 } from 'helpers/contentNotifications';
@@ -24,6 +25,9 @@ import {
   postNotification,
 } from 'services/notifications';
 import { refreshSurfaces } from 'services/surfaces';
+import { calendarWeekQuery } from 'data/schedule';
+import { startOfWeek } from 'helpers/schedule';
+import { beijingDate } from 'helpers/serverTime';
 
 export type SyncResult =
   /** Not logged in, no courses cached yet, or the login failed. */
@@ -58,6 +62,46 @@ const followLatestSemester = async (shownSemester: string) => {
  * by then is saved and notified about, and the rest waits for the next run.
  */
 export const SYNC_BUDGET_MS = 25_000;
+
+/**
+ * The least time left for a timetable week to be asked for; the registrar
+ * answers in about a second, and a week cut short is only asked again next
+ * run.
+ */
+const TIMETABLE_MIN_MS = 3_000;
+
+/**
+ * Fetches this week's and next week's timetable when the saved copy is older
+ * than its stale time (half a day), one request a week, in what's left of
+ * the budget. The class reminders and the Up Next widget follow it
+ * (services/surfaces), so they keep up with a moved class while the app stays
+ * closed. A week that fails keeps its saved copy.
+ */
+const refreshTimetable = async (deadline: number) => {
+  const thisWeek = startOfWeek(beijingDate(Date.now()));
+  const { graduate } = getSettings();
+  for (const week of [thisWeek, thisWeek.add(7, 'day')]) {
+    const left = deadline - Date.now();
+    if (left < TIMETABLE_MIN_MS) {
+      return;
+    }
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      await Promise.race([
+        queryClient.fetchQuery(
+          calendarWeekQuery(week.format('YYYY-MM-DD'), graduate),
+        ),
+        new Promise<void>(resolve => {
+          timer = setTimeout(resolve, left);
+        }),
+      ]);
+    } catch {
+      // Kept as it was; Today shows the saved week and tries again.
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+};
 
 /** The lists the sync fetches. */
 const SYNC_LISTS: readonly ContentListName[] = [
@@ -192,6 +236,8 @@ export const syncContent = async ({
   if (!after.notices && !after.assignments && !after.files) {
     return record({ status: 'failed' }, details);
   }
+  // After the lists, which matter more if time runs short.
+  await refreshTimetable(deadline);
   // The lists saved above update the widgets, reminders and Spotlight
   // (services/surfaces); wait for that before the system ends the task.
   await refreshSurfaces();
@@ -202,10 +248,21 @@ export const syncContent = async ({
 };
 
 /**
+ * What's still posted while the app is open: changes to an assignment the
+ * user already has, which are easy to miss in a list. New notices, files and
+ * assignments stay quiet there, as their unread markers show them.
+ */
+const OPEN_APP_KINDS: ReadonlySet<ContentKind> = new Set([
+  'grades',
+  'comments',
+  'deadlineChanges',
+]);
+
+/**
  * Tells the user what a sync found, as they chose in Settings › Notifications.
- * Nothing is posted while the app is open, where the lists show it; what was
- * found is still remembered so it isn't posted later. `inForeground` posts
- * anyway, for trying it out in a debug build.
+ * While the app is open, only `OPEN_APP_KINDS` are posted; everything found is
+ * remembered so it isn't posted later. `inForeground` posts all of it anyway,
+ * for trying it out in a debug build.
  */
 export const notifyContent = async (
   diff: ContentDiff,
@@ -222,12 +279,19 @@ export const notifyContent = async (
   if (items.length === 0) {
     return [];
   }
+  // Remembered before posting, so a sync that finds the same change while
+  // this one waits on the permission doesn't post it again.
+  addNotifiedKeys(items.map(item => item.key));
 
-  const notifications = groupContentItems(items);
-  if (
-    (inForeground || AppState.currentState !== 'active') &&
-    (await getNotificationPermission()) === 'granted'
-  ) {
+  const appOpen = !inForeground && AppState.currentState === 'active';
+  const shown = appOpen
+    ? items.filter(item => OPEN_APP_KINDS.has(item.kind))
+    : items;
+  if (shown.length === 0) {
+    return [];
+  }
+  const notifications = groupContentItems(shown);
+  if ((await getNotificationPermission()) === 'granted') {
     for (const notification of notifications) {
       try {
         await postNotification(notification);
@@ -237,8 +301,50 @@ export const notifyContent = async (
       }
     }
   }
-  addNotifiedKeys(items.map(item => item.key));
   return notifications;
+};
+
+/** Each semester's assignments as last seen, by query hash. */
+const seenAssignments = new Map<string, readonly Assignment[]>();
+let watchingAssignments = false;
+
+/**
+ * Notifies about assignments the app itself finds graded, commented on or
+ * moved while it's open: a pull to refresh, coming back to the app, a
+ * course's page. The background task compares what it fetches on its own;
+ * this covers every other fetch, which would otherwise update the list
+ * without a word. The first list seen for a semester (restored or fetched)
+ * is only remembered, and nothing is posted while the app isn't open, where
+ * the background task does it. Safe to call more than once.
+ */
+export const watchAssignmentChanges = () => {
+  if (watchingAssignments) {
+    return;
+  }
+  watchingAssignments = true;
+  queryClient.getQueryCache().subscribe(event => {
+    const { query } = event;
+    if (query.queryKey[0] !== queryKeys.contentAll('assignments')[0]) {
+      return;
+    }
+    if (event.type === 'removed') {
+      seenAssignments.delete(query.queryHash);
+      return;
+    }
+    if (event.type !== 'updated' || event.action.type !== 'success') {
+      return;
+    }
+    // A successful update always has data.
+    const after = query.state.data as readonly Assignment[];
+    const before = seenAssignments.get(query.queryHash);
+    seenAssignments.set(query.queryHash, after);
+    if (!before || before === after || AppState.currentState !== 'active') {
+      return;
+    }
+    notifyContent(
+      diffContent({ assignments: before }, { assignments: after }),
+    ).catch(error => recordError(error, 'Posting assignment changes'));
+  });
 };
 
 const FETCH_ALL_CONTENT_TASK = 'FETCH_ALL_CONTENT_TASK';

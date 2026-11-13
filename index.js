@@ -16,7 +16,7 @@ import { setUpNotificationActions } from './src/services/notificationActions';
 // first runs: a background launch runs only this file, without mounting the
 // app. Metro inlines requires, so the import where the task is registered
 // (useMainStartup) would load the module only once the app has mounted.
-import './src/services/background';
+import { watchAssignmentChanges } from './src/services/background';
 import { watchSurfaces } from './src/services/surfaces';
 import { withLaunchOptions } from './src/services/launchOptions';
 
@@ -33,6 +33,8 @@ setUpNotificationActions();
 // Keeps the widgets, reminders, Spotlight and App Intents in step with the
 // data, in this runtime whether or not the app renders.
 watchSurfaces();
+// Notifies about grades and moved deadlines the app itself fetches while open.
+watchAssignmentChanges();
 
 // Test runs set the app up with launch arguments (services/launchOptions).
 AppRegistry.registerComponent(appName, () => withLaunchOptions(App));

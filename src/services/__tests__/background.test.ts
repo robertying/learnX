@@ -25,7 +25,11 @@ import {
   notifyContent,
   setUpBackgroundFetch,
   syncContent,
+  watchAssignmentChanges,
 } from 'services/background';
+import { calendarWeekQuery } from 'data/schedule';
+import { startOfWeek } from 'helpers/schedule';
+import { beijingDate } from 'helpers/serverTime';
 import * as BackgroundTask from 'expo-background-task';
 import * as TaskManager from 'expo-task-manager';
 import { AppState } from 'react-native';
@@ -368,6 +372,24 @@ describe('notifyContent', () => {
     expect(getNotifiedKeys()).toContain(`notice:${unread.id}`);
   });
 
+  it('posts only changes to assignments while the app is open', async () => {
+    setSetting('notifications', {
+      ...defaultSettings.notifications,
+      notices: true,
+      grades: true,
+    });
+    const before = { ...inSemester(mockAssignments)[0], graded: false };
+    const after = { ...before, graded: true, grade: 95 };
+    setAppState('active');
+    const posted = await notifyContent({
+      ...diff(),
+      assignments: { ...diff().assignments, graded: [{ before, after }] },
+    });
+    expect(posted.map(n => n.kind)).toEqual(['grades']);
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+    expect(getNotifiedKeys()).toContain(`notice:${unread.id}`);
+  });
+
   it("doesn't post without the permission", async () => {
     jest
       .mocked(Notifications.getPermissionsAsync)
@@ -393,6 +415,145 @@ describe('notifyContent', () => {
     await notifyContent(diff());
     expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
     expect(getNotifiedKeys().size).toBe(0);
+  });
+});
+
+describe('the timetable', () => {
+  const graduate = defaultSettings.graduate;
+  const weekKey = (offset: number) =>
+    calendarWeekQuery(
+      startOfWeek(beijingDate(Date.now()))
+        .add(offset, 'day')
+        .format('YYYY-MM-DD'),
+      graduate,
+    ).queryKey;
+
+  it("fetches this week's and next week's after the lists", async () => {
+    await seed();
+    await sync();
+    expect(queryClient.getQueryState(weekKey(0))?.status).toBe('success');
+    expect(queryClient.getQueryState(weekKey(7))?.status).toBe('success');
+  });
+
+  it('keeps weeks fetched within the stale time', async () => {
+    await seed();
+    queryClient.setQueryData(weekKey(0), []);
+    queryClient.setQueryData(weekKey(7), []);
+    const getCalendar = jest.spyOn(mockSource, 'getCalendar');
+    await sync();
+    expect(getCalendar).not.toHaveBeenCalled();
+    getCalendar.mockRestore();
+  });
+
+  it('is left for the next run when time is short', async () => {
+    await seed();
+    await syncContent({ budget: 1_000 });
+    expect(queryClient.getQueryState(weekKey(0))).toBeUndefined();
+  });
+
+  it('keeps the saved week when the fetch fails', async () => {
+    await seed();
+    const getCalendar = jest
+      .spyOn(mockSource, 'getCalendar')
+      .mockRejectedValue(new Error('down'));
+    jest.useFakeTimers({ doNotFake: ['nextTick', 'setImmediate'] });
+    const run = syncContent();
+    await jest.runAllTimersAsync();
+    expect((await run).status).toBe('synced');
+    jest.useRealTimers();
+    expect(queryClient.getQueryData(weekKey(0))).toBeUndefined();
+    getCalendar.mockRestore();
+  });
+});
+
+describe('watchAssignmentChanges', () => {
+  const key = assignmentsQuery(semesterId).queryKey;
+  const setAppState = (state: string) =>
+    Object.defineProperty(AppState, 'currentState', {
+      value: state,
+      configurable: true,
+    });
+  const assignment = () => inSemester(mockAssignments).find(a => a.graded)!;
+  /** Sets the list with `assignment()` graded or not. */
+  const setGraded = (graded: boolean) =>
+    queryClient.setQueryData(key, old =>
+      old!.map(a =>
+        a.id === assignment().id
+          ? { ...a, graded, gradeTime: new Date().toISOString() }
+          : a,
+      ),
+    );
+  const flush = () => new Promise(resolve => setTimeout(resolve, 0));
+
+  beforeAll(() => {
+    watchAssignmentChanges();
+    // Safe to call again.
+    watchAssignmentChanges();
+  });
+
+  beforeEach(async () => {
+    resetNotified();
+    setSetting('notifications', {
+      ...defaultSettings.notifications,
+      grades: true,
+    });
+    jest
+      .mocked(Notifications.getPermissionsAsync)
+      .mockResolvedValue({ granted: true, canAskAgain: true } as never);
+    setAppState('active');
+    await seed();
+    setGraded(false);
+    jest.mocked(Notifications.scheduleNotificationAsync).mockClear();
+  });
+
+  it('posts a grade the app fetches while open', async () => {
+    setGraded(true);
+    await flush();
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+    expect(
+      jest.mocked(Notifications.scheduleNotificationAsync).mock.calls[0][0]
+        .content.data,
+    ).toMatchObject({ type: 'assignment', id: assignment().id });
+  });
+
+  it("leaves it to the background task while the app isn't open", async () => {
+    setAppState('background');
+    setGraded(true);
+    await flush();
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+    // And the next change is compared with this list.
+    setAppState('active');
+    setGraded(true);
+    await flush();
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  it('only remembers the first list of a semester', async () => {
+    clearQueryCache();
+    await flush();
+    await seed();
+    await flush();
+    expect(Notifications.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  it('posts a grade once, also when the background task finds it', async () => {
+    setGraded(true);
+    await flush();
+    setGraded(false);
+    setGraded(true);
+    await flush();
+    expect(Notifications.scheduleNotificationAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('records a failure to post', async () => {
+    const error = new Error('no permission API');
+    jest.mocked(Notifications.getPermissionsAsync).mockRejectedValueOnce(error);
+    setGraded(true);
+    await flush();
+    expect(recordError).toHaveBeenCalledWith(
+      error,
+      'Posting assignment changes',
+    );
   });
 });
 
