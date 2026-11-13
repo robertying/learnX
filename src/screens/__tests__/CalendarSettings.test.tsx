@@ -7,7 +7,6 @@ import {
   screen,
   userEvent,
 } from '@testing-library/react-native';
-import DeviceInfo from 'constants/DeviceInfo';
 import { resetCalendarSync, setLastSynced } from 'data/calendarSync';
 import { getSettings, resetSettings, setSetting } from 'data/settings';
 import { t } from 'helpers/i18n';
@@ -172,7 +171,7 @@ it('explains the system settings row with calendars and reminders on iOS', async
 it('exports, deletes and opens the system settings', async () => {
   const user = userEvent.setup();
   await renderScreen();
-  await user.press(screen.getByText(t('exportSyncedCalendarsEllipsis')));
+  await user.press(screen.getByText(t('exportSyncedCalendars')));
   expect(exportToICS).toHaveBeenCalled();
   await user.press(
     screen.getByText(t('deleteSyncedCalendarsAndRemindersEllipsis')),
@@ -180,12 +179,6 @@ it('exports, deletes and opens the system settings', async () => {
   expect(confirmDeleteCalendars).toHaveBeenCalled();
   await user.press(screen.getByText(t('openSystemSettings')));
   expect(openSystemSettings).toHaveBeenCalledWith('security');
-});
-
-it('leaves the ellipsis off Export on the Mac, which saves to Downloads', async () => {
-  jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
-  await renderScreen();
-  expect(screen.getByText(t('exportSyncedCalendars'))).toBeTruthy();
 });
 
 it('saves the range picked in the picker', async () => {

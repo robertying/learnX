@@ -71,6 +71,7 @@ const submitItem = () =>
   navigation.setOptions.mock.calls
     .findLast(([o]) => o.unstable_headerRightItems)![0]
     .unstable_headerRightItems()[0] as {
+    label: string;
     disabled: boolean;
     onPress: () => void;
   };
@@ -130,6 +131,8 @@ it('adds the late deadline once the deadline has passed', async () => {
 it('submits only once there is something to send', async () => {
   const user = userEvent.setup();
   await renderScreen();
+  // It asks for confirmation first.
+  expect(submitItem().label).toBe(t('submitEllipsis'));
   expect(submitItem().disabled).toBe(true);
   await user.type(screen.getByTestId('submissionContent'), 'My answer');
   expect(submitItem().disabled).toBe(false);

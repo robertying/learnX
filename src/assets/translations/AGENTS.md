@@ -5,7 +5,7 @@ Every user-visible string is a key in `en.ts` and `zh.ts`, with the same keys in
 ## English
 
 - Title Case for titles, rows, buttons and menu items; sentence case for messages, captions, footers and toasts.
-- A row, menu item or sheet choice that needs another step before it acts (a confirmation, picker, share sheet or menu of choices) ends with an ellipsis, "…" in both languages ("Log Out…", "删除…"); one that acts at once or opens a screen doesn't, and neither do toolbar buttons or a screen's main button (Submit, Log In). Alert titles and buttons never do, so a label used both ways has an `…Ellipsis` key for the row (`logout` / `logoutEllipsis`).
+- A button, row or menu item that asks for confirmation before it acts (an alert with Cancel, or a sheet that ends in its own confirm button, like Sync More Dates…) ends with an ellipsis, "…" in both languages ("Log Out…", "删除…", "Submit…"). Labels that act at once, open a screen, a picker, a share sheet or a menu of choices don't. Alert titles and buttons never do, so a label used both ways has an `…Ellipsis` key for the one that asks (`logout` / `logoutEllipsis`).
 - Errors start with "Couldn't …". Success toasts are short ("Deleted").
 - Use the platform's own words: Log In / Log Out, OK, Full Screen, Show in Finder (Mac), Photo Library, Choose File, and "System Settings" for the OS settings app. Android never mentions Reminders.
 - Archive's opposite is Unarchive (key `restore`). A grader's comment is "Grader Comments".

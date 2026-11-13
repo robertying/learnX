@@ -218,7 +218,7 @@ const AssignmentSubmissionContent: React.FC<{
   useHeaderButtons(navigation, 'right', [
     {
       id: 'submit',
-      label: t('submit'),
+      label: t('submitEllipsis'),
       icon: 'upload',
       text: true,
       disabled: submitDisabled,
@@ -230,7 +230,7 @@ const AssignmentSubmissionContent: React.FC<{
     ? t('reUploadAttachment')
     : submittedAttachment
       ? t('overwriteAttachment')
-      : t('pickAttachmentEllipsis');
+      : t('pickAttachment');
 
   return (
     <FormScreen>
