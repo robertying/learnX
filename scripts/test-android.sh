@@ -1,8 +1,8 @@
 #!/bin/bash
 # Run the local modules' Android unit tests (modules/*/android/src/test, JUnit
-# with Robolectric and MockK) and print their line coverage, then the tests of
-# what the patches in patches/ change (android/patch-tests), which test
-# libraries' code, so they have no coverage of their own.
+# with Robolectric and MockK) and print their line coverage. Also runs
+# the tests of what the patches in patches/ change (android/patch-tests),
+# which test libraries' code, so they have no coverage of their own.
 #
 #   scripts/test-android.sh [gradle option...]
 #
