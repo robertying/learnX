@@ -48,13 +48,20 @@ const Shape = ({ modifiers }: ShapeProps) => {
 export const Circle = Shape;
 export const RoundedRectangle = () => <View />;
 
+// Passes its modifiers on as a prop, like the Button stand-in.
 export const Text = ({
   children,
+  modifiers,
   testID,
 }: {
   children?: ReactNode;
+  modifiers?: unknown[];
   testID?: string;
-}) => <RNText testID={testID}>{children}</RNText>;
+}) => (
+  <RNText testID={testID} {...{ modifiers }}>
+    {children}
+  </RNText>
+);
 
 export const Image = ({
   systemName,

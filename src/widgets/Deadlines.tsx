@@ -9,6 +9,7 @@ import {
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
+import type { ReactElement, ReactNode } from 'react';
 import { PlatformColor } from 'react-native';
 import type { DeadlineWidgetProps } from 'widgets/props';
 
@@ -49,6 +50,16 @@ function DeadlinesWidget(
   // Props sent before widget rows had links have no URLs.
   const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
+  // The time left, live, in days, hours and minutes (no seconds), from our
+  // expo-widgets patch (CountdownView). A widget can't import, so this makes
+  // the element itself.
+  const Countdown = (countdownProps: { date: Date; modifiers: unknown[] }) =>
+    ({
+      type: 'CountdownView',
+      key: null,
+      props: countdownProps,
+    }) as unknown as ReactElement;
+
   if (family === 'accessoryRectangular') {
     const next = deadlines[0];
     return (
@@ -61,62 +72,60 @@ function DeadlinesWidget(
           {next ? next.title : props.empty}
         </Text>
         {next ? (
-          <Text
-            date={new Date(next.deadline)}
-            dateStyle="relative"
-            modifiers={[lineLimit(1)]}
-          />
+          <Text modifiers={[lineLimit(1)]}>{next.courseName}</Text>
         ) : null}
         {next ? (
-          <Text modifiers={[lineLimit(1)]}>{next.courseName}</Text>
+          <Countdown
+            date={new Date(next.deadline)}
+            modifiers={[lineLimit(1)]}
+          />
         ) : null}
       </VStack>
     );
   }
 
-  const count =
-    family === 'systemLarge' || family === 'systemExtraLarge'
-      ? 6
-      : family === 'systemMedium'
-        ? 3
-        : 2;
-  const shown = deadlines.slice(0, count);
-  const more = props.total - shown.length;
-  const showCourse = family !== 'systemSmall';
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
+  const small = family === 'systemSmall';
+  // Small and medium widgets fit three rows at the default text size only
+  // with this tight a gap: at 6 pt the third came up about 4 pt short.
+  const spacing = large ? 12 : 4;
 
-  return (
-    <VStack
-      alignment="leading"
-      spacing={large ? 12 : 6}
-      modifiers={[
-        frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
-        background,
-        ...openUrl(props.url),
-      ]}
-    >
-      <HStack>
+  const header = (more: number) => (
+    <HStack>
+      <Text
+        modifiers={[
+          font({ textStyle: 'caption', weight: 'semibold' }),
+          foregroundStyle(accent),
+        ]}
+      >
+        {props.title}
+      </Text>
+      <Spacer />
+      {more > 0 ? (
         <Text
           modifiers={[
-            font({ textStyle: 'caption', weight: 'semibold' }),
-            foregroundStyle(accent),
+            font({ textStyle: 'caption2' }),
+            foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
           ]}
         >
-          {props.title}
+          {`+${more}`}
         </Text>
-        <Spacer />
-        {more > 0 ? (
-          <Text
-            modifiers={[
-              font({ textStyle: 'caption2' }),
-              foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
-            ]}
-          >
-            {`+${more}`}
-          </Text>
-        ) : null}
-      </HStack>
-      {shown.length === 0 ? (
+      ) : null}
+    </HStack>
+  );
+
+  if (deadlines.length === 0) {
+    return (
+      <VStack
+        alignment="leading"
+        spacing={spacing}
+        modifiers={[
+          frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
+          background,
+          ...openUrl(props.url),
+        ]}
+      >
+        {header(0)}
         <Text
           modifiers={[
             font({ textStyle: 'footnote' }),
@@ -125,83 +134,140 @@ function DeadlinesWidget(
         >
           {props.empty}
         </Text>
-      ) : null}
-      {shown.map(item => {
-        const row = (
-          <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+        <Spacer />
+      </VStack>
+    );
+  }
+
+  const row = (item: (typeof deadlines)[number]) => {
+    const content = (
+      <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
+        <Text
+          modifiers={[
+            font({
+              textStyle: large ? 'headline' : 'subheadline',
+              weight: large ? 'semibold' : 'medium',
+            }),
+            lineLimit(1),
+          ]}
+        >
+          {item.title}
+        </Text>
+        {/* The course name shortens before the countdown. */}
+        <HStack spacing={0}>
+          {small ? null : (
             <Text
               modifiers={[
-                font({
-                  textStyle: large ? 'headline' : 'subheadline',
-                  weight: large ? 'semibold' : 'medium',
-                }),
+                font({ textStyle: large ? 'subheadline' : 'caption' }),
+                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                 lineLimit(1),
               ]}
             >
-              {item.title}
+              {item.courseName}
             </Text>
-            {/*
-              A relative date Text takes all the width it's offered (and
-              breaks the layout with fixedSize), so it goes last: the course
-              name gets its width first and the date follows right after it.
-            */}
-            <HStack spacing={0}>
-              {showCourse ? (
-                <Text
-                  modifiers={[
-                    font({ textStyle: large ? 'subheadline' : 'caption' }),
-                    foregroundStyle({
-                      type: 'hierarchical',
-                      style: 'secondary',
-                    }),
-                    lineLimit(1),
-                    layoutPriority(1),
-                  ]}
-                >
-                  {`${item.courseName} · `}
-                </Text>
-              ) : null}
-              <Text
-                date={new Date(item.deadline)}
-                dateStyle="relative"
-                modifiers={[
-                  font({ textStyle: large ? 'subheadline' : 'caption' }),
-                  dueColor(item),
-                  lineLimit(1),
-                ]}
-              />
-            </HStack>
-            {large ? (
-              <Text
-                modifiers={[
-                  font({ textStyle: 'caption' }),
-                  foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
-                  lineLimit(1),
-                ]}
-              >
-                {item.due}
-              </Text>
-            ) : null}
-          </VStack>
-        );
-        // A small widget can't have links; its widgetURL opens the list.
-        return family === 'systemSmall' || !item.url ? (
-          row
-        ) : (
-          <Link
-            key={item.id}
-            destination={item.url}
+          )}
+          {small ? null : (
+            <Text
+              modifiers={[
+                font({ textStyle: large ? 'subheadline' : 'caption' }),
+                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
+                layoutPriority(1),
+              ]}
+            >
+              {' · '}
+            </Text>
+          )}
+          <Countdown
+            date={new Date(item.deadline)}
             modifiers={[
-              // Not the link tint: the row keeps its colors.
-              foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+              font({ textStyle: large ? 'subheadline' : 'caption' }),
+              dueColor(item),
+              lineLimit(1),
+              layoutPriority(1),
+            ]}
+          />
+        </HStack>
+        {large ? (
+          <Text
+            modifiers={[
+              font({ textStyle: 'caption' }),
+              foregroundStyle({ type: 'hierarchical', style: 'tertiary' }),
+              lineLimit(1),
             ]}
           >
-            {row}
-          </Link>
-        );
-      })}
-      <Spacer />
-    </VStack>
+            {item.due}
+          </Text>
+        ) : null}
+      </VStack>
+    );
+    // A small widget can't have links; its widgetURL opens the list.
+    return small || !item.url ? (
+      content
+    ) : (
+      <Link
+        key={item.id}
+        destination={item.url}
+        modifiers={[
+          // Not the link tint: the row keeps its colors.
+          foregroundStyle({ type: 'hierarchical', style: 'primary' }),
+        ]}
+      >
+        {content}
+      </Link>
+    );
+  };
+
+  // SwiftUI's ViewThatFits, from our expo-widgets patch (@expo/ui has none):
+  // it shows the first of its children that fits the widget's height. A
+  // widget can't import, so this makes the element itself.
+  const ViewThatFits = (fitProps: {
+    axes: 'vertical';
+    modifiers: unknown[];
+    children: ReactNode;
+  }) =>
+    ({
+      type: 'ViewThatFitsView',
+      key: null,
+      props: fitProps,
+    }) as unknown as ReactElement;
+
+  // The list with as many rows as fit, at the widget's size and text size,
+  // counting the rest: one version per row count, the longest first.
+  const most = Math.min(deadlines.length, large ? 10 : 5);
+  const counts = Array.from({ length: most }, (_, i) => most - i);
+
+  // A list that leaves rows out spreads the ones it shows over the height,
+  // so the space the next row didn't fit in doesn't all end up at the
+  // bottom. One that shows every row keeps them at the top.
+  const list = (count: number) => {
+    const shown = deadlines.slice(0, count);
+    return props.total > count ? (
+      <VStack key={count} alignment="leading" spacing={0}>
+        {header(props.total - count)}
+        {shown.flatMap(item => [
+          <Spacer key={`gap-${item.id}`} minLength={spacing} />,
+          row(item),
+        ])}
+      </VStack>
+    ) : (
+      <VStack key={count} alignment="leading" spacing={spacing}>
+        {header(props.total - count)}
+        {shown.map(row)}
+      </VStack>
+    );
+  };
+
+  return (
+    <ViewThatFits
+      axes="vertical"
+      modifiers={[
+        frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
+        background,
+        ...openUrl(props.url),
+      ]}
+    >
+      {counts.map(list)}
+    </ViewThatFits>
   );
 }
 

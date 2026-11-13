@@ -120,25 +120,26 @@ const hiddenOffset = 24;
 
 // From iOS 26 the toast floats like the iPhone's tab bar: as far from the
 // screen's sides and bottom as the tab bar is (21 pt, measured: UIKit doesn't
-// expose it), and on iPhone just above the tab bar (62 pt tall). Before iOS 26
-// it keeps the side margin and sits above the docked tab bar (about 56 pt
-// over the home indicator inset). iPad's tab bar is at the top and the Mac
+// expose it), and on iPhone a gap above the tab bar (62 pt tall). Before iOS 26
+// it keeps the side margin and sits the same gap above the docked tab bar
+// (about 56 pt over the home indicator inset). iPad's tab bar is at the top and the Mac
 // has a sidebar, so there the toast sits at the bottom.
 const floatingInset = 21;
 const floatingTabBarHeight = 62;
 const hasTabBarBelow = !DeviceInfo.isTablet() && !DeviceInfo.isMac();
+const tabBarGap = Spacing.m;
 
 const toastInsets = (insets: { bottom: number; left: number; right: number }) =>
   DeviceInfo.hasLiquidGlass()
     ? {
         bottom: hasTabBarBelow
-          ? floatingInset + floatingTabBarHeight + Spacing.s
+          ? floatingInset + floatingTabBarHeight + tabBarGap
           : Math.max(insets.bottom, floatingInset),
         left: Math.max(insets.left, floatingInset),
         right: Math.max(insets.right, floatingInset),
       }
     : {
-        bottom: insets.bottom + (hasTabBarBelow ? 56 + Spacing.s : Spacing.m),
+        bottom: insets.bottom + (hasTabBarBelow ? 56 + tabBarGap : Spacing.m),
         left: insets.left + Spacing.m,
         right: insets.right + Spacing.m,
       };

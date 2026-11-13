@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import {
   Pressable,
   Text,
@@ -23,12 +24,14 @@ export const Icon = ({ name }: { name: string }) => (
 // Passes its SwiftUI modifiers on as a prop, so a test can tell which it got.
 export const Button = ({
   label,
+  children,
   disabled,
   onPress,
   modifiers,
   testID,
 }: {
   label?: string;
+  children?: ReactNode;
   disabled?: boolean;
   onPress?: () => void;
   modifiers?: unknown[];
@@ -42,7 +45,7 @@ export const Button = ({
     disabled={disabled}
     onPress={onPress}
   >
-    <Text>{label}</Text>
+    {label !== undefined ? <Text>{label}</Text> : children}
   </Pressable>
 );
 
