@@ -5,8 +5,6 @@ import ExpoModulesCore
 /// listens (the link that launched the app), the file waits in the app group until `takeSharedItem`. Also saves files
 /// where people pick (`saveFile`).
 public final class ShareModule: Module {
-  @MainActor private lazy var saver = FileSaver()
-
   public func definition() -> ModuleDefinition {
     Name("LearnXShare")
 
@@ -18,23 +16,34 @@ public final class ShareModule: Module {
     Function("takeSharedItem", Self.takeSharedItem)
     Function("getSharedFilesDirectory", Self.getSharedFilesDirectory)
 
-    AsyncFunction("saveFile") { (url: URL, promise: Promise) in
-      MainActor.assumeIsolated {
-        self.saveFile(url, promise: promise)
-      }
+    AsyncFunction("saveFile") { (url: URL) async throws -> Bool in
+      try await Self.saveFile(url)
     }
-    .runOnQueue(.main)
   }
 
-  /// Resolves to whether the file was saved; rejects when there is no screen to ask on.
-  @MainActor func saveFile(_ url: URL, promise: Promise) {
-    guard let presenter = appContext?.utilities?.currentViewController() else {
-      promise.reject("ERR_NO_SCREEN", "No screen to ask where to save on")
-      return
+  @MainActor static let saver = FileSaver()
+
+  /// Whether the file was saved where people picked. Throws when there is no window to ask in.
+  @MainActor static func saveFile(_ url: URL) async throws -> Bool {
+    guard let presenter = presenter() else {
+      throw NoWindowError()
     }
-    saver.save(url, from: presenter) { saved in
-      promise.resolve(saved)
+    return await withCheckedContinuation { continuation in
+      saver.save(url, from: presenter) { continuation.resume(returning: $0) }
     }
+  }
+
+  /// What the key window shows on top, to present the save panel from.
+  @MainActor static func presenter() -> UIViewController? {
+    let window = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .flatMap(\.windows)
+      .first(where: \.isKeyWindow)
+    var top = window?.rootViewController
+    while let presented = top?.presentedViewController {
+      top = presented
+    }
+    return top
   }
 
   /// The app's inbox, in the group the share extension shares with it (`LearnXAppGroup` in both Info.plists).
@@ -71,6 +80,10 @@ public final class ShareModule: Module {
   static func getSharedFilesDirectory() -> String? {
     inbox?.directory.absoluteString
   }
+}
+
+struct NoWindowError: LocalizedError {
+  var errorDescription: String? { "No window to ask where to save in" }
 }
 
 /// Notices links that may come from the share extension. Other modules (React Native's Linking) handle the link
