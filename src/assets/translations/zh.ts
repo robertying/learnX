@@ -267,6 +267,7 @@ const zh: typeof en = {
   retryLogin: '使用已保存的账号登录',
   offlineMode: '离线使用',
   download: '下载',
+  saveFileSucceeded: '已保存 {name}',
   saveFileFailed: '无法保存文件',
   sso: '清华大学用户电子身份服务系统',
   ssoNote:

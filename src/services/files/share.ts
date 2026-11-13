@@ -64,16 +64,18 @@ export const shareFile = async (file: DownloadableFile) => {
   });
 };
 
-/** Shares text as a file, or on Mac asks where to save it. */
+/**
+ * Shares text as a file, or on Mac asks where to save it. Resolves to whether
+ * it was saved on Mac (false for the share sheet, or when cancelled).
+ */
 export const exportTextFile = async (
   filename: string,
   content: string,
   type: string,
-) => {
+): Promise<boolean> => {
   const name = sanitizeFileName(filename);
   if (DeviceInfo.isMac()) {
-    await saveOnMac(name, staged => staged.write(content));
-    return;
+    return await saveOnMac(name, staged => staged.write(content));
   }
 
   const file = new File(Paths.cache, name);
@@ -86,6 +88,7 @@ export const exportTextFile = async (
     showAppsToView: true,
     failOnCancel: false,
   });
+  return false;
 };
 
 /** Lets the app that opens a file read it through its content URI. */

@@ -278,6 +278,7 @@ export default {
   retryLogin: 'Log In with Saved Account',
   offlineMode: 'Continue Offline',
   download: 'Download',
+  saveFileSucceeded: 'Saved {name}',
   saveFileFailed: "Couldn't save the file",
   sso: 'Electronic ID Service System of Tsinghua University',
   ssoNote:

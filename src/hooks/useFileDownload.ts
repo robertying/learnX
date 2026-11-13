@@ -11,6 +11,7 @@ import { useSettings } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import { downloadFile } from 'services/files/downloads';
 import { saveFileOnMac, openFile, shareFile } from 'services/files/share';
+import { fileNameOf } from 'helpers/filename';
 import { t } from 'helpers/i18n';
 
 /**
@@ -87,7 +88,12 @@ const useFileDownload = (file: DownloadableFile) => {
 
   const save = useCallback(async () => {
     try {
-      await saveFileOnMac(downloadable, path);
+      if (await saveFileOnMac(downloadable, path)) {
+        toast(
+          t('saveFileSucceeded', { name: fileNameOf(downloadable) }),
+          'success',
+        );
+      }
     } catch {
       toast(t('saveFileFailed'), 'error');
     }

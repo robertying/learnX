@@ -212,7 +212,10 @@ export const allowAssignmentSync = async (
 export const exportCalendars = async (): Promise<ToastMessage | undefined> => {
   try {
     const ics = await exportSyncedCalendarsToICS();
-    await exportTextFile('learnX.ics', ics, 'text/calendar');
+    const name = 'learnX.ics';
+    if (await exportTextFile(name, ics, 'text/calendar')) {
+      return { text: t('saveFileSucceeded', { name }), type: 'success' };
+    }
   } catch (err) {
     return calendarExportErrorToast(err);
   }

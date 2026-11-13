@@ -58,7 +58,9 @@ it('shares a downloaded file with its type', async () => {
 });
 
 it('exports text through the share sheet', async () => {
-  await exportTextFile('a/b.ics', 'BEGIN', 'text/calendar');
+  await expect(
+    exportTextFile('a/b.ics', 'BEGIN', 'text/calendar'),
+  ).resolves.toBe(false);
   expect(__fs.files(CACHES)).toEqual(['a_b.ics']);
   expect(Share.open).toHaveBeenCalledWith(
     expect.objectContaining({
@@ -82,7 +84,9 @@ describe('on Mac', () => {
   });
 
   it('asks where to save exported text', async () => {
-    await exportTextFile('a/b.ics', 'BEGIN', 'text/calendar');
+    await expect(
+      exportTextFile('a/b.ics', 'BEGIN', 'text/calendar'),
+    ).resolves.toBe(true);
     expect(saved).toEqual({ [`${CACHES}/save/a_b.ics`]: 'BEGIN' });
     expect(Share.open).not.toHaveBeenCalled();
     // The copy for the save panel goes after.

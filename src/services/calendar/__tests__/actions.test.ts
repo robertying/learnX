@@ -293,7 +293,17 @@ describe('allowCourseCalendarSync', () => {
 });
 
 describe('exportCalendars', () => {
-  it('exports learnX.ics without a toast', async () => {
+  it('says when learnX.ics was saved on Mac', async () => {
+    jest.mocked(exportSyncedCalendarsToICS).mockResolvedValue('ICS');
+    jest.mocked(exportTextFile).mockResolvedValueOnce(true);
+
+    await expect(exportCalendars()).resolves.toEqual({
+      text: t('saveFileSucceeded', { name: 'learnX.ics' }),
+      type: 'success',
+    });
+  });
+
+  it('exports learnX.ics without a toast otherwise', async () => {
     jest.mocked(exportSyncedCalendarsToICS).mockResolvedValue('ICS');
 
     await expect(exportCalendars()).resolves.toBeUndefined();

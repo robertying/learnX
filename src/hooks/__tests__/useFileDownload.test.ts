@@ -5,6 +5,7 @@ import { setSetting } from 'data/settings';
 import { DownloadableFile } from 'data/types/state';
 import { downloadFile } from 'services/files/downloads';
 import { openFile, saveFileOnMac, shareFile } from 'services/files/share';
+import { t } from 'helpers/i18n';
 import useFileDownload from 'hooks/useFileDownload';
 
 jest.mock('components/Toast', () => ({ toast: jest.fn() }));
@@ -127,13 +128,22 @@ describe('useFileDownload', () => {
     expect(toast).not.toHaveBeenCalled();
   });
 
-  it('saves where people pick, and says when it fails', async () => {
+  it('saves where people pick, and says how it went', async () => {
     const { result } = await setup();
     await waitFor(() => expect(result.current.path).toBe(PATH));
 
+    // Cancelled
+    jest.mocked(saveFileOnMac).mockResolvedValueOnce(false);
     await act(() => result.current.save());
     expect(saveFileOnMac).toHaveBeenCalledWith(file, PATH);
     expect(toast).not.toHaveBeenCalled();
+
+    jest.mocked(saveFileOnMac).mockResolvedValueOnce(true);
+    await act(() => result.current.save());
+    expect(toast).toHaveBeenLastCalledWith(
+      t('saveFileSucceeded', { name: 'Lecture 1.docx' }),
+      'success',
+    );
 
     jest.mocked(saveFileOnMac).mockRejectedValueOnce(new Error());
     await act(() => result.current.save());
