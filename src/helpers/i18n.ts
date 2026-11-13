@@ -3,7 +3,7 @@ import { getCalendars, getLocales } from 'expo-localization';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import 'dayjs/locale/en';
-import 'dayjs/locale/zh-cn';
+import zhCn from 'dayjs/locale/zh-cn';
 import { HomeworkGradeLevel } from '@robertying/thu-learn-lib';
 import en from 'assets/translations/en';
 import zh from 'assets/translations/zh';
@@ -37,6 +37,19 @@ export const isLocaleChinese = () => getLocale().startsWith('zh');
 // never renders the app (the background task, a notification action) would
 // otherwise format in English. index.js imports this file for that reason.
 dayjs.extend(relativeTime);
+// Chinese 12-hour times say 上午 or 下午, as iOS and Android write them, not
+// the six parts of the day dayjs's zh-cn has (凌晨, 早上, 上午, 中午, 下午,
+// 晚上); so a range marks the half of the day once ("上午9:50–11:25").
+dayjs.locale(
+  {
+    ...zhCn,
+    // oxlint-disable-next-line learnx/no-han-outside-translations -- locale data: Chinese in every app language
+    meridiem: (hour: number) => (hour < 12 ? '上午' : '下午'),
+    // Not in dayjs's ILocale type, though dayjs reads it.
+  } as typeof zhCn,
+  undefined,
+  true,
+);
 dayjs.locale(isLocaleChinese() ? 'zh-cn' : 'en');
 
 /**
