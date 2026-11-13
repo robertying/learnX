@@ -77,7 +77,9 @@ function DeadlinesWidget(
 
   const large = family === 'systemLarge' || family === 'systemExtraLarge';
   const small = family === 'systemSmall';
-  const spacing = large ? 12 : 6;
+  // Small and medium widgets fit three rows at the default text size only
+  // with this tight a gap: at 6 pt the third came up about 4 pt short.
+  const spacing = large ? 12 : 4;
 
   const header = (more: number) => (
     <HStack>
