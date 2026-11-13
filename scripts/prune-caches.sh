@@ -1,10 +1,10 @@
 #!/bin/bash
-# CI only (caches.yml, after each main run): delete superseded GitHub Actions caches so the repo stays
-# under its 10 GB limit. Every dependency change makes new Gradle entries
-# (~1.3 GB of dependencies, ~0.9 GB of transforms) and each main commit can
-# save new ccache, Pods and Xcode entries; the old ones would otherwise sit
-# there until GitHub evicts the least recently used cache, which is usually
-# the Xcode compilation cache, since iOS only runs by hand.
+# CI only (caches.yml, after each main run): delete superseded GitHub Actions
+# caches so the repo stays under its 10 GB limit. Every dependency change makes
+# new Gradle entries (~1.3 GB of dependencies, ~0.9 GB of transforms) and each
+# main commit can save new ccache, Pods and Xcode entries; the old ones would
+# otherwise sit there until GitHub evicts the least recently used cache, which
+# is usually the Xcode compilation cache, since iOS only runs by hand.
 #
 # Caches are grouped by key without its trailing hash, commit or timestamp.
 # Each group keeps its 2 most recently used entries; the ~1.4 GB Xcode

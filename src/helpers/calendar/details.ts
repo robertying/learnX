@@ -1,6 +1,6 @@
 // Pure builders for the calendar events, reminders and ICS entries that
-// services/calendar/calendars writes. Nothing here touches the calendar or the settings
-// store, so it can be tested without native modules.
+// services/calendar/calendars writes. Nothing here touches the calendar or the
+// settings store, so it can be tested without native modules.
 import { Platform } from 'react-native';
 import * as Calendar from 'expo-calendar';
 import dayjs, { Dayjs } from 'dayjs';

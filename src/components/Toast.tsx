@@ -122,8 +122,8 @@ const hiddenOffset = 24;
 // screen's sides and bottom as the tab bar is (21 pt, measured: UIKit doesn't
 // expose it), and on iPhone a gap above the tab bar (62 pt tall). Before iOS 26
 // it keeps the side margin and sits the same gap above the docked tab bar
-// (about 56 pt over the home indicator inset). iPad's tab bar is at the top and the Mac
-// has a sidebar, so there the toast sits at the bottom.
+// (about 56 pt over the home indicator inset). iPad's tab bar is at the top
+// and the Mac has a sidebar, so there the toast sits at the bottom.
 const floatingInset = 21;
 const floatingTabBarHeight = 62;
 const hasTabBarBelow = !DeviceInfo.isTablet() && !DeviceInfo.isMac();

@@ -21,9 +21,10 @@ import useSpotlightTaps from 'hooks/useSpotlightTaps';
 /**
  * What the main UI starts once logged in: picks the semester and keeps its
  * courses and timetable fetched, schedules the background sync, sends the
- * waiting server actions once logged in, opens what was tapped outside the app, sets up
- * notifications, and moves downloads from the old folder layout. The widgets,
- * reminders and Spotlight follow the data by themselves (services/surfaces).
+ * waiting server actions once logged in, opens what was tapped outside the app,
+ * sets up notifications, and deletes the downloads 18.x kept in its old folder
+ * layout. The widgets, reminders and Spotlight follow the data by themselves
+ * (services/surfaces).
  */
 const useMainStartup = () => {
   const loggedIn = useLoggedIn();

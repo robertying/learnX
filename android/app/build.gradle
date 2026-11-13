@@ -80,8 +80,9 @@ android {
             buildConfigField "boolean", "TAKES_LAUNCH_OPTIONS", "true"
         }
         release {
-            // -PciRelease (CI's E2E build): a real release build (R8, bundled
-            // JS) signed with the debug key, and nothing uploaded to Crashlytics.
+            // -PciRelease (E2E builds: CI's and scripts/e2e-build.sh): a real
+            // release build (R8, bundled JS) signed with the debug key, and
+            // nothing uploaded to Crashlytics.
             def ciRelease = project.hasProperty("ciRelease")
             signingConfig = ciRelease ? signingConfigs.debug : signingConfigs.release
             // Only E2E builds take test launch arguments: in a store build,
