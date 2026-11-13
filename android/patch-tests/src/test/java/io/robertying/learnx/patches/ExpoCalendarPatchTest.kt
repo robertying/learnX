@@ -7,7 +7,6 @@ import android.database.MatrixCursor
 import android.net.Uri
 import android.provider.CalendarContract
 import android.provider.CalendarContract.Calendars
-import androidx.test.core.app.ApplicationProvider
 import expo.modules.calendar.next.domain.repositories.calendar.CalendarRepository
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -16,6 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 
 /**
  * What patches/expo-calendar@58.0.6.patch changes on Android: calendars are found on a provider that doesn't know
@@ -70,7 +70,7 @@ class ExpoCalendarPatchTest {
   @Test
   fun findsCalendarsOnAProviderWithoutIsPrimary() = runBlocking {
     Robolectric.setupContentProvider(CalendarProviderWithoutIsPrimary::class.java, CalendarContract.AUTHORITY)
-    val resolver = ApplicationProvider.getApplicationContext<android.app.Application>().contentResolver
+    val resolver = RuntimeEnvironment.getApplication().contentResolver
 
     val calendar = CalendarRepository(resolver).findAll().single()
     assertEquals("learnX", calendar.calendarDisplayName)

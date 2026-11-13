@@ -26,4 +26,6 @@ dependencies {
   testImplementation 'com.facebook.react:react-android'
   testImplementation 'androidx.glance:glance-appwidget:1.2.0'
   testImplementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2'
+  testImplementation 'com.github.zacharee:AndroidPdfViewer:4.0.1'
+  testImplementation 'io.legere:pdfiumandroid:1.0.35'
 }

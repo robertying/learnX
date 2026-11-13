@@ -13,13 +13,13 @@ import androidx.glance.action.ActionModifier
 import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.action.StartActivityIntentAction
 import androidx.glance.layout.EmittableBox
-import androidx.test.core.app.ApplicationProvider
 import com.facebook.react.bridge.DynamicFromObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
@@ -30,7 +30,7 @@ import org.robolectric.annotation.Config
  */
 @RunWith(RobolectricTestRunner::class)
 class ExpoWidgetsPatchTest {
-  private val context = ApplicationProvider.getApplicationContext<Context>()
+  private val context = RuntimeEnvironment.getApplication()
 
   private fun action(modifier: GlanceModifier): StartActivityIntentAction? =
     modifier.foldIn<ActionModifier?>(null) { found, element -> found ?: element as? ActionModifier }
@@ -58,15 +58,16 @@ class ExpoWidgetsPatchTest {
     }
 
     val widgetClass = Class.forName("expo.modules.widgets.ExpoWidgetsPeekWidget")
+    // A widget with no layout, so its content is made without the widgets' JS runtime.
     val widget = widgetClass.getDeclaredConstructor(String::class.java).apply { isAccessible = true }
-      .newInstance("Deadlines")
+      .newInstance("NoLayout")
     // DpSize is an inline class, so the method's name is mangled and the size is a Long.
     val provideRoot = widgetClass.methods.single { it.name.startsWith("provideRoot") }
     val root = provideRoot.invoke(widget, context, AppWidgetId(1), Bundle(), 0L) as Emittable
 
     assertTrue(root is EmittableBox)
     assertEquals(launcher, action(root.modifier)?.intent?.component)
-    // What it wraps: the widget's content (an error, as no layout was sent here).
+    // What it wraps: the widget's content (the error saying there's no layout).
     assertEquals(1, (root as EmittableBox).children.size)
   }
 
@@ -74,9 +75,14 @@ class ExpoWidgetsPatchTest {
   fun openUrlModifierOpensTheLinkInTheApp() {
     val tree = Class.forName("expo.modules.widgets.ExpoWidgetEmittableTreeKt")
     val converterContextClass = Class.forName("expo.modules.widgets.WidgetConverterContext")
-    val converterContext = converterContextClass.declaredConstructors.single().apply { isAccessible = true }
+    // Its size is a DpSize (a Long); Kotlin adds a synthetic constructor beside it.
+    val converterContext = converterContextClass.declaredConstructors.single { !it.isSynthetic }
+      .apply { isAccessible = true }
       .newInstance(context, 0L)
-    val toPeekModifier = tree.declaredMethods.single { it.name == "toPeekModifier" }.apply { isAccessible = true }
+    // The one for a single modifier (a map), not for a list of them.
+    val toPeekModifier = tree.declaredMethods
+      .single { it.name == "toPeekModifier" && it.parameterTypes.first() == Map::class.java }
+      .apply { isAccessible = true }
 
     val modifier = toPeekModifier.invoke(
       null,
