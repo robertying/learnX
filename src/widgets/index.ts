@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
-import { t, timeFormat } from 'helpers/i18n';
+import { isLocaleChinese, t, timeFormat } from 'helpers/i18n';
 import { getTargetUrl } from 'helpers/openTarget';
 import { classTimeRange } from 'helpers/schedule';
 import { beijingWallClock } from 'helpers/serverTime';
@@ -30,6 +30,9 @@ const upNextWidget = (): Widget<UpNextWidgetProps> | undefined =>
       ? require('./UpNext.android').default
       : undefined;
 
+/** The app's language, for the countdowns iOS draws in the widgets. */
+const widgetLocale = () => (isLocaleChinese() ? 'zh_Hans' : 'en');
+
 const deadlineProps = (deadlines: UpcomingDeadlines['deadlines']) =>
   deadlines.map(d => ({
     ...d,
@@ -47,6 +50,7 @@ const toProps = ({
   title: t('widgetDeadlines'),
   empty: t('widgetNoDeadlines'),
   url: getTargetUrl({ type: 'assignment' }),
+  locale: widgetLocale(),
 });
 
 /** Deadlines in the Android widget's props; it shows the first four. */
@@ -120,6 +124,7 @@ export const upNextProps = (classes: UpcomingClass[]): UpNextWidgetProps => ({
   tomorrow: t('widgetTomorrow'),
   noClasses: t('widgetNoClasses'),
   url: getTargetUrl({ type: 'today' }),
+  locale: widgetLocale(),
 });
 
 /** What the Up Next widget was last given, so unchanged props are skipped. */

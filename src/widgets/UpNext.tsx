@@ -5,6 +5,7 @@ import {
   layoutPriority,
   lineLimit,
   minimumScaleFactor,
+  monospacedDigit,
   truncationMode,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
@@ -117,6 +118,7 @@ function UpNextWidget(
         spacing={0}
         modifiers={[
           kit.background,
+          ...kit.language(props.locale),
           ...(featured?.url ? [widgetURL(featured.url)] : openToday),
         ]}
       >
@@ -221,9 +223,9 @@ function UpNextWidget(
     </VStack>
   );
 
-  // A class after the featured one, like a deadline row: its course, then when.
-  // In a line where the course shortens first, or in a small widget, which
-  // is too narrow for both, the start under the course.
+  // A class after the featured one: its course, then when. In a line, with
+  // the times lined up at the end and the course shortening first; in a small
+  // widget, which is too narrow for both, the start under the course.
   const laterRow = (c: UpNextWidgetProps['classes'][number]) =>
     small ? (
       <VStack key={c.key} alignment="leading" spacing={0}>
@@ -244,21 +246,22 @@ function UpNextWidget(
       linked(
         c,
         c.key,
-        <HStack key={c.key} spacing={0}>
+        <HStack key={c.key} spacing={8}>
           <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
             {c.courseName}
           </Text>
+          <Spacer minLength={0} />
           <Text
             modifiers={[
               font({ textStyle: 'caption' }),
               kit.secondary,
+              monospacedDigit(),
               lineLimit(1),
               layoutPriority(1),
             ]}
           >
-            {` · ${when(c)}`}
+            {when(c)}
           </Text>
-          <Spacer />
         </HStack>,
       )
     );
@@ -291,7 +294,7 @@ function UpNextWidget(
           ]
         : [fullTop(false)],
       spacing,
-      modifiers: [kit.background, ...openToday],
+      modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
     });
   }
 
@@ -326,7 +329,7 @@ function UpNextWidget(
       })
       .concat({ key: '0', top, rows: [], cut: false }),
     spacing,
-    modifiers: [kit.background, ...openToday],
+    modifiers: [kit.background, ...kit.language(props.locale), ...openToday],
   });
 }
 

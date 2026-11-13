@@ -41,7 +41,11 @@ function DeadlinesWidget(
       <VStack
         alignment="leading"
         spacing={0}
-        modifiers={[kit.background, ...openUrl(next?.url ?? props.url)]}
+        modifiers={[
+          kit.background,
+          ...kit.language(props.locale),
+          ...openUrl(next?.url ?? props.url),
+        ]}
       >
         <Text modifiers={[font({ textStyle: 'headline' }), lineLimit(1)]}>
           {next ? next.title : props.empty}
@@ -85,6 +89,7 @@ function DeadlinesWidget(
         modifiers={[
           frame({ maxWidth: 10000, maxHeight: 10000, alignment: 'topLeading' }),
           kit.background,
+          ...kit.language(props.locale),
           ...openUrl(props.url),
         ]}
       >
@@ -171,7 +176,11 @@ function DeadlinesWidget(
       };
     }),
     spacing,
-    modifiers: [kit.background, ...openUrl(props.url)],
+    modifiers: [
+      kit.background,
+      ...kit.language(props.locale),
+      ...openUrl(props.url),
+    ],
   });
 }
 

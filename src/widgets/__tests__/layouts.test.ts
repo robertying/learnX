@@ -231,8 +231,7 @@ describe('Up Next on iOS', () => {
   const shown = (widget: Node) => {
     expect(widget.type).toBe('ViewThatFitsView');
     return childrenOf(widget).map(
-      v =>
-        texts(v).filter(w => w.startsWith(' · ') && w.endsWith('-time')).length,
+      v => texts(v).filter(w => / .*-time$/.test(w)).length,
     );
   };
 
@@ -249,7 +248,7 @@ describe('Up Next on iOS', () => {
       'Ends in ',
       `in ${iso(at('11:25'))}`,
       'Course later',
-      ' · Tomorrow later-time',
+      'Tomorrow later-time',
     ]);
     expect(
       all(oneLater)
@@ -263,6 +262,30 @@ describe('Up Next on iOS', () => {
     ]);
     // Medium widgets don't name the section.
     expect(texts(childrenOf(widget)[0])).not.toContain('Later');
+    // The times line up at the end of the rows.
+    const row = all(oneLater).find(
+      n => n.type === 'HStack' && texts(n)[0] === 'Course later',
+    )!;
+    expect(childrenOf(row).map(n => n.type)).toEqual([
+      'Text',
+      'Spacer',
+      'Text',
+    ]);
+    // Countdowns follow the app's language, not the system's; props from
+    // before it leave the system's.
+    expect(modifier(widget, 'environment')).toBeUndefined();
+    for (const family of [
+      'systemSmall',
+      'systemMedium',
+      'accessoryRectangular',
+    ]) {
+      expect(
+        modifier(
+          render(family, { ...upNextProps, locale: 'zh_Hans' }),
+          'environment',
+        ),
+      ).toEqual(['locale', 'zh_Hans']);
+    }
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     expect(modifier(widget, 'containerBackground')).toEqual([
       'PlatformColor(systemBackground)',
@@ -293,7 +316,7 @@ describe('Up Next on iOS', () => {
       'Tomorrow later-time',
       'Later',
       'Course c3',
-      ' · c3-weekday c3-time',
+      'c3-weekday c3-time',
     ]);
     const nextWeek = layout(
       {
@@ -375,7 +398,7 @@ describe('Up Next on iOS', () => {
       // All five classes after this one, then one fewer at a time.
       expect(shown(widget)).toEqual([5, 4, 3, 2, 1, 0]);
       const [all5, cut] = childrenOf(widget);
-      expect(texts(all5)).toContain(' · c6-weekday c6-time');
+      expect(texts(all5)).toContain('c6-weekday c6-time');
       // Showing everything, it keeps to the top; leaving rows out, it
       // spreads them, the heading staying with the first row.
       const spacers = (v: Node) =>
@@ -387,7 +410,7 @@ describe('Up Next on iOS', () => {
       expect(texts(childrenOf(cut)[2]).slice(0, 3)).toEqual([
         'Later',
         'Course later',
-        ' · Tomorrow later-time',
+        'Tomorrow later-time',
       ]);
     }
   });
@@ -611,6 +634,26 @@ describe('Deadlines on iOS', () => {
     });
     expect(links(old)).toEqual([]);
     expect(texts(old)).toContain('Assignment old');
+  });
+
+  it("draws countdowns in the app's language", () => {
+    const props = { ...deadlineProps, locale: 'en' };
+    for (const family of [
+      'systemSmall',
+      'systemLarge',
+      'accessoryRectangular',
+    ]) {
+      expect(modifier(render(family, props), 'environment')).toEqual([
+        'locale',
+        'en',
+      ]);
+    }
+    expect(
+      modifier(
+        render('systemMedium', { ...props, total: 0, deadlines: [] }),
+        'environment',
+      ),
+    ).toEqual(['locale', 'en']);
   });
 });
 

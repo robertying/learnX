@@ -21,6 +21,12 @@ export interface DeadlineWidgetProps {
   empty: string;
   /** The learnx:// link that opens the assignment list. */
   url: string;
+  /**
+   * The app's language as a locale (`en`, `zh_Hans`), for what the system
+   * draws (countdowns) on iOS; the widget extension otherwise follows the
+   * system language.
+   */
+  locale?: string;
 }
 
 /** A class in the Up Next widget. */
@@ -65,4 +71,6 @@ export interface UpNextWidgetProps {
   noClasses: string;
   /** The learnx:// link that opens Today. */
   url: string;
+  /** As in DeadlineWidgetProps. */
+  locale?: string;
 }
