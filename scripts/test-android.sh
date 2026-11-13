@@ -1,6 +1,8 @@
 #!/bin/bash
 # Run the local modules' Android unit tests (modules/*/android/src/test, JUnit
-# with Robolectric and MockK) and print their line coverage.
+# with Robolectric and MockK) and print their line coverage, then the tests of
+# what the patches in patches/ change (android/patch-tests), which test
+# libraries' code, so they have no coverage of their own.
 #
 #   scripts/test-android.sh [gradle option...]
 #
@@ -18,6 +20,8 @@ tasks=()
 for project in "${projects[@]}"; do
   tasks+=(":$project:testDebugUnitTest" ":$project:createDebugUnitTestCoverageReport")
 done
+
+tasks+=(":patch-tests:testDebugUnitTest")
 
 (cd android && ./gradlew --console=plain "$@" "${tasks[@]}")
 
