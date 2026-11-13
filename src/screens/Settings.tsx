@@ -7,7 +7,9 @@ import {
   FormProfile,
   FormScreen,
   FormSection,
+  FormToggle,
 } from 'components/Form';
+import { setSetting, useSettings } from 'data/settings';
 import DeviceInfo from 'constants/DeviceInfo';
 import useAvailableUpdate from 'hooks/useAvailableUpdate';
 import { logout } from 'data/login';
@@ -39,6 +41,7 @@ const latestWhatsNew = () => {
 
 const Settings: React.FC<Props> = ({ navigation }) => {
   const show = useShowDetail(navigation);
+  const graduate = useSettings(settings => settings.graduate);
 
   const loggedIn = useLoggedIn();
   const { data: userInfo } = useQuery({ ...userQuery, enabled: loggedIn });
@@ -89,6 +92,13 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon="semester"
             title={t('semesterSelection')}
             onPress={() => show('SemesterSelection')}
+          />
+          {/* Which timetable Today, Schedule and the calendar show. */}
+          <FormToggle
+            icon="graduate"
+            title={t('graduate')}
+            value={graduate}
+            onValueChange={value => setSetting('graduate', value)}
           />
           <FormLink
             testID="settings-notifications"

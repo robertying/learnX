@@ -107,16 +107,15 @@ export interface AssignmentEventInput {
   assignmentId: string;
   title: string;
   note: string;
-  startDate: Dayjs;
   dueDate: Dayjs;
   completed: boolean;
   completionDate?: Dayjs;
 }
 
 /**
- * iOS reminder for an assignment. With the alert on, it's dated the chosen
- * time before the deadline and alerts then; the deadline is in its notes.
- * Its link opens the assignment in learnX.
+ * iOS reminder for an assignment, due at the deadline. With the alert on, it
+ * alerts then, and the chosen time before as Reminders' Early Reminder. Its
+ * link opens the assignment in learnX.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
@@ -124,50 +123,53 @@ export const buildAssignmentReminderDetails = (
     assignmentId,
     title,
     note,
-    startDate,
     dueDate,
     completed,
     completionDate,
   }: AssignmentEventInput,
 ): ReminderDetails => {
   const alarms = settings.alarms;
-  // Reminders folds any alarm into the reminder's own date and time, so an
-  // early alert is the reminder's date. The real deadline goes in the notes.
-  const remindAt = alarms.assignmentReminderAlarm
-    ? dueDate.subtract(
-        alarms.assignmentReminderAlarmOffset ??
-          calendarDefaults.assignmentReminderAlarmOffset,
-        'minute',
-      )
-    : dueDate;
-  const deadline = `${t('deadline')}: ${dueDate.format(t('shortDateTimeFormat'))}`;
   return {
     title,
-    startDate: (startDate.isBefore(remindAt) ? startDate : remindAt).toDate(),
-    dueDate: remindAt.toDate(),
-    alarms: alarms.assignmentReminderAlarm ? [{ relativeOffset: 0 }] : [],
+    // No start date, so the early alert counts from the due date.
+    dueDate: dueDate.toDate(),
+    alarms: alarms.assignmentReminderAlarm
+      ? [
+          { relativeOffset: 0 },
+          {
+            relativeOffset: -(
+              alarms.assignmentReminderAlarmOffset ??
+              calendarDefaults.assignmentReminderAlarmOffset
+            ),
+          },
+        ]
+      : [],
     // The device's zone: Reminders labels any other zone (e.g. "GMT+8").
     timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
-    notes: note ? `${deadline}\n\n${note}` : deadline,
+    notes: note,
     url: getTargetUrl({ type: 'assignment', id: assignmentId }),
   };
 };
 
 /**
- * An alert `minutes` before the deadline, which is the event's start, so
- * Calendar shows it as that long before.
+ * An alert `minutes` before the deadline, which is the event's end. Alerts
+ * count from the event's start, so the event's length is added back. Android
+ * has no alerts after the start, so one closer to the deadline than the
+ * event is long goes off at the start.
  */
-const alertBeforeDeadline = (minutes: number) => ({
-  relativeOffset: -minutes,
+export const alertBeforeDeadline = (minutes: number, eventLength: number) => ({
+  relativeOffset:
+    Platform.OS === 'android'
+      ? Math.min(eventLength - minutes, 0)
+      : eventLength - minutes,
   method: Calendar.AlarmMethod.DEFAULT,
 });
 
 /**
- * Calendar event for an assignment, starting at the deadline: Calendar shows
- * an event at its start time and counts its alerts from there. Its link
- * opens the assignment in learnX.
+ * Calendar event for an assignment, ending at the deadline. Its link opens
+ * the assignment in learnX.
  */
 export const buildAssignmentEventDetails = (
   settings: SettingsState,
@@ -185,6 +187,7 @@ export const buildAssignmentEventDetails = (
           alertBeforeDeadline(
             alarms.assignmentCalendarAlarmOffset ??
               calendarDefaults.assignmentCalendarAlarmOffset,
+            eventLength,
           ),
         ]
       : [];
@@ -197,14 +200,15 @@ export const buildAssignmentEventDetails = (
       alertBeforeDeadline(
         alarms.assignmentCalendarSecondAlarmOffset ??
           calendarDefaults.assignmentCalendarSecondAlarmOffset,
+        eventLength,
       ),
     );
   }
 
   return {
     title: (completed ? '✅ ' : '') + title,
-    startDate: dueDate.toDate(),
-    endDate: dueDate.add(eventLength, 'minute').toDate(),
+    startDate: dueDate.subtract(eventLength, 'minute').toDate(),
+    endDate: dueDate.toDate(),
     timeZone: TZ,
     notes: note,
     url: getTargetUrl({ type: 'assignment', id: assignmentId }),
@@ -233,7 +237,6 @@ export const buildAssignmentEventInputs = (
           assignmentId: assignment.id,
           title: assignment.title + ' - ' + course.name,
           note: removeTags(assignment.description),
-          startDate: now,
           dueDate: dayjs(assignment.deadline),
           completed: assignment.submitted,
           completionDate: assignment.submitTime

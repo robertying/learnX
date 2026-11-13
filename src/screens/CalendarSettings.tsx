@@ -91,7 +91,10 @@ const CalendarSettings: React.FC<Props> = () => {
   const access = useCalendarAccess();
   const blocked = (on: boolean, state: CalendarAccess | null) =>
     on && state !== null && state !== 'granted';
-  const calendarBlocked = blocked(assignmentCalendarSync, access.calendar);
+  const calendarBlocked = blocked(
+    assignmentCalendarSync || courseCalendarSync,
+    access.calendar,
+  );
   const remindersBlocked =
     Platform.OS === 'ios' && blocked(assignmentReminderSync, access.reminders);
   const allow = (type: 'calendar' | 'reminder', state: CalendarAccess | null) =>
@@ -136,7 +139,7 @@ const CalendarSettings: React.FC<Props> = () => {
                 ? t('graduateSchedule')
                 : t('undergraduateSchedule'),
             }),
-            'courseSchedule',
+            courseCalendarSync ? 'courseSchedule' : undefined,
           )}
         >
           <FormToggle
@@ -146,19 +149,15 @@ const CalendarSettings: React.FC<Props> = () => {
             onValueChange={handleCourseSync}
             loading={courseSyncEnabling}
           />
-          <FormToggle
-            icon="graduate"
-            title={t('graduate')}
-            value={graduate}
-            onValueChange={value => setSetting('graduate', value)}
-          />
-          <FormToggle
-            icon="reminder"
-            title={t('classAlarm')}
-            value={alarms.courseAlarm}
-            onValueChange={value => setAlarm('courseAlarm', value)}
-          />
-          {alarms.courseAlarm && (
+          {courseCalendarSync && (
+            <FormToggle
+              icon="reminder"
+              title={t('classAlarm')}
+              value={alarms.courseAlarm}
+              onValueChange={value => setAlarm('courseAlarm', value)}
+            />
+          )}
+          {courseCalendarSync && alarms.courseAlarm && (
             <FormNumberField
               title={t('classAlarmBefore')}
               value={
@@ -167,21 +166,25 @@ const CalendarSettings: React.FC<Props> = () => {
               onValueChange={value => setAlarm('courseAlarmOffset', value)}
             />
           )}
-          <FormToggle
-            icon="noLocation"
-            title={t('courseEventOmitLocation')}
-            value={courseEventOmitLocation}
-            onValueChange={value =>
-              setSetting('courseEventOmitLocation', value)
-            }
-          />
+          {courseCalendarSync && (
+            <FormToggle
+              icon="noLocation"
+              title={t('courseEventOmitLocation')}
+              value={courseEventOmitLocation}
+              onValueChange={value =>
+                setSetting('courseEventOmitLocation', value)
+              }
+            />
+          )}
           {/* Last: it writes the schedule with the settings above. */}
-          <FormButton
-            icon="sync"
-            title={t('syncCourseSchedule')}
-            onPress={picker.openPicker}
-            loading={courseSyncing}
-          />
+          {courseCalendarSync && (
+            <FormButton
+              icon="sync"
+              title={t('syncCourseSchedule')}
+              onPress={picker.openPicker}
+              loading={courseSyncing}
+            />
+          )}
         </FormSection>
         {/* The switches the note is about; each sync's options follow. */}
         <FormSection

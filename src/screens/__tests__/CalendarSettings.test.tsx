@@ -78,17 +78,24 @@ beforeEach(() => {
     .mockReturnValue({ exporting: false, exportToICS });
 });
 
-it('saves the course schedule settings and opens the range picker', async () => {
+it('turns course schedule sync on through the sync hook', async () => {
   await renderScreen();
   expect(
     screen.getByText(
       t('courseScheduleSyncCaption', { type: t('undergraduateSchedule') }),
     ),
   ).toBeTruthy();
+  // Its options show only while it's on.
+  expect(screen.queryByText(t('classAlarm'))).toBeNull();
+  expect(screen.queryByText(t('syncCourseSchedule'))).toBeNull();
   await toggle(t('setupCourseCalendar'), true);
   expect(setCourseSyncEnabled).toHaveBeenCalledWith(true);
-  await toggle(t('graduate'), true);
-  expect(getSettings().graduate).toBe(true);
+});
+
+it('saves the course schedule settings and opens the range picker', async () => {
+  setSetting('courseCalendarSync', true);
+  setSetting('graduate', true);
+  await renderScreen();
   expect(
     screen.getByText(
       t('courseScheduleSyncCaption', { type: t('graduateSchedule') }),
@@ -102,6 +109,7 @@ it('saves the course schedule settings and opens the range picker', async () => 
 });
 
 it('asks how long before a class to alarm once class alarms are on', async () => {
+  setSetting('courseCalendarSync', true);
   await renderScreen();
   expect(screen.queryByText(t('classAlarmBefore'))).toBeNull();
   await toggle(t('classAlarm'), true);
@@ -189,6 +197,7 @@ it('says when each sync last finished, while it is on', async () => {
   const time = new Date(2026, 10, 11, 9, 30).getTime();
   setLastSynced('courseSchedule', time);
   setLastSynced('calendar', time);
+  setSetting('courseCalendarSync', true);
   await renderScreen();
   const lastSynced = t('lastSynced', {
     time: dayjs(time).format(t('shortDateTimeFormat')),
