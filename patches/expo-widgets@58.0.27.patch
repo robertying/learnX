@@ -143,10 +143,10 @@ index 29e4f1566d188665e301d32bc1ad85640f83e68c..fdbffad2a76c7c578edabdfb7f2b573f
 +#endif
 diff --git a/ios/Widgets/CountdownView.swift b/ios/Widgets/CountdownView.swift
 new file mode 100644
-index 0000000000000000000000000000000000000000..6913b7d6ba045fd81ad7bfeedfddbea0aedecae1
+index 0000000000000000000000000000000000000000..2ecc571ae4cfebe3c426a2e7b585514b912ba37d
 --- /dev/null
 +++ b/ios/Widgets/CountdownView.swift
-@@ -0,0 +1,48 @@
+@@ -0,0 +1,51 @@
 +import SwiftUI
 +import ExpoModulesCore
 +import ExpoUI
@@ -181,12 +181,15 @@ index 0000000000000000000000000000000000000000..6913b7d6ba045fd81ad7bfeedfddbea0
 +        ).locale(locale)
 +        // A live Text takes all the width it's offered, and fixedSize blanks
 +        // the widget, so it takes the width of its value at render time and
-+        // the rest of its row (a course name) gives way to it.
++        // the rest of its row (a course name) gives way to it. Both draw
++        // equal-width digits, so the live value fills the width it was given
++        // (proportional digits left a gap after a narrow "1").
 +        Text(format.format(Date()))
 +          .monospacedDigit()
 +          .hidden()
 +          .overlay(alignment: .leading) {
 +            Text(.currentDate, format: format)
++              .monospacedDigit()
 +              .minimumScaleFactor(0.8)
 +          }
 +      } else {
