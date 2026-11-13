@@ -1,9 +1,9 @@
 import EventKit
-import ExpoModulesCore
+internal import ExpoModulesCore
 import Foundation
 import Testing
 
-@testable import ExpoCalendar
+@testable internal import ExpoCalendar
 
 /// What patches/expo-calendar@58.0.6.patch changes on iOS: a reminder's due date keeps its time zone, so it stays
 /// the same instant on devices in other time zones.

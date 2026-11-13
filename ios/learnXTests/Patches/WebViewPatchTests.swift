@@ -12,9 +12,11 @@ import WebKit
     return try #require(viewClass.init(frame: .zero) as? WKUIDelegate)
   }
 
-  /// WKFrameInfo has no public initializer, and the panels don't read it.
+  /// WKFrameInfo has no public initializer, and the panels don't read it. A bare one crashes when it's released, so
+  /// it's kept.
   private func frame() throws -> WKFrameInfo {
-    try #require((WKFrameInfo.self as NSObject.Type).init() as? WKFrameInfo)
+    let frame = try #require((WKFrameInfo.self as NSObject.Type).init() as? WKFrameInfo)
+    return Unmanaged.passRetained(frame).takeUnretainedValue()
   }
 
   @Test func alertOffScreenCompletesAtOnce() throws {

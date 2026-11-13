@@ -1,3 +1,4 @@
+import ObjectiveC
 import PDFKit
 import Testing
 import UIKit
@@ -17,24 +18,28 @@ import UIKit
     return url
   }
 
-  /// RNPDFPdfView's props are Objective-C properties; React sets them, then sends the names that changed.
+  /// RNPDFPdfView's props are Objective-C properties. React sets them and sends the names that changed, which the
+  /// view keeps until its first frame.
   private func pdfView(width: CGFloat, url: URL) throws -> UIView {
     let viewClass = try #require(NSClassFromString("RNPDFPdfView") as? UIView.Type)
-    let view = viewClass.init(frame: CGRect(x: 0, y: 0, width: width, height: 800))
+    let view = viewClass.init(frame: .zero)
     view.setValue(url.path, forKey: "path")
     view.setValue(1, forKey: "scale")
     view.setValue(1, forKey: "minScale")
     view.setValue(3, forKey: "maxScale")
     view.setValue(0, forKey: "fitPolicy")
-    resize(view, width: width, changed: ["path", "scale", "minScale", "maxScale", "fitPolicy"])
+    view.perform(NSSelectorFromString("didSetProps:"), with: ["path", "scale", "minScale", "maxScale", "fitPolicy"])
+    resize(view, width: width)
     return view
   }
 
-  /// What a layout update does (`updateLayoutMetrics:oldLayoutMetrics:`): resize, then apply the changed props.
-  private func resize(_ view: UIView, width: CGFloat, changed: [String]) {
-    view.frame.size.width = width
-    pdfKitView(in: view)?.frame = view.bounds
-    view.perform(NSSelectorFromString("didSetProps:"), with: changed)
+  /// What a layout update does (`reactSetFrame:`, like Fabric's `updateLayoutMetrics:oldLayoutMetrics:`): resize,
+  /// then apply the props the view kept again.
+  private func resize(_ view: UIView, width: CGFloat) {
+    typealias SetFrame = @convention(c) (AnyObject, Selector, CGRect) -> Void
+    let selector = NSSelectorFromString("reactSetFrame:")
+    let setFrame = unsafeBitCast(class_getMethodImplementation(type(of: view), selector), to: SetFrame.self)
+    setFrame(view, selector, CGRect(x: 0, y: 0, width: width, height: 800))
   }
 
   private func pdfKitView(in view: UIView) -> PDFView? {
@@ -46,7 +51,7 @@ import UIKit
     let pdf = try #require(pdfKitView(in: view))
     #expect(abs(pdf.scaleFactor - 800 / pageWidth) < 0.01)
 
-    resize(view, width: 400, changed: ["scale", "minScale", "maxScale", "fitPolicy"])
+    resize(view, width: 400)
     #expect(abs(pdf.scaleFactor - 400 / pageWidth) < 0.01)
     #expect(abs(pdf.minScaleFactor - 400 / pageWidth) < 0.01)
   }
@@ -54,7 +59,7 @@ import UIKit
   @Test func fitsThePageWhenTheViewGrows() throws {
     let view = try pdfView(width: 400, url: try document())
     let pdf = try #require(pdfKitView(in: view))
-    resize(view, width: 800, changed: ["scale", "minScale", "maxScale", "fitPolicy"])
+    resize(view, width: 800)
     #expect(abs(pdf.scaleFactor - 800 / pageWidth) < 0.01)
   }
 }
