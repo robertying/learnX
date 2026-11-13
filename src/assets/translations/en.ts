@@ -132,7 +132,7 @@ export default {
     'Nothing to export. Sync the course schedule or assignments to your calendar first.',
   calendarExportFailed: "Couldn't export: {error}",
   graduate: 'Graduate',
-  syncCourseSchedule: 'Sync Course Schedule',
+  syncCourseSchedule: 'Sync More Dates…',
   classAlarm: 'Class Alert',
   classAlarmBefore: 'Alert Before Class (Minutes)',
   calendarEventLength: 'Event Length (Minutes)',
@@ -396,7 +396,7 @@ export default {
   shareFile: 'Share File',
   submissionAttachmentName: '{title} Submission.{ext}',
   courseScheduleSyncCaption:
-    'When on, the {type} classes learnX has fetched, from today on, are added to your calendar and kept up to date with the timetable and these settings. Sync adds the days you pick.',
+    "When on, this week's and next week's {type} classes are added to your calendar and kept up to date with the timetable and these settings. For more weeks, tap Sync More Dates and pick the dates; those classes are kept up to date too.",
   graduateSchedule: 'graduate',
   undergraduateSchedule: 'undergraduate',
   courseInformationSharingOnCaption:

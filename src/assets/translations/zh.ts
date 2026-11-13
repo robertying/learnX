@@ -128,7 +128,7 @@ const zh: typeof en = {
   calendarExportNoEvent: '没有可导出的日程，请先将课表或作业同步到日历。',
   calendarExportFailed: '导出失败：{error}',
   graduate: '研究生',
-  syncCourseSchedule: '同步课表',
+  syncCourseSchedule: '同步更多日期…',
   classAlarm: '上课日历提醒',
   classAlarmBefore: '课前提醒（分钟）',
   calendarEventLength: '日程长度（分钟）',
@@ -383,7 +383,7 @@ const zh: typeof en = {
   shareFile: '分享文件',
   submissionAttachmentName: '{title}-提交.{ext}',
   courseScheduleSyncCaption:
-    '开启后，learnX 已获取的今天起的{type}课程会添加到日历，并随课表和以上设置自动更新。同步课表可添加所选日期的课程。',
+    '开启后，本周和下周的{type}课程会自动添加到日历，并随课表和以上设置更新。如需更多周，点按同步更多日期并选择日期，这些课程同样会自动更新。',
   graduateSchedule: '研究生',
   undergraduateSchedule: '本科生',
   courseInformationSharingOnCaption:

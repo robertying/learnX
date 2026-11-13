@@ -80,6 +80,13 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             name={userInfo?.name ?? username ?? 'learnX'}
             detail={userInfo?.department ?? undefined}
           />
+          {/* Which timetable Today, Schedule and the calendar show. */}
+          <FormToggle
+            icon="graduate"
+            title={t('graduate')}
+            value={graduate}
+            onValueChange={value => setSetting('graduate', value)}
+          />
           <FormButton
             testID="settings-logout"
             icon="logout"
@@ -92,13 +99,6 @@ const Settings: React.FC<Props> = ({ navigation }) => {
             icon="semester"
             title={t('semesterSelection')}
             onPress={() => show('SemesterSelection')}
-          />
-          {/* Which timetable Today, Schedule and the calendar show. */}
-          <FormToggle
-            icon="graduate"
-            title={t('graduate')}
-            value={graduate}
-            onValueChange={value => setSetting('graduate', value)}
           />
           <FormLink
             testID="settings-notifications"
