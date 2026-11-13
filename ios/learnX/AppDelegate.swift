@@ -21,7 +21,6 @@ class AppDelegate: ExpoAppDelegate, @MainActor ExpoReactNativeFactoryProvider {
   ) -> Bool {
     FirebaseApp.configure()
     UIScrollView.preferSoftTopEdgeEffect()
-    UICollectionView.keepRefreshControlAboveRows()
     TextInputRecycling.disable()
 
     let delegate = ReactNativeDelegate()

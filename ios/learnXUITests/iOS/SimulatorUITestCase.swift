@@ -69,10 +69,10 @@ class SimulatorUITestCase: XCTestCase {
     try XCTUnwrap(tab, "tab \(id) isn't on screen").tap()
   }
 
-  /// Pulls `element` down by `distance` points and holds it there, and returns a screenshot taken `delay` seconds
-  /// in, while the finger is still down. XCUITest's press blocks until it lifts, so the screenshot is taken off
-  /// the main thread.
-  func holdingScreenshot(pullingDown element: XCUIElement, by distance: CGFloat, after delay: TimeInterval)
+  /// Drags `element` down by `distance` points (up when negative) and holds it there, and returns a screenshot taken
+  /// `delay` seconds in, while the finger is still down. XCUITest's press blocks until it lifts, so the screenshot is
+  /// taken off the main thread.
+  func holdingScreenshot(dragging element: XCUIElement, by distance: CGFloat, after delay: TimeInterval)
     -> XCUIScreenshot?
   {
     let shot = Screenshot()
@@ -81,7 +81,7 @@ class SimulatorUITestCase: XCTestCase {
       shot.value = XCUIScreen.main.screenshot()
       taken.fulfill()
     }
-    let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.3))
+    let start = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: distance < 0 ? 0.6 : 0.3))
     start.press(
       forDuration: 0.1, thenDragTo: start.withOffset(CGVector(dx: 0, dy: distance)), withVelocity: .slow,
       thenHoldForDuration: delay + 2)

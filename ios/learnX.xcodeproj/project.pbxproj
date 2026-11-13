@@ -15,7 +15,6 @@
 		5A071000000000000000000C /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000B /* AppShortcuts.swift */; };
 		5A071000000000000000000E /* ScrollEdgeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A071000000000000000000D /* ScrollEdgeEffect.swift */; };
 		5A0710000000000000000D02 /* SharedFileInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000D01 /* SharedFileInbox.swift */; };
-		5A0710000000000000000F0E /* ListRefreshControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A0710000000000000000F0D /* ListRefreshControl.swift */; };
 		5E191CFA541A0D10472C77C2 /* Pods_learnXTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3C3928D6036512F98EC224CA /* Pods_learnXTests.framework */; };
 		66752A57317AE195AB987FFB /* Pods_learnX.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1DE528F5AED26E2F21053210 /* Pods_learnX.framework */; };
 		7687BF1E4C754BCD9B7E27BB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75600012A61A4062AECAF1A7 /* SceneDelegate.swift */; };
@@ -102,7 +101,6 @@
 		5A0710000000000000000D01 /* SharedFileInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SharedFileInbox.swift; path = ../modules/share/ios/SharedFileInbox.swift; sourceTree = SOURCE_ROOT; };
 		5A0710000000000000000E01 /* learnXTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A0710000000000000000F01 /* learnXUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = learnXUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5A0710000000000000000F0D /* ListRefreshControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = ListRefreshControl.swift; path = learnX/ListRefreshControl.swift; sourceTree = "<group>"; };
 		75600012A61A4062AECAF1A7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = learnX/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = learnX/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		98A6289E98CCDFCA5DBBFDA4 /* Pods-ExpoWidgetsTarget.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ExpoWidgetsTarget.release.xcconfig"; path = "Target Support Files/Pods-ExpoWidgetsTarget/Pods-ExpoWidgetsTarget.release.xcconfig"; sourceTree = "<group>"; };
@@ -195,7 +193,6 @@
 				5A0710000000000000000001 /* NextDeadlineIntent.swift */,
 				5A0710000000000000000009 /* NextClassIntent.swift */,
 				5A071000000000000000000B /* AppShortcuts.swift */,
-				5A0710000000000000000F0D /* ListRefreshControl.swift */,
 				5A071000000000000000000D /* ScrollEdgeEffect.swift */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				D40B9F652B248AEB004BC08C /* Assets.xcassets */,
@@ -813,7 +810,6 @@
 				5A0710000000000000000002 /* NextDeadlineIntent.swift in Sources */,
 				5A071000000000000000000A /* NextClassIntent.swift in Sources */,
 				5A071000000000000000000C /* AppShortcuts.swift in Sources */,
-				5A0710000000000000000F0E /* ListRefreshControl.swift in Sources */,
 				5A071000000000000000000E /* ScrollEdgeEffect.swift in Sources */,
 				22EC837FAE632F836A46582C /* ExpoModulesProvider.swift in Sources */,
 			);
