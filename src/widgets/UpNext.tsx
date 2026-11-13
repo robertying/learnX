@@ -21,8 +21,8 @@ import type { UpNextWidgetProps } from 'widgets/props';
  *
  * Every timeline entry has the same props; the class on now and the next ones
  * are picked by the entry's date. A class opens its course (the Lock Screen
- * widget its class's, a medium or large one each tapped class's) and a
- * deadline row its assignment; the rest, and a small widget, open Today.
+ * widget its class's, a medium or large one each tapped class's); the rest,
+ * and a small widget, open Today.
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
@@ -37,7 +37,6 @@ function UpNextWidget(
   const date = environment.date ?? new Date();
   const now = date.getTime();
   const classes = (props.classes ?? []).filter(c => c.end > now);
-  const deadlines = (props.deadlines ?? []).filter(d => d.deadline > now);
   const featured = classes[0];
   const current = !!featured && featured.start <= now;
 
@@ -222,7 +221,7 @@ function UpNextWidget(
     </VStack>
   );
 
-  // A class after the featured one, like a deadline: its course, then when.
+  // A class after the featured one, like a deadline row: its course, then when.
   // In a line where the course shortens first, or in a small widget, which
   // is too narrow for both, the start under the course.
   const laterRow = (c: UpNextWidgetProps['classes'][number]) =>
@@ -302,79 +301,30 @@ function UpNextWidget(
       : null,
   );
 
-  const dueRow = (item: UpNextWidgetProps['deadlines'][number]) => (
-    <Link
-      key={item.id}
-      destination={item.url}
-      modifiers={[
-        // Not the link tint: the row keeps its colors.
-        foregroundStyle({ type: 'hierarchical', style: 'primary' }),
-      ]}
-    >
-      {kit.dueLine({
-        title: large ? item.title : `${props.due}: ${item.title}`,
-        courseName: item.courseName,
-        due: item,
-        textStyle: 'caption',
-        color: kit.dueColor(item, now),
-      })}
-    </Link>
-  );
-
-  // A large widget names its sections; the name stays with the first row.
-  const section = (name: string, first: ReactElement) =>
-    large ? (
-      <VStack key={String(first.key)} alignment="leading" spacing={spacing}>
-        {kit.label(name, accent)}
-        {first}
-      </VStack>
-    ) : (
-      first
-    );
-
-  // The deadlines and the classes after this one, as many as fit. Rows go to
-  // the deadlines and the classes in turn, so both sections show once
-  // there's room for two; one version per pair of counts, the most first.
-  const laterClasses = classes.slice(1, large ? 9 : 4);
-  const dueDeadlines = deadlines.slice(0, large ? 6 : 3);
-  // (No array destructuring: Babel turns it into a helper the widget runtime
-  // doesn't have.)
-  const counts = [{ classes: 0, deadlines: 0 }];
-  for (;;) {
-    const last = counts[counts.length - 1];
-    const classTurn = counts.length % 2 === 0;
-    if (
-      last.classes < laterClasses.length &&
-      (classTurn || last.deadlines >= dueDeadlines.length)
-    ) {
-      counts.push({ ...last, classes: last.classes + 1 });
-    } else if (last.deadlines < dueDeadlines.length) {
-      counts.push({ ...last, deadlines: last.deadlines + 1 });
-    } else {
-      break;
-    }
-  }
-
+  // The classes after this one, as many as fit; a large widget names them
+  // above the first.
+  const later = classes.slice(1, large ? 11 : 5);
   return kit.fitted({
-    versions: counts.reverse().map(count => ({
-      key: `${count.classes}-${count.deadlines}`,
-      top,
-      rows: [
-        ...laterClasses
-          .slice(0, count.classes)
-          .map((cl, i) =>
-            i === 0 ? section(props.later, laterRow(cl)) : laterRow(cl),
+    versions: later
+      .map((_, i) => {
+        const count = later.length - i;
+        return {
+          key: String(count),
+          top,
+          rows: later.slice(0, count).map((c, j) =>
+            j === 0 && large ? (
+              <VStack key={c.key} alignment="leading" spacing={spacing}>
+                {kit.label(props.later, accent)}
+                {laterRow(c)}
+              </VStack>
+            ) : (
+              laterRow(c)
+            ),
           ),
-        ...dueDeadlines
-          .slice(0, count.deadlines)
-          .map((item, i) =>
-            i === 0 ? section(props.due, dueRow(item)) : dueRow(item),
-          ),
-      ],
-      cut:
-        count.classes < classes.length - 1 ||
-        count.deadlines < deadlines.length,
-    })),
+          cut: count < classes.length - 1,
+        };
+      })
+      .concat({ key: '0', top, rows: [], cut: false }),
     spacing,
     modifiers: [kit.background, ...openToday],
   });

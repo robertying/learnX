@@ -179,18 +179,10 @@ const upNextProps: UpNextWidgetProps = {
     klass('c5', at('08:00') + 4 * DAY, at('09:35') + 4 * DAY),
     klass('c6', at('08:00') + 5 * DAY, at('09:35') + 5 * DAY),
   ],
-  deadlines: [
-    deadline('gone', at('09:00')),
-    deadline('d1', at('23:59')),
-    deadline('d2', at('23:59') + DAY),
-    deadline('d3', at('23:59') + 2 * DAY),
-    deadline('d4', at('23:59') + 3 * DAY),
-  ],
   title: 'Up Next',
   now: 'Now',
   next: 'Next',
   later: 'Later',
-  due: 'Due',
   startsIn: 'Starts in',
   endsIn: 'Ends in',
   tomorrow: 'Tomorrow',
@@ -235,51 +227,41 @@ describe('Up Next on iOS', () => {
   const render = (widgetFamily?: string, props = upNextProps) =>
     layout(props, { widgetFamily, date: new Date(now) });
 
-  /** How many later classes and deadlines each version shows, in order. */
+  /** How many later classes each version shows, in order. */
   const shown = (widget: Node) => {
     expect(widget.type).toBe('ViewThatFitsView');
-    return childrenOf(widget).map(v => [
-      texts(v).filter(w => w.startsWith(' · ') && w.endsWith('-time')).length,
-      links(v).filter(l => String(l).startsWith('learnx://assignment/')).length,
-    ]);
+    return childrenOf(widget).map(
+      v =>
+        texts(v).filter(w => w.startsWith(' · ') && w.endsWith('-time')).length,
+    );
   };
 
-  it('shows the class on now with its end countdown, and the next deadline', () => {
+  it('shows the class on now with its end countdown, and the classes after it', () => {
     const widget = render('systemMedium');
-    // Deadlines and classes in turn, up to three each, the most first.
-    expect(shown(widget)).toEqual([
-      [3, 3],
-      [2, 3],
-      [2, 2],
-      [1, 2],
-      [1, 1],
-      [0, 1],
-      [0, 0],
-    ]);
-    const oneDeadline = childrenOf(widget)[5];
-    expect(texts(oneDeadline)).toEqual([
+    // Up to four, the most first.
+    expect(shown(widget)).toEqual([4, 3, 2, 1, 0]);
+    const oneLater = childrenOf(widget)[3];
+    expect(texts(oneLater)).toEqual([
       'Now',
       'Course now',
       'now-time',
       ' · 六教6A414',
       'Ends in ',
       `in ${iso(at('11:25'))}`,
-      'Due: Assignment d1 · ',
-      'Course of d1',
-      ' · ',
-      `in ${iso(at('23:59'))}`,
+      'Course later',
+      ' · Tomorrow later-time',
     ]);
     expect(
-      all(oneDeadline)
+      all(oneLater)
         .filter(n => n.type === 'CountdownView')
         .map(n => modifier(n, 'font')),
-    ).toEqual([{ textStyle: 'footnote' }, { textStyle: 'caption' }]);
-    // The class opens its course, the deadline its assignment.
-    expect(links(oneDeadline)).toEqual([
+    ).toEqual([{ textStyle: 'footnote' }]);
+    // Each class opens its course; no deadlines.
+    expect(links(oneLater)).toEqual([
       'learnx://course/now',
-      'learnx://assignment/d1',
+      'learnx://course/later',
     ]);
-    // Medium widgets don't name the sections.
+    // Medium widgets don't name the section.
     expect(texts(childrenOf(widget)[0])).not.toContain('Later');
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     expect(modifier(widget, 'containerBackground')).toEqual([
@@ -387,30 +369,20 @@ describe('Up Next on iOS', () => {
     expect(links(widget)).toEqual([]);
   });
 
-  it('lists as many classes and deadlines as fit under headings when large', () => {
+  it('lists as many classes as fit under a heading when large', () => {
     for (const family of ['systemLarge', 'systemExtraLarge']) {
       const widget = render(family);
-      // All five classes after this one and the four deadlines still open,
-      // then one fewer at a time.
-      expect(shown(widget).slice(0, 4)).toEqual([
-        [5, 4],
-        [4, 4],
-        [3, 4],
-        [3, 3],
-      ]);
-      const [all9, cut] = childrenOf(widget);
-      const words = texts(all9);
-      expect(words.indexOf('Later')).toBeLessThan(words.indexOf('Due'));
-      expect(words).toContain(' · c6-weekday c6-time');
-      expect(words).toContain('Assignment d4 · ');
-      expect(words).toContain('Course of d4');
+      // All five classes after this one, then one fewer at a time.
+      expect(shown(widget)).toEqual([5, 4, 3, 2, 1, 0]);
+      const [all5, cut] = childrenOf(widget);
+      expect(texts(all5)).toContain(' · c6-weekday c6-time');
       // Showing everything, it keeps to the top; leaving rows out, it
-      // spreads them, each section's name staying with its first row.
+      // spreads them, the heading staying with the first row.
       const spacers = (v: Node) =>
         childrenOf(v).filter(child => child.type === 'Spacer');
-      expect(spacers(all9)).toEqual([]);
+      expect(spacers(all5)).toEqual([]);
       expect(spacers(cut).map(spacer => spacer.props.minLength)).toEqual(
-        Array(8).fill(10),
+        Array(4).fill(10),
       );
       expect(texts(childrenOf(cut)[2]).slice(0, 3)).toEqual([
         'Later',
@@ -588,13 +560,14 @@ describe('Deadlines on iOS', () => {
     );
   });
 
-  it('lists rows without courses or links in a small widget', () => {
+  it('lists rows with courses after their titles and no links in a small widget', () => {
     const widget = render('systemSmall');
     expect(texts(version(widget, 3))).toEqual([
       'Deadlines',
       '+6',
       ...[1, 2, 3].flatMap(i => [
         `Assignment d${i}`,
+        ` · Course of d${i}`,
         `in ${iso(at('23:59') + i * DAY)}`,
       ]),
     ]);
@@ -723,21 +696,20 @@ describe('Up Next on Android', () => {
     jest.spyOn(Date, 'now').mockReturnValue(now);
   });
 
-  it('shows the class on now, the one after and the next deadline', () => {
+  it('shows the class on now and the two after it', () => {
     const widget = layout(upNextProps, { colorScheme: 'dark' });
     expect(texts(widget)).toEqual([
       'Now',
       'Course now',
       'now-time · 六教6A414',
       'Later: Course later · Tomorrow later-time',
-      'Due d1-due  ',
-      'Assignment d1',
+      'Course c3 · c3-weekday c3-time',
     ]);
     expect(openUrls(widget)).toEqual([
       'learnx://today',
       'learnx://course/now',
       'learnx://course/later',
-      'learnx://assignment/d1',
+      'learnx://course/c3',
     ]);
   });
 

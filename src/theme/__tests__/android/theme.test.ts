@@ -109,11 +109,14 @@ describe('Android widget colors', () => {
   };
   const palettes = (widget: string) => {
     const source = readFileSync(`src/widgets/${widget}.tsx`, 'utf8');
+    // The colors in the object literal that starts at `from`.
     const palette = (from: number) =>
       Object.fromEntries(
-        [...source.slice(from).matchAll(/(\w+): '(#[0-9A-F]{6})'/gi)]
-          .slice(0, 6)
-          .map(([, key, hex]) => [key, toRgb(hex)]),
+        [
+          ...source
+            .slice(from, source.indexOf('}', from))
+            .matchAll(/(\w+): '(#[0-9A-F]{6})'/gi),
+        ].map(([, key, hex]) => [key, toRgb(hex)]),
       );
     return {
       dark: palette(source.indexOf('? {')),
@@ -121,21 +124,30 @@ describe('Android widget colors', () => {
     };
   };
 
-  it.each(['Deadlines.android', 'UpNext.android'])(
-    '%s uses the Material roles',
-    widget => {
-      const widgetColors = palettes(widget);
-      for (const theme of [BrandLightTheme, BrandDarkTheme]) {
-        const colors = theme.colors as MaterialColors;
-        expect(widgetColors[theme.dark ? 'dark' : 'light']).toEqual({
-          background: colors.surface,
-          title: colors.onSurface,
-          caption: colors.onSurfaceVariant,
-          accent: colors.primary,
-          red: colors.status.red,
-          orange: colors.status.orange,
-        });
-      }
-    },
-  );
+  const roles = (colors: MaterialColors) => ({
+    background: colors.surface,
+    title: colors.onSurface,
+    caption: colors.onSurfaceVariant,
+    accent: colors.primary,
+  });
+
+  it.each([
+    // Deadlines also colors due times.
+    [
+      'Deadlines.android',
+      (colors: MaterialColors) => ({
+        ...roles(colors),
+        red: colors.status.red,
+        orange: colors.status.orange,
+      }),
+    ],
+    ['UpNext.android', roles],
+  ])('%s uses the Material roles', (widget, expected) => {
+    const widgetColors = palettes(widget);
+    for (const theme of [BrandLightTheme, BrandDarkTheme]) {
+      expect(widgetColors[theme.dark ? 'dark' : 'light']).toEqual(
+        expected(theme.colors as MaterialColors),
+      );
+    }
+  });
 });

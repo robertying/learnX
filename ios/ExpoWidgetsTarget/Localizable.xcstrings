@@ -35,19 +35,19 @@
         }
       }
     },
-    "Your class on now or next, and what's due next." : {
+    "Your class on now or next, and the ones after it." : {
       "extractionState" : "manual",
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在上或下一节课，以及最近截止的作业。"
+            "value" : "正在上或下一节课，以及之后的课。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在上或下一节课，以及最近截止的作业。"
+            "value" : "正在上或下一节课，以及之后的课。"
           }
         }
       }

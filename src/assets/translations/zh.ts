@@ -9,7 +9,6 @@ const zh: typeof en = {
   widgetNoDeadlines: '暂无待交作业',
   widgetUpNext: '接下来',
   widgetLater: '之后',
-  widgetDue: '截止',
   widgetStartsIn: '距上课',
   widgetEndsIn: '距下课',
   widgetTomorrow: '明天',

@@ -1,11 +1,10 @@
-import { Column, Row, Spacer, Text } from '@expo/ui/jetpack-compose';
+import { Column, Spacer, Text } from '@expo/ui/jetpack-compose';
 import {
   background,
   cornerRadius,
   fillMaxSize,
   fillMaxWidth,
   height,
-  padding,
   paddingAll,
 } from '@expo/ui/jetpack-compose/modifiers';
 import { createWidget, type WidgetEnvironment } from 'expo-widgets';
@@ -22,7 +21,7 @@ import type { UpNextWidgetProps } from 'widgets/props';
  * res/xml/up_next_info.xml) and whenever the app sends new props. The build
  * embeds it with `initialProps` (see expo-widgets-layout-registry.config.json)
  * so a widget added before the app has run asks to open it. Tapping it opens
- * Today, a class its course and the deadline row its assignment.
+ * Today, and a class its course.
  */
 function UpNextWidget(
   props: UpNextWidgetProps,
@@ -37,17 +36,12 @@ function UpNextWidget(
         title: '#EBDFE6',
         caption: '#D0C3CC',
         accent: '#F4ABFF',
-        // The error role and the orange custom color.
-        red: '#FFB4AB',
-        orange: '#FFB68E',
       }
     : {
         background: '#FFF7FA',
         title: '#1F1A1F',
         caption: '#4D444C',
         accent: '#660874',
-        red: '#BA1A1A',
-        orange: '#9A4605',
       };
   // Fallbacks for before the app first sends its strings. Widget layouts run
   // in their own runtime without the app's translations.
@@ -63,20 +57,11 @@ function UpNextWidget(
     url ? [{ $type: 'openUrl', url }] : [];
 
   const now = Date.now();
-  // The deadline's color by the app's rule (deadlineUrgency in
-  // helpers/assignments): red under a day left, orange when it's due by the
-  // end of tomorrow.
-  const dueColor = (d: UpNextWidgetProps['deadlines'][number]) =>
-    now > d.urgentFrom
-      ? colors.red
-      : now >= d.soonFrom
-        ? colors.orange
-        : undefined;
   const classes = (props.classes ?? []).filter(c => c.end > now);
-  const deadline = (props.deadlines ?? []).find(d => d.deadline > now);
   const featured = classes[0];
   const current = !!featured && featured.start <= now;
-  const following = classes[1];
+  // The two after it.
+  const following = classes.slice(1, 3);
 
   // Days counted in Beijing (UTC+8), as the app's timetable counts them.
   const beijingDay = (ms: number) =>
@@ -130,38 +115,16 @@ function UpNextWidget(
           {noClasses}
         </Text>
       )}
-      {following ? (
-        <Column modifiers={[fillMaxWidth(), ...openUrl(following.url)]}>
-          <Spacer modifiers={[height(6)]} />
+      {following.map((c, i) => (
+        <Column key={c.key} modifiers={[fillMaxWidth(), ...openUrl(c.url)]}>
+          <Spacer modifiers={[height(i === 0 ? 6 : 2)]} />
           <Text color={colors.caption} style={{ fontSize: 12 }} maxLines={1}>
-            {`${props.later}: ${following.courseName} · ${when(following)}`}
+            {i === 0
+              ? `${props.later}: ${c.courseName} · ${when(c)}`
+              : `${c.courseName} · ${when(c)}`}
           </Text>
         </Column>
-      ) : null}
-      {deadline ? (
-        // Padded so the row is easier to tap; more would push it out of a
-        // widget at its smallest size.
-        <Column
-          modifiers={[
-            fillMaxWidth(),
-            padding(0, 8, 0, 8),
-            ...openUrl(deadline.url),
-          ]}
-        >
-          <Row modifiers={[fillMaxWidth()]}>
-            <Text
-              color={dueColor(deadline) ?? colors.accent}
-              style={{ fontSize: 12, fontWeight: 'bold' }}
-              maxLines={1}
-            >
-              {`${props.due} ${deadline.due}  `}
-            </Text>
-            <Text color={colors.title} style={{ fontSize: 12 }} maxLines={1}>
-              {deadline.title}
-            </Text>
-          </Row>
-        </Column>
-      ) : null}
+      ))}
     </Column>
   );
 }
@@ -169,12 +132,10 @@ function UpNextWidget(
 /** What the widget shows until the app sends the first snapshot. */
 const initialProps: UpNextWidgetProps = {
   classes: [],
-  deadlines: [],
   title: '',
   now: '',
   next: '',
   later: '',
-  due: '',
   startsIn: '',
   endsIn: '',
   tomorrow: '',

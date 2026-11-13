@@ -3,6 +3,7 @@ import {
   font,
   foregroundStyle,
   frame,
+  layoutPriority,
   lineLimit,
   widgetURL,
 } from '@expo/ui/swift-ui/modifiers';
@@ -16,6 +17,7 @@ import type { DeadlineWidgetProps } from 'widgets/props';
  * the function; only its props, `environment`, the @expo/ui components and
  * what `kit` (widgets/kit) shares between the layouts.
  *
+ * A small widget names each course after its title, the rest on the due line.
  * A small widget or a Lock Screen one has one tap target, so it opens the
  * list, or the next assignment. Medium and large ones open the tapped row's
  * assignment, and the list when tapped elsewhere.
@@ -95,20 +97,30 @@ function DeadlinesWidget(
     );
   }
 
+  const titleFont = [
+    font({
+      textStyle: large ? 'headline' : 'subheadline',
+      weight: large ? 'semibold' : 'medium',
+    }),
+  ];
   const row = (item: (typeof deadlines)[number]) => {
     const content = (
       <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
-        <Text
-          modifiers={[
-            font({
-              textStyle: large ? 'headline' : 'subheadline',
-              weight: large ? 'semibold' : 'medium',
-            }),
-            lineLimit(1),
-          ]}
-        >
-          {item.title}
-        </Text>
+        {small ? (
+          // No room for the course on the due line: it follows the title,
+          // which keeps its width, and tells apart same-named assignments.
+          <HStack spacing={0}>
+            <Text modifiers={[...titleFont, lineLimit(1), layoutPriority(1)]}>
+              {item.title}
+            </Text>
+            <Text modifiers={[...titleFont, kit.secondary, lineLimit(1)]}>
+              {` · ${item.courseName}`}
+            </Text>
+            <Spacer />
+          </HStack>
+        ) : (
+          <Text modifiers={[...titleFont, lineLimit(1)]}>{item.title}</Text>
+        )}
         {kit.dueLine({
           courseName: small ? undefined : item.courseName,
           due: item,

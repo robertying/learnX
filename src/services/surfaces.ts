@@ -261,17 +261,15 @@ const surfaces: Surface[] = [
   },
   {
     name: 'Up Next',
-    deps: i => [i.classes, i.assignments, i.hiddenCourses, i.archived],
+    deps: i => [i.classes],
     // Until this week's classes are known, both keep what they had.
-    update: ({ classes: json, assignments, hiddenCourses, archived }) => {
+    update: ({ classes: json }) => {
       if (!json) {
         return;
       }
       const classes = JSON.parse(json) as UpcomingClass[];
       saveUpcomingClasses(classes);
-      if (assignments) {
-        updateUpNextWidget(classes, assignments, { hiddenCourses, archived });
-      }
+      updateUpNextWidget(classes);
     },
   },
   {

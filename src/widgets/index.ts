@@ -9,7 +9,6 @@ import { beijingWallClock } from 'helpers/serverTime';
 import { UpcomingClass, upNextTimes } from 'helpers/upNext';
 import { deadlineUrgencyTimes } from 'helpers/assignments';
 import {
-  deadlineChangeTimes,
   deadlineTimeline,
   upcomingDeadlines,
   UpcomingDeadlines,
@@ -95,11 +94,8 @@ export function updateDeadlineWidget(
   }
 }
 
-/** The Up Next widget's props, for the classes and assignments still ahead. */
-export const upNextProps = (
-  classes: UpcomingClass[],
-  deadlines: UpcomingDeadlines['deadlines'],
-): UpNextWidgetProps => ({
+/** The Up Next widget's props, for the classes still ahead. */
+export const upNextProps = (classes: UpcomingClass[]): UpNextWidgetProps => ({
   classes: classes.map(c => ({
     key: c.key,
     courseName: c.courseName,
@@ -115,12 +111,10 @@ export const upNextProps = (
       ? getTargetUrl({ type: 'course', id: c.courseId })
       : undefined,
   })),
-  deadlines: deadlineProps(deadlines),
   title: t('widgetUpNext'),
   now: t('todayNow'),
   next: t('todayNext'),
   later: t('widgetLater'),
-  due: t('widgetDue'),
   startsIn: t('widgetStartsIn'),
   endsIn: t('widgetEndsIn'),
   tomorrow: t('widgetTomorrow'),
@@ -132,50 +126,28 @@ export const upNextProps = (
 let lastUpNext: string | undefined;
 
 /**
- * Shows the classes still ahead and the next deadlines in the Up Next widget.
- * Pass nothing (e.g. after logging out) to empty it.
+ * Shows the classes still ahead in the Up Next widget. Pass nothing (e.g.
+ * after logging out) to empty it.
  *
  * The widget picks what's on now from the props by its own clock, so iOS gets
- * one set of props in a timeline entry at each class start and end and each
- * deadline. Android has no timelines; its widget redraws every half hour.
+ * one set of props in a timeline entry at each class start and end. Android
+ * has no timelines; its widget redraws every half hour.
  */
-export function updateUpNextWidget(
-  classes: UpcomingClass[] = [],
-  assignments: Assignment[] = [],
-  {
-    hiddenCourses = [],
-    archived = [],
-  }: { hiddenCourses?: string[]; archived?: string[] } = {},
-) {
+export function updateUpNextWidget(classes: UpcomingClass[] = []) {
   try {
     const widget = upNextWidget();
     if (!widget) {
       return;
     }
-    const now = Date.now();
-    const { deadlines } = upcomingDeadlines(assignments, {
-      hiddenCourses,
-      archived,
-      now,
-      limit: 10,
-    });
-    const props = upNextProps(classes, deadlines);
+    const props = upNextProps(classes);
     const key = JSON.stringify(props);
     if (key === lastUpNext) {
       return;
     }
     lastUpNext = key;
     if (Platform.OS === 'ios') {
-      const times = upNextTimes(
-        classes,
-        deadlineChangeTimes(
-          deadlines.map(d => d.deadline),
-          now,
-        ),
-        { now },
-      );
       widget.updateTimeline(
-        times.map(date => ({ date: new Date(date), props })),
+        upNextTimes(classes).map(date => ({ date: new Date(date), props })),
       );
     } else {
       widget.updateSnapshot(props);
