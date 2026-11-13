@@ -49,19 +49,18 @@ jest.mock('services/listActions', () => ({
 }));
 
 jest.mock('components/FlatList', () => require('react-native').FlatList);
-// The pager, showing the selected tab's page.
+// The pager, showing the selected tab's page, its props recorded.
+const mockTabView = jest.fn();
 jest.mock('react-native-tab-view', () => ({
-  TabView: ({
-    navigationState,
-    renderScene,
-    renderTabBar,
-    onIndexChange,
-  }: {
+  TabView: (props: {
     navigationState: { index: number; routes: { key: string }[] };
     renderScene: (props: object) => React.ReactNode;
     renderTabBar: (props: object) => React.ReactNode;
     onIndexChange: (index: number) => void;
+    swipeEnabled?: boolean;
   }) => {
+    mockTabView(props);
+    const { navigationState, renderScene, renderTabBar, onIndexChange } = props;
     const jumpTo = (key: string) =>
       onIndexChange(navigationState.routes.findIndex(r => r.key === key));
     return (
@@ -162,7 +161,7 @@ const actionNames = () =>
   noticeCard().props.accessibilityActions?.map((a: { name: string }) => a.name);
 const swipeEnabled = () => screen.getAllByTestId('swipeable')[0].props.enabled;
 
-it('favorites and archives a card from its actions, and leaves archived ones out', async () => {
+it('favorites and archives a card from its actions, and keeps archived ones', async () => {
   const notice = of(mockNotices)[0];
   await renderScreen();
   expect(actionNames()).toEqual(['fav', 'archive']);
@@ -180,12 +179,20 @@ it('favorites and archives a card from its actions, and leaves archived ones out
   expect(toggleArchived).toHaveBeenCalledWith('notice', [notice.id], false);
 
   await act(() => setArchived('notice', [notice.id], true));
-  expect(screen.queryByText(notice.title)).toBeNull();
+  expect(screen.getByText(notice.title)).toBeTruthy();
+  expect(actionNames()).toEqual(['archive']);
+  await fireEvent(noticeCard(), 'accessibilityAction', {
+    nativeEvent: { actionName: 'archive' },
+  });
+  expect(toggleArchived).toHaveBeenLastCalledWith('notice', [notice.id], true);
 });
 
-it("doesn't swipe the cards, which the pager swipes between tabs", async () => {
+it('swipes the cards, and changes tabs only from the tabs', async () => {
   await renderScreen();
-  expect(swipeEnabled()).toBe(false);
+  expect(swipeEnabled()).toBe(true);
+  expect(mockTabView).toHaveBeenLastCalledWith(
+    expect.objectContaining({ swipeEnabled: false }),
+  );
 });
 
 it('opens the course on CourseX from the header', async () => {
@@ -230,7 +237,7 @@ describe('from iOS 26', () => {
     expect(screen.queryByText(of(mockNotices)[0].title)).toBeNull();
   });
 
-  it('swipes the cards, with no pager to swipe', async () => {
+  it('swipes the cards', async () => {
     await renderScreen();
     await fireEvent(screen.getByText(t('files')), 'layout', {
       nativeEvent: { layout: { height: 52 } },

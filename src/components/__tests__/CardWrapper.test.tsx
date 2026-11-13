@@ -107,16 +107,6 @@ describe('CardWrapper', () => {
     expect(mockSwipeableMethods.openRight).not.toHaveBeenCalled();
   });
 
-  it('turns only swipe off with swipeDisabled', async () => {
-    const onToggleFav = jest.fn();
-    await render(card({ swipeDisabled: true, onToggleFav }));
-    expect(swipeEnabled()).toBe(false);
-    expect(menu().actions.map(a => a.key)).toEqual(['fav', 'archive']);
-    expect(actionNames()).toEqual(['fav:Favorite', 'archive:Archive']);
-    await accessibilityAction('fav');
-    expect(onToggleFav).toHaveBeenCalled();
-  });
-
   describe('for VoiceOver and TalkBack', () => {
     it('is a button with the swipe actions as accessibility actions', async () => {
       const onToggleFav = jest.fn();
