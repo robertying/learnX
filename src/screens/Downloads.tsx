@@ -156,7 +156,7 @@ const Downloads: React.FC<Props> = () => {
                       },
                     },
                     {
-                      label: t('delete'),
+                      label: t('deleteEllipsis'),
                       destructive: true,
                       onPress: () =>
                         confirm(
@@ -186,7 +186,7 @@ const Downloads: React.FC<Props> = () => {
         <FormSection>
           <FormButton
             icon="delete"
-            title={t('clearFileCache')}
+            title={t('clearFileCacheEllipsis')}
             onPress={() =>
               confirm(
                 t('clearFileCache'),

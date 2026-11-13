@@ -230,7 +230,7 @@ const AssignmentSubmissionContent: React.FC<{
     ? t('reUploadAttachment')
     : submittedAttachment
       ? t('overwriteAttachment')
-      : t('pickAttachment');
+      : t('pickAttachmentEllipsis');
 
   return (
     <FormScreen>
@@ -345,7 +345,7 @@ const AssignmentSubmissionContent: React.FC<{
         {hasDraft ? (
           <FormSection>
             <FormButton
-              title={t('discardDraft')}
+              title={t('discardDraftEllipsis')}
               icon="delete"
               disabled={uploading}
               onPress={handleDraftDiscard}

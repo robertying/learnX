@@ -80,7 +80,7 @@ const Settings: React.FC<Props> = ({ navigation }) => {
           <FormButton
             testID="settings-logout"
             icon="logout"
-            title={t('logout')}
+            title={t('logoutEllipsis')}
             onPress={handleLogout}
           />
         </FormSection>

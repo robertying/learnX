@@ -67,13 +67,15 @@ export default {
   removeUploadedAttachment: 'Remove Uploaded Attachment',
   draftSaved: 'Draft saved',
   discardDraft: 'Discard Draft',
+  discardDraftEllipsis: 'Discard Draft…',
   discardDraftConfirmation:
     "The text and file you haven't submitted will be deleted.",
   discard: 'Discard',
   removePickedAttachment: 'Remove Attachment',
-  reUploadAttachment: 'Choose Another Attachment',
-  overwriteAttachment: 'Replace Uploaded Attachment',
+  reUploadAttachment: 'Choose Another Attachment…',
+  overwriteAttachment: 'Replace Uploaded Attachment…',
   pickAttachment: 'Choose Attachment',
+  pickAttachmentEllipsis: 'Choose Attachment…',
   submissionContent: 'Content',
   submissionAttachment: 'Attachment',
   uploadingSubmission: 'Uploading…',
@@ -90,7 +92,10 @@ export default {
     'No classes in this date range. Check Web Learning for a schedule.',
   openSystemSettings: 'Open System Settings',
   deleteSyncedCalendarsAndReminders: 'Delete Synced Calendars & Reminders',
+  deleteSyncedCalendarsAndRemindersEllipsis:
+    'Delete Synced Calendars & Reminders…',
   deleteSyncedCalendars: 'Delete Synced Calendars',
+  deleteSyncedCalendarsEllipsis: 'Delete Synced Calendars…',
   deleteSyncedCalendarsAndRemindersConfirmation:
     "Delete the calendars and reminder lists learnX created? This can't be undone.",
   deleteSyncedCalendarsConfirmation:
@@ -104,6 +109,7 @@ export default {
     "Couldn't delete. Give learnX access to Reminders in System Settings. If it already has access, restart learnX.",
   deleteFailed: "Couldn't delete: {error}",
   exportSyncedCalendars: 'Export Synced Events (.ics)',
+  exportSyncedCalendarsEllipsis: 'Export Synced Events (.ics)…',
   turnOnNotifications: 'Turn On Notifications',
   notificationsOffCaption:
     "Notifications for learnX are off in System Settings, so the ones turned on below can't show.",
@@ -146,13 +152,14 @@ export default {
   assignmentSyncDescription:
     "Upcoming assignments are added and kept up to date whenever learnX gets assignments. Past-due assignments aren't added, and archived ones and those of hidden courses are removed.",
   clearFileCache: 'Delete All Downloads',
+  clearFileCacheEllipsis: 'Delete All Downloads…',
   clearFileCacheConfirmation:
     "Delete all downloaded files? This can't be undone.",
   clearFileCacheSucceeded: 'Deleted all downloads',
   fileDownloadFailed: "Couldn't download the file. Try again.",
   openFileFailed:
     "Couldn't open the file. Download it again, or install an app that can open this type of file.",
-  share: 'Share',
+  share: 'Share…',
   open: 'Open',
   missingUsername: 'Enter your username or student ID',
   missingPassword: 'Enter your password',
@@ -165,6 +172,7 @@ export default {
   itemNotFound: 'This item is no longer available',
   searchPlaceholder: 'Notices, assignments and files',
   logout: 'Log Out',
+  logoutEllipsis: 'Log Out…',
   logoutQuestion: 'Log Out?',
   logoutConfirmation:
     'Your settings, favorites, archived and hidden items and drafts on this device will be removed.',
@@ -257,8 +265,8 @@ export default {
   more: 'More',
   refresh: 'Refresh',
   dragToReorder: 'Hold and drag to reorder',
-  documents: 'Choose File',
-  photos: 'Photo Library',
+  documents: 'Choose File…',
+  photos: 'Photo Library…',
   assignmentIndividualCompletion: 'Complete Individually',
   assignmentGroupCompletion: 'Complete as a Group',
   assignmentOnlineSubmission: 'Submit Online',
@@ -404,14 +412,15 @@ export default {
   courseInformationSharingOffCaption:
     'When this is on, course information for the current semester (course number, name, teacher, times and locations) is uploaded to courseX, where others can see it. Personal information is never uploaded or shared.\n\nUse courseX to find courses and see when and where they meet.',
   delete: 'Delete',
+  deleteEllipsis: 'Delete…',
   downloads: 'Downloads',
   downloadsTotal: 'All Downloads',
   downloadsCaption:
     'Files downloaded in learnX, by course. Tap a course to export or delete its files.',
-  downloadsExport: 'Export All Downloads',
+  downloadsExport: 'Export All Downloads…',
   downloadsExportCaption:
     'Copies the files to a "learnX" folder in a place you choose, sorted by semester and course. Exporting again updates that folder.',
-  downloadsExportCourse: 'Export',
+  downloadsExportCourse: 'Export…',
   downloadsExported: 'Exported {files}',
   downloadsExportedPartly: "Exported {files}; {failed} couldn't be copied",
   downloadsExportFailed: "Couldn't export: {error}",

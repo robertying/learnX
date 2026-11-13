@@ -91,7 +91,7 @@ it("deletes a course's files once confirmed, then lists again", async () => {
       `${t('downloadsFileCount', { count: 3 })} · 2.0 KB`,
     ),
   ).toBeTruthy();
-  await pressChoice(t('delete'));
+  await pressChoice(t('deleteEllipsis'));
   expect(alert.mock.calls[0][0]).toBe(t('downloadsDeleteCourse'));
   expect(alert.mock.calls[0][1]).toContain('物理');
   expect(removeCourseDownloads).not.toHaveBeenCalled();
@@ -108,13 +108,13 @@ it("deletes a course's files once confirmed, then lists again", async () => {
 
 it('clears the file cache, and says why when it fails', async () => {
   await renderScreen();
-  await userEvent.press(screen.getByText(t('clearFileCache')));
+  await userEvent.press(screen.getByText(t('clearFileCacheEllipsis')));
   await confirmDelete();
   expect(removeFileDir).toHaveBeenCalled();
   expect(toast).toHaveBeenCalledWith(t('clearFileCacheSucceeded'), 'success');
 
   jest.mocked(removeFileDir).mockRejectedValueOnce(new Error('busy'));
-  await userEvent.press(screen.getByText(t('clearFileCache')));
+  await userEvent.press(screen.getByText(t('clearFileCacheEllipsis')));
   await confirmDelete();
   expect(toast).toHaveBeenLastCalledWith(
     t('deleteFailed', { error: 'busy' }),
