@@ -354,7 +354,6 @@ const AssignmentSubmissionContent: React.FC<{
               <FormButton
                 title={t('removeUploadedAttachment')}
                 icon="delete"
-                destructive
                 disabled={uploading}
                 onPress={handleUploadedAttachmentRemove}
               />
