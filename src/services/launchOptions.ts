@@ -19,10 +19,11 @@ export interface LaunchOptions {
    */
   storeReport?: unknown;
   /**
-   * The live test account (`scripts/e2e.sh --live`): typing this username
-   * signs in with `liveFingerprint`, the device fingerprint of an earlier SSO
-   * login, instead of opening the SSO page, which adds a device each time.
-   * Only debug builds and E2E_LIVE builds take them.
+   * A test login: typing this username signs in with `liveFingerprint`
+   * instead of opening the SSO page, which adds a device each time. The live
+   * test account (`scripts/e2e.sh --live`) passes the fingerprint of an
+   * earlier SSO login; the login check flow passes an account that doesn't
+   * exist. Only debug builds and E2E builds (TEST_LOGIN) take them.
    */
   liveUsername?: unknown;
   liveFingerprint?: unknown;
@@ -56,7 +57,7 @@ export const applyLaunchOptions = (initialProps?: LaunchOptions) => {
     setMockNetworkConfig({ latency: mockLatency });
   }
 
-  if (__DEV__ || env.E2E_LIVE) {
+  if (__DEV__ || env.TEST_LOGIN) {
     const username = read('liveUsername', initialProps);
     const fingerPrint = read('liveFingerprint', initialProps);
     liveLogin =

@@ -3,9 +3,10 @@
 # emulator. E2E runs always use Release, never a debug build: it bundles the
 # JS (no Metro), starts faster and is what ships, so the flows run on what R8
 # and Hermes made.
-# The bundle inlines .env, so its mock login works as in debug builds. With
-# E2E_LIVE=1 it takes the live test login from launch arguments
-# (scripts/e2e.sh --live); no live value goes into the build.
+# The bundle inlines .env, so its mock login works as in debug builds. It's
+# built with TEST_LOGIN=1, so it takes a test login from launch arguments (the
+# login check flow, scripts/e2e.sh --live) and says why a login failed; no live
+# value goes into the build, and the fastlane lanes refuse to build with it.
 #
 #   scripts/e2e-build.sh ios <simulator udid>
 #   scripts/e2e-build.sh android <emulator serial>
@@ -28,6 +29,8 @@ fi
 
 cd "$(dirname "$0")/.."
 
+export TEST_LOGIN=1
+
 case "$platform" in
 ios)
   derived="${DERIVED_DATA:-$HOME/Library/Developer/Xcode/DerivedData/learnX-e2e}"
@@ -46,9 +49,9 @@ ios)
   ;;
 android)
   abi="${ANDROID_ABI:-arm64-v8a}"
-  # The JS bundle task doesn't see the build's environment (E2E_LIVE, see
-  # babel/inline-env.js), so it always reruns rather than reuse a bundle made
-  # with or without it.
+  # Gradle doesn't know the JS bundle depends on TEST_LOGIN (see
+  # babel/inline-env.js), so the task always reruns rather than reuse a bundle
+  # made without it.
   (cd android && ./gradlew app:createBundleReleaseJsAndAssets --rerun \
     app:assembleRelease -PciRelease -PreactNativeArchitectures="$abi")
   apk="android/app/build/outputs/apk/release/app-$abi-release.apk"

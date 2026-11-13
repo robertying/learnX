@@ -14,8 +14,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-if [ -n "${E2E_LIVE:-}" ]; then
-  echo "E2E_LIVE is set: unset it; release bundles never take a live login" >&2
+if [ -n "${TEST_LOGIN:-}" ]; then
+  echo "TEST_LOGIN is set: unset it; release bundles never take a test login" >&2
   exit 1
 fi
 if [ ! -f .env ]; then

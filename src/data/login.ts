@@ -21,6 +21,7 @@ import { clearAccountData } from 'data/accountData';
 import { userQuery } from 'data/queries';
 import type { UserData } from 'data/userData';
 import { errorReason, isBadCredential, isNetworkError } from 'helpers/errors';
+import env from 'helpers/env';
 import { isMockUser } from 'helpers/mock';
 import { retry } from 'helpers/retry';
 
@@ -150,8 +151,8 @@ export async function login({
       loggedIn: false,
       error: errorReason(err),
       // What the SSO server answered (thu-learn-lib's `extra`), which the
-      // login screen shows in debug builds.
-      errorDetail: __DEV__ ? errorDetail(err) : null,
+      // login screen shows in debug and E2E builds.
+      errorDetail: __DEV__ || env.TEST_LOGIN ? errorDetail(err) : null,
       failure: offline ? 'offline' : 'rejected',
     });
   }

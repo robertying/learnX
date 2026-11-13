@@ -8,10 +8,11 @@
 //   are transformed with Babel env "production" and never get them; the
 //   fastlane build lanes also fail if a release bundle contains a .env value
 //   that shouldn't be there.
-// - E2E_LIVE=1 in the build's environment (`E2E_LIVE=1 scripts/e2e-build.sh`)
-//   adds `E2E_LIVE: true`, no .env value: that build takes the live test login
-//   from launch arguments (services/launchOptions.ts), so live E2E runs need no
-//   secret in any bundle. The fastlane build lanes refuse to run with it set.
+// - TEST_LOGIN=1 in the build's environment (set by scripts/e2e-build.sh for
+//   every E2E build) adds `TEST_LOGIN: true`, no .env value: that build takes a
+//   test login from launch arguments (services/launchOptions.ts) and says why a
+//   login failed, so E2E runs need no secret in any bundle. The fastlane build
+//   lanes refuse to run with it set.
 // Every other key in .env is left out.
 const crypto = require('crypto');
 const fs = require('fs');
@@ -38,7 +39,7 @@ const mask = value => {
   return { key, data: codes.map((c, i) => c ^ key[i]) };
 };
 
-const buildEnv = (includeDev, e2eLive = false) => {
+const buildEnv = (includeDev, testLogin = false) => {
   const parsed = readEnv();
   const env = {};
   for (const key of PUBLIC_KEYS) {
@@ -52,14 +53,14 @@ const buildEnv = (includeDev, e2eLive = false) => {
       if (DEV_KEY.test(key) && value) env[key] = value;
     }
   }
-  if (e2eLive) env.E2E_LIVE = true;
+  if (testLogin) env.TEST_LOGIN = true;
   return env;
 };
 
 function inlineEnv(api) {
   // Also makes Babel cache this plugin's config per env name.
   const includeDev = DEV_ENVS.has(api.env());
-  const e2eLive = api.cache.using(() => process.env.E2E_LIVE === '1');
+  const testLogin = api.cache.using(() => process.env.TEST_LOGIN === '1');
   const t = api.types;
 
   return {
@@ -67,7 +68,7 @@ function inlineEnv(api) {
     visitor: {
       Identifier(p) {
         if (p.node.name !== PLACEHOLDER || !p.isReferencedIdentifier()) return;
-        p.replaceWith(t.valueToNode(buildEnv(includeDev, e2eLive)));
+        p.replaceWith(t.valueToNode(buildEnv(includeDev, testLogin)));
       },
     },
   };

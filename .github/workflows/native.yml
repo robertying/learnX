@@ -125,6 +125,8 @@ jobs:
         env:
           CMAKE_C_COMPILER_LAUNCHER: ccache
           CMAKE_CXX_COMPILER_LAUNCHER: ccache
+          # An E2E build, as scripts/e2e-build.sh makes (babel/inline-env.js).
+          TEST_LOGIN: '1'
 
       - name: Show ccache stats
         if: always() && steps.changes.outputs.changed == 'true'

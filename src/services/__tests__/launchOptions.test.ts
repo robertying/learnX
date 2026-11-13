@@ -69,7 +69,7 @@ describe('live login', () => {
 
   afterEach(() => {
     (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
-    delete (env as { E2E_LIVE?: boolean }).E2E_LIVE;
+    delete (env as { TEST_LOGIN?: boolean }).TEST_LOGIN;
     applyLaunchOptions();
   });
 
@@ -96,13 +96,13 @@ describe('live login', () => {
     expect(getLiveLogin()).toBeUndefined();
   });
 
-  it('is ignored by release builds without E2E_LIVE', () => {
+  it('is ignored by release builds other than E2E builds', () => {
     jest.replaceProperty(Platform, 'OS', 'android');
     (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
     applyLaunchOptions(live);
     expect(getLiveLogin()).toBeUndefined();
 
-    (env as { E2E_LIVE?: boolean }).E2E_LIVE = true;
+    (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
     applyLaunchOptions(live);
     expect(getLiveLogin()).toEqual({ username: 'student', fingerPrint: 'fp' });
   });
