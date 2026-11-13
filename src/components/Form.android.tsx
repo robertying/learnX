@@ -1,6 +1,11 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
-import { StyleSheet, useWindowDimensions, type ViewProps } from 'react-native';
+import {
+  Keyboard,
+  StyleSheet,
+  useWindowDimensions,
+  type ViewProps,
+} from 'react-native';
 import {
   Badge,
   CircularProgressIndicator,
@@ -612,7 +617,9 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
         <OutlinedTextField
           value={text}
           singleLine
-          keyboardOptions={{ keyboardType: 'number' }}
+          // The keyboard's ✓ key puts the keyboard away.
+          keyboardOptions={{ keyboardType: 'number', imeAction: 'done' }}
+          keyboardActions={{ onDone: () => Keyboard.dismiss() }}
           textStyle={{ textAlign: 'right' }}
           onValueChange={parseNumberInput(onValueChange)}
           modifiers={[width(96)]}

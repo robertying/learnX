@@ -161,7 +161,7 @@ const Downloads: React.FC<Props> = () => {
                       onPress: () =>
                         confirm(
                           t('downloadsDeleteCourse'),
-                          `${course.courseName}\n${summary(course)}`,
+                          `${course.courseName}\n${summary(course)}\n\n${t('downloadsDeleteKeepsExported')}`,
                           () => removeCourseDownloads(course.courseId),
                           t('downloadsDeletedCourse', {
                             course: course.courseName,

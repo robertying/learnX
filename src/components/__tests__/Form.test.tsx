@@ -6,7 +6,7 @@ import {
   waitFor,
 } from '@testing-library/react-native';
 import { useState } from 'react';
-import { PlatformColor, Text } from 'react-native';
+import { Keyboard, PlatformColor, Text } from 'react-native';
 import {
   Form,
   FormButton,
@@ -36,6 +36,7 @@ import {
 } from '@expo/ui/swift-ui/modifiers';
 import { FormProfile } from 'components/Form';
 import DeviceInfo from 'constants/DeviceInfo';
+import { t } from 'helpers/i18n';
 import { BrandLightTheme } from 'theme';
 
 describe('Form', () => {
@@ -234,6 +235,47 @@ describe('Form', () => {
     await fireEvent.changeText(field, '30');
     expect(onValueChange).toHaveBeenCalledTimes(1);
     expect(onValueChange).toHaveBeenCalledWith(30);
+  });
+
+  it('shows Done in the header while a number is typed, except on the Mac', async () => {
+    const dismiss = jest.spyOn(Keyboard, 'dismiss');
+    const navigation = { setOptions: jest.fn() };
+    const numberForm = (
+      <NavigationContext.Provider value={navigation as never}>
+        <Form>
+          <FormSection>
+            <FormNumberField
+              title="Minutes"
+              value={15}
+              onValueChange={jest.fn()}
+            />
+          </FormSection>
+        </Form>
+      </NavigationContext.Provider>
+    );
+    const headerRight = () =>
+      navigation.setOptions.mock.calls
+        .map(([options]) => options)
+        .findLast(options => 'headerRight' in options)?.headerRight;
+    await render(numberForm);
+    expect(headerRight()).toBeUndefined();
+
+    await fireEvent(screen.getByLabelText('Minutes'), 'focus');
+    await render(<>{headerRight()()}</>);
+    await userEvent.setup().press(screen.getByText(t('done')));
+    expect(dismiss).toHaveBeenCalled();
+
+    await render(numberForm);
+    await fireEvent(screen.getByLabelText('Minutes'), 'focus');
+    await fireEvent(screen.getByLabelText('Minutes'), 'blur');
+    await render(<>{headerRight()()}</>);
+    expect(screen.queryByText(t('done'))).toBeNull();
+
+    jest.spyOn(DeviceInfo, 'isMac').mockReturnValue(true);
+    navigation.setOptions.mockClear();
+    await render(numberForm);
+    await fireEvent(screen.getByLabelText('Minutes'), 'focus');
+    expect(headerRight()).toBeUndefined();
   });
 
   it('names a text field for screen readers by its label', async () => {

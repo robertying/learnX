@@ -20,6 +20,7 @@ import {
 import useCalendarAccess from 'hooks/useCalendarAccess';
 import CalendarSettings from 'screens/CalendarSettings';
 import { screenProps } from 'test-utils/screenProps';
+import { navigationTitle } from '@expo/ui/swift-ui/modifiers';
 
 jest.mock('helpers/systemSettings', () => ({ openSystemSettings: jest.fn() }));
 jest.mock('hooks/useCalendarAccess', () => jest.fn());
@@ -80,9 +81,10 @@ beforeEach(() => {
 
 it('turns course schedule sync on through the sync hook', async () => {
   await renderScreen();
+  // Off, the note says what the switch does, not the settings it hides.
   expect(
     screen.getByText(
-      t('courseScheduleSyncCaption', { type: t('undergraduateSchedule') }),
+      t('courseScheduleSyncOffCaption', { type: t('undergraduateSchedule') }),
     ),
   ).toBeTruthy();
   // Its options show only while it's on.
@@ -98,7 +100,7 @@ it('saves the course schedule settings and opens the range picker', async () => 
   await renderScreen();
   expect(
     screen.getByText(
-      t('courseScheduleSyncCaption', { type: t('graduateSchedule') }),
+      t('courseScheduleSyncOnCaption', { type: t('graduateSchedule') }),
     ),
   ).toBeTruthy();
   await toggle(t('courseEventOmitLocation'), true);
@@ -106,6 +108,26 @@ it('saves the course schedule settings and opens the range picker', async () => 
 
   await userEvent.press(screen.getByText(t('syncCourseSchedule')));
   expect(picker.openPicker).toHaveBeenCalled();
+});
+
+it('says the sync dates are Beijing dates on a phone elsewhere', async () => {
+  setSetting('courseCalendarSync', true);
+  await renderScreen();
+  expect(
+    screen.queryByText(t('syncDatesBeijingCaption'), { exact: false }),
+  ).toBeNull();
+
+  jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(480);
+  jest
+    .mocked(useCourseScheduleSync)
+    .mockReturnValue({ ...courseSync, picker: { ...picker, open: true } });
+  await renderScreen();
+  expect(
+    screen.getByText(t('syncDatesBeijingCaption'), { exact: false }),
+  ).toBeTruthy();
+  expect(navigationTitle).toHaveBeenCalledWith(
+    `${t('datePickerLabel')} · ${t('beijingTime')}`,
+  );
 });
 
 it('asks how long before a class to alarm once class alarms are on', async () => {
@@ -120,7 +142,9 @@ it('asks how long before a class to alarm once class alarms are on', async () =>
 
 it('turns assignment sync on and off through the sync hook', async () => {
   await renderScreen();
-  expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
+  expect(screen.getByText(t('assignmentCalendarSyncOffCaption'))).toBeTruthy();
+  expect(screen.getByText(t('assignmentReminderSyncOffCaption'))).toBeTruthy();
+  expect(screen.queryByText(t('assignmentSyncDescription'))).toBeNull();
   // Each sync's options show only while it's on.
   expect(screen.queryByText(t('assignmentCalendarAlarm'))).toBeNull();
   expect(screen.queryByText(t('assignmentReminderAlarm'))).toBeNull();
@@ -148,7 +172,11 @@ it('shows the alert options of the syncs that are on', async () => {
   ] as const) {
     expect(screen.getAllByText(t(label)).length).toBeGreaterThan(0);
   }
-  expect(screen.getByText(t('assignmentReminderAlarmCaption'))).toBeTruthy();
+  expect(
+    screen.getByText(
+      `${t('assignmentSyncDescription')}\n${t('assignmentReminderAlarmCaption')}`,
+    ),
+  ).toBeTruthy();
   await toggle(t('assignmentCalendarNoAlarmIfComplete'), true);
   expect(getSettings().alarms.assignmentCalendarNoAlarmIfComplete).toBe(true);
   await toggle(t('assignmentCalendarSecondAlarm'), false);
@@ -161,7 +189,8 @@ it('leaves the Reminders section out on Android', async () => {
   jest.replaceProperty(Platform, 'OS', 'android');
   await renderScreen();
   expect(screen.queryByText(t('setupReminders'))).toBeNull();
-  expect(screen.getByText(t('assignmentSyncDescription'))).toBeTruthy();
+  expect(screen.getByText(t('assignments'))).toBeTruthy();
+  expect(screen.getByText(t('assignmentCalendarSyncOffCaption'))).toBeTruthy();
   expect(screen.getByText(t('calendarAccessCaption'))).toBeTruthy();
 });
 
@@ -211,7 +240,7 @@ it('says when each sync last finished, while it is on', async () => {
   await renderScreen();
   expect(screen.getAllByText(lastSynced, { exact: false })).toHaveLength(2);
   // On the caption's next line, not a paragraph of its own.
-  const caption = t('courseScheduleSyncCaption', {
+  const caption = t('courseScheduleSyncOnCaption', {
     type: t('undergraduateSchedule'),
   });
   expect(screen.getByText(`${caption}\n${lastSynced}`)).toBeTruthy();

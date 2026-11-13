@@ -114,9 +114,10 @@ export interface AssignmentEventInput {
 
 /**
  * iOS reminder for an assignment, due at the deadline. With the alert on, it
- * alerts then and the chosen minutes before. Reminders lists a reminder at its
+ * alerts then and the chosen minutes before, unless that time has passed. Reminders lists a reminder at its
  * earliest alert (apps can't set Early Reminder), while the due date stays
- * the deadline. Its link opens the assignment in learnX.
+ * the deadline. Its link, at the end of its notes, opens the assignment in
+ * learnX.
  */
 export const buildAssignmentReminderDetails = (
   settings: SettingsState,
@@ -128,11 +129,13 @@ export const buildAssignmentReminderDetails = (
     completed,
     completionDate,
   }: AssignmentEventInput,
+  now: Dayjs = dayjs(),
 ): ReminderDetails => {
   const alarms = settings.alarms;
   const before =
     alarms.assignmentReminderAlarmOffset ??
     calendarDefaults.assignmentReminderAlarmOffset;
+  const url = getTargetUrl({ type: 'assignment', id: assignmentId });
   return {
     title,
     // No start date, so the alerts count from the due date.
@@ -140,15 +143,20 @@ export const buildAssignmentReminderDetails = (
     alarms: alarms.assignmentReminderAlarm
       ? [
           { relativeOffset: 0 },
-          ...(before > 0 ? [{ relativeOffset: -before }] : []),
+          // Not one already past, which Reminders would fire right away.
+          ...(before > 0 && dueDate.subtract(before, 'minute').isAfter(now)
+            ? [{ relativeOffset: -before }]
+            : []),
         ]
       : [],
     // The device's zone: Reminders labels any other zone (e.g. "GMT+8").
     timeZone: deviceTimeZone(),
     completed,
     completionDate: completionDate?.toDate(),
-    notes: note,
-    url: getTargetUrl({ type: 'assignment', id: assignmentId }),
+    // Reminders doesn't show the url field that apps can set, so the link
+    // also ends the notes, where it can be tapped.
+    notes: [note, url].filter(Boolean).join('\n\n'),
+    url,
   };
 };
 

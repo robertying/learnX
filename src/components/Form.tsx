@@ -1,5 +1,6 @@
 import {
   cloneElement,
+  createContext,
   useContext,
   useLayoutEffect,
   useRef,
@@ -8,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import {
+  Keyboard,
   PlatformColor,
   StyleSheet,
   useWindowDimensions,
@@ -66,6 +68,7 @@ import { BADGE_COLOR, DOT_SIZE } from 'components/Badge';
 import DeviceInfo from 'constants/DeviceInfo';
 import Spacing from 'constants/Spacing';
 import { t } from 'helpers/i18n';
+import { headerButtons } from 'navigation/headerButtons';
 import { useFieldText } from 'hooks/useFieldText';
 import { systemIcons } from 'helpers/systemIcons';
 import { useTheme } from 'theme';
@@ -160,21 +163,58 @@ export const Form: React.FC<FormProps> = ({ children, onRefresh, testID }) => {
       });
   }, [navigation]);
 
+  // Done in the header while a number is typed: the number pad has no
+  // return key. (SwiftUI's keyboard toolbar shows only inside a SwiftUI
+  // navigation stack.) The Mac's keyboard has one.
+  const [numberFocused, setNumberFocused] = useState(false);
+  const doneShown = useRef(false);
+  useLayoutEffect(() => {
+    if (!numberFocused && !doneShown.current) {
+      return;
+    }
+    doneShown.current = numberFocused;
+    navigation?.setOptions(
+      headerButtons(
+        'right',
+        numberFocused
+          ? [
+              {
+                id: 'keyboard-done',
+                label: t('done'),
+                icon: 'checkAll',
+                sfSymbol: 'checkmark',
+                text: true,
+                onPress: () => Keyboard.dismiss(),
+                testID: 'keyboard-done',
+              },
+            ]
+          : [],
+      ),
+    );
+  }, [navigation, numberFocused]);
+
   return (
     <ThemedHost style={styles.fill} testID={testID}>
-      <SwiftUIForm
-        modifiers={[
-          // Dragging the form down pulls the keyboard away, as in Notes.
-          scrollDismissesKeyboard('interactively'),
-          ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
-          ...(onRefresh ? [refreshable(onRefresh)] : []),
-        ]}
-      >
-        {lastSectionMarked(children)}
-      </SwiftUIForm>
+      <NumberFocusContext value={DeviceInfo.isMac() ? null : setNumberFocused}>
+        <SwiftUIForm
+          modifiers={[
+            // Dragging the form down pulls the keyboard away, as in Notes.
+            scrollDismissesKeyboard('interactively'),
+            ...(DeviceInfo.isMac() ? macFormModifiers : glassHeaderModifiers),
+            ...(onRefresh ? [refreshable(onRefresh)] : []),
+          ]}
+        >
+          {lastSectionMarked(children)}
+        </SwiftUIForm>
+      </NumberFocusContext>
     </ThemedHost>
   );
 };
+
+/** Tells the Form a number field took or lost the focus. */
+const NumberFocusContext = createContext<((focused: boolean) => void) | null>(
+  null,
+);
 
 /**
  * The root view of a screen that is a Form, in place of `SafeArea`. A SwiftUI
@@ -699,20 +739,25 @@ export const FormNumberField: React.FC<FormNumberFieldProps> = ({
   testID,
   value,
   onValueChange,
-}) => (
-  <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
-    <TextInput
-      defaultValue={String(value)}
-      onChangeText={parseNumberInput(onValueChange)}
-      keyboardType="number-pad"
-      textAlign="right"
-      // Narrow, so the label keeps the rest of the row.
-      style={styles.numberField}
-      accessibilityLabel={title}
-      testID={testID}
-    />
-  </LabeledContent>
-);
+}) => {
+  const setFocused = useContext(NumberFocusContext);
+  return (
+    <LabeledContent label={<RowLabel title={title} icon={icon} plain />}>
+      <TextInput
+        defaultValue={String(value)}
+        onChangeText={parseNumberInput(onValueChange)}
+        keyboardType="number-pad"
+        textAlign="right"
+        onFocus={() => setFocused?.(true)}
+        onBlur={() => setFocused?.(false)}
+        // Narrow, so the label keeps the rest of the row.
+        style={styles.numberField}
+        accessibilityLabel={title}
+        testID={testID}
+      />
+    </LabeledContent>
+  );
+};
 
 const paragraphModifiers = [primaryText, textSelection(true)];
 const headlineModifiers = [

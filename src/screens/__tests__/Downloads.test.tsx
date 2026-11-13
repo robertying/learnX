@@ -94,6 +94,8 @@ it("deletes a course's files once confirmed, then lists again", async () => {
   await pressChoice(t('deleteEllipsis'));
   expect(alert.mock.calls[0][0]).toBe(t('downloadsDeleteCourse'));
   expect(alert.mock.calls[0][1]).toContain('物理');
+  // Exported copies aren't the app's to delete.
+  expect(alert.mock.calls[0][1]).toContain(t('downloadsDeleteKeepsExported'));
   expect(removeCourseDownloads).not.toHaveBeenCalled();
 
   jest.mocked(listDownloads).mockReturnValue([courses[0]] as never);
