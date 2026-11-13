@@ -1,131 +1,39 @@
-diff --git a/ios/LiveActivity.swift b/ios/LiveActivity.swift
-index b80655d..57de329 100644
---- a/ios/LiveActivity.swift
-+++ b/ios/LiveActivity.swift
-@@ -1,3 +1,4 @@
-+#if !targetEnvironment(macCatalyst)
- import ExpoModulesCore
- import ActivityKit
+diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
+index 3df9e4a4d92155a00d3f5652d17d20be10bef1c1..b2257d0c76ede0d358b51163c75de9d794f4ba48 100644
+--- a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
++++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
+@@ -4,6 +4,8 @@ package expo.modules.widgets
  
-@@ -75,3 +76,4 @@ final class LiveActivity: SharedObject {
-     pushTokenObserverTask = nil
-   }
- }
-+#endif
-diff --git a/ios/LiveActivityFactory.swift b/ios/LiveActivityFactory.swift
-index 29e4f15..fdbffad 100644
---- a/ios/LiveActivityFactory.swift
-+++ b/ios/LiveActivityFactory.swift
-@@ -1,3 +1,4 @@
-+#if !targetEnvironment(macCatalyst)
- import ExpoModulesCore
- import ActivityKit
- 
-@@ -63,3 +64,4 @@ final class LiveActivityFactory: SharedObject {
-     instances.removeAll()
-   }
- }
-+#endif
-diff --git a/ios/Widgets/LiveActivityBanner.swift b/ios/Widgets/LiveActivityBanner.swift
-index 3e6ff0b..0ac8618 100644
---- a/ios/Widgets/LiveActivityBanner.swift
-+++ b/ios/Widgets/LiveActivityBanner.swift
-@@ -1,3 +1,4 @@
-+#if !targetEnvironment(macCatalyst)
- import SwiftUI
- import WidgetKit
- 
-@@ -17,3 +18,4 @@ struct LiveActivityBanner: View {
-     }
-   }
- }
-+#endif
-diff --git a/ios/Widgets/Utils.swift b/ios/Widgets/Utils.swift
-index 76b2199..bffd6ee 100644
---- a/ios/Widgets/Utils.swift
-+++ b/ios/Widgets/Utils.swift
-@@ -117,6 +117,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
-   return env
- }
- 
-+#if !targetEnvironment(macCatalyst)
- func getLiveActivityEnvironment(for environment: EnvironmentValues, in context: ActivityViewContext<LiveActivityAttributes>) -> [String: Any] {
-   var env: [String: Any] = [
-     "colorScheme": "\(environment.colorScheme)",
-@@ -134,3 +135,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
-   }
-   return env
- }
-+#endif
-diff --git a/ios/Widgets/WidgetLiveActivity.swift b/ios/Widgets/WidgetLiveActivity.swift
-index 4d135c4..7c4bd9d 100644
---- a/ios/Widgets/WidgetLiveActivity.swift
-+++ b/ios/Widgets/WidgetLiveActivity.swift
-@@ -1,3 +1,4 @@
-+#if !targetEnvironment(macCatalyst)
- import SwiftUI
- import WidgetKit
- import ExpoModulesCore
-@@ -114,3 +115,4 @@ extension WidgetConfiguration {
-     }
-   }
- }
-+#endif
-diff --git a/ios/WidgetsModule.swift b/ios/WidgetsModule.swift
-index 285136b..6925014 100644
---- a/ios/WidgetsModule.swift
-+++ b/ios/WidgetsModule.swift
-@@ -85,6 +85,7 @@ public final class WidgetsModule: Module {
-       }
-     }
- 
-+    #if !targetEnvironment(macCatalyst)
-     Class("LiveActivityFactory", LiveActivityFactory.self) {
-       Constructor { (name: String, layout: String) in
-         LiveActivityFactory(name: name, layout: layout)
-@@ -116,6 +117,7 @@ public final class WidgetsModule: Module {
-         try instance.getPushToken()
-       }
-     }
-+    #endif
-   }
- 
-   @objc func handleUserInteractionNotification(_ notification: Notification) {
-@@ -135,6 +137,7 @@ public final class WidgetsModule: Module {
-   }
- 
-   private func observePushToStartToken() {
-+    #if !targetEnvironment(macCatalyst)
-     guard #available(iOS 17.2, *), ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-     pushToStartTokenObserverTask = Task {
-       let initialToken = (Activity<LiveActivityAttributes>.pushToStartToken?.reduce("") { $0 + String(format: "%02x", $1) })
-@@ -149,6 +152,7 @@ public final class WidgetsModule: Module {
-         }
-       }
-     }
-+    #endif
-   }
- 
-   private var pushNotificationsEnabled: Bool {
-diff --git a/ios/WidgetsRecords.swift b/ios/WidgetsRecords.swift
-index f1e1fee..61c7e28 100644
---- a/ios/WidgetsRecords.swift
-+++ b/ios/WidgetsRecords.swift
-@@ -23,6 +23,7 @@ struct WidgetConfigurationOptionRecord: Record {
-   }
- }
- 
-+#if !targetEnvironment(macCatalyst)
- internal enum LiveActivityDismissalPolicy: String, Enumerable {
-   case `default`
-   case immediate
-@@ -36,3 +37,4 @@ internal enum LiveActivityDismissalPolicy: String, Enumerable {
-     }
-   }
- }
-+#endif
+ import android.annotation.SuppressLint
+ import android.content.Context
++import android.content.Intent
++import android.net.Uri
+ import android.graphics.Color as AndroidColor
+ import androidx.compose.ui.unit.DpSize
+ import androidx.compose.ui.unit.TextUnit
+@@ -66,6 +68,7 @@ import androidx.glance.ImageProvider
+ import androidx.glance.TintColorFilterParams
+ import androidx.glance.GlanceModifier
+ import androidx.glance.action.clickable
++import androidx.glance.appwidget.action.actionStartActivity
+ import androidx.glance.appwidget.CheckboxDefaults
+ import androidx.glance.appwidget.cornerRadius
+ import androidx.glance.appwidget.EmittableCheckBox
+@@ -419,6 +422,12 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
+     "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
+       ?.let { GlanceModifier.background(it) }
+     "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
++    // learnX: `{ $type: 'openUrl', url }` opens the URL in the app, e.g. a widget row's assignment.
++    "openUrl" -> this["url"]?.asString()?.let { url ->
++      val context = converterContext.applicationContext
++      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(context.packageName)
++      GlanceModifier.clickable(actionStartActivity(intent))
++    }
+     // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
+     else -> null
+   } ?: GlanceModifier
 diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
-index edabde8..95f0cb5 100644
+index edabde8f51b3bd9162b634e46f2f09686c3a3b8a..95f0cb550a517f20f44e26cf7ccf36843791c514 100644
 --- a/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
 +++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetsPeekWidget.kt
 @@ -6,8 +6,13 @@ import android.content.Context
@@ -167,7 +75,7 @@ index edabde8..95f0cb5 100644
    }
  }
 diff --git a/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt b/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
-index 1ffad5e..cb27e85 100644
+index 1ffad5e5a9b07c06e28269c53023d295f80a1396..cb27e85d17bbae087441568cda9b94de763cc5b0 100644
 --- a/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
 +++ b/android/src/main/java/expo/modules/widgets/WidgetsUtils.kt
 @@ -9,6 +9,8 @@ import expo.modules.ui.colors.getMaterialColorTokens
@@ -179,56 +87,137 @@ index 1ffad5e..cb27e85 100644
      "configuration" to emptyMap<String, Any?>(),
      // TODO(@jakex7): accessing a materialColors through environment is
      //  a hack to fulfill expo-ui module stub with data
-diff --git a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-index 3df9e4a..b2257d0 100644
---- a/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-+++ b/android/src/main/java/expo/modules/widgets/ExpoWidgetEmittableTree.kt
-@@ -4,6 +4,8 @@ package expo.modules.widgets
+diff --git a/ios/LiveActivity.swift b/ios/LiveActivity.swift
+index b80655d974acbdd764b7b476fdc9a56b6aa4dcca..57de329cb8ceacfe7cdc0cbf7a254f840bb8732a 100644
+--- a/ios/LiveActivity.swift
++++ b/ios/LiveActivity.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import ExpoModulesCore
+ import ActivityKit
  
- import android.annotation.SuppressLint
- import android.content.Context
-+import android.content.Intent
-+import android.net.Uri
- import android.graphics.Color as AndroidColor
- import androidx.compose.ui.unit.DpSize
- import androidx.compose.ui.unit.TextUnit
-@@ -66,6 +68,7 @@ import androidx.glance.ImageProvider
- import androidx.glance.TintColorFilterParams
- import androidx.glance.GlanceModifier
- import androidx.glance.action.clickable
-+import androidx.glance.appwidget.action.actionStartActivity
- import androidx.glance.appwidget.CheckboxDefaults
- import androidx.glance.appwidget.cornerRadius
- import androidx.glance.appwidget.EmittableCheckBox
-@@ -419,6 +422,12 @@ private fun ModifierType.toPeekModifier(converterContext: ConverterContext): Gla
-     "background" -> asRecord<BackgroundParams>(converterContext)?.color?.toGlanceColorProvider()
-       ?.let { GlanceModifier.background(it) }
-     "cornerRadius" -> asRecord<CornerRadiusParams>(converterContext)?.let { GlanceModifier.cornerRadius(it.radius.dp) }
-+    // learnX: `{ $type: 'openUrl', url }` opens the URL in the app, e.g. a widget row's assignment.
-+    "openUrl" -> this["url"]?.asString()?.let { url ->
-+      val context = converterContext.applicationContext
-+      val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(context.packageName)
-+      GlanceModifier.clickable(actionStartActivity(intent))
+@@ -75,3 +76,4 @@ final class LiveActivity: SharedObject {
+     pushTokenObserverTask = nil
+   }
+ }
++#endif
+diff --git a/ios/LiveActivityFactory.swift b/ios/LiveActivityFactory.swift
+index 29e4f1566d188665e301d32bc1ad85640f83e68c..fdbffad2a76c7c578edabdfb7f2b573f9e50199c 100644
+--- a/ios/LiveActivityFactory.swift
++++ b/ios/LiveActivityFactory.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import ExpoModulesCore
+ import ActivityKit
+ 
+@@ -63,3 +64,4 @@ final class LiveActivityFactory: SharedObject {
+     instances.removeAll()
+   }
+ }
++#endif
+diff --git a/ios/Widgets/CountdownView.swift b/ios/Widgets/CountdownView.swift
+new file mode 100644
+index 0000000000000000000000000000000000000000..6913b7d6ba045fd81ad7bfeedfddbea0aedecae1
+--- /dev/null
++++ b/ios/Widgets/CountdownView.swift
+@@ -0,0 +1,48 @@
++import SwiftUI
++import ExpoModulesCore
++import ExpoUI
++
++// learnX: the time left until (or since) a date, kept live by the system
++// like Text(date, style: .relative), but in days, hours and minutes, at most
++// two of them ("42 minutes", "2 days, 20 hours") or as many as
++// `maxFieldCount`, without the seconds the relative style counts under an
++// hour. A layout makes the node itself:
++// { type: 'CountdownView', props: { date, maxFieldCount, modifiers } }.
++final class CountdownViewProps: UIBaseViewProps {
++  @Field var date: Date?
++  @Field var maxFieldCount: Int?
++}
++
++struct CountdownView: ExpoSwiftUI.View {
++  @ObservedObject var props: CountdownViewProps
++  @Environment(\.locale) private var locale
++
++  init(props: CountdownViewProps) {
++    self.props = props
++  }
++
++  var body: some View {
++    if let date = props.date {
++      if #available(iOS 18.0, *) {
++        let format = SystemFormatStyle.DateOffset.offset(
++          to: date,
++          allowedFields: [.day, .hour, .minute],
++          maxFieldCount: props.maxFieldCount ?? 2,
++          sign: .never
++        ).locale(locale)
++        // A live Text takes all the width it's offered, and fixedSize blanks
++        // the widget, so it takes the width of its value at render time and
++        // the rest of its row (a course name) gives way to it.
++        Text(format.format(Date()))
++          .monospacedDigit()
++          .hidden()
++          .overlay(alignment: .leading) {
++            Text(.currentDate, format: format)
++              .minimumScaleFactor(0.8)
++          }
++      } else {
++        Text(date, style: .relative)
++      }
 +    }
-     // Unsupported Expo UI modifiers are ignored until they have exact Glance semantics.
-     else -> null
-   } ?: GlanceModifier
++  }
++}
+diff --git a/ios/Widgets/LiveActivityBanner.swift b/ios/Widgets/LiveActivityBanner.swift
+index 3e6ff0b55c0b6d57ddeb1ba6605536adae2ca62d..0ac8618fa3c6959af86526cd17cc77f23f01a7f8 100644
+--- a/ios/Widgets/LiveActivityBanner.swift
++++ b/ios/Widgets/LiveActivityBanner.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import SwiftUI
+ import WidgetKit
+ 
+@@ -17,3 +18,4 @@ struct LiveActivityBanner: View {
+     }
+   }
+ }
++#endif
+diff --git a/ios/Widgets/Utils.swift b/ios/Widgets/Utils.swift
+index 76b2199c2d3f879463fed5d2bd49038b0428a2e7..bffd6ee91e52c246d59fd9c979cd09eee63a2d97 100644
+--- a/ios/Widgets/Utils.swift
++++ b/ios/Widgets/Utils.swift
+@@ -117,6 +117,7 @@ public func getWidgetEnvironment(environment: EnvironmentValues) -> [String: Any
+   return env
+ }
+ 
++#if !targetEnvironment(macCatalyst)
+ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context: ActivityViewContext<LiveActivityAttributes>) -> [String: Any] {
+   var env: [String: Any] = [
+     "colorScheme": "\(environment.colorScheme)",
+@@ -134,3 +135,4 @@ func getLiveActivityEnvironment(for environment: EnvironmentValues, in context:
+   }
+   return env
+ }
++#endif
 diff --git a/ios/Widgets/ViewRenderer.swift b/ios/Widgets/ViewRenderer.swift
-index 68e376f..a98f903 100644
+index 68e376fdd5a4a1b088f6e2e28b0babb285feec12..77a092d35795db5172db75ef67acc6707ce52bf8 100644
 --- a/ios/Widgets/ViewRenderer.swift
 +++ b/ios/Widgets/ViewRenderer.swift
-@@ -81,6 +81,8 @@ struct WidgetsViewRenderer {
+@@ -81,6 +81,10 @@ struct WidgetsViewRenderer {
        return renderWithModifiers(FragmentView.self, FragmentProps.self, updateProps: updateChildren)
      case "LinkView":
        return renderWithModifiers(LinkView.self, LinkViewProps.self, updateProps: updateChildren)
 +    case "ViewThatFitsView":
 +      return renderWithModifiers(ViewThatFitsView.self, ViewThatFitsViewProps.self, updateProps: updateChildren)
++    case "CountdownView":
++      return renderWithModifiers(CountdownView.self, CountdownViewProps.self)
  #if DEBUG
      case "RedBoxView":
        return renderWithModifiers(RedBoxView.self, RedBoxViewProps.self) { redBoxProps in
 diff --git a/ios/Widgets/ViewThatFitsView.swift b/ios/Widgets/ViewThatFitsView.swift
 new file mode 100644
-index 0000000..3c9a494
+index 0000000000000000000000000000000000000000..3c9a494368066699ba7dbaf1c77dc58f483b676d
 --- /dev/null
 +++ b/ios/Widgets/ViewThatFitsView.swift
 @@ -0,0 +1,32 @@
@@ -264,3 +253,70 @@ index 0000000..3c9a494
 +    }
 +  }
 +}
+diff --git a/ios/Widgets/WidgetLiveActivity.swift b/ios/Widgets/WidgetLiveActivity.swift
+index 4d135c4e4eb1f846315654ed9d835a935d120d42..7c4bd9dc9dcf7ec9b31b23f2bbb4bbc3804ed574 100644
+--- a/ios/Widgets/WidgetLiveActivity.swift
++++ b/ios/Widgets/WidgetLiveActivity.swift
+@@ -1,3 +1,4 @@
++#if !targetEnvironment(macCatalyst)
+ import SwiftUI
+ import WidgetKit
+ import ExpoModulesCore
+@@ -114,3 +115,4 @@ extension WidgetConfiguration {
+     }
+   }
+ }
++#endif
+diff --git a/ios/WidgetsModule.swift b/ios/WidgetsModule.swift
+index 285136b3774e531b35c1a3e832506f93f61654be..69250146e84d79d0bf6bb198454fea8c1c6e0fa0 100644
+--- a/ios/WidgetsModule.swift
++++ b/ios/WidgetsModule.swift
+@@ -85,6 +85,7 @@ public final class WidgetsModule: Module {
+       }
+     }
+ 
++    #if !targetEnvironment(macCatalyst)
+     Class("LiveActivityFactory", LiveActivityFactory.self) {
+       Constructor { (name: String, layout: String) in
+         LiveActivityFactory(name: name, layout: layout)
+@@ -116,6 +117,7 @@ public final class WidgetsModule: Module {
+         try instance.getPushToken()
+       }
+     }
++    #endif
+   }
+ 
+   @objc func handleUserInteractionNotification(_ notification: Notification) {
+@@ -135,6 +137,7 @@ public final class WidgetsModule: Module {
+   }
+ 
+   private func observePushToStartToken() {
++    #if !targetEnvironment(macCatalyst)
+     guard #available(iOS 17.2, *), ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+     pushToStartTokenObserverTask = Task {
+       let initialToken = (Activity<LiveActivityAttributes>.pushToStartToken?.reduce("") { $0 + String(format: "%02x", $1) })
+@@ -149,6 +152,7 @@ public final class WidgetsModule: Module {
+         }
+       }
+     }
++    #endif
+   }
+ 
+   private var pushNotificationsEnabled: Bool {
+diff --git a/ios/WidgetsRecords.swift b/ios/WidgetsRecords.swift
+index f1e1fee9ca6d2d96b041bb5e0f940bdfc817962b..61c7e283299dee1b0f9f8aaa0148425aacd05bf9 100644
+--- a/ios/WidgetsRecords.swift
++++ b/ios/WidgetsRecords.swift
+@@ -23,6 +23,7 @@ struct WidgetConfigurationOptionRecord: Record {
+   }
+ }
+ 
++#if !targetEnvironment(macCatalyst)
+ internal enum LiveActivityDismissalPolicy: String, Enumerable {
+   case `default`
+   case immediate
+@@ -36,3 +37,4 @@ internal enum LiveActivityDismissalPolicy: String, Enumerable {
+     }
+   }
+ }
++#endif

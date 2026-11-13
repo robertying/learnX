@@ -60,10 +60,13 @@ const childrenOf = (node: Node): Node[] =>
 
 const all = (node: Node): Node[] => [node, ...childrenOf(node).flatMap(all)];
 
-/** Each Text's words, a relative date as `in <ISO time>`. */
+/**
+ * Each Text's words, a countdown (our patch's CountdownView) or relative date
+ * as `in <ISO time>`.
+ */
 const texts = (node: Node) =>
   all(node)
-    .filter(n => n.type === 'Text')
+    .filter(n => n.type === 'Text' || n.type === 'CountdownView')
     .map(n =>
       n.props.date
         ? `in ${(n.props.date as Date).toISOString()}`
@@ -82,8 +85,12 @@ const modifier = (node: Node, name: string) =>
 const version = (node: Node, rows: number) => {
   expect(node.type).toBe('ViewThatFitsView');
   // The header and the rows.
-  return childrenOf(node).find(v => childrenOf(v).length === rows + 1)!;
+  return childrenOf(node).find(v => rowsOf(v).length === rows + 1)!;
 };
+
+/** A version's header and rows, without the spacers between them. */
+const rowsOf = (node: Node) =>
+  childrenOf(node).filter(child => child.type !== 'Spacer');
 
 const links = (node: Node) =>
   all(node)
@@ -150,11 +157,11 @@ const coloredDeadlines = [
   },
 ];
 
-/** The Text that shows a deadline's due time, relative or formatted. */
+/** The Text that shows a deadline's due time, a countdown or formatted. */
 const dueText = (node: Node, ms: number, due: string) =>
   all(node).find(
     n =>
-      n.type === 'Text' &&
+      (n.type === 'Text' || n.type === 'CountdownView') &&
       ((n.props.date as Date | undefined)?.getTime() === ms ||
         n.props.children === due),
   )!;
@@ -212,8 +219,15 @@ describe('Up Next on iOS', () => {
       'Ends in ',
       `in ${iso(at('11:25'))}`,
       'Due: Assignment d1 · ',
+      'Course of d1',
+      ' · ',
       `in ${iso(at('23:59'))}`,
     ]);
+    expect(
+      all(widget)
+        .filter(n => n.type === 'CountdownView')
+        .map(n => modifier(n, 'font')),
+    ).toEqual([{ textStyle: 'footnote' }, { textStyle: 'caption' }]);
     expect(links(widget)).toEqual(['learnx://assignment/d1']);
     expect(modifier(widget, 'widgetURL')).toBe('learnx://today');
     expect(modifier(widget, 'containerBackground')).toEqual([
@@ -246,12 +260,24 @@ describe('Up Next on iOS', () => {
     ]);
   });
 
-  it('fits only the featured class in a small widget, without a countdown', () => {
-    expect(texts(render('systemSmall'))).toEqual([
-      'Now',
+  it('shows the countdown in a small widget only when it fits', () => {
+    const widget = render('systemSmall');
+    const fits = all(widget).find(n => n.type === 'ViewThatFitsView')!;
+    expect(fits.props.axes).toBe('vertical');
+    const [withCountdown, without] = childrenOf(fits);
+    expect(texts(withCountdown)).toEqual([
       'Course now',
       'now-time · 六教6A414',
+      'Ends in ',
+      `in ${iso(at('11:25'))}`,
     ]);
+    expect(texts(without)).toEqual(['Course now', 'now-time · 六教6A414']);
+    // Its largest unit only, to fit the width.
+    expect(
+      all(withCountdown).find(n => n.type === 'CountdownView')!.props
+        .maxFieldCount,
+    ).toBe(1);
+    expect(links(widget)).toEqual([]);
   });
 
   it('lists four more classes and three deadlines under headings when large', () => {
@@ -263,15 +289,40 @@ describe('Up Next on iOS', () => {
       expect(words).toContain('c5-day c5-time');
       expect(words).not.toContain('Course c6');
       expect(words).toContain('Assignment d3 · ');
+      expect(words).toContain('Course of d3');
       expect(links(widget)).toHaveLength(3);
     }
   });
 
-  it('shows the class with its countdown on the Lock Screen', () => {
+  it('shows the class, its time, and its place with the countdown on the Lock Screen', () => {
     expect(texts(render('accessoryRectangular'))).toEqual([
       'Course now',
-      'now-time · 六教6A414',
+      'now-time',
+      '六教6A414 · ',
       `in ${iso(at('11:25'))}`,
+    ]);
+    expect(
+      all(render('accessoryRectangular')).find(n => n.type === 'CountdownView')!
+        .props.maxFieldCount,
+    ).toBe(1);
+    // Without a place, the countdown alone; not today, the place alone.
+    const unplaced = layout(
+      {
+        ...upNextProps,
+        classes: [klass('soon', at('13:30'), at('15:05'), '')],
+      },
+      { widgetFamily: 'accessoryRectangular', date: new Date(now) },
+    );
+    expect(texts(unplaced)).toEqual([
+      'Course soon',
+      'soon-time',
+      `in ${iso(at('13:30'))}`,
+    ]);
+    const later = { ...upNextProps, classes: upNextProps.classes.slice(3) };
+    expect(texts(render('accessoryRectangular', later))).toEqual([
+      'Course c3',
+      'c3-day c3-time',
+      '六教6A414',
     ]);
     const tomorrow = { ...upNextProps, classes: upNextProps.classes.slice(2) };
     expect(texts(render('accessoryRectangular', tomorrow))).toEqual([
@@ -321,8 +372,8 @@ describe('Deadlines on iOS', () => {
     const widget = render('accessoryRectangular');
     expect(texts(widget)).toEqual([
       'Assignment d1',
-      `in ${iso(at('23:59') + DAY)}`,
       'Course of d1',
+      `in ${iso(at('23:59') + DAY)}`,
     ]);
     expect(modifier(widget, 'widgetURL')).toBe('learnx://assignment/d1');
 
@@ -337,7 +388,7 @@ describe('Deadlines on iOS', () => {
   it('offers the list with each number of rows, the longest first', () => {
     const widget = render('systemMedium');
     expect(widget.props.axes).toBe('vertical');
-    expect(childrenOf(widget).map(v => childrenOf(v).length - 1)).toEqual([
+    expect(childrenOf(widget).map(v => rowsOf(v).length - 1)).toEqual([
       5, 4, 3, 2, 1,
     ]);
     expect(modifier(widget, 'widgetURL')).toBe('learnx://assignment');
@@ -350,7 +401,32 @@ describe('Deadlines on iOS', () => {
       ...deadlineProps,
       deadlines: deadlineProps.deadlines.slice(0, 2),
     });
-    expect(childrenOf(two).map(v => childrenOf(v).length - 1)).toEqual([2, 1]);
+    expect(childrenOf(two).map(v => rowsOf(v).length - 1)).toEqual([2, 1]);
+  });
+
+  it('spreads the rows over the height only when it leaves some out', () => {
+    const spacers = (v: Node) =>
+      childrenOf(v)
+        .filter(child => child.type === 'Spacer')
+        .map(child => child.props.minLength);
+    // Nine open, so every version leaves some out: a gap at least as wide
+    // as the rows' spacing between each pair.
+    const cut = version(render('systemMedium'), 3);
+    expect(cut.props.spacing).toBe(0);
+    expect(spacers(cut)).toEqual([4, 4, 4]);
+    expect(spacers(version(render('systemLarge'), 6))).toEqual(
+      Array(6).fill(12),
+    );
+
+    // Two open: the version with both keeps them at the top.
+    const two = render('systemMedium', {
+      ...deadlineProps,
+      deadlines: deadlineProps.deadlines.slice(0, 2),
+      total: 2,
+    });
+    expect(spacers(version(two, 2))).toEqual([]);
+    expect(version(two, 2).props.spacing).toBe(4);
+    expect(spacers(version(two, 1))).toEqual([4]);
   });
 
   it('links rows with their courses in a medium widget, counting the rest', () => {
@@ -360,7 +436,8 @@ describe('Deadlines on iOS', () => {
       '+6',
       ...[1, 2, 3].flatMap(i => [
         `Assignment d${i}`,
-        `Course of d${i} · `,
+        `Course of d${i}`,
+        ' · ',
         `in ${iso(at('23:59') + i * DAY)}`,
       ]),
     ]);

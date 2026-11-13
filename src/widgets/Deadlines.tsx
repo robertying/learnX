@@ -50,6 +50,16 @@ function DeadlinesWidget(
   // Props sent before widget rows had links have no URLs.
   const openUrl = (url: string | undefined) => (url ? [widgetURL(url)] : []);
 
+  // The time left, live, in days, hours and minutes (no seconds), from our
+  // expo-widgets patch (CountdownView). A widget can't import, so this makes
+  // the element itself.
+  const Countdown = (countdownProps: { date: Date; modifiers: unknown[] }) =>
+    ({
+      type: 'CountdownView',
+      key: null,
+      props: countdownProps,
+    }) as unknown as ReactElement;
+
   if (family === 'accessoryRectangular') {
     const next = deadlines[0];
     return (
@@ -62,14 +72,13 @@ function DeadlinesWidget(
           {next ? next.title : props.empty}
         </Text>
         {next ? (
-          <Text
-            date={new Date(next.deadline)}
-            dateStyle="relative"
-            modifiers={[lineLimit(1)]}
-          />
+          <Text modifiers={[lineLimit(1)]}>{next.courseName}</Text>
         ) : null}
         {next ? (
-          <Text modifiers={[lineLimit(1)]}>{next.courseName}</Text>
+          <Countdown
+            date={new Date(next.deadline)}
+            modifiers={[lineLimit(1)]}
+          />
         ) : null}
       </VStack>
     );
@@ -144,11 +153,7 @@ function DeadlinesWidget(
         >
           {item.title}
         </Text>
-        {/*
-          A relative date Text takes all the width it's offered (and breaks
-          the layout with fixedSize), so it goes last: the course name gets
-          its width first and the date follows right after it.
-        */}
+        {/* The course name shortens before the countdown. */}
         <HStack spacing={0}>
           {small ? null : (
             <Text
@@ -156,19 +161,29 @@ function DeadlinesWidget(
                 font({ textStyle: large ? 'subheadline' : 'caption' }),
                 foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                 lineLimit(1),
+              ]}
+            >
+              {item.courseName}
+            </Text>
+          )}
+          {small ? null : (
+            <Text
+              modifiers={[
+                font({ textStyle: large ? 'subheadline' : 'caption' }),
+                foregroundStyle({ type: 'hierarchical', style: 'secondary' }),
                 layoutPriority(1),
               ]}
             >
-              {`${item.courseName} · `}
+              {' · '}
             </Text>
           )}
-          <Text
+          <Countdown
             date={new Date(item.deadline)}
-            dateStyle="relative"
             modifiers={[
               font({ textStyle: large ? 'subheadline' : 'caption' }),
               dueColor(item),
               lineLimit(1),
+              layoutPriority(1),
             ]}
           />
         </HStack>
@@ -221,6 +236,27 @@ function DeadlinesWidget(
   const most = Math.min(deadlines.length, large ? 10 : 5);
   const counts = Array.from({ length: most }, (_, i) => most - i);
 
+  // A list that leaves rows out spreads the ones it shows over the height,
+  // so the space the next row didn't fit in doesn't all end up at the
+  // bottom. One that shows every row keeps them at the top.
+  const list = (count: number) => {
+    const shown = deadlines.slice(0, count);
+    return props.total > count ? (
+      <VStack key={count} alignment="leading" spacing={0}>
+        {header(props.total - count)}
+        {shown.flatMap(item => [
+          <Spacer key={`gap-${item.id}`} minLength={spacing} />,
+          row(item),
+        ])}
+      </VStack>
+    ) : (
+      <VStack key={count} alignment="leading" spacing={spacing}>
+        {header(props.total - count)}
+        {shown.map(row)}
+      </VStack>
+    );
+  };
+
   return (
     <ViewThatFits
       axes="vertical"
@@ -230,12 +266,7 @@ function DeadlinesWidget(
         ...openUrl(props.url),
       ]}
     >
-      {counts.map(count => (
-        <VStack key={count} alignment="leading" spacing={spacing}>
-          {header(props.total - count)}
-          {deadlines.slice(0, count).map(row)}
-        </VStack>
-      ))}
+      {counts.map(list)}
     </ViewThatFits>
   );
 }
