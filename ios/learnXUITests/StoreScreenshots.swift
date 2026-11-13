@@ -18,6 +18,8 @@ final class StoreScreenshots: LearnXUITestCase {
   private let searchTerm = "作业"
 
   func testTakesStoreScreenshots() throws {
+    // Every shot in one test: more than the 3 minutes scripts/e2e-mac.sh allows each test.
+    executionTimeAllowance = 600
     try clearSettingsBadge()
 
     // 1 Notices with a notice open

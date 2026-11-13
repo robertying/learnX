@@ -9,6 +9,9 @@
 # while they run. They run the Release app (bundled JS, as it ships) and log
 # out whatever account the learnX Mac app has: they share its data, so quit
 # any other learnX Mac app first.
+# A test that runs over 3 minutes is stopped and fails: after a failure,
+# XCUITest can hang quitting the app (in tearDown), which would otherwise stall
+# the run.
 # DerivedData goes to $DERIVED_DATA (default
 # ~/Library/Developer/Xcode/DerivedData/learnX-e2e-mac), the result bundle to
 # build/e2e/mac.xcresult.
@@ -52,4 +55,6 @@ TEST_RUNNER_E2E_USERNAME="$username" TEST_RUNNER_E2E_PASSWORD="$password" \
   -derivedDataPath "$derived" \
   -resultBundlePath "$result" \
   -allowProvisioningUpdates \
+  -test-timeouts-enabled YES \
+  -default-test-execution-time-allowance 180 \
   "$@"
