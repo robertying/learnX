@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run the Mac app's end-to-end tests (ios/learnXUITests, XCUITest: Maestro
+# Run the Mac app's end-to-end tests (ios/learnXUITests/Mac, XCUITest: Maestro
 # can't drive Mac Catalyst), logged in with the mock account from .env
 # (DUMMY_USERNAME / DUMMY_PASSWORD).
 #

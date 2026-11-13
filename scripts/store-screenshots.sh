@@ -17,7 +17,7 @@
 #   ipad            .maestro/store/ipad.yaml         ios/ipad/ (landscape)
 #   android-phone   .maestro/store/android-phone.yaml   android/phone/
 #   android-tablet  .maestro/store/android-tablet.yaml  android/tablet/
-#   mac             ios/learnXUITests/StoreScreenshots.swift  macos/windows/
+#   mac             ios/learnXUITests/Mac/StoreScreenshots.swift  macos/windows/
 #
 # mac runs the Mac app's XCUITest (scripts/e2e-mac.sh: it takes over the
 # pointer and keyboard, so start it by hand and leave the Mac alone) and saves
