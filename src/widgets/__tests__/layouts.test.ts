@@ -330,11 +330,12 @@ describe('Up Next on iOS', () => {
     const widget = render('systemSmall');
     expect(widget.type).toBe('ViewThatFitsView');
     const versions = childrenOf(widget);
-    // Three classes after it, then two, one, and none in two ways.
+    // Three classes after it, then two, one, and none with the class in full,
+    // in two ways.
     expect(
-      versions.map(v => texts(v).filter(w => w.startsWith(' · ')).length),
+      versions.map(v => texts(v).filter(w => w.endsWith('-start')).length),
     ).toEqual([3, 2, 1, 0, 0]);
-    // In short: the start alone, and one line each.
+    // In short: the start alone, under each course.
     expect(texts(versions[1])).toEqual([
       'Now',
       'Course now',
@@ -342,9 +343,9 @@ describe('Up Next on iOS', () => {
       'Ends in ',
       `in ${iso(at('11:25'))}`,
       'Course later',
-      ' · Tomorrow later-start',
+      'Tomorrow later-start',
       'Course c3',
-      ' · c3-weekday c3-start',
+      'c3-weekday c3-start',
     ]);
     // With no room for them, the class in full, then without the countdown.
     const withCountdown = versions[3];

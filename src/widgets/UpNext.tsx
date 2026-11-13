@@ -62,13 +62,13 @@ function UpNextWidget(
   ) => (c.location ? `${when(c, start)} · ${c.location}` : when(c, start));
   const today = !!featured && daysAway(featured.start) === 0;
   const small = family === 'systemSmall';
-  // A class's course, where it's known. A small widget can't have links.
+  // A class's course, where it's known.
   const linked = (
     c: UpNextWidgetProps['classes'][number],
     key: string,
     content: ReactElement,
   ) =>
-    c.url && !small ? (
+    c.url ? (
       <Link
         key={key}
         destination={c.url}
@@ -200,28 +200,46 @@ function UpNextWidget(
     </VStack>
   );
 
-  // A class after the featured one in a line, like a deadline's: its course,
-  // then when (the start alone in a small widget). The course shortens first.
+  // A class after the featured one, like a deadline: its course, then when.
+  // In a line where the course shortens first, or in a small widget, which
+  // is too narrow for both, the start under the course.
   const laterRow = (c: UpNextWidgetProps['classes'][number]) =>
-    linked(
-      c,
-      c.key,
-      <HStack key={c.key} spacing={0}>
+    small ? (
+      <VStack key={c.key} alignment="leading" spacing={0}>
         <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
           {c.courseName}
         </Text>
         <Text
           modifiers={[
-            font({ textStyle: 'caption' }),
+            font({ textStyle: 'caption2' }),
             kit.secondary,
             lineLimit(1),
-            layoutPriority(1),
           ]}
         >
-          {` · ${when(c, small)}`}
+          {when(c, true)}
         </Text>
-        <Spacer />
-      </HStack>,
+      </VStack>
+    ) : (
+      linked(
+        c,
+        c.key,
+        <HStack key={c.key} spacing={0}>
+          <Text modifiers={[font({ textStyle: 'caption' }), lineLimit(1)]}>
+            {c.courseName}
+          </Text>
+          <Text
+            modifiers={[
+              font({ textStyle: 'caption' }),
+              kit.secondary,
+              lineLimit(1),
+              layoutPriority(1),
+            ]}
+          >
+            {` · ${when(c)}`}
+          </Text>
+          <Spacer />
+        </HStack>,
+      )
     );
 
   if (small) {
