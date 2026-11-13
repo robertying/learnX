@@ -2,7 +2,9 @@ import {
   beijingClock,
   beijingDate,
   beijingTime,
+  beijingWallClock,
   sameServerTime,
+  showsBeijingTime,
 } from 'helpers/serverTime';
 
 // jest runs in Asia/Shanghai (jest.config.js), where Beijing time and local
@@ -36,5 +38,23 @@ describe('Beijing days and times', () => {
     expect(new Date(beijingTime('2026-09-14', '8:00')).toISOString()).toBe(
       '2026-09-14T00:00:00.000Z',
     );
+  });
+});
+
+describe('Beijing wall clock', () => {
+  it('reads the Beijing day and time of an instant', () => {
+    // Sunday 21:30 in Los Angeles is Monday 12:30 in Beijing
+    const time = Date.parse('2026-09-14T04:30:00Z');
+    expect(beijingWallClock(time).format('YYYY-MM-DD HH:mm')).toBe(
+      '2026-09-14 12:30',
+    );
+  });
+
+  it("tells whether the device's clock is on Beijing time", () => {
+    const time = Date.parse('2026-09-14T04:30:00Z');
+    expect(showsBeijingTime(time)).toBe(true);
+    // Los Angeles in September (UTC-7)
+    jest.spyOn(Date.prototype, 'getTimezoneOffset').mockReturnValue(420);
+    expect(showsBeijingTime(time)).toBe(false);
   });
 });

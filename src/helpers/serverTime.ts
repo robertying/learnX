@@ -1,6 +1,7 @@
 // Server times are Beijing time (UTC+8). thu-learn-lib gives them as ISO 8601
 // strings with the offset (`2026-11-07T18:28:00+08:00`), so any time zone
 // reads the right moment; the timetable works in Beijing days and times.
+import dayjs from 'dayjs';
 
 const BEIJING_OFFSET_MS = 8 * 60 * 60 * 1000;
 
@@ -23,3 +24,15 @@ export const beijingTime = (date: string, time: string) => {
     `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00+08:00`,
   );
 };
+
+/**
+ * A dayjs whose fields read Beijing's wall clock at `time` (ms), so dayjs
+ * formats show the Beijing time and day on a device in any time zone. Only for
+ * showing: the moment it holds is off by the device's offset from UTC+8.
+ */
+export const beijingWallClock = (time: number) =>
+  dayjs(`${beijingDate(time)}T${beijingClock(time)}`);
+
+/** Whether the device's clock reads Beijing time at `time` (ms). */
+export const showsBeijingTime = (time: number) =>
+  new Date(time).getTimezoneOffset() === -BEIJING_OFFSET_MS / 60000;

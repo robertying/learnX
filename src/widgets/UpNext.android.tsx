@@ -78,12 +78,11 @@ function UpNextWidget(
   const current = !!featured && featured.start <= now;
   const following = classes[1];
 
-  const midnight = (ms: number) => {
-    const d = new Date(ms);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-  };
+  // Days counted in Beijing (UTC+8), as the app's timetable counts them.
+  const beijingDay = (ms: number) =>
+    Math.floor((ms + 8 * 60 * 60 * 1000) / 86400000);
   const when = (c: UpNextWidgetProps['classes'][number]) => {
-    const days = Math.round((midnight(c.start) - midnight(now)) / 86400000);
+    const days = beijingDay(c.start) - beijingDay(now);
     return days === 0
       ? c.time
       : days === 1

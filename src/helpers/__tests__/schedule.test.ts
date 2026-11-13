@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import type { Course } from 'data/types/state';
 import { beijingTime } from 'helpers/serverTime';
 import {
+  classDetails,
   currentAndNext,
   matchCourse,
   sessionsFromCalendar,
@@ -186,5 +187,16 @@ describe('on a phone outside UTC+8', () => {
     expect(new Date(session.start).toISOString()).toBe(
       '2026-09-14T00:00:00.000Z',
     );
+  });
+});
+
+describe('class details', () => {
+  it('gives the Beijing time range and the room', () => {
+    const [session] = sessionsFromCourses(
+      [course('a', 'A', ['星期一第1节(全周)，六教6A414'])],
+      termStart,
+      '2026-09-14',
+    );
+    expect(classDetails(session)).toMatch(/8:00.*9:35 · 六教6A414$/);
   });
 });

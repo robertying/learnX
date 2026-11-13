@@ -2,8 +2,10 @@ import { Platform } from 'react-native';
 import dayjs from 'dayjs';
 import type { Widget } from 'expo-widgets';
 import { Assignment } from 'data/types/state';
-import { t, timeRange } from 'helpers/i18n';
+import { t } from 'helpers/i18n';
 import { getTargetUrl } from 'helpers/openTarget';
+import { classTimeRange } from 'helpers/schedule';
+import { beijingWallClock } from 'helpers/serverTime';
 import { UpcomingClass, upNextTimes } from 'helpers/upNext';
 import { deadlineUrgencyTimes } from 'helpers/assignments';
 import {
@@ -104,8 +106,9 @@ export const upNextProps = (
     location: c.location,
     start: c.start,
     end: c.end,
-    time: timeRange(c.start, c.end),
-    day: dayjs(c.start).format(t('widgetClassDay')),
+    // Beijing times and days, as Today and Schedule show them
+    time: classTimeRange(c),
+    day: beijingWallClock(c.start).format(t('widgetClassDay')),
   })),
   deadlines: deadlineProps(deadlines),
   title: t('widgetUpNext'),

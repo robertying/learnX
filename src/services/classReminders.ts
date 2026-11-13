@@ -2,7 +2,6 @@
 // the cached timetable (this and next week), scheduled ahead like deadline
 // reminders, so they go off without the app. They are planned again whenever
 // the timetable or the settings change (`services/surfaces`).
-import dayjs from 'dayjs';
 import { NotificationSettings } from 'data/types/state';
 import { t, timeFormat } from 'helpers/i18n';
 import {
@@ -15,6 +14,7 @@ import {
   dateTrigger,
   reconcileScheduled,
 } from 'services/scheduledNotifications';
+import { beijingWallClock, showsBeijingTime } from 'helpers/serverTime';
 import { UpcomingClass } from 'helpers/upNext';
 
 /**
@@ -86,7 +86,10 @@ export const classReminderContent = ({
 }: UpcomingClass) => ({
   title: courseName,
   body: [
-    t('classStartsAt', { time: dayjs(start).format(timeFormat()) }),
+    // In Beijing time, as Today lists the class, saying so on a phone elsewhere
+    t(showsBeijingTime(start) ? 'classStartsAt' : 'classStartsAtBeijing', {
+      time: beijingWallClock(start).format(timeFormat()),
+    }),
     location,
   ]
     .filter(Boolean)

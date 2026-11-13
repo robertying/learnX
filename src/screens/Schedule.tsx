@@ -4,7 +4,7 @@ import { Form, FormScreen, FormSection, FormText } from 'components/Form';
 import { useWeekSchedule } from 'data/schedule';
 import { t } from 'helpers/i18n';
 import { classDetails } from 'helpers/schedule';
-import { beijingDate } from 'helpers/serverTime';
+import { beijingDate, showsBeijingTime } from 'helpers/serverTime';
 import { useMinute } from 'hooks/useClock';
 import usePullToRefresh from 'hooks/usePullToRefresh';
 import { MainStackScreenProps, ScheduleParamList } from 'navigation/types';
@@ -47,6 +47,12 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
     };
   }).filter((day, i) => i === 0 || day.classes.length > 0);
 
+  // Class times are Beijing's; a phone elsewhere says so in the header of the
+  // first day with classes.
+  const labeled = showsBeijingTime(now)
+    ? -1
+    : days.findIndex(day => day.classes.length > 0);
+
   const handleRefresh = async () => {
     const results = await Promise.all([thisWeek.refetch(), nextWeek.refetch()]);
     return { isError: results.some(r => r.isError) };
@@ -64,7 +70,9 @@ const Schedule: React.FC<Props> = ({ navigation }) => {
         {days.map((day, i) => (
           <FormSection
             key={day.date}
-            title={day.title}
+            title={
+              i === labeled ? `${day.title} · ${t('beijingTime')}` : day.title
+            }
             footer={i === days.length - 1 ? note : undefined}
           >
             {day.classes.length === 0 ? (
