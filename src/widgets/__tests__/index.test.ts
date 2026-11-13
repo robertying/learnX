@@ -139,6 +139,7 @@ describe('updateUpNextWidget', () => {
     expect(entries[0].props).toMatchObject({
       title: 'Up Next',
       url: 'learnx://today',
+      locale: 'en',
       classes: [
         {
           courseName: 'Calculus',

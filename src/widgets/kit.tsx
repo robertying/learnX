@@ -1,6 +1,7 @@
 import { HStack, Spacer, Text, VStack } from '@expo/ui/swift-ui';
 import {
   containerBackground,
+  environment,
   font,
   foregroundStyle,
   frame,
@@ -82,9 +83,15 @@ export function widgetKit() {
       PlatformColor('systemBackground'),
       'widget',
     ),
+    /**
+     * The app's language for what the system draws (the countdowns), which
+     * otherwise follows the system's. Props from before it have none.
+     */
+    language: (locale: string | undefined) =>
+      locale ? [environment('locale', locale)] : [],
     /** The brand color (brandColors in src/theme), which a widget can't import. */
-    accent: (environment: WidgetEnvironment) =>
-      environment.colorScheme === 'dark' ? '#F4ABFF' : '#660874',
+    accent: (widgetEnvironment: WidgetEnvironment) =>
+      widgetEnvironment.colorScheme === 'dark' ? '#F4ABFF' : '#660874',
 
     /**
      * A deadline's color by the app's rule (deadlineUrgency in
