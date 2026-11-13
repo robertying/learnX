@@ -566,8 +566,8 @@ describe('Deadlines on iOS', () => {
       'Deadlines',
       '+6',
       ...[1, 2, 3].flatMap(i => [
-        `Assignment d${i}`,
-        ` · Course of d${i}`,
+        `Assignment d${i} · `,
+        `Course of d${i}`,
         `in ${iso(at('23:59') + i * DAY)}`,
       ]),
     ]);

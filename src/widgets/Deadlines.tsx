@@ -107,14 +107,15 @@ function DeadlinesWidget(
     const content = (
       <VStack key={item.id} alignment="leading" spacing={large ? 2 : 1}>
         {small ? (
-          // No room for the course on the due line: it follows the title,
-          // which keeps its width, and tells apart same-named assignments.
+          // No room for the course on the due line: it follows the title, to
+          // tell apart same-named assignments. The title keeps its width (as
+          // in kit.dueLine) and the course shortens.
           <HStack spacing={0}>
             <Text modifiers={[...titleFont, lineLimit(1), layoutPriority(1)]}>
-              {item.title}
+              {`${item.title} · `}
             </Text>
             <Text modifiers={[...titleFont, kit.secondary, lineLimit(1)]}>
-              {` · ${item.courseName}`}
+              {item.courseName}
             </Text>
             <Spacer />
           </HStack>
