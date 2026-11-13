@@ -273,6 +273,38 @@ describe('Login', () => {
     expect(toast).toHaveBeenCalledTimes(2);
   });
 
+  it('gives the reason only in debug and E2E builds', async () => {
+    const dev = __DEV__;
+    (globalThis as unknown as { __DEV__: boolean }).__DEV__ = false;
+    try {
+      await setup();
+      const fail = async () => {
+        await act(() => useAuthStore.setState({ loggingIn: true }));
+        await act(() =>
+          useAuthStore.setState({
+            loggingIn: false,
+            error: FailReason.BAD_CREDENTIAL,
+            failure: 'rejected',
+          }),
+        );
+      };
+      await fail();
+      expect(toast).toHaveBeenLastCalledWith(t('loginFailed'), 'error', 8000);
+
+      // The login check flow (.maestro/00-login-check.yaml) reads it.
+      (env as { TEST_LOGIN?: boolean }).TEST_LOGIN = true;
+      await fail();
+      expect(toast).toHaveBeenLastCalledWith(
+        `${FailReason.BAD_CREDENTIAL}\n${t('loginFailed')}`,
+        'error',
+        8000,
+      );
+    } finally {
+      (globalThis as unknown as { __DEV__: boolean }).__DEV__ = dev;
+      delete (env as { TEST_LOGIN?: boolean }).TEST_LOGIN;
+    }
+  });
+
   it('says nothing when a login from here succeeds', async () => {
     await setup();
     await act(() => useAuthStore.setState({ loggingIn: true }));

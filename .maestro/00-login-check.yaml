@@ -1,0 +1,47 @@
+appId: ${APP_ID}
+name: Reach the login server
+# Live runs check it too.
+tags:
+  - live
+env:
+  # An account that doesn't exist, so the server turns it down and no real
+  # account can be locked out. The fingerprint is made up too: the login never
+  # gets far enough to add a device.
+  NOBODY: learnx-e2e-nobody
+---
+# Logs in from the shipped JS with a made-up account and expects the server's
+# answer to a wrong password. Getting it means the release build sent the whole
+# SSO login (fetch, the form, cookies, the encrypted password) and read the
+# reply; a build that breaks any of that fails before the server answers, with
+# another reason. E2E builds (TEST_LOGIN) take the test login from the launch
+# arguments and put the reason first in the toast (screens/Login.tsx).
+- runFlow: subflows/reset.yaml
+- launchApp:
+    arguments:
+      mockLatency: none
+      liveUsername: ${NOBODY}
+      liveFingerprint: '00000000000000000000000000000000'
+- extendedWaitUntil:
+    visible:
+      id: welcome-continue
+    timeout: 60000
+- tapOn:
+    id: welcome-continue
+- extendedWaitUntil:
+    visible:
+      id: login-username
+    timeout: 10000
+- tapOn:
+    id: login-username
+- inputText: ${NOBODY}
+- pressKey: Enter
+- tapOn:
+    id: login-password
+- inputText: not-a-password
+# The password field submits the login on return.
+- pressKey: Enter
+# thu-learn-lib's FailReason.BAD_CREDENTIAL, then what the server said.
+- extendedWaitUntil:
+    visible: 'bad credential(.|\n)*'
+    timeout: 30000
+- stopApp

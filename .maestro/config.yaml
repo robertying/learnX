@@ -9,6 +9,9 @@ flows:
 executionOrder:
   continueOnFailure: true
   flowsOrder:
+    # Leaves the app logged out; the reset after it starts the shared login
+    # from a fresh install.
+    - Reach the login server
     - Start from a fresh install
     # Logs in. Right after the reset, because released Maestro only reads
     # the notice detail's deep accessibility tree on iOS after a login in the

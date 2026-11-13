@@ -7,9 +7,9 @@
 #
 # --live logs in with the real test account from .env (LIVE_USERNAME /
 # LIVE_PASSWORD / LIVE_FINGERPRINT) instead, and runs only the flows tagged
-# `live`. Local only: it refuses to run in CI. Install a build made with
-# E2E_LIVE=1 (`E2E_LIVE=1 scripts/e2e-build.sh ios|android <device>`), which
-# holds no live value: the flow passes the fingerprint as a launch argument,
+# `live`. Local only: it refuses to run in CI. The build from
+# scripts/e2e-build.sh holds no live value: the flow passes the fingerprint as a
+# launch argument,
 # and the app signs the account in with it instead of opening the SSO page,
 # which would add a device each run. Maestro's output, which has the password
 # and fingerprint in it, goes to a temporary folder that is deleted afterwards,

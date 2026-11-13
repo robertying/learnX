@@ -20,8 +20,8 @@ const inlinedInputsHash = () => {
       .map(name => path.join(prevalDir, name)),
   ];
   const hash = crypto.createHash('sha256');
-  // babel/inline-env.js reads it too (live E2E release builds).
-  hash.update(`E2E_LIVE=${process.env.E2E_LIVE ?? ''}`);
+  // babel/inline-env.js reads it too (E2E builds).
+  hash.update(`TEST_LOGIN=${process.env.TEST_LOGIN ?? ''}`);
   for (const file of files) {
     hash.update(file);
     hash.update(fs.existsSync(file) ? fs.readFileSync(file) : '');

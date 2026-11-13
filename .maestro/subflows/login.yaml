@@ -28,7 +28,7 @@ appId: ${APP_ID}
             AppleLanguages: '(${APP_LANGUAGE})'
 # Live runs (scripts/e2e.sh --live) hand the app the live account's saved
 # fingerprint, so typing its username signs in without the SSO page
-# (services/launchOptions.ts). Only E2E_LIVE builds take it.
+# (services/launchOptions.ts). Only E2E builds (TEST_LOGIN) take it.
 - runFlow:
     when:
       true: ${!APP_LANGUAGE && ACCOUNT == 'live'}
