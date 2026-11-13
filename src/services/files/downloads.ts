@@ -269,8 +269,8 @@ export const removeFileDir = async () => {
 };
 
 /**
- * Deletes the downloads versions up to 18.x kept in Caches or Documents,
- * which the app no longer finds; they download again when opened.
+ * Deletes the downloads that versions up to 18.x kept in Caches or Documents,
+ * which the app doesn't look for; they download again when opened.
  */
 export const removeLegacyDownloads = () => {
   for (const base of [Paths.cache, Paths.document]) {

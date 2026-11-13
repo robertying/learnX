@@ -199,14 +199,6 @@ const createCalendar = async ({
   return newCalendar;
 };
 
-/** The course calendar if there is one; never creates it. */
-export const findCourseCalendar = () =>
-  findCalendar(
-    'courseCalendarId',
-    courseCalendarName,
-    Calendar.EntityTypes.EVENT,
-  );
-
 export const getCourseCalendar = () =>
   getOrCreateCalendar({
     setting: 'courseCalendarId',
